@@ -49,6 +49,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "TransformStepRuntimeOptions",
+    "WorkflowStepDispatchDeps",
     "apply_workflow_step_transition",
     "dispatch_workflow_step",
     "execute_pipeline_step",
@@ -219,6 +220,26 @@ class TransformStepRuntimeOptions:
     created_at_factory: Callable[[], datetime] | None
 
 
+@dataclass(frozen=True, slots=True)
+class WorkflowStepDispatchDeps:
+    """Shared runner/transform collaborators for one workflow step dispatch."""
+
+    pipeline_runner: PipelineRunnerService
+    cohort_resolver: (
+        Callable[
+            [WorkflowStepConfig, Mapping[str, object]], Awaitable[WorkflowStepConfig]
+        ]
+        | None
+    )
+    transform_service: WorkflowTransformService
+    artifact_sink: WorkflowTransformArtifactSinkProtocol | None
+    metrics: MetricsPort
+    monotonic: Callable[[], float]
+    snapshot_reader: (
+        Callable[[str, str], Awaitable[dict[str, dict[str, object]]]] | None
+    )
+
+
 async def execute_transform_step(
     *,
     transform_service: WorkflowTransformService,
@@ -261,66 +282,36 @@ async def execute_transform_step(
 
 async def dispatch_workflow_step(
     *,
-    pipeline_runner: PipelineRunnerService,
-    cohort_resolver: Callable[
-        [WorkflowStepConfig, Mapping[str, object]], Awaitable[WorkflowStepConfig]
-    ]
-    | None,
-    transform_service: WorkflowTransformService,
-    artifact_sink: WorkflowTransformArtifactSinkProtocol | None,
+    deps: WorkflowStepDispatchDeps,
     workflow_name: str,
     step: WorkflowStepDefinition,
     step_outputs: dict[str, object],
     workflow_context_labels: Mapping[str, str],
-    completed_transform_fingerprints: dict[str, str] | None,
-    step_started_callback: Callable[..., None] | None,
-    transform_commit_callback: (
-        Callable[[WorkflowTransformDestructiveCommit], None] | None
-    ),
-    dry_run: bool,
-    workflow_run_id: str | None,
-    manifest_id: str | None,
-    debug_export_enabled: bool,
-    debug_export_dir: str | None,
-    created_at_factory: Callable[[], datetime] | None,
-    metrics: MetricsPort,
-    monotonic: Callable[[], float],
-    snapshot_reader: Callable[[str, str], Awaitable[dict[str, dict[str, object]]]]
-    | None,
+    options: TransformStepRuntimeOptions,
     capture_producer_snapshot: bool = False,
 ) -> WorkflowStepExecutionResult:
     """Dispatch a typed workflow step to its pipeline or transform executor."""
     if isinstance(step, WorkflowStepConfig):
         return await execute_pipeline_step(
-            pipeline_runner=pipeline_runner,
-            cohort_resolver=cohort_resolver,
+            pipeline_runner=deps.pipeline_runner,
+            cohort_resolver=deps.cohort_resolver,
             upstream_outputs=step_outputs,
             capture_producer_snapshot=capture_producer_snapshot,
-            metrics=metrics,
-            monotonic=monotonic,
+            metrics=deps.metrics,
+            monotonic=deps.monotonic,
             workflow_name=workflow_name,
             step=step,
             workflow_context_labels=workflow_context_labels,
-            step_started_callback=step_started_callback,
-            workflow_run_id=workflow_run_id,
-            snapshot_reader=snapshot_reader,
+            step_started_callback=options.step_started_callback,
+            workflow_run_id=options.workflow_run_id,
+            snapshot_reader=deps.snapshot_reader,
         )
     return await execute_transform_step(
-        transform_service=transform_service,
-        artifact_sink=artifact_sink,
+        transform_service=deps.transform_service,
+        artifact_sink=deps.artifact_sink,
         workflow_name=workflow_name,
         step=step,
         step_outputs=step_outputs,
         workflow_context_labels=workflow_context_labels,
-        options=TransformStepRuntimeOptions(
-            completed_transform_fingerprints=completed_transform_fingerprints,
-            step_started_callback=step_started_callback,
-            transform_commit_callback=transform_commit_callback,
-            dry_run=dry_run,
-            workflow_run_id=workflow_run_id,
-            manifest_id=manifest_id,
-            debug_export_enabled=debug_export_enabled,
-            debug_export_dir=debug_export_dir,
-            created_at_factory=created_at_factory,
-        ),
+        options=options,
     )

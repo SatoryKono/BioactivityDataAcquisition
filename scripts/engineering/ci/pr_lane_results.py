@@ -148,7 +148,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
     ),
     "docs/00-project/governance/05-github-policy.md": (
-        "tests/architecture/test_github_actions_runtime_policy.py",
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
         "tests/architecture/test_root_hygiene_workflow.py",
     ),
     **dict.fromkeys(
@@ -460,7 +460,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "CHANGELOG.md": ("tests/architecture/test_docs_version_sync.py",),
     ".coderabbit.yaml": ("tests/architecture/test_coderabbit_config.py",),
     ".github/workflows/duplication-complexity.yml": (
-        "tests/architecture/test_github_actions_runtime_policy.py",
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
         "tests/architecture/test_tech_debt_issues_5811_5816_closeout.py",
     ),
     ".pre-commit-config.yaml": (

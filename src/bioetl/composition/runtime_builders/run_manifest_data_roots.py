@@ -61,9 +61,7 @@ class EvidenceLocationBindingContext:
         return self.skip_reason is None and self.runtime_source_id is not None
 
 
-def resolve_dashboard_data_alias_base(
-    *, write_data_root: Path, settings: Settings
-) -> Path | None:
+def resolve_dashboard_data_alias_base(*, settings: Settings) -> Path | None:
     """Resolve the trusted ``dashboard_data`` alias base at composition edge."""
     configured = getattr(settings, "dashboard_data_root", None)
     if configured is None or not str(configured).strip():
