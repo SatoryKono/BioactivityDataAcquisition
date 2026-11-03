@@ -149,6 +149,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/quality_move_qm09_reference_decisions.json": (
         "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
     ),
+    "configs/quality/external_resource_inventory_pr12728_hotspot_move_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+    ),
     "scripts/engineering/README.md": (
         SCRIPTS_INVENTORY_MANIFEST_TEST,
         "tests/architecture/test_scripts_inventory_discovery.py",
