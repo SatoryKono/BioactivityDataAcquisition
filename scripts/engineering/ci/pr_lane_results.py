@@ -339,6 +339,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
+    "reports/audit/pack-v2.1/evidence_p12_parity.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+    ),
+    "src/bioetl/infrastructure/adapters/decorators/README.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+    ),
     "reports/engineering/SEC-003_audit_report.md": (
         "tests/unit/domain/services/test_composite_metadata_helpers.py",
     ),
