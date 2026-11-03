@@ -132,7 +132,7 @@ guides. Do not treat `v3.0/` as a shipping contract.
   belong to Run Overview panel 9480; fleet/range runtime telemetry belongs to
   Incident Workspace's collapsed Fleet diagnostics row 8808.
 - Four visible navigation chips: Run Explorer, Replay Readiness, Run Overview,
-  `6. Incident Workspace`. Data Quality is reached through contextual links.
+  `Incident Workspace`. Data Quality is reached through contextual links.
 - Identity HTTP panels use datasource **BioETL Ops HTTP** → main health server
   `:8000`. `BIOETL_OPS_HTTP_URL` is the Grafana-server-to-backend URL and may
   legitimately contain Docker or host-specific addressing.

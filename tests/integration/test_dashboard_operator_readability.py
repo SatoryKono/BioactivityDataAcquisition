@@ -89,7 +89,7 @@ NUMBERED_DASHBOARDS = (
     "3. Pipeline Diagnostics",
     "4. Provider Health",
     "5. Data Quality",
-    "6. Incident Workspace",
+    "Incident Workspace",
     "Run Explorer",
 )
 STATUS_SCOPE_TOKENS = (

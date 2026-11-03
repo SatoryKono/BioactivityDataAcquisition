@@ -29,7 +29,7 @@ navigation contract in [the dashboard index](README.md) and
    fleet/range workflow diagnostics. This telemetry is not exact-run evidence.
 
 The four visible navigation chips are Run Explorer, Replay Readiness, Run
-Overview and `6. Incident Workspace`; Data Quality has contextual entry links.
+Overview and `Incident Workspace`; Data Quality has contextual entry links.
 Run Explorer uses row actions instead of navigation panel 1000. Other nav panels
 have height 2 and 16px wrapping text, including at 1024px. Standalone
 `bioetl-runtime` and `bioetl-provider-health-v2` are retired. Provider routes use
@@ -136,7 +136,7 @@ HTTP identity backend contract:
 | 2. Overview (Fleet)       | `bioetl-overview-v2`            | L0 answer-first Fleet: Status + Inputs evidence + Status/Domains handoff |
 | 4. Provider Health        | `bioetl-provider-health-v2`     | Population-first fleet severity + top causes |
 | 5. Data Quality           | `bioetl-dq-v2`                  | Now / Run / Range lanes; quarantine aggregates |
-| 6. Incident Workspace     | `bioetl-incident-v1`            | Domain-separated suspects + ALERTS timeline |
+| Incident Workspace     | `bioetl-incident-v1`            | Domain-separated suspects + ALERTS timeline |
 | Run Explorer           | `bioetl-run-explorer-v1`        | HTTP identity + processed records (`run_id` not Prom) |
 | Record forensics (CLI)    | `bioetl quarantine inspect`     | Silver structural rejects; not a Grafana board |
 
@@ -153,7 +153,7 @@ mention `6. Alerts & SLO` / Explore Logs / Explore Traces as removed surfaces.
 | `bioetl-overview-v2` | Navigation bus `2. Overview` |
 | `bioetl-provider-health-v2` | Navigation bus `4. Provider Health` |
 | `bioetl-dq-v2` | Navigation bus `5. Data Quality` |
-| `bioetl-incident-v1` | Navigation bus `6. Incident Workspace` (or alert entry hop) |
+| `bioetl-incident-v1` | Navigation bus `Incident Workspace` (or alert entry hop) |
 | `bioetl-run-explorer-v1` | Navigation bus `Run Explorer` |
 | CLI forensics | `bioetl quarantine inspect` / `bioetl run-manifest show` |
 
@@ -422,7 +422,7 @@ Explorer health probe and monitoring setup docs for that reason.
 
 В `3. Pipeline Diagnostics` cross-dashboard routing выполняется через полный top-level bus:
 `1. Trust`, `2. Overview`, `3. Pipeline Diagnostics`, `4. Provider Health`,
-`5. Data Quality`, `6. Incident Workspace`, `Run Explorer`, затем
+`5. Data Quality`, `Incident Workspace`, `Run Explorer`, затем
 `0..6` bus only (adjuncts removed); текущий Runtime item
 остаётся видимым disabled.
 
@@ -533,7 +533,7 @@ Primary dashboards MUST follow the canonical navigation contract in
 
 The top-level dashboard bus is:
 `1. Trust`, `2. Overview`, `3. Pipeline Diagnostics`, `4. Provider Health`,
-`5. Data Quality`, `6. Incident Workspace`, `Run Explorer`. Each page renders the full
+`5. Data Quality`, `Incident Workspace`, `Run Explorer`. Each page renders the full
 visual bus in navigation panel `id=1000`; the current dashboard stays visible
 as a disabled high-contrast item, while machine-readable `panel.links` still
 omit self-links.
@@ -591,11 +591,11 @@ Variable handoff policy for dashboard links remains strict and bounded:
 ## First 2 clicks scenario (operator)
 
 1. **Click #1:** открыть `bioetl-overview-v2`, прочитать `Status` + Domains (`First Action` панель снята, RF-006 #11257, issue #11809).
-2. **Click #2:** открыть рекомендуемый dashboard из top-level bus (`1. Trust`, `3. Pipeline Diagnostics`, `4. Provider Health`, `5. Data Quality`, `6. Incident Workspace`, `Run Explorer`).
+2. **Click #2:** открыть рекомендуемый dashboard из top-level bus (`1. Trust`, `3. Pipeline Diagnostics`, `4. Provider Health`, `5. Data Quality`, `Incident Workspace`, `Run Explorer`).
 
 Цель сценария: root-cause направление должно быть определено максимум за 2 клика без обязательной прокрутки по нечастым CTA.
 - `bioetl-runtime`: top-level links `1. Trust`, `2. Overview`,
-  `4. Provider Health`, `5. Data Quality`, `6. Incident Workspace`, `Run Explorer`,
+  `4. Provider Health`, `5. Data Quality`, `Incident Workspace`, `Run Explorer`,
   `0..6` bus only (adjuncts removed) дают явный
   routing path из L2 runtime triage. Cross-dashboard handoffs передают только
   target-scoped variables; forensic IDs в runtime dashboard запрещены.
@@ -625,7 +625,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `bioetl_control_plane_read_duration_seconds_bucket` глобальны по
   `store/operation/status`.
 - `bioetl-provider-health-v2`: dashboard links `1. Trust`,
-  `2. Overview`, `3. Pipeline Diagnostics`, `5. Data Quality`, `6. Incident Workspace` дают быстрый
+  `2. Overview`, `3. Pipeline Diagnostics`, `5. Data Quality`, `Incident Workspace` дают быстрый
   переход из provider health surface без дублирования Runtime variants.
   Panel `id=114` (`Review Raw Provider Health Enum`) показывает явный enum
   raw-source mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY` as below-fold
@@ -644,7 +644,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   2. Click #2: перейти в `3. Pipeline Diagnostics` при active degradation/failure trend или
      в `1. Trust` при симптомах retry exhaustion/state inconsistency.
 - `bioetl-dq-v2`: dashboard bus links `1. Trust`, `2. Overview`,
-  `3. Pipeline Diagnostics`, `4. Provider Health`, `6. Incident Workspace`,
+  `3. Pipeline Diagnostics`, `4. Provider Health`, `Incident Workspace`,
   `Run Explorer`. Record-level forensics are **CLI**
   (`bioetl quarantine inspect`), not Grafana Explore/SRE adjuncts
   (removed 2026-07-23). Keep handoff scope bounded to `$pipeline/$run_type`

@@ -47,7 +47,7 @@ def test_nav_bus_complete_without_truncation() -> None:
             "Replay Readiness",
             "Run Overview",
             "Data Quality",
-            "6. Incident Workspace",
+            "Incident Workspace",
             "Run Explorer",
         ):
             assert chip in content, f"{path.name} missing chip {chip}"

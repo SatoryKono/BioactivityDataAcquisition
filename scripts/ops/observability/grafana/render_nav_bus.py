@@ -68,7 +68,7 @@ BUS: list[dict[str, str]] = [
     },
     {
         "uid": "bioetl-incident-v1",
-        "title": "6. Incident Workspace",
+        "title": "Incident Workspace",
         "path": "6-incident-workspace",
     },
 ]
@@ -1107,7 +1107,7 @@ _SELECT_RUN_EMPTY = (
     "VALID EMPTY if the selected run has no rows for this table."
 )
 _RUN_EXPLORER_URL = (
-    "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?"
+    "/d/bioetl-run-explorer-v1/run-explorer?"
     "${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}"
     "&${run_id:queryparam}&${__url_time_range}"
 )
