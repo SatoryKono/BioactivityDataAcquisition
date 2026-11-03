@@ -857,6 +857,9 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
             "tests/architecture/test_external_resource_inventory_catalog.py",
             "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
         },
+        "configs/quality/architecture_acceptance_baseline.yaml": {
+            "tests/architecture/test_architecture_acceptance_baseline.py",
+        },
         "configs/quality/quality_move_qm09_reference_decisions.json": {
             "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
         },
