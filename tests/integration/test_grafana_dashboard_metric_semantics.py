@@ -141,8 +141,9 @@ def _assert_processed_records_target_contract(processed: dict[str, object]) -> N
     assert targets[1]["parser"] == "uql"
     assert (
         targets[1]["url"]
-        == "/ops/observability/pipeline-run-report?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
+        == "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
     )
+    assert "quality_evidence.funnel" in targets[1]["uql"]
     assert "records_in" in targets[1]["uql"]
     assert targets[0] == {
         "datasource": {
@@ -379,12 +380,9 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         in panels[9400]["options"]["content"]
     )
     identity = panels[9402]
-    assert identity["datasource"] == {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "bioetl-ops-http",
-    }
-    assert all("run_id=${run_id}" in t["url"] for t in identity["targets"])
-    assert identity["fieldConfig"]["defaults"]["custom"]["inspect"] is True
+    assert identity["type"] == "text"
+    assert "Open Review Run Identity on Overview" in identity["options"]["content"]
+    assert identity.get("targets", []) == []
     processed = panels[9403]
     _assert_processed_records_target_contract(processed)
     description = processed["description"]
@@ -405,7 +403,7 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
 def test_control_plane_identity_evidence_uses_http_not_prometheus_labels() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
-    for pid in (9406, 9408, 9423):
+    for pid in (9406, 9408):
         panel = panels[pid]
         assert panel["datasource"] == {
             "type": "yesoreyeram-infinity-datasource",
@@ -413,6 +411,15 @@ def test_control_plane_identity_evidence_uses_http_not_prometheus_labels() -> No
         }
         assert get_panel_expressions({"panels": [panel]}) == []
         assert all("run_id=${run_id}" in t["url"] for t in panel["targets"])
+    identity = panels[9423]
+    assert identity["datasource"] == {
+        "type": "datasource",
+        "uid": "-- Dashboard --",
+    }
+    assert identity["targets"][0]["panelId"] == 9418
+    source = panels[9418]
+    assert source["datasource"]["uid"] == "bioetl-ops-http"
+    assert all("run_id=${run_id}" in t["url"] for t in source["targets"])
     for path in Path("grafana/dashboards").glob("*.json"):
         expressions = "\n".join(get_panel_expressions(load_dashboard(path)))
         for forbidden in (
@@ -1404,6 +1411,8 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert organize["indexByName"]["parameter"] == 0
     assert organize["excludeByName"]["row_status"] is True
     assert organize["excludeByName"]["Time"] is True
+    assert "value A" not in organize["excludeByName"]
+    assert "percentage A" not in organize["excludeByName"]
     assert "percintage" not in organize["excludeByName"]
     assert organize["excludeByName"].get("percentage") is not True
     parameter = next(
