@@ -82,10 +82,13 @@ def test_dq_dashboard_gold_reject_panel_is_not_silver_alias_surface() -> None:
     assert panel["title"] == "Inspect Processed Records"
     targets = panel["targets"]
     assert targets[0]["url"].startswith("/ops/observability/processed-records?")
-    # A2-aligned identity: same selected_* scope as StageInput sibling query.
-    assert "run_id=${selected_run_id}" in targets[0]["url"]
-    assert "pipeline=${selected_pipeline}" in targets[0]["url"]
+    # A2-aligned identity: same Grafana template scope as StageInput sibling query.
+    # DQ HTTP evidence uses $pipeline/$run_id (selected_* remains for artifact links).
+    assert "run_id=${run_id}" in targets[0]["url"]
+    assert "pipeline=${pipeline}" in targets[0]["url"]
     stage_input = next(target for target in targets if target["refId"] == "StageInput")
+    assert "run_id=${run_id}" in stage_input["url"]
+    assert "pipeline=${pipeline}" in stage_input["url"]
     projection = stage_input["uql"]
     assert "gold_quarantined_records" in projection
     assert "gold_excluded_by_contract_records" in projection
