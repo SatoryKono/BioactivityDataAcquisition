@@ -889,8 +889,8 @@ def apply_dq(data: dict[str, Any]) -> None:
     processed = _by_id(data, 9403)
     # StageInput stays a dedicated Infinity target: a panel-level
     # ``_bioetl_frame`` filter would also drop processed-records rows from A.
-    # Budget: donor 9406 = 1 SRS; StageInput reads pipeline-run-report funnel
-    # (1 PRR) so removals stay available without a second SRS hop.
+    # Budget (rev7 §2.5 / F-17): donor 9406 + StageInput = ≤2 SRS; PRR on DQ = 0.
+    # Funnel ``records_in`` comes from selected-run-status ``quality_evidence``.
     targets = list(processed.get("targets") or [])
     new_targets = []
     for target in targets:
@@ -904,13 +904,13 @@ def apply_dq(data: dict[str, Any]) -> None:
                     "format": "table",
                     "root_selector": "",
                     "url": (
-                        "/ops/observability/pipeline-run-report"
+                        "/ops/observability/selected-run-status"
                         "?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
                     ),
                     "url_options": {"method": "GET", "data": ""},
                     "uql": (
                         'parse-json | jsonata "'
-                        "($f := funnel; "
+                        "($f := quality_evidence.funnel; "
                         "$map(['01 bronze_records','02 silver_valid_records',"
                         "'03 silver_filtered_out_records',"
                         "'04 silver_quarantined_records',"
