@@ -1,12 +1,12 @@
 {
   "summary": {
     "scanned_modules": 2603,
-    "total_internal_imports": 8457,
+    "total_internal_imports": 8459,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 329,
     "violations": 0,
-    "source_fingerprint": "ae0ad1b5decda2822ab5859520a99369b5ca7ca4ab3ade9e040e056b657d6a4f"
+    "source_fingerprint": "c899f5f471bba3707f816a0647b652f9c642550a85be4aec44787fae870032cc"
   },
   "layer_edges": [
     {
@@ -24,7 +24,7 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 236,
+      "imports": 237,
       "allowed": true
     },
     {
@@ -84,7 +84,7 @@
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 480,
+      "imports": 481,
       "allowed": true
     }
   ],
@@ -310,6 +310,11 @@
       "imports": 19
     },
     {
+      "source": "composition.runtime_builders",
+      "target": "application.services",
+      "imports": 18
+    },
+    {
       "source": "application.observability",
       "target": "domain.control_plane",
       "imports": 17
@@ -327,11 +332,6 @@
     {
       "source": "application.services",
       "target": "domain.run_reports",
-      "imports": 17
-    },
-    {
-      "source": "composition.runtime_builders",
-      "target": "application.services",
       "imports": 17
     },
     {
