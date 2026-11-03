@@ -849,6 +849,10 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
             "tests/architecture/test_external_resource_inventory_catalog.py",
             "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
         },
+        "configs/quality/external_resource_inventory_pr12748_status_cache_review.json": {
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        },
         "configs/quality/external_resource_inventory_pr12730_rf001_004_review.json": {
             "tests/architecture/test_external_resource_inventory_catalog.py",
             "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
