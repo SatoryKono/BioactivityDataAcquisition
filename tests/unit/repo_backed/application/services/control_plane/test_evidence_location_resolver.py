@@ -12,7 +12,7 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.services.control_plane.evidence_location import (
+from bioetl.application.services.evidence_location import (
     EvidenceLocationLegacyRootPolicy,
     EvidenceLocationResolver,
 )

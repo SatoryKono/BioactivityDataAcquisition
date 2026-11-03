@@ -9,7 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.evidence_location.registration import (
+from bioetl.application.services.evidence_location.registration import (
     EvidenceLocationRegisterRequest,
     EvidenceLocationRegistrationOutcome,
     EvidenceLocationRegistrationService,
@@ -40,9 +40,11 @@ from bioetl.composition.control_plane_paths import (
 
 __all__ = [
     "EvidenceLocationBindingContext",
+    "bind_pipeline_run_location_verifier",
     "build_evidence_location_binding_context",
     "build_evidence_location_registration_service",
     "register_pipeline_manifest_location",
+    "register_pipeline_manifest_location_soft",
     "register_workflow_manifest_location",
     "relative_data_root_under_alias",
     "resolve_dashboard_data_alias_base",
@@ -202,3 +204,50 @@ def verify_workflow_run_location(
         run_id=workflow_run_id,
         workflow_run_id=None,
     )
+
+
+def bind_pipeline_run_location_verifier(settings: Settings):
+    """Return a PipelineRunnerService finalize hook closed over settings."""
+
+    def _verify(result, options) -> None:
+        workflow_run_id = (
+            getattr(options, "workflow_run_id", None) if options is not None else None
+        )
+        verify_pipeline_run_location(
+            pipeline_name=result.pipeline_name,
+            run_id=result.run_id,
+            workflow_run_id=str(workflow_run_id) if workflow_run_id else None,
+            settings=settings,
+        )
+
+    return _verify
+
+
+def register_pipeline_manifest_location_soft(
+    *,
+    manifest: object,
+    settings: object,
+) -> None:
+    """Publish pipeline locator after durable save; never fail ETL."""
+    from bioetl.application.services.evidence_location import (
+        EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS,
+        record_registration_exception_observation,
+        record_registration_outcome_observation,
+    )
+    from bioetl.domain.control_plane.run_manifest import RunManifest
+    from bioetl.infrastructure.config.settings_api import Settings
+
+    if not isinstance(manifest, RunManifest) or not isinstance(settings, Settings):
+        return
+    try:
+        outcome = register_pipeline_manifest_location(
+            manifest=manifest, settings=settings
+        )
+        record_registration_outcome_observation(
+            outcome,
+            kind="pipeline",
+            owner=str(manifest.pipeline_name),
+            run_id=str(manifest.run_id),
+        )
+    except EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS as exc:
+        record_registration_exception_observation(kind="pipeline", exc=exc)

@@ -10,7 +10,7 @@ from time import perf_counter
 from typing import TYPE_CHECKING
 
 from bioetl.application.runtime_clock import current_utc_time
-from bioetl.application.services.control_plane.evidence_location import (
+from bioetl.application.services.evidence_location import (
     soft_invoke_evidence_location_verify,
 )
 from bioetl.application.services.execution.workflow_runner_step_execution import (

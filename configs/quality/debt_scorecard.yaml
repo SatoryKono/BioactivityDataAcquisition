@@ -498,7 +498,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 49
-      total_loc: 6467
+      total_loc: 6459
       files_ge_250_loc: 0
       helper_function_ratio: 0.288
       max_internal_fan_in: 2
@@ -525,7 +525,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 32
-      total_loc: 3855
+      total_loc: 3853
       files_ge_250_loc: 0
       helper_function_ratio: 0.358
       max_internal_fan_in: 2
@@ -551,10 +551,10 @@ hotspot_family_ratchets:
       max_internal_fan_in: 2
     metrics:
       duplication_clusters: 0
-      files: 137
-      total_loc: 16486
+      files: 130
+      total_loc: 15443
       files_ge_250_loc: 0
-      helper_function_ratio: 0.393
+      helper_function_ratio: 0.4
       max_internal_fan_in: 1
       max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
@@ -580,10 +580,10 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 55
-      total_loc: 6816
+      files: 54
+      total_loc: 6583
       files_ge_250_loc: 0
-      helper_function_ratio: 0.349
+      helper_function_ratio: 0.345
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.runtime_builders.runner_inputs
     trend:
@@ -926,8 +926,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration updates the tracked
         debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 2
-      max_count: 2
+      current_count: 1
+      max_count: 1
       linked_issue: '#6791'
       owner: '@bioetl-architecture'
       rationale: 'Reviewed 2026-08-25, rebaselined 2026-09-19: two fully classified zero-import surfaces
@@ -936,8 +936,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh updates the classified
         candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 2
-      max_count: 2
+      current_count: 1
+      max_count: 1
       linked_issue: '#6791'
       owner: '@bioetl-architecture'
       rationale: Both repo-wide zero-import candidates remain covered by explicit disposition ledger entries.
@@ -951,8 +951,8 @@ retirement_governance_metrics:
       rationale: All repo-wide zero-import candidates are now classified.
       ratchet_policy: Zero-budget fail-fast metric.
     repo_wide_owner_test_anchored_candidate_count:
-      current_count: 2
-      max_count: 2
+      current_count: 1
+      max_count: 1
       linked_issue: '#6353'
       owner: '@bioetl-architecture'
       rationale: Both repo-wide zero-import candidates are anchored by explicit owner-test or runtime-reachability

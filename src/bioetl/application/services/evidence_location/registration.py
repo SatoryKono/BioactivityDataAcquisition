@@ -10,12 +10,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from bioetl.application.services.control_plane.evidence_location.registration_models import (
+from bioetl.application.services.evidence_location.registration_models import (
     EvidenceLocationRegisterRequest,
     EvidenceLocationRegistrationOutcome,
     EvidenceLocationVerifyOutcome,
 )
-from bioetl.application.services.control_plane.evidence_location.registration_observations import (
+from bioetl.application.services.evidence_location.registration_observations import (
     EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
     EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS,
     record_registration_exception_observation,
@@ -23,6 +23,7 @@ from bioetl.application.services.control_plane.evidence_location.registration_ob
     record_registration_soft_failure_observation,
     record_verify_exception_observation,
     soft_failure_exception_detail,
+    soft_invoke_evidence_location_register,
     soft_invoke_evidence_location_verify,
 )
 from bioetl.application.services.run_reports.observations import record_run_observation
@@ -53,6 +54,7 @@ __all__ = [
     "record_registration_soft_failure_observation",
     "record_verify_exception_observation",
     "soft_failure_exception_detail",
+    "soft_invoke_evidence_location_register",
     "soft_invoke_evidence_location_verify",
 ]
 

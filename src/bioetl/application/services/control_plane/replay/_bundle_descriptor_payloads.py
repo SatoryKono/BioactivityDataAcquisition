@@ -11,7 +11,6 @@ from bioetl.application.services.control_plane.replay._bundle_descriptor_payload
     _build_code_provenance_dict,
 )
 
-
 class _InspectionManifest(Protocol):
     """Read-only manifest view (properties keep protocol members covariant)."""
 

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import asyncio
 
-from bioetl.application.services.control_plane.evidence_location import (
+from bioetl.application.services.evidence_location import (
     soft_invoke_evidence_location_verify,
 )
 from bioetl.application.services.run_reports.control_plane_snapshot import (

@@ -10,7 +10,7 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.composition.runtime_builders.evidence_location_registration import (
+from bioetl.composition.evidence_location.registration import (
     build_evidence_location_binding_context,
     register_pipeline_manifest_location,
     register_workflow_manifest_location,
@@ -188,7 +188,7 @@ def test_resolve_registration_runtime_source_id_reads_env_local(
     from bioetl.application.services.run_reports.source_identity import (
         RUNTIME_SOURCE_ID_ENV,
     )
-    import bioetl.composition.runtime_builders.evidence_location_registration as mod
+    import bioetl.composition.evidence_location.registration as mod
 
     monkeypatch.delenv(RUNTIME_SOURCE_ID_ENV, raising=False)
     (tmp_path / ".env").write_text(

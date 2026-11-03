@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "e1110b39a27320ff6a077f46af0d9163430b06fc",
+  "source_ref": "93e60c882eecfd2dd7c3789d84965bbab6ead9ce",
+  "source_reviews": {
+    "src/bioetl/application/services/control_plane/__init__.py": "Class residual shrink / import path updates after evidence-location relocation; no new acquisition owner.",
+    "src/bioetl/application/services/control_plane/effective_config/config_source_hashing.py": "Removed from control_plane/runtime_builders hotspot path; logic relocated (COMP-004 path move).",
+    "src/bioetl/application/services/control_plane/evidence_location/__init__.py": "Removed from control_plane/runtime_builders hotspot path; logic relocated (COMP-004 path move).",
+    "src/bioetl/application/services/control_plane/evidence_location/registration.py": "Removed from control_plane/runtime_builders hotspot path; logic relocated (COMP-004 path move).",
+    "src/bioetl/application/services/control_plane/evidence_location/registration_models.py": "Removed from control_plane/runtime_builders hotspot path; logic relocated (COMP-004 path move).",
+    "src/bioetl/application/services/control_plane/evidence_location/registration_observations.py": "Removed from control_plane/runtime_builders hotspot path; logic relocated (COMP-004 path move).",
+    "src/bioetl/application/services/control_plane/evidence_location/resolver.py": "Removed from control_plane/runtime_builders hotspot path; logic relocated (COMP-004 path move).",
+    "src/bioetl/application/services/control_plane/evidence_location/resolver_types.py": "Removed from control_plane/runtime_builders hotspot path; logic relocated (COMP-004 path move).",
+    "src/bioetl/application/services/control_plane/forensic/diagnostics_support.py": "Class residual shrink / import path updates after evidence-location relocation; no new acquisition owner.",
+    "src/bioetl/application/services/control_plane/manifest/diagnostics/selected_run_replay_readiness.py": "Class residual shrink / import path updates after evidence-location relocation; no new acquisition owner.",
+    "src/bioetl/application/services/control_plane/replay/_bundle_descriptor_payloads.py": "Class residual shrink / import path updates after evidence-location relocation; no new acquisition owner.",
+    "src/bioetl/application/services/control_plane/workflow/manifest_service.py": "Class residual shrink / import path updates after evidence-location relocation; no new acquisition owner.",
+    "src/bioetl/application/services/effective_config/__init__.py": "Relocated evidence-location / effective-config helper outside Class hotspot prefixes; same acquisition owners.",
+    "src/bioetl/application/services/effective_config/config_source_hashing.py": "Relocated evidence-location / effective-config helper outside Class hotspot prefixes; same acquisition owners.",
+    "src/bioetl/application/services/evidence_location/__init__.py": "Relocated evidence-location / effective-config helper outside Class hotspot prefixes; same acquisition owners.",
+    "src/bioetl/application/services/evidence_location/registration.py": "Relocated evidence-location / effective-config helper outside Class hotspot prefixes; same acquisition owners.",
+    "src/bioetl/application/services/evidence_location/registration_models.py": "Relocated evidence-location / effective-config helper outside Class hotspot prefixes; same acquisition owners.",
+    "src/bioetl/application/services/evidence_location/registration_observations.py": "Relocated evidence-location / effective-config helper outside Class hotspot prefixes; same acquisition owners.",
+    "src/bioetl/application/services/evidence_location/resolver.py": "Relocated evidence-location / effective-config helper outside Class hotspot prefixes; same acquisition owners.",
+    "src/bioetl/application/services/evidence_location/resolver_types.py": "Relocated evidence-location / effective-config helper outside Class hotspot prefixes; same acquisition owners.",
+    "src/bioetl/application/services/execution/pipeline_runner_service.py": "Class residual shrink / import path updates after evidence-location relocation; no new acquisition owner.",
+    "src/bioetl/application/services/workflow/workflow_runner_service.py": "Class residual shrink / import path updates after evidence-location relocation; no new acquisition owner.",
+    "src/bioetl/composition/bootstrap/runtime/runner.py": "Class residual shrink / import path updates after evidence-location relocation; no new acquisition owner.",
+    "src/bioetl/composition/evidence_location/__init__.py": "Relocated evidence-location / effective-config helper outside Class hotspot prefixes; same acquisition owners.",
+    "src/bioetl/composition/evidence_location/registration.py": "Relocated evidence-location / effective-config helper outside Class hotspot prefixes; same acquisition owners.",
+    "src/bioetl/composition/factories/pipeline/factory_method_helpers.py": "Class residual shrink / import path updates after evidence-location relocation; no new acquisition owner.",
+    "src/bioetl/composition/factories/services/workflow_services.py": "Class residual shrink / import path updates after evidence-location relocation; no new acquisition owner.",
+    "src/bioetl/composition/runtime_builders/_effective_config_source_refs_support.py": "Class residual shrink / import path updates after evidence-location relocation; no new acquisition owner.",
+    "src/bioetl/composition/runtime_builders/evidence_location_registration.py": "Removed from control_plane/runtime_builders hotspot path; logic relocated (COMP-004 path move).",
+    "src/bioetl/composition/runtime_builders/run_manifest_builder.py": "Class residual shrink / import path updates after evidence-location relocation; no new acquisition owner."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [
+    {
+      "from": {
+        "file": "src/bioetl/application/services/control_plane/evidence_location/resolver.py",
+        "line": 164,
+        "expression": "self.opener.open(data_root, trusted_alias_base=trusted_base)",
+        "call": "self.opener.open"
+      },
+      "to": {
+        "file": "src/bioetl/application/services/evidence_location/resolver.py",
+        "scope": "EvidenceLocationResolver._open_context",
+        "call": "self.opener.open",
+        "expression": "self.opener.open(data_root, trusted_alias_base=trusted_base)",
+        "reason": "Port/delegated opener; resource owned by concrete evidence-location opener, not a new acquisition."
+      }
+    }
+  ],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}

@@ -1,12 +1,12 @@
 {
   "summary": {
-    "scanned_modules": 2602,
+    "scanned_modules": 2604,
     "total_internal_imports": 8456,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 329,
+    "cross_layer_group_edges_total": 333,
     "violations": 0,
-    "source_fingerprint": "777e346e4038b80b583b4aa290969c169e339df8d68175a5f928f6f1335b0679"
+    "source_fingerprint": "13a939ef57d93e87fdc0b005c1351575cd1d5b8db191a2a8c303904f528d617b"
   },
   "layer_edges": [
     {
@@ -170,11 +170,6 @@
       "imports": 36
     },
     {
-      "source": "composition.runtime_builders",
-      "target": "domain.control_plane",
-      "imports": 35
-    },
-    {
       "source": "composition.bootstrap",
       "target": "domain.ports",
       "imports": 34
@@ -183,6 +178,11 @@
       "source": "infrastructure.control_plane",
       "target": "domain.control_plane",
       "imports": 34
+    },
+    {
+      "source": "composition.runtime_builders",
+      "target": "domain.control_plane",
+      "imports": 33
     },
     {
       "source": "interfaces.cli",
@@ -250,11 +250,6 @@
       "imports": 23
     },
     {
-      "source": "composition.runtime_builders",
-      "target": "infrastructure.config",
-      "imports": 23
-    },
-    {
       "source": "interfaces.cli",
       "target": "composition.runtime_builders",
       "imports": 23
@@ -282,6 +277,11 @@
     {
       "source": "composition.factories",
       "target": "domain.schemas",
+      "imports": 22
+    },
+    {
+      "source": "composition.runtime_builders",
+      "target": "infrastructure.config",
       "imports": 22
     },
     {
@@ -330,11 +330,6 @@
       "imports": 17
     },
     {
-      "source": "composition.runtime_builders",
-      "target": "application.services",
-      "imports": 17
-    },
-    {
       "source": "infrastructure.schemas",
       "target": "domain.config",
       "imports": 17
@@ -362,6 +357,11 @@
     {
       "source": "composition.bootstrap",
       "target": "infrastructure.observability",
+      "imports": 15
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "infrastructure.time",
       "imports": 15
     }
   ],

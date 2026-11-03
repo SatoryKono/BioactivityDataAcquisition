@@ -11,7 +11,6 @@ from bioetl.application.services.control_plane.manifest.inspection_service impor
 )
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 
-
 def inspection_service_factory_from_ports(
     manifest_port: RunManifestPort,
     ledger_port: RunLedgerPort | None,
@@ -25,14 +24,11 @@ def inspection_service_factory_from_ports(
         ledger_port=ledger_port,
     )
 
-
 def dict_or_empty(value: object) -> dict[str, object]:
     """Return a plain dict for JSON-safe nested diagnostics."""
     return dict(value) if isinstance(value, Mapping) else {}
 
-
 _dict_or_empty = dict_or_empty
-
 
 def artifact_refs(diagnostics: dict[str, object]) -> list[dict[str, object]]:
     """Return artifact ref mappings from diagnostics payloads."""
@@ -41,10 +37,8 @@ def artifact_refs(diagnostics: dict[str, object]) -> list[dict[str, object]]:
         return []
     return [dict(ref) for ref in refs if isinstance(ref, Mapping)]
 
-
 # Backward-compatible private alias (prefer public name for cross-module use).
 _artifact_refs = artifact_refs
-
 
 def coerce_int(value: object) -> int:
     """Return a stable integer view for loosely-typed diagnostics payloads."""
@@ -61,10 +55,8 @@ def coerce_int(value: object) -> int:
             return 0
     return 0
 
-
 def metadata_sidecar_missing_count(diagnostics: dict[str, object]) -> int:
     return sum(1 for ref in _artifact_refs(diagnostics) if not ref.get("metadata_path"))
-
 
 def trace_missing_requirements(diagnostics: dict[str, object]) -> tuple[str, ...]:
     trace = _dict_or_empty(diagnostics.get("produced_artifact_trace"))
@@ -73,18 +65,15 @@ def trace_missing_requirements(diagnostics: dict[str, object]) -> tuple[str, ...
         return ()
     return tuple(str(item) for item in missing)
 
-
 def string_list_or_empty(value: object) -> list[str]:
     """Return a stringified list view for loosely typed diagnostics payloads."""
     if not isinstance(value, list):
         return []
     return [str(item) for item in value]
 
-
 def string_list(value: tuple[str, ...]) -> list[str]:
     """Return a concrete list for tuple-backed string fields."""
     return list(value)
-
 
 def trace_complete(diagnostics: dict[str, object]) -> bool:
     trace = _dict_or_empty(diagnostics.get("produced_artifact_trace"))

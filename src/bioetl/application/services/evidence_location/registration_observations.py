@@ -18,6 +18,7 @@ __all__ = [
     "record_registration_soft_failure_observation",
     "record_verify_exception_observation",
     "soft_failure_exception_detail",
+    "soft_invoke_evidence_location_register",
     "soft_invoke_evidence_location_verify",
 ]
 
@@ -96,6 +97,29 @@ def soft_invoke_evidence_location_verify(
     except EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS as exc:
         record_verify_exception_observation(
             kind=kind, owner=owner, run_id=run_id, exc=exc
+        )
+
+
+def soft_invoke_evidence_location_register(
+    callback: Callable[[], object] | None,
+    *,
+    kind: str,
+    owner: str,
+    run_id: str,
+) -> None:
+    """Run post-save register; soft-fail so processing success stays intact."""
+    if callback is None:
+        return
+    try:
+        outcome = callback()
+    except EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS as exc:
+        record_registration_exception_observation(
+            kind=kind, owner=owner, run_id=run_id, exc=exc
+        )
+        return
+    if outcome is not None:
+        record_registration_outcome_observation(
+            outcome, kind=kind, owner=owner, run_id=run_id
         )
 
 

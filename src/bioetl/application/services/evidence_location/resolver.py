@@ -10,7 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from uuid import UUID
 
-from bioetl.application.services.control_plane.evidence_location.resolver_types import (
+from bioetl.application.services.evidence_location.resolver_types import (
     EvidenceLocationLegacyRootPolicy,
     EvidenceLocationResolveResult,
     EvidenceReadContext,
