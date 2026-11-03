@@ -959,13 +959,9 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Status"
+              "options": "Overall verdict"
             },
             "properties": [
-              {
-                "id": "displayName",
-                "value": "Overall verdict"
-              },
               {
                 "id": "links",
                 "value": []
@@ -1007,13 +1003,9 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Result"
+              "options": "Processing"
             },
             "properties": [
-              {
-                "id": "displayName",
-                "value": "Processing"
-              },
               {
                 "id": "custom.cellOptions",
                 "value": {
@@ -1054,55 +1046,6 @@
                       "UNFINISHED": {
                         "text": "UNFINISHED",
                         "color": "orange"
-                      },
-                      "НЕТ ЗАПУСКОВ": {
-                        "text": "НЕТ ЗАПУСКОВ",
-                        "color": "gray"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Rules"
-            },
-            "properties": [
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Evidence"
-            },
-            "properties": [
-              {
-                "id": "links",
-                "value": [
-                  {
-                    "title": "Open Run Explorer",
-                    "url": "/d/bioetl-run-explorer-v1/run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-                    "targetBlank": false,
-                    "includeVars": false
-                  }
-                ]
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "SELECT RUN": {
-                        "text": "Choose a run",
-                        "color": "text"
                       },
                       "НЕТ ЗАПУСКОВ": {
                         "text": "НЕТ ЗАПУСКОВ",
@@ -1298,8 +1241,8 @@
               "run_reason": 3
             },
             "renameByName": {
-              "run_verdict": "Status",
-              "run_execution": "Result",
+              "run_verdict": "Overall verdict",
+              "run_execution": "Processing",
               "run_reason": "Reason",
               "saved_trust": "Trust"
             },
@@ -2348,7 +2291,7 @@
               "config": {
                 "align": "center",
                 "valign": "middle",
-                "size": 48,
+                "size": 40,
                 "text": {
                   "mode": "field",
                   "field": "status",
@@ -2361,13 +2304,13 @@
               },
               "constraint": {
                 "horizontal": "leftright",
-                "vertical": "center"
+                "vertical": "top"
               },
               "placement": {
                 "left": 8,
                 "right": 8,
-                "top": 30,
-                "height": 60
+                "top": 8,
+                "height": 70
               },
               "background": {
                 "color": {
@@ -2381,7 +2324,7 @@
               "config": {
                 "align": "center",
                 "valign": "middle",
-                "size": 42,
+                "size": 28,
                 "text": {
                   "mode": "field",
                   "field": "detail",
@@ -2394,13 +2337,13 @@
               },
               "constraint": {
                 "horizontal": "leftright",
-                "vertical": "center"
+                "vertical": "top"
               },
               "placement": {
                 "left": 8,
                 "right": 8,
-                "top": -30,
-                "height": 60
+                "top": 88,
+                "height": 70
               },
               "background": {
                 "color": {

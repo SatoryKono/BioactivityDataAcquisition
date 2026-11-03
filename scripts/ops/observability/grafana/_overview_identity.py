@@ -13,13 +13,14 @@ def apply_overview_identity(payload: dict) -> None:
     for pid in (9002, 9603):
         by_id[pid]["options"]["cellHeight"] = "sm"
     # Fixed status widths must fit the existing 200% CSS budget; Reason stays flexible.
+    # F-15 titles: Processing / Overall verdict / Trust (aligned with DQ/Incident).
     for override in by_id[9603]["fieldConfig"]["overrides"]:
         field = override["matcher"].get("options")
-        if field in {"Status", "Result", "Trust"}:
+        if field in {"Overall verdict", "Processing", "Trust", "Status", "Result"}:
             override["properties"] = [
                 prop for prop in override["properties"] if prop["id"] != "custom.width"
             ]
-            if field in {"Result", "Trust"}:
+            if field in {"Processing", "Trust", "Result"}:
                 override["properties"].append({"id": "custom.width", "value": 80})
     # Provider evidence is now local. Keep the three domain actions discoverable
     # without forwarding legacy provider selectors that Overview does not own.
@@ -426,11 +427,12 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
                         "text": {"mode": "field", "field": field, "fixed": ""},
                         "color": {"field": "status", "fixed": "gray"},
                     },
-                    "constraint": {"horizontal": "leftright", "vertical": "center"},
-                    "placement": {"left": 8, "right": 8, "top": offset, "height": 60},
+                    # F-05 / §1.3: top/bottom halves — no overlapping ±center offsets.
+                    "constraint": {"horizontal": "leftright", "vertical": "top"},
+                    "placement": {"left": 8, "right": 8, "top": top, "height": 70},
                     "background": {"color": {"fixed": "transparent"}},
                 }
-                for field, size, offset in (("status", 48, 30), ("detail", 42, -30))
+                for field, size, top in (("status", 40, 8), ("detail", 28, 88))
             ],
         },
     }

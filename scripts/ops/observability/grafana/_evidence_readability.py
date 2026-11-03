@@ -580,10 +580,15 @@ def _selection_summary(panel: dict) -> None:
     rename = _status_panel_rename_targets(panel)
     # Prefer post-organize column titles (Phase 2.5 donors use Processing /
     # Overall verdict). Fall back to legacy Result/Status rename targets.
+    # Prefer F-15 / Phase 2.5 titles; only fall back to legacy Result/Status.
     processing = (
-        rename.get("execution_state") or rename.get("run_execution") or "Result"
+        rename.get("run_execution")
+        or rename.get("execution_state")
+        or "Processing"
     )
-    verdict = rename.get("verdict") or rename.get("run_verdict") or "Status"
+    verdict = (
+        rename.get("run_verdict") or rename.get("verdict") or "Overall verdict"
+    )
     trust = rename.get("saved_trust")
     select_run_map = [
         {
@@ -697,12 +702,58 @@ def _overview_share_envelope(summary: dict, source: dict) -> list[str]:
     summary["targets"] = [{"panelId": 9002, "refId": "A", "withTransforms": False}]
     for transform in summary["transformations"]:
         if transform["id"] == "organize":
-            transform["options"]["renameByName"].update(
-                run_execution="Result",
-                run_verdict="Status",
+            # F-15: same visible titles as DQ 9406 / Incident 2101.
+            # Drop stale execution_state/verdict→Result/Status keys so the late
+            # render_nav_bus `_selection_summary` pass cannot prefer them over
+            # run_execution/run_verdict.
+            rename = transform["options"]["renameByName"]
+            for stale in (
+                "execution_state",
+                "verdict",
+                "evidence_completeness",
+                "rules_version",
+                "domain",
+            ):
+                rename.pop(stale, None)
+            rename.update(
+                run_execution="Processing",
+                run_verdict="Overall verdict",
                 run_reason="Reason",
                 saved_trust="Trust",
             )
+    # Retarget legacy Result/Status byName overrides to the F-15 titles.
+    remap = {"Result": "Processing", "Status": "Overall verdict"}
+    seen: set[str] = set()
+    kept: list[dict] = []
+    for override in summary.setdefault("fieldConfig", {}).setdefault("overrides", []):
+        if not isinstance(override, dict):
+            kept.append(override)
+            continue
+        matcher = override.get("matcher")
+        if not isinstance(matcher, dict) or matcher.get("id") != "byName":
+            kept.append(override)
+            continue
+        name = matcher.get("options")
+        target = remap.get(name, name) if isinstance(name, str) else name
+        if target in {"Processing", "Overall verdict", "Trust", "Reason"}:
+            if target in seen:
+                continue
+            seen.add(target)
+            matcher["options"] = target
+            # Drop echo displayName that only repeats the column title.
+            props = override.get("properties")
+            if isinstance(props, list):
+                override["properties"] = [
+                    prop
+                    for prop in props
+                    if not (
+                        isinstance(prop, dict)
+                        and prop.get("id") == "displayName"
+                        and prop.get("value") == target
+                    )
+                ]
+        kept.append(override)
+    summary["fieldConfig"]["overrides"] = kept
     return ["run_execution", "run_verdict", "saved_trust", "run_reason"]
 
 
@@ -758,8 +809,8 @@ def _overview_selected_run_layout(p: dict[int, dict], summary: dict) -> None:
             "Severity",
         }:
             rule["properties"] = [v for v in rule["properties"] if v["id"] != _WIDTH]
-    _override(summary, "Result", _WIDTH, 100)
-    _override(summary, "Status", _WIDTH, 115)
+    _override(summary, "Processing", _WIDTH, 100)
+    _override(summary, "Overall verdict", _WIDTH, 115)
     for field in ("Domain", "Status", "Reason"):
         _override(p[9002], field, "links", [])
     _override(summary, "Trust", "displayName", "Trust")
@@ -783,10 +834,10 @@ def _overview_selected_run_layout(p: dict[int, dict], summary: dict) -> None:
     for panel in (summary, p[9002]):
         _override(panel, "Reason", _WRAP, True)
         _override(panel, "Reason", _CELL, {"type": "auto", "wrapText": True})
-    _override(summary, "Result", _CELL, {"type": "color-text", "wrapText": False})
+    _override(summary, "Processing", _CELL, {"type": "color-text", "wrapText": False})
     _override(
         summary,
-        "Result",
+        "Processing",
         "mappings",
         [
             {
@@ -821,17 +872,35 @@ def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
                 transform["options"]["renameByName"]["status_display"] = "Status"
     for panel, fields in views:
         _apply_reason_columns(panel, fields)
-    rename = _status_panel_rename_targets(summary)
-    # displayName only when organize still emits legacy Result/Status titles.
-    if (
-        rename.get("execution_state") == "Result"
-        or rename.get("run_execution") == "Result"
-    ):
-        _override(summary, "Result", "displayName", "Processing")
-    if rename.get("verdict") == "Status" or rename.get("run_verdict") == "Status":
-        _override(summary, "Status", "displayName", "Overall verdict")
+    # F-15: organize titles are already Processing / Overall verdict on all three
+    # Review Selected Run Status panels; drop legacy Result/Status displayName
+    # shims that fought donor matchers.
     if overview:
         _overview_selected_run_layout(p, summary)
+    # `_selection_summary` may run before organize rename and leave dead
+    # Result/Status byName rows; drop them after F-15 titles are final.
+    _drop_legacy_status_override_names(summary)
+
+
+def _drop_legacy_status_override_names(panel: dict) -> None:
+    """Remove byName overrides that still target pre-F-15 Result/Status titles."""
+    field_config = panel.get("fieldConfig")
+    if not isinstance(field_config, dict):
+        return
+    overrides = field_config.get("overrides")
+    if not isinstance(overrides, list):
+        return
+    dead = {"Result", "Status", "Rules", "Evidence"}
+    field_config["overrides"] = [
+        override
+        for override in overrides
+        if not (
+            isinstance(override, dict)
+            and isinstance(override.get("matcher"), dict)
+            and override["matcher"].get("id") == "byName"
+            and override["matcher"].get("options") in dead
+        )
+    ]
 
 
 def _apply_stat_value_sizes(p: dict[int, dict]) -> None:

@@ -523,88 +523,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Processing"
-            },
-            "properties": [
-              {
-                "id": "custom.wrapText",
-                "value": false
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              },
-              {
-                "id": "links",
-                "value": []
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "SELECT RUN": {
-                        "text": "—",
-                        "color": "text"
-                      },
-                      "НЕТ ЗАПУСКОВ": {
-                        "text": "НЕТ ЗАПУСКОВ",
-                        "color": "gray"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Overall verdict"
-            },
-            "properties": [
-              {
-                "id": "custom.wrapText",
-                "value": false
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              },
-              {
-                "id": "links",
-                "value": []
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "SELECT RUN": {
-                        "text": "—",
-                        "color": "text"
-                      },
-                      "НЕТ ЗАПУСКОВ": {
-                        "text": "НЕТ ЗАПУСКОВ",
-                        "color": "gray"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "Trust"
             },
             "properties": [
@@ -696,6 +614,66 @@
                       },
                       "archive_evidence_not_recorded": {
                         "text": "No verified archive"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Processing"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "SELECT RUN": {
+                        "text": "—",
+                        "color": "text"
+                      },
+                      "НЕТ ЗАПУСКОВ": {
+                        "text": "НЕТ ЗАПУСКОВ",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Overall verdict"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "SELECT RUN": {
+                        "text": "—",
+                        "color": "text"
+                      },
+                      "НЕТ ЗАПУСКОВ": {
+                        "text": "НЕТ ЗАПУСКОВ",
+                        "color": "gray"
                       }
                     }
                   }
