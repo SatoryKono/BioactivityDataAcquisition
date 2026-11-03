@@ -46,7 +46,7 @@ if TYPE_CHECKING:
 
 class BasePublicationTransformer(
     PublicationTransformerHooksMixin,
-    BaseTransformer,  # type: ignore[misc]
+    BaseTransformer,  # type: ignore[misc]  # tracked(#12721): type safety debt
 ):
     """Shared facade flow for publication transformers."""
 
