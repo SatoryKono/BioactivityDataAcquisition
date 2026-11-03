@@ -55,6 +55,7 @@ __all__ = [
     "resolve_registration_runtime_source_id",
 ]
 
+
 def build_evidence_location_registration_service(
     settings: Settings,
 ) -> tuple[EvidenceLocationRegistrationService, EvidenceLocationBindingContext]:
@@ -195,8 +196,6 @@ def verify_workflow_run_location(
         run_id=workflow_run_id,
         workflow_run_id=None,
     )
-
-
 
 
 def _register_evidence_location_soft(

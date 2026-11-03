@@ -37,6 +37,20 @@ def test_shadow_compare_routes_assertless_ratchet_config() -> None:
     ]
 
 
+def test_shadow_compare_routes_removed_vscode_root() -> None:
+    """Removing editor metadata still selects the root-directory contract."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        [".vscode/settings.json", ".vscode/extensions.json"],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py"
+    ]
+
+
 def test_shadow_compare_routes_diagram_runner_paths() -> None:
     """Diagram tooling changes select their runner and budget contracts."""
     repo_root = Path(__file__).resolve().parents[5]

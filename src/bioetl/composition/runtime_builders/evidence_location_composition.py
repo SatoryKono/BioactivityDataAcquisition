@@ -52,6 +52,7 @@ __all__ = [
     "resolve_registration_runtime_source_id",
 ]
 
+
 @dataclass(frozen=True, slots=True)
 class EvidenceLocationBindingContext:
     """Trusted write root + alias binding for one publisher call."""

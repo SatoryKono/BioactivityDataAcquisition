@@ -51,6 +51,7 @@ __all__ = [
     "soft_failure_exception_detail",
 ]
 
+
 class _RegisterAndReadPort(
     RunEvidenceLocationRegisterPort, RunEvidenceLocationReadPort, Protocol
 ):
