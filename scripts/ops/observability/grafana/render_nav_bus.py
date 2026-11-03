@@ -2794,8 +2794,28 @@ def _apply_phase25_srs_prr_budget(payload: dict[str, Any], *, current_uid: str) 
 def _neutralize_mapped_status_thresholds(payload: dict[str, Any]) -> None:
     """Keep missing status values neutral when text mappings provide real colors."""
     status_tokens = ("OK", "WARN", "CRIT", "ERROR", "UNKNOWN", "INCOMPLETE")
+    green_zero_panels = {
+        "Monitor Runtime Error Rate",
+        "Monitor Worst Stage Lag",
+        "Monitor Active Blocker Count",
+        "Monitor Manifest (30m)",
+        "Monitor Ledger (30m)",
+        "Monitor Global Read Failures (30m)",
+    }
     for panel in _walk_panels(payload.get("panels", [])):
         if panel.get("type") != "stat":
+            continue
+        if panel.get("title") in green_zero_panels:
+            # These gauges have a healthy-zero threshold; null has its own
+            # explicit mapping and remains neutral.
+            steps = (
+                panel.get("fieldConfig", {})
+                .get("defaults", {})
+                .get("thresholds", {})
+                .get("steps", [])
+            )
+            if steps and isinstance(steps[0], dict) and steps[0].get("value") is None:
+                steps[0]["color"] = "green"
             continue
         defaults = panel.get("fieldConfig", {}).get("defaults", {})
         mappings = defaults.get("mappings", [])

@@ -1567,7 +1567,7 @@
         {
           "includeVars": false,
           "title": "Show all rows and total (summary: up to 2)",
-          "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=22005&${__url_time_range}",
+          "url": "/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=22005&${__url_time_range}",
           "targetBlank": false
         }
       ]
@@ -2405,9 +2405,6 @@
                   "Time": 11
                 },
                 "renameByName": {
-                  "pipeline": "Pipeline",
-                  "run_type": "Run type",
-                  "stage": "Stage",
                   "signal": "Signal",
                   "Value": "Value",
                   "unit": "Unit",
@@ -4364,7 +4361,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "green",
                     "value": null
                   },
                   {
@@ -4461,7 +4458,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "gray",
+                    "color": "green",
                     "value": null
                   },
                   {
@@ -6809,7 +6806,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "green",
                     "value": null
                   },
                   {
@@ -8370,7 +8367,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "green",
                     "value": null
                   },
                   {
@@ -8654,7 +8651,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "green",
                     "value": null
                   },
                   {
@@ -10672,7 +10669,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "green",
                     "value": null
                   },
                   {
@@ -11861,7 +11858,7 @@
             "x": 0,
             "y": 59,
             "w": 24,
-            "h": 12
+            "h": 8
           },
           "datasource": {
             "type": "datasource",
@@ -12100,15 +12097,8 @@
                 "renameByName": {
                   "domain": "Domain",
                   "verdict": "Status",
-                  "execution_state": "Result",
-                  "evidence_completeness": "Evidence",
-                  "rules_version": "Rules",
                   "action": "Action",
                   "evidence_ref": "Evidence reference",
-                  "pipeline": "Pipeline",
-                  "run_id": "Run ID",
-                  "completed_at": "Completed",
-                  "revision": "Revision",
                   "reason_display": "Reason"
                 }
               }

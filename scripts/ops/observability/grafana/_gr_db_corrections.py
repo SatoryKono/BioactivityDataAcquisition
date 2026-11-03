@@ -290,6 +290,23 @@ def _correct_incident(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     if uid != "bioetl-incident-v1":
         return
     for panel in panels.values():
+        if panel.get("title") not in {
+            "Monitor Runtime Error Rate",
+            "Monitor Worst Stage Lag",
+            "Monitor Active Blocker Count",
+            "Monitor Manifest (30m)",
+            "Monitor Ledger (30m)",
+        }:
+            continue
+        steps = (
+            panel.get("fieldConfig", {})
+            .get("defaults", {})
+            .get("thresholds", {})
+            .get("steps", [])
+        )
+        if steps and steps[0].get("value") is None:
+            steps[0]["color"] = "green"
+    for panel in panels.values():
         if panel.get("type") != "table":
             continue
         defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
