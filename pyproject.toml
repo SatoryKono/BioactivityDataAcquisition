@@ -464,7 +464,8 @@ select = [
     # TCH disabled: types are used at runtime for isinstance checks with Protocols
     "PTH", # flake8-use-pathlib
     "RUF", # ruff-specific
-    "T201", # flake8-print (no print statements in production code)
+    "T201", # flake8-print
+    "S506", # unsafe-yaml-load
 ]
 ignore = [
     "RUF001",  # Ambiguous unicode in strings - project uses Russian help text
