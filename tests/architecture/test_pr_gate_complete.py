@@ -109,7 +109,7 @@ def test_coordinator_materializes_on_supported_pr_bases_after_owner_cutover() ->
     on = data.get("on", data.get(True, {}))
     assert isinstance(on, dict)
     assert set(on) == {"pull_request", "workflow_dispatch"}
-    assert on["pull_request"] == {"branches": ["main", "develop"]}
+    assert on["pull_request"] == {"branches": ["main"]}
     perms = data.get("permissions", {})
     assert perms == {"contents": "read"} or perms.get("contents") == "read"
     conc = data.get("concurrency", {})
@@ -185,13 +185,13 @@ def test_catalog_keeps_target_context_distinct_from_ruleset_mode() -> None:
         "github_ruleset_13643213_enforcement",
         "github_ruleset_15730586_enforcement",
     ):
-        assert policy[key] in {"disabled", "active", "evaluate"}
+        assert policy[key] in {"disabled", "active", "evaluate", "deleted"}
     assert policy["allow_skipped_as_success"] is False
     assert policy["allow_cancelled_as_success"] is False
     assert policy["require_sha_binding"] is True
     header = "\n".join(COORDINATOR.read_text(encoding="utf-8").splitlines()[:16])
     assert "Enforcement stays disabled (#11180)" not in header
-    assert "not the context stored" in header
+    assert "is the context stored" in header
     assert "not active CircleCI protection" in header
     assert "not configured GitHub Actions enforcement" in header
 
@@ -204,7 +204,8 @@ def test_policy_section_3_separates_enforcement_from_stored_contexts() -> None:
     assert "the active provider is" not in current.lower()
     assert "enforcement: disabled" in current
     assert "`ci/circleci: pr-gate-complete`" in current
-    assert "not the context stored" in current
+    assert "is the context stored" in current
+    assert "deleted" in current
     assert "enforcement_verified_date" in current
     assert "2026-10-09" in current
     assert "2026-10-16" in current
