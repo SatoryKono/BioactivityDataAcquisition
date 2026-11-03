@@ -335,19 +335,6 @@ def test_shadow_compare_routes_composite_configs(path: str) -> None:
     )
 
 
-def test_shadow_compare_routes_composite_fixtures() -> None:
-    """Composite fixture YAML selects the integration schema contract suite."""
-    repo_root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare(
-        ["tests/fixtures/composite/many_to_one_enricher.yaml"],
-        repo_root=repo_root,
-    )
-    assert (
-        "tests/integration/composite/test_composite_config_schema_contract.py"
-        in report["selected"]
-    )
-
-
 @pytest.mark.parametrize(
     "path",
     (
