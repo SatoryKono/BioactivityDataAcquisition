@@ -17,10 +17,6 @@ from bioetl.composition.composite_catalog import (
     attach_contract_fields,
     project_assay_replay,
 )
-from bioetl.composition.selected_run_contract_exclusions import (
-    attach_contract_fields,
-    project_assay_replay,
-)
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.selected_status import (
     provider_check_rows,
@@ -35,14 +31,6 @@ from bioetl.interfaces.http._health_server_observability_protocols import (
     _HealthObservabilityRoutingHost,
 )
 from bioetl.interfaces.http._reconciliation_display import linked_reconciliation_display
-from bioetl.interfaces.http._selected_run_a2_resolve import (
-    CATALOG_UNAVAILABLE_REASON,
-    NO_RUNS_REASON,
-    NO_RUNS_STATUS,
-    is_unresolved_run_id,
-    list_a2_catalog,
-    resolve_a2_latest_run_id,
-)
 from bioetl.interfaces.http._selected_run_a2_resolve import (
     CATALOG_UNAVAILABLE_REASON,
     NO_RUNS_REASON,

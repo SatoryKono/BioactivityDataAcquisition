@@ -52093,7 +52093,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "3b4177c28b1065df66656c8d8059b39c15eb24cb5aa95d5f8cf93480fb273bad",
+  "source_tree_sha256": "e1aa5d0ce1a963e0754ee15f1b7a86fba70a3b07d7fafabd92333b4c408943de",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -52248,16 +52248,16 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2603,
+    "source_module_count": 2604,
     "status_counts": {
-      "coverage_xml_missing": 0,
+      "coverage_xml_missing": 1,
       "fully_covered": 2518,
       "no_executable_lines": 2,
-      "partially_covered": 75,
-      "uncovered": 8,
+      "partially_covered": 76,
+      "uncovered": 7,
       "unmeasured": 0
     },
-    "uncovered_module_count": 8,
+    "uncovered_module_count": 7,
     "uncovered_modules": [
       {
         "module": "bioetl.application.services.control_plane.effective_config.config_source_hashing",
@@ -52277,11 +52277,6 @@
       {
         "module": "bioetl.domain.control_plane.selected_run_contract_exclusions",
         "path": "src/bioetl/domain/control_plane/selected_run_contract_exclusions.py",
-        "reason": "coverage_xml_reports_zero_executed_lines"
-      },
-      {
-        "module": "bioetl.interfaces.http._run_type_universe_options",
-        "path": "src/bioetl/interfaces/http/_run_type_universe_options.py",
         "reason": "coverage_xml_reports_zero_executed_lines"
       },
       {

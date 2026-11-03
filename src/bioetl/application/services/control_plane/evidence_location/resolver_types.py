@@ -95,4 +95,3 @@ class EvidenceLocationResolveResult:
     @property
     def is_open(self) -> bool:
         return self.context is not None and self.data_root is not None
-

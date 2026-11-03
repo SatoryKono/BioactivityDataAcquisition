@@ -294,20 +294,9 @@ def _selector_context_payload_with_a2(
             report_scopes,
             store=report_store,
         )
-        if auto_selected_run_id is not None:
-            report_selected = verified_report_identity_for_run(
-                auto_selected_run_id,
-                {
-                    "workflow": selected_workflows,
-                    "pipeline": selected_pipelines,
-                    "run_type": selected_run_types,
-                    "run_status": selected_run_statuses,
-                    "run_id": (),
-                },
-                store=report_store,
-            )
     return build_selector_context_payload(
         manifests=manifests,
+        ledger_port=host._run_ledger_port,
         workflow_manifests=workflow_manifests,
         selected_workflows=selected_workflows,
         selected_pipelines=selected_pipelines,

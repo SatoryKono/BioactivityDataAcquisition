@@ -1,12 +1,12 @@
 {
   "summary": {
-    "scanned_modules": 2599,
-    "total_internal_imports": 8443,
+    "scanned_modules": 2602,
+    "total_internal_imports": 8456,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 329,
     "violations": 0,
-    "source_fingerprint": "68756fa0f72775c89d933cba3024cb81cc47782f4ffde9110a8d18cb143648fa"
+    "source_fingerprint": "777e346e4038b80b583b4aa290969c169e339df8d68175a5f928f6f1335b0679"
   },
   "layer_edges": [
     {
@@ -195,8 +195,8 @@
       "imports": 32
     },
     {
-      "source": "composition.runtime_builders",
-      "target": "domain.control_plane",
+      "source": "infrastructure.storage",
+      "target": "domain.medallion",
       "imports": 31
     },
     {
@@ -282,11 +282,6 @@
     {
       "source": "composition.factories",
       "target": "domain.schemas",
-      "imports": 22
-    },
-    {
-      "source": "composition.runtime_builders",
-      "target": "infrastructure.config",
       "imports": 22
     },
     {
