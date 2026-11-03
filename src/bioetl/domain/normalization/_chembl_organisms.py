@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-import re
-
 from bioetl.domain.mapping.organism_classification import normalize_organism_name
 from bioetl.domain.normalization.text import normalize_string
 
-_ORGANISM_WHITESPACE_RE = re.compile(r"\s+")
 _ORGANISM_DISPLAY_NAME_MAP: dict[str, str] = {
     "homo sapiens": "Homo sapiens",
     "mus musculus": "Mus musculus",
@@ -54,7 +51,11 @@ def normalize_chembl_organism_name(value: str | None) -> str | None:
         return None
 
     cleaned = _strip_trailing_parenthetical_annotation(normalized)
-    cleaned = _ORGANISM_WHITESPACE_RE.sub(" ", cleaned).strip()
+
+    # BOLT OPTIMIZATION:
+    # " ".join(str.split()) efficiently collapses multiple internal spaces
+    # and inherently strips leading/trailing space without regex overhead.
+    cleaned = " ".join(cleaned.split())
     if not cleaned:
         return None
 
