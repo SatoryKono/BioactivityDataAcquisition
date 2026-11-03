@@ -163,3 +163,5 @@ dashboards:
       - pipeline
       - run_type
       - run_id
+      - selected_run_id
+      - selected_pipeline

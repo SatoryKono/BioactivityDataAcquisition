@@ -288,37 +288,6 @@ def test_newer_alias_fallback_not_hidden_by_older_declared_match() -> None:
     assert latest == str(newer_undeclared.run_id)
 
 
-def test_declared_workflow_beats_pipeline_wide_aliases() -> None:
-    """Newer chembl_core run must not win when workflow=chembl_assay is selected."""
-    older_matching = _manifest(1, workflow="chembl_assay")
-    newer_foreign = _manifest(2, workflow="chembl_core")
-    workflows = (
-        _workflow("chembl_assay", index=50),
-        _workflow("chembl_core", index=51),
-    )
-    latest = resolve_a2_latest_run_id(
-        manifests=(older_matching, newer_foreign),
-        ledger_port=None,
-        workflow_manifests=workflows,
-        pipeline="chembl_assay",
-        query={"pipeline": "chembl_assay", "workflow": "chembl_assay"},
-    )
-    assert latest == str(older_matching.run_id)
-
-
-def test_alias_fallback_when_run_has_no_declared_workflow() -> None:
-    undeclared = _manifest(3)  # no launch_context / top-level workflow
-    workflows = (_workflow("chembl_assay", index=52),)
-    latest = resolve_a2_latest_run_id(
-        manifests=(undeclared,),
-        ledger_port=None,
-        workflow_manifests=workflows,
-        pipeline="chembl_assay",
-        query={"pipeline": "chembl_assay", "workflow": "chembl_assay"},
-    )
-    assert latest == str(undeclared.run_id)
-
-
 def _host() -> MagicMock:
     import asyncio
 

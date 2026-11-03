@@ -451,7 +451,7 @@ shipped_selector_registry:
     family: incident_workspace
     visible_selectors: *id001
     hidden_context_selectors: []
-    hidden_detail_selectors: []
+    hidden_detail_selectors: *id006
     top_bar_order:
     - workflow
     - pipeline
@@ -477,7 +477,7 @@ shipped_selector_registry:
     - run_type
     - run_id
     hidden_context_selectors: []
-    hidden_detail_selectors: []
+    hidden_detail_selectors: *id006
     top_bar_order:
     - workflow
     - pipeline
@@ -508,6 +508,7 @@ ship_now_selector_contract_by_uid:
   bioetl-run-explorer-v1:
     visible_selectors: *id005
     time_range: grafana_builtin
+
 hidden_handoff_contract:
   allowed_shipped_vars: []
   detail_only_shipped_vars:
