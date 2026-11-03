@@ -21,7 +21,7 @@
   },
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "474699cf4a8f48d32d30abebeb8a8bb102e574114a81275f536ebf7b95d365ac",
-    "bioetl-dq-v2": "ade2ceac007edb78322254f764b47cefac8a237640ef90298ef440c992811851",
+    "bioetl-dq-v2": "dece82209dcf4cd709bb2d4d55601280bbf150c5b0ea77b0c4bdf5f961c38628",
     "bioetl-incident-v1": "bd7bcee10e628d225b4b0a05a32bccb0f152769e8f3aa55cabb328a23c6e4828",
     "bioetl-overview-v2": "53fc5b237b6f264245863e6167cc237cca89e15a37a023781d8dce35bf5b1de6",
     "bioetl-run-explorer-v1": "9a289d123606a286010cb30d4e7bc2107ec60685b963b321900417d91459f16a"
