@@ -158,6 +158,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/external_resource_inventory_pr12728_hotspot_move_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
+    "configs/quality/external_resource_inventory_pr12748_status_cache_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+    ),
     "scripts/engineering/README.md": (
         SCRIPTS_INVENTORY_MANIFEST_TEST,
         "tests/architecture/test_scripts_inventory_discovery.py",
@@ -341,6 +345,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/audit/pack-v2.1/P05-interfaces-contracts.md",
         ),
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/audit/pack-v2.1/evidence_p12_parity.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+    ),
+    "src/bioetl/infrastructure/adapters/decorators/README.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
     ),
     "reports/engineering/SEC-003_audit_report.md": (
         "tests/unit/domain/services/test_composite_metadata_helpers.py",
