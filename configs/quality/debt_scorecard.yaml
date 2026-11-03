@@ -580,10 +580,10 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 53
-      total_loc: 6571
+      files: 52
+      total_loc: 6648
       files_ge_250_loc: 0
-      helper_function_ratio: 0.345
+      helper_function_ratio: 0.338
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.runtime_builders.runner_inputs
     trend:

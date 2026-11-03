@@ -38,7 +38,7 @@ def test_shadow_compare_routes_assertless_ratchet_config() -> None:
 
 
 def test_shadow_compare_routes_removed_vscode_root() -> None:
-    """Removing editor metadata still selects the root-directory contract."""
+    """Editor metadata selects root-hygiene tests and the closeout contract."""
     repo_root = Path(__file__).resolve().parents[5]
 
     report = build_shadow_compare(
@@ -47,7 +47,9 @@ def test_shadow_compare_routes_removed_vscode_root() -> None:
     )
 
     assert report["selected"] == [
-        "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py"
+        "tests/architecture/test_root_hygiene_review_registry.py",
+        "tests/architecture/test_root_hygiene_workflow.py",
+        "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
     ]
 
 

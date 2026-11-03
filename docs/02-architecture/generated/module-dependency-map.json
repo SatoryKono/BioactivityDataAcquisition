@@ -1,12 +1,12 @@
 {
   "summary": {
     "scanned_modules": 2602,
-    "total_internal_imports": 8460,
+    "total_internal_imports": 8463,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 329,
     "violations": 0,
-    "source_fingerprint": "0c97a68b892497f2209886c34be252899d652d45e12b033dcd09e24e82554280"
+    "source_fingerprint": "a9d8fcdb41e8bc2e9b1db57da9ffd1311cf73b20426860ebcacaaf90b0e03fa6"
   },
   "layer_edges": [
     {
@@ -24,7 +24,7 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 237,
+      "imports": 238,
       "allowed": true
     },
     {
@@ -36,7 +36,7 @@
     {
       "source": "composition",
       "target": "domain",
-      "imports": 321,
+      "imports": 322,
       "allowed": true
     },
     {
@@ -48,7 +48,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1315,
+      "imports": 1316,
       "allowed": true
     },
     {
@@ -155,13 +155,13 @@
       "imports": 43
     },
     {
-      "source": "composition.factories",
-      "target": "domain.ports",
-      "imports": 37
-    },
-    {
       "source": "composition.runtime_builders",
       "target": "domain.control_plane",
+      "imports": 38
+    },
+    {
+      "source": "composition.factories",
+      "target": "domain.ports",
       "imports": 37
     },
     {
@@ -312,7 +312,7 @@
     {
       "source": "composition.runtime_builders",
       "target": "application.services",
-      "imports": 18
+      "imports": 19
     },
     {
       "source": "application.observability",
