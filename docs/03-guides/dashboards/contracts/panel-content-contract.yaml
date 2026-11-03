@@ -369,9 +369,10 @@ dashboards:
         tier: 3
         scope: selected_run
         scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
+        - N/A
         - VALID_EMPTY
         - UNKNOWN
         - ERROR
@@ -478,9 +479,10 @@ dashboards:
         tier: 3
         scope: selected_run
         scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
+        - N/A
         - VALID_EMPTY
         - UNKNOWN
         - ERROR
@@ -2458,8 +2460,8 @@ dashboards:
         title: Pipeline fleet and range, not this Run ID
         role: row_group
         tier: 4
-        scope: current
-        scope_class: current
+        scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
@@ -2637,9 +2639,10 @@ dashboards:
         tier: 3
         scope: selected_run
         scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
+        - N/A
         - VALID_EMPTY
         - UNKNOWN
         - ERROR
@@ -2659,9 +2662,10 @@ dashboards:
         tier: 3
         scope: selected_run
         scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
+        - N/A
         - VALID_EMPTY
         - UNKNOWN
         - ERROR
@@ -3266,6 +3270,24 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
+      '1000':
+        title: ''
+        role: navigation
+        tier: 3
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - navigation_context
+        fixture_cases:
+        - not_applicable
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
       '3010':
         title: Inspect Recent Runs (last 10)
         role: forensic_table
