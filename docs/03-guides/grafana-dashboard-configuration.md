@@ -1,10 +1,10 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
-Last verified: '2026-10-15'
+Last verified: '2026-11-03'
 
 ______________________________________________________________________
 
@@ -28,13 +28,23 @@ ______________________________________________________________________
 3. Verify variables (`pipeline`, `provider`, …) resolve.
 4. Confirm panels that require recording rules have rules deployed.
 
-## BioETL dashboard families
+## Shipped dashboard set (five JSON)
 
-- Workflow / pipeline overview
-- Runtime / resource
-- Data Quality / Run Explorer
-- Alerts / SLO (when rules present)
-- Incident views
+Provisioned under `grafana/dashboards/` (no `*-preview.json`, no retired
+boards 3/4):
+
+| File | UID | Title |
+| --- | --- | --- |
+| `bioetl-control-plane-v1.json` | `bioetl-control-plane-v1` | Replay Readiness |
+| `bioetl-overview-v2.json` | `bioetl-overview-v2` | Run Overview |
+| `bioetl-dq-v2.json` | `bioetl-dq-v2` | Data Quality |
+| `bioetl-incident-v1.json` | `bioetl-incident-v1` | Incident Workspace |
+| `bioetl-run-explorer-v1.json` | `bioetl-run-explorer-v1` | Run Explorer |
+
+Each board carries navigation panel `id=1000` (`Navigate Dashboards`): five
+chips at 19.5% width; the current board is a `<span class="bioetl-nav-current">`,
+not a link. Runtime / Provider Health JSON were retired; their evidence lives on
+Overview / Incident.
 
 See [dashboard-guide.md](dashboard-guide.md) and `dashboards/README.md`.
 

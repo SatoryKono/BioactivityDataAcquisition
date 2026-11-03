@@ -267,6 +267,25 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
                 for target in panel.get("targets", [])
                 if isinstance(target, dict)
             ]
+            # Phase 2.5: some first-screen panels consume SRS via Dashboard DS
+            # from an in-dashboard donor (panelId), not a direct Infinity URL.
+            donor_ids = [
+                target.get("panelId")
+                for target in panel.get("targets", [])
+                if isinstance(target, dict) and target.get("panelId") is not None
+            ]
+            if donor_ids:
+                panels_by_id = {p.get("id"): p for p in get_dashboard_panels(dashboard)}
+                for donor_id in donor_ids:
+                    donor = panels_by_id.get(donor_id)
+                    assert donor is not None, (
+                        f"{dashboard_name}:{panel_title} donor {donor_id} missing"
+                    )
+                    expressions.extend(
+                        str(t.get("expr") or t.get("url") or "")
+                        for t in donor.get("targets", [])
+                        if isinstance(t, dict)
+                    )
             assert any(expected_metric in expr for expr in expressions), (
                 f"{dashboard_name}:{panel_title} must consume {expected_metric}"
             )
@@ -507,8 +526,8 @@ def test_current_status_headlines_use_instant_queries() -> None:
 def test_run_explorer_shows_ten_rows_and_only_the_browse_surface() -> None:
     dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-run-explorer-v1.json")
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
-    assert len(panels) == 2
-    assert 1000 not in panels
+    # Phase 2 §2.1: five-chip nav bus joins the selection leaf.
+    assert set(panels) == {1000, 1, 3010}
     assert 9450 not in panels
     assert not ({3098, 3099, 3011, 3012, 3013, 3014, 3020, 3022, 3023} & panels.keys())
     browse = panels[3010]
@@ -518,6 +537,10 @@ def test_run_explorer_shows_ten_rows_and_only_the_browse_surface() -> None:
     assert browse["options"]["footer"]["enablePagination"] is False
     assert browse["options"]["cellHeight"] == "sm"
     assert "last 10" in browse["title"]
+    nav = panels[1000]
+    content = str((nav.get("options") or {}).get("content") or "")
+    assert content.count("width:19.5%") == 5
+    assert "Data Quality" in content
 
 
 def test_run_explorer_first_screen_empty_copy_has_no_selector_dollars() -> None:
