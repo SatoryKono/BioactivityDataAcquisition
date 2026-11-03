@@ -2755,6 +2755,7 @@ def apply_to_dashboard(
     _apply_phase25_srs_prr_budget(payload, current_uid=current_uid)
     _migrate_grafana_schema42(payload)
     _neutralize_mapped_status_thresholds(payload)
+    _remove_dead_organize_renames(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:
@@ -2791,6 +2792,53 @@ def _apply_phase25_srs_prr_budget(payload: dict[str, Any], *, current_uid: str) 
         apply(payload)
 
 
+def _keep_healthy_zero_threshold(panel: dict[str, Any], titles: set[str]) -> bool:
+    if panel.get("title") not in titles:
+        return False
+    steps = (
+        panel.get("fieldConfig", {})
+        .get("defaults", {})
+        .get("thresholds", {})
+        .get("steps", [])
+    )
+    if steps and isinstance(steps[0], dict) and steps[0].get("value") is None:
+        steps[0]["color"] = "green"
+    return True
+
+
+def _has_mapped_status(mappings: list[dict[str, Any]], tokens: tuple[str, ...]) -> bool:
+    for mapping in mappings:
+        if not isinstance(mapping, dict) or not isinstance(
+            mapping.get("options"), dict
+        ):
+            continue
+        for key, value in mapping["options"].items():
+            text = value.get("text", "") if isinstance(value, dict) else value
+            if any(
+                token in str(candidate).upper()
+                for token in tokens
+                for candidate in (key, text)
+            ):
+                return True
+    return False
+
+
+def _remove_dead_organize_renames(payload: dict[str, Any]) -> None:
+    """Drop rename mappings for fields the same organize transform excludes."""
+    for panel in _walk_panels(payload.get("panels", [])):
+        for transform in panel.get("transformations", []):
+            if transform.get("id") != "organize":
+                continue
+            options = transform.get("options", {})
+            index = options.get("indexByName")
+            rename = options.get("renameByName")
+            if not isinstance(index, dict) or not isinstance(rename, dict):
+                continue
+            options["renameByName"] = {
+                field: label for field, label in rename.items() if field in index
+            }
+
+
 def _neutralize_mapped_status_thresholds(payload: dict[str, Any]) -> None:
     """Keep missing status values neutral when text mappings provide real colors."""
     status_tokens = ("OK", "WARN", "CRIT", "ERROR", "UNKNOWN", "INCOMPLETE")
@@ -2803,35 +2851,12 @@ def _neutralize_mapped_status_thresholds(payload: dict[str, Any]) -> None:
         "Monitor Global Read Failures (30m)",
     }
     for panel in _walk_panels(payload.get("panels", [])):
-        if panel.get("type") != "stat":
-            continue
-        if panel.get("title") in green_zero_panels:
-            # These gauges have a healthy-zero threshold; null has its own
-            # explicit mapping and remains neutral.
-            steps = (
-                panel.get("fieldConfig", {})
-                .get("defaults", {})
-                .get("thresholds", {})
-                .get("steps", [])
-            )
-            if steps and isinstance(steps[0], dict) and steps[0].get("value") is None:
-                steps[0]["color"] = "green"
+        if panel.get("type") != "stat" or _keep_healthy_zero_threshold(
+            panel, green_zero_panels
+        ):
             continue
         defaults = panel.get("fieldConfig", {}).get("defaults", {})
-        mappings = defaults.get("mappings", [])
-        mapped_status = any(
-            isinstance(mapping, dict)
-            and isinstance(mapping.get("options"), dict)
-            and any(
-                any(token in str(text).upper() for token in status_tokens)
-                for key, value in mapping["options"].items()
-                for text in (
-                    key,
-                    value.get("text", "") if isinstance(value, dict) else value,
-                )
-            )
-            for mapping in mappings
-        )
+        mapped_status = _has_mapped_status(defaults.get("mappings", []), status_tokens)
         steps = defaults.get("thresholds", {}).get("steps", [])
         if not mapped_status or not steps or not isinstance(steps[0], dict):
             continue

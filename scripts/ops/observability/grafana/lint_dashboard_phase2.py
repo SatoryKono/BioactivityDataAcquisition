@@ -48,7 +48,7 @@ _NAV_CHIP_TITLES = (
     "Replay Readiness",
     "Run Overview",
     "Data Quality",
-    "6. Incident Workspace",
+    "Incident Workspace",
 )
 _STATUS_TOKENS = (
     "OK",
@@ -136,7 +136,7 @@ _NAV_DESTINATIONS = {
     "Replay Readiness": "bioetl-control-plane-v1",
     "Run Overview": "bioetl-overview-v2",
     "Data Quality": "bioetl-dq-v2",
-    "6. Incident Workspace": "bioetl-incident-v1",
+    "Incident Workspace": "bioetl-incident-v1",
 }
 _NAV_CHIP_WIDTH_RE = re.compile(r"(?:^|;)\s*width:19\.5%\s*(?:;|$)")
 _NAV_ELEMENT_RE = re.compile(
@@ -461,19 +461,27 @@ def _lint_unused_variables(path: Path, payload: dict[str, Any]) -> list[str]:
     return findings
 
 
+def _organize_transformations(panel: dict[str, Any]):
+    for transform in panel.get("transformations") or []:
+        if isinstance(transform, dict) and transform.get("id") == "organize":
+            yield transform
+
+
+def _dead_rename_keys(transform: dict[str, Any]) -> list[str]:
+    options = transform.get("options") or {}
+    index = options.get("indexByName")
+    rename = options.get("renameByName")
+    if not isinstance(index, dict) or not isinstance(rename, dict) or not index:
+        return []
+    return sorted(key for key in rename if key not in index)
+
+
 def _lint_dead_renames(path: Path, panels: list[dict[str, Any]]) -> list[str]:
     """Phase-4: renameByName keys must appear in the same organize indexByName."""
     findings: list[str] = []
     for panel in panels:
-        for transform in panel.get("transformations") or []:
-            if not isinstance(transform, dict) or transform.get("id") != "organize":
-                continue
-            options = transform.get("options") or {}
-            index = options.get("indexByName")
-            rename = options.get("renameByName")
-            if not isinstance(index, dict) or not isinstance(rename, dict) or not index:
-                continue
-            dead = sorted(key for key in rename if key not in index)
+        for transform in _organize_transformations(panel):
+            dead = _dead_rename_keys(transform)
             if dead:
                 findings.append(
                     f"{path.name}: panel {panel.get('id')} dead renameByName {dead}"

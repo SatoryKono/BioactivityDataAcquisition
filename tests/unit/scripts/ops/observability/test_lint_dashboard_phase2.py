@@ -69,7 +69,7 @@ def test_nav_linter_checks_real_elements_and_destinations() -> None:
         'href="/d/bioetl-dq-v2/5-data-quality">Data Quality</a>'
         '<a class="bioetl-nav-link" style="width:19.5%" '
         'href="/d/bioetl-incident-v1/6-incident-workspace">'
-        "6. Incident Workspace</a></div>"
+        "Incident Workspace</a></div>"
     )
     assert lint._nav_content_findings("fixture.json", content) == []
 
