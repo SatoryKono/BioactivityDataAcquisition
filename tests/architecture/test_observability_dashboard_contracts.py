@@ -228,7 +228,10 @@ def test_provider_evidence_scope_distinguishes_saved_run_from_global_alerts() ->
     panel = next(p for p in _iter_panels(overview) if p.get("id") == 9480)
     assert "SELECTED RUN" in panel["description"]
     assert "UNKNOWN" in panel["description"]
-    assert "run_id=" in panel["targets"][0]["url"]
+    # Phase 2.5: provider evidence reuses donor 9002 via Dashboard DS.
+    assert panel["targets"][0].get("panelId") == 9002
+    donor = next(p for p in _iter_panels(overview) if p.get("id") == 9002)
+    assert "run_id=" in donor["targets"][0]["url"]
     assert not _panel_expressions(panel)
     incident = json.loads(
         (DASHBOARD_DIR / "bioetl-incident-v1.json").read_text(encoding="utf-8")

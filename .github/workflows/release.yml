@@ -1,9 +1,11 @@
 name: Release
-# KEEP-DISABLED (#11182): Actions billing will not return. Do not re-enable.
-# Publish stays outside GitHub Actions. workflow_dispatch is not a substitute.
+# KEEP-DISABLED (#11182): Actions billing will not return. Do not re-enable the
+# `release` event or production PyPI / GitHub Release asset jobs.
+# Sole remaining publish path in YAML: `publish-testpypi` on workflow_dispatch
+# with dry_run == false (TestPyPI only). That is not a substitute for PyPI.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  # Deploy/publish path: do not cancel mid-flight OIDC publish or asset upload.
+  # Deploy/publish path: do not cancel mid-flight OIDC TestPyPI publish.
   cancel-in-progress: false
 
 permissions:
@@ -202,8 +204,8 @@ jobs:
     needs: [build, test-install, security-gate, release-tests]
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # Only publish on release events or manual non-dry-run
-    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false')
+    # Only publish on manual non-dry-run
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false'
     environment:
       name: testpypi
       url: https://test.pypi.org/p/bioetl
@@ -223,55 +225,3 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true
 
-  publish-pypi:
-    name: Publish to PyPI
-    needs: [build, test-install, publish-testpypi, security-gate, release-tests]
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    # Only publish on release events
-    if: github.event_name == 'release'
-    environment:
-      name: pypi
-      url: https://pypi.org/p/bioetl
-    permissions:
-      id-token: write # Required for OIDC trusted publishing
-
-    steps:
-      - name: Download distribution artifacts
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: dist
-          path: dist/
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
-
-  create-github-release-assets:
-    name: Upload Release Assets
-    needs: [build, publish-pypi]
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    if: github.event_name == 'release'
-    permissions:
-      contents: write # Required to upload release assets
-
-    steps:
-      - name: Download distribution artifacts
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: dist
-          path: dist/
-
-      - name: Download dist SBOM
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: bioetl-dist-sbom
-          path: sbom/
-
-      - name: Upload release assets
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
-        with:
-          files: |
-            dist/*.whl
-            dist/*.tar.gz
-            sbom/**

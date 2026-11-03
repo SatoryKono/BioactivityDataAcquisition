@@ -353,6 +353,26 @@ def test_shadow_compare_routes_entity_configs(path: str) -> None:
     )
 
 
+def test_shadow_compare_routes_run_report_contracts_and_docs() -> None:
+    """Run-report contracts, goldens, and operator docs select contract tests."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            "configs/contracts/reports/run_evidence_location.v1.json",
+            "tests/fixtures/reports/run_evidence_location_golden.json",
+            "docs/04-reference/reports/run-reports.md",
+        ],
+        repo_root=repo_root,
+    )
+    assert report["covers_full_suite"] is False
+    assert "tests/unit/domain/run_reports/test_contracts.py" in report["selected"]
+    assert (
+        "tests/unit/domain/control_plane/test_run_evidence_location.py"
+        in report["selected"]
+    )
+    assert "tests/architecture/test_documentation_sync.py" in report["selected"]
+
+
 def test_shadow_compare_routes_published_pipeline_schemas() -> None:
     """Published pipeline JSON schemas select the tests that read them."""
     repo_root = Path(__file__).resolve().parents[5]
@@ -821,6 +841,18 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
             "tests/architecture/test_external_resource_inventory_catalog.py",
             "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
         },
+        "configs/quality/external_resource_inventory_pr12728_main_merge_12737_review.json": {
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        },
+        "configs/quality/external_resource_inventory_pr12728_mypy_types_review.json": {
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        },
+        "configs/quality/external_resource_inventory_pr12730_rf001_004_review.json": {
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        },
         "configs/quality/quality_move_qm09_reference_decisions.json": {
             "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
         },
@@ -1041,6 +1073,17 @@ def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
 
     # The selected parent suite already executes test_sample.py exactly once.
     assert targets == ["tests/unit/domain"]
+
+
+def test_shadow_compare_routes_domain_ports_stub() -> None:
+    """Typed ports package stubs map like their .py siblings under tests/unit."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["src/bioetl/domain/ports/__init__.pyi"],
+        repo_root=repo_root,
+    )
+    assert report["covers_full_suite"] is False
+    assert "tests/unit/domain" in report["selected"]
 
 
 def test_affected_targets_map_shared_helper_to_importing_tests(
