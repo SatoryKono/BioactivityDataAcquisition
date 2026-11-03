@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-03T19:00:13.929914+00:00",
+  "generated_at": "2026-11-03T19:03:28.335582+00:00",
   "summary": {
     "total_scripts": 711,
     "status_counts": {
@@ -10432,7 +10432,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 31,
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
@@ -12907,13 +12907,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 539,
+          "line": 536,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 552,
+          "line": 549,
           "source_group": "tests",
           "text": "if path == \"scripts/engineering/dev/zed_mypy.py\":"
         }
@@ -20300,13 +20300,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 795,
+          "line": 792,
           "source_group": "tests",
           "text": "\"src/bioetl/infrastructure/quality/scoring.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 796,
+          "line": 793,
           "source_group": "tests",
           "text": "\"scripts/engineering/quality/scoring.py\","
         },
