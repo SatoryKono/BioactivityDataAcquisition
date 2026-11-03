@@ -226,6 +226,27 @@ def test_mapping_value_text_tokens_count_as_status() -> None:
     )
 
 
+def test_non_digit_mapping_requires_status_token() -> None:
+    assert not lint._non_digit_mapping_is_status("data_quality", "DQ")
+    assert lint._non_digit_mapping_is_status("SELECT RUN", "")
+    assert lint._non_digit_mapping_is_status("x", "UNKNOWN")
+    assert not lint._mapping_has_status_token(
+        {
+            "type": "value",
+            "options": {"data_quality": {"text": "DQ"}},
+        }
+    )
+    assert lint._mapping_has_status_token(
+        {
+            "type": "value",
+            "options": {
+                "data_quality": {"text": "DQ"},
+                "OK": {"text": "OK", "color": "green"},
+            },
+        }
+    )
+
+
 def test_overview_exclusions_status_preserves_select_run() -> None:
     """No Run ID must not collapse into UNKNOWN next to Choose a run."""
     assert (

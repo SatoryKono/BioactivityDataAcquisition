@@ -278,11 +278,8 @@ def _mapping_option_texts(key: Any, meta: Any) -> tuple[str, str]:
 
 
 def _non_digit_mapping_is_status(key_text: str, value_text: str) -> bool:
-    return (
-        _text_has_status_token(key_text)
-        or _text_has_status_token(value_text)
-        or bool(key_text)
-    )
+    """True only when key or mapped text carries a known status token."""
+    return _text_has_status_token(key_text) or _text_has_status_token(value_text)
 
 
 def _accumulate_digit_mapping(
@@ -306,7 +303,9 @@ def _value_options_look_like_status(options: dict[Any, Any]) -> bool:
     for key, meta in options.items():
         key_text, value_text = _mapping_option_texts(key, meta)
         if not key_text.isdigit():
-            return _non_digit_mapping_is_status(key_text, value_text)
+            if _non_digit_mapping_is_status(key_text, value_text):
+                status_hits += 1
+            continue
         status_hits, count_style_hits = _accumulate_digit_mapping(
             key_text,
             value_text,

@@ -20,6 +20,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from scripts.ops.observability.grafana.render_nav_bus import write_dashboard_source
+
 ROOT = Path(__file__).resolve().parents[4]
 DASH = ROOT / "grafana" / "dashboards"
 
@@ -885,9 +887,10 @@ def apply_dq(data: dict[str, Any]) -> None:
     _prepend_frame_filter(domains, "domains")
 
     processed = _by_id(data, 9403)
-    # StageInput must stay a dedicated Infinity SRS target: a panel-level
+    # StageInput stays a dedicated Infinity target: a panel-level
     # ``_bioetl_frame`` filter would also drop processed-records rows from A.
-    # Budget: donor 9406 + StageInput = 2 SRS; PRR removed.
+    # Budget: donor 9406 = 1 SRS; StageInput reads pipeline-run-report funnel
+    # (1 PRR) so removals stay available without a second SRS hop.
     targets = list(processed.get("targets") or [])
     new_targets = []
     for target in targets:
@@ -1136,9 +1139,10 @@ def main() -> None:
         before = inventory(data)
         apply(data)
         after = inventory(data)
-        path.write_text(
+        write_dashboard_source(
+            path,
             json.dumps(data, indent=2, ensure_ascii=False) + "\n",
-            encoding="utf-8",
+            root=ROOT,
         )
         print(f"  {name}: SRS {before[0]}→{after[0]}  PRR {before[1]}→{after[1]}")
 
