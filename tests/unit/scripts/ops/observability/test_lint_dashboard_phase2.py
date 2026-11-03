@@ -12,6 +12,8 @@ from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
     _assert_donor_jsonata_balanced,
     _CP_DONOR,
     _jsonata_brackets_balanced,
+    _DONOR_SCHEMA,
+    _MERGED_PRR,
     _OV_DONOR,
     _DQ_DONOR,
     _INC_DONOR,
@@ -20,6 +22,21 @@ from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_prr_only_stage_fields_are_not_emitted_by_shared_donor() -> None:
+    """Avoid null duplicates when the Overview panel joins its PRR target."""
+    prr_fields = (
+        "quarantined",
+        "excluded",
+        "deduplicated",
+        "filtered_out",
+        "excluded_pct",
+        "saved_pct",
+    )
+    for field in prr_fields:
+        assert f"'{field}': null" not in _DONOR_SCHEMA
+        assert f"'{field}'" in _MERGED_PRR
 
 
 def test_phase2_linter_passes_on_provisioned_dashboards() -> None:
