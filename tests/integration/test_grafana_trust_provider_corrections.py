@@ -51,7 +51,9 @@ def test_provider_status_uses_filtered_vectors_in_severity_order():
         == ["check_result_display"]
         for t in panel.get("transformations") or []
     )
-    assert "—" in json.dumps(panel["fieldConfig"]["defaults"]["mappings"], ensure_ascii=False)
+    assert "—" in json.dumps(
+        panel["fieldConfig"]["defaults"]["mappings"], ensure_ascii=False
+    )
     blob = json.dumps(panel)
     assert "vector(0)" not in blob
     assert not (ROOT / "grafana/dashboards/bioetl-provider-health-v2.json").exists()

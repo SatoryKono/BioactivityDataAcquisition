@@ -699,9 +699,7 @@ def apply_overview(data: dict[str, Any]) -> None:
     defaults = check.setdefault("fieldConfig", {}).setdefault("defaults", {})
     mappings = defaults.setdefault("mappings", [])
     if mappings and isinstance(mappings[0].get("options"), dict):
-        mappings[0]["options"].setdefault(
-            "—", {"text": "—", "color": "gray"}
-        )
+        mappings[0]["options"].setdefault("—", {"text": "—", "color": "gray"})
     recon = _by_id(data, 9483)
     if not any(t.get("id") == "organize" for t in recon.get("transformations") or []):
         recon.setdefault("transformations", []).append(
