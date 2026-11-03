@@ -49,7 +49,9 @@ class WorkflowManifestService:
     _manifest_id_factory: Callable[[], str] = field(
         default_factory=lambda: _missing_manifest_id_factory
     )
-    evidence_location_register: Callable[[WorkflowManifest], object | None] | None = None
+    evidence_location_register: Callable[[WorkflowManifest], object | None] | None = (
+        None
+    )
 
     def _resolve_created_at(self) -> datetime:
         """Resolve workflow manifest creation time through the configured seam."""

@@ -171,7 +171,14 @@ def empty_replay_readiness(
     reason: str,
 ) -> ReplayReadinessSnapshot:
     """HTTP states that are not a domain READY."""
-    if verdict not in {SELECT_RUN, "НЕТ ЗАПУСКОВ", QUERY_ERROR, INSUFFICIENT, BLOCKED, UNSUPPORTED}:
+    if verdict not in {
+        SELECT_RUN,
+        "НЕТ ЗАПУСКОВ",
+        QUERY_ERROR,
+        INSUFFICIENT,
+        BLOCKED,
+        UNSUPPORTED,
+    }:
         verdict = INSUFFICIENT
     return {
         "run_id": run_id,
