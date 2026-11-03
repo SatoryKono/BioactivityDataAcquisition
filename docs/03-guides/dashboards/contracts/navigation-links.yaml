@@ -52,16 +52,16 @@ required_top_level_links_by_uid:
   bioetl-control-plane-v1:
   - Run Explorer
   - Run Overview
-  - 6. Incident Workspace
+  - Incident Workspace
   bioetl-overview-v2:
   - Run Explorer
   - Replay Readiness
-  - 6. Incident Workspace
+  - Incident Workspace
   bioetl-dq-v2:
   - Run Explorer
   - Replay Readiness
   - Run Overview
-  - 6. Incident Workspace
+  - Incident Workspace
   bioetl-incident-v1:
   - Run Explorer
   - Replay Readiness
@@ -384,7 +384,7 @@ visual_bus_titles_ordered:
 - Run Explorer
 - Replay Readiness
 - Run Overview
-- 6. Incident Workspace
+- Incident Workspace
 visual_bus_uids_ordered:
 - bioetl-run-explorer-v1
 - bioetl-control-plane-v1
