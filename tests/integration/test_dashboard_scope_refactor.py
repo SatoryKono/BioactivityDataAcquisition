@@ -275,7 +275,10 @@ def test_provider_reason_and_causes_share_empty_state() -> None:
     assert "run_id" not in expr
     overview = _load(DASHBOARD_DIR / "bioetl-overview-v2.json")
     saved = next(p for p in overview["panels"] if p["id"] == 9480)
-    assert "run_id=${run_id}" in saved["targets"][0]["url"]
+    assert saved["datasource"]["uid"] == "-- Dashboard --"
+    assert saved["targets"][0]["panelId"] == 9002
+    donor = next(p for p in overview["panels"] if p["id"] == 9002)
+    assert "run_id=${run_id}" in donor["targets"][0]["url"]
     assert (
         "No API check" in str(saved)
         or "provider api was not called" in saved["description"].lower()
@@ -299,8 +302,9 @@ def test_promql_targets_do_not_select_run_id_label() -> None:
 def test_run_explorer_selects_rows_without_removed_detail_groups() -> None:
     dashboard = _load(DASHBOARD_DIR / "bioetl-run-explorer-v1.json")
     roots = _root_panels(dashboard)
-    assert len(roots) == 2
-    assert len([p for p in roots if p.get("type") != "row"]) == 2
+    # Phase 2 §2.1: navigation bus 1000 joins the selection leaf (1 + 3010).
+    assert {p.get("id") for p in roots} == {1000, 1, 3010}
+    assert len([p for p in roots if p.get("type") != "row"]) == 3
     assert all(p.get("id") != 9450 for p in roots)
     browse = next(p for p in roots if p["id"] == 3010)
     override = next(

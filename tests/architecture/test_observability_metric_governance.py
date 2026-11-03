@@ -252,8 +252,8 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
 
     http_targets = report["http_targets"]
     assert (
-        len(http_targets) == 33
-    )  # Five dashboards; summaries reuse saved domain responses.
+        len(http_targets) == 14
+    )  # Five dashboards; Phase 2.5 shared-donor panels reuse Infinity frames.
     assert any(
         target["dashboard_uid"] == "bioetl-control-plane-v1"
         and target["panel_id"] == 9418
@@ -265,7 +265,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     )
     assert report["typed_target_counts"] == {
         "promql": 105,  # Retained fleet panels live in Incident Workspace.
-        "http": 33,
+        "http": 14,
         "loki": 0,
         "tempo": 0,
         "unknown": 0,

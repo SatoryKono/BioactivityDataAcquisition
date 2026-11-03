@@ -35,6 +35,8 @@ DATASOURCE_ORDER = {
     "Tempo": 2,
     QUARANTINE_EXPLORER_DATASOURCE: 3,
     "Grafana": 4,
+    "Mixed": 5,
+    "BioETL Ops HTTP": 6,
 }
 
 MANDATORY_LINK_UIDS: dict[str, set[str]] = {
@@ -166,6 +168,8 @@ def _normalize_datasource_string(value: str) -> str | None:
         return QUARANTINE_EXPLORER_DATASOURCE
     if stripped == "-- Grafana --":
         return "Grafana"
+    if stripped.lower() == "-- mixed --":
+        return "Mixed"
     return stripped
 
 
@@ -186,6 +190,8 @@ def _normalize_datasource_dict(ref: dict[str, object]) -> str | None:
         return "Tempo"
     if kind == "grafana" or uid in {"grafana", "-- grafana --", "-- dashboard --"}:
         return "Grafana"
+    if uid == "-- mixed --":
+        return "Mixed"
     return name or uid or kind or None
 
 
