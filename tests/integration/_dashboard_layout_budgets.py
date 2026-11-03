@@ -356,7 +356,9 @@ def panel_declared_row_cap(panel: dict[str, Any]) -> int | None:
                         regex_values.append(value)
                     elif config.get("id") == "equal":
                         equal_count += 1
-                if equal_count:
+                # A single equality often selects a frame (for example
+                # ``_bioetl_frame == 'domains'``); it does not bound row count.
+                if equal_count > 1:
                     caps.append(equal_count)
                 for pattern in regex_values:
                     alternatives = [

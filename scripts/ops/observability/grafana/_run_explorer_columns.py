@@ -41,14 +41,16 @@ _COLORS = {
     "LAYOUT_UNHEALTHY": "#F2495C",
     "IDENTITY_UNHEALTHY": "#F2495C",
 }
+_RUN_ID_LABEL = "Run ID"
 _COLUMNS = {
     "workflow_id": ("Workflow", None, 100),
     "pipeline": ("Pipeline", None, 80),
     "provider": ("Provider", 85, 50),
-    "run_label": ("Run ID", 60, 50),
-    "started_at": ("Started", 115, 50),
-    "duration_display": ("Duration", 75, 50),
-    "status": ("Overview", 180, 180),
+    # Phase 4.3: Run ID ≥110; trim siblings so first-window 200% CSS budget holds.
+    "run_label": (_RUN_ID_LABEL, 110, 50),
+    "started_at": ("Started", 100, 50),
+    "duration_display": ("Duration", 70, 50),
+    "status": ("Overview", 150, 150),
     "saved_evidence_status": ("Saved Evidence", None, 90),
     "data_quality_status": ("Data Quality", None, 90),
     "replay_readiness_status": ("Replay Readiness", 125, 90),
@@ -81,7 +83,12 @@ def apply_overall_verdict(payload: dict) -> None:
         "id": 9604,
         "type": "stat",
         "title": "Review Overall Verdict",
-        "description": "SELECTED RUN · Saved overall verdict for the selected Run ID, identical to Review Selected Run Status. This verdict does not authorize replay. Missing evidence remains UNKNOWN; request errors remain errors.",
+        "description": (
+            "SELECTED RUN · Saved overall verdict for the selected "
+            f"{_RUN_ID_LABEL}, identical to Review Selected Run Status. "
+            "This verdict does not authorize replay. Missing evidence remains "
+            "UNKNOWN; request errors remain errors."
+        ),
         "gridPos": {
             "x": source["gridPos"]["x"],
             "y": 2,
@@ -174,6 +181,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         return
     _apply_run_explorer_templating(payload)
     panels = {panel["id"]: panel for panel in payload["panels"]}
+    # Keep helper copy at its two-row minimum and place table 3010 below it.
     panels[1]["gridPos"]["h"] = 2
     content = panels[1]["options"]["content"].replace(
         "Select a Run ID to view details.", "Select a status to view details."
@@ -214,6 +222,9 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         "pipeline_passport_path",
     ]
     names = [*_COLUMNS, *hidden]
+    # Phase 4.3 / F-29: drop unused overview/diagnostics/provider/quality_handoff
+    # JSONata fields — they were filtered out by filterFieldsByName and polluted
+    # the Infinity payload for no UI gain.
     panel["targets"][0]["root_selector"] = (
         'index_state = "valid_empty" and $exists(items) and $count(items) = 0 '
         '? [{"pipeline": "VALID EMPTY"}] : items.($merge([$, '
@@ -221,9 +232,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         '"workflow_passport_path": $substringAfter(workflow_passport_url, '
         '"https://github.com/SatoryKono/BioactivityDataAcquisition/"), '
         '"pipeline_passport_path": $substringAfter(pipeline_passport_url, '
-        '"https://github.com/SatoryKono/BioactivityDataAcquisition/"), '
-        '"overview_handoff": "Open", "diagnostics_handoff": "Open", '
-        '"provider_handoff": "Open", "quality_handoff": "Open"}]))'
+        '"https://github.com/SatoryKono/BioactivityDataAcquisition/")}]))'
     )
     panel["transformations"] = [
         {
@@ -271,7 +280,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
             "https://github.com/SatoryKono/BioactivityDataAcquisition/"
             "${__data.fields.pipeline_passport_path:raw}",
         ),
-        "Run ID": (
+        _RUN_ID_LABEL: (
             "Report \u00b7 ${__data.fields.run_id}",
             "${__data.fields.report_url:raw}",
         ),
@@ -290,13 +299,14 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
             "/d/bioetl-control-plane-v1/1-trust?" + _CONTEXT,
         ),
     }
+    _inspect_columns = frozenset({"Workflow", "Pipeline", _RUN_ID_LABEL})
     overrides: list[dict[str, Any]] = []
     for name, width, min_width in _COLUMNS.values():
         properties: list[dict[str, Any]] = [
             {"id": "custom.minWidth", "value": min_width},
             {
                 "id": "custom.inspect",
-                "value": name in {"Workflow", "Pipeline", "Run ID"},
+                "value": name in _inspect_columns,
             },
         ]
         if width is not None:
@@ -308,10 +318,10 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
                     "title": title,
                     "url": url,
                     "includeVars": False,
-                    "targetBlank": name in {"Workflow", "Pipeline", "Run ID"},
+                    "targetBlank": name in _inspect_columns,
                 }
             ]
-            if name == "Run ID":
+            if name == _RUN_ID_LABEL:
                 link_items.insert(
                     0,
                     {

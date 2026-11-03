@@ -42,7 +42,13 @@ def test_prr_only_stage_fields_are_not_emitted_by_shared_donor() -> None:
 
 
 def test_phase2_linter_passes_on_provisioned_dashboards() -> None:
+    assert lint.main(["--profile", "phase2"]) == 0
+
+
+def test_phase4_linter_passes_on_provisioned_dashboards() -> None:
+    # Default profile is phase4 (CI/unit gate for full acceptance checks).
     assert lint.main([]) == 0
+    assert lint.main(["--profile", "phase4"]) == 0
 
 
 def test_phase2_linter_flags_missing_nav_and_index_collision(
@@ -84,7 +90,7 @@ def test_nav_linter_checks_real_elements_and_destinations() -> None:
         'href="/d/bioetl-dq-v2/5-data-quality">Data Quality</a>'
         '<a class="bioetl-nav-link" style="width:19.5%" '
         'href="/d/bioetl-incident-v1/6-incident-workspace">'
-        "6. Incident Workspace</a></div>"
+        "Incident Workspace</a></div>"
     )
     assert lint._nav_content_findings("fixture.json", content) == []
 

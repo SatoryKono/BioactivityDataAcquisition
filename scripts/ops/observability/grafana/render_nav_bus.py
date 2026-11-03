@@ -68,7 +68,7 @@ BUS: list[dict[str, str]] = [
     },
     {
         "uid": "bioetl-incident-v1",
-        "title": "6. Incident Workspace",
+        "title": "Incident Workspace",
         "path": "6-incident-workspace",
     },
 ]
@@ -222,7 +222,8 @@ _OVERVIEW_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     99: (0, 2, 17, 3),
     9604: (17, 2, 7, 3),
     9603: (0, 5, 12, 7),
-    9002: (12, 5, 12, 7),
+    # Phase 4.3 / rev7 §4.3: h in 7–8 with limitField=6 (JSON authoring source).
+    9002: (12, 5, 12, 8),
     9300: (0, 12, 24, 7),
 }
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
@@ -258,7 +259,8 @@ CONTAINER_STYLE = (
     "padding:0 2px;overflow:visible;white-space:normal;font-size:16px"
 )
 _PROVIDER_VARIABLE_UIDS = {"bioetl-provider-health-v2", "bioetl-incident-v1"}
-_STAGE_TARGET_UIDS = {"bioetl-runtime", "bioetl-dq-v2"}
+# Phase 4.1 removed DQ $stage; keep only retired/runtime boards that still use it.
+_STAGE_TARGET_UIDS = {"bioetl-runtime"}
 _PRESERVE_SCOPE_TOOLTIP = "Preserves selected scope and time range."
 
 NAV_DESCRIPTION = (
@@ -1105,7 +1107,7 @@ _SELECT_RUN_EMPTY = (
     "VALID EMPTY if the selected run has no rows for this table."
 )
 _RUN_EXPLORER_URL = (
-    "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?"
+    "/d/bioetl-run-explorer-v1/run-explorer?"
     "${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}"
     "&${run_id:queryparam}&${__url_time_range}"
 )
@@ -2711,13 +2713,14 @@ def apply_to_dashboard(
                     value["tooltip"] = (
                         "Saved Provider Evidence for the selected Run ID. CURRENT provider alert conditions remain in Incident Workspace and do not prove this saved verdict."
                     )
-            if (
-                isinstance(value.get("url"), str)
-                and current_uid == "bioetl-incident-v1"
-                and value["url"].startswith("/d/bioetl-dq-v2/")
-            ):
-                value["url"] = value["url"].replace(
-                    "${stage:queryparam}", "var-stage=$__all"
+            if isinstance(value.get("url"), str) and "/d/bioetl-dq-v2/" in value["url"]:
+                # Phase 4.1: DQ no longer exposes $stage — drop stale query params.
+                value["url"] = (
+                    value["url"]
+                    .replace("&var-stage=$__all", "")
+                    .replace("${stage:queryparam}&", "")
+                    .replace("&${stage:queryparam}", "")
+                    .replace("${stage:queryparam}", "")
                 )
             pending_links.extend(value.values())
         elif isinstance(value, list):
@@ -2752,6 +2755,7 @@ def apply_to_dashboard(
     _apply_phase25_srs_prr_budget(payload, current_uid=current_uid)
     _migrate_grafana_schema42(payload)
     _neutralize_mapped_status_thresholds(payload)
+    _remove_dead_organize_renames(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:
@@ -2788,6 +2792,53 @@ def _apply_phase25_srs_prr_budget(payload: dict[str, Any], *, current_uid: str) 
         apply(payload)
 
 
+def _keep_healthy_zero_threshold(panel: dict[str, Any], titles: set[str]) -> bool:
+    if panel.get("title") not in titles:
+        return False
+    steps = (
+        panel.get("fieldConfig", {})
+        .get("defaults", {})
+        .get("thresholds", {})
+        .get("steps", [])
+    )
+    if steps and isinstance(steps[0], dict) and steps[0].get("value") is None:
+        steps[0]["color"] = "green"
+    return True
+
+
+def _has_mapped_status(mappings: list[dict[str, Any]], tokens: tuple[str, ...]) -> bool:
+    for mapping in mappings:
+        if not isinstance(mapping, dict) or not isinstance(
+            mapping.get("options"), dict
+        ):
+            continue
+        for key, value in mapping["options"].items():
+            text = value.get("text", "") if isinstance(value, dict) else value
+            if any(
+                token in str(candidate).upper()
+                for token in tokens
+                for candidate in (key, text)
+            ):
+                return True
+    return False
+
+
+def _remove_dead_organize_renames(payload: dict[str, Any]) -> None:
+    """Drop rename mappings for fields the same organize transform excludes."""
+    for panel in _walk_panels(payload.get("panels", [])):
+        for transform in panel.get("transformations", []):
+            if transform.get("id") != "organize":
+                continue
+            options = transform.get("options", {})
+            index = options.get("indexByName")
+            rename = options.get("renameByName")
+            if not isinstance(index, dict) or not isinstance(rename, dict):
+                continue
+            options["renameByName"] = {
+                field: label for field, label in rename.items() if field in index
+            }
+
+
 def _neutralize_mapped_status_thresholds(payload: dict[str, Any]) -> None:
     """Keep missing status values neutral when text mappings provide real colors."""
     status_tokens = ("OK", "WARN", "CRIT", "ERROR", "UNKNOWN", "INCOMPLETE")
@@ -2797,29 +2848,15 @@ def _neutralize_mapped_status_thresholds(payload: dict[str, Any]) -> None:
         "Monitor Active Blocker Count",
         "Monitor Manifest (30m)",
         "Monitor Ledger (30m)",
+        "Monitor Global Read Failures (30m)",
     }
     for panel in _walk_panels(payload.get("panels", [])):
-        if panel.get("type") != "stat":
-            continue
-        if panel.get("title") in green_zero_panels:
-            # These gauges have a meaningful healthy zero threshold; null is
-            # colored separately by their explicit special-value mappings.
+        if panel.get("type") != "stat" or _keep_healthy_zero_threshold(
+            panel, green_zero_panels
+        ):
             continue
         defaults = panel.get("fieldConfig", {}).get("defaults", {})
-        mappings = defaults.get("mappings", [])
-        mapped_status = any(
-            isinstance(mapping, dict)
-            and isinstance(mapping.get("options"), dict)
-            and any(
-                any(token in str(text).upper() for token in status_tokens)
-                for key, value in mapping["options"].items()
-                for text in (
-                    key,
-                    value.get("text", "") if isinstance(value, dict) else value,
-                )
-            )
-            for mapping in mappings
-        )
+        mapped_status = _has_mapped_status(defaults.get("mappings", []), status_tokens)
         steps = defaults.get("thresholds", {}).get("steps", [])
         if not mapped_status or not steps or not isinstance(steps[0], dict):
             continue

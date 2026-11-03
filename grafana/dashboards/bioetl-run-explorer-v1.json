@@ -264,132 +264,6 @@
         "useTags": false
       },
       {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "-",
-          "value": "-"
-        },
-        "datasource": {
-          "type": "yesoreyeram-infinity-datasource",
-          "uid": "bioetl-ops-http"
-        },
-        "definition": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
-        "description": "Concrete SELECTED RUN identity from /ops/control-plane/selector-context (selected.run_id). When Grafana $run_id is still '-', A2 latest fills this value so pipeline-run-report / artifact queries do not stay unresolved_scope.",
-        "hide": 2,
-        "includeAll": false,
-        "label": "Selected Run ID",
-        "multi": false,
-        "name": "selected_run_id",
-        "options": [
-          {
-            "selected": true,
-            "text": "-",
-            "value": "-"
-          }
-        ],
-        "query": {
-          "queryType": "infinity",
-          "refId": "variable",
-          "infinityQuery": {
-            "format": "table",
-            "parser": "backend",
-            "root_selector": "($id := selected.run_id; $exists($id) and $string($id) != \"\" ? [{\"text\":$string($id),\"value\":$string($id)}] : [{\"text\":\"-\",\"value\":\"-\"}])",
-            "type": "json",
-            "source": "url",
-            "url_options": {
-              "method": "GET",
-              "data": ""
-            },
-            "url": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
-            "columns": [
-              {
-                "selector": "text",
-                "text": "__text",
-                "type": "string"
-              },
-              {
-                "selector": "value",
-                "text": "__value",
-                "type": "string"
-              }
-            ]
-          }
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": true,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "All"
-        },
-        "datasource": {
-          "type": "yesoreyeram-infinity-datasource",
-          "uid": "bioetl-ops-http"
-        },
-        "definition": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
-        "description": "Concrete SELECTED RUN pipeline from /ops/control-plane/selector-context (selected.pipeline). When Grafana $pipeline is still All/aggregate and A2 fills selected_run_id, this carries the concrete pipeline so pipeline-run-report / artifact queries do not stay unresolved_scope.",
-        "hide": 2,
-        "includeAll": false,
-        "label": "Selected Pipeline",
-        "multi": false,
-        "name": "selected_pipeline",
-        "options": [
-          {
-            "selected": true,
-            "text": "All",
-            "value": "All"
-          }
-        ],
-        "query": {
-          "queryType": "infinity",
-          "refId": "variable",
-          "infinityQuery": {
-            "format": "table",
-            "parser": "backend",
-            "root_selector": "($p := selected.pipeline; $exists($p) and $string($p) != \"\" and $string($p) != \"unknown\" ? [{\"text\":$string($p),\"value\":$string($p)}] : [{\"text\":\"All\",\"value\":\"All\"}])",
-            "type": "json",
-            "source": "url",
-            "url_options": {
-              "method": "GET",
-              "data": ""
-            },
-            "url": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
-            "columns": [
-              {
-                "selector": "text",
-                "text": "__text",
-                "type": "string"
-              },
-              {
-                "selector": "value",
-                "text": "__value",
-                "type": "string"
-              }
-            ]
-          }
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": true,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
         "name": "lookup_run_id",
         "label": "Find exact Run ID",
         "type": "textbox",
@@ -402,34 +276,6 @@
         "hide": 0,
         "skipUrlSync": false,
         "description": "Exact UUID within the current Workflow/Pipeline/Run Type, including launches older than the latest ten. Does not replace Selected Run until a matching row is found. Clear to browse recent launches."
-      },
-      {
-        "name": "provider_for_pipeline",
-        "label": "Provider for pipeline",
-        "type": "query",
-        "hide": 2,
-        "includeAll": false,
-        "multi": false,
-        "refresh": 1,
-        "sort": 1,
-        "regex": "",
-        "skipUrlSync": true,
-        "options": [],
-        "current": {
-          "selected": false,
-          "text": "",
-          "value": ""
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
-        "query": {
-          "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
-          "refId": "StandardVariableQuery"
-        },
-        "description": "Hidden selector: provider for a concrete Pipeline. Unused when Pipeline is All ($__all / .*). Table Provider handoff uses the row field."
       }
     ]
   },
@@ -437,7 +283,20 @@
     "from": "now-12h",
     "to": "now"
   },
-  "timepicker": {},
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
   "timezone": "browser",
   "title": "Run Explorer",
   "uid": "bioetl-run-explorer-v1",
@@ -457,7 +316,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><span class=\"bioetl-nav-current\" aria-current=\"page\" data-current=\"page\" title=\"Run Explorer (Run Explorer)\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none;display:inline-block\">Run Explorer</span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Replay Readiness). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Overview (Run Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><span class=\"bioetl-nav-current\" aria-current=\"page\" data-current=\"page\" title=\"Run Explorer (Run Explorer)\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none;display:inline-block\">Run Explorer</span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Replay Readiness). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Overview (Run Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Data Quality (Data Quality). Preserves selected scope and time range.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Incident Workspace</a></div>"
       },
       "links": [
         {
@@ -486,8 +345,8 @@
         },
         {
           "title": "Data Quality",
-          "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-          "tooltip": "Data Quality (Data Quality). Scope reset: stage=All; preserves time range.",
+          "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "Data Quality (Data Quality). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -497,9 +356,9 @@
           "tags": []
         },
         {
-          "title": "6. Incident Workspace",
+          "title": "Incident Workspace",
           "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
+          "tooltip": "Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -700,7 +559,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 60
+                "value": 110
               },
               {
                 "id": "links",
@@ -744,7 +603,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 115
+                "value": 100
               },
               {
                 "id": "unit",
@@ -768,7 +627,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 75
+                "value": 70
               },
               {
                 "id": "noValue",
@@ -784,7 +643,7 @@
             "properties": [
               {
                 "id": "custom.minWidth",
-                "value": 180
+                "value": 150
               },
               {
                 "id": "custom.inspect",
@@ -792,7 +651,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 180
+                "value": 150
               },
               {
                 "id": "links",
@@ -1492,7 +1351,7 @@
           "format": "table",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items.($merge([$, {\"workflow_id\": workflow_id != \"\" ? workflow_id : \"N/A\", \"run_label\": run_id, \"workflow_passport_path\": $substringAfter(workflow_passport_url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\"), \"pipeline_passport_path\": $substringAfter(pipeline_passport_url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\"), \"overview_handoff\": \"Open\", \"diagnostics_handoff\": \"Open\", \"provider_handoff\": \"Open\", \"quality_handoff\": \"Open\"}]))",
+          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items.($merge([$, {\"workflow_id\": workflow_id != \"\" ? workflow_id : \"N/A\", \"run_label\": run_id, \"workflow_passport_path\": $substringAfter(workflow_passport_url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\"), \"pipeline_passport_path\": $substringAfter(pipeline_passport_url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\")}]))",
           "source": "url",
           "type": "json",
           "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}",

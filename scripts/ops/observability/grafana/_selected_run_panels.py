@@ -226,7 +226,7 @@ def _stamp_status_links(panel: dict[str, object], uid: object) -> None:
     panel["fieldConfig"]["defaults"]["links"] = [
         {
             "title": "Open Run Explorer",
-            "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+            "url": "/d/bioetl-run-explorer-v1/run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
             "targetBlank": False,
             "includeVars": False,
         }

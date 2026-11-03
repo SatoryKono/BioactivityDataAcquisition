@@ -792,7 +792,7 @@ def _assert_cross_dashboard_link_policy(
         assert "${__data.fields.action_scope:raw}" in url
         for resolved_uid in routes[current_uid]:
             scope = "var-pipeline=chembl_assay"
-            if resolved_uid in {"bioetl-runtime", "bioetl-dq-v2"}:
+            if resolved_uid == "bioetl-runtime":
                 scope += "&var-stage=$__all"
             if resolved_uid == "bioetl-provider-health-v2":
                 scope += "&var-provider=$__all&var-pipeline_context=chembl_assay"
@@ -1488,7 +1488,7 @@ _EXPECTED_CURRENT_NAV_TITLE = {
     "bioetl-runtime": "Pipeline Diagnostics",
     "bioetl-provider-health-v2": "Provider Health",
     "bioetl-dq-v2": "Data Quality",
-    "bioetl-incident-v1": "6. Incident Workspace",
+    "bioetl-incident-v1": "Incident Workspace",
     "bioetl-run-explorer-v1": "Run Explorer",
 }
 
@@ -1497,7 +1497,7 @@ _BASE_VISUAL_NAV_TITLES = (
     "Replay Readiness",
     "Run Overview",
     "Data Quality",
-    "6. Incident Workspace",
+    "Incident Workspace",
 )
 
 _OPTIONAL_VISUAL_NAV_TITLES = (

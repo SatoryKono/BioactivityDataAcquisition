@@ -33,7 +33,7 @@ def test_normalize_run_id_trims_and_rejects_internal_space() -> None:
 
 def test_rewrite_fills_missing_run_id_and_time() -> None:
     url = rewrite_dashboard_handoff_url(
-        "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline"
+        "/d/bioetl-run-explorer-v1/run-explorer?var-pipeline=$pipeline"
     )
     assert "var-run_id=$run_id" in url
     assert preserves_time_window(url)

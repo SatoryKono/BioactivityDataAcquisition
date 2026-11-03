@@ -527,6 +527,9 @@ def test_runtime_contextual_handoffs_keep_single_top_level_dq_bus_link() -> None
         )
         == 1
     )
+    assert all(
+        "viewPanel=9480" not in str(candidate.get("url") or "") for candidate in nav
+    )
     for pid in (4, 7):
         link = next(
             candidate
@@ -534,7 +537,7 @@ def test_runtime_contextual_handoffs_keep_single_top_level_dq_bus_link() -> None
             if candidate["title"] == "Open Data Quality"
         )
         assert _extract_dashboard_uid(link["url"]) == "bioetl-dq-v2"
-        assert "var-stage=$__all" in link["url"]
+        assert "var-stage=" not in link["url"]
         assert "${run_id:queryparam}" in link["url"]
         assert "${__url_time_range}" in link["url"]
     for pid in (6, 259):
@@ -919,8 +922,8 @@ def test_nav_bus_never_uses_literal_stage_unknown() -> None:
             )
             target = _extract_dashboard_uid(url)
             if target == "bioetl-dq-v2":
-                assert "var-stage=$__all" in url, (
-                    f"{uid} → {target} must pass var-stage=$__all"
+                assert "var-stage=" not in url, (
+                    f"{uid} → {target} must not pass removed $stage"
                 )
 
     from scripts.ops.observability.grafana.render_nav_bus import _url_for
@@ -930,8 +933,7 @@ def test_nav_bus_never_uses_literal_stage_unknown() -> None:
             {"uid": target_uid, "path": target_uid, "title": "x"},
             source_uid="bioetl-overview-v2",
         )
-        assert "var-stage=unknown" not in url
-        assert "var-stage=$__all" in url
+        assert "var-stage=" not in url
 
 
 def test_provider_health_first_action_cta_contract() -> None:

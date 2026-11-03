@@ -48,7 +48,7 @@ _NAV_CHIP_TITLES = (
     "Replay Readiness",
     "Run Overview",
     "Data Quality",
-    "6. Incident Workspace",
+    "Incident Workspace",
 )
 _STATUS_TOKENS = (
     "OK",
@@ -137,7 +137,7 @@ _NAV_DESTINATIONS = {
     "Replay Readiness": "bioetl-control-plane-v1",
     "Run Overview": "bioetl-overview-v2",
     "Data Quality": "bioetl-dq-v2",
-    "6. Incident Workspace": "bioetl-incident-v1",
+    "Incident Workspace": "bioetl-incident-v1",
 }
 _NAV_CHIP_WIDTH_RE = re.compile(r"(?:^|;)\s*width:19\.5%\s*(?:;|$)")
 _NAV_ELEMENT_RE = re.compile(
@@ -434,7 +434,86 @@ def _lint_urls(
     return findings
 
 
-def lint_dashboard(path: Path) -> list[str]:
+def _variable_reference_patterns(name: str) -> tuple[str, ...]:
+    return (
+        f"${name}",
+        f"${{{name}",
+        f"var-{name}",
+        f'"repeat": "{name}"',
+        f'"repeat":"{name}"',
+    )
+
+
+def _lint_unused_variables(path: Path, payload: dict[str, Any]) -> list[str]:
+    """Phase-4: every templating variable must be referenced outside templating."""
+    variables = (payload.get("templating") or {}).get("list") or []
+    body = {key: value for key, value in payload.items() if key != "templating"}
+    blob = json.dumps(body)
+    findings: list[str] = []
+    for var in variables:
+        if not isinstance(var, dict):
+            continue
+        name = str(var.get("name") or "")
+        if not name:
+            continue
+        if not any(pattern in blob for pattern in _variable_reference_patterns(name)):
+            findings.append(f"{path.name}: unused template variable {name!r}")
+    return findings
+
+
+def _organize_transformations(panel: dict[str, Any]):
+    for transform in panel.get("transformations") or []:
+        if isinstance(transform, dict) and transform.get("id") == "organize":
+            yield transform
+
+
+def _dead_rename_keys(transform: dict[str, Any]) -> list[str]:
+    options = transform.get("options") or {}
+    index = options.get("indexByName")
+    rename = options.get("renameByName")
+    if not isinstance(index, dict) or not isinstance(rename, dict) or not index:
+        return []
+    return sorted(key for key in rename if key not in index)
+
+
+def _lint_dead_renames(path: Path, panels: list[dict[str, Any]]) -> list[str]:
+    """Phase-4: renameByName keys must appear in the same organize indexByName."""
+    findings: list[str] = []
+    for panel in panels:
+        for transform in _organize_transformations(panel):
+            dead = _dead_rename_keys(transform)
+            if dead:
+                findings.append(
+                    f"{path.name}: panel {panel.get('id')} dead renameByName {dead}"
+                )
+    return findings
+
+
+_EXPECTED_REFRESH_INTERVALS = [
+    "5s",
+    "10s",
+    "30s",
+    "1m",
+    "5m",
+    "15m",
+    "30m",
+    "1h",
+    "2h",
+    "1d",
+]
+
+
+def _lint_timepicker(path: Path, payload: dict[str, Any]) -> list[str]:
+    """Phase-4: shared timepicker.refresh_intervals across provisioned boards."""
+    intervals = (payload.get("timepicker") or {}).get("refresh_intervals")
+    if intervals == _EXPECTED_REFRESH_INTERVALS:
+        return []
+    return [
+        f"{path.name}: timepicker.refresh_intervals must match shared Phase 4.4 list"
+    ]
+
+
+def lint_dashboard(path: Path, *, profile: str = "phase2") -> list[str]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     uid = str(payload.get("uid") or UID_BY_FILE.get(path.name) or "")
     panels = _walk(payload.get("panels", []))
@@ -457,6 +536,10 @@ def lint_dashboard(path: Path) -> list[str]:
     findings.extend(
         _lint_urls(path, payload, uid=uid, id_set=id_set, id_by_uid=id_by_uid)
     )
+    if profile == "phase4":
+        findings.extend(_lint_unused_variables(path, payload))
+        findings.extend(_lint_dead_renames(path, panels))
+        findings.extend(_lint_timepicker(path, payload))
     return findings
 
 
@@ -475,7 +558,16 @@ def lint_donor_jsonata() -> list[str]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.parse_args(argv)
+    parser.add_argument(
+        "--profile",
+        choices=("phase2", "phase4"),
+        default="phase4",
+        help=(
+            "phase2 = nav/links/index/thresholds; "
+            "phase4 (default) adds unused vars, dead renames, shared timepicker"
+        ),
+    )
+    args = parser.parse_args(argv)
     all_findings: list[str] = []
     all_findings.extend(lint_donor_jsonata())
     for name in FILES:
@@ -483,13 +575,13 @@ def main(argv: list[str] | None = None) -> int:
         if not path.exists():
             all_findings.append(f"missing {name}")
             continue
-        all_findings.extend(lint_dashboard(path))
+        all_findings.extend(lint_dashboard(path, profile=args.profile))
     if all_findings:
-        print("phase-2 dashboard lint FAILED:")
+        print(f"{args.profile} dashboard lint FAILED:")
         for item in all_findings:
             print(f"  - {item}")
         return 1
-    print("phase-2 dashboard lint OK")
+    print(f"{args.profile} dashboard lint OK")
     return 0
 
 

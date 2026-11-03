@@ -370,34 +370,6 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
-      },
-      {
-        "name": "provider_for_pipeline",
-        "label": "Provider for pipeline",
-        "type": "query",
-        "hide": 2,
-        "includeAll": false,
-        "multi": false,
-        "refresh": 1,
-        "sort": 1,
-        "regex": "",
-        "skipUrlSync": true,
-        "options": [],
-        "current": {
-          "selected": false,
-          "text": "",
-          "value": ""
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
-        "query": {
-          "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
-          "refId": "StandardVariableQuery"
-        },
-        "description": "Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input."
       }
     ]
   },
@@ -435,7 +407,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Replay Readiness). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><span class=\"bioetl-nav-current\" aria-current=\"page\" data-current=\"page\" title=\"Run Overview (Run Overview)\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none;display:inline-block\">Run Overview</span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Replay Readiness). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><span class=\"bioetl-nav-current\" aria-current=\"page\" data-current=\"page\" title=\"Run Overview (Run Overview)\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none;display:inline-block\">Run Overview</span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Data Quality (Data Quality). Preserves selected scope and time range.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Incident Workspace</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared five-chip bus (19.5% each): Run Explorer / Replay Readiness / Run Overview / Data Quality / Incident Workspace. Current workspace is a non-interactive <span class=\"bioetl-nav-current\"> (aria-current=page, underlined) so active state is not color-only and is not a link. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -467,8 +439,8 @@
         },
         {
           "title": "Data Quality",
-          "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-          "tooltip": "Data Quality (Data Quality). Scope reset: stage=All; preserves time range.",
+          "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "Data Quality (Data Quality). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -478,9 +450,9 @@
           "tags": []
         },
         {
-          "title": "6. Incident Workspace",
+          "title": "Incident Workspace",
           "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
+          "tooltip": "Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -507,10 +479,7 @@
       "description": "SELECTED RUN · Saved evidence for the selected Run ID. UNKNOWN means the saved assessment is missing, not a healthy empty run. A request failure is QUERY ERROR.",
       "title": "",
       "type": "text",
-      "links": [],
-      "repeat": "overview_fleet",
-      "repeatDirection": "v",
-      "maxPerRow": 1
+      "links": []
     },
     {
       "id": 9604,
@@ -672,7 +641,7 @@
         "x": 0,
         "y": 5,
         "w": 15,
-        "h": 13
+        "h": 8
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -701,7 +670,7 @@
             },
             {
               "title": "Open Data Quality",
-              "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+              "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
             },
@@ -908,8 +877,7 @@
             "renameByName": {
               "domain": "Domain",
               "status_display": "Status",
-              "reason_display": "Reason",
-              "saved_trust": "Trust"
+              "reason_display": "Reason"
             }
           }
         }
@@ -924,7 +892,7 @@
         },
         {
           "title": "Open Data Quality",
-          "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+          "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },
@@ -969,7 +937,7 @@
           "links": [
             {
               "title": "Open Run Explorer",
-              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "url": "/d/bioetl-run-explorer-v1/run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
             }
@@ -1120,7 +1088,7 @@
                 "value": [
                   {
                     "title": "Open Run Explorer",
-                    "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                    "url": "/d/bioetl-run-explorer-v1/run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
                     "targetBlank": false,
                     "includeVars": false
                   }
@@ -1308,16 +1276,10 @@
               "run_reason": 3
             },
             "renameByName": {
-              "domain": "Domain",
-              "verdict": "Status",
-              "execution_state": "Result",
-              "evidence_completeness": "Evidence",
-              "rules_version": "Rules",
               "run_verdict": "Status",
               "run_execution": "Result",
               "run_reason": "Reason",
-              "saved_trust": "Trust",
-              "reason_display": "Reason"
+              "saved_trust": "Trust"
             },
             "excludeByName": {
               "__name__": true,

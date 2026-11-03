@@ -89,16 +89,14 @@ def test_pipeline_runtime_has_required_variables() -> None:
         for variable in _dashboard().get("templating", {}).get("list", [])
         if variable.get("name")
     }
+    # Phase 4.5: unused selected_* dropped from Incident (kept on Overview/DQ).
     assert variables == {
         "workflow",
         "pipeline",
         "run_type",
         "run_id",
         "provider",
-        "provider_for_pipeline",
         "read_latency_quantile",
-        "selected_pipeline",
-        "selected_run_id",
     }
 
 
@@ -116,7 +114,7 @@ def test_pipeline_runtime_variables_use_runtime_universe() -> None:
             "url", ""
         )
     )
-    provider_query = str(variables["provider_for_pipeline"].get("definition") or "")
+    assert "provider_for_pipeline" not in variables
 
     assert "filter-options?dimension=pipeline" in pipeline_query
     assert "filter-options?dimension=run_type" in run_type_def
@@ -124,7 +122,6 @@ def test_pipeline_runtime_variables_use_runtime_universe() -> None:
     assert variables["run_type"]["current"]["value"] == "$__all"
     assert "bioetl_records_processed_total" not in pipeline_query
     assert "bioetl_records_processed_total" not in run_type_def
-    assert "bioetl_workflow_pipeline_expected" in provider_query
 
 
 def test_pipeline_runtime_keeps_record_level_forensic_variables_out() -> None:
@@ -322,8 +319,6 @@ def test_pipeline_runtime_links_are_target_scoped() -> None:
                 "bioetl-dq-v2",
             ):
                 scope = "var-pipeline=chembl_assay"
-                if resolved_uid == "bioetl-dq-v2":
-                    scope += "&var-stage=$__all"
                 resolved = url.replace(scope_token, scope)
                 assert (
                     _extract_link_vars(resolved)
