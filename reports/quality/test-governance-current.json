@@ -999,11 +999,11 @@
     "max_group_size": 0,
     "scan_root": "tests/fixtures",
     "scope_file_counts": {
-      "fixture": 86,
+      "fixture": 87,
       "golden": 30,
       "vcr": 344
     },
-    "total_files": 460,
+    "total_files": 461,
     "tracked_extensions": [
       ".json",
       ".yaml",
@@ -1745,11 +1745,11 @@
       "max_group_size": 0,
       "scan_root": "tests/fixtures",
       "scope_file_counts": {
-        "fixture": 86,
+        "fixture": 87,
         "golden": 30,
         "vcr": 344
       },
-      "total_files": 460,
+      "total_files": 461,
       "tracked_extensions": [
         ".json",
         ".yaml",
@@ -1775,8 +1775,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3218,
-      "test_python_file_count": 3469,
+      "test_glob_file_count": 3220,
+      "test_python_file_count": 3471,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1817,13 +1817,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3218,
-    "total_test_functions": 31906,
+    "total_test_files": 3220,
+    "total_test_functions": 31912,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "ddd3de5fa8223248e5aefa3b1b2428112066b6d193dae99d5d24cc2e3cc5bb25",
+  "source_tree_sha256": "6fb214aa44606cf2efe3afe53f93e687eefcac47b000d327ecec48732fc16592",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 70,
@@ -1843,8 +1843,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3218,
-    "test_python_file_count": 3469,
+    "test_glob_file_count": 3220,
+    "test_python_file_count": 3471,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -1885,8 +1885,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3218,
-  "total_test_functions": 31906,
+  "total_test_files": 3220,
+  "total_test_functions": 31912,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
