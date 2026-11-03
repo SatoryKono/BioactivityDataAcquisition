@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "catalog_ref": "15094edf8750ae1fcc90520076c66ad978b01191",
-  "source_ref": "6bdfb1886d47d45f99445ff846ee617ed8394c49",
+  "catalog_ref": "72173730bdab0c2c5b8cc04b0cb37b3ea3f4799f",
+  "source_ref": "dda97f1bcef08b64b22a9b949a53a12587b1e4d3",
   "source_reviews": {
-    "src/bioetl/domain/run_reports/models.py": "PR #12728 ruff-format models.py for Class; no new acquisition owner."
+    "src/bioetl/application/services/workflow/workflow_runner_service.py": "PR #12728 shrink workflow_runner_service to application LOC ceiling; no new acquisition."
   },
   "expression_updates": {},
   "resource_updates": {},
