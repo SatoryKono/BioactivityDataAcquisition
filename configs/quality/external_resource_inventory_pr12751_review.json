@@ -1,9 +1,10 @@
 {
   "schema_version": 1,
-  "catalog_ref": "193df05473f419f90f095be87dbca34e05550fef",
-  "source_ref": "889497b06b1cf212f92b221eb6bfc2b64d4b5550",
+  "catalog_ref": "159591f407d92f590dfb5e78a3c1fb820e97f35b",
+  "source_ref": "795b9ef453b2bc06748db34d6eb4d65b93924134",
   "source_reviews": {
-    "src/bioetl/composition/runtime_builders/run_manifest_builder.py": "Connected the already inventoried maybe_create_ledger_service helper to manifest publication; this changes the concrete caller but adds no resource acquisition or lifecycle owner."
+    "src/bioetl/application/services/execution/workflow_runner_step_execution.py": "Renamed the dispatch dependency dataclass and its references only; no acquisition call, external-resource owner, or lifecycle behavior changed.",
+    "src/bioetl/application/services/workflow/workflow_runner_service.py": "Updated the import and construction reference for the renamed dispatch dependency dataclass only; no resource acquisition or lifecycle behavior changed."
   },
   "expression_updates": {},
   "segment_updates": {},

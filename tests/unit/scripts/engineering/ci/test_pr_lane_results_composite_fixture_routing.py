@@ -1,14 +1,12 @@
-"""Focused routing for composite fixtures and protocol-inventory config."""
+"""Focused shadow-compare routing for composite fixture YAML."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
 import pytest
-from scripts.engineering.ci.pr_lane_results import (
-    affected_pytest_targets,
-    build_shadow_compare,
-)
+from scripts.engineering.ci.pr_lane_results import build_shadow_compare
+from scripts.engineering.ci.pr_lane_results import affected_pytest_targets
 
 pytestmark = pytest.mark.unit
 
@@ -26,8 +24,8 @@ def test_shadow_compare_routes_composite_fixtures() -> None:
     )
 
 
-def test_affected_targets_map_composition_protocol_inventory() -> None:
-    """Protocol inventory edits select their completeness and drift tests."""
+def test_composition_protocol_inventory_selects_its_contract_test() -> None:
+    """Protocol inventory edits select their completeness and drift test."""
     repo_root = Path(__file__).resolve().parents[5]
     assert affected_pytest_targets(
         ["configs/quality/composition_protocol_inventory.yaml"],

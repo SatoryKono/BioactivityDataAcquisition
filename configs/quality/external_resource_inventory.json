@@ -10582,25 +10582,15 @@
     }
   ],
   "source_requalification": {
-    "catalog_ref": "193df05473f419f90f095be87dbca34e05550fef",
+    "catalog_ref": "159591f407d92f590dfb5e78a3c1fb820e97f35b",
     "source_ref": "795b9ef453b2bc06748db34d6eb4d65b93924134",
-    "baseline_source_ref": "8715e92a3aeeb47a8ae33a3403c24283ff44d469",
-    "review_sha256": "c6721df5b512c2843b015f5100d0e44c73317b3c96ac0283ef076325b7cadf59",
+    "baseline_source_ref": "889497b06b1cf212f92b221eb6bfc2b64d4b5550",
+    "review_sha256": "04dd490419e9ec76e8b9af934349b6c10cbb487b6f6c471fd0cc7aa9294ca311",
     "production_file_count": 2605,
     "definition_count": 206,
     "creation_site_count": 545,
     "runtime_result": "NOT_RUN_12553"
   },
-  "source_rebindings": [
-    {
-      "from_commit": "889497b06b1cf212f92b221eb6bfc2b64d4b5550",
-      "to_commit": "795b9ef453b2bc06748db34d6eb4d65b93924134",
-      "reviewed_resource_free_sources": {
-        "src/bioetl/application/services/execution/workflow_runner_step_execution.py": "50fed519a133c09fe808542ec06db80f59a74899bc5adfcec557f58ea30b9d60",
-        "src/bioetl/application/services/workflow/workflow_runner_service.py": "d3cd82d1bd3aaf4cb35dc57242697a23bd1ed862f1bc02f3d5b3ed56825da296"
-      }
-    }
-  ],
   "resource_parts": [
     {
       "file": "configs/quality/external_resource_inventory/part-01.json",
