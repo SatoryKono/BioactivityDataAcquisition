@@ -78,6 +78,17 @@ def test_docs_workflow_runs_lightweight_docs_governance_profile() -> None:
 
     assert "docs-governance:" in workflow
     assert "fetch-depth: 0" in workflow
+    diagram_change_job = workflow.split("  detect-diagram-changes:", maxsplit=1)[
+        1
+    ].split("\n  render-generated-pipeline-dataflows:", maxsplit=1)[0]
+    mermaid_job = workflow.split("  validate-mermaid:", maxsplit=1)[1].split(
+        "\n  render-diagrams:", maxsplit=1
+    )[0]
+    assert "fetch-depth: ${{ github.event_name == 'pull_request' && 1 || 2 }}" in (
+        diagram_change_job
+    )
+    assert "fetch-depth: 1" in mermaid_job
+    assert 'git fetch --no-tags --depth=1 origin "${BASE_REF}"' in mermaid_job
     assert "generate_package_family_class_diagrams.py --check" not in workflow
     assert "Run docs-governance architecture tests" in workflow
     assert "validate-mkdocs:\n    needs: docs-governance" in workflow

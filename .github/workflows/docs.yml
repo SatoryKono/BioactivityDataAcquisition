@@ -180,7 +180,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 0
+          fetch-depth: ${{ github.event_name == 'pull_request' && 1 || 2 }}
 
       - name: Check for diagram file changes
         id: filter
@@ -285,7 +285,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Setup Mermaid CLI
         uses: ./.github/actions/setup-mermaid
@@ -310,7 +310,7 @@ jobs:
               echo "unsupported pull-request base ref" >&2
               exit 1
             fi
-            git fetch --no-tags origin "${BASE_REF}"
+            git fetch --no-tags --depth=1 origin "${BASE_REF}"
             if git diff --quiet "origin/${BASE_REF}"...HEAD -- \
               scripts/diagrams .github/actions/setup-mermaid; then
               changed_targets="${RUNNER_TEMP}/changed-diagram-targets.txt"
