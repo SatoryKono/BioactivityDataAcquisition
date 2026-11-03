@@ -523,12 +523,72 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "execution_state"
+            },
+            "properties": [
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Overall verdict"
+            },
+            "properties": [
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "SELECT RUN": {
+                        "text": "—",
+                        "color": "text"
+                      },
+                      "НЕТ ЗАПУСКОВ": {
+                        "text": "НЕТ ЗАПУСКОВ",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "Trust"
             },
             "properties": [
               {
-                "id": "displayName",
-                "value": "Trust"
+                "id": "custom.wrapText",
+                "value": false
               },
               {
                 "id": "custom.cellOptions",
@@ -648,51 +708,6 @@
                     }
                   }
                 ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Overall verdict"
-            },
-            "properties": [
-              {
-                "id": "links",
-                "value": []
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "SELECT RUN": {
-                        "text": "—",
-                        "color": "text"
-                      },
-                      "НЕТ ЗАПУСКОВ": {
-                        "text": "НЕТ ЗАПУСКОВ",
-                        "color": "gray"
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                "id": "custom.inspect",
-                "value": true
-              },
-              {
-                "id": "custom.wrapText",
-                "value": true
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
               }
             ]
           }
