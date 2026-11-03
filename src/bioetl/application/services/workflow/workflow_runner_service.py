@@ -126,10 +126,9 @@ def _finalize_workflow_run_result(
         status=state.status,
         context_labels=workflow_context_labels,
     )
-    result = workflow_result_from_state(config.name, state)
     identified_result = _require_workflow_result(
         replace(
-            result,
+            workflow_result_from_state(config.name, state),
             workflow_run_id=workflow_run_id,
             manifest_id=manifest_id,
             execution_fingerprint=execution_fingerprint,
