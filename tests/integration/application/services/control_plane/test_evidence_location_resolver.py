@@ -65,7 +65,7 @@ def _create_symlink_or_skip(
         raise
 
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.integration
 
 _SOURCE_A = "a" * 64
 _SOURCE_B = "b" * 64
@@ -361,7 +361,7 @@ def test_context_rechecks_child_paths_before_manifest_read(tmp_path: Path) -> No
     outside.mkdir()
     _create_symlink_or_skip(data_root / "output", outside, target_is_directory=True)
 
-    with pytest.raises(EvidenceLocationInvalidError, match="escapes|symlink"):
+    with pytest.raises(EvidenceLocationInvalidError, match=r"escapes|symlink"):
         context.get_manifest_by_run_id(UUID(_RUN_A))
 
 
@@ -389,7 +389,7 @@ def test_context_rejects_symlinked_manifest_index_and_record(
         record = store_base / "manifest-a.json"
         _create_symlink_or_skip(record, outside)
 
-    with pytest.raises(EvidenceLocationInvalidError, match="symlink|escapes"):
+    with pytest.raises(EvidenceLocationInvalidError, match=r"symlink|escapes"):
         context.get_manifest_by_run_id(UUID(_RUN_A))
 
 
@@ -441,7 +441,7 @@ def test_context_rejects_symlinked_effective_config_index_and_record(
         source_refs=(),
         objects={},
     )
-    with pytest.raises(EvidenceLocationInvalidError, match="symlink|escapes"):
+    with pytest.raises(EvidenceLocationInvalidError, match=r"symlink|escapes"):
         context.verify_replay_objects(evidence)  # type: ignore[arg-type]
 
 

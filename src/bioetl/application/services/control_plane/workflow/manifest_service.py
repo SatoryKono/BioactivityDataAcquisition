@@ -86,7 +86,7 @@ class WorkflowManifestService:
         )
         self.manifest_port.save(manifest)
         if self.evidence_location_register is not None:
-            from bioetl.application.services.control_plane.evidence_location.registration import (
+            from bioetl.application.services.control_plane.evidence_location.registration_observations import (
                 record_registration_exception_observation,
                 record_registration_outcome_observation,
             )

@@ -30,6 +30,7 @@ pytestmark = pytest.mark.unit
 _SOURCE = "c" * 64
 _RUN = "ac0b4e22-6a6e-5b7e-818e-106aeaf41390"
 _WF = "3dc8ffe4-305b-5d4b-a945-fe8e78f03828"
+_CREATED_AT = datetime(2026, 11, 3, tzinfo=UTC)
 
 
 def test_relative_data_root_standard_and_isolated(tmp_path: Path) -> None:
@@ -151,7 +152,7 @@ def test_register_workflow_manifest_parent(
         workflow_run_id=RunID(UUID(_WF)),
         execution_fingerprint="f" * 64,
         schema_version="1.0",
-        created_at=datetime.now(UTC),
+        created_at=_CREATED_AT,
         workflow_name="chembl_assay_pack",
         workflow_version="1",
         launch_context={},
@@ -188,7 +189,7 @@ def test_resolve_registration_runtime_source_id_reads_env_local(
     from bioetl.application.services.run_reports.source_identity import (
         RUNTIME_SOURCE_ID_ENV,
     )
-    import bioetl.composition.runtime_builders.evidence_location_registration as mod
+    import bioetl.composition.runtime_builders.run_manifest_data_roots as mod
 
     monkeypatch.delenv(RUNTIME_SOURCE_ID_ENV, raising=False)
     (tmp_path / ".env").write_text(

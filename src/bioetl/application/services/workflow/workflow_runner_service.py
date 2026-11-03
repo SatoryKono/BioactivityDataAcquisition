@@ -14,10 +14,8 @@ from bioetl.application.services.control_plane.evidence_location import (
     record_verify_exception_observation,
 )
 from bioetl.application.services.execution.workflow_runner_step_execution import (
-    TransformStepRuntimeOptions,
     apply_workflow_step_transition,
-    execute_pipeline_step,
-    execute_transform_step,
+    dispatch_workflow_step,
 )
 from bioetl.application.services.run_reports.observations import (
     bind_run_observations_if_unbound,
@@ -339,7 +337,13 @@ class WorkflowRunnerService:
             )
         return ResolvedWorkflowStepTransitionRecord(
             policy=policy,
-            result=await self._run_step(
+            result=await dispatch_workflow_step(
+                pipeline_runner=self.pipeline_runner,
+                cohort_resolver=self.cohort_resolver,
+                transform_service=self.transform_service,
+                artifact_sink=self.workflow_transform_artifact_sink,
+                metrics=self.metrics,
+                monotonic=self.monotonic,
                 workflow_name=workflow_name,
                 step=step,
                 step_outputs=state.step_outputs,
@@ -353,65 +357,11 @@ class WorkflowRunnerService:
                 debug_export_enabled=debug_export_enabled,
                 debug_export_dir=debug_export_dir,
                 created_at_factory=created_at_factory,
-                capture_producer_snapshot=capture_producer_snapshot,
-            ),
-        )
-
-    async def _run_step(
-        self,
-        *,
-        workflow_name: str,
-        step: WorkflowStepDefinition,
-        step_outputs: dict[str, object],
-        workflow_context_labels: Mapping[str, str],
-        completed_transform_fingerprints: dict[str, str] | None,
-        step_started_callback: Callable[..., None] | None,
-        transform_commit_callback: (
-            Callable[[WorkflowTransformDestructiveCommit], None] | None
-        ),
-        dry_run: bool,
-        workflow_run_id: str | None,
-        manifest_id: str | None,
-        debug_export_enabled: bool,
-        debug_export_dir: str | None,
-        created_at_factory: Callable[[], datetime] | None,
-        capture_producer_snapshot: bool = False,
-    ) -> WorkflowStepExecutionResult:
-        if isinstance(step, WorkflowStepConfig):
-            return await execute_pipeline_step(
-                pipeline_runner=self.pipeline_runner,
-                cohort_resolver=self.cohort_resolver,
-                upstream_outputs=step_outputs,
-                capture_producer_snapshot=capture_producer_snapshot,
-                metrics=self.metrics,
-                monotonic=self.monotonic,
-                workflow_name=workflow_name,
-                step=step,
-                workflow_context_labels=workflow_context_labels,
-                step_started_callback=step_started_callback,
-                workflow_run_id=workflow_run_id,
                 snapshot_reader=getattr(
                     getattr(self.transform_service, "registry", None),
                     "snapshot_reader",
                     None,
                 ),
-            )
-        return await execute_transform_step(
-            transform_service=self.transform_service,
-            artifact_sink=self.workflow_transform_artifact_sink,
-            workflow_name=workflow_name,
-            step=step,
-            step_outputs=step_outputs,
-            workflow_context_labels=workflow_context_labels,
-            options=TransformStepRuntimeOptions(
-                completed_transform_fingerprints=completed_transform_fingerprints,
-                step_started_callback=step_started_callback,
-                transform_commit_callback=transform_commit_callback,
-                dry_run=dry_run,
-                workflow_run_id=workflow_run_id,
-                manifest_id=manifest_id,
-                debug_export_enabled=debug_export_enabled,
-                debug_export_dir=debug_export_dir,
-                created_at_factory=created_at_factory,
+                capture_producer_snapshot=capture_producer_snapshot,
             ),
         )

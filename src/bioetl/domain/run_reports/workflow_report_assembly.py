@@ -14,6 +14,7 @@ from bioetl.domain.run_reports.workflow_reasons import (
 from bioetl.domain.run_reports.workflow_totals import (
     _as_int,
     _build_totals,
+    _copy_workflow_observations,
     _first_attribute,
     _first_present,
     _optional_int,
@@ -290,12 +291,13 @@ def build_workflow_run_report(
     plan = tuple(_normalize_plan_step(step) for step in plan_steps)
     normalized = tuple(_normalize_execution(raw) for raw in execution_steps)
     execution = tuple(item.row for item in normalized)
+    planned_steps = len(plan) if plan else len(execution)
     return WorkflowRunReport(
         identity=dict(identity),
         plan_steps=plan,
         execution=execution,
-        totals=_build_totals(execution, planned=len(plan) or len(execution)),
+        totals=_build_totals(execution, planned=planned_steps),
         index=_build_index(normalized),
         reasons_rollup=build_reasons_rollup(execution),
-        observations=None if observations is None else dict(observations),
+        observations=_copy_workflow_observations(observations),
     )

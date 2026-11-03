@@ -6,8 +6,6 @@ receive absolute paths, alias bases, and runtime_source_id as parameters.
 
 from __future__ import annotations
 
-import os
-from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -20,20 +18,16 @@ from bioetl.application.services.control_plane.evidence_location.registration im
 from bioetl.application.services.run_reports.evidence_location_paths import (
     default_evidence_root_alias_registry,
 )
-from bioetl.application.services.run_reports.source_identity import (
-    RUNTIME_SOURCE_ID_ENV,
-    resolve_runtime_source_identity,
-)
-from bioetl.composition.bootstrap.composite_infrastructure_context import (
-    load_repository_source_environment,
-)
 from bioetl.composition.runtime_builders.run_manifest_data_roots import (
+    EvidenceLocationBindingContext,
+    relative_data_root_under_alias,
     resolve_data_root,
+    resolve_dashboard_data_alias_base,
+    resolve_registration_runtime_source_id,
 )
 from bioetl.domain.control_plane.run_evidence_location import (
     DEFAULT_EVIDENCE_ROOT_ALIAS,
     EvidenceLocationKind,
-    canonicalize_relative_data_root,
 )
 from bioetl.infrastructure.control_plane.file_evidence_location_store import (
     FileEvidenceLocationStore,
@@ -54,96 +48,6 @@ __all__ = [
     "resolve_dashboard_data_alias_base",
     "resolve_registration_runtime_source_id",
 ]
-
-_DASHBOARD_DATA_ROOT_ENV = "BIOETL_DASHBOARD_DATA_ROOT"
-
-
-@dataclass(frozen=True, slots=True)
-class EvidenceLocationBindingContext:
-    """Trusted write root + alias binding for one publisher call."""
-
-    write_data_root: Path
-    alias_base: Path
-    root_alias: str
-    relative_data_root: str
-    runtime_source_id: str | None
-    report_root: Path | None
-    # Set when write root is outside an explicitly configured dashboard alias.
-    skip_reason: str | None = None
-
-    @property
-    def registration_allowed(self) -> bool:
-        """False when the binding must not publish a ``dashboard_data`` locator."""
-        return self.skip_reason is None and self.runtime_source_id is not None
-
-
-def resolve_dashboard_data_alias_base(*, write_data_root: Path) -> Path | None:
-    """Resolve the trusted ``dashboard_data`` alias base at composition edge.
-
-    Returns the configured ``BIOETL_DASHBOARD_DATA_ROOT`` when set, otherwise
-    ``None`` so callers may treat the write root as the alias base.
-    """
-    raw = os.environ.get(_DASHBOARD_DATA_ROOT_ENV, "").strip()
-    if raw:
-        return Path(raw).expanduser().resolve(strict=False)
-    _ = write_data_root
-    return None
-
-
-def relative_data_root_under_alias(
-    *,
-    write_data_root: Path,
-    alias_base: Path,
-) -> str | None:
-    """Return posix relative path of write root under alias, or ``.``.
-
-    Uses ``Path.relative_to`` against the DI/composition alias base — not
-    parent-folder name heuristics. Returns ``None`` when write root is outside
-    the alias base (caller must skip registration, never remap ``dashboard_data``).
-    """
-    write = Path(write_data_root).resolve(strict=False)
-    base = Path(alias_base).resolve(strict=False)
-    try:
-        relative = write.relative_to(base)
-    except ValueError:
-        return None
-    text = relative.as_posix()
-    if text in {"", "."}:
-        return "."
-    return canonicalize_relative_data_root(text)
-
-
-def _repository_root() -> Path:
-    # runtime_builders → composition → bioetl → src → repo root
-    return Path(__file__).resolve().parents[4]
-
-
-def resolve_registration_runtime_source_id(settings: Settings) -> str | None:
-    """Resolve bind/runtime source digest for locators (composition edge).
-
-    Precedence matches :func:`resolve_runtime_source_identity`: typed settings /
-    process env, then repository ``.env`` / ``.env.local``.
-    """
-    configured = getattr(settings, "runtime_source_id", None)
-    process_environment: dict[str, str] = {}
-    if configured is not None and str(configured).strip():
-        process_environment[RUNTIME_SOURCE_ID_ENV] = str(configured).strip()
-    else:
-        env_value = os.environ.get(RUNTIME_SOURCE_ID_ENV, "").strip()
-        if env_value:
-            process_environment[RUNTIME_SOURCE_ID_ENV] = env_value
-    repository_environment = load_repository_source_environment(
-        _repository_root(),
-        names=(RUNTIME_SOURCE_ID_ENV,),
-        process_environment=process_environment,
-    )
-    resolution = resolve_runtime_source_identity(
-        process_environment=process_environment,
-        repository_environment=repository_environment,
-    )
-    if resolution.is_resolved and resolution.value is not None:
-        return resolution.value
-    return None
 
 
 def build_evidence_location_binding_context(

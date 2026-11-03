@@ -143,7 +143,8 @@ class PipelineRunnerService:
             options=effective_options,
             started_at=started_at,
         )
-        run_logger = self._create_run_logger(
+        run_logger = _create_pipeline_run_logger(
+            logger=self.logger,
             context=context,
             options=effective_options,
         )
@@ -282,21 +283,6 @@ class PipelineRunnerService:
         available = self.runner_factory.list_pipelines()
         raise PipelineNotFoundError(pipeline_name, available)
 
-    def _create_run_logger(
-        self,
-        *,
-        context: PipelineRunContext,
-        options: RunOptions,
-    ) -> LoggerPort:
-        run_logger = self.logger.bind(**context.log_correlation_fields())
-        run_logger.info(
-            "Starting pipeline run",
-            run_type=options.run_type,
-            dry_run=options.dry_run,
-            limit=options.limit,
-        )
-        return run_logger
-
     def list_pipelines(self) -> list[str]:
         """Return registered pipeline names in sorted order."""
         return self.runner_factory.list_pipelines()
@@ -403,3 +389,20 @@ class PipelineRunnerService:
         self, result: RunResult, options: RunOptions | None
     ) -> None:
         archive_run_completion(self.archive_control_plane, result, options)
+
+
+def _create_pipeline_run_logger(
+    *,
+    logger: LoggerPort,
+    context: PipelineRunContext,
+    options: RunOptions,
+) -> LoggerPort:
+    """Bind pipeline run context and emit the stable start event."""
+    run_logger = logger.bind(**context.log_correlation_fields())
+    run_logger.info(
+        "Starting pipeline run",
+        run_type=options.run_type,
+        dry_run=options.dry_run,
+        limit=options.limit,
+    )
+    return run_logger

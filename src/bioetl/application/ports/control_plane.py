@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
@@ -42,6 +44,42 @@ if TYPE_CHECKING:
         ControlPlaneArtifactLifecyclePlan,
         ControlPlaneArtifactLifecyclePolicy,
     )
+
+
+@runtime_checkable
+class EvidenceReadContext(Protocol):
+    """Read-only control-plane view bound to one data root."""
+
+    @property
+    def data_root(self) -> Path:
+        """Absolute data root selected for this resolve."""
+        ...
+
+    def get_manifest_by_run_id(self, run_id: object) -> object | None:
+        """Load a manifest by run id from the bound root, or ``None``."""
+        ...
+
+    def get_workflow_manifest_by_run_id(self, run_id: object) -> object | None:
+        """Load a workflow manifest by run id from the bound root, or ``None``."""
+        ...
+
+    def verify_replay_objects(self, manifest: object) -> Mapping[str, bool]:
+        """Re-validate saved config, lock and Bronze bytes for ``manifest``."""
+        ...
+
+
+@runtime_checkable
+class EvidenceReadContextOpenerPort(Protocol):
+    """Open read-only stores beneath a trusted data-root alias."""
+
+    def open(
+        self,
+        data_root: Path,
+        *,
+        trusted_alias_base: Path,
+    ) -> EvidenceReadContext:
+        """Open read-only ports after validating path containment."""
+        ...
 
 
 @runtime_checkable

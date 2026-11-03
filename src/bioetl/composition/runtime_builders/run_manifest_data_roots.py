@@ -10,6 +10,18 @@ from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, cast
+from dataclasses import dataclass
+
+from bioetl.application.services.run_reports.source_identity import (
+    RUNTIME_SOURCE_ID_ENV,
+    resolve_runtime_source_identity,
+)
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
+    load_repository_source_environment,
+)
+from bioetl.domain.control_plane.run_evidence_location import (
+    canonicalize_relative_data_root,
+)
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
@@ -18,13 +30,88 @@ DataRootMode = Literal["explicit", "repo_default", "private_cache", "tmp"]
 
 __all__ = [
     "DataRootMode",
+    "EvidenceLocationBindingContext",
     "build_planned_artifacts",
     "control_plane_root",
     "is_explicit_data_root_configured",
+    "relative_data_root_under_alias",
+    "resolve_dashboard_data_alias_base",
     "resolve_data_root",
     "resolve_data_root_mode",
     "resolve_data_root_with_mode",
+    "resolve_registration_runtime_source_id",
 ]
+
+_DASHBOARD_DATA_ROOT_ENV = "BIOETL_DASHBOARD_DATA_ROOT"
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceLocationBindingContext:
+    """Trusted write root + alias binding for one publisher call."""
+
+    write_data_root: Path
+    alias_base: Path
+    root_alias: str
+    relative_data_root: str
+    runtime_source_id: str | None
+    report_root: Path | None
+    skip_reason: str | None = None
+
+    @property
+    def registration_allowed(self) -> bool:
+        """False when binding cannot publish a ``dashboard_data`` locator."""
+        return self.skip_reason is None and self.runtime_source_id is not None
+
+
+def resolve_dashboard_data_alias_base(*, write_data_root: Path) -> Path | None:
+    """Resolve the trusted ``dashboard_data`` alias base at composition edge."""
+    raw = os.environ.get(_DASHBOARD_DATA_ROOT_ENV, "").strip()
+    return Path(raw).expanduser().resolve(strict=False) if raw else None
+
+
+def relative_data_root_under_alias(
+    *, write_data_root: Path, alias_base: Path
+) -> str | None:
+    """Return the canonical write-root path relative to its trusted alias."""
+    try:
+        relative = (
+            Path(write_data_root)
+            .resolve(strict=False)
+            .relative_to(Path(alias_base).resolve(strict=False))
+        )
+    except ValueError:
+        return None
+    text = relative.as_posix()
+    return "." if text in {"", "."} else canonicalize_relative_data_root(text)
+
+
+def resolve_registration_runtime_source_id(settings: Settings) -> str | None:
+    """Resolve the bind/runtime source digest at the composition boundary."""
+    configured = getattr(settings, "runtime_source_id", None)
+    process_environment = (
+        {RUNTIME_SOURCE_ID_ENV: str(configured).strip()}
+        if configured is not None and str(configured).strip()
+        else {}
+    )
+    if not process_environment:
+        env_value = os.environ.get(RUNTIME_SOURCE_ID_ENV, "").strip()
+        if env_value:
+            process_environment[RUNTIME_SOURCE_ID_ENV] = env_value
+    repository_environment = load_repository_source_environment(
+        _repository_root(),
+        names=(RUNTIME_SOURCE_ID_ENV,),
+        process_environment=process_environment,
+    )
+    resolution = resolve_runtime_source_identity(
+        process_environment=process_environment,
+        repository_environment=repository_environment,
+    )
+    return resolution.value if resolution.is_resolved else None
+
+
+def _repository_root() -> Path:
+    """Return the repository root for repository-local runtime identity inputs."""
+    return Path(__file__).resolve().parents[4]
 
 
 def compat_attr(module: str, name: str, *args: object, **kwargs: object) -> object:
