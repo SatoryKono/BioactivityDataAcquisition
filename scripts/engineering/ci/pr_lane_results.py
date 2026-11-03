@@ -339,6 +339,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
+    "reports/audit/pack-v2.1/evidence_p12_parity.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+    ),
+    "src/bioetl/infrastructure/adapters/decorators/README.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+    ),
     "reports/engineering/SEC-003_audit_report.md": (
         "tests/unit/domain/services/test_composite_metadata_helpers.py",
     ),
@@ -702,6 +708,10 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "tests/fixtures/reports/": (RUN_REPORT_CONTRACTS_TEST,),
     "configs/composites/": (
         "tests/unit/infrastructure/schemas/test_composite_config_schema.py",
+    ),
+    # Composite MANY_TO_ONE / enricher fixtures → schema contract suite.
+    "tests/fixtures/composite/": (
+        "tests/integration/composite/test_composite_config_schema_contract.py",
     ),
     # Entity YAML family: fail-closed pipeline load + FilterConfigFile boundary.
     "configs/entities/": (
