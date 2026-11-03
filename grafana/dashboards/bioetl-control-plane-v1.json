@@ -99,7 +99,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -156,7 +156,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -220,7 +220,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -646,6 +646,10 @@
                 "INCOMPLETE": {
                   "text": "INCOMPLETE",
                   "color": "#555555"
+                },
+                "НЕТ ЗАПУСКОВ": {
+                  "text": "НЕТ ЗАПУСКОВ",
+                  "color": "gray"
                 }
               }
             },
@@ -1259,6 +1263,10 @@
                       "UNFINISHED": {
                         "text": "UNFINISHED",
                         "color": "#A3A3A3"
+                      },
+                      "НЕТ ЗАПУСКОВ": {
+                        "text": "НЕТ ЗАПУСКОВ",
+                        "color": "gray"
                       }
                     }
                   }
@@ -1327,6 +1335,10 @@
                       "SELECT RUN": {
                         "text": "SELECT RUN",
                         "color": "#A3A3A3"
+                      },
+                      "НЕТ ЗАПУСКОВ": {
+                        "text": "НЕТ ЗАПУСКОВ",
+                        "color": "gray"
                       }
                     }
                   }

@@ -37,6 +37,7 @@ FRAME = "_bioetl_frame"
 VIEW_PANEL_TRUST_SELF = "viewPanel=9418"
 VIEW_PANEL_TRUST_SIBLING = "viewPanel=9414"
 _SELECT_RUN = "SELECT RUN"
+_NO_RUNS = "НЕТ ЗАПУСКОВ"
 
 OV_IDENTITY = (
     "/d/bioetl-overview-v2/2-overview"
@@ -248,10 +249,12 @@ _OV_PROVIDER = (
 _OV_STAGES = _tag_rows("stage_diagnostics", "stages")
 _OV_RECON = _tag_rows("reconciliation_display", "reconciliation")
 _OV_EXCL = (
-    f"[{{'status': verdict='SELECT RUN' ? 'SELECT RUN' : contract_exclusions_status, "
+    f"[{{'status': (verdict='{_SELECT_RUN}' or verdict='{_NO_RUNS}') ? verdict : "
+    f"contract_exclusions_status, "
     f"'detail': contract_exclusions_rate != null ? "
     f"'excluded ' & $string($round(contract_exclusions_rate*100,2)) & '%' : "
-    f"(verdict='SELECT RUN' ? 'Choose a run' : 'excluded UNKNOWN'), "
+    f"(verdict='{_SELECT_RUN}' ? 'Choose a run' : "
+    f"(verdict='{_NO_RUNS}' ? 'No runs in scope' : 'excluded UNKNOWN')), "
     f"'{FRAME}': 'exclusions'}}]"
 )
 
@@ -530,8 +533,39 @@ def _value_mapping_options(item: Any) -> dict[str, Any] | None:
     return options if isinstance(options, dict) else None
 
 
+def _ensure_selection_status_value_maps(
+    mappings: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], bool]:
+    """Keep A1 SELECT RUN and A2 empty-catalog НЕТ ЗАПУСКОВ as gray value maps."""
+    required = {
+        _SELECT_RUN: {"text": _SELECT_RUN, "color": "gray"},
+        _NO_RUNS: {"text": _NO_RUNS, "color": "gray"},
+    }
+    changed = False
+    value_maps = [
+        (index, options)
+        for index, item in enumerate(mappings)
+        if (options := _value_mapping_options(item)) is not None
+    ]
+    if value_maps:
+        index, options = value_maps[0]
+        merged = dict(options)
+        for key, value in required.items():
+            if merged.get(key) != value:
+                merged[key] = value
+                changed = True
+        if changed:
+            mappings = list(mappings)
+            mappings[index] = {"type": "value", "options": merged}
+    else:
+        mappings = list(mappings)
+        mappings.append({"type": "value", "options": dict(required)})
+        changed = True
+    return mappings, changed
+
+
 def _ensure_exclusions_crit_color(panel: dict[str, Any]) -> None:
-    """Canvas 9482 colors CRIT and keeps SELECT RUN distinct from UNKNOWN."""
+    """Canvas 9482 colors CRIT and keeps selection empties distinct from UNKNOWN."""
     defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
     mappings = list(defaults.get("mappings") or [])
     changed = False
@@ -552,23 +586,9 @@ def _ensure_exclusions_crit_color(panel: dict[str, Any]) -> None:
             },
         )
         changed = True
-    # No-selection must not reuse the UNKNOWN value map (Codex P2 #4449151423).
-    select_run = {"text": _SELECT_RUN, "color": "gray"}
-    value_maps = [
-        (index, options)
-        for index, item in enumerate(mappings)
-        if (options := _value_mapping_options(item)) is not None
-    ]
-    if value_maps:
-        index, options = value_maps[0]
-        if options.get(_SELECT_RUN) != select_run:
-            options = dict(options)
-            options[_SELECT_RUN] = select_run
-            mappings[index] = {"type": "value", "options": options}
-            changed = True
-    else:
-        mappings.append({"type": "value", "options": {_SELECT_RUN: select_run}})
-        changed = True
+    # No-selection / empty catalog must not reuse the UNKNOWN value map.
+    mappings, map_changed = _ensure_selection_status_value_maps(mappings)
+    changed = changed or map_changed
     if changed:
         defaults["mappings"] = mappings
     description = str(panel.get("description") or "")
@@ -576,6 +596,43 @@ def _ensure_exclusions_crit_color(panel: dict[str, Any]) -> None:
         panel["description"] = description.replace(
             "hard limit ERROR", "hard limit CRIT"
         )
+
+
+def _stamp_no_runs_into_mapping_list(mappings: Any) -> None:
+    if not isinstance(mappings, list):
+        return
+    for item in mappings:
+        options = _value_mapping_options(item)
+        if options is not None and _SELECT_RUN in options:
+            options.setdefault(_NO_RUNS, {"text": _NO_RUNS, "color": "gray"})
+
+
+def _stamp_no_runs_value_maps(data: dict[str, Any]) -> None:
+    """Add A2 empty-catalog maps wherever SELECT RUN already has a value map."""
+
+    def walk_mapping_host(host: dict[str, Any]) -> None:
+        defaults = (host.get("fieldConfig") or {}).get("defaults") or {}
+        _stamp_no_runs_into_mapping_list(defaults.get("mappings"))
+        for override in (host.get("fieldConfig") or {}).get("overrides") or []:
+            if not isinstance(override, dict):
+                continue
+            for prop in override.get("properties") or []:
+                if not isinstance(prop, dict):
+                    continue
+                # Grafana stores mappings as properties id=mappings value=[...]
+                if prop.get("id") == "mappings":
+                    _stamp_no_runs_into_mapping_list(prop.get("value"))
+
+    def walk(panels: list[Any]) -> None:
+        for panel in panels or []:
+            if not isinstance(panel, dict):
+                continue
+            walk_mapping_host(panel)
+            nested = panel.get("panels")
+            if isinstance(nested, list):
+                walk(nested)
+
+    walk(data.get("panels") or [])
 
 
 def _status_donor_transforms() -> list[dict[str, Any]]:
@@ -1142,12 +1199,18 @@ def main() -> None:
         "bioetl-incident-v1.json": apply_incident,
         "bioetl-control-plane-v1.json": apply_control_plane,
     }
+    from scripts.ops.observability.grafana._selected_run_panels import (
+        stamp_selector_columns,
+    )
+
     print("Phase 2.5 SRS/PRR budget apply")
     for name, apply in files.items():
         path = DASH / name
         data = json.loads(path.read_text(encoding="utf-8"))
         before = inventory(data)
         apply(data)
+        stamp_selector_columns(data)
+        _stamp_no_runs_value_maps(data)
         after = inventory(data)
         write_dashboard_source(
             path,
@@ -1156,10 +1219,17 @@ def main() -> None:
         )
         print(f"  {name}: SRS {before[0]}→{after[0]}  PRR {before[1]}→{after[1]}")
 
-    # Run Explorer unchanged; still print budget line.
+    # Run Explorer: empty-catalog selector label + maps only (no SRS/PRR rewrite).
     re_path = DASH / "bioetl-run-explorer-v1.json"
     re_data = json.loads(re_path.read_text(encoding="utf-8"))
-    print(f"  bioetl-run-explorer-v1.json: SRS/PRR {inventory(re_data)} (unchanged)")
+    stamp_selector_columns(re_data)
+    _stamp_no_runs_value_maps(re_data)
+    write_dashboard_source(
+        re_path,
+        json.dumps(re_data, indent=2, ensure_ascii=False) + "\n",
+        root=ROOT,
+    )
+    print(f"  bioetl-run-explorer-v1.json: SRS/PRR {inventory(re_data)}")
 
 
 if __name__ == "__main__":

@@ -242,11 +242,10 @@ def test_non_digit_mapping_requires_status_token() -> None:
 
 
 def test_overview_exclusions_status_preserves_select_run() -> None:
-    """No Run ID must not collapse into UNKNOWN next to Choose a run."""
-    assert (
-        "verdict='SELECT RUN' ? 'SELECT RUN' : contract_exclusions_status" in _OV_EXCL
-    )
+    """A1 SELECT RUN and A2 empty catalog must not collapse into UNKNOWN."""
+    assert "verdict='SELECT RUN' or verdict='НЕТ ЗАПУСКОВ'" in _OV_EXCL
     assert "verdict='SELECT RUN' ? 'Choose a run'" in _OV_EXCL
+    assert "verdict='НЕТ ЗАПУСКОВ' ? 'No runs in scope'" in _OV_EXCL
     assert _OV_EXCL in _OV_DONOR
 
 
@@ -271,6 +270,10 @@ def test_exclusions_canvas_keeps_select_run_value_mapping() -> None:
         item["options"] for item in mappings if item.get("type") == "value"
     )
     assert value_options["SELECT RUN"] == {"text": "SELECT RUN", "color": "gray"}
+    assert value_options["НЕТ ЗАПУСКОВ"] == {
+        "text": "НЕТ ЗАПУСКОВ",
+        "color": "gray",
+    }
     assert value_options["UNKNOWN"] == {"text": "UNKNOWN", "color": "gray"}
     assert any(
         item.get("type") == "regex"

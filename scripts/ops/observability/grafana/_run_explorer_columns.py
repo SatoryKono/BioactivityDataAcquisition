@@ -63,8 +63,10 @@ _RESET_FILTERS = (
     "&var-lookup_run_id=&${__url_time_range}"
 )
 _OPS_HTTP = "BioETL Ops HTTP"
+_NO_RUNS_LABEL = "НЕТ ЗАПУСКОВ"
 _FILTER_ROOT = (
-    '$exists(items) and $count(items) = 0 ? [{"text":"NO MATCHES","value":"-"}] : items'
+    "$exists(items) and $count(items) = 0 ? "
+    f'[{{"text":"{_NO_RUNS_LABEL}","value":"-"}}] : items'
 )
 
 
@@ -113,6 +115,7 @@ def apply_overall_verdict(payload: dict) -> None:
                                 "N/A": "gray",
                                 "QUERY ERROR": "red",
                                 "SELECT RUN": "gray",
+                                _NO_RUNS_LABEL: "gray",
                             }.items()
                         },
                     },
