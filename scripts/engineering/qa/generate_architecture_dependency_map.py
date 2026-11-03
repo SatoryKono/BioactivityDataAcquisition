@@ -52,6 +52,7 @@ LAYER_IMPORT_MATRIX: dict[str, frozenset[str]] = {
 
 LAYER_ORDER = tuple(LAYER_IMPORT_MATRIX.keys())
 GROUP_EDGE_LIMIT = 55
+_COMPOSITION_RUNTIME_BUILDERS_GROUP = "composition.runtime_builders"
 MODULE_GROUP_OVERRIDES = {
     # The detached backend is part of the canonical observability runtime
     # composition family even though it keeps a focused import surface for CLI.
@@ -59,13 +60,13 @@ MODULE_GROUP_OVERRIDES = {
     # Selected-run contract wiring shares runtime_builders so domain.control_plane
     # and infrastructure.config edges fold into existing composition group totals.
     "bioetl.composition.selected_run_contract_exclusions": (
-        "composition.runtime_builders"
+        _COMPOSITION_RUNTIME_BUILDERS_GROUP
     ),
     # Leaf control-plane path/access helpers stay under runtime_builders so the
     # unique composition.control_plane_* group edges do not inflate the total.
-    "bioetl.composition.control_plane_paths": "composition.runtime_builders",
+    "bioetl.composition.control_plane_paths": _COMPOSITION_RUNTIME_BUILDERS_GROUP,
     "bioetl.composition.control_plane_service_access": (
-        "composition.runtime_builders"
+        _COMPOSITION_RUNTIME_BUILDERS_GROUP
     ),
 }
 TYPE_CHECKING_NAME = "TYPE_CHECKING"
