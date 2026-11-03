@@ -558,11 +558,32 @@ def _incident(p: dict[int, dict]) -> None:
     _incident_alert_tables(p)
 
 
+def _status_panel_rename_targets(panel: dict) -> dict[str, str]:
+    """Return organize renameByName for Review Selected Run Status panels."""
+    for transform in panel.get("transformations") or []:
+        if transform.get("id") == "organize":
+            rename = (transform.get("options") or {}).get("renameByName") or {}
+            if isinstance(rename, dict):
+                return {
+                    str(key): str(value)
+                    for key, value in rename.items()
+                    if isinstance(key, str) and isinstance(value, str)
+                }
+    return {}
+
+
 def _selection_summary(panel: dict) -> None:
     """Present one selection action; preserve the selected-run verdict values."""
     if panel.get("title") != "Review Selected Run Status":
         return
-    for field in ("Result", "Status"):
+    rename = _status_panel_rename_targets(panel)
+    # Prefer post-organize column titles (Phase 2.5 donors use Processing /
+    # Overall verdict). Fall back to legacy Result/Status rename targets.
+    processing = (
+        rename.get("execution_state") or rename.get("run_execution") or "Result"
+    )
+    verdict = rename.get("verdict") or rename.get("run_verdict") or "Status"
+    for field in (processing, verdict):
         _override(panel, field, "links", [])
         _override(
             panel,
@@ -575,20 +596,24 @@ def _selection_summary(panel: dict) -> None:
                 }
             ],
         )
-    _override(panel, "Rules", _HIDDEN, True)
-    links = panel["fieldConfig"]["defaults"].get("links", [])
-    _override(panel, "Evidence", "links", links[:1])
-    _override(
-        panel,
-        "Evidence",
-        "mappings",
-        [
-            {
-                "type": "value",
-                "options": {_SELECT_RUN: {"text": "Choose a run", "color": "text"}},
-            }
-        ],
-    )
+    rules = rename.get("rules_version")
+    if rules:
+        _override(panel, rules, _HIDDEN, True)
+    evidence = rename.get("evidence_completeness")
+    if evidence:
+        links = panel["fieldConfig"]["defaults"].get("links", [])
+        _override(panel, evidence, "links", links[:1])
+        _override(
+            panel,
+            evidence,
+            "mappings",
+            [
+                {
+                    "type": "value",
+                    "options": {_SELECT_RUN: {"text": "Choose a run", "color": "text"}},
+                }
+            ],
+        )
 
 
 # DQ-subset of reason codes for panel 9451 (uid bioetl-dq-v2, #11686).
@@ -796,8 +821,15 @@ def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
                 transform["options"]["renameByName"]["status_display"] = "Status"
     for panel, fields in views:
         _apply_reason_columns(panel, fields)
-    _override(summary, "Result", "displayName", "Processing")
-    _override(summary, "Status", "displayName", "Overall verdict")
+    rename = _status_panel_rename_targets(summary)
+    # displayName only when organize still emits legacy Result/Status titles.
+    if (
+        rename.get("execution_state") == "Result"
+        or rename.get("run_execution") == "Result"
+    ):
+        _override(summary, "Result", "displayName", "Processing")
+    if rename.get("verdict") == "Status" or rename.get("run_verdict") == "Status":
+        _override(summary, "Status", "displayName", "Overall verdict")
     if overview:
         _overview_selected_run_layout(p, summary)
 

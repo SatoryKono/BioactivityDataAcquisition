@@ -2637,7 +2637,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Result"
+                  "options": "Processing"
                 },
                 "properties": [
                   {
@@ -2667,7 +2667,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Status"
+                  "options": "Overall verdict"
                 },
                 "properties": [
                   {
@@ -2682,55 +2682,6 @@
                         "options": {
                           "SELECT RUN": {
                             "text": "—",
-                            "color": "text"
-                          },
-                          "НЕТ ЗАПУСКОВ": {
-                            "text": "НЕТ ЗАПУСКОВ",
-                            "color": "gray"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Rules"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Evidence"
-                },
-                "properties": [
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Open Run Explorer",
-                        "url": "/d/bioetl-run-explorer-v1/run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-                        "targetBlank": false,
-                        "includeVars": false
-                      }
-                    ]
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "SELECT RUN": {
-                            "text": "Choose a run",
                             "color": "text"
                           },
                           "НЕТ ЗАПУСКОВ": {

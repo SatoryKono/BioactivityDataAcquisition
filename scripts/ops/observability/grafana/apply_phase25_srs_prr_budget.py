@@ -685,6 +685,66 @@ def _status_donor_transforms() -> list[dict[str, Any]]:
     ]
 
 
+_STATUS_DONOR_COLUMNS = frozenset({"Processing", "Overall verdict", "Trust", "Reason"})
+_LEGACY_STATUS_OVERRIDE_REMAP = {
+    "Result": "Processing",
+    "Status": "Overall verdict",
+}
+_DEAD_STATUS_OVERRIDE_NAMES = frozenset({"Rules", "Evidence", "Result", "Status"})
+
+
+def _align_status_donor_overrides(panel: dict[str, Any]) -> None:
+    """Retarget byName overrides to post-organize column titles on status donors.
+
+    Phase 2.5 organize renames ``execution_state``→Processing and
+    ``verdict``→Overall verdict. Legacy Result/Status/Rules/Evidence matchers
+    miss the frame; Evidence is intentionally out of the donor field filter
+    (no ``evidence_completeness`` column), so drop that override rather than
+    widening the first-screen contract.
+    """
+    field_config = panel.setdefault("fieldConfig", {})
+    overrides = field_config.setdefault("overrides", [])
+    if not isinstance(overrides, list):
+        return
+    kept: list[dict[str, Any]] = []
+    seen_targets: set[str] = set()
+    for override in overrides:
+        if not isinstance(override, dict):
+            continue
+        matcher = override.get("matcher")
+        if not isinstance(matcher, dict) or matcher.get("id") != "byName":
+            kept.append(override)
+            continue
+        name = matcher.get("options")
+        if not isinstance(name, str):
+            kept.append(override)
+            continue
+        target = _LEGACY_STATUS_OVERRIDE_REMAP.get(name, name)
+        if name in _DEAD_STATUS_OVERRIDE_NAMES and target not in _STATUS_DONOR_COLUMNS:
+            continue
+        if target not in _STATUS_DONOR_COLUMNS and name not in _STATUS_DONOR_COLUMNS:
+            # Preserve unrelated overrides (if any) without inventing columns.
+            kept.append(override)
+            continue
+        if target in seen_targets:
+            continue
+        seen_targets.add(target)
+        matcher["options"] = target
+        props = override.get("properties")
+        if isinstance(props, list):
+            override["properties"] = [
+                prop
+                for prop in props
+                if not (
+                    isinstance(prop, dict)
+                    and prop.get("id") == "displayName"
+                    and prop.get("value") == target
+                )
+            ]
+        kept.append(override)
+    field_config["overrides"] = kept
+
+
 def _replace_with_handoff(
     panel: dict[str, Any],
     *,
@@ -735,7 +795,6 @@ def apply_overview(data: dict[str, Any]) -> None:
                     "domain": "Domain",
                     "status_display": "Status",
                     "reason_display": "Reason",
-                    "saved_trust": "Trust",
                 },
             },
         },
@@ -906,6 +965,7 @@ def apply_dq(data: dict[str, Any]) -> None:
     donor["datasource"] = dict(OPS)
     donor["targets"] = [_infinity_uql(_DQ_DONOR)]
     donor["transformations"] = _status_donor_transforms()
+    _align_status_donor_overrides(donor)
 
     stages = _by_id(data, 9460)
     stages["datasource"] = dict(DASH_DS)
@@ -1042,6 +1102,7 @@ def apply_incident(data: dict[str, Any]) -> None:
     donor["datasource"] = dict(OPS)
     donor["targets"] = [_infinity_uql(_INC_DONOR)]
     donor["transformations"] = _status_donor_transforms()
+    _align_status_donor_overrides(donor)
 
     for pid, frame in ((9463, "duration"), (9451, "domains")):
         panel = _by_id(data, pid)

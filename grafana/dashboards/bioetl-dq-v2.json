@@ -523,7 +523,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Result"
+              "options": "Processing"
             },
             "properties": [
               {
@@ -558,17 +558,13 @@
                     }
                   }
                 ]
-              },
-              {
-                "id": "displayName",
-                "value": "Processing"
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Status"
+              "options": "Overall verdict"
             },
             "properties": [
               {
@@ -603,10 +599,6 @@
                     }
                   }
                 ]
-              },
-              {
-                "id": "displayName",
-                "value": "Overall verdict"
               }
             ]
           },
@@ -647,10 +639,6 @@
                 }
               },
               {
-                "id": "displayName",
-                "value": "Reason"
-              },
-              {
                 "id": "links",
                 "value": []
               },
@@ -686,55 +674,6 @@
                       },
                       "archive_evidence_not_recorded": {
                         "text": "No verified archive"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Rules"
-            },
-            "properties": [
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Evidence"
-            },
-            "properties": [
-              {
-                "id": "links",
-                "value": [
-                  {
-                    "title": "Open Run Explorer",
-                    "url": "/d/bioetl-run-explorer-v1/run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-                    "targetBlank": false,
-                    "includeVars": false
-                  }
-                ]
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "SELECT RUN": {
-                        "text": "Choose a run",
-                        "color": "text"
-                      },
-                      "НЕТ ЗАПУСКОВ": {
-                        "text": "НЕТ ЗАПУСКОВ",
-                        "color": "gray"
                       }
                     }
                   }
