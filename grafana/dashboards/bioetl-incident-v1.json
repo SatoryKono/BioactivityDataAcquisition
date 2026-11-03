@@ -11877,7 +11877,7 @@
             "x": 0,
             "y": 59,
             "w": 24,
-            "h": 12
+            "h": 8
           },
           "datasource": {
             "type": "datasource",
