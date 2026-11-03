@@ -857,10 +857,8 @@ function dashboardEntryFromPayload(payload) {
     requiredTerminalPanelIds:
       uid === "bioetl-silver-reject-explorer" ? [13] : [],
     collapsedRowTitles,
-    // Only anchors are actionable links. The current workspace is a span and
-    // must not inflate the expected browser link count.
     navigationLinkCount: (panels.find(panel => panel.id === 1000)?.options?.content || '')
-      .match(/<a\b[^>]*class="bioetl-nav-link"/g)?.length || 0,
+      .match(/class="bioetl-nav-(?:link|current)"/g)?.length || 0,
   };
 }
 
