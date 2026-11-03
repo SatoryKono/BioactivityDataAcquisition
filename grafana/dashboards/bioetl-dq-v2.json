@@ -1433,12 +1433,12 @@
           "parser": "uql",
           "format": "table",
           "root_selector": "",
-          "url": "/ops/observability/pipeline-run-report?pipeline=${selected_pipeline}&run_id=${selected_run_id}",
+          "url": "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}",
           "url_options": {
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"($f := funnel; $map(['01 bronze_records','02 silver_valid_records','03 silver_filtered_out_records','04 silver_quarantined_records','06 silver_deduplicated_records','07 gold_written_records','08 gold_excluded_by_contract_records','09 gold_quarantined_records','11 gold_deduplicated_records'], function($p) { ($layerName := $contains($p, 'bronze') ? 'bronze' : ($contains($p, 'silver') ? 'silver' : 'gold'); {'parameter': $p, 'count in': $f[stage_id = $layerName].records_in}) }))\"",
+          "uql": "parse-json | jsonata \"($f := quality_evidence.funnel; $map(['01 bronze_records','02 silver_valid_records','03 silver_filtered_out_records','04 silver_quarantined_records','06 silver_deduplicated_records','07 gold_written_records','08 gold_excluded_by_contract_records','09 gold_quarantined_records','11 gold_deduplicated_records'], function($p) { ($layerName := $contains($p, 'bronze') ? 'bronze' : ($contains($p, 'silver') ? 'silver' : 'gold'); {'parameter': $p, 'count in': $f[stage_id = $layerName].records_in}) }))\"",
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
