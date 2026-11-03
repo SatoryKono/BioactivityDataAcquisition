@@ -114347,7 +114347,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 642,
+      "reports": 643,
       "security": 2
     },
     "by_status": {
@@ -114355,17 +114355,17 @@
       "Archived": 1554,
       "Canonical": 76,
       "Generated": 1066,
-      "Working": 605
+      "Working": 606
     },
     "by_surface_family": {
       "active": 751,
       "archive": 1554,
       "canonical": 76,
       "generated": 1066,
-      "working": 605
+      "working": 606
     },
     "by_tracking_state": {
-      "tracked": 4052
+      "tracked": 4053
     },
     "docs_reports_local_count": 60,
     "duplicate_group_count": 80,
@@ -114378,8 +114378,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4052,
+    "total_doc_like": 4053,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4052
+    "total_doc_like_tracked": 4053
   }
 }
