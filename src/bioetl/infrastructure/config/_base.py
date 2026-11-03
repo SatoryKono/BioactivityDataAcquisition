@@ -130,12 +130,12 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
         description="Whether salt rotation is active (BIOETL_PII_SALT_ROTATION_ACTIVE)",
     )
 
-    # Process/runtime integration settings. Environment access is centralized
-    # here so interfaces and composition callers consume typed configuration.
+    # Process/runtime settings stay centralized for typed configuration access.
     report_root: Path | None = Field(
         default=None,
         description="Run-report root override (BIOETL_REPORT_ROOT)",
     )
+    dashboard_data_root: Path | None = Field(default=None)
     enforce_report_root_marker: bool = Field(
         default=False,
         description=(
@@ -181,7 +181,7 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
         """Coerce invalid or non-positive timeout values back to the safe default."""
         return coerce_silver_dedup_timeout_seconds(value)
 
-    @field_validator("report_root", "runtime_source_id", mode="before")
+    @field_validator("report_root", "dashboard_data_root", "runtime_source_id", mode="before")  # fmt: skip
     @classmethod
     def _empty_runtime_setting_to_none(cls, value: object) -> object:
         """Normalize blank optional environment values to ``None``."""

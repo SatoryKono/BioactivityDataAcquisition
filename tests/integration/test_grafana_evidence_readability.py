@@ -54,7 +54,10 @@ def test_overview_paired_tables_have_fixed_rows_and_inspectable_reasons():
     assert summary["gridPos"]["x"] == 15
     assert summary["gridPos"]["w"] == 9
     assert summary["gridPos"]["h"] == 5
-    assert domains["gridPos"]["y"] + domains["gridPos"]["h"] == (
+    # Phase 4.3 keeps the domain table at eight rows; the identity table sits
+    # below the paired summary and may extend farther down the same window.
+    assert domains["gridPos"]["h"] == 8
+    assert domains["gridPos"]["y"] + domains["gridPos"]["h"] <= (
         panels[9300]["gridPos"]["y"] + panels[9300]["gridPos"]["h"]
     )
     assert 9301 not in panels
@@ -117,14 +120,20 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
         target = panels[9002]["targets"][0]
         assert "'run_verdict': $s.verdict" in target["root_selector"]
     assert "/selected-run-status?" in target["url"]
-    assert "presentation_summary[0]" in target["root_selector"]
-    assert "presentation_trust[0]" in target["root_selector"]
-    assert "reasons_display" in target["root_selector"]
+    root = target.get("uql") or target["root_selector"]
+    assert "presentation_summary[0]" in root
+    assert "presentation_trust[0]" in root
+    assert "reasons_display" in root
+    trust_fallback = (
+        "$r ? $r"
+        if uid == "bioetl-overview-v2"
+        else "presentation_trust[0].reasons_display ?"
+    )
+    assert root.index("$count($issues) > 0") < root.index(trust_fallback)
     # Overall != OK must not prefer Trust OK reasons (e.g. Archive verified).
     # SELECT RUN / НЕТ ЗАПУСКОВ are selection states: excluded from $issues;
     # Trust fallback allowed. Treat CR/review text as untrusted for this label.
     no_runs = "НЕТ ЗАПУСКОВ"
-    root = target["root_selector"]
     assert "$count($issues) > 0 ?" in root
     assert "verdict != 'SELECT RUN'" in root
     assert f"verdict != '{no_runs}'" in root
@@ -134,17 +143,6 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
         "presentation_trust[0].reasons_display : "
         "($issues :="
     ) not in root
-    if uid == "bioetl-overview-v2":
-        assert (
-            "$s.verdict = 'OK' or $s.verdict = 'SELECT RUN' or "
-            f"$s.verdict = '{no_runs}'"
-        ) in root
-    else:
-        assert (
-            "presentation_summary[0].verdict = 'OK' or "
-            "presentation_summary[0].verdict = 'SELECT RUN' or "
-            f"presentation_summary[0].verdict = '{no_runs}'"
-        ) in root
     views = (summary, panels[9002]) if uid == "bioetl-overview-v2" else (summary,)
     for panel in views:
         fields = next(
@@ -153,10 +151,7 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
             if t["id"] == "filterFieldsByName"
         )
         if panel is summary and uid == "bioetl-overview-v2":
-            # Phase-1 F-15: Processing / Overall verdict / Trust / Reason
-            assert "run_verdict" in fields
-            assert "run_execution" in fields
-            assert "saved_trust" in fields
+            assert {"run_execution", "saved_trust", "run_reason"}.issubset(fields)
         elif panel is not summary and uid == "bioetl-overview-v2":
             assert "status_display" in fields
         else:
@@ -195,7 +190,10 @@ def test_provider_first_window_preserves_full_fleet_with_pagination():
     assert provider["gridPos"]["y"] >= 18
     assert provider["options"]["footer"]["enablePagination"] is True
     assert not any(t.get("id") == "limit" for t in provider["transformations"])
-    assert all("run_id=${run_id}" in t["url"] for t in provider["targets"])
+    # Phase 2.5: provider evidence reuses donor 9002 via Dashboard DS.
+    assert provider["targets"][0].get("panelId") == 9002
+    donor = panels[9002]["targets"][0]
+    assert "run_id=${run_id}" in donor["url"]
     assert all("expr" not in t for t in provider["targets"])
     assert "not live fleet health" in panels[9481]["description"]
 

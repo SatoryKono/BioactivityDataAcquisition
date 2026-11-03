@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.application.services.control_plane.evidence_location import (
+from bioetl.application.services.evidence_location import (
     EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
     EvidenceLocationRegisterRequest,
     EvidenceLocationRegistrationService,
@@ -27,7 +27,7 @@ from bioetl.infrastructure.control_plane.file_evidence_location_store import (
     FileEvidenceLocationStore,
 )
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 _SOURCE = "a" * 64
 _RUN = "ac0b4e22-6a6e-5b7e-818e-106aeaf41390"

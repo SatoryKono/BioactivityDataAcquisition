@@ -1,5 +1,3 @@
-"""Shared helpers for pipeline factory-method composition."""
-
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -7,9 +5,7 @@ from typing import TypeVar
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.base_transformer import BaseTransformer
-from bioetl.application.core.base_transformer.types import (
-    TransformerDependencyContext,
-)
+from bioetl.application.core.base_transformer.types import TransformerDependencyContext
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.factories.pipeline._factory_method_control_plane import (

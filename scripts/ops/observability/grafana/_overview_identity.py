@@ -6,21 +6,34 @@ def apply_overview_identity(payload: dict) -> None:
     panels = payload["panels"]
     panels[:] = [panel for panel in panels if panel.get("id") not in {9301, 9399, 9390}]
     by_id = {panel["id"]: panel for panel in panels}
-    by_id[9002]["gridPos"].update(x=0, y=5, w=15, h=13)
+    by_id[9002]["gridPos"].update(x=0, y=5, w=15, h=8)
     by_id[9603]["gridPos"].update(x=15, y=5, w=9, h=5)
     identity = next(p for p in panels if p.get("id") == 9300)
     identity["gridPos"].update(x=15, y=10, w=9, h=8)
     for pid in (9002, 9603):
         by_id[pid]["options"]["cellHeight"] = "sm"
     # Fixed status widths must fit the existing 200% CSS budget; Reason stays flexible.
+    # F-15 titles: Processing / Overall verdict / Trust (aligned with DQ/Incident).
+    # Keep property order when width is already correct so workflow_scope stays
+    # idempotent for saved-run panel 9603 (test_workflow_scope).
     for override in by_id[9603]["fieldConfig"]["overrides"]:
         field = override["matcher"].get("options")
-        if field in {"Status", "Result", "Trust"}:
+        if field not in {"Overall verdict", "Processing", "Trust", "Status", "Result"}:
+            continue
+        props = override["properties"]
+        width_props = [prop for prop in props if prop.get("id") == "custom.width"]
+        if field in {"Processing", "Trust", "Result"}:
+            if len(width_props) == 1 and width_props[0].get("value") == 80:
+                continue
             override["properties"] = [
-                prop for prop in override["properties"] if prop["id"] != "custom.width"
+                prop for prop in props if prop.get("id") != "custom.width"
             ]
-            if field in {"Result", "Trust"}:
-                override["properties"].append({"id": "custom.width", "value": 80})
+            override["properties"].append({"id": "custom.width", "value": 80})
+            continue
+        if width_props:
+            override["properties"] = [
+                prop for prop in props if prop.get("id") != "custom.width"
+            ]
     # Provider evidence is now local. Keep the three domain actions discoverable
     # without forwarding legacy provider selectors that Overview does not own.
     links = by_id[9002]["fieldConfig"]["defaults"].setdefault("links", [])
@@ -143,7 +156,7 @@ def apply_saved_evidence_readability(payload: dict) -> None:
                     prop["value"] = [
                         {
                             "title": "Open saved run report",
-                            "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+                            "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
                             "targetBlank": True,
                         }
                     ]
@@ -347,7 +360,7 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
         gridPos={"x": 15, "y": y, "w": 9, "h": 6},
         description=(
             "SELECTED RUN · Excluded-by-contract records summed across Bronze, Silver and Gold. "
-            "Exclusion rate uses Bronze records out: below soft limit OK, at soft limit WARN, at hard limit ERROR. "
+            "Exclusion rate uses Bronze records out: below soft limit OK, at soft limit WARN, at hard limit CRIT. "
             "Limits come from pipeline configuration at dashboard generation, not historical run overrides. "
             "UNKNOWN means incomplete tracking or invalid counters; SELECT RUN requires a Run ID. "
             "Failed requests remain QUERY ERROR. Quarantined, filtered and deduplicated records "
@@ -383,11 +396,22 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
                 },
                 {
                     "type": "regex",
+                    "options": {"pattern": "^CRIT.*", "result": {"color": "red"}},
+                },
+                {
+                    "type": "regex",
                     "options": {"pattern": "^ERROR.*", "result": {"color": "red"}},
                 },
                 {
                     "type": "value",
-                    "options": {"UNKNOWN": {"text": "UNKNOWN", "color": "gray"}},
+                    "options": {
+                        "UNKNOWN": {"text": "UNKNOWN", "color": "gray"},
+                        "SELECT RUN": {"text": "SELECT RUN", "color": "gray"},
+                        "НЕТ ЗАПУСКОВ": {
+                            "text": "НЕТ ЗАПУСКОВ",
+                            "color": "gray",
+                        },
+                    },
                 },
             ],
             "color": {"mode": "fixed", "fixedColor": "gray"},
@@ -415,11 +439,12 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
                         "text": {"mode": "field", "field": field, "fixed": ""},
                         "color": {"field": "status", "fixed": "gray"},
                     },
-                    "constraint": {"horizontal": "leftright", "vertical": "center"},
-                    "placement": {"left": 8, "right": 8, "top": offset, "height": 60},
+                    # F-05 / §1.3: top/bottom halves — no overlapping ±center offsets.
+                    "constraint": {"horizontal": "leftright", "vertical": "top"},
+                    "placement": {"left": 8, "right": 8, "top": top, "height": 70},
                     "background": {"color": {"fixed": "transparent"}},
                 }
-                for field, size, offset in (("status", 48, 30), ("detail", 42, -30))
+                for field, size, top in (("status", 40, 8), ("detail", 28, 88))
             ],
         },
     }

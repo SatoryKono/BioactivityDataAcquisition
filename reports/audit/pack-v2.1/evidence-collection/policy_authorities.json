@@ -1,0 +1,22 @@
+{
+  "HTTP Transport": {
+    "owner": "configs/providers/<provider>.yaml::source",
+    "duplicates": []
+  },
+  "Pipeline / Entity": {
+    "owner": "configs/base/pipeline.yaml + configs/entities/{provider}/{entity}.yaml",
+    "duplicates": []
+  },
+  "DQ / Normalization": {
+    "owner": "P09 Owner (DQ config loader)",
+    "duplicates": []
+  },
+  "Composite / Workflow": {
+    "owner": "P10 Owner (Composite config)",
+    "duplicates": []
+  },
+  "Credentials": {
+    "owner": "provider_config.api_key_env + Settings secret fields",
+    "duplicates": []
+  }
+}

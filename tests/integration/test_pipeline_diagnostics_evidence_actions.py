@@ -69,10 +69,10 @@ def test_accounting_links_reference_exact_saved_run_only() -> None:
     links = panels[9403]["fieldConfig"]["defaults"]["links"]
     assert len(links) == 1
     assert (
-        "pipeline-run-report-artifact?pipeline=${pipeline:percentencode}"
+        "pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}"
         in links[0]["url"]
     )
-    assert "run_id=${run_id:percentencode}" in links[0]["url"]
+    assert "run_id=${selected_run_id:percentencode}" in links[0]["url"]
     untouched = deepcopy(payload)
     _correct_runtime("another-dashboard", panels)
     assert payload == untouched
@@ -101,10 +101,11 @@ def test_saved_reason_labels_and_accounting_use_current_owners() -> None:
     dq = {p["id"]: p for p in _panels(_dashboard("bioetl-dq-v2")["panels"])}
     targets = dq[9403]["targets"]
     assert any("processed-records?" in target["url"] for target in targets)
-    assert any("pipeline-run-report?" in target["url"] for target in targets)
+    assert any("selected-run-status?" in target["url"] for target in targets)
+    assert not any("pipeline-run-report?" in target["url"] for target in targets)
     for target in targets:
-        assert "pipeline=${pipeline" in target["url"]
-        assert "run_id=${run_id" in target["url"]
+        assert "pipeline=${selected_pipeline" in target["url"]
+        assert "run_id=${selected_run_id" in target["url"]
     assert "SELECTED RUN" in dq[9403]["description"]
     assert "CURRENT" not in dq[9403]["description"]
 
