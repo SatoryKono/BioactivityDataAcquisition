@@ -37,7 +37,7 @@ def apply_stage_removal_columns(payload: dict) -> None:
             uql='parse-json | jsonata "' + projection + '"',
             url=(
                 "/ops/observability/pipeline-run-report-artifact"
-                "?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}"
+                "?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}"
                 "&format=pipeline_run_report_json"
             ),
         )
@@ -182,8 +182,8 @@ def _provider_evidence_columns(panel: dict) -> None:
                         {
                             "title": "Open report",
                             "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/"
-                            "pipeline-run-report-artifact?pipeline=${pipeline:percentencode}"
-                            "&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+                            "pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}"
+                            "&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
                             "targetBlank": True,
                         }
                     ],

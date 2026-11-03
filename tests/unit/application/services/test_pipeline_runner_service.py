@@ -1020,7 +1020,7 @@ async def test_cancelled_execution_persists_snapshot_and_releases_observations(
 def test_finalize_report_records_verify_exception_without_status_change(
     service, tmp_path
 ) -> None:
-    from bioetl.application.services.control_plane.evidence_location import (
+    from bioetl.application.services.evidence_location import (
         EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
     )
     from bioetl.application.services.run_reports.observations import (

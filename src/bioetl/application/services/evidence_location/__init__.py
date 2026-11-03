@@ -7,8 +7,9 @@ Ops/Run Explorer wiring of the resolver remains RF-005.
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.evidence_location.registration import (
+from bioetl.application.services.evidence_location.registration import (
     EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
+    EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS,
     EvidenceLocationRegisterRequest,
     EvidenceLocationRegistrationOutcome,
     EvidenceLocationRegistrationService,
@@ -18,17 +19,20 @@ from bioetl.application.services.control_plane.evidence_location.registration im
     record_registration_soft_failure_observation,
     record_verify_exception_observation,
     soft_failure_exception_detail,
+    soft_invoke_evidence_location_register,
+    soft_invoke_evidence_location_verify,
 )
-from bioetl.application.services.control_plane.evidence_location.resolver import (
+from bioetl.application.services.evidence_location.resolver import (
     EvidenceLocationLegacyRootPolicy,
     EvidenceLocationResolver,
     EvidenceLocationResolveResult,
     EvidenceReadContext,
-    EvidenceReadContextOpener,
+    EvidenceReadContextFactoryProtocol,
 )
 
 __all__ = [
     "EVIDENCE_LOCATION_OBSERVATION_DOMAIN",
+    "EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS",
     "EvidenceLocationLegacyRootPolicy",
     "EvidenceLocationRegisterRequest",
     "EvidenceLocationRegistrationOutcome",
@@ -37,10 +41,12 @@ __all__ = [
     "EvidenceLocationResolver",
     "EvidenceLocationVerifyOutcome",
     "EvidenceReadContext",
-    "EvidenceReadContextOpener",
+    "EvidenceReadContextFactoryProtocol",
     "record_registration_exception_observation",
     "record_registration_outcome_observation",
     "record_registration_soft_failure_observation",
     "record_verify_exception_observation",
     "soft_failure_exception_detail",
+    "soft_invoke_evidence_location_register",
+    "soft_invoke_evidence_location_verify",
 ]
