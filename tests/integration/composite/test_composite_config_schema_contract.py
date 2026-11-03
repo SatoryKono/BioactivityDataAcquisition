@@ -16,6 +16,9 @@ import yaml
 import pytest
 from pydantic import ValidationError
 
+from bioetl.application.composite.helpers.preflight_type_and_aggregation import (
+    validate_aggregation_ordering,
+)
 from bioetl.infrastructure.schemas.composite_config import (
     CompositeConfigFileSchema,
     validate_composite_config_payload,
@@ -68,6 +71,7 @@ def test_new_composite_yaml_validates_against_strict_contract() -> None:
     assert enricher.aggregation is not None
     assert enricher.aggregation.order_by == ["entity_id"]
     assert enricher.aggregation.fields["authors"].agg == "first"
+    assert validate_aggregation_ordering(schema.to_domain()) == []
 
 
 def test_composite_yaml_without_version_is_rejected() -> None:
