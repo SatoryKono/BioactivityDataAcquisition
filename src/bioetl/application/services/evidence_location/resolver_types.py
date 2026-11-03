@@ -1,18 +1,26 @@
-"""Policy and result values for evidence-location resolution."""
+"""RF-003 evidence-location resolver protocols and result types."""
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
+from typing import Protocol, runtime_checkable
 
-from bioetl.application.ports import EvidenceReadContext
 from bioetl.domain.control_plane.run_evidence_location import (
     EvidenceLocationKind,
     EvidenceLocationLookupCode,
     EvidenceLocationLookupResult,
     RunEvidenceLocation,
 )
+
+__all__ = [
+    "EvidenceLocationLegacyRootPolicy",
+    "EvidenceLocationResolveResult",
+    "EvidenceReadContext",
+    "EvidenceReadContextFactoryProtocol",
+]
 
 
 class EvidenceLocationLegacyRootPolicy(StrEnum):
@@ -26,6 +34,42 @@ class EvidenceLocationLegacyRootPolicy(StrEnum):
 
     REQUIRE_EXPLICIT_RECORD = "require_explicit_record"
     ALLOW_STANDARD_ALIAS_BASE = "allow_standard_alias_base"
+
+
+@runtime_checkable
+class EvidenceReadContext(Protocol):
+    """Read-only control-plane view bound to one data root."""
+
+    @property
+    def data_root(self) -> Path:
+        """Absolute data root selected for this resolve."""
+        ...
+
+    def get_manifest_by_run_id(self, run_id: object) -> object | None:
+        """Load a manifest by run id from the bound root, or ``None``."""
+        ...
+
+    def get_workflow_manifest_by_run_id(self, run_id: object) -> object | None:
+        """Load a workflow manifest by run id from the bound root, or ``None``."""
+        ...
+
+    def verify_replay_objects(self, manifest: object) -> Mapping[str, bool]:
+        """Re-validate saved config / lock / Bronze bytes for ``manifest``."""
+        ...
+
+
+@runtime_checkable
+class EvidenceReadContextFactoryProtocol(Protocol):
+    """Composition-injected factory that opens stores under a trusted base."""
+
+    def open(
+        self,
+        data_root: Path,
+        *,
+        trusted_alias_base: Path,
+    ) -> EvidenceReadContext:
+        """Open read-only ports for ``data_root`` after containment checks."""
+        ...
 
 
 @dataclass(frozen=True, slots=True)

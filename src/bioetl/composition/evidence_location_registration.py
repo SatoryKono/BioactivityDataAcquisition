@@ -1,15 +1,24 @@
 """Composition-edge wiring for RF-004 evidence-location registration.
 
-Reads process env only at the composition boundary. Application services
+Reads typed Settings at the composition boundary. Application services
 receive absolute paths, alias bases, and runtime_source_id as parameters.
 """
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.evidence_location.registration import (
+from bioetl.application.services.evidence_location import (
+    EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS,
+    record_registration_exception_observation,
+    record_registration_outcome_observation,
+)
+from bioetl.application.services.execution.pipeline_runner_models import (
+    RunOptions,
+    RunResult,
+)
+from bioetl.application.services.evidence_location.registration import (
     EvidenceLocationRegisterRequest,
     EvidenceLocationRegistrationOutcome,
     EvidenceLocationRegistrationService,
@@ -18,31 +27,31 @@ from bioetl.application.services.control_plane.evidence_location.registration im
 from bioetl.application.services.run_reports.evidence_location_paths import (
     default_evidence_root_alias_registry,
 )
-from bioetl.composition.runtime_builders.run_manifest_data_roots import (
-    EvidenceLocationBindingContext,
-    relative_data_root_under_alias,
-    resolve_data_root,
-    resolve_dashboard_data_alias_base,
-    resolve_registration_runtime_source_id,
-)
 from bioetl.domain.control_plane.run_evidence_location import (
-    DEFAULT_EVIDENCE_ROOT_ALIAS,
     EvidenceLocationKind,
 )
+from bioetl.domain.control_plane.run_manifest import RunManifest
+from bioetl.domain.control_plane.workflow_manifest import WorkflowManifest
+from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.control_plane.file_evidence_location_store import (
     FileEvidenceLocationStore,
 )
 
-if TYPE_CHECKING:
-    from bioetl.domain.control_plane.run_manifest import RunManifest
-    from bioetl.domain.control_plane.workflow_manifest import WorkflowManifest
-    from bioetl.infrastructure.config.settings_api import Settings
+from bioetl.composition.control_plane_paths import (
+    EvidenceLocationBindingContext,
+    build_evidence_location_binding_context,
+    relative_data_root_under_alias,
+    resolve_dashboard_data_alias_base,
+    resolve_registration_runtime_source_id as _resolve_registration_runtime_source_id,
+)
 
 __all__ = [
     "EvidenceLocationBindingContext",
+    "bind_pipeline_run_location_verifier",
     "build_evidence_location_binding_context",
     "build_evidence_location_registration_service",
     "register_pipeline_manifest_location",
+    "register_pipeline_manifest_location_soft",
     "register_workflow_manifest_location",
     "relative_data_root_under_alias",
     "resolve_dashboard_data_alias_base",
@@ -50,57 +59,15 @@ __all__ = [
 ]
 
 
-def build_evidence_location_binding_context(
-    settings: Settings,
-) -> EvidenceLocationBindingContext:
-    """Build alias/write binding from settings + composition-edge env.
+def _repository_root() -> Path:
+    """Return the repository root; kept as a test seam for env-file lookup."""
+    return Path(__file__).resolve().parents[3]
 
-    Never remaps ``dashboard_data`` onto a foreign write root. When
-    ``BIOETL_DASHBOARD_DATA_ROOT`` is set and the write root lies outside it,
-    registration is skipped with diagnostics.
-    """
-    write_root = resolve_data_root(settings).resolve(strict=False)
-    configured_alias = resolve_dashboard_data_alias_base(
-        write_data_root=write_root, settings=settings
-    )
-    report_root = getattr(settings, "report_root", None)
-    runtime_source_id = resolve_registration_runtime_source_id(settings)
 
-    if configured_alias is None:
-        # No explicit dashboard alias: write root IS the trusted base.
-        return EvidenceLocationBindingContext(
-            write_data_root=write_root,
-            alias_base=write_root,
-            root_alias=DEFAULT_EVIDENCE_ROOT_ALIAS,
-            relative_data_root=".",
-            runtime_source_id=runtime_source_id,
-            report_root=Path(report_root) if report_root is not None else None,
-        )
-
-    relative = relative_data_root_under_alias(
-        write_data_root=write_root,
-        alias_base=configured_alias,
-    )
-    if relative is None:
-        return EvidenceLocationBindingContext(
-            write_data_root=write_root,
-            alias_base=configured_alias,
-            root_alias=DEFAULT_EVIDENCE_ROOT_ALIAS,
-            relative_data_root=".",
-            runtime_source_id=runtime_source_id,
-            report_root=Path(report_root) if report_root is not None else None,
-            skip_reason=(
-                "write_data_root_outside_dashboard_data_alias; "
-                "refusing to publish dashboard_data locator for foreign root"
-            ),
-        )
-    return EvidenceLocationBindingContext(
-        write_data_root=write_root,
-        alias_base=configured_alias,
-        root_alias=DEFAULT_EVIDENCE_ROOT_ALIAS,
-        relative_data_root=relative,
-        runtime_source_id=runtime_source_id,
-        report_root=Path(report_root) if report_root is not None else None,
+def resolve_registration_runtime_source_id(settings: Settings) -> str | None:
+    """Resolve runtime source identity using this builder's repository root."""
+    return _resolve_registration_runtime_source_id(
+        settings, repository_root=_repository_root()
     )
 
 
@@ -244,3 +211,44 @@ def verify_workflow_run_location(
         run_id=workflow_run_id,
         workflow_run_id=None,
     )
+
+
+def bind_pipeline_run_location_verifier(
+    settings: Settings,
+) -> Callable[[RunResult, RunOptions | None], None]:
+    """Return a PipelineRunnerService finalize hook closed over settings."""
+
+    def _verify(result: RunResult, options: RunOptions | None) -> None:
+        workflow_run_id = (
+            getattr(options, "workflow_run_id", None) if options is not None else None
+        )
+        verify_pipeline_run_location(
+            pipeline_name=result.pipeline_name,
+            run_id=result.run_id,
+            workflow_run_id=str(workflow_run_id) if workflow_run_id else None,
+            settings=settings,
+        )
+
+    return _verify
+
+
+def register_pipeline_manifest_location_soft(
+    *,
+    manifest: object,
+    settings: object,
+) -> None:
+    """Publish pipeline locator after durable save; never fail ETL."""
+    if not isinstance(manifest, RunManifest) or not isinstance(settings, Settings):
+        return
+    try:
+        outcome = register_pipeline_manifest_location(
+            manifest=manifest, settings=settings
+        )
+        record_registration_outcome_observation(
+            outcome,
+            kind="pipeline",
+            owner=str(manifest.pipeline_name),
+            run_id=str(manifest.run_id),
+        )
+    except EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS as exc:
+        record_registration_exception_observation(kind="pipeline", exc=exc)

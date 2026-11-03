@@ -14,7 +14,6 @@ from bioetl.domain.run_reports.workflow_reasons import (
 from bioetl.domain.run_reports.workflow_totals import (
     _as_int,
     _build_totals,
-    _copy_workflow_observations,
     _first_attribute,
     _first_present,
     _optional_int,
@@ -278,26 +277,29 @@ def _append_index_row(
     bucket["step_ids"] = [*bucket["step_ids"], row.step_id]
 
 
+def _optional_observations_copy(
+    observations: Mapping[str, object] | None,
+) -> dict[str, object] | None:
+    return None if observations is None else dict(observations)
+
+
 def build_workflow_run_report(
     *,
-    identity: Mapping[str, Any],  # Any: report/json payload shape is dynamic
-    plan_steps: Sequence[Mapping[str, Any]],  # Any: dynamic workflow plan payload
-    execution_steps: Sequence[
-        Mapping[str, Any] | object
-    ],  # Any: external workflow result payload
+    identity: Mapping[str, Any],  # Any: report payload
+    plan_steps: Sequence[Mapping[str, Any]],  # Any: plan payload
+    execution_steps: Sequence[Mapping[str, Any] | object],  # Any: result payload
     observations: Mapping[str, object] | None = None,
 ) -> WorkflowRunReport:
     """Project a deterministic workflow report with extraction rollups."""
     plan = tuple(_normalize_plan_step(step) for step in plan_steps)
     normalized = tuple(_normalize_execution(raw) for raw in execution_steps)
     execution = tuple(item.row for item in normalized)
-    planned_steps = len(plan) if plan else len(execution)
     return WorkflowRunReport(
         identity=dict(identity),
         plan_steps=plan,
         execution=execution,
-        totals=_build_totals(execution, planned=planned_steps),
+        totals=_build_totals(execution, planned=len(plan) or len(execution)),
         index=_build_index(normalized),
         reasons_rollup=build_reasons_rollup(execution),
-        observations=_copy_workflow_observations(observations),
+        observations=_optional_observations_copy(observations),
     )

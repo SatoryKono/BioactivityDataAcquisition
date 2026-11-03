@@ -12,7 +12,7 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.services.control_plane.evidence_location import (
+from bioetl.application.services.evidence_location import (
     EvidenceLocationLegacyRootPolicy,
     EvidenceLocationResolver,
 )
@@ -33,9 +33,7 @@ from bioetl.infrastructure.control_plane.file_effective_config_artifact_store im
 from bioetl.infrastructure.control_plane.file_evidence_location_store import (
     FileEvidenceLocationStore,
 )
-from bioetl.infrastructure.control_plane.file_evidence_read_context import (
-    FileEvidenceReadContextOpener,
-)
+from bioetl.composition.control_plane_paths import FileEvidenceReadContextFactory
 from bioetl.infrastructure.control_plane.file_run_manifest_store import (
     FileRunManifestStore,
 )
@@ -65,7 +63,7 @@ def _create_symlink_or_skip(
         raise
 
 
-pytestmark = pytest.mark.integration
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 _SOURCE_A = "a" * 64
 _SOURCE_B = "b" * 64
@@ -104,7 +102,7 @@ def _resolver(
     resolver = EvidenceLocationResolver(
         locations=store,
         aliases=aliases,
-        opener=FileEvidenceReadContextOpener(),
+        opener=FileEvidenceReadContextFactory(),
         legacy_root_policy=legacy,
     )
     return resolver, store, data_root
@@ -353,7 +351,7 @@ def test_explicit_dot_relative_uses_standard_root(tmp_path: Path) -> None:
 def test_context_rechecks_child_paths_before_manifest_read(tmp_path: Path) -> None:
     data_root = (tmp_path / "data").resolve()
     data_root.mkdir()
-    context = FileEvidenceReadContextOpener().open(
+    context = FileEvidenceReadContextFactory().open(
         data_root,
         trusted_alias_base=data_root,
     )
@@ -361,7 +359,7 @@ def test_context_rechecks_child_paths_before_manifest_read(tmp_path: Path) -> No
     outside.mkdir()
     _create_symlink_or_skip(data_root / "output", outside, target_is_directory=True)
 
-    with pytest.raises(EvidenceLocationInvalidError, match=r"escapes|symlink"):
+    with pytest.raises(EvidenceLocationInvalidError, match="escapes|symlink"):
         context.get_manifest_by_run_id(UUID(_RUN_A))
 
 
@@ -372,7 +370,7 @@ def test_context_rejects_symlinked_manifest_index_and_record(
 ) -> None:
     data_root = (tmp_path / "data").resolve()
     data_root.mkdir()
-    context = FileEvidenceReadContextOpener().open(
+    context = FileEvidenceReadContextFactory().open(
         data_root,
         trusted_alias_base=data_root,
     )
@@ -389,7 +387,7 @@ def test_context_rejects_symlinked_manifest_index_and_record(
         record = store_base / "manifest-a.json"
         _create_symlink_or_skip(record, outside)
 
-    with pytest.raises(EvidenceLocationInvalidError, match=r"symlink|escapes"):
+    with pytest.raises(EvidenceLocationInvalidError, match="symlink|escapes"):
         context.get_manifest_by_run_id(UUID(_RUN_A))
 
 
@@ -401,7 +399,7 @@ def test_context_rejects_symlinked_effective_config_index_and_record(
     """Outward effective-config symlinks must not verify as trusted evidence."""
     data_root = (tmp_path / "data").resolve()
     data_root.mkdir()
-    context = FileEvidenceReadContextOpener().open(
+    context = FileEvidenceReadContextFactory().open(
         data_root,
         trusted_alias_base=data_root,
     )
@@ -441,7 +439,7 @@ def test_context_rejects_symlinked_effective_config_index_and_record(
         source_refs=(),
         objects={},
     )
-    with pytest.raises(EvidenceLocationInvalidError, match=r"symlink|escapes"):
+    with pytest.raises(EvidenceLocationInvalidError, match="symlink|escapes"):
         context.verify_replay_objects(evidence)  # type: ignore[arg-type]
 
 

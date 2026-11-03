@@ -16,14 +16,6 @@ from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane.evidence_location_path_safety import (
     assert_path_within_trusted_base,
 )
-from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
-from bioetl.infrastructure.control_plane.file_run_ledger_store import FileRunLedgerStore
-from bioetl.infrastructure.control_plane.file_run_manifest_store import (
-    FileRunManifestStore,
-)
-from bioetl.infrastructure.control_plane.file_workflow_manifest_store import (
-    FileWorkflowManifestStore,
-)
 from bioetl.infrastructure.control_plane.replay_object_verifier import (
     ReplayObjectVerifier,
 )
@@ -31,7 +23,6 @@ from bioetl.infrastructure.control_plane.replay_object_verifier import (
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
         LineageStorePort,
-        MetricsPort,
         RunLedgerPort,
         RunManifestPort,
         WorkflowManifestPort,
@@ -39,7 +30,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "FileEvidenceReadContext",
-    "FileEvidenceReadContextOpener",
+    "validate_control_tree",
 ]
 
 # Shared Sonar-safe suffix for control-plane JSON records (manifest / config).
@@ -130,7 +121,7 @@ class FileEvidenceReadContext:
             raise EvidenceLocationInvalidError(
                 "data_root changed after the read context was opened"
             )
-        _validate_control_tree(
+        validate_control_tree(
             current_root,
             trusted_alias_base=self.trusted_alias_base,
         )
@@ -171,58 +162,7 @@ class FileEvidenceReadContext:
         )
 
 
-@dataclass(frozen=True, slots=True)
-class FileEvidenceReadContextOpener:
-    """Open file-backed read ports under a trusted alias base (RF-003)."""
-
-    metrics: MetricsPort | None = None
-
-    def open(
-        self,
-        data_root: Path,
-        *,
-        trusted_alias_base: Path,
-    ) -> FileEvidenceReadContext:
-        """Validate containment, then bind standard control-plane file stores."""
-        alias_base = Path(trusted_alias_base).resolve(strict=False)
-        safe_root = assert_path_within_trusted_base(
-            Path(data_root),
-            trusted_base=alias_base,
-            field_name="data_root",
-        )
-        _validate_control_tree(safe_root, trusted_alias_base=alias_base)
-        output_root = safe_root / "output" / "control"
-        verifier = ReplayObjectVerifier(
-            config_root=output_root / "effective_config",
-            lock_root=output_root / "dependency_locks",
-            bronze_root=safe_root / "output" / "bronze",
-            trusted_base=alias_base,
-        )
-        return FileEvidenceReadContext(
-            data_root=safe_root,
-            trusted_alias_base=alias_base,
-            manifest_port=FileRunManifestStore(
-                base_path=output_root / "run_manifest",
-                metrics=self.metrics,
-                replay_object_verifier=verifier,
-            ),
-            ledger_port=FileRunLedgerStore(
-                base_path=output_root / "run_ledger",
-                metrics=self.metrics,
-            ),
-            workflow_manifest_port=FileWorkflowManifestStore(
-                base_path=output_root / "workflow_manifest",
-                metrics=self.metrics,
-            ),
-            lineage_port=FileLineageStore(
-                base_path=output_root / "lineage",
-                metrics=self.metrics,
-            ),
-            replay_object_verifier=verifier,
-        )
-
-
-def _validate_control_tree(
+def validate_control_tree(
     data_root: Path,
     *,
     trusted_alias_base: Path,

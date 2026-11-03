@@ -1,4 +1,4 @@
-"""Request and result values for evidence-location registration."""
+"""RF-004 evidence-location registration request/outcome value objects."""
 
 from __future__ import annotations
 
@@ -8,6 +8,12 @@ from bioetl.domain.control_plane.run_evidence_location import (
     DEFAULT_EVIDENCE_ROOT_ALIAS,
     EvidenceLocationKind,
 )
+
+__all__ = [
+    "EvidenceLocationRegisterRequest",
+    "EvidenceLocationRegistrationOutcome",
+    "EvidenceLocationVerifyOutcome",
+]
 
 
 @dataclass(frozen=True, slots=True)

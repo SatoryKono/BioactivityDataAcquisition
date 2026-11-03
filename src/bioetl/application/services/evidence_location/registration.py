@@ -10,20 +10,23 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from bioetl.application.services.control_plane.evidence_location.registration_observations import (
+from bioetl.application.services.evidence_location.registration_models import (
+    EvidenceLocationRegisterRequest,
+    EvidenceLocationRegistrationOutcome,
+    EvidenceLocationVerifyOutcome,
+)
+from bioetl.application.services.evidence_location.registration_observations import (
     EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
-    record_location_verify_observation,
+    EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS,
     record_registration_exception_observation,
     record_registration_outcome_observation,
     record_registration_soft_failure_observation,
     record_verify_exception_observation,
     soft_failure_exception_detail,
+    soft_invoke_evidence_location_register,
+    soft_invoke_evidence_location_verify,
 )
-from bioetl.application.services.control_plane.evidence_location.registration_types import (
-    EvidenceLocationRegisterRequest,
-    EvidenceLocationRegistrationOutcome,
-    EvidenceLocationVerifyOutcome,
-)
+from bioetl.application.services.run_reports.observations import record_run_observation
 from bioetl.domain.control_plane.run_evidence_location import (
     DEFAULT_EVIDENCE_ROOT_ALIAS,
     EvidenceLocationConflictError,
@@ -41,6 +44,7 @@ from bioetl.domain.ports import (
 
 __all__ = [
     "EVIDENCE_LOCATION_OBSERVATION_DOMAIN",
+    "EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS",
     "EvidenceLocationRegisterRequest",
     "EvidenceLocationRegistrationOutcome",
     "EvidenceLocationRegistrationService",
@@ -50,6 +54,8 @@ __all__ = [
     "record_registration_soft_failure_observation",
     "record_verify_exception_observation",
     "soft_failure_exception_detail",
+    "soft_invoke_evidence_location_register",
+    "soft_invoke_evidence_location_verify",
 ]
 
 
@@ -222,19 +228,22 @@ class EvidenceLocationRegistrationService:
     ) -> EvidenceLocationVerifyOutcome:
         """Verify and publish an Evidence Location observation (soft)."""
         outcome = self.verify(request)
-        record_location_verify_observation(
+        record_run_observation(
+            EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
             verdict=outcome.verdict,
-            code=outcome.code,
-            kind=(
-                request.kind.value
-                if isinstance(request.kind, EvidenceLocationKind)
-                else request.kind
-            ),
-            owner=request.owner,
-            run_id=request.run_id,
-            workflow_run_id=request.workflow_run_id,
-            root_alias=request.root_alias,
-            relative_data_root=request.relative_data_root,
-            detail=outcome.detail,
+            reason=outcome.code,
+            facts={
+                "kind": str(
+                    request.kind.value
+                    if isinstance(request.kind, EvidenceLocationKind)
+                    else request.kind
+                ),
+                "owner": request.owner,
+                "run_id": request.run_id,
+                "workflow_run_id": request.workflow_run_id,
+                "root_alias": request.root_alias,
+                "relative_data_root": request.relative_data_root,
+                "detail": outcome.detail,
+            },
         )
         return outcome

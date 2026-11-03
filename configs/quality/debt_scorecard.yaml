@@ -498,7 +498,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 49
-      total_loc: 6467
+      total_loc: 6459
       files_ge_250_loc: 0
       helper_function_ratio: 0.288
       max_internal_fan_in: 2
@@ -525,7 +525,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 32
-      total_loc: 3855
+      total_loc: 3853
       files_ge_250_loc: 0
       helper_function_ratio: 0.358
       max_internal_fan_in: 2
@@ -559,9 +559,10 @@ hotspot_family_ratchets:
       max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
       status: reduced_2026-09-16_issue_10468_coupling_closeout
-      next_action: '2026-09-16 #10468/#10472-#10475: control-plane max_internal_fan_in 2->1 and files
-        128->113 with files_ge_250_loc remaining 0. Bounded-growth budgets stay 0 files_ge_250_loc and
-        max_internal_fan_in 2; no technical-debt budget is increased.
+      next_action: '2026-11-03 #12728: refresh measured control-plane census after evidence-location
+        split (files 130->137, LOC 15443->16486) with files_ge_250_loc remaining 0 and max_internal_fan_in
+        1. Bounded-growth budgets stay 0 files_ge_250_loc and max_internal_fan_in 2; no technical-debt
+        budget is increased.
 
         '
   - name: composition_runtime_builders
@@ -579,8 +580,8 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 55
-      total_loc: 6587
+      files: 54
+      total_loc: 6583
       files_ge_250_loc: 0
       helper_function_ratio: 0.345
       max_internal_fan_in: 2
@@ -681,7 +682,7 @@ oversized_source_module_inventory:
     target_split: 'remaining: further split checkpoint policy evaluation paths only; diagnostic payload
       assembly already extracted under #5031 (checkpoint_compatibility_results.py)'
   - path: src/bioetl/infrastructure/config/_base.py
-    lines: 234
+    lines: 228
     owner: '@bioetl-config'
     target_split: separate config discovery, validation, and environment resolution helpers
   - path: src/bioetl/infrastructure/control_plane/file_run_ledger_store.py
@@ -925,8 +926,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration updates the tracked
         debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 2
-      max_count: 2
+      current_count: 1
+      max_count: 1
       linked_issue: '#6791'
       owner: '@bioetl-architecture'
       rationale: 'Reviewed 2026-08-25, rebaselined 2026-09-19: two fully classified zero-import surfaces
@@ -935,8 +936,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh updates the classified
         candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 2
-      max_count: 2
+      current_count: 1
+      max_count: 1
       linked_issue: '#6791'
       owner: '@bioetl-architecture'
       rationale: Both repo-wide zero-import candidates remain covered by explicit disposition ledger entries.
@@ -950,8 +951,8 @@ retirement_governance_metrics:
       rationale: All repo-wide zero-import candidates are now classified.
       ratchet_policy: Zero-budget fail-fast metric.
     repo_wide_owner_test_anchored_candidate_count:
-      current_count: 2
-      max_count: 2
+      current_count: 1
+      max_count: 1
       linked_issue: '#6353'
       owner: '@bioetl-architecture'
       rationale: Both repo-wide zero-import candidates are anchored by explicit owner-test or runtime-reachability

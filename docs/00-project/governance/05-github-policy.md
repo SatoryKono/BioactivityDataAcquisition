@@ -262,8 +262,7 @@ double-run it. Thresholds stay 70/60/60/60.
 | Release | `release.yml` | `workflow_dispatch` only (YAML only; `release` event removed) | optional | `disabled_manually` | `keep-disabled` |
 
 `release.yml` stays **KEEP-DISABLED** for the removed `release` event and for
-production PyPI / GitHub Release asset jobs. YAML still **Build and test on
-Python 3.13**. The only remaining publish job is manual TestPyPI
+production PyPI / GitHub Release asset jobs. YAML still **Build and test on Python 3.13**. The only remaining publish job is manual TestPyPI
 (`publish-testpypi`) when that optional lane is intentionally run with
 `workflow_dispatch` and `dry_run == false` — TestPyPI only, not a substitute
 for PyPI. Unreachable `publish-pypi` / `create-github-release-assets` jobs

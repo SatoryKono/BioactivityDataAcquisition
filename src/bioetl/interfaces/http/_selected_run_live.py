@@ -100,11 +100,17 @@ def _ledger_diagnostics(
 
 
 def scope_matches(payload: dict[str, object], query: dict[str, str]) -> bool:
-    """A changed pipeline/workflow/run-type must never silently retain a foreign run."""
+    """A changed pipeline/workflow/run-type must never silently retain a foreign run.
+
+    Selector values are stripped like ``selected_run_status_key`` so spaced
+    query encodings (``run_type=%20foo``) cannot share a cache key with a
+    mismatch verdict for the trimmed selector.
+    """
     for selector, field in (("run_type", "run_type"), ("workflow", "workflow_id")):
-        selection = query.get(selector, "")
+        selection = str(query.get(selector, "") or "").strip()
         if selection in {"", "All", "all", ".*", "$__all", "__all", "*"}:
             continue
-        if payload.get(field) not in selection.split(","):
+        allowed = [part.strip() for part in selection.split(",") if part.strip()]
+        if payload.get(field) not in allowed:
             return False
     return True

@@ -4,13 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.evidence_location.registration import (
-    record_registration_exception_observation,
-    record_registration_outcome_observation,
-)
 from bioetl.application.services.control_plane.ledger.service import RunLedgerService
-from bioetl.composition.runtime_builders.evidence_location_registration import (
-    register_pipeline_manifest_location,
+from bioetl.composition.evidence_location_registration import (
+    register_pipeline_manifest_location_soft,
 )
 from bioetl.composition.runtime_builders.run_manifest_support import (
     ManifestControlPlaneRefs as ManifestControlPlaneRefs,
@@ -22,11 +18,11 @@ from bioetl.composition.runtime_builders.run_manifest_support import (
 )
 from bioetl.composition.runtime_builders._run_manifest_creation_support import (
     build_manifest_create_request,
+    create_ledger_service,
     emit_replay_reconstructability_metric,
 )
 from bioetl.composition.runtime_builders._run_manifest_creation_support_helpers import (
     RunManifestCreateRequestInputs,
-    maybe_create_ledger_service,
 )
 from bioetl.composition.runtime_builders._run_manifest_publication_support import (
     create_manifest_record,
@@ -42,8 +38,6 @@ from bioetl.composition.runtime_builders._runner_control_plane_policy import (
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
-from bioetl.domain.control_plane.run_manifest import RunManifest
-from bioetl.infrastructure.config.settings_api import Settings
 
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.manifest.service import (
@@ -110,7 +104,7 @@ def _publish_manifest_and_refs(
 ) -> tuple[ManifestControlPlaneRefs, RunLedgerService | None]:
     """Persist the manifest record and translate it into runner control-plane refs."""
     manifest_store = create_manifest_store(inputs)
-    ledger_service = maybe_create_ledger_service(
+    ledger_service = _maybe_create_ledger_service(
         ledger_enabled=ledger_enabled,
         inputs=inputs,
         ctx=ctx,
@@ -139,7 +133,9 @@ def _publish_manifest_and_refs(
         manifest_create_request=manifest_create_request,
         ledger_service=ledger_service,
     )
-    _register_evidence_location_soft(manifest=manifest, settings=inputs.settings)
+    register_pipeline_manifest_location_soft(
+        manifest=manifest, settings=inputs.settings
+    )
     if not require_before_persist:
         _require_cached_bronze_snapshots(
             inputs=inputs, manifest_context=manifest_context
@@ -153,34 +149,6 @@ def _publish_manifest_and_refs(
         ),
     )
     return control_plane_refs, ledger_service
-
-
-def _register_evidence_location_soft(
-    *,
-    manifest: object,
-    settings: object,
-) -> None:
-    """RF-004: publish locator after durable manifest save (never fail ETL)."""
-    try:
-        if not isinstance(manifest, RunManifest):
-            return
-        if not isinstance(settings, Settings):
-            return
-        outcome = register_pipeline_manifest_location(
-            manifest=manifest, settings=settings
-        )
-        record_registration_outcome_observation(
-            outcome,
-            kind="pipeline",
-            owner=str(manifest.pipeline_name),
-            run_id=str(manifest.run_id),
-        )
-    except (OSError, RuntimeError, ValueError) as exc:
-        # Registration is additive diagnostics; processing success is independent.
-        try:
-            record_registration_exception_observation(kind="pipeline", exc=exc)
-        except (OSError, RuntimeError, ValueError):
-            return
 
 
 def _strict_cached_bronze_require(
@@ -240,3 +208,14 @@ def _build_manifest_create_request(
         )
     )
     return request
+
+
+def _maybe_create_ledger_service(
+    *,
+    ledger_enabled: bool,
+    inputs: RunnerInputs,
+    ctx: PipelineRunContext,
+) -> RunLedgerService | None:
+    if not ledger_enabled:
+        return None
+    return create_ledger_service(inputs, ctx)

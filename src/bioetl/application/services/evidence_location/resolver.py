@@ -10,13 +10,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from uuid import UUID
 
-from bioetl.application.ports import (
-    EvidenceReadContext,
-    EvidenceReadContextOpenerProtocol,
-)
-from bioetl.application.services.control_plane.evidence_location.resolver_types import (
+from bioetl.application.services.evidence_location.resolver_types import (
     EvidenceLocationLegacyRootPolicy,
     EvidenceLocationResolveResult,
+    EvidenceReadContext,
+    EvidenceReadContextFactoryProtocol,
 )
 from bioetl.application.services.run_reports.evidence_location_paths import (
     EvidenceRootAliasRegistry,
@@ -36,10 +34,8 @@ __all__ = [
     "EvidenceLocationResolveResult",
     "EvidenceLocationResolver",
     "EvidenceReadContext",
-    "EvidenceReadContextOpener",
+    "EvidenceReadContextFactoryProtocol",
 ]
-
-EvidenceReadContextOpener = EvidenceReadContextOpenerProtocol
 
 
 def _is_workflow_kind(kind: EvidenceLocationKind | str | None) -> bool:
@@ -57,7 +53,7 @@ class EvidenceLocationResolver:
 
     locations: RunEvidenceLocationReadPort
     aliases: EvidenceRootAliasRegistry
-    opener: EvidenceReadContextOpenerProtocol
+    opener: EvidenceReadContextFactoryProtocol
     legacy_root_policy: EvidenceLocationLegacyRootPolicy = (
         EvidenceLocationLegacyRootPolicy.ALLOW_STANDARD_ALIAS_BASE
     )

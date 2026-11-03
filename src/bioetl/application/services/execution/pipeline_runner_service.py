@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import asyncio
 
-from bioetl.application.services.control_plane.evidence_location import (
-    record_verify_exception_observation,
+from bioetl.application.services.evidence_location import (
+    soft_invoke_evidence_location_verify,
 )
 from bioetl.application.services.run_reports.control_plane_snapshot import (
     archive_run_completion,
@@ -143,8 +143,10 @@ class PipelineRunnerService:
             options=effective_options,
             started_at=started_at,
         )
-        run_logger = self.logger.bind(**context.log_correlation_fields())
-        _log_pipeline_run_start(run_logger=run_logger, options=effective_options)
+        run_logger = self._create_run_logger(
+            context=context,
+            options=effective_options,
+        )
         await _record_pipeline_audit_event(
             self.audit,
             event_name="PipelineRunStarted",
@@ -280,6 +282,21 @@ class PipelineRunnerService:
         available = self.runner_factory.list_pipelines()
         raise PipelineNotFoundError(pipeline_name, available)
 
+    def _create_run_logger(
+        self,
+        *,
+        context: PipelineRunContext,
+        options: RunOptions,
+    ) -> LoggerPort:
+        run_logger = self.logger.bind(**context.log_correlation_fields())
+        run_logger.info(
+            "Starting pipeline run",
+            run_type=options.run_type,
+            dry_run=options.dry_run,
+            limit=options.limit,
+        )
+        return run_logger
+
     def list_pipelines(self) -> list[str]:
         """Return registered pipeline names in sorted order."""
         return self.runner_factory.list_pipelines()
@@ -354,45 +371,40 @@ class PipelineRunnerService:
             write_report=False,
             store=self.report_store,
         )
-        return self._finalize_report(result, options)
+        return _finalize_pipeline_report(self, result, options)
 
     def _finalize_report(
-        self, result: RunResult, options: RunOptions | None
+        self,
+        result: RunResult,
+        options: RunOptions | None,
     ) -> RunResult:
-        """Capture control-plane evidence, persist the run report, then archive."""
-        capture_run_completion(self.capture_control_plane, result, options)
-        # RF-004: record Evidence Location observation BEFORE report snapshot.
-        if self.evidence_location_verify is not None:
-            try:
-                self.evidence_location_verify(result, options)
-            except (OSError, RuntimeError, ValueError) as exc:
-                # Consistency diagnostics must not mask processing success.
-                record_verify_exception_observation(
-                    kind="pipeline",
-                    owner=str(result.pipeline_name),
-                    run_id=str(result.run_id),
-                    exc=exc,
-                )
-        finalized = finalize_pipeline_run_report(
-            result=result,
-            options=options,
-            report_root=self.report_root,
-            store=self.report_store,
-        )
-        self._archive_control_plane(finalized, options)
-        return finalized
-
-    def _archive_control_plane(
-        self, result: RunResult, options: RunOptions | None
-    ) -> None:
-        archive_run_completion(self.archive_control_plane, result, options)
+        """Finalize and persist a run report from all terminal paths."""
+        return _finalize_pipeline_report(self, result, options)
 
 
-def _log_pipeline_run_start(*, run_logger: LoggerPort, options: RunOptions) -> None:
-    """Emit the stable start event through the run-bound logger."""
-    run_logger.info(
-        "Starting pipeline run",
-        run_type=options.run_type,
-        dry_run=options.dry_run,
-        limit=options.limit,
+def _finalize_pipeline_report(
+    runner: PipelineRunnerService,
+    result: RunResult,
+    options: RunOptions | None,
+) -> RunResult:
+    """Capture control-plane evidence, persist the run report, then archive."""
+    capture_run_completion(runner.capture_control_plane, result, options)
+    evidence_location_verify = runner.evidence_location_verify
+    soft_invoke_evidence_location_verify(
+        (
+            None
+            if evidence_location_verify is None
+            else (lambda: evidence_location_verify(result, options))
+        ),
+        kind="pipeline",
+        owner=str(result.pipeline_name),
+        run_id=str(result.run_id),
     )
+    finalized = finalize_pipeline_run_report(
+        result=result,
+        options=options,
+        report_root=runner.report_root,
+        store=runner.report_store,
+    )
+    archive_run_completion(runner.archive_control_plane, finalized, options)
+    return finalized

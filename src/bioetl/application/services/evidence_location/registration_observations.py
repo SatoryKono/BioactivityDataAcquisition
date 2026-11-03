@@ -1,21 +1,40 @@
-"""Soft diagnostic observations for Evidence Location registration."""
+"""Soft RF-004/RF-003 evidence-location observation helpers."""
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from bioetl.application.services.run_reports.observations import record_run_observation
+from bioetl.domain.control_plane.run_evidence_location import (
+    EvidenceLocationConflictError,
+    EvidenceLocationInvalidError,
+)
 
 __all__ = [
     "EVIDENCE_LOCATION_OBSERVATION_DOMAIN",
-    "record_location_verify_observation",
+    "EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS",
     "record_registration_exception_observation",
     "record_registration_outcome_observation",
     "record_registration_soft_failure_observation",
     "record_verify_exception_observation",
     "soft_failure_exception_detail",
+    "soft_invoke_evidence_location_register",
+    "soft_invoke_evidence_location_verify",
 ]
 
 EVIDENCE_LOCATION_OBSERVATION_DOMAIN = "Evidence Location"
+
 _REGISTRATION_SUCCESS_CODES = frozenset({"registered", "already_identical"})
+
+# Soft RF-004/RF-003 callbacks must not mask processing success.
+EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS: tuple[type[BaseException], ...] = (
+    EvidenceLocationConflictError,
+    EvidenceLocationInvalidError,
+    OSError,
+    RuntimeError,
+    TypeError,
+    ValueError,
+)
 
 
 def soft_failure_exception_detail(exc: BaseException) -> str:
@@ -29,7 +48,12 @@ def record_registration_soft_failure_observation(
     detail: str | None = None,
     facts: dict[str, object] | None = None,
 ) -> None:
-    """Publish conflict/error/exception diagnostics without mutating status."""
+    """Publish conflict/error/exception diagnostics without mutating status.
+
+    Success and explicit skip codes stay silent. Soft-register callers use this
+    so RF-004 failures remain visible on the Evidence Location observation
+    channel while processing_status stays untouched.
+    """
     if code in _REGISTRATION_SUCCESS_CODES or code.startswith("skipped_"):
         return
     payload = dict(facts or {})
@@ -56,6 +80,47 @@ def record_verify_exception_observation(
         detail=soft_failure_exception_detail(exc),
         facts={"kind": kind, "owner": owner, "run_id": run_id},
     )
+
+
+def soft_invoke_evidence_location_verify(
+    callback: Callable[[], object] | None,
+    *,
+    kind: str,
+    owner: str,
+    run_id: str,
+) -> None:
+    """Run finalize verify; soft-fail so processing success stays intact."""
+    if callback is None:
+        return
+    try:
+        callback()
+    except EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS as exc:
+        record_verify_exception_observation(
+            kind=kind, owner=owner, run_id=run_id, exc=exc
+        )
+
+
+def soft_invoke_evidence_location_register(
+    callback: Callable[[], object] | None,
+    *,
+    kind: str,
+    owner: str,
+    run_id: str,
+) -> None:
+    """Run post-save register; soft-fail so processing success stays intact."""
+    if callback is None:
+        return
+    try:
+        outcome = callback()
+    except EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS as exc:
+        record_registration_exception_observation(
+            kind=kind, owner=owner, run_id=run_id, exc=exc
+        )
+        return
+    if outcome is not None:
+        record_registration_outcome_observation(
+            outcome, kind=kind, owner=owner, run_id=run_id
+        )
 
 
 def record_registration_exception_observation(
@@ -97,34 +162,5 @@ def record_registration_outcome_observation(
             "owner": owner,
             "run_id": run_id,
             "revision": getattr(outcome, "revision", None),
-        },
-    )
-
-
-def record_location_verify_observation(
-    *,
-    verdict: str,
-    code: str,
-    kind: str,
-    owner: str,
-    run_id: str,
-    workflow_run_id: str | None,
-    root_alias: str,
-    relative_data_root: str,
-    detail: str | None,
-) -> None:
-    """Publish verification outcome facts without changing run status."""
-    record_run_observation(
-        EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
-        verdict=verdict,
-        reason=code,
-        facts={
-            "kind": kind,
-            "owner": owner,
-            "run_id": run_id,
-            "workflow_run_id": workflow_run_id,
-            "root_alias": root_alias,
-            "relative_data_root": relative_data_root,
-            "detail": detail,
         },
     )
