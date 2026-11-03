@@ -363,8 +363,6 @@ nav:
               - "Selector Resolution": 03-guides/dashboards/v3.0/template/selector-resolution-contract.md
               - "Panel Contract": 03-guides/dashboards/v3.0/template/panel-contract.md
   - Reference:
-      - Reports:
-          - "GitHub Settings Inventory": reports/audit/github_settings_inventory.md
       - "Reference Index": 04-reference/index.md
       - CLI: 04-reference/cli.md
       - "Workflow Catalog": 04-reference/workflow-catalog.md
