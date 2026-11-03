@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "e177bff3e136f39f8246fe561e7f6fa0075de31b",
+  "source_ref": "e177bff3e136f39f8246fe561e7f6fa0075de31b",
+  "source_reviews": {
+    "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py": "PR #12721/#12731 type-ignore justifications only (tracked(#12721) / inline # Any:). No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/application/core/_batch_writer_gold_support.py": "PR #12721/#12731 type-ignore justifications only (tracked(#12721) / inline # Any:). No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/application/pipelines/common/base_publication_transformer.py": "PR #12721/#12731 type-ignore justifications only (tracked(#12721) / inline # Any:). No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/application/pipelines/common/publication_transformer_records.py": "PR #12721/#12731 type-ignore justifications only (tracked(#12721) / inline # Any:). No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/application/pipelines/pubmed/extractors/identifier.py": "PR #12721/#12731 type-ignore justifications only (tracked(#12721) / inline # Any:). No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/application/ports/pipeline.py": "PR #12721/#12731 type-ignore justifications only (tracked(#12721) / inline # Any:). No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/composition/factories/services/port_factories.py": "PR #12721/#12731 type-ignore justifications only (tracked(#12721) / inline # Any:). No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py": "PR #12721/#12731 type-ignore justifications only (tracked(#12721) / inline # Any:). No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/domain/control_plane/run_evidence_location.py": "PR #12721/#12731 type-ignore justifications only (tracked(#12721) / inline # Any:). No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/infrastructure/adapters/common/fallback_policy_mixin.py": "PR #12721/#12731 type-ignore justifications only (tracked(#12721) / inline # Any:). No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/infrastructure/adapters/http/request_timing.py": "PR #12721/#12731 type-ignore justifications only (tracked(#12721) / inline # Any:). No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/infrastructure/adapters/pubchem/client.py": "PR #12721/#12731 type-ignore justifications only (tracked(#12721) / inline # Any:). No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/infrastructure/config/enum_file_loader.py": "PR #12721/#12731 type-ignore justifications only (tracked(#12721) / inline # Any:). No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/infrastructure/schemas/filter_config.py": "PR #12721/#12731 type-ignore justifications only (tracked(#12721) / inline # Any:). No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py": "PR #12721/#12731 type-ignore justifications only (tracked(#12721) / inline # Any:). No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/infrastructure/storage/gold/writer_metrics.py": "PR #12721/#12731 type-ignore justifications only (tracked(#12721) / inline # Any:). No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "reference_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
