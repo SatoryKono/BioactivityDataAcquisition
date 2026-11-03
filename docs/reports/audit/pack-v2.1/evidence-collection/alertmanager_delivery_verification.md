@@ -9,7 +9,7 @@ This report provides runtime confirmation of Alertmanager delivery and notificat
 | Группа → доставлено/нет | Да. Тестовые срабатывания для трех групп успешно доставлены в Alertmanager. (См. таблицу ниже) |
 | Время | Зафиксировано время доставки: 2026-11-03T18:38:43.497Z. |
 | Получатель | Зафиксирован получатель: `default` (согласно конфигурации `grafana/alertmanager.yml`). |
-| Недоставки заведены отдельными дефектами | Недостаток не обнаружено, все три целевые группы успешно доставляются. |
+| Недоставки заведены отдельными дефектами | Заведен дефект `P14-OBS-003`: маршрут Prometheus → Alertmanager не упражнён, получатель default без интеграций, происхождение timestamp не зафиксировано. |
 
 ## 2. Test Execution Details
 
@@ -43,4 +43,4 @@ The active alerts were successfully queried from Alertmanager (`/api/v2/alerts`)
 
 ## 3. Conclusion
 
-The alert delivery surface for control-plane observability works as expected. The alerts correctly include their configured runbook URLs and reach the default receiver. The `NOT_VERIFIABLE` status in audit `pack-v2.1/P14` can be resolved as verified.
+Хотя API Alertmanager принимает алерты, полный маршрут от вычисления правил в Prometheus до доставки через Alertmanager получателю с настроенной интеграцией не был подтвержден. Кроме того, происхождение timestamp не зафиксировано первичным ответом. Статус `NOT_VERIFIABLE` в отчете P14 возвращен, и заведен соответствующий дефект (`P14-OBS-003`).
