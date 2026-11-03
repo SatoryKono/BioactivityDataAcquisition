@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.composition.runtime_builders._run_manifest_sink_policy import (
+from bioetl.domain.control_plane.run_manifest_sink_policy import (
     validate_reproducible_sink_modes,
 )
 from bioetl.composition.services.versioning import (

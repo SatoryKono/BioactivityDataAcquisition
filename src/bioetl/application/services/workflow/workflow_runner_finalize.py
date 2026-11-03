@@ -10,8 +10,8 @@ from time import perf_counter
 from typing import TYPE_CHECKING
 
 from bioetl.application.runtime_clock import current_utc_time
-from bioetl.application.services.control_plane.evidence_location import (
-    record_verify_exception_observation,
+from bioetl.application.services.evidence_location import (
+    soft_invoke_evidence_location_verify,
 )
 from bioetl.application.services.run_reports.observations import (
     bind_run_observations_if_unbound,
@@ -81,10 +81,9 @@ def finalize_workflow_run_result(
         status=context.state.status,
         context_labels=context.workflow_context_labels,
     )
-    result = workflow_result_from_state(context.config.name, context.state)
     identified_result = _require_workflow_result(
         replace(
-            result,
+            workflow_result_from_state(context.config.name, context.state),
             workflow_run_id=context.workflow_run_id,
             manifest_id=context.manifest_id,
             execution_fingerprint=context.execution_fingerprint,
@@ -97,17 +96,13 @@ def finalize_workflow_run_result(
     # RF-004: reuse outer prepare→report scope when present; else bind locally.
     observation_token = bind_run_observations_if_unbound()
     try:
-        if context.evidence_location_verify is not None:
-            try:
-                context.evidence_location_verify(identified_result)
-            except Exception as exc:
-                # Consistency diagnostics must not mask processing success.
-                record_verify_exception_observation(
-                    kind="workflow",
-                    owner=str(identified_result.workflow_name),
-                    run_id=str(identified_result.workflow_run_id or ""),
-                    exc=exc,
-                )
+        verify = context.evidence_location_verify
+        soft_invoke_evidence_location_verify(
+            None if verify is None else (lambda: verify(identified_result)),
+            kind="workflow",
+            owner=str(identified_result.workflow_name),
+            run_id=str(identified_result.workflow_run_id or ""),
+        )
         reported = attach_workflow_run_report(
             config=context.config,
             result=identified_result,

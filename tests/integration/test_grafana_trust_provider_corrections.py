@@ -30,6 +30,26 @@ def test_retention_does_not_repeat_hash_verification_for_header():
     )
 
 
+def test_retention_unavailable_mappings_use_theme_text_color():
+    dashboard = _dashboard("bioetl-control-plane-v1")
+    apply_corrections(dashboard)
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9416)
+    for field in ("reason", "Reason"):
+        override = next(
+            item
+            for item in panel["fieldConfig"]["overrides"]
+            if item["matcher"].get("options") == field
+        )
+        mappings = next(
+            prop["value"] for prop in override["properties"] if prop["id"] == "mappings"
+        )
+        unavailable = next(
+            item["options"] for item in mappings if item["type"] == "value"
+        )
+        assert unavailable["retention_plan_read_error"]["color"] == "text"
+        assert unavailable["checkpoint_scope_manifest_parse_error"]["color"] == "text"
+
+
 def test_provider_status_uses_filtered_vectors_in_severity_order():
     """Saved provider check stays categorical and never fabricates a healthy fleet."""
     dashboard = _dashboard("bioetl-overview-v2")
@@ -38,6 +58,14 @@ def test_provider_status_uses_filtered_vectors_in_severity_order():
     )
     assert all("expr" not in target for target in panel["targets"])
     assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    defaults = panel["fieldConfig"]["defaults"]
+    threshold_colors = [step.get("color") for step in defaults["thresholds"]["steps"]]
+    assert "green" not in threshold_colors
+    assert threshold_colors[0] in {"text", "gray", "#555555"}
+    value_maps = next(
+        m["options"] for m in defaults["mappings"] if m.get("type") == "value"
+    )
+    assert value_maps["QUERY ERROR"]["color"] == "red"
     description = panel["description"]
     assert "not live fleet health" in description
     assert "QUERY ERROR" in description

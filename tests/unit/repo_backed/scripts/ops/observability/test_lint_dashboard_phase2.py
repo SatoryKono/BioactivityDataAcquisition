@@ -23,7 +23,7 @@ from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
 )
 
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.repo_backed
 
 
 def test_prr_only_stage_fields_are_not_emitted_by_shared_donor() -> None:

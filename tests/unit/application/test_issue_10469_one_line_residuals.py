@@ -409,7 +409,7 @@ async def test_workflow_runner_skips_missing_topological_step() -> None:
             debug_export_dir=None,
         ),
     )
-    final_result = object()
+    final_result = SimpleNamespace(workflow_name="workflow", workflow_run_id=None)
     with (
         patch.object(WorkflowRunnerService, "record_expected_pipeline_metrics"),
         patch(

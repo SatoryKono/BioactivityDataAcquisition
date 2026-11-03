@@ -7,8 +7,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.evidence_location import (
-    record_verify_exception_observation,
+from bioetl.application.services.evidence_location import (
+    soft_invoke_evidence_location_verify,
 )
 from bioetl.application.services.execution._pipeline_runner_support import (
     build_pipeline_run_result,
@@ -97,17 +97,16 @@ def finalize_pipeline_service_report(
     """Capture control-plane evidence, persist the run report, then archive."""
     capture_run_completion(capture_control_plane, result, options)
     # RF-004: record Evidence Location observation BEFORE report snapshot.
-    if evidence_location_verify is not None:
-        try:
-            evidence_location_verify(result, options)
-        except Exception as exc:
-            # Consistency diagnostics must not mask processing success.
-            record_verify_exception_observation(
-                kind="pipeline",
-                owner=str(result.pipeline_name),
-                run_id=str(result.run_id),
-                exc=exc,
-            )
+    soft_invoke_evidence_location_verify(
+        (
+            None
+            if evidence_location_verify is None
+            else (lambda: evidence_location_verify(result, options))
+        ),
+        kind="pipeline",
+        owner=str(result.pipeline_name),
+        run_id=str(result.run_id),
+    )
     finalized = finalize_pipeline_run_report(
         result=result,
         options=options,
