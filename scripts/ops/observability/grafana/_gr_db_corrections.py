@@ -13,6 +13,7 @@ _HIDDEN = "custom.hidden"
 _INSPECT = "custom.inspect"
 _WIDTH = "custom.width"
 _CELL = "custom.cellOptions"
+_COUNT_IN = "count in"
 
 
 def _panels(items: list[dict[str, Any]]):
@@ -289,6 +290,38 @@ def _stamp_scope_copy(uid: str, panels: dict[int, dict[str, Any]]) -> None:
 def _correct_incident(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     if uid != "bioetl-incident-v1":
         return
+    _correct_incident_stat_thresholds(panels)
+    _correct_incident_table_no_value(panels)
+    _correct_incident_table_widths(panels)
+    status = panels.get(9401)
+    if isinstance(status, dict):
+        _ensure_open_run_overview_link(status)
+
+
+_INCIDENT_GREEN_STAT_TITLES = {
+    "Monitor Runtime Error Rate",
+    "Monitor Worst Stage Lag",
+    "Monitor Active Blocker Count",
+    "Monitor Manifest (30m)",
+    "Monitor Ledger (30m)",
+}
+
+
+def _correct_incident_stat_thresholds(panels: dict[int, dict[str, Any]]) -> None:
+    for panel in panels.values():
+        if panel.get("title") not in _INCIDENT_GREEN_STAT_TITLES:
+            continue
+        steps = (
+            panel.get("fieldConfig", {})
+            .get("defaults", {})
+            .get("thresholds", {})
+            .get("steps", [])
+        )
+        if steps and steps[0].get("value") is None:
+            steps[0]["color"] = "green"
+
+
+def _correct_incident_table_no_value(panels: dict[int, dict[str, Any]]) -> None:
     for panel in panels.values():
         if panel.get("type") != "table":
             continue
@@ -296,6 +329,9 @@ def _correct_incident(uid: str, panels: dict[int, dict[str, Any]]) -> None:
         if "EMPTY DOMAIN" in defaults.get("noValue", ""):
             # Grafana applies noValue to missing cells inside non-empty rows too.
             defaults["noValue"] = "UNKNOWN"
+
+
+def _correct_incident_table_widths(panels: dict[int, dict[str, Any]]) -> None:
     for panel_id in (2005, 22005):
         for field in ("instance", "job"):
             _override(panels[panel_id], field, "noValue", "NOT PROVIDED")
@@ -306,27 +342,28 @@ def _correct_incident(uid: str, panels: dict[int, dict[str, Any]]) -> None:
             ("job", 185),
         ):
             _override(panels[panel_id], field, _WIDTH, width)
-    status = panels.get(9401)
-    if isinstance(status, dict):
-        diagnostics_url = (
-            "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}"
-            "&${pipeline:queryparam}&${run_type:queryparam}"
-            "&${run_id:queryparam}&${__url_time_range}"
-        )
-        links = [
-            link
-            for link in status.get("links") or []
-            if not (isinstance(link, dict) and link.get("title") == "Open Run Overview")
-        ]
-        links.append(
-            {
-                "title": "Open Run Overview",
-                "url": diagnostics_url,
-                "includeVars": False,
-                "targetBlank": False,
-            }
-        )
-        status["links"] = links
+
+
+def _ensure_open_run_overview_link(status: dict[str, Any]) -> None:
+    diagnostics_url = (
+        "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}"
+        "&${pipeline:queryparam}&${run_type:queryparam}"
+        "&${run_id:queryparam}&${__url_time_range}"
+    )
+    links = [
+        link
+        for link in status.get("links") or []
+        if not (isinstance(link, dict) and link.get("title") == "Open Run Overview")
+    ]
+    links.append(
+        {
+            "title": "Open Run Overview",
+            "url": diagnostics_url,
+            "includeVars": False,
+            "targetBlank": False,
+        }
+    )
+    status["links"] = links
 
 
 def _correct_provider_fleet_panel(
@@ -965,7 +1002,7 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
     expression = (
         "($f := funnel; $map(" + parameters + ", function($p) { "
         "($layerName := $contains($p, 'bronze') ? 'bronze' : ($contains($p, 'silver') ? 'silver' : 'gold'); "
-        "{'parameter': $p, 'count in': $f[stage_id = $layerName].records_in}) }))"
+        f"{{'parameter': $p, '{_COUNT_IN}': $f[stage_id = $layerName].records_in}}) }})"
     )
     panel["targets"] = [t for t in panel["targets"] if t.get("refId") != "StageInput"]
     panel["targets"][0]["parser"] = "backend"
@@ -977,7 +1014,7 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
             "source": "url",
             "parser": "uql",
             "format": "table",
-            "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+            "url": "/ops/observability/pipeline-run-report?pipeline=${selected_pipeline}&run_id=${selected_run_id}",
             "url_options": {"method": "GET", "data": ""},
             "uql": 'parse-json | jsonata "' + expression + '"',
         }
@@ -1004,21 +1041,19 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
         {
             "id": "organize",
             "options": {
-                "excludeByName": {"row_status": True, "Time": True},
+                "excludeByName": {
+                    "row_status": True,
+                    "Time": True,
+                },
                 "indexByName": {
                     "parameter": 0,
-                    "count in": 1,
                     "count in StageInput": 1,
                     "value": 2,
-                    "value A": 2,
                     "percentage": 3,
-                    "percentage A": 3,
                 },
                 "renameByName": {
                     "value": "count out",
-                    "value A": "count out",
-                    "count in StageInput": "count in",
-                    "percentage A": "percentage",
+                    "count in StageInput": _COUNT_IN,
                 },
             },
         },
@@ -1029,22 +1064,19 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
                 prop["value"] = "count out"
             if prop["id"] == _CELL:
                 prop["value"]["wrapText"] = False
-    for field in ("count in", "count out"):
+    for field in (_COUNT_IN, "count out"):
         _override(panel, field, _WIDTH, 90)
         _override(panel, field, "custom.align", "right")
-    for field in ("value", "value A", "count", "count out"):
+    for field in ("value", "count", "count out"):
         _override(panel, field, _WIDTH, 100)
     _override(panel, "percentage", _WIDTH, 100)
     _override(panel, "percentage", "displayName", _BRONZE_PERCENTAGE_DISPLAY)
-    _override(panel, "percentage A", "displayName", _BRONZE_PERCENTAGE_DISPLAY)
     for field in (
         "value",
-        "value A",
         "count",
-        "count in",
+        _COUNT_IN,
         "count out",
         "percentage",
-        "percentage A",
     ):
         _override(panel, field, "noValue", "N/A")
         _override(

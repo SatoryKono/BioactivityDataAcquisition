@@ -117,7 +117,7 @@ def fix_runtime() -> None:
                 {
                     "title": "Open Run Explorer",
                     "url": (
-                        "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1"
+                        "/d/bioetl-run-explorer-v1/run-explorer"
                         "?${__url_time_range}&var-workflow=${workflow}"
                         "&var-pipeline=${pipeline}&var-run_type=${run_type}"
                         "&var-run_id=${run_id}"
@@ -295,7 +295,7 @@ def _incident_domain_links() -> list[JsonObject]:
         {
             "title": "Open Run Explorer",
             "url": (
-                "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${__url_time_range}"
+                "/d/bioetl-run-explorer-v1/run-explorer?${__url_time_range}"
                 "&var-workflow=${workflow}&var-pipeline=${pipeline}"
                 "&var-run_type=${run_type}&var-run_id=${run_id}"
             ),
