@@ -485,7 +485,7 @@ Implementation guardrails:
 Источник фиксированного словаря для `links[].title`: `docs/03-guides/dashboards/navigation-contract.md`.
 
 Правила:
-- Названия top-level ссылок MUST совпадать с каноническими строками из navigation contract: `Run Explorer`, `Replay Readiness`, `Run Overview`, `6. Incident Workspace` (visible bus; Data Quality is contextual; **no** `Silver Reject Explorer` / `Explore Logs` / `Explore Traces`).
+- Названия top-level ссылок MUST совпадать с каноническими строками из navigation contract: `Run Explorer`, `Replay Readiness`, `Run Overview`, `Incident Workspace` (visible bus; Data Quality is contextual; **no** `Silver Reject Explorer` / `Explore Logs` / `Explore Traces`).
 - Формулировки вида `Back to Overview`, `5. Control Plane`, `6. Workflow Overview`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)`, `Next Recommended Drilldown`, and reintroduced adjunct titles, считаются legacy-лексикой и не допускаются в shipped top navigation.
 
 Navigation panel 1000 renders the same four-chip composition on Replay Readiness,

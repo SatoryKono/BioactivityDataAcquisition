@@ -55,6 +55,8 @@ def test_observability_dashboard_scripts_do_not_write_dashboard_json() -> None:
         "_apply_ds2_all.py",
         "_apply_dsa_residual.py",
         "apply_dux2_residual.py",
+        "apply_phase4_dead_vars.py",
+        "apply_phase4_reflow.py",
         "generate_dux4_issue_pack.py",
         "render_nav_bus.py",
     }

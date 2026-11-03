@@ -259,10 +259,15 @@ double-run it. Thresholds stay 70/60/60/60.
 | Quality Debt Weekly | `quality-debt-weekly.yml` | Weekly Mon 04:45 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
 | Stale | `stale.yml` | Weekly Mon 06:00 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
 | PR Hygiene | `pr-hygiene.yml` | Weekly Mon 06:30 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
-| Release | `release.yml` | `release` + `workflow_dispatch` (YAML only) | optional | `disabled_manually` | `keep-disabled` |
+| Release | `release.yml` | `workflow_dispatch` only (YAML only; `release` event removed) | optional | `disabled_manually` | `keep-disabled` |
 
-`release.yml` YAML still **Build and test on Python 3.13**, then publish to
-TestPyPI+PyPI, when that optional lane is re-enabled for an actual release.
+`release.yml` stays **KEEP-DISABLED** for the removed `release` event and for
+production PyPI / GitHub Release asset jobs. YAML still **Build and test on
+Python 3.13**. The only remaining publish job is manual TestPyPI
+(`publish-testpypi`) when that optional lane is intentionally run with
+`workflow_dispatch` and `dry_run == false` — TestPyPI only, not a substitute
+for PyPI. Unreachable `publish-pypi` / `create-github-release-assets` jobs
+(conditioned on the removed `release` event) are deleted from the workflow.
 
 ______________________________________________________________________
 
@@ -274,15 +279,15 @@ This subsection is the current repo-side description. It is a read-only GET,
 not a server change. Four facts stay separate:
 
 1. **Enforcement.** `GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets?per_page=100&includes_parents=true` returned one page (`Link` absent, HTTP 200, `Date: Fri, 16 Oct 2026 07:38:05 GMT`). The page listed three repository rulesets, all `enforcement: disabled`: `13643213` (`main`), `15730586` (`root-hygiene-required-check`), and `24517966` (`ci-11928-isolated-negative-acceptance`). Only `13643213` and `15730586` include `refs/heads/main`. `24517966` includes `refs/heads/codex/ci-11928-negative-base-20261005` and excludes `refs/heads/main`, so it does not apply to `main`. `GET /repos/SatoryKono/BioactivityDataAcquisition/rules/branches/main` returned HTTP 200 and an empty rule list.
-2. **Stored contexts, including while disabled.** `13643213` stores `ci/circleci: pr-gate-complete`. `15730586` stores `ci/circleci: pr-gate-complete` and `ci/circleci: root-hygiene`. A stored context on a disabled ruleset is not active CircleCI protection.
-3. **Target GitHub Actions context.** Catalog `deployment.required_context` is `pr-gate-complete`, the job name in `.github/workflows/pr-required.yml`. That name is not the context stored on these rulesets. The 2026-10-16 read did not show configured GitHub Actions ruleset enforcement.
+2. **Stored contexts, including while disabled.** Since the 2026-11-02 settings-audit phase 0, `13643213` stores the GitHub Actions context `pr-gate-complete`; before that read it stored `ci/circleci: pr-gate-complete`, and the deleted `15730586` had stored `ci/circleci: pr-gate-complete` and `ci/circleci: root-hygiene`. A stored context on a disabled ruleset is not active merge protection.
+3. **Target GitHub Actions context.** Catalog `deployment.required_context` is `pr-gate-complete`, the job name in `.github/workflows/pr-required.yml`. Since 2026-11-02 that name is the context stored on ruleset `13643213`; the 2026-10-16 read had not shown configured GitHub Actions ruleset enforcement.
 4. **What the date covers.** <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` stays `2026-10-09`. `enforcement_verified_date_is_live_protection_evidence` is false: that stamp is not proof of active merge protection. The schema has no stored-context snapshot. The 2026-10-16 read verified enforcement mode and stored contexts only, so the date was not moved to 2026-10-16.
 
-<!-- policy-anchor:deployment-provider --> `deployment.provider` is `github_actions`. <!-- policy-anchor:ruleset-enforcement-mode --> Rulesets `13643213` and `15730586` are `enforcement: disabled`. <!-- policy-anchor:stored-ruleset-contexts --> They store `ci/circleci: pr-gate-complete`, which is not active CircleCI protection. <!-- policy-anchor:target-gha-context --> Target job `pr-gate-complete` is not the context stored on those rulesets. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge: classic branch protection returned HTTP 404 and the applicable rulesets are disabled. Matching `prose_claims` is an offline catalog check and does not confirm live server rulesets.
+<!-- policy-anchor:deployment-provider --> `deployment.provider` is `github_actions`. <!-- policy-anchor:ruleset-enforcement-mode --> Ruleset `13643213` is `enforcement: disabled`; rulesets `15730586` and `24517966` were deleted on 2026-11-02 (settings-audit phase 0). <!-- policy-anchor:stored-ruleset-contexts --> Since 2026-11-02 it stores the GitHub Actions context `pr-gate-complete`, which is not active merge protection while the ruleset stays disabled. <!-- policy-anchor:target-gha-context --> Target job `pr-gate-complete` is the context stored on ruleset `13643213` since 2026-11-02. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge: classic branch protection returned HTTP 404 and the applicable rulesets are disabled. Matching `prose_claims` is an offline catalog check and does not confirm live server rulesets.
 
 Classic branch protection `GET /repos/SatoryKono/BioactivityDataAcquisition/branches/main/protection` returned HTTP 404 `Branch not protected` (`Date: Fri, 16 Oct 2026 07:38:08 GMT`). That is an answered read, not an unknown access failure. Org-parent rulesets beyond `includes_parents=true` on this list were not returned.
 
-`deployment.provider` and `policy.enforcement_provider` remain `github_actions` because they name the runnable coordinator in this catalog. They do not mean the ruleset stores or enforces that provider. `policy.github_ruleset_13643213_enforcement` and `policy.github_ruleset_15730586_enforcement` stay `disabled`, matching the enforcement field from this read. `24517966` is outside those two catalog keys; its enforcement was also `disabled`, and it does not target `main`.
+`deployment.provider` and `policy.enforcement_provider` remain `github_actions` because they name the runnable coordinator in this catalog. They do not mean the ruleset stores or enforces that provider. `policy.github_ruleset_13643213_enforcement` stays `disabled`, matching the enforcement field from this read. `policy.github_ruleset_15730586_enforcement` is now `deleted`, matching the 2026-11-02 phase-0 deletion of that ruleset. `24517966` is outside those two catalog keys, was also `disabled` on that read, did not target `main`, and was deleted in the same phase-0 step.
 
 ### Historical CircleCI activation — #11928
 
@@ -490,7 +495,7 @@ Live GitHub enforcement state (as of `2026-09-10T02:53:01+03:00`, GET-verified):
 - Tracking references: `#3380`, `#8619`, `#9800`, `#9975`, `#9979` (closed),
   `#10267` (activation), `#10268` (docs live-state), Scorecard `#1272`.
 - Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/13643213`
-- Companion (disabled): `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
+- Companion (deleted 2026-11-02, settings-audit phase 0): `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
 - API: `GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets/13643213`
 - Applied rules: `GET /repos/SatoryKono/BioactivityDataAcquisition/rules/branches/main`
 - Rollback payload: `reports/governance/ruleset-10267-rollback-13643213.json`
@@ -685,20 +690,27 @@ ______________________________________________________________________
 ### Workflow: `release.yml`
 
 The build job attests `dist/*` after SBOM generation, including manual dry-run
-validation. Attestation is independent of package publication; existing PyPI
-environment reviews still govern upload. Signed-Releases acceptance must be
-checked against a subsequently published release, not inferred from YAML alone.
+validation. Attestation is independent of package publication; the `testpypi`
+environment review still governs TestPyPI upload when publish runs.
+Signed-Releases acceptance must be checked against a subsequently published
+artifact path outside this workflow, not inferred from YAML alone.
 
-Triggered by GitHub Release publication or manual dispatch (`workflow_dispatch` with `dry_run` default `true`).
+Triggered by manual dispatch only (`workflow_dispatch` with `dry_run` default
+`true`). The `release` event trigger was removed; jobs that required
+`github.event_name == 'release'` were unreachable and are deleted.
 
-Environments: `testpypi` (`if: release || (workflow_dispatch && dry_run == 'false')`) and `pypi` (`if: release` only, `needs: publish-testpypi` chain). Both use OIDC trusted publishing (`id-token: write`, `pypa/gh-action-pypi-publish`). Configure deployment branch policy (tags/releases only for `pypi`) and a reviewer/wait-timer in GitHub Settings → Environments; repository docs do not replace the live protection rule.
+Environment: `testpypi` only
+(`if: workflow_dispatch && dry_run == 'false'`), OIDC trusted publishing
+(`id-token: write`, `pypa/gh-action-pypi-publish`). Configure deployment branch
+policy and a reviewer/wait-timer in GitHub Settings → Environments; repository
+docs do not replace the live protection rule. The live `pypi` GitHub Environment
+may still exist for inventory/protection history, but **no** `release.yml` job
+binds it after `publish-pypi` removal.
 
 ```
 1. Build         → wheel + sdist + twine verify
 2. Test Install  → Python 3.13
-3. TestPyPI      → Publish to test index
-4. PyPI          → Publish to production index (releases only)
-5. Assets        → Upload to GitHub Release
+3. TestPyPI      → Publish to test index (manual non-dry-run only)
 ```
 
 ### Versioning
@@ -738,7 +750,7 @@ permissions:
 | Permission               | Workflows That Use It                             |
 | ------------------------ | ------------------------------------------------- |
 | `contents: read`         | All workflows (default)                           |
-| `contents: write`        | release.yml (asset upload)                        |
+| `contents: write`        | (none in active `release.yml`; asset-upload job removed) |
 | `packages: write`        | docker.yml `docker-push` (GHCR; Environment `ghcr-publish`) |
 | `security-events: write` | docker.yml (Trivy SARIF upload)                   |
 
@@ -756,7 +768,7 @@ The publish job uses run-scoped concurrency so a stale protected publish request
 cannot block a newer validation run. Before writing GHCR tags, it queries the
 current `main` branch SHA and fails closed if the approved run no longer matches
 `main`, preventing stale `:${{ github.ref_name }}` publication.
-| `id-token: write` | release.yml build provenance and PyPI trusted publishing; docker.yml protected `docker-push` provenance |
+| `id-token: write` | release.yml build provenance and TestPyPI trusted publishing (`publish-testpypi`); docker.yml protected `docker-push` provenance |
 | `attestations: write` | release.yml `build` for `dist/*`; docker.yml `docker-push` for the published manifest digest |
 | `issues: write`          | contract-tests.yml (auto-create issue on failure); memory-freshness.yml `open-review-issue`; diagram-nightly.yml `nightly-phase2`; stale.yml; pr-hygiene.yml |
 | `pull-requests: write`   | stale.yml; pr-hygiene.yml; labeler.yml |
@@ -767,8 +779,8 @@ Live publishing/deployment environment controls (API-verified 2026-08-30):
 | --- | --- | --- | --- |
 | `ghcr-publish` | `@SatoryKono` | branch `main` | `docker.yml` → immutable SHA/ref-name GHCR tags |
 | `observability-render-host` | `@SatoryKono` | branch `main` | reviewed manual execution on the self-hosted render runner |
-| `testpypi` | `@SatoryKono` | branch `main`; tags `v*` | reviewed manual dry-run override or release OIDC publish |
-| `pypi` | `@SatoryKono` | tags `v*` | release-only OIDC publish after `testpypi` |
+| `testpypi` | `@SatoryKono` | branch `main`; tags `v*` | reviewed manual `workflow_dispatch` OIDC publish (`dry_run == false`) |
+| `pypi` | `@SatoryKono` | tags `v*` | retained Environment; **unbound** by `release.yml` after `publish-pypi` removal |
 | `copilot` | `@SatoryKono` | branch glob `copilot/**` | GitHub Copilot coding agent runtime (#10371). Not a publish surface. |
 
 Each listed **publish** environment has a required-reviewer rule and a custom deployment
