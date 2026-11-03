@@ -702,6 +702,10 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "configs/composites/": (
         "tests/unit/infrastructure/schemas/test_composite_config_schema.py",
     ),
+    # Composite MANY_TO_ONE / enricher fixtures → schema contract suite.
+    "tests/fixtures/composite/": (
+        "tests/integration/composite/test_composite_config_schema_contract.py",
+    ),
     # Entity YAML family: fail-closed pipeline load + FilterConfigFile boundary.
     "configs/entities/": (
         "tests/architecture/test_config_strict_keys.py",
