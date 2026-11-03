@@ -201,7 +201,11 @@ async def test_resume_skipped_child_retains_saved_identity_without_execution(
 ):
     pipeline = SimpleNamespace(run=AsyncMock())
     service = WorkflowRunnerService(pipeline, Mock(), Mock(), Mock())
-    monkeypatch.setattr(WorkflowRunnerService, "_finalize_run_result", Mock())
+    monkeypatch.setattr(
+        "bioetl.application.services.workflow.workflow_runner_service."
+        "_finalize_workflow_run_result",
+        Mock(),
+    )
     config = WorkflowConfig(
         "workflow", (WorkflowStepConfig("extract", "chembl_assay"),)
     )

@@ -12,6 +12,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import yaml
 import pytest
 from pydantic import ValidationError
@@ -78,3 +80,21 @@ def test_composite_local_gold_filters_are_rejected() -> None:
         match="Composite-local top-level gold_filters are unsupported",
     ):
         validate_composite_config_payload(payload)
+
+
+def test_composite_many_to_one_enricher_aggregation_is_validated() -> None:
+    """MANY_TO_ONE enrichers must explicitly define aggregation rules statically."""
+    fixture = Path(__file__).parents[2] / "fixtures/composite/many_to_one_enricher.yaml"
+    base = yaml.safe_load(fixture.read_text(encoding="utf-8"))
+
+    # Verify missing aggregation fails
+    missing_aggregation = yaml.safe_load(fixture.read_text(encoding="utf-8"))
+    del missing_aggregation["composite"]["enrichers"][0]["aggregation"]
+    with pytest.raises(ValidationError, match="requires aggregation config"):
+        validate_composite_config_payload(missing_aggregation)
+
+    # Verify complete MANY_TO_ONE specification passes
+    schema = CompositeConfigFileSchema.model_validate(base)
+    assert schema.composite.enrichers[0].cardinality == "many_to_one"
+    assert schema.composite.enrichers[0].aggregation is not None
+    assert schema.composite.enrichers[0].aggregation.group_by == "doi"
