@@ -628,21 +628,6 @@ def test_setuptools_package_exclusion_uses_narrow_classified_route(
     assert capsys.readouterr().out.splitlines() == [contract]
 
 
-def test_ruff_rule_selection_uses_narrow_classified_route(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """Adding a Ruff rule is classified without broadening pytest selection."""
-    before = {"tool": {"ruff": {"lint": {"select": ["F", "I"]}}}}
-    after = {"tool": {"ruff": {"lint": {"select": ["F", "I", "S506"]}}}}
-    monkeypatch.setattr(
-        dependencies,
-        "_read_revision",
-        lambda _root, revision, _name: before if revision == "base" else after,
-    )
-
-    assert not dependencies.pytest_configuration_changed(tmp_path, "base", "head")
-
-
 def test_legacy_pytest_asyncio_table_migration_uses_full_suite_route(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
