@@ -1315,7 +1315,7 @@
           "root_selector": "rows",
           "source": "url",
           "type": "json",
-          "url": "/ops/observability/processed-records?pipeline=${selected_pipeline}&run_type=${run_type:csv}&run_id=${selected_run_id}",
+          "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -1332,7 +1332,7 @@
           "parser": "uql",
           "format": "table",
           "root_selector": "",
-          "url": "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}",
+          "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}",
           "url_options": {
             "method": "GET",
             "data": ""

@@ -1254,7 +1254,6 @@
         {
           "id": "organize",
           "options": {
-            "excludeByName": {},
             "indexByName": {
               "run_execution": 0,
               "run_verdict": 1,
@@ -1695,10 +1694,6 @@
                 "INCOMPLETE": {
                   "text": "INCOMPLETE",
                   "color": "orange"
-                },
-                "QUERY ERROR": {
-                  "text": "QUERY ERROR",
-                  "color": "red"
                 }
               }
             },
