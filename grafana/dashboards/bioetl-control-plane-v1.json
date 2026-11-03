@@ -2841,10 +2841,6 @@
                         }
                       }
                     ]
-                  },
-                  {
-                    "id": "custom.hidden",
-                    "value": true
                   }
                 ]
               },
@@ -2972,7 +2968,7 @@
                   },
                   {
                     "id": "displayName",
-                    "value": "Reason"
+                    "value": "Detail"
                   }
                 ]
               }
