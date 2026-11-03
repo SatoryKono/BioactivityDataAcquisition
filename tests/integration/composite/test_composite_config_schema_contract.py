@@ -71,7 +71,9 @@ def test_new_composite_yaml_validates_against_strict_contract() -> None:
     enricher = schema.composite.enrichers[0]
     assert enricher.cardinality == "many_to_one"
     assert enricher.aggregation is not None
+    assert enricher.aggregation.group_by == "doi"
     assert enricher.aggregation.order_by == ["entity_id"]
+    assert enricher.aggregation.fields["authors"].source == "authors_list"
     assert enricher.aggregation.fields["authors"].agg == "first"
     assert validate_aggregation_ordering(schema.to_domain()) == []
 
