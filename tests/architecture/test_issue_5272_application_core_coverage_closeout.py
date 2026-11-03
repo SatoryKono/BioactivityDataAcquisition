@@ -127,6 +127,4 @@ def test_issue_5244_parent_epic_stays_open_until_default_floor_is_zero() -> None
     if parent_status == "closeable":
         assert below_default_floor == 0
     else:
-        assert (
-            parent_status == "not_closeable_under_current_definition_of_done"
-        )
+        assert parent_status == "not_closeable_under_current_definition_of_done"

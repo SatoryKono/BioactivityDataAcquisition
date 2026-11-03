@@ -851,6 +851,9 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
         "configs/quality/external_resource_inventory_pr12748_status_cache_review.json": (
             catalog_and_requalify_tests
         ),
+        "configs/quality/external_resource_inventory_pr12755_review.json": (
+            catalog_and_requalify_tests
+        ),
         "configs/quality/external_resource_inventory_pr12730_rf001_004_review.json": (
             catalog_and_requalify_tests
         ),
