@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "catalog_ref": "8656c38f17209e2da6d630786800478acb9087fb",
-  "source_ref": "0cf75aa35b45d57e91c219e8dc4fe3f63e144e0a",
+  "source_ref": "a4e4c73a2ad6975cbc4667442656c1fa3e413d01",
   "source_reviews": {
     "src/bioetl/application/ports/__init__.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
     "src/bioetl/application/ports/control_plane.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
