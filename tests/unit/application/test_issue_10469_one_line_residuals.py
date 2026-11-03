@@ -444,7 +444,6 @@ async def test_workflow_runner_skips_missing_topological_step() -> None:
     assert result is final_result
 
 
-
 @pytest.mark.parametrize(
     ("transformer", "keyword"),
     [
