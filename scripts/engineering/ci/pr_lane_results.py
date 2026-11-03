@@ -126,6 +126,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     ".dockerignore": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "mkdocs.yml": (DOCUMENTATION_SYNC_TEST,),
+    "docs/00-project/governance/05-github-policy.md": (
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
     "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md": (
         "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
     ),
