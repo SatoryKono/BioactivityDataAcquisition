@@ -18,7 +18,9 @@ from copy import deepcopy
 from dataclasses import dataclass
 from time import monotonic
 
+from bioetl.interfaces.http._control_plane_selector_payloads import RUN_ID_NO_SELECTION
 from bioetl.interfaces.http._forensic_request_budget import ForensicEndpointUnavailable
+from bioetl.interfaces.http._selected_run_a2_resolve import is_unresolved_run_id
 
 FRESH_SECONDS = 30.0
 MAX_AGE_SECONDS = 90.0
@@ -38,10 +40,14 @@ def selected_run_status_key(query: Mapping[str, str]) -> StatusKey:
             return ""
         return str(raw).strip()
 
+    run_id = _one("run_id")
+    if is_unresolved_run_id(run_id):
+        run_id = RUN_ID_NO_SELECTION
+
     return (
         "selected-run-status",
         _one("pipeline"),
-        _one("run_id") or "-",
+        run_id,
         _one("run_type"),
         _one("workflow"),
         _one("run_status"),
