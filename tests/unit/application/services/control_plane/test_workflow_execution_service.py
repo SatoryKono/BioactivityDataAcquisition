@@ -489,7 +489,7 @@ async def test_workflow_execution_service_persists_manifest_ledger_and_state() -
 @pytest.mark.asyncio
 async def test_workflow_prepare_registration_observation_visible_during_run() -> None:
     """RF-004: create_manifest soft-failures stay in the prepare→report scope."""
-    from bioetl.application.services.control_plane.evidence_location import (
+    from bioetl.application.services.evidence_location import (
         EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
     )
     from bioetl.application.services.run_reports.observations import run_observations
