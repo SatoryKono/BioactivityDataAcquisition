@@ -84,7 +84,7 @@ def test_overview_stages_and_quality_are_outside_saved_evidence() -> None:
     assert "Choose a run" in donor["root_selector"]
     assert any(
         item.get("type") == "value"
-        and "SELECT RUN" in ((item.get("options") or {}))
+        and "SELECT RUN" in (item.get("options") or {})
         for item in quality["fieldConfig"]["defaults"]["mappings"]
     )
 
@@ -99,7 +99,7 @@ NUMBERED_DASHBOARDS = (
     "3. Pipeline Diagnostics",
     "4. Provider Health",
     "5. Data Quality",
-    "Incident Workspace",
+    "6. Incident Workspace",
     "Run Explorer",
 )
 STATUS_SCOPE_TOKENS = (
