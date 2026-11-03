@@ -561,6 +561,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "configs/quality/generated_artifact_tests.json": (
         "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+        "tests/unit/scripts/engineering/ci/test_pr_lane_results_generated_routing.py",
     ),
     "tests/fixtures/reports/run_evidence_location_golden.json": (
         "tests/unit/domain/control_plane/test_run_evidence_location.py",
@@ -597,6 +598,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "scripts/engineering/ci/pr_lane_results.py": (
         "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+        "tests/unit/scripts/engineering/ci/test_pr_lane_results_generated_routing.py",
     ),
     PYPROJECT_TOML: ("tests/architecture/qm_07/test_distribution_isolation.py",),
     "configs/quality/integration_vcr_policy.yaml": (
