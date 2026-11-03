@@ -66,11 +66,9 @@ import bioetl.application.services.control_plane as control_plane_root
 
 pytestmark = pytest.mark.unit
 
-# evidence_location moved out of control_plane implementation prefixes;
-# its explicit ownership seam is registered here for the external package.
+# evidence_location is no longer a responsibility seam exposed by the package root.
 EXPECTED_RESPONSIBILITY_SEAMS = {
     "effective_config",
-    "evidence_location",
     "forensic",
     "ledger",
     "manifest",
