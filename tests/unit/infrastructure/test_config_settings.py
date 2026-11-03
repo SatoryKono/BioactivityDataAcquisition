@@ -84,6 +84,18 @@ class TestPipelineSettings:
         assert settings.control_plane.checkpoint_compatibility_policy == "hard_fail"
         assert settings.control_plane.required_persistence_profile == "replay_ready"
 
+
+@pytest.mark.unit
+def test_empty_dashboard_data_root_environment_value_is_none(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Blank optional path variables must not become the current directory."""
+    monkeypatch.setenv("BIOETL_DASHBOARD_DATA_ROOT", "")
+
+    settings = Settings(_env_file=None)
+
+    assert settings.dashboard_data_root is None
+
     def test_pipeline_settings__custom_values__695415ca(self) -> None:
         """Test custom pipeline settings."""
         settings = PipelineSettings(

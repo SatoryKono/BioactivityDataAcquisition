@@ -65,7 +65,7 @@ def _create_symlink_or_skip(
         raise
 
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 _SOURCE_A = "a" * 64
 _SOURCE_B = "b" * 64

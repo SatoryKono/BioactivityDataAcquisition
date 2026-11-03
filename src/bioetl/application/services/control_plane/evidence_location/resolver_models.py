@@ -8,6 +8,7 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Protocol, runtime_checkable
 
+from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.run_evidence_location import (
     EvidenceLocationKind,
     EvidenceLocationLookupCode,
@@ -55,7 +56,7 @@ class EvidenceReadContext(Protocol):
         """Load a workflow manifest by run id from the bound root, or ``None``."""
         ...
 
-    def verify_replay_objects(self, manifest: object) -> Mapping[str, bool]:
+    def verify_replay_objects(self, manifest: RunManifest) -> Mapping[str, bool]:
         """Re-validate saved config / lock / Bronze bytes for ``manifest``."""
         ...
 

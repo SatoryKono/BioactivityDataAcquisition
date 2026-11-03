@@ -173,7 +173,7 @@ class PipelineRunnerService:
                 dry_run_result=dry_run_result,
                 record_event=_record_pipeline_audit_event,
             )
-            return self._finalize_report(completed_dry_run, effective_options)
+            return _finalize_report(self, completed_dry_run, effective_options)
 
         record_constructor_failure = constructor_failure_recorder(
             audit=self.audit,
@@ -182,7 +182,7 @@ class PipelineRunnerService:
             run_id=effective_run_id,
             options=effective_options,
             started_at=started_at,
-            finalize=self._finalize_report,
+            finalize=lambda result, options: _finalize_report(self, result, options),
             record_event=_record_pipeline_audit_event,
         )
 
@@ -270,7 +270,7 @@ class PipelineRunnerService:
                 timestamp=completed_at,
                 error_type="CancelledError",
             )
-            self._finalize_report(result, options)
+            _finalize_report(self, result, options)
             raise
         finally:
             reset_stage_accounting(accounting_token)

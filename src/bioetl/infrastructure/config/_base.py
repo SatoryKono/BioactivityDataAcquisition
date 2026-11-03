@@ -185,7 +185,9 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
         """Coerce invalid or non-positive timeout values back to the safe default."""
         return coerce_silver_dedup_timeout_seconds(value)
 
-    @field_validator("report_root", "runtime_source_id", mode="before")
+    @field_validator(
+        "report_root", "dashboard_data_root", "runtime_source_id", mode="before"
+    )
     @classmethod
     def _empty_runtime_setting_to_none(cls, value: object) -> object:
         """Normalize blank optional environment values to ``None``."""

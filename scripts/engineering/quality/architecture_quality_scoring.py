@@ -155,9 +155,11 @@ def _composition_module_cap(package_cohesion_budget: dict[str, object]) -> int:
 
 
 def _lazy_import_util(*, observed: int, cap: int) -> float:
-    """Return bounded utilisation, including observed debt above a zero cap."""
+    """Return bounded utilisation and reject residual debt at a zero cap."""
     if cap == 0:
-        return 1.0 if observed else 0.0
+        if observed:
+            raise ValueError("lazy import count must be 0 when max_count is 0")
+        return 0.0
     return round(observed / cap, 4)
 
 

@@ -206,6 +206,10 @@ class WorkflowRunnerService:
             started_monotonic=started_monotonic,
         )
 
+    def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:
+        """Record expected pipeline metrics through the extracted policy helper."""
+        record_workflow_pipeline_expected_metrics(metrics=self.metrics, config=config)
+
     def _finalize_run_result(
         self,
         *,

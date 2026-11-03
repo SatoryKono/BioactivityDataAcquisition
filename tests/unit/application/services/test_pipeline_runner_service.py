@@ -63,6 +63,7 @@ from bioetl.application.services.execution.pipeline_runner_models import (
 )
 from bioetl.application.services.execution.pipeline_runner_service import (
     PipelineRunnerService,
+    _finalize_report,
 )
 
 
@@ -1051,7 +1052,7 @@ def test_finalize_report_records_verify_exception_without_status_change(
     )
     token = bind_run_observations()
     try:
-        finalized = service._finalize_report(result, RunOptions())
+        finalized = _finalize_report(service, result, RunOptions())
         assert finalized.status == PipelineRunResult.SUCCESS
         observations = run_observations()
         assert (
