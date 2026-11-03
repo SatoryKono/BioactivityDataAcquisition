@@ -121,14 +121,22 @@ CHECK_DOC_LINKS_GUARDRAILS_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    **dict.fromkeys(
+        (
+            ".vscode/extensions.json",
+            ".vscode/launch.json",
+            ".vscode/settings.json",
+        ),
+        (
+            "tests/architecture/test_root_hygiene_review_registry.py",
+            "tests/architecture/test_root_hygiene_workflow.py",
+        ),
+    ),
     ".gitleaks.toml": (
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
     ),
     ".dockerignore": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "mkdocs.yml": (DOCUMENTATION_SYNC_TEST,),
-    "docs/00-project/governance/05-github-policy.md": (
-        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
-    ),
     "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md": (
         "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
     ),
@@ -137,6 +145,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "configs/quality/architecture_acceptance_baseline.yaml": (
         "tests/architecture/test_architecture_acceptance_baseline.py",
+    ),
+    "configs/quality/external_resource_inventory_pr12751_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+    ),
+    "docs/00-project/governance/05-github-policy.md": (
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+        "tests/architecture/test_root_hygiene_workflow.py",
     ),
     **dict.fromkeys(
         (
@@ -159,6 +175,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
     "configs/quality/external_resource_inventory_pr12748_status_cache_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+    ),
+    "configs/quality/external_resource_inventory_pr12751_main_merge_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
@@ -459,7 +479,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "CHANGELOG.md": ("tests/architecture/test_docs_version_sync.py",),
     ".coderabbit.yaml": ("tests/architecture/test_coderabbit_config.py",),
     ".github/workflows/duplication-complexity.yml": (
-        "tests/architecture/test_github_actions_runtime_policy.py",
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
         "tests/architecture/test_tech_debt_issues_5811_5816_closeout.py",
     ),
     ".pre-commit-config.yaml": (
@@ -546,6 +566,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "configs/quality/generated_artifact_tests.json": (
         "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+        "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
     ),
     "tests/fixtures/reports/run_evidence_location_golden.json": (
         "tests/unit/domain/control_plane/test_run_evidence_location.py",
@@ -582,6 +603,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "scripts/engineering/ci/pr_lane_results.py": (
         "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+        "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
     ),
     PYPROJECT_TOML: ("tests/architecture/qm_07/test_distribution_isolation.py",),
     "configs/quality/integration_vcr_policy.yaml": (
@@ -624,6 +646,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "configs/quality/domain_aggregate_classification.yaml": (
         "tests/architecture/test_domain_aggregate_classification.py",
+    ),
+    "configs/quality/composition_protocol_inventory.yaml": (
+        "tests/architecture/test_composition_protocol_inventory.py",
     ),
     "configs/quality/scripts_lifecycle_registry.json": (
         "tests/architecture/test_scripts_lifecycle_registry.py",

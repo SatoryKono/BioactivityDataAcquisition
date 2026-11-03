@@ -2203,6 +2203,42 @@
       "review_by": "2026-11-30",
       "next_step": "Retain as the release verification/writer backend behind python -m scripts.ops refresh-router-delivery; owning tests exercise read-only check and atomic update through this dispatcher. Preserve full rootfs/config/layer parity and immutable registry identity. Direct module invocation remains compatible."
     },
+    "scripts/ops/observability/grafana/apply_phase25_srs_prr_budget.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the dashboard transform helpers imported by render_nav_bus and lint_dashboard_phase2; route the legacy apply command through python -m scripts.ops apply-grafana-phase25-srs-prr-budget. Direct module invocation remains compatible."
+    },
+    "scripts/ops/observability/grafana/apply_phase2_remainder.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the dashboard transform helpers imported by render_nav_bus; route the legacy apply command through python -m scripts.ops apply-grafana-phase2-remainder. Direct module invocation remains compatible."
+    },
+    "scripts/ops/observability/grafana/apply_phase4_dead_vars.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the tested Phase 4.1 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-dead-vars; keep direct module invocation as a compatibility surface."
+    },
+    "scripts/ops/observability/grafana/apply_phase4_reflow.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the tested Phase 4.2–4.3 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-reflow; keep direct module invocation as a compatibility surface."
+    },
+    "scripts/ops/observability/grafana/lint_dashboard_phase2.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the Phase 2 linter implementation behind python -m scripts.ops lint-grafana-phase2; its repo-backed tests and canonical dispatcher exercise the supported command."
+    },
+    "scripts/ops/observability/seed_dc6_pipeline_run_report.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the local-only DC-6 fixture writer behind python -m scripts.ops seed-dc6-pipeline-run-report; keep acceptance data out of committed run reports."
+    },
     "scripts/ops/observability/grafana/trusted_docker.py": {
       "decision": "shared_helper_module",
       "owner": "@bioetl-platform",
