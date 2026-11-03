@@ -120,8 +120,12 @@ def test_acceptance_baseline_code_anchors_match_current_runtime_contract() -> No
     )
     runner_service_source = "\n".join(
         [
-            _read("src/bioetl/application/services/execution/pipeline_runner_service.py"),
-            _read("src/bioetl/application/services/execution/pipeline_runner_finalize.py"),
+            _read(
+                "src/bioetl/application/services/execution/pipeline_runner_service.py"
+            ),
+            _read(
+                "src/bioetl/application/services/execution/pipeline_runner_finalize.py"
+            ),
         ]
     )
 
