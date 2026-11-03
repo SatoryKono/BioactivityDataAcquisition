@@ -55,7 +55,7 @@ def test_provider_registry_create_adapter_concurrency() -> None:
                 "test_provider",
                 http_client=MagicMock(),
                 logger=MagicMock(),
-                settings=MagicMock()
+                settings=MagicMock(),
             )
             results.append(adapter)
         except Exception as e:
@@ -89,7 +89,7 @@ def test_provider_registry_create_data_source_concurrency() -> None:
                 "test_provider",
                 settings=MagicMock(),
                 pipeline_config=MagicMock(),
-                logger=MagicMock()
+                logger=MagicMock(),
             )
             results.append(data_source)
         except Exception as e:
