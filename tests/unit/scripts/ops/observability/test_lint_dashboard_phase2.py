@@ -10,10 +10,12 @@ import pytest
 from scripts.ops.observability.grafana import lint_dashboard_phase2 as lint
 from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
     _assert_donor_jsonata_balanced,
+    _CP_DONOR,
     _jsonata_brackets_balanced,
     _OV_DONOR,
     _DQ_DONOR,
     _INC_DONOR,
+    _OV_PROVIDER,
 )
 
 
@@ -157,6 +159,19 @@ def test_phase25_donor_jsonata_brackets_are_balanced() -> None:
     assert _jsonata_brackets_balanced(_OV_DONOR)
     assert _jsonata_brackets_balanced(_DQ_DONOR)
     assert _jsonata_brackets_balanced(_INC_DONOR)
+
+
+def test_phase25_donors_normalize_columns_before_frame_conversion() -> None:
+    for donor in (_OV_DONOR, _DQ_DONOR, _INC_DONOR, _CP_DONOR):
+        assert "$schema :=" in donor
+        assert "_bioetl_frame" in donor
+        assert "'parameter': null" in donor
+        assert "'stage_id': null" in donor
+
+
+def test_provider_table_formats_result_without_mutating_stat_value() -> None:
+    assert "'check_result_display':" in _OV_PROVIDER
+    assert "'check_result': $cached" not in _OV_PROVIDER
 
 
 def test_nav_lint_requires_real_chip_elements() -> None:
