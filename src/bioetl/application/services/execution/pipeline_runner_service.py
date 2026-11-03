@@ -389,11 +389,12 @@ def _finalize_pipeline_report(
 ) -> RunResult:
     """Capture control-plane evidence, persist the run report, then archive."""
     capture_run_completion(runner.capture_control_plane, result, options)
+    evidence_location_verify = runner.evidence_location_verify
     soft_invoke_evidence_location_verify(
         (
             None
-            if runner.evidence_location_verify is None
-            else (lambda: runner.evidence_location_verify(result, options))
+            if evidence_location_verify is None
+            else (lambda: evidence_location_verify(result, options))
         ),
         kind="pipeline",
         owner=str(result.pipeline_name),

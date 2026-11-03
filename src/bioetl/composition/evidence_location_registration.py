@@ -6,11 +6,17 @@ receive absolute paths, alias bases, and runtime_source_id as parameters.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
+
 from bioetl.application.services.evidence_location import (
     EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS,
     record_registration_exception_observation,
     record_registration_outcome_observation,
+)
+from bioetl.application.services.execution.pipeline_runner_models import (
+    RunOptions,
+    RunResult,
 )
 from bioetl.application.services.evidence_location.registration import (
     EvidenceLocationRegisterRequest,
@@ -207,10 +213,12 @@ def verify_workflow_run_location(
     )
 
 
-def bind_pipeline_run_location_verifier(settings: Settings):
+def bind_pipeline_run_location_verifier(
+    settings: Settings,
+) -> Callable[[RunResult, RunOptions | None], None]:
     """Return a PipelineRunnerService finalize hook closed over settings."""
 
-    def _verify(result, options) -> None:
+    def _verify(result: RunResult, options: RunOptions | None) -> None:
         workflow_run_id = (
             getattr(options, "workflow_run_id", None) if options is not None else None
         )
