@@ -504,6 +504,7 @@ ship_now_selector_contract_by_uid:
   bioetl-run-explorer-v1:
     visible_selectors: *id005
     time_range: grafana_builtin
+
 hidden_handoff_contract:
   allowed_shipped_vars: []
   detail_only_shipped_vars:
@@ -521,7 +522,8 @@ hidden_handoff_contract:
   - Hidden vars preserve navigation or detail-only scope and do not automatically become visible top-level selectors.
   - Visible selectors MUST NOT be propagated implicitly with blanket includeVars semantics.
   - selected_run_id / selected_pipeline are detail-only A2 resolves from selector-context for
-    selected-run report/artifact URLs; browse/list panels keep visible $pipeline / $run_id.
+    Overview + DQ selected-run report/artifact URLs; Incident and Run Explorer dropped the
+    unused selected_* pair (Phase 4.5) and keep visible $pipeline / $run_id only.
 default_selection_policy:
   status: shipped
   epic: '#7550'

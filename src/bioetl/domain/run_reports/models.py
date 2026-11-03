@@ -175,15 +175,11 @@ class PipelineRunReport:
     identity: dict[str, Any]  # Any: report/json payload shape is dynamic
     funnel: tuple[StageFunnelRow, ...]
     layers: LayerCounts
-    reasons_top_n: tuple[
-        dict[str, Any], ...  # Any: dynamic reason payload
-    ]  # Any: report/json payload shape is dynamic
+    reasons_top_n: tuple[dict[str, Any], ...]  # Any: dynamic reason payload
     reconciliation: dict[str, Any]  # Any: report/json payload shape is dynamic
     tracking_coverage: TrackingCoverage
     reason_catalog_version: str
-    artifacts: tuple[
-        dict[str, Any], ...  # Any: dynamic artifact payload
-    ] = ()  # Any: report/json payload shape is dynamic
+    artifacts: tuple[dict[str, Any], ...] = ()  # Any: dynamic artifact payload
     failure: dict[str, Any] | None = None  # Any: optional failure block
     io: dict[str, Any] | None = None  # Any: optional IO summary
     quarantine: dict[str, Any] | None = None  # Any: optional quarantine rollup
@@ -286,15 +282,13 @@ class WorkflowRunReport:
     plan_steps: tuple[dict[str, Any], ...]  # Any: report/json payload shape is dynamic
     execution: tuple[WorkflowExecutionRow, ...]
     totals: dict[str, Any]  # Any: report/json payload shape is dynamic
-    index: dict[str, Any] = field(  # Any: dynamic workflow index payload
-        default_factory=dict
-    )  # Any: report/json payload shape is dynamic
+    index: dict[str, Any] = field(default_factory=dict)  # Any: dynamic index
     reasons_rollup: tuple[dict[str, Any], ...] = ()  # Any: aggregated child reasons
     observations: dict[str, object] | None = None
     schema_version: str = "workflow_run_report_v1"
 
     def to_dict(self) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
-        payload: dict[str, Any] = {  # Any: report/json payload shape is dynamic
+        payload: dict[str, Any] = {  # Any: dynamic report payload
             "schema_version": self.schema_version,
             "identity": dict(self.identity),
             "plan": {"steps": [dict(step) for step in self.plan_steps]},

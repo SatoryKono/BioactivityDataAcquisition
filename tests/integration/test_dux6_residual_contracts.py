@@ -231,10 +231,10 @@ def test_pfill_10_provider_missing_series_has_reason_and_action() -> None:
     )
     assert len(report_links) == 1
     assert (
-        "pipeline-run-report-artifact?pipeline=${pipeline:percentencode}"
+        "pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}"
         in report_links[0]["url"]
     )
-    assert "run_id=${run_id:percentencode}" in report_links[0]["url"]
+    assert "run_id=${selected_run_id:percentencode}" in report_links[0]["url"]
 
 
 def test_percent_scores_integer_precision() -> None:

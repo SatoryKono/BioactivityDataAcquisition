@@ -156,7 +156,7 @@ def apply_saved_evidence_readability(payload: dict) -> None:
                     prop["value"] = [
                         {
                             "title": "Open saved run report",
-                            "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+                            "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
                             "targetBlank": True,
                         }
                     ]
