@@ -607,32 +607,43 @@ def _stamp_no_runs_into_mapping_list(mappings: Any) -> None:
             options.setdefault(_NO_RUNS, {"text": _NO_RUNS, "color": "gray"})
 
 
+def _stamp_no_runs_into_override(override: Any) -> None:
+    """Stamp A2 empty-catalog maps into one fieldConfig override block."""
+    if not isinstance(override, dict):
+        return
+    for prop in override.get("properties") or []:
+        if isinstance(prop, dict) and prop.get("id") == "mappings":
+            # Grafana stores mappings as properties id=mappings value=[...]
+            _stamp_no_runs_into_mapping_list(prop.get("value"))
+
+
+def _stamp_no_runs_on_panel(panel: dict[str, Any]) -> None:
+    """Stamp defaults + override value maps on one panel (not nested children)."""
+    field_config = panel.get("fieldConfig") or {}
+    defaults = field_config.get("defaults") or {}
+    _stamp_no_runs_into_mapping_list(defaults.get("mappings"))
+    for override in field_config.get("overrides") or []:
+        _stamp_no_runs_into_override(override)
+
+
+def _walk_panels_stamp_no_runs(panels: list[Any]) -> None:
+    """Depth-first stamp of A2 empty-catalog maps across a panel tree."""
+    stack = list(panels or [])
+    while stack:
+        panel = stack.pop()
+        if not isinstance(panel, dict):
+            continue
+        _stamp_no_runs_on_panel(panel)
+        nested = panel.get("panels")
+        if isinstance(nested, list):
+            stack.extend(nested)
+
+
 def _stamp_no_runs_value_maps(data: dict[str, Any]) -> None:
     """Add A2 empty-catalog maps wherever SELECT RUN already has a value map."""
-
-    def walk_mapping_host(host: dict[str, Any]) -> None:
-        defaults = (host.get("fieldConfig") or {}).get("defaults") or {}
-        _stamp_no_runs_into_mapping_list(defaults.get("mappings"))
-        for override in (host.get("fieldConfig") or {}).get("overrides") or []:
-            if not isinstance(override, dict):
-                continue
-            for prop in override.get("properties") or []:
-                if not isinstance(prop, dict):
-                    continue
-                # Grafana stores mappings as properties id=mappings value=[...]
-                if prop.get("id") == "mappings":
-                    _stamp_no_runs_into_mapping_list(prop.get("value"))
-
-    def walk(panels: list[Any]) -> None:
-        for panel in panels or []:
-            if not isinstance(panel, dict):
-                continue
-            walk_mapping_host(panel)
-            nested = panel.get("panels")
-            if isinstance(nested, list):
-                walk(nested)
-
-    walk(data.get("panels") or [])
+    panels = data.get("panels")
+    if isinstance(panels, list):
+        _walk_panels_stamp_no_runs(panels)
 
 
 def _status_donor_transforms() -> list[dict[str, Any]]:
