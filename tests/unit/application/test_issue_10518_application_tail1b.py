@@ -373,25 +373,36 @@ class TestScdIntegrityHelpers:
 # services/execution/pipeline_runner_service.py [381, 382, 383, 384]
 # ---------------------------------------------------------------------------
 
-from bioetl.application.services.run_reports.control_plane_snapshot import (
-    archive_run_completion,
+from bioetl.application.services.execution.pipeline_runner_service import (
+    PipelineRunnerService,
 )
+
+
+def _make_runner_service() -> PipelineRunnerService:
+    return object.__new__(PipelineRunnerService)
 
 
 class TestArchiveControlPlane:
     def test_missing_hook_is_noop(self) -> None:
-        assert archive_run_completion(None, MagicMock(), None) is None
+        svc = _make_runner_service()
+        svc.archive_control_plane = None
+        assert svc._archive_control_plane(MagicMock(), None) is None
 
     def test_operator_errors_are_swallowed(self) -> None:
+        svc = _make_runner_service()
+
         def _boom(result: object, options: object) -> None:
             raise OSError("disk gone")
 
-        assert archive_run_completion(_boom, MagicMock(), None) is None
+        svc.archive_control_plane = _boom
+        assert svc._archive_control_plane(MagicMock(), None) is None
 
     def test_successful_archive_is_invoked(self) -> None:
+        svc = _make_runner_service()
         calls: list[tuple[object, object]] = []
+        svc.archive_control_plane = lambda r, o: calls.append((r, o))
         result = MagicMock()
-        archive_run_completion(lambda r, o: calls.append((r, o)), result, None)
+        svc._archive_control_plane(result, None)
         assert calls == [(result, None)]
 
 

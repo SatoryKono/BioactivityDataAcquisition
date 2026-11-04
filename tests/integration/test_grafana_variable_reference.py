@@ -91,6 +91,8 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
         "pipeline",
         "run_type",
         "run_id",
+        # Hidden helper for selected-run provider evidence.
+        "provider_for_pipeline",
         # Phase-1 A2 detail resolve from selector-context.
         "selected_pipeline",
         "selected_run_id",
@@ -127,8 +129,16 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
         assert run_id.get("sort") == 0
         assert run_id.get("current", {}).get("value") == "-"
 
-    assert "provider_for_pipeline" not in overview
-    assert "stage" not in _variables("bioetl-dq-v2.json")
+    provider = overview["provider_for_pipeline"]
+    assert provider["hide"] == 2
+    assert provider["skipUrlSync"] is True
+    assert (
+        'label_values(bioetl_workflow_pipeline_expected{pipeline=~"$pipeline"}, provider)'
+        in str(provider["query"])
+    )
+    stage = _variables("bioetl-dq-v2.json")["stage"]
+    assert stage["includeAll"] is True
+    assert stage["current"]["value"] == "$__all"
     for uid in (
         "bioetl-runtime",
         "bioetl-provider-health-v2",

@@ -37,7 +37,7 @@ def apply_stage_removal_columns(payload: dict) -> None:
             uql='parse-json | jsonata "' + projection + '"',
             url=(
                 "/ops/observability/pipeline-run-report-artifact"
-                "?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}"
+                "?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}"
                 "&format=pipeline_run_report_json"
             ),
         )
@@ -100,7 +100,7 @@ def _provider_evidence_columns(panel: dict) -> None:
         "provider": "Provider",
         "data_source": "Data source",
         "check_performed": "Performed",
-        "check_result_display": "Result",
+        "check_result": "Result",
         "reason": "Reason",
         "observed_display": "Since completed",
         "report_label": "Evidence",
@@ -119,8 +119,8 @@ def _provider_evidence_columns(panel: dict) -> None:
         "'data_source': $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : "
         "($d.reason = 'run_preflight_provider_observation' and $p.evidence = 'PRESENT' ? 'Provider check' : 'UNKNOWN')), "
         "'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), "
-        "'check_result_display': $cached ? '—' : "
-        "($p.check_result = 'QUERY ERROR' ? 'QUERY ERROR' : ($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN')), "
+        "'check_result': $cached ? '—' : "
+        "($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN'), "
         "'reason': $cached ? 'Cached Bronze used; provider API was not called.' : "
         "($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check.' : "
         "($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.')), "
@@ -182,8 +182,8 @@ def _provider_evidence_columns(panel: dict) -> None:
                         {
                             "title": "Open report",
                             "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/"
-                            "pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}"
-                            "&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+                            "pipeline-run-report-artifact?pipeline=${pipeline:percentencode}"
+                            "&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
                             "targetBlank": True,
                         }
                     ],

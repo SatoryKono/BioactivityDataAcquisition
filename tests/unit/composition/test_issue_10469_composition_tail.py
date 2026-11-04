@@ -25,8 +25,8 @@ from bioetl.composition.factories.storage._helpers import (
 from bioetl.composition.runtime_builders import (
     _effective_config_runtime_snapshot_support as snapshot_support,
 )
-from bioetl.composition.runtime_builders._run_manifest_creation_support_helpers import (
-    maybe_create_ledger_service,
+from bioetl.composition.runtime_builders.run_manifest_builder import (
+    _maybe_create_ledger_service,
 )
 
 
@@ -60,7 +60,7 @@ def test_blank_optional_setting_is_not_hashed() -> None:
 
 def test_disabled_run_ledger_does_not_construct_service() -> None:
     assert (
-        maybe_create_ledger_service(
+        _maybe_create_ledger_service(
             ledger_enabled=False,
             inputs=SimpleNamespace(),
             ctx=SimpleNamespace(),

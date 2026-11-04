@@ -296,7 +296,7 @@ def test_called_owner_workflows_reject_duplicate_yaml_keys() -> None:
     owners.add(".github/workflows/pr-required.yml")
     for relative in sorted(owners):
         path = ROOT / relative
-        parsed = yaml.load(path.read_text(encoding="utf-8"), Loader=_UniqueKeyLoader)  # noqa: S506, bandit:nosec
+        parsed = yaml.load(path.read_text(encoding="utf-8"), Loader=_UniqueKeyLoader)
         assert parsed is not None, relative
 
 

@@ -248,7 +248,6 @@ def _validate_review_schema(review: dict[str, Any]) -> None:
         "expression_updates",
         "segment_updates",
         "reference_moves",
-        "exclusion_moves",
         "resource_updates",
         "additional_bindings",
         "new_resources",
@@ -256,32 +255,6 @@ def _validate_review_schema(review: dict[str, Any]) -> None:
     }
     if review["schema_version"] != 1 or set(review) - allowed:
         raise ValueError("Unsupported review schema")
-
-
-def _apply_exclusion_moves(
-    payload: dict[str, Any], review: dict[str, Any], new: Snapshot
-) -> None:
-    """Rewrite reviewed exclusion sites that moved to a different source file."""
-    exclusions = payload.get("delegations_and_exclusions", [])
-    if not isinstance(exclusions, list):
-        raise ValueError("Catalog exclusions must be a list")
-    for move in review.get("exclusion_moves", []):
-        if set(move) != {"from", "to"}:
-            raise ValueError("Invalid exclusion move schema")
-        source = move["from"]
-        if set(source) - {"file", "line", "expression", "call", "source_segment"}:
-            raise ValueError("Invalid exclusion move source selector")
-        matches = [
-            index
-            for index, ref in enumerate(exclusions)
-            if all(ref.get(key) == value for key, value in source.items())
-        ]
-        if len(matches) != 1:
-            raise ValueError("Reviewed exclusion move was missing or ambiguous")
-        target = _locate(new, move["to"])
-        target["scope"] = move["to"]["scope"]
-        target["reason"] = move["to"]["reason"]
-        exclusions[matches[0]] = target
 
 
 def _apply_reference_moves(
@@ -300,7 +273,6 @@ def _apply_reference_moves(
         )
         if matches != len(fields):
             raise ValueError("Reviewed reference move was missing or ambiguous")
-    _apply_exclusion_moves(payload, review, new)
 
 
 def _validated_reference_move(

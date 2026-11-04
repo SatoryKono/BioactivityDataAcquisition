@@ -32,18 +32,6 @@ Stable commands:
     promote-router-host-release  Materialize a verified immutable host release
     refresh-router-host-provenance  Bind declared delivery to original CI evidence
     refresh-router-delivery  Check/update pins from physically verified rebuilt images
-    apply-grafana-phase25-srs-prr-budget
-                       Apply the Grafana selected-run-status donor changes
-    apply-grafana-phase2-remainder
-                       Apply remaining Grafana Phase 2 dashboard edits
-    apply-grafana-phase4-dead-vars
-                       Remove retired Grafana dashboard variables
-    apply-grafana-phase4-reflow
-                       Apply Grafana Phase 4 panel layout changes
-    lint-grafana-phase2
-                       Lint the provisioned Grafana Phase 2 profile
-    seed-dc6-pipeline-run-report
-                       Seed the local DC-6 pipeline run report
     wsl-proxy          Start WSL proxy helper
     codex              Launch Codex via repo-local bootstrap adapter (shell)
     codex-exec         Launch Codex full-auto via repo-local bootstrap adapter (shell)
@@ -113,24 +101,6 @@ COMMAND_SPECS.update(
         ),
         "refresh-router-delivery": module_command(
             "scripts.ops.observability.grafana.refresh_router_delivery"
-        ),
-        "apply-grafana-phase25-srs-prr-budget": module_command(
-            "scripts.ops.observability.grafana.apply_phase25_srs_prr_budget"
-        ),
-        "apply-grafana-phase2-remainder": module_command(
-            "scripts.ops.observability.grafana.apply_phase2_remainder"
-        ),
-        "apply-grafana-phase4-dead-vars": module_command(
-            "scripts.ops.observability.grafana.apply_phase4_dead_vars"
-        ),
-        "apply-grafana-phase4-reflow": module_command(
-            "scripts.ops.observability.grafana.apply_phase4_reflow"
-        ),
-        "lint-grafana-phase2": module_command(
-            "scripts.ops.observability.grafana.lint_dashboard_phase2"
-        ),
-        "seed-dc6-pipeline-run-report": module_command(
-            "scripts.ops.observability.seed_dc6_pipeline_run_report"
         ),
     }
 )

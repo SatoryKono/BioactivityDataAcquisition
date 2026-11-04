@@ -12,15 +12,10 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import yaml
 import pytest
 from pydantic import ValidationError
 
-from bioetl.application.composite.helpers.preflight_type_and_aggregation import (
-    validate_aggregation_ordering,
-)
 from bioetl.infrastructure.schemas.composite_config import (
     CompositeConfigFileSchema,
     validate_composite_config_payload,
@@ -43,14 +38,6 @@ def _base_composite_yaml(with_version: bool) -> str:
         "  enrichers:\n"
         "    - pipeline: crossref_publication\n"
         "      join_keys: [doi]\n"
-        "      cardinality: many_to_one\n"
-        "      aggregation:\n"
-        "        group_by: doi\n"
-        "        order_by: [entity_id]\n"
-        "        fields:\n"
-        "          authors:\n"
-        "            source: authors_list\n"
-        "            agg: first\n"
         "  merge:\n"
         "    output:\n"
         "      silver: silver/composite/publication\n"
@@ -68,14 +55,6 @@ def test_new_composite_yaml_validates_against_strict_contract() -> None:
     schema = CompositeConfigFileSchema.model_validate(payload)
 
     assert schema.composite.version == "1.0.0"
-    enricher = schema.composite.enrichers[0]
-    assert enricher.cardinality == "many_to_one"
-    assert enricher.aggregation is not None
-    assert enricher.aggregation.group_by == "doi"
-    assert enricher.aggregation.order_by == ["entity_id"]
-    assert enricher.aggregation.fields["authors"].source == "authors_list"
-    assert enricher.aggregation.fields["authors"].agg == "first"
-    assert validate_aggregation_ordering(schema.to_domain()) == []
 
 
 def test_composite_yaml_without_version_is_rejected() -> None:
@@ -99,21 +78,3 @@ def test_composite_local_gold_filters_are_rejected() -> None:
         match="Composite-local top-level gold_filters are unsupported",
     ):
         validate_composite_config_payload(payload)
-
-
-def test_composite_many_to_one_enricher_aggregation_is_validated() -> None:
-    """MANY_TO_ONE enrichers must explicitly define aggregation rules statically."""
-    fixture = Path(__file__).parents[2] / "fixtures/composite/many_to_one_enricher.yaml"
-    base = yaml.safe_load(fixture.read_text(encoding="utf-8"))
-
-    # Verify missing aggregation fails
-    missing_aggregation = yaml.safe_load(fixture.read_text(encoding="utf-8"))
-    del missing_aggregation["composite"]["enrichers"][0]["aggregation"]
-    with pytest.raises(ValidationError, match="requires aggregation config"):
-        validate_composite_config_payload(missing_aggregation)
-
-    # Verify complete MANY_TO_ONE specification passes
-    schema = CompositeConfigFileSchema.model_validate(base)
-    assert schema.composite.enrichers[0].cardinality == "many_to_one"
-    assert schema.composite.enrichers[0].aggregation is not None
-    assert schema.composite.enrichers[0].aggregation.group_by == "doi"

@@ -32,7 +32,7 @@ from bioetl.domain.control_plane._run_manifest_serialization import (
     normalize_manifest_created_at,
     normalize_manifest_serializable,
 )
-from bioetl.application.services.effective_config.config_source_hashing import (
+from bioetl.application.services.control_plane.effective_config.config_source_hashing import (
     _UniqueKeySafeLoader,
     _construct_unique_mapping,
     _to_canonical_jsonable,

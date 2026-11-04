@@ -516,9 +516,6 @@ async def _verify_production_http_chain(
     from bioetl.interfaces.cli.commands.domains.health import (
         server_integration_deps as cli,
     )
-    from bioetl.interfaces.http._selected_run_status_cache import (
-        SelectedRunStatusCache,
-    )
     from bioetl.interfaces.http import run_report_ops
     from tests.unit.application.services.run_manifest_test_support import (
         RunManifestOverrides,
@@ -661,10 +658,6 @@ async def _verify_production_http_chain(
             for path in child_paths:
                 original = path.read_bytes()
                 path.write_bytes(b"corrupted child")
-                # Force a cold read: this contract checks integrity projection,
-                # while the selected-run cache intentionally serves snapshots
-                # for its configured TTL.
-                server._selected_run_status_cache = SelectedRunStatusCache()
                 response = await client.get(
                     f"http://127.0.0.1:{port}/ops/observability/selected-run-status",
                     params={"pipeline": "composite_assay", "run_id": run_id},

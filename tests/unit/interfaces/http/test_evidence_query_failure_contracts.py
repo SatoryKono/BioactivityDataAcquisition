@@ -21,16 +21,11 @@ pytestmark = pytest.mark.unit
 async def test_selected_status_timeout_retains_request_id_for_investigation(
     monkeypatch,
 ):
-    class _PassthroughCache:
-        async def read(self, query: object, factory: object) -> object:
-            return await factory()  # type: ignore[misc]
-
     host = SimpleNamespace(
         _read_required_param=lambda query, name: "chembl_assay",
         _read_optional_param=lambda query, name: "run",
         _forensic_endpoint_limiter=Mock(),
         _send_payload_response=AsyncMock(),
-        _selected_run_status_cache=_PassthroughCache(),
     )
     monkeypatch.setattr(
         status,

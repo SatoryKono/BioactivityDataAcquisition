@@ -188,118 +188,6 @@
           "composite_config": 1,
           "entity_config": 1
         }
-      },
-      {
-        "block_path": "expression_updates",
-        "fingerprint": "ab2e64a029c2",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "expression_updates",
-            "path": "configs/quality/external_resource_inventory_pr12651_main_merge_review.json",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "expression_updates",
-            "path": "configs/quality/external_resource_inventory_pr12651_review.json",
-            "surface_kind": "quality_registry"
-          }
-        ],
-        "serialized_bytes": 363,
-        "surface_kind_counts": {
-          "quality_registry": 2
-        }
-      },
-      {
-        "block_path": "expression_updates.src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
-        "fingerprint": "9413008a4875",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "expression_updates.src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
-            "path": "configs/quality/external_resource_inventory_pr12651_main_merge_review.json",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "expression_updates.src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
-            "path": "configs/quality/external_resource_inventory_pr12651_review.json",
-            "surface_kind": "quality_registry"
-          }
-        ],
-        "serialized_bytes": 284,
-        "surface_kind_counts": {
-          "quality_registry": 2
-        }
-      },
-      {
-        "block_path": "properties.observations",
-        "fingerprint": "195fb02f85f3",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "properties.observations",
-            "path": "configs/contracts/reports/pipeline_run_report.v2.json",
-            "surface_kind": "other_config"
-          },
-          {
-            "block_path": "properties.observations",
-            "path": "configs/contracts/reports/workflow_run_report.v1.json",
-            "surface_kind": "other_config"
-          }
-        ],
-        "serialized_bytes": 259,
-        "surface_kind_counts": {
-          "other_config": 2
-        }
-      },
-      {
-        "block_path": "properties.observations.additionalProperties",
-        "fingerprint": "07e3de6567c9",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "properties.observations.additionalProperties",
-            "path": "configs/contracts/reports/pipeline_run_report.v2.json",
-            "surface_kind": "other_config"
-          },
-          {
-            "block_path": "properties.observations.additionalProperties",
-            "path": "configs/contracts/reports/workflow_run_report.v1.json",
-            "surface_kind": "other_config"
-          }
-        ],
-        "serialized_bytes": 215,
-        "surface_kind_counts": {
-          "other_config": 2
-        }
       }
     ],
     "notes": [
@@ -322,7 +210,7 @@
         ".yml",
         ".json"
       ],
-      "files_scanned": 271,
+      "files_scanned": 255,
       "ignored_by_jscpd_patterns": [
         "**/configs/**",
         "**/*.yaml",
@@ -334,10 +222,10 @@
       "structured_block_min_bytes": 200
     },
     "summary": {
-      "affected_file_count": 14,
-      "duplicate_cluster_count": 10,
-      "duplicate_occurrence_count": 23,
-      "reported_cluster_count": 10
+      "affected_file_count": 10,
+      "duplicate_cluster_count": 6,
+      "duplicate_occurrence_count": 15,
+      "reported_cluster_count": 6
     }
   },
   "entity_effective": {
@@ -373,5 +261,5 @@
     "composite_runtime family is at zero inconsistent keys as of Stream B plateau.",
     "Residual entity drift is limited to intentional entity-specific filters, metadata policy blocks, schema field-alias surfaces, and pipeline overrides."
   ],
-  "snapshot_date": "2026-11-03"
+  "snapshot_date": "2026-11-02"
 }

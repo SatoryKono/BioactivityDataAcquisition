@@ -129,9 +129,9 @@ Complete evidence is available in the collapsed detail group. The table reuses t
 | ID | Title | Purpose |
 | --- | --- | --- |
 | 9450 | Inspect Saved Run Evidence | Saved exact-run evidence; expand for identity, version, reasons and actions. |
-| 9460 | Inspect Selected Run Stages | Text handoff to Data Quality `Inspect Selected Run Stages` (9460); Incident no longer hosts a local stages table copy. |
+| 9460 | Inspect Selected Run Stages | Saved stage rows joined with Quarantined, Excluded, Deduplicated and Filtered out counters from the exact report's per-stage funnel removals; untracked stages stay UNKNOWN. |
 | 9451 | Inspect Selected Run Domains | Saved exact-run evidence; expand for identity, version, reasons and actions. |
-| 9452 | Inspect Selected Run Identity | Text handoff to Overview `Review Run Identity` (9300); Incident no longer hosts a local identity table copy. |
+| 9452 | Inspect Selected Run Identity | Saved exact-run evidence; expand for identity, version, reasons and actions. |
 
 The first-window ranked-suspect and current-alert tables show up to two rows;
 the panel links open the unrestricted full lists. Alert history paginates
@@ -242,9 +242,9 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 32005 | Browse Global Alerts | row |
 | 22005 | Monitor Global Alerts (Full) | table |
 | 9450 | Inspect Saved Run Evidence | row |
-| 9460 | Inspect Selected Run Stages | text |
+| 9460 | Inspect Selected Run Stages | table |
 | 9451 | Inspect Selected Run Domains | table |
-| 9452 | Inspect Selected Run Identity | text |
+| 9452 | Inspect Selected Run Identity | table |
 | 9700 | Inspect Current Workflow Evidence | row |
 | 9701 | Review Current Workflow Evidence | table |
 <!-- END SHIPPED PANEL INVENTORY -->

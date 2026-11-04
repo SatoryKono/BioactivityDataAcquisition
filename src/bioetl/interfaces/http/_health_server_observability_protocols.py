@@ -24,7 +24,6 @@ from bioetl.domain.types import RunID
 from bioetl.interfaces.http._health_server_control_plane_metrics_refresh import (
     ControlPlaneMetricsRefresher,
 )
-from bioetl.interfaces.http._selected_run_status_cache import SelectedRunStatusCache
 from bioetl.interfaces.http._selector_catalog import SelectorCatalog
 
 
@@ -66,9 +65,6 @@ class _HealthObservabilityRoutingHost(_HealthResponseSupport, Protocol):
 
     @property
     def _forensic_endpoint_limiter(self) -> asyncio.Semaphore: ...
-
-    @property
-    def _selected_run_status_cache(self) -> SelectedRunStatusCache: ...
 
     @property
     def _prometheus_base_url(self) -> str: ...

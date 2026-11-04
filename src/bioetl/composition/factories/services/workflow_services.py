@@ -23,10 +23,6 @@ from bioetl.composition.occurrence_identity import (
 )
 from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import get_settings
-from bioetl.composition.evidence_location_registration import (
-    register_workflow_manifest_location,
-    verify_workflow_run_location,
-)
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.time import SystemClock
 from bioetl.composition.bootstrap.assembly.workflow_transforms import (
@@ -155,6 +151,10 @@ def get_workflow_runner_service(
     )
 
     def _verify_workflow_evidence_location(result: object) -> None:
+        from bioetl.composition.runtime_builders.evidence_location_registration import (
+            verify_workflow_run_location,
+        )
+
         workflow_name = getattr(result, "workflow_name", None)
         workflow_run_id = getattr(result, "workflow_run_id", None)
         if not workflow_name or not workflow_run_id:
@@ -218,6 +218,10 @@ def _create_workflow_ledger_service(
 
 def _workflow_evidence_location_register(manifest: WorkflowManifest) -> object:
     """RF-004: publish workflow-parent locator after durable manifest save."""
+    from bioetl.composition.runtime_builders.evidence_location_registration import (
+        register_workflow_manifest_location,
+    )
+
     return register_workflow_manifest_location(
         manifest=manifest, settings=get_settings()
     )

@@ -494,7 +494,7 @@ def test_release_publish_requires_same_sha_quality_gates() -> None:
         str(step.get("run", "")) for step in jobs["release-tests"]["steps"]
     )
     assert "pytest" in step_runs
-    for publish in ("publish-testpypi",):
+    for publish in ("publish-testpypi", "publish-pypi"):
         needs = jobs[publish]["needs"]
         assert "security-gate" in needs
         assert "release-tests" in needs
@@ -807,9 +807,15 @@ def test_syft_sbom_is_generated_on_release_and_ghcr_push() -> None:
     assert sbom_sha in policy.ALLOWED_USES["anchore/sbom-action"]
     release_uses = _step_uses(release, "build")
     docker_uses = _step_uses(docker, "docker-push")
+    release_assets = release["jobs"]["create-github-release-assets"]
+    asset_files = str(release_assets["steps"][-1]["with"]["files"])
 
     assert f"anchore/sbom-action@{sbom_sha}" in release_uses
     assert f"anchore/sbom-action@{sbom_sha}" in docker_uses
+    assert "bioetl-dist-sbom" in " ".join(
+        str(step.get("with", {})) for step in release_assets["steps"]
+    )
+    assert "sbom/**" in asset_files
 
 
 _WRITE_PERMISSION_KEYS = (

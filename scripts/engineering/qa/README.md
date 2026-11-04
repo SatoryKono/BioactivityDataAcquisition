@@ -179,7 +179,6 @@ Direct script path:
 - `scripts/engineering/qa/report_duplication_baseline.py` (`python -m scripts.engineering.qa report-duplication-baseline`) generates report-only duplication baseline artifacts for governance review.
 - `scripts/engineering/qa/run_architecture_audit_read_only.py` (`python -m scripts.engineering.qa run-architecture-audit-read-only`) runs check-only architecture diagnostics and fails if tracked governance surfaces mutate.
 - `scripts/engineering/qa/generate_architecture_debt_tasks.py` (`python -m scripts.engineering.qa generate-debt-tasks`) generates the canonical architecture debt task backlog.
-- `scripts/engineering/qa/generate_p05_interfaces_audit_report.py` (`python -m scripts.engineering.qa.generate_p05_interfaces_audit_report`) regenerates `reports/audit/pack-v2.1/P05-interfaces-contracts.md`.
 - `scripts/engineering/qa/reduce_architecture_debt.py` (`python -m scripts.engineering.qa reduce-architecture-debt`) builds the orchestration plan consumed by the architecture-debt agent.
 
 ## Canonical Commands

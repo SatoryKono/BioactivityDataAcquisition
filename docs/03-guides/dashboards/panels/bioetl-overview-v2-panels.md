@@ -9,13 +9,11 @@ UNKNOWN or INCOMPLETE; failed requests remain QUERY ERROR.
 
 ## Review Run Identity
 
-Table `9300` consumes the identity frame from Overview donor `9002` through the
-`-- Dashboard --` datasource. Donor `9002` loads BioETL Ops HTTP
-`/ops/observability/selected-run-status`; this is not a Prometheus panel. Five
-fixed parameters retain the full Run ID, Pipeline, Run Type, Started at with
-saved UTC offset, and Total Run Duration. Cell inspection preserves full values.
-There is no pagination or omitted source row: the JSONata projection contains
-exactly those five parameters.
+Table `9300` uses BioETL Ops HTTP `/ops/observability/selected-run-status`;
+this is not a Prometheus panel. Five fixed parameters retain the full Run ID,
+Pipeline, Run Type, Started at with saved UTC offset, and Total Run Duration.
+Cell inspection preserves full values. There is no pagination or omitted source row:
+the JSONata projection contains exactly those five parameters.
 
 ## Review Overall Verdict
 
@@ -40,10 +38,8 @@ without a remote probe is No API check; it is not a claim of live provider healt
 
 ## Review Provider Check
 
-Stat `9481` reduces `check_result_display` from the shared selected-run donor
-(same field as Review Provider Evidence). Cached Bronze without a remote probe
-shows —. Missing performed checks are UNKNOWN. No API check is distinct from a
-successful remote probe.
+Table `9481` preserves saved check result and reason. Missing performed checks are
+UNKNOWN. No API check is distinct from a successful remote probe.
 
 ## Inspect Selected Run Stages
 

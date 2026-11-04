@@ -14,7 +14,7 @@
   "schema_version": 1,
   "source": "grafana/dashboards/*.json",
   "target_counts": {
-    "http": 14,
+    "http": 33,
     "loki": 0,
     "promql": 105,
     "tempo": 0,
@@ -188,6 +188,83 @@
     },
     {
       "coverage_class": null,
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "coverage_gap",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9422,
+      "panel_title": "Review Exact Replay Readiness",
+      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query_tokens": [
+        "/ops/observability/selected-run-status",
+        "pipeline",
+        "run_id",
+        "run_type",
+        "workflow"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "#555555",
+          "value": null
+        }
+      ],
+      "unit": "none"
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "valid_empty",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9423,
+      "panel_title": "Review Exact Replay Checks",
+      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query_tokens": [
+        "/ops/observability/selected-run-status",
+        "pipeline",
+        "run_id",
+        "run_type",
+        "workflow"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-dq-v2",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "valid_empty",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9402,
+      "panel_title": "Inspect Run Identity",
+      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
+      "query_tokens": [
+        "/ops/control-plane/identity-table",
+        "pipeline",
+        "run_type",
+        "run_id",
+        "timezone"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": null,
       "dashboard_uid": "bioetl-dq-v2",
       "datasource_type": "yesoreyeram-infinity-datasource",
       "documents_backend_down": true,
@@ -220,9 +297,9 @@
       "kind": "http",
       "panel_id": 9403,
       "panel_title": "Inspect Processed Records",
-      "query": "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}",
+      "query": "/ops/observability/pipeline-run-report?pipeline=${selected_pipeline}&run_id=${selected_run_id}",
       "query_tokens": [
-        "/ops/observability/selected-run-status",
+        "/ops/observability/pipeline-run-report",
         "pipeline",
         "run_id"
       ],
@@ -256,6 +333,101 @@
       "unit": "none"
     },
     {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-dq-v2",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "valid_empty",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9451,
+      "panel_title": "Inspect Selected Run Domains",
+      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query_tokens": [
+        "/ops/observability/selected-run-status",
+        "pipeline",
+        "run_id",
+        "run_type",
+        "workflow"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-dq-v2",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "valid_empty",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9452,
+      "panel_title": "Inspect Selected Run Identity",
+      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query_tokens": [
+        "/ops/observability/selected-run-status",
+        "pipeline",
+        "run_id",
+        "run_type",
+        "workflow"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-dq-v2",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "coverage_gap",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9460,
+      "panel_title": "Inspect Selected Run Stages",
+      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query_tokens": [
+        "/ops/observability/selected-run-status",
+        "pipeline",
+        "run_id",
+        "run_type",
+        "workflow"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-dq-v2",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "coverage_gap",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9460,
+      "panel_title": "Inspect Selected Run Stages",
+      "query": "/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+      "query_tokens": [
+        "/ops/observability/pipeline-run-report-artifact",
+        "pipeline",
+        "run_id",
+        "format"
+      ],
+      "ref_id": "B",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
       "coverage_class": "event_optional",
       "dashboard_uid": "bioetl-incident-v1",
       "datasource_type": "prometheus",
@@ -276,7 +448,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -311,7 +483,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -346,7 +518,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -383,7 +555,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -417,7 +589,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -451,7 +623,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -484,7 +656,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -547,7 +719,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -582,7 +754,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -617,7 +789,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -652,7 +824,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -687,7 +859,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -1248,7 +1420,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -1283,7 +1455,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -1318,7 +1490,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -1352,7 +1524,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -1580,7 +1752,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -1653,7 +1825,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -1848,7 +2020,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -1883,7 +2055,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -2525,7 +2697,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -2559,7 +2731,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -2620,7 +2792,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -2653,7 +2825,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -2988,7 +3160,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -3126,7 +3298,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -3162,7 +3334,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -3197,7 +3369,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -3263,7 +3435,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -3280,6 +3452,130 @@
         }
       ],
       "unit": "none"
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "valid_empty",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9451,
+      "panel_title": "Inspect Selected Run Domains",
+      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query_tokens": [
+        "/ops/observability/selected-run-status",
+        "pipeline",
+        "run_id",
+        "run_type",
+        "workflow"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "valid_empty",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9452,
+      "panel_title": "Inspect Selected Run Identity",
+      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query_tokens": [
+        "/ops/observability/selected-run-status",
+        "pipeline",
+        "run_id",
+        "run_type",
+        "workflow"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "coverage_gap",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9460,
+      "panel_title": "Inspect Selected Run Stages",
+      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query_tokens": [
+        "/ops/observability/selected-run-status",
+        "pipeline",
+        "run_id",
+        "run_type",
+        "workflow"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "coverage_gap",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9460,
+      "panel_title": "Inspect Selected Run Stages",
+      "query": "/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+      "query_tokens": [
+        "/ops/observability/pipeline-run-report-artifact",
+        "pipeline",
+        "run_id",
+        "format"
+      ],
+      "ref_id": "B",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "coverage_gap",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9463,
+      "panel_title": "Review Total Run Duration",
+      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query_tokens": [
+        "/ops/observability/selected-run-status",
+        "pipeline",
+        "run_id",
+        "run_type",
+        "workflow"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "unit": "s"
     },
     {
       "coverage_class": "event_optional",
@@ -3301,7 +3597,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -3335,7 +3631,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -3369,7 +3665,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -3403,7 +3699,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -3436,7 +3732,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -3576,7 +3872,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -3648,6 +3944,54 @@
       "empty_state": "coverage_gap",
       "formula": "",
       "kind": "http",
+      "panel_id": 9300,
+      "panel_title": "Review Run Identity",
+      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&workflow=${workflow:csv}",
+      "query_tokens": [
+        "/ops/observability/selected-run-status",
+        "pipeline",
+        "run_type",
+        "run_id",
+        "workflow"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-overview-v2",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "coverage_gap",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9460,
+      "panel_title": "Inspect Selected Run Stages",
+      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query_tokens": [
+        "/ops/observability/selected-run-status",
+        "pipeline",
+        "run_id",
+        "run_type",
+        "workflow"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-overview-v2",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "coverage_gap",
+      "formula": "",
+      "kind": "http",
       "panel_id": 9460,
       "panel_title": "Inspect Selected Run Stages",
       "query": "/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
@@ -3661,6 +4005,130 @@
       "runbook_urls": [],
       "thresholds": [],
       "unit": "none"
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-overview-v2",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "coverage_gap",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9460,
+      "panel_title": "Inspect Selected Run Stages",
+      "query": "/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+      "query_tokens": [
+        "/ops/observability/pipeline-run-report-artifact",
+        "pipeline",
+        "run_id",
+        "format"
+      ],
+      "ref_id": "C",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-overview-v2",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "valid_empty",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9480,
+      "panel_title": "Review Provider Evidence",
+      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query_tokens": [
+        "/ops/observability/selected-run-status",
+        "pipeline",
+        "run_id",
+        "run_type",
+        "workflow"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-overview-v2",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "valid_empty",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9481,
+      "panel_title": "Review Provider Check",
+      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query_tokens": [
+        "/ops/observability/selected-run-status",
+        "pipeline",
+        "run_id",
+        "run_type",
+        "workflow"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "#555555",
+          "value": null
+        }
+      ],
+      "unit": ""
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-overview-v2",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "coverage_gap",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9482,
+      "panel_title": "Review Contract Exclusions",
+      "query": "/ops/observability/selected-run-status?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query_tokens": [
+        "/ops/observability/selected-run-status",
+        "pipeline",
+        "run_id",
+        "run_type",
+        "workflow"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-overview-v2",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "valid_empty",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9483,
+      "panel_title": "Review FK Comparison Scope",
+      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query_tokens": [
+        "/ops/observability/selected-run-status",
+        "pipeline",
+        "run_id",
+        "run_type",
+        "workflow"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
     },
     {
       "coverage_class": null,

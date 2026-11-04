@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
@@ -44,59 +42,6 @@ if TYPE_CHECKING:
         ControlPlaneArtifactLifecyclePlan,
         ControlPlaneArtifactLifecyclePolicy,
     )
-
-
-@runtime_checkable
-class EvidenceReadContext(Protocol):
-    """Read-only control-plane view bound to one data root."""
-
-    @property
-    def data_root(self) -> Path:
-        """Absolute data root selected for this resolve."""
-        ...
-
-    def get_manifest_by_run_id(self, run_id: object) -> object | None:
-        """Load a manifest by run id from the bound root, or ``None``.
-
-        Args:
-            run_id: Identifier of the run whose manifest is requested.
-        """
-        ...
-
-    def get_workflow_manifest_by_run_id(self, run_id: object) -> object | None:
-        """Load a workflow manifest by run id from the bound root, or ``None``.
-
-        Args:
-            run_id: Identifier of the run whose workflow manifest is requested.
-        """
-        ...
-
-    def verify_replay_objects(self, manifest: object) -> Mapping[str, bool]:
-        """Re-validate saved config, lock and Bronze bytes for ``manifest``.
-
-        Args:
-            manifest: Saved manifest containing the replay object references.
-        """
-        ...
-
-
-@runtime_checkable
-class EvidenceReadContextOpenerProtocol(Protocol):
-    """Open read-only stores beneath a trusted data-root alias."""
-
-    def open(
-        self,
-        data_root: Path,
-        *,
-        trusted_alias_base: Path,
-    ) -> EvidenceReadContext:
-        """Open read-only ports after validating path containment.
-
-        Args:
-            data_root: Data root selected for the read-only operation.
-            trusted_alias_base: Trusted base used to validate alias containment.
-        """
-        ...
 
 
 @runtime_checkable

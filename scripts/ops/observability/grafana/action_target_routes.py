@@ -103,19 +103,18 @@ def row_aware_dashboard_url() -> str:
 
     Grafana field links cannot branch on the dynamic destination UID, so the
     URL carries the union of destination selectors. Dashboards ignore selectors
-    they do not declare. Provider Health receives an explicit provider reset
-    plus row pipeline context. Phase 4.1 removed DQ ``$stage``.
+    they do not declare, while Runtime/DQ receive stage=All and Provider Health
+    receives an explicit provider reset plus row pipeline context.
     """
-    # Phase 2 §2.3 F-27: Grafana accepts /d/{uid}/ without a second UID slug.
     uid = "${__data.fields.action_dashboard_uid}"
     row = "${__data.fields"
     return (
-        f"/d/{uid}/?var-workflow={row}.workflow:percentencode}}"
-        f"&var-pipeline={row}.pipeline:percentencode}}"
-        f"&var-run_type={row}.run_type:percentencode}}"
+        f"/d/{uid}/{uid}?var-workflow={row}.workflow}}"
+        f"&var-pipeline={row}.pipeline}}"
+        f"&var-run_type={row}.run_type}}"
         f"&var-run_id={row}.run_id}}"
-        "&var-provider=unknown"
-        f"&var-pipeline_context={row}.pipeline:percentencode}}&{TIME_TOKEN}"
+        "&var-stage=$__all&var-provider=unknown"
+        f"&var-pipeline_context={row}.pipeline}}&{TIME_TOKEN}"
     )
 
 

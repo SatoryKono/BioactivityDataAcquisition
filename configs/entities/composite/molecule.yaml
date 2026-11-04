@@ -1,6 +1,5 @@
 # Composite entity contract for composite_molecule.
 # column_groups mirrors configs/composites/molecule.yaml::composite.merge.column_groups.
-# MANY_TO_ONE test configuration: tests/fixtures/composite/many_to_one_enricher.yaml.
 version: 1.0.0
 provider: composite
 entity: molecule

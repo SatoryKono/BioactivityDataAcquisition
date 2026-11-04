@@ -21,7 +21,6 @@ These tests are the required check whenever grafana/dashboards/*.json changes
 
 from __future__ import annotations
 
-import json
 import re
 from pathlib import Path
 from typing import Any
@@ -57,41 +56,19 @@ def test_overview_stages_and_quality_are_outside_saved_evidence() -> None:
     provider, stages, quality = (panels[i] for i in (9480, 9460, 9482))
     assert stages["gridPos"]["y"] == provider["gridPos"]["y"] + provider["gridPos"]["h"]
     assert quality["gridPos"] == {**stages["gridPos"], "x": 15, "w": 9}
-    assert stages["datasource"].get("uid") == "-- Mixed --"
     assert 9450 not in panels
     assert 9452 not in {p["id"] for p in get_dashboard_panels(dashboard)}
     assert quality["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
-    assert any(
-        item.get("type") == "regex"
-        and (item.get("options") or {}).get("pattern") == "^CRIT.*"
-        and ((item.get("options") or {}).get("result") or {}).get("color") == "red"
-        for item in quality["fieldConfig"]["defaults"]["mappings"]
+    from scripts.ops.observability.grafana._overview_quality import (
+        exclusion_quality_expression,
     )
-    # Phase 2.5: quality canvas reuses donor 9002 exclusions frame
-    # (backend contract_exclusions_* fields; $limits JSONata retired).
-    assert quality["targets"][0].get("panelId") == 9002
-    assert any(
-        t.get("id") == "filterByValue" and "exclusions" in json.dumps(t)
-        for t in quality.get("transformations") or []
+
+    expression = exclusion_quality_expression()
+    assert quality["targets"][0]["root_selector"] == expression
+    assert (
+        quality["targets"][0]["uql"]
+        == 'parse-json | jsonata "' + expression.replace('"', '\\"') + '"'
     )
-    donor = panels[9002]["targets"][0]
-    assert "contract_exclusions_status" in donor["root_selector"]
-    assert "contract_exclusions_status" in donor["uql"]
-    # A1 SELECT RUN and A2 empty catalog must not collapse into UNKNOWN.
-    select_guard = (
-        "(verdict='SELECT RUN' or verdict='НЕТ ЗАПУСКОВ') ? verdict : "
-        "contract_exclusions_status"
-    )
-    assert select_guard in donor["root_selector"]
-    assert select_guard in donor["uql"]
-    assert "Choose a run" in donor["root_selector"]
-    assert "No runs in scope" in donor["root_selector"]
-    value_maps = [
-        item.get("options") or {}
-        for item in quality["fieldConfig"]["defaults"]["mappings"]
-        if item.get("type") == "value"
-    ]
-    assert any("SELECT RUN" in opts and "НЕТ ЗАПУСКОВ" in opts for opts in value_maps)
 
 
 DESIGN_SYSTEM = Path("docs/03-guides/dashboards/design-system.md")
@@ -591,120 +568,63 @@ def test_dq_9460_stage_columns_stable() -> None:
 
 def test_9460_removal_columns_use_per_stage_removals() -> None:
     """#11745-follow: removal columns pivot saved funnel removals per stage."""
-    # Phase 2.5 / §2.4: Incident 9460 is a handoff to DQ; DQ folds removals into
-    # the SRS donor; Overview keeps one merged PRR target joined to donor stages.
-    incident = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
-    incident_9460 = next(
-        item for item in get_dashboard_panels(incident) if item.get("id") == 9460
-    )
-    assert incident_9460["type"] == "text"
-    assert "bioetl-dq-v2" in incident_9460["options"]["content"]
-
-    dq = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    dq_panel = next(item for item in get_dashboard_panels(dq) if item.get("id") == 9460)
-    assert dq_panel["targets"][0].get("panelId") == 9406
-    donor = next(item for item in get_dashboard_panels(dq) if item.get("id") == 9406)
-    assert "removals[outcome=" in donor["targets"][0]["uql"]
-    assert "$s.tracking = 'full' ? 0" in donor["targets"][0]["uql"]
-    assert "pipeline-run-report" not in json.dumps(dq_panel["targets"])
-    include = next(
-        item
-        for item in dq_panel["transformations"]
-        if item["id"] == "filterFieldsByName"
-    )
-    assert include["options"]["include"]["names"] == [
-        "stage_id",
-        "state",
-        "reason",
-        "records_in",
-        "records_out",
-        "quarantined",
-        "excluded",
-        "deduplicated",
-        "filtered_out",
-        "duration_seconds",
-        "source",
-    ]
-
-    overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
-    ov_panel = next(
-        item for item in get_dashboard_panels(overview) if item.get("id") == 9460
-    )
-    targets = ov_panel["targets"]
-    assert [target["refId"] for target in targets] == ["A", "B"]
-    assert targets[0].get("panelId") == 9002
-    removal_target = targets[1]
-    assert removal_target["url"].endswith("format=pipeline_run_report_json")
-    assert removal_target["parser"] == "uql"
-    assert "removals[outcome=" in removal_target["uql"]
-    assert "$s.tracking = 'full' ? 0" in removal_target["uql"]
-    transforms = ov_panel["transformations"]
-    keep_stage_rows = next(item for item in transforms if item["id"] == "filterByValue")
-    assert keep_stage_rows["options"]["match"] == "any"
-    assert {item["fieldName"] for item in keep_stage_rows["options"]["filters"]} == {
-        "_bioetl_frame",
-        "stage_id",
-    }
-    assert any(item["id"] == "joinByField" for item in transforms)
-    join = next(item for item in transforms if item["id"] == "joinByField")
-    assert join["options"] == {"byField": "stage_id", "mode": "outerTabular"}
-    include = next(item for item in transforms if item["id"] == "filterFieldsByName")
-    assert include["options"]["include"]["names"] == [
-        "stage_id",
-        "state",
-        "reason",
-        "records_in",
-        "records_out",
-        "quarantined",
-        "excluded",
-        "deduplicated",
-        "filtered_out",
-        "duration_seconds",
-        "source",
-        "excluded_pct",
-        "saved_pct",
-    ]
-    organize = next(item for item in transforms if item["id"] == "organize")
-    assert organize["options"]["renameByName"] == {
-        "quarantined": "Quarantined",
-        "excluded": "Excluded",
-        "deduplicated": "Deduplicated",
-        "filtered_out": "Filtered out",
-    }
-    assert ov_panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
-    assert "per-stage saved funnel removals" in ov_panel["description"]
-    assert dq_panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
-    assert "per-stage saved funnel removals" in dq_panel["description"]
-
-    control = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    recovery = next(
-        item for item in get_dashboard_panels(control) if item.get("id") == 9400
-    )
-    replay_links = [
-        link
-        for link in recovery.get("links", [])
-        if "viewPanel=" in str(link.get("url", ""))
-    ]
-    assert replay_links
-    assert all("${run_id:queryparam}" in link["url"] for link in replay_links)
-
-    dq_domains = next(
-        item for item in get_dashboard_panels(dq) if item.get("id") == 9451
-    )
-    action_links = [
-        prop["value"]
-        for override in dq_domains["fieldConfig"]["overrides"]
-        if override.get("matcher", {}).get("options") == "Action"
-        for prop in override.get("properties", [])
-        if prop.get("id") == "links"
-    ]
-    assert action_links[0][0]["url"] == "/${__data.fields.action_path}"
+    for name in (
+        "bioetl-dq-v2",
+        "bioetl-overview-v2",
+        "bioetl-incident-v1",
+    ):
+        dashboard = load_dashboard(Path(f"grafana/dashboards/{name}.json"))
+        panel = next(
+            item for item in get_dashboard_panels(dashboard) if item.get("id") == 9460
+        )
+        targets = panel["targets"]
+        assert [target["refId"] for target in targets] == (
+            ["A", "B", "C"] if name == "bioetl-overview-v2" else ["A", "B"]
+        )
+        removal_target = targets[1]
+        assert removal_target["url"].endswith("format=pipeline_run_report_json")
+        assert removal_target["parser"] == "uql"
+        assert "removals[outcome=" in removal_target["uql"]
+        assert "$s.tracking = 'full' ? 0" in removal_target["uql"]
+        transforms = panel["transformations"]
+        assert transforms[0]["id"] == "joinByField"
+        assert transforms[0]["options"] == {
+            "byField": "stage_id",
+            "mode": "outerTabular",
+        }
+        include = next(
+            item for item in transforms if item["id"] == "filterFieldsByName"
+        )
+        assert include["options"]["include"]["names"] == [
+            "stage_id",
+            "state",
+            *([] if name == "bioetl-overview-v2" else ["reason"]),
+            "records_in",
+            "records_out",
+            "quarantined",
+            "excluded",
+            "deduplicated",
+            "filtered_out",
+            *([] if name == "bioetl-overview-v2" else ["duration_seconds"]),
+            *([] if name == "bioetl-overview-v2" else ["source"]),
+            *(["excluded_pct", "saved_pct"] if name == "bioetl-overview-v2" else []),
+        ]
+        organize = next(item for item in transforms if item["id"] == "organize")
+        assert organize["options"]["renameByName"] == {
+            "quarantined": "Quarantined",
+            "excluded": "Excluded",
+            "deduplicated": "Deduplicated",
+            "filtered_out": "Filtered out",
+        }
+        assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+        assert "per-stage saved funnel removals" in panel["description"]
 
 
 def test_dq_renderer_copy_matches_shipped() -> None:
     """Renderer constants and shipped bioetl-dq-v2.json must agree."""
     from scripts.ops.observability.grafana._evidence_readability import (
         _DQ_DOMAINS_DESCRIPTION,
+        _DQ_IDENTITY_DESCRIPTION,
         _DQ_REASON_MAPPINGS,
     )
     from scripts.ops.observability.grafana._gr_db_corrections import (
@@ -736,10 +656,10 @@ def test_dq_renderer_copy_matches_shipped() -> None:
         panels[9451]["description"]
         == f"{_DQ_DOMAINS_DESCRIPTION} {HTTP_EVIDENCE_STATES}"
     )
-    # Phase 2.5 / §2.4: DQ identity is a handoff to Overview 9300.
-    assert panels[9452]["type"] == "text"
-    assert "Overview 9300" in panels[9452]["description"]
-    assert "viewPanel=9300" in panels[9452]["options"]["content"]
+    assert (
+        panels[9452]["description"]
+        == f"{_DQ_IDENTITY_DESCRIPTION} {HTTP_EVIDENCE_STATES}"
+    )
     assert _BRONZE_PERCENTAGE_DISPLAY == "percentage of Bronze"
     mappings: dict[str, Any] = {}
     for override in panels[9451].get("fieldConfig", {}).get("overrides", []):

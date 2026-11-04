@@ -68,7 +68,7 @@ BUS: list[dict[str, str]] = [
     },
     {
         "uid": "bioetl-incident-v1",
-        "title": "Incident Workspace",
+        "title": "6. Incident Workspace",
         "path": "6-incident-workspace",
     },
 ]
@@ -81,8 +81,8 @@ FILE_BY_UID = {
     "bioetl-run-explorer-v1": "bioetl-run-explorer-v1.json",
 }
 
-# Phase 2 (rev7 §2.1): Data Quality is a first-class bus chip on all five boards.
-_NAV_HIDDEN_UIDS: frozenset[str] = frozenset()
+# Data Quality remains a supported detail destination through contextual links.
+_NAV_HIDDEN_UIDS = frozenset({"bioetl-dq-v2"})
 
 
 def write_dashboard_source(path: Path, serialized: str, *, root: Path) -> None:
@@ -122,7 +122,7 @@ FIRST_WINDOW_PANEL_BOTTOM = 17
 # First-window copy that was explicitly designed and tested at h=3 must not be
 # sacrificed when the shared navigation grows to its canonical h=4.
 _MINIMUM_FIRST_WINDOW_HEIGHTS: dict[str, dict[int, int]] = {
-    "bioetl-run-explorer-v1": {1: 3, 3010: 12},
+    "bioetl-run-explorer-v1": {1: 2, 3010: 12},
     "bioetl-incident-v1": {2005: 4, 2010: 4},
     "bioetl-dq-v2": {9406: 5},
     "bioetl-control-plane-v1": {},
@@ -222,8 +222,7 @@ _OVERVIEW_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     99: (0, 2, 17, 3),
     9604: (17, 2, 7, 3),
     9603: (0, 5, 12, 7),
-    # Phase 4.3 / rev7 §4.3: h in 7–8 with limitField=6 (JSON authoring source).
-    9002: (12, 5, 12, 8),
+    9002: (12, 5, 12, 7),
     9300: (0, 12, 24, 7),
 }
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
@@ -240,7 +239,7 @@ _RECOVERY_ACTION_HTML = (
 )
 _RUN_EXPLORER_UID = "bioetl-run-explorer-v1"
 CHIP_BASE = (
-    "box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;"
+    "box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;"
     "border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere"
 )
 # Theme-safe chips: slate link surface works on dark and light Grafana themes.
@@ -248,30 +247,31 @@ LINK_STYLE = (
     f"{CHIP_BASE};color:#f8fafc;background:#334155;"
     "border:2px solid #94a3b8;text-decoration:none"
 )
+# Run Explorer keeps the slate chip face, but the chip must not navigate.
+INACTIVE_HANDOFF_STYLE = f"{LINK_STYLE};cursor:default;pointer-events:none"
 # Current chip: blue fill + cyan border + underline (not color-only).
-# Phase 2 (rev7 §2.1): non-link <span class="bioetl-nav-current"> — not <a>.
+# Rendered as <a aria-disabled> so Grafana HTML sanitizer keeps styles
+# (bare <span aria-current> may lose attributes/styles in text panels).
 CURRENT_STYLE = (
     f"{CHIP_BASE};color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;"
-    "cursor:default;text-decoration:underline;pointer-events:none;display:inline-block"
+    "cursor:default;text-decoration:underline;pointer-events:none"
 )
 CONTAINER_STYLE = (
     "display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;"
     "padding:0 2px;overflow:visible;white-space:normal;font-size:16px"
 )
 _PROVIDER_VARIABLE_UIDS = {"bioetl-provider-health-v2", "bioetl-incident-v1"}
-# Phase 4.1 removed DQ $stage; keep only retired/runtime boards that still use it.
-_STAGE_TARGET_UIDS = {"bioetl-runtime"}
+_STAGE_TARGET_UIDS = {"bioetl-runtime", "bioetl-dq-v2"}
 _PRESERVE_SCOPE_TOOLTIP = "Preserves selected scope and time range."
 
 NAV_DESCRIPTION = (
     "Sanitizer-compatible navigation bus with native keyboard focus. "
-    "Shared five-chip bus (19.5% each): Run Explorer / Replay Readiness / "
-    "Run Overview / Data Quality / Incident Workspace. "
-    'Current workspace is a non-interactive <span class="bioetl-nav-current"> '
-    "(aria-current=page, underlined) so active state is not color-only and is "
-    "not a link. Handoffs open same-tab, preserve current time range, and "
-    "document scope reset or context mapping on cross-scope transitions. "
-    "Chip colors are theme-safe for dark and light."
+    "Shared link-only bus: Run Explorer / Replay Readiness / Run Overview / "
+    "Incident Workspace. Data Quality is a contextual detail destination. "
+    "Current workspace is a non-interactive chip (aria-disabled + data-current=page, "
+    "underlined) so active state is not color-only. Handoffs open same-tab, "
+    "preserve current time range, and document scope reset or context mapping "
+    "on cross-scope transitions. Chip colors are theme-safe for dark and light."
 )
 
 
@@ -331,10 +331,19 @@ def _chip_html(item: dict[str, str], *, current_uid: str, source_uid: str) -> st
     short = item["title"].split(". ", 1)[-1]
     if item["uid"] == current_uid:
         title_attr = html.escape(f"{item['title']} ({short})", quote=True)
+        # Anchor keeps inline styles under Grafana sanitizer; not in tab order.
         return (
-            f'<span class="bioetl-nav-current" aria-current="page" '
-            f'data-current="page" title="{title_attr}" style="{CURRENT_STYLE}">'
-            f"{item['title']}</span>"
+            f'<a class="bioetl-nav-current" href="#{item["uid"]}" '
+            f'aria-disabled="true" aria-current="page" data-current="page" '
+            f'tabindex="-1" title="{title_attr}" style="{CURRENT_STYLE}">'
+            f"{item['title']}</a>"
+        )
+    if current_uid == _RUN_EXPLORER_UID:
+        title_attr = html.escape(f"{item['title']} ({short})", quote=True)
+        return (
+            f'<a class="bioetl-nav-link" href="#{item["uid"]}" '
+            f'aria-disabled="true" tabindex="-1" title="{title_attr}" '
+            f'style="{INACTIVE_HANDOFF_STYLE}">{item["title"]}</a>'
         )
     tooltip = nav_link_tooltip(source_uid=source_uid, target=item)
     title_attr = html.escape(tooltip, quote=True)
@@ -361,6 +370,8 @@ def render_html(*, current_uid: str) -> str:
 
 
 def render_links(*, current_uid: str) -> list[dict[str, Any]]:
+    if current_uid == _RUN_EXPLORER_UID:
+        return []
     links: list[dict[str, Any]] = []
     for item in BUS:
         if item["uid"] == current_uid or item["uid"] in _NAV_HIDDEN_UIDS:
@@ -1107,7 +1118,7 @@ _SELECT_RUN_EMPTY = (
     "VALID EMPTY if the selected run has no rows for this table."
 )
 _RUN_EXPLORER_URL = (
-    "/d/bioetl-run-explorer-v1/run-explorer?"
+    "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?"
     "${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}"
     "&${run_id:queryparam}&${__url_time_range}"
 )
@@ -1940,6 +1951,12 @@ def _attach_nav_bus(nav: dict[str, Any], *, current_uid: str) -> None:
         and not any(f"/d/{uid}/" in str(link.get("url", "")) for uid in bus_uids)
     ]
     nav["links"] = render_links(current_uid=current_uid) + extra_links
+    if current_uid == _RUN_EXPLORER_UID:
+        nav["description"] = (
+            "Chips on Run Explorer do not open other dashboards. "
+            "Open Trust, Overview, Pipeline Diagnostics, Provider Health, "
+            "and Data Quality from Inspect Recent Runs."
+        )
     nav.pop("transparent", None)
 
 
@@ -2491,37 +2508,31 @@ def apply_to_dashboard(
         payload, provider_declared=current_uid in _PROVIDER_VARIABLE_UIDS
     )
     panels = payload.get("panels") or []
-    nav = next((p for p in panels if isinstance(p, dict) and p.get("id") == 1000), None)
-    if nav is None:
-        # Phase 2 §2.1: Run Explorer also carries panel 1000.
-        nav = {
-            "id": 1000,
-            "type": "text",
-            "title": "",
-            "gridPos": {"x": 0, "y": 0, "w": 24, "h": NAV_HEIGHT},
-            "options": {"mode": "html", "content": ""},
-            "links": [],
-        }
-        panels.insert(0, nav)
-        payload["panels"] = panels
-        for panel in panels:
-            if not isinstance(panel, dict) or panel is nav:
-                continue
-            grid = panel.get("gridPos")
-            if isinstance(grid, dict) and isinstance(grid.get("y"), int):
-                grid["y"] = int(grid["y"]) + NAV_HEIGHT
-    compact_replay = current_uid == "bioetl-control-plane-v1" and any(
-        isinstance(p, dict) and p.get("id") == 9430 for p in panels
-    )
-    if not compact_replay:
-        _stamp_nav_panel(nav, panels)
-        _restore_minimum_first_window_heights(panels, current_uid=current_uid)
-        _layout_uid_first_window(panels, current_uid=current_uid)
-        _reclaim_first_window_overflow(nav, panels, current_uid=current_uid)
-        _layout_uid_first_window(panels, current_uid=current_uid)
-        _normalize_collapsed_row_children(panels)
-        _layout_uid_detail_panels(panels, current_uid=current_uid)
-    _attach_nav_bus(nav, current_uid=current_uid)
+    if current_uid == _RUN_EXPLORER_UID:
+        payload["panels"] = [
+            panel
+            for panel in panels
+            if not (isinstance(panel, dict) and panel.get("id") == 1000)
+        ]
+        _restore_minimum_first_window_heights(
+            payload["panels"], current_uid=current_uid
+        )
+    else:
+        nav = next((p for p in panels if p.get("id") == 1000), None)
+        if nav is None:
+            raise SystemExit(f"{safe_path.name}: missing panel id=1000")
+        compact_replay = current_uid == "bioetl-control-plane-v1" and any(
+            p.get("id") == 9430 for p in panels
+        )
+        if not compact_replay:
+            _stamp_nav_panel(nav, panels)
+            _restore_minimum_first_window_heights(panels, current_uid=current_uid)
+            _layout_uid_first_window(panels, current_uid=current_uid)
+            _reclaim_first_window_overflow(nav, panels, current_uid=current_uid)
+            _layout_uid_first_window(panels, current_uid=current_uid)
+            _normalize_collapsed_row_children(panels)
+            _layout_uid_detail_panels(panels, current_uid=current_uid)
+        _attach_nav_bus(nav, current_uid=current_uid)
     stamp_selector_columns(payload)
     # Remove our generated row before other appenders calculate their tail y.
     payload["panels"] = [p for p in payload["panels"] if p.get("id") != 9700]
@@ -2713,14 +2724,13 @@ def apply_to_dashboard(
                     value["tooltip"] = (
                         "Saved Provider Evidence for the selected Run ID. CURRENT provider alert conditions remain in Incident Workspace and do not prove this saved verdict."
                     )
-            if isinstance(value.get("url"), str) and "/d/bioetl-dq-v2/" in value["url"]:
-                # Phase 4.1: DQ no longer exposes $stage — drop stale query params.
-                value["url"] = (
-                    value["url"]
-                    .replace("&var-stage=$__all", "")
-                    .replace("${stage:queryparam}&", "")
-                    .replace("&${stage:queryparam}", "")
-                    .replace("${stage:queryparam}", "")
+            if (
+                isinstance(value.get("url"), str)
+                and current_uid == "bioetl-incident-v1"
+                and value["url"].startswith("/d/bioetl-dq-v2/")
+            ):
+                value["url"] = value["url"].replace(
+                    "${stage:queryparam}", "var-stage=$__all"
                 )
             pending_links.extend(value.values())
         elif isinstance(value, list):
@@ -2750,12 +2760,7 @@ def apply_to_dashboard(
             if http_states not in description:
                 panel["description"] = f"{description} {http_states}".strip()
     _document_required_http_evidence(payload)
-    # Phase 2.5 donor–consumer budget must run after identity/layout rebuilds so
-    # re-running this generator does not wipe SRS/PRR donors or markdown handoffs.
-    _apply_phase25_srs_prr_budget(payload, current_uid=current_uid)
     _migrate_grafana_schema42(payload)
-    _neutralize_mapped_status_thresholds(payload)
-    _remove_dead_organize_renames(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:
@@ -2772,134 +2777,6 @@ def apply_to_dashboard(
     return True
 
 
-def _apply_phase25_srs_prr_budget(payload: dict[str, Any], *, current_uid: str) -> None:
-    """Re-apply Phase 2.5 donors after nav/layout builders (idempotent)."""
-    from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
-        _stamp_no_runs_value_maps,
-        apply_control_plane,
-        apply_dq,
-        apply_incident,
-        apply_overview,
-    )
-    from scripts.ops.observability.grafana.apply_phase2_remainder import (
-        _ensure_run_id_on_cp_scope_links,
-        _move_data_links_to_panel_links,
-        _named_f13_rule,
-        _rewrite_links_in_obj,
-        _walk as _walk_remainder_panels,
-    )
-
-    applicators = {
-        "bioetl-overview-v2": apply_overview,
-        "bioetl-dq-v2": apply_dq,
-        "bioetl-incident-v1": apply_incident,
-        "bioetl-control-plane-v1": apply_control_plane,
-    }
-    apply = applicators.get(current_uid)
-    if apply is not None:
-        apply(payload)
-    # evidence_readability stamps SELECT RUN maps before Phase 2.5 renames
-    # Processing/Overall verdict/Trust; re-apply against the donor organize titles.
-    from scripts.ops.observability.grafana._evidence_readability import (
-        _selection_summary,
-    )
-
-    for panel in _walk_remainder_panels(payload.get("panels", [])):
-        if panel.get("title") == "Review Selected Run Status":
-            _selection_summary(panel)
-    # A2 empty-catalog maps live in phase25 main(); keep them on every regenerate.
-    _stamp_no_runs_value_maps(payload)
-    # Phase 2 remainder link/F-13 rules must follow donors so render_nav_bus alone
-    # stays the durable path (no separate remainder CLI required).
-    for panel in _walk_remainder_panels(payload.get("panels", [])):
-        if panel.get("id") == 9400:
-            _move_data_links_to_panel_links(panel)
-            if current_uid == "bioetl-control-plane-v1":
-                _ensure_run_id_on_cp_scope_links(panel)
-    _rewrite_links_in_obj(payload)
-    _named_f13_rule(payload)
-    if current_uid == "bioetl-incident-v1":
-        # Phase 4.2/4.3: keep 8808 band widths and domains 9451 h=8 after layout
-        # builders that still stamp h=12 for domain tables.
-        from scripts.ops.observability.grafana.apply_phase4_reflow import (
-            apply_incident as apply_phase4_incident_reflow,
-        )
-
-        apply_phase4_incident_reflow(payload)
-
-
-def _keep_healthy_zero_threshold(panel: dict[str, Any], titles: set[str]) -> bool:
-    if panel.get("title") not in titles:
-        return False
-    steps = (
-        panel.get("fieldConfig", {})
-        .get("defaults", {})
-        .get("thresholds", {})
-        .get("steps", [])
-    )
-    if steps and isinstance(steps[0], dict) and steps[0].get("value") is None:
-        steps[0]["color"] = "green"
-    return True
-
-
-def _has_mapped_status(mappings: list[dict[str, Any]], tokens: tuple[str, ...]) -> bool:
-    for mapping in mappings:
-        if not isinstance(mapping, dict) or not isinstance(
-            mapping.get("options"), dict
-        ):
-            continue
-        for key, value in mapping["options"].items():
-            text = value.get("text", "") if isinstance(value, dict) else value
-            if any(
-                token in str(candidate).upper()
-                for token in tokens
-                for candidate in (key, text)
-            ):
-                return True
-    return False
-
-
-def _remove_dead_organize_renames(payload: dict[str, Any]) -> None:
-    """Drop rename mappings for fields the same organize transform excludes."""
-    for panel in _walk_panels(payload.get("panels", [])):
-        for transform in panel.get("transformations", []):
-            if transform.get("id") != "organize":
-                continue
-            options = transform.get("options", {})
-            index = options.get("indexByName")
-            rename = options.get("renameByName")
-            if not isinstance(index, dict) or not isinstance(rename, dict):
-                continue
-            options["renameByName"] = {
-                field: label for field, label in rename.items() if field in index
-            }
-
-
-def _neutralize_mapped_status_thresholds(payload: dict[str, Any]) -> None:
-    """Keep missing status values neutral when text mappings provide real colors."""
-    status_tokens = ("OK", "WARN", "CRIT", "ERROR", "UNKNOWN", "INCOMPLETE")
-    green_zero_panels = {
-        "Monitor Runtime Error Rate",
-        "Monitor Worst Stage Lag",
-        "Monitor Active Blocker Count",
-        "Monitor Manifest (30m)",
-        "Monitor Ledger (30m)",
-        "Monitor Global Read Failures (30m)",
-    }
-    for panel in _walk_panels(payload.get("panels", [])):
-        if panel.get("type") != "stat" or _keep_healthy_zero_threshold(
-            panel, green_zero_panels
-        ):
-            continue
-        defaults = panel.get("fieldConfig", {}).get("defaults", {})
-        mapped_status = _has_mapped_status(defaults.get("mappings", []), status_tokens)
-        steps = defaults.get("thresholds", {}).get("steps", [])
-        if not mapped_status or not steps or not isinstance(steps[0], dict):
-            continue
-        if str(steps[0].get("color", "")).lower() in {"green", "#73bf69", "#56a64b"}:
-            steps[0]["color"] = "gray"
-
-
 def _migrate_grafana_schema42(payload: dict[str, Any]) -> None:
     """Author the pinned Grafana 12.2.5 v1 schema instead of runtime migration.
 
@@ -2914,7 +2791,6 @@ def _migrate_grafana_schema42(payload: dict[str, Any]) -> None:
         },
         "-- Grafana --": {"uid": "-- Grafana --"},
         "-- Dashboard --": {"type": "datasource", "uid": "-- Dashboard --"},
-        "-- Mixed --": {"type": "datasource", "uid": "-- Mixed --"},
     }
     pending: list[object] = [payload]
     while pending:

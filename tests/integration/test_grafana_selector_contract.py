@@ -552,10 +552,7 @@ def test_provider_health_selector_follows_selected_run() -> None:
     variables = {item["name"]: item for item in dashboard["templating"]["list"]}
     assert "provider" not in variables
     panel = _panel_by_id("bioetl-overview-v2.json", 9480)
-    # Phase 2.5: provider evidence reuses donor 9002 via Dashboard DS.
-    assert panel["targets"][0].get("panelId") == 9002
-    donor = _panel_by_id("bioetl-overview-v2.json", 9002)
-    query = donor["targets"][0]["url"]
+    query = panel["targets"][0]["url"]
     assert query.startswith("/ops/observability/selected-run-status?")
     assert "pipeline=${pipeline}" in query
     assert "run_id=${run_id}" in query
@@ -576,9 +573,6 @@ def test_http_selector_frames_declare_columns_for_empty_catalogs() -> None:
             assert infinity["url"].count("allow_stale=1") == 1, path.name
             assert infinity["parser"] == "backend", path.name
             assert infinity["root_selector"] == SELECTOR_ROWS, path.name
-            # A2 empty catalog (rev7 §3.2): client fallback matches API label.
-            assert "НЕТ ЗАПУСКОВ" in SELECTOR_ROWS
-            assert "NO MATCHES" not in SELECTOR_ROWS
             assert infinity["columns"] == [
                 {"selector": field, "text": f"__{field}", "type": "string"}
                 for field in ("text", "value")

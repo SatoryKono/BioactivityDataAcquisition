@@ -172,7 +172,7 @@ def _parse_document(path: Path, raw: bytes) -> tuple[object | None, list[str]]:
     if raw.startswith(_LFS_POINTER_PREFIX):
         return None, [_location(path, "-", "yaml", "LFS pointer is unavailable")]
     try:
-        document = yaml.load(raw, Loader=_StrictCassetteLoader)  # noqa: S506, bandit:nosec
+        document = yaml.load(raw, Loader=_StrictCassetteLoader)
         _reject_alias_cycles(document, set(), set())
     except _AliasExpansionError:
         return None, [

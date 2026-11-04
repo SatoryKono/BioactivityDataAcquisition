@@ -58,8 +58,9 @@ ______________________________________________________________________
   PromQL must not add a `run_id` label. The 12h UNKNOWN-vs-OK contract uses
   provider telemetry: `bioetl_provider_current_status` plus
   `bioetl_provider_range_operational_ok` in the active Grafana range.
-- `$stage` defaults to **All** on Pipeline Diagnostics (`bioetl-runtime`). The
-  shipped Data Quality dashboard no longer defines a stage selector.
+- `$stage` defaults to **All** on Pipeline Diagnostics (`bioetl-runtime`) and
+  Data Quality (`bioetl-dq-v2`). Cross-dashboard handoffs pass
+  `var-stage=$__all` instead of forcing `unknown`.
 - `$provider` on Provider Health and Incident Workspace is **derived**: first
   name segment of `$pipeline` when pipeline is set (same heuristic as runtime
   `$provider_hint`); else first segment of `$workflow` when workflow is set;
@@ -69,11 +70,11 @@ ______________________________________________________________________
 
 | Dashboard UID | Variables |
 |---|---|
-| `bioetl-control-plane-v1` | `$pipeline`, `$run_id`, `$run_type`, `$workflow` |
-| `bioetl-dq-v2` | `$pipeline`, `$run_id`, `$run_type`, `$selected_pipeline`, `$selected_run_id`, `$workflow` |
-| `bioetl-incident-v1` | `$pipeline`, `$provider`, `$read_latency_quantile`, `$run_id`, `$run_type`, `$workflow` |
-| `bioetl-overview-v2` | `$pipeline`, `$run_id`, `$run_type`, `$selected_pipeline`, `$selected_run_id`, `$workflow` |
-| `bioetl-run-explorer-v1` | `$lookup_run_id`, `$pipeline`, `$run_id`, `$run_type`, `$workflow` |
+| `bioetl-control-plane-v1` | `$pipeline`, `$provider_for_pipeline`, `$read_latency_quantile`, `$run_id`, `$run_type`, `$selected_pipeline`, `$selected_run_id`, `$workflow` |
+| `bioetl-dq-v2` | `$pipeline`, `$provider_for_pipeline`, `$run_id`, `$run_type`, `$selected_pipeline`, `$selected_run_id`, `$stage`, `$workflow` |
+| `bioetl-incident-v1` | `$pipeline`, `$provider`, `$provider_for_pipeline`, `$read_latency_quantile`, `$run_id`, `$run_type`, `$selected_pipeline`, `$selected_run_id`, `$workflow` |
+| `bioetl-overview-v2` | `$pipeline`, `$provider_for_pipeline`, `$run_id`, `$run_type`, `$selected_pipeline`, `$selected_run_id`, `$workflow` |
+| `bioetl-run-explorer-v1` | `$lookup_run_id`, `$pipeline`, `$provider_for_pipeline`, `$run_id`, `$run_type`, `$selected_pipeline`, `$selected_run_id`, `$workflow` |
 | `bioetl-silver-reject-explorer` (retired) | `$field`, `$payload_hash`, `$pipeline`, `$quarantine_run_id`, `$reason_code`, `$run_type` |
 | `bioetl-workflow-overview` (retired) | `$pipeline`, `$pipeline_context`, `$pipeline_context_exact`, `$provider_context`, `$provider_context_exact`, `$run_id`, `$run_type`, `$run_type_context`, `$run_type_context_exact`, `$status`, `$step_kind`, `$step_status`, `$workflow`, `$workflow_context` |
 | `bioetl-alerts-slo` (retired) | `$pipeline`, `$run_type`, `$workflow` |

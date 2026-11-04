@@ -294,7 +294,7 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         "Run Explorer",
         "Replay Readiness",
         "Run Overview",
-        "Incident Workspace",
+        "6. Incident Workspace",
     )
     for path in sorted(DASHBOARD_DIR.glob("bioetl-*.json")):
         dashboard = _load(path.name)

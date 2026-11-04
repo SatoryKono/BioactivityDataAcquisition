@@ -133,20 +133,10 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
     # Catalog-approved runtime/CI roots are governed tooling, not root clutter.
     # `.gemini` stays inside that set and does not raise tracked_root_dirs_after.
     # Its tracked surface is the Code Assist repo file only.
-    # `.vscode` is the same curated editor-metadata class as `.zed` (catalog
-    # approved_roots); counting it would silently inflate the closeout baseline.
     assert (
         len(
             root_dirs
-            - {
-                ".claude",
-                ".devin",
-                ".zed",
-                ".opencode",
-                ".circleci",
-                ".gemini",
-                ".vscode",
-            }
+            - {".claude", ".devin", ".zed", ".opencode", ".circleci", ".gemini"}
         )
         == payload["outcomes"]["5847"]["tracked_root_dirs_after"]
     )

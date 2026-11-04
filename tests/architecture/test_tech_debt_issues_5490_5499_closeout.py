@@ -109,9 +109,7 @@ def test_issue_5494_ranked_tail_tier_violations_block() -> None:
 
 def test_issue_5496_control_plane_root_routes_through_explicit_seams() -> None:
     import bioetl.application.services.control_plane as control_plane_root
-    import bioetl.application.services.evidence_location as evidence_location_root
 
-    # control_plane seams after evidence_location extraction to application.services
     assert set(control_plane_root.RESPONSIBILITY_SEAMS) == {
         "effective_config",
         "forensic",
@@ -124,11 +122,6 @@ def test_issue_5496_control_plane_root_routes_through_explicit_seams() -> None:
         control_plane_root._LAZY_ATTR_EXPORTS["ForensicRunDiffService"][0]
         == "bioetl.application.services.control_plane.forensic"
     )
-    # evidence_location remains an explicit first-class application seam
-    assert {
-        "EvidenceLocationRegistrationService",
-        "EvidenceLocationResolver",
-    }.issubset(set(evidence_location_root.__all__))
 
 
 def test_issue_5497_pandera_runtime_monkeypatching_stays_retired() -> None:

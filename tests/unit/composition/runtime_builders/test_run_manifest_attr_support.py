@@ -10,9 +10,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from bioetl.composition.runtime_builders._run_manifest_creation_support_helpers import (
-    read_attr,
-)
+from bioetl.composition.runtime_builders._run_manifest_attr_support import read_attr
 
 pytestmark = pytest.mark.unit
 

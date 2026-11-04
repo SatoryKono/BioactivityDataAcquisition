@@ -320,10 +320,6 @@ async def handle_selected_run_status(
     Mode A2: unresolved ``run_id`` auto-selects latest in scope; empty catalog
     returns «НЕТ ЗАПУСКОВ». An explicit URL ``run_id`` wins over auto-select.
     Missing manifest catalog is QUERY ERROR, not an empty catalog.
-
-    §3.4: concurrent identical scopes share one physical load via the
-    HealthServer-local selected-run-status cache (TTL 30s). Transport and
-    capacity failures raise so the cache keeps the last good snapshot.
     """
     pipeline = host._read_required_param(query, "pipeline")
     requested_run_id = host._read_optional_param(query, "run_id") or "-"
@@ -347,17 +343,12 @@ async def handle_selected_run_status(
             skip_scope_check=a2_resolved,
         )
 
-    async def cached_load() -> dict[str, object]:
-        # Propagate ForensicEndpointUnavailable / IO failures so the cache does
-        # not store QUERY ERROR frames as a fresh success payload.
-        return await run_bounded_forensic_operation(
+    try:
+        payload = await run_bounded_forensic_operation(
             limiter=host._forensic_endpoint_limiter,
             operation_factory=lambda: asyncio.to_thread(load),
             endpoint="selected-run-status",
         )
-
-    try:
-        payload = await host._selected_run_status_cache.read(query, cached_load)
     except ForensicEndpointUnavailable as exc:
         payload = unavailable_status(
             pipeline, requested_run_id, _QUERY_ERROR, exc.reason

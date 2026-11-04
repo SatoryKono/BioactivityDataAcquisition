@@ -86,14 +86,20 @@
         "label": "Pipeline",
         "multi": false,
         "name": "pipeline",
-        "options": [],
+        "options": [
+          {
+            "selected": false,
+            "text": "unknown",
+            "value": "unknown"
+          }
+        ],
         "query": {
           "queryType": "infinity",
           "refId": "variable",
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -150,7 +156,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -214,7 +220,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -245,6 +251,193 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "-",
+          "value": "-"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
+        "definition": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
+        "description": "Concrete SELECTED RUN identity from /ops/control-plane/selector-context (selected.run_id). When Grafana $run_id is still '-', A2 latest fills this value so pipeline-run-report / artifact queries do not stay unresolved_scope.",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Selected Run ID",
+        "multi": false,
+        "name": "selected_run_id",
+        "options": [
+          {
+            "selected": true,
+            "text": "-",
+            "value": "-"
+          }
+        ],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "($id := selected.run_id; $exists($id) and $string($id) != \"\" ? [{\"text\":$string($id),\"value\":$string($id)}] : [{\"text\":\"-\",\"value\":\"-\"}])",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": true,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
+        "definition": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
+        "description": "Concrete SELECTED RUN pipeline from /ops/control-plane/selector-context (selected.pipeline). When Grafana $pipeline is still All/aggregate and A2 fills selected_run_id, this carries the concrete pipeline so pipeline-run-report / artifact queries do not stay unresolved_scope.",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Selected Pipeline",
+        "multi": false,
+        "name": "selected_pipeline",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "All"
+          }
+        ],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "($p := selected.pipeline; $exists($p) and $string($p) != \"\" and $string($p) != \"unknown\" ? [{\"text\":$string($p),\"value\":$string($p)}] : [{\"text\":\"All\",\"value\":\"All\"}])",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": true,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "p95",
+          "value": "0.95"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Read latency",
+        "multi": false,
+        "name": "read_latency_quantile",
+        "description": "Select one control-plane global read-latency quantile. Default p95 keeps a single series per store/operation instead of overlaying p50/p95/p99. Track Global Read Latency shows last and max for the selected quantile.",
+        "options": [
+          {
+            "selected": false,
+            "text": "p50",
+            "value": "0.50"
+          },
+          {
+            "selected": true,
+            "text": "p95",
+            "value": "0.95"
+          },
+          {
+            "selected": false,
+            "text": "p99",
+            "value": "0.99"
+          }
+        ],
+        "query": "p50 : 0.50, p95 : 0.95, p99 : 0.99",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "name": "provider_for_pipeline",
+        "label": "Provider for pipeline",
+        "type": "query",
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "refresh": 1,
+        "sort": 1,
+        "regex": "",
+        "skipUrlSync": true,
+        "options": [],
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
+        "query": {
+          "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
+          "refId": "StandardVariableQuery"
+        },
+        "description": "Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input."
       }
     ]
   },
@@ -282,10 +475,10 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">Run Explorer</a><span class=\"bioetl-nav-current\" aria-current=\"page\" data-current=\"page\" title=\"Replay Readiness (Replay Readiness)\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none;display:inline-block\">Replay Readiness</span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Overview (Run Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Data Quality (Data Quality). Preserves selected scope and time range.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Incident Workspace</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">Run Explorer</a><a class=\"bioetl-nav-current\" href=\"#bioetl-control-plane-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"Replay Readiness (Replay Readiness)\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">Replay Readiness</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Overview (Run Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
       },
       "title": "",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared five-chip bus (19.5% each): Run Explorer / Replay Readiness / Run Overview / Data Quality / Incident Workspace. Current workspace is a non-interactive <span class=\"bioetl-nav-current\"> (aria-current=page, underlined) so active state is not color-only and is not a link. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Run Overview / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
       "type": "text",
       "links": [
         {
@@ -313,21 +506,9 @@
           "tags": []
         },
         {
-          "title": "Data Quality",
-          "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "Data Quality (Data Quality). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "Incident Workspace",
+          "title": "6. Incident Workspace",
           "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
+          "tooltip": "6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -352,34 +533,35 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Inspect Scope & Evidence",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">${pipeline:text} | <code style=\"font:inherit;background:none;border:0;padding:0\">${run_id}</code><br>Blockers: <em>Review Exact Replay Checks</em>.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">${pipeline:text} | <code style=\"font:inherit;background:none;border:0;padding:0\">${run_id}</code><br>Blockers: <em>Review Exact Replay Checks</em>.</div>",
+        "dataLinks": [
+          {
+            "title": "Open Replay Safety Diagnostics",
+            "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&viewPanel=130&${__url_time_range}",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open Selected-Run Trust",
+            "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&viewPanel=9418&${__url_time_range}",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open Lineage Validation",
+            "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&viewPanel=9415&${__url_time_range}",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open Retention Compliance",
+            "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9416&${__url_time_range}",
+            "targetBlank": false,
+            "includeVars": false
+          }
+        ]
       },
-      "links": [
-        {
-          "title": "Open Replay Safety Diagnostics",
-          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9423&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
-        },
-        {
-          "title": "Open Selected-Run Trust",
-          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9418&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
-        },
-        {
-          "title": "Open Lineage Validation",
-          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9415&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
-        },
-        {
-          "title": "Open Retention Compliance",
-          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9416&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
-        }
-      ]
+      "links": []
     },
     {
       "id": 9422,
@@ -392,10 +574,10 @@
         "h": 3
       },
       "datasource": {
-        "type": "datasource",
-        "uid": "-- Dashboard --"
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
       },
-      "description": "SELECTED RUN · Saved exact-replay assessment, not CURRENT health. OK/WARN/CRIT palette: READY=OK, INSUFFICIENT=WARN, BLOCKED=CRIT. UNSUPPORTED/UNKNOWN/INCOMPLETE are gray. SELECT RUN means no Run ID is selected; QUERY ERROR means backend unavailable or request failure. UNKNOWN means no assessed value, never READY. Open replay checks for basis. Occurrence-only versus semantic drift still requires exact-run evidence; current write-risk telemetry is not proof for this run. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+      "description": "SELECTED RUN · Saved exact-replay assessment, not CURRENT health. OK/WARN/CRIT palette: READY=OK, INSUFFICIENT=WARN, BLOCKED=CRIT. UNSUPPORTED/UNKNOWN/INCOMPLETE are gray. SELECT RUN means no Run ID is selected; QUERY ERROR means backend unavailable or request failure. UNKNOWN means no assessed value, never READY. Open replay checks for basis. Occurrence-only versus semantic drift still requires exact-run evidence; current write-risk telemetry is not proof for this run. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
       "options": {
         "reduceOptions": {
           "values": true,
@@ -453,10 +635,6 @@
                 "INCOMPLETE": {
                   "text": "INCOMPLETE",
                   "color": "#555555"
-                },
-                "НЕТ ЗАПУСКОВ": {
-                  "text": "НЕТ ЗАПУСКОВ",
-                  "color": "gray"
                 }
               }
             },
@@ -488,34 +666,24 @@
       },
       "targets": [
         {
-          "panelId": 9418,
           "refId": "A",
-          "withTransforms": false,
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "root_selector": "replay_readiness",
+          "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
           "datasource": {
-            "type": "datasource",
-            "uid": "-- Dashboard --"
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
           }
         }
       ],
       "transformations": [
-        {
-          "id": "filterByValue",
-          "options": {
-            "type": "include",
-            "match": "all",
-            "filters": [
-              {
-                "fieldName": "_bioetl_frame",
-                "config": {
-                  "id": "equal",
-                  "options": {
-                    "value": "replay_readiness"
-                  }
-                }
-              }
-            ]
-          }
-        },
         {
           "id": "filterFieldsByName",
           "options": {
@@ -542,17 +710,26 @@
       "title": "Review Exact Replay Checks",
       "description": "SELECTED RUN · One row per readiness check for this Run ID. Fail blocks replay. Unknown is not a pass. Valid-empty check output stays VALID EMPTY. Request failure is QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "datasource": {
-        "type": "datasource",
-        "uid": "-- Dashboard --"
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
       },
       "targets": [
         {
-          "panelId": 9418,
           "refId": "A",
-          "withTransforms": false,
+          "type": "json",
+          "source": "url",
+          "parser": "uql",
+          "format": "table",
+          "root_selector": "",
+          "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "uql": "parse-json | jsonata \"replay_checks^(result='fail' ? 0 : result='unknown' ? 1 : result='pass' ? 2 : 3)\"",
           "datasource": {
-            "type": "datasource",
-            "uid": "-- Dashboard --"
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
           }
         }
       ],
@@ -571,37 +748,6 @@
         }
       },
       "transformations": [
-        {
-          "id": "filterByValue",
-          "options": {
-            "type": "include",
-            "match": "all",
-            "filters": [
-              {
-                "fieldName": "_bioetl_frame",
-                "config": {
-                  "id": "equal",
-                  "options": {
-                    "value": "replay_checks"
-                  }
-                }
-              }
-            ]
-          }
-        },
-        {
-          "id": "filterFieldsByName",
-          "options": {
-            "include": {
-              "names": [
-                "code",
-                "result",
-                "reason",
-                "evidence_ref"
-              ]
-            }
-          }
-        },
         {
           "id": "organize",
           "options": {
@@ -1022,6 +1168,14 @@
               {
                 "id": "custom.hidden",
                 "value": false
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": true,
+                  "tooltip": true
+                }
               }
             ]
           },
@@ -1070,10 +1224,6 @@
                       "UNFINISHED": {
                         "text": "UNFINISHED",
                         "color": "#A3A3A3"
-                      },
-                      "НЕТ ЗАПУСКОВ": {
-                        "text": "НЕТ ЗАПУСКОВ",
-                        "color": "gray"
                       }
                     }
                   }
@@ -1142,10 +1292,6 @@
                       "SELECT RUN": {
                         "text": "SELECT RUN",
                         "color": "#A3A3A3"
-                      },
-                      "НЕТ ЗАПУСКОВ": {
-                        "text": "НЕТ ЗАПУСКОВ",
-                        "color": "gray"
                       }
                     }
                   }
@@ -1226,7 +1372,7 @@
                 "value": [
                   {
                     "title": "View trust reasons",
-                    "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
+                    "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9418&${__url_time_range}",
                     "includeVars": false,
                     "targetBlank": false
                   }
@@ -1266,18 +1412,18 @@
       },
       "targets": [
         {
-          "refId": "A",
-          "type": "json",
-          "source": "url",
-          "parser": "uql",
           "format": "table",
-          "root_selector": "($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append([presentation_trust.($base := $sift($, function($v,$k){$k != 'trust_reasons_action'}); $merge([$base, reasons_count > 0 ? {'trust_reasons_action':'View trust reasons'} : {'trust_action_note': reasons_count = 0 ? 'No trust issues' : 'Not assessed'}, {'_bioetl_frame': 'trust'}]))], $map(replay_readiness, function($row){$merge([$row, {'_bioetl_frame': 'replay_readiness'}])})), $map(replay_checks^(result='fail' ? 0 : result='unknown' ? 1 : result='pass' ? 2 : 3), function($row){$merge([$row, {'_bioetl_frame': 'replay_checks'}])})), function($row){$merge([$schema, $row])}))",
+          "parser": "uql",
+          "refId": "A",
+          "root_selector": "",
+          "source": "url",
+          "type": "json",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
-            "method": "GET",
-            "data": ""
+            "data": "",
+            "method": "GET"
           },
-          "uql": "parse-json | jsonata \"($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append([presentation_trust.($base := $sift($, function($v,$k){$k != 'trust_reasons_action'}); $merge([$base, reasons_count > 0 ? {'trust_reasons_action':'View trust reasons'} : {'trust_action_note': reasons_count = 0 ? 'No trust issues' : 'Not assessed'}, {'_bioetl_frame': 'trust'}]))], $map(replay_readiness, function($row){$merge([$row, {'_bioetl_frame': 'replay_readiness'}])})), $map(replay_checks^(result='fail' ? 0 : result='unknown' ? 1 : result='pass' ? 2 : 3), function($row){$merge([$row, {'_bioetl_frame': 'replay_checks'}])})), function($row){$merge([$schema, $row])}))\"",
+          "uql": "parse-json | jsonata \"[presentation_trust.($base := $sift($, function($v,$k){$k != \\\"trust_reasons_action\\\"}); $merge([$base, reasons_count > 0 ? {\\\"trust_reasons_action\\\":\\\"View trust reasons\\\"} : {\\\"trust_action_note\\\": reasons_count = 0 ? \\\"No trust issues\\\" : \\\"Not assessed\\\"}]))]\"",
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
@@ -1285,24 +1431,6 @@
         }
       ],
       "transformations": [
-        {
-          "id": "filterByValue",
-          "options": {
-            "type": "include",
-            "match": "all",
-            "filters": [
-              {
-                "fieldName": "_bioetl_frame",
-                "config": {
-                  "id": "equal",
-                  "options": {
-                    "value": "trust"
-                  }
-                }
-              }
-            ]
-          }
-        },
         {
           "id": "convertFieldType",
           "options": {
@@ -1339,11 +1467,11 @@
               "processing_status": 0,
               "trust_status": 1,
               "reasons_display": 2,
-              "reasons_count": 3,
+              "evidence_observed_at": 3,
+              "reasons_count": 2,
+              "evidence_freshness": 5,
               "trust_reasons_action": 4,
-              "trust_action_note": 5,
-              "evidence_observed_at": 6,
-              "evidence_freshness": 7
+              "trust_action_note": 4
             },
             "renameByName": {
               "processing_status": "Processing result",
@@ -1443,17 +1571,6 @@
                 },
                 "properties": [
                   {
-                    "id": "displayName",
-                    "value": "Reason"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "wrapText": false
-                    }
-                  },
-                  {
                     "id": "mappings",
                     "value": [
                       {
@@ -1470,34 +1587,6 @@
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
                             "color": "red"
-                          },
-                          "retention_plan_read_error": {
-                            "text": "UNAVAILABLE — retention plan read error",
-                            "color": "text"
-                          },
-                          "lineage_source_read_error": {
-                            "text": "UNAVAILABLE — lineage source read error",
-                            "color": "text"
-                          },
-                          "trust_evidence_read_error": {
-                            "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "text"
-                          },
-                          "manifest_parse_error": {
-                            "text": "UNAVAILABLE — manifest parse error",
-                            "color": "text"
-                          },
-                          "run_ledger_parse_error": {
-                            "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_scope_manifest_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "text"
                           }
                         }
                       }
@@ -1532,34 +1621,6 @@
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
                             "color": "red"
-                          },
-                          "retention_plan_read_error": {
-                            "text": "UNAVAILABLE — retention plan read error",
-                            "color": "text"
-                          },
-                          "lineage_source_read_error": {
-                            "text": "UNAVAILABLE — lineage source read error",
-                            "color": "text"
-                          },
-                          "trust_evidence_read_error": {
-                            "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "text"
-                          },
-                          "manifest_parse_error": {
-                            "text": "UNAVAILABLE — manifest parse error",
-                            "color": "text"
-                          },
-                          "run_ledger_parse_error": {
-                            "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_scope_manifest_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "text"
                           }
                         }
                       }
@@ -1627,10 +1688,6 @@
                   "options": "detail"
                 },
                 "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": false
-                  },
                   {
                     "id": "displayName",
                     "value": "Reason"
@@ -1774,13 +1831,9 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text",
+                      "type": "auto",
                       "wrapText": true
                     }
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Reason"
                   },
                   {
                     "id": "mappings",
@@ -1799,34 +1852,6 @@
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
                             "color": "red"
-                          },
-                          "retention_plan_read_error": {
-                            "text": "UNAVAILABLE — retention plan read error",
-                            "color": "text"
-                          },
-                          "lineage_source_read_error": {
-                            "text": "UNAVAILABLE — lineage source read error",
-                            "color": "text"
-                          },
-                          "trust_evidence_read_error": {
-                            "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "text"
-                          },
-                          "manifest_parse_error": {
-                            "text": "UNAVAILABLE — manifest parse error",
-                            "color": "text"
-                          },
-                          "run_ledger_parse_error": {
-                            "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_scope_manifest_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "text"
                           }
                         }
                       }
@@ -1850,10 +1875,6 @@
                       "type": "auto",
                       "wrapText": true
                     }
-                  },
-                  {
-                    "id": "custom.hidden",
-                    "value": false
                   },
                   {
                     "id": "displayName",
@@ -1884,34 +1905,6 @@
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
                             "color": "red"
-                          },
-                          "retention_plan_read_error": {
-                            "text": "UNAVAILABLE — retention plan read error",
-                            "color": "text"
-                          },
-                          "lineage_source_read_error": {
-                            "text": "UNAVAILABLE — lineage source read error",
-                            "color": "text"
-                          },
-                          "trust_evidence_read_error": {
-                            "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "text"
-                          },
-                          "manifest_parse_error": {
-                            "text": "UNAVAILABLE — manifest parse error",
-                            "color": "text"
-                          },
-                          "run_ledger_parse_error": {
-                            "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_scope_manifest_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "text"
                           }
                         }
                       }
@@ -2228,34 +2221,6 @@
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
                             "color": "red"
-                          },
-                          "retention_plan_read_error": {
-                            "text": "UNAVAILABLE — retention plan read error",
-                            "color": "text"
-                          },
-                          "lineage_source_read_error": {
-                            "text": "UNAVAILABLE — lineage source read error",
-                            "color": "text"
-                          },
-                          "trust_evidence_read_error": {
-                            "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "text"
-                          },
-                          "manifest_parse_error": {
-                            "text": "UNAVAILABLE — manifest parse error",
-                            "color": "text"
-                          },
-                          "run_ledger_parse_error": {
-                            "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_scope_manifest_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "text"
                           }
                         }
                       }
@@ -2491,34 +2456,6 @@
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
                             "color": "red"
-                          },
-                          "retention_plan_read_error": {
-                            "text": "UNAVAILABLE — retention plan read error",
-                            "color": "text"
-                          },
-                          "lineage_source_read_error": {
-                            "text": "UNAVAILABLE — lineage source read error",
-                            "color": "text"
-                          },
-                          "trust_evidence_read_error": {
-                            "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "text"
-                          },
-                          "manifest_parse_error": {
-                            "text": "UNAVAILABLE — manifest parse error",
-                            "color": "text"
-                          },
-                          "run_ledger_parse_error": {
-                            "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_scope_manifest_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "text"
                           }
                         }
                       }
@@ -2782,17 +2719,6 @@
                 },
                 "properties": [
                   {
-                    "id": "displayName",
-                    "value": "Reason"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "wrapText": false
-                    }
-                  },
-                  {
                     "id": "mappings",
                     "value": [
                       {
@@ -2809,34 +2735,6 @@
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
                             "color": "red"
-                          },
-                          "retention_plan_read_error": {
-                            "text": "UNAVAILABLE — retention plan read error",
-                            "color": "text"
-                          },
-                          "lineage_source_read_error": {
-                            "text": "UNAVAILABLE — lineage source read error",
-                            "color": "text"
-                          },
-                          "trust_evidence_read_error": {
-                            "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "text"
-                          },
-                          "manifest_parse_error": {
-                            "text": "UNAVAILABLE — manifest parse error",
-                            "color": "text"
-                          },
-                          "run_ledger_parse_error": {
-                            "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_scope_manifest_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "text"
                           }
                         }
                       }
@@ -2871,34 +2769,6 @@
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
                             "color": "red"
-                          },
-                          "retention_plan_read_error": {
-                            "text": "UNAVAILABLE — retention plan read error",
-                            "color": "text"
-                          },
-                          "lineage_source_read_error": {
-                            "text": "UNAVAILABLE — lineage source read error",
-                            "color": "text"
-                          },
-                          "trust_evidence_read_error": {
-                            "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "text"
-                          },
-                          "manifest_parse_error": {
-                            "text": "UNAVAILABLE — manifest parse error",
-                            "color": "text"
-                          },
-                          "run_ledger_parse_error": {
-                            "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_scope_manifest_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "text"
                           }
                         }
                       }
@@ -2966,10 +2836,6 @@
                   "options": "detail"
                 },
                 "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": false
-                  },
                   {
                     "id": "displayName",
                     "value": "Reason"
@@ -3486,34 +3352,6 @@
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
                             "color": "red"
-                          },
-                          "retention_plan_read_error": {
-                            "text": "UNAVAILABLE — retention plan read error",
-                            "color": "text"
-                          },
-                          "lineage_source_read_error": {
-                            "text": "UNAVAILABLE — lineage source read error",
-                            "color": "text"
-                          },
-                          "trust_evidence_read_error": {
-                            "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "text"
-                          },
-                          "manifest_parse_error": {
-                            "text": "UNAVAILABLE — manifest parse error",
-                            "color": "text"
-                          },
-                          "run_ledger_parse_error": {
-                            "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_scope_manifest_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "text"
                           }
                         }
                       }
@@ -3544,34 +3382,6 @@
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
                             "color": "red"
-                          },
-                          "retention_plan_read_error": {
-                            "text": "UNAVAILABLE — retention plan read error",
-                            "color": "text"
-                          },
-                          "lineage_source_read_error": {
-                            "text": "UNAVAILABLE — lineage source read error",
-                            "color": "text"
-                          },
-                          "trust_evidence_read_error": {
-                            "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "text"
-                          },
-                          "manifest_parse_error": {
-                            "text": "UNAVAILABLE — manifest parse error",
-                            "color": "text"
-                          },
-                          "run_ledger_parse_error": {
-                            "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "text"
-                          },
-                          "checkpoint_scope_manifest_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "text"
                           }
                         }
                       }

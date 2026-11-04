@@ -158,7 +158,7 @@ def _lazy_import_util(*, observed: int, cap: int) -> float:
     """Return lazy-import utilisation; ``0/0`` is the closed zero-state."""
     if cap == 0:
         if observed != 0:
-            raise ValueError("lazy_import_observed_count must be 0 when max_count is 0")
+            raise ValueError("lazy_import_observed_count must be 0 when cap is 0")
         return 0.0
     return round(observed / cap, 4)
 

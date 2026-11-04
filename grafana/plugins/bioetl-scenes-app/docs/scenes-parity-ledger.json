@@ -20,11 +20,11 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "3cb384402436c403c3b200e44a436b404a69e702388218e86e84e3fcf185539a",
-    "bioetl-dq-v2": "af7723ce917e934d4523c9bf074785458620bad29c0589910b919980069f2d60",
-    "bioetl-incident-v1": "cf51b9a0193c89b965ed0e9d44c3f75eb3fb306f21cd35aee7369f9a58c49115",
-    "bioetl-overview-v2": "5193a4c64f35e79d4244c82e40ace0263b10c041fe9c837380558bdc6176dc87",
-    "bioetl-run-explorer-v1": "9a7081d0cb5e202759b326163c1f9aa0e56db064b2db9bc2ededd1570db12325"
+    "bioetl-control-plane-v1": "cc6b82dcdef08e9d9d1597887455dccdac4410f7e6a373f5f9e0ba3b6246a58b",
+    "bioetl-dq-v2": "aeb753d4b9d8ac817208be2423bbfa13473cc2bdb9a5487e30ccae14459c0034",
+    "bioetl-incident-v1": "4c4f4d15a246f65af6ef0a457d574761643a93c20d27501c233b8712afda4630",
+    "bioetl-overview-v2": "13755dfed635df99e05ca0617c8cbe8e008c7f418c52c0693d01c599def0ac56",
+    "bioetl-run-explorer-v1": "0e9347b07716728ca4139ce1f73192840f20f3031dd281185e5437c3a1b446b8"
   },
   "panels": [
     {
@@ -72,9 +72,11 @@
       "panel_title": "Review Exact Replay Readiness",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Dashboard --",
-        "expressions": [],
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
+        "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+        ],
         "target_count": 1
       }
     },
@@ -89,9 +91,11 @@
       "panel_title": "Review Exact Replay Checks",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Dashboard --",
-        "expressions": [],
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
+        "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+        ],
         "target_count": 1
       }
     },
@@ -285,17 +289,19 @@
       "basis": "preserved-from-json",
       "component": "JSON fallback",
       "dashboard_uid": "bioetl-dq-v2",
-      "disposition": "fallback-only",
+      "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-dq-v2",
       "panel_id": 9402,
       "panel_title": "Inspect Run Identity",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [],
-        "target_count": 0
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
+        "expressions": [
+          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
+        ],
+        "target_count": 1
       }
     },
     {
@@ -313,7 +319,7 @@
         "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/processed-records?pipeline=${selected_pipeline}&run_type=${run_type:csv}&run_id=${selected_run_id}",
-          "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
+          "/ops/observability/pipeline-run-report?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
         ],
         "target_count": 2
       }
@@ -329,10 +335,13 @@
       "panel_title": "Inspect Selected Run Stages",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Dashboard --",
-        "expressions": [],
-        "target_count": 1
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
+        "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+          "/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json"
+        ],
+        "target_count": 2
       }
     },
     {
@@ -346,9 +355,11 @@
       "panel_title": "Inspect Selected Run Domains",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Dashboard --",
-        "expressions": [],
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
+        "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+        ],
         "target_count": 1
       }
     },
@@ -356,17 +367,19 @@
       "basis": "preserved-from-json",
       "component": "JSON fallback",
       "dashboard_uid": "bioetl-dq-v2",
-      "disposition": "fallback-only",
+      "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-dq-v2",
       "panel_id": 9452,
       "panel_title": "Inspect Selected Run Identity",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [],
-        "target_count": 0
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
+        "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+        ],
+        "target_count": 1
       }
     },
     {
@@ -697,9 +710,11 @@
       "panel_title": "Review Total Run Duration",
       "route": "incident-console",
       "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Dashboard --",
-        "expressions": [],
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
+        "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+        ],
         "target_count": 1
       }
     },
@@ -2049,17 +2064,20 @@
       "basis": "preserved-from-json",
       "component": "JSON fallback",
       "dashboard_uid": "bioetl-incident-v1",
-      "disposition": "fallback-only",
+      "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-incident-v1",
       "panel_id": 9460,
       "panel_title": "Inspect Selected Run Stages",
       "route": "incident-console",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [],
-        "target_count": 0
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
+        "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+          "/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json"
+        ],
+        "target_count": 2
       }
     },
     {
@@ -2073,9 +2091,11 @@
       "panel_title": "Inspect Selected Run Domains",
       "route": "incident-console",
       "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Dashboard --",
-        "expressions": [],
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
+        "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+        ],
         "target_count": 1
       }
     },
@@ -2083,17 +2103,19 @@
       "basis": "preserved-from-json",
       "component": "JSON fallback",
       "dashboard_uid": "bioetl-incident-v1",
-      "disposition": "fallback-only",
+      "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-incident-v1",
       "panel_id": 9452,
       "panel_title": "Inspect Selected Run Identity",
       "route": "incident-console",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [],
-        "target_count": 0
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
+        "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+        ],
+        "target_count": 1
       }
     },
     {
@@ -2214,9 +2236,11 @@
       "panel_title": "Review Run Identity",
       "route": "dependency-health",
       "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Dashboard --",
-        "expressions": [],
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
+        "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&workflow=${workflow:csv}"
+        ],
         "target_count": 1
       }
     },
@@ -2231,9 +2255,11 @@
       "panel_title": "Review Provider Evidence",
       "route": "dependency-health",
       "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Dashboard --",
-        "expressions": [],
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
+        "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+        ],
         "target_count": 1
       }
     },
@@ -2248,9 +2274,11 @@
       "panel_title": "Review Provider Check",
       "route": "dependency-health",
       "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Dashboard --",
-        "expressions": [],
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
+        "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+        ],
         "target_count": 1
       }
     },
@@ -2265,12 +2293,14 @@
       "panel_title": "Inspect Selected Run Stages",
       "route": "dependency-health",
       "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Mixed --",
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+          "/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
           "/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json"
         ],
-        "target_count": 2
+        "target_count": 3
       }
     },
     {
@@ -2284,9 +2314,11 @@
       "panel_title": "Review Contract Exclusions",
       "route": "dependency-health",
       "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Dashboard --",
-        "expressions": [],
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
+        "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+        ],
         "target_count": 1
       }
     },
@@ -2301,27 +2333,12 @@
       "panel_title": "Review FK Comparison Scope",
       "route": "dependency-health",
       "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Dashboard --",
-        "expressions": [],
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
+        "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+        ],
         "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-run-explorer-v1",
-      "disposition": "fallback-only",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-run-explorer-v1",
-      "panel_id": 1000,
-      "panel_title": "Navigate Dashboards",
-      "route": "run-explorer",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [],
-        "target_count": 0
       }
     },
     {
@@ -2367,7 +2384,7 @@
     "dashboard_uid_count": 5,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 125,
+    "panel_disposition_count": 124,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],

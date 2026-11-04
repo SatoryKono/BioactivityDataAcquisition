@@ -56,7 +56,7 @@ def test_strict_docs_build_enforces_heading_anchors() -> None:
     root = Path(__file__).resolve().parents[2]
     config = yaml.load(
         (root / "mkdocs.yml").read_text(encoding="utf-8"),
-        Loader=yaml.BaseLoader,  # noqa: S506, bandit:nosec
+        Loader=yaml.BaseLoader,
     )
 
     assert config["validation"]["links"]["anchors"] in {"warn", "error"}

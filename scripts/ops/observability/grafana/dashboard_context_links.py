@@ -145,8 +145,7 @@ def build_handoff_url(
         "run_id": run_id,
     }
     extra_values: dict[str, str] = dict(extras or {})
-    # Phase 4.1 removed DQ $stage; only retired runtime boards still accept it.
-    if target_uid == "bioetl-runtime":
+    if target_uid in {"bioetl-runtime", "bioetl-dq-v2"}:
         extra_values.setdefault("stage", stage)
     if target_uid == "bioetl-provider-health-v2":
         # Auto-select the pipeline's configured provider. Explicit All stays
@@ -407,7 +406,7 @@ def _fix_ranked_links(panel: dict) -> None:
                 "value": [
                     {
                         "title": "Open domain diagnostics",
-                        "url": "/d/${__data.fields.action_dashboard_uid}/?${workflow:queryparam}&var-pipeline=${__data.fields.route_pipeline:percentencode}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
+                        "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.route_pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
                         "targetBlank": False,
                         "includeVars": False,
                     }

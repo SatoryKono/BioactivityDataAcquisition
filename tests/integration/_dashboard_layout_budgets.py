@@ -341,10 +341,6 @@ def panel_declared_row_cap(panel: dict[str, Any]) -> int | None:
                 for item in filters:
                     if not isinstance(item, dict):
                         continue
-                    if item.get("fieldName") == "_bioetl_frame":
-                        # A donor frame label selects a section, not a single
-                        # row; shared-donor tables can contain many rows per frame.
-                        continue
                     config = item.get("config")
                     if not isinstance(config, dict):
                         continue
@@ -356,9 +352,7 @@ def panel_declared_row_cap(panel: dict[str, Any]) -> int | None:
                         regex_values.append(value)
                     elif config.get("id") == "equal":
                         equal_count += 1
-                # A single equality often selects a frame (for example
-                # ``_bioetl_frame == 'domains'``); it does not bound row count.
-                if equal_count > 1:
+                if equal_count:
                     caps.append(equal_count)
                 for pattern in regex_values:
                     alternatives = [

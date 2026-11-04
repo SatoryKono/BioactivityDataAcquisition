@@ -65,7 +65,7 @@ async def test_stale_is_immediate_under_saturation_and_expires(monkeypatch):
     cache = module.SelectorOptionsCache()
     loader = AsyncMock(return_value=PAYLOAD)
     await read(cache, loader)
-    now[0] = module.FRESH_SECONDS + 1
+    now[0] = 31
     result = await read(cache, loader, limiter=asyncio.Semaphore(0))
     assert result["catalog"]["state"] == "stale"
     assert result["catalog"]["refresh_in_progress"]
@@ -75,7 +75,7 @@ async def test_stale_is_immediate_under_saturation_and_expires(monkeypatch):
     }
     await asyncio.gather(*cache._tasks.values())
     assert cache.status(QUERY)["last_refresh_error"] == "capacity_exhausted"
-    now[0] = module.MAX_AGE_SECONDS + 1
+    now[0] = 121
     with pytest.raises(ForensicEndpointUnavailable):
         await read(cache, loader, limiter=asyncio.Semaphore(0))
     assert cache.status(QUERY)["state"] == "unavailable"
@@ -134,7 +134,7 @@ async def test_failed_refresh_preserves_good_snapshot_and_throttles_retry(monkey
     cache = module.SelectorOptionsCache()
     loader = AsyncMock(return_value=PAYLOAD)
     initial = await read(cache, loader)
-    now[0] = module.FRESH_SECONDS + 1
+    now[0] = 31
     loader.side_effect = OSError("unreadable source")
     await read(cache, loader)
     await asyncio.gather(*cache._tasks.values())

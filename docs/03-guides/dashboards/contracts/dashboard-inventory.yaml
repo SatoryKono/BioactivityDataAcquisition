@@ -35,6 +35,10 @@ dashboards:
       - pipeline
       - run_id
       - run_type
+      - provider_for_pipeline
+      - read_latency_quantile
+      - selected_run_id
+      - selected_pipeline
   - uid: bioetl-overview-v2
     title: Run Overview
     owner: "@bioetl-observability"
@@ -44,7 +48,6 @@ dashboards:
     data_sources:
       - Prometheus
       - Grafana
-      - Mixed
       - BioETL Ops HTTP
     panel_count: 11
     key_panels:
@@ -64,6 +67,7 @@ dashboards:
       - workflow
       - pipeline
       - run_id
+      - provider_for_pipeline
       - run_type
       - selected_run_id
       - selected_pipeline
@@ -87,8 +91,8 @@ dashboards:
         description: Saved HTTP evidence for the selected Run ID
       - id: 9402
         title: Inspect Run Identity
-        type: text
-        description: Handoff to Overview Review Run Identity (panel 9300)
+        type: table
+        description: HTTP identity for the selected Run ID
       - id: 9403
         title: Inspect Processed Records
         type: table
@@ -101,7 +105,9 @@ dashboards:
       - workflow
       - pipeline
       - run_id
+      - provider_for_pipeline
       - run_type
+      - stage
       - selected_run_id
       - selected_pipeline
 
@@ -137,7 +143,10 @@ dashboards:
       - run_type
       - run_id
       - read_latency_quantile
+      - provider_for_pipeline
       - provider
+      - selected_run_id
+      - selected_pipeline
   - uid: bioetl-run-explorer-v1
     title: Run Explorer
     owner: "@bioetl-observability"
@@ -147,9 +156,10 @@ dashboards:
     target_workspace: Run Explorer
     ux_phase: drm-05
     data_sources:
+      - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 3
+    panel_count: 2
     key_panels:
       - id: 3010
         title: Inspect Recent Runs (last 10)
@@ -161,3 +171,6 @@ dashboards:
       - pipeline
       - run_type
       - run_id
+      - provider_for_pipeline
+      - selected_run_id
+      - selected_pipeline

@@ -226,7 +226,7 @@ def _stamp_status_links(panel: dict[str, object], uid: object) -> None:
     panel["fieldConfig"]["defaults"]["links"] = [
         {
             "title": "Open Run Explorer",
-            "url": "/d/bioetl-run-explorer-v1/run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+            "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
             "targetBlank": False,
             "includeVars": False,
         }
@@ -377,7 +377,7 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
                             "value": [
                                 {
                                     "title": "Open saved run report (JSON)",
-                                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+                                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
                                     "targetBlank": True,
                                 }
                             ],
@@ -697,24 +697,22 @@ def _style_provider_check(panels: list[dict]) -> None:
     review["gridPos"].update(x=15, y=2, w=9, h=3)
     review["type"] = "stat"
     review["description"] = (
-        "SELECTED RUN · Saved provider check result via check_result_display. "
-        "Cached Bronze (provider API not called) shows —. Missing evidence stays "
-        "UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health."
+        "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. "
+        "OK/WARN/CRIT color the saved check verdict, not live fleet health."
         " SELECT RUN means no Run ID is selected. VALID EMPTY means no saved "
         "provider check. QUERY ERROR means backend unavailable or request failure."
     )
-    # Align with Review Provider Evidence: display field, not raw check_result.
     review["transformations"] = [
         {"id": "limit", "options": {"limitField": 1}},
         {
             "id": "filterFieldsByName",
-            "options": {"include": {"names": ["check_result_display"]}},
+            "options": {"include": {"names": ["check_result"]}},
         },
     ]
     review["options"] = {
         "reduceOptions": {
             "calcs": ["lastNotNull"],
-            "fields": "/^check_result_display$/",
+            "fields": "/^check_result$/",
             "values": True,
         },
         "colorMode": "background",
@@ -736,15 +734,9 @@ def _style_provider_check(panels: list[dict]) -> None:
                         "FAIL": {"text": "FAIL", "color": "red"},
                         "FAILING": {"text": "FAILING", "color": "red"},
                         "CRIT": {"text": "CRIT", "color": "red"},
-                        "QUERY ERROR": {"text": "QUERY ERROR", "color": "red"},
                         "UNKNOWN": {"text": "UNKNOWN", "color": "gray"},
                         "N/A": {"text": "N/A", "color": "gray"},
-                        "—": {"text": "—", "color": "gray"},
                         "SELECT RUN": {"text": "SELECT RUN", "color": "gray"},
-                        _NO_RUNS_LABEL: {
-                            "text": _NO_RUNS_LABEL,
-                            "color": "gray",
-                        },
                         "INCOMPLETE": {"text": "INCOMPLETE", "color": "orange"},
                     },
                 },
@@ -759,7 +751,7 @@ def _style_provider_check(panels: list[dict]) -> None:
             "color": {"mode": "thresholds"},
             "thresholds": {
                 "mode": "absolute",
-                "steps": [{"color": "gray", "value": None}],
+                "steps": [{"color": "green", "value": None}],
             },
         },
         "overrides": [],
@@ -937,12 +929,8 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
         )
 
 
-# A2 empty-catalog client fallback (rev7 §3.2): same label as API finalize when
-# filter-options returns items=[]. Keep SELECT RUN only as A1 regression maps.
-_NO_RUNS_LABEL = "НЕТ ЗАПУСКОВ"
 SELECTOR_ROWS = (
-    "$exists(items) and $count(items) = 0 ? "
-    f'[{{"text":"{_NO_RUNS_LABEL}","value":"-"}}] : items'
+    '$exists(items) and $count(items) = 0 ? [{"text":"NO MATCHES","value":"-"}] : items'
 )
 
 

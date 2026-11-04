@@ -27,7 +27,7 @@ from bioetl.domain.control_plane.run_evidence_location import (
     ownership_key,
     parse_run_evidence_location,
 )
-from bioetl.domain.ports import (
+from bioetl.domain.ports.control_plane.run_evidence_location import (
     RunEvidenceLocationReadPort,
     RunEvidenceLocationRegisterPort,
 )

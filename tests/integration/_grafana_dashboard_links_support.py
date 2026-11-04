@@ -792,7 +792,7 @@ def _assert_cross_dashboard_link_policy(
         assert "${__data.fields.action_scope:raw}" in url
         for resolved_uid in routes[current_uid]:
             scope = "var-pipeline=chembl_assay"
-            if resolved_uid == "bioetl-runtime":
+            if resolved_uid in {"bioetl-runtime", "bioetl-dq-v2"}:
                 scope += "&var-stage=$__all"
             if resolved_uid == "bioetl-provider-health-v2":
                 scope += "&var-provider=$__all&var-pipeline_context=chembl_assay"
@@ -1488,7 +1488,7 @@ _EXPECTED_CURRENT_NAV_TITLE = {
     "bioetl-runtime": "Pipeline Diagnostics",
     "bioetl-provider-health-v2": "Provider Health",
     "bioetl-dq-v2": "Data Quality",
-    "bioetl-incident-v1": "Incident Workspace",
+    "bioetl-incident-v1": "6. Incident Workspace",
     "bioetl-run-explorer-v1": "Run Explorer",
 }
 
@@ -1496,8 +1496,7 @@ _BASE_VISUAL_NAV_TITLES = (
     "Run Explorer",
     "Replay Readiness",
     "Run Overview",
-    "Data Quality",
-    "Incident Workspace",
+    "6. Incident Workspace",
 )
 
 _OPTIONAL_VISUAL_NAV_TITLES = (
@@ -1513,7 +1512,7 @@ _SANITIZER_SAFE_NAV_TOKENS = (
     "display:flex",
     "flex-wrap:nowrap",
     "overflow:visible",
-    "width:19.5%",
+    "width:16.5%",
     "font:600 16px/18px Arial",
     "min-width:0",
     "overflow-wrap:anywhere",
@@ -1550,6 +1549,12 @@ def _assert_visual_bus_base_content(
         "sanitization without a style block"
     )
     for token in _SANITIZER_SAFE_NAV_TOKENS:
+        if dashboard_name == "bioetl-dq-v2.json" and token in {
+            "background:#1d4ed8",
+            "border:2px solid #7dd3fc",
+        }:
+            assert token not in content
+            continue
         assert token in content, (
             f"{dashboard_name} navigation must define sanitizer-safe {token}"
         )
@@ -1563,7 +1568,6 @@ def _assert_visual_bus_base_content(
     assert "Sanitizer-compatible" in description
     assert "native keyboard focus" in description
     assert "Run Overview" in description
-    assert "Data Quality" in description
     assert "Incident Workspace" in description
     assert "Run Explorer" in description
 
@@ -1571,19 +1575,28 @@ def _assert_visual_bus_base_content(
 def _assert_current_dashboard_disabled_in_visual_bus(
     *, dashboard_name: str, uid: str, content: str
 ) -> None:
+    if uid == "bioetl-dq-v2":
+        assert 'aria-current="page"' not in content
+        assert "Data Quality" not in content
+        return
     current_title = _EXPECTED_CURRENT_NAV_TITLE[uid]
-    # Phase 2 §2.1: current chip is <span class="bioetl-nav-current" aria-current>.
+    # Current chip is non-interactive: span[aria-current] (legacy) or
+    # a[aria-disabled][aria-current] (DUX7 sanitizer-safe styles).
     disabled_patterns = (
         re.compile(
-            rf'<span[^>]*class="[^"]*bioetl-nav-current[^"]*"[^>]*'
-            rf'aria-current="page"[^>]*>\s*{re.escape(current_title)}'
-        ),
-        re.compile(
-            rf'<span[^>]*aria-current="page"[^>]*class="[^"]*bioetl-nav-current'
-            rf'[^"]*"[^>]*>\s*{re.escape(current_title)}'
-        ),
-        re.compile(
             rf'<span[^>]*aria-current="page"[^>]*>\s*{re.escape(current_title)}'
+        ),
+        re.compile(
+            rf'<a[^>]*aria-current="page"[^>]*aria-disabled="true"[^>]*>\s*'
+            rf"{re.escape(current_title)}"
+        ),
+        re.compile(
+            rf'<a[^>]*aria-disabled="true"[^>]*aria-current="page"[^>]*>\s*'
+            rf"{re.escape(current_title)}"
+        ),
+        re.compile(
+            rf'<a[^>]*class="[^"]*bioetl-nav-current[^"]*"[^>]*>\s*'
+            rf"{re.escape(current_title)}"
         ),
     )
     assert any(p.search(content) for p in disabled_patterns), (

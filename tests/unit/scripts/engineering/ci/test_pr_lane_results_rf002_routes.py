@@ -10,7 +10,7 @@ from scripts.engineering.ci.pr_lane_results import build_shadow_compare
 pytestmark = pytest.mark.unit
 
 
-def test_shadow_compare_routes_run_report_contracts_and_docs_rf002() -> None:
+def test_shadow_compare_routes_run_report_contracts_and_docs() -> None:
     """Run-report contracts, goldens, and operator docs select contract tests."""
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
@@ -45,7 +45,7 @@ def test_shadow_compare_routes_qm07_closeout_evidence(path: str) -> None:
     ]
 
 
-def test_shadow_compare_routes_domain_ports_stub_rf002() -> None:
+def test_shadow_compare_routes_domain_ports_stub() -> None:
     """Typed ports package stubs map like their .py siblings under tests/unit."""
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(

@@ -1,0 +1,18 @@
+{
+    "recommendations": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "ms-python.mypy-type-checker",
+        "ms-python.debugpy",
+        "ms-python.vscode-python-envs",
+        "redhat.vscode-yaml",
+        "vscode-icons-team.vscode-icons",
+        "mermaidchart.vscode-mermaid-chart",
+        "github.vscode-pull-request-github",
+        "ms-vscode-remote.remote-wsl",
+        "ms-vscode-remote.remote-containers",
+        "anthropic.claude-code",
+        "github.copilot-chat"
+    ]
+}

@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     )
     from bioetl.infrastructure.control_plane.file_evidence_read_context import (
         FileEvidenceReadContext,
+        FileEvidenceReadContextFactory,
     )
     from bioetl.infrastructure.control_plane.file_historical_replay_closure_store import (
         FileHistoricalReplayClosureStore,
@@ -77,6 +78,9 @@ _EXPORT_MODULES = {
     "FileEvidenceReadContext": (
         "bioetl.infrastructure.control_plane.file_evidence_read_context"
     ),
+    "FileEvidenceReadContextFactory": (
+        "bioetl.infrastructure.control_plane.file_evidence_read_context"
+    ),
     "FileHistoricalReplayClosureStore": (
         "bioetl.infrastructure.control_plane.file_historical_replay_closure_store"
     ),
@@ -115,6 +119,7 @@ __all__ = [
     "FileEffectiveConfigArtifactStore",
     "FileEvidenceLocationStore",
     "FileEvidenceReadContext",
+    "FileEvidenceReadContextFactory",
     "FileHistoricalReplayClosureStore",
     "FileHistoricalReplayUniverseStore",
     "FileLineageStore",

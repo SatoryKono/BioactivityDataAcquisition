@@ -252,7 +252,7 @@ row, and CLI `bioetl quarantine inspect` respectively.
   default `backfill`).
 - `$run_id` is HTTP-backed identity context via
   `/ops/control-plane/filter-options`; not a Prometheus label.
-- Role extensions: `$stage` (Runtime; default All), `$provider` (Provider
+- Role extensions: `$stage` (Runtime, DQ; default All), `$provider` (Provider
   Health, Incident; default unknown), hidden `$pipeline_context`/`$adapter`
   (Provider Health), hidden `$provider_hint` (Runtime).
 - Forensic reject narrowing is **CLI** (`bioetl quarantine inspect`), not a

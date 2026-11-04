@@ -68,8 +68,7 @@ function link(text, title) {
     getBoundingClientRect:() => rect,closest:() => nav,
     focus() {document.activeElement = this;}};
 }
-const canonical = [...html.matchAll(/<(?:a|span)\b([^>]*)>([^<]*)<\/(?:a|span)>/g)]
-  .filter(match => match[1].includes('bioetl-nav-link') || match[1].includes('bioetl-nav-current'))
+const canonical = [...html.matchAll(/<a\b([^>]*)>([^<]*)<\/a>/g)]
   .map(match => link(match[2], match[1].match(/title="([^"]*)"/)[1]));
 let actual = canonical;
 const nav = {querySelectorAll:() => actual,querySelector:() => actual[0],getBoundingClientRect:() => rect};
@@ -106,7 +105,7 @@ console.log(JSON.stringify({good,explicitCount,wrongCount,missing,extra,foreign,
     assert result["good"]["status"] == "ok"
     assert result["explicitCount"]["status"] == "ok"
     assert result["wrongCount"]["status"] == "error"
-    assert result["good"]["linkCount"] == result["good"]["expectedLinkCount"] == 5
+    assert result["good"]["linkCount"] == result["good"]["expectedLinkCount"] == 4
     assert result["good"]["linkNames"] == result["good"]["expectedLinkNames"]
     for case in ("missing", "extra", "foreign", "wrongTitle", "absentContract"):
         assert result[case]["status"] == "error", case

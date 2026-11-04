@@ -6,12 +6,14 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.manifest import RunManifestCreateSpec
+from bioetl.composition.runtime_builders._run_manifest_attr_support import (
+    read_attr as _read_attr,
+)
 from bioetl.composition.runtime_builders._run_manifest_creation_support_helpers import (
     RunManifestCreateRequestInputs,
     assemble_manifest_create_spec as _assemble_manifest_create_spec,
     build_manifest_source_refs as _build_manifest_source_refs,
     create_ledger_service as _create_ledger_service,
-    read_attr as _read_attr,
     resolve_replay_lag_seconds as _resolve_replay_lag_seconds_value,
 )
 from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
