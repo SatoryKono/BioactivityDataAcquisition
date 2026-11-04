@@ -85,7 +85,7 @@
   ],
   "generated_by": "scripts/engineering/qa/report_architecture_quality_scorecard.py",
   "schema_version": 1,
-  "semantic_completeness": "not_assessed; documented invariants missing from tests (see P02 audit PR description for missing invariants)",
+  "semantic_completeness": "not_assessed; selected invariant links only",
   "summary": {
     "aggregates_with_invariant_tests": 3,
     "missing_source_paths": [],

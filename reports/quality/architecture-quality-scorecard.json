@@ -25,18 +25,18 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2576,
+        "source_module_count": 2595,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
       "name": "DDD / aggregates / invariants",
-      "score": 10.0,
+      "score": 6.2,
       "weight": 0.09,
-      "weighted_score": 0.9
+      "weighted_score": 0.558
     },
     {
       "evidence_metrics": {
-        "composition_util": 0.9458,
+        "composition_util": 0.9492,
         "layer_violations": 0,
         "lazy_util": 0.0,
         "public_entrypoint_growth_count": 0,
@@ -78,13 +78,13 @@
       "evidence_metrics": {
         "compatibility_test_file_count": 0,
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 0
+        "unmeasured_module_count": 5
       },
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
-      "score": 10.0,
+      "score": 2.5,
       "weight": 0.12,
-      "weighted_score": 1.2
+      "weighted_score": 0.3
     },
     {
       "evidence_metrics": {
@@ -115,7 +115,7 @@
     },
     {
       "evidence_metrics": {
-        "composition_util": 0.9458,
+        "composition_util": 0.9492,
         "expired_compat_count": 0,
         "hotspot_budget_warning_count": 0,
         "public_entrypoint_growth_count": 0,
@@ -168,8 +168,8 @@
   },
   "diagnostics": {
     "composition_module_cap": 295,
-    "composition_module_count": 279,
-    "composition_util": 0.9458,
+    "composition_module_count": 280,
+    "composition_util": 0.9492,
     "families_at_budget": [],
     "families_at_budget_count": 0,
     "grade_kind": "diagnostic_proxy",
@@ -183,16 +183,16 @@
     }
   },
   "generated_by": "scripts.engineering.quality.architecture_quality_scorecard",
-  "integral_score": 10.0,
-  "interpretation": "excellent",
+  "integral_score": 8.76,
+  "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 60,
     "adr_enforcement_blocking_gap_count": 0,
     "adr_enforcement_manual_exception_count": 0,
     "compatibility_test_file_count": 0,
     "composition_module_cap": 295,
-    "composition_module_count": 279,
-    "composition_util": 0.9458,
+    "composition_module_count": 280,
+    "composition_util": 0.9492,
     "contract_blocking_issue_count": 0,
     "dashboarded_without_declaration_count": 0,
     "dashboarded_without_emission_count": 0,
@@ -214,13 +214,13 @@
     "retained_public_export_facade_count": 3,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2576,
+    "source_module_count": 2595,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 0
+    "unmeasured_module_count": 5
   },
   "schema_version": 2,
   "source_artifacts": {
@@ -250,7 +250,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "133cb5b3172a45d2727e5ac3a615db74de155a4ec75904e70bc9ae9e87f15f6b"
+      "source_fingerprint": "5768095bc6e894299e46e92699c26089a04552119e2230c9bf89926bba6ddb92"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -269,7 +269,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "4dc66455506c3529b7ed2450c9131d9d64f9a513b9ca7757b340beac1e3495ce",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "1cf6267ff6060cb5b965ed6e5a4420edaf61aa7c6915b9e2faeb73585aeb3f4c"
+      "source_tree_sha256": "c55f67c500de4fcbaee0052743ae9bf6c640fbd2f6cc540cd1afb9605bfb398b"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
