@@ -1,5 +1,7 @@
 """Compact, persisted identity for the Overview first window."""
 
+_WIDTH = "custom.width"
+
 
 def apply_overview_identity(payload: dict) -> None:
     """Keep only the compact exact-run identity on Overview."""
@@ -17,10 +19,10 @@ def apply_overview_identity(payload: dict) -> None:
         field = override["matcher"].get("options")
         if field in {"Status", "Result", "Trust"}:
             override["properties"] = [
-                prop for prop in override["properties"] if prop["id"] != "custom.width"
+                prop for prop in override["properties"] if prop["id"] != _WIDTH
             ]
             if field in {"Result", "Trust"}:
-                override["properties"].append({"id": "custom.width", "value": 80})
+                override["properties"].append({"id": _WIDTH, "value": 80})
     # Provider evidence is now local. Keep the three domain actions discoverable
     # without forwarding legacy provider selectors that Overview does not own.
     links = by_id[9002]["fieldConfig"]["defaults"].setdefault("links", [])
@@ -91,7 +93,7 @@ def apply_overview_identity(payload: dict) -> None:
         "overrides": [
             {
                 "matcher": {"id": "byName", "options": "Parameter"},
-                "properties": [{"id": "custom.width", "value": 125}],
+                "properties": [{"id": _WIDTH, "value": 125}],
             }
         ],
     }
@@ -233,7 +235,7 @@ def apply_saved_evidence_readability(payload: dict) -> None:
         wrapText=True,
     )
     identity["fieldConfig"]["overrides"] = [
-        override("Parameter", [{"id": "custom.width", "value": 210}]),
+        override("Parameter", [{"id": _WIDTH, "value": 210}]),
         override(
             "Value",
             [
@@ -315,7 +317,7 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
                 "matcher": {"id": "byRegexp", "options": f"^({field})( [BC])?$"},
                 "properties": [
                     {"id": "displayName", "value": label},
-                    {"id": "custom.width", "value": width},
+                    {"id": _WIDTH, "value": width},
                 ],
             }
         )
@@ -336,7 +338,7 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
     stages["fieldConfig"]["defaults"]["custom"]["minWidth"] = 50
     for override in stages["fieldConfig"]["overrides"]:
         override["properties"] = [
-            prop for prop in override["properties"] if prop["id"] != "custom.width"
+            prop for prop in override["properties"] if prop["id"] != _WIDTH
         ]
     row["panels"] = [p for p in row["panels"] if p.get("id") != 9460]
     row["gridPos"]["y"] = y + 6

@@ -41,11 +41,12 @@ _COLORS = {
     "LAYOUT_UNHEALTHY": "#F2495C",
     "IDENTITY_UNHEALTHY": "#F2495C",
 }
+_RUN_ID = "Run ID"
 _COLUMNS = {
     "workflow_id": ("Workflow", None, 100),
     "pipeline": ("Pipeline", None, 80),
     "provider": ("Provider", 85, 50),
-    "run_label": ("Run ID", 60, 50),
+    "run_label": (_RUN_ID, 60, 50),
     "started_at": ("Started", 115, 50),
     "duration_display": ("Duration", 75, 50),
     "status": ("Overview", 180, 180),
@@ -268,7 +269,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
             "https://github.com/SatoryKono/BioactivityDataAcquisition/"
             "${__data.fields.pipeline_passport_path:raw}",
         ),
-        "Run ID": (
+        _RUN_ID: (
             "Report \u00b7 ${__data.fields.run_id}",
             "${__data.fields.report_url:raw}",
         ),
@@ -293,7 +294,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
             {"id": "custom.minWidth", "value": min_width},
             {
                 "id": "custom.inspect",
-                "value": name in {"Workflow", "Pipeline", "Run ID"},
+                "value": name in {"Workflow", "Pipeline", _RUN_ID},
             },
         ]
         if width is not None:
@@ -305,10 +306,10 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
                     "title": title,
                     "url": url,
                     "includeVars": False,
-                    "targetBlank": name in {"Workflow", "Pipeline", "Run ID"},
+                    "targetBlank": name in {"Workflow", "Pipeline", _RUN_ID},
                 }
             ]
-            if name == "Run ID":
+            if name == _RUN_ID:
                 link_items.insert(
                     0,
                     {

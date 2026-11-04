@@ -13,6 +13,9 @@ _HIDDEN = "custom.hidden"
 _INSPECT = "custom.inspect"
 _WIDTH = "custom.width"
 _CELL = "custom.cellOptions"
+_COUNT_IN = "count in"
+_VALUE_A = "value A"
+_PERCENTAGE_A = "percentage A"
 
 
 def _panels(items: list[dict[str, Any]]):
@@ -1007,18 +1010,18 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
                 "excludeByName": {"row_status": True, "Time": True},
                 "indexByName": {
                     "parameter": 0,
-                    "count in": 1,
+                    _COUNT_IN: 1,
                     "count in StageInput": 1,
                     "value": 2,
-                    "value A": 2,
+                    _VALUE_A: 2,
                     "percentage": 3,
-                    "percentage A": 3,
+                    _PERCENTAGE_A: 3,
                 },
                 "renameByName": {
                     "value": "count out",
-                    "value A": "count out",
-                    "count in StageInput": "count in",
-                    "percentage A": "percentage",
+                    _VALUE_A: "count out",
+                    "count in StageInput": _COUNT_IN,
+                    _PERCENTAGE_A: "percentage",
                 },
             },
         },
@@ -1029,22 +1032,22 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
                 prop["value"] = "count out"
             if prop["id"] == _CELL:
                 prop["value"]["wrapText"] = False
-    for field in ("count in", "count out"):
+    for field in (_COUNT_IN, "count out"):
         _override(panel, field, _WIDTH, 90)
         _override(panel, field, "custom.align", "right")
-    for field in ("value", "value A", "count", "count out"):
+    for field in ("value", _VALUE_A, "count", "count out"):
         _override(panel, field, _WIDTH, 100)
     _override(panel, "percentage", _WIDTH, 100)
     _override(panel, "percentage", "displayName", _BRONZE_PERCENTAGE_DISPLAY)
-    _override(panel, "percentage A", "displayName", _BRONZE_PERCENTAGE_DISPLAY)
+    _override(panel, _PERCENTAGE_A, "displayName", _BRONZE_PERCENTAGE_DISPLAY)
     for field in (
         "value",
-        "value A",
+        _VALUE_A,
         "count",
-        "count in",
+        _COUNT_IN,
         "count out",
         "percentage",
-        "percentage A",
+        _PERCENTAGE_A,
     ):
         _override(panel, field, "noValue", "N/A")
         _override(
