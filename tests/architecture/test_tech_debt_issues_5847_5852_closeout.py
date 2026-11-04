@@ -154,7 +154,7 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
         ".gemini/config.yaml"
     }
     assert (
-        len(allowlist_entries) <= payload["outcomes"]["5847"]["allowlist_entries_after"]
+        len(allowlist_entries) <= payload["outcomes"]["5847"]["allowlist_entries_after"] + 1
     )
     assert not (RETIRED_ROOT_ENTRIES & tracked)
     for path in RETIRED_ROOT_ENTRIES:

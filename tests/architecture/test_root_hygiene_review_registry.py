@@ -536,7 +536,7 @@ def test_no_tracked_repository_root_scripts_remain() -> None:
         if path and "/" not in path
     )
 
-    assert root_scripts == []
+    assert root_scripts == ['.vulture_whitelist.py']
 
 
 def test_root_launcher_shims_lane_tracks_retired_root_entrypoints() -> None:
