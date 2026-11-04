@@ -146,14 +146,22 @@ def _resolved_report_path(
     *,
     pipeline: str,
     run_id: str,
-) -> Path | None:
-    """Return a saved report under the resolved evidence root, when one exists."""
+) -> Path | dict[str, object] | None:
+    """Return a saved report under the resolved evidence root, or unavailable status on error.
+    Returns None if resolver is not provided or if the run_id simply shouldn't be resolved here.
+    """
     if resolver is None:
         return None
     try:
         resolved = resolver.resolve(kind="pipeline", owner=pipeline, run_id=run_id)
-    except (OSError, TypeError, ValueError):
-        return None
+    except (OSError, TypeError, ValueError) as exc:
+        return unavailable_status(pipeline, run_id, "ERROR", str(exc))
+
+    if resolved.code.value == "identity_conflict":
+        return unavailable_status(pipeline, run_id, "ERROR", "identity_conflict")
+    elif resolved.code.value == "location_invalid":
+        return unavailable_status(pipeline, run_id, "ERROR", "location_invalid")
+
     context = resolved.context
     if context is None:
         return None
@@ -194,7 +202,12 @@ def load_selected_run_status(
     if selected_pipeline is None:
         return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
     pipeline = selected_pipeline
-    path = _resolved_report_path(resolver, pipeline=pipeline, run_id=run_id)
+    path_or_dict = _resolved_report_path(resolver, pipeline=pipeline, run_id=run_id)
+
+    if isinstance(path_or_dict, dict):
+        return path_or_dict
+
+    path = path_or_dict
     if path is None:
         path, _ = _validated_artifact_paths(
             pipeline, run_id, "pipeline_run_report_json", root
