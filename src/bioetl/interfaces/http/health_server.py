@@ -44,6 +44,7 @@ from bioetl.interfaces.http._run_explorer_snapshot import (
     run_periodic_run_explorer_snapshot,
     stop_run_explorer_snapshot,
 )
+from bioetl.interfaces.http._selected_run_status_cache import SelectedRunStatusCache
 from bioetl.interfaces.http._selector_catalog import (
     SELECTOR_ENDPOINT_CONCURRENCY,
     SelectorCatalog,
@@ -214,6 +215,7 @@ class HealthServer(
             SELECTOR_ENDPOINT_CONCURRENCY
         )
         self._selector_catalog = SelectorCatalog()
+        self._selected_run_status_cache = SelectedRunStatusCache()
         self._selector_prewarm_task: asyncio.Task[None] | None = None
         self._run_explorer_snapshot = RunExplorerSnapshotCache()
         self._run_explorer_refresh_task: asyncio.Task[None] | None = None
@@ -248,6 +250,7 @@ class HealthServer(
         )
 
         self._selector_catalog = SelectorCatalog()
+        self._selected_run_status_cache = SelectedRunStatusCache()
         self._start_time = time.monotonic()
         try:
             self._server = await asyncio.start_server(
@@ -300,6 +303,7 @@ class HealthServer(
     async def stop(self) -> None:
         """Stop the health server gracefully."""
         await self._selector_catalog.options.close()
+        await self._selected_run_status_cache.close()
         if self._selector_prewarm_task is not None:
             self._selector_prewarm_task.cancel()
             await asyncio.gather(self._selector_prewarm_task, return_exceptions=True)

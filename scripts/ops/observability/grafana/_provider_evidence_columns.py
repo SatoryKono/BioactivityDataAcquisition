@@ -120,7 +120,7 @@ def _provider_evidence_columns(panel: dict) -> None:
         "($d.reason = 'run_preflight_provider_observation' and $p.evidence = 'PRESENT' ? 'Provider check' : 'UNKNOWN')), "
         "'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), "
         "'check_result': $cached ? '—' : "
-        "($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN'), "
+        "($p.check_result = 'QUERY ERROR' ? 'QUERY ERROR' : ($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN')), "
         "'reason': $cached ? 'Cached Bronze used; provider API was not called.' : "
         "($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check.' : "
         "($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.')), "

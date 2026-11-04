@@ -194,7 +194,7 @@ jobs:
               exit 1
             fi
             base="origin/${BASE_REF}"
-            git fetch --no-tags --depth=1 origin "${BASE_REF}" 2>/dev/null || true
+            git fetch --no-tags origin "${BASE_REF}"
           else
             base="HEAD~1"
           fi
@@ -206,14 +206,14 @@ jobs:
             '.github/actions/setup-mermaid/**' \
             'docs/02-architecture/diagrams/theme/**' \
             'docs/02-architecture/diagrams/tooling/**' \
-            'docs/02-architecture/diagrams/manifests/**' || true)
+            'docs/02-architecture/diagrams/manifests/**')
           render_sources=$(git diff --name-only "$base"...HEAD -- \
             '*.mmd' '*.mermaid' \
             'scripts/diagrams/**' \
             '.github/actions/setup-mermaid/**' \
             'docs/02-architecture/diagrams/theme/**' \
             'docs/02-architecture/diagrams/tooling/**' \
-            'docs/02-architecture/diagrams/manifests/**' || true)
+            'docs/02-architecture/diagrams/manifests/**')
           if [[ -n "$changed" ]]; then
             echo "diagrams_changed=true" >> "$GITHUB_OUTPUT"
             echo "Diagram-related files changed:"
