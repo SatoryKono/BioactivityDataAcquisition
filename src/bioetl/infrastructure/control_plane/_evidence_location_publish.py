@@ -81,10 +81,15 @@ def publish_bytes_if_absent(
     )
     temp_path = Path(temp_path_str)
     try:
-        with os.fdopen(fd, "wb") as handle:
-            handle.write(data)
-            handle.flush()
-            flush_control_plane_file_descriptor(handle.fileno())
+        try:
+            with os.fdopen(fd, "wb") as handle:
+                handle.write(data)
+                handle.flush()
+                flush_control_plane_file_descriptor(handle.fileno())
+        except Exception:
+            with contextlib.suppress(OSError):
+                os.close(fd)
+            raise
         try:
             target = assert_path_within_trusted_base(
                 target,
