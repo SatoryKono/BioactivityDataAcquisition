@@ -9,7 +9,10 @@ import pytest
 from bioetl.application.services.evidence_location import (
     EvidenceLocationRegistrationOutcome,
 )
-from bioetl.domain.control_plane.run_evidence_location import EvidenceLocationKind
+from bioetl.domain.control_plane.run_evidence_location import (
+    DEFAULT_EVIDENCE_ROOT_ALIAS,
+    EvidenceLocationKind,
+)
 from bioetl.domain.control_plane.run_evidence_location_models import (
     EvidenceLocationLookupCode,
 )
@@ -43,6 +46,7 @@ def mock_build_service(mock_service: MagicMock) -> Generator[MagicMock, None, No
 @pytest.fixture(autouse=True)
 def ensure_logging_for_caplog() -> Generator[None, None, None]:
     import logging
+
     logger = logging.getLogger("scripts.ops.runtime.register_evidence_roots")
     old_level = logger.level
     logger.setLevel(logging.INFO)
@@ -84,6 +88,7 @@ def test_extract_request_from_identity_block() -> None:
     assert request.owner == "chembl_assay"
     assert request.run_id == "run-123"
     assert request.relative_data_root == "some/path"
+    assert request.root_alias == DEFAULT_EVIDENCE_ROOT_ALIAS
 
 
 def test_extract_request_invalid() -> None:
@@ -92,7 +97,10 @@ def test_extract_request_invalid() -> None:
 
 
 def test_dry_run_mode_does_not_mutate(
-    tmp_path: Path, mock_build_service: MagicMock, mock_service: MagicMock, caplog: pytest.LogCaptureFixture
+    tmp_path: Path,
+    mock_build_service: MagicMock,
+    mock_service: MagicMock,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     manifest = tmp_path / "manifest.json"
     manifest.write_text(
@@ -120,7 +128,10 @@ def test_dry_run_mode_does_not_mutate(
 
 
 def test_apply_mode_registers_records(
-    tmp_path: Path, mock_build_service: MagicMock, mock_service: MagicMock, caplog: pytest.LogCaptureFixture
+    tmp_path: Path,
+    mock_build_service: MagicMock,
+    mock_service: MagicMock,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     manifest = tmp_path / "manifest.json"
     manifest.write_text(
@@ -147,7 +158,10 @@ def test_apply_mode_registers_records(
 
 
 def test_conflict_handling_apply(
-    tmp_path: Path, mock_build_service: MagicMock, mock_service: MagicMock, caplog: pytest.LogCaptureFixture
+    tmp_path: Path,
+    mock_build_service: MagicMock,
+    mock_service: MagicMock,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     mock_service.register.return_value = EvidenceLocationRegistrationOutcome(
         code="conflict", detail="binding_conflict"
@@ -170,6 +184,22 @@ def test_conflict_handling_apply(
     mock_service.register.assert_called_once()
     assert (
         "Registration receipt: {'PASS': 0, 'FAIL': 0, 'SKIPPED': 1, 'NOT_RUN': 0}"
+        in caplog.text
+    )
+
+
+def test_relative_escape_is_rejected(
+    mock_build_service: MagicMock,
+    mock_service: MagicMock,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    exit_code = main(["../outside-evidence.json"])
+    assert exit_code == 1
+    mock_build_service.assert_called_once()
+    mock_service.register.assert_not_called()
+    mock_service.locations.lookup.assert_not_called()
+    assert (
+        "Registration receipt: {'PASS': 0, 'FAIL': 1, 'SKIPPED': 0, 'NOT_RUN': 0}"
         in caplog.text
     )
 
