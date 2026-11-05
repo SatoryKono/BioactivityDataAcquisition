@@ -29,6 +29,7 @@ async def test_default_workflow_captures_actual_gold_cohort_producer(
 ):
     from types import SimpleNamespace
     from deltalake import write_deltalake
+    from bioetl.application.services.workflow import workflow_runner_finalize
     from bioetl.application.services.workflow import workflow_runner_service as module
     from bioetl.application.workflow.transforms.reconcile_foreign_keys import (
         build_reconcile_foreign_keys_executor,
@@ -92,9 +93,13 @@ async def test_default_workflow_captures_actual_gold_cohort_producer(
         )
 
     monkeypatch.setattr(
-        module, "attach_workflow_run_report", lambda **kwargs: kwargs["result"]
+        workflow_runner_finalize,
+        "attach_workflow_run_report",
+        lambda **kwargs: kwargs["result"],
     )
-    monkeypatch.setattr(module, "archive_workflow_children", lambda *args: None)
+    monkeypatch.setattr(
+        workflow_runner_finalize, "archive_workflow_children", lambda *args: None
+    )
     config = WorkflowConfig(
         name="closed",
         steps=(

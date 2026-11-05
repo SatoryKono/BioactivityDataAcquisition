@@ -25,16 +25,6 @@ scope:
     - B506
 entries:
   # --- xml.etree.ElementTree (B405): typing/traversal only, parse via defusedxml ---
-  - id: SUP-ET-001
-    path: src/bioetl/application/pipelines/pubmed/xml_parser.py
-    line: 11
-    rule: B405
-    symbol: xml.etree.ElementTree
-    owner: stream-b
-    review_date: "2027-03-18"
-    rationale: >-
-      ET provides Element types and helpers only; this module never calls
-      ET.fromstring/ET.parse. Docstring examples parse via defusedxml.
   - id: SUP-ET-002
     path: src/bioetl/application/pipelines/pubmed/transformer.py
     line: 10
@@ -150,16 +140,6 @@ entries:
     rationale: >-
       Imports Element for type annotations over defusedxml-parsed trees;
       no ET parsing call sites in this module.
-  - id: SUP-ET-014
-    path: src/bioetl/infrastructure/adapters/pubmed/xml_processor.py
-    line: 11
-    rule: B405
-    symbol: xml.etree.ElementTree
-    owner: stream-b
-    review_date: "2027-03-18"
-    rationale: >-
-      External XML is parsed with defusedxml.ElementTree.fromstring; stdlib ET
-      provides Element types and annotation-only use, with no ET parsing sites.
   # --- subprocess imports (B404) ---
   - id: SUP-SP-004
     path: src/bioetl/infrastructure/provenance/code_revision.py

@@ -5,13 +5,21 @@ Provides reusable low-level functions for extracting data from XML elements.
 
 from __future__ import annotations
 
+import typing
+
 __all__ = ["get_int", "get_text"]
 
+if typing.TYPE_CHECKING:
 
-import xml.etree.ElementTree as ET  # nosec B405 - type annotations only, see suppression registry
+    class XmlElementProtocol(typing.Protocol):
+        text: str | None
+
+    Element = XmlElementProtocol
+else:
+    Element = object
 
 
-def get_text(node: ET.Element | None) -> str | None:
+def get_text(node: Element | None) -> str | None:
     """Extract text content from an XML element.
 
     Safely extracts and strips whitespace from XML element text content.
@@ -38,7 +46,7 @@ def get_text(node: ET.Element | None) -> str | None:
     return None
 
 
-def get_int(node: ET.Element | None) -> int | None:
+def get_int(node: Element | None) -> int | None:
     """Extract integer value from an XML element.
 
     Safely parses integer from XML element text content.
