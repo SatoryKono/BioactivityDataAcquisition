@@ -5,6 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.ledger.service import RunLedgerService
+from bioetl.composition.control_plane_paths import (
+    publish_new_run_manifest_to_live_root,
+)
 from bioetl.composition.evidence_location_registration import (
     register_pipeline_manifest_location_soft,
 )
@@ -135,6 +138,11 @@ def _publish_manifest_and_refs(
     )
     register_pipeline_manifest_location_soft(
         manifest=manifest, settings=inputs.settings
+    )
+    publish_new_run_manifest_to_live_root(
+        manifest=manifest,
+        settings=inputs.settings,
+        source_base=manifest_store.base_path,
     )
     if not require_before_persist:
         _require_cached_bronze_snapshots(

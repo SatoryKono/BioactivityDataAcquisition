@@ -209,6 +209,15 @@ def unresolved_scope_check(resolved_via: str) -> EvidenceCheckResult:
                 "control-plane evidence."
             ),
         )
+    if resolved_via == "resolved_without_manifest":
+        return EvidenceCheckResult(
+            check="manifest_not_recorded",
+            status="UNKNOWN",
+            reason="manifest_not_recorded",
+            detail=(
+                "The run is in the report catalog, but its manifest was not recorded."
+            ),
+        )
     reason = (
         "selected_run_id_not_found"
         if resolved_via == "selected_run_id_not_found"

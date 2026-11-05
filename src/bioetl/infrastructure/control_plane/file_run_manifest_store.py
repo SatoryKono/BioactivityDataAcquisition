@@ -434,3 +434,132 @@ class FileRunManifestStore(RawRunManifestInspectionMixin, RunManifestPort):
         for path, previous in reversed(tuple(rollback_state.items())):
             with suppress(OSError):
                 restore_optional_text(path, previous)
+
+
+_ALREADY_MAPPED = "already mapped to a different manifest_id"
+
+
+@dataclass(frozen=True, slots=True)
+class LiveRootRecordResult:
+    """Outcome of one new-run publication into the live catalog."""
+
+    outcome: str
+    catalog_snapshot: tuple[str, ...]
+
+
+def snapshot_manifest_catalog(base_path: Path) -> tuple[str, ...]:
+    """Return sorted manifest ids already stored under ``base_path``."""
+    if not base_path.is_dir():
+        return ()
+    return tuple(
+        sorted(
+            path.stem
+            for path in base_path.glob("*.json")
+            if path.is_file() and not path.name.endswith(".contract-evidence.json")
+        )
+    )
+
+
+def record_manifest_in_live_catalog(
+    *,
+    manifest: RunManifest,
+    live_base: Path,
+    source_base: Path,
+) -> LiveRootRecordResult:
+    """Publish one new manifest into the live catalog.
+
+    Historical data trees are not scanned or copied. An existing live manifest
+    for the same run id, or different bytes for the same manifest id, stay in
+    place. Catalog ids present before the write must still be present after it.
+    """
+    live = Path(live_base)
+    source = Path(source_base)
+    snapshot = snapshot_manifest_catalog(live)
+    if live.resolve(strict=False) == source.resolve(strict=False):
+        return LiveRootRecordResult("already_live", snapshot)
+    if _kept_existing_manifest(live, manifest):
+        _assert_snapshot_preserved(live, snapshot)
+        return LiveRootRecordResult("kept_existing", snapshot)
+    if _already_recorded(live, manifest):
+        _assert_snapshot_preserved(live, snapshot)
+        return LiveRootRecordResult("already_recorded", snapshot)
+    store = FileRunManifestStore(base_path=live)
+    try:
+        persist_manifest(
+            store,
+            manifest,
+            atomic_writer=atomic_write_text,
+            require_local_predecessor=False,
+        )
+    except ValueError as exc:
+        if _ALREADY_MAPPED not in str(exc):
+            raise
+        _assert_snapshot_preserved(live, snapshot)
+        return LiveRootRecordResult("kept_existing", snapshot)
+    _copy_own_contract_evidence(manifest, live_base=live, source_base=source)
+    _assert_snapshot_preserved(live, snapshot)
+    return LiveRootRecordResult("recorded", snapshot)
+
+
+def _rendered_manifest(manifest: RunManifest) -> str:
+    return json.dumps(manifest.to_dict(), indent=2, sort_keys=True)
+
+
+def _normalized_manifest_text(text: str) -> str:
+    return text.replace("\r\n", "\n").rstrip("\n")
+
+
+def _kept_existing_manifest(live_base: Path, manifest: RunManifest) -> bool:
+    """True when a recorded live file must not be replaced."""
+    target = live_base / f"{manifest.manifest_id}.json"
+    if target.is_file():
+        current = target.read_text(encoding="utf-8")
+        if _normalized_manifest_text(current) != _normalized_manifest_text(
+            _rendered_manifest(manifest)
+        ):
+            return True
+    index = live_base / "_by_run_id" / f"{manifest.run_id}.txt"
+    if not index.is_file():
+        return False
+    current_id = index.read_text(encoding="utf-8").strip()
+    return bool(current_id) and current_id != manifest.manifest_id
+
+
+def _already_recorded(live_base: Path, manifest: RunManifest) -> bool:
+    target = live_base / f"{manifest.manifest_id}.json"
+    index = live_base / "_by_run_id" / f"{manifest.run_id}.txt"
+    if not target.is_file() or not index.is_file():
+        return False
+    if index.read_text(encoding="utf-8").strip() != manifest.manifest_id:
+        return False
+    current = target.read_text(encoding="utf-8")
+    return _normalized_manifest_text(current) == _normalized_manifest_text(
+        _rendered_manifest(manifest)
+    )
+
+
+def _copy_own_contract_evidence(
+    manifest: RunManifest,
+    *,
+    live_base: Path,
+    source_base: Path,
+) -> None:
+    """Copy this publication's sidecar only. Predecessor files stay put."""
+    name = f"{manifest.manifest_id}.contract-evidence.json"
+    source = source_base / name
+    destination = live_base / name
+    if destination.exists() or not source.is_file():
+        return
+    atomic_write_text(destination, source.read_text(encoding="utf-8"))
+
+
+def _assert_snapshot_preserved(base_path: Path, snapshot: tuple[str, ...]) -> None:
+    missing = [
+        manifest_id
+        for manifest_id in snapshot
+        if not (base_path / f"{manifest_id}.json").is_file()
+    ]
+    if missing:
+        raise RuntimeError(
+            "live manifest catalog lost recorded manifests: " + ", ".join(missing)
+        )
