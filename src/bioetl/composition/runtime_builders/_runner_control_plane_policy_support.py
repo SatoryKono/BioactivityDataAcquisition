@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition.runtime_builders._runner_control_plane_artifact_policy import (
+from bioetl.domain.control_plane.artifact_publication_policy import (
     requires_artifact_publication_closure as _requires_artifact_publication_closure,
     validate_artifact_recorder_attachment as _validate_artifact_recorder_attachment,
 )
