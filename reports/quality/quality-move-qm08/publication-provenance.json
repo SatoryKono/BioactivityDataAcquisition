@@ -210,9 +210,11 @@
         "merged": true,
         "number": 12728
       },
-      "retrieved_at_utc": "2026-11-03T14:28:32+00:00",
+      "retrieved_at_utc": "2026-11-03T15:19:49Z",
       "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/12728",
       "reviewed_source_commits": [
+        "b03dbf43aeb83786ef410a85667f0c0932ca8b61",
+        "b83a31c6d5c925348a71d6da78a664b3c9ae3f47",
         "1560a3d36e164f69043f8d5b8388af9091b46f57"
       ],
       "schema_version": 1,

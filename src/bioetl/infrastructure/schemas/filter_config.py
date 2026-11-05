@@ -92,7 +92,7 @@ class SilverFiltersFileConfig(BaseGoldFiltersConfig):
             validate_structural_silver_filter_payload(data)
         return data
 
-    def to_domain(self) -> SilverFilterConfig:  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride]
+    def to_domain(self) -> SilverFilterConfig:  # type: ignore[override]  # tracked(#12721): unjustified type ignore debt  # pyright: ignore[reportIncompatibleMethodOverride]
         """Convert to a structural-only domain SilverFilterConfig dataclass.
 
         Returns:
