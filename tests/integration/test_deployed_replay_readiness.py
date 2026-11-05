@@ -63,11 +63,15 @@ def test_deployed_selected_run_is_ready(run):
         assert result["evidence_completeness"] == "COMPLETE", result
 
         # RF-008: evidence depth comes from replay_checks, not invented top-level keys.
-        checks = result.get("replay_checks") or []
-        assert isinstance(checks, list) and checks, result
+        checks = {
+            item["code"]: item
+            for item in (result.get("replay_checks") or [])
+            if isinstance(item, dict) and "code" in item
+        }
+        assert checks, result
+        assert "manifest_not_recorded" not in checks, result
         assert all(
-            not isinstance(item, dict) or item.get("result") not in {"fail", "unknown"}
-            for item in checks
+            item.get("result") not in {"fail", "unknown"} for item in checks.values()
         ), result
 
 

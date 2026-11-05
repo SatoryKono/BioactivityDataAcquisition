@@ -570,40 +570,139 @@ def test_verify_run_id_success(
     )
 
 
-def test_verify_run_id_require_ops_fails_when_endpoint_unreachable(
+def _mutate_readiness_verdict(payload: dict[str, object]) -> None:
+    readiness = payload["replay_readiness"]
+    assert isinstance(readiness, list)
+    row = readiness[0]
+    assert isinstance(row, dict)
+    row["verdict"] = "INSUFFICIENT"
+
+
+def _mutate_evidence_completeness(payload: dict[str, object]) -> None:
+    payload["evidence_completeness"] = "INCOMPLETE"
+
+
+def _mutate_empty_replay_readiness(payload: dict[str, object]) -> None:
+    payload["replay_readiness"] = []
+
+
+def _mutate_non_ready_domain(payload: dict[str, object]) -> None:
+    readiness = payload["replay_readiness"]
+    assert isinstance(readiness, list)
+    row = readiness[0]
+    assert isinstance(row, dict)
+    row["domain_verdict"] = "blocked"
+
+
+def _mutate_manifest_not_recorded(payload: dict[str, object]) -> None:
+    # Tip contract: missing manifest is a replay_checks unknown, not top-level
+    # manifest_present (Jules/CodeRabbit invented field — not on selected-run-status).
+    payload["replay_checks"] = [
+        {
+            "code": "manifest_not_recorded",
+            "result": "unknown",
+            "reason": "manifest_not_recorded",
+        }
+    ]
+
+
+def _mutate_corrupt_object_check(payload: dict[str, object]) -> None:
+    # Tip contract: object corruption surfaces as a failed replay check.
+    payload["replay_checks"] = [
+        {
+            "code": "pipeline_run_report_json",
+            "result": "fail",
+            "reason": "digest_mismatch",
+        }
+    ]
+
+
+def _mutate_location_missing_check(payload: dict[str, object]) -> None:
+    # Tip contract: missing location/artifact is a failed/unknown replay check.
+    payload["replay_checks"] = [
+        {
+            "code": "pipeline_run_report_md",
+            "result": "fail",
+            "reason": "artifact_missing",
+        }
+    ]
+
+
+@pytest.mark.parametrize(
+    ("mutate", "fail_needle"),
+    [
+        (_mutate_readiness_verdict, "replay_readiness is not READY"),
+        (_mutate_evidence_completeness, "evidence_completeness is not COMPLETE"),
+        (_mutate_empty_replay_readiness, "no replay_readiness found"),
+        (_mutate_non_ready_domain, "domain_verdict is not exact_replay_ready"),
+        (_mutate_manifest_not_recorded, "replay_checks unknown"),
+        (_mutate_corrupt_object_check, "replay_checks failed"),
+        (_mutate_location_missing_check, "replay_checks failed"),
+    ],
+    ids=[
+        "verdict",
+        "evidence_completeness",
+        "empty_replay_readiness",
+        "domain_verdict",
+        "manifest_via_replay_checks",
+        "corrupt_via_replay_checks",
+        "location_via_replay_checks",
+    ],
+)
+def test_verify_run_id_negative_selected_run_fields(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    mutate,
+    fail_needle: str,
 ) -> None:
-    """Bind alignment must not mask a missing selected-run-status under --require-ops."""
-    _seed_aligned_host_with_run(tmp_path, monkeypatch)
+    """One-field regressions against the real selected-run-status contract."""
+    expected_source_id = _seed_aligned_host_with_run(tmp_path, monkeypatch)
+    payload = _ready_selected_run_payload()
+    mutate(payload)
+    monkeypatch.setattr(
+        mod,
+        "_json_get",
+        _aligned_list_ops_payload(expected_source_id, selected_run=payload),
+    )
+
+    assert (
+        mod.verify(
+            repo=tmp_path,
+            ops_url="http://127.0.0.1:8000",
+            container="bioetl",
+            pipeline="chembl_assay",
+            require_ops=False,
+            run_id="run-a",
+        )
+        == 1
+    )
+
+    state = mod._VerificationState()
+    mod._verify_run_id_endpoint(
+        state,
+        ops_url="http://127.0.0.1:8000",
+        pipeline="chembl_assay",
+        run_id="run-a",
+        require_ops=False,
+        bind_aligned=True,
+    )
+    assert state.ok is False
+    assert any(fail_needle in line for line in state.findings), state.findings
+
+
+@pytest.mark.parametrize("require_ops", [False, True])
+def test_verify_run_id_fails_when_endpoint_unreachable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    require_ops: bool,
+) -> None:
+    """Explicit --run-id fails closed when selected-run-status is unreachable."""
+    expected_source_id = _seed_aligned_host_with_run(tmp_path, monkeypatch)
 
     def ops_payload(url: str, **_kwargs: object) -> dict[str, object] | None:
         if "selected-run-status" in url:
             return None
-        if url.endswith("/health/ready"):
-            return {
-                "status": "healthy",
-                "checks": {
-                    "report_root": {
-                        "status": "healthy",
-                        "layout_status": "healthy",
-                        "source_identity_status": "healthy",
-                        "source_identity_actual": mod._expected_runtime_environment(
-                            tmp_path
-                        )["BIOETL_RUNTIME_SOURCE_ID"],
-                    }
-                },
-            }
-        return {
-            "status": "ok",
-            "count": 1,
-            "marker_status": "healthy",
-            "source_identity_status": "healthy",
-            "source_identity_actual": mod._expected_runtime_environment(tmp_path)[
-                "BIOETL_RUNTIME_SOURCE_ID"
-            ],
-            "items": [{"run_id": "run-a"}],
-        }
+        return _aligned_list_ops_payload(expected_source_id)(url)
 
     monkeypatch.setattr(mod, "_json_get", ops_payload)
     assert (
@@ -612,39 +711,41 @@ def test_verify_run_id_require_ops_fails_when_endpoint_unreachable(
             ops_url="http://127.0.0.1:8000",
             container="bioetl",
             pipeline="chembl_assay",
-            require_ops=True,
+            require_ops=require_ops,
             run_id="run-a",
         )
         == 1
     )
 
+    state = mod._VerificationState()
+    mod._verify_run_id_endpoint(
+        state,
+        ops_url="http://127.0.0.1:8000",
+        pipeline="chembl_assay",
+        run_id="run-a",
+        require_ops=require_ops,
+        bind_aligned=True,
+    )
+    assert state.ok is False
+    assert any(
+        "selected-run-status endpoint unreachable" in line for line in state.findings
+    ), state.findings
 
-def test_verify_run_id_fails_on_unknown_replay_checks(
+
+def test_verify_run_id_requires_pipeline(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    expected_source_id = _seed_aligned_host_with_run(tmp_path, monkeypatch)
-    payload = _ready_selected_run_payload()
-    payload["replay_checks"] = [
-        {
-            "code": "manifest_not_recorded",
-            "result": "unknown",
-            "reason": "manifest_not_recorded",
-        }
-    ]
-    monkeypatch.setattr(
-        mod,
-        "_json_get",
-        _aligned_list_ops_payload(expected_source_id, selected_run=payload),
+    _seed_aligned_host_with_run(tmp_path, monkeypatch)
+    monkeypatch.setattr(mod, "_json_get", lambda _url, **_kw: None)
+    state = mod._VerificationState()
+    mod._verify_run_id_endpoint(
+        state,
+        ops_url="http://127.0.0.1:8000",
+        pipeline=None,
+        run_id="run-a",
+        require_ops=False,
+        bind_aligned=True,
     )
-    assert (
-        mod.verify(
-            repo=tmp_path,
-            ops_url="http://127.0.0.1:8000",
-            container="bioetl",
-            pipeline="chembl_assay",
-            require_ops=True,
-            run_id="run-a",
-        )
-        == 1
-    )
+    assert state.ok is False
+    assert any("--run-id requires --pipeline" in line for line in state.findings)

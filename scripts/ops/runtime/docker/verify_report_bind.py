@@ -471,17 +471,12 @@ def _record_selected_run_unreachable(
     state: _VerificationState,
     *,
     url: str,
-    require_ops: bool,
-    bind_aligned: bool,
+    run_id: str,
 ) -> None:
-    """Fail under --require-ops; otherwise warn (bind match does not prove run evidence)."""
-    if require_ops:
-        state.fail(f"FAIL: selected-run-status endpoint unreachable: {url}")
-        return
-    if bind_aligned:
-        state.warn(f"WARN: selected-run-status endpoint timed out: {url}")
-        return
-    state.warn(f"WARN: selected-run-status endpoint unreachable: {url}")
+    """Explicit --run-id never succeeds without a selected-run-status payload."""
+    state.fail(
+        f"FAIL: selected-run-status endpoint unreachable for run_id={run_id!r}: {url}"
+    )
 
 
 def _first_replay_readiness(
@@ -570,9 +565,10 @@ def _verify_run_id_endpoint(
     )
     result = _json_get(url, timeout=20.0)
     if result is None:
-        _record_selected_run_unreachable(
-            state, url=url, require_ops=require_ops, bind_aligned=bind_aligned
-        )
+        # bind_aligned / require_ops do not soften --run-id: selected-run evidence
+        # was explicitly requested and must be observed.
+        _ = (require_ops, bind_aligned)
+        _record_selected_run_unreachable(state, url=url, run_id=run_id)
         return
 
     print(f"ops_selected_run_status={result.get('verdict')!r}")
