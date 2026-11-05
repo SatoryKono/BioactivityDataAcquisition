@@ -289,6 +289,9 @@ def test_shadow_compare_routes_12380_acceptance_report() -> None:
     "path",
     (
         "reports/audit/pack-v2.1/P02-ddd-domain.md",
+        "reports/audit/pack-v2.1/P02-invariant-runs.log",
+        "reports/audit/pack-v2.1/domain-pylint-duplicate-code-scan.log",
+        "reports/audit/pack-v2.1/domain-vulture-dead-code-scan.log",
         "reports/audit/pack-v2.1/P05-interfaces-contracts.md",
     ),
 )

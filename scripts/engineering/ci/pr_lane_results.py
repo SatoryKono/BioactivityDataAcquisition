@@ -363,10 +363,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/unit/application/services/run_reports/test_composite_report.py",
         ),
     ),
-    # pack-v2.1 stage handoffs are working_report inventory surfaces (not runtime code).
+    # pack-v2.1 stage handoffs and their evidence logs are inventory surfaces
+    # (not runtime code). Unmapped logs fail shadow-compare closed.
     **dict.fromkeys(
         (
             "reports/audit/pack-v2.1/P02-ddd-domain.md",
+            "reports/audit/pack-v2.1/P02-invariant-runs.log",
+            "reports/audit/pack-v2.1/domain-pylint-duplicate-code-scan.log",
+            "reports/audit/pack-v2.1/domain-vulture-dead-code-scan.log",
             "reports/audit/pack-v2.1/P05-interfaces-contracts.md",
         ),
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
