@@ -1,0 +1,5 @@
+Command: uv run pytest tests/unit/infrastructure/control_plane/test_file_run_ledger_store.py::test_file_store_fails_closed_on_truncated_tail_line_during_reads
+.                                                                        [100%]
+1 passed in 2.04s
+Exit code: 0
+Tue Nov  3 19:15:45 UTC 2026
