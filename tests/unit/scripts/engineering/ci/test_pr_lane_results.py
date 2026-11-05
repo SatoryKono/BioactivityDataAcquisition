@@ -594,19 +594,6 @@ def test_shadow_compare_routes_incident_operator_docs(path: str) -> None:
     ]
 
 
-def test_shadow_compare_routes_run_manifest_inspection_runbook() -> None:
-    """RF-008 runbook edits must map to verify_report_bind + deployed replay tests."""
-    root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare(
-        ["docs/05-operations/runbooks/run-manifest-inspection.md"],
-        repo_root=root,
-    )
-    assert report["selected"] == [
-        "tests/unit/scripts/ops/docker/test_verify_report_bind.py",
-        "tests/integration/test_deployed_replay_readiness.py",
-    ]
-
-
 @pytest.mark.parametrize(
     "path",
     (

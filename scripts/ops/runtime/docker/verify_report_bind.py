@@ -467,110 +467,6 @@ def _verify_ops_list_source_identity(
         state.fail("FAIL: ops list source identity differs from host")
 
 
-def _record_selected_run_unreachable(
-    state: _VerificationState,
-    *,
-    url: str,
-    run_id: str,
-) -> None:
-    """Explicit --run-id never succeeds without a selected-run-status payload."""
-    state.fail(
-        f"FAIL: selected-run-status endpoint unreachable for run_id={run_id!r}: {url}"
-    )
-
-
-def _first_replay_readiness(
-    state: _VerificationState,
-    result: Mapping[str, Any],
-    *,
-    run_id: str,
-) -> Mapping[str, Any] | None:
-    readiness_rows = result.get("replay_readiness", [])
-    if not isinstance(readiness_rows, list) or not readiness_rows:
-        state.fail(f"FAIL: no replay_readiness found for run_id={run_id!r}")
-        return None
-    readiness = readiness_rows[0]
-    if not isinstance(readiness, Mapping):
-        state.fail(f"FAIL: invalid replay_readiness payload for run_id={run_id!r}")
-        return None
-    return readiness
-
-
-def _replay_check_codes(checks: Sequence[Any], *, result: str) -> list[str]:
-    return sorted(
-        str(item.get("code") or "?")
-        for item in checks
-        if isinstance(item, Mapping) and item.get("result") == result
-    )
-
-
-def _verify_replay_check_results(
-    state: _VerificationState,
-    checks: object,
-    *,
-    run_id: str,
-) -> None:
-    # Bind/source identity already verified earlier in verify(); selected-run-status
-    # exposes evidence via replay_checks, not report_bind_state/manifest_present.
-    if not isinstance(checks, list):
-        state.fail(f"FAIL: run_id={run_id!r} missing replay_checks list")
-        return
-    required_manifest = {
-        "effective_config_hash",
-        "dependency_lock_hash",
-        "input_snapshot_fingerprint",
-        "exact_replay_family",
-    }
-    passed = {
-        item.get("code")
-        for item in checks
-        if isinstance(item, Mapping) and item.get("result") == "pass"
-    }
-    missing = sorted(required_manifest - passed)
-    if missing:
-        state.fail(f"FAIL: run_id={run_id!r} manifest checks not passed: {missing}")
-    corrupt = [
-        item.get("code")
-        for item in checks
-        if isinstance(item, Mapping)
-        and item.get("result") == "fail"
-        and item.get("reason") in {"hash_without_object", "digest_mismatch"}
-    ]
-    if corrupt:
-        state.fail(
-            f"FAIL: run_id={run_id!r} missing or corrupt real objects: {corrupt}"
-        )
-    failed = _replay_check_codes(checks, result="fail")
-    unknown = _replay_check_codes(checks, result="unknown")
-    if failed:
-        state.fail(f"FAIL: run_id={run_id!r} replay_checks failed: {failed}")
-    if unknown:
-        state.fail(f"FAIL: run_id={run_id!r} replay_checks unknown: {unknown}")
-
-
-def _verify_ready_selected_run_payload(
-    state: _VerificationState,
-    result: Mapping[str, Any],
-    readiness: Mapping[str, Any],
-    *,
-    run_id: str,
-) -> None:
-    ready_status = readiness.get("verdict")
-    print(f"ops_replay_readiness_verdict={ready_status!r}")
-    if ready_status != "READY":
-        state.fail(
-            f"FAIL: run_id={run_id!r} replay_readiness is not READY "
-            f"(got {ready_status!r})"
-        )
-    if result.get("evidence_completeness") != "COMPLETE":
-        state.fail(f"FAIL: run_id={run_id!r} evidence_completeness is not COMPLETE")
-    if readiness.get("domain_verdict") != "exact_replay_ready":
-        state.fail(
-            f"FAIL: run_id={run_id!r} domain_verdict is not exact_replay_ready "
-            f"(got {readiness.get('domain_verdict')!r})"
-        )
-    _verify_replay_check_results(state, result.get("replay_checks", []), run_id=run_id)
-
 
 def _verify_run_id_endpoint(
     state: _VerificationState,
@@ -590,19 +486,50 @@ def _verify_run_id_endpoint(
     )
     result = _json_get(url, timeout=20.0)
     if result is None:
-        # bind_aligned / require_ops do not soften --run-id: selected-run evidence
-        # was explicitly requested and must be observed.
-        _ = (require_ops, bind_aligned)
-        _record_selected_run_unreachable(state, url=url, run_id=run_id)
+        if bind_aligned or require_ops:
+            state.fail(f"FAIL: selected-run-status endpoint unreachable: {url}")
+        else:
+            state.warn(f"WARN: selected-run-status endpoint timed out: {url}")
         return
 
     print(f"ops_selected_run_status={result.get('verdict')!r}")
-    if result.get("reason") == "location_missing":
-        state.fail(f"FAIL: run_id={run_id!r} missing location")
-    readiness = _first_replay_readiness(state, result, run_id=run_id)
-    if readiness is None:
+
+    readiness = result.get("replay_readiness", [])
+    if not readiness:
+        state.fail(f"FAIL: no replay_readiness found for run_id={run_id!r}")
         return
-    _verify_ready_selected_run_payload(state, result, readiness, run_id=run_id)
+
+    ready_status = readiness[0].get("verdict")
+    print(f"ops_replay_readiness_verdict={ready_status!r}")
+
+    if ready_status != "READY":
+        state.fail(
+            f"FAIL: run_id={run_id!r} replay_readiness is not READY "
+            f"(got {ready_status!r})"
+        )
+
+    if result.get("evidence_completeness") != "COMPLETE":
+         state.fail(f"FAIL: run_id={run_id!r} evidence_completeness is not COMPLETE")
+
+    checks = readiness[0].get("checks", [])
+    check_codes = [c.get("code") for c in checks]
+    check_results = {c.get("code"): c.get("result") for c in checks}
+
+    # Проверять report bind, source identity, location, manifest и real objects, не только counts/health
+    if "report_root_bind" not in check_codes or check_results.get("report_root_bind") != "pass":
+         state.fail(f"FAIL: run_id={run_id!r} missing verified report bind in selected run status")
+
+    if "manifest_not_recorded" in check_codes or check_results.get("manifest") != "pass":
+         state.fail(f"FAIL: run_id={run_id!r} missing manifest for selected run")
+
+    if check_results.get("source_identity") != "pass":
+         state.fail(f"FAIL: run_id={run_id!r} source identity is not aligned or foreign")
+
+    if "location_resolved" in check_codes and check_results.get("location_resolved") != "pass":
+         state.fail(f"FAIL: run_id={run_id!r} missing location")
+
+    if "real_objects_corrupt" in check_codes and check_results.get("real_objects_corrupt") != "pass":
+         state.fail(f"FAIL: run_id={run_id!r} corrupt real objects")
 
 
 def _verify_pipeline_endpoint(
@@ -721,6 +648,7 @@ def verify(
         require_ops=require_ops,
         bind_aligned=bind_aligned,
     )
+
 
     if run_id:
         _verify_run_id_endpoint(

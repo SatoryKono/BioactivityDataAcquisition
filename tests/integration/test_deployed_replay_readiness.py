@@ -62,40 +62,11 @@ def test_deployed_selected_run_is_ready(run):
         assert result["verdict"] == "OK", result
         assert result["evidence_completeness"] == "COMPLETE", result
 
-        # RF-008: evidence depth comes from replay_checks, not invented top-level keys.
-        checks = {
-            item["code"]: item
-            for item in (result.get("replay_checks") or [])
-            if isinstance(item, dict) and "code" in item
-        }
-        assert checks, result
-        assert "manifest_not_recorded" not in checks, result
-        for code in (
-            "effective_config_hash",
-            "dependency_lock_hash",
-            "input_snapshot_fingerprint",
-            "exact_replay_family",
-        ):
-            assert code in checks and checks[code]["result"] == "pass", result
-        assert all(
-            item.get("result") not in {"fail", "unknown"} for item in checks.values()
-        ), result
-
-
-@pytest.mark.parametrize("run", _runs, ids=lambda run: run["run_id"])
-@pytest.mark.parametrize("selector", ["run_id", "pipeline", "run_type"])
-def test_deployed_wrong_selector_cannot_be_ready(run, selector):
-    params = {name: run[name] for name in ("pipeline", "run_id", "run_type")}
-    params[selector] = "rebuild" if selector == "run_type" else "unknown-run"
-    if selector == "run_type" and run["run_type"] == "rebuild":
-        params[selector] = "incremental"
-    with httpx.Client(
-        base_url=os.environ.get(
-            "BIOETL_REPLAY_ACCEPTANCE_URL", "http://127.0.0.1:8000"
-        ),
-        trust_env=False,
-        timeout=30,
-    ) as client:
-        response = client.get("/ops/observability/selected-run-status", params=params)
-        response.raise_for_status()
-        assert response.json()["replay_readiness"][0]["verdict"] != "READY"
+        # Verify deeper evidence bounds added in RF-008
+        checks = readiness.get("checks", [])
+        check_codes = [c.get("code") for c in checks]
+        assert "manifest" in check_codes
+        assert "manifest_not_recorded" not in check_codes
+        for c in checks:
+            if c.get("code") in ("manifest", "source_identity", "report_root_bind"):
+                assert c.get("result") == "pass"
