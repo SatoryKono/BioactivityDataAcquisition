@@ -193,6 +193,8 @@
     "notes": [
       "This audit covers structured config/contract/registry surfaces under configs/** that JSCPD intentionally ignores. Generated JSON Schema mirrors stay governed by schema drift checks and are excluded from the authored-config duplication debt ratchet.",
       "Generated JSON Schemas are excluded because their repeated $defs are materialized from shared Pydantic source models rather than independently maintained configuration debt.",
+      "External-resource inventory review manifests are evidence inputs, not authored runtime configuration; their repeated review fields are excluded from the duplication debt count.",
+      "The identical observations envelope in the pipeline and workflow report schemas is one shared wire contract, governed by schema compatibility checks rather than the authored-config debt count.",
       "The generated test telemetry baseline is excluded because repeated duration maps are captured observations, not maintained config debt.",
       "Clusters report exact canonical JSON subtree duplicates only; near-duplicate prose and comment drift stay out of scope.",
       "The audit is report-only and exists to make YAML/JSON governance duplication reviewable in CI-visible artifacts.",
@@ -205,12 +207,28 @@
       "excluded_generated_roots": [
         "configs/_schema"
       ],
+      "excluded_review_evidence_patterns": [
+        "configs/quality/external_resource_inventory_pr*_review.json"
+      ],
+      "excluded_shared_contract_blocks": [
+        {
+          "block_paths": [
+            "properties.observations",
+            "properties.observations.additionalProperties"
+          ],
+          "files": [
+            "configs/contracts/reports/pipeline_run_report.v2.json",
+            "configs/contracts/reports/workflow_run_report.v1.json"
+          ],
+          "reason": "shared_report_observations_wire_contract"
+        }
+      ],
       "file_suffixes": [
         ".yaml",
         ".yml",
         ".json"
       ],
-      "files_scanned": 255,
+      "files_scanned": 258,
       "ignored_by_jscpd_patterns": [
         "**/configs/**",
         "**/*.yaml",
@@ -261,5 +279,5 @@
     "composite_runtime family is at zero inconsistent keys as of Stream B plateau.",
     "Residual entity drift is limited to intentional entity-specific filters, metadata policy blocks, schema field-alias surfaces, and pipeline overrides."
   ],
-  "snapshot_date": "2026-11-02"
+  "snapshot_date": "2026-11-03"
 }

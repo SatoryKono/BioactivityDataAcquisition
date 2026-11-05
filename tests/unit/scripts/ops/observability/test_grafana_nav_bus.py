@@ -290,8 +290,8 @@ def test_run_explorer_restores_scope_and_compacts_reviewed_table() -> None:
         nav, panels, current_uid="bioetl-run-explorer-v1"
     )
 
-    assert scope["gridPos"] == {"x": 0, "y": 4, "w": 24, "h": 2}
-    assert browse["gridPos"] == {"x": 0, "y": 6, "w": 24, "h": 11}
+    assert scope["gridPos"] == {"x": 0, "y": 4, "w": 24, "h": 3}
+    assert browse["gridPos"] == {"x": 0, "y": 7, "w": 24, "h": 10}
     assert collapsed_row["gridPos"]["y"] == 17
 
 

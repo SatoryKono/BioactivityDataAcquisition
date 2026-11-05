@@ -49,7 +49,9 @@ if TYPE_CHECKING:
 
 __all__ = [
     "TransformStepRuntimeOptions",
+    "WorkflowStepDispatchDependencies",
     "apply_workflow_step_transition",
+    "dispatch_workflow_step",
     "execute_pipeline_step",
     "execute_transform_step",
 ]
@@ -218,6 +220,26 @@ class TransformStepRuntimeOptions:
     created_at_factory: Callable[[], datetime] | None
 
 
+@dataclass(frozen=True, slots=True)
+class WorkflowStepDispatchDependencies:
+    """Shared runner/transform collaborators for one workflow step dispatch."""
+
+    pipeline_runner: PipelineRunnerService
+    cohort_resolver: (
+        Callable[
+            [WorkflowStepConfig, Mapping[str, object]], Awaitable[WorkflowStepConfig]
+        ]
+        | None
+    )
+    transform_service: WorkflowTransformService
+    artifact_sink: WorkflowTransformArtifactSinkProtocol | None
+    metrics: MetricsPort
+    monotonic: Callable[[], float]
+    snapshot_reader: (
+        Callable[[str, str], Awaitable[dict[str, dict[str, object]]]] | None
+    )
+
+
 async def execute_transform_step(
     *,
     transform_service: WorkflowTransformService,
@@ -256,3 +278,40 @@ async def execute_transform_step(
         destructive_commit_callback=options.transform_commit_callback,
     )
     return step_result_from_transform_result(result)
+
+
+async def dispatch_workflow_step(
+    *,
+    deps: WorkflowStepDispatchDependencies,
+    workflow_name: str,
+    step: WorkflowStepDefinition,
+    step_outputs: dict[str, object],
+    workflow_context_labels: Mapping[str, str],
+    options: TransformStepRuntimeOptions,
+    capture_producer_snapshot: bool = False,
+) -> WorkflowStepExecutionResult:
+    """Dispatch a typed workflow step to its pipeline or transform executor."""
+    if isinstance(step, WorkflowStepConfig):
+        return await execute_pipeline_step(
+            pipeline_runner=deps.pipeline_runner,
+            cohort_resolver=deps.cohort_resolver,
+            upstream_outputs=step_outputs,
+            capture_producer_snapshot=capture_producer_snapshot,
+            metrics=deps.metrics,
+            monotonic=deps.monotonic,
+            workflow_name=workflow_name,
+            step=step,
+            workflow_context_labels=workflow_context_labels,
+            step_started_callback=options.step_started_callback,
+            workflow_run_id=options.workflow_run_id,
+            snapshot_reader=deps.snapshot_reader,
+        )
+    return await execute_transform_step(
+        transform_service=deps.transform_service,
+        artifact_sink=deps.artifact_sink,
+        workflow_name=workflow_name,
+        step=step,
+        step_outputs=step_outputs,
+        workflow_context_labels=workflow_context_labels,
+        options=options,
+    )
