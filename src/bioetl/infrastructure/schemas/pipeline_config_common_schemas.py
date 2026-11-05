@@ -249,7 +249,7 @@ class SilverFiltersConfig(BaseGoldFiltersConfig):
             validate_structural_silver_filter_payload(data)
         return data
 
-    def to_domain(self) -> SilverFilterConfig:  # type: ignore[override]
+    def to_domain(self) -> SilverFilterConfig:  # type: ignore[override]  # tracked(#12721): unjustified type ignore debt
         """Convert to a structural-only SilverFilterConfig."""
         from bioetl.domain.filtering.silver_config import (
             build_silver_filter_config_for_compatibility,

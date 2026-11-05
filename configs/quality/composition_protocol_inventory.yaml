@@ -1,9 +1,17 @@
 schema_version: 1
 owner: '@bioetl-architecture'
 linked_issue: '9599'
-expected_total: 77
+expected_total: 79
 max_composition_declarations_outside_contracts: 0
 protocols:
+- name: EvidenceReadContext
+  path: src/bioetl/application/ports/control_plane.py
+  line: 50
+  target_tier: application
+- name: EvidenceReadContextOpenerProtocol
+  path: src/bioetl/application/ports/control_plane.py
+  line: 84
+  target_tier: application
 - name: ObservabilityApiModule
   path: src/bioetl/composition/contracts/factories.py
   line: 38
@@ -110,35 +118,35 @@ protocols:
   target_tier: composition_contracts
 - name: ControlPlaneArtifactLifecycleStoreProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 48
+  line: 103
   target_tier: application
 - name: ForensicRunDiffServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 68
+  line: 123
   target_tier: application
 - name: HistoricalReplayClosureServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 80
+  line: 135
   target_tier: application
 - name: HistoricalReplayCorpusServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 97
+  line: 152
   target_tier: application
 - name: HistoricalReplayUniverseServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 115
+  line: 170
   target_tier: application
 - name: LineageInspectionServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 127
+  line: 182
   target_tier: application
 - name: RunManifestInspectionServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 148
+  line: 203
   target_tier: application
 - name: WorkflowInspectionServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 172
+  line: 227
   target_tier: application
 - name: DQDetectorConfig
   path: src/bioetl/application/ports/dq.py

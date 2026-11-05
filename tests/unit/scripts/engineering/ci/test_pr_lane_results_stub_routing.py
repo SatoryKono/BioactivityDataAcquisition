@@ -10,7 +10,7 @@ from scripts.engineering.ci.pr_lane_results import build_shadow_compare
 pytestmark = pytest.mark.unit
 
 
-def test_shadow_compare_routes_domain_ports_stub() -> None:
+def test_shadow_compare_routes_domain_ports_stub_fixture() -> None:
     """Typed ports package stubs map like their .py siblings under tests/unit."""
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
@@ -34,6 +34,22 @@ def test_shadow_compare_routes_assertless_ratchet_config() -> None:
         "tests/architecture/test_arch_s4_s9_gates.py",
         "tests/architecture/test_test_governance_audit.py",
         "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
+    ]
+
+
+def test_shadow_compare_routes_removed_vscode_root() -> None:
+    """Editor metadata selects root-hygiene tests and the closeout contract."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        [".vscode/settings.json", ".vscode/extensions.json"],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/architecture/test_root_hygiene_review_registry.py",
+        "tests/architecture/test_root_hygiene_workflow.py",
+        "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
     ]
 
 
