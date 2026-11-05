@@ -117,15 +117,18 @@ def read_target_list(
     return targets
 
 
-def _request_for(target: MigrationTarget) -> EvidenceLocationRegisterRequest:
+def _request_from_location(
+    location: RunEvidenceLocation,
+) -> EvidenceLocationRegisterRequest:
+    """Build a register/verify request from already-normalized locator fields."""
     return EvidenceLocationRegisterRequest(
-        kind=target.kind,
-        owner=target.owner,
-        run_id=target.run_id,
-        runtime_source_id=target.runtime_source_id,
-        relative_data_root=target.relative_data_root,
-        root_alias=DEFAULT_EVIDENCE_ROOT_ALIAS,
-        workflow_run_id=target.workflow_run_id,
+        kind=location.kind,
+        owner=location.owner,
+        run_id=location.run_id,
+        runtime_source_id=location.runtime_source_id,
+        relative_data_root=location.relative_data_root,
+        root_alias=location.root_alias,
+        workflow_run_id=location.workflow_run_id,
     )
 
 
@@ -301,7 +304,6 @@ def _preflight_source_anchors(
 
 def _classify_dry_run(
     service: EvidenceLocationRegistrationService,
-    request: EvidenceLocationRegisterRequest,
     *,
     planned: dict[tuple[str, str, str], str],
     location: RunEvidenceLocation,
@@ -318,7 +320,9 @@ def _classify_dry_run(
             detail="intra_batch_binding_conflict",
         )
 
-    verified: EvidenceLocationVerifyOutcome = service.verify(request)
+    verified: EvidenceLocationVerifyOutcome = service.verify(
+        _request_from_location(location)
+    )
     if verified.code == "location_missing":
         planned[key] = fingerprint
         return EvidenceLocationRegistrationOutcome(
@@ -356,7 +360,6 @@ def execute_migration(
     planned: dict[tuple[str, str, str], str] = {}
 
     for target in targets:
-        request = _request_for(target)
         validated = _validated_location(target)
         if isinstance(validated, EvidenceLocationRegistrationOutcome):
             _record_outcome(
@@ -379,10 +382,10 @@ def execute_migration(
             )
             continue
 
+        request = _request_from_location(validated)
         if dry_run:
             outcome = _classify_dry_run(
                 service,
-                request,
                 planned=planned,
                 location=validated,
             )

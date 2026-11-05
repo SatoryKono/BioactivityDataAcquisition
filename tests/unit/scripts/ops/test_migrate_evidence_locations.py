@@ -263,6 +263,44 @@ def test_execute_migration_dry_run_normalizes_owner_whitespace(
     assert stats["conflict"] == 0
 
 
+def test_execute_migration_dry_run_after_apply_tolerates_owner_whitespace(
+    tmp_path: Path,
+) -> None:
+    """Dry-run must classify an existing identical locator as already_identical."""
+    report_root = tmp_path / "reports"
+    report_root.mkdir()
+    alias_base = tmp_path / "data"
+    alias_base.mkdir()
+    clean = _workflow_target()
+    padded = MigrationTarget(
+        kind=clean.kind,
+        owner=f" {clean.owner} ",
+        run_id=f" {clean.run_id} ",
+        runtime_source_id=clean.runtime_source_id,
+        relative_data_root=clean.relative_data_root,
+    )
+    _seed_workflow_anchors(alias_base, clean)
+
+    assert (
+        execute_migration(
+            [clean],
+            report_root=report_root,
+            data_root=alias_base,
+            dry_run=False,
+        )["registered"]
+        == 1
+    )
+    stats = execute_migration(
+        [padded],
+        report_root=report_root,
+        data_root=alias_base,
+        dry_run=True,
+    )
+    assert stats["already_identical"] == 1
+    assert stats["conflict"] == 0
+    assert stats["location_invalid"] == 0
+
+
 def test_execute_migration_apply(tmp_path: Path) -> None:
     report_root = tmp_path / "reports"
     report_root.mkdir()
