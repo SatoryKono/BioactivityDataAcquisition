@@ -2125,12 +2125,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
-    "scripts/ops/runtime/register_evidence_roots.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain as the bounded RF-006 historical evidence-root registrar (`python -m scripts.ops.runtime.register_evidence_roots`) behind explicit manifest paths; keep it supporting so active_script_count_max stays flat, and promote only after an active slot is freed.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-12-31"
-    },
     "scripts/ops/support/load_repo_env.sh": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the shared repo-environment bootstrap helper consumed by local launcher scripts while `.env` loading remains centralized; fold it into a broader canonical shell bootstrap surface only if launcher setup paths are consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",

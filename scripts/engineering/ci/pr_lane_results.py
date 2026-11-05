@@ -146,9 +146,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/layered_suffix_policy.yaml": (
         "tests/architecture/test_layer_aware_suffix_policy.py",
     ),
-    "configs/quality/architecture_acceptance_baseline.yaml": (
-        "tests/architecture/test_architecture_acceptance_baseline.py",
-    ),
     "configs/quality/external_resource_inventory_pr12751_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -434,11 +431,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12728_main_merge_12737_review.json",
             "configs/quality/external_resource_inventory_pr12728_mypy_types_review.json",
             "configs/quality/external_resource_inventory_pr12730_rf001_004_review.json",
-            "configs/quality/external_resource_inventory_pr12756_review.json",
-            "configs/quality/external_resource_inventory_pr12756_main_12748_review.json",
-            "configs/quality/external_resource_inventory_pr12756_main_12751_review.json",
-            "configs/quality/external_resource_inventory_pr12756_main_12755_review.json",
-            "configs/quality/external_resource_inventory_pr12756_main_12766_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,

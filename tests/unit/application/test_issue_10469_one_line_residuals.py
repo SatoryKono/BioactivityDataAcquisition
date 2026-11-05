@@ -413,30 +413,30 @@ async def test_workflow_runner_skips_missing_topological_step() -> None:
     with (
         patch.object(WorkflowRunnerService, "record_expected_pipeline_metrics"),
         patch(
-            "bioetl.application.services.workflow.workflow_runner_finalize."
+            "bioetl.application.services.workflow.workflow_runner_service."
             "record_workflow_run_metrics"
         ),
         patch(
-            "bioetl.application.services.workflow.workflow_runner_finalize."
+            "bioetl.application.services.workflow.workflow_runner_service."
             "workflow_result_from_state",
             return_value=object(),
         ),
         patch(
-            "bioetl.application.services.workflow.workflow_runner_finalize.replace",
+            "bioetl.application.services.workflow.workflow_runner_service.replace",
             return_value=final_result,
         ),
         patch(
-            "bioetl.application.services.workflow.workflow_runner_finalize."
+            "bioetl.application.services.workflow.workflow_runner_service."
             "_require_workflow_result",
             return_value=final_result,
         ),
         patch(
-            "bioetl.application.services.workflow.workflow_runner_finalize."
+            "bioetl.application.services.workflow.workflow_runner_service."
             "attach_workflow_run_report",
             return_value=final_result,
         ),
         patch(
-            "bioetl.application.services.workflow.workflow_runner_finalize."
+            "bioetl.application.services.workflow.workflow_runner_service."
             "archive_workflow_children",
         ),
     ):

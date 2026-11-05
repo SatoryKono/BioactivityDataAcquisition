@@ -198,21 +198,8 @@ def _reconciliation_totals(rows: Sequence[WorkflowExecutionRow]) -> dict[str, ob
     }
 
 
-def planned_execution_count(
-    plan: Sequence[object],
-    execution: Sequence[object],
+def _planned_step_count(
+    plan: Sequence[object], execution: Sequence[WorkflowExecutionRow]
 ) -> int:
-    """Prefer planned step count; fall back to executed rows when plan is empty."""
-    planned = len(plan)
-    if planned:
-        return planned
-    return len(execution)
-
-
-def optional_mapping_copy(
-    observations: Mapping[str, object] | None,
-) -> dict[str, object] | None:
-    """Copy an optional mapping without branching in the caller."""
-    if observations is None:
-        return None
-    return dict(observations)
+    """Prefer declared plan size and fall back to observed execution size."""
+    return len(plan) if plan else len(execution)
