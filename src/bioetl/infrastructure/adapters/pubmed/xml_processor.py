@@ -11,16 +11,19 @@ from __future__ import annotations
 import typing
 
 if typing.TYPE_CHECKING:
+
     class Element:
         text: str | None
-        def find(self, path: str) -> 'Element | None': ...
-        def findall(self, path: str) -> list['Element']: ...
+
+        def find(self, path: str) -> Element | None: ...
+        def findall(self, path: str) -> list[Element]: ...
 else:
-    from defusedxml.ElementTree import ParseError
-    class Element: pass
+
+    class Element:
+        pass
+
 
 from defusedxml import ElementTree as SafeET
-from defusedxml.common import DefusedXmlException
 
 from bioetl.domain.types import JsonDict
 
@@ -31,7 +34,7 @@ class PubMedXmlProcessor:
     """Processes PubMed XML responses and extracts article records."""
 
     @staticmethod
-    def parse_response(xml_text: str) -> 'Element | None':
+    def parse_response(xml_text: str) -> Element | None:
         """Parse XML response text into ElementTree.
 
         Args:
@@ -44,9 +47,10 @@ class PubMedXmlProcessor:
             if len(xml_text) > 31457280:
                 raise ValueError("XML size limit exceeded")
 
-            import xml.etree as etree
             import time
-            from defusedxml.ElementTree import DefusedXMLParser, ParseError
+            import xml.etree as etree
+
+            from defusedxml.ElementTree import DefusedXMLParser
 
             class LimitedTreeBuilder(etree.ElementTree.TreeBuilder):
                 def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
@@ -65,18 +69,26 @@ class PubMedXmlProcessor:
                     return super().start(tag, attrs)
 
             builder = LimitedTreeBuilder()
-            parser = DefusedXMLParser(target=builder, forbid_dtd=False, forbid_entities=True, forbid_external=True)
+            parser = DefusedXMLParser(
+                target=builder,
+                forbid_dtd=False,
+                forbid_entities=True,
+                forbid_external=True,
+            )
             parser.feed(xml_text)
             parsed_root = parser.close()
             return typing.cast("Element", parsed_root)
         except Exception as e:
-            if isinstance(e, ValueError) or type(e).__name__ in ("ParseError", "DefusedXmlException"):
+            if isinstance(e, ValueError) or type(e).__name__ in (
+                "ParseError",
+                "DefusedXmlException",
+            ):
                 return None
             raise
 
     @staticmethod
     def extract_record(
-        article_node: 'Element',
+        article_node: Element,
     ) -> JsonDict:  # Any: untyped API JSON record
         """Extract record dict from a PubmedArticle XML node.
 
@@ -93,11 +105,13 @@ class PubMedXmlProcessor:
             "article_title": (
                 title_node.text if title_node is not None else "No title found"
             ),
-            "_raw_xml": SafeET.tostring(typing.cast(typing.Any, article_node), encoding="unicode"),
+            "_raw_xml": SafeET.tostring(
+                typing.cast(typing.Any, article_node), encoding="unicode"
+            ),
         }
 
     @staticmethod
-    def find_articles(root: 'Element') -> list['Element']:
+    def find_articles(root: Element) -> list[Element]:
         """Find all PubmedArticle elements in the XML tree.
 
         Args:
@@ -110,7 +124,7 @@ class PubMedXmlProcessor:
 
     @staticmethod
     def extract_all_records(
-        root: 'Element',
+        root: Element,
     ) -> list[JsonDict]:  # Any: untyped API JSON record
         """Extract all article records from XML root.
 
