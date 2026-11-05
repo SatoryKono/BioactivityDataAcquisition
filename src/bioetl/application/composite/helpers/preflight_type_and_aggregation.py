@@ -1,8 +1,10 @@
-"""Type-compatibility and aggregation helpers for preflight checks."""
+"""Type-compatibility, aggregation, and normalization-hash helpers for preflight."""
 
 from __future__ import annotations
 
-from bioetl.application.composite._preflight_types import ValidationIssue
+import hashlib
+
+from bioetl.application.composite._preflight_types import ProfileInfo, ValidationIssue
 from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.composite.aggregation import AggregationFunction
 
@@ -11,6 +13,7 @@ __all__ = [
     "ORDER_SENSITIVE_AGGREGATIONS",
     "check_type_compatibility",
     "dtype_in_group",
+    "get_expected_normalization_profile_hash",
     "validate_aggregation_ordering",
 ]
 
@@ -88,3 +91,16 @@ def validate_aggregation_ordering(
             )
         )
     return issues
+
+
+def get_expected_normalization_profile_hash(
+    source_profiles: dict[str, ProfileInfo],
+) -> str:
+    """Compute the deterministic runtime normalization profile hash for the composite DAG."""
+    if not source_profiles:
+        return "empty_dag"
+    components = [
+        f"{source}:{profile.profile_hash}"
+        for source, profile in sorted(source_profiles.items())
+    ]
+    return hashlib.sha256("|".join(components).encode("utf-8")).hexdigest()

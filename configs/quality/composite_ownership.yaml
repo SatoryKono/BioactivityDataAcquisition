@@ -204,7 +204,6 @@ areas:
       - src/bioetl/application/composite/_preflight_orchestration.py
       - src/bioetl/application/composite/_preflight_reporting.py
       - src/bioetl/application/composite/_preflight_types.py
-      - src/bioetl/application/composite/helpers/preflight_normalization_hash.py
       - src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py
       - src/bioetl/application/composite/helpers/preflight_schema_registry.py
       - src/bioetl/application/composite/helpers/preflight_type_and_aggregation.py

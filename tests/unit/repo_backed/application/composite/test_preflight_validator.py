@@ -720,7 +720,7 @@ class TestCompositePreflightValidationServiceWithSchemas:
         self, validator: CompositePreflightValidationService
     ) -> None:
         """Validation passes when YAML-loaded expected hash matches the runtime DAG hash."""
-        from bioetl.application.composite.helpers.preflight_normalization_hash import (
+        from bioetl.application.composite.helpers.preflight_type_and_aggregation import (
             get_expected_normalization_profile_hash,
         )
         from bioetl.infrastructure.config.composite_config_api import (

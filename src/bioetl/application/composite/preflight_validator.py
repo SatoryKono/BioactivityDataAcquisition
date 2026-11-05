@@ -25,7 +25,7 @@ from bioetl.application.composite._preflight_types import (
     SchemaFields,
     ValidationIssue,
 )
-from bioetl.application.composite.helpers.preflight_normalization_hash import (
+from bioetl.application.composite.helpers.preflight_type_and_aggregation import (
     get_expected_normalization_profile_hash,
 )
 from bioetl.application.composite.helpers.preflight_type_and_aggregation import (
