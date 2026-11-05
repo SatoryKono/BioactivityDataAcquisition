@@ -34,10 +34,12 @@ PUBLIC_AGGREGATE_ROOTS = frozenset({"Batch", "PipelineRun", "QuarantineEntry"})
 
 
 def _registry_payload() -> dict[str, Any]:
+    """Load the committed aggregate evidence registry."""
     return json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
 
 
 def _registry_aggregate_rows() -> list[dict[str, Any]]:
+    """Return the aggregate evidence rows."""
     return list(_registry_payload()["aggregates"])
 
 
@@ -87,14 +89,21 @@ def test_semantic_completeness_gaps_match_generator() -> None:
     status, gaps = semantic_completeness_payload(payload["aggregates"])
     assert payload["semantic_completeness"] == status
     assert payload["semantic_completeness_gaps"] == gaps
-    assert status.startswith("not_assessed;")
-    documented = {
-        (aggregate, name)
-        for aggregate, names in DOCUMENTED_KEY_INVARIANTS.items()
-        for name in names
+    assert status.startswith("not_assessed;" if gaps else "assessed;")
+    expected = set()
+    for row in payload["aggregates"]:
+        linked = {
+            str(link["invariant"]).casefold() for link in row["invariant_test_links"]
+        }
+        expected.update(
+            (row["aggregate"], name.casefold())
+            for name in DOCUMENTED_KEY_INVARIANTS[row["aggregate"]]
+            if name.casefold() not in linked
+        )
+    recorded = {
+        (row["aggregate"], row["documented_invariant"].casefold()) for row in gaps
     }
-    recorded = {(row["aggregate"], row["documented_invariant"]) for row in gaps}
-    assert recorded == documented
+    assert recorded == expected
 
 
 @pytest.mark.generated_artifact
@@ -115,3 +124,25 @@ def test_domain_aggregate_invariant_rows_have_direct_test_envelopes() -> None:
                 isinstance(node, ast.FunctionDef) and node.name == link["test_symbol"]
                 for node in ast.walk(tree)
             ), link
+
+
+def test_registered_invariant_without_direct_link_remains_a_gap() -> None:
+    """A registry claim alone must not imply executable test coverage."""
+    rows = [
+        {
+            "aggregate": aggregate,
+            "invariants": list(names),
+            "invariant_test_links": [],
+        }
+        for aggregate, names in DOCUMENTED_KEY_INVARIANTS.items()
+    ]
+    status, gaps = semantic_completeness_payload(rows)
+    assert status.startswith("not_assessed;")
+    assert len(gaps) == sum(map(len, DOCUMENTED_KEY_INVARIANTS.values()))
+    for row in rows:
+        row["invariant_test_links"] = [
+            {"invariant": name.upper()} for name in row["invariants"]
+        ]
+    status, gaps = semantic_completeness_payload(rows)
+    assert status.startswith("assessed;")
+    assert gaps == []

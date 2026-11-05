@@ -780,7 +780,7 @@ def test_nightly_deterministic_lanes_stay_daily_until_shadow_acceptance() -> Non
         for step in daily["steps"]
         if str(step.get("uses", "")).startswith("actions/upload-artifact@")
     }
-    assert uploads["Upload success evidence"]["with"]["retention-days"] == 30
+    assert uploads["Upload success evidence"]["with"]["retention-days"] == 7
     assert uploads["Upload success evidence"]["if"] == (
         "always() && !cancelled() && steps.partition.outputs.bucket == 'success'"
     )
