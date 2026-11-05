@@ -283,6 +283,17 @@ def _pipeline_source_anchor(
         return _invalid_location("source_run_missing")
     if str(found.pipeline_name).strip() != location.owner:
         return _owner_mismatch(location.owner, found.pipeline_name)
+    found_workflow = (
+        str(found.workflow_run_id).strip() if found.workflow_run_id else None
+    )
+    if found_workflow != location.workflow_run_id:
+        return EvidenceLocationRegistrationOutcome(
+            code="binding_mismatch",
+            detail=(
+                f"workflow_run_id_expected={location.workflow_run_id} "
+                f"workflow_run_id_found={found_workflow}"
+            ),
+        )
     source = _first_runtime_source(found.launch_context, found.runtime_config)
     if source is None:
         return _invalid_location("runtime_source_anchor_missing")

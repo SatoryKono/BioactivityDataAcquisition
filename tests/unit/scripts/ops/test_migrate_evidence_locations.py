@@ -83,11 +83,17 @@ def _seed_workflow_anchors(
 def _seed_pipeline_anchors(
     alias_base: Path,
     target: MigrationTarget,
+    *,
+    workflow_run_id: str | None = None,
+    use_target_workflow_run_id: bool = True,
 ) -> Path:
     data_root = alias_base.joinpath(*target.relative_data_root.split("/"))
     data_root.mkdir(parents=True, exist_ok=True)
     store = FileRunManifestStore(
         base_path=data_root / "output" / "control" / "run_manifest"
+    )
+    anchored_workflow = (
+        target.workflow_run_id if use_target_workflow_run_id else workflow_run_id
     )
     store.save(
         RunManifest(
@@ -100,6 +106,9 @@ def _seed_pipeline_anchors(
             pipeline_name=target.owner,
             provider="test",
             entity="test",
+            workflow_run_id=(
+                str(anchored_workflow) if anchored_workflow is not None else None
+            ),
             launch_context={"runtime_source_id": target.runtime_source_id},
         )
     )
@@ -356,6 +365,7 @@ def test_execute_migration_apply_pipeline_anchors(tmp_path: Path) -> None:
         run_id=_RUN_ID,
         runtime_source_id=_VALID_DIGEST,
         relative_data_root="wf/chembl_assay",
+        workflow_run_id="11111111-1111-1111-1111-111111111111",
     )
     _seed_pipeline_anchors(alias_base, target)
 
@@ -366,6 +376,70 @@ def test_execute_migration_apply_pipeline_anchors(tmp_path: Path) -> None:
         dry_run=False,
     )
     assert stats["registered"] == 1
+
+
+def test_execute_migration_rejects_pipeline_workflow_run_id_mismatch(
+    tmp_path: Path,
+) -> None:
+    report_root = tmp_path / "reports"
+    report_root.mkdir()
+    alias_base = tmp_path / "data"
+    alias_base.mkdir()
+    target = MigrationTarget(
+        kind=EvidenceLocationKind.PIPELINE,
+        owner="chembl_assay",
+        run_id=_RUN_ID,
+        runtime_source_id=_VALID_DIGEST,
+        relative_data_root="wf/chembl_assay",
+        workflow_run_id="11111111-1111-1111-1111-111111111111",
+    )
+    _seed_pipeline_anchors(
+        alias_base,
+        target,
+        workflow_run_id="22222222-2222-2222-2222-222222222222",
+        use_target_workflow_run_id=False,
+    )
+
+    stats = execute_migration(
+        [target],
+        report_root=report_root,
+        data_root=alias_base,
+        dry_run=True,
+    )
+    assert stats["binding_mismatch"] == 1
+    assert stats["registered"] == 0
+
+
+def test_execute_migration_rejects_pipeline_workflow_run_id_when_manifest_missing(
+    tmp_path: Path,
+) -> None:
+    report_root = tmp_path / "reports"
+    report_root.mkdir()
+    alias_base = tmp_path / "data"
+    alias_base.mkdir()
+    target = MigrationTarget(
+        kind=EvidenceLocationKind.PIPELINE,
+        owner="chembl_assay",
+        run_id=_RUN_ID,
+        runtime_source_id=_VALID_DIGEST,
+        relative_data_root="wf/chembl_assay",
+        workflow_run_id="11111111-1111-1111-1111-111111111111",
+    )
+    _seed_pipeline_anchors(
+        alias_base,
+        target,
+        workflow_run_id=None,
+        use_target_workflow_run_id=False,
+    )
+
+    stats = execute_migration(
+        [target],
+        report_root=report_root,
+        data_root=alias_base,
+        dry_run=True,
+    )
+    assert stats["binding_mismatch"] == 1
+    assert stats["registered"] == 0
 
 
 def test_read_target_list_rejects_path_escape(tmp_path: Path) -> None:
