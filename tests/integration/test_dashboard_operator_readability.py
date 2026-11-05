@@ -622,8 +622,11 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
     assert incident_donor["targets"][0]["parser"] == "backend"
     incident_selector = incident_donor["targets"][0]["root_selector"]
     assert "presentation_summary" in incident_selector
-    # Backend $toMillis drops the clock; duration rebuilds seconds from the ISO fields.
-    assert "$substring($t,11,2)" in incident_selector
+    # Fraction length is not fixed at six digits: ".123Z" must not feed the zone to $number.
+    assert "$substring($t,20,6)" not in incident_selector
+    assert "$substringBefore($rest, $zone)" in incident_selector
+    assert "$power(10, $length($digits))" in incident_selector
+    assert "$substring($t, 0, 10)" in incident_selector
     assert "($end - $start) / 1000" not in incident_selector
     assert "$end >= $start ? $end - $start : null" in incident_selector
     duration = next(item for item in get_dashboard_panels(incident) if item.get("id") == 9463)

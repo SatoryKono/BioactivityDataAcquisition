@@ -438,15 +438,28 @@ _INC_STATUS = (
 
 _INC_DOMAINS = _tag_rows("presentation_domains", "domains")
 _INC_DURATION = (
-    # Backend $toMillis keeps the UTC date and drops the clock, so both ends
-    # become the same midnight and panel 9463 shows 0 s. Rebuild epoch seconds
-    # from that date plus the ISO clock and fractional seconds. A missing
-    # timestamp stays null (panel noValue "Not recorded"), not 0 and not an error.
+    # Backend $toMillis of a full offset timestamp keeps only the UTC date, while
+    # a Z timestamp includes the clock. Anchor on the calendar date, then add the
+    # clock. The fraction stops at Z/z/+/- and is scaled by its own length:
+    # $substring($t,20,6) pulls the zone into $number for ".123Z" and fails the
+    # whole donor. A missing timestamp stays null, not 0 and not a query error.
     "($s := summary[0]; "
     "$a := $s.started_at; $b := $s.completed_at; "
-    "$secs := function($t){ $toMillis($t)/1000 + $number($substring($t,11,2))*3600 "
-    "+ $number($substring($t,14,2))*60 + $number($substring($t,17,2)) "
-    "+ ($substring($t,19,1) = '.' ? $number($substring($t,20,6))/1000000 : 0) }; "
+    "$secs := function($t){( "
+    "$tail := $substring($t, 19); "
+    "$rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; "
+    "$zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : "
+    "($contains($rest, '+') ? '+' : '-')); "
+    "$digits := $rest != '' ? $substringBefore($rest, $zone) : ''; "
+    "$frac := $digits != '' ? $number($digits) / $power(10, $length($digits)) : 0; "
+    "$sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); "
+    "$off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : "
+    "$substringAfter($tail, '-')); "
+    "$oh := $off != '' ? $number($substring($off, 0, 2)) : 0; "
+    "$om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; "
+    "$toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 "
+    "+ $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac "
+    "- $sign * ($oh*3600 + $om*60) )}; "
     "$start := $a ? $secs($a) : null; "
     "$end := $b ? $secs($b) : null; "
     # Compare only after both ends exist: this backend evaluates `>=` on null
