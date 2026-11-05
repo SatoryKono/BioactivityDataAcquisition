@@ -72,6 +72,9 @@ INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST = (
 DOCUMENTATION_CLEANUP_INVENTORY_TEST = (
     "tests/architecture/test_documentation_cleanup_inventory.py"
 )
+NIGHTLY_SHADOW_ARCHIVE_TEST = (
+    "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py"
+)
 ISSUE_12475_PHYSICAL_PARITY_TESTS = (
     "tests/integration/infrastructure/storage/test_issue_12475_physical_parity.py",
     "tests/integration/infrastructure/storage/test_gold_writer_versioning.py",
@@ -392,11 +395,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     # N1 coordinator status note (sibling of reports/governance/n1-shadow-window/).
     "reports/governance/n1-shadow-window-status.md": (
-        "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
+        NIGHTLY_SHADOW_ARCHIVE_TEST,
     ),
     # Docs-lane audit mirror of the N1 shadow status (Jules / audit pack surface).
     "docs/reports/audit/N1_SHADOW_STATUS.md": (
-        "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
+        NIGHTLY_SHADOW_ARCHIVE_TEST,
     ),
     "docs/04-reference/environment-variables.md": (
         DOCKER_RUNTIME_CONTRACT_TEST,
@@ -817,7 +820,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "reports/test-telemetry/": TELEMETRY_BASELINE_TESTS,
     "reports/performance/": BENCHMARK_EVIDENCE_TESTS,
     "reports/governance/n1-shadow-window/": (
-        "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
+        NIGHTLY_SHADOW_ARCHIVE_TEST,
     ),
     "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.": (
         NPM_RUNTIME_TEST,
