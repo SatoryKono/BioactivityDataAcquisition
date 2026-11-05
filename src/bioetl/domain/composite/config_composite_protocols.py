@@ -246,6 +246,11 @@ class CompositeConfigProtocol(Protocol):
         ...
 
     @property
+    def expected_normalization_profile_hash(self) -> str | None:
+        """Expected normalization profile hash for pre-flight validation."""
+        ...
+
+    @property
     def dq(self) -> _DQConfigProtocol:
         """Composite data-quality thresholds."""
         ...

@@ -25,6 +25,9 @@ from bioetl.application.composite._preflight_types import (
     SchemaFields,
     ValidationIssue,
 )
+from bioetl.application.composite.helpers.preflight_normalization_hash import (
+    get_expected_normalization_profile_hash,
+)
 from bioetl.application.composite.helpers.preflight_type_and_aggregation import (
     check_type_compatibility,
     dtype_in_group,
@@ -159,6 +162,24 @@ class CompositePreflightValidationService(
         source_profiles = self._load_source_profiles(config)
         self._log_schema_loading_summary(source_fields)
         self._log_profile_loading_summary(source_profiles)
+
+        dag_hash = get_expected_normalization_profile_hash(source_profiles)
+        if (
+            config.expected_normalization_profile_hash is not None
+            and dag_hash != config.expected_normalization_profile_hash
+        ):
+            issues.append(
+                ValidationIssue(
+                    field="expected_normalization_profile_hash",
+                    source="composite",
+                    issue_type="normalization_profile_drift",
+                    message=(
+                        f"DAG normalization profile hash mismatch: expected "
+                        f"{config.expected_normalization_profile_hash}, got {dag_hash}"
+                    ),
+                    severity="error",
+                )
+            )
 
         field_priorities = config.merge.field_priorities
         compatibility_overrides = config.merge.normalization_compatibility_overrides

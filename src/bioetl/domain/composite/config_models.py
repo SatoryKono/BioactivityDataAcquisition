@@ -211,6 +211,7 @@ class CompositeConfig:
     seed: SeedConfig
     enrichers: tuple[EnricherConfig, ...]
     merge: MergeConfig
+    expected_normalization_profile_hash: str | None = None
     dependencies: tuple[DependencyConfig, ...] = ()
     dq: CompositeDQConfig = field(default_factory=CompositeDQConfig)
     execution: ExecutionConfig = field(default_factory=ExecutionConfig)

@@ -223,6 +223,10 @@ def composite_from_dict[CompositeT, SeedT, DependencyT, EnricherT, MergeT](
         ),
         "enrichers": _build_enricher_configs(list(enricher_data), enricher_cls),
         "merge": _build_merge_config(merge_data, merge_cls),
+        "expected_normalization_profile_hash": optional_str(
+            data.get("expected_normalization_profile_hash"),
+            "expected_normalization_profile_hash"
+        )
     }
     _attach_optional_composite_sections(kwargs, data)
     return composite_cls(**kwargs)

@@ -190,7 +190,7 @@ def _cross_validation_to_dict(
 
 def composite_to_dict(config: CompositeConfigProtocol) -> dict[str, object]:
     """Convert a composite config to a deterministic serializable mapping."""
-    return {
+    result: dict[str, object] = {
         "name": config.name,
         "version": config.version,
         "seed": _seed_to_dict(config.seed),
@@ -204,3 +204,6 @@ def composite_to_dict(config: CompositeConfigProtocol) -> dict[str, object]:
         "lineage": _lineage_to_dict(config.lineage),
         "cross_validation": _cross_validation_to_dict(config.cross_validation),
     }
+    if config.expected_normalization_profile_hash is not None:
+        result["expected_normalization_profile_hash"] = config.expected_normalization_profile_hash
+    return result
