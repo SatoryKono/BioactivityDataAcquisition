@@ -1,5 +1,5 @@
 {
-  "duplicate_basename_count": 72,
+  "duplicate_basename_count": 73,
   "duplicate_basenames": {
     "test_adapter.py": [
       "tests/integration/adapters/openalex/test_adapter.py",
@@ -14,7 +14,7 @@
     ],
     "test_architecture_quality_scorecard.py": [
       "tests/architecture/test_architecture_quality_scorecard.py",
-      "tests/unit/infrastructure/quality/test_architecture_quality_scorecard.py"
+      "tests/unit/scripts/engineering/quality/test_architecture_quality_scorecard.py"
     ],
     "test_base.py": [
       "tests/unit/domain/normalization/profiles/test_base.py",
@@ -216,7 +216,7 @@
     ],
     "test_primitives.py": [
       "tests/unit/domain/validation/test_primitives.py",
-      "tests/unit/infrastructure/quality/test_primitives.py"
+      "tests/unit/scripts/engineering/quality/test_primitives.py"
     ],
     "test_publication.py": [
       "tests/unit/domain/schemas/openalex/test_publication.py",
@@ -230,6 +230,10 @@
     "test_publication_schema.py": [
       "tests/unit/domain/schemas/openalex/test_publication_schema.py",
       "tests/unit/domain/schemas/semanticscholar/test_publication_schema.py"
+    ],
+    "test_qm07_cold_imports.py": [
+      "tests/architecture/qm_07/test_qm07_cold_imports.py",
+      "tests/architecture/test_qm07_cold_imports.py"
     ],
     "test_quarantine.py": [
       "tests/unit/infrastructure/test_quarantine.py",
