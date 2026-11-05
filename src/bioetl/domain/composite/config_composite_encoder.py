@@ -205,5 +205,7 @@ def composite_to_dict(config: CompositeConfigProtocol) -> dict[str, object]:
         "cross_validation": _cross_validation_to_dict(config.cross_validation),
     }
     if config.expected_normalization_profile_hash is not None:
-        result["expected_normalization_profile_hash"] = config.expected_normalization_profile_hash
+        result["expected_normalization_profile_hash"] = (
+            config.expected_normalization_profile_hash
+        )
     return result

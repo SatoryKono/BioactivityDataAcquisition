@@ -720,27 +720,42 @@ class TestCompositePreflightValidationServiceWithSchemas:
         self, validator: CompositePreflightValidationService
     ) -> None:
         """Validation passes when expected_normalization_profile_hash matches the actual hash."""
-        from bioetl.infrastructure.config.composite_config_api import load_composite_config
+        from bioetl.infrastructure.config.composite_config_api import (
+            load_composite_config,
+        )
+
         config = load_composite_config("activity")
         # Override the expected hash with the valid one computed from current source profiles
         source_profiles = validator._load_source_profiles(config)
-        from bioetl.application.composite.helpers.preflight_normalization_hash import get_expected_normalization_profile_hash
+        from bioetl.application.composite.helpers.preflight_normalization_hash import (
+            get_expected_normalization_profile_hash,
+        )
+
         actual_hash = get_expected_normalization_profile_hash(source_profiles)
         object.__setattr__(config, "expected_normalization_profile_hash", actual_hash)
 
         result = validator.validate(config, fail_on_error=False)
-        assert not any(i.issue_type == "normalization_profile_drift" for i in result.errors)
+        assert not any(
+            i.issue_type == "normalization_profile_drift" for i in result.errors
+        )
 
     def test_validate_expected_normalization_profile_hash_mismatch(
         self, validator: CompositePreflightValidationService
     ) -> None:
         """Validation fails when expected_normalization_profile_hash does not match the actual hash."""
-        from bioetl.infrastructure.config.composite_config_api import load_composite_config
+        from bioetl.infrastructure.config.composite_config_api import (
+            load_composite_config,
+        )
+
         config = load_composite_config("activity")
-        object.__setattr__(config, "expected_normalization_profile_hash", "invalid_hash_value")
+        object.__setattr__(
+            config, "expected_normalization_profile_hash", "invalid_hash_value"
+        )
 
         result = validator.validate(config, fail_on_error=False)
-        drift_errors = [i for i in result.errors if i.issue_type == "normalization_profile_drift"]
+        drift_errors = [
+            i for i in result.errors if i.issue_type == "normalization_profile_drift"
+        ]
         assert len(drift_errors) == 1
         assert "expected invalid_hash_value" in drift_errors[0].message
         assert result.is_valid is False
