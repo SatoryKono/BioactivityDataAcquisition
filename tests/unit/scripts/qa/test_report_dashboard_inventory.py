@@ -450,7 +450,7 @@ def test_inventory_counts_contextual_dashboard_destinations() -> None:
                     "defaults": {
                         "links": [
                             {
-                                "url": "/d/bioetl-dq-v2/5-data-quality?var-run_id=selected"
+                                "url": "/d/bioetl-dq-v2/4-data-quality?var-run_id=selected"
                             }
                         ]
                     }

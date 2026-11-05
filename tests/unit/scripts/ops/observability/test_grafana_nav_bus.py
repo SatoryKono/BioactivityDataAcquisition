@@ -36,8 +36,14 @@ def test_run_explorer_processing_status_fits_zoom_with_inspectable_run_id() -> N
     assert fields["Overview"]["custom.minWidth"] == 150
     assert fields["Run ID"]["custom.width"] == 110
     assert fields["Run ID"]["custom.inspect"] is True
+    assert fields["Run ID"]["custom.wrapText"] is True
+    assert fields["Run ID"]["custom.cellOptions"]["wrapText"] is True
     assert any(
         "${__data.fields.run_id}" in link["title"] for link in fields["Run ID"]["links"]
+    )
+    assert all(
+        link["tooltip"] == "Full Run ID: ${__data.fields.run_id}"
+        for link in fields["Run ID"]["links"]
     )
     visible_width = sum(
         properties.get("custom.width", 0)

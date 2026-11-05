@@ -82,15 +82,15 @@ def test_nav_linter_checks_real_elements_and_destinations() -> None:
     content = (
         '<div class="bioetl-nav">'
         '<a class="bioetl-nav-link" style="width:19.5%" '
-        'href="/d/bioetl-run-explorer-v1/run-explorer">Run Explorer</a>'
+        'href="/d/bioetl-run-explorer-v1/1-run-explorer">1. Run Explorer</a>'
         '<a class="bioetl-nav-link" style="width:19.5%" '
-        'href="/d/bioetl-control-plane-v1/1-trust">Replay Readiness</a>'
-        '<span class="bioetl-nav-current" style="width:19.5%">Run Overview</span>'
+        'href="/d/bioetl-control-plane-v1/2-replay-readiness">2. Replay Readiness</a>'
+        '<span class="bioetl-nav-current" style="width:19.5%">3. Run Overview</span>'
         '<a class="bioetl-nav-link" style="width:19.5%" '
-        'href="/d/bioetl-dq-v2/5-data-quality">Data Quality</a>'
+        'href="/d/bioetl-dq-v2/4-data-quality">4. Data Quality</a>'
         '<a class="bioetl-nav-link" style="width:19.5%" '
-        'href="/d/bioetl-incident-v1/6-incident-workspace">'
-        "Incident Workspace</a></div>"
+        'href="/d/bioetl-incident-v1/5-incident-workspace">'
+        "5. Incident Workspace</a></div>"
     )
     assert lint._nav_content_findings("fixture.json", content) == []
 
@@ -107,7 +107,7 @@ def test_value_mapping_status_text_is_recognized() -> None:
 
 def test_parse_dashboard_view_panel_when_not_first_query_param() -> None:
     uid, panel = lint.parse_dashboard_view_panel(
-        "/d/bioetl-dq-v2/5-data-quality"
+        "/d/bioetl-dq-v2/4-data-quality"
         "?${workflow:queryparam}&${pipeline:queryparam}"
         "&viewPanel=9460&${__url_time_range}"
     )
@@ -117,7 +117,7 @@ def test_parse_dashboard_view_panel_when_not_first_query_param() -> None:
 
 def test_parse_dashboard_view_panel_first_param_and_amp_entities() -> None:
     uid, panel = lint.parse_dashboard_view_panel(
-        "/d/bioetl-overview-v2/2-overview?viewPanel=9300&amp;var-run_id=abc"
+        "/d/bioetl-overview-v2/3-run-overview?viewPanel=9300&amp;var-run_id=abc"
     )
     assert uid == "bioetl-overview-v2"
     assert panel == 9300
@@ -146,7 +146,7 @@ def test_lint_flags_broken_view_panel_mid_query(
                     {
                         "title": "broken mid-query",
                         "url": (
-                            "/d/bioetl-dq-v2/5-data-quality"
+                            "/d/bioetl-dq-v2/4-data-quality"
                             "?var-pipeline=chembl&viewPanel=99999"
                         ),
                     }

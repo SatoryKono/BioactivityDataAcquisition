@@ -6,12 +6,12 @@ from typing import Any
 
 from copy import deepcopy
 
+from scripts.ops.observability.grafana.dashboard_context_links import DASHBOARD_TITLES
+
 TITLES = {
-    "bioetl-control-plane-v1": "Replay Readiness",
-    "bioetl-overview-v2": "Run Overview",
+    **DASHBOARD_TITLES,
     "bioetl-runtime": "Pipeline Diagnostics",
     "bioetl-provider-health-v2": "Provider Health",
-    "bioetl-dq-v2": "Data Quality",
 }
 _RENAMES = {
     "1. Trust": "Replay Readiness",
@@ -57,10 +57,10 @@ _COLUMNS = {
 }
 _CONTEXT = "var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}"
 _SELECT_RUN_URL = (
-    "/d/bioetl-run-explorer-v1/run-explorer?" + _CONTEXT + "&var-lookup_run_id="
+    "/d/bioetl-run-explorer-v1/1-run-explorer?" + _CONTEXT + "&var-lookup_run_id="
 )
 _RESET_FILTERS = (
-    "/d/bioetl-run-explorer-v1/run-explorer"
+    "/d/bioetl-run-explorer-v1/1-run-explorer"
     "?var-workflow=.*&var-pipeline=.*&var-run_type=.*&var-run_id=-"
     "&var-lookup_run_id=&${__url_time_range}"
 )
@@ -200,8 +200,10 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     panel["description"] = (
         "GLOBAL · BROWSE the launch catalog filtered by Workflow/Pipeline/Run Type. "
         "Last 10 launches, newest Started first, independent of the time range. "
-        "Workflow and Pipeline open passports. Run ID opens the persisted Report; "
-        "inspect its full UUID in the cell. Overview is processing status, not replay readiness. "
+        "Workflow and Pipeline open passports. Run ID opens the persisted Report. "
+        "The full UUID wraps inside the column and is repeated on the cell tooltip "
+        "and in cell inspection, so reading it does not depend on widening the column. "
+        "Overview is processing status, not replay readiness. "
         "Saved Evidence, Data Quality and Replay Readiness use exact-run verified evidence. "
         "N/A means unsupported/legacy assessment. INCOMPLETE means missing required evidence. "
         "IN PROGRESS requires an explicit assessment queue/running signal and is never inferred. "
@@ -286,17 +288,17 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         ),
         "Provider": (
             "Provider Evidence",
-            "/d/bioetl-overview-v2/2-overview?" + _CONTEXT + "&viewPanel=9480",
+            "/d/bioetl-overview-v2/3-run-overview?" + _CONTEXT + "&viewPanel=9480",
         ),
-        "Overview": ("Run Overview", "/d/bioetl-overview-v2/2-overview?" + _CONTEXT),
+        "Overview": ("Run Overview", "/d/bioetl-overview-v2/3-run-overview?" + _CONTEXT),
         "Saved Evidence": (
             "Saved Evidence",
-            "/d/bioetl-control-plane-v1/1-trust?" + _CONTEXT + "&viewPanel=9418",
+            "/d/bioetl-control-plane-v1/2-replay-readiness?" + _CONTEXT + "&viewPanel=9418",
         ),
-        "Data Quality": ("Data Quality", "/d/bioetl-dq-v2/5-data-quality?" + _CONTEXT),
+        "Data Quality": ("Data Quality", "/d/bioetl-dq-v2/4-data-quality?" + _CONTEXT),
         "Replay Readiness": (
             "Replay Readiness",
-            "/d/bioetl-control-plane-v1/1-trust?" + _CONTEXT,
+            "/d/bioetl-control-plane-v1/2-replay-readiness?" + _CONTEXT,
         ),
     }
     _inspect_columns = frozenset({"Workflow", "Pipeline", _RUN_ID_LABEL})
@@ -331,7 +333,19 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
                         "targetBlank": False,
                     },
                 )
+                for item in link_items:
+                    item["tooltip"] = "Full Run ID: ${__data.fields.run_id}"
             properties.append({"id": "links", "value": link_items})
+        if name == _RUN_ID_LABEL:
+            properties.extend(
+                [
+                    {"id": "custom.wrapText", "value": True},
+                    {
+                        "id": "custom.cellOptions",
+                        "value": {"type": "auto", "wrapText": True},
+                    },
+                ]
+            )
         if name in {"Overview", "Saved Evidence", "Data Quality", "Replay Readiness"}:
             properties.extend(
                 [

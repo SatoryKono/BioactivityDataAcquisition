@@ -375,7 +375,7 @@ def _correct_incident_table_widths(panels: dict[int, dict[str, Any]]) -> None:
 
 def _ensure_open_run_overview_link(status: dict[str, Any]) -> None:
     diagnostics_url = (
-        "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}"
+        "/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}"
         "&${pipeline:queryparam}&${run_type:queryparam}"
         "&${run_id:queryparam}&${__url_time_range}"
     )
@@ -485,7 +485,7 @@ def _correct_provider(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     if isinstance(answer, dict):
         runtime_link = {
             "title": OPEN_PIPELINE_DIAGNOSTICS_TITLE,
-            "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+            "url": "/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
             "targetBlank": False,
             "includeVars": False,
         }
@@ -921,7 +921,7 @@ def _correct_control_plane_trust(uid: str, panels: dict[int, dict[str, Any]]) ->
             {
                 "title": "View trust reasons",
                 "url": (
-                    "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}"
+                    "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}"
                     "&${pipeline:queryparam}&${run_type:queryparam}"
                     "&${run_id:queryparam}&viewPanel=9418&${__url_time_range}"
                 ),
@@ -1238,7 +1238,7 @@ def _correct_run_explorer(uid: str, panels: dict[int, dict[str, Any]]) -> None:
         [
             {
                 "title": "Open 1. Trust",
-                "url": "/d/bioetl-control-plane-v1/1-trust?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
+                "url": "/d/bioetl-control-plane-v1/2-replay-readiness?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
                 "includeVars": False,
             }
         ],
