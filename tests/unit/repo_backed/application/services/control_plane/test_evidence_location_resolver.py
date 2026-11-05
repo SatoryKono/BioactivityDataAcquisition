@@ -440,7 +440,7 @@ def test_context_rejects_symlinked_effective_config_index_and_record(
         objects={},
     )
     with pytest.raises(EvidenceLocationInvalidError, match="symlink|escapes"):
-        context.verify_replay_objects(evidence)  # type: ignore[arg-type]
+        context.verify_replay_objects(evidence)
 
 
 def test_workflow_location_reads_workflow_manifest_store(

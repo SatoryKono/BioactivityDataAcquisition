@@ -12,6 +12,16 @@ from bioetl.application.observability.control_plane_integrity_metrics import (
 from bioetl.application.observability.control_plane_archive import (
     resolve_control_plane_archive_root,
 )
+from bioetl.application.services.evidence_location.resolver import (
+    EvidenceLocationResolver,
+)
+from bioetl.application.services.run_reports.evidence_location_paths import (
+    default_evidence_root_alias_registry,
+)
+from bioetl.composition.control_plane_paths import FileEvidenceReadContextFactory
+from bioetl.infrastructure.control_plane.file_evidence_location_store import (
+    FileEvidenceLocationStore,
+)
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
@@ -74,6 +84,7 @@ class HealthServerDependencies:
     workflow_manifest_port: WorkflowManifestPort
     metrics_exposition: HealthMetricsExpositionPort
     control_plane_evidence_service: ControlPlaneEvidenceService | None = None
+    evidence_location_resolver: EvidenceLocationResolver | None = None
     control_plane_integrity_refresher: ControlPlaneIntegrityMetricsService | None = None
     data_root: Path = Path()
     run_report_store: RunReportStorePort = field(
@@ -149,6 +160,20 @@ def _create_control_plane_ports(
     )
 
 
+def _build_evidence_location_resolver(
+    *,
+    metrics: MetricsPort,
+    data_root: Path,
+    report_root: Path,
+) -> EvidenceLocationResolver:
+    """Read locators from the report catalog and open the recorded data root."""
+    return EvidenceLocationResolver(
+        locations=FileEvidenceLocationStore(report_root=report_root),
+        aliases=default_evidence_root_alias_registry(dashboard_data_root=data_root),
+        opener=FileEvidenceReadContextFactory(metrics=metrics),
+    )
+
+
 def create_health_server_dependencies(
     *,
     metrics: MetricsPort | None = None,
@@ -205,4 +230,13 @@ def create_health_server_dependencies(
         metrics_exposition=HealthMetricsExpositionAdapter(),
         data_root=resolved_data_root,
         run_report_store=create_run_report_store(),
+        evidence_location_resolver=_build_evidence_location_resolver(
+            metrics=resolved_metrics,
+            data_root=resolved_data_root,
+            report_root=(
+                Path(settings.report_root)
+                if settings.report_root is not None
+                else Path("reports") / "run-reports"
+            ),
+        ),
     )

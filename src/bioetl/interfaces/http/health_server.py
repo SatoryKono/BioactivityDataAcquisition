@@ -1,8 +1,5 @@
 # Boundary object/payload typing residual at this module.
-"""HTTP Health Server for BioETL.
-
-Provides standard liveness and readiness probes.
-"""
+"""HTTP health server: liveness and readiness probes."""
 
 from __future__ import annotations
 
@@ -38,6 +35,9 @@ from bioetl.interfaces.http._health_server_control_plane_metrics_refresh import 
 )
 from bioetl.interfaces.http._health_server_observability_protocols import (
     HealthServerControlPlaneDeps as HealthServerControlPlaneDeps,
+)
+from bioetl.interfaces.http._health_server_observability_protocols import (
+    legacy_evidence_resolver,
 )
 from bioetl.interfaces.http._run_explorer_snapshot import (
     RunExplorerSnapshotCache,
@@ -149,6 +149,7 @@ class HealthServer(
                 run_report_store=cast(
                     RunReportStorePort | None, recognized.get("run_report_store")
                 ),
+                evidence_location_resolver=legacy_evidence_resolver(recognized),
             )
         return control_plane or HealthServerControlPlaneDeps()
 
@@ -184,6 +185,7 @@ class HealthServer(
         self._run_ledger_port = deps.run_ledger_port
         self._workflow_manifest_port = deps.workflow_manifest_port
         self._control_plane_evidence_service = deps.control_plane_evidence_service
+        self._evidence_location_resolver = deps.evidence_location_resolver
         self._control_plane_integrity_refresher = deps.control_plane_integrity_refresher
         self._control_plane_integrity_refresh_task: asyncio.Task[None] | None = None
         self._control_plane_integrity_refresh_interval_seconds = (

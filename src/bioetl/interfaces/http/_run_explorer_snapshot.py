@@ -13,7 +13,11 @@ from datetime import datetime
 from typing import Protocol
 
 from bioetl.application.runtime_clock import current_utc_time
+from bioetl.application.services.evidence_location.resolver import (
+    EvidenceLocationResolver,
+)
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort, RunReportStorePort
+from bioetl.interfaces.http._selected_run_unavailable import bind_runtime_source_id
 from bioetl.interfaces.http.recent_pipeline_runs import (
     RECENT_TIMING_FIELDS,
     _scope,
@@ -36,6 +40,9 @@ class _SnapshotSource(Protocol):
 
     @property
     def _run_ledger_port(self) -> RunLedgerPort | None: ...
+
+    @property
+    def _evidence_location_resolver(self) -> EvidenceLocationResolver | None: ...
 
 
 class RunExplorerSnapshotCache:
@@ -79,6 +86,10 @@ class RunExplorerSnapshotCache:
                 manifest_port=manifest_port,
                 ledger_port=source._run_ledger_port,
                 store=source._run_report_store,
+                resolver=bind_runtime_source_id(
+                    getattr(source, "_evidence_location_resolver", None),
+                    getattr(source, "_runtime_source_id", None),
+                ),
             )
         except _REFRESH_ERRORS:
             return
