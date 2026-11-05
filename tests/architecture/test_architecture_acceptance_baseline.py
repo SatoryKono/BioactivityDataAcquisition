@@ -118,8 +118,15 @@ def test_acceptance_baseline_code_anchors_match_current_runtime_contract() -> No
     load_service_source = _read(
         "src/bioetl/application/composite/checkpoint/load_service.py"
     )
-    runner_service_source = _read(
-        "src/bioetl/application/services/execution/pipeline_runner_service.py"
+    runner_service_source = "\n".join(
+        [
+            _read(
+                "src/bioetl/application/services/execution/pipeline_runner_service.py"
+            ),
+            _read(
+                "src/bioetl/application/services/execution/pipeline_runner_finalize.py"
+            ),
+        ]
     )
 
     for anchor in criteria["canonical_runtime_contexts"]["code_anchors"]:

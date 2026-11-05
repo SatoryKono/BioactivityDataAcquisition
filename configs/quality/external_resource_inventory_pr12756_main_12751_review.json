@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "d2ba9720a75035445d659ff426ca3a4e98ccc9e9",
+  "source_ref": "b5f59d31745549472d1e8dd7d3751349012c3ae2",
+  "source_reviews": {
+    "src/bioetl/application/ports/__init__.py": "Main #12751 ports package export adjustments; no new external resource acquisition.",
+    "src/bioetl/application/ports/control_plane.py": "Main #12751 control-plane port surface updates; Protocol/typing only, no acquisition.",
+    "src/bioetl/application/services/execution/workflow_runner_step_execution.py": "Main #12751 step-execution support updates alongside Class WRS extract retained on this tip; no new external resource acquisition.",
+    "src/bioetl/composition/runtime_builders/_run_manifest_attr_support.py": "Removed by main #12751 run-manifest support fold; acquisition census follows surviving creation/helpers modules.",
+    "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py": "Main #12751 run-manifest creation support refactor after attr helper removal; no new direct external resource acquisition.",
+    "src/bioetl/composition/runtime_builders/_run_manifest_creation_support_helpers.py": "Main #12751 helpers for run-manifest creation; no new direct external resource acquisition.",
+    "src/bioetl/composition/runtime_builders/run_manifest_builder.py": "Main #12751 run-manifest builder wiring updates; no new direct external resource acquisition.",
+    "src/bioetl/composition/runtime_builders/run_manifest_data_roots.py": "Main #12751 data-roots helper updates; existing import_module exclusion remains the resource story.",
+    "src/bioetl/domain/run_reports/model_serialization.py": "New pure serialization helpers extracted from run-report models; no external resource acquisition.",
+    "src/bioetl/domain/run_reports/models.py": "Main #12751 model serialization extract / typing hygiene; no external resource acquisition.",
+    "src/bioetl/domain/run_reports/workflow_totals.py": "Merge of totals helpers with Class extract retained; pure domain math, no acquisition.",
+    "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py": "Main #12751 publish helper touch-ups; existing mkstemp/fdopen/read_bytes acquisitions retained without new owners."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "reference_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
