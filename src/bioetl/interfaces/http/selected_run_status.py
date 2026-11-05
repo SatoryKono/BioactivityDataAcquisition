@@ -61,7 +61,8 @@ from bioetl.interfaces.http._selected_run_report_assessment import (
     _selected_pipeline,
 )
 from bioetl.interfaces.http._selected_run_unavailable import (
-    resolved_report_path,
+    manifest_port_for_context,
+    resolve_selected_run,
     unavailable_status,
 )
 from bioetl.interfaces.http.run_report_ops import _validated_artifact_paths
@@ -168,21 +169,17 @@ def load_selected_run_status(
     if selected_pipeline is None:
         return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
     pipeline = selected_pipeline
-    path_or_dict = resolved_report_path(
+    refusal, context = resolve_selected_run(
         resolver,
         pipeline=pipeline,
         run_id=run_id,
         expected_runtime_source_id=expected_runtime_source_id,
     )
-
-    if isinstance(path_or_dict, dict):
-        return path_or_dict
-
-    path = path_or_dict
-    if path is None:
-        path, _ = _validated_artifact_paths(
-            pipeline, run_id, "pipeline_run_report_json", root
-        )
+    if refusal is not None:
+        return refusal
+    path, _ = _validated_artifact_paths(
+        pipeline, run_id, "pipeline_run_report_json", root
+    )
     if not path.is_file():
         return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
     loaded = _load_saved_assessment(path, pipeline, run_id)
@@ -210,7 +207,13 @@ def load_selected_run_status(
             }
         )
     manifest, replay_probe = project_assay_replay(
-        path.parent, run_id, report, _manifest_snapshot(manifest_port, run_id)
+        path.parent,
+        run_id,
+        report,
+        _manifest_snapshot(
+            manifest_port_for_context(context, manifest_port),
+            run_id,
+        ),
     )
     if replay_probe is not None:
         probes.append(replay_probe)

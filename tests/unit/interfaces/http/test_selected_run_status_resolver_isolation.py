@@ -25,7 +25,7 @@ from bioetl.infrastructure.storage.run_report_store_adapter import (
 )
 from bioetl.interfaces.http._selected_run_unavailable import bind_runtime_source_id
 from bioetl.interfaces.http.selected_run_status import load_selected_run_status
-from tests.unit.interfaces.http.test_selected_run_status import persist
+from tests.unit.interfaces.http.test_selected_run_status import persist, report
 
 pytestmark = pytest.mark.unit
 
@@ -142,6 +142,9 @@ def test_isolated_manifest_not_visible_through_default_port(tmp_path, monkeypatc
         checkpoint_port_factory=lambda _: MagicMock(),
         data_root=isolated,
     )
+    assert isinstance(
+        isolated_deps.evidence_location_resolver, EvidenceLocationResolver
+    )
     foreign_deps = assembly.create_health_server_dependencies(
         metrics=MagicMock(),
         checkpoint_port_factory=lambda _: MagicMock(),
@@ -247,6 +250,48 @@ def test_location_missing_without_context_does_not_read_legacy_root(tmp_path):
     assert result["verdict"] == "ERROR"
     assert result["reason"] == "location_missing"
     assert resolver.kwargs["expected_runtime_source_id"] == "src-1"
+
+
+def test_open_context_keeps_report_root_and_reads_context_manifest(tmp_path):
+    reports = tmp_path / "reports"
+    data = tmp_path / "isolated-data"
+    reports.mkdir()
+    data.mkdir()
+    run_id = "ac0b4e22-6a6e-5b7e-818e-106aeaf41390"
+    persist(reports, report(run_id=run_id))
+
+    class _Context:
+        def __init__(self) -> None:
+            self.seen: list[object] = []
+
+        @property
+        def data_root(self) -> object:
+            return data
+
+        def get_manifest_by_run_id(self, run_id: object) -> None:
+            self.seen.append(run_id)
+            return None
+
+    context = _Context()
+    resolver = _RecordingResolver(
+        EvidenceLocationResolveResult(
+            lookup=EvidenceLocationLookupResult(code=EvidenceLocationLookupCode.FOUND),
+            context=context,
+            data_root=data,
+        )
+    )
+    default_port = MagicMock()
+    result = load_selected_run_status(
+        pipeline="chembl_activity",
+        run_id=run_id,
+        root=reports,
+        manifest_port=default_port,
+        resolver=resolver,
+    )
+    assert result["verdict"] == "OK"
+    assert result["evidence_availability"] == "AVAILABLE"
+    assert context.seen
+    default_port.get_by_run_id.assert_not_called()
 
 
 def test_open_legacy_context_still_reads_saved_report(tmp_path):

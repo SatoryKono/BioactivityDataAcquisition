@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from pathlib import Path
 
 from bioetl.application.observability.reason_aliases import display_reason
 from bioetl.application.services.control_plane.manifest.diagnostics.selected_run_replay_readiness import (
@@ -25,7 +24,6 @@ from bioetl.interfaces.http._selected_run_presentation import (
     _readiness_fields,
     presentation_rows,
 )
-from bioetl.interfaces.http.run_report_ops import _validated_artifact_paths
 
 _NOT_EVALUATED = "NOT EVALUATED"
 _QUERY_ERROR = "QUERY ERROR"
@@ -217,21 +215,43 @@ def bind_runtime_source_id(
     )
 
 
-def resolved_report_path(
+@dataclass(frozen=True, slots=True)
+class _ContextManifestPort:
+    """Adapt an open read context to the manifest-port snapshot shape."""
+
+    _get_manifest_by_run_id: object
+    _verify_replay_objects: object
+
+    def get_by_run_id(self, run_id: object) -> object | None:
+        getter = self._get_manifest_by_run_id
+        if not callable(getter):
+            return None
+        return getter(run_id)
+
+    def verify_replay_objects(self, manifest: object) -> object:
+        verifier = self._verify_replay_objects
+        if not callable(verifier):
+            return None
+        return verifier(manifest)
+
+
+def resolve_selected_run(
     resolver: EvidenceLocationResolver | None,
     *,
     pipeline: str,
     run_id: str,
     expected_runtime_source_id: str | None = None,
-) -> Path | dict[str, object] | None:
-    """Saved report under the resolved root, or an error status.
+) -> tuple[dict[str, object] | None, object | None]:
+    """Return a refusal payload, or an open read context.
 
-    ``None`` means no resolver is configured, so the caller may use its legacy
-    report root. A resolver refusal is an error status. Allowed legacy fallback
-    already happens inside the resolver and arrives here with a context.
+    ``(None, None)`` means no resolver is configured. A refusal is an error
+    payload and must not fall through to the caller's report root. An open
+    context is for manifest and replay only; the saved report stays on the
+    caller's report root. Allowed legacy fallback already happens inside the
+    resolver and arrives here with a context.
     """
     if resolver is None:
-        return None
+        return None, None
     try:
         resolved = resolver.resolve(
             kind="pipeline",
@@ -240,19 +260,26 @@ def resolved_report_path(
             expected_runtime_source_id=expected_runtime_source_id,
         )
     except (OSError, TypeError, ValueError) as exc:
-        return unavailable_status(pipeline, run_id, "ERROR", str(exc))
+        return unavailable_status(pipeline, run_id, "ERROR", str(exc)), None
 
     code = resolved.code.value
     context = resolved.context
     if context is None or code in {"identity_conflict", "location_invalid"}:
-        return unavailable_status(pipeline, run_id, "ERROR", code)
-    try:
-        report_path, _ = _validated_artifact_paths(
-            pipeline,
-            run_id,
-            "pipeline_run_report_json",
-            context.data_root,
-        )
-    except ValueError as exc:
-        return unavailable_status(pipeline, run_id, "ERROR", str(exc))
-    return report_path
+        return unavailable_status(pipeline, run_id, "ERROR", code), None
+    return None, context
+
+
+def manifest_port_for_context(
+    context: object | None,
+    fallback: object | None,
+) -> object | None:
+    """Use the resolved context's manifest when it can load one."""
+    if context is None:
+        return fallback
+    getter = getattr(context, "get_manifest_by_run_id", None)
+    if not callable(getter):
+        return fallback
+    return _ContextManifestPort(
+        _get_manifest_by_run_id=getter,
+        _verify_replay_objects=getattr(context, "verify_replay_objects", None),
+    )
