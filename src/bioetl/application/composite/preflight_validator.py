@@ -176,9 +176,6 @@ class CompositePreflightValidationService(
                     )
                 )
 
-
-
-
         field_priorities = config.merge.field_priorities
         compatibility_overrides = config.merge.normalization_compatibility_overrides
         for field_name, priorities in field_priorities.items():

@@ -216,8 +216,7 @@ class _CrossValidationConfigProtocol(Protocol):
 
 class CompositeConfigProtocol(Protocol):
     @property
-    def expected_normalization_profile_hash(self) -> str | None:
-        ...
+    def expected_normalization_profile_hash(self) -> str | None: ...
 
     @property
     def name(self) -> str:
