@@ -538,7 +538,6 @@ def _dead_code_findings(src_dir: Path) -> list[object]:
 
     vulture = Vulture()
     vulture.scavenge([str(bioetl_path)])
-    vulture.scavenge([str(src_dir.parent / ".vulture_whitelist.py")])
     return [
         item
         for item in vulture.get_unused_code(min_confidence=80)

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-05T12:32:05.109406+00:00",
+  "generated_at": "2026-11-05T13:31:09.260821+00:00",
   "summary": {
     "total_scripts": 712,
     "status_counts": {
@@ -1548,7 +1548,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
-          "line": 207,
+          "line": 245,
           "source_group": "tests",
           "text": "\"setup-codex-wsl.ps1\": \"scripts/ai/codex/setup.ps1\","
         }
@@ -10344,19 +10344,19 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
-          "line": 698,
+          "line": 702,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.nightly_shadow_archive import _span_covers_48_hours"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
-          "line": 708,
+          "line": 712,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.nightly_shadow_archive import _span_covers_48_hours"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
-          "line": 721,
+          "line": 725,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.nightly_shadow_archive import _span_covers_48_hours"
         }
@@ -21082,7 +21082,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
-          "line": 171,
+          "line": 209,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"cleanup_root_local_clutter.py\""
         }
