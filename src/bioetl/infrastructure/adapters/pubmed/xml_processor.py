@@ -8,26 +8,58 @@ Extracted from the PubMed adapter module for better separation of concerns.
 
 from __future__ import annotations
 
+import time
 import typing
-
-if typing.TYPE_CHECKING:
-
-    class Element:
-        text: str | None
-
-        def find(self, path: str) -> Element | None: ...
-        def findall(self, path: str) -> list[Element]: ...
-else:
-
-    class Element:
-        pass
-
+import xml.etree as etree
+from xml.etree.ElementTree import ParseError
 
 from defusedxml import ElementTree as SafeET
+from defusedxml.common import DefusedXmlException
+from defusedxml.ElementTree import DefusedXMLParser
 
 from bioetl.domain.types import JsonDict
 
 __all__ = ["PubMedXmlProcessor"]
+
+if typing.TYPE_CHECKING:
+
+    class XmlElementProtocol(typing.Protocol):
+        text: str | None
+
+        def find(self, path: str) -> XmlElementProtocol | None: ...
+
+        def findall(self, path: str) -> list[XmlElementProtocol]: ...
+
+    Element = XmlElementProtocol
+else:
+    Element = object
+
+
+class LimitedParseTarget(etree.ElementTree.TreeBuilder):
+    """DefusedXML parse target with element-count and wall-time limits."""
+
+    def __init__(
+        self,
+        *args: typing.Any,  # Any: TreeBuilder ctor passthrough
+        **kwargs: typing.Any,  # Any: TreeBuilder ctor passthrough
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        self.element_count = 0
+        self.max_elements = 100000
+        self.start_time = time.monotonic()
+        self.max_time = 5.0
+
+    def start(
+        self,
+        tag: str,
+        attrs: dict[str, str],
+    ) -> typing.Any:  # Any: TreeBuilder.start returns element nodes
+        self.element_count += 1
+        if self.element_count > self.max_elements:
+            raise ValueError("XML element limit exceeded")
+        if time.monotonic() - self.start_time > self.max_time:
+            raise ValueError("XML time limit exceeded")
+        return super().start(tag, attrs)
 
 
 class PubMedXmlProcessor:
@@ -47,30 +79,9 @@ class PubMedXmlProcessor:
             if len(xml_text) > 31457280:
                 raise ValueError("XML size limit exceeded")
 
-            import time
-            import xml.etree as etree
-
-            from defusedxml.ElementTree import DefusedXMLParser
-
-            class LimitedTreeBuilder(etree.ElementTree.TreeBuilder):
-                def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
-                    super().__init__(*args, **kwargs)
-                    self.element_count = 0
-                    self.max_elements = 100000
-                    self.start_time = time.monotonic()
-                    self.max_time = 5.0
-
-                def start(self, tag: str, attrs: dict[str, str]) -> typing.Any:
-                    self.element_count += 1
-                    if self.element_count > self.max_elements:
-                        raise ValueError("XML element limit exceeded")
-                    if time.monotonic() - self.start_time > self.max_time:
-                        raise ValueError("XML time limit exceeded")
-                    return super().start(tag, attrs)
-
-            builder = LimitedTreeBuilder()
+            target = LimitedParseTarget()
             parser = DefusedXMLParser(
-                target=builder,
+                target=target,
                 forbid_dtd=False,
                 forbid_entities=True,
                 forbid_external=True,
@@ -78,13 +89,8 @@ class PubMedXmlProcessor:
             parser.feed(xml_text)
             parsed_root = parser.close()
             return typing.cast("Element", parsed_root)
-        except Exception as e:
-            if isinstance(e, ValueError) or type(e).__name__ in (
-                "ParseError",
-                "DefusedXmlException",
-            ):
-                return None
-            raise
+        except (ValueError, ParseError, DefusedXmlException):
+            return None
 
     @staticmethod
     def extract_record(
@@ -106,7 +112,11 @@ class PubMedXmlProcessor:
                 title_node.text if title_node is not None else "No title found"
             ),
             "_raw_xml": SafeET.tostring(
-                typing.cast(typing.Any, article_node), encoding="unicode"
+                typing.cast(
+                    typing.Any,  # Any: SafeET.tostring expects etree Element
+                    article_node,
+                ),
+                encoding="unicode",
             ),
         }
 

@@ -5,19 +5,18 @@ Provides reusable low-level functions for extracting data from XML elements.
 
 from __future__ import annotations
 
-__all__ = ["get_int", "get_text"]
-
-
 import typing
+
+__all__ = ["get_int", "get_text"]
 
 if typing.TYPE_CHECKING:
 
-    class Element:
+    class XmlElementProtocol(typing.Protocol):
         text: str | None
-else:
 
-    class Element:
-        pass
+    Element = XmlElementProtocol
+else:
+    Element = object
 
 
 def get_text(node: Element | None) -> str | None:
