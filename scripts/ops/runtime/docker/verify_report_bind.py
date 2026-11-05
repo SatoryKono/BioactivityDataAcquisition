@@ -467,7 +467,6 @@ def _verify_ops_list_source_identity(
         state.fail("FAIL: ops list source identity differs from host")
 
 
-
 def _verify_run_id_endpoint(
     state: _VerificationState,
     *,
@@ -509,23 +508,25 @@ def _verify_run_id_endpoint(
             f"(got {ready_status!r})"
         )
 
-
     if result.get("evidence_completeness") != "COMPLETE":
-         state.fail(f"FAIL: run_id={run_id!r} evidence_completeness is not COMPLETE")
+        state.fail(f"FAIL: run_id={run_id!r} evidence_completeness is not COMPLETE")
 
     # Проверять report bind, source identity, location, manifest и real objects, не только counts/health
-    if result.get("report_bind_state") != "aligned" and not result.get("availability", {}).get("report_root_bind"):
-         state.fail(f"FAIL: run_id={run_id!r} missing verified report bind in selected run status")
+    if result.get("report_bind_state") != "aligned" and not result.get(
+        "availability", {}
+    ).get("report_root_bind"):
+        state.fail(
+            f"FAIL: run_id={run_id!r} missing verified report bind in selected run status"
+        )
 
     if not result.get("manifest_present"):
-         state.fail(f"FAIL: run_id={run_id!r} missing manifest for selected run")
+        state.fail(f"FAIL: run_id={run_id!r} missing manifest for selected run")
 
     if result.get("source_identity_state") != "aligned":
-         state.fail(f"FAIL: run_id={run_id!r} source identity is not aligned or foreign")
+        state.fail(f"FAIL: run_id={run_id!r} source identity is not aligned or foreign")
 
     if result.get("real_objects_corrupt") or not result.get("location_resolved"):
-         state.fail(f"FAIL: run_id={run_id!r} corrupt objects or missing location")
-
+        state.fail(f"FAIL: run_id={run_id!r} corrupt objects or missing location")
 
 
 def _verify_pipeline_endpoint(
@@ -644,7 +645,6 @@ def verify(
         require_ops=require_ops,
         bind_aligned=bind_aligned,
     )
-
 
     if run_id:
         _verify_run_id_endpoint(

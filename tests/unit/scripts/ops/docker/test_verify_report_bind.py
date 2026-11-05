@@ -298,10 +298,11 @@ def test_verify_detects_bind_mismatch(
     assert rc == 1
 
 
-def test_verify_accepts_exact_mount_identity_and_newest_run(
+def _seed_aligned_host_with_run(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
-) -> None:
+) -> str:
+    """Host marker + one chembl_assay report + matching docker mount/identity."""
     reports = tmp_path / "reports"
     run_reports = reports / "run-reports"
     target = (
@@ -338,7 +339,14 @@ def test_verify_accepts_exact_mount_identity_and_newest_run(
         "_docker_inspect_source_identity",
         lambda _name: expected_source_id,
     )
+    return expected_source_id
 
+
+def _aligned_list_ops_payload(
+    expected_source_id: str,
+    *,
+    selected_run: dict[str, object] | None = None,
+):
     def ops_payload(url: str, **_kwargs: object) -> dict[str, object]:
         if url.endswith("/health/ready"):
             return {
@@ -352,6 +360,8 @@ def test_verify_accepts_exact_mount_identity_and_newest_run(
                     }
                 },
             }
+        if selected_run is not None and "selected-run-status" in url:
+            return selected_run
         return {
             "status": "ok",
             "count": 1,
@@ -361,7 +371,15 @@ def test_verify_accepts_exact_mount_identity_and_newest_run(
             "items": [{"run_id": "run-a"}],
         }
 
-    monkeypatch.setattr(mod, "_json_get", ops_payload)
+    return ops_payload
+
+
+def test_verify_accepts_exact_mount_identity_and_newest_run(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    expected_source_id = _seed_aligned_host_with_run(tmp_path, monkeypatch)
+    monkeypatch.setattr(mod, "_json_get", _aligned_list_ops_payload(expected_source_id))
 
     assert (
         mod.verify(
@@ -499,60 +517,13 @@ def test_verify_run_id_success(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    reports = tmp_path / "reports"
-    run_reports = reports / "run-reports"
-    target = (
-        run_reports / "pipeline" / "chembl_assay" / "run-a" / "pipeline-run-report.json"
-    )
-    target.parent.mkdir(parents=True)
-    target.write_text(
-        json.dumps(
-            {
-                "schema_version": "pipeline_run_report_v1",
-                "identity": {
-                    "run_id": "run-a",
-                    "pipeline_name": "chembl_assay",
-                    "status": "success",
-                },
-            }
-        ),
-        encoding="utf-8",
-    )
-    (reports / REPORT_ROOT_MARKER_NAME).write_text(
-        REPORT_ROOT_MARKER_VALUE + "\n",
-        encoding="utf-8",
-    )
-    monkeypatch.setenv("BIOETL_DASHBOARD_REPORT_ROOT", str(reports))
-    monkeypatch.setenv("BIOETL_REPORT_ROOT", str(run_reports))
-    expected_source_id = mod._expected_runtime_environment(tmp_path)["BIOETL_RUNTIME_SOURCE_ID"]
-    _attest_reports(tmp_path)
+    expected_source_id = _seed_aligned_host_with_run(tmp_path, monkeypatch)
     monkeypatch.setattr(
         mod,
-        "_docker_inspect_mounts",
-        lambda _name: [{"Destination": "/app/reports", "Source": str(reports)}],
-    )
-    monkeypatch.setattr(
-        mod,
-        "_docker_inspect_source_identity",
-        lambda _name: expected_source_id,
-    )
-
-    def ops_payload(url: str, **_kwargs: object) -> dict[str, object]:
-        if url.endswith("/health/ready"):
-            return {
-                "status": "healthy",
-                "checks": {
-                    "report_root": {
-                        "status": "healthy",
-                        "layout_status": "healthy",
-                        "source_identity_status": "healthy",
-                        "source_identity_actual": expected_source_id,
-                    }
-                },
-            }
-        elif "selected-run-status" in url:
-            return {
-
+        "_json_get",
+        _aligned_list_ops_payload(
+            expected_source_id,
+            selected_run={
                 "verdict": "OK",
                 "evidence_completeness": "COMPLETE",
                 "manifest_present": True,
@@ -561,25 +532,16 @@ def test_verify_run_id_success(
                 "source_identity_state": "aligned",
                 "availability": {"report_root_bind": True},
                 "replay_readiness": [
-
                     {
                         "run_id": "run-a",
                         "pipeline": "chembl_assay",
                         "verdict": "READY",
                         "domain_verdict": "exact_replay_ready",
                     }
-                ]
-            }
-        return {
-            "status": "ok",
-            "count": 1,
-            "marker_status": "healthy",
-            "source_identity_status": "healthy",
-            "source_identity_actual": expected_source_id,
-            "items": [{"run_id": "run-a"}],
-        }
-
-    monkeypatch.setattr(mod, "_json_get", ops_payload)
+                ],
+            },
+        ),
+    )
 
     assert (
         mod.verify(
@@ -588,7 +550,7 @@ def test_verify_run_id_success(
             container="bioetl",
             pipeline="chembl_assay",
             require_ops=True,
-            run_id="run-a"
+            run_id="run-a",
         )
         == 0
     )
