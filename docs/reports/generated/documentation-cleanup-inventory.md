@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 295 |
+| working_report | 296 |
 
 ## GitHub Issue Drafts And Packs
 
