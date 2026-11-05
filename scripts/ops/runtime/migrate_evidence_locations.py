@@ -200,6 +200,110 @@ def _runtime_source_from_mapping(payload: Mapping[str, object]) -> str | None:
     return text or None
 
 
+def _invalid_location(detail: str) -> EvidenceLocationRegistrationOutcome:
+    return EvidenceLocationRegistrationOutcome(code="location_invalid", detail=detail)
+
+
+def _resolve_source_data_root(
+    location: RunEvidenceLocation,
+    *,
+    alias_base: Path,
+) -> Path | EvidenceLocationRegistrationOutcome:
+    registry = default_evidence_root_alias_registry(dashboard_data_root=alias_base)
+    try:
+        candidate = registry.resolve_data_root(
+            root_alias=location.root_alias,
+            relative_data_root=location.relative_data_root,
+        )
+        data_root = assert_path_within_trusted_base(
+            candidate,
+            trusted_base=alias_base,
+            field_name="relative_data_root",
+        )
+    except EvidenceLocationInvalidError as exc:
+        return _invalid_location(str(exc))
+    if not data_root.is_dir():
+        return _invalid_location("source_data_root_missing")
+    return data_root
+
+
+def _parse_migration_run_id(
+    run_id: str,
+) -> RunID | EvidenceLocationRegistrationOutcome:
+    try:
+        return RunID(UUID(str(run_id)))
+    except ValueError:
+        return _invalid_location("run_id_not_uuid")
+
+
+def _owner_mismatch(
+    expected: str, found: object
+) -> EvidenceLocationRegistrationOutcome:
+    return EvidenceLocationRegistrationOutcome(
+        code="binding_mismatch",
+        detail=f"owner_expected={expected} owner_found={found}",
+    )
+
+
+def _first_runtime_source(*payloads: Mapping[str, object]) -> str | None:
+    for payload in payloads:
+        source = _runtime_source_from_mapping(payload)
+        if source is not None:
+            return source
+    return None
+
+
+def _workflow_source_anchor(
+    control: Path,
+    run_id: RunID,
+    location: RunEvidenceLocation,
+) -> str | EvidenceLocationRegistrationOutcome:
+    found = FileWorkflowManifestStore(
+        base_path=control / "workflow_manifest"
+    ).get_by_run_id(run_id)
+    if found is None:
+        return _invalid_location("source_run_missing")
+    if str(found.workflow_name).strip() != location.owner:
+        return _owner_mismatch(location.owner, found.workflow_name)
+    source = _first_runtime_source(found.launch_context, found.defaults)
+    if source is None:
+        return _invalid_location("runtime_source_anchor_missing")
+    return source
+
+
+def _pipeline_source_anchor(
+    control: Path,
+    run_id: RunID,
+    location: RunEvidenceLocation,
+) -> str | EvidenceLocationRegistrationOutcome:
+    found = FileRunManifestStore(base_path=control / "run_manifest").get_by_run_id(
+        run_id
+    )
+    if found is None:
+        return _invalid_location("source_run_missing")
+    if str(found.pipeline_name).strip() != location.owner:
+        return _owner_mismatch(location.owner, found.pipeline_name)
+    source = _first_runtime_source(found.launch_context, found.runtime_config)
+    if source is None:
+        return _invalid_location("runtime_source_anchor_missing")
+    return source
+
+
+def _reject_runtime_source_drift(
+    location: RunEvidenceLocation,
+    anchored_source: str,
+) -> EvidenceLocationRegistrationOutcome | None:
+    if anchored_source != location.runtime_source_id:
+        return EvidenceLocationRegistrationOutcome(
+            code="binding_mismatch",
+            detail=(
+                f"runtime_source_expected={location.runtime_source_id} "
+                f"runtime_source_found={anchored_source}"
+            ),
+        )
+    return None
+
+
 def _preflight_source_anchors(
     location: RunEvidenceLocation,
     *,
@@ -213,93 +317,20 @@ def _preflight_source_anchors(
     - manifest owner matches the locator owner
     - manifest-recorded ``runtime_source_id`` matches the locator claim
     """
-    registry = default_evidence_root_alias_registry(dashboard_data_root=alias_base)
-    try:
-        candidate = registry.resolve_data_root(
-            root_alias=location.root_alias,
-            relative_data_root=location.relative_data_root,
-        )
-        data_root = assert_path_within_trusted_base(
-            candidate,
-            trusted_base=alias_base,
-            field_name="relative_data_root",
-        )
-    except EvidenceLocationInvalidError as exc:
-        return EvidenceLocationRegistrationOutcome(
-            code="location_invalid",
-            detail=str(exc),
-        )
-
-    if not data_root.is_dir():
-        return EvidenceLocationRegistrationOutcome(
-            code="location_invalid",
-            detail="source_data_root_missing",
-        )
-
-    try:
-        run_uuid = UUID(str(location.run_id))
-    except ValueError:
-        return EvidenceLocationRegistrationOutcome(
-            code="location_invalid",
-            detail="run_id_not_uuid",
-        )
-    run_id = RunID(run_uuid)
+    data_root = _resolve_source_data_root(location, alias_base=alias_base)
+    if isinstance(data_root, EvidenceLocationRegistrationOutcome):
+        return data_root
+    run_id = _parse_migration_run_id(location.run_id)
+    if isinstance(run_id, EvidenceLocationRegistrationOutcome):
+        return run_id
     control = data_root / "output" / "control"
-
     if location.kind is EvidenceLocationKind.WORKFLOW:
-        found = FileWorkflowManifestStore(
-            base_path=control / "workflow_manifest"
-        ).get_by_run_id(run_id)
-        if found is None:
-            return EvidenceLocationRegistrationOutcome(
-                code="location_invalid",
-                detail="source_run_missing",
-            )
-        if str(found.workflow_name).strip() != location.owner:
-            return EvidenceLocationRegistrationOutcome(
-                code="binding_mismatch",
-                detail=(
-                    f"owner_expected={location.owner} owner_found={found.workflow_name}"
-                ),
-            )
-        anchored_source = _runtime_source_from_mapping(
-            found.launch_context
-        ) or _runtime_source_from_mapping(found.defaults)
+        anchored = _workflow_source_anchor(control, run_id, location)
     else:
-        found_pipeline = FileRunManifestStore(
-            base_path=control / "run_manifest"
-        ).get_by_run_id(run_id)
-        if found_pipeline is None:
-            return EvidenceLocationRegistrationOutcome(
-                code="location_invalid",
-                detail="source_run_missing",
-            )
-        if str(found_pipeline.pipeline_name).strip() != location.owner:
-            return EvidenceLocationRegistrationOutcome(
-                code="binding_mismatch",
-                detail=(
-                    f"owner_expected={location.owner} "
-                    f"owner_found={found_pipeline.pipeline_name}"
-                ),
-            )
-        anchored_source = _runtime_source_from_mapping(
-            found_pipeline.launch_context
-        ) or _runtime_source_from_mapping(found_pipeline.runtime_config)
-
-    if anchored_source is None:
-        return EvidenceLocationRegistrationOutcome(
-            code="location_invalid",
-            detail="runtime_source_anchor_missing",
-        )
-    if anchored_source != location.runtime_source_id:
-        return EvidenceLocationRegistrationOutcome(
-            code="binding_mismatch",
-            detail=(
-                f"runtime_source_expected={location.runtime_source_id} "
-                f"runtime_source_found={anchored_source}"
-            ),
-        )
-    return None
+        anchored = _pipeline_source_anchor(control, run_id, location)
+    if isinstance(anchored, EvidenceLocationRegistrationOutcome):
+        return anchored
+    return _reject_runtime_source_drift(location, anchored)
 
 
 def _classify_dry_run(
