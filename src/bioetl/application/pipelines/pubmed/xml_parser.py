@@ -11,11 +11,9 @@ __all__ = ["get_int", "get_text"]
 import typing
 
 if typing.TYPE_CHECKING:
-
     class Element:
         text: str | None
 else:
-
     class Element:
         pass
 

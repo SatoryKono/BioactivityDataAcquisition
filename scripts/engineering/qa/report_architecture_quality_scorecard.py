@@ -3,10 +3,9 @@
 
 from __future__ import annotations
 
-import ast
 import json
+import ast
 from pathlib import Path
-from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SRC_ROOT = PROJECT_ROOT / "src"
@@ -22,72 +21,6 @@ from scripts.engineering.quality.architecture_quality_scorecard import (
 DEFAULT_OUTPUT = (
     PROJECT_ROOT / "reports" / "quality" / "architecture-quality-scorecard.json"
 )
-
-# Titles under "Key Invariants" in docs/02-architecture/domain/aggregate-invariants.md.
-# The registry binds a different, narrower invariant wording; these titles are the
-# semantic-completeness set for issue #12715.
-DOCUMENTED_KEY_INVARIANTS: dict[str, tuple[str, ...]] = {
-    "Batch": (
-        "Content Hash Immutability",
-        "No Records After Sealed",
-        "One-Way State Transitions",
-        "Atomic Commit",
-        "Write-Once",
-    ),
-    "PipelineRun": (
-        "Immutable Manifest",
-        "Append-Only Ledger",
-        "Deterministic ID",
-        "No State Reversion",
-        "Provenance Preservation",
-        "Stage Evidence",
-    ),
-    "QuarantineEntry": (
-        "Immutable Root Cause",
-        "Resolution Tracking",
-        "One-Time Resolution",
-        "Exclusion Rationale",
-        "Audit Trail",
-        "Reprocessing Requires New ID",
-    ),
-}
-_GAP_SOURCE = "docs/02-architecture/domain/aggregate-invariants.md"
-_GAP_STATUS = "no_direct_test_link"
-
-
-def semantic_completeness_payload(
-    aggregates: list[dict[str, Any]],
-) -> tuple[str, list[dict[str, str]]]:
-    """Return the registry status string and uncovered documented key invariants."""
-    gaps: list[dict[str, str]] = []
-    for row in aggregates:
-        aggregate = str(row["aggregate"])
-        registered = {str(item).casefold() for item in row["invariants"]}
-        linked = {
-            str(item["invariant"]).casefold() for item in row["invariant_test_links"]
-        }
-        for name in DOCUMENTED_KEY_INVARIANTS[aggregate]:
-            key = name.casefold()
-            if key in registered or key in linked:
-                continue
-            gaps.append(
-                {
-                    "aggregate": aggregate,
-                    "documented_invariant": name,
-                    "source": _GAP_SOURCE,
-                    "status": _GAP_STATUS,
-                }
-            )
-    if gaps:
-        status = (
-            "not_assessed; documented key invariants in "
-            "semantic_completeness_gaps have no direct registry test link"
-        )
-    else:
-        status = (
-            "assessed; every documented key invariant has a direct registry test link"
-        )
-    return status, gaps
 
 
 def _refresh_aggregate_test_links() -> None:
@@ -118,9 +51,7 @@ def _refresh_aggregate_test_links() -> None:
                 "test_symbol": symbol,
             }
         ]
-    status, gaps = semantic_completeness_payload(payload["aggregates"])
-    payload["semantic_completeness"] = status
-    payload["semantic_completeness_gaps"] = gaps
+    payload["semantic_completeness"] = "not_assessed; selected invariant links only"
     payload["generated_by"] = (
         "scripts/engineering/qa/report_architecture_quality_scorecard.py"
     )

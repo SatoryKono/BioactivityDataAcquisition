@@ -52,16 +52,6 @@
 ## K. Verdict
 - On the pinned revision, the Domain Layer inventory and aggregate-invariant **registry** align with DDD / Hexagonal expectations for the audited static scope. No remediation from this audit's executable evidence; deeper behavioral verification remains outside the assessed evidence set.
 
-## L. Follow-up evidence (#12715)
-
-Sections D and I describe only the pinned audit revision `a5243cb4bbed67b267daecdc097b8c48501e140a`. They do not describe later revisions.
-
-Issue #12715 ran every `test_paths` entry from `reports/quality/domain-aggregate-invariant-registry.json`, including `tests/unit/domain/aggregates/test_deterministic_identity.py`. There is no separate aggregate isolation suite under `tests/unit/domain/aggregates/`. Command, source commit, and pytest summary: `reports/audit/pack-v2.1/P02-invariant-runs.log`.
-
-`semantic_completeness` stays `not_assessed`. `scripts/engineering/qa/report_architecture_quality_scorecard.py` writes `semantic_completeness_gaps` for each Key Invariant in `docs/02-architecture/domain/aggregate-invariants.md` that has no direct registry test link. That list is the versioned gap record.
-
-Duplication and dead-code scan output: `reports/audit/pack-v2.1/domain-pylint-duplicate-code-scan.log` and `reports/audit/pack-v2.1/domain-vulture-dead-code-scan.log`.
-
 ### Local P02 specific Output
 - **bounded-context/domain map:** Batch, PipelineRun, QuarantineEntry are aggregate roots. 43 Value Object classes encapsulate local structures (e.g., ActivityMeasurement, DQReport). Events model transition phases.
 - **invariant/FSM matrix:** Documented in `reports/quality/domain-aggregate-invariant-registry.json` and `docs/02-architecture/domain/aggregate-invariants.md`. Batch lifecycle strictly appends. PipelineRun transitions from Running to Completed/Failed based on stage status. QuarantineEntry FSM: `NEW → UNDER_REVIEW`; from `NEW` or `UNDER_REVIEW` → `IGNORED` | `REPROCESSED` | `EXPIRED` (terminal).

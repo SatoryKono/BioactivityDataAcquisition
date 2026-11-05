@@ -11,17 +11,13 @@ from __future__ import annotations
 import typing
 
 if typing.TYPE_CHECKING:
-
     class Element:
         text: str | None
-
         def find(self, path: str) -> Element | None: ...
         def findall(self, path: str) -> list[Element]: ...
 else:
-
     class Element:
         pass
-
 
 from defusedxml import ElementTree as SafeET
 
@@ -69,20 +65,12 @@ class PubMedXmlProcessor:
                     return super().start(tag, attrs)
 
             builder = LimitedTreeBuilder()
-            parser = DefusedXMLParser(
-                target=builder,
-                forbid_dtd=False,
-                forbid_entities=True,
-                forbid_external=True,
-            )
+            parser = DefusedXMLParser(target=builder, forbid_dtd=False, forbid_entities=True, forbid_external=True)
             parser.feed(xml_text)
             parsed_root = parser.close()
             return typing.cast("Element", parsed_root)
         except Exception as e:
-            if isinstance(e, ValueError) or type(e).__name__ in (
-                "ParseError",
-                "DefusedXmlException",
-            ):
+            if isinstance(e, ValueError) or type(e).__name__ in ("ParseError", "DefusedXmlException"):
                 return None
             raise
 
@@ -105,9 +93,7 @@ class PubMedXmlProcessor:
             "article_title": (
                 title_node.text if title_node is not None else "No title found"
             ),
-            "_raw_xml": SafeET.tostring(
-                typing.cast(typing.Any, article_node), encoding="unicode"
-            ),
+            "_raw_xml": SafeET.tostring(typing.cast(typing.Any, article_node), encoding="unicode"),
         }
 
     @staticmethod

@@ -93,7 +93,7 @@ criteria:
       - tests/architecture/test_no_structlog_in_application_interfaces.py
     code_anchors:
       - log_correlation_fields
-      - logger.bind(**context.log_correlation_fields())
+      - self.logger.bind(**context.log_correlation_fields())
   - id: storage_checkpoint_error_consistency
     description: StorageError and CheckpointConflictError stay consistent across checkpoint and control-plane storage paths.
     source_paths:
