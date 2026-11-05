@@ -653,15 +653,15 @@ def test_verify_run_id_success(
         ),
         (
             ("checks", "manifest_not_recorded", "unknown", "manifest_not_recorded"),
-            "replay_checks unknown",
+            "missing manifest via replay_checks",
         ),
         (
             ("checks", "pipeline_run_report_json", "fail", "digest_mismatch"),
-            "replay_checks failed",
+            "corrupt objects via replay_checks",
         ),
         (
             ("checks", "pipeline_run_report_md", "fail", "artifact_missing"),
-            "replay_checks failed",
+            "missing location via replay_checks",
         ),
     ],
     ids=[

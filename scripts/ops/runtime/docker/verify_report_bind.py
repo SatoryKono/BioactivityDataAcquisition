@@ -54,6 +54,7 @@ from bioetl.application.services.run_reports.query import (
 )
 from bioetl.application.services.run_reports.source_identity import (
     IDENTITY_STATE_ALIGNED,
+    IDENTITY_STATE_FOREIGN,
     RuntimeSourceIdentityResolutionResult,
     compare_runtime_source_identity,
     resolve_runtime_source_identity,
@@ -374,6 +375,7 @@ def _verify_container_identity(
     expected_source_id: str | None,
     require_ops: bool,
 ) -> None:
+    """Fail closed with distinct foreign vs non-aligned identity messages."""
     actual = resolution.value if resolution is not None else None
     print(
         "container_source_identity="
@@ -389,12 +391,31 @@ def _verify_container_identity(
         else:
             state.warn(f"WARN: {message}")
         return
+    if comparison.state == IDENTITY_STATE_FOREIGN:
+        state.fail(
+            "FAIL: container source identity is foreign — "
+            f"actual={actual!r} expected={expected_source_id!r}"
+        )
+        return
     if comparison.state != IDENTITY_STATE_ALIGNED or not resolution.is_consistent:
         state.fail(
-            "FAIL: container source identity mismatch — "
+            "FAIL: container source identity is not aligned — "
             f"state={comparison.state!r} actual={actual!r} "
             f"expected={expected_source_id!r} conflicts={resolution.conflicts!r}"
         )
+
+
+def _fail_source_identity_state(
+    state: _VerificationState,
+    *,
+    prefix: str,
+    identity_state: object,
+) -> None:
+    """Emit distinct FAIL for foreign vs other non-aligned identity states."""
+    if identity_state == IDENTITY_STATE_FOREIGN:
+        state.fail(f"FAIL: {prefix} source identity is foreign")
+    else:
+        state.fail(f"FAIL: {prefix} source identity is not aligned")
 
 
 def _verify_ready_endpoint(
@@ -405,6 +426,13 @@ def _verify_ready_endpoint(
     require_ops: bool,
     bind_aligned: bool,
 ) -> None:
+    """Probe /health/ready; soft-warn only when live+bind already prove mount.
+
+    Intentional soft path: ``live is not None and bind_aligned`` means
+    host/container bind already matched, so a ready timeout is not a
+    REPORT_BIND failure. Explicit ``--run-id`` does **not** inherit this
+    softening — selected-run-status stays fail-closed.
+    """
     ready = _json_get(f"{ops_url.rstrip('/')}/health/ready", timeout=20.0)
     if ready is None:
         live = _json_get(f"{ops_url.rstrip('/')}/health/live", timeout=5.0)
@@ -439,7 +467,11 @@ def _verify_ready_endpoint(
         None,
         IDENTITY_STATE_ALIGNED,
     }:
-        state.fail("FAIL: /health/ready source identity is not aligned")
+        _fail_source_identity_state(
+            state,
+            prefix="/health/ready",
+            identity_state=report_check.get("source_identity_state"),
+        )
     elif report_check.get("source_identity_actual") != expected_source_id:
         state.fail("FAIL: /health/ready source identity differs from host")
 
@@ -456,13 +488,18 @@ def _verify_ops_list_source_identity(
     listed: Mapping[str, Any],
     expected_source_id: str | None,
 ) -> None:
+    """Validate ops list source identity with foreign vs non-aligned distinction."""
     if listed.get("source_identity_status") != "healthy":
         state.fail(
             "FAIL: ops list source_identity_status="
             f"{listed.get('source_identity_status')!r}"
         )
     elif listed.get("source_identity_state") not in {None, IDENTITY_STATE_ALIGNED}:
-        state.fail("FAIL: ops list source identity is not aligned")
+        _fail_source_identity_state(
+            state,
+            prefix="ops list",
+            identity_state=listed.get("source_identity_state"),
+        )
     elif listed.get("source_identity_actual") != expected_source_id:
         state.fail("FAIL: ops list source identity differs from host")
 
@@ -485,6 +522,7 @@ def _first_replay_readiness(
     *,
     run_id: str,
 ) -> Mapping[str, Any] | None:
+    """Return the first replay_readiness row or record a FAIL and return None."""
     readiness_rows = result.get("replay_readiness", [])
     if not isinstance(readiness_rows, list) or not readiness_rows:
         state.fail(f"FAIL: no replay_readiness found for run_id={run_id!r}")
@@ -497,11 +535,25 @@ def _first_replay_readiness(
 
 
 def _replay_check_codes(checks: Sequence[Any], *, result: str) -> list[str]:
+    """Return sorted check codes matching ``result`` (fail/unknown/pass)."""
     return sorted(
         str(item.get("code") or "?")
         for item in checks
         if isinstance(item, Mapping) and item.get("result") == result
     )
+
+
+_CORRUPT_REASONS = frozenset(
+    {
+        "digest_mismatch",
+        "child_digest_mismatch",
+        "evidence_corrupt",
+        "revision_corrupt",
+        "snapshot_corrupt_or_rules_unsupported",
+    }
+)
+_LOCATION_REASONS = frozenset({"artifact_missing", "location_invalid"})
+_MANIFEST_CODES = frozenset({"manifest_not_recorded"})
 
 
 def _verify_replay_check_results(
@@ -510,17 +562,60 @@ def _verify_replay_check_results(
     *,
     run_id: str,
 ) -> None:
-    # Bind/source identity already verified earlier in verify(); selected-run-status
-    # exposes evidence via replay_checks, not report_bind_state/manifest_present.
+    """Fail on replay_checks with #12686-distinct location/manifest/corrupt msgs.
+
+    Uses only the real selected-run-status ``replay_checks`` contract (code /
+    result / reason) — not invented top-level fields like ``location_resolved``.
+    """
     if not isinstance(checks, list):
         state.fail(f"FAIL: run_id={run_id!r} missing replay_checks list")
         return
-    failed = _replay_check_codes(checks, result="fail")
-    unknown = _replay_check_codes(checks, result="unknown")
-    if failed:
-        state.fail(f"FAIL: run_id={run_id!r} replay_checks failed: {failed}")
-    if unknown:
-        state.fail(f"FAIL: run_id={run_id!r} replay_checks unknown: {unknown}")
+    missing_location: list[str] = []
+    corrupt_objects: list[str] = []
+    missing_manifest: list[str] = []
+    other_failed: list[str] = []
+    other_unknown: list[str] = []
+    for item in checks:
+        if not isinstance(item, Mapping):
+            continue
+        result = item.get("result")
+        if result not in {"fail", "unknown"}:
+            continue
+        code = str(item.get("code") or "?")
+        reason = str(item.get("reason") or "")
+        if code in _MANIFEST_CODES or reason == "manifest_not_recorded":
+            missing_manifest.append(code)
+        elif reason in _LOCATION_REASONS:
+            missing_location.append(code)
+        elif reason in _CORRUPT_REASONS:
+            corrupt_objects.append(code)
+        elif result == "fail":
+            other_failed.append(code)
+        else:
+            other_unknown.append(code)
+    if missing_location:
+        state.fail(
+            f"FAIL: run_id={run_id!r} missing location via replay_checks: "
+            f"{sorted(missing_location)}"
+        )
+    if corrupt_objects:
+        state.fail(
+            f"FAIL: run_id={run_id!r} corrupt objects via replay_checks: "
+            f"{sorted(corrupt_objects)}"
+        )
+    if missing_manifest:
+        state.fail(
+            f"FAIL: run_id={run_id!r} missing manifest via replay_checks: "
+            f"{sorted(missing_manifest)}"
+        )
+    if other_failed:
+        state.fail(
+            f"FAIL: run_id={run_id!r} replay_checks failed: {sorted(other_failed)}"
+        )
+    if other_unknown:
+        state.fail(
+            f"FAIL: run_id={run_id!r} replay_checks unknown: {sorted(other_unknown)}"
+        )
 
 
 def _verify_ready_selected_run_payload(
@@ -530,6 +625,7 @@ def _verify_ready_selected_run_payload(
     *,
     run_id: str,
 ) -> None:
+    """Validate READY contract fields then classify replay_checks failures."""
     ready_status = readiness.get("verdict")
     print(f"ops_replay_readiness_verdict={ready_status!r}")
     if ready_status != "READY":
@@ -556,6 +652,11 @@ def _verify_run_id_endpoint(
     require_ops: bool,
     bind_aligned: bool,
 ) -> None:
+    """Fetch selected-run-status for ``--run-id``; always fail-closed if missing.
+
+    ``require_ops`` / ``bind_aligned`` are call-site symmetry only — they must
+    not soften an explicit run-id probe (unlike ``_verify_ready_endpoint``).
+    """
     if not pipeline:
         state.fail("FAIL: --run-id requires --pipeline")
         return
@@ -563,8 +664,6 @@ def _verify_run_id_endpoint(
         f"{ops_url.rstrip('/')}/ops/observability/selected-run-status"
         f"?pipeline={pipeline}&run_id={run_id}"
     )
-    # require_ops / bind_aligned kept for call-site symmetry with other endpoints;
-    # explicit --run-id is always fail-closed when selected-run-status is missing.
     del require_ops, bind_aligned
     result = _json_get(url, timeout=20.0)
     if result is None:
