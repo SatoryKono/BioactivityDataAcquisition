@@ -8,6 +8,7 @@ from uuid import UUID
 
 import pytest
 
+from bioetl.domain.control_plane.run_manifest import RunManifest
 from bioetl.domain.types import RunID
 from bioetl.interfaces.http._run_id_resolver import resolve_unique_scope
 from bioetl.interfaces.http._selected_run_live import active_run_diagnostics
@@ -44,6 +45,105 @@ def test_unique_scope_refuses_an_ambiguous_catalog() -> None:
     assert resolution.status == "ambiguous"
     assert resolution.run_id is None
     assert resolution.reason == "ambiguous_scope"
+
+
+def test_nested_workflow_declaration_does_not_drop_the_second_run() -> None:
+    top_level = RunManifest(
+        run_id=RunID(UUID(_RUN_ID)),
+        pipeline_name="uniprot_protein",
+        workflow_name="wf",
+    )
+    launch_context = RunManifest(
+        run_id=RunID(UUID(_OTHER)),
+        pipeline_name="uniprot_protein",
+        launch_context={"workflow_name": "wf"},
+    )
+
+    resolution = resolve_unique_scope(
+        (top_level, launch_context),
+        pipelines=("uniprot_protein",),
+        workflows=("wf",),
+    )
+
+    assert resolution.status == "ambiguous"
+    assert resolution.run_id is None
+    assert resolution.reason == "ambiguous_scope"
+
+
+def test_runtime_and_resolved_workflow_keys_are_both_matches() -> None:
+    runtime = RunManifest(
+        run_id=RunID(UUID(_RUN_ID)),
+        pipeline_name="uniprot_protein",
+        runtime_config={"workflow": "wf"},
+    )
+    resolved = RunManifest(
+        run_id=RunID(UUID(_OTHER)),
+        pipeline_name="uniprot_protein",
+        resolved_config={"workflow": "wf"},
+    )
+
+    resolution = resolve_unique_scope(
+        (runtime, resolved),
+        pipelines=("uniprot_protein",),
+        workflows=("wf",),
+    )
+
+    assert resolution.status == "ambiguous"
+    assert resolution.run_id is None
+    assert resolution.reason == "ambiguous_scope"
+
+
+def test_unique_scope_returns_the_successor_manifest() -> None:
+    run_id = RunID(UUID(_RUN_ID))
+    predecessor = RunManifest(
+        manifest_id="pred",
+        run_id=run_id,
+        pipeline_name="uniprot_protein",
+        workflow_name="wf",
+        execution_fingerprint="stale-fingerprint",
+    )
+    successor = RunManifest(
+        manifest_id="succ",
+        predecessor_manifest_id="pred",
+        run_id=run_id,
+        pipeline_name="uniprot_protein",
+        workflow_name="wf",
+        execution_fingerprint="current-fingerprint",
+    )
+
+    resolution = resolve_unique_scope(
+        (predecessor, successor),
+        pipelines=("uniprot_protein",),
+        workflows=("wf",),
+    )
+
+    assert resolution.status == "resolved"
+    assert resolution.run_id == _RUN_ID
+    assert resolution.manifest is successor
+
+
+def test_two_current_manifests_for_one_run_are_not_chosen() -> None:
+    run_id = RunID(UUID(_RUN_ID))
+    first = RunManifest(
+        manifest_id="one",
+        run_id=run_id,
+        pipeline_name="uniprot_protein",
+        workflow_name="wf",
+        execution_fingerprint="one",
+    )
+    second = RunManifest(
+        manifest_id="two",
+        run_id=run_id,
+        pipeline_name="uniprot_protein",
+        workflow_name="wf",
+        execution_fingerprint="two",
+    )
+
+    resolution = resolve_unique_scope((first, second), workflows=("wf",))
+
+    assert resolution.status == "ambiguous"
+    assert resolution.run_id is None
+    assert resolution.manifest is None
 
 
 def test_compact_stamp_is_not_a_catalog_uuid() -> None:

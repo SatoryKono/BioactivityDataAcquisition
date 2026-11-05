@@ -21,7 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Selected run status:** a missing non-UUID token, including a compact stamp
   such as `20261102T181217`, stays `run_not_found` / `UNKNOWN`. It is no longer
   reported as `QUERY ERROR` / `request_failed`. An explicit UUID and a saved
-  non-UUID report id keep their previous results.
+  non-UUID report id keep their previous results. `resolve=unique` counts a
+  workflow declared on `workflow_name` or in launch, runtime, or resolved
+  config. Several such runs stay `ambiguous_scope`. A predecessor manifest
+  with the same run id is not selected ahead of its successor.
 
 ### Breaking Changes
 

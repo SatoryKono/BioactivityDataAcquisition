@@ -11,9 +11,15 @@ to the newest run.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from types import SimpleNamespace
+from typing import cast
 from uuid import UUID
+
+from bioetl.domain.control_plane.manifest_selection import current_run_manifests
+from bioetl.domain.control_plane.run_manifest import RunManifest
+from bioetl.interfaces.http._selected_run_a2_resolve import _declared_workflows
 
 _ALL_SCOPE = frozenset({"", "All", "all", ".*", "$__all", "__all", "*", "—"})
 
@@ -57,8 +63,8 @@ def resolve_unique_scope(
     pipeline_filter = concrete_scope_values(pipelines)
     run_type_filter = concrete_scope_values(run_types)
     workflow_filter = concrete_scope_values(workflows)
-    matched: dict[str, object] = {}
-    for manifest in manifests:
+    matched: dict[str, list[object]] = {}
+    for manifest in _current_catalog(manifests):
         if not _manifest_in_scope(
             manifest,
             pipelines=pipeline_filter,
@@ -69,14 +75,21 @@ def resolve_unique_scope(
         run_id = str(getattr(manifest, "run_id", "") or "")
         if not run_id or not is_catalog_uuid(run_id):
             continue
-        matched.setdefault(run_id, manifest)
+        matched.setdefault(run_id, []).append(manifest)
     if len(matched) == 1:
-        run_id, manifest = next(iter(matched.items()))
+        run_id, rows = next(iter(matched.items()))
+        if len(rows) == 1:
+            return UniqueScopeResolution(
+                status="resolved",
+                run_id=run_id,
+                manifest=rows[0],
+                reason="unique_scope",
+            )
         return UniqueScopeResolution(
-            status="resolved",
-            run_id=run_id,
-            manifest=manifest,
-            reason="unique_scope",
+            status="ambiguous",
+            run_id=None,
+            manifest=None,
+            reason="ambiguous_scope",
         )
     if not matched:
         return UniqueScopeResolution(
@@ -105,11 +118,47 @@ def _manifest_in_scope(
         return False
     if run_types and _run_type_token(manifest) not in run_types:
         return False
-    if workflows:
-        workflow = getattr(manifest, "workflow_name", None)
-        if not isinstance(workflow, str) or workflow not in workflows:
-            return False
-    return True
+    if not workflows:
+        return True
+    return bool(set(_workflow_names(manifest)).intersection(workflows))
+
+
+def _current_catalog(manifests: Sequence[object]) -> tuple[object, ...]:
+    """Drop predecessor manifests before a run is counted.
+
+    ``list_all`` keeps both the predecessor and the successor for one run id.
+    ``current_run_manifests`` keeps the chain tip, which is the manifest
+    ``get_by_run_id`` indexes. Two current manifests for one run id are left
+    intact so the caller can refuse to choose.
+    """
+    if manifests and all(isinstance(item, RunManifest) for item in manifests):
+        return current_run_manifests(tuple(manifests))
+    return tuple(manifests)
+
+
+def _workflow_names(manifest: object) -> tuple[str, ...]:
+    """Workflows recorded on the run, including nested config payloads.
+
+    ``_declared_workflows`` is the existing catalog semantics. A top-level
+    ``workflow_name`` and the same name under launch, runtime or resolved
+    config are both matches. Neither is preferred.
+    """
+    if isinstance(manifest, RunManifest):
+        return _declared_workflows(manifest)
+    workflow_name = getattr(manifest, "workflow_name", None)
+    view = SimpleNamespace(
+        workflow_name=workflow_name if isinstance(workflow_name, str) else None,
+        launch_context=_config_mapping(getattr(manifest, "launch_context", None)),
+        runtime_config=_config_mapping(getattr(manifest, "runtime_config", None)),
+        resolved_config=_config_mapping(getattr(manifest, "resolved_config", None)),
+    )
+    return _declared_workflows(cast(RunManifest, view))
+
+
+def _config_mapping(value: object) -> dict[str, object]:
+    if not isinstance(value, Mapping):
+        return {}
+    return {str(key): item for key, item in value.items()}
 
 
 def _run_type_token(manifest: object) -> str:
