@@ -4,14 +4,20 @@ from __future__ import annotations
 
 import asyncio
 import json
-from pathlib import Path
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, cast
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.application.services.evidence_location.resolver import (
+    EvidenceLocationLegacyRootPolicy,
+    EvidenceLocationResolveResult,
+    EvidenceLocationResolver,
+)
 from bioetl.application.services.run_reports.observations import (
     bind_run_observations,
     record_run_observation,
@@ -19,7 +25,12 @@ from bioetl.application.services.run_reports.observations import (
     run_observations,
 )
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
+from bioetl.domain.control_plane.run_evidence_location import (
+    EvidenceLocationLookupCode,
+    EvidenceLocationLookupResult,
+)
 from bioetl.domain.run_reports.pipeline_report_assembly import build_pipeline_run_report
+from bioetl.interfaces.http._selected_run_unavailable import bind_runtime_source_id
 from bioetl.domain.run_reports.selected_status import (
     DOMAINS,
     build_snapshot,
@@ -1971,3 +1982,72 @@ def test_isolated_manifest_not_visible_through_default_port(tmp_path, monkeypatc
     assert foreign_view["replay_readiness_now"] == "INSUFFICIENT"
     assert written.json_path.read_bytes() == before
     assert lost["revision"] == recovered["revision"] == foreign_view["revision"]
+
+
+class _RecordingResolver:
+    def __init__(self, result: EvidenceLocationResolveResult) -> None:
+        self.result = result
+        self.kwargs: dict[str, object] = {}
+
+    def resolve(self, **kwargs: object) -> EvidenceLocationResolveResult:
+        self.kwargs = kwargs
+        return self.result
+
+
+def test_location_missing_without_context_does_not_read_legacy_root(tmp_path):
+    persist(tmp_path)
+    resolver = _RecordingResolver(
+        EvidenceLocationResolveResult(
+            lookup=EvidenceLocationLookupResult(
+                code=EvidenceLocationLookupCode.LOCATION_MISSING
+            )
+        )
+    )
+    result = load_selected_run_status(
+        pipeline="chembl_activity",
+        run_id="run-a",
+        root=tmp_path,
+        resolver=resolver,
+        expected_runtime_source_id="src-1",
+    )
+    assert result["verdict"] == "ERROR"
+    assert result["reason"] == "location_missing"
+    assert resolver.kwargs["expected_runtime_source_id"] == "src-1"
+
+
+def test_open_legacy_context_still_reads_saved_report(tmp_path):
+    persist(tmp_path)
+    resolver = _RecordingResolver(
+        EvidenceLocationResolveResult(
+            lookup=EvidenceLocationLookupResult(
+                code=EvidenceLocationLookupCode.LOCATION_MISSING
+            ),
+            context=SimpleNamespace(data_root=tmp_path),
+            data_root=tmp_path,
+        )
+    )
+    result = load_selected_run_status(
+        pipeline="chembl_activity",
+        run_id="run-a",
+        root=tmp_path,
+        resolver=resolver,
+    )
+    assert result["verdict"] == "OK"
+    assert result["evidence_availability"] == "AVAILABLE"
+
+
+def test_bound_resolver_supplies_omitted_runtime_source_id() -> None:
+    locations = MagicMock()
+    locations.lookup.return_value = EvidenceLocationLookupResult(
+        code=EvidenceLocationLookupCode.IDENTITY_CONFLICT
+    )
+    resolver = EvidenceLocationResolver(
+        locations=locations,
+        aliases=MagicMock(),
+        opener=MagicMock(),
+        legacy_root_policy=EvidenceLocationLegacyRootPolicy.REQUIRE_EXPLICIT_RECORD,
+    )
+    bound = bind_runtime_source_id(resolver, "src-1")
+    assert bound is not None
+    bound.resolve(kind="pipeline", owner="chembl_activity", run_id="run-a")
+    assert locations.lookup.call_args.kwargs["expected_runtime_source_id"] == "src-1"

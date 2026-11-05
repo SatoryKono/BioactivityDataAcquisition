@@ -99,6 +99,7 @@ async def test_refresh_strips_cached_age_and_materialize_uses_request_clock(
     )
     await cache.refresh_once(source)
     assert seen[0]["limit"] == 10
+    assert seen[0]["resolver"] is None
     assert seen[0]["pipeline"] == ".*"
     assert seen[0]["selected_run_id"] == "-"
     stored = cache._stored
@@ -125,6 +126,27 @@ async def test_refresh_strips_cached_age_and_materialize_uses_request_clock(
     assert isinstance(later_row, dict)
     assert later_row["event_age_display"] == "2 m"
     assert len(seen) == 1
+
+
+@pytest.mark.asyncio
+async def test_refresh_tolerates_source_without_resolver(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    seen: list[object] = []
+
+    def _scan(**kwargs: object) -> dict[str, object]:
+        seen.append(kwargs.get("resolver"))
+        return _page()
+
+    monkeypatch.setattr(snapshot_module, "list_recent_pipeline_runs", _scan)
+    await RunExplorerSnapshotCache().refresh_once(
+        SimpleNamespace(
+            _run_manifest_port=object(),
+            _run_ledger_port=object(),
+            _run_report_store=Mock(),
+        )
+    )
+    assert seen == [None]
 
 
 @pytest.mark.asyncio

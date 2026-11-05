@@ -152,6 +152,7 @@ def load_selected_run_status(
     manifest_port: object | None = None,
     store: RunReportStorePort | None = None,
     resolver: EvidenceLocationResolver | None = None,
+    expected_runtime_source_id: str | None = None,
 ) -> dict[str, object]:
     """Load and revalidate the exact report, revision and bound identity each time.
 
@@ -167,7 +168,12 @@ def load_selected_run_status(
     if selected_pipeline is None:
         return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
     pipeline = selected_pipeline
-    path_or_dict = resolved_report_path(resolver, pipeline=pipeline, run_id=run_id)
+    path_or_dict = resolved_report_path(
+        resolver,
+        pipeline=pipeline,
+        run_id=run_id,
+        expected_runtime_source_id=expected_runtime_source_id,
+    )
 
     if isinstance(path_or_dict, dict):
         return path_or_dict
@@ -303,12 +309,17 @@ def _load_selected_with_live_fallback(
     query: dict[str, str],
     skip_scope_check: bool,
 ) -> dict[str, object]:
+    raw_resolver = getattr(host, "_evidence_location_resolver", None)
+    source_id = getattr(host, "_runtime_source_id", None)
     result = load_selected_run_status(
         pipeline=pipeline,
         run_id=run_id,
         manifest_port=host._run_manifest_port,
         store=host._run_report_store,
-        resolver=getattr(host, "_evidence_location_resolver", None),
+        resolver=(
+            raw_resolver if isinstance(raw_resolver, EvidenceLocationResolver) else None
+        ),
+        expected_runtime_source_id=source_id if isinstance(source_id, str) else None,
     )
     if result.get("reason") == "run_not_found":
         # URL/explicit run_id stays bound; never substitute a different latest.

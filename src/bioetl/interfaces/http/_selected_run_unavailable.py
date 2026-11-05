@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import dataclass
 from pathlib import Path
 
 from bioetl.application.observability.reason_aliases import display_reason
@@ -12,8 +13,10 @@ from bioetl.application.services.control_plane.manifest.diagnostics.selected_run
 )
 from bioetl.application.services.evidence_location.resolver import (
     EvidenceLocationResolver,
+    EvidenceLocationResolveResult,
 )
 from bioetl.composition.composite_catalog import attach_contract_fields
+from bioetl.domain.control_plane.run_evidence_location import EvidenceLocationKind
 from bioetl.domain.run_reports.selected_status import DOMAINS, RULES_VERSION
 from bioetl.domain.run_reports.stage_diagnostics import project_stage_diagnostics
 from bioetl.interfaces.http._reconciliation_display import unavailable_reconciliation
@@ -168,30 +171,79 @@ def _gap_presentation(
     return dict(summary), dict(trust)
 
 
+@dataclass(frozen=True, slots=True)
+class RuntimeSourceResolver(EvidenceLocationResolver):
+    """Fill in the server source id when a caller does not pass one."""
+
+    bound_runtime_source_id: str | None = None
+
+    def resolve(
+        self,
+        *,
+        kind: EvidenceLocationKind | str,
+        owner: str,
+        run_id: str,
+        expected_runtime_source_id: str | None = None,
+    ) -> EvidenceLocationResolveResult:
+        return super().resolve(
+            kind=kind,
+            owner=owner,
+            run_id=run_id,
+            expected_runtime_source_id=(
+                self.bound_runtime_source_id
+                if expected_runtime_source_id is None
+                else expected_runtime_source_id
+            ),
+        )
+
+
+def bind_runtime_source_id(
+    resolver: EvidenceLocationResolver | None,
+    source_id: str | None,
+) -> EvidenceLocationResolver | None:
+    """Return a resolver that checks ``source_id`` when the call omits one."""
+    if not isinstance(resolver, EvidenceLocationResolver):
+        return None
+    if not isinstance(source_id, str) or not source_id.strip():
+        return resolver
+    return RuntimeSourceResolver(
+        locations=resolver.locations,
+        aliases=resolver.aliases,
+        opener=resolver.opener,
+        legacy_root_policy=resolver.legacy_root_policy,
+        bound_runtime_source_id=source_id,
+    )
+
+
 def resolved_report_path(
     resolver: EvidenceLocationResolver | None,
     *,
     pipeline: str,
     run_id: str,
+    expected_runtime_source_id: str | None = None,
 ) -> Path | dict[str, object] | None:
     """Saved report under the resolved root, or an error status.
 
-    ``None`` means the caller should use the legacy report root.
+    ``None`` means no resolver is configured, so the caller may use its legacy
+    report root. A resolver refusal is an error status. Allowed legacy fallback
+    already happens inside the resolver and arrives here with a context.
     """
     if resolver is None:
         return None
     try:
-        resolved = resolver.resolve(kind="pipeline", owner=pipeline, run_id=run_id)
+        resolved = resolver.resolve(
+            kind="pipeline",
+            owner=pipeline,
+            run_id=run_id,
+            expected_runtime_source_id=expected_runtime_source_id,
+        )
     except (OSError, TypeError, ValueError) as exc:
         return unavailable_status(pipeline, run_id, "ERROR", str(exc))
 
     code = resolved.code.value
-    if code in {"identity_conflict", "location_invalid"}:
-        return unavailable_status(pipeline, run_id, "ERROR", code)
-
     context = resolved.context
-    if context is None:
-        return None
+    if context is None or code in {"identity_conflict", "location_invalid"}:
+        return unavailable_status(pipeline, run_id, "ERROR", code)
     try:
         report_path, _ = _validated_artifact_paths(
             pipeline,
@@ -199,8 +251,6 @@ def resolved_report_path(
             "pipeline_run_report_json",
             context.data_root,
         )
-    except ValueError:
-        return None
-    if not report_path.is_file():
-        return None
+    except ValueError as exc:
+        return unavailable_status(pipeline, run_id, "ERROR", str(exc))
     return report_path
