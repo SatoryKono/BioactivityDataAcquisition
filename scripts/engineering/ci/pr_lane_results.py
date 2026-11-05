@@ -394,13 +394,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/domain/services/test_composite_metadata_helpers.py",
     ),
     # N1 coordinator status note (sibling of reports/governance/n1-shadow-window/).
-    "reports/governance/n1-shadow-window-status.md": (
-        NIGHTLY_SHADOW_ARCHIVE_TEST,
-    ),
+    "reports/governance/n1-shadow-window-status.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
     # Docs-lane audit mirror of the N1 shadow status (Jules / audit pack surface).
-    "docs/reports/audit/N1_SHADOW_STATUS.md": (
-        NIGHTLY_SHADOW_ARCHIVE_TEST,
-    ),
+    "docs/reports/audit/N1_SHADOW_STATUS.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
     "docs/04-reference/environment-variables.md": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
@@ -819,9 +815,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     ),
     "reports/test-telemetry/": TELEMETRY_BASELINE_TESTS,
     "reports/performance/": BENCHMARK_EVIDENCE_TESTS,
-    "reports/governance/n1-shadow-window/": (
-        NIGHTLY_SHADOW_ARCHIVE_TEST,
-    ),
+    "reports/governance/n1-shadow-window/": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
     "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.": (
         NPM_RUNTIME_TEST,
     ),
