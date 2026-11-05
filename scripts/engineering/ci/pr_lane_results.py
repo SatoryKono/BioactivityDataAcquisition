@@ -384,9 +384,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/audit/pack-v2.1/evidence_p12_parity.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
     ),
-    "docs/reports/audit/N1_SHADOW_STATUS.md": (
-        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
-    ),
+    "docs/reports/audit/N1_SHADOW_STATUS.md": (DOCUMENTATION_CLEANUP_INVENTORY_TEST,),
     "src/bioetl/infrastructure/adapters/decorators/README.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
     ),
