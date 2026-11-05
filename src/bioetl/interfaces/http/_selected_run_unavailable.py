@@ -185,7 +185,9 @@ class RuntimeSourceResolver(EvidenceLocationResolver):
         run_id: str,
         expected_runtime_source_id: str | None = None,
     ) -> EvidenceLocationResolveResult:
-        return super().resolve(
+        # slots=True rebuilds the class; zero-arg super() is a TypeError on 3.12.
+        return EvidenceLocationResolver.resolve(
+            self,
             kind=kind,
             owner=owner,
             run_id=run_id,
