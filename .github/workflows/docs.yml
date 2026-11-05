@@ -180,25 +180,26 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 0
+          fetch-depth: ${{ github.event_name == 'pull_request' && 1 || 2 }}
 
       - name: Check for diagram file changes
         id: filter
         env:
           EVENT_NAME: ${{ github.event_name }}
           BASE_REF: ${{ github.base_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           if [[ "${EVENT_NAME}" == "pull_request" ]]; then
             if [[ "${BASE_REF}" != "main" && "${BASE_REF}" != "develop" ]]; then
               echo "unsupported pull-request base ref" >&2
               exit 1
             fi
-            base="origin/${BASE_REF}"
-            git fetch --no-tags --depth=1 origin "${BASE_REF}" 2>/dev/null || true
+            base="${BASE_SHA}"
+            git fetch --no-tags --depth=1 origin "${BASE_SHA}"
           else
             base="HEAD~1"
           fi
-          changed=$(git diff --name-only "$base"...HEAD -- \
+          changed=$(git diff --name-only "$base" HEAD -- \
             '*.mmd' '*.mermaid' \
             'docs/**/*.md' \
             'scripts/diagrams/**' \
@@ -206,14 +207,14 @@ jobs:
             '.github/actions/setup-mermaid/**' \
             'docs/02-architecture/diagrams/theme/**' \
             'docs/02-architecture/diagrams/tooling/**' \
-            'docs/02-architecture/diagrams/manifests/**' || true)
-          render_sources=$(git diff --name-only "$base"...HEAD -- \
+            'docs/02-architecture/diagrams/manifests/**')
+          render_sources=$(git diff --name-only "$base" HEAD -- \
             '*.mmd' '*.mermaid' \
             'scripts/diagrams/**' \
             '.github/actions/setup-mermaid/**' \
             'docs/02-architecture/diagrams/theme/**' \
             'docs/02-architecture/diagrams/tooling/**' \
-            'docs/02-architecture/diagrams/manifests/**' || true)
+            'docs/02-architecture/diagrams/manifests/**')
           if [[ -n "$changed" ]]; then
             echo "diagrams_changed=true" >> "$GITHUB_OUTPUT"
             echo "Diagram-related files changed:"
@@ -285,7 +286,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Setup Mermaid CLI
         uses: ./.github/actions/setup-mermaid
@@ -300,6 +301,7 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           BASE_REF: ${{ github.base_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
           # Source-only PRs lint existing changed destinations. Tooling changes
@@ -310,12 +312,12 @@ jobs:
               echo "unsupported pull-request base ref" >&2
               exit 1
             fi
-            git fetch --no-tags origin "${BASE_REF}"
-            if git diff --quiet "origin/${BASE_REF}"...HEAD -- \
+            git fetch --no-tags --depth=1 origin "${BASE_SHA}"
+            if git diff --quiet "${BASE_SHA}" HEAD -- \
               scripts/diagrams .github/actions/setup-mermaid; then
               changed_targets="${RUNNER_TEMP}/changed-diagram-targets.txt"
               git diff --diff-filter=ACMRTUXB --name-only \
-                "origin/${BASE_REF}"...HEAD -- '*.mmd' '*.mermaid' \
+                "${BASE_SHA}" HEAD -- '*.mmd' '*.mermaid' \
                 > "${changed_targets}"
               mapfile -t lint_targets < "${changed_targets}"
               if (( ${#lint_targets[@]} == 0 )); then
