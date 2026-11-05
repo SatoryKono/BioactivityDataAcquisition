@@ -714,6 +714,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         ("tests/architecture/test_silver_filter_boundary_inventory.py",),
     ),
+    ".github/root-allowlist.txt": (
+        "tests/architecture/test_root_hygiene_review_registry.py",
+        "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
+    ),
+    ".vulture_whitelist.py": (
+        "tests/architecture/test_layer_dependencies.py",
+        "tests/architecture/test_root_hygiene_review_registry.py",
+    ),
 }
 
 # Directory-level edges for generated artifacts and diagrams where an exact
