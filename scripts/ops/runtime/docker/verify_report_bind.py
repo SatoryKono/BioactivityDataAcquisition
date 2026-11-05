@@ -520,13 +520,71 @@ def _verify_pipeline_endpoint(
         )
 
 
+
+def _verify_selected_run_endpoint(
+    state: _VerificationState,
+    *,
+    ops_url: str,
+    pipeline: str | None,
+    run_id: str,
+    expected_source_id: str | None,
+    require_ops: bool,
+    bind_aligned: bool,
+) -> None:
+    if not pipeline:
+        state.fail("FAIL: --run-id requires --pipeline")
+        return
+    url = (
+        f"{ops_url.rstrip('/')}/ops/observability/selected-run-status"
+        f"?pipeline={pipeline}&run_id={run_id}&run_type=incremental"
+    )
+    selected = _json_get(url, timeout=20.0)
+    if selected is None:
+        if bind_aligned:
+            state.warn(
+                "WARN: selected-run-status timed out while host/container bind "
+                f"identity is aligned: {url}"
+            )
+            return
+        if require_ops:
+            state.fail(f"FAIL: selected-run-status unreachable: {url}")
+        return
+
+    verdict = selected.get("verdict")
+    readiness_list = selected.get("replay_readiness")
+    if isinstance(readiness_list, list) and readiness_list:
+        readiness = readiness_list[0].get("verdict")
+    else:
+        readiness = "UNKNOWN"
+
+    print(
+        f"ops_selected_run pipeline={pipeline!r} run_id={run_id!r} "
+        f"verdict={verdict!r} readiness={readiness!r}"
+    )
+
+    if verdict != "OK":
+        state.fail(f"FAIL: selected-run-status verdict={verdict!r}")
+    if readiness != "READY":
+        state.fail(f"FAIL: selected-run-status readiness={readiness!r}")
+
+    domains = selected.get("domains", [])
+    for domain in domains:
+        if isinstance(domain, dict):
+            d_verdict = domain.get("verdict")
+            d_reason = str(domain.get("reason", ""))
+            d_name = domain.get("domain", "")
+            if d_verdict != "OK" and d_verdict != "N/A":
+                state.fail(f"FAIL: selected-run-status domain={d_name!r} verdict={d_verdict!r} reason={d_reason!r}")
+
 def verify(
+
     *,
     repo: Path,
     ops_url: str,
     container: str,
     pipeline: str | None,
     require_ops: bool,
+    run_id: str | None = None,
 ) -> int:
     host_mount = _host_reports_mount(repo)
     host_root = _host_report_root(repo)
@@ -583,6 +641,17 @@ def verify(
         bind_aligned=bind_aligned,
     )
 
+    if run_id:
+        _verify_selected_run_endpoint(
+            state,
+            ops_url=ops_url,
+            pipeline=pipeline,
+            run_id=run_id,
+            expected_source_id=expected_source_id,
+            require_ops=require_ops,
+            bind_aligned=bind_aligned,
+        )
+
     for line in state.findings:
         print(line)
 
@@ -622,14 +691,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         action="store_true",
         help="Skip host/ops pipeline count comparison",
     )
+    parser.add_argument(
+        "--run-id",
+        help="Run ID to check readiness and evidence via selected-run-status",
+    )
     args = parser.parse_args(list(argv) if argv is not None else None)
     pipeline = None if args.no_pipeline else str(args.pipeline or "").strip() or None
+    run_id = str(args.run_id).strip() if getattr(args, "run_id", None) else None
     return verify(
         repo=_repo_root(),
         ops_url=str(args.ops_url),
         container=str(args.container),
         pipeline=pipeline,
         require_ops=bool(args.require_ops),
+        run_id=run_id,
     )
 
 

@@ -493,3 +493,138 @@ def test_host_pipeline_summary_reads_composed_store(tmp_path: Path) -> None:
         state, pipeline="chembl_activity", host_root=tmp_path
     ) == (1, "run-a")
     assert state.ok
+
+def test_verify_run_id_checks_selected_run_status(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    reports = tmp_path / "reports"
+    run_reports = reports / "run-reports"
+    run_reports.mkdir(parents=True)
+    (reports / REPORT_ROOT_MARKER_NAME).write_text(
+        REPORT_ROOT_MARKER_VALUE + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("BIOETL_DASHBOARD_REPORT_ROOT", str(reports))
+    monkeypatch.setenv("BIOETL_REPORT_ROOT", str(run_reports))
+    expected_source_id = _attest_reports(tmp_path)
+    monkeypatch.setattr(
+        mod,
+        "_docker_inspect_mounts",
+        lambda _name: [{"Destination": "/app/reports", "Source": str(reports)}],
+    )
+    monkeypatch.setattr(
+        mod,
+        "_docker_inspect_source_identity",
+        lambda _name: expected_source_id,
+    )
+
+    def ops_payload(url: str, **_kwargs: object) -> dict[str, object]:
+        if url.endswith("/health/ready"):
+            return {
+                "status": "healthy",
+                "checks": {
+                    "report_root": {
+                        "status": "healthy",
+                        "layout_status": "healthy",
+                        "source_identity_status": "healthy",
+                        "source_identity_actual": expected_source_id,
+                    }
+                },
+            }
+        if "selected-run-status" in url:
+            return {
+                "verdict": "OK",
+                "replay_readiness": [{"verdict": "READY"}],
+                "domains": [],
+            }
+        return {
+            "status": "ok",
+            "count": 0,
+            "marker_status": "healthy",
+            "source_identity_status": "healthy",
+            "source_identity_actual": expected_source_id,
+            "items": [],
+        }
+
+    monkeypatch.setattr(mod, "_json_get", ops_payload)
+
+    assert (
+        mod.verify(
+            repo=tmp_path,
+            ops_url="http://127.0.0.1:8000",
+            container="bioetl",
+            pipeline="chembl_assay",
+            require_ops=True,
+            run_id="run-b",
+        )
+        == 0
+    )
+
+
+def test_verify_run_id_fails_on_corrupt_objects(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    reports = tmp_path / "reports"
+    run_reports = reports / "run-reports"
+    run_reports.mkdir(parents=True)
+    (reports / REPORT_ROOT_MARKER_NAME).write_text(
+        REPORT_ROOT_MARKER_VALUE + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("BIOETL_DASHBOARD_REPORT_ROOT", str(reports))
+    monkeypatch.setenv("BIOETL_REPORT_ROOT", str(run_reports))
+    expected_source_id = _attest_reports(tmp_path)
+    monkeypatch.setattr(
+        mod,
+        "_docker_inspect_mounts",
+        lambda _name: [{"Destination": "/app/reports", "Source": str(reports)}],
+    )
+    monkeypatch.setattr(
+        mod,
+        "_docker_inspect_source_identity",
+        lambda _name: expected_source_id,
+    )
+
+    def ops_payload(url: str, **_kwargs: object) -> dict[str, object]:
+        if url.endswith("/health/ready"):
+            return {
+                "status": "healthy",
+                "checks": {
+                    "report_root": {
+                        "status": "healthy",
+                        "layout_status": "healthy",
+                        "source_identity_status": "healthy",
+                        "source_identity_actual": expected_source_id,
+                    }
+                },
+            }
+        if "selected-run-status" in url:
+            return {
+                "verdict": "ERROR",
+                "replay_readiness": [{"verdict": "INSUFFICIENT"}],
+                "domains": [{"domain": "Storage", "verdict": "ERROR", "reason": "corrupt objects"}],
+            }
+        return {
+            "status": "ok",
+            "count": 0,
+            "marker_status": "healthy",
+            "source_identity_status": "healthy",
+            "source_identity_actual": expected_source_id,
+            "items": [],
+        }
+
+    monkeypatch.setattr(mod, "_json_get", ops_payload)
+
+    assert (
+        mod.verify(
+            repo=tmp_path,
+            ops_url="http://127.0.0.1:8000",
+            container="bioetl",
+            pipeline="chembl_assay",
+            require_ops=True,
+            run_id="run-b",
+        )
+        == 1
+    )
