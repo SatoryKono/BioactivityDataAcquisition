@@ -18,6 +18,8 @@ from bioetl.application.services.evidence_location.registration import (
 )
 from bioetl.application.services.evidence_location.registration_models import (
     EvidenceLocationRegisterRequest,
+    EvidenceLocationRegistrationOutcome,
+    EvidenceLocationVerifyOutcome,
 )
 from bioetl.application.services.run_reports import DEFAULT_REPORT_ROOT
 from bioetl.domain.control_plane.run_evidence_location import (
@@ -37,6 +39,14 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 _REJECT_CODES = frozenset({"conflict", "invalid", "error"})
+_VERIFY_REJECT_CODES = frozenset(
+    {
+        "invalid",
+        "identity_conflict",
+        "binding_mismatch",
+        "location_invalid",
+    }
+)
 
 
 @dataclass
@@ -57,8 +67,18 @@ def read_target_list(
     """Read a machine-local list of targets under a confined root."""
     payload = read_text_confined(path, root=root or REPO_ROOT)
     data = json.loads(payload)
+    if not isinstance(data, dict):
+        raise ValueError("targets JSON must be an object")
+    if "targets" not in data:
+        raise ValueError("targets JSON must contain a 'targets' array")
+    raw_targets = data["targets"]
+    if not isinstance(raw_targets, list):
+        raise ValueError("'targets' must be a JSON array")
+
     targets: list[MigrationTarget] = []
-    for item in data.get("targets", []):
+    for item in raw_targets:
+        if not isinstance(item, dict):
+            raise ValueError("each target must be a JSON object")
         targets.append(
             MigrationTarget(
                 kind=EvidenceLocationKind(item["kind"]),
@@ -72,6 +92,77 @@ def read_target_list(
     return targets
 
 
+def _request_for(target: MigrationTarget) -> EvidenceLocationRegisterRequest:
+    return EvidenceLocationRegisterRequest(
+        kind=target.kind,
+        owner=target.owner,
+        run_id=target.run_id,
+        runtime_source_id=target.runtime_source_id,
+        relative_data_root=target.relative_data_root,
+        root_alias=DEFAULT_EVIDENCE_ROOT_ALIAS,
+        workflow_run_id=target.workflow_run_id,
+    )
+
+
+def _empty_stats() -> dict[str, int]:
+    return {
+        "registered": 0,
+        "already_identical": 0,
+        "conflict": 0,
+        "invalid": 0,
+        "error": 0,
+    }
+
+
+def _record_outcome(
+    stats: dict[str, int],
+    *,
+    target: MigrationTarget,
+    code: str,
+    detail: str | None,
+    planned: bool,
+) -> None:
+    stats[code] = stats.get(code, 0) + 1
+    prefix = (
+        "PLAN"
+        if planned
+        else ("PASS" if code in {"registered", "already_identical"} else "FAIL")
+    )
+    message = f"{prefix}: {target.kind.value} {target.owner} {target.run_id} -> {code}"
+    if detail:
+        message = f"{message}: {detail}"
+    if code in {"registered", "already_identical"} or (
+        planned and code not in _REJECT_CODES
+    ):
+        logger.info("%s", message)
+    else:
+        logger.error("%s", message)
+
+
+def _classify_dry_run(
+    service: EvidenceLocationRegistrationService,
+    request: EvidenceLocationRegisterRequest,
+) -> EvidenceLocationRegistrationOutcome:
+    """Validate binding + existing catalog without publishing a locator."""
+    verified: EvidenceLocationVerifyOutcome = service.verify(request)
+    if verified.code == "location_missing":
+        return EvidenceLocationRegistrationOutcome(
+            code="registered", detail="would_register"
+        )
+    if verified.code == "ok":
+        return EvidenceLocationRegistrationOutcome(code="already_identical")
+    if verified.code in _VERIFY_REJECT_CODES:
+        mapped = "invalid" if verified.code == "invalid" else "conflict"
+        return EvidenceLocationRegistrationOutcome(
+            code=mapped,
+            detail=verified.detail or verified.code,
+        )
+    return EvidenceLocationRegistrationOutcome(
+        code="error",
+        detail=verified.detail or verified.code,
+    )
+
+
 def execute_migration(
     targets: Sequence[MigrationTarget],
     report_root: Path,
@@ -80,57 +171,35 @@ def execute_migration(
     """Execute the migration plan."""
     store = FileEvidenceLocationStore(report_root=report_root)
     service = EvidenceLocationRegistrationService(locations=store)
-
-    stats = {
-        "registered": 0,
-        "already_identical": 0,
-        "conflict": 0,
-        "invalid": 0,
-        "error": 0,
-    }
+    stats = _empty_stats()
 
     for target in targets:
-        request = EvidenceLocationRegisterRequest(
-            kind=target.kind,
-            owner=target.owner,
-            run_id=target.run_id,
-            runtime_source_id=target.runtime_source_id,
-            relative_data_root=target.relative_data_root,
-            root_alias=DEFAULT_EVIDENCE_ROOT_ALIAS,
-            workflow_run_id=target.workflow_run_id,
-        )
-
+        request = _request_for(target)
         if dry_run:
-            logger.info(
-                "PLAN: Would register %s %s %s",
-                target.kind.value,
-                target.owner,
-                target.run_id,
+            outcome = _classify_dry_run(service, request)
+            _record_outcome(
+                stats,
+                target=target,
+                code=outcome.code,
+                detail=outcome.detail,
+                planned=True,
             )
             continue
 
         outcome = service.register(request)
-        stats[outcome.code] = stats.get(outcome.code, 0) + 1
-
-        if outcome.code in ("registered", "already_identical"):
-            logger.info(
-                "PASS: %s %s %s -> %s",
-                target.kind.value,
-                target.owner,
-                target.run_id,
-                outcome.code,
-            )
-        else:
-            logger.error(
-                "FAIL: %s %s %s -> %s: %s",
-                target.kind.value,
-                target.owner,
-                target.run_id,
-                outcome.code,
-                outcome.detail,
-            )
+        _record_outcome(
+            stats,
+            target=target,
+            code=outcome.code,
+            detail=outcome.detail,
+            planned=False,
+        )
 
     return stats
+
+
+def _has_rejects(stats: dict[str, int]) -> bool:
+    return any(stats.get(code, 0) for code in _REJECT_CODES)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -174,6 +243,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         logger.error("Failed to parse targets: %s", exc)
         return 1
 
+    if not targets:
+        logger.error("Targets list is empty.")
+        return 1
+
     logger.info("Loaded %s targets.", len(targets))
 
     stats = execute_migration(
@@ -183,13 +256,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
 
     if not args.apply:
-        logger.info("Dry-run complete.")
-        return 0
+        logger.info("Dry-run complete. Stats: %s", stats)
+        return 1 if _has_rejects(stats) else 0
 
     logger.info("Apply complete. Stats: %s", stats)
-    if any(stats.get(code, 0) for code in _REJECT_CODES):
-        return 1
-    return 0
+    return 1 if _has_rejects(stats) else 0
 
 
 if __name__ == "__main__":
