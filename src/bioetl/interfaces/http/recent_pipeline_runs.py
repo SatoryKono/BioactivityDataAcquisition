@@ -17,7 +17,10 @@ from bioetl.interfaces.http._control_plane_selector_records import (
     build_selector_records,
     narrow_manifest_catalog,
 )
-from bioetl.interfaces.http._recent_run_presentation import recent_run_presentation
+from bioetl.interfaces.http._recent_run_presentation import (
+    apply_recent_presentation,
+    workflow_scope,
+)
 from bioetl.interfaces.http.run_report_index import _normalize_list_owner
 from bioetl.interfaces.http.run_report_ops import (
     _validated_artifact_paths,
@@ -168,13 +171,6 @@ def _row_matches_scope(
     if run_types and row.get("run_type") not in run_types:
         return False
     return not lookup_run_id or row["run_id"] == lookup_run_id
-
-
-def _workflow_scope(row: dict[str, object]) -> str:
-    workflow_id = row.get("workflow_id")
-    if workflow_id in {None, "", "—"}:
-        return "$__all"
-    return str(workflow_id)
 
 
 def list_recent_pipeline_runs(
@@ -404,11 +400,7 @@ def _present_page(
     """Enrich only the bounded page after filtering and ranking all identities."""
     for item in items:
         item.update(_report_link(item, root))
-        item.update(
-            recent_run_presentation(
-                item, root=root, manifest_port=manifest_port, resolver=resolver
-            )
-        )
+        apply_recent_presentation(item, root, manifest_port, resolver)
         item.update(_timing_fields(item, observed_at))
         run_identity = str(item["run_id"])
         item["run_label"] = (
@@ -417,7 +409,7 @@ def _present_page(
             else run_identity
         )
         item["selected"] = int(item["run_id"] == selected_run_id)
-        item["workflow_scope"] = _workflow_scope(item)
+        item["workflow_scope"] = workflow_scope(item)
         item["overview_handoff"] = "Open"
         item["diagnostics_handoff"] = "Open"
         item["provider_handoff"] = "Open"

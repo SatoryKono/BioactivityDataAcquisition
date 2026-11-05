@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from pathlib import Path
 
 from bioetl.application.observability.reason_aliases import display_reason
 from bioetl.application.services.control_plane.manifest.diagnostics.selected_run_replay_readiness import (
     INSUFFICIENT,
     empty_replay_readiness,
+)
+from bioetl.application.services.evidence_location.resolver import (
+    EvidenceLocationResolver,
 )
 from bioetl.composition.composite_catalog import attach_contract_fields
 from bioetl.domain.run_reports.selected_status import DOMAINS, RULES_VERSION
@@ -18,6 +22,7 @@ from bioetl.interfaces.http._selected_run_presentation import (
     _readiness_fields,
     presentation_rows,
 )
+from bioetl.interfaces.http.run_report_ops import _validated_artifact_paths
 
 _NOT_EVALUATED = "NOT EVALUATED"
 _QUERY_ERROR = "QUERY ERROR"
@@ -161,3 +166,41 @@ def _gap_presentation(
             },
         )
     return dict(summary), dict(trust)
+
+
+def resolved_report_path(
+    resolver: EvidenceLocationResolver | None,
+    *,
+    pipeline: str,
+    run_id: str,
+) -> Path | dict[str, object] | None:
+    """Saved report under the resolved root, or an error status.
+
+    ``None`` means the caller should use the legacy report root.
+    """
+    if resolver is None:
+        return None
+    try:
+        resolved = resolver.resolve(kind="pipeline", owner=pipeline, run_id=run_id)
+    except (OSError, TypeError, ValueError) as exc:
+        return unavailable_status(pipeline, run_id, "ERROR", str(exc))
+
+    code = resolved.code.value
+    if code in {"identity_conflict", "location_invalid"}:
+        return unavailable_status(pipeline, run_id, "ERROR", code)
+
+    context = resolved.context
+    if context is None:
+        return None
+    try:
+        report_path, _ = _validated_artifact_paths(
+            pipeline,
+            run_id,
+            "pipeline_run_report_json",
+            context.data_root,
+        )
+    except ValueError:
+        return None
+    if not report_path.is_file():
+        return None
+    return report_path

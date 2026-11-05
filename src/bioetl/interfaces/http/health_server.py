@@ -1,8 +1,5 @@
 # Boundary object/payload typing residual at this module.
-"""HTTP Health Server for BioETL.
-
-Provides standard liveness and readiness probes.
-"""
+"""HTTP health server: liveness and readiness probes."""
 
 from __future__ import annotations
 
@@ -12,9 +9,6 @@ from typing import cast
 
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
-)
-from bioetl.application.services.evidence_location.resolver import (
-    EvidenceLocationResolver,
 )
 from bioetl.application.services.quality.quarantine_service import QuarantineService
 from bioetl.composition.observability_runtime import create_run_report_store
@@ -41,6 +35,9 @@ from bioetl.interfaces.http._health_server_control_plane_metrics_refresh import 
 )
 from bioetl.interfaces.http._health_server_observability_protocols import (
     HealthServerControlPlaneDeps as HealthServerControlPlaneDeps,
+)
+from bioetl.interfaces.http._health_server_observability_protocols import (
+    legacy_evidence_resolver,
 )
 from bioetl.interfaces.http._run_explorer_snapshot import (
     RunExplorerSnapshotCache,
@@ -152,10 +149,7 @@ class HealthServer(
                 run_report_store=cast(
                     RunReportStorePort | None, recognized.get("run_report_store")
                 ),
-                evidence_location_resolver=cast(
-                    EvidenceLocationResolver | None,
-                    recognized.get("evidence_location_resolver"),
-                ),
+                evidence_location_resolver=legacy_evidence_resolver(recognized),
             )
         return control_plane or HealthServerControlPlaneDeps()
 

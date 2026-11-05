@@ -168,3 +168,25 @@ def _replay_status(assessment: dict[str, object]) -> str:
     ):
         replay = "ERROR"
     return replay
+
+
+def workflow_scope(row: dict[str, object]) -> str:
+    """Dashboard scope token for one recent-run row."""
+    workflow_id = row.get("workflow_id")
+    if workflow_id in {None, "", "—"}:
+        return "$__all"
+    return str(workflow_id)
+
+
+def apply_recent_presentation(
+    item: dict[str, object],
+    root: Path | None,
+    manifest_port: object | None,
+    resolver: EvidenceLocationResolver | None,
+) -> None:
+    """Attach exact-run presentation fields for one bounded-page row."""
+    item.update(
+        recent_run_presentation(
+            item, root=root, manifest_port=manifest_port, resolver=resolver
+        )
+    )

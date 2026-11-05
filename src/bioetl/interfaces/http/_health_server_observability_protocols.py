@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Protocol, cast
 
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
@@ -165,3 +166,13 @@ class HealthServerControlPlaneDeps:
     runtime_source_id: str | None = None
     run_report_store: RunReportStorePort | None = None
     evidence_location_resolver: EvidenceLocationResolver | None = None
+
+
+def legacy_evidence_resolver(
+    recognized: Mapping[str, object],
+) -> EvidenceLocationResolver | None:
+    """Cast a legacy kwarg without nesting the bag constructor."""
+    return cast(
+        EvidenceLocationResolver | None,
+        recognized.get("evidence_location_resolver"),
+    )
