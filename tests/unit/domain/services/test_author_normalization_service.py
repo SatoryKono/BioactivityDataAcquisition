@@ -327,6 +327,17 @@ class TestHelperFunctions:
 
         assert result == "MIT & Harvard"
 
+    def test_normalize_affiliation_string_collapses_control_whitespace(self) -> None:
+        """Control whitespace is a space before control-character removal."""
+        assert (
+            normalize_affiliation_string("Harvard\fUniversity") == "Harvard University"
+        )
+        assert (
+            normalize_affiliation_string("Harvard\vUniversity") == "Harvard University"
+        )
+        assert normalize_affiliation_string("a\x0bb") == "a b"
+        assert normalize_affiliation_string("a\x85b") == "a b"
+
     def test_deduplicate_case_insensitive_preserves_first(self) -> None:
         """Test that deduplication preserves first occurrence case."""
         strings = ["MIT", "mit", "Harvard", "HARVARD"]
