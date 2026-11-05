@@ -218,3 +218,4 @@ def test_contract_evidence_attachment_handles_missing_root_and_plain_context(
     )
     recorder = runner.attach_contract_evidence_recorder.call_args.args[0]
     assert recorder.base_path == tmp_path / "ledger" / "run_manifest"
+    assert recorder.live_catalog is None

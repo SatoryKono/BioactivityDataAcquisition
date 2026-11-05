@@ -175,3 +175,34 @@ def test_identical_live_record_is_not_rewritten(tmp_path: Path) -> None:
 
     assert result.outcome == "already_recorded"
     assert (live / "new-manifest.json").read_bytes() == before
+
+
+def test_already_recorded_manifest_receives_a_later_sidecar(tmp_path: Path) -> None:
+    live = tmp_path / "run_manifest"
+    source = tmp_path / "source"
+    manifest = _manifest(manifest_id="new-manifest")
+    _save(live, manifest)
+    _save(source, manifest)
+    before = (live / "new-manifest.json").read_bytes()
+    sidecar = source / "new-manifest.contract-evidence.json"
+    sidecar.write_text('{"manifest_id": "new-manifest"}\n', encoding="utf-8")
+
+    result = record_manifest_in_live_catalog(
+        manifest=manifest,
+        live_base=live,
+        source_base=source,
+    )
+
+    assert result.outcome == "already_recorded"
+    assert (live / "new-manifest.json").read_bytes() == before
+    assert (live / sidecar.name).read_text(encoding="utf-8") == sidecar.read_text(
+        encoding="utf-8"
+    )
+    (live / sidecar.name).write_text("kept\n", encoding="utf-8")
+    sidecar.write_text('{"manifest_id": "replaced"}\n', encoding="utf-8")
+    record_manifest_in_live_catalog(
+        manifest=manifest,
+        live_base=live,
+        source_base=source,
+    )
+    assert (live / sidecar.name).read_text(encoding="utf-8") == "kept\n"

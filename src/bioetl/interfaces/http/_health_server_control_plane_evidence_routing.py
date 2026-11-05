@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Coroutine
-from dataclasses import replace
 from time import perf_counter
 from typing import Protocol
 
@@ -76,7 +75,14 @@ def reconcile_manifest_validation_scope(
     )
     if identity is None:
         return scope
-    return replace(scope, resolved_via="resolved_without_manifest")
+    return _IdentityScope(
+        requested_pipeline=scope.requested_pipeline,
+        selected_pipelines=scope.selected_pipelines,
+        selected_run_types=scope.selected_run_types,
+        selected_run_id=scope.selected_run_id,
+        resolved_manifest=scope.resolved_manifest,
+        resolved_via="resolved_without_manifest",
+    )
 
 
 class _EvidenceRoutingHost(EvidenceScopeHost, Protocol):
@@ -334,10 +340,19 @@ async def _service_payload(
         return error_payload
     assert scope is not None
     if endpoint == "manifest-validation":
-        scope = reconcile_manifest_validation_scope(
-            scope,
-            report_store=getattr(host, "_run_report_store", None),
-        )
+        try:
+            scope = await asyncio.to_thread(
+                reconcile_manifest_validation_scope,
+                scope,
+                report_store=getattr(host, "_run_report_store", None),
+            )
+        except SOURCE_READ_ERRORS:
+            return source_error_payload(
+                endpoint=endpoint,
+                scope=to_evidence_scope(scope),
+                reason=source_reason,
+                check=source_check,
+            )
     evidence_scope = to_evidence_scope(scope)
     try:
         if endpoint == "trust-summary":

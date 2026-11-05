@@ -148,13 +148,16 @@ runtime-aligned with the current composition layer.
 
 A newly created run manifest is also recorded under
 `{dashboard_data_root}/output/control/run_manifest` when that alias differs
-from the run data root. The publication copies that manifest, its run-id
-index, and its own contract-evidence sidecar. It does not walk or copy
-historical data trees. A live catalog snapshot is taken before the write.
-An existing live manifest id is not replaced when its bytes differ, and a
-run id already indexed to a different manifest id is left unchanged. When
-the alias is unset, or it is the same directory, the run data root is the
-live catalog and no second copy is written.
+from the run data root. The publication writes that manifest and its run-id
+index. The contract-evidence sidecar is copied when that sidecar is created,
+including onto a manifest already recorded with the same bytes. An existing
+sidecar is not replaced. A failure to write this extra catalog does not fail
+the run; the run data root stays fail-closed. The publication does not walk
+or copy historical data trees. A live catalog snapshot is taken before the
+manifest write. An existing live manifest id is not replaced when its bytes
+differ, and a run id already indexed to a different manifest id is left
+unchanged. When the alias is unset, or it is the same directory, the run
+data root is the live catalog and no second copy is written.
 
 Strict exact-replay, `replay_ready`, and `forensic_grade` contexts require this
 root to come from an explicit `settings.data_dir` configuration. Fallback

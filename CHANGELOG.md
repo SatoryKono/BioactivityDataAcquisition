@@ -77,9 +77,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   recorded in `{dashboard_data_root}/output/control/run_manifest` when that
   alias differs from the run data root. Historical data trees are not copied.
   An existing live manifest is not overwritten, and the catalog ids present
-  before that write must still be present afterward. Other validation routes
-  keep the previous unresolved scope. `[STALE catalog]` remains the options
-  snapshot age mark.
+  before that write must still be present afterward. The contract-evidence
+  sidecar is copied when it is created, including onto an already recorded
+  manifest. A live-root write error does not fail the saved run manifest.
+  Other validation routes keep the previous unresolved scope.
+  `[STALE catalog]` remains the options snapshot age mark.
 
 - **GitHub billing acceptance (#12351):** the October 1–19 window is a source
   slice, not a comparable after period. While the export is absent, the

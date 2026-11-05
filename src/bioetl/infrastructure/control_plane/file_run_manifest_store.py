@@ -481,6 +481,9 @@ def record_manifest_in_live_catalog(
         _assert_snapshot_preserved(live, snapshot)
         return LiveRootRecordResult("kept_existing", snapshot)
     if _already_recorded(live, manifest):
+        _copy_own_contract_evidence(
+            manifest.manifest_id, live_base=live, source_base=source
+        )
         _assert_snapshot_preserved(live, snapshot)
         return LiveRootRecordResult("already_recorded", snapshot)
     store = FileRunManifestStore(base_path=live)
@@ -496,7 +499,9 @@ def record_manifest_in_live_catalog(
             raise
         _assert_snapshot_preserved(live, snapshot)
         return LiveRootRecordResult("kept_existing", snapshot)
-    _copy_own_contract_evidence(manifest, live_base=live, source_base=source)
+    _copy_own_contract_evidence(
+        manifest.manifest_id, live_base=live, source_base=source
+    )
     _assert_snapshot_preserved(live, snapshot)
     return LiveRootRecordResult("recorded", snapshot)
 
@@ -538,14 +543,35 @@ def _already_recorded(live_base: Path, manifest: RunManifest) -> bool:
     )
 
 
+def copy_contract_evidence_to_live_catalog(
+    manifest_id: str,
+    *,
+    source_base: Path,
+    live_base: Path,
+) -> None:
+    """Copy one created sidecar onto a manifest already stored in the live catalog.
+
+    The sidecar is published when it is created, not only during the earlier
+    manifest write. A missing live manifest is left untouched, and an existing
+    sidecar is not replaced.
+    """
+    live = Path(live_base)
+    source = Path(source_base)
+    if live.resolve(strict=False) == source.resolve(strict=False):
+        return
+    if not (live / f"{manifest_id}.json").is_file():
+        return
+    _copy_own_contract_evidence(manifest_id, live_base=live, source_base=source)
+
+
 def _copy_own_contract_evidence(
-    manifest: RunManifest,
+    manifest_id: str,
     *,
     live_base: Path,
     source_base: Path,
 ) -> None:
     """Copy this publication's sidecar only. Predecessor files stay put."""
-    name = f"{manifest.manifest_id}.contract-evidence.json"
+    name = f"{manifest_id}.contract-evidence.json"
     source = source_base / name
     destination = live_base / name
     if destination.exists() or not source.is_file():

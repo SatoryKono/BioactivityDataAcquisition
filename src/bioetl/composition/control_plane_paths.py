@@ -52,12 +52,21 @@ __all__ = [
     "LiveRootRecordResult",
     "build_evidence_location_binding_context",
     "control_plane_root",
+    "live_run_manifest_catalog",
     "publish_new_run_manifest_to_live_root",
     "relative_data_root_under_alias",
     "resolve_dashboard_data_alias_base",
     "resolve_data_root",
     "resolve_registration_runtime_source_id",
 ]
+
+
+def live_run_manifest_catalog(settings: Settings) -> Path | None:
+    """Return the dashboard live manifest catalog, or None when it is not aliased."""
+    alias = resolve_dashboard_data_alias_base(settings=settings)
+    if alias is None:
+        return None
+    return alias / "output" / "control" / "run_manifest"
 
 
 def publish_new_run_manifest_to_live_root(
@@ -68,11 +77,12 @@ def publish_new_run_manifest_to_live_root(
 ) -> LiveRootRecordResult:
     """Record one new manifest in the dashboard live root.
 
-    When ``dashboard_data_root`` differs from the run data root, the manifest,
-    its run-id index, and its own contract-evidence sidecar are recorded under
-    ``{dashboard_data_root}/output/control/run_manifest``. Historical trees are
-    not walked. An unset alias, or the same directory, keeps the run data root
-    as the only catalog.
+    When ``dashboard_data_root`` differs from the run data root, the manifest
+    and its run-id index are recorded under
+    ``{dashboard_data_root}/output/control/run_manifest``. A sidecar that
+    already exists is copied; the finalized sidecar is copied again when the
+    recorder creates it. Historical trees are not walked. An unset alias, or
+    the same directory, keeps the run data root as the only catalog.
     """
     alias = resolve_dashboard_data_alias_base(settings=settings)
     data_root = alias if alias is not None else resolve_data_root(settings)

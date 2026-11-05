@@ -17,10 +17,11 @@ from bioetl.application.observability.control_plane_evidence.service_support imp
     EvidenceScopeContext,
 )
 from bioetl.domain.types import RunID
-from bioetl.interfaces.http._health_server_control_plane_scope import _IdentityScope
 from bioetl.interfaces.http._health_server_control_plane_evidence_routing import (
+    _service_payload,
     reconcile_manifest_validation_scope,
 )
+from bioetl.interfaces.http._health_server_control_plane_scope import _IdentityScope
 
 pytestmark = pytest.mark.unit
 
@@ -135,3 +136,46 @@ def test_missing_report_store_keeps_not_found() -> None:
         report_store=None,
     )
     assert resolved.resolved_via == "selected_run_id_not_found"
+
+
+@pytest.mark.asyncio
+async def test_corrupt_report_catalog_returns_evidence_payload(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import bioetl.interfaces.http._health_server_control_plane_evidence_routing as routing
+
+    scope = _scope(resolved_via="selected_run_id_not_found")
+
+    async def _resolved(*_args: object, **_kwargs: object) -> tuple[object, None]:
+        return scope, None
+
+    scheduled: list[str] = []
+
+    async def _to_thread(fn, /, *args, **kwargs):  # type: ignore[no-untyped-def]
+        scheduled.append(fn.__name__)
+        return fn(*args, **kwargs)
+
+    monkeypatch.setattr(routing, "resolve_evidence_scope", _resolved)
+    monkeypatch.setattr(routing.asyncio, "to_thread", _to_thread)
+    monkeypatch.setattr(
+        routing,
+        "verified_report_identity_for_run",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            ValueError("Persisted selector report is unreadable")
+        ),
+    )
+    payload = await _service_payload(
+        SimpleNamespace(  # type: ignore[arg-type]
+            _control_plane_evidence_service=object(),
+            _run_report_store=object(),
+        ),
+        {},
+        endpoint="manifest-validation",
+    )
+    assert scheduled == ["reconcile_manifest_validation_scope"]
+    assert payload["endpoint"] == "manifest-validation"
+    assert payload["status"] == "UNKNOWN"
+    rows = payload["rows"]
+    assert isinstance(rows, list)
+    assert rows[0]["reason"] == "manifest_parse_error"
+    assert rows[0]["check"] == "parse"

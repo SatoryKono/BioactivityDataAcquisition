@@ -115,3 +115,55 @@ def test_publication_hook_forwards_the_saved_manifest(
     assert ledger is None
     assert seen["manifest"] is manifest
     assert seen["source_base"] == store.base_path
+
+
+def test_live_root_write_error_does_not_fail_the_saved_manifest(
+    monkeypatch, tmp_path: Path
+) -> None:
+    from bioetl.infrastructure.storage.atomic import AtomicWriteError
+
+    manifest = _manifest()
+    store = SimpleNamespace(base_path=tmp_path / "run_manifest")
+    module = "bioetl.composition.runtime_builders.run_manifest_builder"
+    monkeypatch.setattr(f"{module}.create_manifest_store", lambda _inputs: store)
+    monkeypatch.setattr(f"{module}.maybe_create_ledger_service", lambda **_kwargs: None)
+    monkeypatch.setattr(
+        f"{module}.emit_replay_reconstructability_metric", lambda **_kwargs: None
+    )
+    monkeypatch.setattr(f"{module}.create_manifest_record", lambda **_kwargs: manifest)
+    monkeypatch.setattr(
+        f"{module}.register_pipeline_manifest_location_soft", lambda **_kwargs: None
+    )
+    monkeypatch.setattr(
+        f"{module}._require_cached_bronze_snapshots", lambda **_kwargs: None
+    )
+    monkeypatch.setattr(
+        f"{module}.create_control_plane_refs_for_manifest",
+        lambda **_kwargs: "refs",
+    )
+    monkeypatch.setattr(
+        f"{module}.publish_new_run_manifest_to_live_root",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            AtomicWriteError(tmp_path, "read-only")
+        ),
+    )
+    context = SimpleNamespace(
+        reproducibility_context=SimpleNamespace(
+            strict_exact_replay_supported=False,
+            required_persistence_profile="degraded_observable",
+        ),
+        contract_identity=None,
+    )
+    refs, ledger = _publish_manifest_and_refs(
+        ctx=SimpleNamespace(exact_replay=False),  # type: ignore[arg-type]
+        inputs=SimpleNamespace(  # type: ignore[arg-type]
+            settings=SimpleNamespace(data_dir=tmp_path),
+            observability=SimpleNamespace(metrics=None),
+        ),
+        ledger_enabled=False,
+        manifest_context=context,  # type: ignore[arg-type]
+        manifest_create_request=SimpleNamespace(),  # type: ignore[arg-type]
+        provenance=SimpleNamespace(),  # type: ignore[arg-type]
+    )
+    assert refs == "refs"
+    assert ledger is None
