@@ -555,6 +555,59 @@ _CORRUPT_REASONS = frozenset(
 _LOCATION_REASONS = frozenset({"artifact_missing", "location_invalid"})
 _MANIFEST_CODES = frozenset({"manifest_not_recorded"})
 
+_REPLAY_FAIL_LABELS: tuple[tuple[str, str], ...] = (
+    ("missing_location", "missing location via replay_checks"),
+    ("corrupt_objects", "corrupt objects via replay_checks"),
+    ("missing_manifest", "missing manifest via replay_checks"),
+    ("other_failed", "replay_checks failed"),
+    ("other_unknown", "replay_checks unknown"),
+)
+
+
+def _classify_replay_check(item: Mapping[str, Any]) -> tuple[str, str] | None:
+    """Map one replay_checks row to (bucket, code) for #12686 diagnostics."""
+    result = item.get("result")
+    if result not in {"fail", "unknown"}:
+        return None
+    code = str(item.get("code") or "?")
+    reason = str(item.get("reason") or "")
+    if code in _MANIFEST_CODES or reason == "manifest_not_recorded":
+        return "missing_manifest", code
+    if reason in _LOCATION_REASONS:
+        return "missing_location", code
+    if reason in _CORRUPT_REASONS:
+        return "corrupt_objects", code
+    if result == "fail":
+        return "other_failed", code
+    return "other_unknown", code
+
+
+def _bucket_replay_checks(checks: Sequence[Any]) -> dict[str, list[str]]:
+    """Group fail/unknown replay_checks codes by diagnostic bucket."""
+    buckets: dict[str, list[str]] = {key: [] for key, _ in _REPLAY_FAIL_LABELS}
+    for item in checks:
+        if not isinstance(item, Mapping):
+            continue
+        classified = _classify_replay_check(item)
+        if classified is None:
+            continue
+        bucket, code = classified
+        buckets[bucket].append(code)
+    return buckets
+
+
+def _emit_replay_check_bucket_fails(
+    state: _VerificationState,
+    *,
+    run_id: str,
+    buckets: Mapping[str, Sequence[str]],
+) -> None:
+    """Emit one FAIL per non-empty diagnostic bucket (stable label order)."""
+    for key, label in _REPLAY_FAIL_LABELS:
+        codes = buckets.get(key) or ()
+        if codes:
+            state.fail(f"FAIL: run_id={run_id!r} {label}: {sorted(codes)}")
+
 
 def _verify_replay_check_results(
     state: _VerificationState,
@@ -570,52 +623,9 @@ def _verify_replay_check_results(
     if not isinstance(checks, list):
         state.fail(f"FAIL: run_id={run_id!r} missing replay_checks list")
         return
-    missing_location: list[str] = []
-    corrupt_objects: list[str] = []
-    missing_manifest: list[str] = []
-    other_failed: list[str] = []
-    other_unknown: list[str] = []
-    for item in checks:
-        if not isinstance(item, Mapping):
-            continue
-        result = item.get("result")
-        if result not in {"fail", "unknown"}:
-            continue
-        code = str(item.get("code") or "?")
-        reason = str(item.get("reason") or "")
-        if code in _MANIFEST_CODES or reason == "manifest_not_recorded":
-            missing_manifest.append(code)
-        elif reason in _LOCATION_REASONS:
-            missing_location.append(code)
-        elif reason in _CORRUPT_REASONS:
-            corrupt_objects.append(code)
-        elif result == "fail":
-            other_failed.append(code)
-        else:
-            other_unknown.append(code)
-    if missing_location:
-        state.fail(
-            f"FAIL: run_id={run_id!r} missing location via replay_checks: "
-            f"{sorted(missing_location)}"
-        )
-    if corrupt_objects:
-        state.fail(
-            f"FAIL: run_id={run_id!r} corrupt objects via replay_checks: "
-            f"{sorted(corrupt_objects)}"
-        )
-    if missing_manifest:
-        state.fail(
-            f"FAIL: run_id={run_id!r} missing manifest via replay_checks: "
-            f"{sorted(missing_manifest)}"
-        )
-    if other_failed:
-        state.fail(
-            f"FAIL: run_id={run_id!r} replay_checks failed: {sorted(other_failed)}"
-        )
-    if other_unknown:
-        state.fail(
-            f"FAIL: run_id={run_id!r} replay_checks unknown: {sorted(other_unknown)}"
-        )
+    _emit_replay_check_bucket_fails(
+        state, run_id=run_id, buckets=_bucket_replay_checks(checks)
+    )
 
 
 def _verify_ready_selected_run_payload(
