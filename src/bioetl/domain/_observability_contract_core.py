@@ -260,9 +260,10 @@ def _extract_path_basename(value: str) -> str:
 
 def _sanitize_pipeline_label(value: str) -> str:
     normalized = _VERSIONED_PIPELINE_SUFFIX_RE.sub("", value.strip())
-    normalized = normalized.replace(".", "_").replace("-", "_").replace(" ", "_")
-    normalized = re.sub(r"[\W]+", "_", normalized, flags=re.ASCII)
-    normalized = re.sub(r"_+", "_", normalized).strip("_").lower()
+    # BOLT OPTIMIZATION:
+    # A single unified regex consolidating non-word characters and underscores
+    # is significantly faster than multiple chained .replace() and re.sub() passes.
+    normalized = re.sub(r"[\W_]+", "_", normalized, flags=re.ASCII).strip("_").lower()
     return normalized
 
 
