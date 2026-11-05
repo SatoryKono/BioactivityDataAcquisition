@@ -3,7 +3,6 @@
 version: 1.0.0
 provider: composite
 entity: publication
-expected_normalization_profile_hash: 2a6a315166842f703e7831895d9608164a9ee86ebcb18cb63ec839d1ed28dc2c
 pipeline:
   pipeline_name: composite_publication
   provider: composite

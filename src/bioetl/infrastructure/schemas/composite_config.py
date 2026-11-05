@@ -183,6 +183,13 @@ class CompositeConfigSchema(BaseModel):
         default_factory=CrossValidationSchema,
         description="Cross-validation configuration for pre-merge checks",
     )
+    expected_normalization_profile_hash: str | None = Field(
+        default=None,
+        description=(
+            "Optional expected DAG normalization_profile_hash checked during "
+            "composite preflight before merge"
+        ),
+    )
 
     @model_validator(mode="after")
     def validate_domain_invariants(self) -> Self:
@@ -210,6 +217,7 @@ class CompositeConfigSchema(BaseModel):
             dependencies=tuple(d.to_domain() for d in self.dependencies),
             enrichers=tuple(e.to_domain() for e in self.enrichers),
             merge=self.merge.to_domain(),
+            expected_normalization_profile_hash=self.expected_normalization_profile_hash,
             dq=self.dq_overrides.to_domain(),
             execution=self.execution.to_domain(),
             lineage=self.lineage.to_domain(),

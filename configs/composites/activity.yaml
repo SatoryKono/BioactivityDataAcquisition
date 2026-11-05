@@ -30,6 +30,7 @@
 composite:
   name: composite_activity
   version: "1.0.0"
+  expected_normalization_profile_hash: 8ad08444cd82f6cec242fe1a429d38011c24990af0e875094f49297aac37e993
   normalized_anchor_policy:
     pubchem_compound:
       join_boundary:

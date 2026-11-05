@@ -719,20 +719,19 @@ class TestCompositePreflightValidationServiceWithSchemas:
     def test_validate_expected_normalization_profile_hash_match(
         self, validator: CompositePreflightValidationService
     ) -> None:
-        """Validation passes when expected_normalization_profile_hash matches the actual hash."""
+        """Validation passes when YAML-loaded expected hash matches the runtime DAG hash."""
+        from bioetl.application.composite.helpers.preflight_normalization_hash import (
+            get_expected_normalization_profile_hash,
+        )
         from bioetl.infrastructure.config.composite_config_api import (
             load_composite_config,
         )
 
         config = load_composite_config("activity")
-        # Override the expected hash with the valid one computed from current source profiles
+        assert config.expected_normalization_profile_hash is not None
         source_profiles = validator._load_source_profiles(config)
-        from bioetl.application.composite.helpers.preflight_normalization_hash import (
-            get_expected_normalization_profile_hash,
-        )
-
         actual_hash = get_expected_normalization_profile_hash(source_profiles)
-        object.__setattr__(config, "expected_normalization_profile_hash", actual_hash)
+        assert config.expected_normalization_profile_hash == actual_hash
 
         result = validator.validate(config, fail_on_error=False)
         assert not any(
@@ -748,6 +747,7 @@ class TestCompositePreflightValidationServiceWithSchemas:
         )
 
         config = load_composite_config("activity")
+        assert config.expected_normalization_profile_hash is not None
         object.__setattr__(
             config, "expected_normalization_profile_hash", "invalid_hash_value"
         )

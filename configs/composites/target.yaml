@@ -35,6 +35,7 @@
 composite:
   name: composite_target
   version: "1.3.0"
+  expected_normalization_profile_hash: d7040c0675476e0555e00b49c53f9d1ceb71120489ed1c4af06d1bbb028014c0
   normalized_anchor_policy:
     uniprot_idmapping:
       join_boundary:

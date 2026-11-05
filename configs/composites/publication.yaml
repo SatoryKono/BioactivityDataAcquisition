@@ -68,6 +68,7 @@
 composite:
   name: composite_publication
   version: "1.1.0"
+  expected_normalization_profile_hash: 2a6a315166842f703e7831895d9608164a9ee86ebcb18cb63ec839d1ed28dc2c
   normalized_anchor_policy:
     pubchem_compound:
       join_boundary:

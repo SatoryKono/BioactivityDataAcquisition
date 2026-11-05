@@ -203,6 +203,19 @@
         "cross_validation": {
           "$ref": "#/$defs/CrossValidationSchema",
           "description": "Cross-validation configuration for pre-merge checks"
+        },
+        "expected_normalization_profile_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional expected DAG normalization_profile_hash checked during composite preflight before merge",
+          "title": "Expected Normalization Profile Hash"
         }
       },
       "required": [

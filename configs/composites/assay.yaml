@@ -26,6 +26,7 @@
 composite:
   name: composite_assay
   version: "1.0.0"
+  expected_normalization_profile_hash: 21e8642d7f28f000c1c824d5a689bc83454341d7ed0b2d0183c324814fbcc642
   normalized_anchor_policy:
     pubchem_compound:
       join_boundary:
