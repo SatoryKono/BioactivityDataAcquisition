@@ -119,6 +119,9 @@ EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
 CHECK_DOC_LINKS_GUARDRAILS_TEST = (
     "tests/architecture/test_check_doc_links_guardrails.py"
 )
+ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
+    "tests/architecture/test_root_hygiene_review_registry.py"
+)
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     **dict.fromkeys(
@@ -128,7 +131,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             ".vscode/settings.json",
         ),
         (
-            "tests/architecture/test_root_hygiene_review_registry.py",
+            ROOT_HYGIENE_REVIEW_REGISTRY_TEST,
             "tests/architecture/test_root_hygiene_workflow.py",
         ),
     ),
@@ -363,10 +366,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/unit/application/services/run_reports/test_composite_report.py",
         ),
     ),
-    # pack-v2.1 stage handoffs are working_report inventory surfaces (not runtime code).
+    # pack-v2.1 stage handoffs and their evidence logs are inventory surfaces
+    # (not runtime code). Unmapped logs fail shadow-compare closed.
     **dict.fromkeys(
         (
             "reports/audit/pack-v2.1/P02-ddd-domain.md",
+            "reports/audit/pack-v2.1/P02-invariant-runs.log",
+            "reports/audit/pack-v2.1/domain-pylint-duplicate-code-scan.log",
+            "reports/audit/pack-v2.1/domain-vulture-dead-code-scan.log",
             "reports/audit/pack-v2.1/P05-interfaces-contracts.md",
         ),
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
@@ -714,6 +721,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "docs/filters/inventory-baseline.md",
         ),
         ("tests/architecture/test_silver_filter_boundary_inventory.py",),
+    ),
+    ".github/root-allowlist.txt": (
+        ROOT_HYGIENE_REVIEW_REGISTRY_TEST,
+        "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
+    ),
+    ".vulture_whitelist.py": (
+        "tests/architecture/test_layer_dependencies.py",
+        ROOT_HYGIENE_REVIEW_REGISTRY_TEST,
     ),
 }
 
