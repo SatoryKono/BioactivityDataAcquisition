@@ -9,9 +9,10 @@ import argparse
 import json
 import logging
 import sys
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
+from uuid import UUID
 
 from bioetl.application.services.evidence_location.registration import (
     EvidenceLocationRegistrationService,
@@ -22,6 +23,9 @@ from bioetl.application.services.evidence_location.registration_models import (
     EvidenceLocationVerifyOutcome,
 )
 from bioetl.application.services.run_reports import DEFAULT_REPORT_ROOT
+from bioetl.application.services.run_reports.evidence_location_paths import (
+    default_evidence_root_alias_registry,
+)
 from bioetl.domain.control_plane.run_evidence_location import (
     DEFAULT_EVIDENCE_ROOT_ALIAS,
     EvidenceLocationInvalidError,
@@ -29,8 +33,18 @@ from bioetl.domain.control_plane.run_evidence_location import (
     RunEvidenceLocation,
     build_run_evidence_location,
 )
+from bioetl.domain.types import RunID
+from bioetl.infrastructure.control_plane.evidence_location_path_safety import (
+    assert_path_within_trusted_base,
+)
 from bioetl.infrastructure.control_plane.file_evidence_location_store import (
     FileEvidenceLocationStore,
+)
+from bioetl.infrastructure.control_plane.file_run_manifest_store import (
+    FileRunManifestStore,
+)
+from bioetl.infrastructure.control_plane.file_workflow_manifest_store import (
+    FileWorkflowManifestStore,
 )
 from scripts.engineering.common.repo_paths import (
     REPO_ROOT,
@@ -41,7 +55,15 @@ from scripts.engineering.common.repo_paths import (
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
-_REJECT_CODES = frozenset({"conflict", "invalid", "error"})
+_REJECT_CODES = frozenset(
+    {
+        "conflict",
+        "invalid",
+        "error",
+        "binding_mismatch",
+        "location_invalid",
+    }
+)
 _VERIFY_REJECT_CODES = frozenset(
     {
         "invalid",
@@ -114,6 +136,8 @@ def _empty_stats() -> dict[str, int]:
         "conflict": 0,
         "invalid": 0,
         "error": 0,
+        "binding_mismatch": 0,
+        "location_invalid": 0,
     }
 
 
@@ -165,6 +189,116 @@ def _ownership_key(location: RunEvidenceLocation) -> tuple[str, str, str]:
     return (location.kind.value, location.owner, location.run_id)
 
 
+def _runtime_source_from_mapping(payload: Mapping[str, object]) -> str | None:
+    raw = payload.get("runtime_source_id")
+    if raw is None:
+        return None
+    text = str(raw).strip().lower()
+    return text or None
+
+
+def _preflight_source_anchors(
+    location: RunEvidenceLocation,
+    *,
+    alias_base: Path,
+) -> EvidenceLocationRegistrationOutcome | None:
+    """Reject targets whose on-disk run anchors do not match the locator claim.
+
+    Checks (dry-run and apply):
+    - ``relative_data_root`` resolves under the trusted alias base and exists
+    - the run_id has a control-plane manifest under that data root
+    - manifest owner matches the locator owner
+    - manifest-recorded ``runtime_source_id`` matches the locator claim
+    """
+    registry = default_evidence_root_alias_registry(dashboard_data_root=alias_base)
+    try:
+        candidate = registry.resolve_data_root(
+            root_alias=location.root_alias,
+            relative_data_root=location.relative_data_root,
+        )
+        data_root = assert_path_within_trusted_base(
+            candidate,
+            trusted_base=alias_base,
+            field_name="relative_data_root",
+        )
+    except EvidenceLocationInvalidError as exc:
+        return EvidenceLocationRegistrationOutcome(
+            code="location_invalid",
+            detail=str(exc),
+        )
+
+    if not data_root.is_dir():
+        return EvidenceLocationRegistrationOutcome(
+            code="location_invalid",
+            detail="source_data_root_missing",
+        )
+
+    try:
+        run_uuid = UUID(str(location.run_id))
+    except ValueError:
+        return EvidenceLocationRegistrationOutcome(
+            code="location_invalid",
+            detail="run_id_not_uuid",
+        )
+    run_id = RunID(run_uuid)
+    control = data_root / "output" / "control"
+
+    if location.kind is EvidenceLocationKind.WORKFLOW:
+        found = FileWorkflowManifestStore(
+            base_path=control / "workflow_manifest"
+        ).get_by_run_id(run_id)
+        if found is None:
+            return EvidenceLocationRegistrationOutcome(
+                code="location_invalid",
+                detail="source_run_missing",
+            )
+        if str(found.workflow_name).strip() != location.owner:
+            return EvidenceLocationRegistrationOutcome(
+                code="binding_mismatch",
+                detail=(
+                    f"owner_expected={location.owner} owner_found={found.workflow_name}"
+                ),
+            )
+        anchored_source = _runtime_source_from_mapping(
+            found.launch_context
+        ) or _runtime_source_from_mapping(found.defaults)
+    else:
+        found_pipeline = FileRunManifestStore(
+            base_path=control / "run_manifest"
+        ).get_by_run_id(run_id)
+        if found_pipeline is None:
+            return EvidenceLocationRegistrationOutcome(
+                code="location_invalid",
+                detail="source_run_missing",
+            )
+        if str(found_pipeline.pipeline_name).strip() != location.owner:
+            return EvidenceLocationRegistrationOutcome(
+                code="binding_mismatch",
+                detail=(
+                    f"owner_expected={location.owner} "
+                    f"owner_found={found_pipeline.pipeline_name}"
+                ),
+            )
+        anchored_source = _runtime_source_from_mapping(
+            found_pipeline.launch_context
+        ) or _runtime_source_from_mapping(found_pipeline.runtime_config)
+
+    if anchored_source is None:
+        return EvidenceLocationRegistrationOutcome(
+            code="location_invalid",
+            detail="runtime_source_anchor_missing",
+        )
+    if anchored_source != location.runtime_source_id:
+        return EvidenceLocationRegistrationOutcome(
+            code="binding_mismatch",
+            detail=(
+                f"runtime_source_expected={location.runtime_source_id} "
+                f"runtime_source_found={anchored_source}"
+            ),
+        )
+    return None
+
+
 def _classify_dry_run(
     service: EvidenceLocationRegistrationService,
     request: EvidenceLocationRegisterRequest,
@@ -195,6 +329,8 @@ def _classify_dry_run(
         return EvidenceLocationRegistrationOutcome(code="already_identical")
     if verified.code in _VERIFY_REJECT_CODES:
         mapped = "invalid" if verified.code == "invalid" else "conflict"
+        if verified.code in {"binding_mismatch", "location_invalid"}:
+            mapped = verified.code
         return EvidenceLocationRegistrationOutcome(
             code=mapped,
             detail=verified.detail or verified.code,
@@ -208,9 +344,12 @@ def _classify_dry_run(
 def execute_migration(
     targets: Sequence[MigrationTarget],
     report_root: Path,
+    *,
+    data_root: Path,
     dry_run: bool = True,
 ) -> dict[str, int]:
-    """Execute the migration plan."""
+    """Execute the migration plan with source-anchor preflight."""
+    alias_base = Path(data_root).resolve(strict=False)
     store = FileEvidenceLocationStore(report_root=report_root)
     service = EvidenceLocationRegistrationService(locations=store)
     stats = _empty_stats()
@@ -225,6 +364,17 @@ def execute_migration(
                 target=target,
                 code=validated.code,
                 detail=validated.detail,
+                planned=dry_run,
+            )
+            continue
+
+        preflight = _preflight_source_anchors(validated, alias_base=alias_base)
+        if preflight is not None:
+            _record_outcome(
+                stats,
+                target=target,
+                code=preflight.code,
+                detail=preflight.detail,
                 planned=dry_run,
             )
             continue
@@ -278,6 +428,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Path to the reports root directory",
     )
     parser.add_argument(
+        "--data-root",
+        type=Path,
+        required=True,
+        help=(
+            "Trusted dashboard_data alias base used to re-check source run "
+            "anchors before dry-run/apply registration"
+        ),
+    )
+    parser.add_argument(
         "--apply",
         action="store_true",
         help="Actually apply changes instead of dry-run",
@@ -288,6 +447,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         targets_path = confined_io_path(args.targets, root=REPO_ROOT)
         report_root = confined_io_path(args.report_root, root=REPO_ROOT)
+        data_root = confined_io_path(args.data_root, root=REPO_ROOT)
     except ValueError as exc:
         logger.error("%s", exc)
         return 1
@@ -311,6 +471,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     stats = execute_migration(
         targets=targets,
         report_root=report_root,
+        data_root=data_root,
         dry_run=not args.apply,
     )
 
