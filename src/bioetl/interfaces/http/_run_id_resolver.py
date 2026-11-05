@@ -131,8 +131,9 @@ def _current_catalog(manifests: Sequence[object]) -> tuple[object, ...]:
     ``get_by_run_id`` indexes. Two current manifests for one run id are left
     intact so the caller can refuse to choose.
     """
-    if manifests and all(isinstance(item, RunManifest) for item in manifests):
-        return current_run_manifests(tuple(manifests))
+    typed = tuple(item for item in manifests if isinstance(item, RunManifest))
+    if typed and len(typed) == len(manifests):
+        return current_run_manifests(typed)
     return tuple(manifests)
 
 
