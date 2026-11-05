@@ -731,6 +731,20 @@ def test_shadow_compare_routes_silver_filter_inventory_baseline() -> None:
     ]
 
 
+def test_shadow_compare_routes_root_vulture_whitelist_and_allowlist() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [".github/root-allowlist.txt", ".vulture_whitelist.py"],
+        repo_root=root,
+    )
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == {
+        "tests/architecture/test_layer_dependencies.py",
+        "tests/architecture/test_root_hygiene_review_registry.py",
+        "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
+    }
+
+
 def test_shadow_compare_routes_sec003_audit_to_metadata_parser() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(

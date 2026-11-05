@@ -119,6 +119,9 @@ EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
 CHECK_DOC_LINKS_GUARDRAILS_TEST = (
     "tests/architecture/test_check_doc_links_guardrails.py"
 )
+ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
+    "tests/architecture/test_root_hygiene_review_registry.py"
+)
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     **dict.fromkeys(
@@ -128,7 +131,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             ".vscode/settings.json",
         ),
         (
-            "tests/architecture/test_root_hygiene_review_registry.py",
+            ROOT_HYGIENE_REVIEW_REGISTRY_TEST,
             "tests/architecture/test_root_hygiene_workflow.py",
         ),
     ),
@@ -718,6 +721,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "docs/filters/inventory-baseline.md",
         ),
         ("tests/architecture/test_silver_filter_boundary_inventory.py",),
+    ),
+    ".github/root-allowlist.txt": (
+        ROOT_HYGIENE_REVIEW_REGISTRY_TEST,
+        "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
+    ),
+    ".vulture_whitelist.py": (
+        "tests/architecture/test_layer_dependencies.py",
+        ROOT_HYGIENE_REVIEW_REGISTRY_TEST,
     ),
 }
 

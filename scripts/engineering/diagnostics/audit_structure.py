@@ -117,6 +117,7 @@ ALLOWED_PYTHON_PATHS: tuple[str, ...] = (
 ALLOWED_ROOT_PY_FILES: set[str] = {
     "setup.py",
     "conftest.py",
+    ".vulture_whitelist.py",
 }
 CATALOG_ALLOWED_PYTHON_ROOT_SECTIONS: tuple[str, ...] = (
     "root_tooling_roots",
