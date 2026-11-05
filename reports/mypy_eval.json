@@ -1,0 +1,34 @@
+{
+  "cold": {
+    "iteration": "cold",
+    "time_s": 39.19034290313721,
+    "returncode": 0,
+    "stdout_lines": 2,
+    "stderr_lines": 0,
+    "normalized_diagnostics": [
+      "",
+      "pyproject.toml: note: unused section(s): module = ['boto3.*', 'botocore', 'botocore.*', 'orjson.*', 'psutil.*', 's3transfer', 's3transfer.*', 'vcr.*', 'zstandard.*']"
+    ],
+    "diagnostics_hash": -5516890406151826348,
+    "cache_manifest": "47b04c584d1f9b9c8d144e1d3bdf9bd40f2ff497fc55a5d316e4e107b31b1d75"
+  },
+  "warm": {
+    "iteration": "warm",
+    "time_s": 39.528785943984985,
+    "returncode": 0,
+    "stdout_lines": 2,
+    "stderr_lines": 0,
+    "normalized_diagnostics": [
+      "",
+      "pyproject.toml: note: unused section(s): module = ['boto3.*', 'botocore', 'botocore.*', 'orjson.*', 'psutil.*', 's3transfer', 's3transfer.*', 'vcr.*', 'zstandard.*']"
+    ],
+    "diagnostics_hash": -5516890406151826348,
+    "cache_manifest": "f763c35419fc7a148a9d1a8420d9a16e9a2b3eacc8454fe974b99e82e8804cdd"
+  },
+  "comparison": {
+    "diagnostics_match": true,
+    "cold_time": 39.19034290313721,
+    "warm_time": 39.528785943984985,
+    "speedup": 0.9914380613326356
+  }
+}
