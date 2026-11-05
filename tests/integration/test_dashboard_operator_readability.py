@@ -610,9 +610,10 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
     assert donor_target["root_selector"] == donor_target["uql"].removeprefix(
         'parse-json | jsonata "'
     ).removesuffix('"')
-    assert "$exists(stage_diagnostics) ? stage_diagnostics : []" in donor_target[
-        "root_selector"
-    ]
+    assert (
+        "$exists(stage_diagnostics) ? stage_diagnostics : []"
+        in donor_target["root_selector"]
+    )
     assert "QUERY ERROR" not in donor_target["root_selector"]
     assert "removals[outcome=" in donor_target["uql"]
     assert "$s.tracking = 'full' ? 0" in donor_target["uql"]
@@ -629,7 +630,9 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
     assert "$substring($t, 0, 10)" in incident_selector
     assert "($end - $start) / 1000" not in incident_selector
     assert "$end >= $start ? $end - $start : null" in incident_selector
-    duration = next(item for item in get_dashboard_panels(incident) if item.get("id") == 9463)
+    duration = next(
+        item for item in get_dashboard_panels(incident) if item.get("id") == 9463
+    )
     assert duration["targets"][0].get("panelId") == 2101
     assert "pipeline-run-report" not in json.dumps(dq_panel["targets"])
     include = next(
