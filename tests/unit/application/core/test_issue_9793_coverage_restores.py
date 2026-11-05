@@ -269,7 +269,7 @@ def test_snapshot_summary_indexes_and_detects_hash_conflicts() -> None:
 
 
 def test_require_workflow_result_rejects_wrong_type() -> None:
-    from bioetl.application.services.workflow.workflow_runner_service import (
+    from bioetl.application.services.workflow.workflow_runner_finalize import (
         _require_workflow_result,
     )
 
