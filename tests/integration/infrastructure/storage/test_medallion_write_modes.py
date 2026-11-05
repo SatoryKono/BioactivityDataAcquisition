@@ -1,22 +1,52 @@
+"""Runtime evidence: Medallion write-mode matrix on real Delta writers."""
+
+from __future__ import annotations
+
+import datetime
+from pathlib import Path
+from typing import Any
+
 import pyarrow as pa
 import pytest
-from pathlib import Path
-import datetime
 from deltalake import DeltaTable
-from pandera.pandas import DataFrameSchema, Column
+from pandera.pandas import Column, DataFrameSchema
 
-from bioetl.infrastructure.storage.silver_writer import SilverWriter
-from bioetl.infrastructure.storage.silver.runtime_helpers import (
-    SilverWriterRuntimeServicesRequest,
-)
-from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.domain.ports import LoggerPort
+from bioetl.domain.transformations import generate_content_hash
 from bioetl.infrastructure.storage.gold.runtime_helpers import (
     build_gold_writer_runtime_services,
 )
+from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from tests.helpers.clock import fixed_test_clock
-from bioetl.domain.ports import LoggerPort
-from bioetl.domain.transformations import generate_content_hash
-from typing import Any
+
+_SILVER_META_FIELDS: tuple[tuple[str, pa.DataType], ...] = (
+    ("content_hash", pa.string()),
+    ("_run_id", pa.string()),
+    ("_run_type", pa.string()),
+    ("_source_batch_id", pa.string()),
+    ("_ingestion_ts", pa.string()),
+)
+
+_SILVER_META_VALUES: dict[str, str] = {
+    "_run_id": "run-id",
+    "_run_type": "incremental",
+    "_source_batch_id": "batch-1",
+    "_ingestion_ts": "2026-01-01T00:00:00+00:00",
+}
+
+_SCD2_CONFIG: dict[str, object] = {
+    "valid_from_col": "valid_from",
+    "valid_to_col": "valid_to",
+    "is_current_col": "is_current",
+    "identity_cols": ["id"],
+    "update_cols": ["val"],
+    "scd_type": 2,
+    "business_key": "id",
+}
 
 
 class MockLogger(LoggerPort):
@@ -37,6 +67,33 @@ class MockLogger(LoggerPort):
 
     def bind(self, **kwargs: Any) -> LoggerPort:
         return self
+
+
+def _silver_schema(*extra: tuple[str, pa.DataType]) -> pa.Schema:
+    fields: list[tuple[str, pa.DataType]] = [("id", pa.string()), ("val", pa.string())]
+    fields.extend(extra)
+    fields.extend(_SILVER_META_FIELDS)
+    return pa.schema(fields)
+
+
+def _silver_record(record_id: str, val: str, **extra: str) -> dict[str, str]:
+    payload = {"id": record_id, "val": val, **extra}
+    return {
+        "id": record_id,
+        "val": val,
+        **extra,
+        "content_hash": str(generate_content_hash(payload, "test")),
+        **_SILVER_META_VALUES,
+    }
+
+
+def _gold_record(record_id: str, val: str) -> dict[str, str]:
+    payload = {"id": record_id, "val": val}
+    return {
+        "id": record_id,
+        "val": val,
+        "content_hash": str(generate_content_hash(payload, "test")),
+    }
 
 
 @pytest.fixture
@@ -119,33 +176,9 @@ async def test_gold_writer_rejects_invalid_mode(
 async def test_silver_writer_allows_append_and_merge(
     silver_writer: SilverWriter, temp_delta_path: str
 ) -> None:
-    schema = pa.schema(
-        [
-            ("id", pa.string()),
-            ("val", pa.string()),
-            ("content_hash", pa.string()),
-            ("_run_id", pa.string()),
-            ("_run_type", pa.string()),
-            ("_source_batch_id", pa.string()),
-            ("_ingestion_ts", pa.string()),
-        ]
-    )
+    schema = _silver_schema()
+    records = [_silver_record("1", "A")]
 
-    def _record(record_id: str, val: str) -> dict[str, str]:
-        payload = {"id": record_id, "val": val}
-        return {
-            "id": record_id,
-            "val": val,
-            "content_hash": str(generate_content_hash(payload, "test")),
-            "_run_id": "run-id",
-            "_run_type": "incremental",
-            "_source_batch_id": "batch-1",
-            "_ingestion_ts": "2026-01-01T00:00:00+00:00",
-        }
-
-    records = [_record("1", "A")]
-
-    # Write append
     await silver_writer.write_silver(
         table_name="test_silver",
         records=records,
@@ -153,12 +186,9 @@ async def test_silver_writer_allows_append_and_merge(
         schema=schema,
         mode="append",
     )
-
-    records_update = [_record("1", "B")]
-    # Write merge
     await silver_writer.write_silver(
         table_name="test_silver",
-        records=records_update,
+        records=[_silver_record("1", "B")],
         primary_keys=["id"],
         schema=schema,
         mode="merge",
@@ -166,7 +196,6 @@ async def test_silver_writer_allows_append_and_merge(
 
     df = DeltaTable(f"{temp_delta_path}/test_silver").to_pandas()
     assert len(df) == 1
-    # Check that merge updated the value
     assert df["val"].iloc[0] == "B"
 
 
@@ -174,30 +203,16 @@ async def test_silver_writer_allows_append_and_merge(
 async def test_gold_writer_allows_append_and_overwrite(
     gold_writer: GoldWriter, gold_schema: DataFrameSchema, temp_delta_path: str
 ) -> None:
-    def _record(record_id: str, val: str) -> dict[str, str]:
-        payload = {"id": record_id, "val": val}
-        return {
-            "id": record_id,
-            "val": val,
-            "content_hash": str(generate_content_hash(payload, "test")),
-        }
-
-    records = [_record("1", "A")]
-
-    # Write append
     await gold_writer.write_gold(
         table_name="test_gold_write_modes",
-        records=records,
+        records=[_gold_record("1", "A")],
         primary_keys=["id"],
         schema=gold_schema,
         mode="append",
     )
-
-    records_update = [_record("1", "B"), _record("2", "C")]
-    # Write overwrite
     await gold_writer.write_gold(
         table_name="test_gold_write_modes",
-        records=records_update,
+        records=[_gold_record("1", "B"), _gold_record("2", "C")],
         primary_keys=["id"],
         schema=gold_schema,
         mode="overwrite",
@@ -214,75 +229,20 @@ async def test_gold_writer_allows_append_and_overwrite(
 async def test_silver_writer_schema_drift(
     silver_writer: SilverWriter, temp_delta_path: str
 ) -> None:
-    schema = pa.schema(
-        [
-            ("id", pa.string()),
-            ("val", pa.string()),
-            ("content_hash", pa.string()),
-            ("_run_id", pa.string()),
-            ("_run_type", pa.string()),
-            ("_source_batch_id", pa.string()),
-            ("_ingestion_ts", pa.string()),
-        ]
-    )
-
-    def _record(record_id: str, val: str) -> dict[str, str]:
-        payload = {"id": record_id, "val": val}
-        return {
-            "id": record_id,
-            "val": val,
-            "content_hash": str(generate_content_hash(payload, "test")),
-            "_run_id": "run-id",
-            "_run_type": "incremental",
-            "_source_batch_id": "batch-1",
-            "_ingestion_ts": "2026-01-01T00:00:00+00:00",
-        }
-
-    records = [_record("1", "A")]
-
-    # Write append
     await silver_writer.write_silver(
         table_name="test_silver_drift",
-        records=records,
+        records=[_silver_record("1", "A")],
         primary_keys=["id"],
-        schema=schema,
+        schema=_silver_schema(),
         mode="append",
     )
-
-    schema_v2 = pa.schema(
-        [
-            ("id", pa.string()),
-            ("val", pa.string()),
-            ("new_field", pa.string()),
-            ("content_hash", pa.string()),
-            ("_run_id", pa.string()),
-            ("_run_type", pa.string()),
-            ("_source_batch_id", pa.string()),
-            ("_ingestion_ts", pa.string()),
-        ]
-    )
-
-    def _record_v2(record_id: str, val: str, new_field: str) -> dict[str, str]:
-        payload = {"id": record_id, "val": val, "new_field": new_field}
-        return {
-            "id": record_id,
-            "val": val,
-            "new_field": new_field,
-            "content_hash": str(generate_content_hash(payload, "test")),
-            "_run_id": "run-id",
-            "_run_type": "incremental",
-            "_source_batch_id": "batch-1",
-            "_ingestion_ts": "2026-01-01T00:00:00+00:00",
-        }
-
-    records_v2 = [_record_v2("2", "B", "C")]
 
     with pytest.raises(Exception):
         await silver_writer.write_silver(
             table_name="test_silver_drift",
-            records=records_v2,
+            records=[_silver_record("2", "B", new_field="C")],
             primary_keys=["id"],
-            schema=schema_v2,
+            schema=_silver_schema(("new_field", pa.string())),
             mode="append",
         )
 
@@ -291,74 +251,18 @@ async def test_silver_writer_schema_drift(
 async def test_silver_writer_schema_drift_evolve(
     silver_writer: SilverWriter, temp_delta_path: str
 ) -> None:
-    schema = pa.schema(
-        [
-            ("id", pa.string()),
-            ("val", pa.string()),
-            ("content_hash", pa.string()),
-            ("_run_id", pa.string()),
-            ("_run_type", pa.string()),
-            ("_source_batch_id", pa.string()),
-            ("_ingestion_ts", pa.string()),
-        ]
-    )
-
-    def _record(record_id: str, val: str) -> dict[str, str]:
-        payload = {"id": record_id, "val": val}
-        return {
-            "id": record_id,
-            "val": val,
-            "content_hash": str(generate_content_hash(payload, "test")),
-            "_run_id": "run-id",
-            "_run_type": "incremental",
-            "_source_batch_id": "batch-1",
-            "_ingestion_ts": "2026-01-01T00:00:00+00:00",
-        }
-
-    records = [_record("1", "A")]
-
-    # Write append
     await silver_writer.write_silver(
         table_name="test_silver_drift_evolve",
-        records=records,
+        records=[_silver_record("1", "A")],
         primary_keys=["id"],
-        schema=schema,
+        schema=_silver_schema(),
         mode="append",
     )
-
-    schema_v2 = pa.schema(
-        [
-            ("id", pa.string()),
-            ("val", pa.string()),
-            ("new_field", pa.string()),
-            ("content_hash", pa.string()),
-            ("_run_id", pa.string()),
-            ("_run_type", pa.string()),
-            ("_source_batch_id", pa.string()),
-            ("_ingestion_ts", pa.string()),
-        ]
-    )
-
-    def _record_v2(record_id: str, val: str, new_field: str) -> dict[str, str]:
-        payload = {"id": record_id, "val": val, "new_field": new_field}
-        return {
-            "id": record_id,
-            "val": val,
-            "new_field": new_field,
-            "content_hash": str(generate_content_hash(payload, "test")),
-            "_run_id": "run-id",
-            "_run_type": "incremental",
-            "_source_batch_id": "batch-1",
-            "_ingestion_ts": "2026-01-01T00:00:00+00:00",
-        }
-
-    records_v2 = [_record_v2("2", "B", "C")]
-
     await silver_writer.write_silver(
         table_name="test_silver_drift_evolve",
-        records=records_v2,
+        records=[_silver_record("2", "B", new_field="C")],
         primary_keys=["id"],
-        schema=schema_v2,
+        schema=_silver_schema(("new_field", pa.string())),
         mode="append",
         on_schema_mismatch="evolve",
     )
@@ -373,51 +277,26 @@ async def test_silver_writer_schema_drift_evolve(
 async def test_gold_writer_scd2_with_ts(
     gold_writer: GoldWriter, gold_schema: DataFrameSchema, temp_delta_path: str
 ) -> None:
-    def _record(record_id: str, val: str) -> dict[str, str]:
-        payload = {"id": record_id, "val": val}
-        return {
-            "id": record_id,
-            "val": val,
-            "content_hash": str(generate_content_hash(payload, "test")),
-        }
-
-    records = [_record("1", "A")]
-
-    scd_config = {
-        "valid_from_col": "valid_from",
-        "valid_to_col": "valid_to",
-        "is_current_col": "is_current",
-        "identity_cols": ["id"],
-        "update_cols": ["val"],
-        "scd_type": 2,
-        "business_key": "id",
-    }
-
-    # Write scd2 initial
     await gold_writer.write_gold(
         table_name="test_gold_scd2_ts",
-        records=records,
+        records=[_gold_record("1", "A")],
         primary_keys=["id"],
         schema=gold_schema,
         mode="scd2",
-        scd_config=scd_config,
+        scd_config=_SCD2_CONFIG,
         ingestion_ts=datetime.datetime(2026, 1, 1, 0, 0, 0, tzinfo=datetime.UTC),
     )
-
-    records_update = [_record("1", "B")]
-    # Write scd2 update
     await gold_writer.write_gold(
         table_name="test_gold_scd2_ts",
-        records=records_update,
+        records=[_gold_record("1", "B")],
         primary_keys=["id"],
         schema=gold_schema,
         mode="scd2",
-        scd_config=scd_config,
+        scd_config=_SCD2_CONFIG,
         ingestion_ts=datetime.datetime(2026, 1, 2, 0, 0, 0, tzinfo=datetime.UTC),
     )
 
     df = DeltaTable(f"{temp_delta_path}/test_gold_scd2_ts").to_pandas()
-    # 1 record created initially, and 1 record added as new version
     assert len(df) == 2
     assert set(df["id"]) == {"1"}
 
