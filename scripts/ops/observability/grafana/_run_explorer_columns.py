@@ -293,10 +293,15 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
             "Provider Evidence",
             "/d/bioetl-overview-v2/3-run-overview?" + _CONTEXT + "&viewPanel=9480",
         ),
-        "Overview": ("Run Overview", "/d/bioetl-overview-v2/3-run-overview?" + _CONTEXT),
+        "Overview": (
+            "Run Overview",
+            "/d/bioetl-overview-v2/3-run-overview?" + _CONTEXT,
+        ),
         "Saved Evidence": (
             "Saved Evidence",
-            "/d/bioetl-control-plane-v1/2-replay-readiness?" + _CONTEXT + "&viewPanel=9418",
+            "/d/bioetl-control-plane-v1/2-replay-readiness?"
+            + _CONTEXT
+            + "&viewPanel=9418",
         ),
         _DATA_QUALITY: (_DATA_QUALITY, "/d/bioetl-dq-v2/4-data-quality?" + _CONTEXT),
         _REPLAY_READINESS: (

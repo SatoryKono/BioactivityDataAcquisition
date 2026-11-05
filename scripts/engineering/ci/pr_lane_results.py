@@ -762,6 +762,17 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/integration/test_grafana_selector_contract.py",
         "tests/integration/test_grafana_variable_reference.py",
     ),
+    # Prometheus-only mirror of shipped dashboards; same owners as grafana/dashboards/.
+    "grafana/dashboards-prometheus-only/": (
+        DASHBOARD_SCENES_CONTRACT_TEST,
+        "tests/integration/test_dashboard_variable_dependencies.py",
+        "tests/integration/test_grafana_config.py",
+        "tests/integration/test_grafana_dashboard_cta_links.py",
+        "tests/integration/test_grafana_dashboard_metric_semantics.py",
+        "tests/integration/test_grafana_evidence_readability.py",
+        "tests/integration/test_grafana_selector_contract.py",
+        "tests/integration/test_grafana_variable_reference.py",
+    ),
     "docs/02-architecture/decisions/": (
         "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
