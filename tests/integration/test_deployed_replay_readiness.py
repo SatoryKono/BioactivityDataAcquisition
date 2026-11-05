@@ -70,6 +70,13 @@ def test_deployed_selected_run_is_ready(run):
         }
         assert checks, result
         assert "manifest_not_recorded" not in checks, result
+        for code in (
+            "effective_config_hash",
+            "dependency_lock_hash",
+            "input_snapshot_fingerprint",
+            "exact_replay_family",
+        ):
+            assert code in checks and checks[code]["result"] == "pass", result
         assert all(
             item.get("result") not in {"fail", "unknown"} for item in checks.values()
         ), result

@@ -514,32 +514,33 @@ def test_host_pipeline_summary_reads_composed_store(tmp_path: Path) -> None:
 
 
 def _ready_selected_run_payload() -> dict[str, object]:
-    """Shape matches load_selected_run_status / _present_status for READY runs."""
+    """Use the producer's replay projection and HTTP presentation shape."""
+    from bioetl.application.services.control_plane.manifest.diagnostics.selected_run_replay_readiness import (
+        project_selected_run_replay_readiness,
+    )
+    from bioetl.interfaces.http._selected_run_presentation import _readiness_fields
+
+    hashes = (
+        "effective_config_hash",
+        "dependency_lock_hash",
+        "input_snapshot_fingerprint",
+    )
+    projection = project_selected_run_replay_readiness(
+        identity={"run_id": "run-a", "pipeline": "chembl_assay", "status": "success"},
+        manifest={
+            **dict.fromkeys(hashes, "recorded"),
+            "objects": dict.fromkeys(hashes, True),
+            "replay_capability": "exact_replay_supported",
+        },
+        artifact_probes=[
+            {"code": "pipeline_run_report_json", "result": "pass", "reason": "present"},
+        ],
+        inventory_present=True,
+    )
     return {
         "verdict": "OK",
         "evidence_completeness": "COMPLETE",
-        "replay_readiness": [
-            {
-                "run_id": "run-a",
-                "pipeline": "chembl_assay",
-                "verdict": "READY",
-                "domain_verdict": "exact_replay_ready",
-                "blockers": "—",
-                "unknown_checks": "—",
-            }
-        ],
-        "replay_checks": [
-            {
-                "code": "pipeline_run_report_json",
-                "result": "pass",
-                "reason": "present",
-            },
-            {
-                "code": "manifest_digest",
-                "result": "pass",
-                "reason": "matched",
-            },
-        ],
+        **_readiness_fields(projection),
     }
 
 
@@ -606,26 +607,21 @@ def _mutate_manifest_not_recorded(payload: dict[str, object]) -> None:
     ]
 
 
+def _mutate_missing_manifest_checks(payload: dict[str, object]) -> None:
+    payload["replay_checks"] = []
+
+
 def _mutate_corrupt_object_check(payload: dict[str, object]) -> None:
-    # Tip contract: object corruption surfaces as a failed replay check.
-    payload["replay_checks"] = [
-        {
-            "code": "pipeline_run_report_json",
-            "result": "fail",
-            "reason": "digest_mismatch",
-        }
-    ]
+    # Recorded object verification reports failed hashes through replay_checks.
+    checks = payload["replay_checks"]
+    assert isinstance(checks, list)
+    check = next(item for item in checks if item["code"] == "effective_config_hash")
+    check.update(result="fail", reason="hash_without_object")
 
 
 def _mutate_location_missing_check(payload: dict[str, object]) -> None:
-    # Tip contract: missing location/artifact is a failed/unknown replay check.
-    payload["replay_checks"] = [
-        {
-            "code": "pipeline_run_report_md",
-            "result": "fail",
-            "reason": "artifact_missing",
-        }
-    ]
+    # Resolver refusal is represented by the top-level reason.
+    payload["reason"] = "location_missing"
 
 
 @pytest.mark.parametrize(
@@ -636,8 +632,9 @@ def _mutate_location_missing_check(payload: dict[str, object]) -> None:
         (_mutate_empty_replay_readiness, "no replay_readiness found"),
         (_mutate_non_ready_domain, "domain_verdict is not exact_replay_ready"),
         (_mutate_manifest_not_recorded, "replay_checks unknown"),
-        (_mutate_corrupt_object_check, "replay_checks failed"),
-        (_mutate_location_missing_check, "replay_checks failed"),
+        (_mutate_missing_manifest_checks, "manifest checks not passed"),
+        (_mutate_corrupt_object_check, "corrupt real objects"),
+        (_mutate_location_missing_check, "missing location"),
     ],
     ids=[
         "verdict",
@@ -645,8 +642,9 @@ def _mutate_location_missing_check(payload: dict[str, object]) -> None:
         "empty_replay_readiness",
         "domain_verdict",
         "manifest_via_replay_checks",
+        "missing_manifest_checks",
         "corrupt_via_replay_checks",
-        "location_via_replay_checks",
+        "location_reason",
     ],
 )
 def test_verify_run_id_negative_selected_run_fields(

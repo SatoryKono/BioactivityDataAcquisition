@@ -801,10 +801,15 @@ than silently accepting the bundle as canonical.
 ## Rollback
 - This runbook is inspection-only; no rollback is required for read-only diagnostics.
 - If mitigation or recovery commands are executed after inspection, revert config overrides or temporary local state before leaving the incident.
-- When disabling `EvidenceLocationResolver` legacy-root fallback (RF-003; see
+- When disabling `EvidenceLocationResolver` legacy-root fallback through its
+  `legacy_root_policy=REQUIRE_EXPLICIT_RECORD` constructor policy (RF-003; see
   [Run Reports — Evidence locations](../../04-reference/reports/run-reports.md)),
-  preserve `reports/run-reports/` trees and
-  `reports/run-reports/_evidence-locations/` receipts without deletion.
+  preserve without deletion the data roots selected by `dashboard_data` and
+  `relative_data_root` (including their `output/control/` evidence and input
+  snapshots), the configured report root (default `reports/run-reports/`), and
+  location records at `<report-root>/_evidence-locations/{pipeline|workflow}/<owner>/<run_id>.json`.
+  The standard data-root paths are listed in section 4 above; custom roots use
+  the same paths relative to the resolved data root.
 - Final closeout must be tied to the exact git SHA. CI, merge, and runtime states are distinct.
 
 

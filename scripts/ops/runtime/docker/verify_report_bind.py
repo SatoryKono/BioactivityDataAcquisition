@@ -515,6 +515,31 @@ def _verify_replay_check_results(
     if not isinstance(checks, list):
         state.fail(f"FAIL: run_id={run_id!r} missing replay_checks list")
         return
+    required_manifest = {
+        "effective_config_hash",
+        "dependency_lock_hash",
+        "input_snapshot_fingerprint",
+        "exact_replay_family",
+    }
+    passed = {
+        item.get("code")
+        for item in checks
+        if isinstance(item, Mapping) and item.get("result") == "pass"
+    }
+    missing = sorted(required_manifest - passed)
+    if missing:
+        state.fail(f"FAIL: run_id={run_id!r} manifest checks not passed: {missing}")
+    corrupt = [
+        item.get("code")
+        for item in checks
+        if isinstance(item, Mapping)
+        and item.get("result") == "fail"
+        and item.get("reason") in {"hash_without_object", "digest_mismatch"}
+    ]
+    if corrupt:
+        state.fail(
+            f"FAIL: run_id={run_id!r} missing or corrupt real objects: {corrupt}"
+        )
     failed = _replay_check_codes(checks, result="fail")
     unknown = _replay_check_codes(checks, result="unknown")
     if failed:
@@ -572,6 +597,8 @@ def _verify_run_id_endpoint(
         return
 
     print(f"ops_selected_run_status={result.get('verdict')!r}")
+    if result.get("reason") == "location_missing":
+        state.fail(f"FAIL: run_id={run_id!r} missing location")
     readiness = _first_replay_readiness(state, result, run_id=run_id)
     if readiness is None:
         return
