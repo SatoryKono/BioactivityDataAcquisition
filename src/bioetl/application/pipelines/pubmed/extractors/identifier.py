@@ -48,7 +48,7 @@ def _assign_known_article_id(
     key = _ARTICLE_ID_KEY_MAP.get(id_type)
     if key is None:
         return False
-    result[key] = value  # type: ignore[literal-required]
+    result[key] = value  # type: ignore[literal-required]  # tracked(#12721): unjustified type ignore debt
     return True
 
 

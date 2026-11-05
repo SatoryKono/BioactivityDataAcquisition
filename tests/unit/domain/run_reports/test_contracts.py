@@ -124,9 +124,12 @@ def test_run_evidence_location_golden_matches_v1_schema() -> None:
 
 
 def test_every_report_schema_is_valid_json_schema() -> None:
+    checked = 0
     for schema_path in sorted(CONTRACT_ROOT.glob("*.json")):
         schema = json.loads(schema_path.read_text(encoding="utf-8"))
         validator_for(schema).check_schema(schema)
+        checked += 1
+    assert checked > 0
 
 
 def test_evidence_location_schema_rejects_unsafe_and_incompatible_values() -> None:
