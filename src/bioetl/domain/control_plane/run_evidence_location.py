@@ -189,7 +189,7 @@ def _build_from_payload(payload: Mapping[str, object]) -> RunEvidenceLocation:
         runtime_source_id=_payload_text(payload, "runtime_source_id"),
         root_alias=_payload_text(payload, "root_alias"),
         relative_data_root=_payload_text(payload, "relative_data_root"),
-        workflow_run_id=payload.get("workflow_run_id"),  # type: ignore[arg-type]
+        workflow_run_id=payload.get("workflow_run_id"),  # type: ignore[arg-type]  # tracked(#12721): unjustified type ignore debt
     )
 
 

@@ -179,6 +179,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
+    "configs/quality/external_resource_inventory_pr12755_main_merge_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+    ),
+    "configs/quality/external_resource_inventory_pr12755_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+    ),
     "scripts/engineering/README.md": (
         SCRIPTS_INVENTORY_MANIFEST_TEST,
         "tests/architecture/test_scripts_inventory_discovery.py",
@@ -712,6 +720,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    ".vscode/": ("tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",),
     "docs/03-guides/dashboards/": (
         DOCUMENTATION_SYNC_TEST,
         "tests/integration/test_grafana_selector_contract.py",
