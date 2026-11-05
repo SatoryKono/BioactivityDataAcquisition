@@ -18,6 +18,10 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from scripts.engineering.qa.report_architecture_quality_scorecard import (
+    DOCUMENTED_KEY_INVARIANTS,
+    semantic_completeness_payload,
+)
 from tests.architecture.quality_artifacts import (
     quality_artifact_path,
 )
@@ -75,6 +79,22 @@ def test_domain_aggregate_invariant_rows_reference_existing_sources() -> None:
 
         for relative_path in [*source_paths, *test_paths]:
             assert (PROJECT_ROOT / relative_path).exists(), relative_path
+
+
+def test_semantic_completeness_gaps_match_generator() -> None:
+    """Documented key-invariant gaps must survive registry regeneration."""
+    payload = _registry_payload()
+    status, gaps = semantic_completeness_payload(payload["aggregates"])
+    assert payload["semantic_completeness"] == status
+    assert payload["semantic_completeness_gaps"] == gaps
+    assert status.startswith("not_assessed;")
+    documented = {
+        (aggregate, name)
+        for aggregate, names in DOCUMENTED_KEY_INVARIANTS.items()
+        for name in names
+    }
+    recorded = {(row["aggregate"], row["documented_invariant"]) for row in gaps}
+    assert recorded == documented
 
 
 @pytest.mark.generated_artifact
