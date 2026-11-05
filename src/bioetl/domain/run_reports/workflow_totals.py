@@ -55,6 +55,14 @@ def _build_totals(
     }
 
 
+def _copy_workflow_observations(
+    observations: Mapping[str, object] | None,
+) -> dict[str, object] | None:
+    if observations is None:
+        return None
+    return dict(observations)
+
+
 def _snapshot_current(details: Mapping[str, object]) -> int | None:
     snapshot = details.get("source_snapshot")
     if not isinstance(snapshot, dict):
@@ -188,3 +196,10 @@ def _reconciliation_totals(rows: Sequence[WorkflowExecutionRow]) -> dict[str, ob
         "final_current_by_table": final_by_table,
         "historical_by_table": historical_by_table,
     }
+
+
+def _planned_step_count(
+    plan: Sequence[object], execution: Sequence[WorkflowExecutionRow]
+) -> int:
+    """Prefer declared plan size and fall back to observed execution size."""
+    return len(plan) if plan else len(execution)

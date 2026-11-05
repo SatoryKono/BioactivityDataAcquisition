@@ -18,6 +18,7 @@ from bioetl.domain.run_reports.workflow_totals import (
     _first_present,
     _optional_int,
     _optional_text,
+    _planned_step_count,
 )
 
 _COUNT_FIELDS = (
@@ -277,12 +278,6 @@ def _append_index_row(
     bucket["step_ids"] = [*bucket["step_ids"], row.step_id]
 
 
-def _optional_observations_copy(
-    observations: Mapping[str, object] | None,
-) -> dict[str, object] | None:
-    return None if observations is None else dict(observations)
-
-
 def build_workflow_run_report(
     *,
     identity: Mapping[str, Any],  # Any: report payload
@@ -298,8 +293,8 @@ def build_workflow_run_report(
         identity=dict(identity),
         plan_steps=plan,
         execution=execution,
-        totals=_build_totals(execution, planned=len(plan) or len(execution)),
+        totals=_build_totals(execution, planned=_planned_step_count(plan, execution)),
         index=_build_index(normalized),
         reasons_rollup=build_reasons_rollup(execution),
-        observations=_optional_observations_copy(observations),
+        observations=None if observations is None else dict(observations),
     )
