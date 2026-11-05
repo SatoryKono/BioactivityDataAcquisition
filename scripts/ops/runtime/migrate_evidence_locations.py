@@ -413,7 +413,11 @@ def execute_migration(
             )
             continue
 
-        preflight = _preflight_source_anchors(validated, alias_base=alias_base)
+        try:
+            preflight = _preflight_source_anchors(validated, alias_base=alias_base)
+        except (OSError, TypeError, ValueError, RuntimeError, KeyError) as exc:
+            # Keep the batch alive when one target's manifest/index is unreadable.
+            preflight = _invalid_location(f"source_anchor_unreadable: {exc}")
         if preflight is not None:
             _record_outcome(
                 stats,

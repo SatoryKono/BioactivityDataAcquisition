@@ -482,12 +482,68 @@ def test_read_target_list_accepts_confined_path(tmp_path: Path) -> None:
     assert targets[0].owner == "demo"
 
 
-def test_main_rejects_targets_path_escape(
+def test_execute_migration_continues_when_preflight_raises(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    import scripts.ops.runtime.migrate_evidence_locations as migrate_mod
+
+    report_root = tmp_path / "reports"
+    report_root.mkdir()
+    alias_base = tmp_path / "data"
+    alias_base.mkdir()
+    broken = _workflow_target(run_id="00000000-0000-0000-0000-000000000001")
+    healthy = _workflow_target(run_id="00000000-0000-0000-0000-000000000002")
+    _seed_workflow_anchors(alias_base, broken)
+    _seed_workflow_anchors(alias_base, healthy)
+
+    calls = {"n": 0}
+    real = migrate_mod._preflight_source_anchors
+
+    def once_then_real(location, *, alias_base):  # type: ignore[no-untyped-def]
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise OSError("simulated corrupt index")
+        return real(location, alias_base=alias_base)
+
+    monkeypatch.setattr(migrate_mod, "_preflight_source_anchors", once_then_real)
+
+    stats = execute_migration(
+        [broken, healthy],
+        report_root=report_root,
+        data_root=alias_base,
+        dry_run=True,
+    )
+    assert stats["location_invalid"] == 1
+    assert stats["registered"] == 1
+
+
+def test_main_rejects_targets_path_escape(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     outside = tmp_path / "escape.json"
-    outside.write_text('{"targets": []}', encoding="utf-8")
+    # Non-empty targets so an empty-list failure cannot masquerade as path escape.
+    outside.write_text(
+        json.dumps(
+            {
+                "targets": [
+                    {
+                        "kind": "workflow",
+                        "owner": "demo",
+                        "run_id": "00000000-0000-0000-0000-000000000001",
+                        "runtime_source_id": "a" * 64,
+                        "relative_data_root": "demo/data",
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
     monkeypatch.chdir(REPO_ROOT)
 
-    assert main(["--targets", str(outside), "--data-root", "data"]) == 1
+    with caplog.at_level("ERROR"):
+        assert main(["--targets", str(outside), "--data-root", "data"]) == 1
+    assert "refusing path outside" in caplog.text
+    assert "Targets list is empty" not in caplog.text
