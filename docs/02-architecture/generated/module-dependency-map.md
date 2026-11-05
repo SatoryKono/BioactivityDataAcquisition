@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2605`
-- Internal import edges (raw): `8492`
+- Internal import edges (raw): `8495`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `329`
@@ -32,8 +32,8 @@ flowchart LR
     infrastructure -->|1300 OK| infrastructure
     interfaces -->|84 OK| application
     interfaces -->|64 OK| composition
-    interfaces -->|91 OK| domain
-    interfaces -->|485 OK| interfaces
+    interfaces -->|92 OK| domain
+    interfaces -->|487 OK| interfaces
 ```
 
 ## Layer Edge Table
@@ -51,8 +51,8 @@ flowchart LR
 | `infrastructure` | `infrastructure` |    1300 | allowed |
 | `interfaces`     | `application`    |      84 | allowed |
 | `interfaces`     | `composition`    |      64 | allowed |
-| `interfaces`     | `domain`         |      91 | allowed |
-| `interfaces`     | `interfaces`     |     485 | allowed |
+| `interfaces`     | `domain`         |      92 | allowed |
+| `interfaces`     | `interfaces`     |     487 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
@@ -82,10 +82,10 @@ flowchart LR
 | `infrastructure.storage`       | `domain.medallion`             |      31 |
 | `composition.bootstrap`        | `infrastructure.storage`       |      29 |
 | `composition.factories`        | `infrastructure.adapters`      |      27 |
+| `interfaces.http`              | `domain.control_plane`         |      27 |
 | `composition.factories`        | `infrastructure.config`        |      26 |
 | `infrastructure.adapters`      | `domain.ports`                 |      26 |
 | `infrastructure.config`        | `domain.types`                 |      26 |
-| `interfaces.http`              | `domain.control_plane`         |      26 |
 | `application.services`         | `domain.value_objects`         |      25 |
 | `composition.bootstrap`        | `infrastructure.control_plane` |      25 |
 | `infrastructure.adapters`      | `domain.exceptions`            |      24 |
