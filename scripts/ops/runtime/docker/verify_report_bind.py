@@ -467,6 +467,67 @@ def _verify_ops_list_source_identity(
         state.fail("FAIL: ops list source identity differs from host")
 
 
+
+def _verify_run_id_endpoint(
+    state: _VerificationState,
+    *,
+    ops_url: str,
+    pipeline: str | None,
+    run_id: str,
+    require_ops: bool,
+    bind_aligned: bool,
+) -> None:
+    if not pipeline:
+        state.fail("FAIL: --run-id requires --pipeline")
+        return
+    url = (
+        f"{ops_url.rstrip('/')}/ops/observability/selected-run-status"
+        f"?pipeline={pipeline}&run_id={run_id}"
+    )
+    result = _json_get(url, timeout=20.0)
+    if result is None:
+        if bind_aligned:
+            state.warn(f"WARN: selected-run-status endpoint timed out: {url}")
+            return
+        if require_ops:
+            state.fail(f"FAIL: selected-run-status endpoint unreachable: {url}")
+        return
+
+    print(f"ops_selected_run_status={result.get('verdict')!r}")
+
+    readiness = result.get("replay_readiness", [])
+    if not readiness:
+        state.fail(f"FAIL: no replay_readiness found for run_id={run_id!r}")
+        return
+
+    ready_status = readiness[0].get("verdict")
+    print(f"ops_replay_readiness_verdict={ready_status!r}")
+
+    if ready_status != "READY":
+        state.fail(
+            f"FAIL: run_id={run_id!r} replay_readiness is not READY "
+            f"(got {ready_status!r})"
+        )
+
+
+    if result.get("evidence_completeness") != "COMPLETE":
+         state.fail(f"FAIL: run_id={run_id!r} evidence_completeness is not COMPLETE")
+
+    # Проверять report bind, source identity, location, manifest и real objects, не только counts/health
+    if result.get("report_bind_state") != "aligned" and not result.get("availability", {}).get("report_root_bind"):
+         state.fail(f"FAIL: run_id={run_id!r} missing verified report bind in selected run status")
+
+    if not result.get("manifest_present"):
+         state.fail(f"FAIL: run_id={run_id!r} missing manifest for selected run")
+
+    if result.get("source_identity_state") != "aligned":
+         state.fail(f"FAIL: run_id={run_id!r} source identity is not aligned or foreign")
+
+    if result.get("real_objects_corrupt") or not result.get("location_resolved"):
+         state.fail(f"FAIL: run_id={run_id!r} corrupt objects or missing location")
+
+
+
 def _verify_pipeline_endpoint(
     state: _VerificationState,
     *,
@@ -527,6 +588,7 @@ def verify(
     container: str,
     pipeline: str | None,
     require_ops: bool,
+    run_id: str | None = None,
 ) -> int:
     host_mount = _host_reports_mount(repo)
     host_root = _host_report_root(repo)
@@ -583,6 +645,17 @@ def verify(
         bind_aligned=bind_aligned,
     )
 
+
+    if run_id:
+        _verify_run_id_endpoint(
+            state,
+            ops_url=ops_url,
+            pipeline=pipeline,
+            run_id=run_id,
+            require_ops=require_ops,
+            bind_aligned=bind_aligned,
+        )
+
     for line in state.findings:
         print(line)
 
@@ -596,6 +669,10 @@ def verify(
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Verify BioETL host/container report-root bind alignment",
+    )
+    parser.add_argument(
+        "--run-id",
+        help="Target run_id to verify via selected-run-status",
     )
     parser.add_argument(
         "--pipeline",
@@ -630,6 +707,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         container=str(args.container),
         pipeline=pipeline,
         require_ops=bool(args.require_ops),
+        run_id=args.run_id,
     )
 
 

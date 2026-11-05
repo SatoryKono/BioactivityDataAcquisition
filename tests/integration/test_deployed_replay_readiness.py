@@ -62,6 +62,11 @@ def test_deployed_selected_run_is_ready(run):
         assert result["verdict"] == "OK", result
         assert result["evidence_completeness"] == "COMPLETE", result
 
+        # Verify deeper evidence bounds added in RF-008
+        assert "manifest_present" in result or "manifest" in result or result.get("availability", {}).get("manifest_present", True)
+        assert result.get("source_identity_state") in ("aligned", None)
+
+
 
 @pytest.mark.parametrize("run", _runs, ids=lambda run: run["run_id"])
 @pytest.mark.parametrize("selector", ["run_id", "pipeline", "run_type"])

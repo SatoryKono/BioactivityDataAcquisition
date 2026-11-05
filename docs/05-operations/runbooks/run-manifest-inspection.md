@@ -797,10 +797,13 @@ than silently accepting the bundle as canonical.
   align with the latest observed lifecycle state.
 - Diagnostics interpretation is captured with evidence in incident notes or follow-up tasks.
 
-## Rollback
 
+## Rollback
 - This runbook is inspection-only; no rollback is required for read-only diagnostics.
 - If mitigation or recovery commands are executed after inspection, revert config overrides or temporary local state before leaving the incident.
+- When disabling resolver rollback, ensure data/receipts are preserved without deletion.
+- Final closeout must be tied to the exact SHA. CI, merge, and runtime states are distinct.
+
 
 ## Post-incident
 
