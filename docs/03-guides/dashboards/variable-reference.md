@@ -52,6 +52,8 @@ Exact-run handoffs retain workflow, pipeline, run type, Run ID and time; the glo
 | `bioetl-run-explorer-v1` | `$run_id` | Single | `-` | Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved. |
 | `bioetl-run-explorer-v1` | `$lookup_run_id` | Single | `` | Exact UUID within the current Workflow/Pipeline/Run Type, including launches older than the latest ten. Does not replace Selected Run until a matching row is found. Clear to browse recent launches. |
 
+Catalog `run_id` option **value** is the UUID. The option text is a clock label plus that same UUID and must not be copied into `var-run_id`. Panel 9701 does not read `$run_id`. Sources that have no run id can ask identity scope for `resolve=unique`; several matches are not reduced to one run, and a compact `YYYYMMDDTHHMMSS` stamp is not a run id.
+
 ## Retired boards (do not reintroduce)
 
 | Retired UID | Replacement |

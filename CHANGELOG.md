@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Run identifier resolution:** `resolve=unique` on control-plane identity scope
+  returns a catalog UUID only when workflow / pipeline / run_type match exactly
+  one run. Zero matches are `unique_scope_not_found`. Several matches are
+  `ambiguous_scope` and do not pick a run. The flag is for sources that cannot
+  embed a run id (Prometheus, alerts, action scope). Default identity scope is
+  unchanged. A compact clock stamp is not a run id and is not aliased.
+
+### Fixed
+
+- **Selected run status:** a missing non-UUID token, including a compact stamp
+  such as `20261102T181217`, stays `run_not_found` / `UNKNOWN`. It is no longer
+  reported as `QUERY ERROR` / `request_failed`. An explicit UUID and a saved
+  non-UUID report id keep their previous results.
+
 ### Breaking Changes
 
 - **PMCID canonicalizer (#12027):** public `normalize_pmc_id` is removed.
