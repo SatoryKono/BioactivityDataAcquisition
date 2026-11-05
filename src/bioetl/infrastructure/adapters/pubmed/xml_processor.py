@@ -11,15 +11,16 @@ from __future__ import annotations
 import time
 import typing
 import xml.etree as etree
-from xml.etree.ElementTree import ParseError
 
 from defusedxml import ElementTree as SafeET
 from defusedxml.common import DefusedXmlException
-from defusedxml.ElementTree import DefusedXMLParser
+from defusedxml.ElementTree import DefusedXMLParser, ParseError
 
 from bioetl.domain.types import JsonDict
 
 __all__ = ["PubMedXmlProcessor"]
+
+_MAX_XML_BYTES = 31457280
 
 if typing.TYPE_CHECKING:
 
@@ -73,12 +74,22 @@ class PubMedXmlProcessor:
             xml_text: Raw XML response text
 
         Returns:
-            Parsed XML root element, or None if parsing fails
-        """
-        try:
-            if len(xml_text) > 31457280:
-                raise ValueError("XML size limit exceeded")
+            Parsed XML root element, or None if parsing fails due to
+            malformed/hostile XML (ParseError / DefusedXmlException).
 
+        Raises:
+            ValueError: When size, element-count, or wall-time resource
+                limits are exceeded. Callers must treat this as a hard
+                failure rather than an empty batch.
+        """
+        # Char-count fast reject; UTF-8 bytes are always >= Unicode length.
+        if len(xml_text) > _MAX_XML_BYTES:
+            raise ValueError("XML size limit exceeded")
+        # Bounded encode: at most `_MAX_XML_BYTES` characters.
+        if len(xml_text.encode("utf-8")) > _MAX_XML_BYTES:
+            raise ValueError("XML size limit exceeded")
+
+        try:
             target = LimitedParseTarget()
             parser = DefusedXMLParser(
                 target=target,
@@ -88,8 +99,11 @@ class PubMedXmlProcessor:
             )
             parser.feed(xml_text)
             parsed_root = parser.close()
+            if time.monotonic() - target.start_time > target.max_time:
+                raise ValueError("XML time limit exceeded")
             return typing.cast("Element", parsed_root)
-        except (ValueError, ParseError, DefusedXmlException):
+        except (ParseError, DefusedXmlException):
+            # Malformed/hostile XML → empty parse; resource limits raise ValueError.
             return None
 
     @staticmethod

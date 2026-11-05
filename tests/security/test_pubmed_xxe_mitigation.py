@@ -114,16 +114,27 @@ def test_transformer_billion_laughs_mitigation():
 
 
 def test_xml_processor_oversized_mitigation():
-    """Verify that PubMedXmlProcessor blocks oversized payload > 31MB."""
+    """Verify that PubMedXmlProcessor hard-fails oversized payload > 30 MiB."""
     oversized_payload = "<root>" + "A" * (31457280 + 10) + "</root>"
 
-    result = PubMedXmlProcessor.parse_response(oversized_payload)
-    assert result is None
+    with pytest.raises(ValueError, match="XML size limit exceeded"):
+        PubMedXmlProcessor.parse_response(oversized_payload)
 
 
 def test_xml_processor_blowup_mitigation():
-    """Verify that PubMedXmlProcessor blocks quadratic blowup payload with massive number of elements."""
+    """Verify that PubMedXmlProcessor hard-fails quadratic element blowup."""
     blowup_payload = "<root>" + "<child></child>" * 100001 + "</root>"
 
-    result = PubMedXmlProcessor.parse_response(blowup_payload)
-    assert result is None
+    with pytest.raises(ValueError, match="XML element limit exceeded"):
+        PubMedXmlProcessor.parse_response(blowup_payload)
+
+
+def test_xml_processor_utf8_byte_size_limit():
+    """Multibyte text under char-count limit still enforces UTF-8 byte cap."""
+    # € is 3 UTF-8 bytes; 11_000_000 chars → 33 MiB bytes, still < 30 MiB chars.
+    oversized_multibyte = "<root>" + ("€" * 11_000_000) + "</root>"
+    assert len(oversized_multibyte) <= 31457280
+    assert len(oversized_multibyte.encode("utf-8")) > 31457280
+
+    with pytest.raises(ValueError, match="XML size limit exceeded"):
+        PubMedXmlProcessor.parse_response(oversized_multibyte)
