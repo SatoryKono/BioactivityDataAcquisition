@@ -764,13 +764,14 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         GRAFANA_SELECTOR_CONTRACT_TEST,
         GRAFANA_VARIABLE_REFERENCE_TEST,
     ),
-    # Prometheus-only mirror of shipped dashboards; same owners as grafana/dashboards/.
+    # Prometheus-only mirror: shipped dashboard owners plus its provisioning contract.
     "grafana/dashboards-prometheus-only/": (
         DASHBOARD_SCENES_CONTRACT_TEST,
         "tests/integration/test_dashboard_variable_dependencies.py",
         "tests/integration/test_grafana_config.py",
         "tests/integration/test_grafana_dashboard_cta_links.py",
         "tests/integration/test_grafana_dashboard_metric_semantics.py",
+        "tests/integration/test_grafana_dashboard_provisioning.py",
         "tests/integration/test_grafana_evidence_readability.py",
         GRAFANA_SELECTOR_CONTRACT_TEST,
         GRAFANA_VARIABLE_REFERENCE_TEST,
