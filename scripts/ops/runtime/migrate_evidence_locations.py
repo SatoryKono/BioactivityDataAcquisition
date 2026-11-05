@@ -123,11 +123,12 @@ def _record_outcome(
     planned: bool,
 ) -> None:
     stats[code] = stats.get(code, 0) + 1
-    prefix = (
-        "PLAN"
-        if planned
-        else ("PASS" if code in {"registered", "already_identical"} else "FAIL")
-    )
+    if planned:
+        prefix = "PLAN"
+    elif code in {"registered", "already_identical"}:
+        prefix = "PASS"
+    else:
+        prefix = "FAIL"
     message = f"{prefix}: {target.kind.value} {target.owner} {target.run_id} -> {code}"
     if detail:
         message = f"{message}: {detail}"
