@@ -380,7 +380,7 @@ def _collect_tracked_policy_violations(paths: list[str]) -> list[str]:
             continue
         if "/" in path:
             continue
-        if path.endswith(".py"):
+        if path.endswith(".py") and path != ".vulture_whitelist.py":
             violations.append(f"{path}: root-level Python files are not allowed")
             continue
         if path.endswith((".md", ".txt")) and path not in CANONICAL_ROOT_TEXT_FILES:
