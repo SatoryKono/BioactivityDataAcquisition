@@ -58,6 +58,30 @@ def test_execute_migration_dry_run_flags_invalid(tmp_path: Path) -> None:
     assert stats["registered"] == 0
 
 
+def test_execute_migration_dry_run_flags_intra_batch_conflict(
+    tmp_path: Path,
+) -> None:
+    report_root = tmp_path / "reports"
+    report_root.mkdir()
+
+    first = _workflow_target()
+    second = MigrationTarget(
+        kind=first.kind,
+        owner=first.owner,
+        run_id=first.run_id,
+        runtime_source_id=first.runtime_source_id,
+        relative_data_root="other/path",
+    )
+
+    stats = execute_migration(
+        [first, second],
+        report_root=report_root,
+        dry_run=True,
+    )
+    assert stats["registered"] == 1
+    assert stats["conflict"] == 1
+
+
 def test_execute_migration_apply(tmp_path: Path) -> None:
     report_root = tmp_path / "reports"
     report_root.mkdir()

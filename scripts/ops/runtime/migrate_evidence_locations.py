@@ -140,17 +140,45 @@ def _record_outcome(
         logger.error("%s", message)
 
 
+def _ownership_key(target: MigrationTarget) -> tuple[str, str, str]:
+    return (target.kind.value, target.owner, target.run_id)
+
+
+def _binding_fingerprint(target: MigrationTarget) -> tuple[str, str, str | None]:
+    return (
+        target.runtime_source_id,
+        target.relative_data_root,
+        target.workflow_run_id,
+    )
+
+
 def _classify_dry_run(
     service: EvidenceLocationRegistrationService,
     request: EvidenceLocationRegisterRequest,
+    *,
+    planned: dict[tuple[str, str, str], tuple[str, str, str | None]],
+    target: MigrationTarget,
 ) -> EvidenceLocationRegistrationOutcome:
-    """Validate binding + existing catalog without publishing a locator."""
+    """Validate binding + existing/planned catalog without publishing a locator."""
+    key = _ownership_key(target)
+    fingerprint = _binding_fingerprint(target)
+    prior = planned.get(key)
+    if prior is not None:
+        if prior == fingerprint:
+            return EvidenceLocationRegistrationOutcome(code="already_identical")
+        return EvidenceLocationRegistrationOutcome(
+            code="conflict",
+            detail="intra_batch_binding_conflict",
+        )
+
     verified: EvidenceLocationVerifyOutcome = service.verify(request)
     if verified.code == "location_missing":
+        planned[key] = fingerprint
         return EvidenceLocationRegistrationOutcome(
             code="registered", detail="would_register"
         )
     if verified.code == "ok":
+        planned[key] = fingerprint
         return EvidenceLocationRegistrationOutcome(code="already_identical")
     if verified.code in _VERIFY_REJECT_CODES:
         mapped = "invalid" if verified.code == "invalid" else "conflict"
@@ -173,11 +201,17 @@ def execute_migration(
     store = FileEvidenceLocationStore(report_root=report_root)
     service = EvidenceLocationRegistrationService(locations=store)
     stats = _empty_stats()
+    planned: dict[tuple[str, str, str], tuple[str, str, str | None]] = {}
 
     for target in targets:
         request = _request_for(target)
         if dry_run:
-            outcome = _classify_dry_run(service, request)
+            outcome = _classify_dry_run(
+                service,
+                request,
+                planned=planned,
+                target=target,
+            )
             _record_outcome(
                 stats,
                 target=target,
