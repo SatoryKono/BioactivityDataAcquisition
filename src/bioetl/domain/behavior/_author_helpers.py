@@ -25,7 +25,6 @@ __all__ = [
 
 # Regex patterns
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
-_WHITESPACE_PATTERN = re.compile(r"\s+")
 _CONTROL_CHARS_PATTERN = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]")
 
 # Keys to probe when extracting affiliation from a dict
@@ -177,7 +176,7 @@ def normalize_affiliation_string(text: str) -> str | None:
     # Unescape first so entity-encoded markup (e.g. &lt;b&gt;) is stripped too.
     normalized = unescape(text)
     normalized = _HTML_TAG_PATTERN.sub("", normalized)
-    normalized = _WHITESPACE_PATTERN.sub(" ", normalized)
+    normalized = " ".join(normalized.split())
     normalized = _CONTROL_CHARS_PATTERN.sub("", normalized)
     normalized = unicodedata.normalize("NFC", normalized)
     normalized = normalized.strip()

@@ -256,6 +256,18 @@ def test_affected_targets_map_test_governance_audit_config() -> None:
     ]
 
 
+def test_affected_targets_map_memory_dedup_source() -> None:
+    """Semantic dedup changes select the memory dedup unit suite."""
+    repo_root = Path(__file__).resolve().parents[5]
+    targets = affected_pytest_targets(
+        ["src/memory/dedup.py"],
+        repo_root=repo_root,
+    )
+
+    assert targets == ["tests/unit/memory/test_dedup.py"]
+    assert all((repo_root / target).is_file() for target in targets)
+
+
 def test_affected_targets_map_memory_source_without_test_diff() -> None:
     """A chunking-only PR must select its real RAG regression suite."""
     repo_root = Path(__file__).resolve().parents[5]
