@@ -1,5 +1,10 @@
+source_commit: 78d1dd37a6115d033aea1f2c6bc7ee1f2c7e39f8
+command: .venv/bin/python -m pytest -q --tb=line tests/unit/domain/aggregates/test_batch.py tests/unit/domain/aggregates/test_batch_determinism.py tests/unit/domain/aggregates/test_batch_internal_modules.py tests/unit/domain/aggregates/test_batch_invariant_properties.py tests/unit/domain/aggregates/test_pipeline_run.py tests/unit/domain/aggregates/test_pipeline_run_events.py tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py tests/unit/domain/aggregates/test_pipeline_run_invariant_properties.py tests/unit/domain/aggregates/test_quarantine_entry.py tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py tests/unit/domain/aggregates/test_quarantine_entry_invariant_properties.py tests/unit/domain/aggregates/test_deterministic_identity.py
+note: identity suite is test_deterministic_identity.py (included). No aggregate isolation suite exists under tests/unit/domain/aggregates/.
+---
 ........................................................................ [ 25%]
 ........................................................................ [ 51%]
 ........................................................................ [ 77%]
 ...............................................................          [100%]
-279 passed in 4.19s
+
+result: 279 passed, exit_code=0

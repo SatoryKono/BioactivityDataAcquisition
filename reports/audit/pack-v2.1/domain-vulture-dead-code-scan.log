@@ -1,3 +1,4 @@
+provenance: vulture scan of src/bioetl/domain, carried from 1f4bd96c0d; not re-run after merge 78d1dd37a6
 src/bioetl/domain/__init__.py:140: unused function '__getattr__' (60% confidence)
 src/bioetl/domain/__init__.py:157: unused function '__dir__' (60% confidence)
 src/bioetl/domain/_observability_contract_core.py:48: unused variable 'metric_labels' (60% confidence)

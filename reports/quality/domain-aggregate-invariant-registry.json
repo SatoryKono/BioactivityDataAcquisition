@@ -85,7 +85,111 @@
   ],
   "generated_by": "scripts/engineering/qa/report_architecture_quality_scorecard.py",
   "schema_version": 1,
-  "semantic_completeness": "not_assessed; documented invariants missing from tests (see P02 audit PR description for missing invariants)",
+  "semantic_completeness": "not_assessed; documented key invariants in semantic_completeness_gaps have no direct registry test link",
+  "semantic_completeness_gaps": [
+    {
+      "aggregate": "Batch",
+      "documented_invariant": "Content Hash Immutability",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    },
+    {
+      "aggregate": "Batch",
+      "documented_invariant": "No Records After Sealed",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    },
+    {
+      "aggregate": "Batch",
+      "documented_invariant": "One-Way State Transitions",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    },
+    {
+      "aggregate": "Batch",
+      "documented_invariant": "Atomic Commit",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    },
+    {
+      "aggregate": "Batch",
+      "documented_invariant": "Write-Once",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    },
+    {
+      "aggregate": "PipelineRun",
+      "documented_invariant": "Immutable Manifest",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    },
+    {
+      "aggregate": "PipelineRun",
+      "documented_invariant": "Append-Only Ledger",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    },
+    {
+      "aggregate": "PipelineRun",
+      "documented_invariant": "Deterministic ID",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    },
+    {
+      "aggregate": "PipelineRun",
+      "documented_invariant": "No State Reversion",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    },
+    {
+      "aggregate": "PipelineRun",
+      "documented_invariant": "Provenance Preservation",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    },
+    {
+      "aggregate": "PipelineRun",
+      "documented_invariant": "Stage Evidence",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    },
+    {
+      "aggregate": "QuarantineEntry",
+      "documented_invariant": "Immutable Root Cause",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    },
+    {
+      "aggregate": "QuarantineEntry",
+      "documented_invariant": "Resolution Tracking",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    },
+    {
+      "aggregate": "QuarantineEntry",
+      "documented_invariant": "One-Time Resolution",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    },
+    {
+      "aggregate": "QuarantineEntry",
+      "documented_invariant": "Exclusion Rationale",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    },
+    {
+      "aggregate": "QuarantineEntry",
+      "documented_invariant": "Audit Trail",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    },
+    {
+      "aggregate": "QuarantineEntry",
+      "documented_invariant": "Reprocessing Requires New ID",
+      "source": "docs/02-architecture/domain/aggregate-invariants.md",
+      "status": "no_direct_test_link"
+    }
+  ],
   "summary": {
     "aggregates_with_invariant_tests": 3,
     "missing_source_paths": [],

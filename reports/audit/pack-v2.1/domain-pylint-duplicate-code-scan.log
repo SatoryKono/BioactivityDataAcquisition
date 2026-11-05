@@ -1,3 +1,4 @@
+provenance: pylint duplicate-code scan of src/bioetl/domain, carried from 1f4bd96c0d; not re-run after merge 78d1dd37a6
 ************* Module bioetl.domain.filtering._base_filter_config
 src/bioetl/domain/filtering/_base_filter_config.py:1:0: R0801: Similar lines in 2 files
 ==bioetl.domain.ports.__init__:[8:218]
