@@ -9,17 +9,17 @@ import argparse
 import json
 import logging
 import sys
-from pathlib import Path
-from dataclasses import dataclass
 from collections.abc import Sequence
+from dataclasses import dataclass
+from pathlib import Path
 
 from bioetl.application.services.evidence_location.registration import (
     EvidenceLocationRegistrationService,
 )
 from bioetl.application.services.evidence_location.registration_models import (
     EvidenceLocationRegisterRequest,
-    EvidenceLocationRegistrationOutcome,
 )
+from bioetl.application.services.run_reports import DEFAULT_REPORT_ROOT
 from bioetl.domain.control_plane.run_evidence_location import (
     DEFAULT_EVIDENCE_ROOT_ALIAS,
     EvidenceLocationKind,
@@ -27,10 +27,16 @@ from bioetl.domain.control_plane.run_evidence_location import (
 from bioetl.infrastructure.control_plane.file_evidence_location_store import (
     FileEvidenceLocationStore,
 )
-
+from scripts.engineering.common.repo_paths import (
+    REPO_ROOT,
+    confined_io_path,
+    read_text_confined,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
+
+_REJECT_CODES = frozenset({"conflict", "invalid", "error"})
 
 
 @dataclass
@@ -43,23 +49,27 @@ class MigrationTarget:
     workflow_run_id: str | None = None
 
 
-def read_target_list(path: Path) -> list[MigrationTarget]:
-    """Read a machine-local list of targets."""
-    with path.open("r") as f:
-        data = json.load(f)
-        targets = []
-        for item in data.get("targets", []):
-            targets.append(
-                MigrationTarget(
-                    kind=EvidenceLocationKind(item["kind"]),
-                    owner=item["owner"],
-                    run_id=item["run_id"],
-                    runtime_source_id=item["runtime_source_id"],
-                    relative_data_root=item["relative_data_root"],
-                    workflow_run_id=item.get("workflow_run_id"),
-                )
+def read_target_list(
+    path: Path | str,
+    *,
+    root: Path | None = None,
+) -> list[MigrationTarget]:
+    """Read a machine-local list of targets under a confined root."""
+    payload = read_text_confined(path, root=root or REPO_ROOT)
+    data = json.loads(payload)
+    targets: list[MigrationTarget] = []
+    for item in data.get("targets", []):
+        targets.append(
+            MigrationTarget(
+                kind=EvidenceLocationKind(item["kind"]),
+                owner=item["owner"],
+                run_id=item["run_id"],
+                runtime_source_id=item["runtime_source_id"],
+                relative_data_root=item["relative_data_root"],
+                workflow_run_id=item.get("workflow_run_id"),
             )
-        return targets
+        )
+    return targets
 
 
 def execute_migration(
@@ -71,7 +81,13 @@ def execute_migration(
     store = FileEvidenceLocationStore(report_root=report_root)
     service = EvidenceLocationRegistrationService(locations=store)
 
-    stats = {"registered": 0, "already_identical": 0, "conflict": 0, "invalid": 0, "error": 0}
+    stats = {
+        "registered": 0,
+        "already_identical": 0,
+        "conflict": 0,
+        "invalid": 0,
+        "error": 0,
+    }
 
     for target in targets:
         request = EvidenceLocationRegisterRequest(
@@ -85,65 +101,94 @@ def execute_migration(
         )
 
         if dry_run:
-            logger.info(f"PLAN: Would register {target.kind.value} {target.owner} {target.run_id}")
+            logger.info(
+                "PLAN: Would register %s %s %s",
+                target.kind.value,
+                target.owner,
+                target.run_id,
+            )
             continue
 
         outcome = service.register(request)
         stats[outcome.code] = stats.get(outcome.code, 0) + 1
 
         if outcome.code in ("registered", "already_identical"):
-            logger.info(f"PASS: {target.kind.value} {target.owner} {target.run_id} -> {outcome.code}")
+            logger.info(
+                "PASS: %s %s %s -> %s",
+                target.kind.value,
+                target.owner,
+                target.run_id,
+                outcome.code,
+            )
         else:
-            logger.error(f"FAIL: {target.kind.value} {target.owner} {target.run_id} -> {outcome.code}: {outcome.detail}")
+            logger.error(
+                "FAIL: %s %s %s -> %s: %s",
+                target.kind.value,
+                target.owner,
+                target.run_id,
+                outcome.code,
+                outcome.detail,
+            )
 
     return stats
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Migrate historical evidence locations.")
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Migrate historical evidence locations.",
+    )
     parser.add_argument(
         "--targets",
         type=Path,
         required=True,
-        help="Path to JSON file containing explicit list of targets"
+        help="Path to JSON file containing explicit list of targets",
     )
     parser.add_argument(
         "--report-root",
         type=Path,
-        default=Path("reports"),
-        help="Path to the reports root directory"
+        default=DEFAULT_REPORT_ROOT,
+        help="Path to the reports root directory",
     )
     parser.add_argument(
         "--apply",
         action="store_true",
-        help="Actually apply changes instead of dry-run"
+        help="Actually apply changes instead of dry-run",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
-    if not args.targets.exists():
-        logger.error(f"Targets file not found: {args.targets}")
+    try:
+        targets_path = confined_io_path(args.targets, root=REPO_ROOT)
+        report_root = confined_io_path(args.report_root, root=REPO_ROOT)
+    except ValueError as exc:
+        logger.error("%s", exc)
+        return 1
+
+    if not targets_path.is_file():
+        logger.error("Targets file not found: %s", targets_path)
         return 1
 
     try:
-        targets = read_target_list(args.targets)
-    except Exception as exc:
-        logger.error(f"Failed to parse targets: {exc}")
+        targets = read_target_list(targets_path, root=REPO_ROOT)
+    except (OSError, ValueError, json.JSONDecodeError, KeyError, TypeError) as exc:
+        logger.error("Failed to parse targets: %s", exc)
         return 1
 
-    logger.info(f"Loaded {len(targets)} targets.")
+    logger.info("Loaded %s targets.", len(targets))
 
     stats = execute_migration(
         targets=targets,
-        report_root=args.report_root,
+        report_root=report_root,
         dry_run=not args.apply,
     )
 
     if not args.apply:
         logger.info("Dry-run complete.")
-    else:
-        logger.info(f"Apply complete. Stats: {stats}")
+        return 0
 
+    logger.info("Apply complete. Stats: %s", stats)
+    if any(stats.get(code, 0) for code in _REJECT_CODES):
+        return 1
     return 0
 
 
