@@ -630,9 +630,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_arch_s4_s9_gates.py",
         *TEST_GOVERNANCE_ARTIFACT_TESTS,
     ),
-    "configs/quality/composition_protocol_inventory.yaml": (
-        "tests/architecture/test_composition_protocol_inventory.py",
-    ),
     "configs/quality/test_governance_audit.yaml": TEST_GOVERNANCE_ARTIFACT_TESTS,
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
     "reports/quality/quality-move-qm08/publication-provenance.json": (
