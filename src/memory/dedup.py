@@ -4,12 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import json
-import re
 import unicodedata
 from dataclasses import dataclass
 from enum import StrEnum
-
-_WHITESPACE_PATTERN = re.compile(r"\s+")
 
 
 class DuplicateKind(StrEnum):
@@ -56,8 +53,8 @@ class DedupReport:
 
 def normalize_semantic_text(value: str) -> str:
     """Normalize human text without applying language-specific stemming."""
-    normalized = unicodedata.normalize("NFKC", value).casefold().strip()
-    return _WHITESPACE_PATTERN.sub(" ", normalized)
+    normalized = unicodedata.normalize("NFKC", value).casefold()
+    return " ".join(normalized.split())
 
 
 def semantic_key(*, record_type: str, title: str) -> str:
