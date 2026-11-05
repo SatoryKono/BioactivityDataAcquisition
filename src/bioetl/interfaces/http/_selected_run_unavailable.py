@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from typing import cast
 
 from bioetl.application.observability.reason_aliases import display_reason
 from bioetl.application.services.control_plane.manifest.diagnostics.selected_run_replay_readiness import (
@@ -215,22 +216,23 @@ def bind_runtime_source_id(
     )
 
 
+_ManifestGetter = Callable[[object], object]
+_ReplayVerifier = Callable[[object], object]
+
+
 @dataclass(frozen=True, slots=True)
 class _ContextManifestPort:
     """Adapt an open read context to the manifest-port snapshot shape."""
 
-    _get_manifest_by_run_id: object
-    _verify_replay_objects: object
+    _get_manifest_by_run_id: _ManifestGetter
+    _verify_replay_objects: _ReplayVerifier | None
 
     def get_by_run_id(self, run_id: object) -> object | None:
-        getter = self._get_manifest_by_run_id
-        if not callable(getter):
-            return None
-        return getter(run_id)
+        return self._get_manifest_by_run_id(run_id)
 
     def verify_replay_objects(self, manifest: object) -> object:
         verifier = self._verify_replay_objects
-        if not callable(verifier):
+        if verifier is None:
             return None
         return verifier(manifest)
 
@@ -279,7 +281,10 @@ def manifest_port_for_context(
     getter = getattr(context, "get_manifest_by_run_id", None)
     if not callable(getter):
         return fallback
+    verifier = getattr(context, "verify_replay_objects", None)
     return _ContextManifestPort(
-        _get_manifest_by_run_id=getter,
-        _verify_replay_objects=getattr(context, "verify_replay_objects", None),
+        _get_manifest_by_run_id=cast(_ManifestGetter, getter),
+        _verify_replay_objects=(
+            cast(_ReplayVerifier, verifier) if callable(verifier) else None
+        ),
     )
