@@ -153,10 +153,48 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
     assert {path for path in tracked if path.startswith(".gemini/")} == {
         ".gemini/config.yaml"
     }
-    assert (
-        len(allowlist_entries)
-        <= payload["outcomes"]["5847"]["allowlist_entries_after"] + 1
-    )
+    assert payload["outcomes"]["5847"]["allowlist_entries_after"] == 38
+    baseline_entries = {
+        ".aiignore",
+        ".coderabbit.yaml",
+        ".dockerignore",
+        ".editorconfig",
+        ".env.example",
+        ".gitattributes",
+        ".gitignore",
+        ".gitleaks.toml",
+        ".gitleaksignore",
+        ".hadolint.yaml",
+        ".importlinter",
+        ".jscpd.json",
+        ".mcp.json",
+        ".npmrc",
+        ".pr_agent.toml",
+        ".pre-commit-config.yaml",
+        ".python-version",
+        ".secrets.baseline",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "CONTRIBUTING.md",
+        "Dockerfile.bioetl",
+        "LICENSE",
+        "Makefile",
+        "README.md",
+        "best_practices.md",
+        "commitlint.config.mjs",
+        "docker-compose.monitoring.yml",
+        "docker-compose.neo4j-audit.yml",
+        "docker-compose.neo4j.yml",
+        "docker-compose.yml",
+        "mkdocs.yml",
+        "opencode.json",
+        "package-lock.json",
+        "package.json",
+        "pyproject.toml",
+        "skills-lock.json",
+        "uv.lock",
+    }
+    assert allowlist_entries == baseline_entries | {".vulture_whitelist.py"}
     assert not (RETIRED_ROOT_ENTRIES & tracked)
     for path in RETIRED_ROOT_ENTRIES:
         assert not (ROOT / path).exists()

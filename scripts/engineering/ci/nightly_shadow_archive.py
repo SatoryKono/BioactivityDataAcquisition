@@ -45,7 +45,7 @@ ARCHIVE_INDEX_NAME = "index.json"
 PARTITION_NAME = "generated-artifact-daily-partition.json"
 WORKFLOW_PATH = ".github/workflows/nightly.yml"
 ACTIONS_RETENTION_CAP_DAYS = 90
-SUCCESS_RETENTION_DAYS = 30
+SUCCESS_RETENTION_DAYS = 7
 DIAGNOSTIC_RETENTION_DAYS = 90
 RUN_ID_LABEL = "run id"
 RUN_ATTEMPT_LABEL = "run attempt"
@@ -294,7 +294,7 @@ def assess_shadow_window(
         reasons.append("no_parallel_candidate_arm")
     reasons.extend(_window_observation_reason_codes(runs))
     if artifact_retention_days < SUCCESS_RETENTION_DAYS:
-        reasons.append("success_retention_below_30")
+        reasons.append(f"success_retention_below_{SUCCESS_RETENTION_DAYS}")
     if actions_retention_cap_days < DIAGNOSTIC_RETENTION_DAYS:
         reasons.append("actions_retention_cap_below_90")
     if any(run.get("pagination_status") != "complete" for run in runs):
