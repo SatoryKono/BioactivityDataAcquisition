@@ -28,6 +28,7 @@ from bioetl.interfaces.http._pipeline_run_report_table import (
 from bioetl.interfaces.http._run_explorer_snapshot import (
     take_default_recent_snapshot,
 )
+from bioetl.interfaces.http._selected_run_unavailable import bind_runtime_source_id
 from bioetl.interfaces.http.recent_pipeline_runs import (
     _report_link,
     list_recent_pipeline_runs,
@@ -314,6 +315,10 @@ async def handle_pipeline_run_reports_list(
             manifest_port=host._run_manifest_port,
             ledger_port=host._run_ledger_port,
             store=host._run_report_store,
+            resolver=bind_runtime_source_id(
+                getattr(host, "_evidence_location_resolver", None),
+                getattr(host, "_runtime_source_id", None),
+            ),
         )
         await host._send_payload_response(writer, 200, payload)
         return
