@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-05T12:38:49.371854+00:00",
+  "generated_at": "2026-11-05T12:55:19.053941+00:00",
   "summary": {
     "total_scripts": 711,
     "status_counts": {
@@ -10344,19 +10344,19 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
-          "line": 698,
+          "line": 702,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.nightly_shadow_archive import _span_covers_48_hours"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
-          "line": 708,
+          "line": 712,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.nightly_shadow_archive import _span_covers_48_hours"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
-          "line": 721,
+          "line": 725,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.nightly_shadow_archive import _span_covers_48_hours"
         }
