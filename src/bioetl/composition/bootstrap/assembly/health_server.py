@@ -12,7 +12,6 @@ from bioetl.application.observability.control_plane_integrity_metrics import (
 from bioetl.application.observability.control_plane_archive import (
     resolve_control_plane_archive_root,
 )
-from bioetl.composition.control_plane_paths import FileEvidenceReadContextFactory
 from bioetl.application.services.evidence_location.resolver import (
     EvidenceLocationResolver,
 )
@@ -177,19 +176,6 @@ def create_health_server_dependencies(
         run_manifest_port=control_plane_ports.manifest_port,
         run_ledger_port=control_plane_ports.ledger_port,
         workflow_manifest_port=control_plane_ports.workflow_manifest_port,
-        evidence_location_resolver=EvidenceLocationResolver(
-            locations=control_plane_ports.location_port
-            if hasattr(control_plane_ports, "location_port")
-            else getattr(control_plane_ports, "evidence_location_port", None),
-            aliases=getattr(control_plane_ports, "alias_registry", None),
-            opener=FileEvidenceReadContextFactory(),
-        )
-        if (
-            hasattr(control_plane_ports, "location_port")
-            or hasattr(control_plane_ports, "evidence_location_port")
-        )
-        and hasattr(control_plane_ports, "alias_registry")
-        else None,
         control_plane_evidence_service=ControlPlaneEvidenceService(
             archive_verifier=FileArchiveStore(
                 resolved_data_root,
