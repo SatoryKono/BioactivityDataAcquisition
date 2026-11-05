@@ -543,6 +543,75 @@ def _ready_selected_run_payload() -> dict[str, object]:
     }
 
 
+def _readiness_row(payload: dict[str, object]) -> dict[str, object]:
+    readiness = payload["replay_readiness"]
+    assert isinstance(readiness, list) and readiness
+    row = readiness[0]
+    assert isinstance(row, dict)
+    return row
+
+
+def _apply_selected_run_mutation(payload: dict[str, object], spec: object) -> None:
+    """Apply a compact mutation spec against the real selected-run-status contract.
+
+    Spec forms (no Jules/CodeRabbit invented top-level fields):
+    - ``("readiness", field, value)``
+    - ``("top", field, value)``
+    - ``("checks", code, result, reason)``  → single replay_checks row
+    """
+    if not isinstance(spec, tuple) or not spec:
+        raise TypeError(f"unsupported mutation spec: {spec!r}")
+    kind = spec[0]
+    if kind == "readiness":
+        _readiness_row(payload)[str(spec[1])] = spec[2]
+        return
+    if kind == "top":
+        payload[str(spec[1])] = spec[2]
+        return
+    if kind == "checks":
+        # Tip contract only: fail/unknown via replay_checks (not manifest_present etc.).
+        payload["replay_checks"] = [
+            {"code": str(spec[1]), "result": str(spec[2]), "reason": str(spec[3])}
+        ]
+        return
+    raise TypeError(f"unsupported mutation kind: {kind!r}")
+
+
+def _assert_run_id_verify_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    ops_get,
+    require_ops: bool,
+    fail_needle: str,
+    pipeline: str | None = "chembl_assay",
+) -> None:
+    """Shared FAIL path for --run-id: verify() + direct endpoint findings."""
+    monkeypatch.setattr(mod, "_json_get", ops_get)
+    assert (
+        mod.verify(
+            repo=tmp_path,
+            ops_url="http://127.0.0.1:8000",
+            container="bioetl",
+            pipeline=pipeline,
+            require_ops=require_ops,
+            run_id="run-a",
+        )
+        == 1
+    )
+    state = mod._VerificationState()
+    mod._verify_run_id_endpoint(
+        state,
+        ops_url="http://127.0.0.1:8000",
+        pipeline=pipeline,
+        run_id="run-a",
+        require_ops=require_ops,
+        bind_aligned=True,
+    )
+    assert state.ok is False
+    assert any(fail_needle in line for line in state.findings), state.findings
+
+
 def test_verify_run_id_success(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -556,7 +625,6 @@ def test_verify_run_id_success(
             selected_run=_ready_selected_run_payload(),
         ),
     )
-
     assert (
         mod.verify(
             repo=tmp_path,
@@ -570,74 +638,31 @@ def test_verify_run_id_success(
     )
 
 
-def _mutate_readiness_verdict(payload: dict[str, object]) -> None:
-    readiness = payload["replay_readiness"]
-    assert isinstance(readiness, list)
-    row = readiness[0]
-    assert isinstance(row, dict)
-    row["verdict"] = "INSUFFICIENT"
-
-
-def _mutate_evidence_completeness(payload: dict[str, object]) -> None:
-    payload["evidence_completeness"] = "INCOMPLETE"
-
-
-def _mutate_empty_replay_readiness(payload: dict[str, object]) -> None:
-    payload["replay_readiness"] = []
-
-
-def _mutate_non_ready_domain(payload: dict[str, object]) -> None:
-    readiness = payload["replay_readiness"]
-    assert isinstance(readiness, list)
-    row = readiness[0]
-    assert isinstance(row, dict)
-    row["domain_verdict"] = "blocked"
-
-
-def _mutate_manifest_not_recorded(payload: dict[str, object]) -> None:
-    # Tip contract: missing manifest is a replay_checks unknown, not top-level
-    # manifest_present (Jules/CodeRabbit invented field — not on selected-run-status).
-    payload["replay_checks"] = [
-        {
-            "code": "manifest_not_recorded",
-            "result": "unknown",
-            "reason": "manifest_not_recorded",
-        }
-    ]
-
-
-def _mutate_corrupt_object_check(payload: dict[str, object]) -> None:
-    # Tip contract: object corruption surfaces as a failed replay check.
-    payload["replay_checks"] = [
-        {
-            "code": "pipeline_run_report_json",
-            "result": "fail",
-            "reason": "digest_mismatch",
-        }
-    ]
-
-
-def _mutate_location_missing_check(payload: dict[str, object]) -> None:
-    # Tip contract: missing location/artifact is a failed/unknown replay check.
-    payload["replay_checks"] = [
-        {
-            "code": "pipeline_run_report_md",
-            "result": "fail",
-            "reason": "artifact_missing",
-        }
-    ]
-
-
 @pytest.mark.parametrize(
-    ("mutate", "fail_needle"),
+    ("mutation", "fail_needle"),
     [
-        (_mutate_readiness_verdict, "replay_readiness is not READY"),
-        (_mutate_evidence_completeness, "evidence_completeness is not COMPLETE"),
-        (_mutate_empty_replay_readiness, "no replay_readiness found"),
-        (_mutate_non_ready_domain, "domain_verdict is not exact_replay_ready"),
-        (_mutate_manifest_not_recorded, "replay_checks unknown"),
-        (_mutate_corrupt_object_check, "replay_checks failed"),
-        (_mutate_location_missing_check, "replay_checks failed"),
+        (("readiness", "verdict", "INSUFFICIENT"), "replay_readiness is not READY"),
+        (
+            ("top", "evidence_completeness", "INCOMPLETE"),
+            "evidence_completeness is not COMPLETE",
+        ),
+        (("top", "replay_readiness", []), "no replay_readiness found"),
+        (
+            ("readiness", "domain_verdict", "blocked"),
+            "domain_verdict is not exact_replay_ready",
+        ),
+        (
+            ("checks", "manifest_not_recorded", "unknown", "manifest_not_recorded"),
+            "replay_checks unknown",
+        ),
+        (
+            ("checks", "pipeline_run_report_json", "fail", "digest_mismatch"),
+            "replay_checks failed",
+        ),
+        (
+            ("checks", "pipeline_run_report_md", "fail", "artifact_missing"),
+            "replay_checks failed",
+        ),
     ],
     ids=[
         "verdict",
@@ -652,42 +677,20 @@ def _mutate_location_missing_check(payload: dict[str, object]) -> None:
 def test_verify_run_id_negative_selected_run_fields(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
-    mutate,
+    mutation: tuple[object, ...],
     fail_needle: str,
 ) -> None:
     """One-field regressions against the real selected-run-status contract."""
     expected_source_id = _seed_aligned_host_with_run(tmp_path, monkeypatch)
     payload = _ready_selected_run_payload()
-    mutate(payload)
-    monkeypatch.setattr(
-        mod,
-        "_json_get",
-        _aligned_list_ops_payload(expected_source_id, selected_run=payload),
-    )
-
-    assert (
-        mod.verify(
-            repo=tmp_path,
-            ops_url="http://127.0.0.1:8000",
-            container="bioetl",
-            pipeline="chembl_assay",
-            require_ops=False,
-            run_id="run-a",
-        )
-        == 1
-    )
-
-    state = mod._VerificationState()
-    mod._verify_run_id_endpoint(
-        state,
-        ops_url="http://127.0.0.1:8000",
-        pipeline="chembl_assay",
-        run_id="run-a",
+    _apply_selected_run_mutation(payload, mutation)
+    _assert_run_id_verify_fails(
+        tmp_path,
+        monkeypatch,
+        ops_get=_aligned_list_ops_payload(expected_source_id, selected_run=payload),
         require_ops=False,
-        bind_aligned=True,
+        fail_needle=fail_needle,
     )
-    assert state.ok is False
-    assert any(fail_needle in line for line in state.findings), state.findings
 
 
 @pytest.mark.parametrize("require_ops", [False, True])
@@ -699,37 +702,18 @@ def test_verify_run_id_fails_when_endpoint_unreachable(
     """Explicit --run-id fails closed when selected-run-status is unreachable."""
     expected_source_id = _seed_aligned_host_with_run(tmp_path, monkeypatch)
 
-    def ops_payload(url: str, **_kwargs: object) -> dict[str, object] | None:
+    def ops_get(url: str, **_kwargs: object) -> dict[str, object] | None:
         if "selected-run-status" in url:
             return None
         return _aligned_list_ops_payload(expected_source_id)(url)
 
-    monkeypatch.setattr(mod, "_json_get", ops_payload)
-    assert (
-        mod.verify(
-            repo=tmp_path,
-            ops_url="http://127.0.0.1:8000",
-            container="bioetl",
-            pipeline="chembl_assay",
-            require_ops=require_ops,
-            run_id="run-a",
-        )
-        == 1
-    )
-
-    state = mod._VerificationState()
-    mod._verify_run_id_endpoint(
-        state,
-        ops_url="http://127.0.0.1:8000",
-        pipeline="chembl_assay",
-        run_id="run-a",
+    _assert_run_id_verify_fails(
+        tmp_path,
+        monkeypatch,
+        ops_get=ops_get,
         require_ops=require_ops,
-        bind_aligned=True,
+        fail_needle="selected-run-status endpoint unreachable",
     )
-    assert state.ok is False
-    assert any(
-        "selected-run-status endpoint unreachable" in line for line in state.findings
-    ), state.findings
 
 
 def test_verify_run_id_requires_pipeline(
@@ -737,7 +721,6 @@ def test_verify_run_id_requires_pipeline(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _seed_aligned_host_with_run(tmp_path, monkeypatch)
-    monkeypatch.setattr(mod, "_json_get", lambda _url, **_kw: None)
     state = mod._VerificationState()
     mod._verify_run_id_endpoint(
         state,

@@ -563,11 +563,11 @@ def _verify_run_id_endpoint(
         f"{ops_url.rstrip('/')}/ops/observability/selected-run-status"
         f"?pipeline={pipeline}&run_id={run_id}"
     )
+    # require_ops / bind_aligned kept for call-site symmetry with other endpoints;
+    # explicit --run-id is always fail-closed when selected-run-status is missing.
+    del require_ops, bind_aligned
     result = _json_get(url, timeout=20.0)
     if result is None:
-        # bind_aligned / require_ops do not soften --run-id: selected-run evidence
-        # was explicitly requested and must be observed.
-        _ = (require_ops, bind_aligned)
         _record_selected_run_unreachable(state, url=url, run_id=run_id)
         return
 
