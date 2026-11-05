@@ -24,7 +24,10 @@ from bioetl.application.services.evidence_location.registration_models import (
 from bioetl.application.services.run_reports import DEFAULT_REPORT_ROOT
 from bioetl.domain.control_plane.run_evidence_location import (
     DEFAULT_EVIDENCE_ROOT_ALIAS,
+    EvidenceLocationInvalidError,
     EvidenceLocationKind,
+    RunEvidenceLocation,
+    build_run_evidence_location,
 )
 from bioetl.infrastructure.control_plane.file_evidence_location_store import (
     FileEvidenceLocationStore,
@@ -140,28 +143,38 @@ def _record_outcome(
         logger.error("%s", message)
 
 
-def _ownership_key(target: MigrationTarget) -> tuple[str, str, str]:
-    return (target.kind.value, target.owner, target.run_id)
+def _validated_location(
+    target: MigrationTarget,
+) -> RunEvidenceLocation | EvidenceLocationRegistrationOutcome:
+    """Build the same normalized locator registration uses, or invalid."""
+    try:
+        return build_run_evidence_location(
+            kind=target.kind,
+            owner=target.owner,
+            run_id=target.run_id,
+            runtime_source_id=target.runtime_source_id,
+            root_alias=DEFAULT_EVIDENCE_ROOT_ALIAS,
+            relative_data_root=target.relative_data_root,
+            workflow_run_id=target.workflow_run_id,
+        )
+    except EvidenceLocationInvalidError as exc:
+        return EvidenceLocationRegistrationOutcome(code="invalid", detail=str(exc))
 
 
-def _binding_fingerprint(target: MigrationTarget) -> tuple[str, str, str | None]:
-    return (
-        target.runtime_source_id,
-        target.relative_data_root,
-        target.workflow_run_id,
-    )
+def _ownership_key(location: RunEvidenceLocation) -> tuple[str, str, str]:
+    return (location.kind.value, location.owner, location.run_id)
 
 
 def _classify_dry_run(
     service: EvidenceLocationRegistrationService,
     request: EvidenceLocationRegisterRequest,
     *,
-    planned: dict[tuple[str, str, str], tuple[str, str, str | None]],
-    target: MigrationTarget,
+    planned: dict[tuple[str, str, str], str],
+    location: RunEvidenceLocation,
 ) -> EvidenceLocationRegistrationOutcome:
     """Validate binding + existing/planned catalog without publishing a locator."""
-    key = _ownership_key(target)
-    fingerprint = _binding_fingerprint(target)
+    key = _ownership_key(location)
+    fingerprint = location.revision
     prior = planned.get(key)
     if prior is not None:
         if prior == fingerprint:
@@ -201,16 +214,27 @@ def execute_migration(
     store = FileEvidenceLocationStore(report_root=report_root)
     service = EvidenceLocationRegistrationService(locations=store)
     stats = _empty_stats()
-    planned: dict[tuple[str, str, str], tuple[str, str, str | None]] = {}
+    planned: dict[tuple[str, str, str], str] = {}
 
     for target in targets:
         request = _request_for(target)
+        validated = _validated_location(target)
+        if isinstance(validated, EvidenceLocationRegistrationOutcome):
+            _record_outcome(
+                stats,
+                target=target,
+                code=validated.code,
+                detail=validated.detail,
+                planned=dry_run,
+            )
+            continue
+
         if dry_run:
             outcome = _classify_dry_run(
                 service,
                 request,
                 planned=planned,
-                target=target,
+                location=validated,
             )
             _record_outcome(
                 stats,

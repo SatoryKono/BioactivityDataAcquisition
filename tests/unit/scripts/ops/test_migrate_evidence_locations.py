@@ -82,6 +82,31 @@ def test_execute_migration_dry_run_flags_intra_batch_conflict(
     assert stats["conflict"] == 1
 
 
+def test_execute_migration_dry_run_normalizes_owner_whitespace(
+    tmp_path: Path,
+) -> None:
+    report_root = tmp_path / "reports"
+    report_root.mkdir()
+
+    first = _workflow_target()
+    second = MigrationTarget(
+        kind=first.kind,
+        owner=f" {first.owner} ",
+        run_id=first.run_id,
+        runtime_source_id=first.runtime_source_id,
+        relative_data_root=first.relative_data_root,
+    )
+
+    stats = execute_migration(
+        [first, second],
+        report_root=report_root,
+        dry_run=True,
+    )
+    assert stats["registered"] == 1
+    assert stats["already_identical"] == 1
+    assert stats["conflict"] == 0
+
+
 def test_execute_migration_apply(tmp_path: Path) -> None:
     report_root = tmp_path / "reports"
     report_root.mkdir()
