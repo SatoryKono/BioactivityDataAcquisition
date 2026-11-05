@@ -2099,7 +2099,6 @@
       "docs/05-operations/monitoring-architecture.md",
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-dq-v2.json",
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_replay_drift_events_total": [
@@ -2429,11 +2428,7 @@
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/observability/metrics-catalog.md",
-      "grafana/dashboards/bioetl-control-plane-v1.json",
-      "grafana/dashboards/bioetl-dq-v2.json",
-      "grafana/dashboards/bioetl-incident-v1.json",
-      "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-run-explorer-v1.json"
+      "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_workflow_pipeline_verdict_status": [
       "docs/03-guides/metrics-monitoring.md",
