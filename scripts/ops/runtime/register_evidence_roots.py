@@ -55,9 +55,9 @@ def parse_args(args: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 def _optional_text(value: object) -> str | None:
-    if not value:
+    if not isinstance(value, str) or not value.strip():
         return None
-    return str(value)
+    return value.strip()
 
 
 def _require_object(payload: object) -> Mapping[str, object]:
@@ -66,16 +66,29 @@ def _require_object(payload: object) -> Mapping[str, object]:
     return payload
 
 
+def _required_text(source: Mapping[str, object], key: str) -> str:
+    value = source.get(key)
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    raise ValueError(f"Payload missing required field {key}.")
+
+
+def _root_alias(source: Mapping[str, object]) -> str:
+    if "root_alias" not in source:
+        return DEFAULT_EVIDENCE_ROOT_ALIAS
+    return _required_text(source, "root_alias")
+
+
 def _request_from_direct(
     payload: Mapping[str, object],
 ) -> EvidenceLocationRegisterRequest:
     return EvidenceLocationRegisterRequest(
-        kind=EvidenceLocationKind(str(payload.get("kind"))),
-        owner=str(payload.get("owner")),
-        run_id=str(payload.get("run_id")),
-        runtime_source_id=str(payload.get("runtime_source_id")),
-        relative_data_root=str(payload.get("relative_data_root")),
-        root_alias=str(payload.get("root_alias", DEFAULT_EVIDENCE_ROOT_ALIAS)),
+        kind=EvidenceLocationKind(_required_text(payload, "kind")),
+        owner=_required_text(payload, "owner"),
+        run_id=_required_text(payload, "run_id"),
+        runtime_source_id=_required_text(payload, "runtime_source_id"),
+        relative_data_root=_required_text(payload, "relative_data_root"),
+        root_alias=_root_alias(payload),
         workflow_run_id=_optional_text(payload.get("workflow_run_id")),
     )
 
@@ -86,20 +99,26 @@ def _request_from_identity(
     identity = payload["identity"]
     if not isinstance(identity, dict):
         raise ValueError("Payload missing required evidence location fields.")
+    relative_data_root = _required_text(payload, "relative_data_root")
+    runtime_source_id = _required_text(identity, "runtime_source_id")
     if "workflow_name" in identity:
         kind = EvidenceLocationKind.WORKFLOW
-        owner = str(identity.get("workflow_name"))
+        owner = _required_text(identity, "workflow_name")
+        run_id = _required_text(identity, "workflow_run_id")
+        workflow_run_id = None
     else:
         kind = EvidenceLocationKind.PIPELINE
-        owner = str(identity.get("pipeline_name", "unknown"))
+        owner = _required_text(identity, "pipeline_name")
+        run_id = _required_text(identity, "run_id")
+        workflow_run_id = _optional_text(identity.get("workflow_run_id"))
     return EvidenceLocationRegisterRequest(
         kind=kind,
         owner=owner,
-        run_id=str(identity.get("run_id")),
-        runtime_source_id=str(identity.get("runtime_source_id", "")),
-        relative_data_root=str(payload.get("relative_data_root", ".")),
-        root_alias=str(payload.get("root_alias", DEFAULT_EVIDENCE_ROOT_ALIAS)),
-        workflow_run_id=_optional_text(identity.get("workflow_run_id")),
+        run_id=run_id,
+        runtime_source_id=runtime_source_id,
+        relative_data_root=relative_data_root,
+        root_alias=_root_alias(payload),
+        workflow_run_id=workflow_run_id,
     )
 
 
@@ -122,20 +141,20 @@ def _plan(
     request: EvidenceLocationRegisterRequest,
     path: Path,
 ) -> str:
-    lookup = service.locations.lookup(
-        kind=request.kind,
-        owner=request.owner,
-        run_id=request.run_id,
-        expected_runtime_source_id=request.runtime_source_id,
-    )
-    if lookup.code.value == "found":
+    outcome = service.verify(request)
+    if outcome.code == "ok":
         logger.info("[DRY-RUN] Will be identical/already registered for %s", path)
         return "PASS"
-    if lookup.code.value == "identity_conflict":
-        logger.warning("[DRY-RUN] Will conflict for %s", path)
+    if outcome.code in {"binding_mismatch", "identity_conflict"}:
+        logger.warning("[DRY-RUN] Will conflict for %s: %s", path, outcome.detail)
         return "SKIPPED"
-    logger.info("[DRY-RUN] Will register new location for %s", path)
-    return "NOT_RUN"
+    if outcome.code == "location_missing":
+        logger.info("[DRY-RUN] Will register new location for %s", path)
+        return "NOT_RUN"
+    logger.error(
+        "[DRY-RUN] Cannot register %s: %s", path, outcome.detail or outcome.code
+    )
+    return "FAIL"
 
 
 def _apply(
@@ -173,6 +192,14 @@ def _process_one(
         results["FAIL"] += 1
         return
     bucket = _apply(service, request, path) if apply else _plan(service, request, path)
+    logger.info(
+        "entry path=%s kind=%s owner=%s run_id=%s outcome=%s",
+        path,
+        getattr(request.kind, "value", request.kind),
+        request.owner,
+        request.run_id,
+        bucket,
+    )
     results[bucket] += 1
 
 

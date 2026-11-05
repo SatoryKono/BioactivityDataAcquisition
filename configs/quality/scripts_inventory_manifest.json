@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-05T12:19:35.830866+00:00",
+  "generated_at": "2026-11-05T12:44:15.963867+00:00",
   "summary": {
     "total_scripts": 712,
     "status_counts": {
-      "active": 335,
-      "supporting": 377
+      "active": 334,
+      "supporting": 378
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -26528,17 +26528,21 @@
     {
       "path": "scripts/ops/runtime/register_evidence_roots.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
         {
           "path": "tests/unit/scripts/ops/test_register_evidence_roots.py",
-          "line": 19,
+          "line": 21,
           "source_group": "tests",
           "text": "from scripts.ops.runtime.register_evidence_roots import _extract_request, main"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as the bounded RF-006 historical evidence-root registrar (`python -m scripts.ops.runtime.register_evidence_roots`) behind explicit manifest paths; keep it supporting so active_script_count_max stays flat, and promote only after an active slot is freed."
     },
     {
       "path": "scripts/ops/runtime/wsl/start-wsl-proxy.bat",
