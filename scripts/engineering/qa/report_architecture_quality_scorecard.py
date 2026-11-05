@@ -62,13 +62,12 @@ def semantic_completeness_payload(
     gaps: list[dict[str, str]] = []
     for row in aggregates:
         aggregate = str(row["aggregate"])
-        registered = {str(item).casefold() for item in row["invariants"]}
         linked = {
             str(item["invariant"]).casefold() for item in row["invariant_test_links"]
         }
         for name in DOCUMENTED_KEY_INVARIANTS[aggregate]:
             key = name.casefold()
-            if key in registered or key in linked:
+            if key in linked:
                 continue
             gaps.append(
                 {
@@ -130,6 +129,7 @@ def _refresh_aggregate_test_links() -> None:
 
 
 def main() -> int:
+    """Refresh aggregate evidence and write the architecture scorecard."""
     _refresh_aggregate_test_links()
     payload = build_architecture_quality_scorecard(repo_root=PROJECT_ROOT)
     DEFAULT_OUTPUT.write_text(
