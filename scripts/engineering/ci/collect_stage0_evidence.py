@@ -6,7 +6,7 @@ import hashlib
 from datetime import datetime, UTC
 import os
 import subprocess
-from typing import Dict, Any
+from typing import Any
 
 def sha256(data: Any) -> str:
     if isinstance(data, dict):

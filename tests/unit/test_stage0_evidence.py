@@ -1,4 +1,4 @@
-import pytest
+
 from scripts.engineering.ci.collect_stage0_evidence import sha256
 from scripts.engineering.ci.evaluate_mypy import normalize_diagnostics
 

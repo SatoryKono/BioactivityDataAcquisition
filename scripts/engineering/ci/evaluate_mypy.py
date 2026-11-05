@@ -4,7 +4,7 @@ import json
 import os
 import re
 import hashlib
-from typing import Dict, Any, List
+from typing import Any
 
 def normalize_diagnostics(output: str) -> list[str]:
     """Normalize mypy diagnostics for comparison, ignoring line numbers and times."""
