@@ -3,6 +3,7 @@
 version: 1.0.0
 provider: composite
 entity: assay
+expected_normalization_profile_hash: 4f5afe8d853477bc2a0764de6062a6fdad0fdaba83bd37577cd202b9fce00415
 pipeline:
   pipeline_name: composite_assay
   provider: composite

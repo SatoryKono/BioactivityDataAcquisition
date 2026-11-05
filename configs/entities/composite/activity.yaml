@@ -3,6 +3,7 @@
 version: 1.0.0
 provider: composite
 entity: activity
+expected_normalization_profile_hash: db230eaacf6b465d10099a22726ffa85671fd8243ad5feda26f4d94f6ce4b824
 pipeline:
   pipeline_name: composite_activity
   provider: composite

@@ -28,6 +28,15 @@ class PreflightSchemaOrchestrationMixin(PreflightValidationReportingMixin):
 
     _SCHEMA_REGISTRY: dict[str, type] | None = None
 
+    def get_expected_normalization_profile_hash(self, source_profiles: dict[str, ProfileInfo]) -> str:
+        """Calculate the actual aggregated profile hash for the composite DAG."""
+        from bioetl.domain.normalization.profiles._normalization_helpers import (
+            _sha256_hex,
+        )
+        payload = {src: info.profile_hash for src, info in source_profiles.items()}
+        return _sha256_hex(payload)
+
+
     def _parse_pipeline_identity(self, pipeline_name: str) -> tuple[str, str] | None:
         """Return ``(provider, entity)`` for ``provider_entity`` pipelines."""
         if "_" not in pipeline_name:

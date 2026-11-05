@@ -117,3 +117,24 @@ def test_composite_many_to_one_enricher_aggregation_is_validated() -> None:
     assert schema.composite.enrichers[0].cardinality == "many_to_one"
     assert schema.composite.enrichers[0].aggregation is not None
     assert schema.composite.enrichers[0].aggregation.group_by == "doi"
+
+def test_composite_preflight_hash_mismatch() -> None:
+    """Composite preflight must fail fast if expected_normalization_profile_hash mismatches."""
+    from bioetl.application.composite.preflight_validator import CompositePreflightValidationService
+    from bioetl.application.composite._preflight_types import PreflightValidationError
+    from bioetl.infrastructure.schemas.composite_config import CompositeConfigFileSchema
+    from unittest.mock import MagicMock
+    import yaml
+
+    payload = yaml.safe_load(_base_composite_yaml(with_version=True))
+    payload["composite"]["expected_normalization_profile_hash"] = "invalid_hash_abc123"
+    schema = CompositeConfigFileSchema.model_validate(payload)
+    config = schema.to_domain()
+
+    service = CompositePreflightValidationService(MagicMock())
+    service._load_source_profiles = MagicMock(return_value={"test_src": MagicMock(profile_hash="hash456")})
+
+    with pytest.raises(PreflightValidationError) as exc:
+        service.validate(config)
+
+    assert "Expected composite profile hash 'invalid_hash_abc123'" in str(exc.value)

@@ -160,6 +160,25 @@ class CompositePreflightValidationService(
         self._log_schema_loading_summary(source_fields)
         self._log_profile_loading_summary(source_profiles)
 
+        if getattr(config, "expected_normalization_profile_hash", None) is not None:
+            actual_hash = self.get_expected_normalization_profile_hash(source_profiles)
+            if actual_hash != config.expected_normalization_profile_hash:
+                issues.append(
+                    ValidationIssue(
+                        field="expected_normalization_profile_hash",
+                        source="composite",
+                        issue_type="mismatch",
+                        message=(
+                            f"Expected composite profile hash '{config.expected_normalization_profile_hash}', "
+                            f"but got '{actual_hash}'"
+                        ),
+                        severity="error",
+                    )
+                )
+
+
+
+
         field_priorities = config.merge.field_priorities
         compatibility_overrides = config.merge.normalization_compatibility_overrides
         for field_name, priorities in field_priorities.items():

@@ -3,6 +3,7 @@
 version: 1.0.0
 provider: composite
 entity: target
+expected_normalization_profile_hash: 5e92245129ab997da0efebac9f649d72e8fc28acb0049ff56312ba7f9238c327
 pipeline:
   pipeline_name: composite_target
   provider: composite
