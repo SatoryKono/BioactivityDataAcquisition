@@ -18,11 +18,11 @@ from bioetl.composition.runtime_builders.run_manifest_support import (
 )
 from bioetl.composition.runtime_builders._run_manifest_creation_support import (
     build_manifest_create_request,
-    create_ledger_service,
     emit_replay_reconstructability_metric,
 )
 from bioetl.composition.runtime_builders._run_manifest_creation_support_helpers import (
     RunManifestCreateRequestInputs,
+    maybe_create_ledger_service,
 )
 from bioetl.composition.runtime_builders._run_manifest_publication_support import (
     create_manifest_record,
@@ -104,7 +104,7 @@ def _publish_manifest_and_refs(
 ) -> tuple[ManifestControlPlaneRefs, RunLedgerService | None]:
     """Persist the manifest record and translate it into runner control-plane refs."""
     manifest_store = create_manifest_store(inputs)
-    ledger_service = _maybe_create_ledger_service(
+    ledger_service = maybe_create_ledger_service(
         ledger_enabled=ledger_enabled,
         inputs=inputs,
         ctx=ctx,
@@ -208,14 +208,3 @@ def _build_manifest_create_request(
         )
     )
     return request
-
-
-def _maybe_create_ledger_service(
-    *,
-    ledger_enabled: bool,
-    inputs: RunnerInputs,
-    ctx: PipelineRunContext,
-) -> RunLedgerService | None:
-    if not ledger_enabled:
-        return None
-    return create_ledger_service(inputs, ctx)

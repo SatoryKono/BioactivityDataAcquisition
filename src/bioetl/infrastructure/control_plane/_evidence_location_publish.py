@@ -80,16 +80,22 @@ def publish_bytes_if_absent(
         dir=target.parent,
     )
     temp_path = Path(temp_path_str)
+    # Track raw-fd ownership until fdopen takes over so an fdopen failure
+    # never leaks the mkstemp descriptor; path unlink stays a separate duty.
+    fd_owned = True
     try:
         try:
-            with os.fdopen(fd, "wb") as handle:
-                handle.write(data)
-                handle.flush()
-                flush_control_plane_file_descriptor(handle.fileno())
-        except Exception:
+            handle = os.fdopen(fd, "wb")
+        except OSError:
             with contextlib.suppress(OSError):
                 os.close(fd)
+            fd_owned = False
             raise
+        fd_owned = False
+        with handle:
+            handle.write(data)
+            handle.flush()
+            flush_control_plane_file_descriptor(handle.fileno())
         try:
             target = assert_path_within_trusted_base(
                 target,
@@ -101,6 +107,9 @@ def publish_bytes_if_absent(
             return False
         return True
     finally:
+        if fd_owned:
+            with contextlib.suppress(OSError):
+                os.close(fd)
         with contextlib.suppress(OSError):
             if temp_path.exists():
                 temp_path.unlink()
