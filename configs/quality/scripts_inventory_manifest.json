@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-05T11:32:51.101370+00:00",
+  "generated_at": "2026-11-05T12:32:05.109406+00:00",
   "summary": {
     "total_scripts": 712,
     "status_counts": {
-      "active": 335,
-      "supporting": 377
+      "active": 334,
+      "supporting": 378
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -2896,7 +2896,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 599,
+          "line": 607,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3678,7 +3678,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 598,
+          "line": 606,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3733,7 +3733,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 597,
+          "line": 605,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -10432,7 +10432,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 31,
+      "reference_count": 32,
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
@@ -10503,7 +10503,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 499,
+          "line": 507,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10546,7 +10546,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 612,
+          "line": 620,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -11490,7 +11490,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 309,
+      "reference_count": 311,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -12883,7 +12883,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 340,
+          "line": 343,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -20689,7 +20689,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 699,
+          "line": 707,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23825,7 +23825,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 811,
+          "line": 819,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -26326,17 +26326,21 @@
     {
       "path": "scripts/ops/runtime/migrate_evidence_locations.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
         {
           "path": "tests/unit/scripts/ops/test_migrate_evidence_locations.py",
-          "line": 3,
+          "line": 10,
           "source_group": "tests",
-          "text": "from scripts.ops.runtime.migrate_evidence_locations import execute_migration, MigrationTarget"
+          "text": "from scripts.ops.runtime.migrate_evidence_locations import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as the bounded RF-006 historical evidence-location migration CLI (`python -m scripts.ops.runtime.migrate_evidence_locations`) behind an explicit targets JSON list; keep it supporting so active_script_count_max stays flat, and promote only after an active slot is freed and the migration window closes."
     },
     {
       "path": "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1",
