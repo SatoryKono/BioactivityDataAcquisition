@@ -62,6 +62,8 @@ BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
 DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
+GRAFANA_SELECTOR_CONTRACT_TEST = "tests/integration/test_grafana_selector_contract.py"
+GRAFANA_VARIABLE_REFERENCE_TEST = "tests/integration/test_grafana_variable_reference.py"
 RUN_REPORT_CONTRACTS_TEST = "tests/unit/domain/run_reports/test_contracts.py"
 SCRIPTS_INVENTORY_MANIFEST_TEST = (
     "tests/architecture/test_scripts_inventory_manifest.py"
@@ -749,8 +751,8 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     ".vscode/": ("tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",),
     "docs/03-guides/dashboards/": (
         DOCUMENTATION_SYNC_TEST,
-        "tests/integration/test_grafana_selector_contract.py",
-        "tests/integration/test_grafana_variable_reference.py",
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
     ),
     "grafana/dashboards/": (
         DASHBOARD_SCENES_CONTRACT_TEST,
@@ -759,8 +761,8 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/integration/test_grafana_dashboard_cta_links.py",
         "tests/integration/test_grafana_dashboard_metric_semantics.py",
         "tests/integration/test_grafana_evidence_readability.py",
-        "tests/integration/test_grafana_selector_contract.py",
-        "tests/integration/test_grafana_variable_reference.py",
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
     ),
     # Prometheus-only mirror of shipped dashboards; same owners as grafana/dashboards/.
     "grafana/dashboards-prometheus-only/": (
@@ -770,8 +772,8 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/integration/test_grafana_dashboard_cta_links.py",
         "tests/integration/test_grafana_dashboard_metric_semantics.py",
         "tests/integration/test_grafana_evidence_readability.py",
-        "tests/integration/test_grafana_selector_contract.py",
-        "tests/integration/test_grafana_variable_reference.py",
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
     ),
     "docs/02-architecture/decisions/": (
         "tests/architecture/test_adr_enforcement_matrix.py",
