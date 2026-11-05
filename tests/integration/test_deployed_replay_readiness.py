@@ -62,6 +62,26 @@ def test_deployed_selected_run_is_ready(run):
         assert result["verdict"] == "OK", result
         assert result["evidence_completeness"] == "COMPLETE", result
 
+        # RF-008: selected-run-status exposes manifest evidence via replay_checks
+        # (not top-level manifest_present / source_identity_state). Catalog already
+        # asserts aligned source_identity_state above.
+        checks = {
+            item["code"]: item
+            for item in result["replay_checks"]
+            if isinstance(item, dict) and "code" in item
+        }
+        required_manifest_checks = {
+            "effective_config_hash",
+            "dependency_lock_hash",
+            "input_snapshot_fingerprint",
+            "exact_replay_family",
+        }
+        assert required_manifest_checks <= set(checks), result
+        assert "manifest_not_recorded" not in checks, result
+        assert all(
+            checks[code]["result"] == "pass" for code in required_manifest_checks
+        ), result
+
 
 @pytest.mark.parametrize("run", _runs, ids=lambda run: run["run_id"])
 @pytest.mark.parametrize("selector", ["run_id", "pipeline", "run_type"])
