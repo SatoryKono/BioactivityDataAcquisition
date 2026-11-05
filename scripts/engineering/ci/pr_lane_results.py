@@ -119,6 +119,9 @@ EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
 CHECK_DOC_LINKS_GUARDRAILS_TEST = (
     "tests/architecture/test_check_doc_links_guardrails.py"
 )
+ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
+    "tests/architecture/test_root_hygiene_review_registry.py"
+)
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     **dict.fromkeys(
@@ -128,7 +131,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             ".vscode/settings.json",
         ),
         (
-            "tests/architecture/test_root_hygiene_review_registry.py",
+            ROOT_HYGIENE_REVIEW_REGISTRY_TEST,
             "tests/architecture/test_root_hygiene_workflow.py",
         ),
     ),
@@ -142,6 +145,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "configs/quality/layered_suffix_policy.yaml": (
         "tests/architecture/test_layer_aware_suffix_policy.py",
+    ),
+    "configs/quality/architecture_acceptance_baseline.yaml": (
+        "tests/architecture/test_architecture_acceptance_baseline.py",
     ),
     "configs/quality/external_resource_inventory_pr12751_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
@@ -176,6 +182,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
     "configs/quality/external_resource_inventory_pr12751_main_merge_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+    ),
+    "configs/quality/external_resource_inventory_pr12755_main_merge_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+    ),
+    "configs/quality/external_resource_inventory_pr12755_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
@@ -355,10 +369,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/unit/application/services/run_reports/test_composite_report.py",
         ),
     ),
-    # pack-v2.1 stage handoffs are working_report inventory surfaces (not runtime code).
+    # pack-v2.1 stage handoffs and their evidence logs are inventory surfaces
+    # (not runtime code). Unmapped logs fail shadow-compare closed.
     **dict.fromkeys(
         (
             "reports/audit/pack-v2.1/P02-ddd-domain.md",
+            "reports/audit/pack-v2.1/P02-invariant-runs.log",
+            "reports/audit/pack-v2.1/domain-pylint-duplicate-code-scan.log",
+            "reports/audit/pack-v2.1/domain-vulture-dead-code-scan.log",
             "reports/audit/pack-v2.1/P05-interfaces-contracts.md",
         ),
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
@@ -416,6 +434,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12728_main_merge_12737_review.json",
             "configs/quality/external_resource_inventory_pr12728_mypy_types_review.json",
             "configs/quality/external_resource_inventory_pr12730_rf001_004_review.json",
+            "configs/quality/external_resource_inventory_pr12756_review.json",
+            "configs/quality/external_resource_inventory_pr12756_main_12748_review.json",
+            "configs/quality/external_resource_inventory_pr12756_main_12751_review.json",
+            "configs/quality/external_resource_inventory_pr12756_main_12755_review.json",
+            "configs/quality/external_resource_inventory_pr12756_main_12766_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -586,6 +609,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
     ),
     ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
+    "src/memory/dedup.py": ("tests/unit/memory/test_dedup.py",),
     "src/memory/rag/chunking.py": ("tests/unit/memory/test_rag_indexing.py",),
     "configs/quality/mypy_diagnostic_baseline.json": (
         "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
@@ -706,12 +730,21 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         ("tests/architecture/test_silver_filter_boundary_inventory.py",),
     ),
+    ".github/root-allowlist.txt": (
+        ROOT_HYGIENE_REVIEW_REGISTRY_TEST,
+        "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
+    ),
+    ".vulture_whitelist.py": (
+        "tests/architecture/test_layer_dependencies.py",
+        ROOT_HYGIENE_REVIEW_REGISTRY_TEST,
+    ),
 }
 
 # Directory-level edges for generated artifacts and diagrams where an exact
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    ".vscode/": ("tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",),
     "docs/03-guides/dashboards/": (
         DOCUMENTATION_SYNC_TEST,
         "tests/integration/test_grafana_selector_contract.py",

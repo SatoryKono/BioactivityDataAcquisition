@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4057 |
-| Tracked doc-like files | 4057 |
+| Doc-like files | 4067 |
+| Tracked doc-like files | 4067 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4057 |
+| tracked | 4067 |
 
 ## Lifecycle Counts
 
@@ -28,9 +28,9 @@
 | active_quality_baseline | 120 |
 | closeout_evidence | 168 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 29 |
+| docs_reports_curated_or_historical_report | 30 |
 | docs_reports_generated_or_route_owned | 7 |
-| docs_reports_retention_sensitive_evidence | 22 |
+| docs_reports_retention_sensitive_evidence | 28 |
 | generated_skill_reference_mirror | 19 |
 | generated_test_run_evidence | 6 |
 | guide | 2 |
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 292 |
+| working_report | 295 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -51,29 +51,29 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 751 |
+| Active | 757 |
 | Archived | 1554 |
 | Canonical | 76 |
 | Generated | 1066 |
-| Working | 610 |
+| Working | 614 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 751 |
+| active | 757 |
 | archive | 1554 |
 | canonical | 76 |
 | generated | 1066 |
-| working | 610 |
+| working | 614 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 322 |
+| archive-after-migration | 326 |
 | generate-automatically | 1066 |
-| keep | 2669 |
+| keep | 2675 |
 
 ## Cleanup Candidates
 
@@ -93,6 +93,7 @@
 | `docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md` | Working | 3 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
 | `docs/reports/audit/github_settings_inventory.md` | Working | 0 | archive-after-migration |
+| `docs/reports/audit/pack-v2.1/evidence-collection/alertmanager_delivery_verification.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-11.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-16.md` | Working | 0 | archive-after-migration |
@@ -158,7 +159,6 @@
 | `reports/audit-runs/12107-r07/logs/pytest-lifecycle-precommit.txt` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/map-acceptance-verdict.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/owner-decision-package.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/12107-r07/port-relationship-index.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -262,6 +262,7 @@
 | --- | --- | --- | --- |
 | `docs/reports/README.md` | tracked | docs_reports_curated_entrypoint | keep |
 | `docs/reports/audit/github_settings_inventory.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/audit/pack-v2.1/evidence-collection/alertmanager_delivery_verification.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-11.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-16.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
@@ -292,14 +293,13 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/evidence/INDEX.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/README.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/issue-12714/bronze_cleanup.txt` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/issue-12714/conformance_run.txt` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/issue-12714/http_client_close.txt` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/issue-12714/lifecycle_ownership.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/issue-12714/run_ledger_fail_closed.txt` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/issue-12714/silver_vacuum.txt` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/03-synthesis/CROSS-SYNTHESIS-project-legacy-compatibility-remediation.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/project-legacy-compatibility-remediation/04-decisions/DECISIONS.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/project-legacy-compatibility-remediation/05-risks/RISKS.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/project-legacy-compatibility-remediation/06-status/recovered-cross-synthesis-provenance-2026-05-21.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/project-legacy-compatibility-remediation/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/project-legacy-compatibility-remediation/composition-bootstrap-and-registry-compat/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/project-legacy-compatibility-remediation/config-schema-and-migration-compat/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/project-legacy-compatibility-remediation/domain-application-legacy-seams/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 

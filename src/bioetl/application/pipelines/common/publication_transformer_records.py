@@ -35,7 +35,7 @@ def classification_payload(
         raw_type=raw_type,
         raw_types_list=raw_types_list,
         raw_field_name="publication_type",
-        data=data,  # type: ignore[arg-type]
+        data=data,  # type: ignore[arg-type]  # tracked(#12721): unjustified type ignore debt
     )
 
 

@@ -76,8 +76,8 @@ async def release_pending_gold_quarantine(
     writer._pending_gold_outcome_quarantine = ()
     batch_id = writer._gold_quarantine_batch_id or writer._context.source_batch_id
     await flush_gold_outcome_quarantine(
-        quarantine=writer._gold_quarantine_port,  # type: ignore[arg-type]
-        items=pending,  # type: ignore[arg-type]
+        quarantine=writer._gold_quarantine_port,  # type: ignore[arg-type]  # tracked(#12721): unjustified type ignore debt
+        items=pending,  # type: ignore[arg-type]  # tracked(#12721): unjustified type ignore debt
         pipeline_name=writer._config.pipeline_name,
         batch_id=batch_id,
         run_id=writer._context.run_id,
@@ -91,7 +91,7 @@ async def release_pending_gold_quarantine(
         if isinstance(source_index, int) and not isinstance(source_index, bool):
             indexes.append(source_index)
     writer._gold_outcome_quarantine_indexes = tuple(indexes)
-    record_gold_outcome_quarantine_metrics(writer, pending)  # type: ignore[arg-type]
+    record_gold_outcome_quarantine_metrics(writer, pending)  # type: ignore[arg-type]  # tracked(#12721): unjustified type ignore debt
     if records or not pending:
         return None
     return empty_gold_receipt(schema_payload, writer._gold_table_name)

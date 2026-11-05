@@ -43,7 +43,7 @@
       "max_internal_fan_in": 1,
       "helper_function_ratio": 0.4,
       "files": 130,
-      "total_loc": 15464,
+      "total_loc": 15467,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
@@ -51,8 +51,8 @@
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.338,
-      "files": 53,
-      "total_loc": 6661,
+      "files": 52,
+      "total_loc": 6648,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     }
@@ -64,7 +64,7 @@
     "repo_wide_candidates_without_owner_tests_count": 0
   },
   "config_surface": {
-    "duplicate_cluster_count": 10
+    "duplicate_cluster_count": 6
   },
   "module_coverage": {
     "uncovered_module_count": 0,
@@ -73,7 +73,7 @@
   "closeout_program": {
     "tech_debt_closeout_test_file_count": 51,
     "tech_debt_closeout_test_function_count": 265,
-    "tech_debt_closeout_test_loc": 10727,
+    "tech_debt_closeout_test_loc": 10728,
     "closeout_files_using_live_residual_helpers": 8,
     "fold_into_generic_inventory_count": 60,
     "retained_public_entrypoint_count": 12,

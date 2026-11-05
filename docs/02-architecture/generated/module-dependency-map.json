@@ -1,24 +1,24 @@
 {
   "summary": {
-    "scanned_modules": 2603,
-    "total_internal_imports": 8464,
+    "scanned_modules": 2605,
+    "total_internal_imports": 8482,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 329,
     "violations": 0,
-    "source_fingerprint": "b967c01505aaaf21b8ce5331f4c6b941ff64610cd07236c6bcad7b1197c4c760"
+    "source_fingerprint": "7e1b3c94ac546cc6eac9846d3b7c553995bcb5a4159a5f068d51e9991cae2165"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1664,
+      "imports": 1677,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1141,
+      "imports": 1147,
       "allowed": true
     },
     {
@@ -30,13 +30,13 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 654,
+      "imports": 652,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 321,
+      "imports": 322,
       "allowed": true
     },
     {
@@ -112,7 +112,7 @@
     {
       "source": "application.services",
       "target": "domain.types",
-      "imports": 87
+      "imports": 88
     },
     {
       "source": "infrastructure.storage",
@@ -125,13 +125,13 @@
       "imports": 67
     },
     {
-      "source": "application.pipelines",
-      "target": "domain.types",
-      "imports": 57
-    },
-    {
       "source": "application.services",
       "target": "domain.ports",
+      "imports": 59
+    },
+    {
+      "source": "application.pipelines",
+      "target": "domain.types",
       "imports": 57
     },
     {
@@ -155,13 +155,13 @@
       "imports": 43
     },
     {
-      "source": "composition.factories",
-      "target": "domain.ports",
-      "imports": 37
-    },
-    {
       "source": "composition.runtime_builders",
       "target": "domain.control_plane",
+      "imports": 38
+    },
+    {
+      "source": "composition.factories",
+      "target": "domain.ports",
       "imports": 37
     },
     {
@@ -350,6 +350,11 @@
       "imports": 17
     },
     {
+      "source": "application.services",
+      "target": "domain.workflow",
+      "imports": 16
+    },
+    {
       "source": "infrastructure.control_plane",
       "target": "domain.types",
       "imports": 16
@@ -358,11 +363,6 @@
       "source": "interfaces.http",
       "target": "application.services",
       "imports": 16
-    },
-    {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.observability",
-      "imports": 15
     }
   ],
   "violations": []

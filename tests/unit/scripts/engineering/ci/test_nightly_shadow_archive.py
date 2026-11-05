@@ -545,7 +545,7 @@ def test_mixed_history_is_an_unacceptable_window_and_blocks_the_next_stage() -> 
             },
         ],
         candidate_pairs=0,
-        artifact_retention_days=14,
+        artifact_retention_days=6,
         actions_retention_cap_days=30,
         independent_review=False,
         cadence_changed_before_acceptance=True,
@@ -555,7 +555,7 @@ def test_mixed_history_is_an_unacceptable_window_and_blocks_the_next_stage() -> 
     assert "no_parallel_candidate_arm" in historical["reason_codes"]
     assert "independent_review_absent" not in historical["reason_codes"]
     assert "pagination_not_proven" in historical["reason_codes"]
-    assert "success_retention_below_30" in historical["reason_codes"]
+    assert "success_retention_below_7" in historical["reason_codes"]
     assert "actions_retention_cap_below_90" in historical["reason_codes"]
     assert historical["independent_review"] is False
     ledger = {
@@ -653,7 +653,11 @@ def test_record_window_rejects_unverified_index_metadata(
 
 
 @pytest.mark.parametrize("missing_day", [None, 7])
-def test_assess_shadow_window_rejects_missing_daily_attempts(missing_day) -> None:
+@pytest.mark.parametrize("retention_days", [7, 30])
+def test_assess_shadow_window_rejects_missing_daily_attempts(
+    missing_day, retention_days
+) -> None:
+    """Accept both current and historical retention when daily evidence is complete."""
     start = datetime(2026, 10, 1, 3, tzinfo=UTC)
     runs = [
         {
@@ -670,7 +674,7 @@ def test_assess_shadow_window_rejects_missing_daily_attempts(missing_day) -> Non
     result = assess_shadow_window(
         runs,
         candidate_pairs=1,
-        artifact_retention_days=30,
+        artifact_retention_days=retention_days,
         actions_retention_cap_days=90,
         # P0 policy dropped independent review as an acceptance gate.
         independent_review=False,
@@ -787,3 +791,29 @@ def test_committed_gap_ledger_is_not_the_shadow_window() -> None:
         main(["require-accepted", "--ledger", "reports/governance/missing-ledger.json"])
         == 1
     )
+
+
+def test_partition_reports_current_success_retention(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Producer metadata must match the seven-day successful artifact policy."""
+    monkeypatch.setattr(archive_module, "REPO_ROOT", tmp_path)
+    monkeypatch.delenv("GITHUB_OUTPUT", raising=False)
+    output = tmp_path / archive_module.PARTITION_NAME
+    assert (
+        main(
+            [
+                "partition",
+                "--daily-outcome",
+                "success",
+                "--validators-outcome",
+                "success",
+                "--output",
+                str(output),
+            ]
+        )
+        == 0
+    )
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["success_retention_days"] == 7
+    assert payload["diagnostic_retention_target_days"] == 90
