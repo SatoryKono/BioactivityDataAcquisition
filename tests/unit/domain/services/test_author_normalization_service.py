@@ -329,8 +329,12 @@ class TestHelperFunctions:
 
     def test_normalize_affiliation_string_collapses_control_whitespace(self) -> None:
         """Control whitespace is a space before control-character removal."""
-        assert normalize_affiliation_string("Harvard\fUniversity") == "Harvard University"
-        assert normalize_affiliation_string("Harvard\vUniversity") == "Harvard University"
+        assert (
+            normalize_affiliation_string("Harvard\fUniversity") == "Harvard University"
+        )
+        assert (
+            normalize_affiliation_string("Harvard\vUniversity") == "Harvard University"
+        )
         assert normalize_affiliation_string("a\x0bb") == "a b"
         assert normalize_affiliation_string("a\x85b") == "a b"
 
