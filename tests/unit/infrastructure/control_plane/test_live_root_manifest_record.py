@@ -9,6 +9,7 @@ from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane.file_run_manifest_store import (
     FileRunManifestStore,
+    LiveRootRecordResult,
     record_manifest_in_live_catalog,
     snapshot_manifest_catalog,
 )
@@ -159,39 +160,40 @@ def test_different_bytes_for_the_same_manifest_id_are_kept(tmp_path: Path) -> No
     assert target.read_text(encoding="utf-8") == '{"manifest_id": "hand-edited"}'
 
 
-def test_identical_live_record_is_not_rewritten(tmp_path: Path) -> None:
+def _recorded_pair(tmp_path: Path) -> tuple[Path, Path, RunManifest, bytes]:
     live = tmp_path / "run_manifest"
     source = tmp_path / "source"
     manifest = _manifest(manifest_id="new-manifest")
     _save(live, manifest)
     _save(source, manifest)
-    before = (live / "new-manifest.json").read_bytes()
+    return live, source, manifest, (live / "new-manifest.json").read_bytes()
 
-    result = record_manifest_in_live_catalog(
+
+def _record_pair(
+    live: Path, source: Path, manifest: RunManifest
+) -> LiveRootRecordResult:
+    return record_manifest_in_live_catalog(
         manifest=manifest,
         live_base=live,
         source_base=source,
     )
+
+
+def test_identical_live_record_is_not_rewritten(tmp_path: Path) -> None:
+    live, source, manifest, before = _recorded_pair(tmp_path)
+
+    result = _record_pair(live, source, manifest)
 
     assert result.outcome == "already_recorded"
     assert (live / "new-manifest.json").read_bytes() == before
 
 
 def test_already_recorded_manifest_receives_a_later_sidecar(tmp_path: Path) -> None:
-    live = tmp_path / "run_manifest"
-    source = tmp_path / "source"
-    manifest = _manifest(manifest_id="new-manifest")
-    _save(live, manifest)
-    _save(source, manifest)
-    before = (live / "new-manifest.json").read_bytes()
+    live, source, manifest, before = _recorded_pair(tmp_path)
     sidecar = source / "new-manifest.contract-evidence.json"
     sidecar.write_text('{"manifest_id": "new-manifest"}\n', encoding="utf-8")
 
-    result = record_manifest_in_live_catalog(
-        manifest=manifest,
-        live_base=live,
-        source_base=source,
-    )
+    result = _record_pair(live, source, manifest)
 
     assert result.outcome == "already_recorded"
     assert (live / "new-manifest.json").read_bytes() == before
@@ -200,9 +202,5 @@ def test_already_recorded_manifest_receives_a_later_sidecar(tmp_path: Path) -> N
     )
     (live / sidecar.name).write_text("kept\n", encoding="utf-8")
     sidecar.write_text('{"manifest_id": "replaced"}\n', encoding="utf-8")
-    record_manifest_in_live_catalog(
-        manifest=manifest,
-        live_base=live,
-        source_base=source,
-    )
+    _record_pair(live, source, manifest)
     assert (live / sidecar.name).read_text(encoding="utf-8") == "kept\n"

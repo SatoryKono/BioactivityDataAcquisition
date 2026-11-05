@@ -15,6 +15,8 @@ from bioetl.composition.runtime_builders.run_manifest_builder import (
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.types import RunID, RunType
 
+_MODULE = "bioetl.composition.runtime_builders.run_manifest_builder"
+
 
 def _manifest() -> RunManifest:
     return RunManifest(
@@ -63,42 +65,28 @@ def test_unset_alias_keeps_the_run_data_root(tmp_path: Path) -> None:
     assert not (source / "new-manifest.json").exists()
 
 
-def test_publication_hook_forwards_the_saved_manifest(
-    monkeypatch, tmp_path: Path
-) -> None:
+def _run_publish(monkeypatch, tmp_path: Path, publish):  # type: ignore[no-untyped-def]
     manifest = _manifest()
     store = SimpleNamespace(base_path=tmp_path / "run_manifest")
-    seen: dict[str, object] = {}
-    module = "bioetl.composition.runtime_builders.run_manifest_builder"
-    monkeypatch.setattr(f"{module}.create_manifest_store", lambda _inputs: store)
-    monkeypatch.setattr(f"{module}.maybe_create_ledger_service", lambda **_kwargs: None)
+    monkeypatch.setattr(f"{_MODULE}.create_manifest_store", lambda _inputs: store)
     monkeypatch.setattr(
-        f"{module}.emit_replay_reconstructability_metric", lambda **_kwargs: None
-    )
-    monkeypatch.setattr(f"{module}.create_manifest_record", lambda **_kwargs: manifest)
-    monkeypatch.setattr(
-        f"{module}.register_pipeline_manifest_location_soft", lambda **_kwargs: None
+        f"{_MODULE}.maybe_create_ledger_service", lambda **_kwargs: None
     )
     monkeypatch.setattr(
-        f"{module}._require_cached_bronze_snapshots", lambda **_kwargs: None
+        f"{_MODULE}.emit_replay_reconstructability_metric", lambda **_kwargs: None
+    )
+    monkeypatch.setattr(f"{_MODULE}.create_manifest_record", lambda **_kwargs: manifest)
+    monkeypatch.setattr(
+        f"{_MODULE}.register_pipeline_manifest_location_soft", lambda **_kwargs: None
     )
     monkeypatch.setattr(
-        f"{module}.create_control_plane_refs_for_manifest",
+        f"{_MODULE}._require_cached_bronze_snapshots", lambda **_kwargs: None
+    )
+    monkeypatch.setattr(
+        f"{_MODULE}.create_control_plane_refs_for_manifest",
         lambda **_kwargs: "refs",
     )
-
-    def _publish(**kwargs: object) -> str:
-        seen.update(kwargs)
-        return "recorded"
-
-    monkeypatch.setattr(f"{module}.publish_new_run_manifest_to_live_root", _publish)
-    context = SimpleNamespace(
-        reproducibility_context=SimpleNamespace(
-            strict_exact_replay_supported=False,
-            required_persistence_profile="degraded_observable",
-        ),
-        contract_identity=None,
-    )
+    monkeypatch.setattr(f"{_MODULE}.publish_new_run_manifest_to_live_root", publish)
     refs, ledger = _publish_manifest_and_refs(
         ctx=SimpleNamespace(exact_replay=False),  # type: ignore[arg-type]
         inputs=SimpleNamespace(  # type: ignore[arg-type]
@@ -106,10 +94,29 @@ def test_publication_hook_forwards_the_saved_manifest(
             observability=SimpleNamespace(metrics=None),
         ),
         ledger_enabled=False,
-        manifest_context=context,  # type: ignore[arg-type]
+        manifest_context=SimpleNamespace(  # type: ignore[arg-type]
+            reproducibility_context=SimpleNamespace(
+                strict_exact_replay_supported=False,
+                required_persistence_profile="degraded_observable",
+            ),
+            contract_identity=None,
+        ),
         manifest_create_request=SimpleNamespace(),  # type: ignore[arg-type]
         provenance=SimpleNamespace(),  # type: ignore[arg-type]
     )
+    return manifest, store, refs, ledger
+
+
+def test_publication_hook_forwards_the_saved_manifest(
+    monkeypatch, tmp_path: Path
+) -> None:
+    seen: dict[str, object] = {}
+
+    def _publish(**kwargs: object) -> str:
+        seen.update(kwargs)
+        return "recorded"
+
+    manifest, store, refs, ledger = _run_publish(monkeypatch, tmp_path, _publish)
 
     assert refs == "refs"
     assert ledger is None
@@ -122,48 +129,9 @@ def test_live_root_write_error_does_not_fail_the_saved_manifest(
 ) -> None:
     from bioetl.infrastructure.storage.atomic import AtomicWriteError
 
-    manifest = _manifest()
-    store = SimpleNamespace(base_path=tmp_path / "run_manifest")
-    module = "bioetl.composition.runtime_builders.run_manifest_builder"
-    monkeypatch.setattr(f"{module}.create_manifest_store", lambda _inputs: store)
-    monkeypatch.setattr(f"{module}.maybe_create_ledger_service", lambda **_kwargs: None)
-    monkeypatch.setattr(
-        f"{module}.emit_replay_reconstructability_metric", lambda **_kwargs: None
-    )
-    monkeypatch.setattr(f"{module}.create_manifest_record", lambda **_kwargs: manifest)
-    monkeypatch.setattr(
-        f"{module}.register_pipeline_manifest_location_soft", lambda **_kwargs: None
-    )
-    monkeypatch.setattr(
-        f"{module}._require_cached_bronze_snapshots", lambda **_kwargs: None
-    )
-    monkeypatch.setattr(
-        f"{module}.create_control_plane_refs_for_manifest",
-        lambda **_kwargs: "refs",
-    )
-    monkeypatch.setattr(
-        f"{module}.publish_new_run_manifest_to_live_root",
-        lambda **_kwargs: (_ for _ in ()).throw(
-            AtomicWriteError(tmp_path, "read-only")
-        ),
-    )
-    context = SimpleNamespace(
-        reproducibility_context=SimpleNamespace(
-            strict_exact_replay_supported=False,
-            required_persistence_profile="degraded_observable",
-        ),
-        contract_identity=None,
-    )
-    refs, ledger = _publish_manifest_and_refs(
-        ctx=SimpleNamespace(exact_replay=False),  # type: ignore[arg-type]
-        inputs=SimpleNamespace(  # type: ignore[arg-type]
-            settings=SimpleNamespace(data_dir=tmp_path),
-            observability=SimpleNamespace(metrics=None),
-        ),
-        ledger_enabled=False,
-        manifest_context=context,  # type: ignore[arg-type]
-        manifest_create_request=SimpleNamespace(),  # type: ignore[arg-type]
-        provenance=SimpleNamespace(),  # type: ignore[arg-type]
-    )
+    def _publish(**_kwargs: object) -> None:
+        raise AtomicWriteError(tmp_path, "read-only")
+
+    _, _, refs, ledger = _run_publish(monkeypatch, tmp_path, _publish)
     assert refs == "refs"
     assert ledger is None
