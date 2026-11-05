@@ -1,6 +1,12 @@
 {
   "description": "Lifecycle and supporting-taxonomy decisions for non-active scripts.",
   "entries": {
+    "scripts/engineering/qa/external_resource_inventory.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the source-bound COMP-004 catalog integrity and Markdown projection implementation behind the unified QA check-external-resource-inventory command; no runtime lifecycle execution belongs here.",
+      "owner": "@bioetl-architecture",
+      "review_by": "2027-01-29"
+    },
     "scripts/ai/codex/helper/check-env.ps1": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the Windows-side environment-check helper invoked by Codex launcher and setup flows; keep it supporting unless it becomes a standalone documented entrypoint.",
@@ -787,12 +793,6 @@
       "owner": "@bioetl-quality",
       "review_by": "2026-11-30"
     },
-    "scripts/engineering/ci/mutation_protocol_contracts.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the mutation-protocol contract helper imported by its owning unit tests; it has no runtime command surface. Keep it supporting so active_script_count_max stays unchanged.",
-      "owner": "@bioetl-platform",
-      "review_by": "2027-01-31"
-    },
     "scripts/engineering/ci/nightly_shadow_archive.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the N1 shadow partition, mandatory-skip guard, and immutable archive behind python -m scripts.engineering.ci nightly-shadow. Keep it supporting so active_script_count_max does not grow.",
@@ -1165,12 +1165,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
-    "scripts/engineering/qa/external_resource_inventory.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the source-bound COMP-004 catalog integrity and Markdown projection implementation behind the unified QA check-external-resource-inventory command; no runtime lifecycle execution belongs here.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-01-29"
-    },
     "scripts/engineering/qa/extract_uniprot_semantic_payload_vocab.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the governed vocabulary-extraction helper while UniProt semantic payload inventory docs and parity checks still consume this generated support surface; only fold it into a broader schema/docs generator when that pipeline is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
@@ -1422,12 +1416,6 @@
       "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-weak-assert-inventory; keep contributor execution routed through the unified QA dispatcher.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
-    },
-    "scripts/engineering/qa/requalify_external_resource_inventory.py": {
-      "decision": "shared_helper_module",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30",
-      "next_step": "Retain as the source-review implementation behind python -m scripts.engineering.qa requalify-external-resource-inventory; owning tests exercise the dispatcher. Preserve the original catalog checker and NOT_RUN runtime claims. Direct module invocation remains compatible, not a separate public script surface."
     },
     "scripts/engineering/qa/run_architecture_audit_read_only.py": {
       "decision": "shared_helper_module",
@@ -1855,30 +1843,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
-    "scripts/ops/observability/grafana/apply_phase25_srs_prr_budget.py": {
-      "decision": "shared_helper_module",
-      "owner": "@bioetl-platform",
-      "review_by": "2027-01-31",
-      "next_step": "Retain the dashboard transform helpers imported by render_nav_bus and lint_dashboard_phase2; route the legacy apply command through python -m scripts.ops apply-grafana-phase25-srs-prr-budget. Direct module invocation remains compatible."
-    },
-    "scripts/ops/observability/grafana/apply_phase2_remainder.py": {
-      "decision": "shared_helper_module",
-      "owner": "@bioetl-platform",
-      "review_by": "2027-01-31",
-      "next_step": "Retain the dashboard transform helpers imported by render_nav_bus; route the legacy apply command through python -m scripts.ops apply-grafana-phase2-remainder. Direct module invocation remains compatible."
-    },
-    "scripts/ops/observability/grafana/apply_phase4_dead_vars.py": {
-      "decision": "shared_helper_module",
-      "owner": "@bioetl-platform",
-      "review_by": "2027-01-31",
-      "next_step": "Retain the tested Phase 4.1 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-dead-vars; keep direct module invocation as a compatibility surface."
-    },
-    "scripts/ops/observability/grafana/apply_phase4_reflow.py": {
-      "decision": "shared_helper_module",
-      "owner": "@bioetl-platform",
-      "review_by": "2027-01-31",
-      "next_step": "Retain the tested Phase 4.2–4.3 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-reflow; keep direct module invocation as a compatibility surface."
-    },
     "scripts/ops/observability/grafana/capture_acceptance.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the layout/accessibility assessment backend used by check-grafana-audit-preflight; route matrix report assembly through the scripts.ops dispatcher instead of counting the backend twice.",
@@ -1939,12 +1903,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
-    "scripts/ops/observability/grafana/lint_dashboard_phase2.py": {
-      "decision": "shared_helper_module",
-      "owner": "@bioetl-platform",
-      "review_by": "2027-01-31",
-      "next_step": "Retain the Phase 2 linter implementation behind python -m scripts.ops lint-grafana-phase2; its repo-backed tests and canonical dispatcher exercise the supported command."
-    },
     "scripts/ops/observability/grafana/qa_context.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the canonical observability QA-context loader imported by dashboard tooling and tests; keep it supporting unless it becomes a governed standalone entrypoint.",
@@ -1968,12 +1926,6 @@
       "next_step": "Retain only as a bounded optional renderer-only recovery helper while Grafana monitoring remains local and optional; consolidate it into the canonical observability command surface before promotion.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
-    },
-    "scripts/ops/observability/grafana/refresh_router_delivery.py": {
-      "decision": "shared_helper_module",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30",
-      "next_step": "Retain as the release verification/writer backend behind python -m scripts.ops refresh-router-delivery; owning tests exercise read-only check and atomic update through this dispatcher. Preserve full rootfs/config/layer parity and immutable registry identity. Direct module invocation remains compatible."
     },
     "scripts/ops/observability/grafana/regression_acceptance.py": {
       "decision": "shared_helper_module",
@@ -2041,35 +1993,11 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
-    "scripts/ops/observability/grafana/trusted_docker.py": {
-      "decision": "shared_helper_module",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30",
-      "next_step": "Retain as the shared Docker identity library imported by both rootfs and managed-image verifiers; it has no standalone command. Preserve fixed protected Linux paths and the registered signed Windows installation check."
-    },
-    "scripts/ops/observability/promote_router_host_release.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the release-promotion implementation behind the canonical `python -m scripts.ops promote-router-host-release` dispatcher; do not expose a separate script entrypoint or increase active_script_count_max.",
-      "owner": "@bioetl-platform",
-      "review_by": "2027-01-31"
-    },
-    "scripts/ops/observability/refresh_router_host_provenance.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the source-provenance implementation behind the canonical `python -m scripts.ops refresh-router-host-provenance` dispatcher and shared Router validators; keep direct operations routed through scripts.ops so active_script_count_max stays unchanged.",
-      "owner": "@bioetl-platform",
-      "review_by": "2027-01-31"
-    },
     "scripts/ops/observability/refresh_visual_json_baseline.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as the bounded #8576 JSON-source evidence refresher; remove it after visual-baseline closeout or consolidate it into the canonical dashboard audit command.",
       "owner": "@bioetl-observability",
       "review_by": "2026-09-30"
-    },
-    "scripts/ops/observability/seed_dc6_pipeline_run_report.py": {
-      "decision": "shared_helper_module",
-      "owner": "@bioetl-platform",
-      "review_by": "2027-01-31",
-      "next_step": "Retain the local-only DC-6 fixture writer behind python -m scripts.ops seed-dc6-pipeline-run-report; keep acceptance data out of committed run reports."
     },
     "scripts/ops/observability/trust_validation_fixture_materialization.py": {
       "decision": "shared_helper_module",
@@ -2173,12 +2101,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
-    "scripts/ops/runtime/migrate_evidence_locations.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain as the bounded RF-006 historical evidence-location migration CLI (`python -m scripts.ops.runtime.migrate_evidence_locations`) behind an explicit targets JSON list; keep it supporting so active_script_count_max stays flat, and promote only after an active slot is freed and the migration window closes.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-12-31"
-    },
     "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1": {
       "decision": "legacy_manual_utility",
       "next_step": "Deprecated for one release while callers migrate to runtime_manager.py diagnose/recover --stack neo4j; retain only as historical operator guidance.",
@@ -2268,6 +2190,78 @@
       "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/engineering/qa/requalify_external_resource_inventory.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the source-review implementation behind python -m scripts.engineering.qa requalify-external-resource-inventory; owning tests exercise the dispatcher. Preserve the original catalog checker and NOT_RUN runtime claims. Direct module invocation remains compatible, not a separate public script surface."
+    },
+    "scripts/ops/observability/grafana/refresh_router_delivery.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the release verification/writer backend behind python -m scripts.ops refresh-router-delivery; owning tests exercise read-only check and atomic update through this dispatcher. Preserve full rootfs/config/layer parity and immutable registry identity. Direct module invocation remains compatible."
+    },
+    "scripts/ops/observability/grafana/apply_phase25_srs_prr_budget.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the dashboard transform helpers imported by render_nav_bus and lint_dashboard_phase2; route the legacy apply command through python -m scripts.ops apply-grafana-phase25-srs-prr-budget. Direct module invocation remains compatible."
+    },
+    "scripts/ops/observability/grafana/apply_phase2_remainder.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the dashboard transform helpers imported by render_nav_bus; route the legacy apply command through python -m scripts.ops apply-grafana-phase2-remainder. Direct module invocation remains compatible."
+    },
+    "scripts/ops/observability/grafana/apply_phase4_dead_vars.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the tested Phase 4.1 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-dead-vars; keep direct module invocation as a compatibility surface."
+    },
+    "scripts/ops/observability/grafana/apply_phase4_reflow.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the tested Phase 4.2–4.3 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-reflow; keep direct module invocation as a compatibility surface."
+    },
+    "scripts/ops/observability/grafana/lint_dashboard_phase2.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the Phase 2 linter implementation behind python -m scripts.ops lint-grafana-phase2; its repo-backed tests and canonical dispatcher exercise the supported command."
+    },
+    "scripts/ops/observability/seed_dc6_pipeline_run_report.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the local-only DC-6 fixture writer behind python -m scripts.ops seed-dc6-pipeline-run-report; keep acceptance data out of committed run reports."
+    },
+    "scripts/ops/observability/grafana/trusted_docker.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the shared Docker identity library imported by both rootfs and managed-image verifiers; it has no standalone command. Preserve fixed protected Linux paths and the registered signed Windows installation check."
+    },
+    "scripts/engineering/ci/mutation_protocol_contracts.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the mutation-protocol contract helper imported by its owning unit tests; it has no runtime command surface. Keep it supporting so active_script_count_max stays unchanged.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31"
+    },
+    "scripts/ops/observability/promote_router_host_release.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the release-promotion implementation behind the canonical `python -m scripts.ops promote-router-host-release` dispatcher; do not expose a separate script entrypoint or increase active_script_count_max.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31"
+    },
+    "scripts/ops/observability/refresh_router_host_provenance.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the source-provenance implementation behind the canonical `python -m scripts.ops refresh-router-host-provenance` dispatcher and shared Router validators; keep direct operations routed through scripts.ops so active_script_count_max stays unchanged.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31"
     }
   },
   "schema_version": "1.0"

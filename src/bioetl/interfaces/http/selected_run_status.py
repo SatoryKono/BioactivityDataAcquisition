@@ -13,9 +13,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.selected_run
     empty_replay_readiness,
     project_selected_run_replay_readiness,
 )
-from bioetl.application.services.evidence_location.resolver import (
-    EvidenceLocationResolver,
-)
 from bioetl.composition.composite_catalog import (
     attach_contract_fields,
     project_assay_replay,
@@ -60,11 +57,7 @@ from bioetl.interfaces.http._selected_run_report_assessment import (
     _saved_trust,
     _selected_pipeline,
 )
-from bioetl.interfaces.http._selected_run_unavailable import (
-    manifest_port_for_context,
-    resolve_selected_run,
-    unavailable_status,
-)
+from bioetl.interfaces.http._selected_run_unavailable import unavailable_status
 from bioetl.interfaces.http.run_report_ops import _validated_artifact_paths
 
 _NOT_EVALUATED = "NOT EVALUATED"
@@ -152,8 +145,6 @@ def load_selected_run_status(
     root: Path | None = None,
     manifest_port: object | None = None,
     store: RunReportStorePort | None = None,
-    resolver: EvidenceLocationResolver | None = None,
-    expected_runtime_source_id: str | None = None,
 ) -> dict[str, object]:
     """Load and revalidate the exact report, revision and bound identity each time.
 
@@ -169,14 +160,6 @@ def load_selected_run_status(
     if selected_pipeline is None:
         return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
     pipeline = selected_pipeline
-    refusal, context = resolve_selected_run(
-        resolver,
-        pipeline=pipeline,
-        run_id=run_id,
-        expected_runtime_source_id=expected_runtime_source_id,
-    )
-    if refusal is not None:
-        return refusal
     path, _ = _validated_artifact_paths(
         pipeline, run_id, "pipeline_run_report_json", root
     )
@@ -207,13 +190,7 @@ def load_selected_run_status(
             }
         )
     manifest, replay_probe = project_assay_replay(
-        path.parent,
-        run_id,
-        report,
-        _manifest_snapshot(
-            manifest_port_for_context(context, manifest_port),
-            run_id,
-        ),
+        path.parent, run_id, report, _manifest_snapshot(manifest_port, run_id)
     )
     if replay_probe is not None:
         probes.append(replay_probe)
@@ -312,17 +289,11 @@ def _load_selected_with_live_fallback(
     query: dict[str, str],
     skip_scope_check: bool,
 ) -> dict[str, object]:
-    raw_resolver = getattr(host, "_evidence_location_resolver", None)
-    source_id = getattr(host, "_runtime_source_id", None)
     result = load_selected_run_status(
         pipeline=pipeline,
         run_id=run_id,
         manifest_port=host._run_manifest_port,
         store=host._run_report_store,
-        resolver=(
-            raw_resolver if isinstance(raw_resolver, EvidenceLocationResolver) else None
-        ),
-        expected_runtime_source_id=source_id if isinstance(source_id, str) else None,
     )
     if result.get("reason") == "run_not_found":
         # URL/explicit run_id stays bound; never substitute a different latest.

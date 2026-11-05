@@ -98,17 +98,17 @@ class FileEvidenceReadContext:
         )
         return loader(normalized)
 
-    def verify_replay_objects(self, manifest: object) -> Mapping[str, bool]:
+    def verify_replay_objects(self, manifest: RunManifest) -> Mapping[str, bool]:
         """Re-check config / lock / Bronze bytes; never cache READY forever."""
         self._validate_bound_paths()
-        # Index or record symlinks can escape even when the parent stayed inside.
-        bound = cast(RunManifest, manifest)
+        # Effective-config index/JSON can be outward symlinks even when the
+        # parent directory stayed under the trusted alias base.
         self._assert_concrete_run_index(
             self.data_root / "output" / "control" / "effective_config",
-            bound.run_id,
+            manifest.run_id,
             suffix=_CONTROL_PLANE_JSON_RECORD_SUFFIX,
         )
-        return self.replay_object_verifier.verify(bound)
+        return self.replay_object_verifier.verify(manifest)
 
     def _validate_bound_paths(self) -> None:
         """Recheck the alias and child store trees at each read boundary."""

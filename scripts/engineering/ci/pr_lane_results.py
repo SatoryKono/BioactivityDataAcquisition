@@ -289,11 +289,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/05-operations/runbooks/stale-lock.md": (
         INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
     ),
-    # RF-008: run-id preflight + deployed replay readiness own this runbook.
-    "docs/05-operations/runbooks/run-manifest-inspection.md": (
-        "tests/unit/scripts/ops/docker/test_verify_report_bind.py",
-        "tests/integration/test_deployed_replay_readiness.py",
-    ),
     "docs/00-project/RULES.md": (INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,),
     "reports/engineering/SCHEMA-001_execution_evidence.md": (
         "tests/unit/scripts/test_verify_schema_parity.py",
@@ -444,8 +439,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12756_main_12751_review.json",
             "configs/quality/external_resource_inventory_pr12756_main_12755_review.json",
             "configs/quality/external_resource_inventory_pr12756_main_12766_review.json",
-            "configs/quality/external_resource_inventory_pr12763_report_root_review.json",
-            "configs/quality/external_resource_inventory_pr12763_opener_protocol_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,

@@ -498,7 +498,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 49
-      total_loc: 6470
+      total_loc: 6459
       files_ge_250_loc: 0
       helper_function_ratio: 0.288
       max_internal_fan_in: 2
@@ -552,17 +552,17 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 130
-      total_loc: 15467
+      total_loc: 15443
       files_ge_250_loc: 0
       helper_function_ratio: 0.4
       max_internal_fan_in: 1
       max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
       status: reduced_2026-09-16_issue_10468_coupling_closeout
-      next_action: '2026-11-03 #12728: refresh measured control-plane census after evidence-location split
-        (files 130->137, LOC 15443->16486) with files_ge_250_loc remaining 0 and max_internal_fan_in 1.
-        Bounded-growth budgets stay 0 files_ge_250_loc and max_internal_fan_in 2; no technical-debt budget
-        is increased.
+      next_action: '2026-11-03 #12728: refresh measured control-plane census after evidence-location
+        split (files 130->137, LOC 15443->16486) with files_ge_250_loc remaining 0 and max_internal_fan_in
+        1. Bounded-growth budgets stay 0 files_ge_250_loc and max_internal_fan_in 2; no technical-debt
+        budget is increased.
 
         '
   - name: composition_runtime_builders
@@ -580,10 +580,10 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 52
-      total_loc: 6648
+      files: 54
+      total_loc: 6583
       files_ge_250_loc: 0
-      helper_function_ratio: 0.338
+      helper_function_ratio: 0.345
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.runtime_builders.runner_inputs
     trend:
@@ -712,8 +712,8 @@ oversized_source_module_inventory:
     extracted_surface_lines: 416
     rationale: Runtime lazy export resolution remains in the Python module while static re-export type
       declarations live in the adjacent stub, preserving the public API and reducing the governed source
-      module from 579 to 218 lines after adding typed facade exports for RF-002 evidence-location ports;
-      the tracked shrink-only value is tightened to the current source size.
+      module from 579 to 218 lines after adding typed facade exports for RF-002 evidence-location
+      ports; the tracked shrink-only value is tightened to the current source size.
   - issue: '#6478'
     source: src/bioetl/application/services/lineage/metadata_lineage_node_assembly.py
     extracted_surface: src/bioetl/application/services/lineage/metadata_lineage_node_assembly.py

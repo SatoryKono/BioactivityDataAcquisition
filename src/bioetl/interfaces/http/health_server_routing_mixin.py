@@ -11,9 +11,6 @@ from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
 from bioetl.application.runtime_clock import current_utc_time
-from bioetl.application.services.evidence_location.resolver import (
-    EvidenceLocationResolver,
-)
 from bioetl.application.services.quality.quarantine_service import QuarantineService
 from bioetl.domain.ports import (
     CheckpointPort,
@@ -51,7 +48,6 @@ class HealthServerRoutingMixin:
     _run_ledger_port: RunLedgerPort | None = None
     _workflow_manifest_port: WorkflowManifestPort | None = None
     _control_plane_evidence_service: ControlPlaneEvidenceService | None = None
-    _evidence_location_resolver: EvidenceLocationResolver | None = None
     _metrics_exposition: HealthMetricsExpositionPort
     _clock: ClockPort | None = None
     _data_root: str | None = None

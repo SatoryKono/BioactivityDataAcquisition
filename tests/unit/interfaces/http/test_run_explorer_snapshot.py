@@ -92,14 +92,10 @@ async def test_refresh_strips_cached_age_and_materialize_uses_request_clock(
     monkeypatch.setattr(snapshot_module, "list_recent_pipeline_runs", _scan)
     cache = RunExplorerSnapshotCache()
     source = SimpleNamespace(
-        _evidence_location_resolver=None,
-        _run_manifest_port=object(),
-        _run_ledger_port=object(),
-        _run_report_store=Mock(),
+        _run_manifest_port=object(), _run_ledger_port=object(), _run_report_store=Mock()
     )
     await cache.refresh_once(source)
     assert seen[0]["limit"] == 10
-    assert seen[0]["resolver"] is None
     assert seen[0]["pipeline"] == ".*"
     assert seen[0]["selected_run_id"] == "-"
     stored = cache._stored
@@ -129,27 +125,6 @@ async def test_refresh_strips_cached_age_and_materialize_uses_request_clock(
 
 
 @pytest.mark.asyncio
-async def test_refresh_tolerates_source_without_resolver(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    seen: list[object] = []
-
-    def _scan(**kwargs: object) -> dict[str, object]:
-        seen.append(kwargs.get("resolver"))
-        return _page()
-
-    monkeypatch.setattr(snapshot_module, "list_recent_pipeline_runs", _scan)
-    await RunExplorerSnapshotCache().refresh_once(
-        SimpleNamespace(
-            _run_manifest_port=object(),
-            _run_ledger_port=object(),
-            _run_report_store=Mock(),
-        )
-    )
-    assert seen == [None]
-
-
-@pytest.mark.asyncio
 async def test_failed_refresh_keeps_the_last_page(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -164,10 +139,7 @@ async def test_failed_refresh_keeps_the_last_page(
     monkeypatch.setattr(snapshot_module, "list_recent_pipeline_runs", _scan)
     cache = RunExplorerSnapshotCache()
     source = SimpleNamespace(
-        _evidence_location_resolver=None,
-        _run_manifest_port=object(),
-        _run_ledger_port=object(),
-        _run_report_store=Mock(),
+        _run_manifest_port=object(), _run_ledger_port=object(), _run_report_store=Mock()
     )
     await cache.refresh_once(source)
     await cache.refresh_once(source)
@@ -195,10 +167,7 @@ async def test_periodic_scan_waits_out_the_interval(
     monkeypatch.setattr(snapshot_module, "list_recent_pipeline_runs", _scan)
     cache = RunExplorerSnapshotCache()
     source = SimpleNamespace(
-        _evidence_location_resolver=None,
-        _run_manifest_port=object(),
-        _run_ledger_port=object(),
-        _run_report_store=Mock(),
+        _run_manifest_port=object(), _run_ledger_port=object(), _run_report_store=Mock()
     )
     task = asyncio.create_task(
         run_periodic_run_explorer_snapshot(cache, source, interval_seconds=30)
