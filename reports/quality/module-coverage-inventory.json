@@ -3579,14 +3579,14 @@
       "source_lines": 28
     },
     {
-      "coverage_percent": 67.74,
+      "coverage_percent": 53.33,
       "coverage_status": "partially_covered",
-      "covered_lines": 21,
-      "executable_lines": 31,
-      "missing_lines": 10,
+      "covered_lines": 8,
+      "executable_lines": 15,
+      "missing_lines": 7,
       "module": "bioetl.application.normalization._chembl_units",
       "path": "src/bioetl/application/normalization/_chembl_units.py",
-      "source_lines": 54
+      "source_lines": 21
     },
     {
       "coverage_percent": 100.0,
@@ -5306,7 +5306,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane",
       "path": "src/bioetl/application/services/control_plane/__init__.py",
-      "source_lines": 139
+      "source_lines": 136
     },
     {
       "coverage_percent": 100.0,
@@ -6761,86 +6761,6 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 1,
-      "executable_lines": 1,
-      "missing_lines": 0,
-      "module": "bioetl.application.services.effective_config",
-      "path": "src/bioetl/application/services/effective_config/__init__.py",
-      "source_lines": 3
-    },
-    {
-      "coverage_percent": 88.16,
-      "coverage_status": "partially_covered",
-      "covered_lines": 67,
-      "executable_lines": 76,
-      "missing_lines": 9,
-      "module": "bioetl.application.services.effective_config.config_source_hashing",
-      "path": "src/bioetl/application/services/effective_config/config_source_hashing.py",
-      "source_lines": 151
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 4,
-      "executable_lines": 4,
-      "missing_lines": 0,
-      "module": "bioetl.application.services.evidence_location",
-      "path": "src/bioetl/application/services/evidence_location/__init__.py",
-      "source_lines": 52
-    },
-    {
-      "coverage_percent": 80.7,
-      "coverage_status": "partially_covered",
-      "covered_lines": 46,
-      "executable_lines": 57,
-      "missing_lines": 11,
-      "module": "bioetl.application.services.evidence_location.registration",
-      "path": "src/bioetl/application/services/evidence_location/registration.py",
-      "source_lines": 249
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 23,
-      "executable_lines": 23,
-      "missing_lines": 0,
-      "module": "bioetl.application.services.evidence_location.registration_models",
-      "path": "src/bioetl/application/services/evidence_location/registration_models.py",
-      "source_lines": 47
-    },
-    {
-      "coverage_percent": 70.83,
-      "coverage_status": "partially_covered",
-      "covered_lines": 34,
-      "executable_lines": 48,
-      "missing_lines": 14,
-      "module": "bioetl.application.services.evidence_location.registration_observations",
-      "path": "src/bioetl/application/services/evidence_location/registration_observations.py",
-      "source_lines": 166
-    },
-    {
-      "coverage_percent": 86.15,
-      "coverage_status": "partially_covered",
-      "covered_lines": 56,
-      "executable_lines": 65,
-      "missing_lines": 9,
-      "module": "bioetl.application.services.evidence_location.resolver",
-      "path": "src/bioetl/application/services/evidence_location/resolver.py",
-      "source_lines": 232
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 39,
-      "executable_lines": 39,
-      "missing_lines": 0,
-      "module": "bioetl.application.services.evidence_location.resolver_types",
-      "path": "src/bioetl/application/services/evidence_location/resolver_types.py",
-      "source_lines": 97
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
       "covered_lines": 9,
       "executable_lines": 9,
       "missing_lines": 0,
@@ -7779,11 +7699,11 @@
       "source_lines": 178
     },
     {
-      "coverage_percent": 60.71,
-      "coverage_status": "partially_covered",
-      "covered_lines": 85,
-      "executable_lines": 140,
-      "missing_lines": 55,
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.application.services.quality.exceptions_context",
       "path": "src/bioetl/application/services/quality/exceptions_context.py",
       "source_lines": 275
@@ -7869,14 +7789,14 @@
       "source_lines": 312
     },
     {
-      "coverage_percent": 97.06,
+      "coverage_percent": 95.35,
       "coverage_status": "partially_covered",
-      "covered_lines": 33,
-      "executable_lines": 34,
-      "missing_lines": 1,
+      "covered_lines": 41,
+      "executable_lines": 43,
+      "missing_lines": 2,
       "module": "bioetl.application.services.run_reports.evidence_location_paths",
       "path": "src/bioetl/application/services/run_reports/evidence_location_paths.py",
-      "source_lines": 100
+      "source_lines": 119
     },
     {
       "coverage_percent": 100.0,
@@ -9247,16 +9167,6 @@
       "module": "bioetl.composition.entrypoints",
       "path": "src/bioetl/composition/entrypoints.py",
       "source_lines": 50
-    },
-    {
-      "coverage_percent": 70.0,
-      "coverage_status": "partially_covered",
-      "covered_lines": 49,
-      "executable_lines": 70,
-      "missing_lines": 21,
-      "module": "bioetl.composition.evidence_location_registration",
-      "path": "src/bioetl/composition/evidence_location_registration.py",
-      "source_lines": 254
     },
     {
       "coverage_percent": 100.0,
@@ -11059,11 +10969,11 @@
       "source_lines": 27
     },
     {
-      "coverage_percent": 92.5,
-      "coverage_status": "partially_covered",
-      "covered_lines": 37,
-      "executable_lines": 40,
-      "missing_lines": 3,
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.composition.selected_run_contract_exclusions",
       "path": "src/bioetl/composition/selected_run_contract_exclusions.py",
       "source_lines": 85
@@ -11921,12 +11831,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 192,
-      "executable_lines": 192,
+      "covered_lines": 188,
+      "executable_lines": 188,
       "missing_lines": 0,
       "module": "bioetl.domain.composite.config_composite_protocols",
       "path": "src/bioetl/domain/composite/config_composite_protocols.py",
-      "source_lines": 266
+      "source_lines": 262
     },
     {
       "coverage_percent": 100.0,
@@ -12836,7 +12746,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.control_plane.effective_config_artifact",
       "path": "src/bioetl/domain/control_plane/effective_config_artifact.py",
-      "source_lines": 201
+      "source_lines": 202
     },
     {
       "coverage_percent": 100.0,
@@ -12966,7 +12876,7 @@
       "missing_lines": 6,
       "module": "bioetl.domain.control_plane.run_evidence_location",
       "path": "src/bioetl/domain/control_plane/run_evidence_location.py",
-      "source_lines": 262
+      "source_lines": 258
     },
     {
       "coverage_percent": 100.0,
@@ -12979,14 +12889,14 @@
       "source_lines": 133
     },
     {
-      "coverage_percent": 86.42,
+      "coverage_percent": 84.93,
       "coverage_status": "partially_covered",
-      "covered_lines": 70,
-      "executable_lines": 81,
+      "covered_lines": 62,
+      "executable_lines": 73,
       "missing_lines": 11,
       "module": "bioetl.domain.control_plane.run_evidence_location_path",
       "path": "src/bioetl/domain/control_plane/run_evidence_location_path.py",
-      "source_lines": 163
+      "source_lines": 136
     },
     {
       "coverage_percent": 100.0,
@@ -13029,11 +12939,11 @@
       "source_lines": 244
     },
     {
-      "coverage_percent": 89.57,
-      "coverage_status": "partially_covered",
-      "covered_lines": 103,
-      "executable_lines": 115,
-      "missing_lines": 12,
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.domain.control_plane.selected_run_contract_exclusions",
       "path": "src/bioetl/domain/control_plane/selected_run_contract_exclusions.py",
       "source_lines": 184
@@ -15101,12 +15011,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 12,
-      "executable_lines": 12,
+      "covered_lines": 11,
+      "executable_lines": 11,
       "missing_lines": 0,
       "module": "bioetl.domain.ports.control_plane",
       "path": "src/bioetl/domain/ports/control_plane/__init__.py",
-      "source_lines": 84
+      "source_lines": 76
     },
     {
       "coverage_percent": 100.0,
@@ -15977,16 +15887,6 @@
       "module": "bioetl.domain.run_reports.context",
       "path": "src/bioetl/domain/run_reports/context.py",
       "source_lines": 31
-    },
-    {
-      "coverage_percent": null,
-      "coverage_status": "coverage_xml_missing",
-      "covered_lines": null,
-      "executable_lines": null,
-      "missing_lines": null,
-      "module": "bioetl.domain.run_reports.model_serialization",
-      "path": "src/bioetl/domain/run_reports/model_serialization.py",
-      "source_lines": 39
     },
     {
       "coverage_percent": 100.0,
@@ -20526,7 +20426,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.control_plane",
       "path": "src/bioetl/infrastructure/control_plane/__init__.py",
-      "source_lines": 140
+      "source_lines": 126
     },
     {
       "coverage_percent": 100.0,
@@ -20539,14 +20439,14 @@
       "source_lines": 31
     },
     {
-      "coverage_percent": 93.48,
-      "coverage_status": "partially_covered",
-      "covered_lines": 43,
-      "executable_lines": 46,
-      "missing_lines": 3,
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.infrastructure.control_plane._evidence_location_publish",
       "path": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
-      "source_lines": 101
+      "source_lines": 100
     },
     {
       "coverage_percent": 100.0,
@@ -20749,14 +20649,14 @@
       "source_lines": 367
     },
     {
-      "coverage_percent": 69.33,
-      "coverage_status": "partially_covered",
-      "covered_lines": 52,
-      "executable_lines": 75,
-      "missing_lines": 23,
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.infrastructure.control_plane.evidence_location_path_safety",
       "path": "src/bioetl/infrastructure/control_plane/evidence_location_path_safety.py",
-      "source_lines": 168
+      "source_lines": 125
     },
     {
       "coverage_percent": 100.0,
@@ -20849,24 +20749,24 @@
       "source_lines": 309
     },
     {
-      "coverage_percent": 94.32,
-      "coverage_status": "partially_covered",
-      "covered_lines": 83,
-      "executable_lines": 88,
-      "missing_lines": 5,
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.infrastructure.control_plane.file_evidence_location_store",
       "path": "src/bioetl/infrastructure/control_plane/file_evidence_location_store.py",
-      "source_lines": 230
+      "source_lines": 241
     },
     {
-      "coverage_percent": 91.94,
-      "coverage_status": "partially_covered",
-      "covered_lines": 57,
-      "executable_lines": 62,
-      "missing_lines": 5,
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.infrastructure.control_plane.file_evidence_read_context",
       "path": "src/bioetl/infrastructure/control_plane/file_evidence_read_context.py",
-      "source_lines": 190
+      "source_lines": 153
     },
     {
       "coverage_percent": 100.0,
@@ -25441,12 +25341,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 78,
-      "executable_lines": 78,
+      "covered_lines": 75,
+      "executable_lines": 75,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._health_server_observability_protocols",
       "path": "src/bioetl/interfaces/http/_health_server_observability_protocols.py",
-      "source_lines": 160
+      "source_lines": 156
     },
     {
       "coverage_percent": 100.0,
@@ -25629,24 +25529,24 @@
       "source_lines": 29
     },
     {
-      "coverage_percent": 95.89,
-      "coverage_status": "partially_covered",
-      "covered_lines": 70,
-      "executable_lines": 73,
-      "missing_lines": 3,
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.interfaces.http._run_type_universe_options",
       "path": "src/bioetl/interfaces/http/_run_type_universe_options.py",
       "source_lines": 145
     },
     {
-      "coverage_percent": 90.65,
-      "coverage_status": "partially_covered",
-      "covered_lines": 97,
-      "executable_lines": 107,
-      "missing_lines": 10,
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.interfaces.http._selected_run_a2_resolve",
       "path": "src/bioetl/interfaces/http/_selected_run_a2_resolve.py",
-      "source_lines": 251
+      "source_lines": 250
     },
     {
       "coverage_percent": 100.0,
@@ -25659,10 +25559,10 @@
       "source_lines": 379
     },
     {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 3,
-      "executable_lines": 3,
+      "coverage_percent": null,
+      "coverage_status": "no_executable_lines",
+      "covered_lines": 0,
+      "executable_lines": 0,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._selected_run_contract_exclusions",
       "path": "src/bioetl/interfaces/http/_selected_run_contract_exclusions.py",
@@ -25681,12 +25581,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 34,
-      "executable_lines": 34,
+      "covered_lines": 31,
+      "executable_lines": 31,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._selected_run_presentation",
       "path": "src/bioetl/interfaces/http/_selected_run_presentation.py",
-      "source_lines": 134
+      "source_lines": 116
     },
     {
       "coverage_percent": 100.0,
@@ -25699,24 +25599,14 @@
       "source_lines": 310
     },
     {
-      "coverage_percent": 99.07,
-      "coverage_status": "partially_covered",
-      "covered_lines": 107,
-      "executable_lines": 108,
-      "missing_lines": 1,
-      "module": "bioetl.interfaces.http._selected_run_status_cache",
-      "path": "src/bioetl/interfaces/http/_selected_run_status_cache.py",
-      "source_lines": 211
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 35,
-      "executable_lines": 35,
-      "missing_lines": 0,
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.interfaces.http._selected_run_unavailable",
       "path": "src/bioetl/interfaces/http/_selected_run_unavailable.py",
-      "source_lines": 163
+      "source_lines": 161
     },
     {
       "coverage_percent": 100.0,
@@ -26047,6 +25937,146 @@
       "module": "bioetl.interfaces.http.types",
       "path": "src/bioetl/interfaces/http/types.py",
       "source_lines": 62
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 1,
+      "executable_lines": 1,
+      "missing_lines": 0,
+      "module": "bioetl.application.services.effective_config",
+      "path": "src/bioetl/application/services/effective_config/__init__.py",
+      "source_lines": 3
+    },
+    {
+      "coverage_percent": 89.47,
+      "coverage_status": "partially_covered",
+      "covered_lines": 68,
+      "executable_lines": 76,
+      "missing_lines": 8,
+      "module": "bioetl.application.services.effective_config.config_source_hashing",
+      "path": "src/bioetl/application/services/effective_config/config_source_hashing.py",
+      "source_lines": 151
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 4,
+      "executable_lines": 4,
+      "missing_lines": 0,
+      "module": "bioetl.application.services.evidence_location",
+      "path": "src/bioetl/application/services/evidence_location/__init__.py",
+      "source_lines": 52
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 23,
+      "executable_lines": 23,
+      "missing_lines": 0,
+      "module": "bioetl.application.services.evidence_location.registration_models",
+      "path": "src/bioetl/application/services/evidence_location/registration_models.py",
+      "source_lines": 47
+    },
+    {
+      "coverage_percent": 85.42,
+      "coverage_status": "partially_covered",
+      "covered_lines": 41,
+      "executable_lines": 48,
+      "missing_lines": 7,
+      "module": "bioetl.application.services.evidence_location.registration_observations",
+      "path": "src/bioetl/application/services/evidence_location/registration_observations.py",
+      "source_lines": 166
+    },
+    {
+      "coverage_percent": 86.15,
+      "coverage_status": "partially_covered",
+      "covered_lines": 56,
+      "executable_lines": 65,
+      "missing_lines": 9,
+      "module": "bioetl.application.services.evidence_location.resolver",
+      "path": "src/bioetl/application/services/evidence_location/resolver.py",
+      "source_lines": 232
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 39,
+      "executable_lines": 39,
+      "missing_lines": 0,
+      "module": "bioetl.application.services.evidence_location.resolver_types",
+      "path": "src/bioetl/application/services/evidence_location/resolver_types.py",
+      "source_lines": 97
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 33,
+      "executable_lines": 33,
+      "missing_lines": 0,
+      "module": "bioetl.application.services.execution.pipeline_runner_finalize",
+      "path": "src/bioetl/application/services/execution/pipeline_runner_finalize.py",
+      "source_lines": 155
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 48,
+      "executable_lines": 48,
+      "missing_lines": 0,
+      "module": "bioetl.application.services.workflow.workflow_runner_finalize",
+      "path": "src/bioetl/application/services/workflow/workflow_runner_finalize.py",
+      "source_lines": 118
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 64,
+      "executable_lines": 64,
+      "missing_lines": 0,
+      "module": "bioetl.application.services.workflow.workflow_runner_transitions",
+      "path": "src/bioetl/application/services/workflow/workflow_runner_transitions.py",
+      "source_lines": 214
+    },
+    {
+      "coverage_percent": 93.33,
+      "coverage_status": "partially_covered",
+      "covered_lines": 14,
+      "executable_lines": 15,
+      "missing_lines": 1,
+      "module": "bioetl.domain.run_reports.model_serialization",
+      "path": "src/bioetl/domain/run_reports/model_serialization.py",
+      "source_lines": 39
+    },
+    {
+      "coverage_percent": 98.23,
+      "coverage_status": "partially_covered",
+      "covered_lines": 111,
+      "executable_lines": 113,
+      "missing_lines": 2,
+      "module": "bioetl.interfaces.http._selected_run_status_cache",
+      "path": "src/bioetl/interfaces/http/_selected_run_status_cache.py",
+      "source_lines": 217
+    },
+    {
+      "coverage_percent": 80.7,
+      "coverage_status": "partially_covered",
+      "covered_lines": 46,
+      "executable_lines": 57,
+      "missing_lines": 11,
+      "module": "bioetl.application.services.evidence_location.registration",
+      "path": "src/bioetl/application/services/evidence_location/registration.py",
+      "source_lines": 249
+    },
+    {
+      "coverage_percent": 70.0,
+      "coverage_status": "partially_covered",
+      "covered_lines": 49,
+      "executable_lines": 70,
+      "missing_lines": 21,
+      "module": "bioetl.composition.evidence_location_registration",
+      "path": "src/bioetl/composition/evidence_location_registration.py",
+      "source_lines": 254
     }
   ],
   "rows": [
@@ -29621,14 +29651,14 @@
       "source_lines": 28
     },
     {
-      "coverage_percent": 67.74,
+      "coverage_percent": 53.33,
       "coverage_status": "partially_covered",
-      "covered_lines": 21,
-      "executable_lines": 31,
-      "missing_lines": 10,
+      "covered_lines": 8,
+      "executable_lines": 15,
+      "missing_lines": 7,
       "module": "bioetl.application.normalization._chembl_units",
       "path": "src/bioetl/application/normalization/_chembl_units.py",
-      "source_lines": 54
+      "source_lines": 21
     },
     {
       "coverage_percent": 100.0,
@@ -31348,7 +31378,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane",
       "path": "src/bioetl/application/services/control_plane/__init__.py",
-      "source_lines": 139
+      "source_lines": 136
     },
     {
       "coverage_percent": 100.0,
@@ -32803,86 +32833,6 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 1,
-      "executable_lines": 1,
-      "missing_lines": 0,
-      "module": "bioetl.application.services.effective_config",
-      "path": "src/bioetl/application/services/effective_config/__init__.py",
-      "source_lines": 3
-    },
-    {
-      "coverage_percent": 88.16,
-      "coverage_status": "partially_covered",
-      "covered_lines": 67,
-      "executable_lines": 76,
-      "missing_lines": 9,
-      "module": "bioetl.application.services.effective_config.config_source_hashing",
-      "path": "src/bioetl/application/services/effective_config/config_source_hashing.py",
-      "source_lines": 151
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 4,
-      "executable_lines": 4,
-      "missing_lines": 0,
-      "module": "bioetl.application.services.evidence_location",
-      "path": "src/bioetl/application/services/evidence_location/__init__.py",
-      "source_lines": 52
-    },
-    {
-      "coverage_percent": 80.7,
-      "coverage_status": "partially_covered",
-      "covered_lines": 46,
-      "executable_lines": 57,
-      "missing_lines": 11,
-      "module": "bioetl.application.services.evidence_location.registration",
-      "path": "src/bioetl/application/services/evidence_location/registration.py",
-      "source_lines": 249
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 23,
-      "executable_lines": 23,
-      "missing_lines": 0,
-      "module": "bioetl.application.services.evidence_location.registration_models",
-      "path": "src/bioetl/application/services/evidence_location/registration_models.py",
-      "source_lines": 47
-    },
-    {
-      "coverage_percent": 70.83,
-      "coverage_status": "partially_covered",
-      "covered_lines": 34,
-      "executable_lines": 48,
-      "missing_lines": 14,
-      "module": "bioetl.application.services.evidence_location.registration_observations",
-      "path": "src/bioetl/application/services/evidence_location/registration_observations.py",
-      "source_lines": 166
-    },
-    {
-      "coverage_percent": 86.15,
-      "coverage_status": "partially_covered",
-      "covered_lines": 56,
-      "executable_lines": 65,
-      "missing_lines": 9,
-      "module": "bioetl.application.services.evidence_location.resolver",
-      "path": "src/bioetl/application/services/evidence_location/resolver.py",
-      "source_lines": 232
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 39,
-      "executable_lines": 39,
-      "missing_lines": 0,
-      "module": "bioetl.application.services.evidence_location.resolver_types",
-      "path": "src/bioetl/application/services/evidence_location/resolver_types.py",
-      "source_lines": 97
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
       "covered_lines": 9,
       "executable_lines": 9,
       "missing_lines": 0,
@@ -33821,11 +33771,11 @@
       "source_lines": 178
     },
     {
-      "coverage_percent": 60.71,
-      "coverage_status": "partially_covered",
-      "covered_lines": 85,
-      "executable_lines": 140,
-      "missing_lines": 55,
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.application.services.quality.exceptions_context",
       "path": "src/bioetl/application/services/quality/exceptions_context.py",
       "source_lines": 275
@@ -33911,14 +33861,14 @@
       "source_lines": 312
     },
     {
-      "coverage_percent": 97.06,
+      "coverage_percent": 95.35,
       "coverage_status": "partially_covered",
-      "covered_lines": 33,
-      "executable_lines": 34,
-      "missing_lines": 1,
+      "covered_lines": 41,
+      "executable_lines": 43,
+      "missing_lines": 2,
       "module": "bioetl.application.services.run_reports.evidence_location_paths",
       "path": "src/bioetl/application/services/run_reports/evidence_location_paths.py",
-      "source_lines": 100
+      "source_lines": 119
     },
     {
       "coverage_percent": 100.0,
@@ -35289,16 +35239,6 @@
       "module": "bioetl.composition.entrypoints",
       "path": "src/bioetl/composition/entrypoints.py",
       "source_lines": 50
-    },
-    {
-      "coverage_percent": 70.0,
-      "coverage_status": "partially_covered",
-      "covered_lines": 49,
-      "executable_lines": 70,
-      "missing_lines": 21,
-      "module": "bioetl.composition.evidence_location_registration",
-      "path": "src/bioetl/composition/evidence_location_registration.py",
-      "source_lines": 254
     },
     {
       "coverage_percent": 100.0,
@@ -37101,11 +37041,11 @@
       "source_lines": 27
     },
     {
-      "coverage_percent": 92.5,
-      "coverage_status": "partially_covered",
-      "covered_lines": 37,
-      "executable_lines": 40,
-      "missing_lines": 3,
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.composition.selected_run_contract_exclusions",
       "path": "src/bioetl/composition/selected_run_contract_exclusions.py",
       "source_lines": 85
@@ -37963,12 +37903,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 192,
-      "executable_lines": 192,
+      "covered_lines": 188,
+      "executable_lines": 188,
       "missing_lines": 0,
       "module": "bioetl.domain.composite.config_composite_protocols",
       "path": "src/bioetl/domain/composite/config_composite_protocols.py",
-      "source_lines": 266
+      "source_lines": 262
     },
     {
       "coverage_percent": 100.0,
@@ -38878,7 +38818,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.control_plane.effective_config_artifact",
       "path": "src/bioetl/domain/control_plane/effective_config_artifact.py",
-      "source_lines": 201
+      "source_lines": 202
     },
     {
       "coverage_percent": 100.0,
@@ -39008,7 +38948,7 @@
       "missing_lines": 6,
       "module": "bioetl.domain.control_plane.run_evidence_location",
       "path": "src/bioetl/domain/control_plane/run_evidence_location.py",
-      "source_lines": 262
+      "source_lines": 258
     },
     {
       "coverage_percent": 100.0,
@@ -39021,14 +38961,14 @@
       "source_lines": 133
     },
     {
-      "coverage_percent": 86.42,
+      "coverage_percent": 84.93,
       "coverage_status": "partially_covered",
-      "covered_lines": 70,
-      "executable_lines": 81,
+      "covered_lines": 62,
+      "executable_lines": 73,
       "missing_lines": 11,
       "module": "bioetl.domain.control_plane.run_evidence_location_path",
       "path": "src/bioetl/domain/control_plane/run_evidence_location_path.py",
-      "source_lines": 163
+      "source_lines": 136
     },
     {
       "coverage_percent": 100.0,
@@ -39071,11 +39011,11 @@
       "source_lines": 244
     },
     {
-      "coverage_percent": 89.57,
-      "coverage_status": "partially_covered",
-      "covered_lines": 103,
-      "executable_lines": 115,
-      "missing_lines": 12,
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.domain.control_plane.selected_run_contract_exclusions",
       "path": "src/bioetl/domain/control_plane/selected_run_contract_exclusions.py",
       "source_lines": 184
@@ -41143,12 +41083,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 12,
-      "executable_lines": 12,
+      "covered_lines": 11,
+      "executable_lines": 11,
       "missing_lines": 0,
       "module": "bioetl.domain.ports.control_plane",
       "path": "src/bioetl/domain/ports/control_plane/__init__.py",
-      "source_lines": 84
+      "source_lines": 76
     },
     {
       "coverage_percent": 100.0,
@@ -42019,16 +41959,6 @@
       "module": "bioetl.domain.run_reports.context",
       "path": "src/bioetl/domain/run_reports/context.py",
       "source_lines": 31
-    },
-    {
-      "coverage_percent": null,
-      "coverage_status": "coverage_xml_missing",
-      "covered_lines": null,
-      "executable_lines": null,
-      "missing_lines": null,
-      "module": "bioetl.domain.run_reports.model_serialization",
-      "path": "src/bioetl/domain/run_reports/model_serialization.py",
-      "source_lines": 39
     },
     {
       "coverage_percent": 100.0,
@@ -46568,7 +46498,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.control_plane",
       "path": "src/bioetl/infrastructure/control_plane/__init__.py",
-      "source_lines": 140
+      "source_lines": 126
     },
     {
       "coverage_percent": 100.0,
@@ -46581,14 +46511,14 @@
       "source_lines": 31
     },
     {
-      "coverage_percent": 93.48,
-      "coverage_status": "partially_covered",
-      "covered_lines": 43,
-      "executable_lines": 46,
-      "missing_lines": 3,
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.infrastructure.control_plane._evidence_location_publish",
       "path": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
-      "source_lines": 101
+      "source_lines": 100
     },
     {
       "coverage_percent": 100.0,
@@ -46791,14 +46721,14 @@
       "source_lines": 367
     },
     {
-      "coverage_percent": 69.33,
-      "coverage_status": "partially_covered",
-      "covered_lines": 52,
-      "executable_lines": 75,
-      "missing_lines": 23,
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.infrastructure.control_plane.evidence_location_path_safety",
       "path": "src/bioetl/infrastructure/control_plane/evidence_location_path_safety.py",
-      "source_lines": 168
+      "source_lines": 125
     },
     {
       "coverage_percent": 100.0,
@@ -46891,24 +46821,24 @@
       "source_lines": 309
     },
     {
-      "coverage_percent": 94.32,
-      "coverage_status": "partially_covered",
-      "covered_lines": 83,
-      "executable_lines": 88,
-      "missing_lines": 5,
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.infrastructure.control_plane.file_evidence_location_store",
       "path": "src/bioetl/infrastructure/control_plane/file_evidence_location_store.py",
-      "source_lines": 230
+      "source_lines": 241
     },
     {
-      "coverage_percent": 91.94,
-      "coverage_status": "partially_covered",
-      "covered_lines": 57,
-      "executable_lines": 62,
-      "missing_lines": 5,
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.infrastructure.control_plane.file_evidence_read_context",
       "path": "src/bioetl/infrastructure/control_plane/file_evidence_read_context.py",
-      "source_lines": 190
+      "source_lines": 153
     },
     {
       "coverage_percent": 100.0,
@@ -51483,12 +51413,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 78,
-      "executable_lines": 78,
+      "covered_lines": 75,
+      "executable_lines": 75,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._health_server_observability_protocols",
       "path": "src/bioetl/interfaces/http/_health_server_observability_protocols.py",
-      "source_lines": 160
+      "source_lines": 156
     },
     {
       "coverage_percent": 100.0,
@@ -51671,24 +51601,24 @@
       "source_lines": 29
     },
     {
-      "coverage_percent": 95.89,
-      "coverage_status": "partially_covered",
-      "covered_lines": 70,
-      "executable_lines": 73,
-      "missing_lines": 3,
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.interfaces.http._run_type_universe_options",
       "path": "src/bioetl/interfaces/http/_run_type_universe_options.py",
       "source_lines": 145
     },
     {
-      "coverage_percent": 90.65,
-      "coverage_status": "partially_covered",
-      "covered_lines": 97,
-      "executable_lines": 107,
-      "missing_lines": 10,
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.interfaces.http._selected_run_a2_resolve",
       "path": "src/bioetl/interfaces/http/_selected_run_a2_resolve.py",
-      "source_lines": 251
+      "source_lines": 250
     },
     {
       "coverage_percent": 100.0,
@@ -51701,10 +51631,10 @@
       "source_lines": 379
     },
     {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 3,
-      "executable_lines": 3,
+      "coverage_percent": null,
+      "coverage_status": "no_executable_lines",
+      "covered_lines": 0,
+      "executable_lines": 0,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._selected_run_contract_exclusions",
       "path": "src/bioetl/interfaces/http/_selected_run_contract_exclusions.py",
@@ -51723,12 +51653,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 34,
-      "executable_lines": 34,
+      "covered_lines": 31,
+      "executable_lines": 31,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._selected_run_presentation",
       "path": "src/bioetl/interfaces/http/_selected_run_presentation.py",
-      "source_lines": 134
+      "source_lines": 116
     },
     {
       "coverage_percent": 100.0,
@@ -51741,24 +51671,14 @@
       "source_lines": 310
     },
     {
-      "coverage_percent": 99.07,
-      "coverage_status": "partially_covered",
-      "covered_lines": 107,
-      "executable_lines": 108,
-      "missing_lines": 1,
-      "module": "bioetl.interfaces.http._selected_run_status_cache",
-      "path": "src/bioetl/interfaces/http/_selected_run_status_cache.py",
-      "source_lines": 211
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 35,
-      "executable_lines": 35,
-      "missing_lines": 0,
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.interfaces.http._selected_run_unavailable",
       "path": "src/bioetl/interfaces/http/_selected_run_unavailable.py",
-      "source_lines": 163
+      "source_lines": 161
     },
     {
       "coverage_percent": 100.0,
@@ -52089,11 +52009,151 @@
       "module": "bioetl.interfaces.http.types",
       "path": "src/bioetl/interfaces/http/types.py",
       "source_lines": 62
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 1,
+      "executable_lines": 1,
+      "missing_lines": 0,
+      "module": "bioetl.application.services.effective_config",
+      "path": "src/bioetl/application/services/effective_config/__init__.py",
+      "source_lines": 3
+    },
+    {
+      "coverage_percent": 89.47,
+      "coverage_status": "partially_covered",
+      "covered_lines": 68,
+      "executable_lines": 76,
+      "missing_lines": 8,
+      "module": "bioetl.application.services.effective_config.config_source_hashing",
+      "path": "src/bioetl/application/services/effective_config/config_source_hashing.py",
+      "source_lines": 151
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 4,
+      "executable_lines": 4,
+      "missing_lines": 0,
+      "module": "bioetl.application.services.evidence_location",
+      "path": "src/bioetl/application/services/evidence_location/__init__.py",
+      "source_lines": 52
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 23,
+      "executable_lines": 23,
+      "missing_lines": 0,
+      "module": "bioetl.application.services.evidence_location.registration_models",
+      "path": "src/bioetl/application/services/evidence_location/registration_models.py",
+      "source_lines": 47
+    },
+    {
+      "coverage_percent": 85.42,
+      "coverage_status": "partially_covered",
+      "covered_lines": 41,
+      "executable_lines": 48,
+      "missing_lines": 7,
+      "module": "bioetl.application.services.evidence_location.registration_observations",
+      "path": "src/bioetl/application/services/evidence_location/registration_observations.py",
+      "source_lines": 166
+    },
+    {
+      "coverage_percent": 86.15,
+      "coverage_status": "partially_covered",
+      "covered_lines": 56,
+      "executable_lines": 65,
+      "missing_lines": 9,
+      "module": "bioetl.application.services.evidence_location.resolver",
+      "path": "src/bioetl/application/services/evidence_location/resolver.py",
+      "source_lines": 232
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 39,
+      "executable_lines": 39,
+      "missing_lines": 0,
+      "module": "bioetl.application.services.evidence_location.resolver_types",
+      "path": "src/bioetl/application/services/evidence_location/resolver_types.py",
+      "source_lines": 97
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 33,
+      "executable_lines": 33,
+      "missing_lines": 0,
+      "module": "bioetl.application.services.execution.pipeline_runner_finalize",
+      "path": "src/bioetl/application/services/execution/pipeline_runner_finalize.py",
+      "source_lines": 155
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 48,
+      "executable_lines": 48,
+      "missing_lines": 0,
+      "module": "bioetl.application.services.workflow.workflow_runner_finalize",
+      "path": "src/bioetl/application/services/workflow/workflow_runner_finalize.py",
+      "source_lines": 118
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 64,
+      "executable_lines": 64,
+      "missing_lines": 0,
+      "module": "bioetl.application.services.workflow.workflow_runner_transitions",
+      "path": "src/bioetl/application/services/workflow/workflow_runner_transitions.py",
+      "source_lines": 214
+    },
+    {
+      "coverage_percent": 93.33,
+      "coverage_status": "partially_covered",
+      "covered_lines": 14,
+      "executable_lines": 15,
+      "missing_lines": 1,
+      "module": "bioetl.domain.run_reports.model_serialization",
+      "path": "src/bioetl/domain/run_reports/model_serialization.py",
+      "source_lines": 39
+    },
+    {
+      "coverage_percent": 98.23,
+      "coverage_status": "partially_covered",
+      "covered_lines": 111,
+      "executable_lines": 113,
+      "missing_lines": 2,
+      "module": "bioetl.interfaces.http._selected_run_status_cache",
+      "path": "src/bioetl/interfaces/http/_selected_run_status_cache.py",
+      "source_lines": 217
+    },
+    {
+      "coverage_percent": 80.7,
+      "coverage_status": "partially_covered",
+      "covered_lines": 46,
+      "executable_lines": 57,
+      "missing_lines": 11,
+      "module": "bioetl.application.services.evidence_location.registration",
+      "path": "src/bioetl/application/services/evidence_location/registration.py",
+      "source_lines": 249
+    },
+    {
+      "coverage_percent": 70.0,
+      "coverage_status": "partially_covered",
+      "covered_lines": 49,
+      "executable_lines": 70,
+      "missing_lines": 21,
+      "module": "bioetl.composition.evidence_location_registration",
+      "path": "src/bioetl/composition/evidence_location_registration.py",
+      "source_lines": 254
     }
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "51c0d384053af51c21b7abd002de4c603c85106b37e76420d0d6092f13be5d06",
+  "source_tree_sha256": "b7ca25ab0466828060991c752cc790f94b533e261527c0b3de92f83f36a52e81",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -52240,26 +52300,52 @@
           "allowlisted_unmeasured_paths": [],
           "max_unmeasured_module_count": 0,
           "min_covered_line_percent": 94.9,
-          "min_covered_module_count": 53,
-          "min_measured_module_count": 53
+          "min_covered_module_count": 55,
+          "min_measured_module_count": 55
         },
         "unexpected_unmeasured_module_count": 0,
         "unexpected_unmeasured_modules": [],
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2604,
+    "source_module_count": 2607,
     "status_counts": {
-      "coverage_xml_missing": 1,
-      "fully_covered": 2520,
-      "no_executable_lines": 1,
-      "partially_covered": 82,
+      "coverage_xml_missing": 5,
+      "fully_covered": 2521,
+      "no_executable_lines": 2,
+      "partially_covered": 74,
       "uncovered": 0,
-      "unmeasured": 0
+      "unmeasured": 5
     },
     "uncovered_module_count": 0,
     "uncovered_modules": [],
-    "unmeasured_module_count": 0,
-    "unmeasured_modules": []
+    "unmeasured_module_count": 5,
+    "unmeasured_modules": [
+      {
+        "module": "bioetl.application.services.quality.exceptions_context",
+        "path": "src/bioetl/application/services/quality/exceptions_context.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.composition.selected_run_contract_exclusions",
+        "path": "src/bioetl/composition/selected_run_contract_exclusions.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.domain.control_plane.selected_run_contract_exclusions",
+        "path": "src/bioetl/domain/control_plane/selected_run_contract_exclusions.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.interfaces.http._selected_run_a2_resolve",
+        "path": "src/bioetl/interfaces/http/_selected_run_a2_resolve.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.interfaces.http._selected_run_unavailable",
+        "path": "src/bioetl/interfaces/http/_selected_run_unavailable.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      }
+    ]
   }
 }

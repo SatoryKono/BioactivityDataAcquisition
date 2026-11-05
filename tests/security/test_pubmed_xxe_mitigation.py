@@ -112,12 +112,14 @@ def test_transformer_billion_laughs_mitigation():
     with pytest.raises(ValueError, match="XML parse error"):
         transformer._pre_extract_validation(context, record, 0)
 
+
 def test_xml_processor_oversized_mitigation():
     """Verify that PubMedXmlProcessor blocks oversized payload > 31MB."""
     oversized_payload = "<root>" + "A" * (31457280 + 10) + "</root>"
 
     result = PubMedXmlProcessor.parse_response(oversized_payload)
     assert result is None
+
 
 def test_xml_processor_blowup_mitigation():
     """Verify that PubMedXmlProcessor blocks quadratic blowup payload with massive number of elements."""
