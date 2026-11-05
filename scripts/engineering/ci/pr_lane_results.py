@@ -394,6 +394,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/governance/n1-shadow-window-status.md": (
         "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
     ),
+    # Docs-lane audit mirror of the N1 shadow status (Jules / audit pack surface).
+    "docs/reports/audit/N1_SHADOW_STATUS.md": (
+        "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
+    ),
     "docs/04-reference/environment-variables.md": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,

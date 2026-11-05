@@ -514,6 +514,7 @@ def test_n1_evidence_paths_have_shadow_compare_routes() -> None:
             "docs/04-reference/github-actions-workflows.md",
             "docs/05-operations/ci-workflow-map.md",
             "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
+            "docs/reports/audit/N1_SHADOW_STATUS.md",
             "reports/governance/n1-shadow-window/ledger.json",
             "reports/governance/n1-shadow-window-status.md",
             "reports/quality/flaky-test-burndown-review.json",
