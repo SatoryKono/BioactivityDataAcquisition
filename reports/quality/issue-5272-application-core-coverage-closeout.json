@@ -18,7 +18,7 @@
   },
   "parent_epic_status": {
     "status": "not_closeable_under_current_definition_of_done",
-    "remaining_below_85_module_count": 7,
+    "remaining_below_85_module_count": 5,
     "reason": "Live accepted-inventory floor count; this binding does not close the parent epic."
   },
   "evidence": [
@@ -2908,7 +2908,7 @@
     }
   ],
   "current_binding_refresh": {
-    "source_tree_sha256": "f8b07775f375d9b0294d56a21f49c305f62077a058d98fbabdaf41382b8b8899",
+    "source_tree_sha256": "167ba06b26e11f0701f60a9e3fd19feaf0300e55e0926825a19be8ac66414aa9",
     "evidence": "reports/quality/module-coverage-inventory.json",
     "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
   },
