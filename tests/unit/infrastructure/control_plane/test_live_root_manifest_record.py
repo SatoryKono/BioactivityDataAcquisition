@@ -144,6 +144,45 @@ def test_existing_live_manifest_for_the_run_is_not_replaced(tmp_path: Path) -> N
     assert not (live / "replacement-manifest.json").exists()
 
 
+def test_verified_successor_advances_the_index_and_keeps_the_file(
+    tmp_path: Path,
+) -> None:
+    live = tmp_path / "run_manifest"
+    initial = _manifest(manifest_id="initial-manifest")
+    _save(live, initial)
+    successor = _manifest(
+        manifest_id="successor-manifest",
+        predecessor_manifest_id="initial-manifest",
+    )
+
+    result = record_manifest_in_live_catalog(
+        manifest=successor,
+        live_base=live,
+        source_base=tmp_path / "source",
+    )
+
+    assert result.outcome == "recorded"
+    assert (live / "initial-manifest.json").is_file()
+    assert (live / "successor-manifest.json").is_file()
+    assert (live / "_by_run_id" / f"{_RUN_ID}.txt").read_text(encoding="utf-8") == (
+        "successor-manifest"
+    )
+    unrelated = _manifest(
+        manifest_id="other-manifest",
+        predecessor_manifest_id="missing-manifest",
+    )
+    kept = record_manifest_in_live_catalog(
+        manifest=unrelated,
+        live_base=live,
+        source_base=tmp_path / "source",
+    )
+    assert kept.outcome == "kept_existing"
+    assert not (live / "other-manifest.json").exists()
+    assert (live / "_by_run_id" / f"{_RUN_ID}.txt").read_text(encoding="utf-8") == (
+        "successor-manifest"
+    )
+
+
 def test_different_bytes_for_the_same_manifest_id_are_kept(tmp_path: Path) -> None:
     live = tmp_path / "run_manifest"
     live.mkdir()

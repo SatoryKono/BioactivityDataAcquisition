@@ -155,8 +155,11 @@ sidecar is not replaced. A failure to write this extra catalog does not fail
 the run; the run data root stays fail-closed. The publication does not walk
 or copy historical data trees. A live catalog snapshot is taken before the
 manifest write. An existing live manifest id is not replaced when its bytes
-differ, and a run id already indexed to a different manifest id is left
-unchanged. When the alias is unset, or it is the same directory, the run
+differ. A run id already indexed to another manifest stays unchanged, except
+when the new manifest is the confirmed successor of that indexed file: the
+run-id index advances and the previous manifest file stays. That successor
+publication runs from the ledger callback after the rebind commits. When the
+alias is unset, or it is the same directory, the run
 data root is the live catalog and no second copy is written.
 
 Strict exact-replay, `replay_ready`, and `forensic_grade` contexts require this

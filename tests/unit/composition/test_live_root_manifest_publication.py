@@ -65,12 +65,17 @@ def test_unset_alias_keeps_the_run_data_root(tmp_path: Path) -> None:
     assert not (source / "new-manifest.json").exists()
 
 
-def _run_publish(monkeypatch, tmp_path: Path, publish):  # type: ignore[no-untyped-def]
+def _run_publish(  # type: ignore[no-untyped-def]
+    monkeypatch,
+    tmp_path: Path,
+    publish,
+    ledger: object | None = None,
+):
     manifest = _manifest()
     store = SimpleNamespace(base_path=tmp_path / "run_manifest")
     monkeypatch.setattr(f"{_MODULE}.create_manifest_store", lambda _inputs: store)
     monkeypatch.setattr(
-        f"{_MODULE}.maybe_create_ledger_service", lambda **_kwargs: None
+        f"{_MODULE}.maybe_create_ledger_service", lambda **_kwargs: ledger
     )
     monkeypatch.setattr(
         f"{_MODULE}.emit_replay_reconstructability_metric", lambda **_kwargs: None
@@ -135,3 +140,30 @@ def test_live_root_write_error_does_not_fail_the_saved_manifest(
     _, _, refs, ledger = _run_publish(monkeypatch, tmp_path, _publish)
     assert refs == "refs"
     assert ledger is None
+
+
+def test_confirmed_successor_callback_publishes_that_manifest(
+    monkeypatch, tmp_path: Path
+) -> None:
+    from dataclasses import replace
+
+    seen: list[object] = []
+    ledger_service = SimpleNamespace(manifest_successor_callbacks=[])
+
+    def _publish(**kwargs: object) -> str:
+        seen.append(kwargs["manifest"])
+        return "recorded"
+
+    initial, _store, _refs, returned = _run_publish(
+        monkeypatch, tmp_path, _publish, ledger=ledger_service
+    )
+    successor = replace(
+        initial,
+        manifest_id="successor-manifest",
+        predecessor_manifest_id=initial.manifest_id,
+    )
+    callbacks = ledger_service.manifest_successor_callbacks
+    assert returned is ledger_service
+    assert len(callbacks) == 1
+    callbacks[0](successor)
+    assert seen == [initial, successor]

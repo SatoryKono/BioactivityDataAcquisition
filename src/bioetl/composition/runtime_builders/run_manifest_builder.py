@@ -149,6 +149,11 @@ def _publish_manifest_and_refs(
         settings=inputs.settings,
         source_base=manifest_store.base_path,
     )
+    _bind_live_root_successor_callback(
+        ledger_service,
+        settings=inputs.settings,
+        source_base=manifest_store.base_path,
+    )
     if not require_before_persist:
         _require_cached_bronze_snapshots(
             inputs=inputs, manifest_context=manifest_context
@@ -162,6 +167,26 @@ def _publish_manifest_and_refs(
         ),
     )
     return control_plane_refs, ledger_service
+
+
+def _bind_live_root_successor_callback(
+    ledger_service: RunLedgerService | None,
+    *,
+    settings: Settings,
+    source_base: Path,
+) -> None:
+    """Publish a successor only after its ledger rebind has committed."""
+    if ledger_service is None:
+        return
+
+    def _publish(successor: RunManifest) -> None:
+        _publish_live_root_without_failing_the_run(
+            manifest=successor,
+            settings=settings,
+            source_base=source_base,
+        )
+
+    ledger_service.manifest_successor_callbacks.append(_publish)
 
 
 def _publish_live_root_without_failing_the_run(

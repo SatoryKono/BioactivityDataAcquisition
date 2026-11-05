@@ -79,7 +79,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   An existing live manifest is not overwritten, and the catalog ids present
   before that write must still be present afterward. The contract-evidence
   sidecar is copied when it is created, including onto an already recorded
-  manifest. A live-root write error does not fail the saved run manifest.
+  manifest. A confirmed successor advances the live run-id index and keeps
+  the previous manifest file; an unrelated manifest id does not. A live-root
+  write error does not fail the saved run manifest.
   Other validation routes keep the previous unresolved scope.
   `[STALE catalog]` remains the options snapshot age mark.
 

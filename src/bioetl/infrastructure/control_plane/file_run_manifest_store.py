@@ -468,9 +468,10 @@ def record_manifest_in_live_catalog(
 ) -> LiveRootRecordResult:
     """Publish one new manifest into the live catalog.
 
-    Historical data trees are not scanned or copied. An existing live manifest
-    for the same run id, or different bytes for the same manifest id, stay in
-    place. Catalog ids present before the write must still be present after it.
+    Historical data trees are not scanned or copied. Different bytes for an
+    existing manifest id stay in place. A run-id index advances only for the
+    verified successor of the indexed manifest; the previous file stays.
+    Catalog ids present before the write must still be present after it.
     """
     live = Path(live_base)
     source = Path(source_base)
@@ -527,7 +528,25 @@ def _kept_existing_manifest(live_base: Path, manifest: RunManifest) -> bool:
     if not index.is_file():
         return False
     current_id = index.read_text(encoding="utf-8").strip()
-    return bool(current_id) and current_id != manifest.manifest_id
+    if not current_id or current_id == manifest.manifest_id:
+        return False
+    return not _verified_successor_of_indexed(live_base, manifest, current_id)
+
+
+def _verified_successor_of_indexed(
+    live_base: Path,
+    manifest: RunManifest,
+    indexed_id: str,
+) -> bool:
+    """True when this manifest is the next link of the indexed run."""
+    predecessor_id = manifest.predecessor_manifest_id
+    if predecessor_id != indexed_id:
+        return False
+    try:
+        predecessor = FileRunManifestStore(base_path=live_base).get(indexed_id)
+    except (OSError, TypeError, ValueError):
+        return False
+    return predecessor is not None and predecessor.run_id == manifest.run_id
 
 
 def _already_recorded(live_base: Path, manifest: RunManifest) -> bool:
