@@ -568,15 +568,13 @@
                     "title": "Select this run",
                     "url": "/d/bioetl-run-explorer-v1/1-run-explorer?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}&var-lookup_run_id=",
                     "includeVars": false,
-                    "targetBlank": false,
-                    "tooltip": "Full Run ID: ${__data.fields.run_id}"
+                    "targetBlank": false
                   },
                   {
                     "title": "Report · ${__data.fields.run_id}",
                     "url": "${__data.fields.report_url:raw}",
                     "includeVars": false,
-                    "targetBlank": true,
-                    "tooltip": "Full Run ID: ${__data.fields.run_id}"
+                    "targetBlank": true
                   }
                 ]
               },
@@ -596,6 +594,12 @@
                 "value": {
                   "type": "auto",
                   "wrapText": true
+                }
+              },
+              {
+                "id": "custom.tooltip",
+                "value": {
+                  "field": "run_id"
                 }
               }
             ]
