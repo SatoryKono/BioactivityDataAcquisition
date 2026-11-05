@@ -9,6 +9,7 @@ import sys
 from collections import Counter, defaultdict
 from datetime import date
 from hashlib import sha256
+from fnmatch import fnmatchcase
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +32,17 @@ GENERATED_DUPLICATION_SURFACE_DIRS = (ROOT / "configs" / "_schema",)
 GENERATED_DUPLICATION_SURFACE_FILES = (
     ROOT / "configs" / "quality" / "test_telemetry_baseline.yaml",
 )
+REVIEW_EVIDENCE_DUPLICATION_PATTERNS = (
+    "configs/quality/external_resource_inventory_pr*_review.json",
+)
+SHARED_REPORT_CONTRACT_BLOCKS = {
+    "properties.observations",
+    "properties.observations.additionalProperties",
+}
+SHARED_REPORT_CONTRACT_FILES = {
+    "configs/contracts/reports/pipeline_run_report.v2.json",
+    "configs/contracts/reports/workflow_run_report.v1.json",
+}
 JSCPD_IGNORED_PATTERNS = ("**/configs/**", "**/*.yaml", "**/*.yml", "**/*.json")
 MIN_DUPLICATE_BLOCK_BYTES = 200
 MAX_DUPLICATION_BLOCK_DEPTH = 2
@@ -395,6 +407,10 @@ def _iter_duplication_surface_files() -> list[Path]:
             for generated_root in GENERATED_DUPLICATION_SURFACE_DIRS
         )
         and path not in GENERATED_DUPLICATION_SURFACE_FILES
+        and not any(
+            fnmatchcase(path.relative_to(ROOT).as_posix(), pattern)
+            for pattern in REVIEW_EVIDENCE_DUPLICATION_PATTERNS
+        )
     ]
     return sorted(files)
 
@@ -560,6 +576,14 @@ def _select_duplicate_clusters(
             continue
         if _is_ignored_single_file_cluster(unique_paths=unique_paths):
             continue
+        if (
+            str(cluster["block_path"]) in SHARED_REPORT_CONTRACT_BLOCKS
+            and unique_paths == SHARED_REPORT_CONTRACT_FILES
+        ):
+            # Both report schemas intentionally expose the same observations
+            # envelope. Keep that shared wire contract out of the authored
+            # configuration debt count; schema compatibility checks own it.
+            continue
         affected_files.update(entry["path"] for entry in occurrences)
         duplicate_clusters.append(_duplicate_cluster_payload(cluster))
     return duplicate_clusters, affected_files
@@ -609,6 +633,16 @@ def _build_duplication_audit() -> dict[str, Any]:
                 path.relative_to(ROOT).as_posix()
                 for path in GENERATED_DUPLICATION_SURFACE_FILES
             ],
+            "excluded_review_evidence_patterns": list(
+                REVIEW_EVIDENCE_DUPLICATION_PATTERNS
+            ),
+            "excluded_shared_contract_blocks": [
+                {
+                    "block_paths": sorted(SHARED_REPORT_CONTRACT_BLOCKS),
+                    "files": sorted(SHARED_REPORT_CONTRACT_FILES),
+                    "reason": "shared_report_observations_wire_contract",
+                }
+            ],
             "ignored_by_jscpd_patterns": list(JSCPD_IGNORED_PATTERNS),
             "structured_block_min_bytes": MIN_DUPLICATE_BLOCK_BYTES,
             "max_traversal_depth": MAX_DUPLICATION_BLOCK_DEPTH,
@@ -633,6 +667,16 @@ def _build_duplication_audit() -> dict[str, Any]:
                 "Generated JSON Schemas are excluded because their repeated $defs "
                 "are materialized from shared Pydantic source models rather than "
                 "independently maintained configuration debt."
+            ),
+            (
+                "External-resource inventory review manifests are evidence inputs, "
+                "not authored runtime configuration; their repeated review fields "
+                "are excluded from the duplication debt count."
+            ),
+            (
+                "The identical observations envelope in the pipeline and workflow "
+                "report schemas is one shared wire contract, governed by schema "
+                "compatibility checks rather than the authored-config debt count."
             ),
             (
                 "The generated test telemetry baseline is excluded because repeated "

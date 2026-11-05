@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "e70d27357f1a7b6002eb1587faf72334e3e634d8",
+  "source_ref": "e70d27357f1a7b6002eb1587faf72334e3e634d8",
+  "source_reviews": {
+    "src/bioetl/application/ports/__init__.py": "Re-exports the read-only EvidenceReadContext protocols added with #12751. No external resource acquisition or lifecycle behavior is introduced.",
+    "src/bioetl/application/ports/control_plane.py": "Adds EvidenceReadContext and EvidenceReadContextOpenerProtocol as read-only port declarations. They open no files, clients, or tasks.",
+    "src/bioetl/application/services/execution/workflow_runner_step_execution.py": "Extracts dispatch_workflow_step and a dependency dataclass around the existing pipeline and transform executors. The same calls remain; no new acquisition is added.",
+    "src/bioetl/application/services/workflow/workflow_runner_service.py": "The runner now calls the extracted dispatcher with the same collaborators it already held. No resource creation or cleanup path is added.",
+    "src/bioetl/composition/runtime_builders/_run_manifest_attr_support.py": "Deletes the read_attr helper module. The helper moved unchanged into the manifest creation helpers and defined no external resource acquisition.",
+    "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py": "Imports read_attr from the helpers module after the attr-support module was deleted. Manifest assembly and ledger creation are unchanged.",
+    "src/bioetl/composition/runtime_builders/_run_manifest_creation_support_helpers.py": "Receives the existing read_attr helper and the existing maybe_create_ledger_service gate. Ledger creation still happens only when the run enables it, through the already inventoried create_ledger_service call.",
+    "src/bioetl/composition/runtime_builders/run_manifest_builder.py": "Calls the moved maybe_create_ledger_service helper instead of a local copy. The ledger remains conditional and no new acquisition site is introduced.",
+    "src/bioetl/composition/runtime_builders/run_manifest_data_roots.py": "Adds evidence-location path binding helpers. Existing data-root mkdir and private-cache fallback stay in place; no new external resource kind is acquired.",
+    "src/bioetl/domain/run_reports/model_serialization.py": "New module of pure dict copies moved out of the run-report models. It performs no external resource operations.",
+    "src/bioetl/domain/run_reports/models.py": "Imports the moved serialization helpers. Model definitions and resource behavior are unchanged.",
+    "src/bioetl/domain/run_reports/workflow_totals.py": "Adds a pure mapping copy for workflow observations. It performs no external resource operations.",
+    "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py": "Closes the mkstemp descriptor if fdopen fails. The same mkstemp and fdopen sites remain; no new acquisition is introduced."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}

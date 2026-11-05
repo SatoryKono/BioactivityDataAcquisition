@@ -44,6 +44,15 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.context import PipelineRunContext
 
+_MISSING = object()
+
+
+def read_attr(obj: object, attr_name: str, default: object = _MISSING) -> object:
+    """Read an attribute while preserving absent versus explicit None."""
+    if default is _MISSING:
+        return getattr(obj, attr_name)
+    return getattr(obj, attr_name, default)
+
 
 @dataclass(frozen=True, slots=True)
 class RunManifestCreateRequestInputs:
@@ -175,6 +184,15 @@ def create_ledger_service(
         _occurred_at_factory=SystemClock().now,
         _manifest_id_factory=lambda: create_runtime_occurrence_id("run_manifest"),
     )
+
+
+def maybe_create_ledger_service(
+    *, ledger_enabled: bool, inputs: RunnerInputs, ctx: PipelineRunContext
+) -> RunLedgerService | None:
+    """Create the ledger only when this run enables ledger publication."""
+    if not ledger_enabled:
+        return None
+    return create_ledger_service(inputs, ctx)
 
 
 def resolve_replay_lag_seconds(
