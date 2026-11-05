@@ -597,10 +597,8 @@
                 }
               },
               {
-                "id": "custom.tooltip",
-                "value": {
-                  "field": "run_id"
-                }
+                "id": "custom.tooltip.field",
+                "value": "run_id"
               }
             ]
           },

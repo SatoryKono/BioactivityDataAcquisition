@@ -42,7 +42,7 @@ def test_run_explorer_processing_status_fits_zoom_with_inspectable_run_id() -> N
         "${__data.fields.run_id}" in link["title"] for link in fields["Run ID"]["links"]
     )
     assert all("tooltip" not in link for link in fields["Run ID"]["links"])
-    assert fields["Run ID"]["custom.tooltip"] == {"field": "run_id"}
+    assert fields["Run ID"]["custom.tooltip.field"] == "run_id"
     visible_width = sum(
         properties.get("custom.width", 0)
         for properties in fields.values()

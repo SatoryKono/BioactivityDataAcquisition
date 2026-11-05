@@ -223,7 +223,7 @@ def test_run_cell_inspection_and_links_use_full_identity():
     assert rules["Run ID"]["custom.wrapText"] is True
     assert rules["Run ID"]["custom.width"] == 110
     assert all("tooltip" not in link for link in links)
-    assert rules["Run ID"]["custom.tooltip"] == {"field": "run_id"}
+    assert rules["Run ID"]["custom.tooltip.field"] == "run_id"
     for field in ("Overview", "Saved Evidence", "Data Quality", "Replay Readiness"):
         assert all(
             "var-run_id=${__data.fields.run_id:percentencode}" in link["url"]

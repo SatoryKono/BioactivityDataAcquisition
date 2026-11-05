@@ -350,9 +350,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
                         "id": _CELL_OPTIONS_ID,
                         "value": {"type": "auto", "wrapText": True},
                     },
-                    # DataLink has no tooltip field (Grafana 12.2). Hover reads
-                    # the hidden run_id column via TableFieldOptions.tooltip.
-                    {"id": "custom.tooltip", "value": {"field": "run_id"}},
+                    {"id": "custom.tooltip.field", "value": "run_id"},
                 ]
             )
         if name in {"Overview", "Saved Evidence", _DATA_QUALITY, _REPLAY_READINESS}:
