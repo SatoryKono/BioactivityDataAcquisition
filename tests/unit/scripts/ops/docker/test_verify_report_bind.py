@@ -513,6 +513,36 @@ def test_host_pipeline_summary_reads_composed_store(tmp_path: Path) -> None:
     assert state.ok
 
 
+def _ready_selected_run_payload() -> dict[str, object]:
+    """Shape matches load_selected_run_status / _present_status for READY runs."""
+    return {
+        "verdict": "OK",
+        "evidence_completeness": "COMPLETE",
+        "replay_readiness": [
+            {
+                "run_id": "run-a",
+                "pipeline": "chembl_assay",
+                "verdict": "READY",
+                "domain_verdict": "exact_replay_ready",
+                "blockers": "—",
+                "unknown_checks": "—",
+            }
+        ],
+        "replay_checks": [
+            {
+                "code": "pipeline_run_report_json",
+                "result": "pass",
+                "reason": "present",
+            },
+            {
+                "code": "manifest_digest",
+                "result": "pass",
+                "reason": "matched",
+            },
+        ],
+    }
+
+
 def test_verify_run_id_success(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -523,23 +553,7 @@ def test_verify_run_id_success(
         "_json_get",
         _aligned_list_ops_payload(
             expected_source_id,
-            selected_run={
-                "verdict": "OK",
-                "evidence_completeness": "COMPLETE",
-                "manifest_present": True,
-                "location_resolved": True,
-                "real_objects_corrupt": False,
-                "source_identity_state": "aligned",
-                "availability": {"report_root_bind": True},
-                "replay_readiness": [
-                    {
-                        "run_id": "run-a",
-                        "pipeline": "chembl_assay",
-                        "verdict": "READY",
-                        "domain_verdict": "exact_replay_ready",
-                    }
-                ],
-            },
+            selected_run=_ready_selected_run_payload(),
         ),
     )
 
@@ -553,4 +567,84 @@ def test_verify_run_id_success(
             run_id="run-a",
         )
         == 0
+    )
+
+
+def test_verify_run_id_require_ops_fails_when_endpoint_unreachable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Bind alignment must not mask a missing selected-run-status under --require-ops."""
+    _seed_aligned_host_with_run(tmp_path, monkeypatch)
+
+    def ops_payload(url: str, **_kwargs: object) -> dict[str, object] | None:
+        if "selected-run-status" in url:
+            return None
+        if url.endswith("/health/ready"):
+            return {
+                "status": "healthy",
+                "checks": {
+                    "report_root": {
+                        "status": "healthy",
+                        "layout_status": "healthy",
+                        "source_identity_status": "healthy",
+                        "source_identity_actual": mod._expected_runtime_environment(
+                            tmp_path
+                        )["BIOETL_RUNTIME_SOURCE_ID"],
+                    }
+                },
+            }
+        return {
+            "status": "ok",
+            "count": 1,
+            "marker_status": "healthy",
+            "source_identity_status": "healthy",
+            "source_identity_actual": mod._expected_runtime_environment(tmp_path)[
+                "BIOETL_RUNTIME_SOURCE_ID"
+            ],
+            "items": [{"run_id": "run-a"}],
+        }
+
+    monkeypatch.setattr(mod, "_json_get", ops_payload)
+    assert (
+        mod.verify(
+            repo=tmp_path,
+            ops_url="http://127.0.0.1:8000",
+            container="bioetl",
+            pipeline="chembl_assay",
+            require_ops=True,
+            run_id="run-a",
+        )
+        == 1
+    )
+
+
+def test_verify_run_id_fails_on_unknown_replay_checks(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    expected_source_id = _seed_aligned_host_with_run(tmp_path, monkeypatch)
+    payload = _ready_selected_run_payload()
+    payload["replay_checks"] = [
+        {
+            "code": "manifest_not_recorded",
+            "result": "unknown",
+            "reason": "manifest_not_recorded",
+        }
+    ]
+    monkeypatch.setattr(
+        mod,
+        "_json_get",
+        _aligned_list_ops_payload(expected_source_id, selected_run=payload),
+    )
+    assert (
+        mod.verify(
+            repo=tmp_path,
+            ops_url="http://127.0.0.1:8000",
+            container="bioetl",
+            pipeline="chembl_assay",
+            require_ops=True,
+            run_id="run-a",
+        )
+        == 1
     )
