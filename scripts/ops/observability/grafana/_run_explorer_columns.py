@@ -13,12 +13,15 @@ TITLES = {
     "bioetl-runtime": "Pipeline Diagnostics",
     "bioetl-provider-health-v2": "Provider Health",
 }
+_REPLAY_READINESS = "Replay Readiness"
+_DATA_QUALITY = "Data Quality"
+_CELL_OPTIONS_ID = "custom.cellOptions"
 _RENAMES = {
-    "1. Trust": "Replay Readiness",
+    "1. Trust": _REPLAY_READINESS,
     "2. Overview": "Run Overview",
     "3. Pipeline Diagnostics": "Pipeline Diagnostics",
     "4. Provider Health": "Provider Health",
-    "5. Data Quality": "Data Quality",
+    "5. Data Quality": _DATA_QUALITY,
 }
 _COLORS = {
     "OK": "#73BF69",
@@ -52,8 +55,8 @@ _COLUMNS = {
     "duration_display": ("Duration", 70, 50),
     "status": ("Overview", 150, 150),
     "saved_evidence_status": ("Saved Evidence", None, 90),
-    "data_quality_status": ("Data Quality", None, 90),
-    "replay_readiness_status": ("Replay Readiness", 125, 90),
+    "data_quality_status": (_DATA_QUALITY, None, 90),
+    "replay_readiness_status": (_REPLAY_READINESS, 125, 90),
 }
 _CONTEXT = "var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}"
 _SELECT_RUN_URL = (
@@ -295,9 +298,9 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
             "Saved Evidence",
             "/d/bioetl-control-plane-v1/2-replay-readiness?" + _CONTEXT + "&viewPanel=9418",
         ),
-        "Data Quality": ("Data Quality", "/d/bioetl-dq-v2/4-data-quality?" + _CONTEXT),
-        "Replay Readiness": (
-            "Replay Readiness",
+        _DATA_QUALITY: (_DATA_QUALITY, "/d/bioetl-dq-v2/4-data-quality?" + _CONTEXT),
+        _REPLAY_READINESS: (
+            _REPLAY_READINESS,
             "/d/bioetl-control-plane-v1/2-replay-readiness?" + _CONTEXT,
         ),
     }
@@ -341,16 +344,16 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
                 [
                     {"id": "custom.wrapText", "value": True},
                     {
-                        "id": "custom.cellOptions",
+                        "id": _CELL_OPTIONS_ID,
                         "value": {"type": "auto", "wrapText": True},
                     },
                 ]
             )
-        if name in {"Overview", "Saved Evidence", "Data Quality", "Replay Readiness"}:
+        if name in {"Overview", "Saved Evidence", _DATA_QUALITY, _REPLAY_READINESS}:
             properties.extend(
                 [
                     {
-                        "id": "custom.cellOptions",
+                        "id": _CELL_OPTIONS_ID,
                         "value": {
                             "type": "color-text",
                             "mode": "basic",
@@ -385,7 +388,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         if name == "Workflow":
             properties.append(
                 {
-                    "id": "custom.cellOptions",
+                    "id": _CELL_OPTIONS_ID,
                     "value": {"type": "auto"},
                 }
             )
