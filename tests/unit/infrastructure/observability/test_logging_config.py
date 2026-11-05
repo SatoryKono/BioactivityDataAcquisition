@@ -265,6 +265,17 @@ class TestIsLoggingConfigured:
 class TestResetLoggingConfig:
     """Tests for reset_logging_config function."""
 
+    @pytest.fixture(autouse=True)
+    def reset_config(self) -> Generator[None, None, None]:
+        """Reset logging configuration before each test."""
+        from bioetl.infrastructure.observability.logging_config import (
+            reset_logging_config,
+        )
+
+        reset_logging_config()
+        yield
+        reset_logging_config()
+
     def test_reset_clears_configuration(self) -> None:
         """Test that reset clears the configuration state."""
         from bioetl.infrastructure.observability.logging_config import (
