@@ -22,7 +22,10 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
     SilverWriterRuntimeServicesRequest,
 )
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
+from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
 from tests.helpers.clock import fixed_test_clock
+
+pytestmark = pytest.mark.integration
 
 _SILVER_META_FIELDS: tuple[tuple[str, pa.DataType], ...] = (
     ("content_hash", pa.string()),
@@ -109,7 +112,9 @@ def silver_writer(temp_delta_path: str) -> SilverWriter:
     logger = MockLogger()
     return SilverWriter(
         runtime_request=SilverWriterRuntimeServicesRequest(
-            clock=fixed_test_clock(), logger=logger
+            clock=fixed_test_clock(),
+            logger=logger,
+            silver_validator=NoOpValidator(),
         ),
         base_path=temp_delta_path,
         logger=logger,
