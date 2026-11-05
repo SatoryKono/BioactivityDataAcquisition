@@ -34,10 +34,10 @@ def _resolution_factory(
 ) -> ProteinClassificationResolutionService:
     return ProteinClassificationResolutionService(
         ChEMBLProteinClassificationGraph.from_rows(
-            protein_class_rows=protein_class_rows,  # type: ignore[arg-type]
-            target_component_rows=target_component_rows,  # type: ignore[arg-type]
+            protein_class_rows=protein_class_rows,  # type: ignore[arg-type]  # tracked(#12721): unjustified type ignore debt
+            target_component_rows=target_component_rows,  # type: ignore[arg-type]  # tracked(#12721): unjustified type ignore debt
         ),
-        invalid_record_policy=invalid_record_policy,  # type: ignore[arg-type]
+        invalid_record_policy=invalid_record_policy,  # type: ignore[arg-type]  # tracked(#12721): unjustified type ignore debt
         target_type_mapping_data=target_type_mapping_data,
     )
 
@@ -50,7 +50,7 @@ class TargetProteinClassificationSnapshotDataSource(_SnapshotDataSource):
         kwargs.setdefault("entity_type", _TARGET_PROTEIN_CLASSIFICATION_ENTITY_TYPE)
         kwargs.setdefault("index_builder", build_target_component_indexes)
         kwargs.setdefault("target_id_resolver", resolve_target_ids)
-        super().__init__(**kwargs)  # type: ignore[arg-type]
+        super().__init__(**kwargs)  # type: ignore[arg-type]  # tracked(#12721): unjustified type ignore debt
 
 
 __all__ = ["TargetProteinClassificationSnapshotDataSource"]
