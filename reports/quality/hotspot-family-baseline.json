@@ -1628,7 +1628,7 @@
       ],
       "duplication_clusters": 0,
       "files": 49,
-      "total_loc": 6470,
+      "total_loc": 6459,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.288,
       "max_internal_fan_in": 2,
@@ -2299,7 +2299,7 @@
       ],
       "duplication_clusters": 0,
       "files": 130,
-      "total_loc": 15467,
+      "total_loc": 15443,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.4,
       "max_internal_fan_in": 1,
@@ -3305,10 +3305,10 @@
         "src/bioetl/composition/runtime_builders/"
       ],
       "duplication_clusters": 0,
-      "files": 52,
-      "total_loc": 6648,
+      "files": 54,
+      "total_loc": 6583,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.338,
+      "helper_function_ratio": 0.345,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.runtime_builders.runner_inputs",
       "bounded_growth_budgets": {
@@ -3318,8 +3318,8 @@
       "internal_fan_in_census": {
         "distribution": {
           "0": 3,
-          "1": 25,
-          "2": 24
+          "1": 26,
+          "2": 25
         },
         "modules": [
           {
@@ -3415,6 +3415,13 @@
             ]
           },
           {
+            "module": "bioetl.composition.runtime_builders._run_manifest_attr_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._run_manifest_creation_support"
+            ]
+          },
+          {
             "module": "bioetl.composition.runtime_builders._run_manifest_builder_policy",
             "fan_in": 2,
             "runtime_importers": [
@@ -3497,6 +3504,14 @@
             "fan_in": 1,
             "runtime_importers": [
               "bioetl.composition.runtime_builders.runner_builder"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._runner_control_plane_artifact_policy",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._runner_builder_orchestration",
+              "bioetl.composition.runtime_builders._runner_control_plane_policy_support"
             ]
           },
           {
@@ -3718,6 +3733,7 @@
           "bioetl.composition.runtime_builders._run_manifest_replay_support",
           "bioetl.composition.runtime_builders._run_manifest_snapshot_resolution",
           "bioetl.composition.runtime_builders._run_manifest_snapshot_support",
+          "bioetl.composition.runtime_builders._runner_control_plane_artifact_policy",
           "bioetl.composition.runtime_builders._runner_control_plane_data_root_policy",
           "bioetl.composition.runtime_builders._runner_control_plane_policy",
           "bioetl.composition.runtime_builders._runtime_launch_context_fields",
