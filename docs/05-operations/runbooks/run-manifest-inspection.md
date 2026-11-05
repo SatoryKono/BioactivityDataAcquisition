@@ -801,12 +801,11 @@ than silently accepting the bundle as canonical.
 ## Rollback
 - This runbook is inspection-only; no rollback is required for read-only diagnostics.
 - If mitigation or recovery commands are executed after inspection, revert config overrides or temporary local state before leaving the incident.
-- When disabling resolver rollback (e.g. reverting the configuration that enabled `--evidence-location-resolver`), ensure data and receipts are preserved without deletion. Specifically, the following data paths must remain intact:
-  - `reports/run-reports/`
-  - `reports/.bioetl-report-root`
-  - `reports/.bioetl-report-source.json`
-  - `reports/observability/`
-- Final closeout must be tied to the exact SHA. CI, merge, and runtime states are distinct.
+- When disabling `EvidenceLocationResolver` legacy-root fallback (RF-003; see
+  [Run Reports — Evidence locations](../../04-reference/reports/run-reports.md)),
+  preserve `reports/run-reports/` trees and
+  `reports/run-reports/_evidence-locations/` receipts without deletion.
+- Final closeout must be tied to the exact git SHA. CI, merge, and runtime states are distinct.
 
 
 ## Post-incident
