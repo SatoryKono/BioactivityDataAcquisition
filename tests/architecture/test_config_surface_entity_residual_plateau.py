@@ -125,7 +125,24 @@ def test_config_surface_duplication_audit_matches_live_backlog() -> None:
     assert scope["excluded_generated_files"] == [
         "configs/quality/test_telemetry_baseline.yaml"
     ]
+    assert scope["excluded_review_evidence_patterns"] == [
+        "configs/quality/external_resource_inventory_pr*_review.json"
+    ]
+    assert scope["excluded_shared_contract_blocks"] == [
+        {
+            "block_paths": [
+                "properties.observations",
+                "properties.observations.additionalProperties",
+            ],
+            "files": [
+                "configs/contracts/reports/pipeline_run_report.v2.json",
+                "configs/contracts/reports/workflow_run_report.v1.json",
+            ],
+            "reason": "shared_report_observations_wire_contract",
+        }
+    ]
     assert scope["files_scanned"] > 0
+    assert summary["duplicate_cluster_count"] == 6
     assert summary["duplicate_cluster_count"] >= summary["reported_cluster_count"] >= 0
 
     for cluster in audit["clusters"]:

@@ -73,7 +73,17 @@ EXPECTED_RESPONSIBILITY_SEAMS = {
     "ledger",
     "manifest",
     "replay",
+    "evidence_location",
     "workflow",
+}
+SEAM_MODULE_PREFIXES = {
+    "effective_config": "bioetl.application.services.control_plane.effective_config",
+    "forensic": "bioetl.application.services.control_plane.forensic",
+    "ledger": "bioetl.application.services.control_plane.ledger",
+    "manifest": "bioetl.application.services.control_plane.manifest",
+    "replay": "bioetl.application.services.control_plane.replay",
+    "evidence_location": "bioetl.application.services.evidence_location",
+    "workflow": "bioetl.application.services.control_plane.workflow",
 }
 
 
@@ -178,14 +188,10 @@ def test_control_plane_root_lazy_exports_target_responsibility_seams() -> None:
     """Root lazy exports must route to use-case owner packages, not flat wrappers."""
     lazy_exports = control_plane_root._LAZY_ATTR_EXPORTS
     seams = control_plane_root.RESPONSIBILITY_SEAMS
-    allowed_module_prefixes = (
-        *(
-            f"bioetl.application.services.control_plane.{seam}"
-            for seam in EXPECTED_RESPONSIBILITY_SEAMS
-        ),
-    )
+    allowed_module_prefixes = tuple(SEAM_MODULE_PREFIXES.values())
 
     assert set(seams) == EXPECTED_RESPONSIBILITY_SEAMS
+    assert set(SEAM_MODULE_PREFIXES) == EXPECTED_RESPONSIBILITY_SEAMS
     assert lazy_exports
     for export_name, target in lazy_exports.items():
         target_module = target[0]

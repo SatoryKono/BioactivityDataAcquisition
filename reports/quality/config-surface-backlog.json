@@ -188,123 +188,13 @@
           "composite_config": 1,
           "entity_config": 1
         }
-      },
-      {
-        "block_path": "expression_updates",
-        "fingerprint": "ab2e64a029c2",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "expression_updates",
-            "path": "configs/quality/external_resource_inventory_pr12651_main_merge_review.json",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "expression_updates",
-            "path": "configs/quality/external_resource_inventory_pr12651_review.json",
-            "surface_kind": "quality_registry"
-          }
-        ],
-        "serialized_bytes": 363,
-        "surface_kind_counts": {
-          "quality_registry": 2
-        }
-      },
-      {
-        "block_path": "expression_updates.src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
-        "fingerprint": "9413008a4875",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "expression_updates.src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
-            "path": "configs/quality/external_resource_inventory_pr12651_main_merge_review.json",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "expression_updates.src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
-            "path": "configs/quality/external_resource_inventory_pr12651_review.json",
-            "surface_kind": "quality_registry"
-          }
-        ],
-        "serialized_bytes": 284,
-        "surface_kind_counts": {
-          "quality_registry": 2
-        }
-      },
-      {
-        "block_path": "properties.observations",
-        "fingerprint": "195fb02f85f3",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "properties.observations",
-            "path": "configs/contracts/reports/pipeline_run_report.v2.json",
-            "surface_kind": "other_config"
-          },
-          {
-            "block_path": "properties.observations",
-            "path": "configs/contracts/reports/workflow_run_report.v1.json",
-            "surface_kind": "other_config"
-          }
-        ],
-        "serialized_bytes": 259,
-        "surface_kind_counts": {
-          "other_config": 2
-        }
-      },
-      {
-        "block_path": "properties.observations.additionalProperties",
-        "fingerprint": "07e3de6567c9",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "properties.observations.additionalProperties",
-            "path": "configs/contracts/reports/pipeline_run_report.v2.json",
-            "surface_kind": "other_config"
-          },
-          {
-            "block_path": "properties.observations.additionalProperties",
-            "path": "configs/contracts/reports/workflow_run_report.v1.json",
-            "surface_kind": "other_config"
-          }
-        ],
-        "serialized_bytes": 215,
-        "surface_kind_counts": {
-          "other_config": 2
-        }
       }
     ],
     "notes": [
       "This audit covers structured config/contract/registry surfaces under configs/** that JSCPD intentionally ignores. Generated JSON Schema mirrors stay governed by schema drift checks and are excluded from the authored-config duplication debt ratchet.",
       "Generated JSON Schemas are excluded because their repeated $defs are materialized from shared Pydantic source models rather than independently maintained configuration debt.",
+      "External-resource inventory review manifests are evidence inputs, not authored runtime configuration; their repeated review fields are excluded from the duplication debt count.",
+      "The identical observations envelope in the pipeline and workflow report schemas is one shared wire contract, governed by schema compatibility checks rather than the authored-config debt count.",
       "The generated test telemetry baseline is excluded because repeated duration maps are captured observations, not maintained config debt.",
       "Clusters report exact canonical JSON subtree duplicates only; near-duplicate prose and comment drift stay out of scope.",
       "The audit is report-only and exists to make YAML/JSON governance duplication reviewable in CI-visible artifacts.",
@@ -317,12 +207,28 @@
       "excluded_generated_roots": [
         "configs/_schema"
       ],
+      "excluded_review_evidence_patterns": [
+        "configs/quality/external_resource_inventory_pr*_review.json"
+      ],
+      "excluded_shared_contract_blocks": [
+        {
+          "block_paths": [
+            "properties.observations",
+            "properties.observations.additionalProperties"
+          ],
+          "files": [
+            "configs/contracts/reports/pipeline_run_report.v2.json",
+            "configs/contracts/reports/workflow_run_report.v1.json"
+          ],
+          "reason": "shared_report_observations_wire_contract"
+        }
+      ],
       "file_suffixes": [
         ".yaml",
         ".yml",
         ".json"
       ],
-      "files_scanned": 271,
+      "files_scanned": 258,
       "ignored_by_jscpd_patterns": [
         "**/configs/**",
         "**/*.yaml",
@@ -334,10 +240,10 @@
       "structured_block_min_bytes": 200
     },
     "summary": {
-      "affected_file_count": 14,
-      "duplicate_cluster_count": 10,
-      "duplicate_occurrence_count": 23,
-      "reported_cluster_count": 10
+      "affected_file_count": 10,
+      "duplicate_cluster_count": 6,
+      "duplicate_occurrence_count": 15,
+      "reported_cluster_count": 6
     }
   },
   "entity_effective": {

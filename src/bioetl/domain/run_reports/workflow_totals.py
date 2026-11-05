@@ -196,3 +196,10 @@ def _reconciliation_totals(rows: Sequence[WorkflowExecutionRow]) -> dict[str, ob
         "final_current_by_table": final_by_table,
         "historical_by_table": historical_by_table,
     }
+
+
+def _planned_step_count(
+    plan: Sequence[object], execution: Sequence[WorkflowExecutionRow]
+) -> int:
+    """Prefer declared plan size and fall back to observed execution size."""
+    return len(plan) if plan else len(execution)
