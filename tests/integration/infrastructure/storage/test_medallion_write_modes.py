@@ -11,6 +11,7 @@ import pytest
 from deltalake import DeltaTable
 from pandera.pandas import Column, DataFrameSchema
 
+from bioetl.domain.exceptions import SchemaEvolutionError
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.transformations import generate_content_hash
 from bioetl.infrastructure.storage.gold.runtime_helpers import (
@@ -203,6 +204,7 @@ async def test_silver_writer_allows_append_and_merge(
 async def test_gold_writer_allows_append_and_overwrite(
     gold_writer: GoldWriter, gold_schema: DataFrameSchema, temp_delta_path: str
 ) -> None:
+    table_path = f"{temp_delta_path}/test_gold_write_modes"
     await gold_writer.write_gold(
         table_name="test_gold_write_modes",
         records=[_gold_record("1", "A")],
@@ -210,6 +212,10 @@ async def test_gold_writer_allows_append_and_overwrite(
         schema=gold_schema,
         mode="append",
     )
+    appended = DeltaTable(table_path).to_pandas()
+    assert len(appended) == 1
+    assert appended["val"].iloc[0] == "A"
+
     await gold_writer.write_gold(
         table_name="test_gold_write_modes",
         records=[_gold_record("1", "B"), _gold_record("2", "C")],
@@ -218,7 +224,7 @@ async def test_gold_writer_allows_append_and_overwrite(
         mode="overwrite",
     )
 
-    df = DeltaTable(f"{temp_delta_path}/test_gold_write_modes").to_pandas()
+    df = DeltaTable(table_path).to_pandas()
     assert len(df) == 2
     assert set(df["id"]) == {"1", "2"}
     assert df[df["id"] == "1"]["val"].iloc[0] == "B"
@@ -237,7 +243,7 @@ async def test_silver_writer_schema_drift(
         mode="append",
     )
 
-    with pytest.raises(Exception):
+    with pytest.raises(SchemaEvolutionError):
         await silver_writer.write_silver(
             table_name="test_silver_drift",
             records=[_silver_record("2", "B", new_field="C")],
