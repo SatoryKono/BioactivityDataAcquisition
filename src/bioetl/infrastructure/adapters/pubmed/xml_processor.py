@@ -50,6 +50,10 @@ class LimitedParseTarget(etree.ElementTree.TreeBuilder):
         self.start_time = time.monotonic()
         self.max_time = 5.0
 
+    def _raise_if_time_exceeded(self) -> None:
+        if time.monotonic() - self.start_time > self.max_time:
+            raise ValueError("XML time limit exceeded")
+
     def start(
         self,
         tag: str,
@@ -58,9 +62,16 @@ class LimitedParseTarget(etree.ElementTree.TreeBuilder):
         self.element_count += 1
         if self.element_count > self.max_elements:
             raise ValueError("XML element limit exceeded")
-        if time.monotonic() - self.start_time > self.max_time:
-            raise ValueError("XML time limit exceeded")
+        self._raise_if_time_exceeded()
         return super().start(tag, attrs)
+
+    def data(self, data: str) -> None:
+        self._raise_if_time_exceeded()
+        super().data(data)
+
+    def end(self, tag: str) -> typing.Any:  # Any: TreeBuilder.end returns element nodes
+        self._raise_if_time_exceeded()
+        return super().end(tag)
 
 
 class PubMedXmlProcessor:

@@ -138,3 +138,30 @@ def test_xml_processor_utf8_byte_size_limit():
 
     with pytest.raises(ValueError, match="XML size limit exceeded"):
         PubMedXmlProcessor.parse_response(oversized_multibyte)
+
+
+def test_xml_processor_emoji_utf8_byte_size_limit(monkeypatch: pytest.MonkeyPatch):
+    """Codex P2: emoji payload under char gate still trips UTF-8 byte gate."""
+    import bioetl.infrastructure.adapters.pubmed.xml_processor as xml_mod
+
+    monkeypatch.setattr(xml_mod, "_MAX_XML_BYTES", 100)
+    # 😀 is 4 UTF-8 bytes; 30 chars of emoji → 120 bytes, wrapper keeps char count ≤ 100.
+    doc = "<r>" + ("😀" * 30) + "</r>"
+    assert len(doc) <= 100
+    assert len(doc.encode("utf-8")) > 100
+
+    with pytest.raises(ValueError, match="XML size limit exceeded"):
+        PubMedXmlProcessor.parse_response(doc)
+
+
+def test_xml_processor_time_limit_after_close(monkeypatch: pytest.MonkeyPatch):
+    """Codex P2: wall-time limit is enforced after parser.close(), not only on start()."""
+    import bioetl.infrastructure.adapters.pubmed.xml_processor as xml_mod
+
+    # Sequence for <r/>: __init__, start(), end(), then post-close check in parse_response.
+    # Keep element callbacks under the 5s budget; only the post-close sample exceeds it.
+    ticks = iter([100.0, 100.1, 100.2, 106.0])
+    monkeypatch.setattr(xml_mod.time, "monotonic", lambda: next(ticks))
+
+    with pytest.raises(ValueError, match="XML time limit exceeded"):
+        PubMedXmlProcessor.parse_response("<r/>")
