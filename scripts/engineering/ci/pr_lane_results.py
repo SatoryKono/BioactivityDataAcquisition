@@ -598,6 +598,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
     ),
     ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
+    "src/memory/dedup.py": ("tests/unit/memory/test_dedup.py",),
     "src/memory/rag/chunking.py": ("tests/unit/memory/test_rag_indexing.py",),
     "configs/quality/mypy_diagnostic_baseline.json": (
         "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
