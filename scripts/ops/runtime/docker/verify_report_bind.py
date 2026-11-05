@@ -467,6 +467,91 @@ def _verify_ops_list_source_identity(
         state.fail("FAIL: ops list source identity differs from host")
 
 
+def _record_selected_run_unreachable(
+    state: _VerificationState,
+    *,
+    url: str,
+    require_ops: bool,
+    bind_aligned: bool,
+) -> None:
+    """Fail under --require-ops; otherwise warn (bind match does not prove run evidence)."""
+    if require_ops:
+        state.fail(f"FAIL: selected-run-status endpoint unreachable: {url}")
+        return
+    if bind_aligned:
+        state.warn(f"WARN: selected-run-status endpoint timed out: {url}")
+        return
+    state.warn(f"WARN: selected-run-status endpoint unreachable: {url}")
+
+
+def _first_replay_readiness(
+    state: _VerificationState,
+    result: Mapping[str, Any],
+    *,
+    run_id: str,
+) -> Mapping[str, Any] | None:
+    readiness_rows = result.get("replay_readiness", [])
+    if not isinstance(readiness_rows, list) or not readiness_rows:
+        state.fail(f"FAIL: no replay_readiness found for run_id={run_id!r}")
+        return None
+    readiness = readiness_rows[0]
+    if not isinstance(readiness, Mapping):
+        state.fail(f"FAIL: invalid replay_readiness payload for run_id={run_id!r}")
+        return None
+    return readiness
+
+
+def _replay_check_codes(checks: Sequence[Any], *, result: str) -> list[str]:
+    return sorted(
+        str(item.get("code") or "?")
+        for item in checks
+        if isinstance(item, Mapping) and item.get("result") == result
+    )
+
+
+def _verify_replay_check_results(
+    state: _VerificationState,
+    checks: object,
+    *,
+    run_id: str,
+) -> None:
+    # Bind/source identity already verified earlier in verify(); selected-run-status
+    # exposes evidence via replay_checks, not report_bind_state/manifest_present.
+    if not isinstance(checks, list):
+        state.fail(f"FAIL: run_id={run_id!r} missing replay_checks list")
+        return
+    failed = _replay_check_codes(checks, result="fail")
+    unknown = _replay_check_codes(checks, result="unknown")
+    if failed:
+        state.fail(f"FAIL: run_id={run_id!r} replay_checks failed: {failed}")
+    if unknown:
+        state.fail(f"FAIL: run_id={run_id!r} replay_checks unknown: {unknown}")
+
+
+def _verify_ready_selected_run_payload(
+    state: _VerificationState,
+    result: Mapping[str, Any],
+    readiness: Mapping[str, Any],
+    *,
+    run_id: str,
+) -> None:
+    ready_status = readiness.get("verdict")
+    print(f"ops_replay_readiness_verdict={ready_status!r}")
+    if ready_status != "READY":
+        state.fail(
+            f"FAIL: run_id={run_id!r} replay_readiness is not READY "
+            f"(got {ready_status!r})"
+        )
+    if result.get("evidence_completeness") != "COMPLETE":
+        state.fail(f"FAIL: run_id={run_id!r} evidence_completeness is not COMPLETE")
+    if readiness.get("domain_verdict") != "exact_replay_ready":
+        state.fail(
+            f"FAIL: run_id={run_id!r} domain_verdict is not exact_replay_ready "
+            f"(got {readiness.get('domain_verdict')!r})"
+        )
+    _verify_replay_check_results(state, result.get("replay_checks", []), run_id=run_id)
+
+
 def _verify_run_id_endpoint(
     state: _VerificationState,
     *,
@@ -485,65 +570,16 @@ def _verify_run_id_endpoint(
     )
     result = _json_get(url, timeout=20.0)
     if result is None:
-        # Explicit --run-id must not pass under --require-ops just because bind
-        # already matched; bind proves mount identity, not selected-run evidence.
-        if require_ops:
-            state.fail(f"FAIL: selected-run-status endpoint unreachable: {url}")
-            return
-        if bind_aligned:
-            state.warn(f"WARN: selected-run-status endpoint timed out: {url}")
-        else:
-            state.warn(f"WARN: selected-run-status endpoint unreachable: {url}")
+        _record_selected_run_unreachable(
+            state, url=url, require_ops=require_ops, bind_aligned=bind_aligned
+        )
         return
 
     print(f"ops_selected_run_status={result.get('verdict')!r}")
-
-    readiness_rows = result.get("replay_readiness", [])
-    if not isinstance(readiness_rows, list) or not readiness_rows:
-        state.fail(f"FAIL: no replay_readiness found for run_id={run_id!r}")
+    readiness = _first_replay_readiness(state, result, run_id=run_id)
+    if readiness is None:
         return
-    readiness = readiness_rows[0]
-    if not isinstance(readiness, Mapping):
-        state.fail(f"FAIL: invalid replay_readiness payload for run_id={run_id!r}")
-        return
-
-    ready_status = readiness.get("verdict")
-    print(f"ops_replay_readiness_verdict={ready_status!r}")
-    if ready_status != "READY":
-        state.fail(
-            f"FAIL: run_id={run_id!r} replay_readiness is not READY "
-            f"(got {ready_status!r})"
-        )
-
-    if result.get("evidence_completeness") != "COMPLETE":
-        state.fail(f"FAIL: run_id={run_id!r} evidence_completeness is not COMPLETE")
-
-    if readiness.get("domain_verdict") != "exact_replay_ready":
-        state.fail(
-            f"FAIL: run_id={run_id!r} domain_verdict is not exact_replay_ready "
-            f"(got {readiness.get('domain_verdict')!r})"
-        )
-
-    # Bind/source identity already verified earlier in verify(); selected-run-status
-    # exposes evidence via replay_checks, not report_bind_state/manifest_present.
-    checks = result.get("replay_checks", [])
-    if not isinstance(checks, list):
-        state.fail(f"FAIL: run_id={run_id!r} missing replay_checks list")
-        return
-    failed = sorted(
-        str(item.get("code") or "?")
-        for item in checks
-        if isinstance(item, Mapping) and item.get("result") == "fail"
-    )
-    unknown = sorted(
-        str(item.get("code") or "?")
-        for item in checks
-        if isinstance(item, Mapping) and item.get("result") == "unknown"
-    )
-    if failed:
-        state.fail(f"FAIL: run_id={run_id!r} replay_checks failed: {failed}")
-    if unknown:
-        state.fail(f"FAIL: run_id={run_id!r} replay_checks unknown: {unknown}")
+    _verify_ready_selected_run_payload(state, result, readiness, run_id=run_id)
 
 
 def _verify_pipeline_endpoint(
