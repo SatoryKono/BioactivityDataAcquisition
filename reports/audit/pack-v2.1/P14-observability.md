@@ -23,6 +23,21 @@
 
 No confirmed alert-coverage defect was found. The candidate `P14-OBS-001` is withdrawn: alerts in `grafana/prometheus-rules/bioetl_observability.yml` cover the source counters used by the control-plane recording rules and link to runbooks. The absence of `alert:` entries in the recording-rule file alone was insufficient evidence of a gap.
 
+
+### Finding: pack-v2.1/P14-OBS-003
+- **finding_id**: `pack-v2.1/P14-OBS-003`
+- **root_cause_id**: `alertmanager-delivery-unverified`
+- **owner_prompt**: `P14`
+- **concern**: Live Alertmanager delivery and notification routing were not exercised; default receiver lacks notification integrations.
+- **severity**: P3
+- **confidence**: high
+- **status**: NOT_VERIFIABLE (evidence-collection)
+- **expected**: End-to-end alert delivery (Prometheus -> Alertmanager -> Receiver with integration) is verified and primary timestamp origin is documented.
+- **actual**: Route from Prometheus rule evaluation to Alertmanager notification integration is not fully exercised; default receiver in `grafana/alertmanager.yml` lacks external integrations.
+- **impact**: Potential silent failures in alert notification delivery.
+- **root_cause**: Alert delivery path is not tested end-to-end with real integrations.
+- **recommendation**: Verify full delivery path from Prometheus rule to Alertmanager notification integration, ensuring primary timestamps are retained.
+
 ### Finding: pack-v2.1/P14-OBS-002
 - **finding_id**: `pack-v2.1/P14-OBS-002`
 - **root_cause_id**: `cardinality-risk-uuid`
