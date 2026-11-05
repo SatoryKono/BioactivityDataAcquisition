@@ -18,7 +18,7 @@
   },
   "parent_epic_status": {
     "status": "not_closeable_under_current_definition_of_done",
-    "remaining_below_85_module_count": 7,
+    "remaining_below_85_module_count": 5,
     "reason": "Live accepted-inventory floor count; this binding does not close the parent epic."
   },
   "evidence": [

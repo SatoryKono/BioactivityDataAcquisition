@@ -56,13 +56,13 @@
     },
     {
       "current": {
-        "source_module_count": 2603,
+        "source_module_count": 2607,
         "source_tree_sha256": "167ba06b26e11f0701f60a9e3fd19feaf0300e55e0926825a19be8ac66414aa9",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2603,
+        "source_module_count": 2607,
         "source_tree_sha256": "167ba06b26e11f0701f60a9e3fd19feaf0300e55e0926825a19be8ac66414aa9",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
