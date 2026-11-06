@@ -286,6 +286,21 @@ def test_shadow_compare_routes_12380_acceptance_report() -> None:
     assert report["covers_full_suite"] is False
 
 
+def test_shadow_compare_routes_12553_runtime_acceptance_report() -> None:
+    """Issue 12553 acceptance markdown selects the cleanup-inventory contract."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        ["reports/12553_runtime_acceptance_report.md"],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/architecture/test_documentation_cleanup_inventory.py"
+    ]
+    assert report["covers_full_suite"] is False
+
+
 @pytest.mark.parametrize(
     "path",
     (
