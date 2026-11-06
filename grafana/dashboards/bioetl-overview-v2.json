@@ -940,6 +940,11 @@
               "url": "/d/bioetl-run-explorer-v1/1-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
+            },
+            {
+              "title": "Check BioETL Ops HTTP health",
+              "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
+              "targetBlank": true
             }
           ]
         },

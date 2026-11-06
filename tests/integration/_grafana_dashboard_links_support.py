@@ -705,6 +705,14 @@ def _assert_preserved_identity_handoff(
             } == dict.fromkeys(("workflow", "pipeline", "run_type"), ".*")
             assert "var-lookup_run_id=" in url
             return
+        # F-12: Incident/runtime row → DQ retargets pipeline from the row field and
+        # clears page run_id so a foreign UUID does not follow into another pipeline.
+        if (
+            target_uid == "bioetl-dq-v2"
+            and values.get("run_id") == "-"
+            and str(values.get("pipeline", "")).startswith("${__data.fields.pipeline")
+        ):
+            return
         # Row links are checked before this header-bus path. The bus carries
         # the page selector ($run_id), not another row's UUID.
         expected_identity = required_value
@@ -908,9 +916,13 @@ def _collect_cross_dashboard_target_locations(
 ) -> dict[str, list[str]]:
     # A native Dashboard datasource reuses the source frame and its row actions.
     # Validate those links elsewhere, but count navigation ownership at the source.
+    # Nav bus (panel id=1000) is shared chrome; row/panel CTAs may retarget the same
+    # UID with different scope tokens without counting as duplicate ownership.
     def source_panels(panels):
         result = []
         for panel in panels:
+            if panel.get("id") == 1000:
+                continue
             datasource = panel.get("datasource")
             if (
                 isinstance(datasource, dict)
