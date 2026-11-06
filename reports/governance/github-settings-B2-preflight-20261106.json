@@ -1,0 +1,2138 @@
+{
+  "tags": {
+    "source": "GET https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/tags?per_page=100",
+    "observed_at": "2026-11-06T16:47:23.682932+00:00",
+    "exit": 0,
+    "data": [
+      {
+        "commit": {
+          "sha": "19652d097944c256d653aee884a7218da89ec33b",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/19652d097944c256d653aee884a7218da89ec33b"
+        },
+        "name": "type_checking_optimization_completed"
+      },
+      {
+        "commit": {
+          "sha": "19652d097944c256d653aee884a7218da89ec33b",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/19652d097944c256d653aee884a7218da89ec33b"
+        },
+        "name": "type_annotation_fix_completed"
+      },
+      {
+        "commit": {
+          "sha": "19652d097944c256d653aee884a7218da89ec33b",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/19652d097944c256d653aee884a7218da89ec33b"
+        },
+        "name": "silver_writer_refactor_testing_completed"
+      },
+      {
+        "commit": {
+          "sha": "f2e4c055ff6e9134b5e916df4a32cc311f1e22e6",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/f2e4c055ff6e9134b5e916df4a32cc311f1e22e6"
+        },
+        "name": "silver_writer_refactor_start"
+      },
+      {
+        "commit": {
+          "sha": "19652d097944c256d653aee884a7218da89ec33b",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/19652d097944c256d653aee884a7218da89ec33b"
+        },
+        "name": "silver_writer_refactor_metadata_mixin_completed"
+      },
+      {
+        "commit": {
+          "sha": "19652d097944c256d653aee884a7218da89ec33b",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/19652d097944c256d653aee884a7218da89ec33b"
+        },
+        "name": "silver_writer_refactor_maintenance_mixin_completed"
+      },
+      {
+        "commit": {
+          "sha": "19652d097944c256d653aee884a7218da89ec33b",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/19652d097944c256d653aee884a7218da89ec33b"
+        },
+        "name": "silver_writer_refactor_infrastructure_completed"
+      },
+      {
+        "commit": {
+          "sha": "19652d097944c256d653aee884a7218da89ec33b",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/19652d097944c256d653aee884a7218da89ec33b"
+        },
+        "name": "silver_writer_refactor_before_metadata_mixin"
+      },
+      {
+        "commit": {
+          "sha": "19652d097944c256d653aee884a7218da89ec33b",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/19652d097944c256d653aee884a7218da89ec33b"
+        },
+        "name": "silver_writer_refactor_before_maintenance_mixin"
+      },
+      {
+        "commit": {
+          "sha": "91dc46ed95ee37f62f1be106dbdd79340304108a",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/91dc46ed95ee37f62f1be106dbdd79340304108a"
+        },
+        "name": "restore-phaseA-20260303-083029"
+      },
+      {
+        "commit": {
+          "sha": "19652d097944c256d653aee884a7218da89ec33b",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/19652d097944c256d653aee884a7218da89ec33b"
+        },
+        "name": "pipeline_runtime_fix_completed"
+      },
+      {
+        "commit": {
+          "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+        },
+        "name": "naming_fix_start_before_domain_event_emitter"
+      },
+      {
+        "commit": {
+          "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+        },
+        "name": "naming_fix_request_context_spec_completed"
+      },
+      {
+        "commit": {
+          "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+        },
+        "name": "naming_fix_quarantine_manager_completed"
+      },
+      {
+        "commit": {
+          "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+        },
+        "name": "naming_fix_metadata_assemblers_completed"
+      },
+      {
+        "commit": {
+          "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+        },
+        "name": "naming_fix_domain_event_emitter_completed"
+      },
+      {
+        "commit": {
+          "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+        },
+        "name": "naming_fix_composition_rebranding_completed"
+      },
+      {
+        "commit": {
+          "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+        },
+        "name": "naming_fix_callable_contracts_completed"
+      },
+      {
+        "commit": {
+          "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+        },
+        "name": "naming_fix_before_request_context_spec"
+      },
+      {
+        "commit": {
+          "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+        },
+        "name": "naming_fix_before_quarantine_manager"
+      },
+      {
+        "commit": {
+          "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+        },
+        "name": "naming_fix_before_metadata_assemblers"
+      },
+      {
+        "commit": {
+          "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+        },
+        "name": "naming_fix_before_composition_rebranding"
+      },
+      {
+        "commit": {
+          "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+        },
+        "name": "naming_fix_before_assembler_governance"
+      },
+      {
+        "commit": {
+          "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+        },
+        "name": "naming_fix_assembler_governance_completed"
+      },
+      {
+        "commit": {
+          "sha": "0fead443960ac9b19cf2fbf5cae6bddc13ac9a89",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/0fead443960ac9b19cf2fbf5cae6bddc13ac9a89"
+        },
+        "name": "evidence/issue-12474-grafana-source-0fead443960ac9b19cf2fbf5cae6bddc13ac9a89"
+      },
+      {
+        "commit": {
+          "sha": "ffcecacf90d334387118fe9560d9699d2c965a93",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/ffcecacf90d334387118fe9560d9699d2c965a93"
+        },
+        "name": "evidence/issue-12474-checkpoint-ffcecacf90d334387118fe9560d9699d2c965a93"
+      },
+      {
+        "commit": {
+          "sha": "d3d183b87748d964f858a553de8735d9547f0cbc",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/d3d183b87748d964f858a553de8735d9547f0cbc"
+        },
+        "name": "evidence/issue-12474-checkpoint-d3d183b87748d964f858a553de8735d9547f0cbc"
+      },
+      {
+        "commit": {
+          "sha": "af43b497f4324b7cea08e6bf2761d16111609c73",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/af43b497f4324b7cea08e6bf2761d16111609c73"
+        },
+        "name": "evidence/issue-12474-checkpoint-af43b497f4324b7cea08e6bf2761d16111609c73"
+      },
+      {
+        "commit": {
+          "sha": "589041a5d4638143047788300d12b7a8ec760fa0",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/589041a5d4638143047788300d12b7a8ec760fa0"
+        },
+        "name": "evidence/issue-12474-checkpoint-589041a5d4638143047788300d12b7a8ec760fa0"
+      },
+      {
+        "commit": {
+          "sha": "63216d95433f1e111579303186c4baa12c87c9cb",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/63216d95433f1e111579303186c4baa12c87c9cb"
+        },
+        "name": "evidence/issue-12474-checkpoint-63216d95433f1e111579303186c4baa12c87c9cb"
+      },
+      {
+        "commit": {
+          "sha": "25386ce9320fbb9e3d472c3d686eba1c654c137c",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/25386ce9320fbb9e3d472c3d686eba1c654c137c"
+        },
+        "name": "evidence/issue-12474-checkpoint-25386ce9320fbb9e3d472c3d686eba1c654c137c"
+      },
+      {
+        "commit": {
+          "sha": "8970ed37b1a8b49eec9ad5bd1cb55e7fbf4acf21",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/8970ed37b1a8b49eec9ad5bd1cb55e7fbf4acf21"
+        },
+        "name": "evidence/issue-12474-checkpoint-8970ed37b1a8b49eec9ad5bd1cb55e7fbf4acf21"
+      },
+      {
+        "commit": {
+          "sha": "5948ac9b43c5d62a32c6bd83a4fb3986a810c082",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/5948ac9b43c5d62a32c6bd83a4fb3986a810c082"
+        },
+        "name": "evidence/issue-12474-checkpoint-5948ac9b43c5d62a32c6bd83a4fb3986a810c082"
+      },
+      {
+        "commit": {
+          "sha": "4608b7061e48262ca97ad355849dd5a87d59ee21",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/4608b7061e48262ca97ad355849dd5a87d59ee21"
+        },
+        "name": "evidence/issue-12474-checkpoint-4608b7061e48262ca97ad355849dd5a87d59ee21"
+      },
+      {
+        "commit": {
+          "sha": "3126b776fc4bbb851ba24d559c688e2ee7d0f8ed",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/3126b776fc4bbb851ba24d559c688e2ee7d0f8ed"
+        },
+        "name": "evidence/issue-12474-checkpoint-3126b776fc4bbb851ba24d559c688e2ee7d0f8ed"
+      },
+      {
+        "commit": {
+          "sha": "2150e52c1cb8f751cd25a8d5bff03527029f92a1",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/2150e52c1cb8f751cd25a8d5bff03527029f92a1"
+        },
+        "name": "evidence/issue-12474-checkpoint-2150e52c1cb8f751cd25a8d5bff03527029f92a1"
+      },
+      {
+        "commit": {
+          "sha": "498f4391148e375fc10c535899c894d4b7452fbe",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/498f4391148e375fc10c535899c894d4b7452fbe"
+        },
+        "name": "evidence/issue-12474-checkpoint-498f4391148e375fc10c535899c894d4b7452fbe"
+      },
+      {
+        "commit": {
+          "sha": "61ac3cd9f5425b17d5d61c68a6d15312d4b584d7",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/61ac3cd9f5425b17d5d61c68a6d15312d4b584d7"
+        },
+        "name": "evidence/issue-12474-checkpoint-61ac3cd9f5425b17d5d61c68a6d15312d4b584d7"
+      },
+      {
+        "commit": {
+          "sha": "34bfbe4309b8247d5276ccb24929cb718c644884",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/34bfbe4309b8247d5276ccb24929cb718c644884"
+        },
+        "name": "evidence/issue-12474-checkpoint-34bfbe4309b8247d5276ccb24929cb718c644884"
+      },
+      {
+        "commit": {
+          "sha": "9ade25d56cfa9a780c77d5a97212547c279a7534",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/9ade25d56cfa9a780c77d5a97212547c279a7534"
+        },
+        "name": "evidence/issue-12474-checkpoint-9ade25d56cfa9a780c77d5a97212547c279a7534"
+      },
+      {
+        "commit": {
+          "sha": "7ee48ff5aae6d360dc2ed900f1fcb25fe0a4a8f6",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/7ee48ff5aae6d360dc2ed900f1fcb25fe0a4a8f6"
+        },
+        "name": "evidence/issue-12474-checkpoint-7ee48ff5aae6d360dc2ed900f1fcb25fe0a4a8f6"
+      },
+      {
+        "commit": {
+          "sha": "6c4158e2fc0a6008bbe54b36cb2fde2009c30142",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/6c4158e2fc0a6008bbe54b36cb2fde2009c30142"
+        },
+        "name": "evidence/issue-12474-checkpoint-6c4158e2fc0a6008bbe54b36cb2fde2009c30142"
+      },
+      {
+        "commit": {
+          "sha": "5d295539079288e40202c81c514aeeb32505eebe",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/5d295539079288e40202c81c514aeeb32505eebe"
+        },
+        "name": "evidence/issue-12474-checkpoint-5d295539079288e40202c81c514aeeb32505eebe"
+      },
+      {
+        "commit": {
+          "sha": "4eb3964fe51336229063062f65c8af057cd467b7",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/4eb3964fe51336229063062f65c8af057cd467b7"
+        },
+        "name": "evidence/issue-12474-checkpoint-4eb3964fe51336229063062f65c8af057cd467b7"
+      },
+      {
+        "commit": {
+          "sha": "3c2f90710b2e95808ca6964c6014d413d73fb7ad",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/3c2f90710b2e95808ca6964c6014d413d73fb7ad"
+        },
+        "name": "evidence/issue-12474-checkpoint-3c2f90710b2e95808ca6964c6014d413d73fb7ad"
+      },
+      {
+        "commit": {
+          "sha": "0e37d00f8d5100c5ed0b99d19fce1bae2d022a13",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/0e37d00f8d5100c5ed0b99d19fce1bae2d022a13"
+        },
+        "name": "evidence/issue-12474-checkpoint-0e37d00f8d5100c5ed0b99d19fce1bae2d022a13"
+      },
+      {
+        "commit": {
+          "sha": "0d09e1cfecc58948464ae32caf703443a9b1d666",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/0d09e1cfecc58948464ae32caf703443a9b1d666"
+        },
+        "name": "evidence/issue-12474-checkpoint-0d09e1cfecc58948464ae32caf703443a9b1d666"
+      },
+      {
+        "commit": {
+          "sha": "7a32db219035feec9dcbf5a3caff7a8278d07885",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/7a32db219035feec9dcbf5a3caff7a8278d07885"
+        },
+        "name": "backup-main-20260404"
+      },
+      {
+        "commit": {
+          "sha": "88efd26b997f326d77f40b2c2df5ca9b24582cc0",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/88efd26b997f326d77f40b2c2df5ca9b24582cc0"
+        },
+        "name": "audit/coderabbit-20260806"
+      },
+      {
+        "commit": {
+          "sha": "24f34e296e4fc68cafe53077757a6bab4455a118",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/24f34e296e4fc68cafe53077757a6bab4455a118"
+        },
+        "name": "archive/temp-branch-20260901"
+      },
+      {
+        "commit": {
+          "sha": "98fdd9b7e27b97a3f50799a461eb188b87bf2226",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/98fdd9b7e27b97a3f50799a461eb188b87bf2226"
+        },
+        "name": "archive/pr-closeout/20261002-11862"
+      },
+      {
+        "commit": {
+          "sha": "471d90fe2be2176601e0f6d6d84b82932666a588",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/471d90fe2be2176601e0f6d6d84b82932666a588"
+        },
+        "name": "archive/pr-closeout/20261002-11841"
+      },
+      {
+        "commit": {
+          "sha": "9b618801e1a10de416f2c8c92e18c821d9ee1ef9",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/9b618801e1a10de416f2c8c92e18c821d9ee1ef9"
+        },
+        "name": "archive/pr-closeout/20261002-11840"
+      },
+      {
+        "commit": {
+          "sha": "db3ed39e6cfa1f670f37fce1bac063d6065d2b46",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/db3ed39e6cfa1f670f37fce1bac063d6065d2b46"
+        },
+        "name": "archive/pr-closeout/20261002-11838"
+      },
+      {
+        "commit": {
+          "sha": "df2bb78df75d1e980bc69175830a80459933d45e",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/df2bb78df75d1e980bc69175830a80459933d45e"
+        },
+        "name": "archive/pr-closeout/20261002-11837"
+      },
+      {
+        "commit": {
+          "sha": "9ae412e10a46d485c34eb419367c19d3387a6716",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/9ae412e10a46d485c34eb419367c19d3387a6716"
+        },
+        "name": "archive/pr-closeout/20261002-11836"
+      },
+      {
+        "commit": {
+          "sha": "7a93dd02b843bb8ca1c8e0d3cf015687900e2124",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/7a93dd02b843bb8ca1c8e0d3cf015687900e2124"
+        },
+        "name": "archive/pr-closeout/20261002-11835"
+      },
+      {
+        "commit": {
+          "sha": "bb04b284f6a94f125976ea0f0ff4c253c8786faa",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/bb04b284f6a94f125976ea0f0ff4c253c8786faa"
+        },
+        "name": "archive/pr-closeout/20261002-11833"
+      },
+      {
+        "commit": {
+          "sha": "42651f8eb57cff60c75b0ed3835cc8f2467c879b",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/42651f8eb57cff60c75b0ed3835cc8f2467c879b"
+        },
+        "name": "archive/pr-closeout/20261002-11832"
+      },
+      {
+        "commit": {
+          "sha": "54c3f49da09eeed2565545cdc82e6c379268ea9c",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/54c3f49da09eeed2565545cdc82e6c379268ea9c"
+        },
+        "name": "archive/master20260911-1/54c3f49da09e"
+      },
+      {
+        "commit": {
+          "sha": "334560119615f4293c676a44833594f3ad38ff27",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/334560119615f4293c676a44833594f3ad38ff27"
+        },
+        "name": "archive/master20260910/334560119615"
+      },
+      {
+        "commit": {
+          "sha": "55a1ee3558cff753d0ff11099bd9c8a53f62baf4",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/55a1ee3558cff753d0ff11099bd9c8a53f62baf4"
+        },
+        "name": "archive/master20260908-1/55a1ee3558cf"
+      },
+      {
+        "commit": {
+          "sha": "224b4ca95a46074b64c678f6cbb2d833c5482914",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/224b4ca95a46074b64c678f6cbb2d833c5482914"
+        },
+        "name": "archive/master20260906-1/224b4ca95a46"
+      },
+      {
+        "commit": {
+          "sha": "d2cda540a0fefad0586a608e2c395c2eb1c66fce",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/d2cda540a0fefad0586a608e2c395c2eb1c66fce"
+        },
+        "name": "archive/master20260903-10/d2cda540a0fe"
+      },
+      {
+        "commit": {
+          "sha": "01fdbab84ba8191186c0b6a01bf577fbb6d67fe6",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/01fdbab84ba8191186c0b6a01bf577fbb6d67fe6"
+        },
+        "name": "archive/master20260903-7/01fdbab84ba8"
+      },
+      {
+        "commit": {
+          "sha": "3ef771acd2188bea418fa24e152ac9c13cee38bf",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/3ef771acd2188bea418fa24e152ac9c13cee38bf"
+        },
+        "name": "archive/master20260903-5/3ef771acd218"
+      },
+      {
+        "commit": {
+          "sha": "6445b19e195362e1506fcc3c17507269edbcb562",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/6445b19e195362e1506fcc3c17507269edbcb562"
+        },
+        "name": "archive/master20260903-4/6445b19e1953"
+      },
+      {
+        "commit": {
+          "sha": "c770db35f0eebf4e9a0c7de3f39f43cf63fcfa0f",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/c770db35f0eebf4e9a0c7de3f39f43cf63fcfa0f"
+        },
+        "name": "archive/master20260903-1/c770db35f0ee"
+      },
+      {
+        "commit": {
+          "sha": "396ef4fce9cfe19f4950004da208ceca8dc33d51",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/396ef4fce9cfe19f4950004da208ceca8dc33d51"
+        },
+        "name": "archive/master20260902-3/396ef4fce9cf"
+      },
+      {
+        "commit": {
+          "sha": "9bf8032cedb9d77fadc5d47efd9829ae3a6a87cb",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/9bf8032cedb9d77fadc5d47efd9829ae3a6a87cb"
+        },
+        "name": "archive/master20260902-1/9bf8032cedb9"
+      },
+      {
+        "commit": {
+          "sha": "a826435110194e4c21a4b9e29c7d6886c5466f8d",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/a826435110194e4c21a4b9e29c7d6886c5466f8d"
+        },
+        "name": "archive/master20260901-4/a82643511019"
+      },
+      {
+        "commit": {
+          "sha": "562287c4b04256d1aab9b26345e6e504986abd80",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/562287c4b04256d1aab9b26345e6e504986abd80"
+        },
+        "name": "archive/master20260901-3/562287c4b042"
+      },
+      {
+        "commit": {
+          "sha": "13fedee7ca4979dc31d2cf07297b5c0da8766a50",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/13fedee7ca4979dc31d2cf07297b5c0da8766a50"
+        },
+        "name": "archive/master20260901-2/13fedee7ca49"
+      },
+      {
+        "commit": {
+          "sha": "dfcae50427f58554e1ed2a3015cfaa689de0f1e4",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/dfcae50427f58554e1ed2a3015cfaa689de0f1e4"
+        },
+        "name": "archive/master20260901-1/dfcae50427f5"
+      },
+      {
+        "commit": {
+          "sha": "485cea38a8f18472ca11e777d3facccb3f1d651d",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/485cea38a8f18472ca11e777d3facccb3f1d651d"
+        },
+        "name": "archive/master20260820-2/485cea38a8f1"
+      },
+      {
+        "commit": {
+          "sha": "39afa7c364de925e9e4ae04be73c425424cd9628",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/39afa7c364de925e9e4ae04be73c425424cd9628"
+        },
+        "name": "archive/master20260820-1/39afa7c364de"
+      },
+      {
+        "commit": {
+          "sha": "7e5fb892ea4f22b78399f2ef7568001c5c2bab3a",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/7e5fb892ea4f22b78399f2ef7568001c5c2bab3a"
+        },
+        "name": "archive/master_20260604-2026-06-15"
+      },
+      {
+        "commit": {
+          "sha": "fd4cc06316eb62725e94e7eed7ac2cc56621b98d",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/fd4cc06316eb62725e94e7eed7ac2cc56621b98d"
+        },
+        "name": "archive/master_20260602-2026-06-15"
+      },
+      {
+        "commit": {
+          "sha": "b10a8cf1537a23d5d00d859de90d7edfbe923d66",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/b10a8cf1537a23d5d00d859de90d7edfbe923d66"
+        },
+        "name": "archive/master_20260601-2026-06-15"
+      },
+      {
+        "commit": {
+          "sha": "ceade3491d7dbeb8d6aee614365c166b0d8c53a1",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/ceade3491d7dbeb8d6aee614365c166b0d8c53a1"
+        },
+        "name": "archive/main_20260410-2026-04-24"
+      },
+      {
+        "commit": {
+          "sha": "09cab623c8e17d729f7f16eaaa26fc29d7db1486",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/09cab623c8e17d729f7f16eaaa26fc29d7db1486"
+        },
+        "name": "archive/integration-repro-2754-2761-2026-04-24"
+      },
+      {
+        "commit": {
+          "sha": "4e0ebac15325d968a68dfea2d54aeeb1fbb01d2d",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/4e0ebac15325d968a68dfea2d54aeeb1fbb01d2d"
+        },
+        "name": "archive/fix-2793-neo4j-normalization-topology-2026-04-24"
+      },
+      {
+        "commit": {
+          "sha": "ab4bf90195547bf95464d012352d2cee92d68555",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/ab4bf90195547bf95464d012352d2cee92d68555"
+        },
+        "name": "archive/fix-2773-normalization-matrix-gate-2026-04-24"
+      },
+      {
+        "commit": {
+          "sha": "66b5b47df9894073bb6fc535769cdbe9b6f93659",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/66b5b47df9894073bb6fc535769cdbe9b6f93659"
+        },
+        "name": "archive/fix-2764-normalization-plan-2026-04-24"
+      },
+      {
+        "commit": {
+          "sha": "acda85f52a5a219ffcc182c20bbe6fd64ae9b1f9",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/acda85f52a5a219ffcc182c20bbe6fd64ae9b1f9"
+        },
+        "name": "archive/fix-2749-normalization-matrix-2026-04-24"
+      },
+      {
+        "commit": {
+          "sha": "c851d07c183afaeefb1511c588857d2de50ff014",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/c851d07c183afaeefb1511c588857d2de50ff014"
+        },
+        "name": "archive/fix-2728-fingerprint-contract-2026-04-24"
+      },
+      {
+        "commit": {
+          "sha": "770f53c3a7c8d6697dc62aa562b69fdd84b9869b",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/770f53c3a7c8d6697dc62aa562b69fdd84b9869b"
+        },
+        "name": "archive/chore-consolidate-recent-branches-2026-04-24"
+      },
+      {
+        "commit": {
+          "sha": "443ee919221d2b978ff6142f955a61aece97dcac",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/443ee919221d2b978ff6142f955a61aece97dcac"
+        },
+        "name": "archive/branch-consolidation-20261003/remote/11q"
+      },
+      {
+        "commit": {
+          "sha": "f496c23605868109e1c93e39cb80a569fe2cb773",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/f496c23605868109e1c93e39cb80a569fe2cb773"
+        },
+        "name": "archive/branch-consolidation-20261003/remote/master20261002-7"
+      },
+      {
+        "commit": {
+          "sha": "d51867ff1b358c78d9e09716e613a4667db9fbd2",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/d51867ff1b358c78d9e09716e613a4667db9fbd2"
+        },
+        "name": "archive/branch-consolidation-20261003/remote/master20261002-6"
+      },
+      {
+        "commit": {
+          "sha": "89ae123811d9b1c5bb6897baac667c41fcb5174b",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/89ae123811d9b1c5bb6897baac667c41fcb5174b"
+        },
+        "name": "archive/branch-consolidation-20261003/remote/master20261002-5"
+      },
+      {
+        "commit": {
+          "sha": "9e8bbb55944ecef650f60e26b9cb9e13f513b1fa",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/9e8bbb55944ecef650f60e26b9cb9e13f513b1fa"
+        },
+        "name": "archive/branch-consolidation-20261003/remote/master20260930-2"
+      },
+      {
+        "commit": {
+          "sha": "06b99beb486e823e257ca1354469bf2ce4844145",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/06b99beb486e823e257ca1354469bf2ce4844145"
+        },
+        "name": "archive/branch-consolidation-20261003/remote/fix/11852-fan-in-baseline"
+      },
+      {
+        "commit": {
+          "sha": "86644af84e9921aa0684085684044ad5df815a4f",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/86644af84e9921aa0684085684044ad5df815a4f"
+        },
+        "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-god-module-paydown100-10526"
+      },
+      {
+        "commit": {
+          "sha": "9240717736263165cfed34da936cf82f588a28cf",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/9240717736263165cfed34da936cf82f588a28cf"
+        },
+        "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-god-module-dashboard-metrics-10526"
+      },
+      {
+        "commit": {
+          "sha": "974a9f024c11a50267abff85f0c998d585e1c195",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/974a9f024c11a50267abff85f0c998d585e1c195"
+        },
+        "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-247-build-snapshot-10526"
+      },
+      {
+        "commit": {
+          "sha": "b0cba19c0adee020b1c1c5ad537755b57946a4bd",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/b0cba19c0adee020b1c1c5ad537755b57946a4bd"
+        },
+        "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-246-add-impact-analysis-surfaces-10526"
+      },
+      {
+        "commit": {
+          "sha": "e8894df8b38fb1f562852a4bf7e6c36cf64d66e3",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/e8894df8b38fb1f562852a4bf7e6c36cf64d66e3"
+        },
+        "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-245-run-impact-analysis-passes-10526"
+      },
+      {
+        "commit": {
+          "sha": "e38129c6e0d840efb7ff49c6488d4b647c752a28",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/e38129c6e0d840efb7ff49c6488d4b647c752a28"
+        },
+        "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-244-add-pipeline-test-edges-10526"
+      },
+      {
+        "commit": {
+          "sha": "d867b83da19246da46ba500d53a6871d30f431ca",
+          "url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/commits/d867b83da19246da46ba500d53a6871d30f431ca"
+        },
+        "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-243-pipeline-test-context-10526"
+      }
+    ]
+  },
+  "events": {
+    "source": "GET https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/events?per_page=100",
+    "observed_at": "2026-11-06T16:47:26.309853+00:00",
+    "exit": 0,
+    "data": [
+      {
+        "actor": "SatoryKono",
+        "created_at": "2026-11-05T17:59:41Z",
+        "payload": {
+          "description": "BioETL is a data processing framework for acquiring, normalizing, and validating bioactivity-related datasets from multiple external sources.",
+          "full_ref": "refs/heads/cursor_back/lf-07-manifests-38ab",
+          "master_branch": "main",
+          "pusher_type": "user",
+          "ref": "cursor_back/lf-07-manifests-38ab",
+          "ref_type": "branch"
+        },
+        "type": "CreateEvent"
+      },
+      {
+        "actor": "SatoryKono",
+        "created_at": "2026-11-06T07:35:26Z",
+        "payload": {
+          "full_ref": "refs/heads/fix/runtime-builders-file-count-13541712277476591311",
+          "pusher_type": "user",
+          "ref": "fix/runtime-builders-file-count-13541712277476591311",
+          "ref_type": "branch"
+        },
+        "type": "DeleteEvent"
+      }
+    ]
+  },
+  "collaborators": {
+    "source": "GET https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/collaborators?per_page=100",
+    "observed_at": "2026-11-06T16:47:27.531360+00:00",
+    "exit": 0,
+    "data": [
+      {
+        "login": "SatoryKono",
+        "role_name": "admin"
+      }
+    ]
+  },
+  "hooks": {
+    "source": "GET https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/hooks?per_page=100",
+    "observed_at": "2026-11-06T16:47:28.428668+00:00",
+    "exit": 0,
+    "data": []
+  },
+  "keys": {
+    "source": "GET https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/keys?per_page=100",
+    "observed_at": "2026-11-06T16:47:29.325686+00:00",
+    "exit": 0,
+    "data": []
+  },
+  "apps": {
+    "source": "GET https://api.github.com/user/installations",
+    "observed_at": "2026-11-06T16:47:30.233912+00:00",
+    "exit": 1,
+    "data": {
+      "message": "You must authenticate with an access token authorized to a GitHub App in order to list installations",
+      "documentation_url": "https://docs.github.com/rest/apps/installations#list-app-installations-accessible-to-the-user-access-token",
+      "status": "403"
+    }
+  },
+  "all_tags": [
+    {
+      "name": "type_checking_optimization_completed",
+      "sha": "19652d097944c256d653aee884a7218da89ec33b"
+    },
+    {
+      "name": "type_annotation_fix_completed",
+      "sha": "19652d097944c256d653aee884a7218da89ec33b"
+    },
+    {
+      "name": "silver_writer_refactor_testing_completed",
+      "sha": "19652d097944c256d653aee884a7218da89ec33b"
+    },
+    {
+      "name": "silver_writer_refactor_start",
+      "sha": "f2e4c055ff6e9134b5e916df4a32cc311f1e22e6"
+    },
+    {
+      "name": "silver_writer_refactor_metadata_mixin_completed",
+      "sha": "19652d097944c256d653aee884a7218da89ec33b"
+    },
+    {
+      "name": "silver_writer_refactor_maintenance_mixin_completed",
+      "sha": "19652d097944c256d653aee884a7218da89ec33b"
+    },
+    {
+      "name": "silver_writer_refactor_infrastructure_completed",
+      "sha": "19652d097944c256d653aee884a7218da89ec33b"
+    },
+    {
+      "name": "silver_writer_refactor_before_metadata_mixin",
+      "sha": "19652d097944c256d653aee884a7218da89ec33b"
+    },
+    {
+      "name": "silver_writer_refactor_before_maintenance_mixin",
+      "sha": "19652d097944c256d653aee884a7218da89ec33b"
+    },
+    {
+      "name": "restore-phaseA-20260303-083029",
+      "sha": "91dc46ed95ee37f62f1be106dbdd79340304108a"
+    },
+    {
+      "name": "pipeline_runtime_fix_completed",
+      "sha": "19652d097944c256d653aee884a7218da89ec33b"
+    },
+    {
+      "name": "naming_fix_start_before_domain_event_emitter",
+      "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+    },
+    {
+      "name": "naming_fix_request_context_spec_completed",
+      "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+    },
+    {
+      "name": "naming_fix_quarantine_manager_completed",
+      "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+    },
+    {
+      "name": "naming_fix_metadata_assemblers_completed",
+      "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+    },
+    {
+      "name": "naming_fix_domain_event_emitter_completed",
+      "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+    },
+    {
+      "name": "naming_fix_composition_rebranding_completed",
+      "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+    },
+    {
+      "name": "naming_fix_callable_contracts_completed",
+      "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+    },
+    {
+      "name": "naming_fix_before_request_context_spec",
+      "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+    },
+    {
+      "name": "naming_fix_before_quarantine_manager",
+      "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+    },
+    {
+      "name": "naming_fix_before_metadata_assemblers",
+      "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+    },
+    {
+      "name": "naming_fix_before_composition_rebranding",
+      "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+    },
+    {
+      "name": "naming_fix_before_assembler_governance",
+      "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+    },
+    {
+      "name": "naming_fix_assembler_governance_completed",
+      "sha": "faa279b57fc9cb5ba34834ea4b0955c104bbd0be"
+    },
+    {
+      "name": "evidence/issue-12474-grafana-source-0fead443960ac9b19cf2fbf5cae6bddc13ac9a89",
+      "sha": "0fead443960ac9b19cf2fbf5cae6bddc13ac9a89"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-ffcecacf90d334387118fe9560d9699d2c965a93",
+      "sha": "ffcecacf90d334387118fe9560d9699d2c965a93"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-d3d183b87748d964f858a553de8735d9547f0cbc",
+      "sha": "d3d183b87748d964f858a553de8735d9547f0cbc"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-af43b497f4324b7cea08e6bf2761d16111609c73",
+      "sha": "af43b497f4324b7cea08e6bf2761d16111609c73"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-589041a5d4638143047788300d12b7a8ec760fa0",
+      "sha": "589041a5d4638143047788300d12b7a8ec760fa0"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-63216d95433f1e111579303186c4baa12c87c9cb",
+      "sha": "63216d95433f1e111579303186c4baa12c87c9cb"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-25386ce9320fbb9e3d472c3d686eba1c654c137c",
+      "sha": "25386ce9320fbb9e3d472c3d686eba1c654c137c"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-8970ed37b1a8b49eec9ad5bd1cb55e7fbf4acf21",
+      "sha": "8970ed37b1a8b49eec9ad5bd1cb55e7fbf4acf21"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-5948ac9b43c5d62a32c6bd83a4fb3986a810c082",
+      "sha": "5948ac9b43c5d62a32c6bd83a4fb3986a810c082"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-4608b7061e48262ca97ad355849dd5a87d59ee21",
+      "sha": "4608b7061e48262ca97ad355849dd5a87d59ee21"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-3126b776fc4bbb851ba24d559c688e2ee7d0f8ed",
+      "sha": "3126b776fc4bbb851ba24d559c688e2ee7d0f8ed"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-2150e52c1cb8f751cd25a8d5bff03527029f92a1",
+      "sha": "2150e52c1cb8f751cd25a8d5bff03527029f92a1"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-498f4391148e375fc10c535899c894d4b7452fbe",
+      "sha": "498f4391148e375fc10c535899c894d4b7452fbe"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-61ac3cd9f5425b17d5d61c68a6d15312d4b584d7",
+      "sha": "61ac3cd9f5425b17d5d61c68a6d15312d4b584d7"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-34bfbe4309b8247d5276ccb24929cb718c644884",
+      "sha": "34bfbe4309b8247d5276ccb24929cb718c644884"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-9ade25d56cfa9a780c77d5a97212547c279a7534",
+      "sha": "9ade25d56cfa9a780c77d5a97212547c279a7534"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-7ee48ff5aae6d360dc2ed900f1fcb25fe0a4a8f6",
+      "sha": "7ee48ff5aae6d360dc2ed900f1fcb25fe0a4a8f6"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-6c4158e2fc0a6008bbe54b36cb2fde2009c30142",
+      "sha": "6c4158e2fc0a6008bbe54b36cb2fde2009c30142"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-5d295539079288e40202c81c514aeeb32505eebe",
+      "sha": "5d295539079288e40202c81c514aeeb32505eebe"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-4eb3964fe51336229063062f65c8af057cd467b7",
+      "sha": "4eb3964fe51336229063062f65c8af057cd467b7"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-3c2f90710b2e95808ca6964c6014d413d73fb7ad",
+      "sha": "3c2f90710b2e95808ca6964c6014d413d73fb7ad"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-0e37d00f8d5100c5ed0b99d19fce1bae2d022a13",
+      "sha": "0e37d00f8d5100c5ed0b99d19fce1bae2d022a13"
+    },
+    {
+      "name": "evidence/issue-12474-checkpoint-0d09e1cfecc58948464ae32caf703443a9b1d666",
+      "sha": "0d09e1cfecc58948464ae32caf703443a9b1d666"
+    },
+    {
+      "name": "backup-main-20260404",
+      "sha": "7a32db219035feec9dcbf5a3caff7a8278d07885"
+    },
+    {
+      "name": "audit/coderabbit-20260806",
+      "sha": "88efd26b997f326d77f40b2c2df5ca9b24582cc0"
+    },
+    {
+      "name": "archive/temp-branch-20260901",
+      "sha": "24f34e296e4fc68cafe53077757a6bab4455a118"
+    },
+    {
+      "name": "archive/pr-closeout/20261002-11862",
+      "sha": "98fdd9b7e27b97a3f50799a461eb188b87bf2226"
+    },
+    {
+      "name": "archive/pr-closeout/20261002-11841",
+      "sha": "471d90fe2be2176601e0f6d6d84b82932666a588"
+    },
+    {
+      "name": "archive/pr-closeout/20261002-11840",
+      "sha": "9b618801e1a10de416f2c8c92e18c821d9ee1ef9"
+    },
+    {
+      "name": "archive/pr-closeout/20261002-11838",
+      "sha": "db3ed39e6cfa1f670f37fce1bac063d6065d2b46"
+    },
+    {
+      "name": "archive/pr-closeout/20261002-11837",
+      "sha": "df2bb78df75d1e980bc69175830a80459933d45e"
+    },
+    {
+      "name": "archive/pr-closeout/20261002-11836",
+      "sha": "9ae412e10a46d485c34eb419367c19d3387a6716"
+    },
+    {
+      "name": "archive/pr-closeout/20261002-11835",
+      "sha": "7a93dd02b843bb8ca1c8e0d3cf015687900e2124"
+    },
+    {
+      "name": "archive/pr-closeout/20261002-11833",
+      "sha": "bb04b284f6a94f125976ea0f0ff4c253c8786faa"
+    },
+    {
+      "name": "archive/pr-closeout/20261002-11832",
+      "sha": "42651f8eb57cff60c75b0ed3835cc8f2467c879b"
+    },
+    {
+      "name": "archive/master20260911-1/54c3f49da09e",
+      "sha": "54c3f49da09eeed2565545cdc82e6c379268ea9c"
+    },
+    {
+      "name": "archive/master20260910/334560119615",
+      "sha": "334560119615f4293c676a44833594f3ad38ff27"
+    },
+    {
+      "name": "archive/master20260908-1/55a1ee3558cf",
+      "sha": "55a1ee3558cff753d0ff11099bd9c8a53f62baf4"
+    },
+    {
+      "name": "archive/master20260906-1/224b4ca95a46",
+      "sha": "224b4ca95a46074b64c678f6cbb2d833c5482914"
+    },
+    {
+      "name": "archive/master20260903-10/d2cda540a0fe",
+      "sha": "d2cda540a0fefad0586a608e2c395c2eb1c66fce"
+    },
+    {
+      "name": "archive/master20260903-7/01fdbab84ba8",
+      "sha": "01fdbab84ba8191186c0b6a01bf577fbb6d67fe6"
+    },
+    {
+      "name": "archive/master20260903-5/3ef771acd218",
+      "sha": "3ef771acd2188bea418fa24e152ac9c13cee38bf"
+    },
+    {
+      "name": "archive/master20260903-4/6445b19e1953",
+      "sha": "6445b19e195362e1506fcc3c17507269edbcb562"
+    },
+    {
+      "name": "archive/master20260903-1/c770db35f0ee",
+      "sha": "c770db35f0eebf4e9a0c7de3f39f43cf63fcfa0f"
+    },
+    {
+      "name": "archive/master20260902-3/396ef4fce9cf",
+      "sha": "396ef4fce9cfe19f4950004da208ceca8dc33d51"
+    },
+    {
+      "name": "archive/master20260902-1/9bf8032cedb9",
+      "sha": "9bf8032cedb9d77fadc5d47efd9829ae3a6a87cb"
+    },
+    {
+      "name": "archive/master20260901-4/a82643511019",
+      "sha": "a826435110194e4c21a4b9e29c7d6886c5466f8d"
+    },
+    {
+      "name": "archive/master20260901-3/562287c4b042",
+      "sha": "562287c4b04256d1aab9b26345e6e504986abd80"
+    },
+    {
+      "name": "archive/master20260901-2/13fedee7ca49",
+      "sha": "13fedee7ca4979dc31d2cf07297b5c0da8766a50"
+    },
+    {
+      "name": "archive/master20260901-1/dfcae50427f5",
+      "sha": "dfcae50427f58554e1ed2a3015cfaa689de0f1e4"
+    },
+    {
+      "name": "archive/master20260820-2/485cea38a8f1",
+      "sha": "485cea38a8f18472ca11e777d3facccb3f1d651d"
+    },
+    {
+      "name": "archive/master20260820-1/39afa7c364de",
+      "sha": "39afa7c364de925e9e4ae04be73c425424cd9628"
+    },
+    {
+      "name": "archive/master_20260604-2026-06-15",
+      "sha": "7e5fb892ea4f22b78399f2ef7568001c5c2bab3a"
+    },
+    {
+      "name": "archive/master_20260602-2026-06-15",
+      "sha": "fd4cc06316eb62725e94e7eed7ac2cc56621b98d"
+    },
+    {
+      "name": "archive/master_20260601-2026-06-15",
+      "sha": "b10a8cf1537a23d5d00d859de90d7edfbe923d66"
+    },
+    {
+      "name": "archive/main_20260410-2026-04-24",
+      "sha": "ceade3491d7dbeb8d6aee614365c166b0d8c53a1"
+    },
+    {
+      "name": "archive/integration-repro-2754-2761-2026-04-24",
+      "sha": "09cab623c8e17d729f7f16eaaa26fc29d7db1486"
+    },
+    {
+      "name": "archive/fix-2793-neo4j-normalization-topology-2026-04-24",
+      "sha": "4e0ebac15325d968a68dfea2d54aeeb1fbb01d2d"
+    },
+    {
+      "name": "archive/fix-2773-normalization-matrix-gate-2026-04-24",
+      "sha": "ab4bf90195547bf95464d012352d2cee92d68555"
+    },
+    {
+      "name": "archive/fix-2764-normalization-plan-2026-04-24",
+      "sha": "66b5b47df9894073bb6fc535769cdbe9b6f93659"
+    },
+    {
+      "name": "archive/fix-2749-normalization-matrix-2026-04-24",
+      "sha": "acda85f52a5a219ffcc182c20bbe6fd64ae9b1f9"
+    },
+    {
+      "name": "archive/fix-2728-fingerprint-contract-2026-04-24",
+      "sha": "c851d07c183afaeefb1511c588857d2de50ff014"
+    },
+    {
+      "name": "archive/chore-consolidate-recent-branches-2026-04-24",
+      "sha": "770f53c3a7c8d6697dc62aa562b69fdd84b9869b"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/11q",
+      "sha": "443ee919221d2b978ff6142f955a61aece97dcac"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/master20261002-7",
+      "sha": "f496c23605868109e1c93e39cb80a569fe2cb773"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/master20261002-6",
+      "sha": "d51867ff1b358c78d9e09716e613a4667db9fbd2"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/master20261002-5",
+      "sha": "89ae123811d9b1c5bb6897baac667c41fcb5174b"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/master20260930-2",
+      "sha": "9e8bbb55944ecef650f60e26b9cb9e13f513b1fa"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/11852-fan-in-baseline",
+      "sha": "06b99beb486e823e257ca1354469bf2ce4844145"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-god-module-paydown100-10526",
+      "sha": "86644af84e9921aa0684085684044ad5df815a4f"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-god-module-dashboard-metrics-10526",
+      "sha": "9240717736263165cfed34da936cf82f588a28cf"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-247-build-snapshot-10526",
+      "sha": "974a9f024c11a50267abff85f0c998d585e1c195"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-246-add-impact-analysis-surfaces-10526",
+      "sha": "b0cba19c0adee020b1c1c5ad537755b57946a4bd"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-245-run-impact-analysis-passes-10526",
+      "sha": "e8894df8b38fb1f562852a4bf7e6c36cf64d66e3"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-244-add-pipeline-test-edges-10526",
+      "sha": "e38129c6e0d840efb7ff49c6488d4b647c752a28"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-243-pipeline-test-context-10526",
+      "sha": "d867b83da19246da46ba500d53a6871d30f431ca"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-242-pipeline-test-indexes-10526",
+      "sha": "cd5ef22b5ebf82c05c1575dd0bb8a936cc9296a1"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-241-add-ci-workflow-graph-10526",
+      "sha": "89a09c03b8f147feb9d14cd62ac19ec99808618d"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-240-workflow-graph-files-10526",
+      "sha": "2a8c729f6b43eba2acbebde9685cf73819d69a7d"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-239-add-workflow-jobs-10526",
+      "sha": "47c7b7f7c074bd92bfbf79c6a5068bacdce52eeb"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-238-link-workflow-job-dependencies-10526",
+      "sha": "9347c9d0aa7825b984aed21fb0c60e04897abb8d"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-237-workflow-job-dependency-ids-10526",
+      "sha": "4a5925197e3fdc15ddb433e47865eaf5cbebd002"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-236-entity-pipeline-test-index-10526",
+      "sha": "feffad8f9828a4ae9ab845fbec481c8226f43e83"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-235-entity-pipeline-node-identity-10526",
+      "sha": "e5b483fad23f32abcf18363a8f7f472edd7ef755"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-234-provider-pipeline-index-entries-10526",
+      "sha": "f43fa7ec66e63972420fa0f1d7f6af9b7121506d"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-233-provider-pipeline-index-key-10526",
+      "sha": "ded78d1bedc573741c5ad9688e6c7676ff998278"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-232-link-pipeline-test-suite-10526",
+      "sha": "929add199b7b361a1764de42ac3a194283b996cf"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-231-pipeline-test-suite-name-10526",
+      "sha": "2b1522c9f88b6c58ebe18d338d994358841cd7bb"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-230-entity-pipeline-contract-tests-10526",
+      "sha": "3086f7b326552396e2830c2fc383a71e5e1991fb"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-229-entity-pipeline-contract-target-10526",
+      "sha": "cda881664444979bed52e8eb7540e69f3d900f49"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-228-contract-ref-identity-10526",
+      "sha": "b872cbb973e566024cb54330866c7b408af98326"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-227-link-provider-suite-targets-10526",
+      "sha": "f3a582476c2878ce576009b102cf79c9b86e3556"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-226-provider-suite-provenance-10526",
+      "sha": "5761c1cb9b357cc22af27896902a5237262ac888"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-225-provider-regression-suite-target-10526",
+      "sha": "620cca60d84e09bd7b195746738a26d5811ac4de"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-224-provider-regression-provider-targets-10526",
+      "sha": "4bf342eedbf69cefde3f8f7a1d62b96247c54faa"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-223-provider-regression-provider-target-10526",
+      "sha": "8a6e1a51ca1f7ba14490f310bee4543926b30d2a"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-222-alert-rules-paths-10526",
+      "sha": "96c57b68eda42faa67677598f17f215c8771012d"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-221-alert-target-context-10526",
+      "sha": "8d6adc799fceb7e1debdca46c10cff6880bf5d21"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-220-sorted-provider-surface-nodes-10526",
+      "sha": "4fd8f446d402312bef13baceb9828f27170719de"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-219-add-alert-rule-group-surfaces-10526",
+      "sha": "1062239b0088fc5984101e2f4651625dc4a6e9df"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-218-add-single-alert-surface-10526",
+      "sha": "4e022a9134df4bba0b99048b5d423748dc27ac44"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-217-link-alert-targets-10526",
+      "sha": "d3634276b8da3a23682b83b826025c5c7766cbe1"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-216-alert-target-inputs-10526",
+      "sha": "bea9056958d8639d0aa5408518a70a741cbc84a2"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-215-pipelinetestcontext-10526",
+      "sha": "164e823a6fc6c916a5c14a84a3df81dc4a15fe4e"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-213-add-control-plane-run-instance-surfaces-10526",
+      "sha": "ca6deb96f34076b9ef6fda1b57e6611298e0f80e"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-212-process-workflow-job-10526",
+      "sha": "5523641fedc5122efff71aecfe2daaf15e56b75e"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-211-populate-workflow-job-surface-10526",
+      "sha": "75602136c53f37fac86458e92c020c0d1ca85944"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-210-add-run-instance-spec-surfaces-10526",
+      "sha": "316e45eae86ced4f3fe3058ebf4bc0feb5642f6b"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-209-link-workflow-run-targets-10526",
+      "sha": "e973073ddc93390f49a9df397a05ed20bc01f0ad"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-208-add-runtime-state-spec-surfaces-10526",
+      "sha": "18edb2aa6f340c563184188bfea3d6df9ca52242"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-207-link-runtime-state-surface-10526",
+      "sha": "8f2d6613b53b8d451eeab3a0c61fc5ce4fb142a0"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-206-alert-rule-context-10526",
+      "sha": "61829465568f802e18c8493d40dbc489d2565690"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-205-link-pipeline-test-targets-10526",
+      "sha": "ccdec8719a5309e49ca66805080a99e3bd52e5f1"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-204-link-pipeline-test-paths-10526",
+      "sha": "799f08d212bf8dff8d6ddcaa2cc1c06742ecfc12"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-203-pipeline-test-payload-10526",
+      "sha": "a7e5e9a27f31a91cd2ad35e35b00254af34f31e6"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-202-add-storage-data-surfaces-10526",
+      "sha": "0c4897fb4ac74b5138e50daae1ab7cecb1be3f8b"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-201-add-entity-storage-data-surfaces-10526",
+      "sha": "cfbfbf01fd722bdcdf8c092d6aeb2ebea8996e99"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-200-add-entity-storage-layers-10526",
+      "sha": "5a7d083ad821a18fff4e499a81ab629d4ca874e7"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-199-add-entity-storage-layer-10526",
+      "sha": "b2281878cc3851bfc38af2bdd49370efc5f674ce"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-198-add-file-structure-surfaces-10526",
+      "sha": "60564f061dd2df003658fc1b9c4c161b18702806"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-197-add-entity-regular-field-node-10526",
+      "sha": "0dc4a1d2ed30558e2750f62be57e2e010c964cd0"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-196-link-schema-field-definition-10526",
+      "sha": "d59f74b6cb5173118b51d3dc0b41201b36739c16"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-195-materialize-file-structure-10526",
+      "sha": "ba06a512f86333b138a9e06adcbd70ee1160d720"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-194-extract-code-duplication-surfaces-10526",
+      "sha": "87a300306166578ce6d66d8a3c9a6a51efd5647d"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-193-duplication-cluster-thresholds-10526",
+      "sha": "289efec27d2b7c6687eefdeefbb63b54ec5a0775"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-192-duplication-analysis-config-10526",
+      "sha": "d0e134dcb51216780bb06d4d4e2730f822f29e01"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-191-link-runtime-state-evidence-materials-10526",
+      "sha": "718e32608b5e0d299b22b109aae4bd81149e336b"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-190-runtime-state-artifact-targets-10526",
+      "sha": "f8f2444c8205b88a4ebfd4936a5aa16bc8e442d3"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-189-test-artifact-key-10526",
+      "sha": "ff2a15ed98465e7a6570373742e512dfe9d556bc"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-188-alertrulefilecontext-10526",
+      "sha": "5a2bbbc45aa86a369ec4e17b31788a06be87c985"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-187-register-workflow-job-10526",
+      "sha": "dfd3e9573d5aef8bb210ea3d549f60a83212abab"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-186-alert-annotations-10526",
+      "sha": "a64efbca3cee2c0345549d1db77fa1a2dbcb4d82"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-184-complexity-candidate-context-10526",
+      "sha": "5b2bb665e2f41e4ddf6c118abaee042f699fb4c6"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-183-complexity-candidate-anchor-slices-10526",
+      "sha": "d221786349efef61028c676930d557567345f8fb"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-182-alerttargetselection-10526",
+      "sha": "17ae43de2f2c8fc8b518b1e1eec1727f88e448be"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-181-evaluate-complexity-surface-10526",
+      "sha": "0093e7ed9ec2ddf1dab9319433fd45974a7f6138"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-180-complexity-analysis-context-10526",
+      "sha": "695d67b1781892ca6d72c58161d54fd1bdbb922d"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-179-complexity-surface-scores-10526",
+      "sha": "70b02c8aef40c2bafd9b5687a02bf108c814d831"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-178-complexity-score-inputs-10526",
+      "sha": "c31585c9d6348c80ec4e2c78bb9a929320839cfb"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-177-impact-analysis-context-10526",
+      "sha": "dc4c8713454e9dad05650f8b7efc630ba49fbe22"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-176-contract-registry-entries-10526",
+      "sha": "5a51e88c8a581d13f599ca3d8e9345180df064a0"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-175-register-contract-entry-10526",
+      "sha": "ad1f4e05a908bac839ef6cbefe94e441f5f208da"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-174-contract-registry-payload-10526",
+      "sha": "c1c733316ea22eb69d5caeb07e9a46ea36011dcd"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-173-alert-group-name-10526",
+      "sha": "88e20c74dedff724b5c351d55bd8a8c0fcf7927c"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-172-pipeline-test-ownership-path-10526",
+      "sha": "27dc01b1d81c921648060babd9a054a98e7687da"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-171-add-curated-docs-10526",
+      "sha": "f5a603b521961cdbf4d1d15aad551cf855599b8f"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-170-add-provider-surfaces-10526",
+      "sha": "5bff98f90b241c5d0fea129d8787b7b9401f48f7"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-169-curated-policy-surfaces-2-10526",
+      "sha": "228a229ff2b98fb5454f2c182a5c20add32e501a"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-168-contract-mapping-config-10526",
+      "sha": "7c90c368fbe6a89ac954f845305b379651636d3c"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-167-contract-source-prefixes-10526",
+      "sha": "7a56a090d015ddebf69152052db3a123f072d030"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-166-link-source-backed-file-structure-10526",
+      "sha": "c7f984bab01ba09239aa1a2c4a53f68b0f3d8ef6"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-165-policysurfacecontext-10526",
+      "sha": "83aa2846c87b0934bc128982a610cf644c839133"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-164-policy-governance-targets-10526",
+      "sha": "2f144c98416fa143937c64a1565a85d416587188"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-163-alert-runbook-context-10526",
+      "sha": "b9ebfb043f05649619082c410e3397cf0d03089d"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-162-pipeline-operational-context-10526",
+      "sha": "d7e1a3f4315961f1ba45c17e979e121e5f149b2b"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-161-fast-analysis-scope-10526",
+      "sha": "9042016b655fb8699028e0b5bb346b59bc458175"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-160-critical-diff-issues-10526",
+      "sha": "adde9a6b86460be6df5c05df11c49b2661288f6e"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-159-add-docs-to-code-drift-edges-10526",
+      "sha": "4ecc16a31847705578cac6e5659af73ebf3fec5b"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-158-add-single-adr-constraint-edges-10526",
+      "sha": "968b36a4e7974115d112593e1c3ad3904d205853"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-157-add-adr-decision-node-10526",
+      "sha": "0ce6ad0d51546b5a6dd98df0a132ddc3ca47e313"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-156-add-doc-describes-relation-10526",
+      "sha": "38b5eed92edc27a595f73b9887e47cf8eca1a032"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-155-adr-title-10526",
+      "sha": "58acbc9eee7062db1b3f42673fff597d5afcf2b5"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-154-add-doc-claim-edges-10526",
+      "sha": "3452fa39b81966b773a1560f77a7f54f88d2839e"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-153-claim-line-context-10526",
+      "sha": "255a1545b9d909bcdbdd945dfc0da248943db078"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-152-normalize-docs-repo-reference-10526",
+      "sha": "436e84a565a429219346bf703ca86e5980618a2d"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-151-link-alert-target-group-10526",
+      "sha": "53b2475c6387af5c306eaacac83e6d3e6f6e5a16"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-149-link-duplication-override-relations-10526",
+      "sha": "bb5d43cb92d29dc928d1a769a760adb20c3bc7fa"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-148-method-surface-promotion-target-10526",
+      "sha": "75da68048b3bc8863218f75b815ba02be29c513a"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-147-file-structure-zone-roots-10526",
+      "sha": "ef945d9ed3bd6af3d6895f8e935c74540a7644d1"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-146-entity-storage-context-10526",
+      "sha": "db1fd7c27c123e360f95c5005555ea536eefee88"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-145-add-file-structure-zone-10526",
+      "sha": "245afc4d8667cb5111f1dfedabf315d52b51d16d"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-144-link-source-backed-node-structure-10526",
+      "sha": "f9e03183c1873c79183f39797f00f970497560c2"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-143-link-source-backed-file-node-10526",
+      "sha": "ab24e0fdbfb24bcf7dd3eaeaeb23dc594d185288"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-142-repo-zone-for-path-10526",
+      "sha": "240d1b2a82c6183bc2e62b44cbe32dbe349e6d1f"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-141-walk-repo-zone-root-10526",
+      "sha": "3150964712fac2eb2dbcc73000db6b8362255ecc"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-140-walk-repo-zone-file-structure-10526",
+      "sha": "2fa4db0b25684e67e5bcc12b2fcb294739cd5ad4"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-139-add-repo-zone-directory-files-10526",
+      "sha": "73e6778b33be1640b71225fca3e97a8342978c4e"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-138-alert-runbook-path-10526",
+      "sha": "dab040cc40dfa4bdc707018a87d13323f14fc809"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-137-governance-policy-targets-10526",
+      "sha": "955e5227f734e59759c12415f89ec2718d0e1900"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-136-add-pipeline-doc-edges-10526",
+      "sha": "ee3ce4c518fd3577fe6dca64058f50b17401772f"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-135-sorted-governance-targets-10526",
+      "sha": "2b3d0f010936e240251826b318ce9a334247fe17"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-134-governance-policy-definitions-10526",
+      "sha": "76fd5f2a1728ee200427d25b2c8ece1005262f4a"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-133-add-claim-token-targets-10526",
+      "sha": "ea7803a63a180143ffa38c57a771e52dc24efd28"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-132-markdown-headings-10526",
+      "sha": "2be6e5c07411ed6ced86034ab0351df0679bb661"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-131-docs-reference-exact-candidates-10526",
+      "sha": "2c6080a00a1814e40b46bd597a3362c5ba3465b9"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-130-claim-target-tokens-10526",
+      "sha": "23a57a6283964b5663bb81ecf879817afee2db44"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-129-add-workflow-file-surface-10526",
+      "sha": "aa3821024ff64d01d1ae7a960f99dc09600aba1c"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-128-provider-config-paths-10526",
+      "sha": "008f2178db9b1b781dc26db49065dced462d90bb"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-127-provider-config-properties-10526",
+      "sha": "55832a04dd171b3a17d91e31c7495defc33459e2"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-126-entity-config-paths-10526",
+      "sha": "de2c4d6803656f220655c489cdb8876db2131548"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-125-entity-config-identity-10526",
+      "sha": "c3951c85a79357acacdfcf8f5de5679101a114fa"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-124-composite-config-paths-10526",
+      "sha": "8472b90912fa758262bda00141e4bd61fb55c0b6"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-123-link-composite-config-dependencies-10526",
+      "sha": "270a96fc30601b08085e4d555065a2a6e99001bb"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-122-add-port-surfaces-10526",
+      "sha": "d55b394d706b3a65feba370d81c94fc25dc5af73"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-121-link-entity-storage-promotions-10526",
+      "sha": "8d50975c23ff411a31e933304a37813ef05198c4"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-120-override-target-classes-10526",
+      "sha": "39e7d6eb3ce8499d24bf477b8174aaf246d2b2bd"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-119-workflow-module-script-targets-10526",
+      "sha": "bd5bd6701157cc4b47b0ac908107d6afa6edbf9a"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-118-contains-any-10526",
+      "sha": "011ce19338d3b546a60d98f45f6aaa69f45c6503"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-117-workflow-family-rules-10526",
+      "sha": "3f0766c064e2f242d2e0e3a7d9577456ddcab1b5"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-116-workflow-environment-mapping-name-10526",
+      "sha": "3ac2315d527a6cb48fe9ac95b43e614f7deea88e"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-115-workflow-matrix-payload-10526",
+      "sha": "cfd90741fb25b15e23c67a3c315b77b85415bc80"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-114-add-test-suite-surface-10526",
+      "sha": "72c10009bb94f48ade569c43e758bc2a0ea6492e"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-113-test-suite-name-10526",
+      "sha": "308a2669d6a3f11e12ce5878427d9c71607b1406"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-112-link-contract-dependency-modules-10526",
+      "sha": "ac2513f41879a829921e6de9a31f68c1acd5b324"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-111-contract-dependency-module-specs-10526",
+      "sha": "27d8a2759fa51cd85d57608d08674f3d41e2aa2b"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-110-link-runtime-state-run-and-pipeline-10526",
+      "sha": "011307e7d6856481746d59c0b9822039f2aa084f"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-109-add-package-topology-decisions-and-risks-10526",
+      "sha": "99f3f0262a225c36c903268306657e1e13e10eac"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-108-add-curated-doc-source-10526",
+      "sha": "46859848f2eedb58fce8c0544335a34b0fb0de1f"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-107-published-contract-artifact-paths-10526",
+      "sha": "94a7bcf528520539c106229162126590b10a527d"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-106-contract-dependency-module-key-10526",
+      "sha": "43fa7d8a6adf0d8216df56a05293a1b1d4b82edc"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-105-add-contract-doc-dependency-10526",
+      "sha": "3a5c5549344cd1086a9f6f443acf68b518f293dd"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-104-link-contract-provider-10526",
+      "sha": "e02ba653863f1ab1ca73dcbf1c262d00c0dc3a7a"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-103-link-relation-backed-structure-for-relat-10526",
+      "sha": "e2a5b6a47afbbc616d3a124820a8b940204e8c15"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-102-add-repo-zone-directory-file-10526",
+      "sha": "0fbb4c69bd3dbf3869ced6fe1b6b6291d1f3f834"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-101-add-policy-surface-10526",
+      "sha": "b2a39209fe959d28db5d806210074647971eb42e"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-099-add_entity_pipeline_surfaces-10526",
+      "sha": "e6102df82030285d797cb3506b17f6b3b586f7c6"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-098-composite_pipeline_name-10526",
+      "sha": "ea141167dc025c49672353b350427f7e7dfdf0f7"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-097-link_composite_pipeline_dependencies-10526",
+      "sha": "b03ae8e336a0cbad1e4bb17c7e45ef2ec71e2365"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-096-iter_normalization_evidence_updates-10526",
+      "sha": "03f7b2c6467d23e5c67088729165924adc41fb76"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-094-normalization_statement-10526",
+      "sha": "1341be7304a02ce25782ad98c49fa1f63953b3a9"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-094-emit_normalization_batch_progress-10526",
+      "sha": "ac388c494a06bc277a1f5e10b8347a4f7947d81b"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-093-batch_pipeline_names-10526",
+      "sha": "eb71d9699bd9062a0a07112e0a1a69f1ca461770"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-092-process_workflow_uses_step-10526",
+      "sha": "f9ef25ae8f21eca13f9f31c1693656a630207bd3"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-091-resolved_base_classes-10526",
+      "sha": "7b88daf50eca1f4d8032e097c217ea57c018201c"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-090-adr_constraint_candidates-10526",
+      "sha": "e6689cfd5aff46ab3fc5dc50c9e4dcd80bca96bd"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-089-docs_reference_allowed_prefixes-10526",
+      "sha": "b2dfbc261b1a63f9adca251b31296b54d50f2066"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-088-collect_duplication_descriptors_for_modu-10526",
+      "sha": "6d2d0f9ba905d4914975dcf545b1de960aeb9126"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-087-contract_mapping_values-10526",
+      "sha": "b11c43e3fc4a08015f27f4055e81152ceea23e50"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-086-contract_policy_config_path-10526",
+      "sha": "8b9e7319d40d83c27c8a40e6a64e0c23ed67139a"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-085-entity_storage_promotion_pairs-10526",
+      "sha": "405050d4d2872cec32429bd1ee2f43d18672579b"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-084-index_storage_layer_fields-10526",
+      "sha": "437c92440b3b5c6820d981f209dc81abe86d91c8"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-083-classify_silver_storage_fields-10526",
+      "sha": "2d14cae98c452c034abd4930a606a8ea4cc28a54"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-082-composite_group_field_entries-10526",
+      "sha": "0602250e42f401a5964ab262a3cbb52111f04e8d"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-081-composite_pipeline_dependency_keys-10526",
+      "sha": "01d20371755ae76873d0db16b257af73938d148f"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-080-add-runtime-evidence-surface-10526",
+      "sha": "00d26527801a5662565dae2e7759ef0643bd326a"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-079-package-topology-summary-specs-10526",
+      "sha": "57a8cd0943b6f3030244a31e8cfae546637fada2"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-078-normalization-evidence-update-payload-10526",
+      "sha": "fbc006f2789cb709fe6d172c5132327ec409aeff"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-077-register-protocol-port-surface-10526",
+      "sha": "bcc8e096c5760e8bf3afbae9e47a146f750a03b0"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-076-process-adapter-root-child-10526",
+      "sha": "dd69afe2d35bd159fb67df99f8b88cedd3af0525"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-075-process-adapter-package-10526",
+      "sha": "8aa20c40d6f24f1e50b8e6b144604162bb627838"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-074-link-run-instance-dependencies-10526",
+      "sha": "2e63762af3ca2d47685fd876d86185c49ed374d2"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-073-runtime-state-properties-10526",
+      "sha": "99568a063253d6ce9c9ba5ceb286ce4ffcf2767f"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-072-relation-backed-file-structure-types-10526",
+      "sha": "0959ee48c0c23a1d614225b7ca2b1eb7d32889ea"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-071-entity-pipeline-identity-10526",
+      "sha": "59a1809f4b6546a7b3e5d49bc298a2f55a524859"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-070-pipeline-source-config-artifact-10526",
+      "sha": "2b9acec44d9a4062284ac9078849418f171e965c"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-069-contract-source-resolved-path-10526",
+      "sha": "0c8ed23ed3f814514e7a099f3bb0b6a9f214c357"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-068-included-file-structure-dirs-10526",
+      "sha": "31a4a82bde2db0e26e4fa42f0e2a41313470b1fd"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-067-composite-config-dependency-entries-10526",
+      "sha": "6e41ad3b11a5731e27c61ac29dcb0fca8a01e598"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-066-link-curated-execution-script-10526",
+      "sha": "08e1e45285aee72a3e1351fe1d8a4523638ab5d8"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-065-add-claim-target-relation-10526",
+      "sha": "ee3c689ab430bd9a19469613bfd79935068f144a"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-064-composite-seed-storage-ref-10526",
+      "sha": "0e2d61bcace593874a81038a8737b89611fb49b0"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-063-composite-dependency-target-10526",
+      "sha": "02aadc20e17dd1ba970247e985ad7abcc339dce9"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-062-is-describes-doc-to-module-10526",
+      "sha": "407676f8695121fc98c2ec20b6183218ca348736"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-061-retirement-analysis-context-10526",
+      "sha": "121c5a22644032cc73d27ddf11fe0af3ef8e7e30"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-060-link_runtime_evidence_support-10526",
+      "sha": "ed876fad8c2f123cbdb1d81f3da5c63c940db948"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-059-add_repo_zone_file_surface-10526",
+      "sha": "ddb4db23ed070b7e77e6c0af8047780b850e138e"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-058-add_curated_cluster_readme-10526",
+      "sha": "9cc051a0207bff97ab690ea00abe2aa5e857bbd3"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-057-add_port_facade_surface-10526",
+      "sha": "c71cede15f8f4a30e1ce96e2d7db51a86a541dda"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-056-normalization_evidence_statement-10526",
+      "sha": "201990bd797f333b7607578e7d01ee588bdc67a5"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-055-governance_target_groups-10526",
+      "sha": "b58f9ec79fd29b4445a28c2dea33529fe34af218"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-054-should_emit_complexity_candidate-10526",
+      "sha": "7dd6b08085bc5578abb141caf3c30c09fcedeca7"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-053-collect_duplication_class_descriptors-10526",
+      "sha": "571a9f00250facfd6bc47ec9e192185b74c6e903"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-052-register_duplication_class_surface-10526",
+      "sha": "00c219e7ef5203dcfabf8ace7922d0f3e6bc9772"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-051-add_duplication_callable_surface-10526",
+      "sha": "907cd2667834e4f13256573aa3deb4a00c85e95f"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-050-run_instance_doc_targets-10526",
+      "sha": "1d2f1139694e4f00f79974f8daa921b5064e29f4"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-049-run_instance_properties-10526",
+      "sha": "e4b73a486700f683a60960ba1edd308c45c2e09c"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-048-source_backed_path_kind-10526",
+      "sha": "f4a78beed36b90bd41e03c8ac9958dff86641d3b"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-047-empty_normalization_evidence_payload-10526",
+      "sha": "b79ce711d78dc5a66daedaebf5b13425dac20ac8"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-045-create_workflow_job_surface-10526",
+      "sha": "58d4c1bb0991e17597ea9cd91e6fe2b35eae58d2"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-044-reusable_target_workflow_key-10526",
+      "sha": "5ec5da8ff9eef948e5e59daa6fcdc5e35ad1c9f8"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-041-fast_analysis_snapshot_counts-10526",
+      "sha": "b065e4413f311331a969d656f17e4032a9b13504"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-040-pipeline_operational_targets_config-10526",
+      "sha": "3c30044b0b08e0c99bdc0cbe966687476894a550"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-038-complexity_analysis_label_sets-10526",
+      "sha": "ca68b4004cf3f6ae55b1c1ad917d7892be510e83"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-037-duplication_cluster_groups-10526",
+      "sha": "fcb2f738e3632c3395a9178bd733e50ee6121785"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-036-runtime_evidence_definitions-10526",
+      "sha": "404799233da0d5b06f9697555292dea46770f642"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-035-link_composite_layer_promotions-10526",
+      "sha": "b8a04be5cdda4cb0b5b6c4f9cb636604690d4af7"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-034-relation_requirement_keys-10526",
+      "sha": "cd3fd08d07c504ad60c001c57b06282fc2c505f6"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-033-snapshot_support_specs-10526",
+      "sha": "b66201f5f09fe37330db43cd052f954a9f120248"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-032-process_adapter_module-10526",
+      "sha": "f590d84b8958b7d599f093394dfa0ef8414d9db5"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-029-composite_dependency_storage_ref-10526",
+      "sha": "92d1dd41c3aeecd06324baa0a051e8c168316273"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-026-snapshot_required_labels-10526",
+      "sha": "96edaf51f8581b12a41fe3b19036564d299bc170"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-024-pipeline_normalization_targets-10526",
+      "sha": "acdd4f6851def70fbe916571e5893e62a56869b8"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-022-retirement_analysis_label_sets-10526",
+      "sha": "6d9a49ab416dd585ace2c906939e239050b218f2"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-021-retirement_marker_sets-10526",
+      "sha": "e2541407f8e67078bb46de6c0a2b6d9172eeb67f"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-019-composite_output_storage_ref-10526",
+      "sha": "0887c66113eab4b3b842d4a8e385a9dc1342ccad"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-018-merge_field_validation_item-10526",
+      "sha": "9721f738ceea7b0123592aa23c0a8b3e890a267f"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-015-promotion_targets_from_payload-10526",
+      "sha": "ea34272f9d43a4e72d58d88ead22d1567897c105"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-012-merge_storage_layer_config-10526",
+      "sha": "1c0323d391b64840092707b8a6cf13b6b1c4bd10"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-011-add_cli_command_surface-10526",
+      "sha": "a8650d22fdb8b0a6cb606ba04eef6220d9f805c8"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-010-governance_summary_table_specs-10526",
+      "sha": "622b4ae9161f3effcbda0f25f7d185902fe47839"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-009-workflow_output_expression-10526",
+      "sha": "fc902f3eca593bc716676a8de44ae367d7110c85"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-008-storage_surface_format-10526",
+      "sha": "0c1ec118ba4ebfce5400f5e335d2391c73482a17"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-007-curated_quality_gates-10526",
+      "sha": "0373e5a407079615a616ecb186f8acc72c67dd08"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-006-sync_run_id-10526",
+      "sha": "4ade69c7d8bdeba6daa7104df5034cffeef17465"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/tech-debt-gm-005-curated_script_clusters-10526",
+      "sha": "cb43c0591a74a633920bdb8e76e26d4d8a0cc3b5"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/audit-p2p3-closeout-11856-11859-20261002",
+      "sha": "52aa4b87fd87b2358474d637d3e1724bdaec9b1f"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/audit-p2-11856-11859-20261002",
+      "sha": "6b7e9cd8ff8f67d4fdfc17ce05929b37b9fe389b"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/fix/audit-11857-11859-acceptance-20261002",
+      "sha": "83f36d7141081334061683fda3b721bd75aa8b79"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/codex/grdb-trust-detail-widths-20260923",
+      "sha": "0a9e544679a0575e5b335d253a28aac1ae784d35"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/codex/grdb-rate-legend-20260923",
+      "sha": "21fcc34d4ea25dc9092ba6f65764a0ab26a06b70"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/codex/grafana-vis-acceptance",
+      "sha": "1606c683090d0e71250fbaca17fbee92a6a14c65"
+    },
+    {
+      "name": "archive/branch-consolidation-20261003/remote/MASTER20261001-1",
+      "sha": "515b04bd797a8cb21a557c4089797a09a82cd834"
+    }
+  ],
+  "tag_events": [],
+  "code_search": {
+    "\"git tag\"": {
+      "total_count": 10,
+      "incomplete_results": false,
+      "paths": [
+        "scripts/ops/README-coderabbit-audit.md",
+        "docs/03-guides/github-quick-reference.md",
+        ".devin/skills/coderabbit-audit/SKILL.md",
+        "docs/03-guides/github-workflow-diagrams.md",
+        "docs/05-operations/release-checklist.md",
+        "scripts/ops/run-coderabbit-comprehensive-audit.sh",
+        "docs/99-archive/guides/github-setup-plan.md",
+        "scripts/engineering/repo/cleanup_branch_candidates.sh",
+        "reports/quality/issue-12474-ci-parity-evidence.md",
+        "docs/99-archive/reports-20261015/reports/quality/coderabbit/_live/search_crfull_open.json"
+      ]
+    },
+    "\"refs/tags/\"": {
+      "total_count": 2,
+      "incomplete_results": false,
+      "paths": [
+        "tests/architecture/test_import_linter_workflow.py",
+        ".github/workflows/import-linter.yml"
+      ]
+    },
+    "\"git push\" \"tags\"": {
+      "total_count": 5,
+      "incomplete_results": false,
+      "paths": [
+        "docs/03-guides/github-workflow-diagrams.md",
+        "docs/03-guides/github-quick-reference.md",
+        "docs/99-archive/guides/github-setup-plan.md",
+        "scripts/engineering/repo/cleanup_branch_candidates.sh",
+        "tests/architecture/test_github_actions_runtime_policy.py"
+      ]
+    },
+    "\"createRef\"": {
+      "total_count": 0,
+      "incomplete_results": false,
+      "paths": []
+    },
+    "\"deleteRef\"": {
+      "total_count": 0,
+      "incomplete_results": false,
+      "paths": []
+    }
+  },
+  "source_hits": ".github\\workflows\\import-linter.yml:221:                    git fetch --filter=blob:none --no-tags origin 'refs/tags/evidence/issue-12474-*:refs/tags/evidence/issue-12474-*'\n.github\\workflows\\import-linter.yml:287:                    git fetch --filter=blob:none --no-tags origin 'refs/tags/evidence/issue-12474-*:refs/tags/evidence/issue-12474-*'\nscripts\\engineering\\repo\\cleanup_branch_candidates.sh:241:    log_action \"PLAN\" \"git tag ${tag} ${branch}\"\nscripts\\engineering\\repo\\cleanup_branch_candidates.sh:249:    git tag \"${tag}\" \"${branch}\"\nscripts\\ops\\run-coderabbit-comprehensive-audit.sh:331:    # Create git tag (optional, requires confirmation)\nscripts\\ops\\run-coderabbit-comprehensive-audit.sh:332:    log_info \"To create git tag: git tag audit/coderabbit-${AUDIT_TS}\"\nscripts\\ops\\README-coderabbit-audit.md:49:6. **Closeout** - Generates final report and git tag\nscripts\\ops\\README-coderabbit-audit.md:73:6. **Closeout**: Update `FINAL.md` and create git tag\n",
+  "source_commit": "4af92fe06abad38388108c4b8f80b9f57a95d436",
+  "status": "PARTIAL_NOT_APPROVED_NOT_APPLIED",
+  "observed_at": "2026-11-06T17:05:26.047066+00:00",
+  "connector_accessible_installation": {
+    "id": 80946508,
+    "account_login": "SatoryKono",
+    "repository_selection": "all",
+    "complete_inventory": false,
+    "permissions": "NOT_AVAILABLE"
+  }
+}
