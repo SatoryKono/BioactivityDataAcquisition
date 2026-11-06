@@ -153,6 +153,8 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 | `BIOETL_PII_SALT_NEXT` | Next salt for rotation | unset | No |
 | `BIOETL_PII_SALT_ROTATION_ACTIVE` | Whether salt rotation is active | `False` | No |
 
+The application reads `BIOETL_PII_SALT_ROTATION_ACTIVE` through `Settings`. Only callers that construct `Sha256PiiHasher` directly with `from_env()` use `BIOETL_SALT_ROTATION_ACTIVE`.
+
 ### API Security
 
 - **Secrets**: Environment variables only (`BIOETL_{PROVIDER}_{KEY}`)
