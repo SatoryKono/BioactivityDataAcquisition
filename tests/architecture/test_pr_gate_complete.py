@@ -202,6 +202,9 @@ def test_policy_section_3_separates_enforcement_from_stored_contexts() -> None:
     current = current.split("### Historical CircleCI activation", maxsplit=1)[0]
     assert "Current CircleCI protection" not in current
     assert "the active provider is" not in current.lower()
+    assert "enforcement: active" in current
+    assert "2026-11-06" in current
+    assert "Historical ruleset readback" in current
     assert "enforcement: disabled" in current
     assert "`ci/circleci: pr-gate-complete`" in current
     assert "is the context stored" in current
