@@ -514,7 +514,6 @@ nav:
       - Overview: 05-operations/README.md
       - "CI Workflow Map": 05-operations/ci-workflow-map.md
       - "CI/CD Integration": 05-operations/ci-cd-integration.md
-      - "GitHub and CircleCI Gate Platform Matrix": ci/gate-platform-matrix-full.md
       - "Performance Tuning": 05-operations/performance-tuning.md
       - "DQ Investigation Procedures": 05-operations/dq-investigation-procedures.md
       - "Lock Contention Resolution": 05-operations/lock-contention-resolution.md
