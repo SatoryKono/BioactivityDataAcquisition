@@ -53,6 +53,71 @@ def test_metrics_unknown_then_first_and_second_observation(tmp_path: Path) -> No
     )
 
 
+def test_metrics_legacy_naive_timestamp_still_reports_unused_server(
+    tmp_path: Path,
+) -> None:
+    from datetime import UTC, datetime
+
+    module = load_module(
+        "legacy_metrics", ROOT / ".devin/scripts/collect_agent_metrics.py"
+    )
+
+    class FixedDateTime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return cls(2026, 11, 6, tzinfo=tz or UTC)
+
+    module.datetime = FixedDateTime
+    collector = module.AgentMetricsCollector(tmp_path / "metrics.json")
+    collector.metrics["mcp_servers"] = {
+        "legacy": {"call_count": 5, "last_used": "2026-09-01T12:00:00"},
+        "aware": {"call_count": 5, "last_used": "2026-09-01T12:00:00+00:00"},
+        "recent": {"call_count": 5, "last_used": "2026-11-01T12:00:00"},
+    }
+    result = collector.analyze_mcp_usage(30)
+    unused = next(
+        item["servers"]
+        for item in result["recommendations"]
+        if item["type"] == "unused_servers"
+    )
+    assert unused == ["legacy (unused for 30+ days)", "aware (unused for 30+ days)"]
+
+
+def test_neo4j_diagnostic_accepts_combined_auth_without_backend(tmp_path: Path) -> None:
+    bash = shutil.which("bash")
+    if not bash:
+        pytest.skip("Bash unavailable")
+    binaries = tmp_path / "bin"
+    binaries.mkdir()
+    for name, body in {
+        "codex": '#!/bin/sh\ncase "$*" in *list*) echo "neo4j-memory stdio enabled";; *) echo mcp_neo4j_memory_wrapper;; esac\n',
+        "nc": "#!/bin/sh\nexit 0\n",
+        "docker": "#!/bin/sh\necho bioetl-neo4j\n",
+    }.items():
+        executable = binaries / name
+        executable.write_text(body, encoding="utf-8")
+        executable.chmod(0o755)
+    env = {
+        key: value for key, value in os.environ.items() if not key.startswith("NEO4J_")
+    }
+    env.update(
+        PATH=str(binaries) + os.pathsep + env.get("PATH", ""),
+        BIOETL_REPO_ENV_LOADED="1",
+        NEO4J_AUTH="fixture-user/fixture-password",
+    )
+    result = subprocess.run(
+        [bash, str(ROOT / "scripts/ai/mcp/check_neo4j_memory.sh")],
+        env=env,
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "Configured username: fixture-user" in result.stdout
+    assert "required; no credential default" not in result.stderr
+
+
 def test_metrics_load_migrates_zero_samples_without_fabricating_measurements(
     tmp_path: Path,
 ) -> None:

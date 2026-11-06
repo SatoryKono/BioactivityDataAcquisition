@@ -1166,6 +1166,41 @@ def test_setup_mcp_reuses_current_config_and_repairs_drift(
     sys.platform == "win32",
     reason="bash ensure-mcp helper is exercised under WSL/Linux CI (bash hangs on this host)",
 )
+def test_ensure_mcp_check_accepts_memory_seed_key(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The portable config emitted by setup must pass the shell check unchanged."""
+    monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
+    workspace_root, fake_home = _seed_workspace_mcp(tmp_path, monkeypatch)
+    env = dict(
+        os.environ,
+        HOME=_to_bash_path(fake_home),
+        REPO_ROOT=_to_bash_path(workspace_root),
+        CODEX_VALIDATE_MCP_LIST="0",
+        CODEX_MCP_PROFILE="shared",
+        CODEX_MCP_TRANSPORT_MODE="shared",
+    )
+    env.pop("XDG_CACHE_HOME", None)
+    script = (
+        Path(__file__).resolve().parents[3] / "scripts/ai/codex/helper/ensure-mcp.sh"
+    )
+    before = (workspace_root / ".mcp.json").read_bytes()
+    result = subprocess.run(
+        ["bash", _to_bash_path(script), "--check"],
+        cwd=script.parents[4],
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert (workspace_root / ".mcp.json").read_bytes() == before
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="bash ensure-mcp helper is exercised under WSL/Linux CI (bash hangs on this host)",
+)
 def test_ensure_mcp_shell_reuses_current_config_and_repairs_drift(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
