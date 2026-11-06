@@ -20,4 +20,15 @@ on `ValueError`. The inner inventory scan is not executed. Cancellation,
 timeout, and retry are not observed. The other inventory resources are not
 observed.
 
+## Reproduction
+
+- Tested revision: `f492eab7d54a035a6939373d0b10376c2ee73dfd`.
+- Command: `python -m pytest -q -o addopts= tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock.py`.
+- Result: 2 passed, exit code 0.
+
+These unit tests observe the real lock around a substituted collector. External
+caller cancellation, deadline expiry, physical worker completion after either
+interruption, retry, and the missing-release negative control remain unverified.
+The tests provide evidence for normal return and exception unwinding only.
+
 This note does not close #12553.
