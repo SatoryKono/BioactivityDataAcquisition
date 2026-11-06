@@ -218,9 +218,7 @@ class CompositeConfig:
     cross_validation: CrossValidationConfig = field(
         default_factory=CrossValidationConfig
     )
-    expected_normalization_profile_hash: str | None = field(
-        default=None, kw_only=True
-    )
+    expected_normalization_profile_hash: str | None = field(default=None, kw_only=True)
 
     def __post_init__(self) -> None:
         _coerce_composite_collections(self)
