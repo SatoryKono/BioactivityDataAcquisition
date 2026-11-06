@@ -1,4 +1,29 @@
 {
+  "producer": "local",
+  "platform": "Linux",
+  "python_version": "3.13.18",
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "--no-build",
+    "--no-sync",
+    "mypy",
+    "--config-file",
+    "pyproject.toml",
+    "--incremental",
+    "--strict",
+    "--cache-dir",
+    "<temporary-cache>",
+    "src/bioetl",
+    "src/memory",
+    "scripts/engineering/quality"
+  ],
+  "cache_state": {
+    "cold": "empty",
+    "warm": "reused locally",
+    "remote_restore": "not measured"
+  },
   "targets": [
     "src/bioetl",
     "src/memory",
@@ -6,28 +31,28 @@
   ],
   "cold": {
     "iteration": "cold",
-    "time_s": 147.53731560707092,
+    "time_s": 167.29491472244263,
     "returncode": 0,
     "stdout_lines": 2,
     "stderr_lines": 0,
     "normalized_diagnostics": [],
     "diagnostics_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "cache_manifest": "2fcdc634e8c440dbcf63f1536a1a490bc39b6e941a7f2cd6d1429c526c98b3d4"
+    "cache_manifest": "cc0114abb867a1828d19f36baa092721ccfc169fa9ac6cca094c2b784d1376db"
   },
   "warm": {
     "iteration": "warm",
-    "time_s": 9.720015525817871,
+    "time_s": 15.933149576187134,
     "returncode": 0,
     "stdout_lines": 2,
     "stderr_lines": 0,
     "normalized_diagnostics": [],
     "diagnostics_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "cache_manifest": "e089689fb5b6004fdc31f6de1eaaccef60bc36b9790507b137b9db2b70b1849c"
+    "cache_manifest": "1daa0e5fa29272bf2dc20b51af51d17b8e56018aed8b5a87cb8393371aaffdbb"
   },
   "comparison": {
     "diagnostics_match": true,
-    "cold_time": 147.53731560707092,
-    "warm_time": 9.720015525817871,
-    "speedup": 15.178711928513787
+    "cold_time": 167.29491472244263,
+    "warm_time": 15.933149576187134,
+    "speedup": 10.499801933226875
   }
 }
