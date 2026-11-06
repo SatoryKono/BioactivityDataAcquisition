@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-06T21:23:14.226138+00:00",
+  "generated_at": "2026-11-06T21:42:57.048106+00:00",
   "summary": {
     "total_scripts": 714,
     "status_counts": {
@@ -651,7 +651,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 162,
+          "line": 163,
           "source_group": "docs",
           "text": "`scripts/ai/codex/helper/ensure-mcp.sh` is the sole owner of the shared-plane"
         },
@@ -1393,7 +1393,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 179,
+          "line": 180,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/run-codex.sh mcp-static"
         },
@@ -3187,7 +3187,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 178,
+          "line": 179,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/mcp_ast_grep_wrapper.sh"
         },
@@ -25397,7 +25397,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 217,
+          "line": 218,
           "source_group": "docs",
           "text": "2. Restart client after `apply-docker-stable-mcp.ps1 -Profile stable`"
         },
@@ -25477,13 +25477,13 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 210,
+          "line": 211,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1   # never kills bioetl-* / shared labels"
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 219,
+          "line": 220,
           "source_group": "docs",
           "text": "4. Idle: `cleanup-mcp-orphans.ps1 -KillHostGateways`"
         },
@@ -25780,7 +25780,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 211,
+          "line": 212,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\reset-mcp-host-sessions.ps1  # report; -Execute for actions"
         },
@@ -26057,7 +26057,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 208,
+          "line": 209,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\apply-shared-to-grok.ps1  # optional Grok projection; restart Grok afterward"
         },
@@ -26112,7 +26112,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 207,
+          "line": 208,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\health-shared.ps1"
         },
@@ -26212,7 +26212,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 206,
+          "line": 207,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\start-shared.ps1"
         },
@@ -26287,7 +26287,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 164,
+          "line": 165,
           "source_group": "docs",
           "text": "bounds `start-shared.sh`; callers must not wrap ensure with a smaller"
         },
@@ -26324,7 +26324,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 209,
+          "line": 210,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\stop-shared.ps1"
         },
@@ -26370,7 +26370,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 199,
+          "line": 200,
           "source_group": "docs",
           "text": "| Watchdog | `watchdog-shared.ps1 -Daily` restarts DOWN servers only |"
         },

@@ -15,6 +15,48 @@ import pytest
 pytestmark = pytest.mark.integration
 
 
+def test_stdio_unicode_uses_utf8_despite_parent_encoding(tmp_path: Path) -> None:
+    target = tmp_path / ".cache/mcp-memory/graph.json"
+    entity = {"name": "unicode", "entityType": "note", "observations": ["я" * 50_000]}
+    requests = [
+        {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "tools/call",
+            "params": {"name": "create_entities", "arguments": {"entities": [entity]}},
+        },
+        {
+            "jsonrpc": "2.0",
+            "id": 2,
+            "method": "tools/call",
+            "params": {"name": "read_graph", "arguments": {"limit": 1}},
+        },
+    ]
+    env = dict(
+        os.environ,
+        MEMORY_REPO_ROOT=str(tmp_path),
+        MEMORY_FILE_PATH=str(target),
+        PYTHONIOENCODING="ascii",
+    )
+    result = subprocess.run(
+        [sys.executable, "-m", "memory.mcp_server"],
+        input=(
+            "\n".join(json.dumps(request, ensure_ascii=False) for request in requests)
+            + "\n"
+        ).encode("utf-8"),
+        env=env,
+        capture_output=True,
+        timeout=15,
+    )
+    assert result.returncode == 0, result.stderr.decode("utf-8", errors="replace")
+    replies = [
+        json.loads(line)["result"]
+        for line in result.stdout.decode("utf-8").splitlines()
+    ]
+    assert all(not reply.get("isError") for reply in replies)
+    assert json.loads(replies[1]["content"][0]["text"])["entities"] == [entity]
+
+
 def _call(
     process: subprocess.Popen[str], identifier: int, name: str, args: dict[str, Any]
 ) -> Any:

@@ -7,6 +7,7 @@ import os
 import sys
 import time
 from collections.abc import Callable
+from io import TextIOWrapper
 from pathlib import Path
 from typing import Any
 
@@ -285,6 +286,9 @@ def _handle(store: GraphStore, request: Any) -> None:
 
 
 def main() -> int:
+    for stream in (sys.stdin, sys.stdout):
+        if isinstance(stream, TextIOWrapper):
+            stream.reconfigure(encoding="utf-8")
     target = os.environ.get("MEMORY_FILE_PATH")
     if not target:
         print("MEMORY_FILE_PATH is required", file=sys.stderr)
