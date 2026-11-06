@@ -114825,7 +114825,7 @@
       "working_report": 297
     },
     "by_recommended_action": {
-      "archive-after-migration": 328,
+      "archive-after-migration": 329,
       "generate-automatically": 1066,
       "keep": 2675
     },
@@ -114851,7 +114851,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 659,
+      "reports": 660,
       "security": 2
     },
     "by_status": {
@@ -114859,17 +114859,17 @@
       "Archived": 1554,
       "Canonical": 76,
       "Generated": 1066,
-      "Working": 616
+      "Working": 617
     },
     "by_surface_family": {
       "active": 757,
       "archive": 1554,
       "canonical": 76,
       "generated": 1066,
-      "working": 616
+      "working": 617
     },
     "by_tracking_state": {
-      "tracked": 4069
+      "tracked": 4070
     },
     "docs_reports_local_count": 68,
     "duplicate_group_count": 80,
@@ -114882,8 +114882,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4069,
+    "total_doc_like": 4070,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4069
+    "total_doc_like_tracked": 4070
   }
 }

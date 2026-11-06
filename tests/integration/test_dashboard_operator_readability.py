@@ -604,8 +604,36 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
     dq_panel = next(item for item in get_dashboard_panels(dq) if item.get("id") == 9460)
     assert dq_panel["targets"][0].get("panelId") == 9406
     donor = next(item for item in get_dashboard_panels(dq) if item.get("id") == 9406)
-    assert "removals[outcome=" in donor["targets"][0]["uql"]
-    assert "$s.tracking = 'full' ? 0" in donor["targets"][0]["uql"]
+    donor_target = donor["targets"][0]
+    # Backend materializes the frame. UQL leaves zero fields for panel 9460.
+    assert donor_target["parser"] == "backend"
+    assert donor_target["root_selector"] == donor_target["uql"].removeprefix(
+        'parse-json | jsonata "'
+    ).removesuffix('"')
+    assert (
+        "$exists(stage_diagnostics) ? stage_diagnostics : []"
+        in donor_target["root_selector"]
+    )
+    assert "QUERY ERROR" not in donor_target["root_selector"]
+    assert "removals[outcome=" in donor_target["uql"]
+    assert "$s.tracking = 'full' ? 0" in donor_target["uql"]
+    incident_donor = next(
+        item for item in get_dashboard_panels(incident) if item.get("id") == 2101
+    )
+    assert incident_donor["targets"][0]["parser"] == "backend"
+    incident_selector = incident_donor["targets"][0]["root_selector"]
+    assert "presentation_summary" in incident_selector
+    # Fraction length is not fixed at six digits: ".123Z" must not feed the zone to $number.
+    assert "$substring($t,20,6)" not in incident_selector
+    assert "$substringBefore($rest, $zone)" in incident_selector
+    assert "$power(10, $length($digits))" in incident_selector
+    assert "$substring($t, 0, 10)" in incident_selector
+    assert "($end - $start) / 1000" not in incident_selector
+    assert "$end >= $start ? $end - $start : null" in incident_selector
+    duration = next(
+        item for item in get_dashboard_panels(incident) if item.get("id") == 9463
+    )
+    assert duration["targets"][0].get("panelId") == 2101
     assert "pipeline-run-report" not in json.dumps(dq_panel["targets"])
     include = next(
         item
