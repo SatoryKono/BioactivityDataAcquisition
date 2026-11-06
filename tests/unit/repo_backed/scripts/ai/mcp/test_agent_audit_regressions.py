@@ -182,6 +182,64 @@ def test_effective_memory_requirements_follow_task_mode(
     assert ("memory" not in effective["required_local"]) == disabled
 
 
+@pytest.mark.parametrize("explicit", [None, "off", "read-only", "read-write", ""])
+def test_memory_readiness_uses_repository_mode_without_exporting_secrets(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, explicit: str | None
+) -> None:
+    monkeypatch.syspath_prepend(str(ROOT / "scripts/ai/codex"))
+    import mcp_profile_contract
+
+    fixture = tmp_path / "repository-config.fixture"
+    fixture.write_text(
+        '# config\nBIOETL_AI_MEMORY_MODE = "read-write"\nUNRELATED_SECRET=fixture-only\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("BIOETL_ENV_FILE", str(fixture))
+    monkeypatch.delenv("BIOETL_REPO_ENV_LOADED", raising=False)
+    monkeypatch.delenv("BIOETL_AI_MEMORY_MODE", raising=False)
+    monkeypatch.delenv("UNRELATED_SECRET", raising=False)
+    if explicit is not None:
+        monkeypatch.setenv("BIOETL_AI_MEMORY_MODE", explicit)
+    before = dict(os.environ)
+    declared = mcp_profile_contract.profile_plan("stable", ROOT)
+    effective = mcp_profile_contract.effective_profile_plan(declared)
+    assert ("memory" in effective["required_local"]) == (
+        explicit is None or explicit == "read-write"
+    )
+    assert dict(os.environ) == before
+    assert "fixture-only" not in json.dumps(effective)
+
+
+def test_memory_readiness_defaults_to_root_env_without_writing_env_files(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.syspath_prepend(str(ROOT / "scripts/ai/codex"))
+    import mcp_profile_contract
+
+    for key in ("BIOETL_AI_MEMORY_MODE", "BIOETL_ENV_FILE", "BIOETL_REPO_ENV_LOADED"):
+        monkeypatch.delenv(key, raising=False)
+    source = tmp_path / ".env"
+    original_is_file, original_read_text = Path.is_file, Path.read_text
+    monkeypatch.setattr(
+        Path, "is_file", lambda path: path == source or original_is_file(path)
+    )
+    monkeypatch.setattr(
+        Path,
+        "read_text",
+        lambda path, *args, **kwargs: (
+            "BIOETL_AI_MEMORY_MODE=rw # inline comment\n"
+            if path == source
+            else original_read_text(path, *args, **kwargs)
+        ),
+    )
+    declared = mcp_profile_contract.profile_plan("stable", ROOT)
+    effective = mcp_profile_contract.effective_profile_plan(declared, tmp_path)
+    assert "memory" in effective["required_local"]
+    monkeypatch.setenv("BIOETL_REPO_ENV_LOADED", "1")
+    loaded = mcp_profile_contract.effective_profile_plan(declared, tmp_path)
+    assert "memory" not in loaded["required_local"]
+
+
 def test_skills_ci_covers_audited_direct_inputs() -> None:
     config = yaml.safe_load(
         (ROOT / ".github/workflows/skills-consistency.yml").read_text(encoding="utf-8")
