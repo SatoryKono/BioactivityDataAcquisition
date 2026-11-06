@@ -44,6 +44,26 @@ __all__ = [
 ]
 
 
+def _profile_pin_issues(
+    config: CompositeConfig, source_profiles: dict[str, ProfileInfo]
+) -> list[ValidationIssue]:
+    expected = config.expected_normalization_profile_hash
+    if expected is None:
+        return []
+    actual = get_expected_normalization_profile_hash(source_profiles)
+    if actual == expected:
+        return []
+    return [
+        ValidationIssue(
+            field="expected_normalization_profile_hash",
+            source="composite",
+            issue_type="normalization_profile_drift",
+            message=f"DAG normalization profile hash mismatch: expected {expected}, got {actual}",
+            severity="error",
+        )
+    ]
+
+
 class CompositePreflightValidationService(
     PreflightSchemaOrchestrationMixin,
 ):
@@ -147,24 +167,7 @@ class CompositePreflightValidationService(
         """
         source_profiles = self._load_source_profiles(config)
         self._log_profile_loading_summary(source_profiles)
-        dag_hash = get_expected_normalization_profile_hash(source_profiles)
-        issues: list[ValidationIssue] = []
-        if (
-            config.expected_normalization_profile_hash is not None
-            and dag_hash != config.expected_normalization_profile_hash
-        ):
-            issues.append(
-                ValidationIssue(
-                    field="expected_normalization_profile_hash",
-                    source="composite",
-                    issue_type="normalization_profile_drift",
-                    message=(
-                        f"DAG normalization profile hash mismatch: expected "
-                        f"{config.expected_normalization_profile_hash}, got {dag_hash}"
-                    ),
-                    severity="error",
-                )
-            )
+        issues = _profile_pin_issues(config, source_profiles)
         result = PreflightValidationResult(
             is_valid=not issues,
             issues=issues,
@@ -205,23 +208,7 @@ class CompositePreflightValidationService(
         self._log_schema_loading_summary(source_fields)
         self._log_profile_loading_summary(source_profiles)
 
-        dag_hash = get_expected_normalization_profile_hash(source_profiles)
-        if (
-            config.expected_normalization_profile_hash is not None
-            and dag_hash != config.expected_normalization_profile_hash
-        ):
-            issues.append(
-                ValidationIssue(
-                    field="expected_normalization_profile_hash",
-                    source="composite",
-                    issue_type="normalization_profile_drift",
-                    message=(
-                        f"DAG normalization profile hash mismatch: expected "
-                        f"{config.expected_normalization_profile_hash}, got {dag_hash}"
-                    ),
-                    severity="error",
-                )
-            )
+        issues.extend(_profile_pin_issues(config, source_profiles))
 
         field_priorities = config.merge.field_priorities
         compatibility_overrides = config.merge.normalization_compatibility_overrides
