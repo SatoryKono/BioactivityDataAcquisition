@@ -140,6 +140,19 @@
           "title": "Version",
           "type": "string"
         },
+        "expected_normalization_profile_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Expected normalization profile hash.",
+          "title": "Expected Normalization Profile Hash"
+        },
         "normalized_anchor_policy": {
           "anyOf": [
             {
