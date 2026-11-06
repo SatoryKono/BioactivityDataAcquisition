@@ -1,28 +1,33 @@
 {
+  "targets": [
+    "src/bioetl",
+    "src/memory",
+    "scripts/engineering/quality"
+  ],
   "cold": {
     "iteration": "cold",
-    "time_s": 18.878806591033936,
+    "time_s": 147.53731560707092,
     "returncode": 0,
     "stdout_lines": 2,
     "stderr_lines": 0,
     "normalized_diagnostics": [],
     "diagnostics_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "cache_manifest": "80a38333ac00b3d7ad623bf14e271cc371ee6e2a431ffd126ccb1dfff8e71941"
+    "cache_manifest": "2fcdc634e8c440dbcf63f1536a1a490bc39b6e941a7f2cd6d1429c526c98b3d4"
   },
   "warm": {
     "iteration": "warm",
-    "time_s": 0.38109302520751953,
+    "time_s": 9.720015525817871,
     "returncode": 0,
     "stdout_lines": 2,
     "stderr_lines": 0,
     "normalized_diagnostics": [],
     "diagnostics_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "cache_manifest": "c58bcc1ef6e7b3d146ad2c91615266e890d01d9de6770d7cbb9c32a21d5e63a1"
+    "cache_manifest": "e089689fb5b6004fdc31f6de1eaaccef60bc36b9790507b137b9db2b70b1849c"
   },
   "comparison": {
     "diagnostics_match": true,
-    "cold_time": 18.878806591033936,
-    "warm_time": 0.38109302520751953,
-    "speedup": 49.538578095869674
+    "cold_time": 147.53731560707092,
+    "warm_time": 9.720015525817871,
+    "speedup": 15.178711928513787
   }
 }
