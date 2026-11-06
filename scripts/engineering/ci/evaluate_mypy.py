@@ -10,6 +10,8 @@ import time
 from pathlib import Path
 from typing import Any
 
+STRICT_TYPE_GATE_TARGETS = ("src/bioetl", "src/memory", "scripts/engineering/quality")
+
 
 def normalize_diagnostics(output: str) -> list[str]:
     """Normalize mypy diagnostics for comparison, ignoring line numbers and times."""
@@ -59,7 +61,7 @@ def hash_directory_content(directory: str) -> str:
 
 def _atomic_write_text(path: Path, text: str) -> None:
     temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(text, encoding="utf-8")
+    temporary.write_text(text, encoding="utf-8", newline="\n")
     os.replace(temporary, path)
 
 
@@ -74,16 +76,17 @@ def run_mypy(cache_dir: str, iteration: str) -> dict[str, Any]:
         "uv",
         "run",
         "--frozen",
+        "--no-build",
         "--no-sync",
         "mypy",
+        "--config-file",
+        "pyproject.toml",
         "--incremental",
         "--strict",
         "--cache-dir",
         cache_dir,
-        "src/bioetl",
+        *STRICT_TYPE_GATE_TARGETS,
     ]
-    if os.path.exists("src/memory"):
-        cmd.append("src/memory")
 
     timeout_seconds = 180
     try:
@@ -140,6 +143,7 @@ def main() -> None:
     )
 
     data = {
+        "targets": STRICT_TYPE_GATE_TARGETS,
         "cold": cold_result,
         "warm": warm_result,
         "comparison": {

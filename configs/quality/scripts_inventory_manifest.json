@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-06T06:32:38.334574+00:00",
+  "generated_at": "2026-11-06T06:56:31.685180+00:00",
   "summary": {
     "total_scripts": 714,
     "status_counts": {
@@ -10138,13 +10138,13 @@
       "references": [
         {
           "path": "scripts/engineering/ci/collect_stage0_evidence.py",
-          "line": 252,
+          "line": 271,
           "source_group": "scripts",
-          "text": "\"commands\": \"python scripts/engineering/ci/collect_stage0_evidence.py, python scripts/engineering/ci/evaluate_mypy.py\","
+          "text": "\"commands\": \"python scripts/engineering/ci/evaluate_mypy.py, python scripts/engineering/ci/collect_stage0_evidence.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_stage0_evidence.py",
-          "line": 10,
+          "line": 11,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.evaluate_mypy import ("
         }

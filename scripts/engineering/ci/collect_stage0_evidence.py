@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 
+STRICT_TYPE_GATE_TARGETS = ["src/bioetl", "src/memory", "scripts/engineering/quality"]
 INDEPENDENT_AUDIT_NOTE = "Handled externally via independent audit."
 
 
@@ -48,7 +49,7 @@ def generate_file_manifest(filepath: str) -> dict[str, Any]:
 
 def _atomic_write_text(path: Path, text: str) -> None:
     temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(text, encoding="utf-8")
+    temporary.write_text(text, encoding="utf-8", newline="\n")
     os.replace(temporary, path)
 
 
@@ -95,6 +96,7 @@ def evaluate_mypy_criterion(
             "diagnostics_match": False,
         }
 
+    targets_match = payload.get("targets") == STRICT_TYPE_GATE_TARGETS
     cold_rc = cold.get("returncode")
     warm_rc = warm.get("returncode")
     typecheck_pass = cold_rc == 0 and warm_rc == 0
@@ -109,11 +111,20 @@ def evaluate_mypy_criterion(
     )
     # Usable cache evidence requires matching diagnostics and a warm speedup.
     cache_measurement_usable = (
-        typecheck_pass and diagnostics_match and speedup is not None and speedup > 1.05
+        targets_match
+        and typecheck_pass
+        and diagnostics_match
+        and speedup is not None
+        and speedup > 1.05
     )
 
     status, note = _describe_mypy_result(
-        cold_rc, warm_rc, diagnostics_match, speedup, cache_measurement_usable
+        cold_rc,
+        warm_rc,
+        diagnostics_match,
+        speedup,
+        cache_measurement_usable,
+        targets_match,
     )
 
     return {
@@ -124,6 +135,7 @@ def evaluate_mypy_criterion(
         "cache_measurement_usable": cache_measurement_usable,
         "diagnostics_match": diagnostics_match,
         "speedup": speedup,
+        "targets_match": targets_match,
         "cold_returncode": cold_rc,
         "warm_returncode": warm_rc,
     }
@@ -135,11 +147,18 @@ def _describe_mypy_result(
     diagnostics_match: bool,
     speedup: float | None,
     cache_measurement_usable: bool,
+    targets_match: bool,
 ) -> tuple[str, str]:
     if cold_rc != 0 or warm_rc != 0:
         return "PARTIAL", (
             f"Mypy non-PASS: cold returncode={cold_rc}, warm returncode={warm_rc}. "
             f"diagnostics_match={diagnostics_match}."
+        )
+
+    if not targets_match:
+        return "PARTIAL", (
+            "Type-checking PASS для измеренных целей, но отчёт не подтверждает "
+            "полный набор целей строгой проверки CI."
         )
 
     if cache_measurement_usable:
@@ -249,7 +268,7 @@ def main() -> None:
             "collector_worktree_dirty": git_info["worktree_dirty"],
             "scope": "Stage 0 CI Optimization Evidence Gathering",
             "tool_versions": "Python 3.13.x, mypy, uv",
-            "commands": "python scripts/engineering/ci/collect_stage0_evidence.py, python scripts/engineering/ci/evaluate_mypy.py",
+            "commands": "python scripts/engineering/ci/evaluate_mypy.py, python scripts/engineering/ci/collect_stage0_evidence.py",
             "test_data": "Historical GH/Circle data injected, coverage audit data injected, local cold/warm mypy test.",
             "expected_result": (
                 "Evidence gathered from reports/mypy_eval.json "

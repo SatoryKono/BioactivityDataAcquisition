@@ -5,9 +5,11 @@ from pathlib import Path
 
 from scripts.engineering.ci.collect_stage0_evidence import (
     evaluate_mypy_criterion,
+    main as collect_stage0_evidence,
     sha256,
 )
 from scripts.engineering.ci.evaluate_mypy import (
+    STRICT_TYPE_GATE_TARGETS,
     diagnostics_digest,
     normalize_diagnostics,
 )
@@ -70,6 +72,7 @@ def test_evaluate_mypy_criterion_from_pass_report(tmp_path: Path, monkeypatch):
     reports = tmp_path / "reports"
     reports.mkdir()
     payload = {
+        "targets": STRICT_TYPE_GATE_TARGETS,
         "cold": {"returncode": 0, "time_s": 10.0},
         "warm": {"returncode": 0, "time_s": 4.0},
         "comparison": {
@@ -93,6 +96,7 @@ def test_evaluate_mypy_criterion_typecheck_pass_without_speedup(
     reports = tmp_path / "reports"
     reports.mkdir()
     payload = {
+        "targets": STRICT_TYPE_GATE_TARGETS,
         "cold": {"returncode": 0, "time_s": 10.0},
         "warm": {"returncode": 0, "time_s": 10.1},
         "comparison": {
@@ -116,6 +120,7 @@ def test_evaluate_mypy_criterion_non_pass(tmp_path: Path, monkeypatch):
     reports = tmp_path / "reports"
     reports.mkdir()
     payload = {
+        "targets": STRICT_TYPE_GATE_TARGETS,
         "cold": {"returncode": 1, "time_s": 10.0},
         "warm": {"returncode": 1, "time_s": 4.0},
         "comparison": {
@@ -144,3 +149,36 @@ def test_shadow_compare_routes_stage0_reports() -> None:
         assert selection["selected"] == [
             "tests/unit/scripts/engineering/ci/test_stage0_evidence.py",
         ]
+
+
+def test_evaluate_mypy_criterion_requires_full_targets(tmp_path: Path) -> None:
+    """A historical two-target run cannot certify the full type gate."""
+    report = tmp_path / "mypy_eval.json"
+    report.write_text(
+        json.dumps(
+            {
+                "targets": ["src/bioetl", "src/memory"],
+                "cold": {"returncode": 0},
+                "warm": {"returncode": 0},
+                "comparison": {"diagnostics_match": True, "speedup": 2.5},
+            }
+        ),
+        encoding="utf-8",
+    )
+    result = evaluate_mypy_criterion(str(report))
+    assert result["status"] == "PARTIAL"
+    assert result["typecheck_pass"] is True
+    assert result["cache_measurement_usable"] is False
+
+
+def test_closure_manifest_matches_lf_json_bytes(tmp_path: Path, monkeypatch) -> None:
+    """The Markdown manifest describes the JSON bytes committed by Git."""
+    monkeypatch.chdir(tmp_path)
+    collect_stage0_evidence()
+    report_dir = Path("docs/reports/ci")
+    data = (report_dir / "stage0_closure.json").read_bytes()
+    assert b"\r\n" not in data
+    markdown = (report_dir / "stage0_closure_report.md").read_text(encoding="utf-8")
+    manifest = json.loads(markdown.split("```json\n", 1)[1].split("```", 1)[0])
+    assert manifest["stage0_closure.json"]["size_bytes"] == len(data)
+    assert manifest["stage0_closure.json"]["sha256"] == sha256(data)
