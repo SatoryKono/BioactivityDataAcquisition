@@ -58,11 +58,12 @@ def get_preflight_skip_reason(
     *,
     validator: CompositePreflightValidationService | None,
     field_priorities: Collection[str],
+    expected_normalization_profile_hash: str | None = None,
 ) -> str | None:
     """Return the reason preflight validation should be skipped, if any."""
     if validator is None:
         return "preflight_validator not configured"
-    if not field_priorities:
+    if not field_priorities and not expected_normalization_profile_hash:
         return "no field_priorities configured"
     return None
 
@@ -71,12 +72,14 @@ def build_preflight_validation_context(
     *,
     validator: CompositePreflightValidationService | None,
     field_priorities: Collection[str],
+    expected_normalization_profile_hash: str | None = None,
 ) -> _PreparedPreflightValidationContext | None:
     """Build validation context when preflight validation can run."""
     if (
         get_preflight_skip_reason(
             validator=validator,
             field_priorities=field_priorities,
+            expected_normalization_profile_hash=expected_normalization_profile_hash,
         )
         is not None
     ):

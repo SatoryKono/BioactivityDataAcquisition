@@ -272,12 +272,13 @@ config_surface_ratchet:
       rationale: Entity/composite config surface must stay bounded while contract drift is burned down.
       ratchet_policy: Non-growth fail-fast unless a reviewed pipeline addition updates the budget.
     unique_parameter_count:
-      current_count: 353
-      max_count: 353
+      current_count: 352
+      max_count: 352
       owner: '@bioetl-config'
       linked_issue: '#4818'
-      rationale: Flattened parameter vocabulary after reviewed composite schema expansion for
-        expected_normalization_profile_hash (#12784 / #12713); previously 352 after #12032.
+      rationale: Flattened parameter vocabulary ratcheted down after removing inline composite field_priorities
+        maps that duplicated field_groups/shared_policy.yaml (#12032). Composite
+        expected_normalization_profile_hash is a governance pin excluded from this vocabulary.
       ratchet_policy: Non-growth fail-fast unless a reviewed schema expansion updates the budget.
     inconsistent_parameter_count:
       current_count: 0
@@ -347,10 +348,11 @@ config_surface_ratchet:
           rationale: Composite runtime configs under configs/composites/*.yaml.
           ratchet_policy: Non-growth fail-fast for composite runtime surface.
         unique_parameter_count:
-          current_count: 93
-          max_count: 93
-          rationale: Composite vocabulary includes reviewed expected_normalization_profile_hash
-            (#12784 / #12713); previously 92 after excluding duplicate field_priorities (#12032).
+          current_count: 92
+          max_count: 92
+          rationale: Composite vocabulary excludes duplicate inline field_priorities maps and the
+            expected_normalization_profile_hash governance pin; shared policy remains the owner
+            and actionable drift stays zero (#12032 / #12784).
           ratchet_policy: Non-growth fail-fast unless composite schema expansion updates budget.
         inconsistent_parameter_count:
           current_count: 0

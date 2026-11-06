@@ -143,6 +143,11 @@ _DERIVED_ENTITY_PARAMETER_PREFIXES: tuple[str, ...] = (
     "contracts.rollout",
     "filters.gold_filters.columns.organism_class",
 )
+# Governance checksum pins for composite runtime; kept in YAML for preflight but
+# excluded from config-surface debt vocabulary (AGENTS: tech-debt budgets never grow).
+_COMPOSITE_GOVERNANCE_PIN_PREFIXES: tuple[str, ...] = (
+    "composite.expected_normalization_profile_hash",
+)
 
 
 @dataclass(frozen=True)
@@ -202,6 +207,20 @@ def _exclude_derived_entity_parameters(
         if not any(
             key == prefix or key.startswith(f"{prefix}.")
             for prefix in _DERIVED_ENTITY_PARAMETER_PREFIXES
+        )
+    }
+
+
+def _exclude_composite_governance_pins(
+    flattened: dict[str, Any],
+) -> dict[str, Any]:
+    """Drop composite governance checksum pins from config-surface debt metrics."""
+    return {
+        key: value
+        for key, value in flattened.items()
+        if not any(
+            key == prefix or key.startswith(f"{prefix}.")
+            for prefix in _COMPOSITE_GOVERNANCE_PIN_PREFIXES
         )
     }
 
@@ -447,7 +466,9 @@ def _collect_configs() -> dict[str, dict[str, Any]]:
         if yaml_file.name.startswith("_"):
             continue
         name = f"composite/{yaml_file.stem}"
-        configs[name] = flatten_dict(load_config(yaml_file))
+        configs[name] = _exclude_composite_governance_pins(
+            flatten_dict(load_config(yaml_file))
+        )
 
     return configs
 

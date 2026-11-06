@@ -505,6 +505,7 @@ def create_magic_composite_config(
     config.merge.output_gold_path = output_gold_path
     config.dq.soft_fail_threshold = 0.05
     config.dq.hard_fail_threshold = 0.20
+    config.expected_normalization_profile_hash = None
     return config
 
 

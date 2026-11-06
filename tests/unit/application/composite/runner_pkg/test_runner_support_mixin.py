@@ -137,6 +137,7 @@ def test_get_preflight_skip_reason_when_no_field_priorities_then_returns_reason(
     harness = _SupportMixinHarness()
     harness._preflight_validator = MagicMock()
     harness._config.merge.field_priorities = []
+    harness._config.expected_normalization_profile_hash = None
 
     reason = harness._get_preflight_skip_reason()
 
@@ -145,10 +146,25 @@ def test_get_preflight_skip_reason_when_no_field_priorities_then_returns_reason(
 
 
 @pytest.mark.unit
+def test_get_preflight_skip_reason_when_hash_without_field_priorities_then_runs() -> (
+    None
+):
+    harness = _SupportMixinHarness()
+    harness._preflight_validator = MagicMock()
+    harness._config.merge.field_priorities = []
+    harness._config.expected_normalization_profile_hash = "abc123"
+
+    reason = harness._get_preflight_skip_reason()
+
+    assert reason is None
+
+
+@pytest.mark.unit
 def test_get_preflight_skip_reason_when_configured_then_returns_none() -> None:
     harness = _SupportMixinHarness()
     harness._preflight_validator = MagicMock()
     harness._config.merge.field_priorities = ["title", "abstract"]
+    harness._config.expected_normalization_profile_hash = None
 
     reason = harness._get_preflight_skip_reason()
 

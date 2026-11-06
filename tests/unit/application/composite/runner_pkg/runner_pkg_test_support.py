@@ -83,6 +83,7 @@ def make_composite_config(
         dependencies=dependencies or [],
         seed=SimpleNamespace(pipeline="seed_pipeline", silver_table="silver/seed"),
         merge=SimpleNamespace(field_priorities=[]),
+        expected_normalization_profile_hash=None,
     )
 
 

@@ -211,13 +211,15 @@ class CompositeConfig:
     seed: SeedConfig
     enrichers: tuple[EnricherConfig, ...]
     merge: MergeConfig
-    expected_normalization_profile_hash: str | None = None
     dependencies: tuple[DependencyConfig, ...] = ()
     dq: CompositeDQConfig = field(default_factory=CompositeDQConfig)
     execution: ExecutionConfig = field(default_factory=ExecutionConfig)
     lineage: LineageConfig = field(default_factory=LineageConfig)
     cross_validation: CrossValidationConfig = field(
         default_factory=CrossValidationConfig
+    )
+    expected_normalization_profile_hash: str | None = field(
+        default=None, kw_only=True
     )
 
     def __post_init__(self) -> None:

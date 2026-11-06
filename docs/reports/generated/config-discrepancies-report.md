@@ -1,7 +1,7 @@
 # Config Discrepancies Report
 
 Total configs: 27
-Total unique parameters: 353
+Total unique parameters: 352
 Actionable inconsistent parameters: 0
 Sanctioned partial variance parameters: 0
 Raw partial parameter count: 0
@@ -24,9 +24,9 @@ Parameter ownership taxonomy is derived from flattened config parameter paths. I
 ### composite_runtime
 
 Owner: BioETL Team
-Parameters: 93
+Parameters: 92
 
-- `domain_entity_contract`: 36
+- `domain_entity_contract`: 35
 - `dq_validation`: 36
 - `medallion_write_policy`: 5
 - `provider_source_access`: 3
