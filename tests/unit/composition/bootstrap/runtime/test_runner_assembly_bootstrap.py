@@ -35,6 +35,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from bioetl.application.composite.runtime_wiring_api import (
+    CompositePreflightValidationService,
+)
 from bioetl.composition.factories.services.composite_support_services_factory import (
     CompositeSupportServices,
 )
@@ -448,3 +451,49 @@ def test_pipeline_run_id_factory_uses_pipeline_occurrence_kind(monkeypatch) -> N
     monkeypatch.setattr(runner, "create_runtime_occurrence_run_id", occurrence_factory)
     assert runner._pipeline_run_id_factory() == str(expected)
     occurrence_factory.assert_called_once_with("pipeline_run")
+
+
+@pytest.mark.unit
+def test_create_composite_runner_wires_preflight_validator() -> None:
+    """Bootstrap assembly must provide a real preflight validator.
+
+    Regression for the review finding on PR #12784: the service inputs
+    builder hardcoded ``preflight_validator=None``, so the normalization
+    profile hash check never ran in production assembly.
+    """
+    runner_factory = MagicMock(return_value=MagicMock())
+    support_services = cast(
+        CompositeSupportServices,
+        SimpleNamespace(
+            key_extractor=MagicMock(),
+            dependency_coordinator=MagicMock(),
+            coordinator=MagicMock(),
+            merger=MagicMock(),
+            checkpoint_manager=MagicMock(),
+            fsm_state_helper=MagicMock(),
+            dq_report_service=MagicMock(),
+            quarantine_port=MagicMock(),
+            manifest_id="manifest-123",
+            run_ledger_service=MagicMock(name="run_ledger_service"),
+        ),
+    )
+
+    create_composite_runner(
+        config=MagicMock(),
+        runtime=MagicMock(),
+        run_id=_VALID_RUN_ID,
+        logger=MagicMock(),
+        metrics=MagicMock(),
+        tracer=MagicMock(name="tracer"),
+        lock=MagicMock(),
+        seed_runner_factory=MagicMock(),
+        dependencies_runner_factory=MagicMock(),
+        enricher_runner_factory=MagicMock(),
+        support_services=support_services,
+        runner_factory=runner_factory,
+    )
+
+    inputs = runner_factory.call_args[0][0]
+    assert isinstance(
+        inputs.preflight_validator, CompositePreflightValidationService
+    )
