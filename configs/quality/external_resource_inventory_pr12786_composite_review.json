@@ -1,10 +1,13 @@
 {
   "schema_version": 1,
   "catalog_ref": "2ad61c18314f262693a5c782612f9adad5cb074d",
-  "source_ref": "790640d49a0c4508d5388bec4c79e1ca3c48ee09",
+  "source_ref": "7c62c6b19f5e6d9c13a42166df29e9d524a43afa",
   "source_reviews": {
     "src/bioetl/application/composite/_preflight_orchestration.py": "Computes a canonical aggregate digest from already loaded normalization profiles.",
-    "src/bioetl/application/composite/preflight_validator.py": "Adds an error when the actual normalization aggregate differs from the configured pin.",
+    "src/bioetl/application/composite/preflight_validator.py": "Shares the profile hash comparison between standalone validation and the runtime profile-only path; resolves existing normalization metadata.",
+    "src/bioetl/application/composite/runner_pkg/runner_support_policy.py": "Allows checking a configured profile pin when field priorities are empty.",
+    "src/bioetl/application/composite/runner_pkg/runner_support_run_mixin.py": "Passes profile-pin presence to the existing preflight gate.",
+    "src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py": "Constructs the pure profile-validation service for pinned runtime configs without changing resource acquisition.",
     "src/bioetl/domain/composite/config_composite_decoder.py": "Decodes the optional profile pin from serialized config.",
     "src/bioetl/domain/composite/config_composite_encoder.py": "Preserves the optional profile pin during serialization.",
     "src/bioetl/domain/composite/config_composite_protocols.py": "Adds the profile pin to the serializer protocol.",

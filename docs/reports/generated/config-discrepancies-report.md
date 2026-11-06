@@ -26,11 +26,11 @@ Parameter ownership taxonomy is derived from flattened config parameter paths. I
 Owner: BioETL Team
 Parameters: 92
 
-- `domain_entity_contract`: 35
+- `domain_entity_contract`: 36
 - `dq_validation`: 36
 - `medallion_write_policy`: 5
 - `provider_source_access`: 3
-- `replay_provenance`: 5
+- `replay_provenance`: 4
 - `runtime_control_plane`: 8
 
 ### entity_effective
