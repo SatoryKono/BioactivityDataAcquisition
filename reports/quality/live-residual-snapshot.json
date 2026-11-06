@@ -25,7 +25,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.288,
       "files": 49,
-      "total_loc": 6475,
+      "total_loc": 6476,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
@@ -51,8 +51,8 @@
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.338,
-      "files": 53,
-      "total_loc": 6752,
+      "files": 52,
+      "total_loc": 6648,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     }
@@ -68,7 +68,7 @@
   },
   "module_coverage": {
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 0
+    "unmeasured_module_count": 5
   },
   "closeout_program": {
     "tech_debt_closeout_test_file_count": 51,
