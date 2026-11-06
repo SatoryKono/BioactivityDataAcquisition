@@ -698,7 +698,7 @@ def test_live_protection_boolean_true_is_rejected() -> None:
 
 
 def test_historical_catalog_state_matches_dated_get_receipt() -> None:
-    """The catalog state and context agree with a dated GET, not live acceptance."""
+    """Keep the dated pre-binding receipt independent of the current catalog."""
     import json
 
     receipt = json.loads(
@@ -706,15 +706,13 @@ def test_historical_catalog_state_matches_dated_get_receipt() -> None:
             ROOT / "reports/governance/github-settings-A1-readback-20261106.json"
         ).read_text(encoding="utf-8")
     )
-    catalog = _load_yaml(CATALOG)
+    assert receipt["source_commit"] == "22ee9243046df1b1f41350de8fdf56802dd96f94"
     snapshot = receipt["main_ruleset"]
     rule = snapshot["data"]
     assert snapshot["source"].endswith("/rulesets/13643213")
     assert snapshot["observed_at"] == "2026-11-06T16:09:05.965438+00:00"
     assert rule["id"] == 13643213
-    assert (
-        rule["enforcement"] == catalog["policy"]["github_ruleset_13643213_enforcement"]
-    )
+    assert rule["enforcement"] == "active"
     assert rule["conditions"]["ref_name"] == {
         "include": ["refs/heads/main"],
         "exclude": [],
@@ -724,13 +722,9 @@ def test_historical_catalog_state_matches_dated_get_receipt() -> None:
     )
     assert status["parameters"]["strict_required_status_checks_policy"] is True
     assert status["parameters"]["required_status_checks"] == [
-        {"context": catalog["deployment"]["required_context"]}
+        {"context": "pr-gate-complete"}
     ]
     assert receipt["merge_acceptance"] == "NOT_RUN"
-    assert (
-        catalog["policy"]["enforcement_verified_date_is_live_protection_evidence"]
-        is False
-    )
 
 
 def _assert_post_change_binding(receipt: dict[str, Any]) -> None:
