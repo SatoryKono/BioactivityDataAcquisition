@@ -199,6 +199,7 @@ def build_current_audit_semantic_summary(
     if not isinstance(statuses, dict) or not isinstance(metrics, dict):
         raise ValueError("semantic evidence status_counts/metrics must be mappings")
 
+    missing_coverage = statuses.get("coverage_xml_missing", 0)
     return {
         "audit_id": current.audit_id,
         "audited_commit_sha": current.audited_commit_sha,
@@ -208,6 +209,11 @@ def build_current_audit_semantic_summary(
             "architecture_interpretation": scorecard.get("interpretation"),
             "constructor_waiver_count": len(waivers),
             "contract_coverage_schema": contracts.get("schema_version"),
+            **(
+                {"coverage_xml_missing_module_count": missing_coverage}
+                if missing_coverage
+                else {}
+            ),
             "debt_gate_count": gates.get("gate_count"),
             "debt_gate_fail_count": gates.get("fail_count"),
             "debt_gate_pass_count": gates.get("pass_count"),
@@ -253,7 +259,8 @@ def _parse_report_semantic_summary(report: str) -> dict[str, Any]:
 
 def _headline_markers(summary: dict[str, Any]) -> tuple[str, ...]:
     metrics = summary["metrics"]
-    module_total = sum(
+    missing_coverage = metrics.get("coverage_xml_missing_module_count", 0)
+    module_total = missing_coverage + sum(
         metrics[key]
         for key in (
             "fully_covered_module_count",
@@ -274,6 +281,11 @@ def _headline_markers(summary: dict[str, Any]) -> tuple[str, ...]:
         f"no_executable_lines: **{metrics['no_executable_lines_module_count']}**",
         f"uncovered: **{metrics['uncovered_module_count']}**",
         f"unmeasured: **{metrics['unmeasured_module_count']}**",
+        *(
+            (f"coverage_xml_missing: **{missing_coverage}**",)
+            if missing_coverage
+            else ()
+        ),
         f"= {module_total} == source_module_count",
         f"Contract coverage matrix schema: **{metrics['contract_coverage_schema']}**",
         f"Constructor waivers (shrink-only inventory): "
