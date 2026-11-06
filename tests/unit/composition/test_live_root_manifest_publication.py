@@ -91,7 +91,10 @@ def _run_publish(  # type: ignore[no-untyped-def]
         f"{_MODULE}.create_control_plane_refs_for_manifest",
         lambda **_kwargs: "refs",
     )
-    monkeypatch.setattr(f"{_MODULE}.publish_new_run_manifest_to_live_root", publish)
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders._live_manifest_publication.publish_new_run_manifest_to_live_root",
+        publish,
+    )
     refs, ledger = _publish_manifest_and_refs(
         ctx=SimpleNamespace(exact_replay=False),  # type: ignore[arg-type]
         inputs=SimpleNamespace(  # type: ignore[arg-type]

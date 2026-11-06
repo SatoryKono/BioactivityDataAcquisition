@@ -2,17 +2,9 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.ledger.service import RunLedgerService
-from bioetl.application.services.run_reports.observations import record_run_observation
-from bioetl.domain.control_plane import RunManifest
-from bioetl.domain.exceptions import InfrastructureError, StorageError
-from bioetl.infrastructure.config.settings_api import Settings
-from bioetl.composition.control_plane_paths import (
-    publish_new_run_manifest_to_live_root,
-)
 from bioetl.composition.evidence_location_registration import (
     register_pipeline_manifest_location_soft,
 )
@@ -45,6 +37,11 @@ from bioetl.composition.runtime_builders._runner_control_plane_policy import (
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
+)
+
+from bioetl.composition.runtime_builders._live_manifest_publication import (
+    bind_live_root_successor_callback,
+    publish_live_root_without_failing_the_run,
 )
 
 if TYPE_CHECKING:
@@ -144,12 +141,12 @@ def _publish_manifest_and_refs(
     register_pipeline_manifest_location_soft(
         manifest=manifest, settings=inputs.settings
     )
-    _publish_live_root_without_failing_the_run(
+    publish_live_root_without_failing_the_run(
         manifest=manifest,
         settings=inputs.settings,
         source_base=manifest_store.base_path,
     )
-    _bind_live_root_successor_callback(
+    bind_live_root_successor_callback(
         ledger_service,
         settings=inputs.settings,
         source_base=manifest_store.base_path,
@@ -167,52 +164,6 @@ def _publish_manifest_and_refs(
         ),
     )
     return control_plane_refs, ledger_service
-
-
-def _bind_live_root_successor_callback(
-    ledger_service: RunLedgerService | None,
-    *,
-    settings: Settings,
-    source_base: Path,
-) -> None:
-    """Publish a successor only after its ledger rebind has committed."""
-    if ledger_service is None:
-        return
-
-    def _publish(successor: RunManifest) -> None:
-        _publish_live_root_without_failing_the_run(
-            manifest=successor,
-            settings=settings,
-            source_base=source_base,
-        )
-
-    ledger_service.manifest_successor_callbacks.append(_publish)
-
-
-def _publish_live_root_without_failing_the_run(
-    *,
-    manifest: RunManifest,
-    settings: Settings,
-    source_base: Path,
-) -> None:
-    """Record the extra live catalog without failing a saved mandatory manifest."""
-    try:
-        publish_new_run_manifest_to_live_root(
-            manifest=manifest,
-            settings=settings,
-            source_base=source_base,
-        )
-    except (OSError, StorageError, InfrastructureError) as exc:
-        record_run_observation(
-            "Control Plane",
-            verdict="WARN",
-            reason="live_root_manifest_publication_failed",
-            facts={
-                "manifest_id": getattr(manifest, "manifest_id", None),
-                "run_id": str(getattr(manifest, "run_id", "")),
-                "error_type": type(exc).__name__,
-            },
-        )
 
 
 def _strict_cached_bronze_require(

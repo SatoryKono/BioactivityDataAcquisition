@@ -6,13 +6,13 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
-from bioetl.domain.exceptions import InfrastructureError, StorageError
 from bioetl.infrastructure.control_plane._raw_run_manifest_inspection import (
     persist_contract_evidence,
 )
-from bioetl.infrastructure.control_plane.file_run_manifest_store import (
+from bioetl.infrastructure.control_plane.live_run_manifest_catalog import (
     copy_contract_evidence_to_live_catalog,
 )
+from bioetl.infrastructure.storage.atomic import AtomicWriteError
 
 __all__ = ["FileContractEvidenceRecorder"]
 
@@ -36,5 +36,5 @@ class FileContractEvidenceRecorder:
                 source_base=self.base_path,
                 live_base=live_catalog,
             )
-        except (OSError, StorageError, InfrastructureError):
+        except (OSError, AtomicWriteError):
             return

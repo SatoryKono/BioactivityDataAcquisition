@@ -32,6 +32,8 @@ from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageSt
 from bioetl.infrastructure.control_plane.file_run_ledger_store import FileRunLedgerStore
 from bioetl.infrastructure.control_plane.file_run_manifest_store import (
     FileRunManifestStore,
+)
+from bioetl.infrastructure.control_plane.live_run_manifest_catalog import (
     LiveRootRecordResult,
     record_manifest_in_live_catalog,
 )

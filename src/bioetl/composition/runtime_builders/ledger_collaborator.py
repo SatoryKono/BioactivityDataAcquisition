@@ -9,9 +9,13 @@ from bioetl.application.services.control_plane.ledger.artifact_recording import 
     record_published_artifact as _record_artifact,
 )
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.composition.control_plane_paths import live_run_manifest_catalog
+
 if TYPE_CHECKING:
+    from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.domain.context import PipelineRunContext
     from bioetl.application.services.control_plane.ledger.service import (
         RunLedgerService,
@@ -94,7 +98,7 @@ def _attach_contract_evidence_recorder(
     run_ledger_service: RunLedgerService,
     launch_context: PipelineRunContext | None = None,
     *,
-    settings: object | None = None,
+    settings: Settings | None = None,
 ) -> None:
     attach = getattr(runner, "attach_contract_evidence_recorder", None)
     if not callable(attach):
@@ -103,14 +107,8 @@ def _attach_contract_evidence_recorder(
     base_path = getattr(ledger_port, "base_path", None)
     if base_path is None:
         return
-    from pathlib import Path
-
     manifest_root = Path(base_path).parent / "run_manifest"
-    live_catalog = None
-    if settings is not None:
-        from bioetl.composition.control_plane_paths import live_run_manifest_catalog
-
-        live_catalog = live_run_manifest_catalog(settings)  # type: ignore[arg-type]
+    live_catalog = live_run_manifest_catalog(settings) if settings is not None else None
     recorder = FileContractEvidenceRecorder(
         base_path=manifest_root, live_catalog=live_catalog
     )
@@ -125,7 +123,7 @@ def attach_control_plane_collaborators(
     run_ledger_service: RunLedgerService,
     *,
     launch_context: PipelineRunContext | None = None,
-    settings: object | None = None,
+    settings: Settings | None = None,
 ) -> ArtifactRecorderAttachmentResult:
     """Attach ledger collaborators to the runner and its metadata writers."""
     runner.attach_run_ledger_service(run_ledger_service)
