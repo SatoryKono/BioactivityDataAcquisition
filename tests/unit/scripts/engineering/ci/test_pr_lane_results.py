@@ -304,6 +304,7 @@ def test_shadow_compare_routes_12553_runtime_acceptance_report() -> None:
 @pytest.mark.parametrize(
     "path",
     (
+        "reports/audit/hygiene-passport.md",
         "reports/audit/pack-v2.1/P02-ddd-domain.md",
         "reports/audit/pack-v2.1/P02-invariant-runs.log",
         "reports/audit/pack-v2.1/domain-pylint-duplicate-code-scan.log",
