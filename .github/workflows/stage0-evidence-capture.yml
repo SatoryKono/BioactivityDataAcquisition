@@ -310,6 +310,13 @@ jobs:
                   get_json(f"{API}/rulesets/13643213", "governance/ruleset.json")
                   get_json(f"{API}/rulesets/rule-suites?ref=refs%2Fheads%2Fmain&per_page=100",
                            "governance/rule-suites-response.json")
+                  job_errors = [
+                      item for item in (*summary["circleci"], *summary["github"])
+                      if "error_type" in item
+                  ]
+                  summary["job_errors"] = job_errors
+                  if job_errors:
+                      raise ValueError("Per-job capture failed")
                   summary["capture_completed"] = True
               except Exception as exc:
                   error = type(exc).__name__

@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import platform
 import re
 import subprocess
 import tempfile
@@ -11,6 +12,18 @@ from pathlib import Path
 from typing import Any
 
 STRICT_TYPE_GATE_TARGETS = ("src/bioetl", "src/memory", "scripts/engineering/quality")
+MYPY_COMMAND = (
+    "uv",
+    "run",
+    "--frozen",
+    "--no-build",
+    "--no-sync",
+    "mypy",
+    "--config-file",
+    "pyproject.toml",
+    "--incremental",
+    "--strict",
+)
 
 
 def normalize_diagnostics(output: str) -> list[str]:
@@ -65,6 +78,12 @@ def _atomic_write_text(path: Path, text: str) -> None:
     os.replace(temporary, path)
 
 
+def _timeout_text(output: bytes | str | None) -> str:
+    if isinstance(output, bytes):
+        return output.decode("utf-8", errors="replace")
+    return output or ""
+
+
 def run_mypy(cache_dir: str, iteration: str) -> dict[str, Any]:
     """Run strict mypy and record diagnostics, timing, and cache contents."""
     start = time.time()
@@ -72,21 +91,7 @@ def run_mypy(cache_dir: str, iteration: str) -> dict[str, Any]:
     # Explicit --incremental overrides pyproject `incremental = false` so the
     # cold/warm pair actually exercises mypy's module cache for this experiment
     # without changing the protective type-gate setting.
-    cmd = [
-        "uv",
-        "run",
-        "--frozen",
-        "--no-build",
-        "--no-sync",
-        "mypy",
-        "--config-file",
-        "pyproject.toml",
-        "--incremental",
-        "--strict",
-        "--cache-dir",
-        cache_dir,
-        *STRICT_TYPE_GATE_TARGETS,
-    ]
+    cmd = [*MYPY_COMMAND, "--cache-dir", cache_dir, *STRICT_TYPE_GATE_TARGETS]
 
     timeout_seconds = 180
     try:
@@ -99,8 +104,8 @@ def run_mypy(cache_dir: str, iteration: str) -> dict[str, Any]:
         returncode = result.returncode
     except subprocess.TimeoutExpired as e:
         end = time.time()
-        stdout_data = e.stdout.decode("utf-8") if e.stdout else ""
-        stderr_data = e.stderr.decode("utf-8") if e.stderr else ""
+        stdout_data = _timeout_text(e.stdout)
+        stderr_data = _timeout_text(e.stderr)
         returncode = -1
         print(f"[{iteration}] Mypy run timed out after {timeout_seconds} seconds")
 
@@ -143,6 +148,20 @@ def main() -> None:
     )
 
     data = {
+        "producer": "local",
+        "platform": platform.system(),
+        "python_version": platform.python_version(),
+        "command": [
+            *MYPY_COMMAND,
+            "--cache-dir",
+            "<temporary-cache>",
+            *STRICT_TYPE_GATE_TARGETS,
+        ],
+        "cache_state": {
+            "cold": "empty",
+            "warm": "reused locally",
+            "remote_restore": "not measured",
+        },
         "targets": STRICT_TYPE_GATE_TARGETS,
         "cold": cold_result,
         "warm": warm_result,

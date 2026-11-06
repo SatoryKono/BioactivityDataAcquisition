@@ -136,6 +136,7 @@ def evaluate_mypy_criterion(
         "diagnostics_match": diagnostics_match,
         "speedup": speedup,
         "targets_match": targets_match,
+        "remote_cache_verified": False,
         "cold_returncode": cold_rc,
         "warm_returncode": warm_rc,
     }
@@ -162,13 +163,12 @@ def _describe_mypy_result(
         )
 
     if cache_measurement_usable:
-        status = "PASS"
         note = (
             f"Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; "
-            f"speedup={speedup:.3f} — измерение mypy-кэша пригодно."
+            f"speedup={speedup:.3f} подтверждён для локального кэша. "
+            "Восстановление удалённого кэша в CI не измерялось."
         )
     elif diagnostics_match:
-        status = "PARTIAL"
         speedup_text = f"{speedup:.3f}" if speedup is not None else "n/a"
         note = (
             f"Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; "
@@ -176,12 +176,11 @@ def _describe_mypy_result(
             f"(порог >1.05)."
         )
     else:
-        status = "PARTIAL"
         note = (
             "Type-checking PASS (cold/warm returncode=0), но diagnostics cold/warm "
             "не совпадают; измерение кэша непригодно."
         )
-    return status, note
+    return "PARTIAL", note
 
 
 def main() -> None:

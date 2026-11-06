@@ -9,6 +9,7 @@ from scripts.engineering.ci.collect_stage0_evidence import (
     sha256,
 )
 from scripts.engineering.ci.evaluate_mypy import (
+    _timeout_text,
     STRICT_TYPE_GATE_TARGETS,
     diagnostics_digest,
     normalize_diagnostics,
@@ -67,7 +68,9 @@ def test_evaluate_mypy_criterion_missing(tmp_path: Path, monkeypatch):
     assert result["typecheck_pass"] is False
 
 
-def test_evaluate_mypy_criterion_from_pass_report(tmp_path: Path, monkeypatch):
+def test_evaluate_mypy_criterion_from_successful_local_report(
+    tmp_path: Path, monkeypatch
+):
     monkeypatch.chdir(tmp_path)
     reports = tmp_path / "reports"
     reports.mkdir()
@@ -84,7 +87,8 @@ def test_evaluate_mypy_criterion_from_pass_report(tmp_path: Path, monkeypatch):
     }
     (reports / "mypy_eval.json").write_text(json.dumps(payload), encoding="utf-8")
     result = evaluate_mypy_criterion("reports/mypy_eval.json")
-    assert result["status"] == "PASS"
+    assert result["status"] == "PARTIAL"
+    assert result["remote_cache_verified"] is False
     assert result["typecheck_pass"] is True
     assert result["cache_measurement_usable"] is True
 
@@ -182,3 +186,10 @@ def test_closure_manifest_matches_lf_json_bytes(tmp_path: Path, monkeypatch) -> 
     manifest = json.loads(markdown.split("```json\n", 1)[1].split("```", 1)[0])
     assert manifest["stage0_closure.json"]["size_bytes"] == len(data)
     assert manifest["stage0_closure.json"]["sha256"] == sha256(data)
+
+
+def test_mypy_timeout_output_decodes_bytes_and_preserves_text() -> None:
+    """Timeout diagnostics survive platform-dependent stream types."""
+    assert _timeout_text("stdout") == "stdout"
+    assert _timeout_text(b"stderr\xff") == "stderr\ufffd"
+    assert _timeout_text(None) == ""
