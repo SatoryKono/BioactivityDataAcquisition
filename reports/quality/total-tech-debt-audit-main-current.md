@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `59567fc34e7b01ff9874c96d69837ebe5fcdd2c3094ed4e09f5050d706bfd95e`
+Evidence surface SHA-256: `c4182c8b85265fadb925302fd75e052bcb145a062885530af1e4f3cc682547a3`
 
 ## Current evidence summary
 
