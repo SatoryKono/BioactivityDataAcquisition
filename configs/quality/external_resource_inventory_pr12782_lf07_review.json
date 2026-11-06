@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "777f88e4d9454d359aec2924f578c5600d304060",
+  "source_ref": "5f28b1c004e96d27b5ccf3ae99af0158917a1a42",
+  "source_reviews": {
+    "src/bioetl/application/observability/control_plane_evidence/models.py": "Adds an evidence status value; no resource acquisition.",
+    "src/bioetl/composition/bootstrap/runtime/run_status.py": "Wires the live path into the existing sidecar recorder.",
+    "src/bioetl/composition/control_plane_paths.py": "Resolves the configured live path and delegates publication to the file catalog.",
+    "src/bioetl/composition/runtime_builders/_live_manifest_publication.py": "Attaches a successor callback and records publication failures; the file adapter owns persistence.",
+    "src/bioetl/composition/runtime_builders/_runner_builder_orchestration.py": "Passes settings to the existing collaborator attachment.",
+    "src/bioetl/composition/runtime_builders/ledger_collaborator.py": "Configures the existing evidence recorder with the live catalog path.",
+    "src/bioetl/composition/runtime_builders/run_manifest_builder.py": "Calls best-effort publication after persisting the required manifest.",
+    "src/bioetl/composition/runtime_builders/runner_builder.py": "Forwards settings through the existing runner orchestration.",
+    "src/bioetl/infrastructure/control_plane/_file_run_manifest_persistence.py": "Adds a live-root mode to the existing rollback-aware persistence transaction and retains local predecessor checks for source writes.",
+    "src/bioetl/infrastructure/control_plane/file_contract_evidence_recorder.py": "Delegates finalized sidecar mirroring to the live file catalog.",
+    "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py": "Publishes the manifest and sidecar through existing atomic persistence; directory iteration and text reads are scoped to the selected catalogs.",
+    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_routing.py": "Reconciles the report catalog under the existing evidence boundary and dispatches synchronous reads to the shared asyncio executor."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [
+    {
+      "file": "src/bioetl/interfaces/http/_health_server_control_plane_evidence_routing.py",
+      "scope": "_latest_complete_payload",
+      "call": "asyncio.to_thread",
+      "expression": "asyncio.to_thread(build_latest_complete_run_payload, manifests=tuple(manifests), workflow_manifests=tuple(workflow_manifests), service=_require_service(host), pipeline=pipeline, run_type=run_types[0], workflows=workflows, selected_run_id=selected_run_id, now=current_utc_time(), scan_seconds=max(0.0, FORENSIC_ENDPOINT_TIMEOUT_SECONDS - (perf_counter() - started) - 3.0))",
+      "reason": "Submission to the already inventoried asyncio.default-executor; the request does not own or shut down the shared executor."
+    },
+    {
+      "file": "src/bioetl/interfaces/http/_health_server_control_plane_evidence_routing.py",
+      "scope": "_checkpoint_payload",
+      "call": "asyncio.to_thread",
+      "expression": "asyncio.to_thread(service.checkpoint_validation, scope=to_evidence_scope(scope), checkpoint=checkpoint, evidence_source=evidence_source, aggregate_scope_unknown=aggregate_scope_unknown)",
+      "reason": "Submission to the already inventoried asyncio.default-executor; the request does not own or shut down the shared executor."
+    },
+    {
+      "file": "src/bioetl/interfaces/http/_health_server_control_plane_evidence_routing.py",
+      "scope": "_service_payload",
+      "call": "asyncio.to_thread",
+      "expression": "asyncio.to_thread(reconcile_manifest_validation_scope, scope, report_store=getattr(host, '_run_report_store', None))",
+      "reason": "Submission to the already inventoried asyncio.default-executor; the request does not own or shut down the shared executor."
+    },
+    {
+      "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
+      "scope": "snapshot_manifest_catalog",
+      "call": "base_path.glob",
+      "expression": "base_path.glob('*.json')",
+      "reason": "Transient live-catalog enumeration fully consumed in snapshot_manifest_catalog; pathlib manages the scandir handle."
+    },
+    {
+      "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
+      "scope": "_kept_existing_manifest",
+      "call": "target.read_text",
+      "expression": "target.read_text(encoding='utf-8')",
+      "reason": "Synchronous read of a manifest, run index or sidecar; Path.read_text closes its file before returning and retains no handle."
+    },
+    {
+      "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
+      "scope": "_kept_existing_manifest",
+      "call": "index.read_text",
+      "expression": "index.read_text(encoding='utf-8')",
+      "reason": "Synchronous read of a manifest, run index or sidecar; Path.read_text closes its file before returning and retains no handle."
+    },
+    {
+      "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
+      "scope": "_already_recorded",
+      "call": "index.read_text",
+      "expression": "index.read_text(encoding='utf-8')",
+      "reason": "Synchronous read of a manifest, run index or sidecar; Path.read_text closes its file before returning and retains no handle."
+    },
+    {
+      "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
+      "scope": "_already_recorded",
+      "call": "target.read_text",
+      "expression": "target.read_text(encoding='utf-8')",
+      "reason": "Synchronous read of a manifest, run index or sidecar; Path.read_text closes its file before returning and retains no handle."
+    },
+    {
+      "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
+      "scope": "_copy_own_contract_evidence",
+      "call": "source.read_text",
+      "expression": "source.read_text(encoding='utf-8')",
+      "reason": "Synchronous read of a manifest, run index or sidecar; Path.read_text closes its file before returning and retains no handle."
+    }
+  ],
+  "line_updates": {
+    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_routing.py": {
+      "205": 249,
+      "209": 253,
+      "301": 359,
+      "314": 372,
+      "315": 373,
+      "320": 378,
+      "324": 382
+    }
+  }
+}
