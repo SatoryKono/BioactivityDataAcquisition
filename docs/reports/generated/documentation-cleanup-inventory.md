@@ -28,7 +28,7 @@
 | active_quality_baseline | 120 |
 | closeout_evidence | 168 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 30 |
+| docs_reports_curated_or_historical_report | 31 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 28 |
 | generated_skill_reference_mirror | 19 |
@@ -92,6 +92,7 @@
 | `docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md` | Working | 4 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md` | Working | 3 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
+| `docs/reports/audit/N1_SHADOW_STATUS.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/github_settings_inventory.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/pack-v2.1/evidence-collection/alertmanager_delivery_verification.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
@@ -261,6 +262,7 @@
 | Path | Tracking | Lifecycle | Action |
 | --- | --- | --- | --- |
 | `docs/reports/README.md` | tracked | docs_reports_curated_entrypoint | keep |
+| `docs/reports/audit/N1_SHADOW_STATUS.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/audit/github_settings_inventory.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/audit/pack-v2.1/evidence-collection/alertmanager_delivery_verification.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
@@ -299,7 +301,6 @@
 | `docs/reports/evidence/issue-12714/lifecycle_ownership.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/issue-12714/run_ledger_fail_closed.txt` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/issue-12714/silver_vacuum.txt` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/project-legacy-compatibility-remediation/03-synthesis/CROSS-SYNTHESIS-project-legacy-compatibility-remediation.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 
