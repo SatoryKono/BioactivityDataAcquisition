@@ -52,7 +52,12 @@ def active_run_diagnostics(
     """Resolve persisted execution evidence without claiming live worker activity."""
     if host._run_manifest_port is None:
         return None
-    selected_id = cast(RunID, UUID(run_id))
+    try:
+        selected_id = cast(RunID, UUID(run_id))
+    except ValueError:
+        # A compact stamp or other non-UUID is not a manifest run id.
+        # Raising here becomes QUERY ERROR / request_failed for a miss.
+        return None
     manifest = host._run_manifest_port.get_by_run_id(selected_id)
     if manifest is None:
         return None

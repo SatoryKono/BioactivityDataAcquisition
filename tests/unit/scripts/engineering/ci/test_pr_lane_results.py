@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 from scripts.engineering.ci.pr_lane_results import (
+    NIGHTLY_SHADOW_ARCHIVE_TEST,
     affected_pytest_targets,
     assert_step_outcomes,
     build_results,
@@ -514,6 +515,7 @@ def test_n1_evidence_paths_have_shadow_compare_routes() -> None:
             "docs/04-reference/github-actions-workflows.md",
             "docs/05-operations/ci-workflow-map.md",
             "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
+            "docs/reports/audit/N1_SHADOW_STATUS.md",
             "reports/governance/n1-shadow-window/ledger.json",
             "reports/governance/n1-shadow-window-status.md",
             "reports/quality/flaky-test-burndown-review.json",
@@ -523,10 +525,7 @@ def test_n1_evidence_paths_have_shadow_compare_routes() -> None:
     )
     assert report["activation"] == "not_applied"
     assert report["selected_count"] >= 1
-    assert (
-        "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py"
-        in report["selected"]
-    )
+    assert NIGHTLY_SHADOW_ARCHIVE_TEST in report["selected"]
 
 
 @pytest.mark.parametrize(
@@ -591,6 +590,19 @@ def test_shadow_compare_routes_incident_operator_docs(path: str) -> None:
     report = build_shadow_compare([path], repo_root=root)
     assert report["selected"] == [
         "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
+    ]
+
+
+def test_shadow_compare_routes_run_manifest_inspection_runbook() -> None:
+    """RF-008 runbook edits must map to verify_report_bind + deployed replay tests."""
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["docs/05-operations/runbooks/run-manifest-inspection.md"],
+        repo_root=root,
+    )
+    assert report["selected"] == [
+        "tests/unit/scripts/ops/docker/test_verify_report_bind.py",
+        "tests/integration/test_deployed_replay_readiness.py",
     ]
 
 

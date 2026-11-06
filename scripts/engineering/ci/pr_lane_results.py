@@ -72,6 +72,9 @@ INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST = (
 DOCUMENTATION_CLEANUP_INVENTORY_TEST = (
     "tests/architecture/test_documentation_cleanup_inventory.py"
 )
+NIGHTLY_SHADOW_ARCHIVE_TEST = (
+    "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py"
+)
 ISSUE_12475_PHYSICAL_PARITY_TESTS = (
     "tests/integration/infrastructure/storage/test_issue_12475_physical_parity.py",
     "tests/integration/infrastructure/storage/test_gold_writer_versioning.py",
@@ -289,6 +292,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/05-operations/runbooks/stale-lock.md": (
         INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
     ),
+    # RF-008: run-id preflight + deployed replay readiness own this runbook.
+    "docs/05-operations/runbooks/run-manifest-inspection.md": (
+        "tests/unit/scripts/ops/docker/test_verify_report_bind.py",
+        "tests/integration/test_deployed_replay_readiness.py",
+    ),
     "docs/00-project/RULES.md": (INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,),
     "reports/engineering/SCHEMA-001_execution_evidence.md": (
         "tests/unit/scripts/test_verify_schema_parity.py",
@@ -384,6 +392,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/audit/pack-v2.1/evidence_p12_parity.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
     ),
+    "docs/reports/audit/N1_SHADOW_STATUS.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
     "src/bioetl/infrastructure/adapters/decorators/README.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
     ),
@@ -391,9 +400,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/domain/services/test_composite_metadata_helpers.py",
     ),
     # N1 coordinator status note (sibling of reports/governance/n1-shadow-window/).
-    "reports/governance/n1-shadow-window-status.md": (
-        "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
-    ),
+    "reports/governance/n1-shadow-window-status.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
     "docs/04-reference/environment-variables.md": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
@@ -441,6 +448,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12756_main_12766_review.json",
             "configs/quality/external_resource_inventory_pr12763_report_root_review.json",
             "configs/quality/external_resource_inventory_pr12763_opener_protocol_review.json",
+            "configs/quality/external_resource_inventory_pr12783_lf06_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -812,9 +820,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     ),
     "reports/test-telemetry/": TELEMETRY_BASELINE_TESTS,
     "reports/performance/": BENCHMARK_EVIDENCE_TESTS,
-    "reports/governance/n1-shadow-window/": (
-        "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
-    ),
+    "reports/governance/n1-shadow-window/": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
     "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.": (
         NPM_RUNTIME_TEST,
     ),
