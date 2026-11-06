@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4091 |
-| Tracked doc-like files | 4091 |
+| Doc-like files | 4092 |
+| Tracked doc-like files | 4092 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,13 +18,14 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4091 |
+| tracked | 4092 |
 
 ## Lifecycle Counts
 
 | Lifecycle | Count |
 | --- | --- |
 | active_backlog | 1 |
+| active_context | 1 |
 | active_quality_baseline | 125 |
 | closeout_evidence | 168 |
 | docs_reports_curated_entrypoint | 2 |
@@ -55,7 +56,7 @@
 | Archived | 1554 |
 | Canonical | 76 |
 | Generated | 1066 |
-| Working | 638 |
+| Working | 639 |
 
 ## Surface Families
 
@@ -65,13 +66,13 @@
 | archive | 1554 |
 | canonical | 76 |
 | generated | 1066 |
-| working | 638 |
+| working | 639 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 345 |
+| archive-after-migration | 346 |
 | generate-automatically | 1066 |
 | keep | 2680 |
 
@@ -92,6 +93,7 @@
 | `docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md` | Working | 4 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md` | Working | 3 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
+| `docs/plans/ci1-07-negative-merge-protection-plan.md` | Working | 1 | archive-after-migration |
 | `docs/reports/audit/N1_SHADOW_STATUS.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/github_settings_inventory.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/pack-v2.1/evidence-collection/alertmanager_delivery_verification.md` | Working | 0 | archive-after-migration |
@@ -158,7 +160,6 @@
 | `reports/audit-runs/12107-r07/independent-review-6b1b10a7.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/independent-review-91f379.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/issue-12107-final-record.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/12107-r07/logs/pytest-24-on-80dfee.txt` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
