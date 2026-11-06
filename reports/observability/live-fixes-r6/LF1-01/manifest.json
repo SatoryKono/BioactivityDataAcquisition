@@ -8,5 +8,10 @@
     "bioetl-dq-v2.json",
     "bioetl-incident-v1.json",
     "bioetl-run-explorer-v1.json"
+  ],
+  "provisioning": [
+    "grafana-datasource.yml",
+    "bioetl-ops-http.yml",
+    "prometheus.yml"
   ]
 }
