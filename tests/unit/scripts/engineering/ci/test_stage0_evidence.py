@@ -11,6 +11,7 @@ from scripts.engineering.ci.evaluate_mypy import (
     diagnostics_digest,
     normalize_diagnostics,
 )
+from scripts.engineering.ci.pr_lane_results import build_shadow_compare
 
 
 def test_sha256_dict():
@@ -129,3 +130,17 @@ def test_evaluate_mypy_criterion_non_pass(tmp_path: Path, monkeypatch):
     assert result["status"] == "PARTIAL"
     assert result["typecheck_pass"] is False
     assert "non-PASS" in result["note"]
+
+
+def test_shadow_compare_routes_stage0_reports() -> None:
+    """Each evidence artifact routes to the focused Stage 0 tests."""
+    repo_root = Path(__file__).resolve().parents[5]
+    for artifact in (
+        "docs/reports/ci/stage0_closure.json",
+        "docs/reports/ci/stage0_closure_report.md",
+        "reports/mypy_eval.json",
+    ):
+        selection = build_shadow_compare([artifact], repo_root=repo_root)
+        assert selection["selected"] == [
+            "tests/unit/scripts/engineering/ci/test_stage0_evidence.py",
+        ]

@@ -700,6 +700,15 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_gitignore_secret_and_agents_policy.py",
         *BENCHMARK_EVIDENCE_TESTS,
     ),
+    "docs/reports/ci/stage0_closure.json": (
+        "tests/unit/scripts/engineering/ci/test_stage0_evidence.py",
+    ),
+    "docs/reports/ci/stage0_closure_report.md": (
+        "tests/unit/scripts/engineering/ci/test_stage0_evidence.py",
+    ),
+    "reports/mypy_eval.json": (
+        "tests/unit/scripts/engineering/ci/test_stage0_evidence.py",
+    ),
     "docs/reports/generated/documentation-cleanup-inventory.json": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
