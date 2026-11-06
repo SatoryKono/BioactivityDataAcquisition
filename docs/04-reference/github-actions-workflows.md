@@ -102,7 +102,9 @@ new spend/safety decision.
 | `zizmor.yml` | `zizmor` | `workflow_call`, `workflow_dispatch` | `active` | `active` | High-confidence GitHub Actions YAML audit |
 | `semantic-governance.yml` | `Semantic Pipeline Governance` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Semantic pipeline contract/policy governance |
 | `skills-consistency.yml` | `Skills Consistency` | `push`, `pull_request`, `workflow_dispatch` | `active` | `active` | Path-filtered local skill mirrors plus Codex–Junie runtime parity |
+| `stage0-cache-pair.yml` | `Stage 0 cache pair` | `push`, `workflow_dispatch` | `active` | `active` | Isolated mypy cache cold/warm measurement on Stage 0 evidence branches; measurement only, no production cache keys |
 | `stage0-evidence-capture.yml` | `Stage 0 evidence capture` | `push` | `active` | `active` | Captures historical GitHub Actions and CircleCI evidence on workflow-file changes to Stage 0 evidence branches |
+| `stage0-phase-profile.yml` | `Stage 0 phase profile` | `push`, `workflow_dispatch` | `active` | `active` | Measurement-only phase profiling on Stage 0 evidence branches |
 | `tests.yml` | `Tests` | `workflow_call` | `active` | `active` | Main test matrix, DQ gates, coverage, telemetry, control-plane E2E |
 | `type-checking-cold.yml` | `Type Checking (Strict Cold Control)` | `schedule`, `workflow_dispatch` | `active` | `active` | Strict mypy cold control without cache |
 | `type-checking.yml` | `Type Checking (Strict)` | `workflow_call`, `push`, `workflow_dispatch` | `active` | `active` | Strict mypy lane; push to `main` saves the incremental cache |
