@@ -48,8 +48,9 @@ class CompositePreflightValidationService(
 ):
     """Validates composite pipeline configuration before execution."""
 
-    def __init__(self, logger: LoggerPort) -> None:
+    def __init__(self, logger: LoggerPort, *, profile_only: bool = False) -> None:
         super().__init__(logger)
+        self._profile_only = profile_only
 
     def _add_pipeline_source_tokens(
         self,
@@ -133,13 +134,43 @@ class CompositePreflightValidationService(
         """Check if a dtype belongs to a compatibility group."""
         return dtype_in_group(dtype, group)
 
+    def _profile_pin_issue(
+        self, config: CompositeConfig, source_profiles: dict[str, ProfileInfo]
+    ) -> ValidationIssue | None:
+        expected = getattr(config, "expected_normalization_profile_hash", None)
+        if expected is None:
+            return None
+        actual = self.get_expected_normalization_profile_hash(source_profiles)
+        if actual == expected:
+            return None
+        return ValidationIssue(
+            field="expected_normalization_profile_hash",
+            source="composite",
+            issue_type="mismatch",
+            message=f"Expected composite profile hash '{expected}', but got '{actual}'",
+        )
+
+    def _validate_profile_pin(
+        self, config: CompositeConfig, *, fail_on_error: bool
+    ) -> PreflightValidationResult:
+        source_profiles = self._load_source_profiles(config)
+        issue = self._profile_pin_issue(config, source_profiles)
+        result = PreflightValidationResult(
+            is_valid=issue is None,
+            issues=[issue] if issue is not None else [],
+            profile_refs=source_profiles,
+        )
+        if fail_on_error and issue is not None:
+            raise PreflightValidationError(result)
+        return result
+
     def validate(
         self,
         config: CompositeConfig,
         *,
         fail_on_error: bool = True,
     ) -> PreflightValidationResult:
-        """Validate composite configuration field_priorities.
+        """Validate the profile pin and, in full mode, field priorities.
 
         Args:
             config: Composite pipeline configuration containing field_priorities
@@ -151,6 +182,9 @@ class CompositePreflightValidationService(
             PreflightValidationResult with validation status, issues, and
             resolved field source mappings.
         """
+        if self._profile_only:
+            return self._validate_profile_pin(config, fail_on_error=fail_on_error)
+
         issues: list[ValidationIssue] = []
         resolved_fields: dict[str, str] = {}
 
@@ -160,21 +194,9 @@ class CompositePreflightValidationService(
         self._log_schema_loading_summary(source_fields)
         self._log_profile_loading_summary(source_profiles)
 
-        if getattr(config, "expected_normalization_profile_hash", None) is not None:
-            actual_hash = self.get_expected_normalization_profile_hash(source_profiles)
-            if actual_hash != config.expected_normalization_profile_hash:
-                issues.append(
-                    ValidationIssue(
-                        field="expected_normalization_profile_hash",
-                        source="composite",
-                        issue_type="mismatch",
-                        message=(
-                            f"Expected composite profile hash '{config.expected_normalization_profile_hash}', "
-                            f"but got '{actual_hash}'"
-                        ),
-                        severity="error",
-                    )
-                )
+        pin_issue = self._profile_pin_issue(config, source_profiles)
+        if pin_issue is not None:
+            issues.append(pin_issue)
 
         field_priorities = config.merge.field_priorities
         compatibility_overrides = config.merge.normalization_compatibility_overrides

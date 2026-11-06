@@ -55,6 +55,9 @@ class _CompositeRunnerSupportRunMixin:
         return build_preflight_validation_context(
             validator=self._preflight_validator,
             field_priorities=field_priorities,
+            profile_pinned=isinstance(
+                getattr(self._config, "expected_normalization_profile_hash", None), str
+            ),
         )
 
     def _get_preflight_skip_reason(
@@ -65,6 +68,9 @@ class _CompositeRunnerSupportRunMixin:
         return get_preflight_skip_reason(
             validator=self._preflight_validator,
             field_priorities=field_priorities,
+            profile_pinned=isinstance(
+                getattr(self._config, "expected_normalization_profile_hash", None), str
+            ),
         )
 
     async def _save_checkpoint_safe(

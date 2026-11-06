@@ -29,11 +29,16 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from types import SimpleNamespace
 from typing import Any, cast
 from unittest.mock import MagicMock
 
 import pytest
+
+from bioetl.application.composite._preflight_types import PreflightValidationError
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.composition.composite_catalog import load_composite_config
 
 from bioetl.composition.factories.services.composite_support_services_factory import (
     CompositeSupportServices,
@@ -215,6 +220,46 @@ class TestCreateCompositeRunnerService:
 @pytest.mark.unit
 class TestCreateCompositeRunner:
     """Tests for create_composite_runner."""
+
+    @pytest.mark.parametrize("matches_pin", [True, False])
+    async def test_runtime_profile_pin_is_checked_before_lock(
+        self, matches_pin: bool
+    ) -> None:
+        config = load_composite_config("activity")
+        if not matches_pin:
+            config = replace(
+                config,
+                expected_normalization_profile_hash="0" * 64,
+                merge=replace(config.merge, field_priorities={}),
+            )
+        support_services = MagicMock(spec=CompositeSupportServices)
+        support_services.manifest_id = None
+        support_services.run_ledger_service = None
+        lock = MagicMock()
+        seed_runner_factory = MagicMock()
+        runner = create_composite_runner(
+            config=config,
+            runtime=CompositeRuntimeConfig(),
+            run_id=_VALID_RUN_ID,
+            logger=MagicMock(),
+            metrics=None,
+            tracer=None,
+            lock=lock,
+            seed_runner_factory=seed_runner_factory,
+            dependencies_runner_factory=MagicMock(),
+            enricher_runner_factory=MagicMock(),
+            support_services=support_services,
+        )
+
+        if matches_pin:
+            runner._run_preflight_validation()
+        else:
+            with pytest.raises(
+                PreflightValidationError, match="Expected composite profile hash"
+            ):
+                await runner.run()
+            lock.acquire.assert_not_called()
+            seed_runner_factory.assert_not_called()
 
     def test_delegates_to_runner_factory(self) -> None:
         """create_composite_runner calls the provided runner_factory callable."""

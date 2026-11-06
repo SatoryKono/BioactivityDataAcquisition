@@ -10,6 +10,7 @@ from bioetl.application.composite.runner_pkg import CompositePipelineRunner
 from bioetl.application.composite.runtime_wiring_api import (
     CompositeCheckpointService,
     CompositeLifecycleObserverService,
+    CompositePreflightValidationService,
     CompositeRunnerDependencies,
     DependencyCoordinatorService,
     EnrichmentCoordinatorService,
@@ -34,7 +35,6 @@ if TYPE_CHECKING:
 
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.composite.runtime_wiring_api import (
-        CompositePreflightValidationService,
         FSMStateHelperService,
         PipelineRunner,
     )
@@ -156,7 +156,13 @@ def build_composite_runner_service_inputs(
         merger=support_services.merger,
         fsm_state_helper=support_services.fsm_state_helper,
         dq_report_service=support_services.dq_report_service,
-        preflight_validator=None,
+        preflight_validator=(
+            CompositePreflightValidationService(logger, profile_only=True)
+            if isinstance(
+                getattr(config, "expected_normalization_profile_hash", None), str
+            )
+            else None
+        ),
         dependency_coordinator=support_services.dependency_coordinator,
         quarantine_port=support_services.quarantine_port,
         metrics=metrics,
