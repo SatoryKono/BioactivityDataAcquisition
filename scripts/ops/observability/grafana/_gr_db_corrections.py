@@ -1238,7 +1238,7 @@ def _correct_run_explorer(uid: str, panels: dict[int, dict[str, Any]]) -> None:
         [
             {
                 "title": "Open 1. Trust",
-                "url": "/d/bioetl-control-plane-v1/2-replay-readiness?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
+                "url": "/d/bioetl-control-plane-v1/2-replay-readiness?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}",
                 "includeVars": False,
             }
         ],
