@@ -5,8 +5,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.run_reports.observations import record_run_observation
-from bioetl.composition.control_plane_paths import publish_new_run_manifest_to_live_root
-from bioetl.domain.exceptions import InfrastructureError, StorageError
+from bioetl.composition.control_plane_paths import (
+    publish_new_run_manifest_to_live_root,
+)
+
+from bioetl.infrastructure.control_plane.live_run_manifest_catalog import (
+    LIVE_ROOT_PUBLICATION_ERRORS,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -56,13 +61,7 @@ def publish_live_root_without_failing_the_run(
             settings=settings,
             source_base=source_base,
         )
-    except (
-        OSError,
-        ValueError,
-        RuntimeError,
-        StorageError,
-        InfrastructureError,
-    ) as exc:
+    except LIVE_ROOT_PUBLICATION_ERRORS as exc:
         record_run_observation(
             "Control Plane",
             verdict="WARN",

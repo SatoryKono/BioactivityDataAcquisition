@@ -16,7 +16,7 @@ if sys.platform != "win32":
     import fcntl
 
 from bioetl.domain.control_plane import RunManifest
-from bioetl.domain.exceptions import StorageError
+from bioetl.domain.exceptions import InfrastructureError, StorageError
 from bioetl.infrastructure.control_plane._file_run_manifest_persistence import (
     persist_manifest,
 )
@@ -33,6 +33,16 @@ __all__ = [
 ]
 
 _ALREADY_MAPPED = "run_id is already mapped to a different manifest_id"
+
+
+# Failures from the optional dashboard copy handled by its best-effort caller.
+LIVE_ROOT_PUBLICATION_ERRORS = (
+    OSError,
+    ValueError,
+    RuntimeError,
+    StorageError,
+    InfrastructureError,
+)
 
 
 def _is_already_mapped_error(exc: BaseException) -> bool:
