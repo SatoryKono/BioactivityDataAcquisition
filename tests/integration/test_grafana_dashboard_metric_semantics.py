@@ -138,7 +138,11 @@ def _assert_processed_records_target_contract(processed: dict[str, object]) -> N
     assert isinstance(targets, list)
     assert len(targets) == 2
     assert targets[1]["refId"] == "StageInput"
-    assert targets[1]["parser"] == "uql"
+    assert targets[1]["parser"] == "backend"
+    assert "$exists(quality_evidence.funnel)" in targets[1]["root_selector"]
+    assert targets[1]["root_selector"] == targets[1]["uql"].removeprefix(
+        'parse-json | jsonata "'
+    ).removesuffix('"')
     assert (
         targets[1]["url"]
         == "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
