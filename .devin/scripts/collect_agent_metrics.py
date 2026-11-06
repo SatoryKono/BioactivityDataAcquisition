@@ -224,7 +224,10 @@ class AgentMetricsCollector:
                 low_usage_servers.append(mcp_name)
             elif metrics["last_used"]:
                 last_used = datetime.fromisoformat(metrics["last_used"])
-                if last_used.tzinfo is not None and last_used < threshold_date:
+                # Legacy naive timestamps are interpreted as UTC, matching new records.
+                if last_used.tzinfo is None:
+                    last_used = last_used.replace(tzinfo=UTC)
+                if last_used < threshold_date:
                     unused_servers.append(f"{mcp_name} (unused for {days_threshold}+ days)")
 
         if unused_servers:

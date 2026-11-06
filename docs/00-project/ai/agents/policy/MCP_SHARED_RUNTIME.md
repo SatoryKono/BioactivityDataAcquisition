@@ -138,6 +138,10 @@ wrappers validate it before initialization and the server validates it before
 storage access. `read_graph` returns at most 100 entities and 100 relations;
 follow `next_offset` until it is null. Requests, batches and graph size are
 bounded; malformed requests return errors without ending the stdio session.
+Tool responses use UTF-8 byte limits consistently. Mutations validate their
+response and each single-row read page before committing, so a rejected size
+check leaves the graph unchanged and every persisted row remains readable with
+`read_graph(limit=1)`.
 
 GitHub wrappers default to `BIOETL_GITHUB_MCP_ACCESS=read-only`. An explicitly
 authorized write task may select `read-write` with an approved executable

@@ -23,6 +23,27 @@ MAX_BATCH = 100
 MAX_PAGE = 100
 
 
+def _tool_result(value: Any) -> dict[str, Any]:
+    result = {
+        "content": [{"type": "text", "text": json.dumps(value, ensure_ascii=False)}]
+    }
+    if len(json.dumps(result, ensure_ascii=False).encode("utf-8")) > MAX_REQUEST_CHARS:
+        raise ValueError("MCP response exceeds limit; request a smaller page")
+    return result
+
+
+def _graph_page(
+    graph: dict[str, list[dict[str, Any]]], offset: int, limit: int
+) -> dict[str, Any]:
+    return {
+        **{key: rows[offset : offset + limit] for key, rows in graph.items()},
+        "totals": {key: len(rows) for key, rows in graph.items()},
+        "next_offset": offset + limit
+        if any(len(rows) > offset + limit for rows in graph.values())
+        else None,
+    }
+
+
 class GraphStore:
     """Optimistic, atomic graph store safe across MCP server processes."""
 
@@ -73,6 +94,11 @@ class GraphStore:
                 > MAX_GRAPH_BYTES
             ):
                 raise ValueError("MCP memory graph exceeds size limit")
+            # Validate both the mutation result and the smallest readable pages
+            # before committing; rejected calls must leave the stored graph intact.
+            _tool_result(result)
+            for offset in range(max(len(rows) for rows in graph.values())):
+                _tool_result(_graph_page(graph, offset, 1))
             try:
                 atomic_write_json(
                     self.path,
@@ -97,13 +123,7 @@ class GraphStore:
             ):
                 raise ValueError("read_graph requires offset >= 0 and limit in 1..100")
             graph = self.read()
-            return {
-                **{key: rows[offset : offset + limit] for key, rows in graph.items()},
-                "totals": {key: len(rows) for key, rows in graph.items()},
-                "next_offset": offset + limit
-                if any(len(rows) > offset + limit for rows in graph.values())
-                else None,
-            }
+            return _graph_page(graph, offset, limit)
         if name == "create_entities":
             entities = arguments.get("entities")
             if (
@@ -193,7 +213,10 @@ _TOOLS = [
 
 def _reply(identifier: Any, result: Any) -> None:
     print(
-        json.dumps({"jsonrpc": "2.0", "id": identifier, "result": result}), flush=True
+        json.dumps(
+            {"jsonrpc": "2.0", "id": identifier, "result": result}, ensure_ascii=False
+        ),
+        flush=True,
     )
 
 
@@ -245,14 +268,7 @@ def _handle(store: GraphStore, request: Any) -> None:
             _error(identifier, -32602, "Invalid tool parameters")
             return
         try:
-            value = store.call(params["name"], arguments)
-            result = {
-                "content": [
-                    {"type": "text", "text": json.dumps(value, ensure_ascii=False)}
-                ]
-            }
-            if len(json.dumps(result)) > MAX_REQUEST_CHARS:
-                raise ValueError("MCP response exceeds limit; request a smaller page")
+            result = _tool_result(store.call(params["name"], arguments))
         except (ValueError, KeyError, TypeError, OSError, StorageConflictError):
             result = {
                 "isError": True,
