@@ -293,7 +293,6 @@ composite:
   # ---------------------------------------------------------------------------
   lineage:
     track_field_sources: true       # Track which provider contributed each field
-    track_timestamps: true          # Include enrichment timestamps
     track_status: true              # Track per-record enrichment status
 
     # Field-level source tracking (for fields from multiple providers)

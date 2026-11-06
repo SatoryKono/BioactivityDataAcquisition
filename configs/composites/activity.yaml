@@ -338,8 +338,6 @@ composite:
     # Track which source provided each field value
     track_field_sources: true
 
-    # Include timestamps for each step
-    track_timestamps: true
 
     # Include per-record status
     track_status: true

@@ -471,8 +471,6 @@ composite:
     # Track which source provided each field value
     track_field_sources: true
 
-    # Include timestamps for each enrichment
-    track_timestamps: true
 
     # Include per-record enrichment status
     track_status: true
