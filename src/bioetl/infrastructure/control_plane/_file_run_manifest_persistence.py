@@ -262,8 +262,7 @@ def _require_compatible_run_index(
     if (
         existing_manifest_id is not None
         and existing_manifest_id != manifest.manifest_id
-        and getattr(manifest, "predecessor_manifest_id", None)
-        != existing_manifest_id
+        and getattr(manifest, "predecessor_manifest_id", None) != existing_manifest_id
     ):
         raise ValueError(
             "run_id is already mapped to a different manifest_id: "

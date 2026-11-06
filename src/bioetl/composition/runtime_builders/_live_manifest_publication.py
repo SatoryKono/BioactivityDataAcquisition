@@ -11,11 +11,16 @@ from bioetl.domain.exceptions import InfrastructureError, StorageError
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from bioetl.application.services.control_plane.ledger.service import RunLedgerService
+    from bioetl.application.services.control_plane.ledger.service import (
+        RunLedgerService,
+    )
     from bioetl.domain.control_plane import RunManifest
     from bioetl.infrastructure.config.settings_api import Settings
 
-__all__ = ["bind_live_root_successor_callback", "publish_live_root_without_failing_the_run"]
+__all__ = [
+    "bind_live_root_successor_callback",
+    "publish_live_root_without_failing_the_run",
+]
 
 
 def bind_live_root_successor_callback(
