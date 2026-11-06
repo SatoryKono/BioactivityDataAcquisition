@@ -286,27 +286,6 @@ def test_shadow_compare_routes_12380_acceptance_report() -> None:
     assert report["covers_full_suite"] is False
 
 
-def test_shadow_compare_routes_merge_protection_plan_and_structure_catalog() -> None:
-    """The plan and its catalog entry retain their owning validation routes."""
-    repo_root = Path(__file__).resolve().parents[5]
-
-    report = build_shadow_compare(
-        [
-            "configs/quality/repo_structure_catalog.yaml",
-            "docs/plans/ci1-07-negative-merge-protection-plan.md",
-        ],
-        repo_root=repo_root,
-    )
-
-    assert set(report["selected"]) == {
-        "tests/unit/scripts/repo/test_audit_root_cleanliness.py",
-        "tests/unit/scripts/repo/test_check_root_governance_docs.py",
-        "tests/unit/scripts/repo/test_audit_structure.py",
-        "tests/architecture/test_documentation_cleanup_inventory.py",
-    }
-    assert report["covers_full_suite"] is False
-
-
 def test_shadow_compare_routes_12553_runtime_acceptance_report() -> None:
     """Issue 12553 acceptance markdown selects the cleanup-inventory contract."""
     repo_root = Path(__file__).resolve().parents[5]

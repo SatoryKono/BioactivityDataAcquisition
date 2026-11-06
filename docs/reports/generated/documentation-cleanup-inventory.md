@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4076 |
-| Tracked doc-like files | 4076 |
+| Doc-like files | 4074 |
+| Tracked doc-like files | 4074 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,13 +18,14 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4076 |
+| tracked | 4074 |
 
 ## Lifecycle Counts
 
 | Lifecycle | Count |
 | --- | --- |
 | active_backlog | 1 |
+| active_context | 1 |
 | active_quality_baseline | 120 |
 | closeout_evidence | 168 |
 | docs_reports_curated_entrypoint | 2 |
@@ -38,8 +39,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| supporting_validation_plan | 1 |
-| working_report | 300 |
+| working_report | 298 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -56,7 +56,7 @@
 | Archived | 1554 |
 | Canonical | 76 |
 | Generated | 1066 |
-| Working | 623 |
+| Working | 621 |
 
 ## Surface Families
 
@@ -66,13 +66,13 @@
 | archive | 1554 |
 | canonical | 76 |
 | generated | 1066 |
-| working | 623 |
+| working | 621 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 335 |
+| archive-after-migration | 333 |
 | generate-automatically | 1066 |
 | keep | 2675 |
 
@@ -93,7 +93,7 @@
 | `docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md` | Working | 4 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md` | Working | 3 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
-| `docs/plans/ci1-07-negative-merge-protection-plan.md` | Working | 0 | archive-after-migration |
+| `docs/plans/ci1-07-negative-merge-protection-plan.md` | Working | 1 | archive-after-migration |
 | `docs/reports/audit/N1_SHADOW_STATUS.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/github_settings_inventory.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/pack-v2.1/evidence-collection/alertmanager_delivery_verification.md` | Working | 0 | archive-after-migration |
