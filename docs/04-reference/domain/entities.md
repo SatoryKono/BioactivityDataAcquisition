@@ -86,11 +86,11 @@ they are implementation structure, not separate published entity roots.
 | `composite_publication` | `PublicationEntityBase` + provider entities | `publication_base.py` + publication modules |
 
 Composite activity/assay/molecule/target entities are assembled in application
-composite merge paths; see [composite pipeline specs](../pipelines/composite/).
+composite merge paths; see [composite pipeline specs](../pipelines/contract-facet-matrix.md).
 
 ## Related References
 
 - [Domain Layer (architecture)](../../02-architecture/01-domain-layer.md) §2.3
-- [Provider specs](../providers/)
+- [Provider specs](../providers/README.md)
 - [Pipeline catalog](../pipeline-catalog.md)
 - [Aggregates](aggregates.md)
