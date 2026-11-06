@@ -461,6 +461,8 @@ def test_create_composite_runner_wires_preflight_validator() -> None:
     builder hardcoded ``preflight_validator=None``, so the normalization
     profile hash check never ran in production assembly.
     """
+    config = MagicMock()
+    config.expected_normalization_profile_hash = "abc123"
     runner_factory = MagicMock(return_value=MagicMock())
     support_services = cast(
         CompositeSupportServices,
@@ -479,7 +481,7 @@ def test_create_composite_runner_wires_preflight_validator() -> None:
     )
 
     create_composite_runner(
-        config=MagicMock(),
+        config=config,
         runtime=MagicMock(),
         run_id=_VALID_RUN_ID,
         logger=MagicMock(),
@@ -495,3 +497,4 @@ def test_create_composite_runner_wires_preflight_validator() -> None:
 
     inputs = runner_factory.call_args[0][0]
     assert isinstance(inputs.preflight_validator, CompositePreflightValidationService)
+    assert inputs.preflight_validator._profile_only is True

@@ -311,7 +311,7 @@
       "module_path": "src/bioetl/application/composite/runtime_wiring_api.py",
       "module_name": "bioetl.application.composite.runtime_wiring_api",
       "src_importer_count": 18,
-      "test_importer_count": 5,
+      "test_importer_count": 6,
       "min_src_importers": 2,
       "verification_status": "satisfied",
       "evidence_lane": "retained_module_owner_suite",

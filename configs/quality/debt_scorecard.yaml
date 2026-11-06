@@ -277,8 +277,8 @@ config_surface_ratchet:
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Flattened parameter vocabulary ratcheted down after removing inline composite field_priorities
-        maps that duplicated field_groups/shared_policy.yaml (#12032). Composite
-        expected_normalization_profile_hash is a governance pin excluded from this vocabulary.
+        maps that duplicated field_groups/shared_policy.yaml (#12032). Composite expected_normalization_profile_hash
+        is a governance pin excluded from this vocabulary.
       ratchet_policy: Non-growth fail-fast unless a reviewed schema expansion updates the budget.
     inconsistent_parameter_count:
       current_count: 0
@@ -350,9 +350,8 @@ config_surface_ratchet:
         unique_parameter_count:
           current_count: 92
           max_count: 92
-          rationale: Composite vocabulary excludes duplicate inline field_priorities maps and the
-            expected_normalization_profile_hash governance pin; shared policy remains the owner
-            and actionable drift stays zero (#12032 / #12784).
+          rationale: Composite vocabulary excludes duplicate inline field_priorities maps and the expected_normalization_profile_hash
+            governance pin; shared policy remains the owner and actionable drift stays zero (#12032 /
           ratchet_policy: Non-growth fail-fast unless composite schema expansion updates budget.
         inconsistent_parameter_count:
           current_count: 0
@@ -500,7 +499,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 49
-      total_loc: 6470
+      total_loc: 6476
       files_ge_250_loc: 0
       helper_function_ratio: 0.288
       max_internal_fan_in: 2

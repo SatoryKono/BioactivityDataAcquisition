@@ -52,15 +52,12 @@ class _CompositeRunnerSupportRunMixin:
     ) -> _PreparedPreflightValidationContext | None:
         """Build the canonical preflight validation context when validation can run."""
         field_priorities = getattr(self._config.merge, "field_priorities", ())
-        expected_hash = getattr(
-            self._config, "expected_normalization_profile_hash", None
-        )
-        if not isinstance(expected_hash, str):
-            expected_hash = None
         return build_preflight_validation_context(
             validator=self._preflight_validator,
             field_priorities=field_priorities,
-            expected_normalization_profile_hash=expected_hash,
+            profile_pinned=isinstance(
+                getattr(self._config, "expected_normalization_profile_hash", None), str
+            ),
         )
 
     def _get_preflight_skip_reason(
@@ -68,15 +65,12 @@ class _CompositeRunnerSupportRunMixin:
     ) -> str | None:
         """Return skip reason for preflight validation when it should not run."""
         field_priorities = getattr(self._config.merge, "field_priorities", ())
-        expected_hash = getattr(
-            self._config, "expected_normalization_profile_hash", None
-        )
-        if not isinstance(expected_hash, str):
-            expected_hash = None
         return get_preflight_skip_reason(
             validator=self._preflight_validator,
             field_priorities=field_priorities,
-            expected_normalization_profile_hash=expected_hash,
+            profile_pinned=isinstance(
+                getattr(self._config, "expected_normalization_profile_hash", None), str
+            ),
         )
 
     async def _save_checkpoint_safe(

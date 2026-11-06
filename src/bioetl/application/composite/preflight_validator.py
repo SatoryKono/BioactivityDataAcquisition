@@ -49,8 +49,9 @@ class CompositePreflightValidationService(
 ):
     """Validates composite pipeline configuration before execution."""
 
-    def __init__(self, logger: LoggerPort) -> None:
+    def __init__(self, logger: LoggerPort, *, profile_only: bool = False) -> None:
         super().__init__(logger)
+        self._profile_only = profile_only
 
     def _add_pipeline_source_tokens(
         self,
@@ -134,6 +135,46 @@ class CompositePreflightValidationService(
         """Check if a dtype belongs to a compatibility group."""
         return dtype_in_group(dtype, group)
 
+    def _validate_profile_pin(
+        self, config: CompositeConfig, *, fail_on_error: bool
+    ) -> PreflightValidationResult:
+        """Validate only the pinned normalization profile hash.
+
+        Profile-only mode is used for production assembly: the shared
+        ``field_priorities`` policy mixes sources and fields from other
+        DAGs, so the full field-priority validation cannot run on loaded
+        configs yet; the profile hash pin is checked on its own.
+        """
+        source_profiles = self._load_source_profiles(config)
+        self._log_profile_loading_summary(source_profiles)
+        dag_hash = get_expected_normalization_profile_hash(source_profiles)
+        issues: list[ValidationIssue] = []
+        if (
+            config.expected_normalization_profile_hash is not None
+            and dag_hash != config.expected_normalization_profile_hash
+        ):
+            issues.append(
+                ValidationIssue(
+                    field="expected_normalization_profile_hash",
+                    source="composite",
+                    issue_type="normalization_profile_drift",
+                    message=(
+                        f"DAG normalization profile hash mismatch: expected "
+                        f"{config.expected_normalization_profile_hash}, got {dag_hash}"
+                    ),
+                    severity="error",
+                )
+            )
+        result = PreflightValidationResult(
+            is_valid=not issues,
+            issues=issues,
+            resolved_fields={},
+            profile_refs=source_profiles,
+        )
+        if fail_on_error and issues:
+            raise PreflightValidationError(result)
+        return result
+
     def validate(
         self,
         config: CompositeConfig,
@@ -152,6 +193,9 @@ class CompositePreflightValidationService(
             PreflightValidationResult with validation status, issues, and
             resolved field source mappings.
         """
+        if self._profile_only:
+            return self._validate_profile_pin(config, fail_on_error=fail_on_error)
+
         issues: list[ValidationIssue] = []
         resolved_fields: dict[str, str] = {}
 

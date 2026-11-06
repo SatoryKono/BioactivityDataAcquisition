@@ -156,7 +156,13 @@ def build_composite_runner_service_inputs(
         merger=support_services.merger,
         fsm_state_helper=support_services.fsm_state_helper,
         dq_report_service=support_services.dq_report_service,
-        preflight_validator=CompositePreflightValidationService(logger=logger),
+        preflight_validator=(
+            CompositePreflightValidationService(logger=logger, profile_only=True)
+            if isinstance(
+                getattr(config, "expected_normalization_profile_hash", None), str
+            )
+            else None
+        ),
         dependency_coordinator=support_services.dependency_coordinator,
         quarantine_port=support_services.quarantine_port,
         metrics=metrics,
