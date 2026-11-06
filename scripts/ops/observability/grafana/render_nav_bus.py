@@ -28,6 +28,8 @@ from scripts.ops.observability.grafana.action_target_routes import (
     ACTION_DASHBOARD_UID_BY_TARGET,
 )
 from scripts.ops.observability.grafana.dashboard_context_links import (
+    DASHBOARD_TITLES,
+    PATH_BY_UID,
     build_handoff_url,
 )
 
@@ -44,33 +46,21 @@ HTTP_EVIDENCE_STATES = (
     "QUERY ERROR and must not be interpreted as an empty successful response."
 )
 
-# Full portfolio bus (order is normative).
+# Full portfolio bus. Order is the five-dashboard numbering.
+_BUS_UIDS: tuple[str, ...] = (
+    "bioetl-run-explorer-v1",
+    "bioetl-control-plane-v1",
+    "bioetl-overview-v2",
+    "bioetl-dq-v2",
+    "bioetl-incident-v1",
+)
 BUS: list[dict[str, str]] = [
     {
-        "uid": "bioetl-run-explorer-v1",
-        "title": "Run Explorer",
-        "path": "run-explorer",
-    },
-    {
-        "uid": "bioetl-control-plane-v1",
-        "title": "Replay Readiness",
-        "path": "1-trust",
-    },
-    {
-        "uid": "bioetl-overview-v2",
-        "title": "Run Overview",
-        "path": "2-overview",
-    },
-    {
-        "uid": "bioetl-dq-v2",
-        "title": "Data Quality",
-        "path": "5-data-quality",
-    },
-    {
-        "uid": "bioetl-incident-v1",
-        "title": "Incident Workspace",
-        "path": "6-incident-workspace",
-    },
+        "uid": uid,
+        "title": DASHBOARD_TITLES[uid],
+        "path": PATH_BY_UID[uid],
+    }
+    for uid in _BUS_UIDS
 ]
 
 FILE_BY_UID = {
@@ -265,8 +255,10 @@ _PRESERVE_SCOPE_TOOLTIP = "Preserves selected scope and time range."
 
 NAV_DESCRIPTION = (
     "Sanitizer-compatible navigation bus with native keyboard focus. "
-    "Shared five-chip bus (19.5% each): Run Explorer / Replay Readiness / "
-    "Run Overview / Data Quality / Incident Workspace. "
+    "Shared five-dashboard bus, numbered 1-5 (19.5% each): "
+    "1. Run Explorer / 2. Replay Readiness / 3. Run Overview / "
+    "4. Data Quality / 5. Incident Workspace. "
+    "Slugs are the Grafana title slugs. "
     'Current workspace is a non-interactive <span class="bioetl-nav-current"> '
     "(aria-current=page, underlined) so active state is not color-only and is "
     "not a link. Handoffs open same-tab, preserve current time range, and "
@@ -1107,7 +1099,7 @@ _SELECT_RUN_EMPTY = (
     "VALID EMPTY if the selected run has no rows for this table."
 )
 _RUN_EXPLORER_URL = (
-    "/d/bioetl-run-explorer-v1/run-explorer?"
+    "/d/bioetl-run-explorer-v1/1-run-explorer?"
     "${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}"
     "&${run_id:queryparam}&${__url_time_range}"
 )
@@ -1395,7 +1387,7 @@ def _stamp_trust_override(override: dict[str, Any]) -> None:
                 {
                     "title": "View trust reasons",
                     "url": (
-                        "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}"
+                        "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}"
                         "&${pipeline:queryparam}&${run_type:queryparam}"
                         "&${run_id:queryparam}&viewPanel=9418&${__url_time_range}"
                     ),
@@ -2142,7 +2134,7 @@ def _stamp_runtime_answer(panel: dict[str, Any]) -> None:
         {
             "title": "Open Trust replay readiness",
             "url": (
-                "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}"
+                "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}"
                 "&${pipeline:queryparam}&${run_type:queryparam}"
                 "&${run_id:queryparam}&viewPanel=9422"
             ),
@@ -2151,7 +2143,7 @@ def _stamp_runtime_answer(panel: dict[str, Any]) -> None:
         {
             "title": "Open fleet signals on Incident",
             "url": (
-                "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}"
+                "/d/bioetl-incident-v1/5-incident-workspace?${workflow:queryparam}"
                 "&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}"
             ),
             "targetBlank": False,

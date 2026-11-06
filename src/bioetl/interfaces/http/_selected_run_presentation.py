@@ -7,6 +7,7 @@ from urllib.parse import urlencode
 
 _SELECT_RUN = "SELECT RUN"
 _NO_RUNS = "НЕТ ЗАПУСКОВ"
+_RUN_EXPLORER_SELECT_PATH = "d/bioetl-run-explorer-v1/1-run-explorer?var-run_id=-"
 
 
 def presentation_rows(
@@ -27,7 +28,7 @@ def presentation_rows(
                 "verdict": _NO_RUNS,
                 "reason": "no_runs_in_scope",
                 "action": "No runs in current scope",
-                "action_path": "d/bioetl-run-explorer-v1/run-explorer?var-run_id=-",
+                "action_path": _RUN_EXPLORER_SELECT_PATH,
             }
         ]
     if selection:
@@ -41,7 +42,7 @@ def presentation_rows(
                 "verdict": _SELECT_RUN,
                 "reason": "Choose a run to inspect saved evidence",
                 "action": "Choose a run",
-                "action_path": "d/bioetl-run-explorer-v1/run-explorer?var-run_id=-",
+                "action_path": _RUN_EXPLORER_SELECT_PATH,
             }
         ]
     return [

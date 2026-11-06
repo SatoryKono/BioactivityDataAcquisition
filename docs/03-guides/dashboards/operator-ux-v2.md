@@ -28,7 +28,7 @@ Normative design track for epic #6800 (DUX). See also
 
 | Zone | Purpose | Budget |
 | --- | --- | --- |
-| **Nav bus** | Full portfolio switcher `0–6` (Run Explorer…Incident Workspace) | Shared link-only `h=3` on all seven dashboards (DASH-FIT-004 / `layout-budgets.yaml`; shipped nav id=1000); wrap at 1024px; owned by `render_nav_bus.py` |
+| **Nav bus** | Numbered five-dashboard switcher `1–5` (Run Explorer…Incident Workspace), including Data Quality and Run Explorer | Shared link-only `h=2` on all five dashboards (DASH-FIT-004 / `layout-budgets.yaml`; shipped nav id=1000); slugs are Grafana title slugs; wrap at 1024px; owned by `render_nav_bus.py` |
 | **Status strip** | Current verdict + provenance | Provenance + Status shell (ids stable where contracted) |
 | **Evidence** | Population / matrix / blockers / reasons | Above fold (typically `y` ≤ 17) |
 | **Actions** | ≤4 CTA links or compact route table | Not a multi-screen narrative |
