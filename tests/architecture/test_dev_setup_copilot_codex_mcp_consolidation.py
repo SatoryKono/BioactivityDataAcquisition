@@ -204,10 +204,10 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         ("mcp_memory_wrapper.sh", "mcp_memory_wrapper.ps1")
     )
     assert (
-        servers["memory"]["env"]["MEMORY_FILE_PATH"]
+        servers["memory"]["env"]["MEMORY_SEED_PATH"]
         == "docs/00-project/ai/memory/mcp-memory.json"
     )
-    assert _posix(codex_servers["memory"]["env"]["MEMORY_FILE_PATH"]).endswith(
+    assert _posix(codex_servers["memory"]["env"]["MEMORY_SEED_PATH"]).endswith(
         "/docs/00-project/ai/memory/mcp-memory.json"
     )
     wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"

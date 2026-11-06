@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import cast
@@ -49,9 +50,35 @@ def profile_plan(profile: str, repo_root: Path = REPO_ROOT) -> dict[str, object]
     }
 
 
+def effective_profile_plan(plan: dict[str, object]) -> dict[str, object]:
+    """Apply task persistence authority without changing the declared inventory."""
+    mode = os.environ.get("BIOETL_AI_MEMORY_MODE", "off").lower()
+    if mode in {"read-write", "readwrite", "rw"}:
+        return {**plan, "disabled_by_mode": []}
+    if mode not in {"off", "disabled", "read-only", "readonly", "ro"}:
+        raise ValueError("Invalid BIOETL_AI_MEMORY_MODE")
+    return {
+        **plan,
+        "required_local": [
+            name
+            for name in _as_str_list(plan.get("required_local"))
+            if name != "memory"
+        ],
+        "optional_local": [
+            name
+            for name in _as_str_list(plan.get("optional_local"))
+            if name != "memory"
+        ],
+        "disabled_by_mode": ["memory"]
+        if "memory" in _as_str_list(plan.get("selected"))
+        else [],
+    }
+
+
 def _safe_plan_for_json(plan: dict[str, object]) -> dict[str, object]:
     """Return an allowlisted, non-sensitive view of profile plan data."""
     return {
+        "disabled_by_mode": _as_str_list(plan.get("disabled_by_mode")),
         "profile": str(plan.get("profile", "")),
         "selected": _as_str_list(plan.get("selected")),
         "required": _as_str_list(plan.get("required")),
@@ -121,7 +148,7 @@ def main() -> int:
         print(f"[OK] {len(setup_mcp.MCP_PROFILES)} MCP profile matrices are valid")
         return 0
 
-    plan = profile_plan(args.profile)
+    plan = effective_profile_plan(profile_plan(args.profile))
     if args.required_local:
         print("\n".join(_as_str_list(plan["required_local"])))
         return 0

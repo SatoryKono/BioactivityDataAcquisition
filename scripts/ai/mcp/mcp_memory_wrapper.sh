@@ -56,11 +56,15 @@ else
 fi
 
 export PYTHONPATH="${REPO_ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}"
-if [[ -z "${MEMORY_FILE_PATH:-}" ]]; then
-  export MEMORY_FILE_PATH="$(
+scope_args=()
+if [[ -n "${MEMORY_FILE_PATH:-}" ]]; then
+  scope_args+=(--target "${MEMORY_FILE_PATH}")
+fi
+export MEMORY_REPO_ROOT="${REPO_ROOT}"
+export MEMORY_FILE_PATH="$(
     "${MEMORY_PYTHON}" -m memory.mcp_scope \
       --repo-root "${REPO_ROOT}" \
-      --seed "${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"
+      --seed "${MEMORY_SEED_PATH:-${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json}" \
+      "${scope_args[@]}"
   )"
-fi
 exec "${MEMORY_PYTHON}" -m memory.mcp_server "$@"
