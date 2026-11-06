@@ -357,9 +357,12 @@ def _acquire_windows_lock(lock_fd: int, mode: int) -> None:
 
 def _lock_byte(lock_fd: int, mode: int) -> None:
     """Lock one byte at the start of the lock file."""
-    import msvcrt
+    if sys.platform == "win32":
+        import msvcrt
 
-    if os.fstat(lock_fd).st_size < 1:
-        os.write(lock_fd, b"\0")
-        os.lseek(lock_fd, 0, os.SEEK_SET)
-    msvcrt.locking(lock_fd, mode, 1)
+        if os.fstat(lock_fd).st_size < 1:
+            os.write(lock_fd, b"\0")
+            os.lseek(lock_fd, 0, os.SEEK_SET)
+        msvcrt.locking(lock_fd, mode, 1)
+        return
+    raise RuntimeError("Byte-range catalog locks require Windows")
