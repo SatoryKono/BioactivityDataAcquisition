@@ -20,7 +20,6 @@ jobs:
       STAGE0_INSTRUMENTATION_SHA: ${{ github.sha }}
       STAGE0_RUN_ID: ${{ github.run_id }}
       STAGE0_RUN_ATTEMPT: ${{ github.run_attempt }}
-      STAGE0_CACHE_DIR: ${{ runner.temp }}/stage0-isolated-mypy-cache
     steps:
       - name: Checkout immutable measurement source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -37,6 +36,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          export STAGE0_CACHE_DIR="$RUNNER_TEMP/stage0-isolated-mypy-cache"
+          printf 'STAGE0_CACHE_DIR=%s\n' "$STAGE0_CACHE_DIR" >> "$GITHUB_ENV"
           test ! -e "$STAGE0_CACHE_DIR"
           mkdir "$STAGE0_CACHE_DIR"
           mkdir -p reports/stage0-cache
