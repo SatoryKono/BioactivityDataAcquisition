@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "catalog_ref": "4af92fe06abad38388108c4b8f80b9f57a95d436",
-  "source_ref": "223e56d8bc20deb506d8bf8de8fe093e9c372bb7",
+  "catalog_ref": "35bba54760b39421b79f63186c79833498fe758d",
+  "source_ref": "5481b94d18a358e62051a1eafd71e0619e48d25b",
   "source_reviews": {
     "src/bioetl/application/observability/control_plane_evidence/models.py": "Evidence model adds resolution metadata without acquisition.",
     "src/bioetl/composition/bootstrap/runtime/run_status.py": "Runtime assembly selects the live manifest catalog and keeps the existing observation flow.",
