@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "2ad61c18314f262693a5c782612f9adad5cb074d",
+  "source_ref": "790640d49a0c4508d5388bec4c79e1ca3c48ee09",
+  "source_reviews": {
+    "src/bioetl/application/composite/_preflight_orchestration.py": "Computes a canonical aggregate digest from already loaded normalization profiles.",
+    "src/bioetl/application/composite/preflight_validator.py": "Adds an error when the actual normalization aggregate differs from the configured pin.",
+    "src/bioetl/domain/composite/config_composite_decoder.py": "Decodes the optional profile pin from serialized config.",
+    "src/bioetl/domain/composite/config_composite_encoder.py": "Preserves the optional profile pin during serialization.",
+    "src/bioetl/domain/composite/config_composite_protocols.py": "Adds the profile pin to the serializer protocol.",
+    "src/bioetl/domain/composite/config_models.py": "Adds the optional profile pin to the domain model.",
+    "src/bioetl/infrastructure/schemas/composite_config.py": "Loads and forwards the optional profile pin from runtime YAML."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
