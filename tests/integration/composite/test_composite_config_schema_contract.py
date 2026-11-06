@@ -143,3 +143,25 @@ def test_composite_preflight_hash_mismatch() -> None:
         service.validate(config)
 
     assert "Expected composite profile hash 'invalid_hash_abc123'" in str(exc.value)
+
+
+def test_runtime_composite_configs_expose_expected_normalization_profile_hash() -> None:
+    """Real load_composite_config must surface hashes from configs/composites/*.yaml."""
+    from bioetl.composition.composite_catalog import load_composite_config
+
+    expected = {
+        "activity": (
+            "db230eaacf6b465d10099a22726ffa85671fd8243ad5feda26f4d94f6ce4b824"
+        ),
+        "assay": "4f5afe8d853477bc2a0764de6062a6fdad0fdaba83bd37577cd202b9fce00415",
+        "molecule": (
+            "734237278d2ae6187dee27a2a0b8234fdb30c076deaf40764b15064d2aedba9e"
+        ),
+        "publication": (
+            "df17bc95bedffb3bd52d2e8e3b342548b2699cb91ce99916719b2c21c1ef3bba"
+        ),
+        "target": "5e92245129ab997da0efebac9f649d72e8fc28acb0049ff56312ba7f9238c327",
+    }
+    for name, hash_value in sorted(expected.items()):
+        config = load_composite_config(name)
+        assert config.expected_normalization_profile_hash == hash_value

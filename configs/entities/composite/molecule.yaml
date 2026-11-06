@@ -4,7 +4,6 @@
 version: 1.0.0
 provider: composite
 entity: molecule
-expected_normalization_profile_hash: 734237278d2ae6187dee27a2a0b8234fdb30c076deaf40764b15064d2aedba9e
 pipeline:
   pipeline_name: composite_molecule
   provider: composite

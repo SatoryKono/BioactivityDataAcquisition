@@ -29,6 +29,7 @@
 composite:
   name: composite_molecule
   version: "1.0.0"
+  expected_normalization_profile_hash: 734237278d2ae6187dee27a2a0b8234fdb30c076deaf40764b15064d2aedba9e
   normalized_anchor_policy:
     pubchem_compound:
       join_boundary:

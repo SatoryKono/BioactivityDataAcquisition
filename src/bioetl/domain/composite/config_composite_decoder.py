@@ -196,6 +196,10 @@ def _attach_optional_composite_sections(
     _attach_optional_section(
         kwargs, data, "cross_validation", build_cross_validation_config
     )
+    kwargs["expected_normalization_profile_hash"] = optional_str(
+        data.get("expected_normalization_profile_hash"),
+        "expected_normalization_profile_hash",
+    )
 
 
 def composite_from_dict[CompositeT, SeedT, DependencyT, EnricherT, MergeT](

@@ -203,4 +203,5 @@ def composite_to_dict(config: CompositeConfigProtocol) -> dict[str, object]:
         "execution": _execution_to_dict(config.execution),
         "lineage": _lineage_to_dict(config.lineage),
         "cross_validation": _cross_validation_to_dict(config.cross_validation),
+        "expected_normalization_profile_hash": config.expected_normalization_profile_hash,
     }
