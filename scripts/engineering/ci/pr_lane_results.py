@@ -155,6 +155,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/architecture_acceptance_baseline.yaml": (
         "tests/architecture/test_architecture_acceptance_baseline.py",
     ),
+    "configs/quality/repo_structure_catalog.yaml": (
+        "tests/unit/scripts/repo/test_audit_root_cleanliness.py",
+        "tests/unit/scripts/repo/test_check_root_governance_docs.py",
+        "tests/unit/scripts/repo/test_audit_structure.py",
+    ),
+    "docs/plans/ci1-07-negative-merge-protection-plan.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+    ),
     "configs/quality/external_resource_inventory_pr12751_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
