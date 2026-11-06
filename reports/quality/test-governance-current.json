@@ -824,14 +824,7 @@
     }
   },
   "assertless_total_candidates": 69,
-  "budget_violations": [
-    {
-      "actual": 13,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1005,22 +998,8 @@
     ]
   },
   "intentional_no_exception_contract": 68,
-  "markerless_examples": [
-    "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:20",
-    "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:27",
-    "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:35",
-    "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:45",
-    "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:52",
-    "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:64",
-    "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:71",
-    "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:96",
-    "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:122",
-    "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:144",
-    "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:158",
-    "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:178",
-    "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:191"
-  ],
-  "markerless_test_functions": 13,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -1757,22 +1736,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:20",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:27",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:35",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:45",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:52",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:64",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:71",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:96",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:122",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:144",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:158",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:178",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:191"
-    ],
-    "markerless_test_functions": 13,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -1838,7 +1803,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "6ed9cde4ddf00c0bf18284d2de8c72d3b71e2d3f084f7e41af655a379da06329",
+  "source_tree_sha256": "e20d4757901ca0978bf8c8fec72a818d8d9dc3227fa1d61f8a48b2f2fbf2f3c1",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 69,
@@ -1847,22 +1812,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 68,
-    "markerless_examples": [
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:20",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:27",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:35",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:45",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:52",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:64",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:71",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:96",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:122",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:144",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:158",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:178",
-      "tests/unit/scripts/engineering/ci/test_stage0_evidence.py:191"
-    ],
-    "markerless_test_functions": 13,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0

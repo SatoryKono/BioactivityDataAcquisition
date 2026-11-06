@@ -16,6 +16,10 @@ from scripts.engineering.ci.evaluate_mypy import (
 )
 from scripts.engineering.ci.pr_lane_results import build_shadow_compare
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 
 def test_sha256_dict():
     # Positive test
