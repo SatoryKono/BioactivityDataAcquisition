@@ -211,7 +211,7 @@ def test_catalog_prose_matches_declared_documents() -> None:
     policy = catalog["policy"]
     assert policy["enforcement_verified_date"] == "2026-10-09"
     assert policy["enforcement_verified_date_is_live_protection_evidence"] is False
-    assert policy["github_ruleset_13643213_enforcement"] == "disabled"
+    assert policy["github_ruleset_13643213_enforcement"] == "active"
     assert policy["github_ruleset_15730586_enforcement"] == "deleted"
     errors = check_required_checks_prose(
         catalog,
@@ -322,23 +322,20 @@ def test_anchor_region_does_not_reuse_wording_elsewhere() -> None:
     policy = catalog["policy"]
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
     target = "docs/00-project/governance/05-github-policy.md"
-    old = (
-        "<!-- policy-anchor:ruleset-enforcement-mode --> Ruleset `13643213` is "
-        "`enforcement: disabled`; rulesets `15730586` and `24517966` were "
-        "deleted on 2026-11-02 (settings-audit phase 0)."
-    )
+    documents[target] += "\nUnanchored reference: enforcement: active.\n"
+    old = "<!-- policy-anchor:ruleset-enforcement-mode --> Ruleset `13643213` is `enforcement: active` (GET 2026-11-06); rulesets `15730586` and `24517966` were deleted on 2026-11-02 (settings-audit phase 0)."
     assert old in documents[target]
     documents[target] = documents[target].replace(
         old,
-        old.replace("`enforcement: disabled`", "`enforcement: active`"),
+        old.replace("`enforcement: active`", "`enforcement: disabled`"),
         1,
     )
-    assert "enforcement: disabled" in documents[target]
+    assert "enforcement: active" in documents[target]
     errors = check_required_checks_prose(catalog, documents)
     assert any(
         target in error
         and "ruleset-enforcement-mode" in error
-        and "enforcement: disabled" in error
+        and "enforcement: active" in error
         for error in errors
     )
 
@@ -386,12 +383,12 @@ def test_last_anchor_does_not_read_the_next_paragraph() -> None:
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
     target = "docs/05-operations/ci-cd-integration.md"
     original = (
-        "A successful `pr-gate-complete` does not by itself block merge, "
-        "because classic branch protection is absent"
+        "A successful `pr-gate-complete` does not by itself block merge; "
+        "the active server rule requires it."
     )
     replacement = (
-        "A successful `pr-gate-complete` is enough by itself to block merge, "
-        "because classic branch protection is absent"
+        "A successful `pr-gate-complete` is enough by itself to block merge; "
+        "the active server rule requires it."
     )
     assert original in documents[target]
     documents[target] = documents[target].replace(original, replacement, 1)
@@ -456,23 +453,20 @@ def test_contributing_ruleset_region_cannot_borrow_disabled_wording() -> None:
     policy = catalog["policy"]
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
     target = ".github/CONTRIBUTING.md"
-    old = (
-        "<!-- policy-anchor:ruleset-enforcement-mode --> Ruleset `13643213` is "
-        "`enforcement: disabled`; rulesets `15730586` and `24517966` were "
-        "deleted on 2026-11-02 (settings-audit phase 0)."
-    )
+    documents[target] += "\nUnanchored reference: enforcement: active.\n"
+    old = "<!-- policy-anchor:ruleset-enforcement-mode --> Ruleset `13643213` is `enforcement: active` (GET 2026-11-06); rulesets `15730586` and `24517966` were deleted on 2026-11-02 (settings-audit phase 0)."
     assert old in documents[target]
     documents[target] = documents[target].replace(
         old,
-        old.replace("`enforcement: disabled`", "`enforcement: active`"),
+        old.replace("`enforcement: active`", "`enforcement: disabled`"),
         1,
     )
-    assert "enforcement: disabled" in documents[target]
+    assert "enforcement: active" in documents[target]
     errors = check_required_checks_prose(catalog, documents)
     assert any(
         target in error
         and "ruleset-enforcement-mode" in error
-        and "enforcement: disabled" in error
+        and "enforcement: active" in error
         for error in errors
     )
 
@@ -701,3 +695,105 @@ def test_live_protection_boolean_true_is_rejected() -> None:
     documents = _repo_documents(ROOT, list(catalog["policy"]["prose_claim_doc_paths"]))
     errors = check_required_checks_prose(catalog, documents)
     assert any("must be false" in error for error in errors)
+
+
+def test_historical_catalog_state_matches_dated_get_receipt() -> None:
+    """The catalog state and context agree with a dated GET, not live acceptance."""
+    import json
+
+    receipt = json.loads(
+        (
+            ROOT / "reports/governance/github-settings-A1-readback-20261106.json"
+        ).read_text(encoding="utf-8")
+    )
+    catalog = _load_yaml(CATALOG)
+    snapshot = receipt["main_ruleset"]
+    rule = snapshot["data"]
+    assert snapshot["source"].endswith("/rulesets/13643213")
+    assert snapshot["observed_at"] == "2026-11-06T16:09:05.965438+00:00"
+    assert rule["id"] == 13643213
+    assert (
+        rule["enforcement"] == catalog["policy"]["github_ruleset_13643213_enforcement"]
+    )
+    assert rule["conditions"]["ref_name"] == {
+        "include": ["refs/heads/main"],
+        "exclude": [],
+    }
+    status = next(
+        item for item in rule["rules"] if item["type"] == "required_status_checks"
+    )
+    assert status["parameters"]["strict_required_status_checks_policy"] is True
+    assert status["parameters"]["required_status_checks"] == [
+        {"context": catalog["deployment"]["required_context"]}
+    ]
+    assert receipt["merge_acceptance"] == "NOT_RUN"
+    assert (
+        catalog["policy"]["enforcement_verified_date_is_live_protection_evidence"]
+        is False
+    )
+
+
+def _assert_post_change_binding(receipt: dict[str, Any]) -> None:
+    """Check the current snapshot pair, independently from historical evidence."""
+    rule = receipt["main_ruleset"]["data"]
+    assert rule["id"] == 13643213
+    assert rule["enforcement"] == "active"
+    assert rule["bypass_actors"] == []
+    status = next(
+        item for item in rule["rules"] if item["type"] == "required_status_checks"
+    )
+    assert status["parameters"]["strict_required_status_checks_policy"] is True
+    assert status["parameters"]["required_status_checks"] == [
+        {"context": "pr-gate-complete", "integration_id": 15368}
+    ]
+
+
+def _post_change_receipt() -> dict[str, Any]:
+    import json
+
+    return json.loads(
+        (
+            ROOT / "reports/governance/github-settings-A1-post-change-20261106.json"
+        ).read_text(encoding="utf-8")
+    )
+
+
+def test_post_change_snapshot_records_approved_settings() -> None:
+    receipt = _post_change_receipt()
+    _assert_post_change_binding(receipt)
+    assert receipt["fork_policy"]["data"] == {
+        "approval_policy": "all_external_contributors"
+    }
+    assert receipt["repository"]["data"]["allow_update_branch"] is True
+    assert receipt["repository"]["data"]["allow_auto_merge"] is False
+    assert receipt["tag_ruleset"]["data"]["enforcement"] == "disabled"
+    assert receipt["merge_acceptance"] == "NOT_RUN"
+    assert receipt["producer"]["app_id"] == 15368
+    assert receipt["producer"]["pr_head_sha"] == receipt["producer"]["check_head_sha"]
+
+
+def test_post_change_binding_rejects_missing_integration() -> None:
+    receipt = copy.deepcopy(_post_change_receipt())
+    status = next(
+        item
+        for item in receipt["main_ruleset"]["data"]["rules"]
+        if item["type"] == "required_status_checks"
+    )
+    del status["parameters"]["required_status_checks"][0]["integration_id"]
+    with pytest.raises(AssertionError):
+        _assert_post_change_binding(receipt)
+
+
+@pytest.mark.parametrize("integration_id", [None, -1, 15369])
+def test_post_change_binding_rejects_wrong_integration(
+    integration_id: int | None,
+) -> None:
+    receipt = copy.deepcopy(_post_change_receipt())
+    status = next(
+        item
+        for item in receipt["main_ruleset"]["data"]["rules"]
+        if item["type"] == "required_status_checks"
+    )
+    status["parameters"]["required_status_checks"][0]["integration_id"] = integration_id
+    with pytest.raises(AssertionError):
+        _assert_post_change_binding(receipt)
