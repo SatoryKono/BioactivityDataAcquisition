@@ -4,9 +4,9 @@
     "total_internal_imports": 8517,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 331,
+    "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "ddfae201526707297f843d2ea5e5146f88668f19b2538c8c11f00b7c35f47f1b"
+    "source_fingerprint": "362b0a92dc02ad11c585ffe4f4db18bca4c4d41e3d9b627531f3a09de9a5bedc"
   },
   "layer_edges": [
     {
@@ -36,13 +36,13 @@
     {
       "source": "composition",
       "target": "domain",
-      "imports": 324,
+      "imports": 323,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 313,
+      "imports": 314,
       "allowed": true
     },
     {
