@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Protocol, cast
 from uuid import UUID
 
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.types import RunID
+from bioetl.interfaces.http._run_id_resolver import resolve_unique_scope
 from bioetl.interfaces.http._selected_run_a2_resolve import is_unresolved_run_id
 from bioetl.interfaces.http.control_plane_selector_context import UNKNOWN_SCOPE
 
@@ -104,6 +105,15 @@ def resolve_control_plane_identity_scope(
             resolved_via="no_manifest_for_scope",
         )
 
+    if selected_run_id is None and _unique_resolve_requested(host, query):
+        return _resolve_unique_identity_scope(
+            host,
+            query,
+            requested_pipeline=requested_pipeline,
+            selected_pipelines=selected_pipelines,
+            selected_run_types=selected_run_types,
+        )
+
     if selected_run_id is None and len(selected_pipelines) != 1:
         return _identity_scope(
             requested_pipeline=requested_pipeline,
@@ -148,6 +158,51 @@ def resolve_control_plane_identity_scope(
         selected_run_id=None,
         resolved_manifest=None,
         resolved_via="selection_required",
+    )
+
+
+def _unique_resolve_requested(
+    host: _ControlPlaneScopeHost, query: dict[str, str]
+) -> bool:
+    flag = host._read_optional_param(query, "resolve")
+    return isinstance(flag, str) and flag.strip().lower() == "unique"
+
+
+def _resolve_unique_identity_scope(
+    host: _ControlPlaneScopeHost,
+    query: dict[str, str],
+    *,
+    requested_pipeline: str,
+    selected_pipelines: tuple[str, ...],
+    selected_run_types: tuple[str, ...],
+) -> _IdentityScope:
+    """Resolve a source that has scope labels and no run id.
+
+    Explicit tokens never reach this path. Zero or many matches do not pick
+    a substitute run.
+    """
+    port = host._run_manifest_port
+    lister = getattr(port, "list_all", None)
+    workflows = host._read_scope_csv_param(query, "workflow")
+    manifests: tuple[object, ...] = ()
+    if callable(lister):
+        listed = lister()
+        manifests = tuple(listed) if listed is not None else ()
+    pipelines = selected_pipelines or (requested_pipeline,)
+    resolution = resolve_unique_scope(
+        manifests,
+        pipelines=pipelines,
+        run_types=selected_run_types,
+        workflows=workflows,
+    )
+    manifest = resolution.manifest if resolution.status == "resolved" else None
+    return _identity_scope(
+        requested_pipeline=requested_pipeline,
+        selected_pipelines=selected_pipelines,
+        selected_run_types=selected_run_types,
+        selected_run_id=resolution.run_id,
+        resolved_manifest=cast(RunManifest | None, manifest),
+        resolved_via=resolution.reason,
     )
 
 

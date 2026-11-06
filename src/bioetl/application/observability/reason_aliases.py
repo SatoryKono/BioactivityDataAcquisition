@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+_RUN_NOT_FOUND = "Run not found"
+
 REASON_ALIASES: dict[str, str] = {
     "no_gold_candidates": "No Gold candidates",
     "run_observation_missing": "Result not recorded",
@@ -19,7 +21,10 @@ REASON_ALIASES: dict[str, str] = {
     "lineage_identity_not_observable": "Lineage identity not observable",
     "lineage_closure_gap": "Lineage closure gap",
     "lineage_closure_complete": "Lineage closed",
-    "selected_run_id_not_found": "Run not found",
+    "selected_run_id_not_found": _RUN_NOT_FOUND,
+    "run_not_found": _RUN_NOT_FOUND,
+    "unique_scope_not_found": _RUN_NOT_FOUND,
+    "ambiguous_scope": "Several runs match; select a Run ID",
     "deadline_exceeded": "Deadline exceeded",
     "capacity_exhausted": "At capacity",
     "terminal_event_missing": "Started; no terminal event. Liveness unverified",
