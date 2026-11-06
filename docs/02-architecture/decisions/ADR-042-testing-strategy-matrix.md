@@ -17,6 +17,8 @@ ______________________________________________________________________
 
 ## Context
 
+See also [ADR-063](ADR-063-exclude-generated-artifact-tests-from-actions.md) for execution environment rules regarding generated artifact tests.
+
 BioETL has grown to 854+ test files across 9 test categories. While coverage meets
 the 85% threshold, several gaps exist:
 
