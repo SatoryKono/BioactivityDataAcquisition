@@ -1,0 +1,10 @@
+{
+  "grafana_version": "NOT_VERIFIABLE",
+  "infinity_version": "NOT_VERIFIABLE",
+  "backend_image_digest": "NOT_VERIFIABLE",
+  "backend_commit": "NOT_VERIFIABLE",
+  "profile": "NOT_VERIFIABLE",
+  "data_root": "NOT_VERIFIABLE",
+  "report_root": "NOT_VERIFIABLE",
+  "source_identity": "NOT_VERIFIABLE"
+}

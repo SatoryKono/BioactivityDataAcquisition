@@ -1,0 +1,12 @@
+{
+  "report": "report.md",
+  "identity": "identity.json",
+  "panels_inventory": "panels_inventory.json",
+  "dashboards": [
+    "bioetl-control-plane-v1.json",
+    "bioetl-overview-v2.json",
+    "bioetl-dq-v2.json",
+    "bioetl-incident-v1.json",
+    "bioetl-run-explorer-v1.json"
+  ]
+}
