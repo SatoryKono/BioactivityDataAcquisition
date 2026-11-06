@@ -52173,7 +52173,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "2c1fa58039a5be0f43d274464847ab8b776e2dafd19a0b6132a6ac5f53aa31db",
+  "source_tree_sha256": "be2a81ded9eee65d6659023d37bd634259132148fe1cdec907ce1b4b919d989c",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
