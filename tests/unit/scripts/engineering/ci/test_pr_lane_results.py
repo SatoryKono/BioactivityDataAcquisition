@@ -294,6 +294,7 @@ def test_shadow_compare_routes_merge_protection_plan_and_structure_catalog() -> 
         [
             "configs/quality/repo_structure_catalog.yaml",
             "docs/plans/ci1-07-negative-merge-protection-plan.md",
+            "docs/plans/README.md",
         ],
         repo_root=repo_root,
     )

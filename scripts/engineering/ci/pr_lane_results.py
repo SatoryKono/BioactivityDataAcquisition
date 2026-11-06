@@ -163,6 +163,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/plans/ci1-07-negative-merge-protection-plan.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
     ),
+    "docs/plans/README.md": (
+        "tests/unit/scripts/repo/test_check_root_governance_docs.py",
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+    ),
     "configs/quality/external_resource_inventory_pr12751_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,

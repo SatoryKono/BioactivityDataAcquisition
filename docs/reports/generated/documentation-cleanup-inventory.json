@@ -95359,7 +95359,7 @@
       "github_issue_url": null,
       "inbound_links": 3,
       "lifecycle": "plans_governance_entrypoint",
-      "outbound_links": 4,
+      "outbound_links": 5,
       "owner": "BioETL Team",
       "path": "docs/plans/README.md",
       "recommended_action": "keep",
@@ -95371,7 +95371,7 @@
     },
     {
       "canonical_successor": null,
-      "catalog_lifecycle": "supporting_validation_plan",
+      "catalog_lifecycle": "active_context",
       "commit_policy": null,
       "declared_class": null,
       "declared_status": null,
@@ -95385,8 +95385,8 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 0,
-      "lifecycle": "supporting_validation_plan",
+      "inbound_links": 1,
+      "lifecycle": "active_context",
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "docs/plans/ci1-07-negative-merge-protection-plan.md",
@@ -114977,6 +114977,7 @@
   "summary": {
     "by_lifecycle": {
       "active_backlog": 1,
+      "active_context": 1,
       "active_quality_baseline": 120,
       "closeout_evidence": 168,
       "docs_reports_curated_entrypoint": 2,
@@ -114990,7 +114991,6 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 26,
       "reports_workspace_entrypoint": 1,
-      "supporting_validation_plan": 1,
       "working_report": 300
     },
     "by_recommended_action": {
