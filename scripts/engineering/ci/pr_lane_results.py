@@ -62,6 +62,7 @@ BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
 DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
+STAGE0_EVIDENCE_TEST = "tests/unit/scripts/engineering/ci/test_stage0_evidence.py"
 RUN_REPORT_CONTRACTS_TEST = "tests/unit/domain/run_reports/test_contracts.py"
 SCRIPTS_INVENTORY_MANIFEST_TEST = (
     "tests/architecture/test_scripts_inventory_manifest.py"
@@ -700,15 +701,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_gitignore_secret_and_agents_policy.py",
         *BENCHMARK_EVIDENCE_TESTS,
     ),
-    "docs/reports/ci/stage0_closure.json": (
-        "tests/unit/scripts/engineering/ci/test_stage0_evidence.py",
-    ),
-    "docs/reports/ci/stage0_closure_report.md": (
-        "tests/unit/scripts/engineering/ci/test_stage0_evidence.py",
-    ),
-    "reports/mypy_eval.json": (
-        "tests/unit/scripts/engineering/ci/test_stage0_evidence.py",
-    ),
+    "docs/reports/ci/stage0_closure.json": (STAGE0_EVIDENCE_TEST,),
+    "docs/reports/ci/stage0_closure_report.md": (STAGE0_EVIDENCE_TEST,),
+    "reports/mypy_eval.json": (STAGE0_EVIDENCE_TEST,),
     "docs/reports/generated/documentation-cleanup-inventory.json": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
