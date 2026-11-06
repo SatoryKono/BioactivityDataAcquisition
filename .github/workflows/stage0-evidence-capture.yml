@@ -1,0 +1,340 @@
+name: Stage 0 evidence capture
+
+on:
+  push:
+    branches: ['chore/stage0-ci-evidence-*']
+    paths: ['.github/workflows/stage0-evidence-capture.yml']
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+
+concurrency:
+  group: stage0-evidence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Capture historical evidence without running project checks
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYCODE'
+          """Read-only Stage 0 evidence capture. Does not run or modify project gates."""
+          from __future__ import annotations
+          
+          import concurrent.futures
+          import hashlib
+          import json
+          import os
+          import re
+          import threading
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from typing import Any
+          
+          REPO = "SatoryKono/BioactivityDataAcquisition"
+          RUN = 41570319793
+          ATTEMPT = 1
+          HEAD = "36325dd83d1c6c0e600c2e46420620bade3221c5"
+          WORKFLOW = "84c30254-3889-4737-baa6-8e2d23400b61"
+          CIRCLE_HEAD = "cec03dad730ae35b1ca4b01c0d2441284436b2f8"
+          API = f"https://api.github.com/repos/{REPO}"
+          CIRCLE = f"https://circleci.com/api/v1.1/project/github/{REPO}"
+          OUT = Path("stage0-captured")
+          ENTRIES: list[dict[str, Any]] = []
+          LOCK = threading.Lock()
+          
+          
+          class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, req: Any, fp: Any, code: int, msg: str,
+                                   headers: Any, newurl: str) -> None:
+                  return None
+          
+          
+          def digest(data: bytes) -> str:
+              return hashlib.sha256(data).hexdigest()
+          
+          
+          def store(path: str, data: bytes, origin: str, **extra: Any) -> None:
+              relative = Path(path)
+              if relative.is_absolute() or ".." in relative.parts:
+                  raise ValueError("Unsafe evidence path")
+              target = OUT / relative
+              target.parent.mkdir(parents=True, exist_ok=True)
+              with target.open("xb") as stream:
+                  stream.write(data)
+              entry = {"path": path, "size": len(data), "sha256": digest(data),
+                       "source": origin, "retrieved_utc": datetime.now(timezone.utc).isoformat(),
+                       **extra}
+              with LOCK:
+                  ENTRIES.append(entry)
+          
+          
+          def store_json(path: str, value: Any, origin: str, **extra: Any) -> None:
+              store(path, (json.dumps(value, ensure_ascii=False, indent=2) + "\n").encode(),
+                    origin, **extra)
+          
+          
+          def read_url(url: str) -> tuple[int, bytes, dict[str, str]]:
+              """Never forward GitHub authorization to a redirect destination."""
+              original = url
+              opener = urllib.request.build_opener(NoRedirectHandler())
+              for _ in range(5):
+                  parsed = urllib.parse.urlsplit(url)
+                  if parsed.scheme != "https":
+                      raise ValueError("Non-HTTPS redirect rejected")
+                  headers = {"User-Agent": "BioETL-stage0-evidence", "Accept-Encoding": "identity"}
+                  if parsed.hostname == "api.github.com":
+                      headers["Accept"] = "application/vnd.github+json"
+                      token = os.environ.get("GH_TOKEN")
+                      if token:
+                          headers["Authorization"] = f"Bearer {token}"
+                  request = urllib.request.Request(url, headers=headers, method="GET")
+                  try:
+                      with opener.open(request, timeout=25) as response:
+                          body = response.read(16 * 1024 * 1024 + 1)
+                          status, response_headers = response.status, dict(response.headers)
+                  except urllib.error.HTTPError as exc:
+                      status, response_headers = exc.code, dict(exc.headers)
+                      body = exc.read(1024 * 1024)
+                  if status in (301, 302, 303, 307, 308):
+                      location = response_headers.get("Location") or response_headers.get("location")
+                      if not location:
+                          raise ValueError("Redirect without Location")
+                      url = urllib.parse.urljoin(url, location)
+                      host = urllib.parse.urlsplit(url).hostname or ""
+                      allowed = (host in ("api.github.com", "github.com", "circleci.com") or
+                                 host.endswith((".githubusercontent.com", ".actions.githubusercontent.com",
+                                                ".blob.core.windows.net", ".circleci.com")))
+                      if not allowed:
+                          raise ValueError("Unapproved redirect host")
+                      continue
+                  if len(body) > 16 * 1024 * 1024:
+                      raise ValueError("Response exceeds 16 MiB bound")
+                  return status, body, response_headers
+              raise ValueError(f"Too many redirects for {urllib.parse.urlsplit(original).hostname}")
+          
+          
+          def get_json(url: str, path: str) -> tuple[int, Any, dict[str, str]]:
+              status, body, headers = read_url(url)
+              store(path, body, url, http_status=status, representation="original response body")
+              try:
+                  value = json.loads(body)
+              except (ValueError, UnicodeDecodeError):
+                  value = None
+              return status, value, headers
+          
+          
+          def next_link(headers: dict[str, str]) -> str | None:
+              value = headers.get("Link", headers.get("link", ""))
+              match = re.search(r'<([^>]+)>;\s*rel="next"', value)
+              if not match:
+                  return None
+              url = match.group(1)
+              if not url.startswith(API + "/actions/"):
+                  raise ValueError("Unexpected pagination target")
+              return url
+          
+          
+          def redact_signed_urls(text: str) -> tuple[str, int]:
+              count = 0
+              def replace(match: re.Match[str]) -> str:
+                  nonlocal count
+                  url = match.group(0)
+                  parts = urllib.parse.urlsplit(url)
+                  keys = {key.lower() for key, _ in urllib.parse.parse_qsl(parts.query)}
+                  if keys & {"token", "sig", "signature", "x-amz-signature", "access_token"}:
+                      count += 1
+                      return urllib.parse.urlunsplit(parts._replace(query="REDACTED_SIGNED_QUERY"))
+                  return url
+              return re.sub(r'https?://[^\s<>"\x27]+', replace, text), count
+          
+          
+          def checkout_records(text: str) -> list[dict[str, Any]]:
+              lines = text.splitlines()
+              found: list[dict[str, Any]] = []
+              for index, line in enumerate(lines):
+                  if "git log -1 --format=%H" not in line and "git rev-parse HEAD" not in line:
+                      continue
+                  for offset in range(index + 1, min(index + 5, len(lines))):
+                      clean = re.sub(r"^\d{4}-\d{2}-\d{2}T\S+\s+", "", lines[offset]).strip()
+                      if re.fullmatch(r"[0-9a-f]{40}", clean):
+                          found.append({"line": offset + 1, "sha": clean,
+                                        "command_line": index + 1})
+                          break
+              return found
+          
+          
+          def capture_github_job(job: dict[str, Any]) -> dict[str, Any]:
+              job_id = job["id"]
+              result: dict[str, Any] = {"job_id": job_id, "name": job["name"],
+                                       "conclusion": job.get("conclusion")}
+              if job.get("conclusion") == "skipped" or not job.get("steps"):
+                  return {**result, "log_requested": False, "checkout": "not_observed_no_execution"}
+              url = f"{API}/actions/jobs/{job_id}/logs"
+              try:
+                  status, body, _ = read_url(url)
+                  result.update(http_status=status, original_body_sha256=digest(body))
+                  if status != 200:
+                      store(f"github/log-errors/{job_id}.json", body, url, http_status=status)
+                      return {**result, "log_requested": True, "checkout_records": []}
+                  text = body.decode("utf-8")
+                  sanitized, removed = redact_signed_urls(text)
+                  store(f"github/logs/{job_id}.log", sanitized.encode(), url,
+                        http_status=status, original_body_sha256=digest(body),
+                        signed_urls_redacted=removed,
+                        representation="unaltered UTF-8" if removed == 0 else "signed URL queries redacted")
+                  result["checkout_records"] = checkout_records(text)
+                  result["checkout_steps"] = [s["name"] for s in job.get("steps", [])
+                                              if "checkout" in s.get("name", "").lower()
+                                              and "post" not in s.get("name", "").lower()
+                                              and s.get("conclusion") == "success"]
+                  result["revision_switch_lines"] = [i + 1 for i, line in enumerate(text.splitlines())
+                                                    if re.search(r"\bgit (checkout|switch|reset)\b", line)]
+                  return result
+              except Exception as exc:
+                  return {**result, "error_type": type(exc).__name__}
+          
+          
+          def capture_circle_job(job: dict[str, Any]) -> dict[str, Any]:
+              number = job["job_number"]
+              result: dict[str, Any] = {"build": number, "name": job["name"],
+                                       "workflow_status": job.get("status")}
+              try:
+                  status, tests, _ = get_json(f"{CIRCLE}/{number}/tests", f"circleci/tests/{number}.json")
+                  result["tests_http_status"] = status
+                  result["tests_array_present"] = isinstance(tests, dict) and isinstance(tests.get("tests"), list)
+                  if result["tests_array_present"]:
+                      result["records"] = len(tests["tests"])
+                  if job.get("status") == "not_run":
+                      return {**result, "metadata_requested": False}
+                  url = f"{CIRCLE}/{number}"
+                  status, body, _ = read_url(url)
+                  if status != 200:
+                      return {**result, "metadata_http_status": status}
+                  metadata = json.loads(body)
+                  selected = {k: metadata.get(k) for k in (
+                      "build_num", "vcs_revision", "branch", "status", "lifecycle", "queued_at",
+                      "start_time", "stop_time", "parallel", "workflows", "picard", "platform")}
+                  selected["steps"] = [{"name": step.get("name"), "actions": [
+                      {k: action.get(k) for k in ("name", "status", "type", "start_time", "end_time",
+                                                 "run_time_millis")} for action in step.get("actions", [])]}
+                      for step in metadata.get("steps", [])]
+                  selected["original_response_sha256"] = digest(body)
+                  store_json(f"circleci/metadata/{number}.json", selected, url,
+                             representation="selected metadata; original raw hash recorded; signed URLs excluded")
+                  config = metadata.get("circle_yml", {}).get("string")
+                  if isinstance(config, str):
+                      result["compiled_config_sha256"] = digest(config.encode())
+                      if number == 46543:
+                          store("circleci/compiled-config.yml", config.encode(), url,
+                                representation="exact decoded circle_yml.string")
+                  result.update(metadata_http_status=status,
+                                head_sha_matches=metadata.get("vcs_revision") == CIRCLE_HEAD,
+                                workflow_matches=metadata.get("workflows", {}).get("workflow_id") == WORKFLOW)
+                  return result
+              except Exception as exc:
+                  return {**result, "error_type": type(exc).__name__}
+          
+          
+          def capture_context() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+              status, run, _ = get_json(f"{API}/actions/runs/{RUN}/attempts/{ATTEMPT}", "github/run-attempt.json")
+              if status != 200 or not isinstance(run, dict):
+                  raise ValueError("Historical run metadata unavailable")
+              if (run.get("id"), run.get("run_attempt"), run.get("head_sha")) != (RUN, ATTEMPT, HEAD):
+                  raise ValueError("Historical run identity mismatch")
+              if run.get("repository", {}).get("full_name") != REPO:
+                  raise ValueError("Repository identity mismatch")
+              jobs: list[dict[str, Any]] = []
+              counts: set[int] = set()
+              url: str | None = f"{API}/actions/runs/{RUN}/attempts/{ATTEMPT}/jobs?per_page=100"
+              page = 0
+              while url is not None:
+                  page += 1
+                  status, payload, headers = get_json(url, f"github/jobs-page-{page}.json")
+                  if status != 200 or not isinstance(payload, dict) or not isinstance(payload.get("jobs"), list):
+                      raise ValueError("Invalid jobs page")
+                  counts.add(payload["total_count"])
+                  jobs.extend(payload["jobs"])
+                  url = next_link(headers)
+              if any(type(j.get("id")) is not int or j["id"] <= 0 for j in jobs):
+                  raise ValueError("Invalid GitHub job identifier")
+              if counts != {len(jobs)} or len({j["id"] for j in jobs}) != len(jobs):
+                  raise ValueError("Incomplete or duplicated jobs")
+              if any((j.get("run_id"), j.get("run_attempt"), j.get("head_sha")) != (RUN, ATTEMPT, HEAD)
+                     for j in jobs):
+                  raise ValueError("Job identity mismatch")
+              status, payload, _ = get_json(f"https://circleci.com/api/v2/workflow/{WORKFLOW}/job",
+                                            "circleci/workflow-jobs.json")
+              if status != 200 or not isinstance(payload, dict) or not isinstance(payload.get("items"), list):
+                  raise ValueError("Circle workflow unavailable")
+              if payload.get("next_page_token"):
+                  raise ValueError("Circle workflow unexpectedly needs pagination; refuse partial capture")
+              circle_jobs = payload["items"]
+              if any(type(j.get("job_number")) is not int or j["job_number"] <= 0 for j in circle_jobs):
+                  raise ValueError("Invalid Circle job number")
+              if len(circle_jobs) != len({j["id"] for j in circle_jobs}):
+                  raise ValueError("Circle job IDs duplicated")
+              return jobs, circle_jobs
+          
+          
+          def main() -> None:
+              OUT.mkdir(exist_ok=False)
+              summary: dict[str, Any] = {"capture_run": os.environ.get("GITHUB_RUN_ID"),
+                  "capture_attempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
+                  "capture_workflow_sha": os.environ.get("GITHUB_SHA"),
+                  "historical_run": RUN, "historical_attempt": ATTEMPT,
+                  "historical_head_sha": HEAD, "stage0_pass": False,
+                  "meaning": "Evidence capture only; never a Stage 0 acceptance verdict."}
+              error: str | None = None
+              try:
+                  jobs, circle_jobs = capture_context()
+                  with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+                      summary["circleci"] = list(executor.map(capture_circle_job, circle_jobs))
+                      summary["github"] = list(executor.map(capture_github_job, jobs))
+                  for comment in (6612425740, 6655440457):
+                      get_json(f"{API}/issues/comments/{comment}", f"governance/owner-comment-{comment}.json")
+                  for pr in (12758, 12755, 12764):
+                      get_json(f"{API}/pulls/{pr}", f"governance/pr-{pr}.json")
+                  get_json(f"{API}/rulesets/13643213", "governance/ruleset.json")
+                  get_json(f"{API}/rulesets/rule-suites?ref=refs%2Fheads%2Fmain&per_page=100",
+                           "governance/rule-suites-response.json")
+                  summary["capture_completed"] = True
+              except Exception as exc:
+                  error = type(exc).__name__
+                  summary.update(capture_completed=False, error_type=error)
+              store_json("capture-summary.json", summary, "derived from responses in this archive")
+              manifest = {"generated_utc": datetime.now(timezone.utc).isoformat(),
+                          "files": sorted(ENTRIES, key=lambda item: item["path"]),
+                          "note": "Manifest does not hash itself. HTTP errors and absence remain evidence, not PASS."}
+              (OUT / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+                                                 encoding="utf-8")
+              print(json.dumps({"capture_completed": summary.get("capture_completed", False),
+                                "files": len(ENTRIES), "error_type": error,
+                                "stage0_pass": False}))
+              if error:
+                  raise SystemExit(1)
+          
+          
+          if __name__ == "__main__":
+              main()
+          PYCODE
+      - name: Preserve evidence including diagnostic failures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: stage0-capture-${{ github.run_id }}-${{ github.run_attempt }}
+          path: stage0-captured/
+          if-no-files-found: error
+          retention-days: 7
