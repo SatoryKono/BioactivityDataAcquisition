@@ -1,11 +1,11 @@
-import sys
-import json
-import urllib.request
-import urllib.error
+from __future__ import annotations
+
 import hashlib
-from datetime import datetime, UTC
+import json
 import os
 import subprocess
+from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 
@@ -39,11 +39,118 @@ def generate_file_manifest(filepath: str) -> dict[str, Any]:
     }
 
 
+def _atomic_write_text(path: Path, text: str) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(text, encoding="utf-8")
+    os.replace(temporary, path)
+
+
+def evaluate_mypy_criterion(
+    evidence_path: str = "reports/mypy_eval.json",
+) -> dict[str, Any]:
+    """Derive 0.6 mypy status from the actual evaluation report."""
+    path = Path(evidence_path)
+    if not path.is_file():
+        return {
+            "status": "MISSING",
+            "note": (
+                "Файл reports/mypy_eval.json отсутствует; эксперимент cold/warm "
+                "не выполнен, доказательств нет."
+            ),
+            "evidence": evidence_path,
+            "typecheck_pass": False,
+            "cache_measurement_usable": False,
+            "diagnostics_match": False,
+        }
+
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {
+            "status": "PARTIAL",
+            "note": f"reports/mypy_eval.json нечитаем: {exc}",
+            "evidence": evidence_path,
+            "typecheck_pass": False,
+            "cache_measurement_usable": False,
+            "diagnostics_match": False,
+        }
+
+    cold = payload.get("cold") if isinstance(payload, dict) else None
+    warm = payload.get("warm") if isinstance(payload, dict) else None
+    comparison = payload.get("comparison") if isinstance(payload, dict) else None
+    if not isinstance(cold, dict) or not isinstance(warm, dict):
+        return {
+            "status": "PARTIAL",
+            "note": "reports/mypy_eval.json не содержит cold/warm результатов.",
+            "evidence": evidence_path,
+            "typecheck_pass": False,
+            "cache_measurement_usable": False,
+            "diagnostics_match": False,
+        }
+
+    cold_rc = cold.get("returncode")
+    warm_rc = warm.get("returncode")
+    typecheck_pass = cold_rc == 0 and warm_rc == 0
+    diagnostics_match = bool(
+        isinstance(comparison, dict) and comparison.get("diagnostics_match")
+    )
+    speedup = (
+        float(comparison["speedup"])
+        if isinstance(comparison, dict)
+        and isinstance(comparison.get("speedup"), (int, float))
+        else None
+    )
+    # Usable cache evidence requires matching diagnostics and a warm speedup.
+    cache_measurement_usable = (
+        diagnostics_match and speedup is not None and speedup > 1.05
+    )
+
+    if typecheck_pass and cache_measurement_usable:
+        status = "PASS"
+        note = (
+            f"Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; "
+            f"speedup={speedup:.3f} — измерение mypy-кэша пригодно."
+        )
+    elif typecheck_pass and diagnostics_match:
+        status = "PARTIAL"
+        speedup_text = f"{speedup:.3f}" if speedup is not None else "n/a"
+        note = (
+            f"Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; "
+            f"speedup={speedup_text} — ускорение кэша не доказано "
+            f"(порог >1.05)."
+        )
+    elif typecheck_pass:
+        status = "PARTIAL"
+        note = (
+            "Type-checking PASS (cold/warm returncode=0), но diagnostics cold/warm "
+            "не совпадают; измерение кэша непригодно."
+        )
+    else:
+        status = "PARTIAL"
+        note = (
+            f"Mypy non-PASS: cold returncode={cold_rc}, warm returncode={warm_rc}. "
+            f"diagnostics_match={diagnostics_match}."
+        )
+
+    return {
+        "status": status,
+        "note": note,
+        "evidence": evidence_path,
+        "typecheck_pass": typecheck_pass,
+        "cache_measurement_usable": cache_measurement_usable,
+        "diagnostics_match": diagnostics_match,
+        "speedup": speedup,
+        "cold_returncode": cold_rc,
+        "warm_returncode": warm_rc,
+    }
+
+
 def main() -> None:
     os.makedirs("docs/reports/ci", exist_ok=True)
     os.makedirs("reports", exist_ok=True)
 
     git_info = get_git_info()
+    mypy_criterion = evaluate_mypy_criterion()
 
     closure_report = {
         "metadata": {
@@ -79,11 +186,7 @@ def main() -> None:
                 "artifact": "401/403 Resource not accessible by integration from /rulesets/rule-suites API even through sandbox curl. `gh` command not found.",
                 "note": "Ruleset config verified: active, strict, pr-gate-complete, bypassactors[], current_user_can_bypass=never.",
             },
-            "0.6_mypy_evaluation": {
-                "status": "PARTIAL",
-                "note": "Mypy evaluation run, but strictly focused parameters (`--frozen --no-sync mypy --strict`) generated non-PASS results. Evidence in reports/mypy_eval.json",
-                "evidence": "reports/mypy_eval.json",
-            },
+            "0.6_mypy_evaluation": mypy_criterion,
             "0.7_shard_profiles": {
                 "status": "INHERITED_OBSERVATIONAL",
                 "note": "Handled externally via independent audit.",
@@ -125,53 +228,66 @@ def main() -> None:
             "tool_versions": "Python 3.13.x, mypy, uv",
             "commands": "python scripts/engineering/ci/collect_stage0_evidence.py, python scripts/engineering/ci/evaluate_mypy.py",
             "test_data": "Historical GH/Circle data injected, coverage audit data injected, local cold/warm mypy test.",
-            "expected_result": "Evidence gathered, but BLOCKED on 0.5 ruleset API access and PARTIAL on mypy strict constraints.",
+            "expected_result": (
+                "Evidence gathered from reports/mypy_eval.json "
+                f"(0.6 status={mypy_criterion['status']}); "
+                "BLOCKED on 0.5 ruleset API access."
+            ),
             "allowed_skips": "API queries requiring authenticated token skipped and marked BLOCKED.",
             "link_to_evidence": "docs/reports/ci/stage0_closure.json, reports/mypy_eval.json",
             "independent_reviewer": "TBD",
         },
     }
 
-    with open("docs/reports/ci/stage0_closure.json", "w") as f:
-        json.dump(closure_report, f, indent=2)
+    closure_path = Path("docs/reports/ci/stage0_closure.json")
+    _atomic_write_text(
+        closure_path,
+        json.dumps(closure_report, indent=2, ensure_ascii=False) + "\n",
+    )
 
-    with open("docs/reports/ci/stage0_closure_report.md", "w") as f:
-        f.write("# Stage 0 CI Optimization Closure Report\n\n")
-        f.write("## Issue Closure Passport\n")
-        f.write("| Acceptance Criteria (Критерий) | Evidence (Доказательство) |\n")
-        f.write("| :--- | :--- |\n")
-        for k, v in closure_report["closure_passport"].items():
-            f.write(f"| {k} | {v} |\n")
+    report_lines = [
+        "# Stage 0 CI Optimization Closure Report\n",
+        "## Issue Closure Passport\n",
+        "| Acceptance Criteria (Критерий) | Evidence (Доказательство) |\n",
+        "| :--- | :--- |\n",
+    ]
+    for k, v in closure_report["closure_passport"].items():
+        report_lines.append(f"| {k} | {v} |\n")
 
-        f.write("\n## Status Summary\n")
-        for k, v in closure_report["criteria"].items():
-            f.write(f"- **{k}**: {v['status']}\n")
-            if "note" in v:
-                f.write(f"  - {v['note']}\n")
-            if "gh_details" in v:
-                f.write(f"  - GH Details: {v['gh_details']}\n")
-            if "circle_details" in v:
-                f.write(f"  - Circle Details: {v['circle_details']}\n")
+    report_lines.append("\n## Status Summary\n")
+    for k, v in closure_report["criteria"].items():
+        report_lines.append(f"- **{k}**: {v['status']}\n")
+        if "note" in v:
+            report_lines.append(f"  - {v['note']}\n")
+        if "gh_details" in v:
+            report_lines.append(f"  - GH Details: {v['gh_details']}\n")
+        if "circle_details" in v:
+            report_lines.append(f"  - Circle Details: {v['circle_details']}\n")
 
-        f.write("\n## Consolidated Blockers\n")
-        if closure_report["consolidated_blockers"]:
-            for b in closure_report["consolidated_blockers"]:
-                f.write(
-                    f"- **Action**: {b['action']}\n  - Actor: {b['actor']}\n  - Artifact: {b['artifact']}\n"
-                )
-        else:
-            f.write("None.\n")
+    report_lines.append("\n## Consolidated Blockers\n")
+    if closure_report["consolidated_blockers"]:
+        for b in closure_report["consolidated_blockers"]:
+            report_lines.append(
+                f"- **Action**: {b['action']}\n  - Actor: {b['actor']}\n  - Artifact: {b['artifact']}\n"
+            )
+    else:
+        report_lines.append("None.\n")
 
-        f.write("\n## Artifact Manifests\n")
-        f.write("```json\n")
-        manifests = {
-            "stage0_closure.json": generate_file_manifest(
-                "docs/reports/ci/stage0_closure.json"
-            ),
-            "mypy_eval.json": generate_file_manifest("reports/mypy_eval.json"),
-        }
-        f.write(json.dumps(manifests, indent=2))
-        f.write("\n```\n")
+    report_lines.append("\n## Artifact Manifests\n")
+    report_lines.append("```json\n")
+    manifests = {
+        "stage0_closure.json": generate_file_manifest(
+            "docs/reports/ci/stage0_closure.json"
+        ),
+        "mypy_eval.json": generate_file_manifest("reports/mypy_eval.json"),
+    }
+    report_lines.append(json.dumps(manifests, indent=2))
+    report_lines.append("\n```\n")
+
+    _atomic_write_text(
+        Path("docs/reports/ci/stage0_closure_report.md"),
+        "".join(report_lines),
+    )
 
     print(
         "Reports generated: docs/reports/ci/stage0_closure.json, docs/reports/ci/stage0_closure_report.md"

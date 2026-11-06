@@ -1,9 +1,12 @@
-import subprocess
-import time
+from __future__ import annotations
+
+import hashlib
 import json
 import os
 import re
-import hashlib
+import subprocess
+import time
+from pathlib import Path
 from typing import Any
 
 
@@ -12,12 +15,25 @@ def normalize_diagnostics(output: str) -> list[str]:
     lines = output.splitlines()
     normalized = []
     for line in lines:
-        if line.startswith("Success:") or line.startswith("Found "):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("Success:") or stripped.startswith("Found "):
+            continue
+        # Override-section notes drift between cold/warm incremental runs and
+        # are not type errors; drop them from the equality digest.
+        if "note: unused section(s):" in stripped:
             continue
         # Remove line/column numbers
-        line = re.sub(r":\d+(:\d+)?:", ":", line)
-        normalized.append(line.strip())
+        stripped = re.sub(r":\d+(:\d+)?:", ":", stripped)
+        normalized.append(stripped)
     return sorted(normalized)
+
+
+def diagnostics_digest(normalized: list[str]) -> str:
+    """Stable SHA-256 over a canonical serialization of normalized diagnostics."""
+    payload = json.dumps(normalized, ensure_ascii=False, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def hash_directory_content(directory: str) -> str:
@@ -40,16 +56,25 @@ def hash_directory_content(directory: str) -> str:
     return hasher.hexdigest()
 
 
+def _atomic_write_text(path: Path, text: str) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(text, encoding="utf-8")
+    os.replace(temporary, path)
+
+
 def run_mypy(cache_dir: str, iteration: str) -> dict[str, Any]:
     start = time.time()
 
-    # We use strict and precise flags per instructions
+    # Explicit --incremental overrides pyproject `incremental = false` so the
+    # cold/warm pair actually exercises mypy's module cache for this experiment
+    # without changing the protective type-gate setting.
     cmd = [
         "uv",
         "run",
         "--frozen",
         "--no-sync",
         "mypy",
+        "--incremental",
         "--strict",
         "--cache-dir",
         cache_dir,
@@ -75,10 +100,10 @@ def run_mypy(cache_dir: str, iteration: str) -> dict[str, Any]:
         print(f"[{iteration}] Mypy run timed out after {timeout_seconds} seconds")
 
     # Save raw stdout to analyze cache hits or failures
-    with open(f"reports/mypy_run_{iteration}.log", "w") as f:
-        f.write(stdout_data)
-        f.write("\n")
-        f.write(stderr_data)
+    _atomic_write_text(
+        Path(f"reports/mypy_run_{iteration}.log"),
+        stdout_data + "\n" + stderr_data,
+    )
 
     normalized = normalize_diagnostics(stdout_data + "\n" + stderr_data)
 
@@ -92,7 +117,7 @@ def run_mypy(cache_dir: str, iteration: str) -> dict[str, Any]:
         "stdout_lines": len(stdout_data.splitlines()),
         "stderr_lines": len(stderr_data.splitlines()),
         "normalized_diagnostics": normalized,
-        "diagnostics_hash": hash(tuple(normalized)),
+        "diagnostics_hash": diagnostics_digest(normalized),
         "cache_manifest": cache_manifest,
     }
 
@@ -101,7 +126,7 @@ def main() -> None:
     os.makedirs("reports", exist_ok=True)
     cache_dir = ".mypy_cache_eval2"
 
-    subprocess.run(["rm", "-rf", cache_dir])
+    subprocess.run(["rm", "-rf", cache_dir], check=False)
 
     print("Running cold mypy...")
     cold_result = run_mypy(cache_dir, "cold")
@@ -125,8 +150,10 @@ def main() -> None:
         },
     }
 
-    with open("reports/mypy_eval.json", "w") as f:
-        json.dump(data, f, indent=2)
+    _atomic_write_text(
+        Path("reports/mypy_eval.json"),
+        json.dumps(data, indent=2, ensure_ascii=False) + "\n",
+    )
 
     print("Mypy evaluation done.")
 

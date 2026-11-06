@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "timestamp": "2026-11-05T19:40:40.623880+00:00",
+    "timestamp": "2026-11-06T05:25:06.345437+00:00",
     "repository": "SatoryKono/BioactivityDataAcquisition",
-    "git_head": "20bc18f2c1f5ff23b23d732d4c9aa703fddeb8b7"
+    "git_head": "8e8225feb7125800f1136bfbb7007c6e6f7305f5"
   },
   "criteria": {
     "0.1_producer_evidence": {
@@ -33,9 +33,15 @@
       "note": "Ruleset config verified: active, strict, pr-gate-complete, bypassactors[], current_user_can_bypass=never."
     },
     "0.6_mypy_evaluation": {
-      "status": "PARTIAL",
-      "note": "Mypy evaluation run, but strictly focused parameters (`--frozen --no-sync mypy --strict`) generated non-PASS results. Evidence in reports/mypy_eval.json",
-      "evidence": "reports/mypy_eval.json"
+      "status": "PASS",
+      "note": "Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; speedup=49.539 — измерение mypy-кэша пригодно.",
+      "evidence": "reports/mypy_eval.json",
+      "typecheck_pass": true,
+      "cache_measurement_usable": true,
+      "diagnostics_match": true,
+      "speedup": 49.538578095869674,
+      "cold_returncode": 0,
+      "warm_returncode": 0
     },
     "0.7_shard_profiles": {
       "status": "INHERITED_OBSERVATIONAL",
@@ -73,12 +79,12 @@
   "closure_passport": {
     "owner": "SatoryKono",
     "deadline": "N/A",
-    "exact_sha_revision": "20bc18f2c1f5ff23b23d732d4c9aa703fddeb8b7",
+    "exact_sha_revision": "8e8225feb7125800f1136bfbb7007c6e6f7305f5",
     "scope": "Stage 0 CI Optimization Evidence Gathering",
     "tool_versions": "Python 3.13.x, mypy, uv",
     "commands": "python scripts/engineering/ci/collect_stage0_evidence.py, python scripts/engineering/ci/evaluate_mypy.py",
     "test_data": "Historical GH/Circle data injected, coverage audit data injected, local cold/warm mypy test.",
-    "expected_result": "Evidence gathered, but BLOCKED on 0.5 ruleset API access and PARTIAL on mypy strict constraints.",
+    "expected_result": "Evidence gathered from reports/mypy_eval.json (0.6 status=PASS); BLOCKED on 0.5 ruleset API access.",
     "allowed_skips": "API queries requiring authenticated token skipped and marked BLOCKED.",
     "link_to_evidence": "docs/reports/ci/stage0_closure.json, reports/mypy_eval.json",
     "independent_reviewer": "TBD"

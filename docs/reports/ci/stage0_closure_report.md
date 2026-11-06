@@ -1,16 +1,15 @@
 # Stage 0 CI Optimization Closure Report
-
 ## Issue Closure Passport
 | Acceptance Criteria (Критерий) | Evidence (Доказательство) |
 | :--- | :--- |
 | owner | SatoryKono |
 | deadline | N/A |
-| exact_sha_revision | 20bc18f2c1f5ff23b23d732d4c9aa703fddeb8b7 |
+| exact_sha_revision | 8e8225feb7125800f1136bfbb7007c6e6f7305f5 |
 | scope | Stage 0 CI Optimization Evidence Gathering |
 | tool_versions | Python 3.13.x, mypy, uv |
 | commands | python scripts/engineering/ci/collect_stage0_evidence.py, python scripts/engineering/ci/evaluate_mypy.py |
 | test_data | Historical GH/Circle data injected, coverage audit data injected, local cold/warm mypy test. |
-| expected_result | Evidence gathered, but BLOCKED on 0.5 ruleset API access and PARTIAL on mypy strict constraints. |
+| expected_result | Evidence gathered from reports/mypy_eval.json (0.6 status=PASS); BLOCKED on 0.5 ruleset API access. |
 | allowed_skips | API queries requiring authenticated token skipped and marked BLOCKED. |
 | link_to_evidence | docs/reports/ci/stage0_closure.json, reports/mypy_eval.json |
 | independent_reviewer | TBD |
@@ -26,8 +25,8 @@
 - **0.4_semantic_matrix**: INHERITED_OBSERVATIONAL
 - **0.5_live_ruleset**: BLOCKED
   - Ruleset config verified: active, strict, pr-gate-complete, bypassactors[], current_user_can_bypass=never.
-- **0.6_mypy_evaluation**: PARTIAL
-  - Mypy evaluation run, but strictly focused parameters (`--frozen --no-sync mypy --strict`) generated non-PASS results. Evidence in reports/mypy_eval.json
+- **0.6_mypy_evaluation**: PASS
+  - Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; speedup=49.539 — измерение mypy-кэша пригодно.
 - **0.7_shard_profiles**: INHERITED_OBSERVATIONAL
   - Handled externally via independent audit.
 - **0.8_sha_pin_inventory**: INHERITED_OBSERVATIONAL
@@ -52,15 +51,15 @@
 {
   "stage0_closure.json": {
     "path": "docs/reports/ci/stage0_closure.json",
-    "size_bytes": 4520,
-    "sha256": "6ba68916e9250064fc5bf627ef2b9cad73965b286c747aaaef6d46d0633d5b19",
-    "modified": "2026-11-05T19:40:40.621783+00:00"
+    "size_bytes": 4711,
+    "sha256": "fda1b8ee1eed6009c4f405d545aac4262dfe9bd9b1343d05ee00cac0a77987db",
+    "modified": "2026-11-06T05:25:06.343124+00:00"
   },
   "mypy_eval.json": {
     "path": "reports/mypy_eval.json",
-    "size_bytes": 1164,
-    "sha256": "5d8e0fcb9cc1d5c4dd1a51197c8d2034b9aa89b935c578f277a2a694c194ce3e",
-    "modified": "2026-11-05T19:40:40.121783+00:00"
+    "size_bytes": 883,
+    "sha256": "59720855ad281a5514d4f43faaca07d821d10f4406bb671e947b2eb2d1830c51",
+    "modified": "2026-11-06T05:25:06.299124+00:00"
   }
 }
 ```
