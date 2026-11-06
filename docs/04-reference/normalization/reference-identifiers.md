@@ -81,7 +81,7 @@ What can still be strict:
 ## Evidence
 
 - matrix entrypoint:
-  Historical: [Normalization Plan P0-P6](../../99-archive/engineering/normalization_plan_P0_P6.md)
+
   with generated artifact path
   `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md`
 - identifier fixtures:
