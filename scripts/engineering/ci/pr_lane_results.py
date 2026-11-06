@@ -451,6 +451,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12763_report_root_review.json",
             "configs/quality/external_resource_inventory_pr12763_opener_protocol_review.json",
             "configs/quality/external_resource_inventory_pr12783_lf06_review.json",
+            "configs/quality/external_resource_inventory_pr12786_composite_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -663,6 +664,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "configs/quality/test_governance_audit.yaml": TEST_GOVERNANCE_ARTIFACT_TESTS,
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
+    **dict.fromkeys(
+        (
+            "docs/04-reference/config_comparison_matrix.csv",
+            "docs/reports/generated/config-discrepancies-report.md",
+            "reports/quality/config-discrepancy-baseline.json",
+        ),
+        ("tests/architecture/test_config_discrepancy_metrics_ratchets.py",),
+    ),
     "reports/quality/quality-move-qm08/publication-provenance.json": (
         "tests/unit/scripts/ci/test_test_telemetry_provenance.py",
         "tests/architecture/test_external_resource_inventory_catalog.py",

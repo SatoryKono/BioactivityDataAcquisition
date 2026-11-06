@@ -38,8 +38,8 @@
             "composite",
             "composite.dependencies",
             "composite.enrichers",
-            "composite.merge",
-            "composite.merge.column_groups"
+            "composite.expected_normalization_profile_hash",
+            "composite.merge"
           ],
           "dq_validation": [
             "composite.cross_validation",
@@ -64,8 +64,7 @@
             "composite.lineage",
             "composite.lineage.track_field_sources",
             "composite.lineage.track_source_for_fields",
-            "composite.lineage.track_status",
-            "composite.lineage.track_timestamps"
+            "composite.lineage.track_status"
           ],
           "runtime_control_plane": [
             "composite.execution",
@@ -108,11 +107,11 @@
           }
         },
         "groups": {
-          "domain_entity_contract": 35,
+          "domain_entity_contract": 36,
           "dq_validation": 36,
           "medallion_write_policy": 5,
           "provider_source_access": 3,
-          "replay_provenance": 5,
+          "replay_provenance": 4,
           "runtime_control_plane": 8
         },
         "owner": "BioETL Team",
@@ -253,5 +252,5 @@
     },
     "owner": "BioETL Team"
   },
-  "snapshot_date": "2026-11-03"
+  "snapshot_date": "2026-11-06"
 }
