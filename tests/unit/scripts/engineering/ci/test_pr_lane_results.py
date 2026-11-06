@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 from scripts.engineering.ci.pr_lane_results import (
+    NIGHTLY_SHADOW_ARCHIVE_TEST,
     affected_pytest_targets,
     assert_step_outcomes,
     build_results,
@@ -534,6 +535,7 @@ def test_n1_evidence_paths_have_shadow_compare_routes() -> None:
             "docs/04-reference/github-actions-workflows.md",
             "docs/05-operations/ci-workflow-map.md",
             "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
+            "docs/reports/audit/N1_SHADOW_STATUS.md",
             "reports/governance/n1-shadow-window/ledger.json",
             "reports/governance/n1-shadow-window-status.md",
             "reports/quality/flaky-test-burndown-review.json",
@@ -543,10 +545,7 @@ def test_n1_evidence_paths_have_shadow_compare_routes() -> None:
     )
     assert report["activation"] == "not_applied"
     assert report["selected_count"] >= 1
-    assert (
-        "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py"
-        in report["selected"]
-    )
+    assert NIGHTLY_SHADOW_ARCHIVE_TEST in report["selected"]
 
 
 @pytest.mark.parametrize(
