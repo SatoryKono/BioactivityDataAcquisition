@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4073 |
-| Tracked doc-like files | 4073 |
+| Doc-like files | 4074 |
+| Tracked doc-like files | 4074 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4073 |
+| tracked | 4074 |
 
 ## Lifecycle Counts
 
@@ -38,6 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
+| supporting_validation_plan | 1 |
 | working_report | 298 |
 
 ## GitHub Issue Drafts And Packs
@@ -55,7 +56,7 @@
 | Archived | 1554 |
 | Canonical | 76 |
 | Generated | 1066 |
-| Working | 620 |
+| Working | 621 |
 
 ## Surface Families
 
@@ -65,13 +66,13 @@
 | archive | 1554 |
 | canonical | 76 |
 | generated | 1066 |
-| working | 620 |
+| working | 621 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 332 |
+| archive-after-migration | 333 |
 | generate-automatically | 1066 |
 | keep | 2675 |
 
@@ -92,6 +93,7 @@
 | `docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md` | Working | 4 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md` | Working | 3 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
+| `docs/plans/ci1-07-negative-merge-protection-plan.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/N1_SHADOW_STATUS.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/github_settings_inventory.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/pack-v2.1/evidence-collection/alertmanager_delivery_verification.md` | Working | 0 | archive-after-migration |
@@ -158,7 +160,6 @@
 | `reports/audit-runs/12107-r07/independent-review-6b1b10a7.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/independent-review-91f379.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/issue-12107-final-record.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/12107-r07/logs/pytest-24-on-80dfee.txt` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
