@@ -330,6 +330,7 @@ acceptance gates; workflow deletion is no longer a completion criterion.
 | `scorecard.yml` | OpenSSF Scorecard | Weekly non-blocking OpenSSF Scorecard baseline |
 | `security.yml` | Security Scans | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |
 | `skills-consistency.yml` | Skills Consistency | Path-filtered local skill mirrors plus Codex–Junie runtime parity |
+| `stage0-evidence-capture.yml` | Stage 0 evidence capture | Branch-scoped capture of historical GitHub Actions and CircleCI evidence |
 | `tests.yml` | Tests | Primary unit/integration test matrix |
 | `type-checking-cold.yml` | Type Checking (Strict Cold Control) | Strict mypy cold control without cache |
 | `type-checking.yml` | Type Checking (Strict) | basedpyright / type gates |
