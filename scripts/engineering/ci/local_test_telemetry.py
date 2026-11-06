@@ -127,9 +127,9 @@ def _manifest_file(manifest_path: Path, *, repo_root: Path) -> Path:
     root = repo_root.resolve(strict=True)
     if not manifest_path.is_absolute():
         manifest_path = root / manifest_path
+    manifest_path = manifest_path.resolve()
     if ".." in manifest_path.parts or not manifest_path.is_relative_to(root):
         raise ValueError("Local measurement manifest must remain within the repository")
-    manifest_path = manifest_path.resolve(strict=True)
     if not manifest_path.is_relative_to(root) or manifest_path.suffix != ".json":
         raise ValueError("Local measurement manifest must remain within the repository")
     return manifest_path
