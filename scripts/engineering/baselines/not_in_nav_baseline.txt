@@ -247,4 +247,3 @@ filters/README.md
 filters/inventory-baseline.md
 security/export-policy.md
 security/rbac-matrix.md
-ci/gate-platform-matrix-full.md
