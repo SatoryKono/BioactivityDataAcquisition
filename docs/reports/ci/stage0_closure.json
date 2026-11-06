@@ -1,8 +1,9 @@
 {
   "metadata": {
-    "timestamp": "2026-11-06T05:25:06.345437+00:00",
+    "timestamp": "2026-11-06T05:52:08.464773+00:00",
     "repository": "SatoryKono/BioactivityDataAcquisition",
-    "git_head": "8e8225feb7125800f1136bfbb7007c6e6f7305f5"
+    "git_head": "a79909ab5924cf54b03ded559ac2670f51f306e3",
+    "worktree_dirty": false
   },
   "criteria": {
     "0.1_producer_evidence": {
@@ -79,7 +80,8 @@
   "closure_passport": {
     "owner": "SatoryKono",
     "deadline": "N/A",
-    "exact_sha_revision": "8e8225feb7125800f1136bfbb7007c6e6f7305f5",
+    "collector_base_sha": "a79909ab5924cf54b03ded559ac2670f51f306e3",
+    "collector_worktree_dirty": false,
     "scope": "Stage 0 CI Optimization Evidence Gathering",
     "tool_versions": "Python 3.13.x, mypy, uv",
     "commands": "python scripts/engineering/ci/collect_stage0_evidence.py, python scripts/engineering/ci/evaluate_mypy.py",

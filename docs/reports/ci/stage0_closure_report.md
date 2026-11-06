@@ -4,7 +4,8 @@
 | :--- | :--- |
 | owner | SatoryKono |
 | deadline | N/A |
-| exact_sha_revision | 8e8225feb7125800f1136bfbb7007c6e6f7305f5 |
+| collector_base_sha | a79909ab5924cf54b03ded559ac2670f51f306e3 |
+| collector_worktree_dirty | False |
 | scope | Stage 0 CI Optimization Evidence Gathering |
 | tool_versions | Python 3.13.x, mypy, uv |
 | commands | python scripts/engineering/ci/collect_stage0_evidence.py, python scripts/engineering/ci/evaluate_mypy.py |
@@ -51,15 +52,15 @@
 {
   "stage0_closure.json": {
     "path": "docs/reports/ci/stage0_closure.json",
-    "size_bytes": 4711,
-    "sha256": "fda1b8ee1eed6009c4f405d545aac4262dfe9bd9b1343d05ee00cac0a77987db",
-    "modified": "2026-11-06T05:25:06.343124+00:00"
+    "size_bytes": 4873,
+    "sha256": "0d6857033e8d059be9f1433902477bba51341eb6322dbf7a4895fe369d0b7cc4",
+    "modified": "2026-11-06T05:52:08.466931+00:00"
   },
   "mypy_eval.json": {
     "path": "reports/mypy_eval.json",
     "size_bytes": 883,
     "sha256": "59720855ad281a5514d4f43faaca07d821d10f4406bb671e947b2eb2d1830c51",
-    "modified": "2026-11-06T05:25:06.299124+00:00"
+    "modified": "2026-11-06T05:52:07.949064+00:00"
   }
 }
 ```
