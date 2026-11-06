@@ -335,6 +335,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             ".github/workflows/scorecard.yml",
             ".github/workflows/security.yml",
             ".github/workflows/skills-consistency.yml",
+            ".github/workflows/stage0-evidence-capture.yml",
             ".github/workflows/stale.yml",
             ".github/workflows/tests.yml",
             TYPE_CHECKING_COLD_WORKFLOW,
