@@ -494,6 +494,4 @@ def test_create_composite_runner_wires_preflight_validator() -> None:
     )
 
     inputs = runner_factory.call_args[0][0]
-    assert isinstance(
-        inputs.preflight_validator, CompositePreflightValidationService
-    )
+    assert isinstance(inputs.preflight_validator, CompositePreflightValidationService)
