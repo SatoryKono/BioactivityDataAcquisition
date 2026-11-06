@@ -51,7 +51,9 @@ uncovered: **0**
 
 unmeasured: **0**
 
-= 2603 == source_module_count
+coverage_xml_missing: **5**
+
+= 2608 == source_module_count
 
 Contract coverage matrix schema: **contract-coverage-matrix-v3**
 
@@ -75,6 +77,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "architecture_interpretation": "excellent",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
+    "coverage_xml_missing_module_count": 5,
     "debt_gate_count": 47,
     "debt_gate_fail_count": 0,
     "debt_gate_pass_count": 47,
