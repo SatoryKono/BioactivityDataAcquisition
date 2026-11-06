@@ -30,6 +30,7 @@ def _record(source: Path, live: Path) -> None:
 
 def test_file_recorder_mirrors_sidecar_onto_published_manifest(tmp_path: Path) -> None:
     source, live = _catalogs(tmp_path)
+    (source / "manifest-1.json").write_text("{}", encoding="utf-8")
     (live / "manifest-1.json").write_text("{}", encoding="utf-8")
     _record(source, live)
     assert (source / "manifest-1.contract-evidence.json").is_file()

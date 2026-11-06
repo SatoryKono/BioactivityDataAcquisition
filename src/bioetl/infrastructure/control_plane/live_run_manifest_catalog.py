@@ -205,9 +205,7 @@ def copy_contract_evidence_to_live_catalog(
             manifest_id, live_base=live, source_base=source
         ):
             return
-        _copy_own_contract_evidence(
-            manifest_id, live_base=live, source_base=source
-        )
+        _copy_own_contract_evidence(manifest_id, live_base=live, source_base=source)
 
 
 def _live_manifest_matches_source(
@@ -272,8 +270,9 @@ def _live_catalog_lock_path(live_base: Path) -> Path:
 def _live_catalog_lock(live_base: Path) -> Iterator[None]:
     """Hold the thread lock and the sibling file lock for ``live_base``."""
     key = str(live_base.resolve(strict=False))
-    with _catalog_thread_lock(key), _catalog_file_lock(
-        _live_catalog_lock_path(live_base)
+    with (
+        _catalog_thread_lock(key),
+        _catalog_file_lock(_live_catalog_lock_path(live_base)),
     ):
         yield
 
