@@ -42,13 +42,13 @@ _SELECT_RUN = "SELECT RUN"
 _NO_RUNS = "НЕТ ЗАПУСКОВ"
 
 OV_IDENTITY = (
-    "/d/bioetl-overview-v2/2-overview"
+    "/d/bioetl-overview-v2/3-run-overview"
     "?${workflow:queryparam}&${pipeline:queryparam}"
     "&${run_type:queryparam}&${run_id:queryparam}"
     "&viewPanel=9300&${__url_time_range}"
 )
 DQ_STAGES = (
-    "/d/bioetl-dq-v2/5-data-quality"
+    "/d/bioetl-dq-v2/4-data-quality"
     "?${workflow:queryparam}&${pipeline:queryparam}"
     "&${run_type:queryparam}&${run_id:queryparam}"
     "&viewPanel=9460&${__url_time_range}"
