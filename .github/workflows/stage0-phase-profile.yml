@@ -158,13 +158,14 @@ jobs:
                     'hypothesis_profile':env['HYPOTHESIS_PROFILE'], 'coverage_expected':not lane.startswith('fast-'),
                     'input_sha256':{p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
                                     for p in ['uv.lock','pyproject.toml','configs/quality/test_matrix.yaml']}}
+          report['coverage_missing'] = not lane.startswith('fast-') and (not Path('.coverage').is_file() or Path('.coverage').stat().st_size==0)
           for path in [out/'phases.json',out/'junit.xml',out/'stdout.log',out/'stderr.log']:
               report.setdefault('outputs',[]).append({'path':str(path), 'present':path.is_file(),
                   'sha256':hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None})
           (out/'execution.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
           print(json.dumps({'lane':lane,'returncode':result.returncode,'elapsed_s':report['elapsed_s']}))
           missing = not (out/'phases.json').is_file() or not (out/'junit.xml').is_file()
-          coverage_missing = not lane.startswith('fast-') and (not Path('.coverage').is_file() or Path('.coverage').stat().st_size==0)
+          coverage_missing = report['coverage_missing']
           raise SystemExit(result.returncode if result.returncode else (1 if missing or coverage_missing else 0))
           PY
       - name: Preserve phase evidence including failed tests
