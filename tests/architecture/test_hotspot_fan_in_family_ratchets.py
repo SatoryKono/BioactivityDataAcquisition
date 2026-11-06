@@ -286,11 +286,11 @@ def test_hotspot_family_fan_in_census_matches_live_ast_graph() -> None:
         "1": 107,
     }
     assert control_plane["at_budget_module_count"] == 0
-    assert runtime_builders["files"] == 53
+    assert runtime_builders["files"] == 52
     assert runtime_builders["internal_fan_in_census"]["distribution"] == {
         "0": 3,
         "1": 25,
-        "2": 25,
+        "2": 24,
     }
     assert runtime_builders["internal_fan_in_census"]["max_fan_in"] == 2
     assert runtime_builders["at_budget_module_count"] == 0
