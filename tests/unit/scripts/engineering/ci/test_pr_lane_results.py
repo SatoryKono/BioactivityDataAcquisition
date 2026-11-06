@@ -1110,3 +1110,27 @@ def test_shadow_compare_cli_writes_canonical_json(tmp_path: Path) -> None:
         "selected_count",
     ]
     assert not output.with_suffix(".json.tmp").exists()
+
+
+@pytest.mark.parametrize(
+    "path",
+    (
+        ".github/CONTRIBUTING.md",
+        ".github/SECURITY.md",
+        "docs/03-guides/github-local-workflow.md",
+        "docs/03-guides/github-quick-reference.md",
+        "docs/05-operations/ci-cd-integration.md",
+        "docs/05-operations/release-checklist.md",
+        "docs/05-operations/runbooks/github-settings-quarterly-review.md",
+        "reports/governance/github-settings-A1-post-change-20261106.json",
+        "reports/governance/github-settings-A1-readback-20261106.json",
+        "reports/governance/github-settings-B2-preflight-20261106.json",
+        "reports/governance/github-settings-B2-preflight-20261106.md",
+    ),
+)
+def test_shadow_compare_routes_github_settings_governance(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert report["selected"] == [
+        "tests/architecture/test_required_checks_prose_consistency.py"
+    ]
