@@ -222,3 +222,72 @@ def test_control_plane_scope_does_not_scan_catalog_for_latest_lookup() -> None:
 
     assert resolved.resolved_manifest is None
     assert resolved.resolved_via == "selection_required"
+
+
+_STAMP = "20261102T181217"
+_OTHER_RUN = "00000000-0000-0000-0000-000000000124"
+
+
+def test_unique_resolve_returns_the_only_in_scope_uuid() -> None:
+    selected = _manifest(pipeline_name="uniprot_protein", run_id=_RUN_ID)
+    selected.workflow_name = "uniprot_support_pack"  # type: ignore[attr-defined]
+    foreign = _manifest(pipeline_name="uniprot_idmapping", run_id=_OTHER_RUN)
+    host = _Host(_ManifestPort((selected, foreign)))
+
+    resolved = scope.resolve_control_plane_identity_scope(
+        host,
+        {
+            "pipeline": "uniprot_protein",
+            "run_type": "incremental",
+            "workflow": "uniprot_support_pack",
+            "resolve": "unique",
+        },
+    )
+
+    assert resolved.resolved_via == "unique_scope"
+    assert resolved.selected_run_id == _RUN_ID
+    assert resolved.resolved_manifest is selected
+
+
+def test_unique_resolve_does_not_pick_when_several_runs_match() -> None:
+    first = _manifest(pipeline_name="uniprot_protein", run_id=_RUN_ID)
+    second = _manifest(pipeline_name="uniprot_protein", run_id=_OTHER_RUN)
+    host = _Host(_ManifestPort((first, second)))
+
+    resolved = scope.resolve_control_plane_identity_scope(
+        host,
+        {"pipeline": "uniprot_protein", "resolve": "unique"},
+    )
+
+    assert resolved.resolved_via == "ambiguous_scope"
+    assert resolved.selected_run_id is None
+    assert resolved.resolved_manifest is None
+
+
+def test_unique_resolve_miss_is_not_found_and_stamp_is_not_an_alias() -> None:
+    selected = _manifest(pipeline_name="uniprot_protein", run_id=_RUN_ID)
+    manifest_port = _ManifestPort((selected,), by_run_id={_RUN_ID: selected})
+    host = _Host(manifest_port)
+
+    missing = scope.resolve_control_plane_identity_scope(
+        host,
+        {"pipeline": "chembl_activity", "resolve": "unique"},
+    )
+    assert missing.resolved_via == "unique_scope_not_found"
+    assert missing.selected_run_id is None
+    assert missing.resolved_manifest is None
+
+    manifest_port.list_all = lambda: (_ for _ in ()).throw(  # type: ignore[attr-defined]
+        AssertionError("an explicit stamp must not scan for a substitute run")
+    )
+    stamped = scope.resolve_control_plane_identity_scope(
+        host,
+        {
+            "pipeline": "uniprot_protein",
+            "run_id": _STAMP,
+            "resolve": "unique",
+        },
+    )
+    assert stamped.resolved_via == "selected_run_id_not_found"
+    assert stamped.selected_run_id == _STAMP
+    assert stamped.resolved_manifest is None
