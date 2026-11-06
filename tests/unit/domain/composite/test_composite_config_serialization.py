@@ -130,11 +130,13 @@ def test_composite_config_to_dict_snapshot() -> None:
         "execution",
         "lineage",
         "cross_validation",
+        "expected_normalization_profile_hash",
         "merge",
         "seed",
         "enrichers",
         "dependencies",
     }
+    assert payload["expected_normalization_profile_hash"] is None
 
 
 def test_composite_config_from_dict_roundtrip_snapshot() -> None:
@@ -149,6 +151,41 @@ def test_composite_config_from_dict_roundtrip_snapshot() -> None:
     assert restored.seed.output_keys == original.seed.output_keys
     assert restored.merge.strategy == original.merge.strategy
     assert restored.merge.conflict_resolution == original.merge.conflict_resolution
+
+
+def test_composite_config_roundtrips_expected_normalization_profile_hash() -> None:
+    """Non-empty expected_normalization_profile_hash must survive to_dict/from_dict."""
+    hash_value = "db230eaacf6b465d10099a22726ffa85671fd8243ad5feda26f4d94f6ce4b824"
+    original = CompositeConfig(
+        name="composite_activity",
+        version="1.0.0",
+        seed=SeedConfig(
+            pipeline="chembl_activity",
+            output_keys=("activity_id", "molecule_id"),
+            silver_table="silver/chembl/activity",
+        ),
+        enrichers=(
+            EnricherConfig(
+                pipeline="chembl_compound_record",
+                join_keys=("molecule_id",),
+                required=False,
+            ),
+        ),
+        merge=MergeConfig(
+            strategy=MergeStrategy.LEFT_OUTER,
+            conflict_resolution=ConflictResolution.SEED_PRIORITY,
+            output_silver_path="silver/composite/activity",
+            output_gold_path="gold/composite/activity",
+            sort_by_silver=("activity_id",),
+            sort_by_gold=("activity_id",),
+        ),
+        expected_normalization_profile_hash=hash_value,
+    )
+
+    restored = CompositeConfig.from_dict(original.to_dict())
+
+    assert restored.expected_normalization_profile_hash == hash_value
+    assert restored.to_dict()["expected_normalization_profile_hash"] == hash_value
 
 
 def test_composite_config_codec_roundtrips_all_business_sections() -> None:
