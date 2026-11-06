@@ -16,6 +16,7 @@ if sys.platform != "win32":
     import fcntl
 
 from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.exceptions import StorageError
 from bioetl.infrastructure.control_plane._file_run_manifest_persistence import (
     persist_manifest,
 )
@@ -32,6 +33,20 @@ __all__ = [
 ]
 
 _ALREADY_MAPPED = "run_id is already mapped to a different manifest_id"
+
+
+def _is_already_mapped_error(exc: BaseException) -> bool:
+    """True when a persist failure is the run-index conflict.
+
+    The store wraps the conflict ``ValueError`` into ``StorageError``
+    (``raise ... from error``), so the marker text appears both in the
+    wrapper message and in its cause.
+    """
+    if _ALREADY_MAPPED in str(exc):
+        return True
+    cause = exc.__cause__
+    return isinstance(cause, ValueError) and _ALREADY_MAPPED in str(cause)
+
 
 _CATALOG_LOCKS: dict[str, threading.Lock] = {}
 _CATALOG_LOCKS_GUARD = threading.Lock()
@@ -113,8 +128,8 @@ def _record_manifest_in_live_catalog(
             atomic_writer=atomic_write_text,
             require_local_predecessor=False,
         )
-    except ValueError as exc:
-        if _ALREADY_MAPPED not in str(exc):
+    except (StorageError, ValueError) as exc:
+        if not _is_already_mapped_error(exc):
             raise
         _assert_snapshot_preserved(live, snapshot)
         return LiveRootRecordResult("kept_existing", snapshot)
@@ -219,9 +234,14 @@ def _live_manifest_matches_source(
     source_file = source_base / f"{manifest_id}.json"
     if not live_file.is_file() or not source_file.is_file():
         return False
-    return _normalized_manifest_text(
-        live_file.read_text(encoding="utf-8")
-    ) == _normalized_manifest_text(source_file.read_text(encoding="utf-8"))
+    try:
+        live_text = live_file.read_text(encoding="utf-8")
+        source_text = source_file.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return False
+    return _normalized_manifest_text(live_text) == _normalized_manifest_text(
+        source_text
+    )
 
 
 def _copy_own_contract_evidence(

@@ -56,7 +56,13 @@ def publish_live_root_without_failing_the_run(
             settings=settings,
             source_base=source_base,
         )
-    except (OSError, StorageError, InfrastructureError) as exc:
+    except (
+        OSError,
+        ValueError,
+        RuntimeError,
+        StorageError,
+        InfrastructureError,
+    ) as exc:
         record_run_observation(
             "Control Plane",
             verdict="WARN",

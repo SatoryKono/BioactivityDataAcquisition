@@ -6,7 +6,10 @@ from pathlib import Path
 import threading
 from uuid import UUID
 
+import pytest
+
 from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.exceptions import StorageError
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane.file_run_manifest_store import (
     FileRunManifestStore,
@@ -18,6 +21,9 @@ from bioetl.infrastructure.control_plane.live_run_manifest_catalog import (
     record_manifest_in_live_catalog,
     snapshot_manifest_catalog,
 )
+
+pytestmark = pytest.mark.unit
+
 
 _RUN_ID = RunID(UUID("00000000-0000-4000-8000-000000000111"))
 _OTHER_RUN_ID = RunID(UUID("00000000-0000-4000-8000-000000000222"))
@@ -315,3 +321,57 @@ def test_live_catalog_lock_excludes_a_second_holder(tmp_path: Path) -> None:
     holder.join(timeout=10)
     contender.join(timeout=10)
     assert second_entered.is_set()
+
+
+def test_index_conflict_wrapped_in_storage_error_is_kept_existing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    live = tmp_path / "run_manifest"
+    source = tmp_path / "source"
+    source.mkdir(parents=True)
+    cause = ValueError(
+        "run_id is already mapped to a different manifest_id: other-manifest"
+    )
+    wrapped = StorageError(f"Run manifest save failed for 'x': {cause}")
+    wrapped.__cause__ = cause
+
+    def _raise(*_args: object, **_kwargs: object) -> None:
+        raise wrapped
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.control_plane.live_run_manifest_catalog."
+        "persist_manifest",
+        _raise,
+    )
+
+    result = record_manifest_in_live_catalog(
+        manifest=_manifest(manifest_id="new-manifest"),
+        live_base=live,
+        source_base=source,
+    )
+
+    assert result.outcome == "kept_existing"
+
+
+def test_unrelated_storage_error_still_raises(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    live = tmp_path / "run_manifest"
+    source = tmp_path / "source"
+    source.mkdir(parents=True)
+
+    def _raise(*_args: object, **_kwargs: object) -> None:
+        raise StorageError("disk is gone")
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.control_plane.live_run_manifest_catalog."
+        "persist_manifest",
+        _raise,
+    )
+
+    with pytest.raises(StorageError):
+        record_manifest_in_live_catalog(
+            manifest=_manifest(manifest_id="new-manifest"),
+            live_base=live,
+            source_base=source,
+        )

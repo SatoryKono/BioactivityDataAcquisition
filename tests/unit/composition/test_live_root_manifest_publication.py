@@ -15,6 +15,10 @@ from bioetl.composition.runtime_builders.run_manifest_builder import (
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.types import RunID, RunType
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 _MODULE = "bioetl.composition.runtime_builders.run_manifest_builder"
 
 

@@ -36,5 +36,5 @@ class FileContractEvidenceRecorder:
                 source_base=self.base_path,
                 live_base=live_catalog,
             )
-        except (OSError, AtomicWriteError):
+        except (OSError, ValueError, AtomicWriteError):
             return
