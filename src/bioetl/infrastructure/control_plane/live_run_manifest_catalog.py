@@ -329,8 +329,8 @@ def _acquire_exclusive_lock(lock_fd: int) -> None:
         import msvcrt
 
         _acquire_windows_lock(lock_fd, int(msvcrt.LK_LOCK))
-        return
-    fcntl.flock(lock_fd, fcntl.LOCK_EX)
+    else:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
 
 
 def _release_exclusive_lock(lock_fd: int) -> None:
@@ -339,8 +339,8 @@ def _release_exclusive_lock(lock_fd: int) -> None:
         import msvcrt
 
         _lock_byte(lock_fd, int(msvcrt.LK_UNLCK))
-        return
-    fcntl.flock(lock_fd, fcntl.LOCK_UN)
+    else:
+        fcntl.flock(lock_fd, fcntl.LOCK_UN)
 
 
 def _acquire_windows_lock(lock_fd: int, mode: int) -> None:
