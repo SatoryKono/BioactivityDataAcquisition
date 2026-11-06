@@ -1,0 +1,212 @@
+name: Stage 0 cache pair
+# Measurement only: no production cache keys, required checks, or thresholds change.
+on:
+  push:
+    branches: [chore/stage0-ci-evidence-10417314508596451873]
+    paths: [.github/workflows/stage0-cache-pair.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: stage0-cache-pair-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  measure:
+    name: Stage 0 isolated mypy cache measurement
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      STAGE0_PRODUCT_SHA: be3a720c0bdf85751a8849849b59e0801ab2c708
+      STAGE0_INSTRUMENTATION_SHA: ${{ github.sha }}
+      STAGE0_RUN_ID: ${{ github.run_id }}
+      STAGE0_RUN_ATTEMPT: ${{ github.run_attempt }}
+      STAGE0_CACHE_DIR: ${{ runner.temp }}/stage0-isolated-mypy-cache
+    steps:
+      - name: Checkout immutable measurement source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: be3a720c0bdf85751a8849849b59e0801ab2c708
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Set up exact PR type-gate profile
+        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@e890a12b5232f1feb50722de6433c7391bc30a7d
+        with:
+          python-version: '3.12.15'
+          uv-extras: dev
+      - name: Prepare passive cache measurement
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e "$STAGE0_CACHE_DIR"
+          mkdir "$STAGE0_CACHE_DIR"
+          mkdir -p reports/stage0-cache
+          cat > "$RUNNER_TEMP/stage0_mypy_measure.py" <<'PY'
+          from __future__ import annotations
+          import hashlib
+          import json
+          import os
+          import re
+          import subprocess
+          import sys
+          import time
+          from datetime import datetime, timezone
+          from pathlib import Path
+          ROOTS = ('src/bioetl', 'src/memory', 'scripts/engineering/quality')
+          OUT = Path('reports/stage0-cache')
+          CACHE = Path(os.environ['STAGE0_CACHE_DIR'])
+          def digest(data: bytes) -> str:
+              return hashlib.sha256(data).hexdigest()
+          def snapshot(root: Path) -> dict[str, object]:
+              files = []
+              for p in sorted(root.rglob('*')):
+                  if p.is_symlink():
+                      raise ValueError('Symlink in evidence cache')
+                  if p.is_file():
+                      data = p.read_bytes()
+                      files.append({'path': p.relative_to(root).as_posix(), 'size': len(data), 'sha256': digest(data)})
+              canonical = json.dumps(files, sort_keys=True, separators=(',', ':')).encode()
+              return {'files': files, 'file_count': len(files), 'bytes': sum(f['size'] for f in files), 'sha256': digest(canonical)}
+          def source_inputs() -> dict[str, str]:
+              paths = [Path('uv.lock'), Path('pyproject.toml'), Path('.github/workflows/pr-required.yml')]
+              for root in ROOTS:
+                  paths.extend(Path(root).rglob('*.py'))
+              return {p.as_posix(): digest(p.read_bytes()) for p in sorted(set(paths))}
+          def command_output(command: list[str]) -> str:
+              return subprocess.check_output(command, text=True, timeout=60).strip()
+          def normalize(stdout: str, stderr: str) -> list[str]:
+              result = []
+              for line in (stdout + '\n' + stderr).splitlines():
+                  if line.startswith(('LOG:', 'TRACE:')) or not line.strip():
+                      continue
+                  if line.startswith('Success:'):
+                      continue
+                  # Keep diagnostic locations, notes, error codes, and multiplicity.
+                  result.append(line.replace(str(CACHE), '<cache>').replace(str(Path.cwd()), '<repo>'))
+              return sorted(result)
+          def main(phase: str) -> int:
+              if phase not in ('cold', 'warm'):
+                  raise ValueError('Unknown phase')
+              sha = command_output(['git', 'rev-parse', 'HEAD'])
+              if sha != os.environ['STAGE0_PRODUCT_SHA']:
+                  raise ValueError('Wrong product revision')
+              inputs_before = source_inputs()
+              before = snapshot(CACHE)
+              if phase == 'cold' and before['file_count'] != 0:
+                  raise ValueError('Cold cache is not empty')
+              if phase == 'warm':
+                  cold = json.loads((OUT / 'cold.json').read_text())
+                  if os.environ.get('STAGE0_REMOTE_HIT') != 'true':
+                      raise ValueError('Remote cache hit not confirmed')
+                  if before != cold['cache_after']:
+                      raise ValueError('Restored cache differs from cold snapshot')
+                  if inputs_before != cold['source_inputs']:
+                      raise ValueError('Product inputs changed between pair')
+              command = ['uv', 'run', '--frozen', '--no-build', 'mypy', '--config-file', 'pyproject.toml', '--strict', '--incremental', '--verbose', '--cache-dir', str(CACHE), *ROOTS]
+              started = datetime.now(timezone.utc).isoformat()
+              tick = time.perf_counter()
+              with (OUT / (phase + '.stdout.log')).open('w') as stdout, (OUT / (phase + '.stderr.log')).open('w') as stderr:
+                  try:
+                      run = subprocess.run(command, stdout=stdout, stderr=stderr, timeout=600, check=False)
+                      returncode = run.returncode
+                      timed_out = False
+                  except subprocess.TimeoutExpired:
+                      returncode = 124
+                      timed_out = True
+              elapsed = time.perf_counter() - tick
+              ended = datetime.now(timezone.utc).isoformat()
+              stdout_text = (OUT / (phase + '.stdout.log')).read_text()
+              stderr_text = (OUT / (phase + '.stderr.log')).read_text()
+              diagnostics = normalize(stdout_text, stderr_text)
+              versions = {
+                  'python': command_output(['uv', 'run', '--frozen', '--no-build', 'python', '-c', 'import sys; print(sys.version)']),
+                  'mypy': command_output(['uv', 'run', '--frozen', '--no-build', 'mypy', '--version']),
+                  'uv': command_output(['uv', '--version']),
+              }
+              after = snapshot(CACHE)
+              result = {
+                  'phase': phase, 'source_sha': sha, 'source_inputs': inputs_before,
+                  'instrumentation_sha': os.environ['STAGE0_INSTRUMENTATION_SHA'],
+                  'run_id': os.environ['STAGE0_RUN_ID'], 'run_attempt': os.environ['STAGE0_RUN_ATTEMPT'],
+                  'command': command, 'versions': versions, 'targets': list(ROOTS),
+                  'started_at': started, 'ended_at': ended, 'elapsed_s': elapsed,
+                  'returncode': returncode, 'timed_out': timed_out,
+                  'normalized_diagnostics': diagnostics,
+                  'diagnostics_sha256': digest(json.dumps(diagnostics, ensure_ascii=False, separators=(',', ':')).encode()),
+                  'stdout_sha256': digest((OUT / (phase + '.stdout.log')).read_bytes()),
+                  'stderr_sha256': digest((OUT / (phase + '.stderr.log')).read_bytes()),
+                  'cache_before': before, 'cache_after': after,
+                  'verbose_metadata_fresh_count': len(re.findall(r'Metadata fresh for ', stderr_text)),
+                  'verbose_parsing_count': len(re.findall(r'Parsing ', stderr_text)),
+                  'remote_hit': os.environ.get('STAGE0_REMOTE_HIT'),
+                  'normalization': 'Only empty lines, LOG/TRACE instrumentation and Success summary removed; paths normalized; all diagnostic locations and notes retained.'
+              }
+              if inputs_before != source_inputs():
+                  raise ValueError('Product inputs mutated during measurement')
+              (OUT / (phase + '.json')).write_text(json.dumps(result, ensure_ascii=False, indent=2))
+              if phase == 'warm':
+                  checks = {
+                      'same_product': cold['source_sha'] == result['source_sha'],
+                      'same_inputs': cold['source_inputs'] == inputs_before,
+                      'same_versions': cold['versions'] == versions,
+                      'same_command': cold['command'] == command,
+                      'same_exit': cold['returncode'] == returncode,
+                      'same_diagnostics': cold['normalized_diagnostics'] == diagnostics,
+                      'remote_snapshot_matches': cold['cache_after'] == before,
+                      'both_completed': not cold['timed_out'] and not timed_out and cold['returncode'] in (0, 1) and returncode in (0, 1),
+                  }
+                  comparison = {'checks': checks, 'measurement_complete': all(checks.values()),
+                                'typecheck_pass': cold['returncode'] == 0 and returncode == 0,
+                                'cold_s': cold['elapsed_s'], 'warm_s': elapsed,
+                                'speedup_observation': cold['elapsed_s'] / elapsed,
+                                'snapshot_age_s': (datetime.fromisoformat(started) - datetime.fromisoformat(cold['ended_at'])).total_seconds(),
+                                'scope': 'Isolated unique measurement cache; not the production cache hit-rate and not evidence to change cache keys.'}
+                  (OUT / 'comparison.json').write_text(json.dumps(comparison, indent=2))
+                  print(json.dumps(comparison))
+                  return 0 if comparison['measurement_complete'] else 1
+              print(json.dumps({'phase': phase, 'returncode': returncode, 'elapsed_s': elapsed, 'cache_files': after['file_count']}))
+              return 0 if returncode in (0, 1) and not timed_out and after['file_count'] > 0 else 1
+          if __name__ == '__main__':
+              raise SystemExit(main(sys.argv[1]))
+          PY
+          cp "$RUNNER_TEMP/stage0_mypy_measure.py" reports/stage0-cache/instrumentation.py
+      - name: Cold full strict type-gate measurement
+        run: python "$RUNNER_TEMP/stage0_mypy_measure.py" cold
+      - name: Save isolated measurement snapshot
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: ${{ runner.temp }}/stage0-isolated-mypy-cache
+          key: stage0-evidence-mypy-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Remove only this measurement cache before restore
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          import shutil
+          from pathlib import Path
+          p = Path(os.environ['STAGE0_CACHE_DIR']).resolve()
+          expected = Path(os.environ['RUNNER_TEMP']).resolve() / 'stage0-isolated-mypy-cache'
+          if p != expected or p.is_symlink():
+              raise SystemExit('Unsafe cache path')
+          shutil.rmtree(p)
+          if p.exists():
+              raise SystemExit('Cache was not removed')
+          PY
+      - name: Restore exact isolated measurement snapshot
+        id: restore
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: ${{ runner.temp }}/stage0-isolated-mypy-cache
+          key: stage0-evidence-mypy-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
+      - name: Warm full strict type-gate measurement
+        env:
+          STAGE0_REMOTE_HIT: ${{ steps.restore.outputs.cache-hit }}
+        run: python "$RUNNER_TEMP/stage0_mypy_measure.py" warm
+      - name: Preserve raw diagnostics and cache manifests
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: stage0-cache-pair-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reports/stage0-cache/
+          if-no-files-found: error
+          retention-days: 7
