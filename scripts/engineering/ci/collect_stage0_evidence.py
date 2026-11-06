@@ -9,7 +9,11 @@ from pathlib import Path
 from typing import Any
 
 
+INDEPENDENT_AUDIT_NOTE = "Handled externally via independent audit."
+
+
 def sha256(data: Any) -> str:
+    """Hash a JSON object, a string, or bytes for the artifact manifest."""
     if isinstance(data, dict):
         return hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()
     if isinstance(data, str):
@@ -17,15 +21,18 @@ def sha256(data: Any) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def get_git_info() -> dict[str, str]:
+def get_git_info() -> dict[str, str | bool | None]:
+    """Record the checkout base and whether its working tree matches HEAD."""
     try:
-        sha = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
-        return {"head_sha": sha}
-    except Exception:
-        return {"head_sha": "unknown"}
+        head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+        status = subprocess.check_output(["git", "status", "--porcelain"], text=True)
+    except (OSError, subprocess.CalledProcessError):
+        return {"head_sha": "unknown", "worktree_dirty": None}
+    return {"head_sha": head, "worktree_dirty": bool(status)}
 
 
 def generate_file_manifest(filepath: str) -> dict[str, Any]:
+    """Describe an evidence file, including its digest and modification time."""
     if not os.path.exists(filepath):
         return {"error": "file not found"}
     stat = os.stat(filepath)
@@ -92,7 +99,7 @@ def evaluate_mypy_criterion(
     warm_rc = warm.get("returncode")
     typecheck_pass = cold_rc == 0 and warm_rc == 0
     diagnostics_match = bool(
-        isinstance(comparison, dict) and comparison.get("diagnostics_match")
+        isinstance(comparison, dict) and comparison.get("diagnostics_match") is True
     )
     speedup = (
         float(comparison["speedup"])
@@ -102,35 +109,12 @@ def evaluate_mypy_criterion(
     )
     # Usable cache evidence requires matching diagnostics and a warm speedup.
     cache_measurement_usable = (
-        diagnostics_match and speedup is not None and speedup > 1.05
+        typecheck_pass and diagnostics_match and speedup is not None and speedup > 1.05
     )
 
-    if typecheck_pass and cache_measurement_usable:
-        status = "PASS"
-        note = (
-            f"Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; "
-            f"speedup={speedup:.3f} — измерение mypy-кэша пригодно."
-        )
-    elif typecheck_pass and diagnostics_match:
-        status = "PARTIAL"
-        speedup_text = f"{speedup:.3f}" if speedup is not None else "n/a"
-        note = (
-            f"Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; "
-            f"speedup={speedup_text} — ускорение кэша не доказано "
-            f"(порог >1.05)."
-        )
-    elif typecheck_pass:
-        status = "PARTIAL"
-        note = (
-            "Type-checking PASS (cold/warm returncode=0), но diagnostics cold/warm "
-            "не совпадают; измерение кэша непригодно."
-        )
-    else:
-        status = "PARTIAL"
-        note = (
-            f"Mypy non-PASS: cold returncode={cold_rc}, warm returncode={warm_rc}. "
-            f"diagnostics_match={diagnostics_match}."
-        )
+    status, note = _describe_mypy_result(
+        cold_rc, warm_rc, diagnostics_match, speedup, cache_measurement_usable
+    )
 
     return {
         "status": status,
@@ -145,7 +129,44 @@ def evaluate_mypy_criterion(
     }
 
 
+def _describe_mypy_result(
+    cold_rc: int | None,
+    warm_rc: int | None,
+    diagnostics_match: bool,
+    speedup: float | None,
+    cache_measurement_usable: bool,
+) -> tuple[str, str]:
+    if cold_rc != 0 or warm_rc != 0:
+        return "PARTIAL", (
+            f"Mypy non-PASS: cold returncode={cold_rc}, warm returncode={warm_rc}. "
+            f"diagnostics_match={diagnostics_match}."
+        )
+
+    if cache_measurement_usable:
+        status = "PASS"
+        note = (
+            f"Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; "
+            f"speedup={speedup:.3f} — измерение mypy-кэша пригодно."
+        )
+    elif diagnostics_match:
+        status = "PARTIAL"
+        speedup_text = f"{speedup:.3f}" if speedup is not None else "n/a"
+        note = (
+            f"Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; "
+            f"speedup={speedup_text} — ускорение кэша не доказано "
+            f"(порог >1.05)."
+        )
+    else:
+        status = "PARTIAL"
+        note = (
+            "Type-checking PASS (cold/warm returncode=0), но diagnostics cold/warm "
+            "не совпадают; измерение кэша непригодно."
+        )
+    return status, note
+
+
 def main() -> None:
+    """Collect Stage 0 evidence and render its JSON and Markdown reports."""
     os.makedirs("docs/reports/ci", exist_ok=True)
     os.makedirs("reports", exist_ok=True)
 
@@ -157,6 +178,7 @@ def main() -> None:
             "timestamp": datetime.now(UTC).isoformat(),
             "repository": "SatoryKono/BioactivityDataAcquisition",
             "git_head": git_info["head_sha"],
+            "worktree_dirty": git_info["worktree_dirty"],
         },
         "criteria": {
             "0.1_producer_evidence": {
@@ -173,7 +195,7 @@ def main() -> None:
             },
             "0.3_dag_phases": {
                 "status": "INHERITED_OBSERVATIONAL",
-                "evidence": "Handled externally via independent audit.",
+                "evidence": INDEPENDENT_AUDIT_NOTE,
             },
             "0.4_semantic_matrix": {
                 "status": "INHERITED_OBSERVATIONAL",
@@ -189,15 +211,15 @@ def main() -> None:
             "0.6_mypy_evaluation": mypy_criterion,
             "0.7_shard_profiles": {
                 "status": "INHERITED_OBSERVATIONAL",
-                "note": "Handled externally via independent audit.",
+                "note": INDEPENDENT_AUDIT_NOTE,
             },
             "0.8_sha_pin_inventory": {
                 "status": "INHERITED_OBSERVATIONAL",
-                "note": "Handled externally via independent audit.",
+                "note": INDEPENDENT_AUDIT_NOTE,
             },
             "0.9_budget_cards": {
                 "status": "INHERITED_OBSERVATIONAL",
-                "note": "Handled externally via independent audit.",
+                "note": INDEPENDENT_AUDIT_NOTE,
             },
             "0.10_pre_experiment_protocol": {
                 "status": "PARTIAL",
@@ -223,7 +245,8 @@ def main() -> None:
         "closure_passport": {
             "owner": "SatoryKono",
             "deadline": "N/A",
-            "exact_sha_revision": git_info["head_sha"],
+            "collector_base_sha": git_info["head_sha"],
+            "collector_worktree_dirty": git_info["worktree_dirty"],
             "scope": "Stage 0 CI Optimization Evidence Gathering",
             "tool_versions": "Python 3.13.x, mypy, uv",
             "commands": "python scripts/engineering/ci/collect_stage0_evidence.py, python scripts/engineering/ci/evaluate_mypy.py",

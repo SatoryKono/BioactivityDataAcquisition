@@ -5,6 +5,7 @@ import json
 import os
 import re
 import subprocess
+import tempfile
 import time
 from pathlib import Path
 from typing import Any
@@ -46,7 +47,7 @@ def hash_directory_content(directory: str) -> str:
         for file in sorted(files):
             filepath = os.path.join(root, file)
             # Hash path
-            hasher.update(filepath.encode())
+            hasher.update(Path(filepath).relative_to(directory).as_posix().encode())
             # Hash file content
             try:
                 with open(filepath, "rb") as f:
@@ -63,6 +64,7 @@ def _atomic_write_text(path: Path, text: str) -> None:
 
 
 def run_mypy(cache_dir: str, iteration: str) -> dict[str, Any]:
+    """Run strict mypy and record diagnostics, timing, and cache contents."""
     start = time.time()
 
     # Explicit --incremental overrides pyproject `incremental = false` so the
@@ -123,16 +125,14 @@ def run_mypy(cache_dir: str, iteration: str) -> dict[str, Any]:
 
 
 def main() -> None:
+    """Measure a cold and warm mypy run with one fresh, isolated cache."""
     os.makedirs("reports", exist_ok=True)
-    cache_dir = ".mypy_cache_eval2"
 
-    subprocess.run(["rm", "-rf", cache_dir], check=False)
-
-    print("Running cold mypy...")
-    cold_result = run_mypy(cache_dir, "cold")
-
-    print("Running warm mypy...")
-    warm_result = run_mypy(cache_dir, "warm")
+    with tempfile.TemporaryDirectory(prefix="bioetl-mypy-eval-") as cache_dir:
+        print("Running cold mypy...")
+        cold_result = run_mypy(cache_dir, "cold")
+        print("Running warm mypy...")
+        warm_result = run_mypy(cache_dir, "warm")
 
     # Compare
     diagnostics_match = (
