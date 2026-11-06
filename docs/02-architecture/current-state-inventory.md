@@ -52,7 +52,7 @@ evidence, not CircleCI acceptance or lifecycle ADMIT for the final PR head.
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
 | Source modules in module coverage inventory | `2566` | `reports/quality/module-coverage-inventory.json` (historical measurement) |
 | Unmatched live modules / uncovered measured modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, complete source-module snapshot |
-| Coverage inventory status counts | `2522` fully covered, `78` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `2524` fully covered, `41` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `0` | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Module-boundaries coupling | `10.0` (`control-plane` fan-in `1/2`, `runtime_builders` fan-in `2/3`) | `reports/quality/architecture-quality-scorecard.json`, `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py` |
@@ -335,13 +335,13 @@ by storage technology. Current owner boundaries:
 
 ## Current source inventory binding
 
-- `source_tree_sha256=642d35b43408911e93f81c2f2ffbd085dc4db52a00575bdfa8d15d35371e6fab`
-- `source_module_count=2607`
-- Source modules: `2607`
-- `coverage_inventory_module_count=2607`
-- Accepted coverage inventory: `2607` modules
+- `source_tree_sha256=4f1c06c0477134bc68efd2a926527c1573980a8559a116b6f9f97cd2542f2e8c`
+- `source_module_count=2608`
+- Source modules: `2608`
+- `coverage_inventory_module_count=2608`
+- Accepted coverage inventory: `2608` modules
 - Accepted inventory: `2522` fully covered
-- Accepted inventory: `78` partially covered
+- Accepted inventory: `79` partially covered
 - Test inventory: `assertless_total_candidates=69`
 
 Derived by scripts/engineering/qa/report_topology_source_binding.py from

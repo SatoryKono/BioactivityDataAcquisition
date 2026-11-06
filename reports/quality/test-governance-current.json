@@ -824,14 +824,7 @@
     }
   },
   "assertless_total_candidates": 69,
-  "budget_violations": [
-    {
-      "actual": 18,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1005,27 +998,8 @@
     ]
   },
   "intentional_no_exception_contract": 68,
-  "markerless_examples": [
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:118",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:139",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:155",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:173",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:193",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:217",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:246",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:275",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:313",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:339",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:357",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:381",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:413",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:445",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:453",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:461",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:485",
-    "tests/unit/scripts/ops/test_migrate_evidence_locations.py:521"
-  ],
-  "markerless_test_functions": 18,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -1762,27 +1736,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:118",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:139",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:155",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:173",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:193",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:217",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:246",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:275",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:313",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:339",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:357",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:381",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:413",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:445",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:453",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:461",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:485",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:521"
-    ],
-    "markerless_test_functions": 18,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -1800,8 +1755,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3227,
-      "test_python_file_count": 3478,
+      "test_glob_file_count": 3229,
+      "test_python_file_count": 3480,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1842,13 +1797,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3227,
-    "total_test_functions": 31962,
+    "total_test_files": 3229,
+    "total_test_functions": 31976,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "9cd469751167d671833b1b30c8881cc2358f72c0778f1cdee81e27ffc15c620c",
+  "source_tree_sha256": "e987f920569edefecdf35422a6595475cc67ad8fb188a7b9e554ed792741e5e1",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 69,
@@ -1857,27 +1812,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 68,
-    "markerless_examples": [
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:118",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:139",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:155",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:173",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:193",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:217",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:246",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:275",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:313",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:339",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:357",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:381",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:413",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:445",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:453",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:461",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:485",
-      "tests/unit/scripts/ops/test_migrate_evidence_locations.py:521"
-    ],
-    "markerless_test_functions": 18,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -1887,8 +1823,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3227,
-    "test_python_file_count": 3478,
+    "test_glob_file_count": 3229,
+    "test_python_file_count": 3480,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -1929,8 +1865,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3227,
-  "total_test_functions": 31962,
+  "total_test_files": 3229,
+  "total_test_functions": 31976,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
