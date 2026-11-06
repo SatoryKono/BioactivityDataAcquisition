@@ -5,23 +5,30 @@
 Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yaml`.
 
 The approved JSON portfolio contains five dashboards (ADR-053 cutover,
-2026-10-02). The visible bus is:
+2026-10-02). The visible bus is on every dashboard, including Data Quality and
+Run Explorer, and is numbered for those five boards:
 
-`Run Explorer` · `Replay Readiness` · `Run Overview` · `Incident Workspace`
+`1. Run Explorer` · `2. Replay Readiness` · `3. Run Overview` ·
+`4. Data Quality` · `5. Incident Workspace`
 
-The current workspace is disabled (`aria-current="page"`) when it is a bus
-item; machine-readable links on panel `1000` omit that self-link. Data Quality
-is a contextual detail destination rather than a header item.
+URL slugs are the Grafana title slugs (`1-run-explorer`,
+`2-replay-readiness`, `3-run-overview`, `4-data-quality`,
+`5-incident-workspace`). The current workspace is disabled
+(`aria-current="page"`) when it is a bus item; machine-readable links on
+panel `1000` omit that self-link.
 
-Run Explorer uses the exact-run actions in table `3010` instead of a header
-bus. Its Overview, Saved Evidence, Data Quality and Replay Readiness columns
-pass the clicked row's Run ID, pipeline, workflow and run type. A page-level
-Run ID must not replace the row identity. Returning through the Run Explorer
-header link clears the selectors and search field while preserving time.
+Run Explorer keeps the exact-run actions in table `3010` in addition to the
+header bus. Its Overview, Saved Evidence, Data Quality and Replay Readiness
+columns pass the clicked row's Run ID, pipeline, workflow and run type. The
+Run ID cell wraps the full UUID and repeats it on the cell tooltip and in
+cell inspection; column width is not the way to read it. A page-level Run ID
+must not replace the row identity. Returning through the Run Explorer header
+link clears the selectors and search field while preserving time.
 
 `navigation_surfaces` and `navigation_transition_contract` in the YAML define
-these two navigation surfaces and the required paths. Data Quality is reachable
-from the run table; a Replay Readiness / Run Overview round trip remains direct.
+these two navigation surfaces and the required paths. Data Quality is on the
+header bus and remains reachable from the run table; a Replay Readiness / Run
+Overview round trip remains direct.
 All dashboard-owned links set `includeVars=false` and explicitly serialize
 allowlisted context plus `${__url_time_range}`.
 
@@ -65,11 +72,11 @@ YAML также фиксирует time handoff policy в `time_handoff_requirem
 
 ## Примеры URL (нормализованный формат)
 
-- Dashboard: `/d/bioetl-overview-v2/2-overview?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}`
-- Dashboard: `/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}`
-- Dashboard: `/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=unknown&var-run_type=All&${__url_time_range}`
-- Incident: `/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}`
-- Run Explorer: `/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}`
+- Dashboard: `/d/bioetl-overview-v2/3-run-overview?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}`
+- Dashboard: `/d/bioetl-dq-v2/4-data-quality?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}`
+- Dashboard: `/d/bioetl-overview-v2/3-run-overview?var-pipeline=unknown&var-run_type=All&${__url_time_range}`
+- Incident: `/d/bioetl-incident-v1/5-incident-workspace?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}`
+- Run Explorer: `/d/bioetl-run-explorer-v1/1-run-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}`
 
 ## Справка
 

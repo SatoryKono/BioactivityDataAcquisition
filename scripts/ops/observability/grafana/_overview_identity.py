@@ -41,7 +41,7 @@ def apply_overview_identity(payload: dict) -> None:
     links.append(
         {
             "title": "Open Provider Evidence",
-            "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9480&${__url_time_range}",
+            "url": "/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9480&${__url_time_range}",
             "includeVars": False,
             "targetBlank": False,
         }

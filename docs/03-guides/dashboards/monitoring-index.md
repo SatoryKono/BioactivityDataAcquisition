@@ -66,8 +66,9 @@ Every `Inspect`/`Review Processed Records` table displays `parameter`, `value`,
 and canonical `percentage`; both numeric columns are right-aligned. Internal `row_status` is hidden,
 the payload uses canonical `percentage` only, and the table does not act as a
 `$__range` throughput summary.
-All **seven** shipped dashboards share one theme-safe navigation panel: numbered
-bus `0..6`. Loki/Tempo Explore adjuncts and Silver Reject Explorer were removed
+All **five** shipped dashboards share one theme-safe navigation panel: numbered
+bus `1..5` (Run Explorer, Replay Readiness, Run Overview, Data Quality,
+Incident Workspace). Loki/Tempo Explore adjuncts and Silver Reject Explorer were removed
 2026-07-23. The bus wraps at `1024px` and stays readable in dark and light themes.
 
 The shared `ID` and `Processed Records` cards are HTTP-backed via

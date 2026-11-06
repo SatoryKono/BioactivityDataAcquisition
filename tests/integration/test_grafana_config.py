@@ -1372,16 +1372,17 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
 def test_control_plane_dashboard_links_are_scoped() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     links = get_dashboard_navigation_links(dashboard)
+    # Current dashboard is 2. Replay Readiness; bus links use numbered titles 1/3/4/5.
     assert {link["title"] for link in links} == {
-        "Run Explorer",
-        "Run Overview",
-        "Data Quality",
-        "Incident Workspace",
+        "1. Run Explorer",
+        "3. Run Overview",
+        "4. Data Quality",
+        "5. Incident Workspace",
     }
     for link in links:
         assert link["includeVars"] is False
         assert "${__url_time_range}" in link["url"]
-        if link["title"] == "Run Explorer":
+        if link["title"] == "1. Run Explorer":
             assert "var-run_id=-" in link["url"]
             assert "var-pipeline=.*" in link["url"]
         else:
