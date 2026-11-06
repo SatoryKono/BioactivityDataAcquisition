@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4071 |
-| Tracked doc-like files | 4071 |
+| Doc-like files | 4072 |
+| Tracked doc-like files | 4072 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4071 |
+| tracked | 4072 |
 
 ## Lifecycle Counts
 
@@ -28,7 +28,7 @@
 | active_quality_baseline | 120 |
 | closeout_evidence | 168 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 32 |
+| docs_reports_curated_or_historical_report | 33 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 28 |
 | generated_skill_reference_mirror | 19 |
@@ -55,7 +55,7 @@
 | Archived | 1554 |
 | Canonical | 76 |
 | Generated | 1066 |
-| Working | 618 |
+| Working | 619 |
 
 ## Surface Families
 
@@ -65,13 +65,13 @@
 | archive | 1554 |
 | canonical | 76 |
 | generated | 1066 |
-| working | 618 |
+| working | 619 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 330 |
+| archive-after-migration | 331 |
 | generate-automatically | 1066 |
 | keep | 2675 |
 
@@ -92,6 +92,7 @@
 | `docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md` | Working | 4 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md` | Working | 3 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
+| `docs/reports/audit/N1_SHADOW_STATUS.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/github_settings_inventory.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/pack-v2.1/evidence-collection/alertmanager_delivery_verification.md` | Working | 0 | archive-after-migration |
 | `docs/reports/ci/stage0_closure.json` | Working | 0 | archive-after-migration |
@@ -158,7 +159,6 @@
 | `reports/audit-runs/12107-r07/issue-12107-final-record.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/logs/pytest-24-on-80dfee.txt` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/logs/pytest-8-surface-on-80dfee.txt` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/12107-r07/logs/pytest-lifecycle-precommit.txt` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -261,6 +261,7 @@
 | Path | Tracking | Lifecycle | Action |
 | --- | --- | --- | --- |
 | `docs/reports/README.md` | tracked | docs_reports_curated_entrypoint | keep |
+| `docs/reports/audit/N1_SHADOW_STATUS.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/audit/github_settings_inventory.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/audit/pack-v2.1/evidence-collection/alertmanager_delivery_verification.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/ci/stage0_closure.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
@@ -299,7 +300,6 @@
 | `docs/reports/evidence/issue-12714/conformance_run.txt` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/issue-12714/http_client_close.txt` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/issue-12714/lifecycle_ownership.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/issue-12714/run_ledger_fail_closed.txt` | tracked | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 
