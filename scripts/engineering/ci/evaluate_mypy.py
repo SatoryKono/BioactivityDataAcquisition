@@ -68,7 +68,7 @@ def hash_directory_content(directory: str) -> str:
                 with open(filepath, "rb") as f:
                     hasher.update(f.read())
             except OSError:
-                pass
+                hasher.update(b"<unreadable>")
     return hasher.hexdigest()
 
 
