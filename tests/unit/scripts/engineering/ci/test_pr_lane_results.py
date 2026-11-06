@@ -491,6 +491,26 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
     }
 
 
+def test_shadow_compare_routes_grafana_prometheus_only_dashboards() -> None:
+    """Prometheus-only mirrors keep shipped owners and add the provisioning test."""
+    repo_root = Path(__file__).resolve().parents[5]
+    shipped = build_shadow_compare(
+        ["grafana/dashboards/bioetl-control-plane-v1.json"],
+        repo_root=repo_root,
+    )
+    prometheus_only = build_shadow_compare(
+        ["grafana/dashboards-prometheus-only/bioetl-control-plane-v1.json"],
+        repo_root=repo_root,
+    )
+    provisioning = "tests/integration/test_grafana_dashboard_provisioning.py"
+    assert provisioning not in shipped["selected"]
+    without_provisioning = [
+        item for item in prometheus_only["selected"] if item != provisioning
+    ]
+    assert without_provisioning == shipped["selected"]
+    assert prometheus_only["selected"].count(provisioning) == 1
+
+
 def test_shadow_compare_routes_monitoring_and_docker_security_docs() -> None:
     """Monitoring configuration and its security runbook select owner tests."""
     repo_root = Path(__file__).resolve().parents[5]

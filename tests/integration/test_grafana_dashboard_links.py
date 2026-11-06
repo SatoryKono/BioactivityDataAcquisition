@@ -127,7 +127,7 @@ def test_dashboards_do_not_ship_empty_options_data_links_arrays() -> None:
 def test_top_level_handoff_fails_closed_when_required_link_is_removed() -> None:
     """The real policy path must reject a removed required dashboard link."""
     link: dict[str, object] = {
-        "title": "Replay Readiness",
+        "title": "2. Replay Readiness",
         "url": (
             "/d/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline"
             "&var-run_type=$run_type&var-run_id=$run_id&from=$__from&to=$__to"
@@ -440,13 +440,13 @@ def test_critical_top_level_links_follow_title_allowlist_and_scope_reset_suffix(
 def test_dashboard_titles_match_home_dashboard_navigation_names() -> None:
     """Grafana Home > Dashboards uses dashboard.title, so titles must match the navigation map."""
     expected_titles_by_uid = {
-        "bioetl-control-plane-v1": "Replay Readiness",
-        "bioetl-overview-v2": "Run Overview",
+        "bioetl-run-explorer-v1": "1. Run Explorer",
+        "bioetl-control-plane-v1": "2. Replay Readiness",
+        "bioetl-overview-v2": "3. Run Overview",
         "bioetl-runtime": "Pipeline Diagnostics",
         "bioetl-provider-health-v2": "Provider Health",
-        "bioetl-dq-v2": "Data Quality",
-        "bioetl-incident-v1": "Incident Workspace",
-        "bioetl-run-explorer-v1": "Run Explorer",
+        "bioetl-dq-v2": "4. Data Quality",
+        "bioetl-incident-v1": "5. Incident Workspace",
     }
 
     for dashboard_path in get_dashboard_files():
@@ -562,12 +562,7 @@ def test_dashboard_bus_self_links_are_omitted() -> None:
 
 def test_navigation_panel_html_links_open_in_same_window() -> None:
     """Navigation panel id=1000 should not force a new browser tab."""
-    dashboard_paths = [
-        path
-        for path in get_dashboard_files()
-        if path.name != "bioetl-run-explorer-v1.json"
-    ]
-    for dashboard_path in dashboard_paths:
+    for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         panel = next(
             (item for item in dashboard.get("panels", []) if item.get("id") == 1000),
@@ -647,8 +642,8 @@ def test_runtime_and_dq_dashboards_expose_control_plane_handoff() -> None:
     for dashboard_name in ("bioetl-incident-v1.json", "bioetl-dq-v2.json"):
         _assert_named_dashboard_handoff(
             dashboard_name=dashboard_name,
-            expected_title="Replay Readiness",
-            url_prefix="/d/bioetl-control-plane-v1/1-trust",
+            expected_title="2. Replay Readiness",
+            url_prefix="/d/bioetl-control-plane-v1/2-replay-readiness",
         )
 
 
@@ -667,7 +662,7 @@ def test_navigation_dashboards_do_not_expose_removed_silver_reject_explorer() ->
 @pytest.mark.parametrize("damage", [None, "pipeline", "search", "time", "foreign_run"])
 def test_catalog_reset_is_explicit_and_does_not_weaken_identity_handoff(damage):
     url = (
-        "/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&var-pipeline=.*"
+        "/d/bioetl-run-explorer-v1/1-run-explorer?var-workflow=.*&var-pipeline=.*"
         "&var-run_type=.*&var-run_id=-&var-lookup_run_id=&${__url_time_range}"
     )
     if damage == "pipeline":
