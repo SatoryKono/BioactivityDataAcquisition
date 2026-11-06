@@ -61,6 +61,9 @@ RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
+REQUIRED_CHECKS_PROSE_TEST = (
+    "tests/architecture/test_required_checks_prose_consistency.py"
+)
 DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
 STAGE0_EVIDENCE_TEST = "tests/unit/scripts/engineering/ci/test_stage0_evidence.py"
 GRAFANA_SELECTOR_CONTRACT_TEST = "tests/integration/test_grafana_selector_contract.py"
@@ -750,11 +753,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/04-reference/github-actions-workflows.md": (
         "tests/architecture/test_gha_disabled_map_10263.py",
-        "tests/architecture/test_required_checks_prose_consistency.py",
+        REQUIRED_CHECKS_PROSE_TEST,
     ),
-    "docs/05-operations/ci-workflow-map.md": (
-        "tests/architecture/test_required_checks_prose_consistency.py",
-    ),
+    "docs/05-operations/ci-workflow-map.md": (REQUIRED_CHECKS_PROSE_TEST,),
     "docs/05-operations/runbooks/generated-artifact-drift-workflow.md": (
         "tests/architecture/test_generated_artifact_drift_workflow.py",
     ),
@@ -788,7 +789,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/governance/github-settings-B2-preflight-20261106.json",
             "reports/governance/github-settings-B2-preflight-20261106.md",
         ),
-        ("tests/architecture/test_required_checks_prose_consistency.py",),
+        (REQUIRED_CHECKS_PROSE_TEST,),
     ),
 }
 
