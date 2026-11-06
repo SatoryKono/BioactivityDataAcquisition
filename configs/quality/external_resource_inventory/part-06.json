@@ -54,7 +54,7 @@
       "lifetime": "process-scoped singleton; each acquisition lasts for one collector with block",
       "creation_sites": [
         {
-          "source_commit": "9142bc68cd44b53c18dd4c778b4c3616fae946bf",
+          "source_commit": "5481b94d18a358e62051a1eafd71e0619e48d25b",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -68,7 +68,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "9142bc68cd44b53c18dd4c778b4c3616fae946bf",
+          "source_commit": "5481b94d18a358e62051a1eafd71e0619e48d25b",
           "source_blob": "d5aa2dc103b334fc0a1fef4f03cf225aaad3212d",
           "content_sha256": "04529f6059663600e405e54b150068d4582a9033e2fc776ea5c5b85de0cac544",
           "file": "src/bioetl/composition/observability_runtime.py",
@@ -80,7 +80,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "9142bc68cd44b53c18dd4c778b4c3616fae946bf",
+          "source_commit": "5481b94d18a358e62051a1eafd71e0619e48d25b",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -92,7 +92,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "9142bc68cd44b53c18dd4c778b4c3616fae946bf",
+          "source_commit": "5481b94d18a358e62051a1eafd71e0619e48d25b",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -102,12 +102,167 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "9142bc68cd44b53c18dd4c778b4c3616fae946bf",
+          "source_commit": "5481b94d18a358e62051a1eafd71e0619e48d25b",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
           "line": 267,
           "source_segment": "with _COLLECTION_LOCK:"
+        }
+      ]
+    },
+    {
+      "identity": "control_plane.live_manifest_catalog.interprocess_lock",
+      "type": "file-lock",
+      "creator": [
+        "_catalog_file_lock",
+        "_acquire_exclusive_lock",
+        "_lock_byte"
+      ],
+      "owner": "_catalog_file_lock context manager",
+      "closer": "_release_exclusive_lock and os.close in nested finally blocks.",
+      "shutdown_contract": "The context owns the descriptor; close runs even if acquisition or explicit release fails.",
+      "production_entrypoint": "Runner manifest publication, ledger successor publication, and finalized contract-evidence mirroring.",
+      "call_path": [
+        "_live_catalog_lock",
+        "_catalog_file_lock",
+        "os.open",
+        "_acquire_exclusive_lock"
+      ],
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "normal": {
+          "applicability": "Applicable",
+          "expected": "Descriptor closes after exclusive lock release.",
+          "observation": "Observe lock ownership and descriptor closure on return.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "Applicable",
+          "expected": "Descriptor closes if acquire or the body raises; explicit unlock errors are suppressed before close.",
+          "observation": "Inject acquire, body and release errors.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "Synchronous critical section",
+          "expected": "Cancellation of an outer awaiter does not release this worker lock.",
+          "observation": "Observe worker completion and lock release.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "No local lock deadline",
+          "expected": "A blocked caller is not proof of an abandoned descriptor.",
+          "observation": "Observe contending process and descriptor lifecycle.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "Windows EDEADLK",
+          "expected": "Only EDEADLK retries the blocking byte-lock operation on the same descriptor.",
+          "observation": "Inject EDEADLK followed by success or terminal error.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "lifetime": "One descriptor and exclusive lock per live catalog critical section.",
+      "creation_sites": [
+        {
+          "source_commit": "5481b94d18a358e62051a1eafd71e0619e48d25b",
+          "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
+          "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
+          "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
+          "line": 314,
+          "expression": "os.open(lock_path, os.O_CREAT | os.O_RDWR)",
+          "call": "os.open",
+          "creator": "_catalog_file_lock",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "5481b94d18a358e62051a1eafd71e0619e48d25b",
+          "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
+          "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
+          "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
+          "line": 333,
+          "expression": "fcntl.flock(lock_fd, fcntl.LOCK_EX)",
+          "call": "fcntl.flock",
+          "creator": "_acquire_exclusive_lock",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "5481b94d18a358e62051a1eafd71e0619e48d25b",
+          "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
+          "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
+          "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
+          "line": 366,
+          "expression": "msvcrt.locking(lock_fd, mode, 1)",
+          "call": "msvcrt.locking",
+          "creator": "_lock_byte",
+          "creation_mode": "call",
+          "context_manager": false
+        }
+      ],
+      "production_binding": [
+        {
+          "source_commit": "5481b94d18a358e62051a1eafd71e0619e48d25b",
+          "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
+          "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
+          "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
+          "line": 314,
+          "expression": "os.open(lock_path, os.O_CREAT | os.O_RDWR)",
+          "call": "os.open",
+          "creator": "_catalog_file_lock",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "5481b94d18a358e62051a1eafd71e0619e48d25b",
+          "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
+          "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
+          "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
+          "line": 333,
+          "expression": "fcntl.flock(lock_fd, fcntl.LOCK_EX)",
+          "call": "fcntl.flock",
+          "creator": "_acquire_exclusive_lock",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "5481b94d18a358e62051a1eafd71e0619e48d25b",
+          "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
+          "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
+          "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
+          "line": 366,
+          "expression": "msvcrt.locking(lock_fd, mode, 1)",
+          "call": "msvcrt.locking",
+          "creator": "_lock_byte",
+          "creation_mode": "call",
+          "context_manager": false
+        }
+      ],
+      "cleanup_sources": [
+        {
+          "source_commit": "5481b94d18a358e62051a1eafd71e0619e48d25b",
+          "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
+          "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
+          "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
+          "line": 343,
+          "expression": "fcntl.flock(lock_fd, fcntl.LOCK_UN)",
+          "call": "fcntl.flock",
+          "creator": "_release_exclusive_lock",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "5481b94d18a358e62051a1eafd71e0619e48d25b",
+          "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
+          "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
+          "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
+          "line": 323,
+          "expression": "os.close(lock_fd)",
+          "call": "os.close",
+          "creator": "_catalog_file_lock",
+          "creation_mode": "call",
+          "context_manager": false
         }
       ]
     }

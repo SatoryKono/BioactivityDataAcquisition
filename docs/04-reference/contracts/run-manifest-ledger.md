@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: "2026-08-18"
+  Last verified: "2026-11-05"
 
 ______________________________________________________________________
 
@@ -146,6 +146,22 @@ File-backed control-plane persistence uses the following canonical paths:
 `Path(settings.data_dir) / "output" / "control" / <leaf>` and are therefore
 runtime-aligned with the current composition layer.
 
+A newly created run manifest is also recorded under
+`{dashboard_data_root}/output/control/run_manifest` when that alias differs
+from the run data root. The publication writes that manifest and its run-id
+index. The contract-evidence sidecar is copied when that sidecar is created,
+including onto a manifest already recorded with the same bytes. An existing
+sidecar is not replaced. A failure to write this extra catalog does not fail
+the run; the run data root stays fail-closed. The publication does not walk
+or copy historical data trees. A live catalog snapshot is taken before the
+manifest write. An existing live manifest id is not replaced when its bytes
+differ. A run id already indexed to another manifest stays unchanged, except
+when the new manifest is the confirmed successor of that indexed file: the
+run-id index advances and the previous manifest file stays. That successor
+publication runs from the ledger callback after the rebind commits. When the
+alias is unset, or it is the same directory, the run
+data root is the live catalog and no second copy is written.
+
 Strict exact-replay, `replay_ready`, and `forensic_grade` contexts require this
 root to come from an explicit `settings.data_dir` configuration. Fallback
 resolution to repo-local `data/`, private-cache, or `/tmp` is degraded-only and
@@ -218,6 +234,15 @@ All five routes use the same bounded forensic execution budget as the other
 expensive operator endpoints. Capacity exhaustion and deadline expiry return
 the stable forensic-unavailable response rather than allowing unbounded file
 scan work to accumulate.
+
+`manifest-validation` distinguishes a missing run from a run whose manifest
+was not recorded. A run id present in the report catalog and absent from the
+manifest catalog resolves as `resolved_via=resolved_without_manifest` with
+check and reason `manifest_not_recorded`. `selected_run_id_not_found` is
+reserved for a run id that is absent from both catalogs. Other validation
+routes keep their previous unresolved scope. The filter-options label
+`[STALE catalog]` remains the age of the options snapshot; it is not removed
+to hide a label.
 
 ## Lifecycle Management
 

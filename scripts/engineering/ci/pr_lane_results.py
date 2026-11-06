@@ -300,6 +300,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/ops/docker/test_verify_report_bind.py",
         "tests/integration/test_deployed_replay_readiness.py",
     ),
+    "docs/04-reference/contracts/run-manifest-ledger.md": (
+        "tests/unit/infrastructure/control_plane/test_live_root_manifest_record.py",
+        "tests/unit/interfaces/http/test_manifest_validation_catalog.py",
+    ),
     "docs/00-project/RULES.md": (INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,),
     "reports/engineering/SCHEMA-001_execution_evidence.md": (
         "tests/unit/scripts/test_verify_schema_parity.py",
@@ -456,6 +460,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12763_opener_protocol_review.json",
             "configs/quality/external_resource_inventory_pr12783_lf06_review.json",
             "configs/quality/external_resource_inventory_pr12786_composite_review.json",
+            "configs/quality/external_resource_inventory_pr12782_lf07_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
