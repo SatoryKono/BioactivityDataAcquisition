@@ -99505,6 +99505,62 @@
       "lifecycle": "working_report",
       "outbound_links": 0,
       "owner": "BioETL Team",
+      "path": "reports/audit/nightly-checkout-summary.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/audit/nightly-checkout-table.json",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
       "path": "reports/audit/pack-v2.1/P01-architecture-boundaries.md",
       "recommended_action": "archive-after-migration",
       "root_doc_kind": null,
@@ -114906,10 +114962,10 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 26,
       "reports_workspace_entrypoint": 1,
-      "working_report": 298
+      "working_report": 300
     },
     "by_recommended_action": {
-      "archive-after-migration": 332,
+      "archive-after-migration": 334,
       "generate-automatically": 1066,
       "keep": 2675
     },
@@ -114935,7 +114991,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 663,
+      "reports": 665,
       "security": 2
     },
     "by_status": {
@@ -114943,17 +114999,17 @@
       "Archived": 1554,
       "Canonical": 76,
       "Generated": 1066,
-      "Working": 620
+      "Working": 622
     },
     "by_surface_family": {
       "active": 757,
       "archive": 1554,
       "canonical": 76,
       "generated": 1066,
-      "working": 620
+      "working": 622
     },
     "by_tracking_state": {
-      "tracked": 4073
+      "tracked": 4075
     },
     "docs_reports_local_count": 70,
     "duplicate_group_count": 80,
@@ -114966,8 +115022,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4073,
+    "total_doc_like": 4075,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4073
+    "total_doc_like_tracked": 4075
   }
 }
