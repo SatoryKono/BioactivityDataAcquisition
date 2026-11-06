@@ -1,0 +1,927 @@
+{
+  "jobs": [
+    {
+      "job_id": 125701425365,
+      "name": "Generated artifact assertions (daily)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:53.5008630Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:54.0305442Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:09:13.9517676Z ##[group]Checking out the ref",
+        "2026-11-03T03:09:13.9518095Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701425679,
+      "name": "import-linter / Architecture (S7-crosscutting-architecture-d)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:53.3111051Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:53.6679526Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:05.2720301Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:05.2724118Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701425683,
+      "name": "import-linter / Architecture (S7-crosscutting-architecture-guardrails-a)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:04.0382624Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:04.4214939Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:12.6387079Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:12.6390038Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701425688,
+      "name": "tests / config-schema-preflight",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:53.7148401Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:54.0207601Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:05.7537971Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:05.7542466Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701425695,
+      "name": "security / pip-audit",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:53.4717227Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:53.6813378Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:05.7286660Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:05.7290789Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701425715,
+      "name": "clock",
+      "checkout_sha": null,
+      "type": "отсутствует",
+      "command_after": null,
+      "switch": "нет",
+      "reason": "checkout отсутствует по конфигурации (.github/workflows/stage0-phase-profile.yml:58)"
+    },
+    {
+      "job_id": 125701425756,
+      "name": "import-linter / Architecture (S7-crosscutting-architecture-b)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:53.9473948Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:54.3426400Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:05.8273884Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:05.8277014Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701425774,
+      "name": "security / bandit",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:53.6307831Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:53.9331411Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:05.0242103Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:05.0246383Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701425799,
+      "name": "security / gitleaks",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:53.0183955Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:53.4186312Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:39.1395721Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:39.1396086Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701425800,
+      "name": "import-linter / Architecture (S7-crosscutting-architecture-a3)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:53.3886156Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:53.7181187Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:06.6543903Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:06.6547301Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701425811,
+      "name": "security / detect-secrets",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:53.4369102Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:53.7747845Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:04.8596697Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:04.8601050Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701425813,
+      "name": "import-linter / Architecture (S7-crosscutting-architecture-a)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:54.1572519Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:54.5922298Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:05.4503048Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:05.4507014Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701425816,
+      "name": "tests / dependency-preflight",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:53.3567925Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:53.7376421Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:05.1995000Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:05.1999219Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701425880,
+      "name": "security / osv-scanner",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:54.4242794Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:05.5258619Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:13.3329752Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:13.3332034Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main",
+        "2026-11-03T03:08:16.2143074Z ##[command]/usr/bin/docker run --name ghcriogoogleosvscanneractionv270_5febfb --label 965750 --workdir /github/workspace --rm -e \"INPUT_SCAN-ARGS\" -e \"GOTOOLCHAIN\" -e \"HOME\" -e \"GITHUB_JOB\" -e \"GITHUB_REF\" -e \"GITHUB_SHA\" -e \"GITHUB_REPOSITORY\" -e \"GITHUB_REPOSITORY_OWNER\" -e \"GITHUB_REPOSITORY_OWNER_ID\" -e \"GITHUB_RUN_ID\" -e \"GITHUB_RUN_NUMBER\" -e \"GITHUB_RETENTION_DAYS\" -e \"GITHUB_RUN_ATTEMPT\" -e \"GITHUB_ACTOR_ID\" -e \"GITHUB_ACTOR\" -e \"GITHUB_WORKFLOW\" -e \"GITHUB_HEAD_REF\" -e \"GITHUB_BASE_REF\" -e \"GITHUB_EVENT_NAME\" -e \"GITHUB_SERVER_URL\" -e \"GITHUB_API_URL\" -e \"GITHUB_GRAPHQL_URL\" -e \"GITHUB_REF_NAME\" -e \"GITHUB_REF_PROTECTED\" -e \"GITHUB_REF_TYPE\" -e \"GITHUB_WORKFLOW_REF\" -e \"GITHUB_WORKFLOW_SHA\" -e \"GITHUB_REPOSITORY_ID\" -e \"GITHUB_TRIGGERING_ACTOR\" -e \"GITHUB_WORKSPACE\" -e \"GITHUB_ACTION\" -e \"GITHUB_EVENT_PATH\" -e \"GITHUB_ACTION_REPOSITORY\" -e \"GITHUB_ACTION_REF\" -e \"GITHUB_PATH\" -e \"GITHUB_ENV\" -e \"GITHUB_STEP_SUMMARY\" -e \"GITHUB_STATE\" -e \"GITHUB_OUTPUT\" -e \"GITHUB_ARTIFACTS\" -e \"GITHUB_ARTIFACTS_LIST\" -e \"RUNNER_OS\" -e \"RUNNER_ARCH\" -e \"RUNNER_NAME\" -e \"RUNNER_ENVIRONMENT\" -e \"RUNNER_TOOL_CACHE\" -e \"RUNNER_TEMP\" -e \"RUNNER_WORKSPACE\" -e \"ACTIONS_RUNTIME_URL\" -e \"ACTIONS_RUNTIME_TOKEN\" -e \"ACTIONS_CACHE_URL\" -e \"ACTIONS_RESULTS_URL\" -e \"ACTIONS_CACHE_MODE\" -e \"ACTIONS_ORCHESTRATION_ID\" -e GITHUB_ACTIONS=true -e CI=true -v \"/var/run/docker.sock\":\"/var/run/docker.sock\" -v \"/home/runner/work/_temp\":\"/github/runner_temp\" -v \"/home/runner/work/_temp/_github_home\":\"/github/home\" -v \"/home/runner/work/_temp/_github_workflow\":\"/github/workflow\" -v \"/home/runner/work/_temp/_runner_file_commands\":\"/github/file_commands\" -v \"/home/runner/work/BioactivityDataAcquisition/BioactivityDataAcquisition\":\"/github/workspace\" ghcr.io/google/osv-scanner-action:v2.7.0  \"--lockfile=uv.lock"
+      ]
+    },
+    {
+      "job_id": 125701425966,
+      "name": "import-linter / Architecture (S7-crosscutting-architecture-c)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:54.3999299Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:54.7499791Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:10.5118616Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:10.5123816Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701426018,
+      "name": "import-linter / C901 Governance (blocking)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:53.9025885Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:54.2278731Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:05.3384494Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:05.3385047Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701426046,
+      "name": "import-linter / Architecture (S7-crosscutting-architecture-guardrails-b)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:54.0844080Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:54.4224808Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:05.9778045Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:05.9782180Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701426048,
+      "name": "import-linter / Architecture (slow)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:53.5847772Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:54.0496021Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:05.4984893Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:05.4988923Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701426055,
+      "name": "duplication / Constructor Arguments Check",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:19:00.4978840Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:19:00.8168623Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:19:11.8523351Z ##[group]Checking out the ref",
+        "2026-11-03T03:19:11.8527005Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701426065,
+      "name": "import-linter / lint",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:53.7188350Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:54.0122547Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:55.0785371Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:55.0785841Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main",
+        "2026-11-03T03:09:12.4907779Z \u001b[36;1m  diff_range=\"origin/$BASE_REF...HEAD\"\u001b[0m",
+        "2026-11-03T03:09:12.4909960Z \u001b[36;1m    diff_range=\"HEAD^...HEAD\"\u001b[0m"
+      ]
+    },
+    {
+      "job_id": 125701426115,
+      "name": "import-linter / Import contracts",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:54.4539664Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:54.7588214Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:12.7438802Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:12.7440664Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701426271,
+      "name": "zizmor / zizmor",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:07:53.3979053Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:07:54.2401550Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:05.4104560Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:05.4107098Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701426413,
+      "name": "e2e / e2e-nightly-complete",
+      "checkout_sha": null,
+      "type": "отсутствует",
+      "command_after": null,
+      "switch": "нет",
+      "reason": "checkout отсутствует по конфигурации"
+    },
+    {
+      "job_id": 125701426616,
+      "name": "duplication / duplication-complexity",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:19:00.3041486Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:19:00.7792783Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:19:12.0422452Z ##[group]Checking out the ref",
+        "2026-11-03T03:19:12.0426088Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701426701,
+      "name": "duplication / Executor Complexity Check",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:19:00.9148889Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:19:01.2335904Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:19:13.1286726Z ##[group]Checking out the ref",
+        "2026-11-03T03:19:13.1290414Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701426821,
+      "name": "e2e / matrix-smoke-blocking",
+      "checkout_sha": null,
+      "type": "отсутствует",
+      "command_after": null,
+      "switch": "нет",
+      "reason": "checkout отсутствует по конфигурации"
+    },
+    {
+      "job_id": 125701427013,
+      "name": "e2e / e2e-nightly-full-replay",
+      "checkout_sha": null,
+      "type": "отсутствует",
+      "command_after": null,
+      "switch": "нет",
+      "reason": "checkout отсутствует по конфигурации"
+    },
+    {
+      "job_id": 125701427753,
+      "name": "e2e / matrix-smoke-nightly-live",
+      "checkout_sha": null,
+      "type": "отсутствует",
+      "command_after": null,
+      "switch": "нет",
+      "reason": "checkout отсутствует по конфигурации"
+    },
+    {
+      "job_id": 125701427911,
+      "name": "e2e / prompt-tests-nightly",
+      "checkout_sha": null,
+      "type": "отсутствует",
+      "command_after": null,
+      "switch": "нет",
+      "reason": "checkout отсутствует по конфигурации"
+    },
+    {
+      "job_id": 125701453850,
+      "name": "codeql",
+      "checkout_sha": null,
+      "type": "отсутствует",
+      "command_after": null,
+      "switch": "нет",
+      "reason": "checkout отсутствует по конфигурации"
+    },
+    {
+      "job_id": 125701453878,
+      "name": "github-settings",
+      "checkout_sha": null,
+      "type": "отсутствует",
+      "command_after": null,
+      "switch": "нет",
+      "reason": "checkout отсутствует по конфигурации"
+    },
+    {
+      "job_id": 125701454348,
+      "name": "scorecard",
+      "checkout_sha": null,
+      "type": "отсутствует",
+      "command_after": null,
+      "switch": "нет",
+      "reason": "checkout отсутствует по конфигурации"
+    },
+    {
+      "job_id": 125701454415,
+      "name": "branch-hygiene",
+      "checkout_sha": null,
+      "type": "отсутствует",
+      "command_after": null,
+      "switch": "нет",
+      "reason": "checkout отсутствует по конфигурации"
+    },
+    {
+      "job_id": 125701454488,
+      "name": "mutation",
+      "checkout_sha": null,
+      "type": "отсутствует",
+      "command_after": null,
+      "switch": "нет",
+      "reason": "checkout отсутствует по конфигурации"
+    },
+    {
+      "job_id": 125701604350,
+      "name": "tests / control-plane-e2e",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:25.5632875Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:26.0373626Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:34.0897327Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:34.0902210Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604381,
+      "name": "tests / flaky-telemetry",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:25.8944348Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:26.2756765Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:34.1068191Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:34.1072336Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604432,
+      "name": "tests / contract-confidence",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:26.3892129Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:26.7452418Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:40.5660844Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:40.5662520Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604434,
+      "name": "tests / smoke-check",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:26.0438676Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:26.3924568Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:34.4663705Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:34.4667978Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604463,
+      "name": "tests / vcr-preflight",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:29.4516511Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:29.8572764Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:42.2710333Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:42.2712759Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604513,
+      "name": "tests / serial-coverage",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:26.5879142Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:26.9803438Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:37.3977565Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:37.3984487Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604517,
+      "name": "tests / governance-preflight",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:26.0036622Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:26.3818151Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:09:13.8718051Z ##[group]Checking out the ref",
+        "2026-11-03T03:09:13.8718405Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604530,
+      "name": "tests / neo4j-memory-live-audit",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:35.9235583Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:36.3599380Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:48.7173840Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:48.7174337Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604546,
+      "name": "tests / track-d-gates",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:25.2341475Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:25.7332074Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:33.9818007Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:33.9821737Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604561,
+      "name": "tests / unit-filesystem-contracts",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:26.2286045Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:26.6067715Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:34.6867361Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:34.6871714Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604566,
+      "name": "tests / memory-tests",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:25.6162886Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:25.9478876Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:34.1581362Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:34.1584668Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604592,
+      "name": "tests / Repo-backed unit (tooling)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:47.3047019Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:47.6746168Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:55.5237576Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:55.5239052Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604602,
+      "name": "tests / unit-subprocess-backed",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:36.2085051Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:36.6674826Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:45.2569673Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:45.2574938Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604611,
+      "name": "tests / performance-budgets",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:09:17.0893434Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:09:17.4716004Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:09:29.0808095Z ##[group]Checking out the ref",
+        "2026-11-03T03:09:29.0812101Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604621,
+      "name": "tests / Unit scripts tooling (passport)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:26.2060777Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:26.5661938Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:34.5825560Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:34.5829820Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604622,
+      "name": "tests / Unit fast (unit-application)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:26.2211145Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:27.7466949Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:44.4462992Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:44.4467075Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604635,
+      "name": "tests / Unit fast (unit-other)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:26.3872008Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:26.7196900Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:34.8014274Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:34.8018074Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604644,
+      "name": "tests / Repo-backed unit (ops)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:52.2581697Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:52.6517460Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:09:00.3123974Z ##[group]Checking out the ref",
+        "2026-11-03T03:09:00.3127316Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604651,
+      "name": "tests / Unit scripts tooling (debt-governance)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:09:28.9619253Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:09:29.3459267Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:09:41.4719852Z ##[group]Checking out the ref",
+        "2026-11-03T03:09:41.4723047Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604657,
+      "name": "tests / quality-metrics-gate",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:58.0000734Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:58.4752351Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:09:06.7743154Z ##[group]Checking out the ref",
+        "2026-11-03T03:09:06.7744760Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604702,
+      "name": "tests / Repo-backed unit (product)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:10:00.1931862Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:10:00.5326838Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:10:12.0437834Z ##[group]Checking out the ref",
+        "2026-11-03T03:10:12.0441079Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604717,
+      "name": "tests / Unit fast (unit-infrastructure)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:09:20.7917596Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:09:21.4968249Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:09:35.7200101Z ##[group]Checking out the ref",
+        "2026-11-03T03:09:35.7203355Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604738,
+      "name": "tests / test-matrix (3.13, unit-application, tests/unit/application/, tests/unit/application/**/*.py, -n ...",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:09:57.5131717Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:09:57.8581574Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:10:10.3374472Z ##[group]Checking out the ref",
+        "2026-11-03T03:10:10.3376312Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604762,
+      "name": "tests / Unit fast (unit-domain)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:09:57.8102408Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:09:58.2164661Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:10:09.2510160Z ##[group]Checking out the ref",
+        "2026-11-03T03:10:09.2511927Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604767,
+      "name": "tests / test-matrix (3.13, integration, tests/integration/, tests/integration/**/*.py, -p no:xdist)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:33.0767208Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:33.4804155Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:40.6585518Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:40.6587527Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604776,
+      "name": "tests / test-matrix (3.13, unit-domain, tests/unit/domain/, tests/unit/domain/**/*.py, -n auto --dist loa...",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:10:02.8373019Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:10:03.2323791Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:10:16.5409960Z ##[group]Checking out the ref",
+        "2026-11-03T03:10:16.5413270Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604787,
+      "name": "tests / test-matrix (3.13, security, tests/security/, tests/security/**/*.py, -n auto --dist loadscope --...",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:08:25.5766259Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:08:26.1484585Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:08:33.9211095Z ##[group]Checking out the ref",
+        "2026-11-03T03:08:33.9215026Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604828,
+      "name": "tests / Unit scripts tooling (other)",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:10:03.8056428Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:10:04.2891234Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:10:28.6030019Z ##[group]Checking out the ref",
+        "2026-11-03T03:10:28.6030559Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604835,
+      "name": "tests / test-matrix (3.13, unit-infrastructure, tests/unit/infrastructure/, tests/unit/infrastructure/**/...",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:09:31.1360556Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:09:31.5223569Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:09:46.9276317Z ##[group]Checking out the ref",
+        "2026-11-03T03:09:46.9280326Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125701604854,
+      "name": "tests / test-matrix (3.13, unit-other, tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/applic...",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:09:45.6699711Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:09:46.0046848Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:09:58.4701481Z ##[group]Checking out the ref",
+        "2026-11-03T03:09:58.4703764Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125702111624,
+      "name": "tests / dq-consistency-gate",
+      "checkout_sha": null,
+      "type": "отсутствует",
+      "command_after": null,
+      "switch": "нет",
+      "reason": "checkout отсутствует по конфигурации"
+    },
+    {
+      "job_id": 125702920734,
+      "name": "import-linter / checks-complete",
+      "checkout_sha": null,
+      "type": "отсутствует",
+      "command_after": null,
+      "switch": "нет",
+      "reason": "checkout отсутствует по конфигурации"
+    },
+    {
+      "job_id": 125704391599,
+      "name": "tests / duration-telemetry",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:16:53.2998573Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:16:53.9124026Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:17:05.4533165Z ##[group]Checking out the ref",
+        "2026-11-03T03:17:05.4534028Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125704391601,
+      "name": "tests / coverage-verify",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:16:54.1908612Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:16:54.8267074Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:17:06.3325572Z ##[group]Checking out the ref",
+        "2026-11-03T03:17:06.3328999Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125704975701,
+      "name": "tests / Proof-or-Stop advisory closeout",
+      "checkout_sha": "36325dd83d1c6c0e600c2e46420620bade3221c5",
+      "type": "head",
+      "command_after": "[command]/usr/bin/git rev-parse refs/remotes/origin/main",
+      "switch": "да",
+      "lines": [
+        "2026-11-03T03:18:43.4940682Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)",
+        "2026-11-03T03:18:44.3501905Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "2026-11-03T03:18:56.4942805Z ##[group]Checking out the ref",
+        "2026-11-03T03:18:56.4948258Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main"
+      ]
+    },
+    {
+      "job_id": 125704976053,
+      "name": "tests / tests-complete",
+      "checkout_sha": null,
+      "type": "отсутствует",
+      "command_after": null,
+      "switch": "нет",
+      "reason": "checkout отсутствует по конфигурации"
+    },
+    {
+      "job_id": 125704976805,
+      "name": "tests / coverage-inventory-currentness",
+      "checkout_sha": null,
+      "type": "отсутствует",
+      "command_after": null,
+      "switch": "нет",
+      "reason": "checkout отсутствует по конфигурации"
+    }
+  ],
+  "anomalies": []
+}
