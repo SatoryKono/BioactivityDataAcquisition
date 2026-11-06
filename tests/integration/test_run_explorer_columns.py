@@ -72,13 +72,20 @@ def test_ten_columns_keep_full_identity_for_handoffs():
 
 
 @pytest.mark.parametrize(
-    "uid,title",
+    ("uid", "title"),
     [
-        ("bioetl-control-plane-v1", "Replay Readiness"),
-        ("bioetl-overview-v2", "Run Overview"),
-        ("bioetl-run-explorer-v1", "Run Explorer"),
-        ("bioetl-incident-v1", "Incident Workspace"),
-        ("bioetl-dq-v2", "Data Quality"),
+        ("bioetl-control-plane-v1", "2. Replay Readiness"),
+        ("bioetl-overview-v2", "3. Run Overview"),
+        ("bioetl-run-explorer-v1", "1. Run Explorer"),
+        ("bioetl-incident-v1", "5. Incident Workspace"),
+        ("bioetl-dq-v2", "4. Data Quality"),
+    ],
+    ids=[
+        "bioetl-control-plane-v1-Replay Readiness",
+        "bioetl-overview-v2-Run Overview",
+        "bioetl-run-explorer-v1-Run Explorer",
+        "bioetl-incident-v1-6. Incident Workspace",
+        "bioetl-dq-v2-Data Quality",
     ],
 )
 def test_dashboard_names_preserve_uids(uid, title):

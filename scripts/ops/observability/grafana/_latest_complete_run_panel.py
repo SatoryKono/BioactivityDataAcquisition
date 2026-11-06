@@ -51,7 +51,7 @@ def stamp_latest_complete_run_panel(panels: list[object]) -> None:
                             "value": [
                                 {
                                     "title": "Open aggregate-complete run",
-                                    "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&var-run_id=${__value.raw}&${__url_time_range}",
+                                    "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&var-run_id=${__value.raw}&${__url_time_range}",
                                     "targetBlank": True,
                                     "includeVars": False,
                                 }

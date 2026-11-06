@@ -44,11 +44,11 @@ GREEN = frozenset({"green", "#73BF69", "#73bf69", "#56A64B", "#56a64b"})
 _AMP = "&"
 _AMP_ENTITY = "&amp;"
 _NAV_CHIP_TITLES = (
-    "Run Explorer",
-    "Replay Readiness",
-    "Run Overview",
-    "Data Quality",
-    "Incident Workspace",
+    "1. Run Explorer",
+    "2. Replay Readiness",
+    "3. Run Overview",
+    "4. Data Quality",
+    "5. Incident Workspace",
 )
 _STATUS_TOKENS = (
     "OK",
@@ -133,11 +133,11 @@ def parse_dashboard_view_panel(url: str) -> tuple[str | None, int | None]:
 
 
 _NAV_DESTINATIONS = {
-    "Run Explorer": "bioetl-run-explorer-v1",
-    "Replay Readiness": "bioetl-control-plane-v1",
-    "Run Overview": "bioetl-overview-v2",
-    "Data Quality": "bioetl-dq-v2",
-    "Incident Workspace": "bioetl-incident-v1",
+    "1. Run Explorer": "bioetl-run-explorer-v1",
+    "2. Replay Readiness": "bioetl-control-plane-v1",
+    "3. Run Overview": "bioetl-overview-v2",
+    "4. Data Quality": "bioetl-dq-v2",
+    "5. Incident Workspace": "bioetl-incident-v1",
 }
 _NAV_CHIP_WIDTH_RE = re.compile(r"(?:^|;)\s*width:19\.5%\s*(?:;|$)")
 _NAV_ELEMENT_RE = re.compile(
