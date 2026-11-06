@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "catalog_ref": "777f88e4d9454d359aec2924f578c5600d304060",
-  "source_ref": "5f28b1c004e96d27b5ccf3ae99af0158917a1a42",
+  "source_ref": "2a4f3f97d4a2977001b6cdba887fc8a4b1e0d1b6",
   "source_reviews": {
     "src/bioetl/application/observability/control_plane_evidence/models.py": "Adds an evidence status value; no resource acquisition.",
     "src/bioetl/composition/bootstrap/runtime/run_status.py": "Wires the live path into the existing sidecar recorder.",
