@@ -1,11 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-06T05:49:20.452553+00:00",
+  "generated_at": "2026-11-06T05:59:38.093217+00:00",
   "summary": {
     "total_scripts": 714,
     "status_counts": {
-      "active": 336,
-      "supporting": 378
+      "active": 334,
+      "supporting": 378,
+      "temporary_diagnostic": 2
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -10112,7 +10113,7 @@
     {
       "path": "scripts/engineering/ci/collect_stage0_evidence.py",
       "type": "py",
-      "status": "active",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -10122,12 +10123,16 @@
           "source_group": "tests",
           "text": "from scripts.engineering.ci.collect_stage0_evidence import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "temporary_diagnostic",
+      "review_by": "2026-12-01",
+      "next_step": "Retain only to reproduce the Stage 0 evidence reports. Remove the collector after Stage 0 evidence is accepted and archived."
     },
     {
       "path": "scripts/engineering/ci/evaluate_mypy.py",
       "type": "py",
-      "status": "active",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -10143,7 +10148,11 @@
           "source_group": "tests",
           "text": "from scripts.engineering.ci.evaluate_mypy import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "temporary_diagnostic",
+      "review_by": "2026-12-01",
+      "next_step": "Retain only to reproduce the Stage 0 cold/warm mypy experiment. Remove the evaluator after Stage 0 evidence is accepted and archived."
     },
     {
       "path": "scripts/engineering/ci/generated_artifact_checks.py",

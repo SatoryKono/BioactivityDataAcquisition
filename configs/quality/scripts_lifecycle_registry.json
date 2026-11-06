@@ -769,6 +769,18 @@
       "owner": "@bioetl-platform",
       "review_by": "2027-01-30"
     },
+    "scripts/engineering/ci/collect_stage0_evidence.py": {
+      "decision": "temporary_diagnostic",
+      "next_step": "Retain only to reproduce the Stage 0 evidence reports. Remove the collector after Stage 0 evidence is accepted and archived.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-01"
+    },
+    "scripts/engineering/ci/evaluate_mypy.py": {
+      "decision": "temporary_diagnostic",
+      "next_step": "Retain only to reproduce the Stage 0 cold/warm mypy experiment. Remove the evaluator after Stage 0 evidence is accepted and archived.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-01"
+    },
     "scripts/engineering/ci/generated_artifact_checks.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the internal CI scheduling/receipt adapter used by pr-required and nightly workflows. Its bounded CLI delegates to pytest and existing validators; it is not a new independent operator or validation entrypoint. Keep policy ownership with the test matrix and existing producer commands.",
