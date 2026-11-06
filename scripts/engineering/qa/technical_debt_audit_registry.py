@@ -208,6 +208,9 @@ def build_current_audit_semantic_summary(
             "architecture_interpretation": scorecard.get("interpretation"),
             "constructor_waiver_count": len(waivers),
             "contract_coverage_schema": contracts.get("schema_version"),
+            "coverage_xml_missing_module_count": statuses.get(
+                "coverage_xml_missing", 0
+            ),
             "debt_gate_count": gates.get("gate_count"),
             "debt_gate_fail_count": gates.get("fail_count"),
             "debt_gate_pass_count": gates.get("pass_count"),
@@ -261,6 +264,7 @@ def _headline_markers(summary: dict[str, Any]) -> tuple[str, ...]:
             "no_executable_lines_module_count",
             "uncovered_module_count",
             "unmeasured_module_count",
+            "coverage_xml_missing_module_count",
         )
     )
     return (
@@ -274,6 +278,7 @@ def _headline_markers(summary: dict[str, Any]) -> tuple[str, ...]:
         f"no_executable_lines: **{metrics['no_executable_lines_module_count']}**",
         f"uncovered: **{metrics['uncovered_module_count']}**",
         f"unmeasured: **{metrics['unmeasured_module_count']}**",
+        f"coverage_xml_missing: **{metrics['coverage_xml_missing_module_count']}**",
         f"= {module_total} == source_module_count",
         f"Contract coverage matrix schema: **{metrics['contract_coverage_schema']}**",
         f"Constructor waivers (shrink-only inventory): "
