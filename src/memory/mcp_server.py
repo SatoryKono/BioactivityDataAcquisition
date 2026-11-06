@@ -114,69 +114,76 @@ class GraphStore:
 
     def call(self, name: str, arguments: dict[str, Any]) -> Any:
         if name == "read_graph":
-            offset = arguments.get("offset", 0)
-            limit = arguments.get("limit", MAX_PAGE)
-            if (
-                type(offset) is not int
-                or offset < 0
-                or type(limit) is not int
-                or not 1 <= limit <= MAX_PAGE
-            ):
-                raise ValueError("read_graph requires offset >= 0 and limit in 1..100")
-            graph = self.read()
-            return _graph_page(graph, offset, limit)
+            return self._read_graph(arguments)
         if name == "create_entities":
-            entities = arguments.get("entities")
-            if (
-                not isinstance(entities, list)
-                or len(entities) > MAX_BATCH
-                or any(
-                    not isinstance(item, dict)
-                    or not isinstance(item.get("name"), str)
-                    or not item["name"]
-                    or not isinstance(item.get("entityType"), str)
-                    or not isinstance(item.get("observations"), list)
-                    or any(not isinstance(value, str) for value in item["observations"])
-                    for item in entities
-                )
-            ):
-                raise ValueError(
-                    "entities must contain at most 100 valid graph entities"
-                )
-
-            def create(graph: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:
-                existing = {item["name"] for item in graph["entities"]}
-                added = []
-                for item in entities:
-                    if item["name"] not in existing:
-                        existing.add(item["name"])
-                        added.append(item)
-                graph["entities"].extend(added)
-                return added
-
-            return self.update(create)
+            return self._create_entities(arguments.get("entities"))
         if name == "delete_entities":
-            values = arguments.get("entityNames")
-            if (
-                not isinstance(values, list)
-                or len(values) > MAX_BATCH
-                or any(not isinstance(value, str) for value in values)
-            ):
-                raise ValueError("entityNames must contain at most 100 strings")
-            names = set(values)
-
-            def delete(graph: dict[str, list[dict[str, Any]]]) -> None:
-                graph["entities"] = [
-                    item for item in graph["entities"] if item["name"] not in names
-                ]
-                graph["relations"] = [
-                    item
-                    for item in graph["relations"]
-                    if item["from"] not in names and item["to"] not in names
-                ]
-
-            return self.update(delete)
+            return self._delete_entities(arguments.get("entityNames"))
         raise ValueError(f"unsupported tool: {name}")
+
+    def _read_graph(self, arguments: dict[str, Any]) -> dict[str, Any]:
+        offset = arguments.get("offset", 0)
+        limit = arguments.get("limit", MAX_PAGE)
+        if (
+            type(offset) is not int
+            or offset < 0
+            or type(limit) is not int
+            or not 1 <= limit <= MAX_PAGE
+        ):
+            raise ValueError("read_graph requires offset >= 0 and limit in 1..100")
+        return _graph_page(self.read(), offset, limit)
+
+    def _delete_entities(self, values: Any) -> Any:
+        if (
+            not isinstance(values, list)
+            or len(values) > MAX_BATCH
+            or any(not isinstance(value, str) for value in values)
+        ):
+            raise ValueError("entityNames must contain at most 100 strings")
+        names = set(values)
+
+        def delete(graph: dict[str, list[dict[str, Any]]]) -> None:
+            graph["entities"] = [
+                item for item in graph["entities"] if item["name"] not in names
+            ]
+            graph["relations"] = [
+                item
+                for item in graph["relations"]
+                if item["from"] not in names and item["to"] not in names
+            ]
+
+        return self.update(delete)
+
+    @staticmethod
+    def _is_valid_entity(item: Any) -> bool:
+        return (
+            isinstance(item, dict)
+            and isinstance(item.get("name"), str)
+            and bool(item["name"])
+            and isinstance(item.get("entityType"), str)
+            and isinstance(item.get("observations"), list)
+            and all(isinstance(value, str) for value in item["observations"])
+        )
+
+    def _create_entities(self, entities: Any) -> Any:
+        if (
+            not isinstance(entities, list)
+            or len(entities) > MAX_BATCH
+            or any(not self._is_valid_entity(item) for item in entities)
+        ):
+            raise ValueError("entities must contain at most 100 valid graph entities")
+
+        def create(graph: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:
+            existing = {item["name"] for item in graph["entities"]}
+            added = []
+            for item in entities:
+                if item["name"] not in existing:
+                    existing.add(item["name"])
+                    added.append(item)
+            graph["entities"].extend(added)
+            return added
+
+        return self.update(create)
 
 
 _TOOLS = [
@@ -285,44 +292,62 @@ def _handle(store: GraphStore, request: Any) -> None:
         _error(identifier, -32601, "Method not found")
 
 
-def main() -> int:
+def _configure_stdio() -> None:
     for stream in (sys.stdin, sys.stdout):
         if isinstance(stream, TextIOWrapper):
             stream.reconfigure(encoding="utf-8")
+
+
+def _open_store() -> GraphStore | None:
     target = os.environ.get("MEMORY_FILE_PATH")
     if not target:
         print("MEMORY_FILE_PATH is required", file=sys.stderr)
-        return 64
+        return None
     root = Path(os.environ.get("MEMORY_REPO_ROOT", Path(__file__).resolve().parents[2]))
     try:
-        store = GraphStore(Path(target), repo_root=root)
+        return GraphStore(Path(target), repo_root=root)
     except ValueError:
         print(
             "MEMORY_FILE_PATH must be inside repository .cache/mcp-memory",
             file=sys.stderr,
         )
+        return None
+
+
+def _discard_oversized_request(line: str) -> None:
+    while not line.endswith("\n"):
+        line = sys.stdin.readline(MAX_REQUEST_CHARS + 1)
+        if not line:
+            break
+    _error(None, -32600, "Request exceeds size limit")
+
+
+def _handle_request_line(store: GraphStore, line: str) -> None:
+    try:
+        request = json.loads(line)
+    except (ValueError, RecursionError):
+        _error(None, -32700, "Parse error")
+        return
+    try:
+        _handle(store, request)
+    except RecursionError:
+        _error(
+            request.get("id") if isinstance(request, dict) else None,
+            -32602,
+            "Parameters exceed nesting limit",
+        )
+
+
+def main() -> int:
+    _configure_stdio()
+    store = _open_store()
+    if store is None:
         return 64
     while line := sys.stdin.readline(MAX_REQUEST_CHARS + 1):
         if len(line) > MAX_REQUEST_CHARS:
-            while not line.endswith("\n"):
-                line = sys.stdin.readline(MAX_REQUEST_CHARS + 1)
-                if not line:
-                    break
-            _error(None, -32600, "Request exceeds size limit")
+            _discard_oversized_request(line)
             continue
-        try:
-            request = json.loads(line)
-        except (ValueError, RecursionError):
-            _error(None, -32700, "Parse error")
-            continue
-        try:
-            _handle(store, request)
-        except RecursionError:
-            _error(
-                request.get("id") if isinstance(request, dict) else None,
-                -32602,
-                "Parameters exceed nesting limit",
-            )
+        _handle_request_line(store, line)
     return 0
 
 
