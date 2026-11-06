@@ -127,6 +127,10 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "reports/12553_runtime_acceptance_report.md": (
+        "tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock.py",
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+    ),
     **dict.fromkeys(
         (
             ".vscode/extensions.json",

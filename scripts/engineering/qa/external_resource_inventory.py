@@ -241,8 +241,15 @@ def _check_scenarios(record: dict[str, Any]) -> list[str]:
         or not value.get("applicability")
         or not value.get("expected")
         or not value.get("observation")
-        or value.get("runtime_result") != "NOT_RUN_12553"
-        for value in scenarios.values()
+        or (
+            value.get("runtime_result") != "NOT_RUN_12553"
+            and not (
+                record.get("identity") == "diagnostics.metric_inventory.reentrant-lock"
+                and scenario in {"normal", "error"}
+                and value.get("runtime_result") == "PASS"
+            )
+        )
+        for scenario, value in scenarios.items()
     ):
         return [
             f"{record.get('identity')}: incomplete scenarios or unsupported runtime result"
@@ -833,7 +840,7 @@ def _run(args: argparse.Namespace) -> int:
         print("Readable inventory is stale; run --update")
         return 1
     print(
-        f"PASS: {len(payload['resources'])} source-qualified definitions; runtime NOT_RUN_12553"
+        f"PASS: {len(payload['resources'])} source-qualified definitions; runtime NOT_RUN_12553/PASS"
     )
     return 0
 

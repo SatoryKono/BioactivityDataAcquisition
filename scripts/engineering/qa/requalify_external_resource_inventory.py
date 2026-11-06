@@ -487,7 +487,7 @@ def main(argv: list[str] | None = None) -> int:
             print("Reviewed source requalification is stale; run --update")
             return 1
         print(
-            "PASS: reviewed source delta; runtime qualification remains NOT_RUN_12553"
+            "PASS: reviewed source delta; runtime qualification remains NOT_RUN_12553/PASS"
         )
         return 0
     except (ValueError, KeyError, OSError, subprocess.CalledProcessError) as error:
