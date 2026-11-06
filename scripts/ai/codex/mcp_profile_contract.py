@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import sys
 from pathlib import Path
 from typing import cast
@@ -51,6 +50,16 @@ def profile_plan(profile: str, repo_root: Path = REPO_ROOT) -> dict[str, object]
     }
 
 
+def _memory_mode_value(value: str) -> str:
+    value = value.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return value[1:-1]
+    for index, character in enumerate(value):
+        if character == "#" and index > 0 and value[index - 1].isspace():
+            return value[:index].rstrip()
+    return value
+
+
 def _memory_mode(repo_root: Path) -> str:
     """Read only the persistence setting, with the memory wrapper's precedence."""
     key = "BIOETL_AI_MEMORY_MODE"
@@ -65,11 +74,7 @@ def _memory_mode(repo_root: Path) -> str:
             name, separator, value = raw.partition("=")
             if not separator or name.strip() != key:
                 continue
-            value = value.strip()
-            if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
-                mode = value[1:-1]
-            else:
-                mode = re.sub(r"\s+#.*$", "", value).rstrip()
+            mode = _memory_mode_value(value)
     return (mode or "off").lower()
 
 
