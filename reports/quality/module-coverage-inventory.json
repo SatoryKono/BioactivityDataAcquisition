@@ -1,7 +1,7 @@
 {
-  "additive_coverage_xml_path": "reports/coverage/coverage.xml",
-  "additive_coverage_xml_sha256": null,
-  "additive_measured_module_count": 0,
+  "additive_coverage_xml_path": "reports/coverage/lf06-run-id-resolver-coverage.xml",
+  "additive_coverage_xml_sha256": "b8b0cca17b430618f2cdc37141b1f39f9970b3190fa9bd55d09361f64ed3d2fe",
+  "additive_measured_module_count": 1,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": "4dc66455506c3529b7ed2450c9131d9d64f9a513b9ca7757b340beac1e3495ce",
@@ -25647,6 +25647,16 @@
       "module": "bioetl.interfaces.http._run_explorer_snapshot",
       "path": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
       "source_lines": 200
+    },
+    {
+      "coverage_percent": 92.96,
+      "coverage_status": "partially_covered",
+      "covered_lines": 66,
+      "executable_lines": 71,
+      "missing_lines": 5,
+      "module": "bioetl.interfaces.http._run_id_resolver",
+      "path": "src/bioetl/interfaces/http/_run_id_resolver.py",
+      "source_lines": 167
     },
     {
       "coverage_percent": 100.0,
@@ -51721,6 +51731,16 @@
       "source_lines": 200
     },
     {
+      "coverage_percent": 92.96,
+      "coverage_status": "partially_covered",
+      "covered_lines": 66,
+      "executable_lines": 71,
+      "missing_lines": 5,
+      "module": "bioetl.interfaces.http._run_id_resolver",
+      "path": "src/bioetl/interfaces/http/_run_id_resolver.py",
+      "source_lines": 167
+    },
+    {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 8,
@@ -52153,7 +52173,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "d7997841b08cdb459c05f7469f88cbbb1bfe1155996506990b440081c885951a",
+  "source_tree_sha256": "1cdd69e9dd0938dab7fdeacf6a7e10cda9e46ae53de2a973f9440acbf0eb5c49",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -52308,12 +52328,12 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2607,
+    "source_module_count": 2608,
     "status_counts": {
       "coverage_xml_missing": 5,
       "fully_covered": 2522,
       "no_executable_lines": 2,
-      "partially_covered": 78,
+      "partially_covered": 79,
       "uncovered": 0,
       "unmeasured": 0
     },

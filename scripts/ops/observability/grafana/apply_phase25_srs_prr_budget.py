@@ -7,7 +7,9 @@ Rewrites the five provisioned dashboard JSON files in place:
   (presentation enrichment stays in Infinity UQL; Grafana transforms cannot
   express that JSONata). Consumers use ``-- Dashboard --`` and filter
   ``_bioetl_frame``.
-- DQ / Incident / Control Plane follow the same donor pattern.
+- DQ and Incident donors use the backend parser. UQL leaves the HTTP body in
+  ``meta.custom.data`` with zero fields, so Dashboard datasource children
+  (stages, domains, duration) see an empty frame. Control Plane keeps UQL.
 - Identity / stages copies become markdown handoffs per §2.4.
 - Control Plane 9418 indexByName / hideFrom / self-link fixes (F-11/F-12).
 
@@ -143,14 +145,19 @@ _RECONCILIATION_FIELDS = (
 _REPLAY_CHECK_FIELDS = ("code", "result", "reason", "evidence_ref")
 
 
-def _infinity_uql(jsonata: str) -> dict[str, Any]:
-    # Mirror historical Infinity shape: raw JSONata in root_selector and the
-    # same expression wrapped for the UQL parser (tests assert on both).
+def _infinity_uql(jsonata: str, *, parser: str = "uql") -> dict[str, Any]:
+    """Infinity target: JSONata in ``root_selector`` and the same UQL wrapper.
+
+    ``parser="backend"`` evaluates ``root_selector`` on the server. ``uql``
+    does not: ``/api/ds/query`` keeps the body in ``meta.custom.data`` and
+    returns zero fields, so a ``-- Dashboard --`` child cannot see stages.
+    An empty JSONata array stays an empty frame, not a query error.
+    """
     return {
         "refId": "A",
         "type": "json",
         "source": "url",
-        "parser": "uql",
+        "parser": parser,
         "format": "table",
         "root_selector": jsonata,
         "url": SRS_URL,
@@ -381,8 +388,10 @@ _DQ_DOMAINS = _tag_rows("presentation_domains", "domains")
 _DQ_STAGES = (
     "($r := function($s,$o){$exists($s.removals[outcome=$o]) ? "
     "$sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; "
-    "$funnel := quality_evidence.funnel; "
-    "$map(stage_diagnostics, function($d){($s := $funnel[stage_id=$d.stage_id][0]; "
+    # Missing or empty diagnostics are an empty stage frame, not a query error.
+    "$funnel := $exists(quality_evidence.funnel) ? quality_evidence.funnel : []; "
+    "$diags := $exists(stage_diagnostics) ? stage_diagnostics : []; "
+    "$map($diags, function($d){($s := $funnel[stage_id=$d.stage_id][0]; "
     "$merge([$d, {"
     "'quarantined': $exists($s) ? $r($s,'quarantined') : null, "
     "'excluded': $exists($s) ? $r($s,'excluded_by_contract') : null, "
@@ -393,7 +402,7 @@ _DQ_STAGES = (
 )
 
 _DQ_STAGEINPUT = (
-    "($f := quality_evidence.funnel; "
+    "($f := $exists(quality_evidence.funnel) ? quality_evidence.funnel : []; "
     "$map(['01 bronze_records','02 silver_valid_records',"
     "'03 silver_filtered_out_records','04 silver_quarantined_records',"
     "'06 silver_deduplicated_records','07 gold_written_records',"
@@ -429,11 +438,34 @@ _INC_STATUS = (
 
 _INC_DOMAINS = _tag_rows("presentation_domains", "domains")
 _INC_DURATION = (
+    # Backend $toMillis of a full offset timestamp keeps only the UTC date, while
+    # a Z timestamp includes the clock. Anchor on the calendar date, then add the
+    # clock. The fraction stops at Z/z/+/- and is scaled by its own length:
+    # $substring($t,20,6) pulls the zone into $number for ".123Z" and fails the
+    # whole donor. A missing timestamp stays null, not 0 and not a query error.
     "($s := summary[0]; "
-    "$start := $s.started_at ? $toMillis($s.started_at) : null; "
-    "$end := $s.completed_at ? $toMillis($s.completed_at) : null; "
-    f"[{{'Run duration': $start != null and $end != null and $end >= $start ? "
-    f"($end - $start) / 1000 : null, '{FRAME}': 'duration'}}])"
+    "$a := $s.started_at; $b := $s.completed_at; "
+    "$secs := function($t){( "
+    "$tail := $substring($t, 19); "
+    "$rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; "
+    "$zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : "
+    "($contains($rest, '+') ? '+' : '-')); "
+    "$digits := $rest != '' ? $substringBefore($rest, $zone) : ''; "
+    "$frac := $digits != '' ? $number($digits) / $power(10, $length($digits)) : 0; "
+    "$sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); "
+    "$off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : "
+    "$substringAfter($tail, '-')); "
+    "$oh := $off != '' ? $number($substring($off, 0, 2)) : 0; "
+    "$om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; "
+    "$toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 "
+    "+ $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac "
+    "- $sign * ($oh*3600 + $om*60) )}; "
+    "$start := $a ? $secs($a) : null; "
+    "$end := $b ? $secs($b) : null; "
+    # Compare only after both ends exist: this backend evaluates `>=` on null
+    # and fails the whole donor (QUERY ERROR) instead of leaving the stat empty.
+    f"[{{'Run duration': $start != null and $end != null ? "
+    f"($end >= $start ? $end - $start : null) : null, '{FRAME}': 'duration'}}])"
 )
 _INC_DONOR = _normalized_donor(_INC_STATUS, _INC_DOMAINS, _INC_DURATION)
 
@@ -991,7 +1023,7 @@ def apply_overview(data: dict[str, Any]) -> None:
 def apply_dq(data: dict[str, Any]) -> None:
     donor = _by_id(data, 9406)
     donor["datasource"] = dict(OPS)
-    donor["targets"] = [_infinity_uql(_DQ_DONOR)]
+    donor["targets"] = [_infinity_uql(_DQ_DONOR, parser="backend")]
     donor["transformations"] = _status_donor_transforms()
     _align_status_donor_overrides(donor)
 
@@ -1066,9 +1098,24 @@ def apply_dq(data: dict[str, Any]) -> None:
                     "refId": "StageInput",
                     "type": "json",
                     "source": "url",
-                    "parser": "uql",
+                    "parser": "backend",
                     "format": "table",
-                    "root_selector": "",
+                    "root_selector": (
+                        "($f := $exists(quality_evidence.funnel) ? "
+                        "quality_evidence.funnel : []; "
+                        "$map(['01 bronze_records','02 silver_valid_records',"
+                        "'03 silver_filtered_out_records',"
+                        "'04 silver_quarantined_records',"
+                        "'06 silver_deduplicated_records',"
+                        "'07 gold_written_records',"
+                        "'08 gold_excluded_by_contract_records',"
+                        "'09 gold_quarantined_records',"
+                        "'11 gold_deduplicated_records'], function($p) { "
+                        "($layerName := $contains($p, 'bronze') ? 'bronze' : "
+                        "($contains($p, 'silver') ? 'silver' : 'gold'); "
+                        "{'parameter': $p, "
+                        "'count in': $f[stage_id = $layerName].records_in}) }))"
+                    ),
                     "url": (
                         "/ops/observability/selected-run-status"
                         "?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
@@ -1076,7 +1123,8 @@ def apply_dq(data: dict[str, Any]) -> None:
                     "url_options": {"method": "GET", "data": ""},
                     "uql": (
                         'parse-json | jsonata "'
-                        "($f := quality_evidence.funnel; "
+                        "($f := $exists(quality_evidence.funnel) ? "
+                        "quality_evidence.funnel : []; "
                         "$map(['01 bronze_records','02 silver_valid_records',"
                         "'03 silver_filtered_out_records',"
                         "'04 silver_quarantined_records',"
@@ -1128,7 +1176,7 @@ def apply_dq(data: dict[str, Any]) -> None:
 def apply_incident(data: dict[str, Any]) -> None:
     donor = _by_id(data, 2101)
     donor["datasource"] = dict(OPS)
-    donor["targets"] = [_infinity_uql(_INC_DONOR)]
+    donor["targets"] = [_infinity_uql(_INC_DONOR, parser="backend")]
     donor["transformations"] = _status_donor_transforms()
     _align_status_donor_overrides(donor)
 
