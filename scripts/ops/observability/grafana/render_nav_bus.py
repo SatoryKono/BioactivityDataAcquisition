@@ -562,7 +562,7 @@ def _restore_minimum_first_window_heights(
                 f"{current_uid}: missing protected first-window panel id={panel_id}"
             )
         grid, y, height = geometry
-        if height >= minimum_height:
+        if height == minimum_height:
             continue
         delta = minimum_height - height
         old_bottom = y + height
