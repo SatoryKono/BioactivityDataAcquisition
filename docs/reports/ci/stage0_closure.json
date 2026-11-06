@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "timestamp": "2026-11-06T06:59:10.008795+00:00",
+    "timestamp": "2026-11-06T07:19:18.527256+00:00",
     "repository": "SatoryKono/BioactivityDataAcquisition",
-    "git_head": "2e7aacd94ef9e62b4d35dbddc7bac8affaa7986e",
+    "git_head": "ac39261fd590ce253ca53b27ba28ec111f45ebf4",
     "worktree_dirty": false
   },
   "criteria": {
@@ -34,14 +34,15 @@
       "note": "Ruleset config verified: active, strict, pr-gate-complete, bypassactors[], current_user_can_bypass=never."
     },
     "0.6_mypy_evaluation": {
-      "status": "PASS",
-      "note": "Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; speedup=15.179 — измерение mypy-кэша пригодно.",
+      "status": "PARTIAL",
+      "note": "Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; speedup=10.500 подтверждён для локального кэша. Восстановление удалённого кэша в CI не измерялось.",
       "evidence": "reports/mypy_eval.json",
       "typecheck_pass": true,
       "cache_measurement_usable": true,
       "diagnostics_match": true,
-      "speedup": 15.178711928513787,
+      "speedup": 10.499801933226875,
       "targets_match": true,
+      "remote_cache_verified": false,
       "cold_returncode": 0,
       "warm_returncode": 0
     },
@@ -81,13 +82,13 @@
   "closure_passport": {
     "owner": "SatoryKono",
     "deadline": "N/A",
-    "collector_base_sha": "2e7aacd94ef9e62b4d35dbddc7bac8affaa7986e",
+    "collector_base_sha": "ac39261fd590ce253ca53b27ba28ec111f45ebf4",
     "collector_worktree_dirty": false,
     "scope": "Stage 0 CI Optimization Evidence Gathering",
     "tool_versions": "Python 3.13.x, mypy, uv",
     "commands": "python scripts/engineering/ci/evaluate_mypy.py, python scripts/engineering/ci/collect_stage0_evidence.py",
     "test_data": "Historical GH/Circle data injected, coverage audit data injected, local cold/warm mypy test.",
-    "expected_result": "Evidence gathered from reports/mypy_eval.json (0.6 status=PASS); BLOCKED on 0.5 ruleset API access.",
+    "expected_result": "Evidence gathered from reports/mypy_eval.json (0.6 status=PARTIAL); BLOCKED on 0.5 ruleset API access.",
     "allowed_skips": "API queries requiring authenticated token skipped and marked BLOCKED.",
     "link_to_evidence": "docs/reports/ci/stage0_closure.json, reports/mypy_eval.json",
     "independent_reviewer": "TBD"

@@ -4,13 +4,13 @@
 | :--- | :--- |
 | owner | SatoryKono |
 | deadline | N/A |
-| collector_base_sha | 2e7aacd94ef9e62b4d35dbddc7bac8affaa7986e |
+| collector_base_sha | ac39261fd590ce253ca53b27ba28ec111f45ebf4 |
 | collector_worktree_dirty | False |
 | scope | Stage 0 CI Optimization Evidence Gathering |
 | tool_versions | Python 3.13.x, mypy, uv |
 | commands | python scripts/engineering/ci/evaluate_mypy.py, python scripts/engineering/ci/collect_stage0_evidence.py |
 | test_data | Historical GH/Circle data injected, coverage audit data injected, local cold/warm mypy test. |
-| expected_result | Evidence gathered from reports/mypy_eval.json (0.6 status=PASS); BLOCKED on 0.5 ruleset API access. |
+| expected_result | Evidence gathered from reports/mypy_eval.json (0.6 status=PARTIAL); BLOCKED on 0.5 ruleset API access. |
 | allowed_skips | API queries requiring authenticated token skipped and marked BLOCKED. |
 | link_to_evidence | docs/reports/ci/stage0_closure.json, reports/mypy_eval.json |
 | independent_reviewer | TBD |
@@ -26,8 +26,8 @@
 - **0.4_semantic_matrix**: INHERITED_OBSERVATIONAL
 - **0.5_live_ruleset**: BLOCKED
   - Ruleset config verified: active, strict, pr-gate-complete, bypassactors[], current_user_can_bypass=never.
-- **0.6_mypy_evaluation**: PASS
-  - Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; speedup=15.179 — измерение mypy-кэша пригодно.
+- **0.6_mypy_evaluation**: PARTIAL
+  - Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; speedup=10.500 подтверждён для локального кэша. Восстановление удалённого кэша в CI не измерялось.
 - **0.7_shard_profiles**: INHERITED_OBSERVATIONAL
   - Handled externally via independent audit.
 - **0.8_sha_pin_inventory**: INHERITED_OBSERVATIONAL
@@ -52,15 +52,15 @@
 {
   "stage0_closure.json": {
     "path": "docs/reports/ci/stage0_closure.json",
-    "size_bytes": 4808,
-    "sha256": "5f1dbc408022fe216d01f6fa30a045cc24c1ddcbadb87844211f3011c7c86ca4",
-    "modified": "2026-11-06T06:59:10.008950+00:00"
+    "size_bytes": 4950,
+    "sha256": "3aa7f71cecd2457b2af18aa36acd391aa56f8e697ffd46cec888158780229f78",
+    "modified": "2026-11-06T07:19:18.527725+00:00"
   },
   "mypy_eval.json": {
     "path": "reports/mypy_eval.json",
-    "size_bytes": 969,
-    "sha256": "28a124da000d2203d1661a9c2f8f6713edcbc36a3326872122867d34b1ff07f3",
-    "modified": "2026-11-06T06:58:43.476309+00:00"
+    "size_bytes": 1458,
+    "sha256": "4b831dfccd0f24f02563f360d26612e2729f48deb5283cfc8252ccf6c4ba5156",
+    "modified": "2026-11-06T07:18:06.587596+00:00"
   }
 }
 ```
