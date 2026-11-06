@@ -1,55 +1,49 @@
+"""Regression coverage for the metric inventory collection lock."""
+
 from __future__ import annotations
+
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import nullcontext
+from pathlib import Path
 
 import pytest
 
-from bioetl.infrastructure.observability.metric_inventory import (
-    _COLLECTION_LOCK,
-    collect_metric_inventory,
-)
+from bioetl.infrastructure.observability import metric_inventory
 
 pytestmark = pytest.mark.unit
 
-def test_reentrant_lock_normal_acquisition_and_release(tmp_path) -> None:
-    """Test normal acquisition and release of the _COLLECTION_LOCK."""
-    assert not _COLLECTION_LOCK._is_owned()  # Initially unowned
 
-    lock_acquired = False
+@pytest.mark.parametrize("fail_read", [False, True], ids=["normal", "error"])
+def test_collection_lock_released_after_inventory_read(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, fail_read: bool
+) -> None:
+    """A competing thread can take the lock only after collection exits."""
+    lock = metric_inventory._COLLECTION_LOCK
+    load_definitions = metric_inventory._load_declared_metric_definitions
 
-    def mock_collect_impl(*args, **kwargs):
-        nonlocal lock_acquired
-        lock_acquired = _COLLECTION_LOCK._is_owned()
-        return {}
+    def try_acquire() -> bool:
+        acquired = lock.acquire(blocking=False)
+        if acquired:
+            lock.release()
+        return acquired
 
-    # We patch the inner implementation to avoid heavy I/O
-    import bioetl.infrastructure.observability.metric_inventory as metric_inventory
-    original_impl = metric_inventory._collect_metric_inventory_impl
-    metric_inventory._collect_metric_inventory_impl = mock_collect_impl
+    with ThreadPoolExecutor(max_workers=1) as contender:
 
-    try:
-        collect_metric_inventory(tmp_path)
-    finally:
-        metric_inventory._collect_metric_inventory_impl = original_impl
+        def observe_read(repo_root: Path) -> dict[str, set[str]]:
+            assert not contender.submit(try_acquire).result(timeout=5)
+            if fail_read:
+                raise OSError("injected inventory read failure")
+            return load_definitions(repo_root)
 
-    assert lock_acquired is True
-    assert not _COLLECTION_LOCK._is_owned()
+        monkeypatch.setattr(
+            metric_inventory, "_load_declared_metric_definitions", observe_read
+        )
+        outcome = (
+            pytest.raises(OSError, match="injected inventory read failure")
+            if fail_read
+            else nullcontext()
+        )
+        with outcome:
+            metric_inventory.collect_metric_inventory(tmp_path)
 
-
-def test_reentrant_lock_error_release(tmp_path) -> None:
-    """Test release of the _COLLECTION_LOCK upon error."""
-    assert not _COLLECTION_LOCK._is_owned()
-
-    def mock_collect_impl_error(*args, **kwargs):
-        assert _COLLECTION_LOCK._is_owned()
-        raise ValueError("Simulated error inside lock")
-
-    import bioetl.infrastructure.observability.metric_inventory as metric_inventory
-    original_impl = metric_inventory._collect_metric_inventory_impl
-    metric_inventory._collect_metric_inventory_impl = mock_collect_impl_error
-
-    try:
-        with pytest.raises(ValueError, match="Simulated error inside lock"):
-            collect_metric_inventory(tmp_path)
-    finally:
-        metric_inventory._collect_metric_inventory_impl = original_impl
-
-    assert not _COLLECTION_LOCK._is_owned()
+        assert contender.submit(try_acquire).result(timeout=5)

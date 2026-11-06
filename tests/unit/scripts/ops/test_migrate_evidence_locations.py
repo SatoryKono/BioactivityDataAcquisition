@@ -25,6 +25,8 @@ from scripts.ops.runtime.migrate_evidence_locations import (
     read_target_list,
 )
 
+pytestmark = pytest.mark.unit
+
 _VALID_DIGEST = "0" * 64
 _RUN_ID = "00000000-0000-0000-0000-000000000000"
 _CREATED_AT = datetime(2024, 1, 1, tzinfo=UTC)

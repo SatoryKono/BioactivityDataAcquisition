@@ -241,7 +241,7 @@ def _check_scenarios(record: dict[str, Any]) -> list[str]:
         or not value.get("applicability")
         or not value.get("expected")
         or not value.get("observation")
-        or value.get("runtime_result") not in ("NOT_RUN_12553", "PASS")
+        or value.get("runtime_result") != "NOT_RUN_12553"
         for value in scenarios.values()
     ):
         return [
@@ -391,7 +391,7 @@ def _check_source_review(
         or not valid_refs
         or review.get("source_ref") != payload["source_commit"]
         or re.fullmatch(r"[0-9a-f]{64}", str(review.get("review_sha256", ""))) is None
-        or review.get("runtime_result") not in ("NOT_RUN_12553", "PASS")
+        or review.get("runtime_result") != "NOT_RUN_12553"
     ):
         return [
             "source review identity/counts/runtime claim differ from the actual source census"
@@ -833,7 +833,7 @@ def _run(args: argparse.Namespace) -> int:
         print("Readable inventory is stale; run --update")
         return 1
     print(
-        f"PASS: {len(payload['resources'])} source-qualified definitions; runtime NOT_RUN_12553/PASS"
+        f"PASS: {len(payload['resources'])} source-qualified definitions; runtime NOT_RUN_12553"
     )
     return 0
 
