@@ -279,7 +279,7 @@ def run_mcp(
     output_json: bool,
     output_path: Path | None = None,
 ) -> int:
-    plan = effective_profile_plan(profile_plan(profile, repo_root))
+    plan = effective_profile_plan(profile_plan(profile, repo_root), repo_root)
     catalog_path = repo_root / "scripts/ops/runtime/mcp/shared-servers.json"
     catalog = cast(
         dict[str, Any], json.loads(catalog_path.read_text(encoding="utf-8"))["servers"]

@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from pathlib import Path
 from typing import cast
@@ -50,9 +51,33 @@ def profile_plan(profile: str, repo_root: Path = REPO_ROOT) -> dict[str, object]
     }
 
 
-def effective_profile_plan(plan: dict[str, object]) -> dict[str, object]:
+def _memory_mode(repo_root: Path) -> str:
+    """Read only the persistence setting, with the memory wrapper's precedence."""
+    key = "BIOETL_AI_MEMORY_MODE"
+    if key in os.environ:
+        return (os.environ[key] or "off").lower()
+    if os.environ.get("BIOETL_REPO_ENV_LOADED") == "1":
+        return "off"
+    source = Path(os.environ.get("BIOETL_ENV_FILE") or repo_root / ".env")
+    mode = "off"
+    if source.is_file():
+        for raw in source.read_text(encoding="utf-8").splitlines():
+            name, separator, value = raw.partition("=")
+            if not separator or name.strip() != key:
+                continue
+            value = value.strip()
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+                mode = value[1:-1]
+            else:
+                mode = re.sub(r"\s+#.*$", "", value).rstrip()
+    return (mode or "off").lower()
+
+
+def effective_profile_plan(
+    plan: dict[str, object], repo_root: Path = REPO_ROOT
+) -> dict[str, object]:
     """Apply task persistence authority without changing the declared inventory."""
-    mode = os.environ.get("BIOETL_AI_MEMORY_MODE", "off").lower()
+    mode = _memory_mode(repo_root)
     if mode in {"read-write", "readwrite", "rw"}:
         return {**plan, "disabled_by_mode": []}
     if mode not in {"off", "disabled", "read-only", "readonly", "ro"}:
