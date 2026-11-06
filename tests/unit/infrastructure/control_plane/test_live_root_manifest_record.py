@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import threading
 from uuid import UUID
 
 from bioetl.domain.control_plane import RunManifest
@@ -12,6 +13,8 @@ from bioetl.infrastructure.control_plane.file_run_manifest_store import (
 )
 from bioetl.infrastructure.control_plane.live_run_manifest_catalog import (
     LiveRootRecordResult,
+    _live_catalog_lock,
+    copy_contract_evidence_to_live_catalog,
     record_manifest_in_live_catalog,
     snapshot_manifest_catalog,
 )
@@ -245,3 +248,70 @@ def test_already_recorded_manifest_receives_a_later_sidecar(tmp_path: Path) -> N
     sidecar.write_text('{"manifest_id": "replaced"}\n', encoding="utf-8")
     _record_pair(live, source, manifest)
     assert (live / sidecar.name).read_text(encoding="utf-8") == "kept\n"
+
+
+def test_later_sidecar_is_not_attached_to_a_conflicting_live_manifest(
+    tmp_path: Path,
+) -> None:
+    live = tmp_path / "run_manifest"
+    source = tmp_path / "source"
+    _save(live, _manifest(manifest_id="shared-manifest"))
+    _save(
+        source,
+        _manifest(manifest_id="shared-manifest", run_id=_OTHER_RUN_ID),
+    )
+    sidecar = source / "shared-manifest.contract-evidence.json"
+    sidecar.write_text('{"manifest_id": "shared-manifest"}\n', encoding="utf-8")
+
+    copy_contract_evidence_to_live_catalog(
+        "shared-manifest",
+        source_base=source,
+        live_base=live,
+    )
+
+    assert not (live / sidecar.name).exists()
+
+
+def test_later_sidecar_is_attached_when_live_manifest_matches_source(
+    tmp_path: Path,
+) -> None:
+    live, source, manifest, _before = _recorded_pair(tmp_path)
+    sidecar = source / "new-manifest.contract-evidence.json"
+    sidecar.write_text('{"manifest_id": "new-manifest"}\n', encoding="utf-8")
+
+    copy_contract_evidence_to_live_catalog(
+        manifest.manifest_id,
+        source_base=source,
+        live_base=live,
+    )
+
+    assert (live / sidecar.name).read_text(encoding="utf-8") == sidecar.read_text(
+        encoding="utf-8"
+    )
+
+
+def test_live_catalog_lock_excludes_a_second_holder(tmp_path: Path) -> None:
+    live = tmp_path / "run_manifest"
+    entered = threading.Event()
+    release = threading.Event()
+    second_entered = threading.Event()
+
+    def _hold() -> None:
+        with _live_catalog_lock(live):
+            entered.set()
+            release.wait(timeout=10)
+
+    def _contend() -> None:
+        with _live_catalog_lock(live):
+            second_entered.set()
+
+    holder = threading.Thread(target=_hold)
+    holder.start()
+    assert entered.wait(timeout=10)
+    contender = threading.Thread(target=_contend)
+    contender.start()
+    assert not second_entered.wait(timeout=0.5)
+    release.set()
+    holder.join(timeout=10)
+    contender.join(timeout=10)
+    assert second_entered.is_set()
