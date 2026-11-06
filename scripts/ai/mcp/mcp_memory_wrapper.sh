@@ -38,9 +38,6 @@ case "${memory_mode}" in
     ;;
 esac
 
-export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
-mkdir -p "${NPM_CONFIG_CACHE}"
-
 if [[ -n "${BIOETL_WSL_VENV_DIR:-}" && -x "${BIOETL_WSL_VENV_DIR}/bin/python" ]]; then
   MEMORY_PYTHON="${BIOETL_WSL_VENV_DIR}/bin/python"
 elif [[ -x "${REPO_ROOT}/.venv/bin/python" ]]; then

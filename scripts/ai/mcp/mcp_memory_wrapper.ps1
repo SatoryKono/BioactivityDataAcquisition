@@ -35,11 +35,6 @@ if ($memoryMode -notin @('read-write', 'readwrite', 'rw')) {
     exit 64
 }
 
-if (-not $env:NPM_CONFIG_CACHE) {
-    $env:NPM_CONFIG_CACHE = Join-Path $repoRoot '.cache\npm-cache'
-}
-New-Item -ItemType Directory -Force -Path $env:NPM_CONFIG_CACHE | Out-Null
-
 $venvWinPython = Join-Path $repoRoot '.venv-win\Scripts\python.exe'
 $venvPython = Join-Path $repoRoot '.venv\Scripts\python.exe'
 if (Test-Path $venvWinPython) {
