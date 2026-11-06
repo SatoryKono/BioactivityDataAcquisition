@@ -62,6 +62,7 @@ BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
 DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
+STAGE0_EVIDENCE_TEST = "tests/unit/scripts/engineering/ci/test_stage0_evidence.py"
 GRAFANA_SELECTOR_CONTRACT_TEST = "tests/integration/test_grafana_selector_contract.py"
 GRAFANA_VARIABLE_REFERENCE_TEST = "tests/integration/test_grafana_variable_reference.py"
 RUN_REPORT_CONTRACTS_TEST = "tests/unit/domain/run_reports/test_contracts.py"
@@ -299,6 +300,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/ops/docker/test_verify_report_bind.py",
         "tests/integration/test_deployed_replay_readiness.py",
     ),
+    "docs/04-reference/contracts/run-manifest-ledger.md": (
+        "tests/unit/infrastructure/control_plane/test_live_root_manifest_record.py",
+        "tests/unit/interfaces/http/test_manifest_validation_catalog.py",
+    ),
     "docs/00-project/RULES.md": (INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,),
     "reports/engineering/SCHEMA-001_execution_evidence.md": (
         "tests/unit/scripts/test_verify_schema_parity.py",
@@ -336,6 +341,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             ".github/workflows/scorecard.yml",
             ".github/workflows/security.yml",
             ".github/workflows/skills-consistency.yml",
+            ".github/workflows/stage0-cache-pair.yml",
+            ".github/workflows/stage0-evidence-capture.yml",
+            ".github/workflows/stage0-phase-profile.yml",
             ".github/workflows/stale.yml",
             ".github/workflows/tests.yml",
             TYPE_CHECKING_COLD_WORKFLOW,
@@ -452,6 +460,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12763_opener_protocol_review.json",
             "configs/quality/external_resource_inventory_pr12783_lf06_review.json",
             "configs/quality/external_resource_inventory_pr12786_composite_review.json",
+            "configs/quality/external_resource_inventory_pr12782_lf07_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -714,6 +723,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_gitignore_secret_and_agents_policy.py",
         *BENCHMARK_EVIDENCE_TESTS,
     ),
+    "docs/reports/ci/stage0_closure.json": (STAGE0_EVIDENCE_TEST,),
+    "docs/reports/ci/stage0_closure_report.md": (STAGE0_EVIDENCE_TEST,),
+    "reports/mypy_eval.json": (STAGE0_EVIDENCE_TEST,),
     "docs/reports/generated/documentation-cleanup-inventory.json": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),

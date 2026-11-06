@@ -14,7 +14,7 @@ from bioetl.application.observability.control_plane_evidence.service_support imp
     source_error_payload,
 )
 from bioetl.application.runtime_clock import current_utc_time
-from bioetl.domain.ports import CheckpointPort, WorkflowManifestPort
+from bioetl.domain.ports import CheckpointPort, RunReportStorePort, WorkflowManifestPort
 from bioetl.interfaces.http._control_plane_latest_complete import (
     LATEST_COMPLETE_SCAN_LIMIT,
     build_latest_complete_run_payload,
@@ -37,8 +37,52 @@ from bioetl.interfaces.http._health_server_control_plane_evidence_scope import (
     to_evidence_scope,
 )
 from bioetl.interfaces.http._health_server_control_plane_scope import (
+    _IdentityScope,
     read_selected_run_id,
 )
+from bioetl.interfaces.http._report_selector_options import (
+    verified_report_identity_for_run,
+)
+
+_CATALOG_MEMBERSHIP_SCOPES: dict[str, tuple[str, ...]] = {
+    "workflow": (),
+    "pipeline": (),
+    "run_type": (),
+    "run_status": (),
+}
+
+
+def reconcile_manifest_validation_scope(
+    scope: _IdentityScope,
+    *,
+    report_store: RunReportStorePort | None,
+) -> _IdentityScope:
+    """Map a report-catalog run that has no manifest off ``selected_run_id_not_found``.
+
+    ``selected_run_id_not_found`` stays only when the run id is absent from the
+    manifest catalog and from the report catalog. A manifest-catalog hit is
+    unchanged. Other validation routes do not call this helper.
+    """
+    if scope.resolved_via != "selected_run_id_not_found":
+        return scope
+    run_id = scope.selected_run_id
+    if run_id is None or report_store is None:
+        return scope
+    identity = verified_report_identity_for_run(
+        run_id,
+        _CATALOG_MEMBERSHIP_SCOPES,
+        store=report_store,
+    )
+    if identity is None:
+        return scope
+    return _IdentityScope(
+        requested_pipeline=scope.requested_pipeline,
+        selected_pipelines=scope.selected_pipelines,
+        selected_run_types=scope.selected_run_types,
+        selected_run_id=scope.selected_run_id,
+        resolved_manifest=scope.resolved_manifest,
+        resolved_via="resolved_without_manifest",
+    )
 
 
 class _EvidenceRoutingHost(EvidenceScopeHost, Protocol):
@@ -295,6 +339,20 @@ async def _service_payload(
     if error_payload is not None:
         return error_payload
     assert scope is not None
+    if endpoint == "manifest-validation":
+        try:
+            scope = await asyncio.to_thread(
+                reconcile_manifest_validation_scope,
+                scope,
+                report_store=getattr(host, "_run_report_store", None),
+            )
+        except SOURCE_READ_ERRORS:
+            return source_error_payload(
+                endpoint=endpoint,
+                scope=to_evidence_scope(scope),
+                reason=source_reason,
+                check=source_check,
+            )
     evidence_scope = to_evidence_scope(scope)
     try:
         if endpoint == "trust-summary":

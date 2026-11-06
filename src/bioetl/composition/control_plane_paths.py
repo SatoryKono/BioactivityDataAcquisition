@@ -16,6 +16,7 @@ from bioetl.composition.bootstrap.composite_infrastructure_context import (
 from bioetl.composition.runtime_builders.run_manifest_data_roots import (
     resolve_data_root,
 )
+from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.run_evidence_location import (
     DEFAULT_EVIDENCE_ROOT_ALIAS,
     canonicalize_relative_data_root,
@@ -32,6 +33,10 @@ from bioetl.infrastructure.control_plane.file_run_ledger_store import FileRunLed
 from bioetl.infrastructure.control_plane.file_run_manifest_store import (
     FileRunManifestStore,
 )
+from bioetl.infrastructure.control_plane.live_run_manifest_catalog import (
+    LiveRootRecordResult,
+    record_manifest_in_live_catalog,
+)
 from bioetl.infrastructure.control_plane.file_workflow_manifest_store import (
     FileWorkflowManifestStore,
 )
@@ -46,13 +51,49 @@ if TYPE_CHECKING:
 __all__ = [
     "EvidenceLocationBindingContext",
     "FileEvidenceReadContextFactory",
+    "LiveRootRecordResult",
     "build_evidence_location_binding_context",
     "control_plane_root",
+    "live_run_manifest_catalog",
+    "publish_new_run_manifest_to_live_root",
     "relative_data_root_under_alias",
     "resolve_dashboard_data_alias_base",
     "resolve_data_root",
     "resolve_registration_runtime_source_id",
 ]
+
+
+def live_run_manifest_catalog(settings: Settings) -> Path | None:
+    """Return the dashboard live manifest catalog, or None when it is not aliased."""
+    alias = resolve_dashboard_data_alias_base(settings=settings)
+    if alias is None:
+        return None
+    return alias / "output" / "control" / "run_manifest"
+
+
+def publish_new_run_manifest_to_live_root(
+    *,
+    manifest: RunManifest,
+    settings: Settings,
+    source_base: Path,
+) -> LiveRootRecordResult:
+    """Record one new manifest in the dashboard live root.
+
+    When ``dashboard_data_root`` differs from the run data root, the manifest
+    and its run-id index are recorded under
+    ``{dashboard_data_root}/output/control/run_manifest``. A sidecar that
+    already exists is copied; the finalized sidecar is copied again when the
+    recorder creates it. Historical trees are not walked. An unset alias, or
+    the same directory, keeps the run data root as the only catalog.
+    """
+    alias = resolve_dashboard_data_alias_base(settings=settings)
+    data_root = alias if alias is not None else resolve_data_root(settings)
+    live_base = Path(data_root) / "output" / "control" / "run_manifest"
+    return record_manifest_in_live_catalog(
+        manifest=manifest,
+        live_base=live_base,
+        source_base=source_base,
+    )
 
 
 def control_plane_root(settings: Settings, leaf: str) -> Path:
