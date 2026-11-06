@@ -40,7 +40,15 @@ def _server(path: Path) -> subprocess.Popen[str]:
     pythonpath = os.pathsep.join(
         part for part in (str(source_path), os.environ.get("PYTHONPATH")) if part
     )
-    env = dict(os.environ, MEMORY_FILE_PATH=str(path), PYTHONPATH=pythonpath)
+    repo_root = next(
+        parent for parent in path.parents if parent.name == ".cache"
+    ).parent
+    env = dict(
+        os.environ,
+        MEMORY_FILE_PATH=str(path),
+        MEMORY_REPO_ROOT=str(repo_root),
+        PYTHONPATH=pythonpath,
+    )
     return subprocess.Popen(
         [sys.executable, "-m", "memory.mcp_server"],
         stdin=subprocess.PIPE,
@@ -54,7 +62,8 @@ def _server(path: Path) -> subprocess.Popen[str]:
 def test_live_servers_share_scope_persist_and_write_concurrently(
     tmp_path: Path,
 ) -> None:
-    path = tmp_path / "shared.json"
+    path = tmp_path / ".cache" / "mcp-memory" / "shared.json"
+    path.parent.mkdir(parents=True)
     path.write_text('{"entities":[],"relations":[]}\n', encoding="utf-8")
     first, second = _server(path), _server(path)
     try:
@@ -101,7 +110,9 @@ def test_live_servers_share_scope_persist_and_write_concurrently(
 
 
 def test_live_servers_do_not_cross_scope(tmp_path: Path) -> None:
-    paths = [tmp_path / "main.json", tmp_path / "feature.json"]
+    cache = tmp_path / ".cache" / "mcp-memory"
+    cache.mkdir(parents=True)
+    paths = [cache / "main.json", cache / "feature.json"]
     for path in paths:
         path.write_text('{"entities":[],"relations":[]}\n', encoding="utf-8")
     servers = [_server(path) for path in paths]

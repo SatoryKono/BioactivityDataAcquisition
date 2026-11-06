@@ -66,7 +66,8 @@ def test_mcp_memory_default_store_is_scoped_and_untracked() -> None:
     # Scope via the resolved interpreter so Windows/venv paths stay consistent.
     assert '"${MEMORY_PYTHON}" -m memory.mcp_scope' in wrapper
     assert '--repo-root "${REPO_ROOT}"' in wrapper
-    assert '--seed "${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"' in wrapper
+    assert 'MEMORY_SEED_PATH:-${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json' in wrapper
+    assert 'scope_args+=(--target "${MEMORY_FILE_PATH}")' in wrapper
     assert 'export MEMORY_FILE_PATH="$(' in wrapper
 
 

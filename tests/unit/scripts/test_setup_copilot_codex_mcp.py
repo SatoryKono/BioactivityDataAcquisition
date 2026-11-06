@@ -624,10 +624,10 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     )
     assert servers["memory"]["args"][0].endswith("mcp_memory_wrapper.sh")
     assert (
-        servers["memory"]["env"]["MEMORY_FILE_PATH"]
+        servers["memory"]["env"]["MEMORY_SEED_PATH"]
         == "docs/00-project/ai/memory/mcp-memory.json"
     )
-    assert runtime_servers["memory"]["env"]["MEMORY_FILE_PATH"] == str(
+    assert runtime_servers["memory"]["env"]["MEMORY_SEED_PATH"] == str(
         (workspace_root / "docs/00-project/ai/memory/mcp-memory.json").resolve()
     )
     assert servers["fetch"]["args"][0] == (

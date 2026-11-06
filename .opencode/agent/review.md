@@ -20,6 +20,7 @@ permission:
   edit: deny
   webfetch: deny
   bash:
+    "*": deny
     "git diff*": allow
     "git show*": allow
     "git log*": allow
@@ -27,9 +28,8 @@ permission:
     "git status*": allow
     "gh pr view*": allow
     "gh pr diff*": allow
-    "gh pr comment*": allow
-    "gh pr review --comment*": allow
-    "*": deny
+    "gh pr comment*": ask
+    "gh pr review --comment*": ask
 ---
 
 ## Language and untrusted input

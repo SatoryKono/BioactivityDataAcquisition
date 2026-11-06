@@ -7,7 +7,7 @@ to inform optimization decisions.
 """
 
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +18,13 @@ class AgentMetricsCollector:
     def __init__(self, metrics_path: Path):
         self.metrics_path = metrics_path
         self.metrics = self._load_metrics()
+        self.metrics["version"] = "1.1"
+        for group in ("agents", "skills", "workflows", "mcp_servers"):
+            for row in self.metrics[group].values():
+                if row["call_count"] == 0:
+                    row["average_duration_ms"] = None
+                    if "success_rate" in row:
+                        row["success_rate"] = None
 
     def _load_metrics(self) -> dict[str, Any]:
         """Load existing metrics or create new structure."""
@@ -31,7 +38,7 @@ class AgentMetricsCollector:
         return {
             "version": "1.0",
             "description": "Agent usage metrics for Devin runtime optimization",
-            "metrics_collection_start": datetime.now().isoformat(),
+            "metrics_collection_start": datetime.now(UTC).isoformat(),
             "agents": {},
             "skills": {},
             "workflows": {},
@@ -51,25 +58,29 @@ class AgentMetricsCollector:
             self.metrics["agents"][agent_name] = {
                 "call_count": 0,
                 "last_used": None,
-                "average_duration_ms": 0,
-                "success_rate": 0.0,
+                "average_duration_ms": None,
+                "success_rate": None,
                 "common_modes": [],
                 "typical_scope": []
             }
 
         agent = self.metrics["agents"][agent_name]
         agent["call_count"] += 1
-        agent["last_used"] = datetime.now().isoformat()
+        agent["last_used"] = datetime.now(UTC).isoformat()
 
         # Update average duration
-        total_duration = agent["average_duration_ms"] * (agent["call_count"] - 1) + duration_ms
+        total_duration = (agent["average_duration_ms"] or 0) * (agent["call_count"] - 1) + duration_ms
         agent["average_duration_ms"] = total_duration / agent["call_count"]
 
         # Update success rate
         if success:
-            agent["success_rate"] = (agent["success_rate"] * (agent["call_count"] - 1) + 1.0) / agent["call_count"]
+            agent["success_rate"] = (
+                (agent["success_rate"] or 0) * (agent["call_count"] - 1) + 1.0
+            ) / agent["call_count"]
         else:
-            agent["success_rate"] = (agent["success_rate"] * (agent["call_count"] - 1)) / agent["call_count"]
+            agent["success_rate"] = (
+                (agent["success_rate"] or 0) * (agent["call_count"] - 1)
+            ) / agent["call_count"]
 
         # Track common modes and scopes
         if mode and mode not in agent["common_modes"]:
@@ -87,15 +98,15 @@ class AgentMetricsCollector:
             self.metrics["skills"][skill_name] = {
                 "call_count": 0,
                 "last_used": None,
-                "average_duration_ms": 0
+                "average_duration_ms": None
             }
 
         skill = self.metrics["skills"][skill_name]
         skill["call_count"] += 1
-        skill["last_used"] = datetime.now().isoformat()
+        skill["last_used"] = datetime.now(UTC).isoformat()
 
         # Update average duration
-        total_duration = skill["average_duration_ms"] * (skill["call_count"] - 1) + duration_ms
+        total_duration = (skill["average_duration_ms"] or 0) * (skill["call_count"] - 1) + duration_ms
         skill["average_duration_ms"] = total_duration / skill["call_count"]
 
     def record_workflow_call(
@@ -109,23 +120,27 @@ class AgentMetricsCollector:
             self.metrics["workflows"][workflow_name] = {
                 "call_count": 0,
                 "last_used": None,
-                "average_duration_ms": 0,
-                "success_rate": 0.0
+                "average_duration_ms": None,
+                "success_rate": None
             }
 
         workflow = self.metrics["workflows"][workflow_name]
         workflow["call_count"] += 1
-        workflow["last_used"] = datetime.now().isoformat()
+        workflow["last_used"] = datetime.now(UTC).isoformat()
 
         # Update average duration
-        total_duration = workflow["average_duration_ms"] * (workflow["call_count"] - 1) + duration_ms
+        total_duration = (workflow["average_duration_ms"] or 0) * (workflow["call_count"] - 1) + duration_ms
         workflow["average_duration_ms"] = total_duration / workflow["call_count"]
 
         # Update success rate
         if success:
-            workflow["success_rate"] = (workflow["success_rate"] * (workflow["call_count"] - 1) + 1.0) / workflow["call_count"]
+            workflow["success_rate"] = (
+                (workflow["success_rate"] or 0) * (workflow["call_count"] - 1) + 1.0
+            ) / workflow["call_count"]
         else:
-            workflow["success_rate"] = (workflow["success_rate"] * (workflow["call_count"] - 1)) / workflow["call_count"]
+            workflow["success_rate"] = (
+                (workflow["success_rate"] or 0) * (workflow["call_count"] - 1)
+            ) / workflow["call_count"]
 
     def record_mcp_call(
         self,
@@ -137,15 +152,15 @@ class AgentMetricsCollector:
             self.metrics["mcp_servers"][mcp_name] = {
                 "call_count": 0,
                 "last_used": None,
-                "average_duration_ms": 0
+                "average_duration_ms": None
             }
 
         mcp = self.metrics["mcp_servers"][mcp_name]
         mcp["call_count"] += 1
-        mcp["last_used"] = datetime.now().isoformat()
+        mcp["last_used"] = datetime.now(UTC).isoformat()
 
         # Update average duration
-        total_duration = mcp["average_duration_ms"] * (mcp["call_count"] - 1) + duration_ms
+        total_duration = (mcp["average_duration_ms"] or 0) * (mcp["call_count"] - 1) + duration_ms
         mcp["average_duration_ms"] = total_duration / mcp["call_count"]
 
     def save_metrics(self) -> None:
@@ -157,7 +172,7 @@ class AgentMetricsCollector:
         """Generate a human-readable metrics report."""
         report = []
         report.append("# Agent Usage Metrics Report")
-        report.append(f"Generated: {datetime.now().isoformat()}")
+        report.append(f"Generated: {datetime.now(UTC).isoformat()}")
         report.append("")
 
         # Agent usage
@@ -194,13 +209,13 @@ class AgentMetricsCollector:
 
     def analyze_mcp_usage(self, days_threshold: int = 30) -> dict[str, Any]:
         """Analyze MCP server usage and provide optimization recommendations."""
-        from datetime import datetime, timedelta
+        from datetime import timedelta
 
         recommendations = []
         unused_servers = []
         low_usage_servers = []
 
-        threshold_date = datetime.now() - timedelta(days=days_threshold)
+        threshold_date = datetime.now(UTC) - timedelta(days=days_threshold)
 
         for mcp_name, metrics in self.metrics["mcp_servers"].items():
             if metrics["call_count"] == 0:
@@ -209,7 +224,7 @@ class AgentMetricsCollector:
                 low_usage_servers.append(mcp_name)
             elif metrics["last_used"]:
                 last_used = datetime.fromisoformat(metrics["last_used"])
-                if last_used < threshold_date:
+                if last_used.tzinfo is not None and last_used < threshold_date:
                     unused_servers.append(f"{mcp_name} (unused for {days_threshold}+ days)")
 
         if unused_servers:
@@ -229,7 +244,7 @@ class AgentMetricsCollector:
             })
 
         return {
-            "analysis_date": datetime.now().isoformat(),
+            "analysis_date": datetime.now(UTC).isoformat(),
             "days_threshold": days_threshold,
             "total_mcp_servers": len(self.metrics["mcp_servers"]),
             "unused_count": len(unused_servers),
