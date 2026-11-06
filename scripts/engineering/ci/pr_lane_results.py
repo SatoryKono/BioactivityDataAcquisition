@@ -774,6 +774,22 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_layer_dependencies.py",
         ROOT_HYGIENE_REVIEW_REGISTRY_TEST,
     ),
+    **dict.fromkeys(
+        (
+            ".github/CONTRIBUTING.md",
+            ".github/SECURITY.md",
+            "docs/03-guides/github-local-workflow.md",
+            "docs/03-guides/github-quick-reference.md",
+            "docs/05-operations/ci-cd-integration.md",
+            "docs/05-operations/release-checklist.md",
+            "docs/05-operations/runbooks/github-settings-quarterly-review.md",
+            "reports/governance/github-settings-A1-post-change-20261106.json",
+            "reports/governance/github-settings-A1-readback-20261106.json",
+            "reports/governance/github-settings-B2-preflight-20261106.json",
+            "reports/governance/github-settings-B2-preflight-20261106.md",
+        ),
+        ("tests/architecture/test_required_checks_prose_consistency.py",),
+    ),
 }
 
 # Directory-level edges for generated artifacts and diagrams where an exact
