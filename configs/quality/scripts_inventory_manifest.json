@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-06T13:29:29.382988+00:00",
+  "generated_at": "2026-11-06T16:31:50.647105+00:00",
   "summary": {
     "total_scripts": 712,
     "status_counts": {
@@ -2896,7 +2896,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 623,
+          "line": 628,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3678,7 +3678,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 622,
+          "line": 627,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3733,7 +3733,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 621,
+          "line": 626,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -10503,7 +10503,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 523,
+          "line": 528,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10546,7 +10546,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 636,
+          "line": 641,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -12883,7 +12883,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 353,
+          "line": 357,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -18311,7 +18311,7 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 305,
+          "line": 330,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_closure_campaign.py --require-global-claim`"
         },
@@ -18350,19 +18350,19 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 302,
+          "line": 327,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py` persists"
         },
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 308,
+          "line": 333,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-universal-claim`"
         },
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 311,
+          "line": 336,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-durable-evidence-coverage`"
         },
@@ -20689,7 +20689,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 731,
+          "line": 736,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23825,7 +23825,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 853,
+          "line": 858,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
