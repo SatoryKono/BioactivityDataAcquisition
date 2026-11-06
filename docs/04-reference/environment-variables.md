@@ -151,7 +151,7 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 |----------|-------------|---------|----------|
 | `BIOETL_PII_SALT_CURRENT` | Current salt for PII hashing | unset | No |
 | `BIOETL_PII_SALT_NEXT` | Next salt for rotation | unset | No |
-| `BIOETL_PII_SALT_ROTATION_ACTIVE` | Whether salt rotation is active | `False` | No |
+| `BIOETL_SALT_ROTATION_ACTIVE` | Whether salt rotation is active | `False` | No |
 
 ### API Security
 
