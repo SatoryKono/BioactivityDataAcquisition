@@ -4,11 +4,11 @@
 | :--- | :--- |
 | owner | SatoryKono |
 | deadline | N/A |
-| collector_base_sha | a79909ab5924cf54b03ded559ac2670f51f306e3 |
+| collector_base_sha | 2e7aacd94ef9e62b4d35dbddc7bac8affaa7986e |
 | collector_worktree_dirty | False |
 | scope | Stage 0 CI Optimization Evidence Gathering |
 | tool_versions | Python 3.13.x, mypy, uv |
-| commands | python scripts/engineering/ci/collect_stage0_evidence.py, python scripts/engineering/ci/evaluate_mypy.py |
+| commands | python scripts/engineering/ci/evaluate_mypy.py, python scripts/engineering/ci/collect_stage0_evidence.py |
 | test_data | Historical GH/Circle data injected, coverage audit data injected, local cold/warm mypy test. |
 | expected_result | Evidence gathered from reports/mypy_eval.json (0.6 status=PASS); BLOCKED on 0.5 ruleset API access. |
 | allowed_skips | API queries requiring authenticated token skipped and marked BLOCKED. |
@@ -27,7 +27,7 @@
 - **0.5_live_ruleset**: BLOCKED
   - Ruleset config verified: active, strict, pr-gate-complete, bypassactors[], current_user_can_bypass=never.
 - **0.6_mypy_evaluation**: PASS
-  - Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; speedup=49.539 — измерение mypy-кэша пригодно.
+  - Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; speedup=15.179 — измерение mypy-кэша пригодно.
 - **0.7_shard_profiles**: INHERITED_OBSERVATIONAL
   - Handled externally via independent audit.
 - **0.8_sha_pin_inventory**: INHERITED_OBSERVATIONAL
@@ -52,15 +52,15 @@
 {
   "stage0_closure.json": {
     "path": "docs/reports/ci/stage0_closure.json",
-    "size_bytes": 4873,
-    "sha256": "0d6857033e8d059be9f1433902477bba51341eb6322dbf7a4895fe369d0b7cc4",
-    "modified": "2026-11-06T05:52:08.466931+00:00"
+    "size_bytes": 4808,
+    "sha256": "5f1dbc408022fe216d01f6fa30a045cc24c1ddcbadb87844211f3011c7c86ca4",
+    "modified": "2026-11-06T06:59:10.008950+00:00"
   },
   "mypy_eval.json": {
     "path": "reports/mypy_eval.json",
-    "size_bytes": 883,
-    "sha256": "59720855ad281a5514d4f43faaca07d821d10f4406bb671e947b2eb2d1830c51",
-    "modified": "2026-11-06T05:52:07.949064+00:00"
+    "size_bytes": 969,
+    "sha256": "28a124da000d2203d1661a9c2f8f6713edcbc36a3326872122867d34b1ff07f3",
+    "modified": "2026-11-06T06:58:43.476309+00:00"
   }
 }
 ```

@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "timestamp": "2026-11-06T05:52:08.464773+00:00",
+    "timestamp": "2026-11-06T06:59:10.008795+00:00",
     "repository": "SatoryKono/BioactivityDataAcquisition",
-    "git_head": "a79909ab5924cf54b03ded559ac2670f51f306e3",
+    "git_head": "2e7aacd94ef9e62b4d35dbddc7bac8affaa7986e",
     "worktree_dirty": false
   },
   "criteria": {
@@ -35,12 +35,13 @@
     },
     "0.6_mypy_evaluation": {
       "status": "PASS",
-      "note": "Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; speedup=49.539 — измерение mypy-кэша пригодно.",
+      "note": "Type-checking PASS (cold/warm returncode=0); diagnostics совпадают; speedup=15.179 — измерение mypy-кэша пригодно.",
       "evidence": "reports/mypy_eval.json",
       "typecheck_pass": true,
       "cache_measurement_usable": true,
       "diagnostics_match": true,
-      "speedup": 49.538578095869674,
+      "speedup": 15.178711928513787,
+      "targets_match": true,
       "cold_returncode": 0,
       "warm_returncode": 0
     },
@@ -80,11 +81,11 @@
   "closure_passport": {
     "owner": "SatoryKono",
     "deadline": "N/A",
-    "collector_base_sha": "a79909ab5924cf54b03ded559ac2670f51f306e3",
+    "collector_base_sha": "2e7aacd94ef9e62b4d35dbddc7bac8affaa7986e",
     "collector_worktree_dirty": false,
     "scope": "Stage 0 CI Optimization Evidence Gathering",
     "tool_versions": "Python 3.13.x, mypy, uv",
-    "commands": "python scripts/engineering/ci/collect_stage0_evidence.py, python scripts/engineering/ci/evaluate_mypy.py",
+    "commands": "python scripts/engineering/ci/evaluate_mypy.py, python scripts/engineering/ci/collect_stage0_evidence.py",
     "test_data": "Historical GH/Circle data injected, coverage audit data injected, local cold/warm mypy test.",
     "expected_result": "Evidence gathered from reports/mypy_eval.json (0.6 status=PASS); BLOCKED on 0.5 ruleset API access.",
     "allowed_skips": "API queries requiring authenticated token skipped and marked BLOCKED.",
