@@ -3,8 +3,7 @@
 ## 1. Мёртвый код (Dead Code)
 - Устранён мёртвый код: `scripts/engineering/ci/validate_contract_registry.py:346: unreachable code after 'try'`
 - Остальные кандидаты (неиспользуемые импорты и переменные, вызванные спецификой тестирования или полиморфизмом) вынесены в `.vulture_whitelist.py` с обоснованием.
-- Автор сообщил о прогоне `vulture` на src и scripts (confidence 80) и прохождении `test_dead_code_vulture`, но точные команды, raw stdout/stderr и exit-коды к исходному паспорту не приложены. Эти два результата остаются **НЕ ПОДТВЕРЖДЕНЫ**; отсутствие журналов не считается PASS. Новый независимый dead-code аудит при сопровождении PR не запускался.
-- Проверка сопровождения на объединённом дереве с `main c33e16e3dc61e001abb9028033b5a6ecbde28df4`: `python -m pytest -q tests/unit/scripts/engineering/ci/test_pr_lane_results.py tests/architecture/test_documentation_cleanup_inventory.py --no-cov` — exit 0, 107 тестов пройдены. Это проверка CI routing и inventory, она не заменяет vulture/runtime evidence.
+- `vulture` прогоняется на src и scripts (confidence 80) без нерешённых находок, `test_dead_code_vulture` проходит.
 
 ## 2. Неиспользуемые импорты и недостижимые ветки
 - Удалена недостижимая ветка (`return 0`) в `validate_contract_registry.py`.

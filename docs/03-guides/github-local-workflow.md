@@ -251,11 +251,11 @@ Examples:
 
 ## Required PR checks
 
-<!-- policy-anchor:deployment-provider --> `deployment.provider` is `github_actions`. <!-- policy-anchor:ruleset-enforcement-mode --> Ruleset `13643213` is `enforcement: active` (GET 2026-11-06); rulesets `15730586` and `24517966` were deleted on 2026-11-02 (settings-audit phase 0). <!-- policy-anchor:stored-ruleset-contexts --> The active rule requires `pr-gate-complete` (GET 2026-11-06); the rule binds this context to GitHub Actions App 15368 (integration_id=15368). <!-- policy-anchor:target-gha-context --> Target `pr-gate-complete` is the context stored on ruleset `13643213` since 2026-11-02. <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge; the active server rule requires it. An offline catalog match does not confirm live server rulesets. Positive/negative merge acceptance was not run in this audit.
+<!-- policy-anchor:deployment-provider --> `deployment.provider` is `github_actions`. <!-- policy-anchor:ruleset-enforcement-mode --> Ruleset `13643213` is `enforcement: disabled`; rulesets `15730586` and `24517966` were deleted on 2026-11-02 (settings-audit phase 0). <!-- policy-anchor:stored-ruleset-contexts --> Since 2026-11-02 ruleset `13643213` stores the GitHub Actions context `pr-gate-complete`, which is not active merge protection while the ruleset stays disabled. <!-- policy-anchor:target-gha-context --> Target `pr-gate-complete` is the context stored on ruleset `13643213` since 2026-11-02. <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge. An offline catalog match does not confirm live server rulesets.
 
 The coordinator job is `pr-gate-complete` (`.github/workflows/pr-required.yml`).
-GET 2026-11-06 shows an active server rule requiring this context; a green job
-alone is not a server acceptance test. Leaf jobs consumed by the
+While those rulesets stay `enforcement: disabled`, a green coordinator job is
+evidence for review, not live merge protection. Leaf jobs consumed by the
 aggregator include:
 
 - `checks-complete`
