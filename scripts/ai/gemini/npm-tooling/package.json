@@ -7,7 +7,7 @@
     "@google/gemini-cli": "0.66.0"
   },
   "optionalDependencies": {
-    "node-linux-arm64": "26.13.0",
-    "node-linux-x64": "26.13.0"
+    "node-linux-arm64": "26.12.1",
+    "node-linux-x64": "26.12.1"
   }
 }

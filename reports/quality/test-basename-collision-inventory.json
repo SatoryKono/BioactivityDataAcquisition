@@ -1,5 +1,5 @@
 {
-  "duplicate_basename_count": 74,
+  "duplicate_basename_count": 73,
   "duplicate_basenames": {
     "test_adapter.py": [
       "tests/integration/adapters/openalex/test_adapter.py",
