@@ -74,6 +74,8 @@
   },
   "packageManager": "npm@10.8.2",
   "overrides": {
+    "glob@>=9.0.0 <=14.0.1": "14.0.3",
+    "minimatch@>=7.0.0 <11.0.1": "11.0.1",
     "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
     "braces": "$braces",
     "@istanbuljs/load-nyc-config": {
