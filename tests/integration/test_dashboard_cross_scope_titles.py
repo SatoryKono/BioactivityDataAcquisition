@@ -18,6 +18,7 @@ from tests.integration._grafana_test_support import (
     _collect_dashboard_links,
     get_dashboard_panels,
     load_dashboard,
+    resolve_dashboard_target,
 )
 
 pytestmark = pytest.mark.integration
@@ -32,10 +33,14 @@ def test_cross_scope_links_use_required_titles():
             "Replay Readiness",
             "Open Control Plane",
         ],
-        ("bioetl-overview-v2", "bioetl-dq-v2"): ["Open Data Quality"],
+        ("bioetl-overview-v2", "bioetl-dq-v2"): [
+            "Open Data Quality",
+            "4. Data Quality",
+        ],
         ("bioetl-incident-v1", "bioetl-dq-v2"): [
             "Open Data Quality",
             "Inspect DQ",
+            "4. Data Quality",
             "Open domain workspace",
         ],
     }
@@ -128,7 +133,7 @@ def test_provider_health_descriptions_separate_global_and_selected_scope() -> No
         assert description.startswith("SELECTED RUN")
         assert "saved" in description.lower()
         assert "UNKNOWN" in description
-        url = saved[pid]["targets"][0]["url"]
+        url = resolve_dashboard_target(saved, saved[pid]["targets"][0])["url"]
         assert url.startswith("/ops/observability/selected-run-status?")
         assert "run_id=${run_id}" in url
     assert "not live fleet health" in saved[9481]["description"]

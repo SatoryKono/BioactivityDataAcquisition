@@ -20,7 +20,11 @@ from scripts.ops.observability.grafana.dashboard_context_links import (
 
 from tests.integration._dashboard_layout_budgets import FIRST_WINDOW_Y
 from tests.integration._grafana_dashboard_links_support import get_dashboard_files
-from tests.integration._grafana_test_support import get_dashboard_panels, load_dashboard
+from tests.integration._grafana_test_support import (
+    get_dashboard_panels,
+    load_dashboard,
+    resolve_dashboard_target,
+)
 
 pytestmark = pytest.mark.integration
 
@@ -172,8 +176,11 @@ def test_provider_freshness_is_not_present_ok_on_missing_health_status() -> None
     assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
     assert "saved" in panel["description"].lower()
     assert "provider API was not called" in panel["description"]
-    assert all("expr" not in t for t in panel["targets"])
-    assert all("run_id=${run_id}" in t["url"] for t in panel["targets"])
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    targets = [resolve_dashboard_target(panels, target) for target in panel["targets"]]
+    assert targets
+    assert all("expr" not in target for target in targets)
+    assert all("run_id=${run_id}" in target["url"] for target in targets)
 
 
 def test_current_card_disposition_covers_first_window_current_panels() -> None:

@@ -20,6 +20,7 @@ import yaml
 from tests.integration._grafana_test_support import (
     get_dashboard_panels,
     load_dashboard,
+    resolve_dashboard_target,
 )
 
 pytestmark = pytest.mark.integration
@@ -108,8 +109,12 @@ def test_provider_health_fleet_cause_tables_are_retired() -> None:
     assert {9401, 9101, 9102, 9103, 9107, 114}.isdisjoint(panels)
     for panel_id in _PROVIDER_SINGLE_STATE_NO_VALUE_PANEL_IDS:
         panel = panels[panel_id]
-        assert all("expr" not in target for target in panel["targets"])
-        assert all("run_id=${run_id}" in target["url"] for target in panel["targets"])
+        targets = [
+            resolve_dashboard_target(panels, target) for target in panel["targets"]
+        ]
+        assert targets
+        assert all("expr" not in target for target in targets)
+        assert all("run_id=${run_id}" in target["url"] for target in targets)
 
 
 def test_provider_cause_contract_declares_unknown_beside_valid_empty() -> None:

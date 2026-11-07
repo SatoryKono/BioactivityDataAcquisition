@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.integration._grafana_test_support import resolve_dashboard_target
+
 pytestmark = pytest.mark.integration
 
 
@@ -33,6 +35,6 @@ def test_replay_layout_preserves_checks_and_identity_scope():
     assert "present ? 1 : 0" in by_id[9408]["targets"][0]["uql"]
     for panel in by_id.values():
         for target in panel.get("targets", []):
-            assert "run_id=${run_id}" in target["url"]
+            assert "run_id=${run_id}" in resolve_dashboard_target(by_id, target)["url"]
     assert {p["id"] for p in by_id[9430]["panels"]} == {9414, 9415, 9416}
     assert {p["id"] for p in by_id[9431]["panels"]} == {9413, 9406}
