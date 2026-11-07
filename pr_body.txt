@@ -8,7 +8,7 @@
 
 **Паспорт закрытия issue #12830**:
 * **Owner**: AI
-* **Exact SHA revision**: 70dfef024821e1ea9820fdeb561fa5bc2ee1d014
+* **Exact SHA revision**: dd275a6de01db8f8e1d3a77c4984bc54b8301e7d
 * **Scope**: `.circleci/config.yml` and `.github/workflows/*.yml` analysis
 * **Tool/backend versions**: Python 3.10+, PyYAML
 * **Commands and exit codes**: `python3 parse_workflows_final4.py` (exit code 0)
