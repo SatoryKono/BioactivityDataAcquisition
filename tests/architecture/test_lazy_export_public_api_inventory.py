@@ -23,7 +23,6 @@ ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src" / "bioetl"
 
 EXPECTED_LAZY_EXPORT_FACADES = {
-    "src/bioetl/infrastructure/adapters/pubmed/models.py": "internal_lazy_import_optimization",
     "src/bioetl/application/composite/__init__.py": "public_package_facade",
     "src/bioetl/application/core/wiring/__init__.py": "public_package_facade",
     "src/bioetl/application/pipelines/common/blocks.py": "dynamic_entrypoint",
@@ -91,7 +90,6 @@ EXPECTED_LAZY_EXPORT_FACADES = {
 
 ALLOWED_CLASSIFICATIONS = frozenset(
     {
-        "internal_lazy_import_optimization",
         "compatibility_facade",
         "dynamic_entrypoint",
         "public_facade",
