@@ -15,6 +15,48 @@ import pytest
 pytestmark = pytest.mark.integration
 
 
+def test_stdio_unicode_uses_utf8_despite_parent_encoding(tmp_path: Path) -> None:
+    target = tmp_path / ".cache/mcp-memory/graph.json"
+    entity = {"name": "unicode", "entityType": "note", "observations": ["я" * 50_000]}
+    requests = [
+        {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "tools/call",
+            "params": {"name": "create_entities", "arguments": {"entities": [entity]}},
+        },
+        {
+            "jsonrpc": "2.0",
+            "id": 2,
+            "method": "tools/call",
+            "params": {"name": "read_graph", "arguments": {"limit": 1}},
+        },
+    ]
+    env = dict(
+        os.environ,
+        MEMORY_REPO_ROOT=str(tmp_path),
+        MEMORY_FILE_PATH=str(target),
+        PYTHONIOENCODING="ascii",
+    )
+    result = subprocess.run(
+        [sys.executable, "-m", "memory.mcp_server"],
+        input=(
+            "\n".join(json.dumps(request, ensure_ascii=False) for request in requests)
+            + "\n"
+        ).encode("utf-8"),
+        env=env,
+        capture_output=True,
+        timeout=15,
+    )
+    assert result.returncode == 0, result.stderr.decode("utf-8", errors="replace")
+    replies = [
+        json.loads(line)["result"]
+        for line in result.stdout.decode("utf-8").splitlines()
+    ]
+    assert all(not reply.get("isError") for reply in replies)
+    assert json.loads(replies[1]["content"][0]["text"])["entities"] == [entity]
+
+
 def _call(
     process: subprocess.Popen[str], identifier: int, name: str, args: dict[str, Any]
 ) -> Any:
@@ -40,7 +82,15 @@ def _server(path: Path) -> subprocess.Popen[str]:
     pythonpath = os.pathsep.join(
         part for part in (str(source_path), os.environ.get("PYTHONPATH")) if part
     )
-    env = dict(os.environ, MEMORY_FILE_PATH=str(path), PYTHONPATH=pythonpath)
+    repo_root = next(
+        parent for parent in path.parents if parent.name == ".cache"
+    ).parent
+    env = dict(
+        os.environ,
+        MEMORY_FILE_PATH=str(path),
+        MEMORY_REPO_ROOT=str(repo_root),
+        PYTHONPATH=pythonpath,
+    )
     return subprocess.Popen(
         [sys.executable, "-m", "memory.mcp_server"],
         stdin=subprocess.PIPE,
@@ -54,7 +104,8 @@ def _server(path: Path) -> subprocess.Popen[str]:
 def test_live_servers_share_scope_persist_and_write_concurrently(
     tmp_path: Path,
 ) -> None:
-    path = tmp_path / "shared.json"
+    path = tmp_path / ".cache" / "mcp-memory" / "shared.json"
+    path.parent.mkdir(parents=True)
     path.write_text('{"entities":[],"relations":[]}\n', encoding="utf-8")
     first, second = _server(path), _server(path)
     try:
@@ -101,7 +152,9 @@ def test_live_servers_share_scope_persist_and_write_concurrently(
 
 
 def test_live_servers_do_not_cross_scope(tmp_path: Path) -> None:
-    paths = [tmp_path / "main.json", tmp_path / "feature.json"]
+    cache = tmp_path / ".cache" / "mcp-memory"
+    cache.mkdir(parents=True)
+    paths = [cache / "main.json", cache / "feature.json"]
     for path in paths:
         path.write_text('{"entities":[],"relations":[]}\n', encoding="utf-8")
     servers = [_server(path) for path in paths]

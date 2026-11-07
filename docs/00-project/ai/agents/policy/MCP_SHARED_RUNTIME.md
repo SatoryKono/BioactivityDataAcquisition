@@ -51,16 +51,16 @@ Classes:
 | filesystem | T2 | wrapper stdio | shared port 8827; repository-root allowlist |
 | fetch | T2 | uvx wrapper | **Phase 2** port 8821 |
 | github | T2 | wrapper | **Phase 2** port 8820. Daily Grok uses this URL; stdio is fallback only. XOR: not both (#10299). |
-| docker | T2 | Windows Docker MCP streaming gateway | **daily** port 8817 |
+| docker | T2 | Windows Docker MCP streaming gateway | **optional** port 8817 |
 | context7 | T2 | wrapper | **daily** port 8815 |
 | ast-grep | T2 | wrapper | **daily** port 8816 |
 | mcp-code-interpreter | T2 | uvx stdio | shared port 8829 |
-| prometheus | T2 | docker/wrapper | **daily** port 8822 |
-| grafana | T2 | docker/wrapper | **daily** port 8823 |
-| brave-search | T2 | docker run stdio | **daily** port 8811 |
+| prometheus | T2 | docker/wrapper | **optional** port 8822 |
+| grafana | T2 | docker/wrapper | **optional** port 8823 |
+| brave-search | T2 | docker run stdio | **optional** port 8811 |
 | neo4j-cypher | T2 | wrapper | **catalog** port 8824 (needs healthy neo4j auth) |
 | neo4j-memory | T2 | wrapper | **catalog** port 8825 (needs healthy neo4j auth) |
-| mermaid | T2 | pinned `mcp-mermaid@0.4.1` Windows-native streaming | **daily** port 8818 |
+| mermaid | T2 | pinned `mcp-mermaid@0.4.1` Windows-native streaming | **optional** port 8818 |
 | deja | T2 | npx stdio | **Phase 1** port 8814 |
 | adr-analysis | T2 | npx stdio | **Phase 1 MVP** port 8813 |
 | mutmut | T2 | wrapper | shared port 8830 |
@@ -87,12 +87,15 @@ Bridge pin: **`mcp-proxy@6.5.4`** (stdio → Streamable HTTP `/mcp`).
 
 | Server group | Ports | Daily profile `shared` |
 | --- | --- | --- |
-| search/analysis | `8811`, `8813`–`8816` | yes |
-| Windows-native streaming (`docker` gateway, pinned `mermaid`) | `8817`–`8818` | yes |
-| GitHub/fetch/monitoring | `8820`–`8823` | yes |
+| search/analysis | `8813`–`8816` | yes |
+| brave-search | `8811` | optional |
+| Windows-native streaming (`docker` gateway, pinned `mermaid`) | `8817`–`8818` | optional |
+| GitHub/fetch | `8820`–`8821` | yes |
+| monitoring | `8822`–`8823` | optional |
 | Neo4j | `8824`–`8825` | optional; included by `--all` |
 | stateful memory/filesystem | `8826`–`8827` | yes |
-| analyzer/interpreter/mutmut/actions | `8828`–`8831` | yes |
+| analyzer | `8828` | yes |
+| interpreter/mutmut/actions | `8829`–`8831` | optional |
 
 Exact names, ports, launch modes and readiness timeouts are owned by
 `shared-servers.json`; `setup_mcp.py` loads that catalog rather than maintaining
@@ -124,8 +127,37 @@ python3 scripts/ai/codex/setup_mcp.py \
 | Profile `shared` | Every sanctioned local MCP through the shared plane + remote HTTP MCP |
 
 The daily selection is profile `stable` with transport `shared`: exactly ten
-client entries, of which nine are required localhost endpoints and `ref` is
-remote/auth-managed.
+declared client entries, of which nine are localhost endpoints and `ref` is
+remote/auth-managed. Effective readiness excludes `memory` in `off`/`read-only`
+mode; it is required only in authorized `read-write` mode. The declared
+inventory is preserved. No diagnostic starts these services.
+
+`MEMORY_SEED_PATH` identifies the immutable tracked seed. `MEMORY_FILE_PATH`
+is optional and must resolve inside this repository's `.cache/mcp-memory/`;
+wrappers validate it before initialization and the server validates it before
+storage access. `read_graph` returns at most 100 entities and 100 relations;
+follow `next_offset` until it is null. If the response exceeds the size limit,
+retry with a smaller `limit` and the same `offset`. Requests, batches and graph
+size are bounded; malformed requests return errors without ending the stdio session.
+Stdio is configured as UTF-8 independently of the parent locale. Tool responses
+use UTF-8 byte limits consistently. Mutations validate their
+response and each single-row read page before committing, so a rejected size
+check leaves the graph unchanged and every persisted row remains readable with
+`read_graph(limit=1)`.
+
+GitHub wrappers default to `BIOETL_GITHUB_MCP_ACCESS=read-only`. An explicitly
+authorized write task may select `read-write` with an approved executable
+`BIOETL_GITHUB_MCP_SHA256`; token scopes are not changed. An expected digest
+is checked before launch in either mode, without install or authentication.
+Only the GitHub credential and required OS/network variables reach the child.
+`--lockdown-mode` remains a separate content filter. Executable provenance and
+actual token/tool permissions still require host verification.
+
+Doctor `ready` is a compatibility alias for `transport_ready`; JSON explicitly
+sets `readiness_level=transport`, `protocol_ready=null` and `tool_ready=null`.
+It does not claim a successful MCP handshake or tool invocation. Probes share
+a deadline and use daemon workers so an unfinished probe cannot hold CLI exit;
+no worker starts a service or publishes a report.
 
 ## Deterministic cold start and offline preflight
 
