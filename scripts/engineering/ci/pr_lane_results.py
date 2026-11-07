@@ -507,6 +507,13 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/12553_runtime_acceptance_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
+    **dict.fromkeys(
+        (
+            "docs/ci/gate-platform-matrix-full.md",
+            "reports/audit/ci1-03-pr-description.txt",
+        ),
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "reports/audit/comp-004-runtime/verification_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
