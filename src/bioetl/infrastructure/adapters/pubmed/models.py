@@ -37,13 +37,16 @@ __all__ = [
 # Let's keep original order for safety
 __all__ = sorted(__all__)
 
+
 def __getattr__(name: str) -> typing.Any:
     if name in components.ARTICLE_COMPONENT_NAMES:
         return getattr(components, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
+
 def __dir__() -> list[str]:
     return __all__
+
 
 # === Basic Record Model (matches current xml_processor output) ===
 

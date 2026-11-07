@@ -49,7 +49,9 @@ class PubMedExtendedRecord(BaseModel):
     )
 
     # Publication Details
-    pub_date: components.PubMedPubDate | None = Field(default=None, description="Publication date")
+    pub_date: components.PubMedPubDate | None = Field(
+        default=None, description="Publication date"
+    )
     medline_pgn: str | None = Field(
         default=None, description="Page numbers (MEDLINE format)"
     )

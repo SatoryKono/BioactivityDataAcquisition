@@ -117,6 +117,7 @@ class PubMedArticleId(BaseModel):
     id_type: str = Field(description="ID type (pubmed, doi, pmc, etc.)")
     value: str = Field(description="ID value")
 
+
 ARTICLE_COMPONENT_CLASSES = (
     PubMedArticleId,
     PubMedAuthor,
