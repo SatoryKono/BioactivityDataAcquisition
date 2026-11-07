@@ -57,7 +57,6 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 9101 | Review Runtime Blockers |
 | bioetl-incident-v1.json | 9102 | Monitor Coverage |
 | bioetl-incident-v1.json | 2460 | Review Stage Progress |
-| bioetl-incident-v1.json | 9463 | Review Total Run Duration |
 | bioetl-incident-v1.json | 238 | Track Stage Backlog Trend |
 | bioetl-incident-v1.json | 207 | Track Phase Duration |
 | bioetl-incident-v1.json | 239 | Track Pipeline Duration |
@@ -134,6 +133,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 9460 | Inspect Selected Run Stages |
 | bioetl-incident-v1.json | 9451 | Inspect Selected Run Domains |
 | bioetl-incident-v1.json | 9452 | Inspect Selected Run Identity |
+| bioetl-incident-v1.json | 9463 | Review Total Run Duration |
 | bioetl-incident-v1.json | 9700 | Inspect Current Workflow Evidence |
 | bioetl-incident-v1.json | 9701 | Review Current Workflow Evidence |
 | bioetl-overview-v2.json | 1000 | Navigate Dashboards |
