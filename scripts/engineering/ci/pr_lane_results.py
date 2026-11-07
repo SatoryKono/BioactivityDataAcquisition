@@ -144,6 +144,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             ".mcp.json",
             ".opencode/agent/review.md",
             "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+            "docs/00-project/ai/agents/guides/MUSE.md",
             "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
             "docs/00-project/ai/skills/local/py-audit-bot/references/wrapper-contract.md",
             "scripts/ai/.mcp.json",
