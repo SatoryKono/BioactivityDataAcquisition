@@ -11,6 +11,7 @@ from memory.rag.indexing import build_rag_manifests, write_rag_manifests
 from memory.rag.validation import (
     RagManifestValidationError,
     RagValidationReport,
+    _invalid_file_report,
     normalize_rag_source_path,
     require_valid_rag_manifest,
     validate_rag_manifest_files,
@@ -158,6 +159,27 @@ def test_devin_wiki_virtual_fragments_are_normalized_to_base_source(
         )
         == ".devin/wiki.json"
     )
+
+
+def test_invalid_file_report_generates_correct_report() -> None:
+    path = Path("path/to/invalid_file.json")
+    message = "test error message"
+
+    report = _invalid_file_report(path, message)
+
+    assert report.ok is False
+    assert len(report.issues) == 1
+    assert report.issues[0].code == "manifest_io_error"
+    assert report.issues[0].path == "path/to/invalid_file.json"
+    assert report.issues[0].message == "test error message"
+
+    assert report.build_scope is None
+    assert report.eligible_source_count == 0
+    assert report.indexed_source_count == 0
+    assert report.chunk_count == 0
+    assert report.missing_path_count == 0
+    assert report.stale_chunk_count == 0
+    assert report.source_surface_sha256 is None
 
 
 def test_manifest_file_validator_requires_requested_scope(tmp_path: Path) -> None:
