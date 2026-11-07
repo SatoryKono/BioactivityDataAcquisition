@@ -1,0 +1,2571 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "SELECTED RUN. Run ID is always selected. The first screen shows saved status, domain verdicts and full identity for that run. Provider evidence and stage accounting follow below the fold. CURRENT fleet panels, First Action, and TIME RANGE history are not on Overview. run_id is HTTP context only and is never a Prometheus label.",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "refresh": "60s",
+  "schemaVersion": 42,
+  "style": "dark",
+  "tags": [
+    "bioetl",
+    "overview",
+    "pipeline",
+    "v3-baseline",
+    "hybrid-overview",
+    "answer-first",
+    "fleet",
+    "dashboard-2.0"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_workflow_universe, workflow)",
+        "description": "Optional workflow evidence context and workflow-dashboard handoff selector. Overview remains pipeline-summary-first: workflow does not yet drive exact intersection filtering for the current-status PromQL surfaces.",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Workflow",
+        "multi": false,
+        "name": "workflow",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_universe, workflow)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
+        "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}&allow_stale=1",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Pipeline",
+        "multi": false,
+        "name": "pipeline",
+        "options": [],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}&allow_stale=1",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false,
+        "description": "Overview landing keeps Include All / default All so L0 fleet state renders. Option list comes from the control-plane catalog, not the Prometheus universe, so a concrete pipeline remains selectable when Prom is empty."
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
+        "definition": "/ops/control-plane/filter-options?dimension=run_type&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&allow_stale=1",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Run Type",
+        "multi": false,
+        "name": "run_type",
+        "options": [],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=run_type&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&allow_stale=1",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false,
+        "description": "Browse scope from the local control-plane catalog. Default All includes every run type. Explicit URL selections take precedence."
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "-",
+          "value": "-"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
+        "description": "Run ID selector sourced from the local control-plane run-manifest catalog for the current pipeline/run_type scope. Grafana All values are normalized to an unbounded scope, so Run Type = All no longer empties the selector; Pipeline = All exposes aggregate exact-run handoff options from the catalog. This selector remains HTTP-backed and does not reintroduce run_id into Prometheus labels. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Run ID",
+        "multi": false,
+        "name": "run_id",
+        "options": [
+          {
+            "selected": true,
+            "text": "-",
+            "value": "-"
+          }
+        ],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "-",
+          "value": "-"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
+        "definition": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
+        "description": "Concrete SELECTED RUN identity from /ops/control-plane/selector-context (selected.run_id). When Grafana $run_id is still '-', A2 latest fills this value so pipeline-run-report / artifact queries do not stay unresolved_scope.",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Selected Run ID",
+        "multi": false,
+        "name": "selected_run_id",
+        "options": [
+          {
+            "selected": true,
+            "text": "-",
+            "value": "-"
+          }
+        ],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "($id := selected.run_id; $exists($id) and $string($id) != \"\" ? [{\"text\":$string($id),\"value\":$string($id)}] : [{\"text\":\"-\",\"value\":\"-\"}])",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": true,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
+        "definition": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
+        "description": "Concrete SELECTED RUN pipeline from /ops/control-plane/selector-context (selected.pipeline). When Grafana $pipeline is still All/aggregate and A2 fills selected_run_id, this carries the concrete pipeline so pipeline-run-report / artifact queries do not stay unresolved_scope.",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Selected Pipeline",
+        "multi": false,
+        "name": "selected_pipeline",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "All"
+          }
+        ],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "($p := selected.pipeline; $exists($p) and $string($p) != \"\" and $string($p) != \"unknown\" ? [{\"text\":$string($p),\"value\":$string($p)}] : [{\"text\":\"All\",\"value\":\"All\"}])",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": true,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "browser",
+  "title": "3. Run Overview",
+  "uid": "bioetl-overview-v2",
+  "version": 2,
+  "panels": [
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1000,
+      "options": {
+        "mode": "html",
+        "bioetlDisplayTitle": "Navigate Dashboards",
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/1-run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">1. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"2. Replay Readiness (Replay Readiness). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">2. Replay Readiness</a><span class=\"bioetl-nav-current\" aria-current=\"page\" data-current=\"page\" title=\"3. Run Overview (Run Overview)\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none;display:inline-block\">3. Run Overview</span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Preserves selected scope and time range.\" href=\"/d/bioetl-dq-v2/4-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/5-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">5. Incident Workspace</a></div>"
+      },
+      "title": "",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared five-dashboard bus, numbered 1-5 (19.5% each): 1. Run Explorer / 2. Replay Readiness / 3. Run Overview / 4. Data Quality / 5. Incident Workspace. Slugs are the Grafana title slugs. Current workspace is a non-interactive <span class=\"bioetl-nav-current\"> (aria-current=page, underlined) so active state is not color-only and is not a link. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
+      "type": "text",
+      "links": [
+        {
+          "title": "1. Run Explorer",
+          "url": "/d/bioetl-run-explorer-v1/1-run-explorer?var-workflow=.*&var-pipeline=.*&var-run_type=.*&var-run_id=-&var-lookup_run_id=&${__url_time_range}",
+          "tooltip": "1. Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "2. Replay Readiness",
+          "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "2. Replay Readiness (Replay Readiness). Preserves selected scope and time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "4. Data Quality",
+          "url": "/d/bioetl-dq-v2/4-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "4. Data Quality (Data Quality). Preserves selected scope and time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "5. Incident Workspace",
+          "url": "/d/bioetl-incident-v1/5-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        }
+      ]
+    },
+    {
+      "gridPos": {
+        "x": 0,
+        "y": 2,
+        "w": 15,
+        "h": 3
+      },
+      "id": 99,
+      "options": {
+        "content": "<div style=\"max-width:96ch;white-space:normal;padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">${pipeline:text} | ${run_id}<br>This page assesses that run only. Run identity and domain assessments are on this screen. UNKNOWN means saved evidence is missing.</div>",
+        "mode": "html",
+        "bioetlDisplayTitle": "Inspect Scope & Evidence"
+      },
+      "description": "SELECTED RUN · Saved evidence for the selected Run ID. UNKNOWN means the saved assessment is missing, not a healthy empty run. A request failure is QUERY ERROR.",
+      "title": "",
+      "type": "text",
+      "links": []
+    },
+    {
+      "id": 9604,
+      "type": "stat",
+      "title": "Review Overall Verdict",
+      "description": "SELECTED RUN · Saved overall verdict for the selected Run ID, identical to Review Selected Run Status. This verdict does not authorize replay. Missing evidence remains UNKNOWN; request errors remain errors.",
+      "gridPos": {
+        "x": 15,
+        "y": 2,
+        "w": 9,
+        "h": 3
+      },
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "targets": [
+        {
+          "panelId": 9002,
+          "refId": "A",
+          "withTransforms": false,
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "all",
+            "filters": [
+              {
+                "fieldName": "_bioetl_frame",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "domains"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 1
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "run_verdict"
+              ]
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "noValue": "UNKNOWN",
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "OK": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "WARN": {
+                  "text": "WARN",
+                  "color": "yellow"
+                },
+                "ERROR": {
+                  "text": "ERROR",
+                  "color": "red"
+                },
+                "INCOMPLETE": {
+                  "text": "INCOMPLETE",
+                  "color": "orange"
+                },
+                "UNKNOWN": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                },
+                "N/A": {
+                  "text": "N/A",
+                  "color": "gray"
+                },
+                "QUERY ERROR": {
+                  "text": "QUERY ERROR",
+                  "color": "red"
+                },
+                "SELECT RUN": {
+                  "text": "SELECT RUN",
+                  "color": "gray"
+                },
+                "НЕТ ЗАПУСКОВ": {
+                  "text": "НЕТ ЗАПУСКОВ",
+                  "color": "gray"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "gray",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/"
+        },
+        "orientation": "auto",
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "text": {
+          "valueSize": 48
+        }
+      }
+    },
+    {
+      "id": 9002,
+      "type": "table",
+      "title": "Review Run Domains",
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 15,
+        "h": 8
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "UNKNOWN",
+          "unit": "none",
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "inspect": true,
+            "minWidth": 50,
+            "wrapText": false
+          },
+          "links": [
+            {
+              "title": "Open Control Plane",
+              "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            },
+            {
+              "title": "Open Data Quality",
+              "url": "/d/bioetl-dq-v2/4-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            },
+            {
+              "title": "Open Provider Evidence",
+              "url": "/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9480&${__url_time_range}",
+              "includeVars": false,
+              "targetBlank": false,
+              "tooltip": "Saved Provider Evidence for the selected Run ID. CURRENT provider alert conditions remain in Incident Workspace and do not prove this saved verdict."
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Reason"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "execution_success": {
+                        "text": "Processing completed"
+                      },
+                      "standalone_pipeline": {
+                        "text": "Standalone pipeline"
+                      },
+                      "run_dq_threshold_evaluation": {
+                        "text": "Data quality checks"
+                      },
+                      "run_preflight_provider_observation": {
+                        "text": "Provider preflight check"
+                      },
+                      "run_gold_schema_validation": {
+                        "text": "Gold schema validation"
+                      },
+                      "run_observation_missing": {
+                        "text": "Result not recorded"
+                      },
+                      "no_gold_candidates": {
+                        "text": "No Gold candidates"
+                      },
+                      "Archive missing": {
+                        "text": "No verified archive"
+                      },
+                      "archive_evidence_not_recorded": {
+                        "text": "No verified archive"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^(Workflow: )?workflow_parent_not_finalized$",
+                      "result": {
+                        "text": "Parent workflow completion has not been recorded"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": true
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Domain"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              },
+              {
+                "id": "links",
+                "value": []
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 115
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open saved run report",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "uql",
+          "format": "table",
+          "root_selector": "($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append($append($append($append(($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'НЕТ ЗАПУСКОВ']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : (($s.verdict = 'OK' or $s.verdict = 'SELECT RUN' or $s.verdict = 'НЕТ ЗАПУСКОВ') ? ($r ? $r : $s.reason) : $s.reason), '_bioetl_frame': 'domains'}]) })), ($v := function($x){$exists($x) and $x != '' ? $string($x) : 'Not recorded in saved run evidence'}; $s := summary[0]; $start := $s.started_at ? $toMillis($s.started_at) : null; $end := $s.completed_at ? $toMillis($s.completed_at) : null; $map([{'parameter':'Run ID','value':$v(run_id)},{'parameter':'Pipeline','value':$v(pipeline)},{'parameter':'Run Type','value':$v(run_type)},{'parameter':'Started at','value':started_at ? $substring(started_at,0,10) & ' ' & $substring(started_at,11,5) & ' ' & ($substring(started_at,-1) = 'Z' ? 'UTC' : $substring(started_at,-6)) : 'Not recorded in saved run evidence'},{'parameter':'Total Run Duration','value':$start != null and $end != null and $end >= $start ? ($n := $floor(($end - $start) / 1000 + 0.5); $parts := [$floor($n / 86400), $floor(($n % 86400) / 3600), $floor(($n % 3600) / 60), $n % 60]; $units := [' d', ' h', ' min', ' s']; $n = 0 ? '0 s' : $join($map($parts, function($v, $i){$v > 0 ? $string($v) & $units[$i]}), ' ')) : 'Not recorded in saved run evidence'}], function($row){$merge([$row, {'_bioetl_frame':'identity'}])}))), ($d := presentation_domains[domain = 'Provider'][0]; $cached := $d.reason = 'cached_bronze_no_remote_probe'; $saved := evidence_availability in ['AVAILABLE', 'legacy_no_snapshot']; $completed := summary[0].completed_at; $age := $completed ? $floor(($millis() - $toMillis($completed)) / 1000) : null; $seconds := $age != null and $age>=0 ? $age : 0; $parts := [$floor($seconds/86400), $floor(($seconds%86400)/3600), $floor(($seconds%3600)/60)]; $units := [' d',' h',' min']; $elapsed := $join($map($parts,function($v,$i){$v>0 ? $string($v)&$units[$i]}),' '); $map(provider_checks, function($p) { $merge([$p, {'data_source': $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : ($d.reason = 'run_preflight_provider_observation' and $p.evidence = 'PRESENT' ? 'Provider check' : 'UNKNOWN')), 'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), 'check_result_display': $cached ? '—' : ($p.check_result = 'QUERY ERROR' ? 'QUERY ERROR' : ($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN')), 'reason': $cached ? 'Cached Bronze used; provider API was not called.' : ($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check.' : ($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.')), 'observed_display': $age != null and $age >= 0 ? ($age<60 ? 'Just now' : $elapsed & ' ago') : 'Not recorded', 'report_label': $saved or $cached ? 'Open report' : '—', '_bioetl_frame': 'provider'}]) }))), $map(stage_diagnostics, function($row){$merge([$row, {'_bioetl_frame': 'stages'}])})), $map(reconciliation_display, function($row){$merge([$row, {'_bioetl_frame': 'reconciliation'}])})), [{'status': (verdict='SELECT RUN' or verdict='НЕТ ЗАПУСКОВ') ? verdict : contract_exclusions_status, 'detail': contract_exclusions_rate != null ? 'excluded ' & $string($round(contract_exclusions_rate*100,2)) & '%' : (verdict='SELECT RUN' ? 'Choose a run' : (verdict='НЕТ ЗАПУСКОВ' ? 'No runs in scope' : 'excluded UNKNOWN')), '_bioetl_frame': 'exclusions'}]), function($row){$merge([$schema, $row])}))",
+          "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "uql": "parse-json | jsonata \"($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append($append($append($append(($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'НЕТ ЗАПУСКОВ']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : (($s.verdict = 'OK' or $s.verdict = 'SELECT RUN' or $s.verdict = 'НЕТ ЗАПУСКОВ') ? ($r ? $r : $s.reason) : $s.reason), '_bioetl_frame': 'domains'}]) })), ($v := function($x){$exists($x) and $x != '' ? $string($x) : 'Not recorded in saved run evidence'}; $s := summary[0]; $start := $s.started_at ? $toMillis($s.started_at) : null; $end := $s.completed_at ? $toMillis($s.completed_at) : null; $map([{'parameter':'Run ID','value':$v(run_id)},{'parameter':'Pipeline','value':$v(pipeline)},{'parameter':'Run Type','value':$v(run_type)},{'parameter':'Started at','value':started_at ? $substring(started_at,0,10) & ' ' & $substring(started_at,11,5) & ' ' & ($substring(started_at,-1) = 'Z' ? 'UTC' : $substring(started_at,-6)) : 'Not recorded in saved run evidence'},{'parameter':'Total Run Duration','value':$start != null and $end != null and $end >= $start ? ($n := $floor(($end - $start) / 1000 + 0.5); $parts := [$floor($n / 86400), $floor(($n % 86400) / 3600), $floor(($n % 3600) / 60), $n % 60]; $units := [' d', ' h', ' min', ' s']; $n = 0 ? '0 s' : $join($map($parts, function($v, $i){$v > 0 ? $string($v) & $units[$i]}), ' ')) : 'Not recorded in saved run evidence'}], function($row){$merge([$row, {'_bioetl_frame':'identity'}])}))), ($d := presentation_domains[domain = 'Provider'][0]; $cached := $d.reason = 'cached_bronze_no_remote_probe'; $saved := evidence_availability in ['AVAILABLE', 'legacy_no_snapshot']; $completed := summary[0].completed_at; $age := $completed ? $floor(($millis() - $toMillis($completed)) / 1000) : null; $seconds := $age != null and $age>=0 ? $age : 0; $parts := [$floor($seconds/86400), $floor(($seconds%86400)/3600), $floor(($seconds%3600)/60)]; $units := [' d',' h',' min']; $elapsed := $join($map($parts,function($v,$i){$v>0 ? $string($v)&$units[$i]}),' '); $map(provider_checks, function($p) { $merge([$p, {'data_source': $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : ($d.reason = 'run_preflight_provider_observation' and $p.evidence = 'PRESENT' ? 'Provider check' : 'UNKNOWN')), 'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), 'check_result_display': $cached ? '—' : ($p.check_result = 'QUERY ERROR' ? 'QUERY ERROR' : ($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN')), 'reason': $cached ? 'Cached Bronze used; provider API was not called.' : ($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check.' : ($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.')), 'observed_display': $age != null and $age >= 0 ? ($age<60 ? 'Just now' : $elapsed & ' ago') : 'Not recorded', 'report_label': $saved or $cached ? 'Open report' : '—', '_bioetl_frame': 'provider'}]) }))), $map(stage_diagnostics, function($row){$merge([$row, {'_bioetl_frame': 'stages'}])})), $map(reconciliation_display, function($row){$merge([$row, {'_bioetl_frame': 'reconciliation'}])})), [{'status': (verdict='SELECT RUN' or verdict='НЕТ ЗАПУСКОВ') ? verdict : contract_exclusions_status, 'detail': contract_exclusions_rate != null ? 'excluded ' & $string($round(contract_exclusions_rate*100,2)) & '%' : (verdict='SELECT RUN' ? 'Choose a run' : (verdict='НЕТ ЗАПУСКОВ' ? 'No runs in scope' : 'excluded UNKNOWN')), '_bioetl_frame': 'exclusions'}]), function($row){$merge([$schema, $row])}))\"",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          }
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "enablePagination": false
+        }
+      },
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "all",
+            "filters": [
+              {
+                "fieldName": "_bioetl_frame",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "domains"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 6
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "domain",
+                "status_display",
+                "reason_display"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "domain": 0,
+              "status_display": 1,
+              "reason_display": 2
+            },
+            "renameByName": {
+              "domain": "Domain",
+              "status_display": "Status",
+              "reason_display": "Reason"
+            }
+          }
+        }
+      ],
+      "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+      "links": [
+        {
+          "title": "Open Control Plane",
+          "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open Data Quality",
+          "url": "/d/bioetl-dq-v2/4-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open Provider Evidence",
+          "url": "/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9480&${__url_time_range}",
+          "includeVars": false,
+          "targetBlank": false,
+          "tooltip": "Saved Provider Evidence for the selected Run ID. CURRENT provider alert conditions remain in Incident Workspace and do not prove this saved verdict."
+        }
+      ]
+    },
+    {
+      "id": 9603,
+      "type": "table",
+      "title": "Review Selected Run Status",
+      "gridPos": {
+        "x": 15,
+        "y": 5,
+        "w": 9,
+        "h": 5
+      },
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "UNKNOWN",
+          "unit": "none",
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "inspect": true,
+            "wrapText": false,
+            "minWidth": 50
+          },
+          "links": [
+            {
+              "title": "Open Run Explorer",
+              "url": "/d/bioetl-run-explorer-v1/1-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            },
+            {
+              "title": "Check BioETL Ops HTTP health",
+              "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
+              "targetBlank": true
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "action_dashboard_uid"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Overall verdict"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "SELECT RUN": {
+                        "text": "—",
+                        "color": "text"
+                      },
+                      "НЕТ ЗАПУСКОВ": {
+                        "text": "НЕТ ЗАПУСКОВ",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pipeline"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Processing"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 80
+              },
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "SELECT RUN": {
+                        "text": "—",
+                        "color": "text"
+                      },
+                      "SUCCESS": {
+                        "text": "SUCCESS",
+                        "color": "green"
+                      },
+                      "FAILED": {
+                        "text": "FAILED",
+                        "color": "red"
+                      },
+                      "UNKNOWN": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      },
+                      "UNFINISHED": {
+                        "text": "UNFINISHED",
+                        "color": "orange"
+                      },
+                      "НЕТ ЗАПУСКОВ": {
+                        "text": "НЕТ ЗАПУСКОВ",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Reason"
+              },
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "execution_success": {
+                        "text": "Processing completed"
+                      },
+                      "standalone_pipeline": {
+                        "text": "Standalone pipeline"
+                      },
+                      "run_dq_threshold_evaluation": {
+                        "text": "Data quality checks"
+                      },
+                      "run_preflight_provider_observation": {
+                        "text": "Provider preflight check"
+                      },
+                      "run_gold_schema_validation": {
+                        "text": "Gold schema validation"
+                      },
+                      "run_observation_missing": {
+                        "text": "Result not recorded"
+                      },
+                      "no_gold_candidates": {
+                        "text": "No Gold candidates"
+                      },
+                      "Archive missing": {
+                        "text": "No verified archive"
+                      },
+                      "archive_evidence_not_recorded": {
+                        "text": "No verified archive"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^(Workflow: )?workflow_parent_not_finalized$",
+                      "result": {
+                        "text": "Parent workflow completion has not been recorded"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": true
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trust"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Trust"
+              },
+              {
+                "id": "custom.width",
+                "value": 80
+              },
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "SELECT RUN": {
+                        "text": "—",
+                        "color": "text"
+                      },
+                      "НЕТ ЗАПУСКОВ": {
+                        "text": "НЕТ ЗАПУСКОВ",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "enablePagination": false
+        }
+      },
+      "targets": [
+        {
+          "panelId": 9002,
+          "refId": "A",
+          "withTransforms": false,
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "all",
+            "filters": [
+              {
+                "fieldName": "_bioetl_frame",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "domains"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 1
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "run_execution",
+                "run_verdict",
+                "saved_trust",
+                "run_reason"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "run_execution": 0,
+              "run_verdict": 1,
+              "saved_trust": 2,
+              "run_reason": 3
+            },
+            "renameByName": {
+              "run_verdict": "Overall verdict",
+              "run_execution": "Processing",
+              "run_reason": "Reason",
+              "saved_trust": "Trust"
+            },
+            "excludeByName": {
+              "__name__": true,
+              "job": true,
+              "action_dashboard_uid": false
+            }
+          }
+        }
+      ],
+      "links": [
+        {
+          "title": "Open run in Run Explorer",
+          "url": "/d/bioetl-run-explorer-v1/1-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        }
+      ]
+    },
+    {
+      "id": 9300,
+      "type": "table",
+      "title": "Review Run Identity",
+      "gridPos": {
+        "x": 15,
+        "y": 10,
+        "w": 9,
+        "h": 8
+      },
+      "description": "SELECTED RUN · Pipeline and full Run ID identify the saved run. Run Type and Started at (with saved UTC offset) characterize its execution. SELECT RUN means no selected run context. Missing saved values are Not recorded; request failures remain QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "inspect": true,
+            "wrapText": true,
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": true
+            },
+            "minWidth": 50
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Parameter"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 125
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "panelId": 9002,
+          "refId": "A",
+          "withTransforms": false,
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          }
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "enablePagination": false
+        }
+      },
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "all",
+            "filters": [
+              {
+                "fieldName": "_bioetl_frame",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "identity"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "parameter",
+                "value"
+              ]
+            }
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 5
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "parameter": 0,
+              "value": 1
+            },
+            "renameByName": {
+              "parameter": "Parameter",
+              "value": "Value"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 9480,
+      "type": "table",
+      "title": "Review Provider Evidence",
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 15,
+        "h": 5
+      },
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "description": "SELECTED RUN · Saved provider evidence for this Run ID. Cached Bronze means the provider API was not called: Check performed is No and Check result is —. Provider check identifies saved preflight evidence, not the extraction transport. UNKNOWN means the performed state or result is unknown. Since completed is elapsed wall time from the saved completion timestamp, updated on refresh. Expand Provider HTTP details for recorded response time, HTTP status and endpoint; missing details are not invented. VALID EMPTY is an empty successful response. SELECT RUN requires context; QUERY ERROR is a failed request. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "enablePagination": true
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "UNKNOWN",
+          "unit": "none",
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": true
+            },
+            "inspect": true,
+            "minWidth": 50
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Provider"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 75
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Data source"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 105
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Performed"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Result"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 75
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Since completed"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 155
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Evidence"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 95
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Evidence"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open report",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "panelId": 9002,
+          "refId": "A",
+          "withTransforms": false,
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "all",
+            "filters": [
+              {
+                "fieldName": "_bioetl_frame",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "provider"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "provider",
+                "data_source",
+                "check_performed",
+                "check_result_display",
+                "reason",
+                "observed_display",
+                "report_label"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "provider": 0,
+              "data_source": 1,
+              "check_performed": 2,
+              "check_result_display": 3,
+              "reason": 4,
+              "observed_display": 5,
+              "report_label": 6
+            },
+            "renameByName": {
+              "provider": "Provider",
+              "data_source": "Data source",
+              "check_performed": "Performed",
+              "check_result_display": "Result",
+              "reason": "Reason",
+              "observed_display": "Since completed",
+              "report_label": "Evidence"
+            }
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": 9481,
+      "type": "stat",
+      "title": "Review Provider Check",
+      "gridPos": {
+        "x": 15,
+        "y": 18,
+        "w": 9,
+        "h": 5
+      },
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "description": "SELECTED RUN · Saved provider check result via check_result_display. Cached Bronze (provider API not called) shows —. Missing evidence stays UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health. SELECT RUN means no Run ID is selected. VALID EMPTY means no saved provider check. QUERY ERROR means backend unavailable or request failure. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^check_result_display$/",
+          "values": true
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "text": {
+          "valueSize": 48
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "UNKNOWN",
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "OK": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "HEALTHY": {
+                  "text": "HEALTHY",
+                  "color": "green"
+                },
+                "WARN": {
+                  "text": "WARN",
+                  "color": "orange"
+                },
+                "DEGRADED": {
+                  "text": "DEGRADED",
+                  "color": "orange"
+                },
+                "ERROR": {
+                  "text": "ERROR",
+                  "color": "red"
+                },
+                "FAIL": {
+                  "text": "FAIL",
+                  "color": "red"
+                },
+                "FAILING": {
+                  "text": "FAILING",
+                  "color": "red"
+                },
+                "CRIT": {
+                  "text": "CRIT",
+                  "color": "red"
+                },
+                "QUERY ERROR": {
+                  "text": "QUERY ERROR",
+                  "color": "red"
+                },
+                "UNKNOWN": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                },
+                "N/A": {
+                  "text": "N/A",
+                  "color": "gray"
+                },
+                "—": {
+                  "text": "—",
+                  "color": "gray"
+                },
+                "SELECT RUN": {
+                  "text": "SELECT RUN",
+                  "color": "gray"
+                },
+                "НЕТ ЗАПУСКОВ": {
+                  "text": "НЕТ ЗАПУСКОВ",
+                  "color": "gray"
+                },
+                "INCOMPLETE": {
+                  "text": "INCOMPLETE",
+                  "color": "orange"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "gray",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "panelId": 9002,
+          "refId": "A",
+          "withTransforms": false,
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "all",
+            "filters": [
+              {
+                "fieldName": "_bioetl_frame",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "provider"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "check_result_display"
+              ]
+            }
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 1
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": 9460,
+      "type": "table",
+      "title": "Inspect Selected Run Stages",
+      "gridPos": {
+        "x": 0,
+        "y": 23,
+        "w": 15,
+        "h": 6
+      },
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Mixed --"
+      },
+      "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. Excluded % is excluded_by_contract / stage records in; Saved % is records out / stage records in. Empty or incomplete inputs are UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "UNKNOWN",
+          "unit": "none",
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "inspect": true,
+            "minWidth": 50
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stage_id"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Stage"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "state"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "records_in"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Records in"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "records_out"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Records out"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "duration_seconds"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Duration"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reason"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Reason"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "source"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Source"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reason"
+            },
+            "properties": [
+              {
+                "id": "custom.wrapText",
+                "value": true
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "duration_seconds"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "Not recorded"
+              },
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "records_in"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": ""
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "records_out"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": ""
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "source"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "report.funnel": {
+                        "text": "Open report"
+                      },
+                      "report.stage_timings": {
+                        "text": "Open report"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open saved run report (JSON)",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(state|Status)$"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open saved run report (JSON)",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(stage_id|Stage)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Stage"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(records_in|Records in)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "In"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(records_out|Records out)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Out"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(state|Status)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(source|Source)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Evidence"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(quarantined|Quarantined)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Quar."
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(excluded|Excluded)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Excluded"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(deduplicated|Deduplicated)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Dedup."
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(filtered_out|Filtered out)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Filtered"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(excluded_pct)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Excl. %"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(saved_pct)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Saved %"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(excluded_pct|saved_pct|Excl[.] %|Saved %)( C)?$"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "panelId": 9002,
+          "refId": "A",
+          "withTransforms": false,
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          }
+        },
+        {
+          "refId": "B",
+          "type": "json",
+          "source": "url",
+          "parser": "uql",
+          "format": "table",
+          "root_selector": "",
+          "url": "/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "uql": "parse-json | jsonata \"($r := function($s,$o){$exists($s.removals[outcome=$o]) ? $sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; $ratio := function($s,$n){$s.tracking='full' and $type($s.records_in)='number' and $type($n)='number' ? ($s.records_in>0 and $n>=0 and $n<=$s.records_in ? 100*$n/$s.records_in : null) : null}; $map(funnel, function($s){($excluded := $s.tracking='full' and $type($s.removals)='array' ? $sum($append([0], $s.removals[outcome='excluded_by_contract'].count)) : null; {'stage_id':$s.stage_id, 'quarantined':$r($s,'quarantined'), 'excluded':$r($s,'excluded_by_contract'), 'deduplicated':$r($s,'deduplicated'), 'filtered_out':$r($s,'filtered_out'), 'excluded_pct':$ratio($s,$excluded), 'saved_pct':$ratio($s,$s.records_out)})}))\"",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "any",
+            "filters": [
+              {
+                "fieldName": "_bioetl_frame",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "stages"
+                  }
+                }
+              },
+              {
+                "fieldName": "stage_id",
+                "config": {
+                  "id": "isNotNull",
+                  "options": {}
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "stage_id",
+            "mode": "outerTabular"
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 12
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "stage_id",
+                "state",
+                "reason",
+                "records_in",
+                "records_out",
+                "quarantined",
+                "excluded",
+                "deduplicated",
+                "filtered_out",
+                "duration_seconds",
+                "source",
+                "excluded_pct",
+                "saved_pct"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "stage_id": 0,
+              "state": 1,
+              "reason": 2,
+              "records_in": 3,
+              "records_out": 4,
+              "quarantined": 5,
+              "excluded": 6,
+              "deduplicated": 7,
+              "filtered_out": 8,
+              "duration_seconds": 9,
+              "source": 10,
+              "excluded_pct": 11,
+              "saved_pct": 12
+            },
+            "renameByName": {
+              "quarantined": "Quarantined",
+              "excluded": "Excluded",
+              "deduplicated": "Deduplicated",
+              "filtered_out": "Filtered out"
+            },
+            "excludeByName": {
+              "reason": true,
+              "source": true,
+              "Source": true,
+              "Evidence": true
+            }
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": 9482,
+      "type": "canvas",
+      "title": "Review Contract Exclusions",
+      "gridPos": {
+        "x": 15,
+        "y": 23,
+        "w": 9,
+        "h": 6
+      },
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "description": "SELECTED RUN · Excluded-by-contract records summed across Bronze, Silver and Gold. Exclusion rate uses Bronze records out: below soft limit OK, at soft limit WARN, at hard limit CRIT. Limits come from pipeline configuration at dashboard generation, not historical run overrides. UNKNOWN means incomplete tracking or invalid counters; SELECT RUN requires a Run ID. Failed requests remain QUERY ERROR. Quarantined, filtered and deduplicated records are separate outcomes and are not included. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+      "options": {
+        "inlineEditing": false,
+        "panZoom": false,
+        "zoomToContent": false,
+        "tooltip": {
+          "mode": "none"
+        },
+        "root": {
+          "name": "Quality assessment",
+          "type": "frame",
+          "elements": [
+            {
+              "name": "status",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 40,
+                "text": {
+                  "mode": "field",
+                  "field": "status",
+                  "fixed": ""
+                },
+                "color": {
+                  "field": "status",
+                  "fixed": "gray"
+                }
+              },
+              "constraint": {
+                "horizontal": "leftright",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 8,
+                "right": 8,
+                "top": 8,
+                "height": 70
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "detail",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 28,
+                "text": {
+                  "mode": "field",
+                  "field": "detail",
+                  "fixed": ""
+                },
+                "color": {
+                  "field": "status",
+                  "fixed": "gray"
+                }
+              },
+              "constraint": {
+                "horizontal": "leftright",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 8,
+                "right": 8,
+                "top": 88,
+                "height": 70
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "UNKNOWN",
+          "mappings": [
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "^OK.*",
+                "result": {
+                  "color": "green"
+                }
+              }
+            },
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "^WARN.*",
+                "result": {
+                  "color": "orange"
+                }
+              }
+            },
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "^CRIT.*",
+                "result": {
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "^ERROR.*",
+                "result": {
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "value",
+              "options": {
+                "UNKNOWN": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                },
+                "SELECT RUN": {
+                  "text": "SELECT RUN",
+                  "color": "gray"
+                },
+                "НЕТ ЗАПУСКОВ": {
+                  "text": "НЕТ ЗАПУСКОВ",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "gray"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "panelId": 9002,
+          "refId": "A",
+          "withTransforms": false,
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "all",
+            "filters": [
+              {
+                "fieldName": "_bioetl_frame",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "exclusions"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": 9483,
+      "type": "table",
+      "title": "Review FK Comparison Scope",
+      "description": "SELECTED RUN · Persisted FK comparison in the exact parent workflow. selected-snapshot means absence only inside the pinned reference, not absence from the complete provider. Expiry can affect all selected rows while execution succeeds; remaining rows and scope stay explicit. Missing evidence is UNKNOWN and failed requests remain QUERY ERROR. Saved Evidence and Replay Readiness retain their independent checks. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+      "gridPos": {
+        "x": 0,
+        "y": 29,
+        "w": 24,
+        "h": 12
+      },
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "targets": [
+        {
+          "panelId": 9002,
+          "refId": "A",
+          "withTransforms": false,
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "UNKNOWN",
+          "custom": {
+            "align": "left",
+            "minWidth": 50,
+            "inspect": true,
+            "wrapText": true,
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": true
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "lg",
+        "footer": {
+          "show": false,
+          "enablePagination": true
+        }
+      },
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "all",
+            "filters": [
+              {
+                "fieldName": "_bioetl_frame",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "reconciliation"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "step_id",
+                "mode",
+                "scope",
+                "pins",
+                "limit",
+                "result",
+                "meaning"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "step_id": 0,
+              "mode": 1,
+              "scope": 2,
+              "pins": 3,
+              "limit": 4,
+              "result": 5,
+              "meaning": 6
+            },
+            "renameByName": {
+              "step_id": "Workflow step",
+              "mode": "Mode",
+              "scope": "Row scope",
+              "pins": "Compared snapshots",
+              "limit": "Limit",
+              "result": "Result",
+              "meaning": "Interpretation"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

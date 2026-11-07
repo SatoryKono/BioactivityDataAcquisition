@@ -411,6 +411,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/audit/pack-v2.1/domain-pylint-duplicate-code-scan.log",
             "reports/audit/pack-v2.1/domain-vulture-dead-code-scan.log",
             "reports/audit/pack-v2.1/P05-interfaces-contracts.md",
+            "reports/audit/pack-v2.1/P13-test-system.md",
         ),
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
@@ -502,6 +503,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/12375_b_repeat_blocker.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12375_restart_c_no_change_report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12553_runtime_acceptance_report.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
+    "reports/audit/comp-004-runtime/verification_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
     **dict.fromkeys(
