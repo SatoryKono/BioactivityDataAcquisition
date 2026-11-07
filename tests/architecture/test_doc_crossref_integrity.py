@@ -108,10 +108,6 @@ class TestADRReferencesValid:
                         f"references ADR-{adr_num:03d} which does not exist"
                     )
 
-        assert not violations, (
-            f"Found {len(violations)} broken ADR reference(s):\n"
-            + "\n".join(violations[:10])
-        )
         if violations:
             msg = f"Found {len(violations)} broken ADR reference(s):\n"
             msg += "\n".join(violations[:10])

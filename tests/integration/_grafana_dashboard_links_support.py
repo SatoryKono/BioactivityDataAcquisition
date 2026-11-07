@@ -146,7 +146,7 @@ _REQUIRED_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT[
 _REQUIRED_TOP_LEVEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_top_level_links_by_uid"]
 
 _TOP_LEVEL_LINK_TITLE_RE = re.compile(
-    r"^([0-6]\. .+|Run Explorer|Replay Readiness|Run Overview|Pipeline Diagnostics|Provider Health|Data Quality|Incident Workspace|Silver Reject Explorer|Explore (Logs|Traces)|Observability Checklist \(runbook\))$"
+    r"^([0-6]\. .+|Run Explorer|Replay Readiness|Run Overview|Pipeline Diagnostics|Provider Health|Data Quality|Silver Reject Explorer|Explore (Logs|Traces)|Observability Checklist \(runbook\))$"
 )
 
 _CANONICAL_GITHUB_BLOB_PREFIX = (
@@ -174,7 +174,7 @@ _PRIMARY_DASHBOARD_UIDS = frozenset(
 
 # Run Explorer intentionally ships without the shared id=1000 navigation
 # bus (#11322-#11324): the dashboard is a forensic leaf, not a hub.
-_NAV_BUS_EXEMPT_UIDS = frozenset({"bioetl-run-explorer-v1"})
+_NAV_BUS_EXEMPT_UIDS: frozenset[str] = frozenset()
 
 
 def _extract_required_time_tokens(section: str) -> tuple[str, ...]:
@@ -705,24 +705,25 @@ def _assert_preserved_identity_handoff(
             } == dict.fromkeys(("workflow", "pipeline", "run_type"), ".*")
             assert "var-lookup_run_id=" in url
             return
-        expected_identity = (
-            "${__data.fields.run_id:percentencode}"
-            if current_uid == "bioetl-run-explorer-v1"
-            else required_value
-        )
+        # F-12: Incident/runtime row → DQ retargets pipeline from the row field and
+        # clears page run_id so a foreign UUID does not follow into another pipeline.
+        if (
+            target_uid == "bioetl-dq-v2"
+            and values.get("run_id") == "-"
+            and str(values.get("pipeline", "")).startswith("${__data.fields.pipeline")
+        ):
+            return
+        # Row links are checked before this header-bus path. The bus carries
+        # the page selector ($run_id), not another row's UUID.
+        expected_identity = required_value
         assert selector in passed_vars, (
             f"{dashboard_name} link to {target_uid} must preserve exact Run ID "
             f"with var-{selector}={required_value}: {url}"
         )
-        if current_uid == "bioetl-incident-v1" and target_uid == "bioetl-dq-v2":
-            pass
-        elif current_uid == "bioetl-run-explorer-v1":
-            pass
-        else:
-            assert values.get(selector) == expected_identity, (
-                f"{dashboard_name} link to {target_uid} must use "
-                f"var-{selector}={required_value}, got {values.get(selector)!r}: {url}"
-            )
+        assert values.get(selector) == expected_identity, (
+            f"{dashboard_name} link to {target_uid} must use "
+            f"var-{selector}={required_value}, got {values.get(selector)!r}: {url}"
+        )
         return
 
     if current_uid in excluded_source_uids or target_uid in excluded_target_uids:
@@ -912,9 +913,13 @@ def _collect_cross_dashboard_target_locations(
 ) -> dict[str, list[str]]:
     # A native Dashboard datasource reuses the source frame and its row actions.
     # Validate those links elsewhere, but count navigation ownership at the source.
+    # Nav bus (panel id=1000) is shared chrome; row/panel CTAs may retarget the same
+    # UID with different scope tokens without counting as duplicate ownership.
     def source_panels(panels):
         result = []
         for panel in panels:
+            if panel.get("id") == 1000:
+                continue
             datasource = panel.get("datasource")
             if (
                 isinstance(datasource, dict)
@@ -945,11 +950,6 @@ def _assert_no_duplicate_dashboard_targets(
     *, dashboard_name: str, uid: str, target_locations: dict[str, list[str]]
 ) -> None:
     allowed_duplicate_targets = {
-        "bioetl-control-plane-v1",
-        "bioetl-dq-v2",
-        "bioetl-overview-v2",
-        "bioetl-run-explorer-v1",
-    } | {
         str(entry["target_uid"]) for entry in _REQUIRED_PANEL_LINKS_BY_UID.get(uid, ())
     }
     duplicates = {
@@ -1490,21 +1490,21 @@ def _assert_silver_explorer_html_bus_forensic_boundary(
 
 
 _EXPECTED_CURRENT_NAV_TITLE = {
-    "bioetl-control-plane-v1": "Replay Readiness",
-    "bioetl-overview-v2": "Run Overview",
+    "bioetl-run-explorer-v1": "1. Run Explorer",
+    "bioetl-control-plane-v1": "2. Replay Readiness",
+    "bioetl-overview-v2": "3. Run Overview",
     "bioetl-runtime": "Pipeline Diagnostics",
     "bioetl-provider-health-v2": "Provider Health",
-    "bioetl-dq-v2": "Data Quality",
-    "bioetl-incident-v1": "Incident Workspace",
-    "bioetl-run-explorer-v1": "Run Explorer",
+    "bioetl-dq-v2": "4. Data Quality",
+    "bioetl-incident-v1": "5. Incident Workspace",
 }
 
 _BASE_VISUAL_NAV_TITLES = (
-    "Run Explorer",
-    "Replay Readiness",
-    "Run Overview",
-    "Data Quality",
-    "Incident Workspace",
+    "1. Run Explorer",
+    "2. Replay Readiness",
+    "3. Run Overview",
+    "4. Data Quality",
+    "5. Incident Workspace",
 )
 
 _OPTIONAL_VISUAL_NAV_TITLES = (

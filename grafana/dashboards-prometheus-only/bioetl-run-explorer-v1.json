@@ -1,7 +1,7 @@
 {
   "id": null,
   "uid": "bioetl-run-explorer-v1",
-  "title": "Run Explorer",
+  "title": "1. Run Explorer",
   "tags": [
     "bioetl",
     "prometheus-only",

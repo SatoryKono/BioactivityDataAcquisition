@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 GENERATED_MARKER  # unused variable (scripts/ai/codex/native_runtime_contract.py:82)
 GITHUB_MCP_OFFICIAL_SERVER  # unused variable (scripts/ai/codex/setup_mcp.py:62)
 DEVIN_DAILY_DISABLE_SERVERS  # unused variable (scripts/ai/codex/setup_mcp.py:215)

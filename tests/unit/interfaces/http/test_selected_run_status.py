@@ -1685,11 +1685,11 @@ def test_selection_presentation_keeps_canonical_domains_and_one_action():
     assert len(rows) == 1
     assert rows[0]["verdict"] == "SELECT RUN"
     assert (
-        rows[0]["action_path"] == "d/bioetl-run-explorer-v1/run-explorer?var-run_id=-"
+        rows[0]["action_path"] == "d/bioetl-run-explorer-v1/1-run-explorer?var-run_id=-"
     )
     assert (
         _assert_l2_action_path(rows[0]["action_path"])
-        == "/d/bioetl-run-explorer-v1/run-explorer?var-run_id=-"
+        == "/d/bioetl-run-explorer-v1/1-run-explorer?var-run_id=-"
     )
 
 

@@ -49,27 +49,34 @@ selection_serialization:
       dq:
       - stage
 required_top_level_links_by_uid:
+  bioetl-run-explorer-v1:
+  - 2. Replay Readiness
+  - 3. Run Overview
+  - 4. Data Quality
+  - 5. Incident Workspace
   bioetl-control-plane-v1:
-  - Run Explorer
-  - Run Overview
-  - Incident Workspace
+  - 1. Run Explorer
+  - 3. Run Overview
+  - 4. Data Quality
+  - 5. Incident Workspace
   bioetl-overview-v2:
-  - Run Explorer
-  - Replay Readiness
-  - Incident Workspace
+  - 1. Run Explorer
+  - 2. Replay Readiness
+  - 4. Data Quality
+  - 5. Incident Workspace
   bioetl-dq-v2:
-  - Run Explorer
-  - Replay Readiness
-  - Run Overview
-  - Incident Workspace
+  - 1. Run Explorer
+  - 2. Replay Readiness
+  - 3. Run Overview
+  - 5. Incident Workspace
   bioetl-incident-v1:
-  - Run Explorer
-  - Replay Readiness
-  - Run Overview
-  bioetl-run-explorer-v1: []
+  - 1. Run Explorer
+  - 2. Replay Readiness
+  - 3. Run Overview
+  - 4. Data Quality
 top_level_link_priority_by_uid:
   bioetl-overview-v2:
-  - title: Replay Readiness
+  - title: 2. Replay Readiness
     target_uid: bioetl-control-plane-v1
     priority: secondary
     semantics: scoped_control_plane_handoff
@@ -381,14 +388,16 @@ navigation_transition_contract:
       canonical_uid: bioetl-incident-v1
       mirror_panels: []
 visual_bus_titles_ordered:
-- Run Explorer
-- Replay Readiness
-- Run Overview
-- Incident Workspace
+- 1. Run Explorer
+- 2. Replay Readiness
+- 3. Run Overview
+- 4. Data Quality
+- 5. Incident Workspace
 visual_bus_uids_ordered:
 - bioetl-run-explorer-v1
 - bioetl-control-plane-v1
 - bioetl-overview-v2
+- bioetl-dq-v2
 - bioetl-incident-v1
 global_explorer_reset:
   target_uid: bioetl-run-explorer-v1
@@ -403,6 +412,7 @@ navigation_surfaces:
     panel_id: 1000
     height: 2
     uids:
+    - bioetl-run-explorer-v1
     - bioetl-control-plane-v1
     - bioetl-overview-v2
     - bioetl-dq-v2
@@ -417,5 +427,4 @@ navigation_surfaces:
       Replay Readiness: bioetl-control-plane-v1
     identity: row_run_id
     time: selected_dashboard_range
-  contextual_destinations:
-  - bioetl-dq-v2
+  contextual_destinations: []

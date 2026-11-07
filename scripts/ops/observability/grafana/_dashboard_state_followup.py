@@ -340,7 +340,7 @@ def _stamp_trust_table(panel: dict[str, Any]) -> None:
     panel["links"] = [
         {
             "title": "Inspect all trust reasons",
-            "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
+            "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
             "includeVars": False,
             "targetBlank": False,
         }

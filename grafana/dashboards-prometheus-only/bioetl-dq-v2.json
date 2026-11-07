@@ -1,7 +1,7 @@
 {
   "id": null,
   "uid": "bioetl-dq-v2",
-  "title": "Data Quality",
+  "title": "4. Data Quality",
   "tags": [
     "bioetl",
     "prometheus-only",

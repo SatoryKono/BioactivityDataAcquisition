@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-10-15'
+  Last verified: '2026-11-05'
 
 ______________________________________________________________________
 
@@ -28,10 +28,12 @@ navigation contract in [the dashboard index](README.md) and
 5. Use Incident Workspace for CURRENT incidents, GLOBAL alerts and collapsed
    fleet/range workflow diagnostics. This telemetry is not exact-run evidence.
 
-The four visible navigation chips are Run Explorer, Replay Readiness, Run
-Overview and `Incident Workspace`; Data Quality has contextual entry links.
-Run Explorer uses row actions instead of navigation panel 1000. Other nav panels
-have height 2 and 16px wrapping text, including at 1024px. Standalone
+The header bus is on all five dashboards, numbered `1. Run Explorer`,
+`2. Replay Readiness`, `3. Run Overview`, `4. Data Quality` and
+`5. Incident Workspace`. Slugs follow those Grafana titles. Run Explorer also
+keeps row actions on panel 3010; the full Run ID wraps in the cell and is on
+the cell tooltip, so it is not read by widening the column. Nav panels have
+height 2 and 16px wrapping text, including at 1024px. Standalone
 `bioetl-runtime` and `bioetl-provider-health-v2` are retired. Provider routes use
 Overview panel 9480; runtime diagnostics use Incident row 8808.
 

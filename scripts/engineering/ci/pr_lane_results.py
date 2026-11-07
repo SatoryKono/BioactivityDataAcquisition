@@ -61,7 +61,13 @@ RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
+REQUIRED_CHECKS_PROSE_TEST = (
+    "tests/architecture/test_required_checks_prose_consistency.py"
+)
 DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
+STAGE0_EVIDENCE_TEST = "tests/unit/scripts/engineering/ci/test_stage0_evidence.py"
+GRAFANA_SELECTOR_CONTRACT_TEST = "tests/integration/test_grafana_selector_contract.py"
+GRAFANA_VARIABLE_REFERENCE_TEST = "tests/integration/test_grafana_variable_reference.py"
 RUN_REPORT_CONTRACTS_TEST = "tests/unit/domain/run_reports/test_contracts.py"
 SCRIPTS_INVENTORY_MANIFEST_TEST = (
     "tests/architecture/test_scripts_inventory_manifest.py"
@@ -151,6 +157,18 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "configs/quality/architecture_acceptance_baseline.yaml": (
         "tests/architecture/test_architecture_acceptance_baseline.py",
+    ),
+    "configs/quality/repo_structure_catalog.yaml": (
+        "tests/unit/scripts/repo/test_audit_root_cleanliness.py",
+        "tests/unit/scripts/repo/test_check_root_governance_docs.py",
+        "tests/unit/scripts/repo/test_audit_structure.py",
+    ),
+    "docs/plans/ci1-07-negative-merge-protection-plan.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+    ),
+    "docs/plans/README.md": (
+        "tests/unit/scripts/repo/test_check_root_governance_docs.py",
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
     ),
     "configs/quality/external_resource_inventory_pr12751_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
@@ -297,6 +315,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/ops/docker/test_verify_report_bind.py",
         "tests/integration/test_deployed_replay_readiness.py",
     ),
+    "docs/04-reference/contracts/run-manifest-ledger.md": (
+        "tests/unit/infrastructure/control_plane/test_live_root_manifest_record.py",
+        "tests/unit/interfaces/http/test_manifest_validation_catalog.py",
+    ),
     "docs/00-project/RULES.md": (INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,),
     "reports/engineering/SCHEMA-001_execution_evidence.md": (
         "tests/unit/scripts/test_verify_schema_parity.py",
@@ -334,6 +356,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             ".github/workflows/scorecard.yml",
             ".github/workflows/security.yml",
             ".github/workflows/skills-consistency.yml",
+            ".github/workflows/stage0-cache-pair.yml",
+            ".github/workflows/stage0-evidence-capture.yml",
+            ".github/workflows/stage0-phase-profile.yml",
             ".github/workflows/stale.yml",
             ".github/workflows/tests.yml",
             TYPE_CHECKING_COLD_WORKFLOW,
@@ -386,6 +411,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/audit/pack-v2.1/domain-pylint-duplicate-code-scan.log",
             "reports/audit/pack-v2.1/domain-vulture-dead-code-scan.log",
             "reports/audit/pack-v2.1/P05-interfaces-contracts.md",
+            "reports/audit/pack-v2.1/P13-test-system.md",
         ),
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
@@ -449,6 +475,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12763_report_root_review.json",
             "configs/quality/external_resource_inventory_pr12763_opener_protocol_review.json",
             "configs/quality/external_resource_inventory_pr12783_lf06_review.json",
+            "configs/quality/external_resource_inventory_pr12786_composite_review.json",
+            "configs/quality/external_resource_inventory_pr12782_lf07_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -475,6 +503,16 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/12375_b_repeat_blocker.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12375_restart_c_no_change_report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12553_runtime_acceptance_report.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
+    **dict.fromkeys(
+        (
+            "docs/ci/gate-platform-matrix-full.md",
+            "reports/audit/ci1-03-pr-description.txt",
+        ),
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/audit/comp-004-runtime/verification_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
     **dict.fromkeys(
@@ -661,6 +699,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "configs/quality/test_governance_audit.yaml": TEST_GOVERNANCE_ARTIFACT_TESTS,
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
+    **dict.fromkeys(
+        (
+            "docs/04-reference/config_comparison_matrix.csv",
+            "docs/reports/generated/config-discrepancies-report.md",
+            "reports/quality/config-discrepancy-baseline.json",
+        ),
+        ("tests/architecture/test_config_discrepancy_metrics_ratchets.py",),
+    ),
     "reports/quality/quality-move-qm08/publication-provenance.json": (
         "tests/unit/scripts/ci/test_test_telemetry_provenance.py",
         "tests/architecture/test_external_resource_inventory_catalog.py",
@@ -703,6 +749,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_gitignore_secret_and_agents_policy.py",
         *BENCHMARK_EVIDENCE_TESTS,
     ),
+    "docs/reports/ci/stage0_closure.json": (STAGE0_EVIDENCE_TEST,),
+    "docs/reports/ci/stage0_closure_report.md": (STAGE0_EVIDENCE_TEST,),
+    "reports/mypy_eval.json": (STAGE0_EVIDENCE_TEST,),
     "docs/reports/generated/documentation-cleanup-inventory.json": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
@@ -727,11 +776,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/04-reference/github-actions-workflows.md": (
         "tests/architecture/test_gha_disabled_map_10263.py",
-        "tests/architecture/test_required_checks_prose_consistency.py",
+        REQUIRED_CHECKS_PROSE_TEST,
     ),
-    "docs/05-operations/ci-workflow-map.md": (
-        "tests/architecture/test_required_checks_prose_consistency.py",
-    ),
+    "docs/05-operations/ci-workflow-map.md": (REQUIRED_CHECKS_PROSE_TEST,),
     "docs/05-operations/runbooks/generated-artifact-drift-workflow.md": (
         "tests/architecture/test_generated_artifact_drift_workflow.py",
     ),
@@ -751,6 +798,22 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_layer_dependencies.py",
         ROOT_HYGIENE_REVIEW_REGISTRY_TEST,
     ),
+    **dict.fromkeys(
+        (
+            ".github/CONTRIBUTING.md",
+            ".github/SECURITY.md",
+            "docs/03-guides/github-local-workflow.md",
+            "docs/03-guides/github-quick-reference.md",
+            "docs/05-operations/ci-cd-integration.md",
+            "docs/05-operations/release-checklist.md",
+            "docs/05-operations/runbooks/github-settings-quarterly-review.md",
+            "reports/governance/github-settings-A1-post-change-20261106.json",
+            "reports/governance/github-settings-A1-readback-20261106.json",
+            "reports/governance/github-settings-B2-preflight-20261106.json",
+            "reports/governance/github-settings-B2-preflight-20261106.md",
+        ),
+        (REQUIRED_CHECKS_PROSE_TEST,),
+    ),
 }
 
 # Directory-level edges for generated artifacts and diagrams where an exact
@@ -760,8 +823,8 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     ".vscode/": ("tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",),
     "docs/03-guides/dashboards/": (
         DOCUMENTATION_SYNC_TEST,
-        "tests/integration/test_grafana_selector_contract.py",
-        "tests/integration/test_grafana_variable_reference.py",
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
     ),
     "grafana/dashboards/": (
         DASHBOARD_SCENES_CONTRACT_TEST,
@@ -770,8 +833,20 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/integration/test_grafana_dashboard_cta_links.py",
         "tests/integration/test_grafana_dashboard_metric_semantics.py",
         "tests/integration/test_grafana_evidence_readability.py",
-        "tests/integration/test_grafana_selector_contract.py",
-        "tests/integration/test_grafana_variable_reference.py",
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+    ),
+    # Prometheus-only mirror: shipped dashboard owners plus its provisioning contract.
+    "grafana/dashboards-prometheus-only/": (
+        DASHBOARD_SCENES_CONTRACT_TEST,
+        "tests/integration/test_dashboard_variable_dependencies.py",
+        "tests/integration/test_grafana_config.py",
+        "tests/integration/test_grafana_dashboard_cta_links.py",
+        "tests/integration/test_grafana_dashboard_metric_semantics.py",
+        "tests/integration/test_grafana_dashboard_provisioning.py",
+        "tests/integration/test_grafana_evidence_readability.py",
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
     ),
     "docs/02-architecture/decisions/": (
         "tests/architecture/test_adr_enforcement_matrix.py",

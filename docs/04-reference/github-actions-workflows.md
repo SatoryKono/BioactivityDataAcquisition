@@ -16,7 +16,7 @@ ______________________________________________________________________
 ## Current migration status
 
 The pull-request coordinator runs in GitHub Actions (`.github/workflows/pr-required.yml`). On the 2026-10-16 read-only GET, rulesets `13643213` and `15730586` are `enforcement: disabled`, so a successful `pr-gate-complete` does not by itself block merge. The tables below retain the historical inventory and API-state snapshot; `active` in a historical row does not mean that workflow currently runs.
-<!-- policy-anchor:deployment-provider --> `deployment.provider=github_actions`. <!-- policy-anchor:ruleset-enforcement-mode --> Ruleset `13643213` is `enforcement: disabled`; rulesets `15730586` and `24517966` were deleted on 2026-11-02 (settings-audit phase 0). <!-- policy-anchor:stored-ruleset-contexts --> Since 2026-11-02 ruleset `13643213` stores the GitHub Actions context `pr-gate-complete`, which is not active merge protection while the ruleset stays disabled. <!-- policy-anchor:target-gha-context --> `pr-gate-complete` is the context stored on ruleset `13643213` since 2026-11-02. <!-- policy-anchor:enforcement-verified-date --> `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge and does not confirm live server rulesets.
+<!-- policy-anchor:deployment-provider --> `deployment.provider=github_actions`. <!-- policy-anchor:ruleset-enforcement-mode --> Ruleset `13643213` is `enforcement: active` (GET 2026-11-06); rulesets `15730586` and `24517966` were deleted on 2026-11-02 (settings-audit phase 0). <!-- policy-anchor:stored-ruleset-contexts --> The active rule requires `pr-gate-complete` (GET 2026-11-06); the rule binds this context to GitHub Actions App 15368 (integration_id=15368). <!-- policy-anchor:target-gha-context --> `pr-gate-complete` is the context stored on ruleset `13643213` since 2026-11-02. <!-- policy-anchor:enforcement-verified-date --> `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge; the active server rule requires it. An offline catalog match does not confirm live server rulesets. Positive/negative merge acceptance was not run in this audit.
 CodeQL is excluded from required checks (#11929). Its workflow definition remains
 until retirement (#11930); optional analysis is a separate decision. Trivy and
 Scorecard SARIF upload functions must survive migration even though the old upload
@@ -24,7 +24,7 @@ transport uses `github/codeql-action/upload-sarif`.
 
 ## Purpose
 
-This page is the canonical published inventory of the **55** live GitHub Actions
+This page is the canonical published inventory of the **58** live GitHub Actions
 workflow files tracked under `.github/workflows/` on the default branch.
 The count is derived from those tracked `*.yml` files; it is not a separately
 maintained target and it is **not** equal to the GitHub Actions API
@@ -34,7 +34,7 @@ Live GET `2026-09-17`: API `total_count` is **79**.
 
 | Bucket | Count | Meaning |
 | --- | --- | --- |
-| Tracked `.github/workflows/*.yml` | 55 | Canonical inventory on `main`; this page |
+| Tracked `.github/workflows/*.yml` | 58 | Canonical inventory on `main`; this page |
 | GitHub-hosted `dynamic/**` | 10 | Dependabot, CodeQL default, agent reviewers; not PR gates |
 | GitHub-only orphan temp/codex IDs | 16 | Files left `main`; `disabled_manually` after #10265 |
 | GitHub-only residual deleted files | 3 | Former tracked workflows; `disabled_manually`; not gates |
@@ -90,7 +90,7 @@ new spend/safety decision.
 | `no-partial-tree-commits.yml` | `No partial-tree commits` | `workflow_dispatch` | `active` | `active` | Rejects partial-tree commits that would collapse history for downstream PRs (#11709) |
 | `opencode-pr-review.yml` | `opencode-pr-review` | `workflow_dispatch` | `active` | `active` | Dispatch-only stub (#11012); remote OpenCode installer removed until a digest pin exists |
 | `opencode-triage.yml` | `opencode-triage` | `workflow_dispatch` | `active` | `active` | Dispatch-only stub (#11012); remote OpenCode installer removed until a digest pin exists |
-| `pr-required.yml` | `PR Gate Complete` | `pull_request`, `workflow_dispatch` | `active` | `active` | Always-materialized fail-closed coordinator; job `pr-gate-complete` is the target name while ruleset 13643213 is `enforcement: disabled` |
+| `pr-required.yml` | `PR Gate Complete` | `pull_request`, `workflow_dispatch` | `active` | `active` | Always-materialized fail-closed coordinator; job `pr-gate-complete` is required by ruleset 13643213 (`enforcement: active`, GET 2026-11-06) |
 | `port-contracts.yml` | `Port Contract Tests` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Port-protocol and hypothesis contract tests |
 | `provider-contract-drift.yml` | `Provider Contract Drift` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Provider contract replay/drift gate |
 | `router-v7-bridge.yml` | `Router 7 bridge candidate` | `workflow_dispatch` | `active` | `active` | Path-filtered migration candidate tests, browser build, and dependency audit; host acceptance remains separate |
@@ -102,6 +102,9 @@ new spend/safety decision.
 | `zizmor.yml` | `zizmor` | `workflow_call`, `workflow_dispatch` | `active` | `active` | High-confidence GitHub Actions YAML audit |
 | `semantic-governance.yml` | `Semantic Pipeline Governance` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Semantic pipeline contract/policy governance |
 | `skills-consistency.yml` | `Skills Consistency` | `push`, `pull_request`, `workflow_dispatch` | `active` | `active` | Path-filtered local skill mirrors plus Codex–Junie runtime parity |
+| `stage0-cache-pair.yml` | `Stage 0 cache pair` | `push`, `workflow_dispatch` | `active` | `active` | Isolated mypy cache cold/warm measurement on Stage 0 evidence branches; measurement only, no production cache keys |
+| `stage0-evidence-capture.yml` | `Stage 0 evidence capture` | `push` | `active` | `active` | Captures historical GitHub Actions and CircleCI evidence on workflow-file changes to Stage 0 evidence branches |
+| `stage0-phase-profile.yml` | `Stage 0 phase profile` | `push`, `workflow_dispatch` | `active` | `active` | Measurement-only phase profiling on Stage 0 evidence branches |
 | `tests.yml` | `Tests` | `workflow_call` | `active` | `active` | Main test matrix, DQ gates, coverage, telemetry, control-plane E2E |
 | `type-checking-cold.yml` | `Type Checking (Strict Cold Control)` | `schedule`, `workflow_dispatch` | `active` | `active` | Strict mypy cold control without cache |
 | `type-checking.yml` | `Type Checking (Strict)` | `workflow_call`, `push`, `workflow_dispatch` | `active` | `active` | Strict mypy lane; push to `main` saves the incremental cache |

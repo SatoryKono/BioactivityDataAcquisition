@@ -1,7 +1,7 @@
 {
   "id": null,
   "uid": "bioetl-incident-v1",
-  "title": "6. Incident Workspace",
+  "title": "5. Incident Workspace",
   "tags": [
     "bioetl",
     "prometheus-only",
