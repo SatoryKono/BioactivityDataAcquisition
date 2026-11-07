@@ -1,7 +1,7 @@
 {
-  "additive_coverage_xml_path": "reports/coverage/coverage.xml",
-  "additive_coverage_xml_sha256": null,
-  "additive_measured_module_count": 0,
+  "additive_coverage_xml_path": "reports/coverage/lf06-run-id-resolver-coverage.xml",
+  "additive_coverage_xml_sha256": "b8b0cca17b430618f2cdc37141b1f39f9970b3190fa9bd55d09361f64ed3d2fe",
+  "additive_measured_module_count": 1,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": "4dc66455506c3529b7ed2450c9131d9d64f9a513b9ca7757b340beac1e3495ce",
