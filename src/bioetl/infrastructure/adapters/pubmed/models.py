@@ -18,7 +18,7 @@ import typing
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from bioetl.infrastructure.adapters.pubmed import _article_components as components
+import bioetl.infrastructure.adapters.pubmed._article_components as components
 from bioetl.infrastructure.adapters.pubmed._extended_record import (
     PubMedExtendedRecord,
 )
