@@ -110,7 +110,7 @@ def test_incident_pipeline_scope_status_matches_priority_enum() -> None:
 
 
 def test_incident_metrics_evidence_uses_standard_threshold_steps() -> None:
-    """Coverage evidence stays neutral at zero and preserves warning thresholds."""
+    """Evidence chip follows shared severity thresholds; null mapping stays UNKNOWN."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     evidence = next(
         panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 9102
@@ -119,7 +119,7 @@ def test_incident_metrics_evidence_uses_standard_threshold_steps() -> None:
     assert defaults["thresholds"] == {
         "mode": "absolute",
         "steps": [
-            {"color": "#555555", "value": None},
+            {"color": "green", "value": None},
             {"color": "orange", "value": 1},
             {"color": "red", "value": 2},
         ],
