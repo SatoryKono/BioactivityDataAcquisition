@@ -418,6 +418,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/audit/pack-v2.1/evidence_p12_parity.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
     ),
+    "docs/reports/dashboard-ux-checks/2026-11-07.md": (
+        "tests/integration/test_dashboard_ux_report_freshness.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "docs/reports/audit/N1_SHADOW_STATUS.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
     "src/bioetl/infrastructure/adapters/decorators/README.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,

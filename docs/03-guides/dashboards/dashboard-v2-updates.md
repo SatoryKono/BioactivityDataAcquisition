@@ -1,6 +1,6 @@
 ## Run Explorer first-window follow-up — 2026-11-07
 
-The [static UX check](../../reports/dashboard-ux-checks/2026-11-07.md) records the local first-window and navigation results and the outstanding browser verification.
+The static UX check at `docs/reports/dashboard-ux-checks/2026-11-07.md` records the local first-window and navigation results and the outstanding browser verification.
 
 ## Silver accounting and standalone FK scope — 2026-10-06
 

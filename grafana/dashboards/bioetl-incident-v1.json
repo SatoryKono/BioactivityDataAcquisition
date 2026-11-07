@@ -3948,89 +3948,6 @@
           "links": []
         },
         {
-          "id": 9463,
-          "type": "stat",
-          "title": "Review Total Run Duration",
-          "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing. No selection stays SELECT RUN; missing timestamps stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
-          "gridPos": {
-            "x": 0,
-            "y": 67,
-            "w": 24,
-            "h": 3
-          },
-          "datasource": {
-            "type": "datasource",
-            "uid": "-- Dashboard --"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "unit": "s",
-              "decimals": 2,
-              "noValue": "Not recorded",
-              "color": {
-                "mode": "thresholds"
-              },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "colorMode": "none",
-            "graphMode": "none",
-            "textMode": "value",
-            "text": {
-              "valueSize": 20,
-              "titleSize": 14
-            }
-          },
-          "targets": [
-            {
-              "panelId": 2101,
-              "refId": "A",
-              "withTransforms": false,
-              "datasource": {
-                "type": "datasource",
-                "uid": "-- Dashboard --"
-              }
-            }
-          ],
-          "transformations": [
-            {
-              "id": "filterByValue",
-              "options": {
-                "type": "include",
-                "match": "all",
-                "filters": [
-                  {
-                    "fieldName": "_bioetl_frame",
-                    "config": {
-                      "id": "equal",
-                      "options": {
-                        "value": "duration"
-                      }
-                    }
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
@@ -4137,7 +4054,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 70,
+            "y": 67,
             "w": 24,
             "h": 10
           },
@@ -4218,7 +4135,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 80,
+            "y": 77,
             "w": 12,
             "h": 6
           },
@@ -4314,7 +4231,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 80,
+            "y": 77,
             "w": 12,
             "h": 6
           },
@@ -4371,7 +4288,7 @@
           "title": "Review Runtime Escalation",
           "gridPos": {
             "x": 0,
-            "y": 86,
+            "y": 83,
             "w": 24,
             "h": 3
           },
@@ -4430,7 +4347,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 89,
+            "y": 86,
             "w": 8,
             "h": 4
           },
@@ -4523,7 +4440,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 89,
+            "y": 86,
             "w": 8,
             "h": 4
           },
@@ -4613,7 +4530,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 89,
+            "y": 86,
             "w": 8,
             "h": 4
           },
@@ -4705,7 +4622,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 93,
+            "y": 90,
             "w": 10,
             "h": 4
           },
@@ -4810,7 +4727,7 @@
           },
           "gridPos": {
             "x": 10,
-            "y": 93,
+            "y": 90,
             "w": 14,
             "h": 4
           },
@@ -4895,7 +4812,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 97,
+            "y": 94,
             "w": 10,
             "h": 4
           },
@@ -5000,7 +4917,7 @@
           },
           "gridPos": {
             "x": 10,
-            "y": 97,
+            "y": 94,
             "w": 14,
             "h": 4
           },
@@ -5101,7 +5018,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 101,
+            "y": 98,
             "w": 10,
             "h": 4
           },
@@ -5266,7 +5183,7 @@
           },
           "gridPos": {
             "x": 10,
-            "y": 101,
+            "y": 98,
             "w": 14,
             "h": 6
           },
@@ -5426,7 +5343,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 107,
+            "y": 104,
             "w": 13,
             "h": 6
           },
@@ -5550,7 +5467,7 @@
             "h": 4,
             "w": 5,
             "x": 13,
-            "y": 107
+            "y": 104
           },
           "id": 891,
           "options": {
@@ -5643,7 +5560,7 @@
             "h": 4,
             "w": 6,
             "x": 18,
-            "y": 107
+            "y": 104
           },
           "id": 892,
           "options": {
@@ -5771,7 +5688,7 @@
             "h": 4,
             "w": 13,
             "x": 0,
-            "y": 113
+            "y": 110
           },
           "id": 893,
           "options": {
@@ -5881,7 +5798,7 @@
             "h": 4,
             "w": 11,
             "x": 13,
-            "y": 113
+            "y": 110
           },
           "id": 907,
           "options": {
@@ -5930,7 +5847,7 @@
           "title": "Review Cross-Domain Handoffs",
           "gridPos": {
             "x": 0,
-            "y": 117,
+            "y": 114,
             "w": 24,
             "h": 3
           },
@@ -6048,7 +5965,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 120,
+            "y": 117,
             "w": 24,
             "h": 10
           },
@@ -6132,7 +6049,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 130,
+            "y": 127,
             "w": 8,
             "h": 4
           },
@@ -6228,7 +6145,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 130,
+            "y": 127,
             "w": 8,
             "h": 4
           },
@@ -6318,7 +6235,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 130,
+            "y": 127,
             "w": 8,
             "h": 4
           },
@@ -6376,7 +6293,7 @@
             "h": 2,
             "w": 24,
             "x": 0,
-            "y": 134
+            "y": 131
           },
           "options": {
             "mode": "html",
@@ -6415,7 +6332,7 @@
         {
           "gridPos": {
             "x": 0,
-            "y": 136,
+            "y": 133,
             "w": 24,
             "h": 5
           },
@@ -6487,7 +6404,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 141,
+            "y": 138,
             "w": 24,
             "h": 4
           },
@@ -6567,7 +6484,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 145,
+            "y": 142,
             "w": 24,
             "h": 4
           },
@@ -6671,7 +6588,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 149,
+            "y": 146,
             "w": 12,
             "h": 4
           },
@@ -6776,7 +6693,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 149,
+            "y": 146,
             "w": 12,
             "h": 3
           },
@@ -6876,7 +6793,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 153,
+            "y": 150,
             "w": 14,
             "h": 3
           },
@@ -6977,7 +6894,7 @@
           },
           "gridPos": {
             "x": 14,
-            "y": 153,
+            "y": 150,
             "w": 10,
             "h": 3
           },
@@ -7077,7 +6994,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 156,
+            "y": 153,
             "w": 8,
             "h": 3
           },
@@ -7177,7 +7094,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 156,
+            "y": 153,
             "w": 8,
             "h": 3
           },
@@ -7270,7 +7187,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 156,
+            "y": 153,
             "w": 8,
             "h": 3
           },
@@ -7383,7 +7300,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 159,
+            "y": 156,
             "w": 24,
             "h": 9
           },
@@ -7582,7 +7499,7 @@
           "description": "CURRENT · Expected stage coverage for Pipeline / Run Type. Missing lag/backlog signals are listed individually. Undefined expected stages are UNKNOWN. VALID EMPTY requires a recorded complete stage catalog and every expected signal. Query failures are QUERY ERROR.",
           "gridPos": {
             "x": 0,
-            "y": 168,
+            "y": 165,
             "w": 24,
             "h": 14
           },
@@ -7712,7 +7629,7 @@
           "title": "Review Global Process Signals",
           "gridPos": {
             "x": 0,
-            "y": 182,
+            "y": 179,
             "w": 24,
             "h": 3
           },
@@ -7783,7 +7700,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 185,
+            "y": 182,
             "w": 24,
             "h": 6
           },
@@ -7874,7 +7791,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 191,
+            "y": 188,
             "w": 8,
             "h": 3
           },
@@ -7975,7 +7892,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 191,
+            "y": 188,
             "w": 8,
             "h": 3
           },
@@ -8075,7 +7992,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 191,
+            "y": 188,
             "w": 8,
             "h": 3
           },
@@ -8232,7 +8149,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 194,
+            "y": 191,
             "w": 24,
             "h": 6
           },
@@ -8337,7 +8254,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 200,
+            "y": 197,
             "w": 12,
             "h": 3
           },
@@ -8437,7 +8354,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 200,
+            "y": 197,
             "w": 12,
             "h": 3
           },
@@ -8527,7 +8444,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 203,
+            "y": 200,
             "w": 14,
             "h": 6
           },
@@ -8621,7 +8538,7 @@
           },
           "gridPos": {
             "x": 14,
-            "y": 203,
+            "y": 200,
             "w": 10,
             "h": 3
           },
@@ -8721,7 +8638,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 209,
+            "y": 206,
             "w": 10,
             "h": 3
           },
@@ -8811,7 +8728,7 @@
           },
           "gridPos": {
             "x": 10,
-            "y": 209,
+            "y": 206,
             "w": 14,
             "h": 6
           },
@@ -8905,7 +8822,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 215,
+            "y": 212,
             "w": 24,
             "h": 3
           },
@@ -9000,7 +8917,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 218,
+            "y": 215,
             "w": 24,
             "h": 8
           },
@@ -9134,7 +9051,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 226,
+            "y": 223,
             "w": 24,
             "h": 3
           },
@@ -9219,7 +9136,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 229,
+            "y": 226,
             "w": 24,
             "h": 10
           },
@@ -9288,7 +9205,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 239,
+            "y": 236,
             "w": 24,
             "h": 9
           },
@@ -9378,7 +9295,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 248,
+            "y": 245,
             "w": 24,
             "h": 3
           },
@@ -9449,7 +9366,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 251,
+            "y": 248,
             "w": 24,
             "h": 7
           },
@@ -9520,7 +9437,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 258,
+            "y": 255,
             "w": 24,
             "h": 6
           },
@@ -9559,7 +9476,7 @@
           "description": "TIME RANGE · Shows selected-range stage lag in seconds for Pipeline, Run Type, and Stage. No data means no emitted lag samples or unavailable telemetry, never zero lag. Use Worst Stage Lag and current blockers for severity",
           "gridPos": {
             "x": 0,
-            "y": 264,
+            "y": 261,
             "w": 24,
             "h": 10
           },
@@ -9730,7 +9647,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 274,
+            "y": 271,
             "w": 24,
             "h": 6
           },
@@ -9788,7 +9705,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 280,
+            "y": 277,
             "w": 24,
             "h": 7
           },
@@ -9863,7 +9780,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 287,
+            "y": 284,
             "w": 24,
             "h": 6
           },
@@ -9921,7 +9838,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 293,
+            "y": 290,
             "w": 24,
             "h": 12
           },
@@ -10228,7 +10145,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 305,
+            "y": 302,
             "w": 24,
             "h": 9
           },
@@ -10348,7 +10265,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 314,
+            "y": 311,
             "w": 24,
             "h": 7
           },
@@ -10445,7 +10362,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 321,
+            "y": 318,
             "w": 24,
             "h": 7
           },
@@ -10541,7 +10458,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 328,
+            "y": 325,
             "w": 24,
             "h": 7
           },
@@ -10638,7 +10555,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 335,
+            "y": 332,
             "w": 24,
             "h": 7
           },
@@ -10738,7 +10655,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 342,
+            "y": 339,
             "w": 24,
             "h": 3
           },
@@ -10800,7 +10717,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 345,
+            "y": 342,
             "w": 24,
             "h": 6
           },
@@ -11891,7 +11808,7 @@
             "x": 0,
             "y": 51,
             "w": 24,
-            "h": 8
+            "h": 3
           },
           "transparent": true,
           "options": {
@@ -11905,7 +11822,7 @@
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
-            "y": 59,
+            "y": 54,
             "w": 24,
             "h": 8
           },
@@ -12162,15 +12079,98 @@
           "description": "SELECTED RUN · Canonical identity is Overview 9300 (rev7 §2.4).",
           "gridPos": {
             "x": 0,
-            "y": 67,
+            "y": 62,
             "w": 24,
-            "h": 8
+            "h": 3
           },
           "transparent": true,
           "options": {
             "mode": "markdown",
             "content": "**Canonical identity:** [Open Review Run Identity on Overview](/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range})"
           }
+        },
+        {
+          "id": 9463,
+          "type": "stat",
+          "title": "Review Total Run Duration",
+          "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing. No selection stays SELECT RUN; missing timestamps stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+          "gridPos": {
+            "x": 0,
+            "y": 65,
+            "w": 24,
+            "h": 4
+          },
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "decimals": 2,
+              "noValue": "Not recorded",
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "none",
+            "graphMode": "none",
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
+          },
+          "targets": [
+            {
+              "panelId": 2101,
+              "refId": "A",
+              "withTransforms": false,
+              "datasource": {
+                "type": "datasource",
+                "uid": "-- Dashboard --"
+              }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "filterByValue",
+              "options": {
+                "type": "include",
+                "match": "all",
+                "filters": [
+                  {
+                    "fieldName": "_bioetl_frame",
+                    "config": {
+                      "id": "equal",
+                      "options": {
+                        "value": "duration"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
         }
       ]
     },

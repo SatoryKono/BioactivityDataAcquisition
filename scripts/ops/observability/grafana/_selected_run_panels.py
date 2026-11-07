@@ -932,10 +932,13 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
             if not isinstance(panel, dict) or panel.get("id") != 9450
         ]
     elif uid != "bioetl-run-explorer-v1":
+        if uid == "bioetl-incident-v1":
+            panels = _without_panel_ids(panels, frozenset({9463}))
+            payload["panels"] = panels
         _append_saved_run_evidence_row(
             panels,
             include_identity=uid != _CONTROL_PLANE_UID,
-            include_duration=uid == "bioetl-runtime",
+            include_duration=uid in {"bioetl-runtime", "bioetl-incident-v1"},
         )
 
 

@@ -121,7 +121,7 @@
 | `docs/reports/dashboard-ux-checks/2026-09-25.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-10-02.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-10-06.md` | Working | 0 | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-11-07.md` | Working | 1 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-11-07.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-event-age.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-final-tests.txt` | Working | 0 | archive-after-migration |

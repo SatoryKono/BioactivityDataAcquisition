@@ -22,9 +22,9 @@
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "342c266dcee49fb230db82ca62db8b72da369cac636ac692577889fb688888a3",
     "bioetl-dq-v2": "a45b7f2ba23d086c020c23b11e3e160c286c04865700bfc7fc74b2f7c9c642bd",
-    "bioetl-incident-v1": "0b1627d29dab39951220a45647a2294b9fa4d618d4524080ca636b2623af8e3e",
+    "bioetl-incident-v1": "7fde2c0261b931786376226d3517961910283d072272a3e2c002197d4c2fbd23",
     "bioetl-overview-v2": "1201ccb716f6528d135ae8f44d161ea8f6cae7163e1471b3fe701807d5cad131",
-    "bioetl-run-explorer-v1": "730c97c69961d905779206d7cca66cd68b9a777097f1dd0100570ca496e5bb77"
+    "bioetl-run-explorer-v1": "5e8115777bbc2351eb4f999aca8f2c528933aa7f680bf9cf02d92cde1034b503"
   },
   "panels": [
     {
@@ -683,23 +683,6 @@
         "expressions": [
           "bioetl_runtime_stage_progress_by_scope{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}"
         ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-incident-v1",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-incident-v1",
-      "panel_id": 9463,
-      "panel_title": "Review Total Run Duration",
-      "route": "incident-console",
-      "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Dashboard --",
-        "expressions": [],
         "target_count": 1
       }
     },
@@ -2094,6 +2077,23 @@
         "datasource_uid": null,
         "expressions": [],
         "target_count": 0
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-incident-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-incident-v1",
+      "panel_id": 9463,
+      "panel_title": "Review Total Run Duration",
+      "route": "incident-console",
+      "source": {
+        "datasource_type": "datasource",
+        "datasource_uid": "-- Dashboard --",
+        "expressions": [],
+        "target_count": 1
       }
     },
     {

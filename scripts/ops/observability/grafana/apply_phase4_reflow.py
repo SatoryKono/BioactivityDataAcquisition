@@ -116,6 +116,15 @@ def apply_incident(data: dict[str, Any]) -> dict[str, int]:
     domains = _by_id(data, DOMAINS_PANEL_ID)
     height_before = int((domains.get("gridPos") or {}).get("h") or 0)
     domains.setdefault("gridPos", {})["h"] = DOMAINS_HEIGHT
+    # Keep both canonical handoffs with the saved evidence they describe.
+    # The duration and domain panels provide the data for this group.
+    saved = _by_id(data, 9450)
+    y = saved["gridPos"]["y"] + 1
+    heights = {9463: 4, 9460: 3, 9451: DOMAINS_HEIGHT, 9452: 3}
+    for child in saved["panels"]:
+        height = heights[child["id"]]
+        child["gridPos"].update(y=y, h=height)
+        y += height
     return {
         "fleet_bands_adjusted": bands,
         "domains_height_before": height_before,
