@@ -115654,7 +115654,7 @@
       "working": 644
     },
     "by_tracking_state": {
-      "tracked": 4097
+      "tracked": 4098
     },
     "docs_reports_local_count": 73,
     "duplicate_group_count": 80,
@@ -115667,8 +115667,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4097,
+    "total_doc_like": 4098,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4097
+    "total_doc_like_tracked": 4098
   }
 }
