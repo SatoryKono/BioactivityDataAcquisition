@@ -1,0 +1,4 @@
+Синхронизация с main выполнена: 1e6426e0012eea2f08ea30db03184615445c4115
+
+- Regenerated governance artifacts after merging latest main.
+- Included issue closure passport information from previous commits for #12853.
