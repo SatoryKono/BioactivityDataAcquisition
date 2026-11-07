@@ -23,7 +23,7 @@
 - `E2 STATIC`: `configs/quality/flaky_test_inventory.yaml` - Current inventory of flaky tests.
 - `E3 EXECUTABLE`: `grep -rn "@pytest.mark.skip(" tests/` and `grep -rn "pytest.skip(" tests/` - Verifying skip reason governance.
 - `E3 EXECUTABLE`: `uv run python -m scripts.engineering.qa.report_flaky_test_burndown_review --check` (Returns: `[flaky-test-burndown-review] artifact is current`)
-- `E4 RUNTIME`: `reports/test-telemetry/coverage-summary.json` (Fresh, Refreshed 2026-11-06T17:54:37.543230+00:00).
+- `E4 RUNTIME`: `reports/test-telemetry/coverage-summary.json` (Fresh, Refreshed 2026-11-06T17:54:37.543230+00:00, tied to source_commit facb0b5673c7cec55b6f4efb230f531618e9b56e).
 - `E4 RUNTIME`: `reports/test-telemetry/slowest-tests.json` (Freshness linked to coverage-summary.json run).
 - `E4 RUNTIME`: `reports/test-telemetry/s7-governance-hotspots.json` (Refreshed 2026-07-13T08:58:53.124004+00:00).
 
@@ -50,7 +50,7 @@
 - **verification command**: `uv run python -m scripts.engineering.qa.report_flaky_test_burndown_review --check`
 
 ## E. Quantitative Scorecard
-- **Coverage Enforcement**: 5 (Строгий контроль покрытия, фактический уровень 99.5%).
+- **Coverage Enforcement**: 5 (Строгий контроль покрытия, фактический уровень 99.5% для коммита facb0b5673c7cec55b6f4efb230f531618e9b56e).
 - **Deterministic Runs**: 5 (Механизмы встроены, flaky-инвентаризация функционирует штатно).
 - **Test Organization**: 5 (Четкое разделение на unit/integration/architecture и repo-backed).
 
@@ -62,7 +62,7 @@
 
 ## H. Verification Matrix
 - All static checks performed against pinned SHA (8476a5afba6f86b453d91e81669b3a7bacd2c65c).
-- Coverage limits validated: Actual 99.5% >= 85.0% Threshold.
+- Coverage limits validated: Actual 99.5% (from telemetry of `facb0b56`) >= 85.0% Threshold.
 
 ## I. NOT_VERIFIABLE и missing evidence
 - None.
@@ -74,4 +74,4 @@
 - False-positive rejected through correct usage of the tooling.
 
 ## K. Verdict
-- Тестовая система обладает высоким уровнем зрелости (99.5% покрытие, строгая архитектурная проверка, функционирующая отчетность). Критических и системных дефектов не обнаружено.
+- Тестовая система обладает высоким уровнем зрелости (99.5% покрытие согласно телеметрии `facb0b5673c7cec55b6f4efb230f531618e9b56e`, строгая архитектурная проверка, функционирующая отчетность). Критических и системных дефектов не обнаружено.
