@@ -5,16 +5,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from bioetl.infrastructure.adapters.pubmed._article_components import (
-    PubMedArticleId,
-    PubMedAuthor,
-    PubMedChemical,
-    PubMedGrant,
-    PubMedJournal,
-    PubMedMeshHeading,
-    PubMedPubDate,
-    PubMedReference,
-)
+from bioetl.infrastructure.adapters.pubmed import _article_components as components
 
 __all__ = ["PubMedExtendedRecord"]
 
@@ -47,18 +38,18 @@ class PubMedExtendedRecord(BaseModel):
     language: str | None = Field(default=None, description="Primary language code")
 
     # Authors
-    authors: list[PubMedAuthor] | None = Field(
+    authors: list[components.PubMedAuthor] | None = Field(
         default_factory=list, description="Article authors"
     )
     author_count: int | None = Field(default=None, description="Number of authors")
 
     # Journal Information
-    journal: PubMedJournal | None = Field(
+    journal: components.PubMedJournal | None = Field(
         default=None, description="Journal information"
     )
 
     # Publication Details
-    pub_date: PubMedPubDate | None = Field(default=None, description="Publication date")
+    pub_date: components.PubMedPubDate | None = Field(default=None, description="Publication date")
     medline_pgn: str | None = Field(
         default=None, description="Page numbers (MEDLINE format)"
     )
@@ -70,7 +61,7 @@ class PubMedExtendedRecord(BaseModel):
     )
 
     # MeSH Terms
-    mesh_headings: list[PubMedMeshHeading] | None = Field(
+    mesh_headings: list[components.PubMedMeshHeading] | None = Field(
         default_factory=list, description="MeSH headings"
     )
     mesh_heading_count: int | None = Field(
@@ -82,19 +73,19 @@ class PubMedExtendedRecord(BaseModel):
     keyword_count: int | None = Field(default=None, description="Number of keywords")
 
     # Chemicals
-    chemicals: list[PubMedChemical] | None = Field(
+    chemicals: list[components.PubMedChemical] | None = Field(
         default_factory=list, description="Chemical substances"
     )
     chemical_count: int | None = Field(default=None, description="Number of chemicals")
 
     # Grants
-    grants: list[PubMedGrant] | None = Field(
+    grants: list[components.PubMedGrant] | None = Field(
         default_factory=list, description="Grant information"
     )
     grant_count: int | None = Field(default=None, description="Number of grants")
 
     # References
-    references: list[PubMedReference] | None = Field(
+    references: list[components.PubMedReference] | None = Field(
         default_factory=list, description="Article references"
     )
     reference_count: int | None = Field(
@@ -113,6 +104,6 @@ class PubMedExtendedRecord(BaseModel):
     )
 
     # Article IDs
-    article_ids: list[PubMedArticleId] | None = Field(
+    article_ids: list[components.PubMedArticleId] | None = Field(
         default_factory=list, description="All article identifiers"
     )
