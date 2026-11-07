@@ -28,11 +28,11 @@ From the extracted JSON configuration for panel 9701 (`panel-9701.json`):
 | **Empty run_id** | `run_id=""` | No change in query | None. `$run_id` is not present in the Prometheus queries. | Queries execute with `$workflow`, `$pipeline`, `$run_type` scopes only. |
 | **Original UUID** | `run_id="ee3ce1ed-9487-572f-ae24-c98c6f6e3a37"` | Filter by original UUID | None. `$run_id` is ignored by the panel's queries. | No change to data retrieval; panel scope remains independent of run selection. |
 | **Different UUID** | `run_id="different-uuid-value"` | Filter by new UUID | None. The Prometheus queries do not filter by `$run_id`. | Consistent behavior regardless of `run_id` assignment. |
-| **Timestamp Variation** | `time="20261102T181217"` | Bound by evaluation time | Evaluates using `bioetl_workflow_scope_published_seconds`. | Global visibility bounded only by gateway clock, not Prometheus eval time. |
+| **Timestamp Variation** | Change the Grafana time range | The expressions stay the same. Both targets are instant queries without an `@` modifier, so the evaluation time can change the selected samples. | BLOCKED. No runtime request or frame was captured. | `bioetl_workflow_scope_published_seconds` supplies the displayed publication timestamp. Prometheus evaluation time still governs which status and timestamp samples are selected. |
 
 ## 4. HTTP Request / Frame Diagnostics
 - **Expected Action**: Save request/HTTP/body/frame and verify what really changes the request.
-- **Actual Action**: BLOCKED. Live environment is unavailable. However, static analysis of the panel's Prometheus configuration confirms that changing the selected run (`$run_id` variable) in the Grafana UI will not append a `$run_id` filter to the outbound HTTP request payload directed to Prometheus. Identical request strings confirm that selected-run support is absent.
+- **Actual Action**: BLOCKED. Live environment is unavailable. However, static analysis of the panel's Prometheus configuration confirms that changing the selected run (`$run_id` variable) in the Grafana UI will not append a `$run_id` filter to the outbound HTTP request payload directed to Prometheus. The stored expressions omit the selected-run filter. No live request was captured for comparison.
 
 ## 5. Comparison and Contract (vs. #11268 and #12783)
 - **#11268 Context**: Addressed global vs run-scoped dashboard components and standard link injection.
