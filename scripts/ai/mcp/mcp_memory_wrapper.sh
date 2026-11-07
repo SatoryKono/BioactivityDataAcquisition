@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 memory_mode_is_explicit=0
 requested_memory_mode=""
-if [[ -v BIOETL_AI_MEMORY_MODE ]]; then
+if [[ -n "${BIOETL_AI_MEMORY_MODE:-}" ]]; then
   memory_mode_is_explicit=1
   requested_memory_mode="${BIOETL_AI_MEMORY_MODE}"
 fi
@@ -58,10 +58,14 @@ if [[ -n "${MEMORY_FILE_PATH:-}" ]]; then
   scope_args+=(--target "${MEMORY_FILE_PATH}")
 fi
 export MEMORY_REPO_ROOT="${REPO_ROOT}"
-export MEMORY_FILE_PATH="$(
+if ! MEMORY_FILE_PATH="$(
     "${MEMORY_PYTHON}" -m memory.mcp_scope \
       --repo-root "${REPO_ROOT}" \
       --seed "${MEMORY_SEED_PATH:-${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json}" \
       "${scope_args[@]}"
-  )"
+  )"; then
+  printf '%s\n' "Memory MCP could not scope its store. Regenerate the MCP configuration with a store under .cache/mcp-memory." >&2
+  exit 78
+fi
+export MEMORY_FILE_PATH
 exec "${MEMORY_PYTHON}" -m memory.mcp_server "$@"

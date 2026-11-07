@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-07T17:39:56.716136+00:00",
+  "generated_at": "2026-11-07T18:43:46.623288+00:00",
   "summary": {
     "total_scripts": 714,
     "status_counts": {
@@ -3992,7 +3992,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
-          "line": 158,
+          "line": 159,
           "source_group": "tests",
           "text": "Without the executable bit, ``exec ./mcp_memory_wrapper.sh`` returns 126"
         }

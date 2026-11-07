@@ -149,7 +149,8 @@ def test_mcp_memory_default_store_is_scoped_and_untracked() -> None:
         in wrapper
     )
     assert 'scope_args+=(--target "${MEMORY_FILE_PATH}")' in wrapper
-    assert 'export MEMORY_FILE_PATH="$(' in wrapper
+    assert 'if ! MEMORY_FILE_PATH="$(' in wrapper
+    assert 'export MEMORY_FILE_PATH\nexec' in wrapper
 
 
 def test_mcp_memory_wrapper_is_git_executable() -> None:
