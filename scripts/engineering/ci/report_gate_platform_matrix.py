@@ -22,15 +22,27 @@ PAIRS = {
     "test-fast": ("tests.yml:test-fast",),
     "test-integration": ("tests.yml:test-matrix",),
     "dq-consistency": ("tests.yml:dq-consistency-gate",),
-    "root-hygiene": ("root-hygiene.yml:root-hygiene",),
-    "compiled-artifacts": ("compiled-artifacts-block.yml:check-artifacts",),
+    "root-hygiene": (
+        "root-hygiene.yml:root-hygiene",
+        "pr-required.yml:fast-governance",
+    ),
+    "compiled-artifacts": (
+        "compiled-artifacts-block.yml:check-artifacts",
+        "pr-required.yml:fast-governance",
+    ),
     "security-scans": ("security.yml:security-scans",),
-    "actions-audit": ("zizmor.yml:zizmor",),
+    "actions-audit": (
+        "zizmor.yml:zizmor",
+        "pr-required.yml:fast-governance",
+    ),
     "docs-diagrams": ("diagram-nightly.yml:docs-diagrams",),
     "duplication": ("duplication-complexity.yml:duplication",),
     "schema-governance": ("schema-governance.yml:schema-governance",),
     "semantic-governance": ("semantic-governance.yml:semantic-governance",),
-    "commit-lint": ("commit-lint.yml:commit-lint",),
+    "commit-lint": (
+        "commit-lint.yml:commit-lint",
+        "pr-required.yml:fast-governance",
+    ),
     "docs-governance": ("docs.yml:docs-governance",),
     "docker-build": (
         "pr-required.yml:docker-lane",
@@ -173,7 +185,12 @@ def render() -> str:
         for candidate in candidates:
             job, path, line, events = github[candidate]
             mapped.add(candidate)
-            relation = "[DIFF]" if candidate in DOCKER_COMPONENTS else "[EQ?]"
+            relation = (
+                "[DIFF]"
+                if candidate in DOCKER_COMPONENTS
+                or candidate == "pr-required.yml:fast-governance"
+                else "[EQ?]"
+            )
             lines.append(
                 row(
                     call,
@@ -206,6 +223,14 @@ def render() -> str:
             "",
             "CircleCI `docker-build` включает Hadolint и проверку обеих Compose-конфигураций.",
             "Эти шаги сопоставлены с отдельными GitHub jobs как части составной проверки.",
+        )
+    )
+    lines.extend(
+        (
+            "",
+            "GitHub `fast-governance` включает root hygiene, compiled-artifacts, commitlint и zizmor.",
+            "Сопоставления относятся к отдельным шагам. Проверки закрепления reusable workflows",
+            "и Dependency Review остаются дополнительными шагами GitHub в этой паре контуров.",
         )
     )
     return "\n".join(lines) + "\n"
