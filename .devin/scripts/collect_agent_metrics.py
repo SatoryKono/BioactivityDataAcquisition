@@ -36,7 +36,7 @@ class AgentMetricsCollector:
     def _create_empty_metrics(self) -> dict[str, Any]:
         """Create empty metrics structure."""
         return {
-            "version": "1.0",
+            "version": "1.1",
             "description": "Agent usage metrics for Devin runtime optimization",
             "metrics_collection_start": datetime.now(UTC).isoformat(),
             "agents": {},

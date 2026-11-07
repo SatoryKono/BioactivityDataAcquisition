@@ -199,3 +199,15 @@ def test_response_boundary_never_persists_an_unreadable_entity(
         result = json.loads(capsys.readouterr().out)["result"]
         assert not result.get("isError")
         assert json.loads(result["content"][0]["text"])["entities"] == [entity]
+
+
+def test_reply_escapes_surrogates_without_escaping_valid_unicode(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    identifier = chr(0xD800)
+    result = {"protocolVersion": "é" + identifier}
+    mcp_server._reply(identifier, result)
+    response = capsys.readouterr().out
+    response.encode("utf-8")
+    assert "é" in response
+    assert json.loads(response) == {"jsonrpc": "2.0", "id": identifier, "result": result}

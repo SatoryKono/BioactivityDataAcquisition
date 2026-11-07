@@ -220,12 +220,10 @@ _TOOLS = [
 
 
 def _reply(identifier: Any, result: Any) -> None:
-    print(
-        json.dumps(
-            {"jsonrpc": "2.0", "id": identifier, "result": result}, ensure_ascii=False
-        ),
-        flush=True,
+    response = json.dumps(
+        {"jsonrpc": "2.0", "id": identifier, "result": result}, ensure_ascii=False
     )
+    print(response.encode("utf-8", "backslashreplace").decode("utf-8"), flush=True)
 
 
 def _error(identifier: Any, code: int, message: str) -> None:
