@@ -14,11 +14,34 @@ See RULES.md §8.2 for JSON response modeling guidelines.
 
 from __future__ import annotations
 
-import typing
+__all__ = [
+    "PubMedArticleId",
+    "PubMedArticleRecord",
+    "PubMedAuthor",
+    "PubMedChemical",
+    "PubMedExtendedRecord",
+    "PubMedGrant",
+    "PubMedJournal",
+    "PubMedMeshHeading",
+    "PubMedPubDate",
+    "PubMedReference",
+    "PubMedSearchResponse",
+    "PubMedSearchResult",
+]
+
 
 from pydantic import BaseModel, ConfigDict, Field
 
-import bioetl.infrastructure.adapters.pubmed._article_components as components
+from bioetl.infrastructure.adapters.pubmed._article_components import (
+    PubMedArticleId,
+    PubMedAuthor,
+    PubMedChemical,
+    PubMedGrant,
+    PubMedJournal,
+    PubMedMeshHeading,
+    PubMedPubDate,
+    PubMedReference,
+)
 from bioetl.infrastructure.adapters.pubmed._extended_record import (
     PubMedExtendedRecord,
 )
@@ -26,27 +49,6 @@ from bioetl.infrastructure.adapters.pubmed._search_models import (
     PubMedSearchResponse,
     PubMedSearchResult,
 )
-
-__all__ = [
-    "PubMedArticleRecord",
-    "PubMedExtendedRecord",
-    "PubMedSearchResponse",
-    "PubMedSearchResult",
-    *components.ARTICLE_COMPONENT_NAMES,
-]
-# Let's keep original order for safety
-__all__ = sorted(__all__)
-
-
-def __getattr__(name: str) -> typing.Any:  # Any: module level magic method returns Any
-    if name in components.ARTICLE_COMPONENT_NAMES:
-        return getattr(components, name)
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
-def __dir__() -> list[str]:
-    return __all__
-
 
 # === Basic Record Model (matches current xml_processor output) ===
 
