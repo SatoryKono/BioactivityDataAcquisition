@@ -8,6 +8,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from bioetl.domain.types import JsonDict
 
 __all__ = [
+    "ARTICLE_COMPONENT_CLASSES",
+    "ARTICLE_COMPONENT_NAMES",
     "PubMedArticleId",
     "PubMedAuthor",
     "PubMedChemical",
@@ -114,3 +116,17 @@ class PubMedArticleId(BaseModel):
 
     id_type: str = Field(description="ID type (pubmed, doi, pmc, etc.)")
     value: str = Field(description="ID value")
+
+
+ARTICLE_COMPONENT_CLASSES = (
+    PubMedArticleId,
+    PubMedAuthor,
+    PubMedChemical,
+    PubMedGrant,
+    PubMedJournal,
+    PubMedMeshHeading,
+    PubMedPubDate,
+    PubMedReference,
+)
+
+ARTICLE_COMPONENT_NAMES = tuple(cls.__name__ for cls in ARTICLE_COMPONENT_CLASSES)

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field
 
-import bioetl.infrastructure.adapters.pubmed._article_components as components
+from bioetl.infrastructure.adapters.pubmed import _article_components as components
 
 __all__ = ["PubMedExtendedRecord"]
 
