@@ -24,7 +24,9 @@ def test_metrics_service_provider_returns_correct_type_and_does_not_reuse_instan
 def test_checkpoint_service_provider_returns_correct_type_and_does_not_reuse_instance() -> (
     None
 ):
-    from bioetl.application.services.checkpoint.checkpoint_service import CheckpointService
+    from bioetl.application.services.checkpoint.checkpoint_service import (
+        CheckpointService,
+    )
 
     first_instance = _services.get_checkpoint_service()
     second_instance = _services.get_checkpoint_service()
@@ -37,7 +39,9 @@ def test_checkpoint_service_provider_returns_correct_type_and_does_not_reuse_ins
 def test_audit_service_provider_returns_correct_type_and_does_not_reuse_instance() -> (
     None
 ):
-    from bioetl.application.services.export_lineage.audit_inspection_service import AuditInspectionService
+    from bioetl.application.services.export_lineage.audit_inspection_service import (
+        AuditInspectionService,
+    )
 
     first_instance = _services.get_audit_service()
     second_instance = _services.get_audit_service()
