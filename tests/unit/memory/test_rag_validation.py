@@ -170,7 +170,7 @@ def test_invalid_file_report_generates_correct_report() -> None:
     assert report.ok is False
     assert len(report.issues) == 1
     assert report.issues[0].code == "manifest_io_error"
-    assert report.issues[0].path == "path/to/invalid_file.json"
+    assert report.issues[0].path == str(path)
     assert report.issues[0].message == "test error message"
 
     assert report.build_scope is None
