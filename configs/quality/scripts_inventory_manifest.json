@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-07T19:29:18.760398+00:00",
+  "generated_at": "2026-11-07T19:38:46.681558+00:00",
   "summary": {
     "total_scripts": 714,
     "status_counts": {
@@ -2885,7 +2885,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 695,
+          "line": 706,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3127,7 +3127,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
@@ -3140,6 +3140,12 @@
           "line": 117,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\""
+        },
+        {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 155,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\","
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_adr_analysis_wrapper_contracts.py",
@@ -3177,7 +3183,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
@@ -3202,6 +3208,12 @@
           "line": 12,
           "source_group": "scripts",
           "text": "EXPECTED_AST_GREP_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_ast_grep_wrapper.sh\""
+        },
+        {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 156,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\","
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
@@ -3327,7 +3339,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
@@ -3352,6 +3364,12 @@
           "line": 136,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\""
+        },
+        {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 157,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3433,7 +3451,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
@@ -3452,6 +3470,12 @@
           "line": 11,
           "source_group": "scripts",
           "text": "EXPECTED_CONTEXT7_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_context7_wrapper.sh\""
+        },
+        {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 158,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\","
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
@@ -3491,7 +3515,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
@@ -3504,6 +3528,12 @@
           "line": 108,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\""
+        },
+        {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 159,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3685,7 +3715,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 694,
+          "line": 705,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3746,7 +3776,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 693,
+          "line": 704,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -3800,7 +3830,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
@@ -3813,6 +3843,12 @@
           "line": 145,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\""
+        },
+        {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 160,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\","
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
@@ -3923,7 +3959,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 155,
+          "line": 163,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.ps1\","
         },
@@ -3962,7 +3998,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 156,
+          "line": 164,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\","
         },
@@ -4138,7 +4174,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 157,
+          "line": 165,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\","
         },
@@ -4181,7 +4217,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 158,
+          "line": 166,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\","
         },
@@ -4214,7 +4250,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 159,
+          "line": 167,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\","
         },
@@ -4773,7 +4809,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 40,
+      "reference_count": 41,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
@@ -4928,7 +4964,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
@@ -4953,6 +4989,12 @@
           "line": 31,
           "source_group": "scripts",
           "text": "\"test-env-loading\": shell_command(\"test_env_loading.sh\"),"
+        },
+        {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 162,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/test_env_loading.sh\","
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
@@ -10602,7 +10644,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 595,
+          "line": 606,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10645,7 +10687,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 708,
+          "line": 719,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -12988,7 +13030,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 420,
+          "line": 431,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -20794,7 +20836,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 806,
+          "line": 817,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -22230,7 +22272,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 31,
+      "reference_count": 32,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -23930,7 +23972,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 942,
+          "line": 953,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -26808,7 +26850,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 162,
+          "line": 170,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/load_repo_env.sh\","
         },

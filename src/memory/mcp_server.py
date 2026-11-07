@@ -251,9 +251,13 @@ def _call_tool(store: GraphStore, identifier: Any, params: dict[str, Any]) -> No
     try:
         result = _tool_result(store.call(params["name"], arguments))
     except (ValueError, KeyError, TypeError, OSError, StorageConflictError) as exc:
-        message = "Memory operation failed: invalid data, storage conflict or resource limit"
+        message = (
+            "Memory operation failed: invalid data, storage conflict or resource limit"
+        )
         if params["name"] == "read_graph" and isinstance(exc, ResponseLimitError):
-            message = "Response exceeds limit; retry with a smaller limit and the same offset"
+            message = (
+                "Response exceeds limit; retry with a smaller limit and the same offset"
+            )
         result = {"isError": True, "content": [{"type": "text", "text": message}]}
     _reply(identifier, result)
 
