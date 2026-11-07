@@ -61,6 +61,9 @@ RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
+REQUIRED_CHECKS_PROSE_TEST = (
+    "tests/architecture/test_required_checks_prose_consistency.py"
+)
 DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
 STAGE0_EVIDENCE_TEST = "tests/unit/scripts/engineering/ci/test_stage0_evidence.py"
 GRAFANA_SELECTOR_CONTRACT_TEST = "tests/integration/test_grafana_selector_contract.py"
@@ -154,6 +157,18 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "configs/quality/architecture_acceptance_baseline.yaml": (
         "tests/architecture/test_architecture_acceptance_baseline.py",
+    ),
+    "configs/quality/repo_structure_catalog.yaml": (
+        "tests/unit/scripts/repo/test_audit_root_cleanliness.py",
+        "tests/unit/scripts/repo/test_check_root_governance_docs.py",
+        "tests/unit/scripts/repo/test_audit_structure.py",
+    ),
+    "docs/plans/ci1-07-negative-merge-protection-plan.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+    ),
+    "docs/plans/README.md": (
+        "tests/unit/scripts/repo/test_check_root_governance_docs.py",
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
     ),
     "configs/quality/external_resource_inventory_pr12751_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
@@ -753,11 +768,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/04-reference/github-actions-workflows.md": (
         "tests/architecture/test_gha_disabled_map_10263.py",
-        "tests/architecture/test_required_checks_prose_consistency.py",
+        REQUIRED_CHECKS_PROSE_TEST,
     ),
-    "docs/05-operations/ci-workflow-map.md": (
-        "tests/architecture/test_required_checks_prose_consistency.py",
-    ),
+    "docs/05-operations/ci-workflow-map.md": (REQUIRED_CHECKS_PROSE_TEST,),
     "docs/05-operations/runbooks/generated-artifact-drift-workflow.md": (
         "tests/architecture/test_generated_artifact_drift_workflow.py",
     ),
@@ -776,6 +789,22 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".vulture_whitelist.py": (
         "tests/architecture/test_layer_dependencies.py",
         ROOT_HYGIENE_REVIEW_REGISTRY_TEST,
+    ),
+    **dict.fromkeys(
+        (
+            ".github/CONTRIBUTING.md",
+            ".github/SECURITY.md",
+            "docs/03-guides/github-local-workflow.md",
+            "docs/03-guides/github-quick-reference.md",
+            "docs/05-operations/ci-cd-integration.md",
+            "docs/05-operations/release-checklist.md",
+            "docs/05-operations/runbooks/github-settings-quarterly-review.md",
+            "reports/governance/github-settings-A1-post-change-20261106.json",
+            "reports/governance/github-settings-A1-readback-20261106.json",
+            "reports/governance/github-settings-B2-preflight-20261106.json",
+            "reports/governance/github-settings-B2-preflight-20261106.md",
+        ),
+        (REQUIRED_CHECKS_PROSE_TEST,),
     ),
 }
 
