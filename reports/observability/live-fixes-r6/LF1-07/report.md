@@ -19,7 +19,7 @@
 - `parameter`: Название этапа, string, никогда не пустое.
 - `value`: Значение счетчика, string (отформатированное число или `"UNKNOWN"`), Null policy: если нет данных или `None`, то возвращается `"UNKNOWN"`.
 - `percentage`: Процентное соотношение, string (отформатированное с `%` или `"UNKNOWN"`), Null policy: если нет данных или `None`, то возвращается `"UNKNOWN"`.
-- `row_status`: Статус (дефицит), string (например, `"silver_deficit"`, `"gold_deficit"` или `""`), Null policy: `""` при ক্ষমতায় отсутствии дефицита.
+- `row_status`: Статус (дефицит), string (например, `"silver_deficit"`, `"gold_deficit"` или `""`), Null policy: `""` при отсутствии дефицита.
 
 В объединенной таблице панели 9403 (после transform) колонки:
 
@@ -67,6 +67,7 @@
 (строка `05 silver_skipped_records` исключается трансформацией).
 
 ## Decision & Evidence
-**Deploy SHA:** `a474a4118bd19288c4315c98a0168a863e7b36ad`
+**Source SHA:** `a474a4118bd19288c4315c98a0168a863e7b36ad`
+**Deploy SHA:** `NOT_VERIFIABLE`
 **Date (UTC):** `2026-11-07 22:30:26 UTC`
 **Status:** BLOCKED / NOT_VERIFIABLE. Live observability stack unavailable. Connection refused on 3000 and 8000 ports in the sandbox environment. Original F-Audit records unavailable.
