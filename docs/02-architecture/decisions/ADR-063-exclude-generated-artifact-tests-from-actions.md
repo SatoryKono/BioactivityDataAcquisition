@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: Accepted
 Class: published
 Owner: BioETL Team
@@ -20,7 +20,11 @@ Committed generated artifacts (telemetry baseline, governance artifacts, invento
 
 ## Decision
 
-A group of tests whose subject is a generated artifact (criterion: the test verifies the content/hash of a generated file as its subject, rather than using it as a fixture) is isolated. This group is marked with a single pytest marker and a registry in `configs/quality/test_matrix.yaml`, and is excluded from all GitHub Actions runs using a single mechanism at the test matrix level. The tests themselves are preserved and can be run locally with a single command. New tests of this nature are included in the group upon creation.
+A group of tests whose subject is a generated artifact (criterion: the test verifies the content/hash of a generated file as its subject, rather than using it as a fixture) is isolated. This group is marked with a single pytest marker and a registry in `configs/quality/test_matrix.yaml`, and is to be excluded from all GitHub Actions runs using a single mechanism at the test matrix level. This is the target decision, not a claim that the migration is complete. The tests themselves are preserved and can be run locally with a single command. New tests of this nature are included in the group upon creation.
+
+### Implementation Status
+
+The current configuration in `configs/quality/test_matrix.yaml` excludes the group from ordinary CI through `ordinary_ci_selection: ci`. It still runs daily in `.github/workflows/nightly.yml` through the `generated-artifact-daily` job and `daily_selection: daily` (including slow tests). Exclusion from Nightly remains part of the separate implementation PR; this documentation PR does not change the workflow or matrix. Until that implementation lands, generated-artifact drift can still fail Nightly.
 
 ## Alternatives Considered
 
@@ -29,6 +33,8 @@ A group of tests whose subject is a generated artifact (criterion: the test veri
 - **Delete the tests:** Loses local verification capability. Rejected.
 
 ## Consequences
+
+The following consequences describe the completed target state. The Nightly exception above remains in effect until the separate implementation lands.
 
 ### Positive
 - Clean CI signal for code.
@@ -44,9 +50,9 @@ A group of tests whose subject is a generated artifact (criterion: the test veri
 - The decision will be reviewed when deterministic regeneration in CI becomes available.
 
 ### Coverage Impact
-- The excluded group is not included in Actions coverage; the delta is shown explicitly.
+- Once the target exclusion is implemented, the group will not be included in Actions coverage; the implementation must show the delta explicitly. The current daily Nightly execution remains unchanged by this ADR.
 
 ## Related ADRs
 
-- Implementation: This decision is implemented in a separate session/PR ("СРОЧНО: правило — тесты генерируемых артефактов исключаются из GitHub Actions").
+- Implementation: Completion of this decision, including exclusion from Nightly, is deferred to a separate session/PR ("СРОЧНО: правило — тесты генерируемых артефактов исключаются из GitHub Actions").
 - [ADR-042](ADR-042-testing-strategy-matrix.md): Testing Strategy Matrix and Fixture Governance. This ADR supplements ADR-042 by redefining the execution environment for generated artifact tests.

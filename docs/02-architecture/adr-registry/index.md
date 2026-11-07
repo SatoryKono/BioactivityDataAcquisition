@@ -7,19 +7,19 @@ Canonical live ADR index: `docs/02-architecture/decisions/README.md`.
 This page is a generated governance mirror and MUST be regenerated via
 `python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes.
 
-**Total ADRs**: 62
-**Last Updated**: 2026-10-04
+**Total ADRs**: 63
+**Last Updated**: 2026-11-06
 
 ## 📊 Status Summary
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 60 | 96.8% |
+| `accepted` | 61 | 96.8% |
 | `superseded` | 2 | 3.2% |
 
 ## 🟢 Accepted ADRs
 
-### 60 decisions
+### 61 decisions
 
 ### ADR-001: Delta Lake vs Parquet
 
@@ -656,7 +656,7 @@ Gold datasets. The operation is data-plane transformation, DQ validation,...
 
 ### ADR-056: Proof-or-Stop Lifecycle Control
 
-**Status**: `accepted` | **Category**: `Governance` | **Owner**: `BioETL Team`
+**Status**: `accepted` | **Category**: `Governance` | **Owner**: `BioETL maintainers`
 
 **Context**: BioETL already has comprehensive pre-commit, pre-push, CI, documentation,
 architecture, and debt gates. It also has an immutable EvidenceStore. The
@@ -741,6 +741,18 @@ coverage. They cannot define the outcome of a completed run. A successf...
 Successful child processing and intact child reports cannot establish that t...
 
 [📄 View Full ADR](../decisions/ADR-062-assay-parent-exact-replay.md)
+
+---
+
+### ADR-063: Exclude Generated Artifact Tests from GitHub Actions
+
+**Status**: `accepted` | **Category**: `CI/CD` | **Owner**: `BioETL Team`
+
+**Relationships**: Related: ADR-042
+
+**Context**: Committed generated artifacts (telemetry baseline, governance artifacts, inventories, dependency maps, passports, manifests) are verified in CI by ide...
+
+[📄 View Full ADR](../decisions/ADR-063-exclude-generated-artifact-tests-from-actions.md)
 
 ---
 

@@ -2165,6 +2165,8 @@ fields:
 | [ADR-061](../02-architecture/decisions/ADR-061-persisted-selected-run-assessment.md) | Persisted Selected Run Assessment | Accepted | 2026-09-16 |
 | [ADR-062](../02-architecture/decisions/ADR-062-assay-parent-exact-replay.md) | Immutable composite parent merge replay | Accepted | 2026-10-03 |
 
+| [ADR-063](../02-architecture/decisions/ADR-063-exclude-generated-artifact-tests-from-actions.md) | Exclude Generated Artifact Tests from GitHub Actions | Accepted | 2026-11-07 |
+
 ## История Изменений (Changelog)
 
 - **6.1.13** (2026-09-16): синхронизирован индекс решений с ADR-061

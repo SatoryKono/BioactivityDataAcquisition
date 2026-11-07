@@ -17,8 +17,6 @@ ______________________________________________________________________
 
 ## Context
 
-See also [ADR-063](ADR-063-exclude-generated-artifact-tests-from-actions.md) for execution environment rules regarding generated artifact tests.
-
 BioETL has grown to 854+ test files across 9 test categories. While coverage meets
 the 85% threshold, several gaps exist:
 
@@ -30,6 +28,8 @@ the 85% threshold, several gaps exist:
    application control-plane targets currently blocking
 1. **Contract tests** exist but no schema stability verification across versions
 1. **Performance tests** optional, no regression gate
+
+See also [ADR-063](ADR-063-exclude-generated-artifact-tests-from-actions.md) for execution environment rules regarding generated artifact tests.
 
 ### Conflict: Property-Based Tests vs VCR Cassettes
 

@@ -44,8 +44,8 @@ def test_adr_registry_mirrors_track_latest_decision_index() -> None:
 
     # The registry includes all ADRs (including proposed), but the navigator
     # registry only shows accepted ADRs in the detailed sections
-    assert expected_total == 62
-    assert latest_adr == "062"
+    assert expected_total == 63
+    assert latest_adr == "063"
     assert registry_payload["total_adrs"] == expected_total
     assert len(registry_payload["adrs"]) == expected_total
     assert latest_adr in registry_numbers
@@ -80,6 +80,7 @@ def test_rules_and_requirements_do_not_publish_stale_adr_ceiling() -> None:
     assert "[ADR-060]" in rules_text
     assert "[ADR-061]" in rules_text
     assert "[ADR-062]" in rules_text
+    assert "[ADR-063]" in rules_text
     assert "ADR-050" in decisions_index_text
     assert "ADR-051" in decisions_index_text
     assert "ADR-052" in decisions_index_text
@@ -93,6 +94,7 @@ def test_rules_and_requirements_do_not_publish_stale_adr_ceiling() -> None:
     assert "ADR-060" in decisions_index_text
     assert "ADR-061" in decisions_index_text
     assert "ADR-062" in decisions_index_text
+    assert "ADR-063" in decisions_index_text
 
 
 def test_filters_docs_keep_adr_050_as_canonical_boundary() -> None:
