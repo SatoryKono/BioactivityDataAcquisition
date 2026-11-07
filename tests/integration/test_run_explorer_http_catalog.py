@@ -238,8 +238,14 @@ def test_run_explorer_visible_selectors_use_ops_http_catalog() -> None:
     assert "dimension=workflow" in variables["workflow"]["definition"]
     assert variables["run_type"]["multi"] is False
     assert variables["workflow"]["allValue"] == ".*"
-    assert "var-run_id=-" in dashboard["panels"][0]["options"]["content"]
-    assert "var-workflow=.*" in dashboard["panels"][0]["options"]["content"]
+    scope = next(panel for panel in dashboard["panels"] if panel["id"] == 1)
+    reset = scope["options"]["content"]
+    assert "Reset filters" in reset
+    assert "/d/bioetl-run-explorer-v1/" in reset
+    assert "var-run_id=-" in reset
+    assert "var-workflow=.*" in reset
+    assert "var-lookup_run_id=" in reset
+    assert "${__url_time_range}" in reset
 
 
 def test_run_explorer_flex_columns_omit_custom_width() -> None:
@@ -263,9 +269,9 @@ def test_run_explorer_flex_columns_omit_custom_width() -> None:
         assert field not in widths
         assert min_widths[field] >= 80
     assert widths["Replay Readiness"] == 125
-    assert widths["Run ID"] == 60
+    assert widths["Run ID"] == 110
     assert min_widths["Run ID"] == 50
-    assert widths["Overview"] == min_widths["Overview"] == 180
+    assert widths["Overview"] == min_widths["Overview"] == 150
     visible_width = sum(width for field, width in widths.items() if field not in hidden)
     budget = (1366 // 2) * panel["gridPos"]["w"] // 24 - 40
     assert visible_width <= budget
