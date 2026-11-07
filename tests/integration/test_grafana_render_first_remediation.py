@@ -1085,8 +1085,10 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     assert "Pipeline" not in hidden
     assert "run_type" in hidden
     grid = recent.get("gridPos") or {}
-    assert int(grid.get("h") or 0) == 13
-    assert int(grid.get("y") or 0) + int(grid.get("h") or 0) == 16
+    scope = _panel(explorer, 1)["gridPos"]
+    assert grid["y"] == scope["y"] + scope["h"]
+    assert grid["h"] == 12
+    assert grid["y"] + grid["h"] == 17
     assert recent.get("options", {}).get("cellHeight") == "sm"
     assert (
         next(t for t in recent["transformations"] if t["id"] == "limit")
