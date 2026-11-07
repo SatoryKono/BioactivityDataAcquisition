@@ -71,7 +71,7 @@ if ! MEMORY_FILE_PATH="$(
     "${MEMORY_PYTHON}" -m memory.mcp_scope \
       --repo-root "${REPO_ROOT}" \
       --seed "${MEMORY_SEED_PATH:-${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json}" \
-      "${scope_args[@]}"
+      ${scope_args[@]+"${scope_args[@]}"}
   )"; then
   printf '%s\n' "Memory MCP could not scope its store. Regenerate the MCP configuration with a store under .cache/mcp-memory." >&2
   exit 78

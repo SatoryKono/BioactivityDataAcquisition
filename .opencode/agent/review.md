@@ -23,8 +23,8 @@ permission:
     "*": deny
     "git status --porcelain": allow
     "git rev-parse HEAD": allow
-    "gh pr view*": allow
-    "gh pr diff*": allow
+    "gh pr view*": ask
+    "gh pr diff*": ask
     "gh pr comment*": ask
     "gh pr review --comment*": ask
 ---

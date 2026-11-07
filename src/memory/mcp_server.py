@@ -300,9 +300,10 @@ def _handle(store: GraphStore, request: Any) -> None:
 
 
 def _configure_stdio() -> None:
-    for stream in (sys.stdin, sys.stdout):
-        if isinstance(stream, TextIOWrapper):
-            stream.reconfigure(encoding="utf-8")
+    if isinstance(sys.stdin, TextIOWrapper):
+        sys.stdin.reconfigure(encoding="utf-8", errors="surrogateescape")
+    if isinstance(sys.stdout, TextIOWrapper):
+        sys.stdout.reconfigure(encoding="utf-8", errors="strict")
 
 
 def _open_store() -> GraphStore | None:
@@ -331,6 +332,8 @@ def _discard_oversized_request(line: str) -> None:
 
 def _handle_request_line(store: GraphStore, line: str) -> None:
     try:
+        # Reject undecodable input bytes before JSON can accept them inside strings.
+        line.encode("utf-8")
         request = json.loads(line)
     except (ValueError, RecursionError):
         _error(None, -32700, "Parse error")

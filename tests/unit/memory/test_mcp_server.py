@@ -55,6 +55,24 @@ def test_server_recovers_after_invalid_requests(
     assert not target.exists()
 
 
+def test_server_recovers_after_invalid_utf8(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setenv("MEMORY_REPO_ROOT", str(tmp_path))
+    monkeypatch.setenv(
+        "MEMORY_FILE_PATH", str(tmp_path / ".cache/mcp-memory/graph.json")
+    )
+    invalid = b'{"jsonrpc":"2.0","id":1,"method":"ping","params":{"name":"\xff"}}\n'
+    valid = b'{"jsonrpc":"2.0","id":2,"method":"ping"}\n'
+    with io.TextIOWrapper(io.BytesIO(invalid + valid)) as stream:
+        monkeypatch.setattr(mcp_server.sys, "stdin", stream)
+        assert mcp_server.main() == 0
+
+    replies = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
+    assert replies[0]["error"]["code"] == -32700
+    assert replies[1] == {"jsonrpc": "2.0", "id": 2, "result": {}}
+
+
 def test_graph_pages_and_batch_validation(tmp_path: Path) -> None:
     path = tmp_path / ".cache" / "mcp-memory" / "memory.json"
     path.parent.mkdir(parents=True)
