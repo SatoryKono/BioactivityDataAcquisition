@@ -8335,7 +8335,7 @@
       "github_issue_url": null,
       "inbound_links": 3,
       "lifecycle": null,
-      "outbound_links": 62,
+      "outbound_links": 63,
       "owner": "BioETL Team",
       "path": "docs/02-architecture/adr-registry.md",
       "recommended_action": "generate-automatically",
@@ -8391,7 +8391,7 @@
       "github_issue_url": null,
       "inbound_links": 1,
       "lifecycle": null,
-      "outbound_links": 62,
+      "outbound_links": 63,
       "owner": "BioETL Team",
       "path": "docs/02-architecture/adr-registry/index.md",
       "recommended_action": "generate-automatically",
@@ -9733,9 +9733,9 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 12,
+      "inbound_links": 13,
       "lifecycle": null,
-      "outbound_links": 4,
+      "outbound_links": 5,
       "owner": "BioETL Team",
       "path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
       "recommended_action": "keep",
@@ -10310,6 +10310,34 @@
       "catalog_lifecycle": null,
       "commit_policy": null,
       "declared_class": "published",
+      "declared_status": "Accepted",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 4,
+      "lifecycle": null,
+      "outbound_links": 1,
+      "owner": "BioETL Team",
+      "path": "docs/02-architecture/decisions/ADR-063-exclude-generated-artifact-tests-from-actions.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "02-architecture",
+      "status": "Canonical",
+      "surface_family": "canonical",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": "published",
       "declared_status": "active",
       "diagram_kind": null,
       "duplicate_group": null,
@@ -10323,7 +10351,7 @@
       "github_issue_url": null,
       "inbound_links": 2,
       "lifecycle": null,
-      "outbound_links": 123,
+      "outbound_links": 124,
       "owner": "BioETL Team",
       "path": "docs/02-architecture/decisions/README.md",
       "recommended_action": "keep",
@@ -115528,13 +115556,13 @@
     "by_recommended_action": {
       "archive-after-migration": 349,
       "generate-automatically": 1066,
-      "keep": 2680
+      "keep": 2681
     },
     "by_section": {
       ".github": 6,
       "00-project": 274,
       "01-requirements": 4,
-      "02-architecture": 997,
+      "02-architecture": 998,
       "03-data-model": 2,
       "03-guides": 127,
       "04-reference": 334,
@@ -115558,19 +115586,19 @@
     "by_status": {
       "Active": 757,
       "Archived": 1554,
-      "Canonical": 76,
+      "Canonical": 77,
       "Generated": 1066,
       "Working": 642
     },
     "by_surface_family": {
       "active": 757,
       "archive": 1554,
-      "canonical": 76,
+      "canonical": 77,
       "generated": 1066,
       "working": 642
     },
     "by_tracking_state": {
-      "tracked": 4095
+      "tracked": 4096
     },
     "docs_reports_local_count": 72,
     "duplicate_group_count": 80,
@@ -115583,8 +115611,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4095,
+    "total_doc_like": 4096,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4095
+    "total_doc_like_tracked": 4096
   }
 }
