@@ -17,6 +17,7 @@ def test_metrics_service_provider_returns_correct_type_and_does_not_reuse_instan
     # and are not inherently cached as singletons within the module itself, hence
     # the second instance is a distinct object
     assert isinstance(first_instance, MetricsService)
+    assert isinstance(second_instance, MetricsService)
     assert first_instance is not second_instance
 
 
@@ -32,6 +33,7 @@ def test_checkpoint_service_provider_returns_correct_type_and_does_not_reuse_ins
     second_instance = _services.get_checkpoint_service()
 
     assert isinstance(first_instance, CheckpointService)
+    assert isinstance(second_instance, CheckpointService)
     assert first_instance is not second_instance
 
 
@@ -47,4 +49,5 @@ def test_audit_service_provider_returns_correct_type_and_does_not_reuse_instance
     second_instance = _services.get_audit_service()
 
     assert isinstance(first_instance, AuditInspectionService)
+    assert isinstance(second_instance, AuditInspectionService)
     assert first_instance is not second_instance

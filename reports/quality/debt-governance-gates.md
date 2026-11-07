@@ -17,8 +17,8 @@
 | `debt_budget_growth_policy` | `pass` | `budget_growth_allowed` | `False` | `False` | `configs/quality/debt_scorecard.yaml` |
 | `flaky_test_review_input_preflight` | `pass` | `required_json_input` | `available_valid_object` | `available_valid_object` | `reports/quality/flaky-test-burndown-review.json` |
 | `debt_scorecard_budget_no_growth` | `pass` | `budget_increase_count` | `not_evaluated_without_changed_from_ref` | `0` | `configs/quality/debt_scorecard.yaml` |
-| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `0d000c4ca15052abca68f983a022bb55d324b5769361c350b2403c303ff634f4` | `0d000c4ca15052abca68f983a022bb55d324b5769361c350b2403c303ff634f4` | `reports/quality/module-coverage-inventory.json` |
-| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2610, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '0d000c4ca15052abca68f983a022bb55d324b5769361c350b2403c303ff634f4'}` | `{'source_module_count': 2610, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '0d000c4ca15052abca68f983a022bb55d324b5769361c350b2403c303ff634f4'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
+| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `4f1c06c0477134bc68efd2a926527c1573980a8559a116b6f9f97cd2542f2e8c` | `4f1c06c0477134bc68efd2a926527c1573980a8559a116b6f9f97cd2542f2e8c` | `reports/quality/module-coverage-inventory.json` |
+| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2608, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '4f1c06c0477134bc68efd2a926527c1573980a8559a116b6f9f97cd2542f2e8c'}` | `{'source_module_count': 2608, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '4f1c06c0477134bc68efd2a926527c1573980a8559a116b6f9f97cd2542f2e8c'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
 | `module_coverage_unmeasured_modules` | `pass` | `unmeasured_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `module_coverage_uncovered_modules` | `pass` | `uncovered_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `hotspot_family_baseline_budget_warnings` | `pass` | `budget_warnings` | `0` | `0` | `reports/quality/hotspot-family-baseline.json` |
@@ -39,7 +39,7 @@
 | `full_app_duplication_total_clusters` | `pass` | `total_duplicate_clusters` | `0` | `0` | `reports/quality/full-app-duplication-baseline.json` |
 | `supporting_scripts_zero_reference_count` | `pass` | `zero_reference_supporting_script_count` | `0` | `0` | `configs/quality/scripts_inventory_manifest.json` |
 | `supporting_scripts_untriaged_zero_reference_count` | `pass` | `untriaged_zero_reference_supporting_script_count` | `0` | `0` | `configs/quality/scripts_inventory_manifest.json` |
-| `scripts_review_expiry_ratchet` | `pass` | `expired_review_by_count` | `178` | `[178, 178]` | `configs/quality/scripts_lifecycle_registry.json` |
+| `scripts_review_expiry_ratchet` | `pass` | `expired_review_by_count` | `172` | `[172, 172]` | `configs/quality/scripts_lifecycle_registry.json` |
 | `test_governance_budget_violations` | `pass` | `budget_violations` | `0` | `0` | `reports/quality/test-governance-current.json` |
 | `test_governance_uuid4_call_sites` | `pass` | `uuid4_call_sites` | `0` | `0` | `reports/quality/test-governance-current.json` |
 | `flaky_test_total_count` | `pass` | `total_flaky` | `0` | `0` | `reports/quality/flaky-test-burndown-review.json` |
@@ -53,9 +53,9 @@
 | `observability_runtime_cardinality_review_required` | `pass` | `runtime_cardinality_review_required` | `0` | `0` | `reports/observability/runtime_cardinality_inventory.json` |
 | `observability_runtime_cardinality_threshold_violations` | `pass` | `runtime_cardinality_threshold_violations` | `0` | `0` | `reports/observability/runtime_cardinality_inventory.json` |
 | `observability_release_review_status` | `pass` | `status` | `passed` | `passed` | `reports/observability/runtime_cardinality_review.json` |
-| `observability_release_review_freshness` | `pass` | `generated_at_age_days` | `8` | `21` | `reports/observability/runtime_cardinality_review.json` |
+| `observability_release_review_freshness` | `pass` | `generated_at_age_days` | `6` | `21` | `reports/observability/runtime_cardinality_review.json` |
 | `observability_touched_metric_inventory_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_inventory.json` |
 | `observability_touched_metric_review_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_review.json` |
 | `adr_enforcement_blocking_gaps` | `pass` | `blocking_gap_count` | `0` | `0` | `reports/quality/adr-enforcement-matrix.json` |
-| `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `f5340b07f503e74ee4498acde2720028adaf95694ec89340b7c867bc681db187` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
+| `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `443ed41a6e7311ad6af748a0e0828c6772551d018b8d384119d5f8f256badf3f` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
 | `generated_artifact_drift` | `pass` | `stale_artifact_count` | `{'count': 0, 'artifacts': []}` | `0` | `reports/quality/*.json` |
