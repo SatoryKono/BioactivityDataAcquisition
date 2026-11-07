@@ -3,7 +3,12 @@
 ## 1. Environment Identity & Context
 - **Base SHA:** `e54596f903e0b280e2b7e572a1c32ab831590b54` (current main)
 - **Time (UTC):** `2026-11-06 18:48:37 UTC`
-- **Environment Access:** The live monitoring stack failed preflight (docker compose start error: Connection refused for both 3000 and 8000 ports on both `main` and `monitoring` stacks). Missing access to Grafana instance. Marked NOT_VERIFIABLE for live components per instructions.
+- **Environment Access:** The live monitoring stack failed to start via docker compose.
+Error encountered:
+```
+failed to extract layer (application/vnd.docker.image.rootfs.diff.tar.gzip sha256:f01933c9ecefeeaabda6d58934c0fc92cf62b43ba50600c658db2474bf84bf61) to overlayfs as "extract-249568770-SuXn sha256:7ece827647fdd796982087e16218222f0c2606ce4e80695976f63a518f4b55b1": failed to convert whiteout file "usr/share/grafana/public/.wh.build": operation not permitted
+```
+Marked NOT_VERIFIABLE for live components per instructions.
 
 ## 2. Infrastructure Inventory (identity.json)
 All values are marked as `NOT_VERIFIABLE` because access to the live environment Grafana/backend was not possible.
