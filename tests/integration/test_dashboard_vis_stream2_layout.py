@@ -125,7 +125,14 @@ def test_provider_severity_column_has_min_width_and_narrower_provider() -> None:
     assert panel["fieldConfig"]["defaults"]["custom"]["minWidth"] >= 50
     names = _organize(panel)["renameByName"]
     assert names["provider"] == "Provider"
-    assert names["check_result"] == "Result"
+    assert names["check_result_display"] == "Result"
+    assert "check_result" not in names
+    result_fields = next(
+        item["options"]["include"]["names"]
+        for item in panel["transformations"]
+        if item["id"] == "filterFieldsByName"
+    )
+    assert "check_result_display" in result_fields
     assert names["check_performed"] == "Performed"
     assert panel["gridPos"]["y"] >= 18
     assert not _PROVIDER.exists()

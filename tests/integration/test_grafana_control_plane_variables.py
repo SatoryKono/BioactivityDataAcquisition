@@ -1,6 +1,7 @@
 """Integration contracts for Grafana control-plane variable sources."""
 
 from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
@@ -22,22 +23,22 @@ def test_control_plane_dashboard_uses_control_plane_native_variable_sources() ->
     assert pipeline_var is not None
     assert run_type_var is not None
 
-    pipeline_query = pipeline_var.get("query", {})
-    run_type_query = run_type_var.get("query", {})
-    assert isinstance(pipeline_query, dict)
-    infinity = pipeline_query.get("infinityQuery", {})
-    assert isinstance(infinity, dict)
-    pipeline_url = str(infinity.get("url", ""))
-    run_type_query_text = (
-        run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""
-    )
-
-    assert "/ops/control-plane/filter-options" in pipeline_url
-    assert "dimension=pipeline" in pipeline_url
-    assert pipeline_var.get("datasource") == {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "bioetl-ops-http",
-    }
-    assert "bioetl_control_plane_run_type_universe" in run_type_query_text
-    assert "bioetl_control_plane_manifest_writes_total" not in run_type_query_text
-    assert "bioetl_records_processed_total" not in run_type_query_text
+    for name, variable in (("pipeline", pipeline_var), ("run_type", run_type_var)):
+        assert variable["datasource"] == {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http",
+        }
+        query = variable["query"]["infinityQuery"]
+        assert query["parser"] == "backend"
+        assert query["url_options"]["method"] == "GET"
+        url = urlsplit(query["url"])
+        assert url.path == "/ops/control-plane/filter-options"
+        parameters = parse_qs(url.query)
+        assert parameters["dimension"] == [name]
+        assert parameters["response_shape"] == ["options"]
+        assert parameters["workflow"] == ["${workflow}"]
+        assert "expr" not in query
+        if name == "run_type":
+            assert parameters["pipeline"] == ["${pipeline}"]
+    assert run_type_var["allValue"] == ".*"
+    assert run_type_var["multi"] is False
