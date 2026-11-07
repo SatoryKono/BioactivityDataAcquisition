@@ -99,7 +99,6 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| `BIOETL_LOG_FILE` | Explicit override for the log file path | unset | No |
 | `BIOETL_METRICS_PORT` | Prometheus metrics endpoint port | `8000` | No |
 | `BIOETL_METRICS_ENABLED` | Flat `Settings.metrics_enabled`. Used only when `observability` is absent, and shown in settings info. Standard runtime bootstrap does not let this override `Settings.observability.metrics_enabled` | `True` | No |
 | `BIOETL_METRICS_ADDR` | Prometheus metrics endpoint address | `0.0.0.0` | No |
@@ -122,16 +121,6 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 | `BIOETL_OBSERVABILITY__DQ_COLD_START_RUNS` | Stored on `ObservabilitySettings` only (integer, range 0–20). `bootstrap_dq_monitor()` leaves the value unused, so early runs still emit absolute-threshold anomalies from `DQ_ERROR_RATE_MAX` and `DQ_QUALITY_SCORE_MIN`. Z-score detection waits on `DQ_MIN_BASELINE_SAMPLES` | `5` | No |
 | `BIOETL_OBSERVABILITY__DQ_ERROR_RATE_MAX` | Maximum allowed error rate | `0.10` | No |
 | `BIOETL_OBSERVABILITY__DQ_QUALITY_SCORE_MIN` | Minimum quality score threshold | `0.8` | No |
-
-### OpenTelemetry (OTLP)
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` | OTLP traces exporter endpoint | No |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP generic exporter endpoint (used as fallback) | No |
-| `OTEL_EXPORTER_OTLP_TRACES_INSECURE` | Disable TLS for OTLP traces exporter (`True`/`False`) | No |
-| `OTEL_EXPORTER_OTLP_INSECURE` | Disable TLS for OTLP generic exporter (`True`/`False`) | No |
-| `OTEL_SERVICE_NAME` | Explicit override for the OTel service name | No |
 
 ## Runtime Identity
 
