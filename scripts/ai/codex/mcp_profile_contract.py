@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import cast
@@ -49,9 +50,65 @@ def profile_plan(profile: str, repo_root: Path = REPO_ROOT) -> dict[str, object]
     }
 
 
+def _memory_mode_value(value: str) -> str:
+    value = value.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return value[1:-1]
+    for index, character in enumerate(value):
+        if character == "#" and index > 0 and value[index - 1].isspace():
+            return value[:index].rstrip()
+    return value
+
+
+def _memory_mode(repo_root: Path) -> str:
+    """Read only the persistence setting, with the memory wrapper's precedence."""
+    key = "BIOETL_AI_MEMORY_MODE"
+    if key in os.environ:
+        return (os.environ[key] or "off").lower()
+    if os.environ.get("BIOETL_REPO_ENV_LOADED") == "1":
+        return "off"
+    source = Path(os.environ.get("BIOETL_ENV_FILE") or repo_root / ".env")
+    mode = "off"
+    if source.is_file():
+        for raw in source.read_text(encoding="utf-8").splitlines():
+            name, separator, value = raw.partition("=")
+            if not separator or name.strip() != key:
+                continue
+            mode = _memory_mode_value(value)
+    return (mode or "off").lower()
+
+
+def effective_profile_plan(
+    plan: dict[str, object], repo_root: Path = REPO_ROOT
+) -> dict[str, object]:
+    """Apply task persistence authority without changing the declared inventory."""
+    mode = _memory_mode(repo_root)
+    if mode in {"read-write", "readwrite", "rw"}:
+        return {**plan, "disabled_by_mode": []}
+    if mode not in {"off", "disabled", "read-only", "readonly", "ro"}:
+        raise ValueError("Invalid BIOETL_AI_MEMORY_MODE")
+    return {
+        **plan,
+        "required_local": [
+            name
+            for name in _as_str_list(plan.get("required_local"))
+            if name != "memory"
+        ],
+        "optional_local": [
+            name
+            for name in _as_str_list(plan.get("optional_local"))
+            if name != "memory"
+        ],
+        "disabled_by_mode": ["memory"]
+        if "memory" in _as_str_list(plan.get("selected"))
+        else [],
+    }
+
+
 def _safe_plan_for_json(plan: dict[str, object]) -> dict[str, object]:
     """Return an allowlisted, non-sensitive view of profile plan data."""
     return {
+        "disabled_by_mode": _as_str_list(plan.get("disabled_by_mode")),
         "profile": str(plan.get("profile", "")),
         "selected": _as_str_list(plan.get("selected")),
         "required": _as_str_list(plan.get("required")),
@@ -121,7 +178,7 @@ def main() -> int:
         print(f"[OK] {len(setup_mcp.MCP_PROFILES)} MCP profile matrices are valid")
         return 0
 
-    plan = profile_plan(args.profile)
+    plan = effective_profile_plan(profile_plan(args.profile))
     if args.required_local:
         print("\n".join(_as_str_list(plan["required_local"])))
         return 0

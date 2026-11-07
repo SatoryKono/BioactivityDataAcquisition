@@ -4,10 +4,11 @@
 from __future__ import annotations
 
 import argparse
-import concurrent.futures
+import queue
 import json
 import socket
 import time
+import threading
 import urllib.request
 from pathlib import Path
 from typing import Any, cast
@@ -18,7 +19,11 @@ if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
 import setup_mcp  # pyright: ignore[reportImplicitRelativeImport]
-from mcp_profile_contract import profile_plan, validate_profile_matrix  # pyright: ignore[reportImplicitRelativeImport]
+from mcp_profile_contract import (
+    effective_profile_plan,
+    profile_plan,
+    validate_profile_matrix,
+)  # pyright: ignore[reportImplicitRelativeImport]
 from native_runtime_contract import Finding, REPO_ROOT, validate_native_runtime  # pyright: ignore[reportImplicitRelativeImport]
 
 if str(REPO_ROOT) not in sys.path:
@@ -70,6 +75,7 @@ def run_static(repo_root: Path, *, output_json: bool = False) -> int:
 
 def _probe(name: str, entry: dict[str, Any], timeout: float) -> dict[str, Any]:
     started = time.monotonic()
+    deadline = started + timeout
     port = int(entry["port"])
     path = str(entry.get("path") or "/mcp")
     url = f"http://127.0.0.1:{port}{path}"
@@ -84,7 +90,8 @@ def _probe(name: str, entry: dict[str, Any], timeout: float) -> dict[str, Any]:
             detail = "listener ready; streaming bridge has no /ping requirement"
         else:
             with urllib.request.urlopen(
-                f"http://127.0.0.1:{port}/ping", timeout=timeout
+                f"http://127.0.0.1:{port}/ping",
+                timeout=max(0.001, deadline - time.monotonic()),
             ) as response:
                 ping_ok = 200 <= response.status < 500
                 detail = f"/ping HTTP {response.status}"
@@ -96,6 +103,10 @@ def _probe(name: str, entry: dict[str, Any], timeout: float) -> dict[str, Any]:
         "port_open": port_open,
         "ping_ok": ping_ok,
         "ready": port_open and ping_ok,
+        "readiness_level": "transport",
+        "transport_ready": port_open and ping_ok,
+        "protocol_ready": None,
+        "tool_ready": None,
         "detail": detail,
         "elapsed_ms": round((time.monotonic() - started) * 1000),
     }
@@ -108,10 +119,9 @@ def _probe_status(*, ready: bool, required: bool) -> str:
 
 
 def _completed_probe_result(
-    future: concurrent.futures.Future[dict[str, Any]],
+    result: dict[str, Any],
     required: set[str],
 ) -> dict[str, Any]:
-    result = future.result()
     is_required = result["server"] in required
     result["required"] = is_required
     result["status"] = _probe_status(
@@ -135,6 +145,10 @@ def _timed_out_probe_result(
         "port_open": False,
         "ping_ok": False,
         "ready": False,
+        "readiness_level": "transport",
+        "transport_ready": False,
+        "protocol_ready": None,
+        "tool_ready": None,
         "detail": f"overall timeout after {overall_timeout:.1f}s",
         "elapsed_ms": round(overall_timeout * 1000),
         "required": is_required,
@@ -150,22 +164,42 @@ def _run_profile_probes(
     timeout: float,
     overall_timeout: float,
 ) -> list[dict[str, Any]]:
-    pool = concurrent.futures.ThreadPoolExecutor(
-        max_workers=min(8, len(selected_local) or 1)
+    deadline = time.monotonic() + overall_timeout
+    completed: queue.Queue[dict[str, Any]] = queue.Queue()
+
+    def probe_one(name: str) -> None:
+        try:
+            result = _probe(
+                name,
+                catalog[name],
+                min(timeout, max(0.001, deadline - time.monotonic())),
+            )
+        except Exception:
+            result = _timed_out_probe_result(name, catalog, required, overall_timeout)
+            result["detail"] = "probe failed"
+        completed.put(result)
+
+    # Diagnostics only: daemon workers cannot hold CLI shutdown past the budget.
+    # Socket/HTTP operations also receive the remaining deadline. No worker
+    # starts a service or writes reports; report publication stays on this thread.
+    for name in selected_local:
+        threading.Thread(target=probe_one, args=(name,), daemon=True).start()
+    pending = set(selected_local)
+    results = []
+    while pending:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        try:
+            result = completed.get(timeout=remaining)
+        except queue.Empty:
+            break
+        pending.discard(result["server"])
+        results.append(_completed_probe_result(result, required))
+    results.extend(
+        _timed_out_probe_result(name, catalog, required, overall_timeout)
+        for name in pending
     )
-    futures = {
-        pool.submit(_probe, name, catalog[name], timeout): name
-        for name in selected_local
-    }
-    done, pending = concurrent.futures.wait(futures, timeout=overall_timeout)
-    results = [_completed_probe_result(future, required) for future in done]
-    for future in pending:
-        name = futures[future]
-        future.cancel()
-        results.append(
-            _timed_out_probe_result(name, catalog, required, overall_timeout)
-        )
-    pool.shutdown(wait=False, cancel_futures=True)
     return sorted(results, key=lambda item: item["server"])
 
 
@@ -183,11 +217,15 @@ def _mcp_payload(
             "this diagnostic does not rewrite persisted state."
         )
     return {
+        "readiness_level": "transport",
+        "protocol_ready": None,
+        "tool_ready": None,
         "checked_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "profile": profile,
         "failed": failed,
         "warned": warned,
         "remote_or_external_skipped": _as_str_list(plan.get("remote_or_external")),
+        "disabled_by_mode": _as_str_list(plan.get("disabled_by_mode")),
         "migration_hint": migration_hint,
         "results": results,
     }
@@ -241,7 +279,7 @@ def run_mcp(
     output_json: bool,
     output_path: Path | None = None,
 ) -> int:
-    plan = profile_plan(profile, repo_root)
+    plan = effective_profile_plan(profile_plan(profile, repo_root), repo_root)
     catalog_path = repo_root / "scripts/ops/runtime/mcp/shared-servers.json"
     catalog = cast(
         dict[str, Any], json.loads(catalog_path.read_text(encoding="utf-8"))["servers"]
