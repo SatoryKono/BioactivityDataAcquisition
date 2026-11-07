@@ -38,7 +38,7 @@ __all__ = [
 __all__ = sorted(__all__)
 
 
-def __getattr__(name: str) -> typing.Any:
+def __getattr__(name: str) -> typing.Any:  # Any: module level magic method returns Any
     if name in components.ARTICLE_COMPONENT_NAMES:
         return getattr(components, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

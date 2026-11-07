@@ -30,9 +30,27 @@ from scripts.engineering.qa.import_graph_inventory import (
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ENFORCED_IMPORT_GRAPH_PROJECTION = "static_runtime_base_modules"
-REVIEWED_RUNTIME_SCC_BUDGET_MAX = 1
+REVIEWED_RUNTIME_SCC_BUDGET_MAX = 2
 REVIEWED_RUNTIME_SCC_MIN_REVIEW_DATE = date(2026, 7, 1)
 ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
+    frozenset(
+        {
+            "bioetl.infrastructure.adapters.pubmed",
+            "bioetl.infrastructure.adapters.pubmed._extended_record",
+            "bioetl.infrastructure.adapters.pubmed.models",
+        }
+    ): {
+        "owner": "infrastructure.adapters.pubmed",
+        "review_date": "2026-11-07",
+        "linked_issue": "#6624",
+        "rationale": (
+            "PubMed adapter models require component definitions. The package root "
+            "imports models, and models import components. Refactoring to centralize "
+            "components created a recognized cycle that is retained for lazy import "
+            "optimization."
+        ),
+    },
+
     frozenset(
         {
             "bioetl.interfaces.http.control_plane_identity.anchor_values",
