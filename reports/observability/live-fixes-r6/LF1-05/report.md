@@ -9,6 +9,14 @@
 * **Time (UTC)**: `2026-11-07 22:03:23 UTC`
 * **Parameters**: `pipeline=uniprot_protein,uniprot_idmapping`, `run_type=backfill`
 
+### Verification provenance
+
+* Deployment SHA: `NOT_VERIFIABLE`; the live deployment could not be queried.
+* Local test checkout: `9a01476fee1b655f62ccc758e3fc409b9cdb535c`.
+* Command: `python -m pytest -q -p no:cacheprovider -o addopts= tests/unit/interfaces/http/test_run_id_resolver.py tests/unit/interfaces/http/test_manifest_validation_catalog.py`.
+* Local result: 13 passed in 3.93s. These unit tests cover resolver behavior with fixtures. They provide no live catalog or deployment evidence for the identifiers below.
+* GitHub `pr-gate-complete` for the local test checkout: result unavailable at the time of this check.
+
 ## 2. UUID Selections and Expectations
 
 | Category | UUID | Pipeline / Workflow | Manifest / Expected Artifacts | Expected Outcome / Rationale |
