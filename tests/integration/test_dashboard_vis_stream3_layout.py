@@ -22,7 +22,11 @@ from pathlib import Path
 import pytest
 
 from tests.integration._dashboard_layout_budgets import FIRST_WINDOW_Y
-from tests.integration._grafana_test_support import get_dashboard_panels, load_dashboard
+from tests.integration._grafana_test_support import (
+    get_dashboard_panels,
+    load_dashboard,
+    resolve_dashboard_target,
+)
 
 pytestmark = pytest.mark.integration
 
@@ -58,7 +62,17 @@ def test_overview_dq_timeline_hides_dotstar_and_in_band_state() -> None:
     quality = _panel(dashboard, 9482)
     assert quality["type"] == "canvas"
     assert quality["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
-    assert "run_id=${run_id:percentencode}" in quality["targets"][0]["url"]
+    target = quality["targets"][0]
+    assert target["panelId"] == 9002
+    by_id = {panel["id"]: panel for panel in get_dashboard_panels(dashboard)}
+    source = resolve_dashboard_target(by_id, target)
+    assert "run_id=${run_id}" in source["url"]
+    assert quality["transformations"][0]["options"]["filters"] == [
+        {
+            "fieldName": "_bioetl_frame",
+            "config": {"id": "equal", "options": {"value": "exclusions"}},
+        }
+    ]
 
 
 def test_set_range_action_names_run_explorer_handoff() -> None:
