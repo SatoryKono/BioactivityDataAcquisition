@@ -212,8 +212,11 @@ def test_memory_readiness_uses_repository_mode_without_exporting_secrets(
     assert "fixture-only" not in json.dumps(effective)
 
 
+@pytest.mark.parametrize(
+    "config_value", ["rw # inline comment", '" read-write "', '" rw " # inline comment']
+)
 def test_memory_readiness_defaults_to_root_env_without_writing_env_files(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, config_value: str
 ) -> None:
     monkeypatch.syspath_prepend(str(ROOT / "scripts/ai/codex"))
     import mcp_profile_contract
@@ -229,7 +232,7 @@ def test_memory_readiness_defaults_to_root_env_without_writing_env_files(
         Path,
         "read_text",
         lambda path, *args, **kwargs: (
-            "BIOETL_AI_MEMORY_MODE=rw # inline comment\n"
+            f"BIOETL_AI_MEMORY_MODE={config_value}\n"
             if path == source
             else original_read_text(path, *args, **kwargs)
         ),
@@ -276,7 +279,8 @@ def test_opencode_last_match_permissions_allow_reads_and_gate_writes() -> None:
         ][-1]
 
     for command in (
-        "git status --short",
+        "git status --porcelain",
+        "git rev-parse HEAD",
         "gh pr view 1",
         "gh pr diff 1",
     ):

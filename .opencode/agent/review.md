@@ -21,7 +21,8 @@ permission:
   webfetch: deny
   bash:
     "*": deny
-    "git status*": allow
+    "git status --porcelain": allow
+    "git rev-parse HEAD": allow
     "gh pr view*": allow
     "gh pr diff*": allow
     "gh pr comment*": ask
@@ -64,7 +65,10 @@ Be constructive: thank the contributor, explain your reasoning, frame feedback a
 
 ## How to work
 
-1. Read the PR diff: `gh pr diff <PR number>`.
+1. Read the head SHA with `gh pr view <PR number> --json headRefOid`. Require
+   `git rev-parse HEAD` to match and `git status --porcelain` to be empty.
+   If either check fails, report that a clean checkout of the exact head is
+   required before reading local files. Otherwise read `gh pr diff <PR number>`.
 2. For each changed file, `read` the surrounding code to judge it in context.
 3. Read the style guide when a style point is at stake.
 4. Give specific, actionable, line-referenced feedback.

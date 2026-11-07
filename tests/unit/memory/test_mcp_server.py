@@ -247,3 +247,22 @@ def test_oversize_read_guides_client_to_retry_same_offset(
     page = json.loads(second["content"][0]["text"])
     assert page["entities"] == entities[1:2]
     assert page["next_offset"] == 2
+
+
+def test_graph_updates_preserve_metadata_and_validate_arrays(tmp_path: Path) -> None:
+    target = tmp_path / ".cache/mcp-memory/graph.json"
+    target.parent.mkdir(parents=True)
+    target.write_text(
+        '{"entities": [], "relations": [], "version": 1}', encoding="utf-8"
+    )
+    store = mcp_server.GraphStore(target, repo_root=tmp_path)
+    store.call(
+        "create_entities",
+        {"entities": [{"name": "one", "entityType": "note", "observations": []}]},
+    )
+    assert json.loads(target.read_text(encoding="utf-8"))["version"] == 1
+    assert set(store.call("read_graph", {})["totals"]) == {"entities", "relations"}
+    target.write_text("{}", encoding="utf-8")
+    with pytest.raises(ValueError, match="entity and relation arrays"):
+        store.update(lambda graph: None)
+    assert target.read_text(encoding="utf-8") == "{}"

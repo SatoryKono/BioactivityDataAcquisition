@@ -40,11 +40,12 @@ def _tool_result(value: Any) -> dict[str, Any]:
 def _graph_page(
     graph: dict[str, list[dict[str, Any]]], offset: int, limit: int
 ) -> dict[str, Any]:
+    rows = {key: graph[key] for key in ("entities", "relations")}
     return {
-        **{key: rows[offset : offset + limit] for key, rows in graph.items()},
-        "totals": {key: len(rows) for key, rows in graph.items()},
+        **{key: values[offset : offset + limit] for key, values in rows.items()},
+        "totals": {key: len(values) for key, values in rows.items()},
         "next_offset": offset + limit
-        if any(len(rows) > offset + limit for rows in graph.values())
+        if any(len(values) > offset + limit for values in rows.values())
         else None,
     }
 
@@ -66,17 +67,18 @@ class GraphStore:
             raise ValueError("MCP memory graph exceeds size limit")
         return raw
 
-    def read(self) -> dict[str, list[dict[str, Any]]]:
-        raw = self._raw()
+    @staticmethod
+    def _parse(raw: bytes) -> dict[str, Any]:
         payload = json.loads(raw) if raw else {"entities": [], "relations": []}
         if not isinstance(payload, dict) or any(
             not isinstance(payload.get(key), list) for key in ("entities", "relations")
         ):
             raise ValueError("MCP memory graph must contain entity and relation arrays")
-        return {
-            "entities": list(payload.get("entities", [])),
-            "relations": list(payload.get("relations", [])),
-        }
+        return payload
+
+    def read(self) -> dict[str, list[dict[str, Any]]]:
+        payload = self._parse(self._raw())
+        return {key: payload[key] for key in ("entities", "relations")}
 
     def update(
         self, operation: Callable[[dict[str, list[dict[str, Any]]]], Any]
@@ -87,7 +89,7 @@ class GraphStore:
             if remaining <= 0:
                 break
             raw = self._raw()
-            graph = json.loads(raw) if raw else {"entities": [], "relations": []}
+            graph = self._parse(raw)
             result = operation(graph)
             if (
                 len(
@@ -102,7 +104,7 @@ class GraphStore:
             # Validate both the mutation result and the smallest readable pages
             # before committing; rejected calls must leave the stored graph intact.
             _tool_result(result)
-            for offset in range(max(len(rows) for rows in graph.values())):
+            for offset in range(max(len(graph["entities"]), len(graph["relations"]))):
                 _tool_result(_graph_page(graph, offset, 1))
             try:
                 atomic_write_json(

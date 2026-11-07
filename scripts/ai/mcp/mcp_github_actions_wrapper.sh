@@ -22,7 +22,6 @@ LOCAL_GITHUB_ACTIONS_MCP="${HOME}/github-actions-mcp/dist/index.js"
 LOCAL_GITHUB_ACTIONS_MAIN="${HOME}/github-actions-mcp/dist/main.js"
 
 mcp_exit_if_validate_only "github-actions"
-mcp_prepare_npm_cache
 
 if [[ -f "${LOCAL_GITHUB_ACTIONS_MCP}" ]]; then
     exec node "${LOCAL_GITHUB_ACTIONS_MCP}" --stdio
@@ -32,4 +31,5 @@ fi
 
 # Published package: github-actions-mcp (bin: github-actions-mcp)
 # (The old @modelcontextprotocol/server-github-actions package is 404.)
+mcp_prepare_npm_cache
 exec npx -y "github-actions-mcp@1.0.1" --stdio

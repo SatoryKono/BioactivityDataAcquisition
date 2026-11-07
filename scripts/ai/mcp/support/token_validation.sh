@@ -103,9 +103,8 @@ mcp_exit_if_validate_only() {
 # Called by npm launchers after validation-only has exited.
 mcp_prepare_npm_cache() {
   if ! mkdir -p "${NPM_CONFIG_CACHE}" 2>/dev/null || [[ ! -w "${NPM_CONFIG_CACHE}" ]]; then
-    NPM_CONFIG_CACHE="${TMPDIR:-/tmp}/bioetl-npm-cache"
-    mkdir -p "${NPM_CONFIG_CACHE}" && [[ -w "${NPM_CONFIG_CACHE}" ]] ||
-      mcp_fail "Unable to prepare a writable npm cache"
+    NPM_CONFIG_CACHE="$(mktemp -d "${TMPDIR:-/tmp}/bioetl-npm-cache.XXXXXXXX")" ||
+      mcp_fail "Unable to prepare a private npm cache"
   fi
   export NPM_CONFIG_CACHE
   export npm_config_cache="${NPM_CONFIG_CACHE}"

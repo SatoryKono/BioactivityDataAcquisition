@@ -56,7 +56,7 @@ def _memory_mode_value(value: str) -> str:
         return value[1:-1]
     for index, character in enumerate(value):
         if character == "#" and index > 0 and value[index - 1].isspace():
-            return value[:index].rstrip()
+            return _memory_mode_value(value[:index])
     return value
 
 
@@ -75,7 +75,7 @@ def _memory_mode(repo_root: Path) -> str:
             if not separator or name.strip() != key:
                 continue
             mode = _memory_mode_value(value)
-    return (mode or "off").lower()
+    return mode.strip().lower() or "off"
 
 
 def effective_profile_plan(

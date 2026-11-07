@@ -23,6 +23,11 @@ source "${SCRIPT_DIR}/support/token_validation.sh"
 mcp_exit_if_validate_only "memory"
 
 memory_mode="${BIOETL_AI_MEMORY_MODE:-}"
+if [[ "${memory_mode_is_explicit}" == "0" ]]; then
+  case "$memory_mode" in
+    \"*\"|\'*\') memory_mode="${memory_mode:1:-1}" ;;
+  esac
+fi
 memory_mode="${memory_mode#"${memory_mode%%[![:space:]]*}"}"
 memory_mode="${memory_mode%"${memory_mode##*[![:space:]]}"}"
 memory_mode="${memory_mode:-off}"

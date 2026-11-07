@@ -17,10 +17,14 @@ if ($null -ne $explicitMemoryMode) {
 
 Exit-McpValidateOnly -ServerName 'memory'
 
-$memoryMode = if ([string]::IsNullOrWhiteSpace($env:BIOETL_AI_MEMORY_MODE)) {
+$loadedMode = $env:BIOETL_AI_MEMORY_MODE
+if ($null -eq $explicitMemoryMode -and $loadedMode -match '^([''"])(.*)\1$') {
+    $loadedMode = $Matches[2]
+}
+$memoryMode = if ([string]::IsNullOrWhiteSpace($loadedMode)) {
     'off'
 } else {
-    $env:BIOETL_AI_MEMORY_MODE.Trim().ToLowerInvariant()
+    $loadedMode.Trim().ToLowerInvariant()
 }
 if ($memoryMode -notin @('read-write', 'readwrite', 'rw')) {
     if ($memoryMode -in @('off', 'disabled', 'read-only', 'readonly', 'ro')) {

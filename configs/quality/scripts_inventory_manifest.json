@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-07T19:38:46.681558+00:00",
+  "generated_at": "2026-11-07T20:05:28.995007+00:00",
   "summary": {
-    "total_scripts": 714,
+    "total_scripts": 715,
     "status_counts": {
       "active": 334,
-      "supporting": 378,
+      "supporting": 379,
       "temporary_diagnostic": 2
     },
     "reference_group_coverage": {
@@ -14,7 +14,7 @@
       "ci": 74,
       "docs": 291,
       "other": 16,
-      "scripts": 603,
+      "scripts": 604,
       "skills": 13,
       "tests": 529
     }
@@ -308,7 +308,7 @@
       "agent_usage": [
         "CODEX-RUNTIME"
       ],
-      "reference_count": 17,
+      "reference_count": 22,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -1613,7 +1613,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 66,
+      "reference_count": 71,
       "references": [
         {
           "path": "Makefile",
@@ -2614,7 +2614,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 11,
       "references": [
         {
           "path": "AGENTS.md",
@@ -2647,10 +2647,22 @@
           "text": "- Python: `check_junie_mirror.py`"
         },
         {
-          "path": "scripts/ai/junie/check_junie_mirror.sh",
-          "line": 43,
-          "source_group": "scripts",
-          "text": "exec \"$PYTHON_BIN\" \"$SCRIPT_DIR/check_junie_mirror.py\" \"$MODE\""
+          "path": "docs/ci/gate-platform-matrix-full.md",
+          "line": 154,
+          "source_group": "docs",
+          "text": "| контур не найден | `skills-consistency.yml:verify-native-codex-runtime` (.github/workflows/skills-consistency.yml:43) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {\"push\": {\"paths\": [\".codex/"
+        },
+        {
+          "path": "docs/ci/gate-platform-matrix-full.md",
+          "line": 155,
+          "source_group": "docs",
+          "text": "| контур не найден | `skills-consistency.yml:detect-runtime-skill-drift` (.github/workflows/skills-consistency.yml:58) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {\"push\": {\"paths\": [\".codex/c"
+        },
+        {
+          "path": "docs/ci/gate-platform-matrix-full.md",
+          "line": 156,
+          "source_group": "docs",
+          "text": "| контур не найден | `skills-consistency.yml:approved-runtime-skill-sync` (.github/workflows/skills-consistency.yml:82) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {\"push\": {\"paths\": [\".codex/"
         }
       ],
       "owner": "@bioetl-platform",
@@ -2663,7 +2675,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 35,
+      "reference_count": 40,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -2885,7 +2897,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 706,
+          "line": 713,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3028,7 +3040,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 328,
+          "line": 332,
           "source_group": "tests",
           "text": "str(ROOT / \"scripts/ai/mcp/github-mcp-wrapper.ps1\"),"
         }
@@ -3715,13 +3727,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 705,
+          "line": 712,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 383,
+          "line": 387,
           "source_group": "tests",
           "text": "str(ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\"),"
         },
@@ -3776,13 +3788,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 704,
+          "line": 711,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 396,
+          "line": 400,
           "source_group": "tests",
           "text": "command = [executable, str(ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.sh\")]"
         },
@@ -5025,7 +5037,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 253,
+          "line": 256,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/wrappers.py\","
         },
@@ -9844,7 +9856,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 34,
+      "reference_count": 36,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -10107,7 +10119,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 46,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"e2e-skip-rate\": \"check_e2e_matrix_skip_rate.py\","
         },
@@ -10152,7 +10164,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"e2e-rerun\": \"check_e2e_rerun_stability.py\","
         },
@@ -10185,7 +10197,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"neo4j-memory-live\": \"check_neo4j_memory_live_audit.py\","
         }
@@ -10200,7 +10212,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"neo4j-memory\": \"check_neo4j_memory_ontology.py\","
         }
@@ -10461,13 +10473,13 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 25,
+          "line": 26,
           "source_group": "scripts",
           "text": "nightly-shadow  Partition nightly evidence and guard mandatory skips"
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 58,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"scripts.engineering.ci.nightly_shadow_archive\""
         },
@@ -10522,7 +10534,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 60,
+          "line": 62,
           "source_group": "scripts",
           "text": "\"pr-gate\": module_command(\"scripts.engineering.ci.pr_gate\"),"
         },
@@ -10589,7 +10601,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 61,
+          "line": 63,
           "source_group": "scripts",
           "text": "\"pr-lane-results\": module_command(\"scripts.engineering.ci.pr_lane_results\"),"
         },
@@ -10638,13 +10650,13 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"presubmit\": \"presubmit_gate.py\","
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 606,
+          "line": 613,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10681,13 +10693,13 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 65,
+          "line": 67,
           "source_group": "scripts",
           "text": "\"publish-docker\": shell_command(\"publish_docker_image.sh\"),"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 719,
+          "line": 726,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -10712,7 +10724,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 63,
+          "line": 65,
           "source_group": "scripts",
           "text": "\"scripts.engineering.ci.publish_scorecard_sarif\""
         },
@@ -10902,13 +10914,13 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"quality-gate\": \"quality_integral_gate.py\","
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"architecture-junit-skips\": \"quality_integral_gate.py\","
         },
@@ -10984,7 +10996,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 50,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"docker-timing\": \"report_docker_actions_timing.py\","
         },
@@ -11013,6 +11025,25 @@
       "next_step": "Retain as the implementation behind python -m scripts.engineering.ci docker-timing; keep contributor execution routed through the unified CI dispatcher and do not count it as a separate active script."
     },
     {
+      "path": "scripts/engineering/ci/report_gate_platform_matrix.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/ci/__main__.py",
+          "line": 51,
+          "source_group": "scripts",
+          "text": "\"gate-platform-matrix\": \"report_gate_platform_matrix.py\","
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as the implementation behind python -m scripts.engineering.ci gate-platform-matrix."
+    },
+    {
       "path": "scripts/engineering/ci/report_pr_gate_timing.py",
       "type": "py",
       "status": "supporting",
@@ -11027,7 +11058,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 51,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"pr-gate-timing\": \"report_pr_gate_timing.py\","
         },
@@ -11064,7 +11095,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 52,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"debt-report\": \"report_quality_debt_weekly.py\","
         },
@@ -11127,7 +11158,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"run-tests\": \"run_pytest_resilient.py\","
         }
@@ -11522,7 +11553,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 34,
+          "line": 35,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.cli_dispatch import ("
         },
@@ -11616,7 +11647,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 256,
+          "line": 259,
           "source_group": "tests",
           "text": "\"scripts/engineering/common/platform.py\","
         },
@@ -20836,7 +20867,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 817,
+          "line": 824,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23972,7 +24003,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 953,
+          "line": 960,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -26999,7 +27030,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 255,
+          "line": 258,
           "source_group": "tests",
           "text": "\"scripts/ops/support/skills/check_skills_mirror.sh\","
         }
