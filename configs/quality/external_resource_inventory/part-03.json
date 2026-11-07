@@ -3298,8 +3298,8 @@
           "source_commit": "37ac0eeac5bef80dc230474a4c2cb5b695bad30c",
           "source_blob": "f4cff109d2a444e1945bb8ba599d0d7e292b1496",
           "content_sha256": "233584d5477a021fb87df8a6f6723eb11ae86b29afde169c0f29628d616d38f2",
-          "line": 142,
-          "source_segment": "",
+          "line": 153,
+          "source_segment": "await cache.refresh_once(source)",
           "binding_symbol": "bioetl.interfaces.http._run_explorer_snapshot.RunExplorerSnapshotCache.refresh_once",
           "binding_caller": "bioetl.interfaces.http._run_explorer_snapshot.run_periodic_run_explorer_snapshot",
           "binding_relation": "cache.refresh_once"
@@ -4172,9 +4172,9 @@
           "source_commit": "37ac0eeac5bef80dc230474a4c2cb5b695bad30c",
           "source_blob": "d0fa47fb0c7d2e9634f9124e5097d2b0de4e5a6c",
           "content_sha256": "a87a6ab0eb94ea7882aa6d424c4eff74faee0899085c57f164ebe68891463a4d",
-          "line": 320,
+          "line": 325,
           "binding_relation": "concrete allocation inside handle_pipeline_run_reports_list",
-          "source_segment": "getattr(host, \"_runtime_source_id\", None),"
+          "source_segment": "payload = await asyncio.to_thread("
         },
         {
           "file": "src/bioetl/interfaces/http/_health_server_observability_routing.py",
@@ -4294,9 +4294,9 @@
           "source_commit": "37ac0eeac5bef80dc230474a4c2cb5b695bad30c",
           "source_blob": "f4cff109d2a444e1945bb8ba599d0d7e292b1496",
           "content_sha256": "233584d5477a021fb87df8a6f6723eb11ae86b29afde169c0f29628d616d38f2",
-          "line": 71,
+          "line": 78,
           "binding_relation": "concrete allocation inside RunExplorerSnapshotCache.refresh_once",
-          "source_segment": ""
+          "source_segment": "payload = await asyncio.to_thread("
         },
         {
           "file": "src/bioetl/interfaces/http/_selector_catalog.py",
@@ -4330,9 +4330,9 @@
           "source_commit": "37ac0eeac5bef80dc230474a4c2cb5b695bad30c",
           "source_blob": "ad12ec0cbe5c3ac6c3d224c52c5e691fee908a1d",
           "content_sha256": "629a2be21f1a4fd4fd4fd70f432d5e6809a4f5012c123718d2f39297c67debe7",
-          "line": 113,
+          "line": 117,
           "binding_relation": "concrete allocation inside HealthServerRoutingMixin._route_request",
-          "source_segment": "if route_path == \"/metrics\":"
+          "source_segment": "await asyncio.to_thread(self._handle_metrics),"
         },
         {
           "source_commit": "37ac0eeac5bef80dc230474a4c2cb5b695bad30c",

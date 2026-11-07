@@ -10699,7 +10699,7 @@
   "resource_parts": [
     {
       "file": "configs/quality/external_resource_inventory/part-01.json",
-      "sha256": "0261b67ddbd7f71cfe7fafe25557a0914c0faf8861e6d2a7934f54e61ac9f07e",
+      "sha256": "f2f642e102b699802f2f796057f56428c0d50105f02a6526ce513d8c7c140a2b",
       "resource_count": 44
     },
     {
@@ -10709,12 +10709,12 @@
     },
     {
       "file": "configs/quality/external_resource_inventory/part-03.json",
-      "sha256": "cfce65d4620b0e9c426ffe7643fcd808764896e49c5e253ee14154f7e264f5e4",
+      "sha256": "203d19d031c52e224ec4f33d32bb54734c7a08fb7031d5e4a47421ad6412da41",
       "resource_count": 28
     },
     {
       "file": "configs/quality/external_resource_inventory/part-04.json",
-      "sha256": "11cdd5d005469e4b0328098b6f704407264876130fe90bdedb407506165bc185",
+      "sha256": "361700a76ecd7ca7328d24b1b289faa6c9e31a092e87567e2543d7e489b01772",
       "resource_count": 48
     },
     {
