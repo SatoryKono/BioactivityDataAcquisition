@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4084 |
-| Tracked doc-like files | 4084 |
+| Doc-like files | 4096 |
+| Tracked doc-like files | 4096 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4084 |
+| tracked | 4096 |
 
 ## Lifecycle Counts
 
@@ -26,7 +26,7 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_context | 1 |
-| active_quality_baseline | 124 |
+| active_quality_baseline | 125 |
 | closeout_evidence | 168 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 36 |
@@ -39,7 +39,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 301 |
+| working_report | 312 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -56,7 +56,7 @@
 | Archived | 1554 |
 | Canonical | 76 |
 | Generated | 1066 |
-| Working | 631 |
+| Working | 643 |
 
 ## Surface Families
 
@@ -66,15 +66,15 @@
 | archive | 1554 |
 | canonical | 76 |
 | generated | 1066 |
-| working | 631 |
+| working | 643 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 339 |
+| archive-after-migration | 350 |
 | generate-automatically | 1066 |
-| keep | 2679 |
+| keep | 2680 |
 
 ## Cleanup Candidates
 
