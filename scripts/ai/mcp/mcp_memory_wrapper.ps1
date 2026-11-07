@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = (Resolve-Path (Join-Path $scriptDir '..\..\..')).Path
 $explicitMemoryMode = $null
-if (Test-Path Env:BIOETL_AI_MEMORY_MODE) {
+if ($env:BIOETL_AI_MEMORY_MODE) {
     $explicitMemoryMode = $env:BIOETL_AI_MEMORY_MODE
 }
 . (Join-Path $scriptDir 'support\load_repo_env.ps1')
@@ -20,7 +20,7 @@ Exit-McpValidateOnly -ServerName 'memory'
 $memoryMode = if ([string]::IsNullOrWhiteSpace($env:BIOETL_AI_MEMORY_MODE)) {
     'off'
 } else {
-    $env:BIOETL_AI_MEMORY_MODE.ToLowerInvariant()
+    $env:BIOETL_AI_MEMORY_MODE.Trim().ToLowerInvariant()
 }
 if ($memoryMode -notin @('read-write', 'readwrite', 'rw')) {
     if ($memoryMode -in @('off', 'disabled', 'read-only', 'readonly', 'ro')) {

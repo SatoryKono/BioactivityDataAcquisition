@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-07T18:43:46.623288+00:00",
+  "generated_at": "2026-11-07T18:52:21.705734+00:00",
   "summary": {
     "total_scripts": 714,
     "status_counts": {
@@ -3028,7 +3028,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 320,
+          "line": 322,
           "source_group": "tests",
           "text": "str(ROOT / \"scripts/ai/mcp/github-mcp-wrapper.ps1\"),"
         }
@@ -3691,7 +3691,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 375,
+          "line": 377,
           "source_group": "tests",
           "text": "str(ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\"),"
         },
@@ -3752,7 +3752,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 388,
+          "line": 390,
           "source_group": "tests",
           "text": "command = [executable, str(ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.sh\")]"
         },
@@ -4983,7 +4983,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 251,
+          "line": 253,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/wrappers.py\","
         },
@@ -11574,7 +11574,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 254,
+          "line": 256,
           "source_group": "tests",
           "text": "\"scripts/engineering/common/platform.py\","
         },
@@ -26957,7 +26957,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 253,
+          "line": 255,
           "source_group": "tests",
           "text": "\"scripts/ops/support/skills/check_skills_mirror.sh\","
         }

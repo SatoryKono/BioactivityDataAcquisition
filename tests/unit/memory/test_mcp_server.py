@@ -210,4 +210,40 @@ def test_reply_escapes_surrogates_without_escaping_valid_unicode(
     response = capsys.readouterr().out
     response.encode("utf-8")
     assert "é" in response
-    assert json.loads(response) == {"jsonrpc": "2.0", "id": identifier, "result": result}
+    assert json.loads(response) == {
+        "jsonrpc": "2.0",
+        "id": identifier,
+        "result": result,
+    }
+
+
+def test_oversize_read_guides_client_to_retry_same_offset(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    store = mcp_server.GraphStore(
+        tmp_path / ".cache/mcp-memory/graph.json", repo_root=tmp_path
+    )
+    entities = [
+        {"name": str(index), "entityType": "note", "observations": ["x" * 160]}
+        for index in range(4)
+    ]
+    store.call("create_entities", {"entities": entities})
+    monkeypatch.setattr(mcp_server, "MAX_REQUEST_CHARS", 500)
+    for arguments in ({"offset": 1}, {"offset": 1, "limit": 1}):
+        mcp_server._handle(
+            store,
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "tools/call",
+                "params": {"name": "read_graph", "arguments": arguments},
+            },
+        )
+    first, second = [
+        json.loads(line)["result"] for line in capsys.readouterr().out.splitlines()
+    ]
+    assert first["isError"]
+    assert "smaller limit and the same offset" in first["content"][0]["text"]
+    page = json.loads(second["content"][0]["text"])
+    assert page["entities"] == entities[1:2]
+    assert page["next_offset"] == 2

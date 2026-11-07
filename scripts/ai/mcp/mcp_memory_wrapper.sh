@@ -22,7 +22,10 @@ source "${SCRIPT_DIR}/support/token_validation.sh"
 
 mcp_exit_if_validate_only "memory"
 
-memory_mode="${BIOETL_AI_MEMORY_MODE:-off}"
+memory_mode="${BIOETL_AI_MEMORY_MODE:-}"
+memory_mode="${memory_mode#"${memory_mode%%[![:space:]]*}"}"
+memory_mode="${memory_mode%"${memory_mode##*[![:space:]]}"}"
+memory_mode="${memory_mode:-off}"
 case "${memory_mode}" in
   read-write|readwrite|rw)
     ;;

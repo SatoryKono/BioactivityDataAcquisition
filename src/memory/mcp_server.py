@@ -24,12 +24,16 @@ MAX_BATCH = 100
 MAX_PAGE = 100
 
 
+class ResponseLimitError(ValueError):
+    """A valid result exceeds the transport size limit."""
+
+
 def _tool_result(value: Any) -> dict[str, Any]:
     result = {
         "content": [{"type": "text", "text": json.dumps(value, ensure_ascii=False)}]
     }
     if len(json.dumps(result, ensure_ascii=False).encode("utf-8")) > MAX_REQUEST_CHARS:
-        raise ValueError("MCP response exceeds limit; request a smaller page")
+        raise ResponseLimitError("MCP response exceeds limit; request a smaller page")
     return result
 
 
@@ -275,16 +279,11 @@ def _handle(store: GraphStore, request: Any) -> None:
             return
         try:
             result = _tool_result(store.call(params["name"], arguments))
-        except (ValueError, KeyError, TypeError, OSError, StorageConflictError):
-            result = {
-                "isError": True,
-                "content": [
-                    {
-                        "type": "text",
-                        "text": "Memory operation failed: invalid data, storage conflict or resource limit",
-                    }
-                ],
-            }
+        except (ValueError, KeyError, TypeError, OSError, StorageConflictError) as exc:
+            message = "Memory operation failed: invalid data, storage conflict or resource limit"
+            if params["name"] == "read_graph" and isinstance(exc, ResponseLimitError):
+                message = "Response exceeds limit; retry with a smaller limit and the same offset"
+            result = {"isError": True, "content": [{"type": "text", "text": message}]}
         _reply(identifier, result)
     else:
         _error(identifier, -32601, "Method not found")

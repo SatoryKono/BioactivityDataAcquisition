@@ -63,8 +63,8 @@ def _memory_mode_value(value: str) -> str:
 def _memory_mode(repo_root: Path) -> str:
     """Read only the persistence setting, with the memory wrapper's precedence."""
     key = "BIOETL_AI_MEMORY_MODE"
-    if os.environ.get(key):
-        return os.environ[key].lower()
+    if explicit := os.environ.get(key):
+        return explicit.strip().lower() or "off"
     if os.environ.get("BIOETL_REPO_ENV_LOADED") == "1":
         return "off"
     source = Path(os.environ.get("BIOETL_ENV_FILE") or repo_root / ".env")

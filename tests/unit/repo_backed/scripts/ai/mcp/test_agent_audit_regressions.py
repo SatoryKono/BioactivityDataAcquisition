@@ -182,7 +182,9 @@ def test_effective_memory_requirements_follow_task_mode(
     assert ("memory" not in effective["required_local"]) == disabled
 
 
-@pytest.mark.parametrize("explicit", [None, "off", "read-only", "read-write", ""])
+@pytest.mark.parametrize(
+    "explicit", [None, "off", "read-only", "read-write", "", "   ", " read-write "]
+)
 def test_memory_readiness_uses_repository_mode_without_exporting_secrets(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path, explicit: str | None
 ) -> None:
@@ -204,7 +206,7 @@ def test_memory_readiness_uses_repository_mode_without_exporting_secrets(
     declared = mcp_profile_contract.profile_plan("stable", ROOT)
     effective = mcp_profile_contract.effective_profile_plan(declared)
     assert ("memory" in effective["required_local"]) == (
-        explicit in {None, "", "read-write"}
+        explicit in {None, "", "read-write", " read-write "}
     )
     assert dict(os.environ) == before
     assert "fixture-only" not in json.dumps(effective)
