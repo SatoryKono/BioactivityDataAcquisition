@@ -65,7 +65,7 @@
 - Coverage limits validated: Actual 99.5% (from telemetry of `facb0b56`) >= 85.0% Threshold.
 
 ## I. NOT_VERIFIABLE и missing evidence
-- None.
+- Coverage at the pinned audit revision `8476a5afba6f86b453d91e81669b3a7bacd2c65c` is unverified. The reported 99.5% applies only to telemetry source commit `facb0b5673c7cec55b6f4efb230f531618e9b56e`.
 
 ## J. Self-check
 - Revision matched.
