@@ -1826,11 +1826,6 @@ def _layout_uid_first_window(panels: list[object], *, current_uid: str) -> None:
             panels, _RUNTIME_SELECTED_GEOMETRY, uid=current_uid
         )
         return
-    if current_uid == _RUN_EXPLORER_UID:
-        _apply_first_window_geometry(
-            panels, {1: (0, 2, 24, 3), 3010: (0, 5, 24, 12)}, uid=current_uid
-        )
-        return
     if current_uid == "bioetl-overview-v2":
         _apply_first_window_geometry(
             panels, _OVERVIEW_FIRST_WINDOW_GEOMETRY, uid=current_uid

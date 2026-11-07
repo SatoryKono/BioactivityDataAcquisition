@@ -579,13 +579,6 @@
                 ]
               },
               {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#93C5FD"
-                }
-              },
-              {
                 "id": "custom.wrapText",
                 "value": true
               },
@@ -599,6 +592,13 @@
               {
                 "id": "custom.tooltip.field",
                 "value": "run_id"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#93C5FD"
+                }
               }
             ]
           },
