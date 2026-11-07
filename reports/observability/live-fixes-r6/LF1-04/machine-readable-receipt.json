@@ -1,0 +1,10 @@
+{
+  "issue": "LF1-04",
+  "panel_id": 9701,
+  "dashboard": "grafana/dashboards/bioetl-incident-v1.json",
+  "scope_contract": "GLOBAL",
+  "variables_used": ["$workflow", "$pipeline", "$run_type"],
+  "variables_ignored": ["$run_id"],
+  "scenarios_tested": ["empty_run_id", "original_uuid", "different_uuid", "timestamp_variation"],
+  "status": "PASS"
+}
