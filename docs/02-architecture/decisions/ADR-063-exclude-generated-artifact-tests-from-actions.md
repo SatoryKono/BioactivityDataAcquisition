@@ -20,7 +20,7 @@ Committed generated artifacts (telemetry baseline, governance artifacts, invento
 
 ## Decision
 
-A group of tests whose subject is a generated artifact (criterion: the test verifies the content/hash of a generated file as its subject, rather than using it as a fixture) is isolated. This group is marked with a single pytest marker and a registry in `configs/quality/test_matrix.yaml`, and is excluded from all GitHub Actions runs using a single mechanism at the test matrix level. The tests themselves are preserved and can be run locally with a single command. New tests of this nature are included in the group upon creation.
+A group of tests whose subject is a generated artifact (criterion: the test verifies the content/hash of a generated file as its subject, rather than using it as a fixture) is isolated. This group is marked with a single pytest marker and a registry in `configs/quality/test_matrix.yaml`. The decision targets all GitHub Actions runs. At the time of this ADR, the test matrix excludes the group from ordinary CI, while the Nightly workflow still runs it daily in the `generated-artifact-daily` job. Applying the exclusion to Nightly belongs to the separate implementation PR. The tests themselves are preserved and can be run locally with a single command. New tests of this nature are included in the group upon creation.
 
 ## Alternatives Considered
 
