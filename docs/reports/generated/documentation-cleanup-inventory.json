@@ -95210,6 +95210,34 @@
       "diagram_kind": null,
       "duplicate_group": null,
       "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/ci/gate-platform-matrix-full.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "ci",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
       "extension": ".json",
       "freshness": "current",
       "generated_route": null,
@@ -99562,6 +99590,34 @@
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "reports/audit/AUDIT-20261022-APP-001-Cancellation.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".txt",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/audit/ci1-03-pr-description.txt",
       "recommended_action": "archive-after-migration",
       "root_doc_kind": null,
       "section": "reports",
@@ -115579,12 +115635,12 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 26,
       "reports_workspace_entrypoint": 1,
-      "working_report": 313
+      "working_report": 314
     },
     "by_recommended_action": {
-      "archive-after-migration": 351,
+      "archive-after-migration": 352,
       "generate-automatically": 1066,
-      "keep": 2680
+      "keep": 2681
     },
     "by_section": {
       ".github": 6,
@@ -115604,29 +115660,30 @@
       "DOCKER_SETUP.md": 1,
       "README.md": 1,
       "best_practices.md": 1,
+      "ci": 1,
       "doc.json": 1,
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 3,
-      "reports": 686,
+      "reports": 687,
       "security": 2
     },
     "by_status": {
-      "Active": 757,
+      "Active": 758,
       "Archived": 1554,
       "Canonical": 76,
       "Generated": 1066,
-      "Working": 644
+      "Working": 645
     },
     "by_surface_family": {
-      "active": 757,
+      "active": 758,
       "archive": 1554,
       "canonical": 76,
       "generated": 1066,
-      "working": 644
+      "working": 645
     },
     "by_tracking_state": {
-      "tracked": 4097
+      "tracked": 4099
     },
     "docs_reports_local_count": 73,
     "duplicate_group_count": 80,
@@ -115639,8 +115696,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4097,
+    "total_doc_like": 4099,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4097
+    "total_doc_like_tracked": 4099
   }
 }
