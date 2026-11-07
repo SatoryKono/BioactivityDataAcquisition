@@ -1,6 +1,6 @@
 # Статическая матрица гейтов GitHub Actions и CircleCI
 
-Проверка воспроизводимости: `python scripts/engineering/ci/report_gate_platform_matrix.py --check`.
+Проверка воспроизводимости: `python -m scripts.engineering.ci gate-platform-matrix --check`.
 
 Сравнение охватывает все вызовы в CircleCI `pr-gate` и все определения jobs
 в `.github/workflows/`. Статическое сопоставление не подтверждает

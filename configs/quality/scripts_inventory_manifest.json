@@ -1,21 +1,20 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-07T19:08:59.728040+00:00",
+  "generated_at": "2026-11-07T19:10:51.876455+00:00",
   "summary": {
     "total_scripts": 715,
     "status_counts": {
-      "active": 334,
+      "active": 335,
       "supporting": 378,
-      "temporary_diagnostic": 2,
-      "unknown": 1
+      "temporary_diagnostic": 2
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
       "ci": 75,
-      "docs": 292,
+      "docs": 291,
       "other": 16,
-      "scripts": 599,
+      "scripts": 600,
       "skills": 13,
       "tests": 527
     }
@@ -9749,7 +9748,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 34,
+      "reference_count": 36,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -10012,7 +10011,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 46,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"e2e-skip-rate\": \"check_e2e_matrix_skip_rate.py\","
         },
@@ -10057,7 +10056,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"e2e-rerun\": \"check_e2e_rerun_stability.py\","
         },
@@ -10090,7 +10089,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"neo4j-memory-live\": \"check_neo4j_memory_live_audit.py\","
         }
@@ -10105,7 +10104,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"neo4j-memory\": \"check_neo4j_memory_ontology.py\","
         }
@@ -10366,13 +10365,13 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 25,
+          "line": 26,
           "source_group": "scripts",
           "text": "nightly-shadow  Partition nightly evidence and guard mandatory skips"
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 58,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"scripts.engineering.ci.nightly_shadow_archive\""
         },
@@ -10427,7 +10426,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 60,
+          "line": 62,
           "source_group": "scripts",
           "text": "\"pr-gate\": module_command(\"scripts.engineering.ci.pr_gate\"),"
         },
@@ -10494,7 +10493,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 61,
+          "line": 63,
           "source_group": "scripts",
           "text": "\"pr-lane-results\": module_command(\"scripts.engineering.ci.pr_lane_results\"),"
         },
@@ -10543,7 +10542,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"presubmit\": \"presubmit_gate.py\","
         },
@@ -10586,7 +10585,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 65,
+          "line": 67,
           "source_group": "scripts",
           "text": "\"publish-docker\": shell_command(\"publish_docker_image.sh\"),"
         },
@@ -10617,7 +10616,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 63,
+          "line": 65,
           "source_group": "scripts",
           "text": "\"scripts.engineering.ci.publish_scorecard_sarif\""
         },
@@ -10807,13 +10806,13 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"quality-gate\": \"quality_integral_gate.py\","
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"architecture-junit-skips\": \"quality_integral_gate.py\","
         },
@@ -10889,7 +10888,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 50,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"docker-timing\": \"report_docker_actions_timing.py\","
         },
@@ -10920,15 +10919,15 @@
     {
       "path": "scripts/engineering/ci/report_gate_platform_matrix.py",
       "type": "py",
-      "status": "unknown",
+      "status": "active",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
         {
-          "path": "docs/ci/gate-platform-matrix-full.md",
-          "line": 3,
-          "source_group": "docs",
-          "text": "Проверка воспроизводимости: `python scripts/engineering/ci/report_gate_platform_matrix.py --check`."
+          "path": "scripts/engineering/ci/__main__.py",
+          "line": 51,
+          "source_group": "scripts",
+          "text": "\"gate-platform-matrix\": \"report_gate_platform_matrix.py\","
         }
       ]
     },
@@ -10947,7 +10946,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 51,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"pr-gate-timing\": \"report_pr_gate_timing.py\","
         },
@@ -10984,7 +10983,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 52,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"debt-report\": \"report_quality_debt_weekly.py\","
         },
@@ -11047,7 +11046,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"run-tests\": \"run_pytest_resilient.py\","
         }
@@ -11442,7 +11441,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 34,
+          "line": 35,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.cli_dispatch import ("
         },
