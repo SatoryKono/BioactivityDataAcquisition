@@ -8,9 +8,9 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
+Audited commit SHA: `9c4625cfc2587f014e066feed5c84093640c9914`
 
-Evidence surface SHA-256: `3163263b127ffc792ba06635bbbdf984d9011f95ebabdc58a21157ea2c7efa4e`
+Evidence surface SHA-256: `eda6e894bf5af340a7816f3192826f82ac309397f057bad1db19a2249cf85972`
 
 ## Current evidence summary
 
@@ -71,7 +71,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "9c4625cfc2587f014e066feed5c84093640c9914",
-  "evidence_surface_sha256": "3163263b127ffc792ba06635bbbdf984d9011f95ebabdc58a21157ea2c7efa4e",
+  "evidence_surface_sha256": "eda6e894bf5af340a7816f3192826f82ac309397f057bad1db19a2249cf85972",
   "metrics": {
     "architecture_integral_score": 10.0,
     "architecture_interpretation": "excellent",
