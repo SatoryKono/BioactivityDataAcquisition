@@ -51,6 +51,7 @@ compose_start_hint() {
 # shellcheck source=./support/load_repo_env.sh
 source "${SCRIPT_DIR}/support/load_repo_env.sh"
 load_repo_env_if_present
+normalize_neo4j_auth_aliases
 
 status=0
 INDENT_SED='s/^/  /'

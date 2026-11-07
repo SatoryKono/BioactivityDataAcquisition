@@ -15,9 +15,9 @@ Remove-Item Env:BIOETL_SKIP_ENV_LOCAL -ErrorAction SilentlyContinue
 if (-not $env:NPM_CONFIG_CACHE) {
     $env:NPM_CONFIG_CACHE = Join-Path $repoRoot ".cache/npm-cache"
 }
-New-Item -ItemType Directory -Force -Path $env:NPM_CONFIG_CACHE | Out-Null
 
 Exit-McpValidateOnly -ServerName "filesystem"
+New-Item -ItemType Directory -Force -Path $env:NPM_CONFIG_CACHE | Out-Null
 
 # Optional extra allowed roots after the repo root (advanced clients).
 & npx -y "@modelcontextprotocol/server-filesystem@2026.8.31" $repoRoot @args
