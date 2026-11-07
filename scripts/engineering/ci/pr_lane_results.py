@@ -411,7 +411,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/audit/pack-v2.1/domain-pylint-duplicate-code-scan.log",
             "reports/audit/pack-v2.1/domain-vulture-dead-code-scan.log",
             "reports/audit/pack-v2.1/P05-interfaces-contracts.md",
-            "reports/audit/pack-v2.1/P13-test-system.md",
         ),
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
