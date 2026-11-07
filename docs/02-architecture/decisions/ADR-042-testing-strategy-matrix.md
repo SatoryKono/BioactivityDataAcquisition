@@ -17,8 +17,6 @@ ______________________________________________________________________
 
 ## Context
 
-See also [ADR-063](ADR-063-exclude-generated-artifact-tests-from-actions.md) for execution environment rules regarding generated artifact tests.
-
 BioETL has grown to 854+ test files across 9 test categories. While coverage meets
 the 85% threshold, several gaps exist:
 
@@ -174,6 +172,7 @@ ______________________________________________________________________
 
 ## References
 
+- [ADR-063](ADR-063-exclude-generated-artifact-tests-from-actions.md) for execution environment rules regarding generated artifact tests.
 - [Testing guide](../../03-guides/testing.md)
 - [Test matrix registry](../../../configs/quality/test_matrix.yaml)
 - [Module coverage inventory generator](../../../scripts/engineering/qa/report_module_coverage_inventory.py)

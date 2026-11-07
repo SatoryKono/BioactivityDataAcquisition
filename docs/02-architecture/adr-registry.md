@@ -8,7 +8,7 @@ This page is a generated governance mirror and MUST be regenerated via
 `python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes.
 
 **Total ADRs**: 63
-**Last Updated**: 2026-11-06
+**Last Updated**: 2026-11-07
 
 ## 📊 Status Summary
 
@@ -487,8 +487,9 @@ configs/
 
 **Relationships**: Related: ADR-027, ADR-032
 
-**Context**: See also [ADR-063](ADR-063-exclude-generated-artifact-tests-from-actions.md) for execution environment rules regarding generated artifact tests.
-BioET...
+**Context**: BioETL has grown to 854+ test files across 9 test categories. While coverage meets
+the 85% threshold, several gaps exist:
+1. **No formalized test matr...
 
 [📄 View Full ADR](decisions/ADR-042-testing-strategy-matrix.md)
 
