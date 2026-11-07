@@ -21,10 +21,6 @@ permission:
   webfetch: deny
   bash:
     "*": deny
-    "git diff*": allow
-    "git show*": allow
-    "git log*": allow
-    "git blame*": allow
     "git status*": allow
     "gh pr view*": allow
     "gh pr diff*": allow
@@ -68,7 +64,7 @@ Be constructive: thank the contributor, explain your reasoning, frame feedback a
 
 ## How to work
 
-1. Read the diff: `git diff origin/<base>...HEAD` (the PR is the current branch).
+1. Read the PR diff: `gh pr diff <PR number>`.
 2. For each changed file, `read` the surrounding code to judge it in context.
 3. Read the style guide when a style point is at stake.
 4. Give specific, actionable, line-referenced feedback.

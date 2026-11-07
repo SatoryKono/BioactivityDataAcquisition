@@ -276,13 +276,19 @@ def test_opencode_last_match_permissions_allow_reads_and_gate_writes() -> None:
         ][-1]
 
     for command in (
-        "git diff origin/main...HEAD",
         "git status --short",
         "gh pr view 1",
         "gh pr diff 1",
     ):
         assert resolve(command) == "allow"
-    for command in ("git push", "gh pr merge 1", "gh pr review --approve 1"):
+    for command in (
+        "git diff --output=review.patch origin/main...HEAD",
+        "git show --output=review.patch HEAD",
+        "git log --output=review.patch",
+        "git push",
+        "gh pr merge 1",
+        "gh pr review --approve 1",
+    ):
         assert resolve(command) == "deny"
     assert resolve("gh pr comment 1") == "ask"
 
