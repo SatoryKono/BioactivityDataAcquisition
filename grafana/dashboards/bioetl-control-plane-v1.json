@@ -672,7 +672,14 @@
             "inspect": true,
             "wrapText": false,
             "minWidth": 50
-          }
+          },
+          "links": [
+            {
+              "title": "Check BioETL Ops HTTP health",
+              "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
+              "targetBlank": true
+            }
+          ]
         },
         "overrides": [
           {

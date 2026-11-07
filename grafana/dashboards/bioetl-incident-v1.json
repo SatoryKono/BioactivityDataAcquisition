@@ -327,7 +327,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "6. Incident Workspace",
+  "title": "Incident Workspace",
   "uid": "bioetl-incident-v1",
   "version": 3,
   "style": "dark",
