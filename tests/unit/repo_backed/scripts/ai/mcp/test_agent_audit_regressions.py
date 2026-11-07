@@ -281,8 +281,6 @@ def test_opencode_last_match_permissions_allow_reads_and_gate_writes() -> None:
     for command in (
         "git status --porcelain",
         "git rev-parse HEAD",
-        "gh pr view 1",
-        "gh pr diff 1",
     ):
         assert resolve(command) == "allow"
     for command in (
@@ -295,6 +293,9 @@ def test_opencode_last_match_permissions_allow_reads_and_gate_writes() -> None:
     ):
         assert resolve(command) == "deny"
     assert resolve("gh pr comment 1") == "ask"
+    assert resolve("gh pr view 1") == "ask"
+    assert resolve("gh pr diff 1") == "ask"
+    assert resolve("gh pr diff 1 > .env") != "allow"
 
 
 def test_github_powershell_child_env_is_isolated(tmp_path: Path) -> None:

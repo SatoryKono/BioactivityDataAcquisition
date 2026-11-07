@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-07T20:05:28.995007+00:00",
+  "generated_at": "2026-11-07T21:41:26.332661+00:00",
   "summary": {
     "total_scripts": 715,
     "status_counts": {
@@ -3040,7 +3040,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 332,
+          "line": 333,
           "source_group": "tests",
           "text": "str(ROOT / \"scripts/ai/mcp/github-mcp-wrapper.ps1\"),"
         }
@@ -3733,7 +3733,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 387,
+          "line": 388,
           "source_group": "tests",
           "text": "str(ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\"),"
         },
@@ -3794,7 +3794,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 400,
+          "line": 401,
           "source_group": "tests",
           "text": "command = [executable, str(ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.sh\")]"
         },
