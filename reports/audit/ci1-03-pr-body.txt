@@ -1,0 +1,19 @@
+Синхронизация с main выполнена: 14260053638ee09a3090845ac61a55afeed4267e
+
+| Критерий (Acceptance criteria) | Доказательство (Evidence) |
+| :--- | :--- |
+| Покрыты 100% job'ов lane pr-gate CCI и 100% GH-контуров; у каждой строки — file:line на обеих платформах или пометка «контур не найден». | В `docs/ci/gate-platform-matrix-full.md` перечислены 35 jobs из CCI `pr-gate` и все GH-контуры, указаны точные строки файлов (`file:line`) и/или статус «контур не найден». |
+| Ни одна строка не содержит решения об удалении/переносе/объединении. | Все строки классифицированы как `[EQ?]`, `[DIFF]`, `[UNIQUE-CCI]` или `[UNIQUE-GH]`. Решения KEEP не пересматриваются. |
+| Частота и обязательность разведены: «нет в контуре X» ≠ «нет на платформе вообще». | Матрица показывает сопоставление по контурам, статус `[UNIQUE-CCI]` и `[UNIQUE-GH]` отражает отсутствие именно в соответствующих контурах (lane `pr-gate` / GH workflows), а не удаление. |
+
+**Паспорт закрытия issue #12830**:
+* **Owner**: AI
+* **Exact SHA revision**: dd275a6de01db8f8e1d3a77c4984bc54b8301e7d
+* **Scope**: `.circleci/config.yml` and `.github/workflows/*.yml` analysis
+* **Tool/backend versions**: Python 3.10+, PyYAML
+* **Commands and exit codes**: `python3 parse_workflows_final4.py` (exit code 0)
+* **Test data**: `.circleci/config.yml`, `.github/workflows/`
+* **Expected result**: Markdown matrix generation
+* **Allowed skips**: none
+* **Evidence link**: PR
+* **Independent reviewer**: SatoryKono (Owner)
