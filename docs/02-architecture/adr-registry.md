@@ -487,9 +487,8 @@ configs/
 
 **Relationships**: Related: ADR-027, ADR-032
 
-**Context**: BioETL has grown to 854+ test files across 9 test categories. While coverage meets
-the 85% threshold, several gaps exist:
-1. **No formalized test matr...
+**Context**: See also [ADR-063](ADR-063-exclude-generated-artifact-tests-from-actions.md) for execution environment rules regarding generated artifact tests.
+BioET...
 
 [📄 View Full ADR](decisions/ADR-042-testing-strategy-matrix.md)
 
