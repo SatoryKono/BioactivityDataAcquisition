@@ -204,7 +204,7 @@ def test_memory_readiness_uses_repository_mode_without_exporting_secrets(
     declared = mcp_profile_contract.profile_plan("stable", ROOT)
     effective = mcp_profile_contract.effective_profile_plan(declared)
     assert ("memory" in effective["required_local"]) == (
-        explicit is None or explicit == "read-write"
+        explicit in {None, "", "read-write"}
     )
     assert dict(os.environ) == before
     assert "fixture-only" not in json.dumps(effective)
