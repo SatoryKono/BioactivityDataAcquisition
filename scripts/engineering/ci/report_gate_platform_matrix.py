@@ -12,28 +12,30 @@ import yaml
 CIRCLE = Path(".circleci/config.yml")
 OUTPUT = Path("docs/ci/gate-platform-matrix-full.md")
 GITHUB = Path(".github/workflows")
+CLASS_LANE = "pr-required.yml:class-lane"
+FAST_GOVERNANCE = "pr-required.yml:fast-governance"
 PAIRS = {
     "classify": ("pr-required.yml:classify-changes",),
-    "lint-ruff": ("pr-required.yml:class-lane",),
-    "lint-arch": ("pr-required.yml:class-lane",),
-    "arch-tests": ("pr-required.yml:class-lane",),
-    "mypy": ("pr-required.yml:class-lane",),
+    "lint-ruff": (CLASS_LANE,),
+    "lint-arch": (CLASS_LANE,),
+    "arch-tests": (CLASS_LANE,),
+    "mypy": (CLASS_LANE,),
     "dependency-lock": ("tests.yml:dependency-preflight",),
     "test-fast": ("tests.yml:test-fast",),
     "test-integration": ("tests.yml:test-matrix",),
     "dq-consistency": ("tests.yml:dq-consistency-gate",),
     "root-hygiene": (
         "root-hygiene.yml:root-hygiene",
-        "pr-required.yml:fast-governance",
+        FAST_GOVERNANCE,
     ),
     "compiled-artifacts": (
         "compiled-artifacts-block.yml:check-artifacts",
-        "pr-required.yml:fast-governance",
+        FAST_GOVERNANCE,
     ),
     "security-scans": ("security.yml:security-scans",),
     "actions-audit": (
         "zizmor.yml:zizmor",
-        "pr-required.yml:fast-governance",
+        FAST_GOVERNANCE,
     ),
     "docs-diagrams": ("diagram-nightly.yml:docs-diagrams",),
     "duplication": ("duplication-complexity.yml:duplication",),
@@ -41,7 +43,7 @@ PAIRS = {
     "semantic-governance": ("semantic-governance.yml:semantic-governance",),
     "commit-lint": (
         "commit-lint.yml:commit-lint",
-        "pr-required.yml:fast-governance",
+        FAST_GOVERNANCE,
     ),
     "docs-governance": ("docs.yml:docs-governance",),
     "docker-build": (
@@ -79,7 +81,7 @@ def commands(job: dict) -> str:
     )
     chunks = (run.get("command", "") if isinstance(run, dict) else run for run in runs)
     return "\n".join(
-        re.sub(r"\s+#.*$", "", line)
+        re.split(r"[ \t]#", line, maxsplit=1)[0].rstrip()
         for chunk in chunks
         for line in chunk.splitlines()
         if not line.lstrip().startswith("#")
@@ -114,16 +116,7 @@ def row(*values: str) -> str:
     return "| " + " | ".join(value.replace("|", "&#124;") for value in values) + " |"
 
 
-def render() -> str:
-    circle = yaml.safe_load(CIRCLE.read_text(encoding="utf-8"))
-    lane = circle["workflows"]["pr-gate"]
-    entries = [
-        next(iter(item.items())) if isinstance(item, dict) else (item, {})
-        for item in lane["jobs"]
-    ]
-    aggregate = set(dict(entries)["pr-gate-complete"]["requires"])
-    circle_lines = job_lines(CIRCLE)
-
+def github_jobs() -> dict:
     github = {}
     for path in sorted(GITHUB.iterdir()):
         if path.suffix not in {".yml", ".yaml"}:
@@ -136,6 +129,37 @@ def render() -> str:
                 line,
                 workflow.get("on", workflow.get(True)),
             )
+    return github
+
+
+def unmatched_rows(github: dict, mapped: set[str]):
+    for candidate, (job, path, line, events) in github.items():
+        if candidate not in mapped:
+            yield (
+                row(
+                    "контур не найден",
+                    f"`{candidate}` ({path.as_posix()}:{line})",
+                    "[UNIQUE-GH]",
+                    "—",
+                    features(job, job.get("strategy", {}).get("matrix")),
+                    "—",
+                    "—",
+                    f"{cell(events)} / {cell(job.get('if'))}",
+                )
+            )
+
+
+def render() -> str:
+    circle = yaml.safe_load(CIRCLE.read_text(encoding="utf-8"))
+    lane = circle["workflows"]["pr-gate"]
+    entries = [
+        next(iter(item.items())) if isinstance(item, dict) else (item, {})
+        for item in lane["jobs"]
+    ]
+    aggregate = set(dict(entries)["pr-gate-complete"]["requires"])
+    circle_lines = job_lines(CIRCLE)
+
+    github = github_jobs()
 
     lines = [
         "# Статическая матрица гейтов GitHub Actions и CircleCI",
@@ -160,11 +184,9 @@ def render() -> str:
         label = params.get("name", name)
         call = f"`{label}` ({CIRCLE.as_posix()}:{circle_lines[name]})"
         cci_features = features(circle["jobs"][name], params.get("matrix"))
-        member = (
-            "агрегатор"
-            if name == "pr-gate-complete"
-            else ("да" if label in aggregate else "нет")
-        )
+        member = "да" if label in aggregate else "нет"
+        if name == "pr-gate-complete":
+            member = "агрегатор"
         filters = cell(params.get("filters"))
         candidates = [
             candidate for candidate in PAIRS.get(name, ()) if candidate in github
@@ -187,8 +209,7 @@ def render() -> str:
             mapped.add(candidate)
             relation = (
                 "[DIFF]"
-                if candidate in DOCKER_COMPONENTS
-                or candidate == "pr-required.yml:fast-governance"
+                if candidate in DOCKER_COMPONENTS or candidate == FAST_GOVERNANCE
                 else "[EQ?]"
             )
             lines.append(
@@ -204,20 +225,7 @@ def render() -> str:
                 )
             )
 
-    for candidate, (job, path, line, events) in github.items():
-        if candidate not in mapped:
-            lines.append(
-                row(
-                    "контур не найден",
-                    f"`{candidate}` ({path.as_posix()}:{line})",
-                    "[UNIQUE-GH]",
-                    "—",
-                    features(job, job.get("strategy", {}).get("matrix")),
-                    "—",
-                    "—",
-                    f"{cell(events)} / {cell(job.get('if'))}",
-                )
-            )
+    lines.extend(unmatched_rows(github, mapped))
     lines.extend(
         (
             "",
