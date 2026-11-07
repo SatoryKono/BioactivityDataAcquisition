@@ -32,9 +32,9 @@ def _write_registry_fixture(root: Path) -> Path:
     quality = root / "reports/quality"
     quality.mkdir(parents=True)
     (quality / "module-coverage-inventory.json").write_text(
-        '{"summary":{"source_module_count":4,"status_counts":'
+        '{"summary":{"source_module_count":3,"status_counts":'
         '{"fully_covered":1,"partially_covered":1,"no_executable_lines":1,'
-        '"uncovered":0,"unmeasured":0,"coverage_xml_missing":1}}}\n',
+        '"uncovered":0,"unmeasured":0}}}\n',
         encoding="utf-8",
     )
     (quality / "debt-governance-gates.json").write_text(
@@ -81,14 +81,13 @@ def _write_registry_fixture(root: Path) -> Path:
         f"Evidence surface SHA-256: `{evidence_hash}`\n"
         "Debt-governance gates: **2 pass / 0 fail**\n"
         "Architecture quality integral score: **9.5** (`good`)\n"
-        "source_module_count: **4**\n"
+        "source_module_count: **3**\n"
         "fully_covered: **1**\n"
         "partially_covered: **1**\n"
         "no_executable_lines: **1**\n"
         "uncovered: **0**\n"
         "unmeasured: **0**\n"
-        "coverage_xml_missing: **1**\n"
-        "= 4 == source_module_count\n"
+        "= 3 == source_module_count\n"
         "Contract coverage matrix schema: **contract-v1**\n"
         "Constructor waivers (shrink-only inventory): **1** entries\n"
         "Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**\n"
@@ -158,8 +157,8 @@ def test_registry_detects_semantic_summary_drift(tmp_path: Path) -> None:
     report = tmp_path / "reports/quality/current.md"
     report.write_text(
         report.read_text(encoding="utf-8").replace(
-            '"coverage_xml_missing_module_count": 1',
-            '"coverage_xml_missing_module_count": 2',
+            '"source_module_count": 3',
+            '"source_module_count": 4',
         ),
         encoding="utf-8",
     )
@@ -178,8 +177,8 @@ def test_registry_detects_human_headline_drift(tmp_path: Path) -> None:
     report = tmp_path / "reports/quality/current.md"
     report.write_text(
         report.read_text(encoding="utf-8").replace(
-            "coverage_xml_missing: **1**",
-            "coverage_xml_missing: **2**",
+            "source_module_count: **3**",
+            "source_module_count: **4**",
         ),
         encoding="utf-8",
     )

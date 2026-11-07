@@ -13,7 +13,6 @@ from bioetl.infrastructure.control_plane.file_contract_evidence_recorder import 
 )
 from bioetl.application.services.execution.pipeline_runner_models import RunResult
 from bioetl.application.services.run_reports.composite import CompositeRunReportService
-from bioetl.composition.control_plane_paths import live_run_manifest_catalog
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.adapters.http.health import provider_execution_scope
 from bioetl.infrastructure.storage.composite_replay_evidence import replay_artifacts
@@ -74,13 +73,9 @@ def create_composite_contract_finalizer(
     pipeline_name: str,
     manifest_id: str,
 ) -> Callable[[str, bool], None]:
-    settings = get_settings()
-    root = Path(settings.data_dir) / "output/control/run_manifest"
+    root = Path(get_settings().data_dir) / "output/control/run_manifest"
     store = FileRunManifestStore(base_path=root)
-    recorder = FileContractEvidenceRecorder(
-        base_path=root,
-        live_catalog=live_run_manifest_catalog(settings),
-    )
+    recorder = FileContractEvidenceRecorder(base_path=root)
 
     def finalize(run_id: str, resume_requested: bool) -> None:
         manifest = store.get(manifest_id)

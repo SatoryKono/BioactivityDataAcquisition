@@ -734,7 +734,9 @@ class TestUnifiedHTTPClientObservability:
         assert client.provider == "chembl"
 
     @pytest.mark.asyncio
-    async def test_client_ignores_proxy_env_vars(self, mock_rate_limiter, mock_circuit_breaker, monkeypatch):
+    async def test_client_ignores_proxy_env_vars(
+        self, mock_rate_limiter, mock_circuit_breaker, monkeypatch
+    ):
         """Test client initialization ignores HTTP_PROXY, HTTPS_PROXY, and NO_PROXY variables."""
         monkeypatch.setenv("HTTP_PROXY", "http://127.0.0.1:9999")
         monkeypatch.setenv("HTTPS_PROXY", "http://127.0.0.1:9999")

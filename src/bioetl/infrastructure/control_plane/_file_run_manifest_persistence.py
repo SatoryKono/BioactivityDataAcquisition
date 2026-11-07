@@ -255,35 +255,14 @@ def _require_same_run_predecessor(
         )
 
 
-def _require_compatible_run_index(
-    store: FileRunManifestStore, manifest: RunManifest
-) -> None:
-    existing_manifest_id = store._load_manifest_id_for_run_id(manifest.run_id)
-    if (
-        existing_manifest_id is not None
-        and existing_manifest_id != manifest.manifest_id
-        and getattr(manifest, "predecessor_manifest_id", None) != existing_manifest_id
-    ):
-        raise ValueError(
-            "run_id is already mapped to a different manifest_id: "
-            f"{existing_manifest_id}"
-        )
-
-
 def persist_manifest(
     store: FileRunManifestStore,
     manifest: RunManifest,
     *,
     atomic_writer: Callable[..., None],
     scope_index_writer: Callable[..., None] = write_latest_scope_index,
-    require_local_predecessor: bool = True,
 ) -> None:
-    """Persist one manifest and all indexes as one rollback-aware transaction.
-
-    ``require_local_predecessor`` stays true for the run's own store. A live-root
-    record of a new run sets it false so a predecessor that remains in another
-    data tree is not copied and is not required to exist locally.
-    """
+    """Persist one manifest and all indexes as one rollback-aware transaction."""
     started_at = perf_counter()
     manifest_path = store.base_path / f"{manifest.manifest_id}.json"
     run_index_path = store.base_path / "_by_run_id" / f"{manifest.run_id}.txt"
@@ -296,9 +275,18 @@ def persist_manifest(
     try:
         store.base_path.mkdir(parents=True, exist_ok=True)
         run_index_path.parent.mkdir(parents=True, exist_ok=True)
-        if require_local_predecessor:
-            _require_same_run_predecessor(store, manifest)
-        _require_compatible_run_index(store, manifest)
+        _require_same_run_predecessor(store, manifest)
+        existing_manifest_id = store._load_manifest_id_for_run_id(manifest.run_id)
+        if (
+            existing_manifest_id is not None
+            and existing_manifest_id != manifest.manifest_id
+            and getattr(manifest, "predecessor_manifest_id", None)
+            != existing_manifest_id
+        ):
+            raise ValueError(
+                "run_id is already mapped to a different manifest_id: "
+                f"{existing_manifest_id}"
+            )
         catalog = store._load_latest_scope_catalog()
         if catalog is None:
             catalog = LatestScopeIndexCatalog(

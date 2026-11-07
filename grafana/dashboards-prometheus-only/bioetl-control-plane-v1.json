@@ -1,7 +1,7 @@
 {
   "id": null,
   "uid": "bioetl-control-plane-v1",
-  "title": "2. Replay Readiness",
+  "title": "Replay Readiness",
   "tags": [
     "bioetl",
     "prometheus-only",

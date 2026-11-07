@@ -30,12 +30,12 @@ policy:
   require_sha_binding: true
   not_applicable_requires_reason: true
   # Ruleset enforcement field only. Does not record stored status contexts.
-  github_ruleset_13643213_enforcement: active
+  github_ruleset_13643213_enforcement: disabled
   # Ruleset 15730586 (root-hygiene-required-check) was deleted on 2026-11-02
   # (settings-audit phase 0); "deleted" replaces the disabled enforcement field.
   github_ruleset_15730586_enforcement: deleted
   catalog_check_status: enforced
-  # Runnable catalog provider; the server snapshot is recorded separately.
+  # Runnable catalog provider, not the context stored on a disabled ruleset.
   enforcement_provider: github_actions
   # Catalog stamp from 2026-10-09. Not evidence that merge is blocked.
   enforcement_verified_date: "2026-10-09"
@@ -57,13 +57,13 @@ policy:
       required_substrings: ["policy-anchor:deployment-provider", "github_actions"]
     - id: ruleset-enforcement-mode
       required_substrings:
-        ["policy-anchor:ruleset-enforcement-mode", "13643213", "15730586", "enforcement: active", "deleted"]
+        ["policy-anchor:ruleset-enforcement-mode", "13643213", "15730586", "enforcement: disabled", "deleted"]
     - id: stored-ruleset-contexts
       required_substrings:
         [
           "policy-anchor:stored-ruleset-contexts",
           "pr-gate-complete",
-          "active rule requires",
+          "not active merge protection",
         ]
     - id: target-gha-context
       required_substrings:
@@ -89,8 +89,8 @@ policy:
     - "MUST be `enforcement: active`"
     - "Active main rulesets"
     - "CI runs through `.circleci/config.yml`"
-    # Unqualified merge-wall claims remain forbidden: the GET snapshot is not
-    # positive/negative acceptance evidence.
+    # Current claims that a ruleset already requires this job. Disabled
+    # enforcement makes both phrases false for the live main rulesets.
     - "GitHub-required merge wall"
     - "enforces exactly one required status context"
     - "GitHub required context is job"

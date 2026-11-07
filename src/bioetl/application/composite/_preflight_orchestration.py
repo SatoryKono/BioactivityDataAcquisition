@@ -20,7 +20,6 @@ from bioetl.application.composite.helpers.preflight_schema_registry import (
     load_schema_registry,
 )
 from bioetl.domain.composite import CompositeConfig
-from bioetl.domain.normalization.json import CanonicalJsonProfile, stable_json_hash
 from bioetl.domain.normalization.profiles import resolve_normalization_profile
 
 
@@ -28,13 +27,6 @@ class PreflightSchemaOrchestrationMixin(PreflightValidationReportingMixin):
     """Schema discovery and dtype extraction helper methods."""
 
     _SCHEMA_REGISTRY: dict[str, type] | None = None
-
-    def get_expected_normalization_profile_hash(
-        self, source_profiles: dict[str, ProfileInfo]
-    ) -> str:
-        """Calculate the actual aggregated profile hash for the composite DAG."""
-        payload = {src: info.profile_hash for src, info in source_profiles.items()}
-        return stable_json_hash(payload, profile=CanonicalJsonProfile.DOMAIN_STDLIB_V1)
 
     def _parse_pipeline_identity(self, pipeline_name: str) -> tuple[str, str] | None:
         """Return ``(provider, entity)`` for ``provider_entity`` pipelines."""

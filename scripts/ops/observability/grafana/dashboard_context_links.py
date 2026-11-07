@@ -23,32 +23,12 @@ SEVEN_UIDS: tuple[str, ...] = (
     "bioetl-run-explorer-v1",
 )
 
-# Portfolio order is the five-dashboard numbering (1–5). Grafana's live URL
-# slug is the title slug (verified 2026-11-05 against /api/search): alphanumeric
-# runs lowercased, every other character a hyphen, empty chunks dropped.
-DASHBOARD_TITLES: dict[str, str] = {
-    "bioetl-run-explorer-v1": "1. Run Explorer",
-    "bioetl-control-plane-v1": "2. Replay Readiness",
-    "bioetl-overview-v2": "3. Run Overview",
-    "bioetl-dq-v2": "4. Data Quality",
-    "bioetl-incident-v1": "5. Incident Workspace",
-}
-
-
-def grafana_dashboard_slug(title: str) -> str:
-    """Return the dashboard slug Grafana publishes for a title."""
-    slug = "-".join(
-        chunk
-        for chunk in "".join(
-            char.lower() if char.isalnum() else "-" for char in title.strip()
-        ).split("-")
-        if chunk
-    )
-    return slug or "dashboard"
-
-
 PATH_BY_UID: dict[str, str] = {
-    uid: grafana_dashboard_slug(title) for uid, title in DASHBOARD_TITLES.items()
+    "bioetl-run-explorer-v1": "run-explorer",
+    "bioetl-control-plane-v1": "1-trust",
+    "bioetl-overview-v2": "2-overview",
+    "bioetl-dq-v2": "5-data-quality",
+    "bioetl-incident-v1": "6-incident-workspace",
 }
 
 CORE_VAR_ORDER: tuple[str, ...] = ("workflow", "pipeline", "run_type", "run_id")
@@ -553,8 +533,7 @@ def retire_runtime_links(node: object) -> None:
                     if retired_uid in value:
                         value = re.sub(
                             rf"/d/{retired_uid}(?:/[^?\s\"<>]+)?",
-                            "/d/bioetl-overview-v2/"
-                            + PATH_BY_UID["bioetl-overview-v2"],
+                            "/d/bioetl-overview-v2/2-overview",
                             value,
                         )
                         value = value.replace(retired_uid, "bioetl-overview-v2")
