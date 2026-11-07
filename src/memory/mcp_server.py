@@ -243,6 +243,21 @@ def _error(identifier: Any, code: int, message: str) -> None:
     )
 
 
+def _call_tool(store: GraphStore, identifier: Any, params: dict[str, Any]) -> None:
+    arguments = params.get("arguments", {})
+    if not isinstance(params.get("name"), str) or not isinstance(arguments, dict):
+        _error(identifier, -32602, "Invalid tool parameters")
+        return
+    try:
+        result = _tool_result(store.call(params["name"], arguments))
+    except (ValueError, KeyError, TypeError, OSError, StorageConflictError) as exc:
+        message = "Memory operation failed: invalid data, storage conflict or resource limit"
+        if params["name"] == "read_graph" and isinstance(exc, ResponseLimitError):
+            message = "Response exceeds limit; retry with a smaller limit and the same offset"
+        result = {"isError": True, "content": [{"type": "text", "text": message}]}
+    _reply(identifier, result)
+
+
 def _handle(store: GraphStore, request: Any) -> None:
     if (
         not isinstance(request, dict)
@@ -273,18 +288,7 @@ def _handle(store: GraphStore, request: Any) -> None:
     elif method == "tools/list":
         _reply(identifier, {"tools": _TOOLS})
     elif method == "tools/call":
-        arguments = params.get("arguments", {})
-        if not isinstance(params.get("name"), str) or not isinstance(arguments, dict):
-            _error(identifier, -32602, "Invalid tool parameters")
-            return
-        try:
-            result = _tool_result(store.call(params["name"], arguments))
-        except (ValueError, KeyError, TypeError, OSError, StorageConflictError) as exc:
-            message = "Memory operation failed: invalid data, storage conflict or resource limit"
-            if params["name"] == "read_graph" and isinstance(exc, ResponseLimitError):
-                message = "Response exceeds limit; retry with a smaller limit and the same offset"
-            result = {"isError": True, "content": [{"type": "text", "text": message}]}
-        _reply(identifier, result)
+        _call_tool(store, identifier, params)
     else:
         _error(identifier, -32601, "Method not found")
 
