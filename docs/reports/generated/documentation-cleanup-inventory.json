@@ -99925,6 +99925,34 @@
       "lifecycle": "working_report",
       "outbound_links": 0,
       "owner": "BioETL Team",
+      "path": "reports/audit/pack-v2.1/P13-test-system.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
       "path": "reports/audit/pack-v2.1/P14-observability.md",
       "recommended_action": "archive-after-migration",
       "root_doc_kind": null,
@@ -114991,10 +115019,10 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 26,
       "reports_workspace_entrypoint": 1,
-      "working_report": 300
+      "working_report": 301
     },
     "by_recommended_action": {
-      "archive-after-migration": 335,
+      "archive-after-migration": 336,
       "generate-automatically": 1066,
       "keep": 2675
     },
@@ -115020,7 +115048,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 3,
-      "reports": 665,
+      "reports": 666,
       "security": 2
     },
     "by_status": {
@@ -115028,17 +115056,17 @@
       "Archived": 1554,
       "Canonical": 76,
       "Generated": 1066,
-      "Working": 623
+      "Working": 624
     },
     "by_surface_family": {
       "active": 757,
       "archive": 1554,
       "canonical": 76,
       "generated": 1066,
-      "working": 623
+      "working": 624
     },
     "by_tracking_state": {
-      "tracked": 4076
+      "tracked": 4077
     },
     "docs_reports_local_count": 70,
     "duplicate_group_count": 80,
@@ -115051,8 +115079,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4076,
+    "total_doc_like": 4077,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4076
+    "total_doc_like_tracked": 4077
   }
 }
