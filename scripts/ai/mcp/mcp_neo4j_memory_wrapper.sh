@@ -41,6 +41,7 @@ export NEO4J_DATABASE
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-/tmp/npm-cache}"
 mcp_validate_neo4j_credentials "Neo4j Memory MCP"
 mcp_exit_if_validate_only "neo4j-memory"
+mcp_prepare_npm_cache
 
 PYTHON_BIN="${PYTHON_BIN:-$(command -v python3 || command -v python || true)}"
 if [[ -z "${PYTHON_BIN}" ]]; then

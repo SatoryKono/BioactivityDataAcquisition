@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-07T19:14:42.919356+00:00",
+  "generated_at": "2026-11-07T19:29:18.760398+00:00",
   "summary": {
     "total_scripts": 714,
     "status_counts": {
@@ -4361,7 +4361,7 @@
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
-          "line": 57,
+          "line": 58,
           "source_group": "scripts",
           "text": "exec \"${PYTHON_BIN}\" \"${REPO_ROOT}/scripts/ai/mcp/neo4j_memory_mcp_adapter.py\" -- \\"
         },
