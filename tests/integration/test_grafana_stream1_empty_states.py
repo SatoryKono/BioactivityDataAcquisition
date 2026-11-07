@@ -185,8 +185,14 @@ def test_dq_10253_select_run_novalue_drops_hedge_tails() -> None:
         for panel in get_dashboard_panels(dashboard)
         if isinstance(panel.get("id"), int)
     }
+    guidance = panels[9402]
+    assert guidance["type"] == "text"
+    assert not guidance.get("targets")
+    handoff = guidance["options"]["content"]
+    assert "/d/bioetl-overview-v2/" in handoff
+    assert "viewPanel=9300" in handoff
+    assert "${run_id:queryparam}" in handoff
     expected = {
-        9402: "SELECT RUN — no exact Run ID selected. Choose a run first.",
         9403: (
             "SELECT RUN — no exact Run ID selected. Choose this run in Run Explorer."
         ),
