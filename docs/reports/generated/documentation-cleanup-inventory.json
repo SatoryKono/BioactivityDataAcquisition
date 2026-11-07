@@ -95546,6 +95546,34 @@
       "diagram_kind": null,
       "duplicate_group": null,
       "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "docs_reports_curated_or_historical_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/reports/audit/phase-instrumentation-spec.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
       "extension": ".json",
       "freshness": "review-required",
       "generated_route": null,
@@ -99534,6 +99562,34 @@
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "reports/audit/AUDIT-20261022-APP-001-Cancellation.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/audit/comp-004-runtime/verification_report.md",
       "recommended_action": "archive-after-migration",
       "root_doc_kind": null,
       "section": "reports",
@@ -115513,7 +115569,7 @@
       "active_quality_baseline": 125,
       "closeout_evidence": 168,
       "docs_reports_curated_entrypoint": 2,
-      "docs_reports_curated_or_historical_report": 35,
+      "docs_reports_curated_or_historical_report": 36,
       "docs_reports_generated_or_route_owned": 7,
       "docs_reports_retention_sensitive_evidence": 28,
       "generated_skill_reference_mirror": 19,
@@ -115523,10 +115579,10 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 26,
       "reports_workspace_entrypoint": 1,
-      "working_report": 312
+      "working_report": 313
     },
     "by_recommended_action": {
-      "archive-after-migration": 349,
+      "archive-after-migration": 351,
       "generate-automatically": 1066,
       "keep": 2680
     },
@@ -115552,7 +115608,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 3,
-      "reports": 684,
+      "reports": 686,
       "security": 2
     },
     "by_status": {
@@ -115560,19 +115616,19 @@
       "Archived": 1554,
       "Canonical": 76,
       "Generated": 1066,
-      "Working": 642
+      "Working": 644
     },
     "by_surface_family": {
       "active": 757,
       "archive": 1554,
       "canonical": 76,
       "generated": 1066,
-      "working": 642
+      "working": 644
     },
     "by_tracking_state": {
-      "tracked": 4095
+      "tracked": 4097
     },
-    "docs_reports_local_count": 72,
+    "docs_reports_local_count": 73,
     "duplicate_group_count": 80,
     "generated_route_count": 76,
     "generated_without_route_count": 214,
@@ -115583,8 +115639,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4095,
+    "total_doc_like": 4097,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4095
+    "total_doc_like_tracked": 4097
   }
 }
