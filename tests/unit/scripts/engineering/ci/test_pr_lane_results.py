@@ -216,6 +216,39 @@ def test_shadow_compare_routes_domain_layer_doc() -> None:
     assert report["covers_full_suite"] is False
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/agents/guides/MUSE.md",
+    ],
+)
+def test_shadow_compare_routes_mcp_runtime_guides(path: str) -> None:
+    """Runtime guide edits retain explicit MCP contract owners in shadow mode."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare([path], repo_root=repo_root)
+
+    assert report["selected"] == [
+        "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
+        "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py",
+        "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+    ]
+    assert report["covers_full_suite"] is False
+    assert report["activation"] == "not_applied"
+
+
+def test_shadow_compare_rejects_unmapped_runtime_guide() -> None:
+    """Known guide routes do not waive the fail-closed policy for other docs."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            ["docs/00-project/ai/agents/guides/UNMAPPED.md"],
+            repo_root=repo_root,
+        )
+
+
 def test_shadow_compare_routes_billing_pr_non_code_changes() -> None:
     """Billing documentation and its manifest have explicit test routes."""
     repo_root = Path(__file__).resolve().parents[5]
