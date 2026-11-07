@@ -1,0 +1,111 @@
+{
+    "run_id": "41570319793",
+    "status": "PARTIAL",
+    "blocker": "E:\\backup\\ci-stage0-20261103\\ and raw-jobs-attempt-1.json are inaccessible in sandbox environment. gh CLI and authorized GitHub Actions API access are unavailable.",
+    "suites": [
+        {
+            "suite": "tooling-other",
+            "test_time_sum": 320.5,
+            "wall_time": "UNAVAILABLE",
+            "setup_sum": "UNAVAILABLE",
+            "call_sum": "UNAVAILABLE",
+            "teardown_sum": "UNAVAILABLE",
+            "remainder": "UNAVAILABLE"
+        },
+        {
+            "suite": "integration",
+            "test_time_sum": 233.2,
+            "wall_time": "UNAVAILABLE",
+            "setup_sum": "UNAVAILABLE",
+            "call_sum": "UNAVAILABLE",
+            "teardown_sum": "UNAVAILABLE",
+            "remainder": "UNAVAILABLE"
+        },
+        {
+            "suite": "repo-backed-tooling",
+            "test_time_sum": 125.6,
+            "wall_time": "UNAVAILABLE",
+            "setup_sum": "UNAVAILABLE",
+            "call_sum": "UNAVAILABLE",
+            "teardown_sum": "UNAVAILABLE",
+            "remainder": "UNAVAILABLE"
+        },
+        {
+            "suite": "unit-domain",
+            "test_time_sum": 118.8,
+            "wall_time": "UNAVAILABLE",
+            "setup_sum": "UNAVAILABLE",
+            "call_sum": "UNAVAILABLE",
+            "teardown_sum": "UNAVAILABLE",
+            "remainder": "UNAVAILABLE"
+        },
+        {
+            "suite": "unit-infrastructure",
+            "test_time_sum": 95.0,
+            "wall_time": "UNAVAILABLE",
+            "setup_sum": "UNAVAILABLE",
+            "call_sum": "UNAVAILABLE",
+            "teardown_sum": "UNAVAILABLE",
+            "remainder": "UNAVAILABLE"
+        },
+        {
+            "suite": "unit-application",
+            "test_time_sum": 74.5,
+            "wall_time": "UNAVAILABLE",
+            "setup_sum": "UNAVAILABLE",
+            "call_sum": "UNAVAILABLE",
+            "teardown_sum": "UNAVAILABLE",
+            "remainder": "UNAVAILABLE"
+        },
+        {
+            "suite": "contract-confidence",
+            "test_time_sum": 72.9,
+            "wall_time": "UNAVAILABLE",
+            "setup_sum": "UNAVAILABLE",
+            "call_sum": "UNAVAILABLE",
+            "teardown_sum": "UNAVAILABLE",
+            "remainder": "UNAVAILABLE"
+        },
+        {
+            "suite": "unit-other",
+            "test_time_sum": 70.9,
+            "wall_time": "UNAVAILABLE",
+            "setup_sum": "UNAVAILABLE",
+            "call_sum": "UNAVAILABLE",
+            "teardown_sum": "UNAVAILABLE",
+            "remainder": "UNAVAILABLE"
+        },
+        {
+            "suite": "fast-unit-domain",
+            "test_time_sum": 31.6,
+            "wall_time": "UNAVAILABLE",
+            "setup_sum": "UNAVAILABLE",
+            "call_sum": "UNAVAILABLE",
+            "teardown_sum": "UNAVAILABLE",
+            "remainder": "UNAVAILABLE"
+        },
+        {
+            "suite": "fast-unit-application",
+            "test_time_sum": 25.9,
+            "wall_time": "UNAVAILABLE",
+            "setup_sum": "UNAVAILABLE",
+            "call_sum": "UNAVAILABLE",
+            "teardown_sum": "UNAVAILABLE",
+            "remainder": "UNAVAILABLE"
+        }
+    ],
+    "instrumentation_candidates": [
+        {
+            "suite": "tooling-other",
+            "justification": "Largest test execution time (320.5s). High priority for profiling to identify slow tests or bottlenecks."
+        },
+        {
+            "suite": "integration",
+            "justification": "Second largest test execution time (233.2s). Integration tests often have significant setup/teardown overhead, making them prime candidates for phase profiling."
+        },
+        {
+            "suite": "repo-backed-tooling",
+            "justification": "Third largest execution time (125.6s). Tooling tests with I/O or network operations are likely sources of high latency."
+        }
+    ]
+}
