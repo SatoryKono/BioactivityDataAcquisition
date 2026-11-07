@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "catalog_ref": "37ac0eeac5bef80dc230474a4c2cb5b695bad30c",
-  "source_ref": "37ac0eeac5bef80dc230474a4c2cb5b695bad30c",
+  "catalog_ref": "60e6098cb150aa61bc73c24db08eb8e1c7b93bf8",
+  "source_ref": "8256c02f8c9eb06e7f24d8bb5e47f55f06f57207",
   "source_reviews": {
     "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py": "PR #12838 changes only trailing explanations for existing type: ignore pragmas from tracked(#12721) to technical-reason. Reviewed diff and identical Python AST confirm unchanged acquisition calls, resource ownership, lifetime and shutdown behavior; no runtime qualification is claimed.",
     "src/bioetl/application/core/_batch_writer_gold_support.py": "PR #12838 changes only trailing explanations for existing type: ignore pragmas from tracked(#12721) to technical-reason. Reviewed diff and identical Python AST confirm unchanged acquisition calls, resource ownership, lifetime and shutdown behavior; no runtime qualification is claimed.",
