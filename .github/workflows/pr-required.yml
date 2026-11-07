@@ -234,7 +234,7 @@ jobs:
 
       - name: Run zizmor
         id: zizmor
-        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+        uses: zizmorcore/zizmor-action@53290badfa369cb0bf7ad16342cb62c2fa47ac7b # v0.8.0
         with:
           inputs: |
             .github/workflows
@@ -801,7 +801,7 @@ jobs:
       contents: read
     # Pin must stay on trusted main (#11232). docs.yml owns diagram/docs
     # governance so arch-pytest can ignore the expensive Mermaid modules (#12374).
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@02888d30cd4e343eeb9778fb8bbea8098591cf3d
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@0deeafe064844e467b6c5943430dbfb3b80333ba
 
   docker-lane:
     name: Docker lane
@@ -816,7 +816,7 @@ jobs:
       packages: write
       id-token: write
       attestations: write
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@fa8d903223efda3c26c19af08933d8a4000b2a7a
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@89fbcab7461c6400f8b2df38ebd95375713e7d32
     with:
       caller-sha: ${{ needs.classify-changes.outputs.head_sha }}
 
