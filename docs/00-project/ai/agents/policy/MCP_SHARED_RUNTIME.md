@@ -136,8 +136,9 @@ inventory is preserved. No diagnostic starts these services.
 is optional and must resolve inside this repository's `.cache/mcp-memory/`;
 wrappers validate it before initialization and the server validates it before
 storage access. `read_graph` returns at most 100 entities and 100 relations;
-follow `next_offset` until it is null. Requests, batches and graph size are
-bounded; malformed requests return errors without ending the stdio session.
+follow `next_offset` until it is null. If the response exceeds the size limit,
+retry with a smaller `limit` and the same `offset`. Requests, batches and graph
+size are bounded; malformed requests return errors without ending the stdio session.
 Stdio is configured as UTF-8 independently of the parent locale. Tool responses
 use UTF-8 byte limits consistently. Mutations validate their
 response and each single-row read page before committing, so a rejected size

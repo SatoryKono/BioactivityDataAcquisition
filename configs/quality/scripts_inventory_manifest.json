@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-06T23:50:42.406750+00:00",
+  "generated_at": "2026-11-07T17:39:56.716136+00:00",
   "summary": {
     "total_scripts": 714,
     "status_counts": {
@@ -651,7 +651,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 163,
+          "line": 164,
           "source_group": "docs",
           "text": "`scripts/ai/codex/helper/ensure-mcp.sh` is the sole owner of the shared-plane"
         },
@@ -693,7 +693,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 150,
+          "line": 151,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/ensure-mcp.sh\","
         }
@@ -1393,7 +1393,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 180,
+          "line": 181,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/run-codex.sh mcp-static"
         },
@@ -2885,7 +2885,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 690,
+          "line": 692,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3004,7 +3004,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 152,
+          "line": 153,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\","
         },
@@ -3067,7 +3067,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 153,
+          "line": 154,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\","
         },
@@ -3187,7 +3187,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 179,
+          "line": 180,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/mcp_ast_grep_wrapper.sh"
         },
@@ -3685,7 +3685,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 689,
+          "line": 691,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3746,7 +3746,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 688,
+          "line": 690,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -3923,7 +3923,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 154,
+          "line": 155,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.ps1\","
         },
@@ -3962,7 +3962,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 155,
+          "line": 156,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\","
         },
@@ -4138,7 +4138,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 156,
+          "line": 157,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\","
         },
@@ -4181,7 +4181,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 157,
+          "line": 158,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\","
         },
@@ -4214,7 +4214,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 158,
+          "line": 159,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\","
         },
@@ -10602,7 +10602,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 590,
+          "line": 592,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10645,7 +10645,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 703,
+          "line": 705,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -12988,7 +12988,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 419,
+          "line": 420,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -13012,13 +13012,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 595,
+          "line": 628,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 608,
+          "line": 641,
           "source_group": "tests",
           "text": "if path == \"scripts/engineering/dev/zed_mypy.py\":"
         }
@@ -20411,13 +20411,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 878,
+          "line": 911,
           "source_group": "tests",
           "text": "\"src/bioetl/infrastructure/quality/scoring.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 879,
+          "line": 912,
           "source_group": "tests",
           "text": "\"scripts/engineering/quality/scoring.py\","
         },
@@ -20794,7 +20794,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 801,
+          "line": 803,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -21269,7 +21269,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_github_actions_runtime_policy.py",
-          "line": 197,
+          "line": 203,
           "source_group": "scripts",
           "text": "vs this list is reviewed by `github_settings_review.py`, not here."
         },
@@ -23930,7 +23930,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 937,
+          "line": 939,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -25403,7 +25403,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 218,
+          "line": 219,
           "source_group": "docs",
           "text": "2. Restart client after `apply-docker-stable-mcp.ps1 -Profile stable`"
         },
@@ -25483,13 +25483,13 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 211,
+          "line": 212,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1   # never kills bioetl-* / shared labels"
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 220,
+          "line": 221,
           "source_group": "docs",
           "text": "4. Idle: `cleanup-mcp-orphans.ps1 -KillHostGateways`"
         },
@@ -25786,7 +25786,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 212,
+          "line": 213,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\reset-mcp-host-sessions.ps1  # report; -Execute for actions"
         },
@@ -25880,7 +25880,7 @@
         },
         {
           "path": "docs/04-reference/environment-variables.md",
-          "line": 129,
+          "line": 140,
           "source_group": "docs",
           "text": "| `BIOETL_RUNTIME_SOURCE_ID` | Opaque digest computed from the runtime root and mount roots and injected by `runtime_manager.py` | No |"
         },
@@ -26063,7 +26063,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 209,
+          "line": 210,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\apply-shared-to-grok.ps1  # optional Grok projection; restart Grok afterward"
         },
@@ -26118,7 +26118,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 208,
+          "line": 209,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\health-shared.ps1"
         },
@@ -26218,7 +26218,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 207,
+          "line": 208,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\start-shared.ps1"
         },
@@ -26293,7 +26293,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 165,
+          "line": 166,
           "source_group": "docs",
           "text": "bounds `start-shared.sh`; callers must not wrap ensure with a smaller"
         },
@@ -26330,7 +26330,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 210,
+          "line": 211,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\stop-shared.ps1"
         },
@@ -26376,7 +26376,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 200,
+          "line": 201,
           "source_group": "docs",
           "text": "| Watchdog | `watchdog-shared.ps1 -Daily` restarts DOWN servers only |"
         },
@@ -26808,7 +26808,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 161,
+          "line": 162,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/load_repo_env.sh\","
         },
