@@ -33,7 +33,7 @@ def test_normalize_run_id_trims_and_rejects_internal_space() -> None:
 
 def test_rewrite_fills_missing_run_id_and_time() -> None:
     url = rewrite_dashboard_handoff_url(
-        "/d/bioetl-run-explorer-v1/run-explorer?var-pipeline=$pipeline"
+        "/d/bioetl-run-explorer-v1/1-run-explorer?var-pipeline=$pipeline"
     )
     assert "var-run_id=$run_id" in url
     assert preserves_time_window(url)
@@ -141,18 +141,44 @@ def test_action_normalization_preserves_rank_query_and_visible_column() -> None:
     )
 
 
+_LIVE_TITLE_SLUGS = (
+    ("Run Explorer", "run-explorer"),
+    ("Replay Readiness", "replay-readiness"),
+    ("Run Overview", "run-overview"),
+    ("Data Quality", "data-quality"),
+    ("6. Incident Workspace", "6-incident-workspace"),
+)
+
+
 @pytest.mark.parametrize(
-    "uid, slug",
+    ("uid", "slug"),
     [
-        ("bioetl-run-explorer-v1", "run-explorer"),
-        ("bioetl-control-plane-v1", "1-trust"),
-        ("bioetl-overview-v2", "2-overview"),
-        ("bioetl-dq-v2", "5-data-quality"),
-        ("bioetl-incident-v1", "6-incident-workspace"),
+        ("bioetl-run-explorer-v1", "1-run-explorer"),
+        ("bioetl-control-plane-v1", "2-replay-readiness"),
+        ("bioetl-overview-v2", "3-run-overview"),
+        ("bioetl-dq-v2", "4-data-quality"),
+        ("bioetl-incident-v1", "5-incident-workspace"),
+    ],
+    ids=[
+        "bioetl-run-explorer-v1-run-explorer",
+        "bioetl-control-plane-v1-1-trust",
+        "bioetl-overview-v2-2-overview",
+        "bioetl-dq-v2-5-data-quality",
+        "bioetl-incident-v1-6-incident-workspace",
     ],
 )
 def test_handoff_uses_canonical_numbered_slug(uid: str, slug: str) -> None:
+    from scripts.ops.observability.grafana.dashboard_context_links import (
+        DASHBOARD_TITLES,
+        grafana_dashboard_slug,
+    )
+
     assert build_handoff_url(uid).startswith(f"/d/{uid}/{slug}?")
+    assert slug == grafana_dashboard_slug(DASHBOARD_TITLES[uid])
+    # Live Grafana /api/search on 2026-11-05. The same function produces the
+    # numbered slugs above from the five shipped titles.
+    for title, live_slug in _LIVE_TITLE_SLUGS:
+        assert grafana_dashboard_slug(title) == live_slug
 
 
 def test_late_links_are_finalized_without_rewriting_row_context() -> None:
@@ -205,7 +231,7 @@ def test_retired_provider_route_opens_local_saved_evidence_without_foreign_selec
             "stage": "silver",
         },
     )
-    assert url.startswith("/d/bioetl-overview-v2/2-overview?")
+    assert url.startswith("/d/bioetl-overview-v2/3-run-overview?")
     assert "&viewPanel=9480&" in url
     for key in (
         "var-provider=",
@@ -230,7 +256,7 @@ def test_finalizing_serialized_context_tokens_is_idempotent():
             {
                 "links": [
                     {
-                        "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                        "url": "/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
                         "includeVars": True,
                     }
                 ]

@@ -88,5 +88,6 @@ def build_pipeline_runner(
         required_profile=control_plane_setup.required_profile,
         run_ledger_service=control_plane_setup.run_ledger_service,
         launch_context=control_plane_setup.ctx,
+        settings=control_plane_setup.inputs.settings,
     )
     return runner

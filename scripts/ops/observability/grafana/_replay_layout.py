@@ -128,7 +128,7 @@ def apply_replay_layout(payload: dict) -> None:
     trust["fieldConfig"]["defaults"]["links"] = [
         {
             "title": "Open Run Explorer",
-            "url": "/d/bioetl-run-explorer-v1/run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+            "url": "/d/bioetl-run-explorer-v1/1-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
             "includeVars": False,
             "targetBlank": False,
         }

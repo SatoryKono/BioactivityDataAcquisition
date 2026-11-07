@@ -36,7 +36,7 @@ def explain_incident(panels: dict[int, dict], override) -> None:
         '<div style="font-size:16px;line-height:1.2">Rule triggered; cause not confirmed. '
         "Read the ranked suspect first. Fleet blockers and time-range charts are "
         "in Pipeline fleet and range on this page. PENDING has not fired. "
-        '<a href="/d/bioetl-incident-v1/6-incident-workspace?viewPanel=22011&from=${__from}&to=${__to}">'
+        '<a href="/d/bioetl-incident-v1/5-incident-workspace?viewPanel=22011&from=${__from}&to=${__to}">'
         "Stage lag/backlog measurements</a>.</div>"
     )
     for panel_id, description in (
@@ -134,7 +134,7 @@ def _explain_ranked_suspects(panels: dict[int, dict], override) -> None:
             panel["links"] = [
                 {
                     "title": "Show all rows and total (summary: up to 2)",
-                    "url": "/d/bioetl-incident-v1/6-incident-workspace?viewPanel=22010&from=${__from}&to=${__to}",
+                    "url": "/d/bioetl-incident-v1/5-incident-workspace?viewPanel=22010&from=${__from}&to=${__to}",
                     "targetBlank": False,
                     "includeVars": False,
                 }

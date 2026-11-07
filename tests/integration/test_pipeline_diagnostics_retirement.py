@@ -34,7 +34,7 @@ def test_legacy_handoff_preserves_run_and_time_without_stage_scope():
     retire_runtime_links(link)
     assert link == {
         "title": "Open Run Overview",
-        "url": "/d/bioetl-overview-v2/2-overview?var-workflow=w"
+        "url": "/d/bioetl-overview-v2/3-run-overview?var-workflow=w"
         "&var-pipeline=p&var-run_type=backfill&var-run_id=exact-run"
         "&from=100&to=200",
     }
@@ -61,7 +61,7 @@ def test_provider_handoff_preserves_run_and_time_without_retired_scope(separator
     retire_runtime_links(link)
     assert link == {
         "title": "Open Provider Evidence",
-        "url": "/d/bioetl-overview-v2/2-overview?var-pipeline=chembl_assay"
+        "url": "/d/bioetl-overview-v2/3-run-overview?var-pipeline=chembl_assay"
         + separator
         + "var-run_id=exact-run"
         + separator

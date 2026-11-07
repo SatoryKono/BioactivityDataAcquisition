@@ -217,13 +217,13 @@ def _fix_incident_2542(panel: dict[str, Any]) -> None:
     options["content"] = (
         '<div style="font-size:16px;line-height:1.25;padding:0;white-space:normal;'
         'overflow-wrap:anywhere">Cross-domain action: inspect dependencies in '
-        f'<a href="/d/bioetl-overview-v2/2-overview?${{workflow:queryparam}}&amp;'
+        f'<a href="/d/bioetl-overview-v2/3-run-overview?${{workflow:queryparam}}&amp;'
         f"{_CONTEXT_QUERYPARAMS}"
         '&amp;${__url_time_range}"><b>Run Overview</b></a>, rejects in '
-        f'<a href="/d/bioetl-dq-v2/5-data-quality?${{workflow:queryparam}}&amp;'
+        f'<a href="/d/bioetl-dq-v2/4-data-quality?${{workflow:queryparam}}&amp;'
         f"{_CONTEXT_QUERYPARAMS}"
         '&amp;${__url_time_range}"><b>Data Quality</b></a>, replay in '
-        f'<a href="/d/bioetl-control-plane-v1/1-trust?${{workflow:queryparam}}&amp;'
+        f'<a href="/d/bioetl-control-plane-v1/2-replay-readiness?${{workflow:queryparam}}&amp;'
         f"{_CONTEXT_QUERYPARAMS}"
         '&amp;${__url_time_range}"><b>Replay Readiness</b></a>.</div>'
     )

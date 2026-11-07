@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-11-02'
+  Last verified: '2026-11-06'
 
 ______________________________________________________________________
 
@@ -28,13 +28,13 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `main`
-- Source commit: `pending`
-- Source run id: `pending`
-- Source event: `push`
-- Source run URL: `pending`
-- Source tree sha256: `0b58ba85e215efb91b5d988816b3399b67a6530da2f24bf95a760bd2287ab571`
+- Source commit: `facb0b5673c7cec55b6f4efb230f531618e9b56e`
+- Source run id: `42263682929`
+- Source event: `workflow_dispatch`
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/42263682929`
+- Source tree sha256: `a3ef9e55954d84a97ea94d4e9b96d2ca400a15713cd83c60eac4534f09d0ff5f`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-11-02T06:59:46.567039+00:00`
+- Refreshed at (UTC): `2026-11-06T17:54:37.543230+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -43,10 +43,8 @@ trend evidence only.
   `.github/workflows/tests.yml`, and the live JUnit producers
   `scripts/engineering/ci/junit_duration_summary.py` and
   `scripts/engineering/dev/pytest_junit_subtests.py`.
-- Top-level `source_branch`, `source_commit`, `source_event`,
-  `source_run_id`, `source_run_url`, and `source_tree_sha256` retain the
-  captured run identity. `measurement_provenance.head` is optional local
-  capture detail and may be absent from CI-backed snapshots.
+- `measurement_provenance.head` and `test_tree_sha256` retain the captured
+  run identity when the current audited test tree advances later.
 - Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)
   and rejects future/stale `refreshed_at_utc` values.
 - `source_commit` must remain an ancestor of HEAD or have a reviewed squash
@@ -62,15 +60,6 @@ trend evidence only.
   <original-worktree> --local-manifest <manifest.json> --pull-request <merged-PR>`.
   The generator validates the complete 17-shard capture and reads the merged
   PR mapping before writing the bridge. Keep the original capture available.
-- For a real Nightly CI capture, promote its successful coverage/duration
-  artifacts, then run `python -m scripts.engineering.ci.test_telemetry_provenance
-  --ci-run-id <actual-run-id> --pull-request <PR>` on its published candidate.
-  The writer checks run identity, both producer jobs and unchanged TEST_INPUTS.
-  It verifies original artifact ZIP identity/size/SHA256 and reconstructs
-  expected metrics before writing; edited YAML cannot issue a matching receipt.
-  It writes telemetry and independent QM-08 source-publication receipts.
-  A pending receipt contains no future merge SHA; actual merge/tree/ancestry
-  are resolved read-only after squash. This does not upgrade capture trust.
 - For a reviewed local coverage capture, run
   `python -m scripts.engineering.ci.update_test_telemetry_baseline
   --rebind-current-tree`, then the coupled `refresh-ci-drift-families`
@@ -83,11 +72,11 @@ trend evidence only.
 - Reviewed snapshots retain `local_single_host` trust; they are not signed
   vendor attestations or CI execution receipts. Exact `source_commit == HEAD`
   remains opt-in via `BIOETL_REQUIRE_TELEMETRY_SOURCE_COMMIT_EQUALS_HEAD=1`.
-- GitHub evidence from a non-main branch requires `pull_request` or a
-  manually dispatched Nightly run. `workflow_dispatch` is also supported
-  for a Nightly run on `main`; the run URL and id remain auditable.
-- Use `workflow_dispatch` for a manually started `Nightly` run on `main`
-  or a PR branch. Start it with `gh workflow run nightly.yml --ref <branch>`,
+- GitHub evidence from a non-main branch requires `pull_request`;
+  a manually dispatched Nightly run may instead use `workflow_dispatch`.
+  Its run URL and id remain independently auditable.
+- Use `workflow_dispatch` only for a manually started `Nightly` run on the
+  PR branch. Start it with `gh workflow run nightly.yml --ref <branch>`,
   then download both source artifacts from that exact run:
   `gh run download <run-id> --name coverage-report --dir reports` and
   `gh run download <run-id> --name test-duration-telemetry
@@ -107,18 +96,18 @@ trend evidence only.
   --slowest-json reports/test-telemetry/slowest-tests.json
   --source-branch <branch> --source-commit <sha>
   --source-run-id <run-id> --source-event <event>
-  --source-run-url <url>`. For `workflow_dispatch`, use the exact source
-  identity from the manually started Nightly workflow described above.
+  --source-run-url <url>`. Use `workflow_dispatch` only for the
+  manually started Nightly workflow described above.
 
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `pending`
-- Threshold satisfied: `None`
+- Actual coverage: `99.50%`
+- Threshold satisfied: `True`
 
 ## Duration Telemetry
 
-- Total executed test cases: `62803`
+- Total executed test cases: `63747`
 - Executed means observed non-skipped JUnit testcase records, not
   collection count or distinct logical tests. Error records can describe
   setup or collection failures rather than a test body run.
@@ -130,31 +119,31 @@ trend evidence only.
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | `32.194` | `tests.unit.scripts.engineering.ci.test_pr_lane_results::test_shadow_compare_keeps_package_discovery_contract_narrow` | `junit-unit-scripts-tooling.other.xml` |
-| 2 | `11.266` | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `junit.integration.xml` |
-| 3 | `10.968` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `junit-repo-backed-unit.ops.xml` |
-| 4 | `10.881` | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `junit.integration.xml` |
-| 5 | `10.651` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_source_fields` | `junit.integration.xml` |
-| 6 | `10.5` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_happy_path` | `junit.integration.xml` |
-| 7 | `10.431` | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline::test_chembl_compound_record_happy_path` | `junit.integration.xml` |
-| 8 | `10.402` | `tests.performance.test_measure_merger_input::test_measurement_harness_smoke` | `junit-serial-coverage.xml` |
-| 9 | `10.257` | `tests.unit.scripts.qa.test_check_quality_exemptions::test_check_quality_exemptions_passes_current_zero_budget_registry` | `junit-unit-scripts-tooling.other.xml` |
-| 10 | `9.84` | `tests.unit.infrastructure.test_issue_10469_stream_a_infra_thirteen.TestExemptionsDebtReductionAndFormatter::test_exemptions_policy_outside_src_and_required_registry_shapes` | `junit.unit-infrastructure.xml` |
+| 1 | `33.554` | `tests.unit.scripts.engineering.ci.test_pr_lane_results::test_shadow_compare_keeps_package_discovery_contract_narrow` | `junit-unit-scripts-tooling.other.xml` |
+| 2 | `19.844` | `tests.unit.scripts.engineering.ci.test_generated_artifact_selection::test_real_pytest_partition_and_daily_missing_node_fail_closed` | `junit-unit-scripts-tooling.other.xml` |
+| 3 | `12.299` | `tests.performance.test_measure_merger_input::test_measurement_harness_smoke` | `junit-serial-coverage.xml` |
+| 4 | `10.918` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `junit-repo-backed-unit.ops.xml` |
+| 5 | `10.906` | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `junit.integration.xml` |
+| 6 | `10.895` | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `junit.integration.xml` |
+| 7 | `10.607` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_source_fields` | `junit.integration.xml` |
+| 8 | `10.476` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_happy_path` | `junit.integration.xml` |
+| 9 | `10.425` | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline::test_chembl_compound_record_happy_path` | `junit.integration.xml` |
+| 10 | `10.25` | `tests.unit.scripts.qa.test_check_quality_exemptions::test_check_quality_exemptions_passes_current_zero_budget_registry` | `junit-unit-scripts-tooling.other.xml` |
 
 ### Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.unit.scripts.engineering.ci.test_pr_lane_results` | 1 | 32.194 | 32.194 |
-| 2 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 21.151 | 10.651 |
-| 3 | `tests.unit.infrastructure.test_issue_10469_stream_a_infra_thirteen.TestExemptionsDebtReductionAndFormatter` | 2 | 15.483 | 9.84 |
-| 4 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 11.266 | 11.266 |
-| 5 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 1 | 10.968 | 10.968 |
-| 6 | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline` | 1 | 10.881 | 10.881 |
-| 7 | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline` | 1 | 10.431 | 10.431 |
-| 8 | `tests.performance.test_measure_merger_input` | 1 | 10.402 | 10.402 |
-| 9 | `tests.unit.scripts.qa.test_check_quality_exemptions` | 1 | 10.257 | 10.257 |
-| 10 | `tests.security.test_security.TestInputValidation` | 1 | 9.665 | 9.665 |
+| 1 | `tests.unit.scripts.engineering.ci.test_pr_lane_results` | 2 | 40.068 | 33.554 |
+| 2 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 21.083 | 10.607 |
+| 3 | `tests.unit.scripts.engineering.ci.test_generated_artifact_selection` | 1 | 19.844 | 19.844 |
+| 4 | `tests.unit.composition.bootstrap.runtime.test_composite_contract_evidence` | 2 | 13.703 | 7.183 |
+| 5 | `tests.performance.test_measure_merger_input` | 1 | 12.299 | 12.299 |
+| 6 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 1 | 10.918 | 10.918 |
+| 7 | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline` | 1 | 10.906 | 10.906 |
+| 8 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 10.895 | 10.895 |
+| 9 | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline` | 1 | 10.425 | 10.425 |
+| 10 | `tests.unit.scripts.qa.test_check_quality_exemptions` | 1 | 10.25 | 10.25 |
 
 ## Refresh Procedure
 

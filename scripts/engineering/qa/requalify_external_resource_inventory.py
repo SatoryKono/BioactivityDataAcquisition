@@ -164,6 +164,7 @@ def _relocate(
     new: Snapshot,
     replacements: dict[str, str],
     segment_replacements: dict[str, str],
+    reviewed_line: int | None = None,
 ) -> None:
     path, line = ref["file"], ref["line"]
     old_tree, new_tree = ast.parse(old.sources[path]), ast.parse(new.sources[path])
@@ -179,6 +180,8 @@ def _relocate(
             scope,
             segment_replacements,
         )
+    if reviewed_line is not None:
+        candidates = [line for line in candidates if line == reviewed_line]
     if len(candidates) != 1:
         raise ValueError(
             f"Reference relocation needs an explicit unambiguous review: {path}:{line}"
@@ -247,6 +250,7 @@ def _validate_review_schema(review: dict[str, Any]) -> None:
         "source_reviews",
         "expression_updates",
         "segment_updates",
+        "line_updates",
         "reference_moves",
         "exclusion_moves",
         "resource_updates",
@@ -410,6 +414,9 @@ def build_requalification(root: Path, review: dict[str, Any]) -> dict[str, Any]:
                 new,
                 review.get("expression_updates", {}).get(ref["file"], {}),
                 review.get("segment_updates", {}).get(ref["file"], {}),
+                review.get("line_updates", {})
+                .get(ref["file"], {})
+                .get(str(ref["line"])),
             )
     _apply_resource_reviews(payload, review, new)
     for ref in inventory._references(payload):
