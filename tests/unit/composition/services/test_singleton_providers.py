@@ -6,7 +6,9 @@ from bioetl.composition import _services
 
 
 @pytest.mark.unit
-def test_metrics_service_provider_returns_correct_type_and_does_not_reuse_instance() -> None:
+def test_metrics_service_provider_returns_correct_type_and_does_not_reuse_instance() -> (
+    None
+):
     first_instance = _services.get_metrics_service()
     second_instance = _services.get_metrics_service()
 
@@ -18,7 +20,9 @@ def test_metrics_service_provider_returns_correct_type_and_does_not_reuse_instan
 
 
 @pytest.mark.unit
-def test_checkpoint_service_provider_returns_correct_type_and_does_not_reuse_instance() -> None:
+def test_checkpoint_service_provider_returns_correct_type_and_does_not_reuse_instance() -> (
+    None
+):
     first_instance = _services.get_checkpoint_service()
     second_instance = _services.get_checkpoint_service()
 
@@ -27,7 +31,9 @@ def test_checkpoint_service_provider_returns_correct_type_and_does_not_reuse_ins
 
 
 @pytest.mark.unit
-def test_audit_service_provider_returns_correct_type_and_does_not_reuse_instance() -> None:
+def test_audit_service_provider_returns_correct_type_and_does_not_reuse_instance() -> (
+    None
+):
     first_instance = _services.get_audit_service()
     second_instance = _services.get_audit_service()
 
