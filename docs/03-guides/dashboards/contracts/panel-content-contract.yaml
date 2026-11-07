@@ -365,7 +365,7 @@ dashboards:
         render_profiles: *id001
       '9402':
         title: Inspect Run Identity
-        role: forensic_table
+        role: guidance
         tier: 3
         scope: selected_run
         scope_class: selected_run
@@ -475,7 +475,7 @@ dashboards:
         render_profiles: *id003
       '9452':
         title: Inspect Selected Run Identity
-        role: forensic_table
+        role: guidance
         tier: 3
         scope: selected_run
         scope_class: selected_run
@@ -2635,7 +2635,7 @@ dashboards:
         render_profiles: *id003
       '9452':
         title: Inspect Selected Run Identity
-        role: forensic_table
+        role: guidance
         tier: 3
         scope: selected_run
         scope_class: selected_run
@@ -2658,7 +2658,7 @@ dashboards:
         render_profiles: *id003
       '9460':
         title: Inspect Selected Run Stages
-        role: forensic_table
+        role: guidance
         tier: 3
         scope: selected_run
         scope_class: selected_run

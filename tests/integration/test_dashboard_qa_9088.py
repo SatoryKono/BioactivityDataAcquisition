@@ -105,6 +105,29 @@ def test_data_bearing_selected_run_uses_ops_http() -> None:
     assert not offenders, "selected_run must be ops_http:\n" + "\n".join(offenders)
 
 
+@pytest.mark.parametrize(
+    ("source", "panel_id", "target", "target_id"),
+    [
+        ("bioetl-dq-v2", 9402, "bioetl-overview-v2", 9300),
+        ("bioetl-dq-v2", 9452, "bioetl-overview-v2", 9300),
+        ("bioetl-incident-v1", 9452, "bioetl-overview-v2", 9300),
+        ("bioetl-incident-v1", 9460, "bioetl-dq-v2", 9460),
+    ],
+)
+def test_selected_run_guidance_links_to_canonical_evidence(
+    source: str, panel_id: int, target: str, target_id: int
+) -> None:
+    dashboard = load_dashboard(DASHBOARD_DIR / f"{source}.json")
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == panel_id)
+    assert panel["type"] == "text"
+    assert not panel.get("targets")
+    content = panel["options"]["content"]
+    assert f"/d/{target}/" in content
+    assert f"viewPanel={target_id}" in content
+    assert "${run_id:queryparam}" in content
+    assert "${__url_time_range}" in content
+
+
 def test_empty_state_classes_are_declared_and_visible_copy_differs() -> None:
     contract = yaml.safe_load(CONTRACT_PATH.read_text(encoding="utf-8"))
     records, _ = content._contract_panel_records(contract)
