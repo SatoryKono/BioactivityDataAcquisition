@@ -44,8 +44,8 @@ def test_adr_registry_mirrors_track_latest_decision_index() -> None:
 
     # The registry includes all ADRs (including proposed), but the navigator
     # registry only shows accepted ADRs in the detailed sections
-    assert expected_total == 62
-    assert latest_adr == "062"
+    assert expected_total == 63
+    assert latest_adr == "063"
     assert registry_payload["total_adrs"] == expected_total
     assert len(registry_payload["adrs"]) == expected_total
     assert latest_adr in registry_numbers
