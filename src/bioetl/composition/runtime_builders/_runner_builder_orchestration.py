@@ -34,7 +34,6 @@ if TYPE_CHECKING:
         ExecutionObservabilityPort,
         SettingsPort,
     )
-    from bioetl.infrastructure.config.settings_api import Settings
 
 
 @dataclass(frozen=True, slots=True)
@@ -112,7 +111,6 @@ def attach_runner_control_plane_collaborators(
     required_profile: str,
     run_ledger_service: RunLedgerService | None,
     launch_context: PipelineRunContext | None = None,
-    settings: Settings | None = None,
 ) -> None:
     """Attach optional control-plane collaborators and validate closure."""
     if run_ledger_service is None:
@@ -128,7 +126,6 @@ def attach_runner_control_plane_collaborators(
         runner,
         run_ledger_service,
         launch_context=launch_context,
-        settings=settings,
     )
     _validate_artifact_recorder_attachment(
         required_profile=required_profile,

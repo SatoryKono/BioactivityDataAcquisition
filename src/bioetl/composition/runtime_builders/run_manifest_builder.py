@@ -39,11 +39,6 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
 
-from bioetl.composition.runtime_builders._live_manifest_publication import (
-    bind_live_root_successor_callback,
-    publish_live_root_without_failing_the_run,
-)
-
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.manifest.service import (
         RunManifestCreateSpec,
@@ -140,16 +135,6 @@ def _publish_manifest_and_refs(
     )
     register_pipeline_manifest_location_soft(
         manifest=manifest, settings=inputs.settings
-    )
-    publish_live_root_without_failing_the_run(
-        manifest=manifest,
-        settings=inputs.settings,
-        source_base=manifest_store.base_path,
-    )
-    bind_live_root_successor_callback(
-        ledger_service,
-        settings=inputs.settings,
-        source_base=manifest_store.base_path,
     )
     if not require_before_persist:
         _require_cached_bronze_snapshots(

@@ -215,7 +215,6 @@ class CompositeConfig:
     dq: CompositeDQConfig = field(default_factory=CompositeDQConfig)
     execution: ExecutionConfig = field(default_factory=ExecutionConfig)
     lineage: LineageConfig = field(default_factory=LineageConfig)
-    expected_normalization_profile_hash: str | None = field(default=None, kw_only=True)
     cross_validation: CrossValidationConfig = field(
         default_factory=CrossValidationConfig
     )

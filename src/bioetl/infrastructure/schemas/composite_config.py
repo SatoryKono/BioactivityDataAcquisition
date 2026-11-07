@@ -145,9 +145,6 @@ class CompositeConfigSchema(BaseModel):
     version: str = Field(
         ..., min_length=1, description="Configuration version (semver)"
     )
-    expected_normalization_profile_hash: str | None = Field(
-        default=None, description="Expected normalization profile hash."
-    )
     normalized_anchor_policy: NormalizedAnchorPolicySchema | None = Field(
         default=None,
         description=(
@@ -217,7 +214,6 @@ class CompositeConfigSchema(BaseModel):
             execution=self.execution.to_domain(),
             lineage=self.lineage.to_domain(),
             cross_validation=self.cross_validation.to_domain(),
-            expected_normalization_profile_hash=self.expected_normalization_profile_hash,
         )
 
 

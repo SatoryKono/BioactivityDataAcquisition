@@ -93,7 +93,7 @@ ______________________________________________________________________
 
 ## 2. CI/CD Workflows
 
-BioETL uses **58 GitHub Actions workflows** (including reusable helper workflows).
+BioETL uses **55 GitHub Actions workflows** (including reusable helper workflows).
 That number is the tracked `.github/workflows/*.yml` inventory, not GitHub's
 `GET /actions/workflows` `total_count` (live GET `2026-09-17`: **79** objects =
 50 tracked files + hosted `dynamic/**` workflows + GitHub-only orphan/residual
@@ -207,11 +207,11 @@ weaken gates, raise tech-debt budgets, or force Grafana npm majors
 | `sha_pinning_required` | `true` | Workflow SHA-pin SSOT: [`check_github_actions_runtime_policy.py`](../../../scripts/engineering/repo/check_github_actions_runtime_policy.py) `ALLOWED_USES` |
 | `allowed_actions` | `selected` | `github_owned_allowed: true`, `verified_allowed: false`. Third-party patterns are `owner/repo@*` plus nested `owner/repo/path@*` from `ALLOWED_USES` (GitHub `*` does not cross `/`). Live selected vs allowlist is [`github_settings_review.py`](../../../scripts/engineering/repo/github_settings_review.py) `GH-ACTIONS-003`; the SHA-pin checker does not call the Actions allowlist API. |
 | Secret scanning | enabled | Push protection enabled |
-| `secret_scanning_validity_checks` | desired: enabled; observed: disabled (GET 2026-11-06) | Partner-pattern validity. GitHub documents validity checks as GitHub Team/Enterprise **Secret Protection** only. This repo is user-owned public: `PATCH /repos/{owner}/{repo}` returns HTTP 200 and GET stays `disabled` (re-verified `2026-09-10`). Do not git-claim `enabled`. Standing exception #10310. `GH-SECRET-002.known_issue: 10310`. |
+| `secret_scanning_validity_checks` | enabled | Partner-pattern validity. GitHub documents validity checks as GitHub Team/Enterprise **Secret Protection** only. This repo is user-owned public: `PATCH /repos/{owner}/{repo}` returns HTTP 200 and GET stays `disabled` (re-verified `2026-09-10`). Do not git-claim `enabled`. Standing exception #10310. `GH-SECRET-002.known_issue: 10310`. |
 | `secret_scanning_non_provider_patterns` | disabled | Intentionally off (noisy). Do not enable without a dated issue. |
 | Unused environments | absent | `staging` MUST NOT exist. `copilot` is an **agent-runtime** environment (`GH-ENV-003`, #10371), not unused. Live GET `2026-09-11`: `copilot` present with required reviewers + custom branch policy `copilot/**`; `staging` absent. Publish environments stay `ghcr-publish`, `observability-render-host`, `pypi`, `testpypi`. `GH-ENV-002.known_issue: null`. |
 | Agent-runtime environment | protected, non-publish | `copilot`: reviewer `@SatoryKono`, custom refs `copilot/**` only, zero environment secrets, no tracked workflow `environment: copilot`. Must not overlap `protected_environments`. `#10311` DELETE is superseded. |
-| `allow_auto_merge` | `false` (GET 2026-11-06) | Auto-merge cannot bypass a ruleset while its enforcement is `active`. The 2026-10-16 read found main ruleset enforcement `disabled`, so this row does not claim a currently enforced CircleCI or GitHub Actions required check. See §3. |
+| `allow_auto_merge` | `true` | Auto-merge cannot bypass a ruleset while its enforcement is `active`. The 2026-10-16 read found main ruleset enforcement `disabled`, so this row does not claim a currently enforced CircleCI or GitHub Actions required check. See §3. |
 
 Controls live in [`github_governance_policy.json`](../../../configs/quality/github_governance_policy.json): `GH-SECRET-002`, `GH-SECRET-003`, `GH-ACTIONS-002`, `GH-ACTIONS-003`, `GH-ENV-002`, `GH-ENV-003`.
 
@@ -272,49 +272,23 @@ ______________________________________________________________________
 
 ## 3. Status Checks and Ruleset Contract
 
-### Current ruleset readback — 2026-11-06
-
-Post-change snapshot: `reports/governance/github-settings-A1-post-change-20261106.json`. The unchanged pre-change receipt is `reports/governance/github-settings-A1-readback-20261106.json`. It is dated evidence, not a live test.
+### Current ruleset readback — 2026-10-16 (#12009)
 
 This subsection is the current repo-side description. It is a read-only GET,
-not a server change. Four facts stay separate:
-
-1. **Enforcement.** GET `/rulesets/13643213` at `2026-11-06T16:45:56.783001Z` returned `active`, targeting `refs/heads/main`, with no bypass actors. GET `/rulesets/26429996` returned `disabled` for `refs/tags/v*`. These are settings observations, separate from source commit identity and merge acceptance.
-2. **Stored contexts, including while disabled.** Since the 2026-11-02 settings-audit phase 0, `13643213` stores the GitHub Actions context `pr-gate-complete`; before that read it stored `ci/circleci: pr-gate-complete`, and the deleted `15730586` had stored `ci/circleci: pr-gate-complete` and `ci/circleci: root-hygiene`. The current active rule requires `pr-gate-complete`; the earlier disabled snapshot remains historical below.
-3. **Target GitHub Actions context.** Catalog `deployment.required_context` is `pr-gate-complete`, the job name in `.github/workflows/pr-required.yml`. Since 2026-11-02 that name is the context stored on ruleset `13643213`; the 2026-10-16 read had not shown configured GitHub Actions ruleset enforcement.
-4. **What the date covers.** <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` stays `2026-10-09`. `enforcement_verified_date_is_live_protection_evidence` is false: that stamp is not proof of active merge protection. The schema has no stored-context snapshot. The 2026-10-16 read verified enforcement mode and stored contexts only, so the date was not moved to 2026-10-16.
-
-<!-- policy-anchor:deployment-provider --> `deployment.provider` is `github_actions`. <!-- policy-anchor:ruleset-enforcement-mode --> Ruleset `13643213` is `enforcement: active` (GET 2026-11-06); rulesets `15730586` and `24517966` were deleted on 2026-11-02 (settings-audit phase 0). <!-- policy-anchor:stored-ruleset-contexts --> The active rule requires `pr-gate-complete` (GET 2026-11-06); the rule binds this context to GitHub Actions App 15368 (integration_id=15368). <!-- policy-anchor:target-gha-context --> Target job `pr-gate-complete` is the context stored on ruleset `13643213` since 2026-11-02. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge; the active server rule requires it. An offline catalog match does not confirm live server rulesets. Positive/negative merge acceptance was not run in this audit.
-
-Classic branch protection `GET /repos/SatoryKono/BioactivityDataAcquisition/branches/main/protection` returned HTTP 404 `Branch not protected` (`Date: Fri, 16 Oct 2026 07:38:08 GMT`). That is an answered read, not an unknown access failure. Org-parent rulesets beyond `includes_parents=true` on this list were not returned.
-
-`deployment.provider` and `policy.enforcement_provider` remain `github_actions` because they name the runnable coordinator in this catalog. Provider names alone do not establish server enforcement. `policy.github_ruleset_13643213_enforcement` is `active`, matching the 2026-11-06 GET. `policy.github_ruleset_15730586_enforcement` is now `deleted`, matching the 2026-11-02 phase-0 deletion of that ruleset. `24517966` is outside those two catalog keys, was also `disabled` on that read, did not target `main`, and was deleted in the same phase-0 step.
-
-Post-change GETs also confirm `approval_policy=all_external_contributors`
-(2026-11-06T16:45:58.684529Z), `allow_update_branch=true` and
-`allow_auto_merge=false` (2026-11-06T16:45:59.654943Z). B2 remains disabled;
-no tag rule or bypass actor was added. These settings were read back; their
-behavioral acceptance remains NOT_RUN. The first cached B4 GET showed the
-previous value; a cache-bypassing re-read confirmed the new value without a
-second write.
-
-### Historical ruleset readback — 2026-10-16 (#12009)
-
-This subsection preserves the earlier repo-side description. It is a read-only GET,
 not a server change. Four facts stay separate:
 
 1. **Enforcement.** `GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets?per_page=100&includes_parents=true` returned one page (`Link` absent, HTTP 200, `Date: Fri, 16 Oct 2026 07:38:05 GMT`). The page listed three repository rulesets, all `enforcement: disabled`: `13643213` (`main`), `15730586` (`root-hygiene-required-check`), and `24517966` (`ci-11928-isolated-negative-acceptance`). Only `13643213` and `15730586` include `refs/heads/main`. `24517966` includes `refs/heads/codex/ci-11928-negative-base-20261005` and excludes `refs/heads/main`, so it does not apply to `main`. `GET /repos/SatoryKono/BioactivityDataAcquisition/rules/branches/main` returned HTTP 200 and an empty rule list.
 2. **Stored contexts, including while disabled.** Since the 2026-11-02 settings-audit phase 0, `13643213` stores the GitHub Actions context `pr-gate-complete`; before that read it stored `ci/circleci: pr-gate-complete`, and the deleted `15730586` had stored `ci/circleci: pr-gate-complete` and `ci/circleci: root-hygiene`. A stored context on a disabled ruleset is not active merge protection.
 3. **Target GitHub Actions context.** Catalog `deployment.required_context` is `pr-gate-complete`, the job name in `.github/workflows/pr-required.yml`. Since 2026-11-02 that name is the context stored on ruleset `13643213`; the 2026-10-16 read had not shown configured GitHub Actions ruleset enforcement.
-4. **What the date covers.** Catalog `enforcement_verified_date` stays `2026-10-09`. `enforcement_verified_date_is_live_protection_evidence` is false: that stamp is not proof of active merge protection. The schema has no stored-context snapshot. The 2026-10-16 read verified enforcement mode and stored contexts only, so the date was not moved to 2026-10-16.
+4. **What the date covers.** <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` stays `2026-10-09`. `enforcement_verified_date_is_live_protection_evidence` is false: that stamp is not proof of active merge protection. The schema has no stored-context snapshot. The 2026-10-16 read verified enforcement mode and stored contexts only, so the date was not moved to 2026-10-16.
 
-`deployment.provider` is `github_actions`. Ruleset `13643213` is `enforcement: disabled`; rulesets `15730586` and `24517966` were deleted on 2026-11-02 (settings-audit phase 0). Since 2026-11-02 it stores the GitHub Actions context `pr-gate-complete`, which is not active merge protection while the ruleset stays disabled. Target job `pr-gate-complete` is the context stored on ruleset `13643213` since 2026-11-02. A successful `pr-gate-complete` does not by itself block merge: classic branch protection returned HTTP 404 and the applicable rulesets are disabled. Matching `prose_claims` is an offline catalog check and does not confirm live server rulesets.
+<!-- policy-anchor:deployment-provider --> `deployment.provider` is `github_actions`. <!-- policy-anchor:ruleset-enforcement-mode --> Ruleset `13643213` is `enforcement: disabled`; rulesets `15730586` and `24517966` were deleted on 2026-11-02 (settings-audit phase 0). <!-- policy-anchor:stored-ruleset-contexts --> Since 2026-11-02 it stores the GitHub Actions context `pr-gate-complete`, which is not active merge protection while the ruleset stays disabled. <!-- policy-anchor:target-gha-context --> Target job `pr-gate-complete` is the context stored on ruleset `13643213` since 2026-11-02. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge: classic branch protection returned HTTP 404 and the applicable rulesets are disabled. Matching `prose_claims` is an offline catalog check and does not confirm live server rulesets.
 
 Classic branch protection `GET /repos/SatoryKono/BioactivityDataAcquisition/branches/main/protection` returned HTTP 404 `Branch not protected` (`Date: Fri, 16 Oct 2026 07:38:08 GMT`). That is an answered read, not an unknown access failure. Org-parent rulesets beyond `includes_parents=true` on this list were not returned.
 
 `deployment.provider` and `policy.enforcement_provider` remain `github_actions` because they name the runnable coordinator in this catalog. They do not mean the ruleset stores or enforces that provider. `policy.github_ruleset_13643213_enforcement` stays `disabled`, matching the enforcement field from this read. `policy.github_ruleset_15730586_enforcement` is now `deleted`, matching the 2026-11-02 phase-0 deletion of that ruleset. `24517966` is outside those two catalog keys, was also `disabled` on that read, did not target `main`, and was deleted in the same phase-0 step.
 
-### Hist### Historical CircleCI activation — #11928
+### Historical CircleCI activation — #11928
 
 As of 2026-10-05, a previous read recorded ruleset `main` (13643213) with stored context `ci/circleci: pr-gate-complete` and companion `root-hygiene-required-check` (15730586) with `ci/circleci: root-hygiene`, both then treated as active. The [GET receipt](../../../reports/governance/ruleset-11928-closeout-get-2026-10-05.json) is that historical record. It does not describe the 2026-10-16 enforcement mode. Main pipelines 218–220 and negative PR #11954 belong to that historical activation.
 
@@ -394,8 +368,8 @@ The following leaf checks remain required by policy whenever the canonical
 catalog classifies their changed paths as `required`. The always-materialized
 coordinator emits an explicit, SHA-bound `not_applicable` decision otherwise;
 raw leaf contexts MUST NOT be configured as unconditional repository required
-statuses. GET 2026-11-06 shows ruleset `13643213` as `enforcement: active`,
-requiring `pr-gate-complete`; no additional leaf context is proposed.
+statuses. Ruleset `13643213` is `enforcement: disabled` and does not currently
+require `pr-gate-complete`.
 
 | Check Name                 | Workflow              | Purpose                                                       |
 | -------------------------- | --------------------- | ------------------------------------------------------------- |
