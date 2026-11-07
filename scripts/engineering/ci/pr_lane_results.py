@@ -519,6 +519,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
+    "reports/observability/live-fixes-r6/LF1-06/checksums.txt": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/observability/live-fixes-r6/LF1-06/machine_readable_receipt.json": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/observability/live-fixes-r6/LF1-06/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/audit/comp-004-runtime/verification_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
