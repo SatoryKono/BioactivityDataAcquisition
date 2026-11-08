@@ -168,6 +168,7 @@ def test_non_uuid_token_does_not_raise_into_live_diagnostics() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.usefixtures("require_local_tcp")
 @pytest.mark.parametrize("missing_run_id", [_STAMP, _OTHER], ids=["stamp", "uuid"])
 async def test_not_found_payload_is_not_query_error(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path, missing_run_id: str
