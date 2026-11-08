@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "3d62240e17f2aec4da6b960f68b23d2f79f57e74",
+  "source_ref": "eea5cba9999c27f85d85ef134eb036edf06a9111",
+  "source_reviews": {
+    "src/bioetl/composition/runtime_builders/_cached_bronze_binding.py": "Moved existing context binding code; no resource is opened, transferred, or closed.",
+    "src/bioetl/composition/runtime_builders/_exact_replay_snapshot_evidence.py": "Moved existing immutable snapshot and ledger metadata validation. Pure path parsing and data validation do not allocate resources.",
+    "src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py": "Delegates context binding and metadata parsing; the existing resource acquisition and release contracts remain unchanged."
+  }
+}
