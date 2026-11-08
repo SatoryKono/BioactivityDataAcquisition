@@ -1,14 +1,16 @@
 # LF1-19 Processed Records DQ 9403 Audit Report
 
-**Date:** 2026-11-08T09:12:53Z
-**Base SHA:** 2540264745315b52f419c2c936603025d9f64754
+**Report updated (UTC):** 2026-11-08T19:22:28Z
+**Base SHA at report update:** 52cb6ea07ca5f2a4dbdaf3c34bf207539cef1e05
+**Retained audit (UTC):** 2026-11-08T09:18:52.015039Z
+**Retained audit source/deploy SHA:** NOT_VERIFIABLE
 **Execution Status:** BLOCKED (blocked_backend_unavailable)
 
 ## Context
 This report covers issue LF1-19 for evaluating the `Processed Records` table on `bioetl-dq-v2#9403` dashboard against its contract specifications based on live run data.
 
 ## Diagnostics
-Running the live panel audit failed with `blocked_backend_unavailable`. The BioETL Ops HTTP backend could not be reached via canonical health probes.
+The latest attempt reported `blocked_backend_unavailable` when probing the BioETL Ops HTTP backend. It has no separately captured audit artifacts. The retained audit.json and audit.log show the earlier blocked run, recorded at 2026-11-08T09:18:52.015039Z. The excerpt below is from those retained artifacts.
 
 ```text
 bioetl-dq-v2#9403 Processed Records: error/blocked_backend_unavailable
@@ -25,7 +27,7 @@ bioetl-dq-v2#9403 Inspect Processed Records: ok/blocked_backend_unavailable
    - **Reason:** Requires querying two exact UUID runs in live system.
 3. **Результат приложен как отчёт с exact source/deploy SHA, UTC, параметрами, expected/actual и ссылками на сохранённые доказательства.**
    - **Status:** BLOCKED
-   - **Reason:** Execution halted due to blocked HTTP connection. See `audit.json` and `audit.log`. No JSON patching or codebase modifications applied since root cause is an unavailable live environment rather than a verified layer defect.
+   - **Reason:** Execution halted due to blocked HTTP connection. The retained `audit.json` and `audit.log` document the earlier attempt. No JSON patching or codebase modifications applied since root cause is an unavailable live environment rather than a verified layer defect.
 
 ### Dependencies Status
 - LF1-07 (#12803): Dependent component - Not evaluated here.
