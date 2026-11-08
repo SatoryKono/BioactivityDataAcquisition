@@ -1,5 +1,7 @@
 """Attach cached Bronze inputs to an existing runner context."""
 
+from __future__ import annotations
+
 from dataclasses import is_dataclass, replace
 
 from bioetl.domain.context import CachedBronzeContext

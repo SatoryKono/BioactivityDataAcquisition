@@ -1,5 +1,7 @@
 """Validate and interpret immutable Bronze evidence for exact replay."""
 
+from __future__ import annotations
+
 from collections.abc import Mapping
 from pathlib import PurePosixPath
 
