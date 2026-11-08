@@ -133,6 +133,26 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "scripts/ops/observability/grafana/dashboard_context_links.py": (
+        "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+    ),
+    "reports/observability/live-fixes-r6/LF1-17/report.md": (
+        "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-13/checksums.txt",
+            "reports/observability/live-fixes-r6/LF1-13/machine_readable_receipt.json",
+            "reports/observability/live-fixes-r6/LF1-13/report.md",
+        ),
+        (
+            GRAFANA_SELECTOR_CONTRACT_TEST,
+            "tests/unit/interfaces/http/test_health_server_control_plane_scope_helpers.py",
+            "tests/unit/interfaces/http/test_run_id_resolver.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
     **dict.fromkeys(
         (
             ".codex/skills/py-audit-bot/references/wrapper-contract.md",
@@ -155,7 +175,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh",
             "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
             "scripts/ai/mcp/mcp_code_analyzer_wrapper.sh",
-            "scripts/ai/mcp/mcp_context7_wrapper.sh",
             "scripts/ai/mcp/mcp_deja_wrapper.sh",
             "scripts/ai/mcp/mcp_github_actions_wrapper.sh",
             "scripts/ai/mcp/support/token_validation.sh",
@@ -175,6 +194,24 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py",
             "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
         ),
+    ),
+    **dict.fromkeys(
+        (
+            "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
+            "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
+            "scripts/ai/mcp/mcp_context7_wrapper.ps1",
+            "scripts/ai/mcp/support/host_transport.mjs",
+            "scripts/ai/mcp/support/invoke_host_transport.ps1",
+            "scripts/ai/mcp/support/invoke_host_transport.sh",
+            "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
+        ),
+        ("tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",),
+    ),
+    "scripts/ai/mcp/mcp_context7_wrapper.sh": (
+        "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
+        "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",
+        "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py",
+        "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
     ),
     "scripts/ops/docker-setup.ps1": (
         "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
@@ -474,6 +511,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
     ),
     "reports/audit/hygiene-passport.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "docs/reports/dashboard-ux-checks/2026-11-07.md": (
+        "tests/integration/test_dashboard_ux_report_freshness.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "docs/reports/audit/N1_SHADOW_STATUS.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
     "src/bioetl/infrastructure/adapters/decorators/README.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
@@ -534,6 +575,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12786_composite_review.json",
             "configs/quality/external_resource_inventory_pr12782_lf07_review.json",
             "configs/quality/external_resource_inventory_pr12838_hygiene_review.json",
+            "configs/quality/external_resource_inventory_pr12848_http_proxy_review.json",
+            "configs/quality/external_resource_inventory_pr12889_chembl_review.json",
+            "configs/quality/external_resource_inventory_pr12892_replay_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -576,6 +620,42 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-11/contract-evidence.json",
+            "reports/observability/live-fixes-r6/LF1-11/manifest-show.txt",
+            "reports/observability/live-fixes-r6/LF1-11/manifest-validation.json",
+            "reports/observability/live-fixes-r6/LF1-11/manifest.json",
+            "reports/observability/live-fixes-r6/LF1-11/report.md",
+        ),
+        (
+            "tests/unit/interfaces/http/test_manifest_validation_catalog.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    "reports/observability/live-fixes-r6/LF1-02/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/observability/live-fixes-r6/LF1-14/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/observability/live-fixes-r6/LF1-03/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-16/bioetl-incident-v1.json",
+            "reports/observability/live-fixes-r6/LF1-16/report.json",
+            "reports/observability/live-fixes-r6/LF1-16/report.md",
+        ),
+        (
+            "tests/integration/test_dashboard_operator_readability.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-06/checksums.txt",
+            "reports/observability/live-fixes-r6/LF1-06/machine_readable_receipt.json",
+            "reports/observability/live-fixes-r6/LF1-06/report.md",
+        ),
+        (GRAFANA_SELECTOR_CONTRACT_TEST, *DOCUMENTATION_CLEANUP_INVENTORY_TESTS),
+    ),
+    "reports/observability/live-fixes-r6/LF1-15/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/observability/live-fixes-r6/LF1-04/checksums.txt": (
         GRAFANA_SELECTOR_CONTRACT_TEST,
         GRAFANA_VARIABLE_REFERENCE_TEST,
@@ -593,6 +673,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/observability/live-fixes-r6/LF1-04/queries.json": (
         GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/observability/live-fixes-r6/LF1-18/report.md": (
         GRAFANA_VARIABLE_REFERENCE_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),

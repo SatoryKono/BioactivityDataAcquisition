@@ -84,10 +84,12 @@ def test_ops_http_health_links_use_same_origin_grafana_proxy() -> None:
             if _FORBIDDEN_OPS_HTTP_BROWSER_HOST_RE.match(url):
                 forbidden.append(f"{dashboard_path.name}:{title!r} -> {url}")
 
-    assert len(health_links) == 3, (
-        "Shipped dashboards must expose exactly three Ops HTTP health CTAs; "
-        f"found {len(health_links)}"
-    )
+    assert sorted(dashboard for dashboard, _, _ in health_links) == [
+        "bioetl-control-plane-v1.json",
+        "bioetl-dq-v2.json",
+        "bioetl-incident-v1.json",
+        "bioetl-overview-v2.json",
+    ]
     assert not forbidden, (
         "Browser-side Ops HTTP health links must not target loopback, "
         "host.docker.internal, or container service DNS:\n" + "\n".join(forbidden)
