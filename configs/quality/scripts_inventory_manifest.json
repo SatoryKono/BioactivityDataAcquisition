@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-08T17:42:44.046840+00:00",
+  "generated_at": "2026-11-08T19:58:56.930832+00:00",
   "summary": {
-    "total_scripts": 715,
+    "total_scripts": 716,
     "status_counts": {
-      "active": 334,
+      "active": 335,
       "supporting": 379,
       "temporary_diagnostic": 2
     },
@@ -14,9 +14,9 @@
       "ci": 74,
       "docs": 291,
       "other": 16,
-      "scripts": 604,
+      "scripts": 605,
       "skills": 13,
-      "tests": 529
+      "tests": 530
     }
   },
   "scripts": [
@@ -4533,17 +4533,17 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
-          "line": 5,
+          "line": 22,
           "source_group": "scripts",
           "text": "# shellcheck source=./support/docker_cli_resolver.sh"
         },
         {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
-          "line": 6,
+          "line": 23,
           "source_group": "scripts",
           "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
         },
@@ -4586,11 +4586,56 @@
       ]
     },
     {
+      "path": "scripts/ai/mcp/support/host_transport.mjs",
+      "type": "mjs",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "& $mcpHostNode (Join-Path $PSScriptRoot \"support/host_transport.mjs\") --root $mcpHostRoot --server brave-search -- @args"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "if node \"${mcp_host_dir}/support/host_transport.mjs\" --root \"${mcp_host_root}\" --server brave-search -- \"$@\"; then"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_context7_wrapper.ps1",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "& $mcpHostNode (Join-Path $PSScriptRoot \"support/host_transport.mjs\") --root $mcpHostRoot --server context7 -- @args"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_context7_wrapper.sh",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "if node \"${mcp_host_dir}/support/host_transport.mjs\" --root \"${mcp_host_root}\" --server context7 -- \"$@\"; then"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
+          "line": 9,
+          "source_group": "tests",
+          "text": "const helper=process.env.BIOETL_TEST_HOST_HELPER || fileURLToPath(new URL('../../../../../../scripts/ai/mcp/support/host_transport.mjs',import.meta.url));"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
+          "line": 102,
+          "source_group": "tests",
+          "text": "fs.copyFileSync(path.join(sourceMcp,path.basename(file)),file);fs.copyFileSync(helper,path.join(support,'host_transport.mjs'));"
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/mcp/support/load_repo_env.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 29,
+      "reference_count": 30,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
@@ -4686,11 +4731,11 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
-          "line": 15,
+          "line": 39,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/mcp_docker_prune.ps1\")"
         },
@@ -4713,6 +4758,12 @@
           "text": "root / \"scripts\" / \"ai\" / \"mcp\" / \"support\" / \"mcp_docker_prune.ps1\""
         },
         {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
+          "line": 105,
+          "source_group": "tests",
+          "text": "fs.writeFileSync(path.join(support,'mcp_docker_prune.ps1'),'function Remove-McpExitedContainers {}\\n');"
+        },
+        {
           "path": "tests/unit/scripts/ai/mcp/test_mcp_docker_prune_defaults.py",
           "line": 12,
           "source_group": "tests",
@@ -4725,17 +4776,17 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
-          "line": 19,
+          "line": 36,
           "source_group": "scripts",
           "text": "# shellcheck source=./support/mcp_docker_prune.sh"
         },
         {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
-          "line": 20,
+          "line": 37,
           "source_group": "scripts",
           "text": "source \"${script_dir}/support/mcp_docker_prune.sh\""
         },
@@ -4752,6 +4803,12 @@
           "text": "root / \"scripts\" / \"ai\" / \"mcp\" / \"support\" / \"mcp_docker_prune.sh\""
         },
         {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
+          "line": 108,
+          "source_group": "tests",
+          "text": "fs.writeFileSync(path.join(support,'mcp_docker_prune.sh'),'remove_mcp_exited_containers() { :; }\\n');"
+        },
+        {
           "path": "tests/unit/scripts/ai/mcp/test_mcp_docker_prune_defaults.py",
           "line": 13,
           "source_group": "tests",
@@ -4764,7 +4821,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 24,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
@@ -4798,7 +4855,7 @@
         },
         {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
-          "line": 10,
+          "line": 34,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/token_validation.ps1\")"
         },
@@ -4821,7 +4878,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 41,
+      "reference_count": 42,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
