@@ -23,11 +23,11 @@
 | :--- | :--- | :--- | :--- | :--- |
 | **Positive 1 (Original)** | `ee3ce1ed-9487-572f-ae24-c98c6f6e3a37` | `uniprot_protein` / `uniprot_support_pack` | Manifest, reports, staging outputs | `NOT_VERIFIABLE` (Live API unreachable. Documented in unit tests: `test_run_id_resolver.py` & `test_manifest_validation_catalog.py`) |
 | **Positive 2 (Additional)** | `d7cdb35b-e37a-5767-b30e-aa8dfb60d775` | `uniprot_idmapping` | Manifest, parsed TSV mappings | `NOT_VERIFIABLE` (Live environment blocked. Used as disambiguation case in `test_run_id_resolver.py`) |
-| **Negative 1 (Historic without Manifest)** | `20261102T181217` | `uniprot_protein` | Report only, no manifest | `PASS` (Documented in `test_run_id_resolver.py` as a non-UUID compact stamp that acts as historic, lacking manifest) |
+| **Negative 1 (Historic without Manifest)** | `56471b4b-3689-50e9-996b-70250feef36b` | `uniprot_protein` | Verified report; no match in the inspected manifest catalog | `PASS` (local catalog and resolver check; deployed route acceptance remains `NOT_VERIFIABLE`) |
 | **Negative 2 (Missing Manifest)** | `00000000-0000-0000-0000-000000000000` | N/A | None | `PASS` (Deliberately non-existent UUID to test absent manifest logic, expected resolution: `selected_run_id_not_found`) |
 
 ### Justification for the Negative Cases
-* **Historic without Manifest (`20261102T181217`)**: As tested in `test_run_id_resolver.py`, compact historic stamps from reports catalogs that have no associated UUID manifest catalog entry fail to resolve in a live context (`test_non_uuid_token_does_not_raise_into_live_diagnostics`).
+* **Historic without Manifest (`56471b4b-3689-50e9-996b-70250feef36b`)**: The mounted report catalog contains `pipeline/uniprot_protein/56471b4b-3689-50e9-996b-70250feef36b/pipeline-run-report.json` (SHA-256 `31fa378f059b245d605aed34edb7c7f5ff42e7ec832009cc4086014d937a2d36`); the inspected manifest root had no match. The current source with `FileRunReportStoreAdapter` and the mounted catalog returned `UNKNOWN / resolved_without_manifest / manifest_not_recorded` locally. The running endpoint returned `UNKNOWN / selected_run_id_not_found`; deploy SHA and live acceptance remain `NOT_VERIFIABLE`.
 * **Completely Missing (`00000000-0000-0000-0000-000000000000`)**: A null UUID is selected to guarantee an absolute negative response from the catalog resolver. When queried, this UUID will be absent from both the manifest and report catalogs, triggering the fallback behavior which correctly reports `selected_run_id_not_found` rather than throwing a system exception, matching the logic detailed in `test_manifest_validation_catalog.py`.
 
 ## 3. Stages and Expected Responses
