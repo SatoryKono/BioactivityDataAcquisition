@@ -16,7 +16,7 @@ runs:
       run: |
         set -euo pipefail
         archive="${RUNNER_TEMP}/trivy_0.70.0_Linux-64bit.tar.gz"
-        curl -fsSL --proto '=https' --tlsv1.2 "${TRIVY_TARBALL_URL}" -o "${archive}"
+        curl -fsSL --proto '=https' --tlsv1.2 --retry 3 --retry-max-time 120 --connect-timeout 15 --max-time 90 "${TRIVY_TARBALL_URL}" -o "${archive}"
         echo "${TRIVY_TARBALL_SHA256}  ${archive}" | sha256sum -c -
         install_dir="${HOME}/.local/bin"
         mkdir -p "${install_dir}"
