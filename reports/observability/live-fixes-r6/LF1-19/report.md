@@ -1,7 +1,9 @@
 # LF1-19 Processed Records DQ 9403 Audit Report
 
-**Latest reported attempt (UTC):** 2026-11-08T19:22:28Z
-**Source SHA reported for the latest attempt:** 52cb6ea07ca5f2a4dbdaf3c34bf207539cef1e05
+**Report updated (UTC):** 2026-11-08T19:22:28Z
+**Base SHA at report update:** 52cb6ea07ca5f2a4dbdaf3c34bf207539cef1e05
+**Retained audit (UTC):** 2026-11-08T09:18:52.015039Z
+**Retained audit source/deploy SHA:** NOT_VERIFIABLE
 **Execution Status:** BLOCKED (blocked_backend_unavailable)
 
 ## Context
