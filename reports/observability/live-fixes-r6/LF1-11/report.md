@@ -1,9 +1,34 @@
-# LF1-11 Execution Report
+# LF1-11 Execution Report (Остаток)
 
 ## Overview
-This report confirms the successful execution of the `chembl_activity` pipeline for a limited backfill run and the publication of its observability bundle.
+Этот отчет фиксирует статус выполнения живого запуска для проверки манифестов. В соответствии с решением сводного гейта LF1-09 (REJECTED), живой запуск и поставка **не разрешены**.
 
 ## Execution Details
+- **Command:** `uv run python -m bioetl run --pipeline chembl_activity --run-type backfill --limit 10 --required-persistence-profile degraded_observable -y` (Не выполнялась)
+- **Exit Code:** NOT_RUN
+- **Source SHA (base):** `ba13e94f23ff267ac940cc6d8fc9bf35bbc8be06`
+- **Deploy SHA (HEAD):** NOT_VERIFIABLE (Среда недоступна / запуск заблокирован)
+- **Report assessment UTC:** 2026-11-08 21:17:36 UTC
+- **Run ID:** NOT_RUN
+- **Manifest ID:** NOT_RUN
+- **Status:** BLOCKED
+
+## Actual vs Expected
+- **Expected:** Pipeline executes successfully and generates a complete manifest bundle in `data/output/control/run_manifest`.
+- **Actual:** Запуск не выполнялся (BLOCKED), так как сводный гейт LF1-09 отклонен (REJECTED) и поставка заблокирована.
+
+## Dependencies
+- **LF1-10 / #12806:** BLOCKED. Поставка отменена из-за LF1-09 REJECTED. (На проверенной ревизии файл LF1-10 отсутствовал. Отчёт о блокировке позже опубликован в PR #12906, коммит db563cfacff3dc8ab67cd3bca20969657796f16e).
+- **LF1-05 / #12801:** BLOCKED / NOT_VERIFIABLE (Живая приёмка отклонена, живая среда недоступна).
+- **LF1-09 / #12805:** REJECTED. Поставка НЕ РАЗРЕШЕНА, контрольный запуск (ETL/downstream) НЕ РАЗРЕШЁН.
+
+## Artifacts
+Запуск не производился. Исторические артефакты остаются в каталоге, но новые не сгенерированы.
+
+## Historical execution and retained evidence
+
+Эти результаты относятся к предыдущему запуску. Соседние артефакты относятся к указанным ниже идентификаторам.
+
 - **Command:** `uv run python -m bioetl run --pipeline chembl_activity --run-type backfill --limit 10 --required-persistence-profile degraded_observable -y`
 - **Exit Code:** 0
 - **Source SHA (base):** `74cb6ccaa5dfe6fa97ec4e7ce468cc2d3c3992fd`
@@ -17,11 +42,8 @@ This report confirms the successful execution of the `chembl_activity` pipeline 
 - **Expected:** Pipeline executes successfully and generates a complete manifest bundle in `data/output/control/run_manifest`.
 - **Actual:** Pipeline executed successfully. The manifest, contract-evidence sidecar, and validation/inspection artifacts were generated and successfully copied to `reports/observability/live-fixes-r6/LF1-11/`.
 
-## Dependencies
-- **LF1-10 / #12806:** BLOCKED / NOT_VERIFIABLE (Artifacts unavailable in this environment).
-- **LF1-05 / #12801:** BLOCKED / NOT_VERIFIABLE (Artifacts unavailable in this environment).
+### Historical artifacts
 
-## Artifacts
 1. `manifest.json` - Complete manifest bundle.
 2. `contract-evidence.json` - Evidence of contract validation.
 3. `manifest-validation.json` - Score validation output.
