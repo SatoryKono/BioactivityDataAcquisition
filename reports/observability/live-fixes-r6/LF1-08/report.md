@@ -19,17 +19,17 @@ Using offline dashboard exports from `reports/observability/live-fixes-r6/LF1-01
 
 ### 3.2 DQ Domains (ID 9406 & 9403)
 * Panel 9406 uses the `backend` parser. The target URL extracted is: `/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}`. It extracts fields such as `_bioetl_frame`, `domain`, `verdict`, `status`, `detail`, `reason`, `reason_display`, `status_display`.
-* Panel 9403 uses both the `json` parser (on `/ops/observability/processed-records`) and `backend` parser (on `/ops/observability/selected-run-status`).
+* Panel 9403 uses the `backend` parser for both targets. Target A queries `/ops/observability/processed-records`; StageInput queries `/ops/observability/selected-run-status`.
 * Due to isolated environment, live API bodies cannot be inspected. Frame extraction depends completely on Grafana offline definition.
 
 ### 3.3 Incident (ID 2101)
-* Panel 2101 is located inside `reports/observability/live-fixes-r6/LF1-01/bioetl-incident-v1.json` nested within panel 2100 (Review Selected Run Status).
+* Panel 2101 is located inside `reports/observability/live-fixes-r6/LF1-01/bioetl-incident-v1.json` as Review Selected Run Status nested within row 2100 (Inspect Selected Run Summary).
 * It uses `backend` parser and queries `/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}`.
 * Its JSONata transformations extract nested durations and overall verdicts mapping them to `_bioetl_frame: status`, `domains`, and `duration`.
 
 ### 3.4 Control Plane (ID 9418) & Funnel (ID 9002)
 * Panel 9418 (Target A) parsing payload uses `uql` parser. Target URL extracted is: `/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}`. Field definitions in JSONata map `_bioetl_frame`, `domain`, `verdict`, `status`, `detail`, `reason`.
-* Panel 9002 (Funnel) parsing payload uses `uql` parser on `/ops/observability/pipeline-run-report-artifact` and fields mapped include `_bioetl_frame`, `stage_id`, `quarantined`, `excluded`, `deduplicated`, `filtered_out`.
+* Overview panel 9002 (Review Run Domains) uses the `uql` parser. Target A queries `/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}`. Dashboard links are navigation and are not request targets.
 
 ## 4. Closure Passport
 * **[x] Попанельный baseline по двум UUID сохранён**: `PASS` (for offline dashboard structure analysis) / `BLOCKED` (for live UUID query inspection due to offline environment).
