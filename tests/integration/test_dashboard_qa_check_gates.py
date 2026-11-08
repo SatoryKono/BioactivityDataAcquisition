@@ -36,11 +36,19 @@ from scripts.engineering.qa.report_dashboard_promql_scope import (
 from scripts.engineering.qa.report_dashboard_query_duplicates import (
     main as query_duplicates_main,
 )
+from scripts.ops.observability.grafana.render_nav_bus import apply_to_dashboard
 from tests.helpers import assert_cli_succeeded, run_main_in_process
 
 pytestmark = pytest.mark.integration
 
 _TEST_PATH = "tests/integration/test_dashboard_qa_check_gates.py"
+
+
+def test_incident_navigation_regeneration_preserves_saved_evidence_handoffs() -> None:
+    dashboard = Path("grafana/dashboards/bioetl-incident-v1.json").resolve()
+    assert apply_to_dashboard(
+        dashboard, current_uid="bioetl-incident-v1", check=True, state_followup=False
+    )
 
 
 def test_query_duplicates_check_passes_shipped_dashboards() -> None:
