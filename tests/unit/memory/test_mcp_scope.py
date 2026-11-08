@@ -8,7 +8,11 @@ from pathlib import Path
 
 import pytest
 
-from memory.mcp_scope import initialize_memory_file, memory_scope_path
+from memory.mcp_scope import (
+    initialize_memory_file,
+    memory_scope_path,
+    validate_memory_target,
+)
 
 pytestmark = pytest.mark.memory
 
@@ -58,3 +62,35 @@ def test_existing_same_scope_memory_is_shared_not_reseeded(tmp_path: Path) -> No
     assert json.loads(target.read_text(encoding="utf-8"))["entities"] == [
         {"name": "shared"}
     ]
+
+
+@pytest.mark.parametrize(
+    "target",
+    [
+        "docs/00-project/ai/memory/mcp-memory.json",
+        "../outside.json",
+        ".cache/mcp-memory/../other.json",
+    ],
+)
+def test_memory_target_rejects_seed_and_escapes(tmp_path: Path, target: str) -> None:
+    with pytest.raises(ValueError):
+        validate_memory_target(tmp_path / target, tmp_path)
+    assert not (tmp_path / ".cache").exists()
+
+
+def test_memory_target_accepts_scoped_cache(tmp_path: Path) -> None:
+    target = memory_scope_path(tmp_path, branch="main", commit="a" * 40)
+    assert validate_memory_target(target, tmp_path) == target
+
+
+def test_memory_target_rejects_symlink_cache(tmp_path: Path) -> None:
+    cache = tmp_path / ".cache"
+    cache.mkdir()
+    outside = tmp_path / "docs"
+    outside.mkdir()
+    try:
+        (cache / "mcp-memory").symlink_to(outside, target_is_directory=True)
+    except OSError:
+        pytest.skip("symlink creation unavailable")
+    with pytest.raises(ValueError):
+        validate_memory_target(cache / "mcp-memory" / "seed.json", tmp_path)
