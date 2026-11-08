@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "catalog_ref": "0a6450ae61c0c5f4d349bfcf7a943f6a606d7c18",
-  "source_ref": "a80ebf04fc73c67d5e2d0c6d069fecc42edb59d3",
+  "source_ref": "811f505103e73392dad5662441e4eff72815280d",
   "source_reviews": {
-    "src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py": "PR #12889 replaces Polars row iteration with in-memory conversion and precomputes numeric sort keys for resolved classification rows. Static review found no change to resource acquisition, lifetime, ownership or shutdown. No live qualification is claimed."
+    "src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py": "PR #12889 bounds temporary Polars row conversion lists and chooses one resolved row per leaf before sorting distinct leaves. Static review found no change to resource acquisition, lifetime, ownership or shutdown. No live qualification is claimed."
   }
 }
