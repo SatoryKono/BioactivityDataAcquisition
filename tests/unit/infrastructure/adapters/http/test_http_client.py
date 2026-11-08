@@ -65,6 +65,7 @@ def http_client(mock_rate_limiter, mock_circuit_breaker):
         circuit_breaker=mock_circuit_breaker,
         retry_config=RetryConfig(max_attempts=2, jitter_range=(0.0, 0.0)),
         timeout=10.0,
+        trust_env=False,
     )
 
 
@@ -80,6 +81,7 @@ class TestUnifiedHTTPClientInit:
             rate_limiter=mock_rate_limiter,
             circuit_breaker=mock_circuit_breaker,
         )
+        assert client.trust_env is True
         assert client.timeout == pytest.approx(30.0)
         assert client.run_id is None
         assert client.user_agent == BIOETL_USER_AGENT
@@ -467,6 +469,7 @@ class TestUnifiedHTTPClientRequestMethods:
     async def test_unified_http_client_outgoing_transport_headers(
         self,
         mock_rate_limiter,
+        monkeypatch: pytest.MonkeyPatch,
         user_agent: str | None,
         contact_email: str | None,
         run_id: str | None,
@@ -474,6 +477,9 @@ class TestUnifiedHTTPClientRequestMethods:
         expected_correlation_id: str | None,
     ):
         """Outgoing transport sends Accept, UA, and an optional correlation ID."""
+        monkeypatch.setenv("HTTP_PROXY", "http://127.0.0.1:9")
+        monkeypatch.setenv("HTTPS_PROXY", "http://127.0.0.1:9")
+        monkeypatch.setenv("NO_PROXY", "")
         mock_cb = AsyncMock()
 
         async def _call_cb(req_coro, *args, **kwargs):

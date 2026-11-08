@@ -133,6 +133,13 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "scripts/ops/observability/grafana/dashboard_context_links.py": (
+        "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+    ),
+    "reports/observability/live-fixes-r6/LF1-17/report.md": (
+        "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     **dict.fromkeys(
         (
             "reports/observability/live-fixes-r6/LF1-13/checksums.txt",
@@ -487,6 +494,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
     ),
     "reports/audit/hygiene-passport.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "docs/reports/dashboard-ux-checks/2026-11-07.md": (
+        "tests/integration/test_dashboard_ux_report_freshness.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "docs/reports/audit/N1_SHADOW_STATUS.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
     "src/bioetl/infrastructure/adapters/decorators/README.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
@@ -547,6 +558,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12786_composite_review.json",
             "configs/quality/external_resource_inventory_pr12782_lf07_review.json",
             "configs/quality/external_resource_inventory_pr12838_hygiene_review.json",
+            "configs/quality/external_resource_inventory_pr12848_http_proxy_review.json",
+            "configs/quality/external_resource_inventory_pr12889_chembl_review.json",
             "configs/quality/external_resource_inventory_pr12892_replay_review.json",
         ),
         (
@@ -604,6 +617,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
     ),
     "reports/observability/live-fixes-r6/LF1-02/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/observability/live-fixes-r6/LF1-14/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/observability/live-fixes-r6/LF1-03/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     **dict.fromkeys(
         (

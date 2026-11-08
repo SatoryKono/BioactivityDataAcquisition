@@ -238,3 +238,4 @@ def test_env_example_documents_mcp_token_sources_without_real_tokens() -> None:
 def test_readme_mcp_env_block_does_not_embed_neo4j_password() -> None:
     readme = _read("README.md")
     assert_no_historical_neo4j_passwords(readme)
+    assert "BIOETL_NEO4J_PASSWORD" not in readme
