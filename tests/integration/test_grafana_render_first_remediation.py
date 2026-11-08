@@ -393,10 +393,21 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
 
     provider = _panel(overview, 9480)
     assert provider["gridPos"]["y"] >= FIRST_WINDOW_Y
-    assert "run_id=${run_id}" in provider["targets"][0]["url"]
+    assert "run_id=${run_id}" in _selected_run_donor(overview, provider)["url"]
     assert _panel(overview, 9481)["gridPos"]["y"] == provider["gridPos"]["y"]
 
     # Workflow overview + Alerts/SLO retired (#6570/#6647).
+
+
+def _selected_run_donor(
+    overview: dict[str, object], panel: dict[str, object]
+) -> dict[str, object]:
+    reuse = panel["targets"][0]
+    assert reuse["datasource"]["uid"] == "-- Dashboard --"
+    assert reuse["withTransforms"] is False
+    target = _panel(overview, reuse["panelId"])["targets"][0]
+    assert "/selected-run-status?" in target["url"]
+    return target
 
 
 def test_rf004_identity_and_scope_are_persistent() -> None:
@@ -412,7 +423,13 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
     }
     overview = _load("bioetl-overview-v2.json")
     identity = _panel(overview, 9300)
-    assert "run_id=${run_id}" in identity["targets"][0]["url"]
+    target = _selected_run_donor(overview, identity)
+    assert "run_id=${run_id}" in target["url"]
+    assert any(
+        item["id"] == "filterByValue"
+        and item["options"]["filters"][0]["config"]["options"]["value"] == "identity"
+        for item in identity["transformations"]
+    )
     assert identity["fieldConfig"]["defaults"]["custom"]["inspect"] is True
     assert {
         "Run ID",
@@ -421,7 +438,7 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
         "Started at",
         "Total Run Duration",
     } <= set(
-        re.findall(r'"parameter":"([^"]+)"', identity["targets"][0]["root_selector"])
+        re.findall(r"'parameter':'([^']+)'", target["root_selector"])
     )
 
     # Workflow overview + Alerts/SLO retired; ID-card noValue contract remains.
@@ -439,7 +456,7 @@ def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
 
     provider = _panel(overview, 9480)
     assert provider["gridPos"]["y"] >= FIRST_WINDOW_Y
-    assert "run_id=${run_id}" in provider["targets"][0]["url"]
+    assert "run_id=${run_id}" in _selected_run_donor(overview, provider)["url"]
     assert _panel(overview, 9481)["gridPos"]["y"] == provider["gridPos"]["y"]
     dq = _load("bioetl-dq-v2.json")
     dq_ids = {panel.get("id") for panel in _iter_panels(list(dq.get("panels", [])))}
