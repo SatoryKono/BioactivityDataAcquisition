@@ -238,9 +238,14 @@ def test_run_explorer_visible_selectors_use_ops_http_catalog() -> None:
     assert "dimension=workflow" in variables["workflow"]["definition"]
     assert variables["run_type"]["multi"] is False
     assert variables["workflow"]["allValue"] == ".*"
-    banner = next(p for p in dashboard["panels"] if p["id"] == 1)
-    assert "var-run_id=-" in banner["options"]["content"]
-    assert "var-workflow=.*" in banner["options"]["content"]
+    scope = next(panel for panel in dashboard["panels"] if panel["id"] == 1)
+    reset = scope["options"]["content"]
+    assert "Reset filters" in reset
+    assert "/d/bioetl-run-explorer-v1/" in reset
+    assert "var-run_id=-" in reset
+    assert "var-workflow=.*" in reset
+    assert "var-lookup_run_id=" in reset
+    assert "${__url_time_range}" in reset
 
 
 def test_run_explorer_flex_columns_omit_custom_width() -> None:

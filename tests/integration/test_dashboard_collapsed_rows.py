@@ -16,6 +16,7 @@ from tests.integration._grafana_test_support import (
     get_dashboard_files,
     get_dashboard_panels,
     load_dashboard,
+    resolve_dashboard_target,
     materialize_expanded,
 )
 
@@ -82,26 +83,42 @@ def test_dashboard_rows_match_flat_and_forensic_surfaces() -> None:
         ]
         observed[dashboard_path.name] = len(rows)
         if expected_rows[dashboard_path.name] == 0:
-            by_id = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+            flat_panels = get_dashboard_panels(dashboard)
             if dashboard_path.stem == "bioetl-run-explorer-v1":
-                assert set(by_id) == {1000, 1, 3010}
+                assert [panel["id"] for panel in flat_panels] == [1000, 1, 3010]
             else:
-                assert len(by_id) == 11
-                comparison = by_id[9483]
-                assert comparison["type"] == "table"
-                reuse = comparison["targets"][0]
-                assert reuse["datasource"]["uid"] == "-- Dashboard --"
-                assert reuse["withTransforms"] is False
-                donor = by_id[reuse["panelId"]]["targets"][0]
-                assert "/selected-run-status?" in donor["url"]
-                assert "run_id=${run_id}" in donor["url"]
-                assert "$map(reconciliation_display," in donor["root_selector"]
-                assert any(
-                    item["id"] == "filterByValue"
-                    and item["options"]["filters"][0]["config"]["options"]["value"]
-                    == "reconciliation"
-                    for item in comparison["transformations"]
+                assert len(flat_panels) == 11
+            if dashboard_path.stem == "bioetl-overview-v2":
+                comparison = next(
+                    panel
+                    for panel in get_dashboard_panels(dashboard)
+                    if panel["id"] == 9483
                 )
+                assert comparison["type"] == "table"
+                by_id = {
+                    panel["id"]: panel for panel in get_dashboard_panels(dashboard)
+                }
+                target = comparison["targets"][0]
+                assert target["panelId"] == 9002
+                source = resolve_dashboard_target(by_id, target)
+                assert "reconciliation_display" in source["root_selector"]
+                assert "run_id=${run_id}" in source["url"]
+                assert comparison["transformations"][0] == {
+                    "id": "filterByValue",
+                    "options": {
+                        "type": "include",
+                        "match": "all",
+                        "filters": [
+                            {
+                                "fieldName": "_bioetl_frame",
+                                "config": {
+                                    "id": "equal",
+                                    "options": {"value": "reconciliation"},
+                                },
+                            }
+                        ],
+                    },
+                }
     assert observed == expected_rows
 
 
