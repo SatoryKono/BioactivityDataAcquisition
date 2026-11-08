@@ -30,7 +30,7 @@ function exists(value) {
 
 function readPolicyFile(marker) {
     const data = JSON.parse(fs.readFileSync(marker, 'utf8').replace(/^\uFEFF/, ''));
-    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Invalid host route policy');
+    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new TypeError('Invalid host route policy');
     if (Object.hasOwn(data, 'source')) {
         if (typeof data.source !== 'string' || !data.source) throw new Error('Invalid host route source');
     } else if (!Array.isArray(data.workspaces)) {
