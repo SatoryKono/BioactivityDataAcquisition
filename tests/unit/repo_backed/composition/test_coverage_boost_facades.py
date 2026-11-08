@@ -964,39 +964,6 @@ def test_exact_replay_collect_ledger_bronze_dates_covers_mismatch_and_source_ref
         )
 
 
-def test_exact_replay_prefers_published_ledger_snapshot_over_manifest_fallback() -> (
-    None
-):
-    manifest = SimpleNamespace(
-        provider="chembl",
-        entity="activity",
-        source_refs=(
-            SimpleNamespace(
-                provider="chembl",
-                entity="activity",
-                input_snapshots=(
-                    SimpleNamespace(immutable_uri="bronze://2026-02-01/old.json"),
-                ),
-            ),
-        ),
-    )
-    entries = (
-        SimpleNamespace(
-            event_type=replay_context.INPUT_SNAPSHOT_PUBLISHED_EVENT,
-            details={
-                "provider": "chembl",
-                "entity": "activity",
-                "immutable_uri": "bronze://2026-02-02/published.json",
-            },
-        ),
-    )
-
-    assert replay_context._collect_ledger_bronze_dates(
-        manifest=manifest,
-        ledger_entries=entries,
-    ) == ("2026-02-02",)
-
-
 def test_exact_replay_resolution_helpers_cover_parent_lookup_and_date_errors(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

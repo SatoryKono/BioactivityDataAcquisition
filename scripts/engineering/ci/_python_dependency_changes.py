@@ -33,10 +33,7 @@ NARROW_CONFIGURATION_PREFIXES = (
     "tool.ruff.lint.select",
 )
 # Stub-only wheels have no runtime import owner. Keep reviewed ownership explicit.
-STUB_RUNTIME_DISTRIBUTIONS = {
-    "types-openpyxl": ("openpyxl", "openpyxl"),
-    "types-pyyaml": ("pyyaml", "yaml"),
-}
+STUB_RUNTIME_DISTRIBUTIONS = {"types-openpyxl": ("openpyxl", "openpyxl")}
 
 
 def _route_anchor(*, distribution: str) -> str:

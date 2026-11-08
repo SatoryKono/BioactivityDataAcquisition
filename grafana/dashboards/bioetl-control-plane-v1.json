@@ -823,11 +823,6 @@
           "title": "Find complete runs",
           "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/control-plane/latest-complete-run?pipeline=${pipeline:percentencode}&run_type=${run_type:percentencode}&run_id=${run_id:percentencode}&workflow=${workflow:percentencode}&error_as_row=1",
           "targetBlank": true
-        },
-        {
-          "title": "Check BioETL Ops HTTP health",
-          "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
-          "targetBlank": true
         }
       ]
     },

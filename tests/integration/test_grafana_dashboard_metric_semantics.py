@@ -395,7 +395,7 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         "accounting",
         "count in",
         "count out",
-        "UNKNOWN",
+        "N/A",
         "QUERY ERROR",
     ):
         assert token in description

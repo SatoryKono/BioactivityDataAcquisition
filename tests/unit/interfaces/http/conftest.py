@@ -62,13 +62,6 @@ def _local_tcp_socket_available() -> bool:
     return True
 
 
-@pytest.fixture
-def require_local_tcp() -> None:
-    """Skip only tests that need to bind a loopback socket."""
-    if not _local_tcp_socket_available():
-        pytest.skip("Local TCP sockets are unavailable in this test environment.")
-
-
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     if not _local_tcp_socket_available():
         skip_local_socket = pytest.mark.skip(

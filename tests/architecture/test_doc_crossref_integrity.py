@@ -108,11 +108,12 @@ class TestADRReferencesValid:
                         f"references ADR-{adr_num:03d} which does not exist"
                     )
 
-        msg = f"Found {len(violations)} broken ADR reference(s):\n"
-        msg += "\n".join(violations[:10])
-        if len(violations) > 10:
-            msg += f"\n... and {len(violations) - 10} more"
-        assert not violations, msg
+        if violations:
+            msg = f"Found {len(violations)} broken ADR reference(s):\n"
+            msg += "\n".join(violations[:10])
+            if len(violations) > 10:
+                msg += f"\n... and {len(violations) - 10} more"
+            pytest.fail(msg)
 
 
 @pytest.mark.architecture

@@ -147,14 +147,8 @@ def test_vendored_extract_zip_validates_symlink_targets() -> None:
 
 def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
     """Only the explicit scenes bridge candidate may override the router seam."""
-    audited_overrides = {
-        "glob@>=9.0.0 <=14.0.1": "14.0.3",
-        "minimatch@>=7.0.0 <11.0.1": "11.0.1",
-        "postcss-selector-parser": "7.1.6",
-    }
     selector_pkg = _json(SELECTOR_PKG)
     assert selector_pkg["overrides"] == {
-        **audited_overrides,
         "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
         "braces": "$braces",
         "@istanbuljs/load-nyc-config": {"js-yaml": "4.3.2"},
@@ -166,7 +160,6 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
     assert scenes_pkg["dependencies"]["react-router-dom-v5-compat"] == bridge_ref
     assert selector_pkg["dependencies"]["react-router-dom-v5-compat"] == bridge_ref
     assert scenes_pkg["overrides"] == {
-        **audited_overrides,
         "@grafana/scenes": {"react-router-dom": "7.18.4"},
         "braces": "$braces",
         "react-router-dom-v5-compat": "$react-router-dom-v5-compat",

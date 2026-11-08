@@ -313,14 +313,6 @@ def _merge_panel_contract(
 ) -> dict[str, object]:
     if not isinstance(previous, dict):
         return generated
-    if (
-        generated["role"] in _NON_DATA_ROLES
-        and generated["evidence_source"] == "grafana_builtin"
-        and previous.get("role") not in _NON_DATA_ROLES
-    ):
-        # A data panel replaced by an operator handoff must not retain the
-        # old panel's data role, evidence fixtures, or empty-state contract.
-        return generated
     merged = {**generated, **previous}
     merged["title"] = generated["title"]
     merged["evidence_source"] = generated["evidence_source"]

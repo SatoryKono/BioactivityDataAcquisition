@@ -67,7 +67,7 @@
 (строка `05 silver_skipped_records` исключается трансформацией).
 
 ## Decision & Evidence
-**Source SHA:** `dc0ad6f20b518b8dbc1c1aeb02859cdc1d9823a8`
+**Source SHA:** `a474a4118bd19288c4315c98a0168a863e7b36ad`
 **Deploy SHA:** `NOT_VERIFIABLE`
-**Date (UTC):** `2026-11-08 20:12:38 UTC`
-**Status:** BLOCKED / NOT_VERIFIABLE. Live observability stack unavailable. Port 3000 and 8000 blocked / backend unavailable in the sandbox environment (as shown by script error `error/blocked_backend_unavailable`). Original F-Audit records unavailable.
+**Date (UTC):** `2026-11-07 22:30:26 UTC`
+**Status:** BLOCKED / NOT_VERIFIABLE. Live observability stack unavailable. Connection refused on 3000 and 8000 ports in the sandbox environment. Original F-Audit records unavailable.

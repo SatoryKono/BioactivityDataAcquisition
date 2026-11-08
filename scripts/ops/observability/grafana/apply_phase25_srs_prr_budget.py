@@ -451,7 +451,7 @@ _INC_DURATION = (
     "$zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : "
     "($contains($rest, '+') ? '+' : '-')); "
     "$digits := $rest != '' ? $substringBefore($rest, $zone) : ''; "
-    "$frac := $digits != '' ? $number('0.' & $digits) : 0; "
+    "$frac := $digits != '' ? $number($digits) / $power(10, $length($digits)) : 0; "
     "$sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); "
     "$off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : "
     "$substringAfter($tail, '-')); "
@@ -1206,25 +1206,6 @@ def apply_incident(data: dict[str, Any]) -> None:
             f"({OV_IDENTITY})"
         ),
     )
-
-    # Keep the collapsed row focused on saved data. The two canonical handoffs
-    # stay visible immediately after the collapsed rows, including on first use.
-    row = _by_id(data, 9450)
-    stages = _by_id(data, 9460)
-    identity = _by_id(data, 9452)
-    domains = _by_id(data, 9451)
-    row["panels"] = [domains]
-    row["description"] = (
-        "Expand for saved domain trust reasons for the selected Run ID."
-    )
-    domains["gridPos"].update(y=row["gridPos"]["y"] + 1)
-    root = data["panels"]
-    handoffs = (stages, identity)
-    root[:] = [panel for panel in root if panel["id"] not in {9460, 9452}]
-    y = max(panel["gridPos"]["y"] + panel["gridPos"]["h"] for panel in root)
-    for x, panel in zip((0, 12), handoffs, strict=True):
-        panel["gridPos"].update(x=x, y=y, w=12, h=3)
-    root.extend(handoffs)
 
 
 def _cp_trust_donor_transforms() -> list[dict[str, Any]]:

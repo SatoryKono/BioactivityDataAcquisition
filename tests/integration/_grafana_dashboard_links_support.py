@@ -1565,10 +1565,7 @@ def _assert_visual_bus_base_content(
     assert options.get("bioetlDisplayTitle") == "Navigate Dashboards"
     assert panel.get("title") == ""
     assert "bioetl-panel-title" not in content
-    # Run Explorer shares the first row with its scope banner; at 16 columns
-    # the bus reserves three rows for wrapped links.
-    expected_height = 3 if dashboard_name == "bioetl-run-explorer-v1.json" else 2
-    assert panel["gridPos"]["h"] == expected_height
+    assert panel["gridPos"]["h"] == 2
     description = str(panel.get("description", ""))
     assert "Sanitizer-compatible" in description
     assert "native keyboard focus" in description

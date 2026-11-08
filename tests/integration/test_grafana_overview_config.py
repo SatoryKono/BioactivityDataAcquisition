@@ -72,7 +72,7 @@ def test_overview_dashboard_identity_and_primary_question() -> None:
     content = str(provenance.get("options", {}).get("content", ""))
     description = str(dashboard.get("description", ""))
 
-    assert dashboard.get("title") == "3. Run Overview"
+    assert dashboard.get("title") == "Run Overview"
     assert dashboard.get("uid") == "bioetl-overview-v2"
     assert "Run ID is always selected" in description
     assert "not on Overview" in description

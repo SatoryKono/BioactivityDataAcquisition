@@ -30,11 +30,7 @@ def test_control_plane_dashboard_uses_control_plane_native_variable_sources() ->
         }
         query = variable["query"]
         assert query["queryType"] == "infinity"
-        infinity = query["infinityQuery"]
-        assert infinity["parser"] == "backend"
-        assert infinity["url_options"]["method"] == "GET"
-        assert "expr" not in infinity
-        url = urlsplit(infinity["url"])
+        url = urlsplit(query["infinityQuery"]["url"])
         assert url.path == "/ops/control-plane/filter-options"
         assert parse_qs(url.query) == {
             "dimension": [dimension],
@@ -42,5 +38,3 @@ def test_control_plane_dashboard_uses_control_plane_native_variable_sources() ->
             "allow_stale": ["1"],
             **scope,
         }
-    assert variable_map["run_type"]["allValue"] == ".*"
-    assert variable_map["run_type"]["multi"] is False

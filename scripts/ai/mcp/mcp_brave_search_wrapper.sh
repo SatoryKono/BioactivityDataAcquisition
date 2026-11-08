@@ -1,15 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# shellcheck source=./support/invoke_host_transport.sh
-source "$(dirname -- "${BASH_SOURCE[0]}")/support/invoke_host_transport.sh"
-if run_mcp_host_route brave-search "$@"; then
-  exit 0
-else
-  mcp_host_status=$?
-  if [[ "${mcp_host_status}" -ne 78 ]]; then exit "${mcp_host_status}"; fi
-fi
-
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=./support/docker_cli_resolver.sh
 source "${script_dir}/support/docker_cli_resolver.sh"

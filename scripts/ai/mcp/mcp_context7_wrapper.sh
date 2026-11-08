@@ -2,15 +2,6 @@
 
 set -euo pipefail
 
-# shellcheck source=./support/invoke_host_transport.sh
-source "$(dirname -- "${BASH_SOURCE[0]}")/support/invoke_host_transport.sh"
-if run_mcp_host_route context7 "$@"; then
-  exit 0
-else
-  mcp_host_status=$?
-  if [[ "${mcp_host_status}" -ne 78 ]]; then exit "${mcp_host_status}"; fi
-fi
-
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
 
