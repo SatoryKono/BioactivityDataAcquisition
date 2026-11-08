@@ -135,6 +135,19 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     **dict.fromkeys(
         (
+            "reports/observability/live-fixes-r6/LF1-13/checksums.txt",
+            "reports/observability/live-fixes-r6/LF1-13/machine_readable_receipt.json",
+            "reports/observability/live-fixes-r6/LF1-13/report.md",
+        ),
+        (
+            GRAFANA_SELECTOR_CONTRACT_TEST,
+            "tests/unit/interfaces/http/test_health_server_control_plane_scope_helpers.py",
+            "tests/unit/interfaces/http/test_run_id_resolver.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    **dict.fromkeys(
+        (
             ".codex/skills/py-audit-bot/references/wrapper-contract.md",
             ".devin/agent-metrics.json",
             ".devin/scripts/collect_agent_metrics.py",
