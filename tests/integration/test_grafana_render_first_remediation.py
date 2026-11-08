@@ -317,13 +317,11 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         "Run Explorer",
         "Replay Readiness",
         "Run Overview",
+        "Data Quality",
         "Incident Workspace",
     )
     for path in sorted(DASHBOARD_DIR.glob("bioetl-*.json")):
         dashboard = _load(path.name)
-        if path.stem == "bioetl-run-explorer-v1":
-            assert 1000 not in {p["id"] for p in dashboard["panels"]}
-            continue
         content = unescape(_panel(dashboard, 1000)["options"]["content"])
         positions = [content.index(title) for title in canonical_titles]
         assert positions == sorted(positions), path.name
@@ -344,18 +342,25 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         assert "flex-wrap:nowrap" in containers[0]["style"]
         anchors = [a for t, a in parser.elements if t == "a"]
         assert len(anchors) == 4
-        current = [a for a in anchors if a.get("aria-current") == "page"]
-        assert len(current) == (0 if path.stem == "bioetl-dq-v2" else 1)
+        current = [
+            (tag, attrs)
+            for tag, attrs in parser.elements
+            if attrs.get("aria-current") == "page"
+        ]
+        assert len(current) == 1
+        tag, selected = current[0]
+        assert tag == "span"
+        assert selected["class"] == "bioetl-nav-current"
+        assert dashboard["title"] in selected["title"]
+        assert "href" not in selected
+        assert "text-decoration:underline" in selected["style"]
+        for chip in [*anchors, selected]:
+            assert "font:600 16px/18px Arial" in chip["style"]
+            assert "overflow-wrap:anywhere" in chip["style"]
+            assert "min-width:0" in chip["style"]
         for anchor in anchors:
-            assert "font:600 16px/18px Arial" in anchor["style"]
-            assert "overflow-wrap:anywhere" in anchor["style"]
-            assert "min-width:0" in anchor["style"]
-            if anchor in current:
-                assert anchor["aria-disabled"] == "true"
-                assert not anchor["href"].startswith("/d/")
-            else:
-                assert "background:#334155" in anchor["style"]
-                assert anchor["href"].startswith("/d/")
+            assert "background:#334155" in anchor["style"]
+            assert anchor["href"].startswith("/d/")
 
 
 def test_rf003_navigation_tokens_meet_wcag_contrast_floors() -> None:
