@@ -515,7 +515,6 @@ nav:
       - Overview: 05-operations/README.md
       - "CI Workflow Map": 05-operations/ci-workflow-map.md
       - "CI/CD Integration": 05-operations/ci-cd-integration.md
-      - "Class Lane Separation Experiment": ci/card-0.10-class-lane-separation.md
       - "GitHub and CircleCI Gate Platform Matrix": ci/gate-platform-matrix-full.md
       - "Performance Tuning": 05-operations/performance-tuning.md
       - "DQ Investigation Procedures": 05-operations/dq-investigation-procedures.md

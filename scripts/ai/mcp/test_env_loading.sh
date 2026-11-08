@@ -7,7 +7,6 @@ cd "$(dirname "${BASH_SOURCE[0]}")"/../../.. || exit 1
 
 source scripts/ai/mcp/support/load_repo_env.sh
 load_repo_env_if_present
-normalize_neo4j_auth_aliases
 
 echo "=== Environment Variables Loaded ==="
 for name in BRAVE_API_KEY REF_TOOL_API_KEY NEO4J_URI NEO4J_USERNAME NEO4J_PASSWORD NEO4J_DATABASE NEO4J_AUTH \

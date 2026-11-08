@@ -46,7 +46,7 @@ if TYPE_CHECKING:
 
 class BasePublicationTransformer(
     PublicationTransformerHooksMixin,
-    BaseTransformer,  # type: ignore[misc]  # technical-reason: Mixin MRO resolution in static analysis
+    BaseTransformer,  # type: ignore[misc]  # tracked(#12721): unjustified type ignore debt
 ):
     """Shared facade flow for publication transformers."""
 

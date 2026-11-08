@@ -9,7 +9,6 @@ REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
 export BIOETL_SKIP_ENV_LOCAL=1
 source "${SCRIPT_DIR}/support/load_repo_env.sh"
 load_repo_env_if_present
-normalize_neo4j_auth_aliases
 unset BIOETL_SKIP_ENV_LOCAL
 # shellcheck source=./support/token_validation.sh
 source "${SCRIPT_DIR}/support/token_validation.sh"
@@ -33,7 +32,6 @@ export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
 
 mcp_validate_neo4j_credentials "Neo4j Cypher MCP"
 mcp_exit_if_validate_only "neo4j-cypher"
-mcp_prepare_npm_cache
 
 # Node-based package (bun-based @daanrongen/neo4j-mcp fails on Windows without bun).
 # Pinned to 0.2.0 for reproducibility

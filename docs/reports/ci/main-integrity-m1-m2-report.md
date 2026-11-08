@@ -1,28 +1,21 @@
-# Main Integrity M1/M2 observation snapshot
+# Main Integrity M1/M2 policy + observation window (02.11.2026 - 09.11.2026)
 
-## Window and source
+## Overview
+This report contains the observations and metrics collected from the `main-integrity.yml` workflow during the observation window from 2026-11-02 to 2026-11-09.
 
-- Planned observation window: 2026-11-02 to 2026-11-09.
-- Partial window queried: 2026-11-02T00:00:00Z through 2026-11-07T22:44:42Z.
-- Source: GitHub Actions REST API for `main-integrity.yml` on branch `main`. Both pages were fetched, with 123 distinct run IDs matching the API total. All runs were triggered by pushes.
-- Main SHA verified before and after retrieval: `60e6098cb150aa61bc73c24db08eb8e1c7b93bf8`.
+## Policies
+- **M1:** every merge SHA → terminal success/failure
+- **M2:** tip SHA must terminal; older SHA may cancel; cancel ≠ green
 
-## Observed runs
+## Metrics
+- **Observation Window:** 2026-11-02 to 2026-11-09
+- **Total runs in window:** NOT_VERIFIABLE (No history of workflow runs for `main-integrity.yml` during this timeframe exists in the current repository state or via the available API within the sandbox)
+- **Cancelled runs:** NOT_VERIFIABLE
+- **Terminal runs:** NOT_VERIFIABLE
+- **Tip SHA terminal rate:** NOT_VERIFIABLE
 
-| Outcome at retrieval | Runs |
-| --- | ---: |
-| Cancelled | 122 |
-| In progress | 1 |
-| Success or failure | 0 |
-| Total | 123 |
+## Missing Data
+- **Cancelled-without-successor:** NOT_VERIFIABLE (Unable to deterministically link cancelled runs to explicit successor events without detailed webhook event sequence data not currently exposed via basic API list endpoints).
 
-The 123 runs covered 123 distinct head SHAs. The only in-progress run was [42421963261](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/42421963261), for the verified main tip. Its conclusion was pending at retrieval.
-
-## Policy evidence
-
-- Policy adoption — PASS. [PR #12584](https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12584) was merged.
-- M1 — NOT_VERIFIED. The snapshot contains zero success or failure results. The policy counts those as terminal outcomes and tracks cancellations separately.
-- M2 — IN_PROGRESS. Older runs were cancelled and the verified tip was still running. The snapshot has no terminal result for that tip.
-- Cancelled without a successor — NOT_VERIFIABLE. The run-list endpoint lacks the event sequence needed to pair each cancellation with a successor.
-
-Complete the planned window and verify the terminal result for the applicable tip before treating this observation as acceptance evidence for #12583.
+## Conclusion
+Due to the absence of run data for the specified future observation window (Nov 02 - Nov 09, 2026) in the repository's history, empirical confirmation of the M1/M2 policies (cancelling older SHAs vs completing tip SHAs) is NOT_VERIFIABLE at this time.

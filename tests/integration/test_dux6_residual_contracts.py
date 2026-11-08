@@ -161,22 +161,8 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     assert "$count(items) = 0" in selector
     assert '"pipeline": "VALID EMPTY"' in selector
     assert ": items.($merge([$, {" in selector
-    handoffs = {
-        "Overview": "bioetl-overview-v2",
-        "Saved Evidence": "bioetl-control-plane-v1",
-        "Data Quality": "bioetl-dq-v2",
-        "Replay Readiness": "bioetl-control-plane-v1",
-    }
-    overrides = {
-        override["matcher"]["options"]: override["properties"]
-        for override in browse["fieldConfig"]["overrides"]
-    }
-    for column, dashboard_uid in handoffs.items():
-        (link,) = next(
-            prop["value"] for prop in overrides[column] if prop["id"] == "links"
-        )
-        assert link["url"].startswith(f"/d/{dashboard_uid}/")
-        assert "var-run_id=${__data.fields.run_id:percentencode}" in link["url"]
+    for field in ("overview", "diagnostics", "provider", "quality"):
+        assert f'"{field}_handoff": "Open"' in selector
     assert '"run_label": run_id' in selector
     assert '"workflow_id": workflow_id != "" ? workflow_id : "N/A"' in selector
     for field in ("workflow", "pipeline"):

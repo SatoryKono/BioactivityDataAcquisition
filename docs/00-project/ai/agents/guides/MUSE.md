@@ -62,12 +62,12 @@ Machine-local Codex projections (`~/.codex/config.toml` managed MCP block,
 
 Muse user-level file: `${XDG_CONFIG_HOME:-$HOME/.config}/muse/settings.json`,
 key `mcpServers` (camelCase). Every server gets `"mode": "optional"` so one
-failing server cannot block Muse startup. Base set (stdio; run Muse from the
-repo root so the memory scope can validate that working directory):
+failing server cannot block Muse startup. Base set (stdio, run Muse from the
+repo root or replace `args` with absolute paths):
 
 ```json
 "mcpServers": {
-  "memory":     { "type": "stdio", "command": "bash", "args": ["scripts/ai/mcp/mcp_memory_wrapper.sh"], "env": { "MEMORY_SEED_PATH": "docs/00-project/ai/memory/mcp-memory.json" }, "startup_timeout_sec": 120, "mode": "optional" },
+  "memory":     { "type": "stdio", "command": "bash", "args": ["scripts/ai/mcp/mcp_memory_wrapper.sh"], "env": { "NPM_CONFIG_CACHE": ".cache/npm-cache", "MEMORY_FILE_PATH": "docs/00-project/ai/memory/mcp-memory.json" }, "startup_timeout_sec": 120, "mode": "optional" },
   "filesystem": { "type": "stdio", "command": "bash", "args": ["scripts/ai/mcp/mcp_filesystem_wrapper.sh"], "env": { "NPM_CONFIG_CACHE": ".cache/npm-cache" }, "mode": "optional" },
   "fetch":      { "type": "stdio", "command": "bash", "args": ["scripts/ai/mcp/mcp_fetch_wrapper.sh"], "env": { "UV_CACHE_DIR": ".cache/uv-cache", "UV_TOOL_DIR": ".cache/uv-tools", "NPM_CONFIG_CACHE": ".cache/npm-cache" }, "startup_timeout_sec": 300, "mode": "optional" },
   "github":     { "type": "stdio", "command": "bash", "args": ["scripts/ai/mcp/github-mcp-wrapper.sh"], "env": { "GITHUB_TOOLSETS": "context,issues,pull_requests,repos,users,actions,code_security,dependabot,notifications", "GITHUB_EXCLUDE_TOOLS": "create_or_update_file,push_files,delete_file,fork_repository,create_repository,merge_pull_request,actions_run_trigger", "GITHUB_LOCKDOWN_MODE": "true" }, "startup_timeout_sec": 180, "mode": "optional" },
@@ -75,12 +75,6 @@ repo root so the memory scope can validate that working directory):
   "ast-grep":   { "type": "stdio", "command": "bash", "args": ["scripts/ai/mcp/mcp_ast_grep_wrapper.sh"], "startup_timeout_sec": 120, "mode": "optional" }
 }
 ```
-
-Memory inherits `BIOETL_AI_MEMORY_MODE`; persistent startup requires an explicitly
-authorized `read-write` run. `MEMORY_SEED_PATH` is a read-only input. The wrapper
-selects a mutable target under the untracked `.cache/mcp-memory` scope; the tracked
-seed must never be passed as `MEMORY_FILE_PATH`. The Python memory server does not
-use or create an npm cache.
 
 Extension servers (`brave-search`, `deepwiki`, `ref`, `mermaid`,
 `adr-analysis`, `code-analyzer`, `prometheus`, `grafana`, `neo4j-*`,

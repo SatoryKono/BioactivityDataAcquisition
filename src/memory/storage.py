@@ -172,12 +172,11 @@ def atomic_write_bytes(
     data: bytes,
     *,
     expected_digest: str | None = None,
-    lock_timeout_seconds: float = 5.0,
 ) -> str:
     """Atomically replace target and optionally enforce optimistic concurrency."""
     target = canonicalize_memory_path(target)
     target.parent.mkdir(parents=True, exist_ok=True)
-    with exclusive_lock(target, timeout_seconds=lock_timeout_seconds):
+    with exclusive_lock(target):
         if expected_digest is not None:
             current = target.read_bytes() if target.exists() else b""
             if content_digest(current) != expected_digest:
@@ -210,14 +209,12 @@ def atomic_write_text(
     text: str,
     *,
     expected_digest: str | None = None,
-    lock_timeout_seconds: float = 5.0,
 ) -> str:
     """Atomically write UTF-8 text."""
     return atomic_write_bytes(
         target,
         text.encode("utf-8"),
         expected_digest=expected_digest,
-        lock_timeout_seconds=lock_timeout_seconds,
     )
 
 
@@ -226,7 +223,6 @@ def atomic_write_json(
     payload: Any,
     *,
     expected_digest: str | None = None,
-    lock_timeout_seconds: float = 5.0,
 ) -> str:
     """Atomically write deterministic JSON."""
     rendered = (
@@ -238,12 +234,7 @@ def atomic_write_json(
         )
         + "\n"
     )
-    return atomic_write_text(
-        target,
-        rendered,
-        expected_digest=expected_digest,
-        lock_timeout_seconds=lock_timeout_seconds,
-    )
+    return atomic_write_text(target, rendered, expected_digest=expected_digest)
 
 
 def append_jsonl(

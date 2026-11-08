@@ -26,20 +26,6 @@ def _confine_under_root(path: Path, *, root: Path) -> Path:
 _SAFE_COMPONENT = re.compile(r"[^A-Za-z0-9_.-]")
 
 
-def validate_memory_target(target: Path, repo_root: Path) -> Path:
-    """Only the untracked MCP cache may hold mutable graph data."""
-    root = repo_root.resolve()
-    cache = root / ".cache" / "mcp-memory"
-    # Resolve against the lexical cache, so a symlink of the cache itself cannot
-    # turn an external directory into an approved storage root.
-    resolved = target.expanduser().resolve(strict=False)
-    if not resolved.is_relative_to(cache):
-        raise ValueError("MCP memory cache escapes repository")
-    if resolved == cache or resolved.suffix != ".json":
-        raise ValueError("MCP memory target must be a JSON file inside its cache")
-    return resolved
-
-
 def _git_value(repo_root: Path, *args: str, fallback: str) -> str:
     try:
         result = subprocess.run(
@@ -100,14 +86,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", type=Path, required=True)
     parser.add_argument("--seed", type=Path, required=True)
-    parser.add_argument("--target", type=Path)
     args = parser.parse_args(argv)
     repo_root = _confine_under_root(args.repo_root, root=Path.cwd())
     # seed must live under repo_root (no arbitrary path injection)
     seed = _confine_under_root(args.seed, root=repo_root)
-    target = validate_memory_target(
-        args.target or memory_scope_path(repo_root), repo_root
-    )
+    target = memory_scope_path(repo_root)
     initialize_memory_file(target, seed)
     print(target)
     return 0

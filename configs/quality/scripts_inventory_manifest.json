@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-08T08:37:51.187663+00:00",
+  "generated_at": "2026-11-07T19:36:27.321772+00:00",
   "summary": {
     "total_scripts": 715,
     "status_counts": {
@@ -11,12 +11,12 @@
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
-      "ci": 74,
+      "ci": 75,
       "docs": 291,
       "other": 16,
-      "scripts": 604,
+      "scripts": 600,
       "skills": 13,
-      "tests": 529
+      "tests": 527
     }
   },
   "scripts": [
@@ -308,7 +308,7 @@
       "agent_usage": [
         "CODEX-RUNTIME"
       ],
-      "reference_count": 22,
+      "reference_count": 24,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -336,7 +336,19 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 71,
+          "line": 15,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/codex/doctor.py\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 27,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/codex/doctor.py\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 53,
           "source_group": "ci",
           "text": "run: python3 scripts/ai/codex/doctor.py static --no-write"
         },
@@ -345,18 +357,6 @@
           "line": 144,
           "source_group": "docs",
           "text": "python scripts/ai/codex/doctor.py static --no-write"
-        },
-        {
-          "path": "docs/00-project/ai/agents/guides/MUSE.md",
-          "line": 121,
-          "source_group": "docs",
-          "text": "python scripts/ai/codex/doctor.py static --no-write"
-        },
-        {
-          "path": "docs/00-project/ai/agents/guides/grok-tui-config-checklist.md",
-          "line": 103,
-          "source_group": "docs",
-          "text": "- [ ] `python scripts/ai/codex/doctor.py static --no-write`"
         }
       ]
     },
@@ -647,11 +647,11 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 164,
+          "line": 132,
           "source_group": "docs",
           "text": "`scripts/ai/codex/helper/ensure-mcp.sh` is the sole owner of the shared-plane"
         },
@@ -692,10 +692,10 @@
           "text": "ENSURE_MCP_SCRIPT=\"${SCRIPT_DIR}/ensure-mcp.sh\""
         },
         {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 151,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/codex/helper/ensure-mcp.sh\","
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 1190,
+          "source_group": "tests",
+          "text": "ensure_script = _to_bash_path(root / \"scripts/ai/codex/helper/ensure-mcp.sh\")"
         }
       ],
       "owner": "@bioetl-platform",
@@ -1393,7 +1393,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 181,
+          "line": 149,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/run-codex.sh mcp-static"
         },
@@ -1613,8 +1613,20 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 71,
+      "reference_count": 73,
       "references": [
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 16,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/codex/setup_mcp.py\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 28,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/codex/setup_mcp.py\""
+        },
         {
           "path": "Makefile",
           "line": 178,
@@ -1647,21 +1659,9 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
-          "line": 89,
+          "line": 83,
           "source_group": "docs",
           "text": "`scripts/ai/codex/setup_mcp.py`: every entry carries `\"mode\": \"optional\"`"
-        },
-        {
-          "path": "docs/00-project/ai/agents/guides/grok-tui-config-checklist.md",
-          "line": 104,
-          "source_group": "docs",
-          "text": "- [ ] `python scripts/ai/codex/setup_mcp.py --check`"
-        },
-        {
-          "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 34,
-          "source_group": "docs",
-          "text": "| `.mcp.json` | yes | tracked exact-root workspace MCP entrypoint | generated from `scripts/ai/codex/setup_mcp.py`; MUST stay repo-relative and must not embed machine-local absolute paths; tracked JSO"
         }
       ]
     },
@@ -2614,8 +2614,20 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 13,
       "references": [
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 20,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/junie/check_junie_mirror.py\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 32,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/junie/check_junie_mirror.py\""
+        },
         {
           "path": "AGENTS.md",
           "line": 99,
@@ -2651,18 +2663,6 @@
           "line": 154,
           "source_group": "docs",
           "text": "| контур не найден | `skills-consistency.yml:verify-native-codex-runtime` (.github/workflows/skills-consistency.yml:43) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {\"push\": {\"paths\": [\".codex/"
-        },
-        {
-          "path": "docs/ci/gate-platform-matrix-full.md",
-          "line": 155,
-          "source_group": "docs",
-          "text": "| контур не найден | `skills-consistency.yml:detect-runtime-skill-drift` (.github/workflows/skills-consistency.yml:58) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {\"push\": {\"paths\": [\".codex/c"
-        },
-        {
-          "path": "docs/ci/gate-platform-matrix-full.md",
-          "line": 156,
-          "source_group": "docs",
-          "text": "| контур не найден | `skills-consistency.yml:approved-runtime-skill-sync` (.github/workflows/skills-consistency.yml:82) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {\"push\": {\"paths\": [\".codex/"
         }
       ],
       "owner": "@bioetl-platform",
@@ -2675,7 +2675,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 40,
+      "reference_count": 42,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -2691,7 +2691,19 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 139,
+          "line": 19,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/junie/check_junie_mirror.sh\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 31,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/junie/check_junie_mirror.sh\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 121,
           "source_group": "ci",
           "text": "run: bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -2712,18 +2724,6 @@
           "line": 50,
           "source_group": "docs",
           "text": "`scripts/ai/junie/check_junie_mirror.sh`. Docs mirrors в"
-        },
-        {
-          "path": "docs/00-project/NORMATIVE_SOURCES.md",
-          "line": 108,
-          "source_group": "docs",
-          "text": "- `../../scripts/ai/junie/check_junie_mirror.sh` — `.codex/**` ↔ `.junie/**` parity check"
-        },
-        {
-          "path": "docs/00-project/ai/README.md",
-          "line": 37,
-          "source_group": "docs",
-          "text": "(parity: `bash scripts/ai/junie/check_junie_mirror.sh --check`)."
         }
       ]
     },
@@ -2742,7 +2742,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 74,
+          "line": 56,
           "source_group": "ci",
           "text": "run: python3 -m scripts.ai.mcp wrappers check"
         },
@@ -2897,7 +2897,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 761,
+          "line": 658,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -2912,7 +2912,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 34,
+      "reference_count": 32,
       "references": [
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
@@ -3012,14 +3012,8 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
-        {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 153,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\","
-        },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
           "line": 374,
@@ -3037,12 +3031,6 @@
           "line": 113,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\": \"Test-McpRequiredToken\","
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 333,
-          "source_group": "tests",
-          "text": "str(ROOT / \"scripts/ai/mcp/github-mcp-wrapper.ps1\"),"
         }
       ]
     },
@@ -3051,7 +3039,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
@@ -3076,12 +3064,6 @@
           "line": 9,
           "source_group": "scripts",
           "text": "EXPECTED_GITHUB_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/github-mcp-wrapper.sh\""
-        },
-        {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 154,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\","
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
@@ -3139,7 +3121,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
@@ -3152,12 +3134,6 @@
           "line": 117,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\""
-        },
-        {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 155,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\","
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_adr_analysis_wrapper_contracts.py",
@@ -3195,7 +3171,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
@@ -3205,7 +3181,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 180,
+          "line": 148,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/mcp_ast_grep_wrapper.sh"
         },
@@ -3220,12 +3196,6 @@
           "line": 12,
           "source_group": "scripts",
           "text": "EXPECTED_AST_GREP_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_ast_grep_wrapper.sh\""
-        },
-        {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 156,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\","
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
@@ -3351,7 +3321,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
@@ -3376,12 +3346,6 @@
           "line": 136,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\""
-        },
-        {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 157,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3463,7 +3427,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
@@ -3482,12 +3446,6 @@
           "line": 11,
           "source_group": "scripts",
           "text": "EXPECTED_CONTEXT7_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_context7_wrapper.sh\""
-        },
-        {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 158,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\","
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
@@ -3527,7 +3485,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
@@ -3540,12 +3498,6 @@
           "line": 108,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\""
-        },
-        {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 159,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3717,7 +3669,7 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -3727,15 +3679,9 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 760,
+          "line": 657,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 388,
-          "source_group": "tests",
-          "text": "str(ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\"),"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
@@ -3760,7 +3706,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
@@ -3788,15 +3734,9 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 759,
+          "line": 656,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 401,
-          "source_group": "tests",
-          "text": "command = [executable, str(ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.sh\")]"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
@@ -3809,6 +3749,12 @@
           "line": 220,
           "source_group": "tests",
           "text": "script = ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 1160,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         }
       ]
     },
@@ -3842,7 +3788,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
@@ -3855,12 +3801,6 @@
           "line": 145,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\""
-        },
-        {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 160,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\","
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
@@ -3967,14 +3907,8 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 163,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_memory_wrapper.ps1\","
-        },
         {
           "path": "tests/architecture/test_ai_memory_program_contracts.py",
           "line": 31,
@@ -3994,25 +3928,19 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
           "line": 70,
           "source_group": "docs",
-          "text": "\"memory\":     { \"type\": \"stdio\", \"command\": \"bash\", \"args\": [\"scripts/ai/mcp/mcp_memory_wrapper.sh\"], \"env\": { \"MEMORY_SEED_PATH\": \"docs/00-project/ai/memory/mcp-memory.json\" }, \"startup_timeout_sec\":"
+          "text": "\"memory\":     { \"type\": \"stdio\", \"command\": \"bash\", \"args\": [\"scripts/ai/mcp/mcp_memory_wrapper.sh\"], \"env\": { \"NPM_CONFIG_CACHE\": \".cache/npm-cache\", \"MEMORY_FILE_PATH\": \"docs/00-project/ai/memory/mc"
         },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 7,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\""
-        },
-        {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 164,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\","
         },
         {
           "path": "tests/architecture/test_ai_memory_program_contracts.py",
@@ -4028,21 +3956,21 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
-          "line": 21,
+          "line": 17,
           "source_group": "tests",
           "text": "WRAPPER = Path(\"scripts/ai/mcp/mcp_memory_wrapper.sh\")"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
-          "line": 73,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\","
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
-          "line": 159,
+          "line": 76,
           "source_group": "tests",
           "text": "Without the executable bit, ``exec ./mcp_memory_wrapper.sh`` returns 126"
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 625,
+          "source_group": "tests",
+          "text": "assert servers[\"memory\"][\"args\"][0].endswith(\"mcp_memory_wrapper.sh\")"
         }
       ]
     },
@@ -4182,14 +4110,8 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 165,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\","
-        },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
           "line": 117,
@@ -4213,7 +4135,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
@@ -4226,12 +4148,6 @@
           "line": 17,
           "source_group": "scripts",
           "text": "EXPECTED_NEO4J_CYPHER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
-        },
-        {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 166,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\","
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
@@ -4258,14 +4174,8 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 167,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\","
-        },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
           "line": 118,
@@ -4283,7 +4193,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 24,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -4409,7 +4319,7 @@
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
-          "line": 58,
+          "line": 56,
           "source_group": "scripts",
           "text": "exec \"${PYTHON_BIN}\" \"${REPO_ROOT}/scripts/ai/mcp/neo4j_memory_mcp_adapter.py\" -- \\"
         },
@@ -4590,7 +4500,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 29,
+      "reference_count": 28,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
@@ -4647,7 +4557,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -4672,12 +4582,6 @@
           "line": 8,
           "source_group": "scripts",
           "text": "source scripts/ai/mcp/support/load_repo_env.sh"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
-          "line": 74,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/support/load_repo_env.sh\","
         }
       ]
     },
@@ -4821,7 +4725,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 41,
+      "reference_count": 39,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
@@ -4976,7 +4880,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
@@ -5003,12 +4907,6 @@
           "text": "\"test-env-loading\": shell_command(\"test_env_loading.sh\"),"
         },
         {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 162,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/test_env_loading.sh\","
-        },
-        {
           "path": "tests/architecture/test_mcp_token_configuration.py",
           "line": 128,
           "source_group": "tests",
@@ -5021,7 +4919,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/codex/setup_mcp.py",
@@ -5034,12 +4932,6 @@
           "line": 32,
           "source_group": "scripts",
           "text": "\"wrappers\": module_command(\"scripts.ai.mcp.wrappers\"),"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 256,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/wrappers.py\","
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_wrappers.py",
@@ -5537,7 +5429,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 13,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
@@ -5620,13 +5512,13 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 88,
+          "line": 70,
           "source_group": "ci",
           "text": "python -m scripts.ai.sync.runtime_skills"
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 112,
+          "line": 94,
           "source_group": "ci",
           "text": "python -m scripts.ai.sync.runtime_skills"
         },
@@ -10656,7 +10548,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 661,
+          "line": 558,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10699,7 +10591,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 774,
+          "line": 671,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -11607,7 +11499,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 8,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -11646,16 +11538,16 @@
           "text": "\"python_version\": platform.python_version(),"
         },
         {
-          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 259,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/common/platform.py\","
-        },
-        {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_wrappers.py",
           "line": 13,
           "source_group": "tests",
           "text": "from scripts.engineering.common.platform import PlatformInfo, PlatformKind"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/common/test_platform.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.engineering.common.platform import ("
         }
       ],
       "owner": "@bioetl-platform",
@@ -12031,7 +11923,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-          "line": 91,
+          "line": 89,
           "source_group": "docs",
           "text": "`pretest_guardrails.sh --report-json ...` persists only compact"
         },
@@ -13061,7 +12953,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 431,
+          "line": 376,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -13085,13 +12977,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 607,
+          "line": 595,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 620,
+          "line": 608,
           "source_group": "tests",
           "text": "if path == \"scripts/engineering/dev/zed_mypy.py\":"
         }
@@ -13537,8 +13429,8 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-12-07",
-      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this finalizes the dated CodeRabbit evidence into Markdown and JSON. Keep historical/manual; no Make or workflow callers found."
+      "review_by": "2026-11-05",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
     },
     {
       "path": "scripts/engineering/diagnostics/legacy/coderabbit_20260925/normalize_findings.py",
@@ -13556,8 +13448,8 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-12-07",
-      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this parses the dated audit leaves and writes normalized findings and leaf status. Keep historical/manual; no Make or workflow callers found."
+      "review_by": "2026-11-05",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
     },
     {
       "path": "scripts/engineering/diagnostics/legacy/coderabbit_20260925/triage_findings.py",
@@ -13575,8 +13467,8 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-12-07",
-      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this triages the dated finding set against source snippets and writes the campaign JSON. Keep historical/manual; no Make or workflow callers found."
+      "review_by": "2026-11-05",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
     },
     {
       "path": "scripts/engineering/finances/github_billing_pipeline.py",
@@ -13934,8 +13826,8 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-12-07",
-      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this writes the issue-specific closeout JSON from the coverage inventory. Keep historical/manual; no Make, workflow or QA router callers found."
+      "review_by": "2026-11-05",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
     },
     {
       "path": "scripts/engineering/qa/_tracked_glob.py",
@@ -17860,7 +17752,7 @@
         },
         {
           "path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
-          "line": 178,
+          "line": 177,
           "source_group": "docs",
           "text": "- [Module coverage inventory generator](../../../scripts/engineering/qa/report_module_coverage_inventory.py)"
         },
@@ -20484,13 +20376,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 890,
+          "line": 878,
           "source_group": "tests",
           "text": "\"src/bioetl/infrastructure/quality/scoring.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 891,
+          "line": 879,
           "source_group": "tests",
           "text": "\"scripts/engineering/quality/scoring.py\","
         },
@@ -20867,7 +20759,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 872,
+          "line": 769,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -22303,7 +22195,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 32,
+      "reference_count": 31,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -24003,7 +23895,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1008,
+          "line": 905,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -24742,8 +24634,8 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-12-07",
-      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks. 2026-11-07 review: retain behind the scripts.ops router. The host verification workflow imports it and the managed-image tests cover immutable image and complete rootfs comparisons."
+      "review_by": "2026-11-05",
+      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks."
     },
     {
       "path": "scripts/ops/observability/grafana/router_rootfs.py",
@@ -24803,8 +24695,8 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-12-07",
-      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks. 2026-11-07 review: retain behind the scripts.ops router. The Router bridge workflow runs the rootfs tests, which cover trusted extraction and filesystem comparisons."
+      "review_by": "2026-11-05",
+      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks."
     },
     {
       "path": "scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py",
@@ -25476,7 +25368,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 219,
+          "line": 187,
           "source_group": "docs",
           "text": "2. Restart client after `apply-docker-stable-mcp.ps1 -Profile stable`"
         },
@@ -25556,13 +25448,13 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 212,
+          "line": 180,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1   # never kills bioetl-* / shared labels"
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 221,
+          "line": 189,
           "source_group": "docs",
           "text": "4. Idle: `cleanup-mcp-orphans.ps1 -KillHostGateways`"
         },
@@ -25859,7 +25751,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 213,
+          "line": 181,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\reset-mcp-host-sessions.ps1  # report; -Execute for actions"
         },
@@ -25953,7 +25845,7 @@
         },
         {
           "path": "docs/04-reference/environment-variables.md",
-          "line": 129,
+          "line": 140,
           "source_group": "docs",
           "text": "| `BIOETL_RUNTIME_SOURCE_ID` | Opaque digest computed from the runtime root and mount roots and injected by `runtime_manager.py` | No |"
         },
@@ -26136,7 +26028,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 210,
+          "line": 178,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\apply-shared-to-grok.ps1  # optional Grok projection; restart Grok afterward"
         },
@@ -26191,7 +26083,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 209,
+          "line": 177,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\health-shared.ps1"
         },
@@ -26291,7 +26183,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 208,
+          "line": 176,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\start-shared.ps1"
         },
@@ -26366,7 +26258,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 166,
+          "line": 134,
           "source_group": "docs",
           "text": "bounds `start-shared.sh`; callers must not wrap ensure with a smaller"
         },
@@ -26403,7 +26295,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 211,
+          "line": 179,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\stop-shared.ps1"
         },
@@ -26449,7 +26341,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
-          "line": 201,
+          "line": 169,
           "source_group": "docs",
           "text": "| Watchdog | `watchdog-shared.ps1 -Daily` restarts DOWN servers only |"
         },
@@ -26841,20 +26733,8 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 7,
       "references": [
-        {
-          "path": ".github/workflows/skills-consistency.yml",
-          "line": 20,
-          "source_group": "ci",
-          "text": "- \"scripts/ops/support/load_repo_env.sh\""
-        },
-        {
-          "path": ".github/workflows/skills-consistency.yml",
-          "line": 41,
-          "source_group": "ci",
-          "text": "- \"scripts/ops/support/load_repo_env.sh\""
-        },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
           "line": 243,
@@ -26880,16 +26760,22 @@
           "text": "source \"${_BIOETL_MCP_REPO_ROOT}/scripts/ops/support/load_repo_env.sh\""
         },
         {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 170,
-          "source_group": "scripts",
-          "text": "\"scripts/ops/support/load_repo_env.sh\","
-        },
-        {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
           "line": 448,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/load_repo_env.sh or pass --username/--password \""
+        },
+        {
+          "path": "tests/architecture/test_mcp_token_configuration.py",
+          "line": 32,
+          "source_group": "tests",
+          "text": "shell_loader = _read(\"scripts/ops/support/load_repo_env.sh\")"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
+          "line": 374,
+          "source_group": "tests",
+          "text": "assert \"scripts/ops/support/load_repo_env.sh\" in hint"
         }
       ],
       "owner": "@bioetl-platform",
@@ -26969,7 +26855,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 154,
+          "line": 136,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_ai_skills_layout.sh"
         },
@@ -26996,7 +26882,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -27012,7 +26898,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 151,
+          "line": 133,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_skills_mirror.sh --check"
         },
@@ -27027,12 +26913,6 @@
           "line": 45,
           "source_group": "tests",
           "text": "\"bash scripts/ops/support/skills/check_skills_mirror.sh --check\","
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 258,
-          "source_group": "tests",
-          "text": "\"scripts/ops/support/skills/check_skills_mirror.sh\","
         }
       ],
       "owner": "@bioetl-platform",

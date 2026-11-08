@@ -143,11 +143,13 @@ Minimum expectation:
   runtime sources. Devin-specific behavior starts there and remains subordinate
   to the repository-wide governance stack; it MUST NOT be silently replaced by
   a Codex-only profile.
-- Gemini is not a project runtime. Do not add root `GEMINI.md` or tracked
-  `.gemini/agents/**` or `.gemini/skills/**`. Only `.gemini/config.yaml`
-  (Gemini Code Assist on GitHub) is tracked; all other Gemini files remain
-  machine-local and are not a BioETL source of truth.
-- `.claude/**` is not an active runtime source for Codex/Junie behavior
+- `.gemini/settings.json` may exist as a machine-local Gemini config surface,
+  but the current `main` checkout does not contain a tracked Gemini
+  `agents/` or `skills/` runtime tree.
+- Treat `docs/00-project/ai/**` Gemini references as mirrors or historical
+  guidance unless a future task adds and verifies tracked `.gemini/agents/**`
+  or `.gemini/skills/**` surfaces on `main`.
+- `.claude/**` is not an active runtime source for Codex/Junie/Gemini behavior
   in this change program and is treated as unavailable until a local checkout
   proves otherwise.
 - `docs/00-project/ai/memory/mcp-memory.json` and

@@ -24,7 +24,6 @@ export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${TMPDIR:-/tmp}/bioetl-npm-cache}"
 export NPM_CONFIG_IGNORE_SCRIPTS="${NPM_CONFIG_IGNORE_SCRIPTS:-true}"
 
 mcp_exit_if_validate_only "adr-analysis"
-mcp_prepare_npm_cache
 
 # Package defaults to stdio MCP transport. Do not pass a bare "--stdio" flag.
 exec env \
