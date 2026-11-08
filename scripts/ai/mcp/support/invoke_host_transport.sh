@@ -9,19 +9,20 @@ run_mcp_host_route() {
   fi
 
   local support_dir root pid status=0 signal_status=0
-  local -x PC_AGENT_MCP_ROUTES_FILE="${PC_AGENT_MCP_ROUTES_FILE:-}"
+  local route_file="${PC_AGENT_MCP_ROUTES_FILE:-}"
   support_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)" || return 1
   root="$(cd -- "${support_dir}/../../../.." && pwd)" || return 1
   if command -v cygpath >/dev/null 2>&1; then
     root="$(cygpath -w "${root}")" || return 1
-    if [[ "${PC_AGENT_MCP_ROUTES_FILE}" == /* ]]; then
-      PC_AGENT_MCP_ROUTES_FILE="$(cygpath -w "${PC_AGENT_MCP_ROUTES_FILE}")" || return 1
+    if [[ "${route_file}" == /* ]]; then
+      route_file="$(cygpath -w "${route_file}")" || return 1
     fi
   fi
 
   # Forward the client's signal and wait for Node to finish stopping its adapter.
   trap 'signal_status=143; if [[ -n "${pid:-}" ]]; then kill -TERM "${pid}" 2>/dev/null || true; fi' TERM
   trap 'signal_status=130; if [[ -n "${pid:-}" ]]; then kill -INT "${pid}" 2>/dev/null || true; fi' INT
+  PC_AGENT_MCP_ROUTES_FILE="${route_file}" \
   node "${support_dir}/host_transport.mjs" \
     --root "${root}" --server "${server}" -- "$@" <&0 &
   pid=$!
