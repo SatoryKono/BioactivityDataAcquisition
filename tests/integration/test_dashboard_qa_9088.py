@@ -20,7 +20,11 @@ from scripts.ops.observability.grafana.dashboard_context_links import (
 
 from tests.integration._dashboard_layout_budgets import FIRST_WINDOW_Y
 from tests.integration._grafana_dashboard_links_support import get_dashboard_files
-from tests.integration._grafana_test_support import get_dashboard_panels, load_dashboard
+from tests.integration._grafana_test_support import (
+    get_dashboard_panels,
+    load_dashboard,
+    resolve_dashboard_target,
+)
 
 pytestmark = pytest.mark.integration
 
@@ -105,6 +109,29 @@ def test_data_bearing_selected_run_uses_ops_http() -> None:
     assert not offenders, "selected_run must be ops_http:\n" + "\n".join(offenders)
 
 
+@pytest.mark.parametrize(
+    ("source", "panel_id", "target", "target_id"),
+    [
+        ("bioetl-dq-v2", 9402, "bioetl-overview-v2", 9300),
+        ("bioetl-dq-v2", 9452, "bioetl-overview-v2", 9300),
+        ("bioetl-incident-v1", 9452, "bioetl-overview-v2", 9300),
+        ("bioetl-incident-v1", 9460, "bioetl-dq-v2", 9460),
+    ],
+)
+def test_selected_run_guidance_links_to_canonical_evidence(
+    source: str, panel_id: int, target: str, target_id: int
+) -> None:
+    dashboard = load_dashboard(DASHBOARD_DIR / f"{source}.json")
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == panel_id)
+    assert panel["type"] == "text"
+    assert not panel.get("targets")
+    content = panel["options"]["content"]
+    assert f"/d/{target}/" in content
+    assert f"viewPanel={target_id}" in content
+    assert "${run_id:queryparam}" in content
+    assert "${__url_time_range}" in content
+
+
 def test_empty_state_classes_are_declared_and_visible_copy_differs() -> None:
     contract = yaml.safe_load(CONTRACT_PATH.read_text(encoding="utf-8"))
     records, _ = content._contract_panel_records(contract)
@@ -149,18 +176,11 @@ def test_provider_freshness_is_not_present_ok_on_missing_health_status() -> None
     assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
     assert "saved" in panel["description"].lower()
     assert "provider API was not called" in panel["description"]
-    targets = panel["targets"]
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    targets = [resolve_dashboard_target(panels, target) for target in panel["targets"]]
     assert targets
-    if panel["datasource"]["uid"] == "-- Dashboard --":
-        by_id = {p["id"]: p for p in get_dashboard_panels(dashboard)}
-        targets = [
-            source_target
-            for reuse in targets
-            for source_target in by_id[reuse["panelId"]]["targets"]
-        ]
-    assert targets
-    assert all("expr" not in t for t in targets)
-    assert all("run_id=${run_id}" in t["url"] for t in targets)
+    assert all("expr" not in target for target in targets)
+    assert all("run_id=${run_id}" in target["url"] for target in targets)
 
 
 def test_current_card_disposition_covers_first_window_current_panels() -> None:
