@@ -170,6 +170,13 @@ def main() -> int:
             if name not in servers:
                 raise ValueError("Local transport is outside the shared catalog")
             servers[name] = deepcopy(entry)
+<<<<<<< Updated upstream
+||||||| Stash base
+=======
+    # Explicit host input survives Git branch switches; never embeds service tokens.
+    from scripts.ops.runtime.mcp.host_routes import merge_host_routes
+    servers = merge_host_routes(servers, ROOT, allowed=set(servers))
+>>>>>>> Stashed changes
     # Preserve approved remote HTTPS servers from tracked .mcp.json when present.
     _merge_tracked_https_servers(servers, ROOT / _DOT_MCP_JSON)
 

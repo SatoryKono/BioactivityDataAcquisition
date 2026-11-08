@@ -435,6 +435,13 @@ def _apply_shared_transport(
                             raise ValueError("Local transport path escapes workspace")
                         projected["args"][0] = str(resolved)
                 rewritten[name] = projected
+<<<<<<< Updated upstream
+||||||| Stash base
+=======
+    if workspace_root is not None:
+        from scripts.ops.runtime.mcp.host_routes import merge_host_routes
+        rewritten = merge_host_routes(rewritten, workspace_root, allowed=set(MCP_SHARED_SERVER_ENDPOINTS))
+>>>>>>> Stashed changes
     return rewritten
 
 
@@ -557,7 +564,7 @@ def _canonical_servers(
     }
     servers["memory"]["env"] = {
         "NPM_CONFIG_CACHE": npm_cache_dir,
-        "MEMORY_SEED_PATH": str(memory_file_path),
+        "MEMORY_FILE_PATH": str(memory_file_path),
     }
     servers["deja"]["env"] = {"NPM_CONFIG_CACHE": npm_cache_dir}
     servers["adr-analysis"]["env"] = {
