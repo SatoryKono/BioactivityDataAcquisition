@@ -53,7 +53,7 @@ $ curl -s -v http://localhost:8000/ops/control-plane/filter-options
 
 ## 4. Diagnostics Results
 - **UUID verification for multiple options:** `PASS` (via unit tests).
-- **HTTP/Semantic Response for Stamp:** `PASS` (via unit tests). Returns `run_not_found` and `UNKNOWN`, not `QUERY ERROR`.
+- **HTTP/Semantic Response for Stamp:** `PASS` (isolated local HTTP test). A real GET to a loopback HealthServer with a temporary file catalog returns HTTP 200, `run_not_found` and `UNKNOWN`, not `QUERY ERROR`. The response is not stubbed; this does not establish live deployment behavior.
 - **`resolve=unique` coverage:** `PASS` (via unit tests). Handles 0, 1, and >1 matches explicitly without guessing.
 - **Implicit scan for empty run_id or explicit token:** `PASS` (via unit tests). Scan is blocked.
 - **Live Endpoint Test:** `NOT_VERIFIABLE`. Live environment stack is down.

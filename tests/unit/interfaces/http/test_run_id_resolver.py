@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 from uuid import UUID
 
+import httpx
 import pytest
 
 from bioetl.domain.control_plane.run_manifest import RunManifest
@@ -165,34 +167,40 @@ def test_non_uuid_token_does_not_raise_into_live_diagnostics() -> None:
     host._run_manifest_port.get_by_run_id.assert_not_called()
 
 
-def test_stamp_not_found_payload_is_not_query_error(
-    monkeypatch: pytest.MonkeyPatch,
+@pytest.mark.asyncio
+async def test_stamp_not_found_payload_is_not_query_error(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from bioetl.interfaces.http import selected_run_status as selected
-    from bioetl.interfaces.http._selected_run_unavailable import unavailable_status
-
-    host = MagicMock()
-    host._run_manifest_port = MagicMock()
-    host._run_ledger_port = None
-    host._evidence_location_resolver = None
-    host._runtime_source_id = None
-
-    def _missing(**kwargs: object) -> dict[str, object]:
-        return unavailable_status(
-            str(kwargs["pipeline"]),
-            str(kwargs["run_id"]),
-            "UNKNOWN",
-            "run_not_found",
-        )
-
-    monkeypatch.setattr(selected, "load_selected_run_status", _missing)
-    payload = selected._load_selected_with_live_fallback(
-        host,
-        pipeline="uniprot_protein",
-        run_id=_STAMP,
-        query={"pipeline": "uniprot_protein", "run_type": "backfill"},
-        skip_scope_check=True,
+    from bioetl.infrastructure.control_plane.file_run_manifest_store import (
+        FileRunManifestStore,
     )
+    from bioetl.interfaces.http.health_server import HealthServer
+
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    monkeypatch.setenv("BIOETL_REPORT_ROOT", str(reports))
+    manifests = FileRunManifestStore(tmp_path / "control" / "run_manifest")
+    manifests.save(
+        RunManifest(run_id=RunID(UUID(_RUN_ID)), pipeline_name="uniprot_protein")
+    )
+    server = HealthServer(host="127.0.0.1", port=0, run_manifest_port=manifests)
+    await server.start()
+    try:
+        assert server._server is not None
+        port = server._server.sockets[0].getsockname()[1]
+        async with httpx.AsyncClient(trust_env=False) as client:
+            response = await client.get(
+                f"http://127.0.0.1:{port}/ops/observability/selected-run-status",
+                params={
+                    "pipeline": "uniprot_protein",
+                    "run_id": _STAMP,
+                    "run_type": "backfill",
+                },
+            )
+        assert response.status_code == 200
+        payload = response.json()
+    finally:
+        await server.stop()
 
     assert payload["reason"] == "run_not_found"
     assert payload["verdict"] == "UNKNOWN"
