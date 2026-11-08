@@ -194,7 +194,9 @@ def _deduplicate_resolved_rows(
             continue
 
         component_id = _positive_int_or_none(row.get("component_id"))
-        parsed_rows.append((leaf_id, component_id if component_id is not None else 10**12, row))
+        parsed_rows.append(
+            (leaf_id, component_id if component_id is not None else 10**12, row)
+        )
 
     parsed_rows.sort(key=lambda x: (x[0], x[1]))
 

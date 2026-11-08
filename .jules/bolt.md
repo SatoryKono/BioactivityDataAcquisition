@@ -1,7 +1,0 @@
-## 2024-03-24 - [Polars DataFrame Row Iteration Optimization]
-**Learning:** In Polars, iterating row-by-row over a DataFrame natively in Python using `df.iter_rows(named=True)` is significantly slower than converting the DataFrame to Python dictionaries first with `df.to_dicts()`. This is because `to_dicts()` pushes the dictionary instantiation logic down to Rust and returns fully constructed Python objects in bulk, avoiding per-row boundary-crossing overhead.
-**Action:** When row-level dictionary iteration is strictly required in Polars pipelines (and vectorized Polars functions cannot be used), prefer `df.to_dicts()` over `df.iter_rows(named=True)` for faster dict materialization, particularly for larger DataFrames.
-
-## 2024-03-24 - [Schwartzian Transform for Object List Sorting]
-**Learning:** For deduplication and sorting pipelines filtering heavily formatted dictionaries (like those using custom extraction rules before deduplication), calculating custom tuple sort keys on-the-fly (`key=lambda...` running on O(N) dicts repeatedly within python's `.sort()` or `sorted()`) takes significantly longer. Using a Schwartzian transform (decorate-sort-undecorate) by projecting out the sort fields into flat tuples during a single pre-filtering loop reduces total sorting and processing time substantially.
-**Action:** Pre-calculate and extract heavy sort fields during an initial loop, sort the list of tuples, then extract the underlying dictionaries in the deduplication step.
