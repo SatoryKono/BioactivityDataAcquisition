@@ -10,7 +10,7 @@ from bioetl.composition.runtime_builders._runtime_launch_context_fields import (
 from bioetl.composition.runtime_builders._run_manifest_snapshot_resolution import (
     resolve_name_component,
 )
-from bioetl.application.serialization.snapshot_serialization import (
+from bioetl.composition.services.effective_config_serializer import (
     to_serializable_mapping as to_serializable_mapping,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
