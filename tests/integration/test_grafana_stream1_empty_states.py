@@ -109,7 +109,17 @@ def test_provider_health_fleet_cause_tables_are_retired() -> None:
     for panel_id in _PROVIDER_SINGLE_STATE_NO_VALUE_PANEL_IDS:
         panel = panels[panel_id]
         assert all("expr" not in target for target in panel["targets"])
-        assert all("run_id=${run_id}" in target["url"] for target in panel["targets"])
+        assert panel["targets"]
+        for target in panel["targets"]:
+            assert target["datasource"]["uid"] == "-- Dashboard --"
+            assert target["withTransforms"] is False
+            sources = panels[target["panelId"]]["targets"]
+            assert sources
+            assert all(
+                "/selected-run-status?" in source["url"]
+                and "run_id=${run_id}" in source["url"]
+                for source in sources
+            )
 
 
 def test_provider_cause_contract_declares_unknown_beside_valid_empty() -> None:
@@ -181,12 +191,16 @@ def test_dq_10253_select_run_novalue_drops_hedge_tails() -> None:
         if isinstance(panel.get("id"), int)
     }
     expected = {
-        9402: "SELECT RUN — no exact Run ID selected. Choose a run first.",
         9403: (
             "SELECT RUN — no exact Run ID selected. Choose this run in Run Explorer."
         ),
         9406: "UNKNOWN",
     }
+    handoff = panels[9402]
+    assert handoff["type"] == "text"
+    assert not handoff.get("targets")
+    assert "viewPanel=9300" in handoff["options"]["content"]
+    assert "${run_id:queryparam}" in handoff["options"]["content"]
     for panel_id, expected_no_value in expected.items():
         no_value = (
             panels[panel_id].get("fieldConfig", {}).get("defaults", {}).get("noValue")
