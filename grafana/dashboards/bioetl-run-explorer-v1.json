@@ -579,26 +579,26 @@
                 ]
               },
               {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#93C5FD"
-                }
-              },
-              {
                 "id": "custom.wrapText",
-                "value": true
+                "value": false
               },
               {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
                 "id": "custom.tooltip.field",
                 "value": "run_id"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#93C5FD"
+                }
               }
             ]
           },

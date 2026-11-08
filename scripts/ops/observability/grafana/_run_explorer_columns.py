@@ -345,10 +345,10 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         if name == _RUN_ID_LABEL:
             properties.extend(
                 [
-                    {"id": "custom.wrapText", "value": True},
+                    {"id": "custom.wrapText", "value": False},
                     {
                         "id": _CELL_OPTIONS_ID,
-                        "value": {"type": "auto", "wrapText": True},
+                        "value": {"type": "auto", "wrapText": False},
                     },
                     {"id": "custom.tooltip.field", "value": "run_id"},
                 ]
