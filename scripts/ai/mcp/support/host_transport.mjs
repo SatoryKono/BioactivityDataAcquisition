@@ -19,8 +19,24 @@ export function nativePath(value, platform = process.platform) {
 }
 
 function exists(value) {
-    try { fs.lstatSync(value); return true; }
-    catch (error) { if (error.code === 'ENOENT') return false; throw error; }
+    try {
+        fs.lstatSync(value);
+        return true;
+    } catch (error) {
+        if (error.code === 'ENOENT') return false;
+        throw error;
+    }
+}
+
+function readPolicyFile(marker) {
+    const data = JSON.parse(fs.readFileSync(marker, 'utf8').replace(/^\uFEFF/, ''));
+    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Invalid host route policy');
+    if (Object.hasOwn(data, 'source')) {
+        if (typeof data.source !== 'string' || !data.source) throw new Error('Invalid host route source');
+    } else if (!Array.isArray(data.workspaces)) {
+        throw new Error('Invalid workspace route list');
+    }
+    return data;
 }
 
 export function readPolicy(marker, explicit = false) {
@@ -34,16 +50,10 @@ export function readPolicy(marker, explicit = false) {
         const identity = fs.realpathSync(marker);
         if (seen.has(identity)) throw new Error('Host route indirection cycle');
         seen.add(identity);
-        const data = JSON.parse(fs.readFileSync(marker, 'utf8').replace(/^\uFEFF/, ''));
-        if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Invalid host route policy');
-        if (Object.hasOwn(data, 'source')) {
-            if (typeof data.source !== 'string' || !data.source) throw new Error('Invalid host route source');
-            const next = nativePath(data.source);
-            marker = path.isAbsolute(next) ? next : path.resolve(path.dirname(marker), next);
-        } else {
-            if (!Array.isArray(data.workspaces)) throw new Error('Invalid workspace route list');
-            return data;
-        }
+        const data = readPolicyFile(marker);
+        if (!Object.hasOwn(data, 'source')) return data;
+        const next = nativePath(data.source);
+        marker = path.isAbsolute(next) ? next : path.resolve(path.dirname(marker), next);
     }
     throw new Error('Too many host route indirections');
 }
@@ -67,9 +77,18 @@ function matches(root, scope) {
     if ([...(scope.roots || []), ...(scope.patterns || [])].some(x => typeof x !== 'string')) throw new Error('Invalid route path');
     if ((scope.roots || []).some(value => normalized(value) === root)) return true;
     return (scope.patterns || []).some(value => {
-        const escaped = normalized(value).split('*').map(part => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*');
+        const escaped = normalized(value).split('*').map(part => part.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)).join('.*');
         return new RegExp(`^${escaped}$`).test(root);
     });
+}
+
+function validateEntry(entry) {
+    if (!entry || typeof entry.command !== 'string' || !entry.command.trim() || !Array.isArray(entry.args) ||
+        !entry.args.every(value => typeof value === 'string') ||
+        (entry.type !== undefined && entry.type !== 'stdio') ||
+        ['env', 'headers', 'url'].some(key => Object.hasOwn(entry, key)) || entry.disabled || entry.enabled === false)
+        throw new Error('Invalid or disabled managed stdio route');
+    return {command: entry.command, args: [...entry.args]};
 }
 
 export function selectRoute(data, root, name, commonDirectory = gitCommonDirectory) {
@@ -86,12 +105,7 @@ export function selectRoute(data, root, name, commonDirectory = gitCommonDirecto
         if (!scope.entries || typeof scope.entries !== 'object') throw new Error('Invalid managed route entries');
         if (!Object.hasOwn(scope.entries, name)) continue;
         const entry = scope.entries[name];
-        if (!entry || typeof entry.command !== 'string' || !entry.command.trim() || !Array.isArray(entry.args) ||
-            !entry.args.every(value => typeof value === 'string') ||
-            (entry.type !== undefined && entry.type !== 'stdio') ||
-            ['env', 'headers', 'url'].some(key => Object.hasOwn(entry, key)) || entry.disabled || entry.enabled === false)
-            throw new Error('Invalid or disabled managed stdio route');
-        selected = {command: entry.command, args: [...entry.args]};
+        selected = validateEntry(entry);
     }
     if (managed && !selected) throw new Error('Managed workspace has no route for the requested server');
     return selected;
@@ -116,7 +130,8 @@ export async function dispatch({root, name, extra = [], marker, explicit, valida
         process.once('SIGTERM', terminate); process.once('SIGINT', interrupt);
         let finished = false;
         const finish = code => {
-            if (finished) return; finished = true;
+            if (finished) return;
+            finished = true;
             process.off('SIGTERM', terminate); process.off('SIGINT', interrupt);
             // A managed adapter must never return the wrapper's permission to use legacy fallback.
             resolve(Number.isInteger(code) && code !== UNMANAGED ? code : 1);

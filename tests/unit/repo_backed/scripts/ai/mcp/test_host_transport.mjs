@@ -69,8 +69,8 @@ test('workspace route matching follows platform case semantics',()=>{
     else assert.equal(other,null);
 });
 test('Windows policy paths map only when a non-Windows client needs them',()=>{
-    assert.equal(route.nativePath('D:\\host\\routes.json','linux'),'/mnt/d/host/routes.json');
-    assert.equal(route.nativePath('D:\\host\\routes.json','win32'),'D:\\host\\routes.json');
+    assert.equal(route.nativePath(String.raw`D:\host\routes.json`,'linux'),'/mnt/d/host/routes.json');
+    assert.equal(route.nativePath(String.raw`D:\host\routes.json`,'win32'),String.raw`D:\host\routes.json`);
 });
 test('credential-bearing, remote, disabled and malformed entries are rejected',t=>{
     const root=fixture(t);
@@ -122,7 +122,7 @@ function wrapperFixture(t,stem,shell){
     for(const command of ['npx','docker'])fs.writeFileSync(path.join(bin,command),'#!/usr/bin/env bash\nprintf LEGACY_SENTINEL\n',{mode:0o755});
     return {root,file,driver,support,bin};
 }
-function wrapperRun(f,marker,shell,extra=[],updates={},input){
+function wrapperRun(f,marker,shell,extra=[],updates={},input=undefined){
     const env={...process.env,PC_AGENT_MCP_ROUTES_FILE:marker,BIOETL_MCP_VALIDATE_ONLY:'0',BIOETL_TEST_FAKE_BIN:f.bin,...updates};
     return spawnSync(shell==='ps1'?ps:bash,shell==='ps1'?['-NoLogo','-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',f.driver,f.file,...extra]:[f.driver,f.file,...extra],
         {env,input,encoding:'utf8',windowsHide:true,timeout:20000,cwd:fixtures});
