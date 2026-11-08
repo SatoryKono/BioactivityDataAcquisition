@@ -903,6 +903,14 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
     """Replace selected-run summaries through the generator, keeping CURRENT distinct."""
     panels = payload.get("panels", [])
     uid = payload.get("uid")
+    if uid == "bioetl-incident-v1":
+        # These handoffs are rebuilt with the saved evidence row, then promoted
+        # to the root by apply_incident. Do not keep their previous text copies.
+        panels[:] = [
+            panel
+            for panel in panels
+            if not isinstance(panel, dict) or panel.get("id") not in {9452, 9460}
+        ]
     for panel in _walk_panels(panels):
         if not isinstance(panel, dict):
             continue
