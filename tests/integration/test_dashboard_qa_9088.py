@@ -149,8 +149,18 @@ def test_provider_freshness_is_not_present_ok_on_missing_health_status() -> None
     assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
     assert "saved" in panel["description"].lower()
     assert "provider API was not called" in panel["description"]
-    assert all("expr" not in t for t in panel["targets"])
-    assert all("run_id=${run_id}" in t["url"] for t in panel["targets"])
+    targets = panel["targets"]
+    assert targets
+    if panel["datasource"]["uid"] == "-- Dashboard --":
+        by_id = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+        targets = [
+            source_target
+            for reuse in targets
+            for source_target in by_id[reuse["panelId"]]["targets"]
+        ]
+    assert targets
+    assert all("expr" not in t for t in targets)
+    assert all("run_id=${run_id}" in t["url"] for t in targets)
 
 
 def test_current_card_disposition_covers_first_window_current_panels() -> None:
