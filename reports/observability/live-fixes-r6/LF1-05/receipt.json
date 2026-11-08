@@ -1,0 +1,37 @@
+{
+  "issue": "12801",
+  "task": "LF1-05",
+  "base_sha": "6374496d30c7111a3c0c535091ecbefd4797cf87",
+  "time_utc": "2026-11-08T13:39:19Z",
+  "parameters": {
+    "pipeline": ["uniprot_protein", "uniprot_idmapping"],
+    "run_type": "backfill"
+  },
+  "uuids": [
+    {
+      "uuid": "ee3ce1ed-9487-572f-ae24-c98c6f6e3a37",
+      "type": "positive",
+      "pipeline": "uniprot_protein",
+      "status": "NOT_VERIFIABLE"
+    },
+    {
+      "uuid": "d7cdb35b-e37a-5767-b30e-aa8dfb60d775",
+      "type": "positive",
+      "pipeline": "uniprot_idmapping",
+      "status": "NOT_VERIFIABLE"
+    },
+    {
+      "uuid": "20261102T181217",
+      "type": "negative",
+      "pipeline": "uniprot_protein",
+      "status": "PASS"
+    },
+    {
+      "uuid": "00000000-0000-0000-0000-000000000000",
+      "type": "negative",
+      "pipeline": null,
+      "status": "PASS"
+    }
+  ],
+  "overall_status": "PARTIAL"
+}
