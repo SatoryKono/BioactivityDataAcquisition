@@ -574,6 +574,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-13/checksums.txt",
+            "reports/observability/live-fixes-r6/LF1-13/machine_readable_receipt.json",
+            "reports/observability/live-fixes-r6/LF1-13/report.md",
+        ),
+        (GRAFANA_SELECTOR_CONTRACT_TEST, *DOCUMENTATION_CLEANUP_INVENTORY_TESTS),
+    ),
     "reports/audit/comp-004-runtime/verification_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
