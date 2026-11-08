@@ -75,9 +75,9 @@ export function gitCommonDirectory(root) {
 function matches(root, scope) {
     if (!Array.isArray(scope.roots || []) || !Array.isArray(scope.patterns || [])) throw new Error('Invalid route scope');
     if ([...(scope.roots || []), ...(scope.patterns || [])].some(x => typeof x !== 'string')) throw new Error('Invalid route path');
-    if ((scope.roots || []).some(value => normalized(value) === root)) return true;
+    if ((scope.roots || []).some(value => normalized(nativePath(value)) === root)) return true;
     return (scope.patterns || []).some(value => {
-        const escaped = normalized(value).split('*').map(part => part.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)).join('.*');
+        const escaped = normalized(nativePath(value)).split('*').map(part => part.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)).join('.*');
         return new RegExp(`^${escaped}$`).test(root);
     });
 }
@@ -115,7 +115,12 @@ export async function dispatch({root, name, extra = [], marker, explicit, valida
     const policy = readPolicy(marker, explicit);
     if (!policy) return UNMANAGED;
     const resolved = fs.realpathSync(root);
-    if (normalized(resolved) !== normalized(path.resolve(root))) throw new Error('Managed workspace uses a reparse path');
+    const requested = normalized(path.resolve(root));
+    const physical = normalized(resolved);
+    if (physical !== requested && policy.workspaces.some(scope =>
+        scope && (matches(physical, scope) || matches(requested, scope)))) {
+        throw new Error('Managed workspace uses a reparse path');
+    }
     const entry = selectRoute(policy, resolved, name);
     if (!entry) return UNMANAGED;
     if (extra.length) throw new Error('Extra arguments are unsupported by the fixed managed route');

@@ -397,6 +397,18 @@
       "owner": "@bioetl-platform",
       "review_by": "2027-01-31"
     },
+    "scripts/ai/mcp/support/invoke_host_transport.ps1": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal host route launcher for the Context7 and Brave wrappers.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31"
+    },
+    "scripts/ai/mcp/support/invoke_host_transport.sh": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal host route launcher for the Context7 and Brave wrappers.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31"
+    },
     "scripts/ai/mcp/support/uv_resolver.ps1": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the internal PowerShell uvx resolution and proxy-cleanup helper shared by MCP wrappers; keep it supporting unless command resolution becomes a standalone governed MCP command.",

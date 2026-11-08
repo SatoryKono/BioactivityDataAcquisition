@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
-import {spawnSync} from 'node:child_process';
+import {spawn,spawnSync} from 'node:child_process';
 
 const helper=process.env.BIOETL_TEST_HOST_HELPER || fileURLToPath(new URL('../../../../../../scripts/ai/mcp/support/host_transport.mjs',import.meta.url));
 const sourceMcp=process.env.BIOETL_TEST_MCP_DIR || path.dirname(path.dirname(helper));
@@ -107,7 +107,9 @@ function wrapperFixture(t,stem,shell){
     fs.mkdirSync(support,{recursive:true});
     const file=path.join(mcp,`mcp_${stem}_wrapper.${shell}`);
     fs.copyFileSync(path.join(sourceMcp,path.basename(file)),file);fs.copyFileSync(helper,path.join(support,'host_transport.mjs'));
-    fs.copyFileSync(path.join(sourceMcp,'support/invoke_host_transport.ps1'),path.join(support,'invoke_host_transport.ps1'));
+    for(const name of ['invoke_host_transport.ps1','invoke_host_transport.sh']){
+        fs.copyFileSync(path.join(sourceMcp,'support',name),path.join(support,name));
+    }
     fs.writeFileSync(path.join(support,'load_repo_env.ps1'),'function Import-BioetlRepoEnv {}\n');
     fs.writeFileSync(path.join(support,'token_validation.ps1'),'function Test-McpOptionalToken {}\nfunction Test-McpRequiredToken {}\nfunction Exit-McpValidateOnly {}\n');
     fs.writeFileSync(path.join(support,'mcp_docker_prune.ps1'),'function Remove-McpExitedContainers {}\n');
@@ -163,3 +165,53 @@ for(const shell of ['ps1','sh'])for(const stem of ['context7','brave_search']){
         assert.equal(result.status,0,result.stderr);assert.equal(result.stdout,payload);
     });
 }
+
+test('WSL matches Windows roots and patterns from the policy',{skip:process.platform==='win32'},()=>{
+    const expected=policy('/mnt/c/projects/repo').workspaces[0].entries.context7;
+    for(const scope of [{roots:[String.raw`C:\projects\repo`]},{patterns:[String.raw`C:\projects\*`]}]){
+        assert.deepEqual(route.selectRoute({workspaces:[{...scope,entries:{context7:expected}}]},
+            '/mnt/c/projects/repo','context7'),expected);
+    }
+});
+
+test('reparse paths fail closed only for managed workspaces',{skip:process.platform==='win32'},t=>{
+    const root=fixture(t),real=path.join(root,'real'),link=path.join(root,'link');
+    fs.mkdirSync(real);fs.symlinkSync(real,link,'dir');
+    const marker=path.join(root,'policy.json');
+    json(marker,{workspaces:[]});
+    assert.equal(invoke(link,marker).status,route.UNMANAGED);
+    for(const managedRoot of [real,link]){
+        json(marker,policy(managedRoot));
+        assert.equal(invoke(link,marker).status,1);
+    }
+});
+
+test('Git Bash accepts POSIX paths for an explicit policy',{skip:process.platform!=='win32'||!shellAvailable.sh},t=>{
+    const f=wrapperFixture(t,'context7','sh'),marker=path.join(f.root,'policy.json');
+    json(marker,policy(f.root));
+    const converted=spawnSync(bash,['-c','cygpath -u "$1"','bash',marker],{encoding:'utf8'});
+    assert.equal(converted.status,0,converted.stderr);
+    const result=wrapperRun(f,converted.stdout.trim(),'sh');
+    assert.equal(result.status,0,result.stderr);
+    assert.equal(result.stdout,'PROTOCOL_SENTINEL');
+});
+
+test('Bash forwards termination to the managed adapter',{skip:process.platform==='win32'||!shellAvailable.sh,timeout:8000},async t=>{
+    const f=wrapperFixture(t,'context7','sh'),marker=path.join(f.root,'policy.json');
+    const data=policy(f.root);
+    data.workspaces[0].entries.context7.args=['-e',
+        "process.on('SIGTERM',()=>{process.stdout.write('TERMINATED');process.exit(0)});process.stdout.write('READY');setInterval(()=>{},1000)"];
+    json(marker,data);
+    const child=spawn(bash,[f.file],{env:{...process.env,PC_AGENT_MCP_ROUTES_FILE:marker}});
+    t.after(()=>child.kill('SIGTERM'));
+    const result=await new Promise((resolve,reject)=>{
+        let stdout='';
+        child.on('error',reject);
+        child.stdout.on('data',chunk=>{
+            stdout+=chunk;
+            if(stdout==='READY') child.kill('SIGTERM');
+        });
+        child.on('close',code=>resolve({code,stdout}));
+    });
+    assert.deepEqual(result,{code:143,stdout:'READYTERMINATED'});
+});
