@@ -578,6 +578,19 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     **dict.fromkeys(
         (
+            "reports/observability/live-fixes-r6/LF1-11/contract-evidence.json",
+            "reports/observability/live-fixes-r6/LF1-11/manifest-show.txt",
+            "reports/observability/live-fixes-r6/LF1-11/manifest-validation.json",
+            "reports/observability/live-fixes-r6/LF1-11/manifest.json",
+            "reports/observability/live-fixes-r6/LF1-11/report.md",
+        ),
+        (
+            "tests/unit/interfaces/http/test_manifest_validation_catalog.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    **dict.fromkeys(
+        (
             "reports/observability/live-fixes-r6/LF1-06/checksums.txt",
             "reports/observability/live-fixes-r6/LF1-06/machine_readable_receipt.json",
             "reports/observability/live-fixes-r6/LF1-06/report.md",
