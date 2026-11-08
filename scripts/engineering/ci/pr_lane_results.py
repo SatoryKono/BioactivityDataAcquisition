@@ -175,7 +175,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh",
             "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
             "scripts/ai/mcp/mcp_code_analyzer_wrapper.sh",
-            "scripts/ai/mcp/mcp_context7_wrapper.sh",
             "scripts/ai/mcp/mcp_deja_wrapper.sh",
             "scripts/ai/mcp/mcp_github_actions_wrapper.sh",
             "scripts/ai/mcp/support/token_validation.sh",
@@ -195,6 +194,24 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py",
             "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
         ),
+    ),
+    **dict.fromkeys(
+        (
+            "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
+            "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
+            "scripts/ai/mcp/mcp_context7_wrapper.ps1",
+            "scripts/ai/mcp/support/host_transport.mjs",
+            "scripts/ai/mcp/support/invoke_host_transport.ps1",
+            "scripts/ai/mcp/support/invoke_host_transport.sh",
+            "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
+        ),
+        ("tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",),
+    ),
+    "scripts/ai/mcp/mcp_context7_wrapper.sh": (
+        "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
+        "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",
+        "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py",
+        "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
     ),
     "scripts/ops/docker-setup.ps1": (
         "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
