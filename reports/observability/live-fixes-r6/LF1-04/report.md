@@ -23,7 +23,7 @@ From the extracted JSON configuration for panel 9701 (`panel-9701.json`):
 
 ## 3. Scope Scenarios Table (Expected vs Actual)
 
-| Scenario | Parameters | Expected PromQL Modification | Actual PromQL Execution | Conclusion |
+| Scenario | Parameters | Expected PromQL Modification | Static PromQL Analysis (queries not executed) | Conclusion |
 | :--- | :--- | :--- | :--- | :--- |
 | **Empty run_id** | `run_id=""` | No change in query | None. `$run_id` is not present in the Prometheus queries. | Queries execute with `$workflow`, `$pipeline`, `$run_type` scopes only. |
 | **Original UUID** | `run_id="ee3ce1ed-9487-572f-ae24-c98c6f6e3a37"` | Filter by original UUID | None. `$run_id` is ignored by the panel's queries. | No change to data retrieval; panel scope remains independent of run selection. |
