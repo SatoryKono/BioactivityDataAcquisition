@@ -198,6 +198,11 @@ def test_dq_10253_select_run_novalue_drops_hedge_tails() -> None:
         ),
         9406: "UNKNOWN",
     }
+    handoff = panels[9402]
+    assert handoff["type"] == "text"
+    assert not handoff.get("targets")
+    assert "viewPanel=9300" in handoff["options"]["content"]
+    assert "${run_id:queryparam}" in handoff["options"]["content"]
     for panel_id, expected_no_value in expected.items():
         no_value = (
             panels[panel_id].get("fieldConfig", {}).get("defaults", {}).get("noValue")

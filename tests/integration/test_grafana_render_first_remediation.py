@@ -409,6 +409,17 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
     # Workflow overview + Alerts/SLO retired (#6570/#6647).
 
 
+def _selected_run_donor(
+    overview: dict[str, object], panel: dict[str, object]
+) -> dict[str, object]:
+    reuse = panel["targets"][0]
+    assert reuse["datasource"]["uid"] == "-- Dashboard --"
+    assert reuse["withTransforms"] is False
+    target = _panel(overview, reuse["panelId"])["targets"][0]
+    assert "/selected-run-status?" in target["url"]
+    return target
+
+
 def test_rf004_identity_and_scope_are_persistent() -> None:
     incident = _load("bioetl-incident-v1.json")
     latency = _panel(incident, 111)
@@ -632,6 +643,7 @@ def _override_width(panel: dict[str, object], field_name: str) -> int | None:
 def test_operator_critical_tables_expose_full_values() -> None:
     expected_panels = {
         "bioetl-dq-v2.json": (9406, 9403),
+        "bioetl-overview-v2.json": (9300,),
         "bioetl-incident-v1.json": (2010, 2002, 2003, 2004, 2005),
         "bioetl-run-explorer-v1.json": (3010,),
     }
@@ -1123,8 +1135,8 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     grid = recent.get("gridPos") or {}
     scope = _panel(explorer, 1)["gridPos"]
     assert grid["y"] == scope["y"] + scope["h"]
-    assert grid["h"] == 12
-    assert grid["y"] + grid["h"] == 17
+    assert grid["h"] == 13
+    assert grid["y"] + grid["h"] == 16
     assert recent.get("options", {}).get("cellHeight") == "sm"
     assert (
         next(t for t in recent["transformations"] if t["id"] == "limit")
