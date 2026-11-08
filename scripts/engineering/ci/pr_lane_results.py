@@ -133,9 +133,9 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
-    "reports/observability/live-fixes-r6/LF1-05/report.md": ("tests/architecture/test_documentation_cleanup_inventory.py",),
-    "reports/observability/live-fixes-r6/LF1-05/machine_readable_receipt.json": ("tests/architecture/test_documentation_cleanup_inventory.py",),
-    "reports/observability/live-fixes-r6/LF1-05/checksums.txt": ("tests/architecture/test_documentation_cleanup_inventory.py",),
+    "reports/observability/live-fixes-r6/LF1-05/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/observability/live-fixes-r6/LF1-05/machine_readable_receipt.json": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/observability/live-fixes-r6/LF1-05/checksums.txt": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
 
     **dict.fromkeys(
         (
