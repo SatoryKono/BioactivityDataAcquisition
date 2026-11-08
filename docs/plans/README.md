@@ -53,6 +53,10 @@ Protocol:
 
 This is the only active execution/backlog document in `docs/plans/`.
 
+### CI Context Plans
+
+- [ci1-07-negative-merge-protection-plan.md](ci1-07-negative-merge-protection-plan.md)
+
 
 ### Archived context (DOC-GOV-08)
 
