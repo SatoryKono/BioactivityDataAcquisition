@@ -437,9 +437,7 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
         "Run Type",
         "Started at",
         "Total Run Duration",
-    } <= set(
-        re.findall(r"'parameter':'([^']+)'", target["root_selector"])
-    )
+    } <= set(re.findall(r"'parameter':'([^']+)'", target["root_selector"]))
 
     # Workflow overview + Alerts/SLO retired; ID-card noValue contract remains.
 

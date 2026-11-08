@@ -193,14 +193,14 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         panels[1]["gridPos"].update(x=0, y=0, w=24, h=3)
     panels[1]["options"]["content"] = (
         '<div style="padding:4px 10px;border-left:4px solid #6b7280;'
-        'font-size:16px;line-height:20px;white-space:normal;'
+        "font-size:16px;line-height:20px;white-space:normal;"
         'overflow-wrap:anywhere;box-sizing:border-box">'
         '<a href="/d/bioetl-run-explorer-v1/1-run-explorer?'
-        'var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*'
+        "var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*"
         '&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}">'
-        '<strong>Reset filters</strong></a><br>'
-        'Last 10 launches · independent of the time range'
-        '</div>'
+        "<strong>Reset filters</strong></a><br>"
+        "Last 10 launches · independent of the time range"
+        "</div>"
     )
     panel = panels[3010]
     panel["gridPos"].update(y=3, h=13)
