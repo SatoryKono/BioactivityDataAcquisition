@@ -351,6 +351,20 @@ def get_dashboard_panels(dashboard: dict) -> list[dict]:
     return panels
 
 
+def resolve_dashboard_target(panels: dict[int, dict], target: dict) -> dict:
+    """Resolve a Dashboard datasource reference to its exact source query."""
+    if "panelId" not in target:
+        return target
+    assert target["datasource"]["uid"] == "-- Dashboard --"
+    source = panels[target["panelId"]]
+    matches = [
+        query for query in source["targets"] if query["refId"] == target["refId"]
+    ]
+    assert len(matches) == 1
+    assert "panelId" not in matches[0], "Expected a direct canonical source"
+    return matches[0]
+
+
 def get_row_child_panels(dashboard: dict, row_title: str) -> list[dict]:
     """Return panels that belong to a row in nested or expanded Grafana JSON."""
     panels = list(dashboard.get("panels", []))

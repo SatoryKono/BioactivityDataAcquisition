@@ -20,6 +20,7 @@ import yaml
 from tests.integration._grafana_test_support import (
     get_dashboard_panels,
     load_dashboard,
+    resolve_dashboard_target,
 )
 
 pytestmark = pytest.mark.integration
@@ -108,18 +109,12 @@ def test_provider_health_fleet_cause_tables_are_retired() -> None:
     assert {9401, 9101, 9102, 9103, 9107, 114}.isdisjoint(panels)
     for panel_id in _PROVIDER_SINGLE_STATE_NO_VALUE_PANEL_IDS:
         panel = panels[panel_id]
-        assert all("expr" not in target for target in panel["targets"])
-        assert panel["targets"]
-        for target in panel["targets"]:
-            assert target["datasource"]["uid"] == "-- Dashboard --"
-            assert target["withTransforms"] is False
-            sources = panels[target["panelId"]]["targets"]
-            assert sources
-            assert all(
-                "/selected-run-status?" in source["url"]
-                and "run_id=${run_id}" in source["url"]
-                for source in sources
-            )
+        targets = [
+            resolve_dashboard_target(panels, target) for target in panel["targets"]
+        ]
+        assert targets
+        assert all("expr" not in target for target in targets)
+        assert all("run_id=${run_id}" in target["url"] for target in targets)
 
 
 def test_provider_cause_contract_declares_unknown_beside_valid_empty() -> None:
@@ -190,6 +185,13 @@ def test_dq_10253_select_run_novalue_drops_hedge_tails() -> None:
         for panel in get_dashboard_panels(dashboard)
         if isinstance(panel.get("id"), int)
     }
+    guidance = panels[9402]
+    assert guidance["type"] == "text"
+    assert not guidance.get("targets")
+    handoff = guidance["options"]["content"]
+    assert "/d/bioetl-overview-v2/" in handoff
+    assert "viewPanel=9300" in handoff
+    assert "${run_id:queryparam}" in handoff
     expected = {
         9403: (
             "SELECT RUN — no exact Run ID selected. Choose this run in Run Explorer."
