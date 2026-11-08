@@ -32,31 +32,30 @@ def _distribution_owners(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.mark.parametrize("declare_runtime", [True, False])
+@pytest.mark.parametrize(
+    ("stub", "runtime", "module"),
+    [("types-openpyxl", "openpyxl", "openpyxl"), ("types-pyyaml", "pyyaml", "yaml")],
+)
 def test_stub_route_requires_declared_locked_runtime(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, declare_runtime: bool
+    tmp_path: Path, declare_runtime: bool, stub: str, runtime: str, module: str
 ) -> None:
     """Reviewed stub ownership selects real imports, never guesses package names."""
-    _consumer(tmp_path, "tests/test_export.py", "openpyxl")
-    requirements = (
-        '["types-openpyxl", "openpyxl"]' if declare_runtime else '["types-openpyxl"]'
-    )
+    _consumer(tmp_path, "tests/test_export.py", module)
+    requirements = [stub, runtime] if declare_runtime else [stub]
     (tmp_path / "pyproject.toml").write_text(
         f"[project]\ndependencies = {requirements}\n", encoding="utf-8"
     )
     (tmp_path / "uv.lock").write_text(
-        '[[package]]\nname = "types-openpyxl"\n[[package]]\nname = "openpyxl"\n',
+        f'[[package]]\nname = "{stub}"\n[[package]]\nname = "{runtime}"\n',
         encoding="utf-8",
     )
-    monkeypatch.setattr(
-        dependencies, "packages_distributions", lambda: {"openpyxl": ["openpyxl"]}
-    )
     if declare_runtime:
-        assert dependencies.dependency_consumers(tmp_path, {"types-openpyxl"}) == [
+        assert dependencies.dependency_consumers(tmp_path, {stub}) == [
             "tests/test_export.py"
         ]
     else:
         with pytest.raises(ValueError, match="Unconfirmed Python dependency"):
-            dependencies.dependency_consumers(tmp_path, {"types-openpyxl"})
+            dependencies.dependency_consumers(tmp_path, {stub})
 
 
 def test_pytest_helper_uses_canonical_all_tests_lane(tmp_path: Path) -> None:
