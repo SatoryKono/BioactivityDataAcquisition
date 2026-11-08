@@ -1,8 +1,0 @@
-{
-  "schema_version": 1,
-  "catalog_ref": "2adffb1103cc98d02d0dd9d383e6ed269bfa845b",
-  "source_ref": "984a6754140dfa20850e8128e4d0bcebcff497c4",
-  "source_reviews": {
-    "src/bioetl/infrastructure/adapters/http/client.py": "UnifiedHTTPClient now defaults to trust_env=False. Existing HTTP client construction and cleanup sites are unchanged. Explicit opt-in remains available."
-  }
-}
