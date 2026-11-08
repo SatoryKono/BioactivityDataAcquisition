@@ -1,0 +1,9 @@
+{
+  "pass_id": "LF1-13",
+  "base_sha": "1f7e40be764b10092fd866b8aae750bc977d7e64",
+  "target_endpoint": "/ops/control-plane/filter-options",
+  "status": "NOT_VERIFIABLE",
+  "reason": "Live observability stack unavailable; connection refused.",
+  "ttl_stale_definition_seconds": 300,
+  "ttl_max_age_seconds": 600
+}
