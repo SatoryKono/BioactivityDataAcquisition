@@ -451,7 +451,7 @@ _INC_DURATION = (
     "$zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : "
     "($contains($rest, '+') ? '+' : '-')); "
     "$digits := $rest != '' ? $substringBefore($rest, $zone) : ''; "
-    "$frac := $digits != '' ? $number($digits) / $power(10, $length($digits)) : 0; "
+    "$frac := $digits != '' ? $number('0.' & $digits) : 0; "
     "$sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); "
     "$off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : "
     "$substringAfter($tail, '-')); "
