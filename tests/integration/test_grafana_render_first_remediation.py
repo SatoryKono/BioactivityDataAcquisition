@@ -193,9 +193,32 @@ def test_dq_duplicate_validation_fact_is_removed_and_grid_is_compacted() -> None
 
     assert 12 not in panels
     assert 1 not in panels
-    for panel_id in (9406, 9402, 9403, 9451, 9452):
-        targets = panels[panel_id].get("targets") or []
-        assert any("run_id=" in str(target.get("url") or "") for target in targets)
+    overview = _load("bioetl-overview-v2.json")
+    identity = _panel(overview, 9300)
+    assert identity["type"] == "table"
+    for panel_id in (9402, 9452):
+        handoff = panels[panel_id]
+        assert handoff["type"] == "text"
+        assert not handoff.get("targets")
+        copy = handoff["options"]["content"]
+        assert "/d/bioetl-overview-v2/" in copy
+        assert "viewPanel=9300" in copy
+        assert "${run_id:queryparam}" in copy
+    for owner, panel in (
+        (dashboard, panels[9406]),
+        (dashboard, panels[9403]),
+        (dashboard, panels[9451]),
+        (overview, identity),
+    ):
+        targets = panel["targets"]
+        if panel["datasource"]["uid"] == "-- Dashboard --":
+            targets = [
+                source
+                for target in targets
+                for source in _panel(owner, target["panelId"])["targets"]
+            ]
+        assert targets
+        assert all("run_id=" in target["url"] for target in targets)
 
 
 def test_iteration_2_active_alert_severity_is_not_overridden_by_count() -> None:
@@ -595,7 +618,8 @@ def _override_width(panel: dict[str, object], field_name: str) -> int | None:
 
 def test_operator_critical_tables_expose_full_values() -> None:
     expected_panels = {
-        "bioetl-dq-v2.json": (9406, 9402, 9403),
+        "bioetl-dq-v2.json": (9406, 9403),
+        "bioetl-overview-v2.json": (9300,),
         "bioetl-incident-v1.json": (2010, 2002, 2003, 2004, 2005),
         "bioetl-run-explorer-v1.json": (3010,),
     }
