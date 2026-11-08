@@ -21,7 +21,7 @@
       "status": "NOT_VERIFIABLE"
     },
     {
-      "uuid": "20261102T181217",
+      "uuid": "56471b4b-3689-50e9-996b-70250feef36b",
       "type": "negative",
       "pipeline": "uniprot_protein",
       "status": "PASS"
