@@ -106,7 +106,7 @@ function Normalize-BioetlRepoEnvAliases {
     Set-BioetlSearchEnvAliases
     Set-BioetlDockerHubEnvAliases
     Set-BioetlGrafanaEnvAliases
-    Set-BioetlNeo4jEnvAliases
+    # Provider-specific validation is performed by the Neo4j wrappers.
 }
 
 function ConvertFrom-BioetlEnvFileLine {
