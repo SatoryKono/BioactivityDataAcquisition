@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-08T16:17:11.336685+00:00",
+  "generated_at": "2026-11-08T16:34:47.912649+00:00",
   "summary": {
     "total_scripts": 715,
     "status_counts": {
@@ -2897,7 +2897,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 804,
+          "line": 805,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3727,7 +3727,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 803,
+          "line": 804,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3788,7 +3788,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 802,
+          "line": 803,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -10656,7 +10656,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 704,
+          "line": 705,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10699,7 +10699,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 817,
+          "line": 818,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -20867,7 +20867,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 915,
+          "line": 916,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -24003,7 +24003,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1051,
+          "line": 1052,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -24015,7 +24015,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 295,
+          "line": 296,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\""
         }
@@ -24947,7 +24947,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 339,
+          "line": 340,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1\""
         },
