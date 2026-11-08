@@ -19,7 +19,7 @@ bioetl-dq-v2#9403 Inspect Processed Records: ok/blocked_backend_unavailable
 
 1. **Числовые колонки соответствуют спецификации и API.**
    - **Status:** BLOCKED / NOT_VERIFIABLE
-   - **Reason:** Live backend unavailable. Contract format validation (`tests/unit/interfaces/http/test_processed_records_table.py`) passes offline.
+   - **Reason:** Live backend unavailable. Offline contract check on source SHA 3292de8d85240104d2c5e6f11e21986d362780bd. Command: python -m pytest -o addopts= -q --no-cov -p no:cacheprovider tests/unit/interfaces/http/test_processed_records_table.py. Exit code 0. 12 passed in 5.08s.
 2. **L-09(в) классифицирован и закрыт решением/исправлением; unexplained row drift отсутствует.**
    - **Status:** BLOCKED / NOT_RUN
    - **Reason:** Requires querying two exact UUID runs in live system.
