@@ -238,8 +238,9 @@ def test_run_explorer_visible_selectors_use_ops_http_catalog() -> None:
     assert "dimension=workflow" in variables["workflow"]["definition"]
     assert variables["run_type"]["multi"] is False
     assert variables["workflow"]["allValue"] == ".*"
-    assert "var-run_id=-" in dashboard["panels"][0]["options"]["content"]
-    assert "var-workflow=.*" in dashboard["panels"][0]["options"]["content"]
+    banner = next(p for p in dashboard["panels"] if p["id"] == 1)
+    assert "var-run_id=-" in banner["options"]["content"]
+    assert "var-workflow=.*" in banner["options"]["content"]
 
 
 def test_run_explorer_flex_columns_omit_custom_width() -> None:
@@ -263,9 +264,9 @@ def test_run_explorer_flex_columns_omit_custom_width() -> None:
         assert field not in widths
         assert min_widths[field] >= 80
     assert widths["Replay Readiness"] == 125
-    assert widths["Run ID"] == 60
+    assert widths["Run ID"] == 110
     assert min_widths["Run ID"] == 50
-    assert widths["Overview"] == min_widths["Overview"] == 180
+    assert widths["Overview"] == min_widths["Overview"] == 150
     visible_width = sum(width for field, width in widths.items() if field not in hidden)
     budget = (1366 // 2) * panel["gridPos"]["w"] // 24 - 40
     assert visible_width <= budget
