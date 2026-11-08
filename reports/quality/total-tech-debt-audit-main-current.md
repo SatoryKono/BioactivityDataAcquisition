@@ -8,9 +8,9 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
+Audited commit SHA: `9c4625cfc2587f014e066feed5c84093640c9914`
 
-Evidence surface SHA-256: `c4182c8b85265fadb925302fd75e052bcb145a062885530af1e4f3cc682547a3`
+Evidence surface SHA-256: `a5dda15e54b105958dcdea051a7e7650d243453b3d807adfc244319624791a46`
 
 ## Current evidence summary
 
@@ -35,7 +35,7 @@ reported separately in the issue closeout evidence.
 
 <!-- current-audit-headlines:start -->
 
-Debt-governance gates: **47 pass / 0 fail**
+Debt-governance gates: **46 pass / 1 fail**
 
 Architecture quality integral score: **10.0** (`excellent`)
 
@@ -70,8 +70,8 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "c4182c8b85265fadb925302fd75e052bcb145a062885530af1e4f3cc682547a3",
+  "audited_commit_sha": "9c4625cfc2587f014e066feed5c84093640c9914",
+  "evidence_surface_sha256": "a5dda15e54b105958dcdea051a7e7650d243453b3d807adfc244319624791a46",
   "metrics": {
     "architecture_integral_score": 10.0,
     "architecture_interpretation": "excellent",
@@ -79,8 +79,8 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "coverage_xml_missing_module_count": 5,
     "debt_gate_count": 47,
-    "debt_gate_fail_count": 0,
-    "debt_gate_pass_count": 47,
+    "debt_gate_fail_count": 1,
+    "debt_gate_pass_count": 46,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
     "fully_covered_module_count": 2523,

@@ -33,12 +33,13 @@ _SECRET_KEY_RE = re.compile(
     r"(SECRET|TOKEN|PASSWORD|PASSWD|PWD|CREDENTIAL|PRIVATE|PAT|_KEY|AUTH|URL|DSN|URI)",
     re.IGNORECASE,
 )
-_CRASH_OBSERVATION = re.compile(
+_RUNNER_FAILURE_OBSERVATION = re.compile(
     r"(^\[gw\d+\]\s+node down:\s+\S"
     r"|^replacing crashed worker gw\d+"
     r"|^worker gw\d+ crashed\b"
     r"|^maximum crashed workers reached:"
-    r"|^xdist\.[\w.]*(?:internal error|Interrupted)\b)",
+    r"|^xdist\.[\w.]*(?:internal error|Interrupted)\b"
+    r"|^\[run_pytest_resilient\] pass '[^'\n]+' timed out\b)",
     re.IGNORECASE,
 )
 _MAXFAIL_OBSERVATION = re.compile(r"stopping after \d+ failures", re.IGNORECASE)
@@ -657,11 +658,11 @@ def validate_receipt_ids(run_id: str, attempt: str) -> None:
 
 
 def _clip_observed_error(text: str, limit: int = 4000) -> str:
-    """Keep a crash line that pytest prints after a long quiet log.
+    """Keep the observed failure cause when clipping a long runner log.
 
     The first 4000 characters of a ``-q`` run are progress marks. The node-down
-    line is at the end, so a long observation keeps that tail and any earlier
-    crash line that the tail would drop.
+    line is at the end, while a watchdog timeout can precede a long stack dump.
+    Keep the tail and any failure cause that the tail would drop.
     """
     redacted = redact_secrets(text)
     if len(redacted) <= limit:
@@ -669,7 +670,8 @@ def _clip_observed_error(text: str, limit: int = 4000) -> str:
     matched = [
         line
         for line in redacted.splitlines()
-        if _CRASH_OBSERVATION.search(line) and not _MAXFAIL_OBSERVATION.search(line)
+        if _RUNNER_FAILURE_OBSERVATION.search(line)
+        and not _MAXFAIL_OBSERVATION.search(line)
     ]
     tail = redacted[-limit:]
     if not matched or "\n".join(matched) in tail:

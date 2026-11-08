@@ -17,6 +17,7 @@ export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
 
 mcp_validate_optional_token "CONTEXT7_API_KEY" 8 "Context7 MCP (optional higher rate limits)"
 mcp_exit_if_validate_only "context7"
+mcp_prepare_npm_cache
 
 shared_client="${REPO_ROOT}/scripts/ops/runtime/mcp/stdio_shared_client.py"
 if [[ -f "$shared_client" ]] && { [[ -n "${WSL_INTEROP:-}" ]] || grep -qi microsoft /proc/sys/kernel/osrelease 2>/dev/null; }; then
