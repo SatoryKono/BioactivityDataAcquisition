@@ -191,18 +191,17 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         panels[1]["gridPos"].update(x=16, y=0, w=8, h=3)
     else:
         panels[1]["gridPos"].update(x=0, y=0, w=24, h=3)
-    content = panels[1]["options"]["content"].replace(
-        "Select a Run ID to view details.", "Select a status to view details."
+    panels[1]["options"]["content"] = (
+        '<div style="padding:4px 10px;border-left:4px solid #6b7280;'
+        'font-size:16px;line-height:20px;white-space:normal;'
+        'overflow-wrap:anywhere;box-sizing:border-box">'
+        '<a href="/d/bioetl-run-explorer-v1/1-run-explorer?'
+        'var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*'
+        '&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}">'
+        '<strong>Reset filters</strong></a><br>'
+        'Last 10 launches · independent of the time range'
+        '</div>'
     )
-    content = content.replace(
-        "var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=",
-        "var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=",
-    )
-    content = content.replace(
-        "var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-",
-        "var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-",
-    )
-    panels[1]["options"]["content"] = content
     panel = panels[3010]
     panel["gridPos"].update(y=3, h=13)
     panel["description"] = (
