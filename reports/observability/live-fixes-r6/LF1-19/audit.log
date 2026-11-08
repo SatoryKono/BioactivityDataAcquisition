@@ -1,0 +1,119 @@
+bioetl-control-plane-v1#9418 Review Selected-Run Trust: error/blocked_backend_unavailable
+bioetl-dq-v2#9403 Processed Records: error/blocked_backend_unavailable
+bioetl-control-plane-v1#9408 Review Replay Evidence: ok/blocked_backend_unavailable
+bioetl-control-plane-v1#9414 Review Manifest Validation: ok/blocked_backend_unavailable
+bioetl-control-plane-v1#9415 Review Lineage Validation: ok/blocked_backend_unavailable
+bioetl-control-plane-v1#9416 Review Retention Compliance: ok/blocked_backend_unavailable
+bioetl-control-plane-v1#9413 Review Checkpoint Validation: ok/blocked_backend_unavailable
+bioetl-control-plane-v1#9406 Compare Checkpoint Anchors: ok/blocked_backend_unavailable
+bioetl-dq-v2#9406 Review Selected Run Status: ok/blocked_backend_unavailable
+bioetl-dq-v2#9403 Inspect Processed Records: ok/blocked_backend_unavailable
+bioetl-incident-v1#9401 Monitor Scope Status: ok/blocked_unavailable
+bioetl-incident-v1#2010 Inspect Ranked Suspects: ok/blocked_unavailable
+bioetl-incident-v1#2005 Monitor Global Alerts: ok/blocked_unavailable
+bioetl-incident-v1#2006 Track Alert State History: ok/blocked_unavailable
+bioetl-incident-v1#2002 Inspect Runtime Suspects: ok/blocked_unavailable
+bioetl-incident-v1#2003 Inspect Provider Suspects: ok/blocked_unavailable
+bioetl-incident-v1#2004 Inspect DQ Suspects: ok/blocked_unavailable
+bioetl-incident-v1#22011 Inspect Global Signal Measurements: ok/blocked_unavailable
+bioetl-incident-v1#2101 Review Selected Run Status: ok/blocked_backend_unavailable
+bioetl-incident-v1#18940 Monitor Pipeline Status: ok/blocked_unavailable
+bioetl-incident-v1#9101 Review Runtime Blockers: ok/blocked_unavailable
+bioetl-incident-v1#9102 Monitor Coverage: ok/blocked_unavailable
+bioetl-incident-v1#9102 Monitor Coverage: ok/blocked_unavailable
+bioetl-incident-v1#9102 Monitor Coverage: ok/blocked_unavailable
+bioetl-incident-v1#2460 Review Stage Progress: ok/blocked_unavailable
+bioetl-incident-v1#238 Track Stage Backlog Trend: ok/blocked_unavailable
+bioetl-incident-v1#207 Track Phase Duration: ok/blocked_unavailable
+bioetl-incident-v1#207 Track Phase Duration: ok/blocked_unavailable
+bioetl-incident-v1#207 Track Phase Duration: ok/blocked_unavailable
+bioetl-incident-v1#239 Track Pipeline Duration: ok/blocked_unavailable
+bioetl-incident-v1#239 Track Pipeline Duration: ok/blocked_unavailable
+bioetl-incident-v1#239 Track Pipeline Duration: ok/blocked_unavailable
+bioetl-incident-v1#237 Monitor Worst Stage Lag: ok/blocked_unavailable
+bioetl-incident-v1#16 Monitor Active Blocker Count: ok/blocked_unavailable
+bioetl-incident-v1#205 Monitor Failed Runs: ok/blocked_unavailable
+bioetl-incident-v1#230 Monitor Pipeline Alerts: ok/blocked_unavailable
+bioetl-incident-v1#9996 Track Failed Workflow Runs: ok/blocked_unavailable
+bioetl-incident-v1#236 Monitor No-Records Runs: ok/blocked_unavailable
+bioetl-incident-v1#9997 Track Failed Workflow Steps: ok/blocked_unavailable
+bioetl-incident-v1#21 Monitor Memory Pressure: ok/blocked_unavailable
+bioetl-incident-v1#256 Review Errors by Stage & Code: ok/blocked_unavailable
+bioetl-incident-v1#241 Compare Records by Stage & Run Type: ok/blocked_unavailable
+bioetl-incident-v1#891 Monitor Replay: ok/blocked_unavailable
+bioetl-incident-v1#892 Track Checkpoint: ok/blocked_unavailable
+bioetl-incident-v1#893 Monitor Ledger: ok/blocked_unavailable
+bioetl-incident-v1#907 Monitor Telemetry: ok/blocked_unavailable
+bioetl-incident-v1#240 Track Records by Stage / Interval: ok/blocked_unavailable
+bioetl-incident-v1#4 Inspect DQ Alert Conditions: ok/blocked_unavailable
+bioetl-incident-v1#5 Inspect Control Plane Alerts: ok/blocked_unavailable
+bioetl-incident-v1#6 Inspect Provider Alerts: ok/blocked_unavailable
+bioetl-incident-v1#259 Inspect Global Provider Alert Conditions: ok/blocked_unavailable
+bioetl-incident-v1#908 Review Observed Terminal Counters: ok/blocked_unavailable
+bioetl-incident-v1#7 Inspect Entities Stale Over 24h: ok/blocked_unavailable
+bioetl-incident-v1#8804 Track Global Read Failures: ok/blocked_unavailable
+bioetl-incident-v1#136 Monitor Global Read Failures (30m): ok/blocked_unavailable
+bioetl-incident-v1#122 Track Missing Lineage: ok/blocked_unavailable
+bioetl-incident-v1#137 Track Lineage Failures: ok/blocked_unavailable
+bioetl-incident-v1#2 Track Ledger Failures: ok/blocked_unavailable
+bioetl-incident-v1#130 Track Replay Blockers: ok/blocked_unavailable
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/blocked_unavailable
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/blocked_unavailable
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/blocked_unavailable
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/blocked_unavailable
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/blocked_unavailable
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/blocked_unavailable
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/blocked_unavailable
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/blocked_unavailable
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/blocked_unavailable
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/blocked_unavailable
+bioetl-incident-v1#2461 Inspect Current Missing Stage Signals: ok/blocked_unavailable
+bioetl-incident-v1#8806 Compare Global Reads by Store: ok/blocked_unavailable
+bioetl-incident-v1#1 Track Manifest Failures: ok/blocked_unavailable
+bioetl-incident-v1#3 Track Incompatibilities: ok/blocked_unavailable
+bioetl-incident-v1#104 Track Unreconstructable: ok/blocked_unavailable
+bioetl-incident-v1#138 Review Missing Lineage by Layer: ok/blocked_unavailable
+bioetl-incident-v1#120 Track Replay Drift: ok/blocked_unavailable
+bioetl-incident-v1#132 Monitor Manifest (30m): ok/blocked_unavailable
+bioetl-incident-v1#209 Track Global Shutdown Starts: ok/blocked_unavailable
+bioetl-incident-v1#101 Track Load Failures: ok/blocked_unavailable
+bioetl-incident-v1#133 Monitor Ledger (30m): ok/blocked_unavailable
+bioetl-incident-v1#210 Track Global Shutdown Completions: ok/blocked_unavailable
+bioetl-incident-v1#102 Track Save Failures: ok/blocked_unavailable
+bioetl-incident-v1#9491 Inspect Telemetry Coverage: ok/blocked_unavailable
+bioetl-incident-v1#9491 Inspect Telemetry Coverage: ok/blocked_unavailable
+bioetl-incident-v1#9491 Inspect Telemetry Coverage: ok/blocked_unavailable
+bioetl-incident-v1#9491 Inspect Telemetry Coverage: ok/blocked_unavailable
+bioetl-incident-v1#9491 Inspect Telemetry Coverage: ok/blocked_unavailable
+bioetl-incident-v1#103 Track Global Admin Failures: ok/blocked_unavailable
+bioetl-incident-v1#111 Track Global Read Latency: ok/blocked_unavailable
+bioetl-incident-v1#131 Track Observed Manifest Write Increments: ok/blocked_unavailable
+bioetl-incident-v1#121 Track Peak Replay Lag: ok/blocked_unavailable
+bioetl-incident-v1#107 Compare Global Audit Write Outcomes: ok/blocked_unavailable
+bioetl-incident-v1#134 Track Replay Drift by Type: ok/blocked_unavailable
+bioetl-incident-v1#9105 Track Stage Lag: ok/blocked_unavailable
+bioetl-incident-v1#8805 Compare Checkpoint Outcomes: ok/blocked_unavailable
+bioetl-incident-v1#108 Compare Global Audit Query Outcomes: ok/blocked_unavailable
+bioetl-incident-v1#135 Track Replay Lag: ok/blocked_unavailable
+bioetl-incident-v1#8807 Compare Ledger Appends by Type & Status: ok/blocked_unavailable
+bioetl-incident-v1#243 Inspect Stage Expectedness: ok/blocked_unavailable
+bioetl-incident-v1#243 Inspect Stage Expectedness: ok/blocked_unavailable
+bioetl-incident-v1#105 Track Checkpoint Save Latency: ok/blocked_unavailable
+bioetl-incident-v1#105 Track Checkpoint Save Latency: ok/blocked_unavailable
+bioetl-incident-v1#105 Track Checkpoint Save Latency: ok/blocked_unavailable
+bioetl-incident-v1#109 Track Global Audit Write Latency: ok/blocked_unavailable
+bioetl-incident-v1#109 Track Global Audit Write Latency: ok/blocked_unavailable
+bioetl-incident-v1#109 Track Global Audit Write Latency: ok/blocked_unavailable
+bioetl-incident-v1#106 Track Global Checkpoint Admin Latency: ok/blocked_unavailable
+bioetl-incident-v1#106 Track Global Checkpoint Admin Latency: ok/blocked_unavailable
+bioetl-incident-v1#106 Track Global Checkpoint Admin Latency: ok/blocked_unavailable
+bioetl-incident-v1#110 Track Global Audit Query Latency: ok/blocked_unavailable
+bioetl-incident-v1#110 Track Global Audit Query Latency: ok/blocked_unavailable
+bioetl-incident-v1#110 Track Global Audit Query Latency: ok/blocked_unavailable
+bioetl-incident-v1#220 Monitor Runtime Error Rate: ok/blocked_unavailable
+bioetl-incident-v1#112 Compare Lineage Persistence Outcomes: ok/blocked_unavailable
+bioetl-incident-v1#9701 Review Current Workflow Evidence: ok/blocked_unavailable
+bioetl-incident-v1#9701 Review Current Workflow Evidence: ok/blocked_unavailable
+bioetl-overview-v2#9002 Review Run Domains: ok/blocked_backend_unavailable
+bioetl-overview-v2#9460 Inspect Selected Run Stages: ok/blocked_backend_unavailable
+bioetl-run-explorer-v1#3010 Inspect Recent Runs (last 10): ok/blocked_backend_unavailable
