@@ -168,8 +168,9 @@ def test_non_uuid_token_does_not_raise_into_live_diagnostics() -> None:
 
 
 @pytest.mark.asyncio
-async def test_stamp_not_found_payload_is_not_query_error(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+@pytest.mark.parametrize("missing_run_id", [_STAMP, _OTHER], ids=["stamp", "uuid"])
+async def test_not_found_payload_is_not_query_error(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, missing_run_id: str
 ) -> None:
     from bioetl.infrastructure.control_plane.file_run_manifest_store import (
         FileRunManifestStore,
@@ -193,8 +194,8 @@ async def test_stamp_not_found_payload_is_not_query_error(
                 f"http://127.0.0.1:{port}/ops/observability/selected-run-status",
                 params={
                     "pipeline": "uniprot_protein",
-                    "run_id": _STAMP,
-                    "run_type": "backfill",
+                    "run_id": missing_run_id,
+                    "run_type": "incremental",
                 },
             )
         assert response.status_code == 200
