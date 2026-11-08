@@ -310,8 +310,8 @@
       "gridPos": {
         "x": 0,
         "y": 0,
-        "w": 24,
-        "h": 2
+        "w": 16,
+        "h": 3
       },
       "options": {
         "mode": "html",
@@ -376,14 +376,14 @@
       "title": "",
       "gridPos": {
         "h": 3,
-        "w": 24,
-        "x": 0,
-        "y": 2
+        "w": 8,
+        "x": 16,
+        "y": 0
       },
       "options": {
         "bioetlDisplayTitle": "Understand Run Scope",
         "mode": "html",
-        "content": "<div style=\"max-width:96ch;padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:20px;white-space:normal;overflow-wrap:anywhere;word-break:break-word;width:100%;max-width:96ch;box-sizing:border-box;overflow:visible\"><strong>Last 10 launches · newest first · independent of the time range</strong><br>Select a status to view details. <a href=\"/d/bioetl-run-explorer-v1/1-run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\"><strong>Reset filters</strong></a></div>"
+        "content": "<div style=\"max-width:96ch;padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:20px;white-space:normal;overflow-wrap:anywhere;box-sizing:border-box\"><a href=\"/d/bioetl-run-explorer-v1/1-run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\"><strong>Reset filters</strong></a><br>Last 10 launches · independent of the time range</div>"
       },
       "description": "Browse the latest 10 launches across All pipelines by start time. Workflow and Run Type filter the list. The dashboard time picker does not filter this table. Running means a recorded start without a terminal event, not a live health probe. REPORT MISSING means no final report is available. Defaults All / All / All and run_id=- select no exact run. Effective refresh: 60s; timezone: browser.",
       "links": [
@@ -404,7 +404,7 @@
         "h": 13,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 3
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -579,13 +579,6 @@
                 ]
               },
               {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#93C5FD"
-                }
-              },
-              {
                 "id": "custom.wrapText",
                 "value": true
               },
@@ -599,6 +592,13 @@
               {
                 "id": "custom.tooltip.field",
                 "value": "run_id"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#93C5FD"
+                }
               }
             ]
           },
