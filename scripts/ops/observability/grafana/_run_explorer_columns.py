@@ -208,7 +208,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         "GLOBAL · BROWSE the launch catalog filtered by Workflow/Pipeline/Run Type. "
         "Last 10 launches, newest Started first, independent of the time range. "
         "Workflow and Pipeline open passports. Run ID opens the persisted Report. "
-        "The full UUID wraps inside the column and is repeated on the cell tooltip "
+        "The full UUID is available on the cell tooltip "
         "and in cell inspection, so reading it does not depend on widening the column. "
         "Overview is processing status, not replay readiness. "
         "Saved Evidence, Data Quality and Replay Readiness use exact-run verified evidence. "
@@ -349,10 +349,10 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         if name == _RUN_ID_LABEL:
             properties.extend(
                 [
-                    {"id": "custom.wrapText", "value": True},
+                    {"id": "custom.wrapText", "value": False},
                     {
                         "id": _CELL_OPTIONS_ID,
-                        "value": {"type": "auto", "wrapText": True},
+                        "value": {"type": "auto", "wrapText": False},
                     },
                     {"id": "custom.tooltip.field", "value": "run_id"},
                 ]

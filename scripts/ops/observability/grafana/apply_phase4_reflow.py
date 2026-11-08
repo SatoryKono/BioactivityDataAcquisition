@@ -120,14 +120,13 @@ def apply_incident(data: dict[str, Any]) -> dict[str, int]:
     # The duration and domain panels provide the data for this group.
     saved = _by_id(data, 9450)
     y = saved["gridPos"]["y"] + 1
-    heights = {9463: 4, 9460: 3, 9451: DOMAINS_HEIGHT, 9452: 3}
-    for child in saved["panels"]:
-        height = heights[child["id"]]
-        child["gridPos"].update(y=y, h=height)
-        if child["id"] == 9463:
-            # Keep the saved-run duration stat denser than the first screen.
-            child["gridPos"].update(x=0, w=5)
-        y += height
+    children = {panel["id"]: panel for panel in saved["panels"]}
+    # Put the two navigation cards on one band so saved evidence keeps
+    # both its scalar and data area density without reducing table space.
+    children[9460]["gridPos"].update(x=0, y=y, w=12, h=3)
+    children[9452]["gridPos"].update(x=12, y=y, w=12, h=3)
+    children[9451]["gridPos"].update(y=y + 3, h=DOMAINS_HEIGHT)
+    children[9463]["gridPos"].update(x=0, y=y + 3 + DOMAINS_HEIGHT, w=5, h=4)
     return {
         "fleet_bands_adjusted": bands,
         "domains_height_before": height_before,
