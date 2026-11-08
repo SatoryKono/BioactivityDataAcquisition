@@ -103751,6 +103751,34 @@
       "duplicate_group": null,
       "duplicate_resolution": null,
       "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/observability/live-fixes-r6/LF1-07/report.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
       "freshness": "current",
       "generated_route": null,
       "generated_route_exception": null,
@@ -115887,10 +115915,10 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 26,
       "reports_workspace_entrypoint": 1,
-      "working_report": 321
+      "working_report": 322
     },
     "by_recommended_action": {
-      "archive-after-migration": 359,
+      "archive-after-migration": 360,
       "generate-automatically": 1066,
       "keep": 2683
     },
@@ -115917,7 +115945,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 3,
-      "reports": 694,
+      "reports": 695,
       "security": 2
     },
     "by_status": {
@@ -115925,17 +115953,17 @@
       "Archived": 1554,
       "Canonical": 77,
       "Generated": 1066,
-      "Working": 652
+      "Working": 653
     },
     "by_surface_family": {
       "active": 759,
       "archive": 1554,
       "canonical": 77,
       "generated": 1066,
-      "working": 652
+      "working": 653
     },
     "by_tracking_state": {
-      "tracked": 4108
+      "tracked": 4109
     },
     "docs_reports_local_count": 73,
     "duplicate_group_count": 80,
@@ -115948,8 +115976,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4108,
+    "total_doc_like": 4109,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4108
+    "total_doc_like_tracked": 4109
   }
 }
