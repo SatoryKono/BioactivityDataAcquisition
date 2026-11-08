@@ -202,5 +202,21 @@
       "readiness_timeout_sec": 300,
       "state_model": "shared_optional_upstream"
     }
+  },
+  "host_services": {
+    "markdownify": {
+      "port": 8832,
+      "path": "/mcp",
+      "bind_host": "127.0.0.1",
+      "launch_owner": "windows-pc-agent",
+      "transport": "native_streamable_http",
+      "state_model": "fixed_user_fixed_workspace_per_client_protocol_sessions",
+      "allowed_paths": [
+        "D:/pc-agent"
+      ],
+      "markitdown_path": "C:/Users/Fedor/AppData/Local/Programs/Python/Python313/Scripts/markitdown.exe",
+      "daily": false,
+      "note": "Host pilot only; existing portable server projections unchanged. Windows owns lifecycle; WSL is a client only."
+    }
   }
 }

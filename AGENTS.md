@@ -117,6 +117,21 @@ Minimum expectation:
 
 ## Guardrails
 
+- **Local Git location:** on this Windows workstation, all local checkouts,
+  linked worktrees (including detached HEAD, temporary, review, and recovery
+  worktrees), and their shared Git metadata MUST reside under `D:\github`.
+  Creating them outside that directory is prohibited, including under
+  `C:\Users\Fedor\.codex`, visualizations, and system temporary directories.
+  Resolve the destination and existing ancestors before creation or migration;
+  reject junctions/symlinks that escape `D:\github`. Prefer
+  `D:\github\BioactivityDataAcquisition-worktrees\<task>` for new worktrees.
+  Creation MUST use `python D:/github/BioactivityDataAcquisition/.git/hooks/bioetl-create-worktree.py <task>`;
+  direct `git worktree add` and automatic creation with an uncontrolled path
+  are prohibited on this workstation, including `--no-checkout` creation.
+  Do not invoke an automatic worktree mode unless its destination can be set
+  inside this root. Branch refs remain in the shared repository under this root.
+  Preserve worktree indexes, uncommitted files, locks, and unfinished operations
+  during relocation; the env-file approval guardrail still applies.
 - **Root scratch ban (RH5/RH6):** do not create root-level `_tmp_*.py`, `/_cr_*.py`,
   `/_publish_*.py`, ad-hoc `test_*.py`, or Windows device-name files such as
   `nul` / `NUL`. Prefer `scripts/**` or `reports/**`. Tracked root must stay

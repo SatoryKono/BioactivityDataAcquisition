@@ -21,6 +21,21 @@ Available sources; load by **Context tiers** below, not as an always-on dump:
 
 ## Context tiers
 
+### Local checkout and worktree location
+
+On the user's Windows workstation, create or relocate BioETL checkouts and
+worktrees only beneath `D:\github`; prefer
+`D:\github\BioactivityDataAcquisition-worktrees\<task>`. This includes detached,
+temporary, review, and recovery worktrees. Resolve the destination and existing
+ancestors first, and reject any path or junction/symlink that escapes this root.
+Do not use automatic worktree creation with an uncontrolled destination.
+Create worktrees through
+`python D:/github/BioactivityDataAcquisition/.git/hooks/bioetl-create-worktree.py <task>`;
+direct `git worktree add` is prohibited on this workstation, including
+`--no-checkout`. The helper validates the resolved destination before invoking Git.
+Preserve staged/unstaged state and unfinished operations when relocating.
+The env-file approval guardrail applies to relocation as well as editing.
+
 Follow the `AGENTS.md` Required AI Context table. Hash-only rebind, date stamp,
 and remote-main skip RULES/ADR and full `pre-task` RAG
 (`BIOETL_AI_MEMORY_MODE=off`). V3/V4 keep the full package.

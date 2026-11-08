@@ -44,6 +44,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'proxy-auth.ps1')
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..\..')).Path
 Set-Location $Root
 
@@ -244,7 +245,7 @@ $apiKey = [string]$env:BIOETL_MCP_SHARED_API_KEY
 if ([string]::IsNullOrWhiteSpace($apiKey)) {
     $apiKey = ''
 } else {
-    Write-Host 'Auth: BIOETL_MCP_SHARED_API_KEY set (mcp-proxy --apiKey / clients need X-API-Key)'
+    Write-Host 'Auth: BIOETL_MCP_SHARED_API_KEY set (mcp-proxy env auth / clients need X-API-Key)'
 }
 
 if (-not $DryRun -and -not $SkipPrewarm) {
@@ -335,11 +336,6 @@ foreach ($name in $selected) {
         [int]$catalog.request_timeout_ms
     } else { 300000 }
     $proxyFlags = "--host $BindHost --port $port --server stream --connectionTimeout $connectionTimeoutMs --requestTimeout $requestTimeoutMs"
-    if (-not [string]::IsNullOrWhiteSpace($apiKey)) {
-        # Quote key for cmd; avoid logging the secret.
-        $escapedKey = $apiKey.Replace('"', '\"')
-        $proxyFlags = "--apiKey `"$escapedKey`" $proxyFlags"
-    }
     if ([string]$entry.launch_mode -eq 'windows_docker_streaming') {
         $cmdArgs = "/d /c docker mcp gateway run --servers $name --transport streaming --host $BindHost --port $port --allow-unauthenticated"
     } elseif ([string]$entry.launch_mode -eq 'windows_npx_streaming') {
@@ -401,13 +397,15 @@ foreach ($name in $selected) {
             $env:BIOETL_AI_MEMORY_MODE = 'read-write'
         }
         try {
-            $proc = Start-Process -FilePath $comSpec `
-                -ArgumentList $cmdArgs `
-                -WorkingDirectory $Root `
-                -WindowStyle Hidden `
-                -RedirectStandardOutput $attemptOut `
-                -RedirectStandardError $attemptErr `
-                -PassThru
+            $proc = Invoke-WithMcpProxyAuth -ApiKey $apiKey -Action {
+                Start-Process -FilePath $comSpec `
+                    -ArgumentList $cmdArgs `
+                    -WorkingDirectory $Root `
+                    -WindowStyle Hidden `
+                    -RedirectStandardOutput $attemptOut `
+                    -RedirectStandardError $attemptErr `
+                    -PassThru
+            }
         } catch {
             Write-Warning "  $name Start-Process failed: $($_.Exception.Message)"
             $state = 'start_error'
