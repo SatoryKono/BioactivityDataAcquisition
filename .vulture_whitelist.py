@@ -1883,3 +1883,24 @@ node_or_string  # unused variable (tests/unit/scripts/test_codex_local_state_aud
 node_or_string  # unused variable (tests/unit/scripts/test_codex_local_state_audit.py:343)
 testscollected  # unused variable (tests/unit/tools/test_pytest_last_failed_policy.py:68)
 _._executions  # unused attribute (tests/unit/tools/test_pytest_option_handling.py:55)
+
+
+# False positive candidates
+_profile_lookup_field_name  # unused import (scripts/docs/matrix/generate_pipeline_normalization_matrix.py)
+_pipeline_scopes_from_payload  # unused import (src/bioetl/application/observability/current_metrics_rehydrate.py)
+DataclassInstance  # unused import (src/bioetl/application/serialization/snapshot_serialization.py)
+pdr  # unused import (src/bioetl/composition/factories/services/_builder_record_processor_support.py)
+pdr  # unused import (src/bioetl/composition/factories/services/pipeline_record_processor_builder.py)
+_LoggerBindableObservability  # unused import (src/bioetl/composition/observability.py)
+store_name  # unused variable (src/bioetl/composition/runtime_builders/__init__.py)
+DataclassInstance  # unused import (src/bioetl/composition/runtime_builders/_context_field_binding.py)
+DataclassInstance  # unused import (src/bioetl/composition/runtime_builders/control_plane.py)
+_canonical_lineage_fragment_id  # unused import (src/bioetl/composition/runtime_builders/ledger_collaborator.py)
+_record_input_snapshots_from_artifact  # unused import (src/bioetl/composition/runtime_builders/ledger_collaborator.py)
+from_phase  # unused variable (src/bioetl/domain/types/_execution_phase_transition_support.py)
+allows_retry  # unused variable (src/bioetl/domain/types/_execution_phase_transition_support.py)
+compensation_required  # unused variable (src/bioetl/domain/types/_execution_phase_transition_support.py)
+degraded_mode_allowed  # unused variable (src/bioetl/domain/types/_execution_phase_transition_support.py)
+
+CollectorRegistry  # unused import (scripts/engineering/dev/metrics_mock_server.py)
+panpa  # unused import (scripts/engineering/diagnostics/debug_pandera.py)
