@@ -135,6 +135,19 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     **dict.fromkeys(
         (
+            "reports/observability/live-fixes-r6/LF1-13/checksums.txt",
+            "reports/observability/live-fixes-r6/LF1-13/machine_readable_receipt.json",
+            "reports/observability/live-fixes-r6/LF1-13/report.md",
+        ),
+        (
+            GRAFANA_SELECTOR_CONTRACT_TEST,
+            "tests/unit/interfaces/http/test_health_server_control_plane_scope_helpers.py",
+            "tests/unit/interfaces/http/test_run_id_resolver.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    **dict.fromkeys(
+        (
             ".codex/skills/py-audit-bot/references/wrapper-contract.md",
             ".devin/agent-metrics.json",
             ".devin/scripts/collect_agent_metrics.py",
@@ -534,6 +547,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12786_composite_review.json",
             "configs/quality/external_resource_inventory_pr12782_lf07_review.json",
             "configs/quality/external_resource_inventory_pr12838_hygiene_review.json",
+            "configs/quality/external_resource_inventory_pr12892_replay_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -593,6 +607,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/observability/live-fixes-r6/LF1-03/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     **dict.fromkeys(
         (
+            "reports/observability/live-fixes-r6/LF1-16/bioetl-incident-v1.json",
+            "reports/observability/live-fixes-r6/LF1-16/report.json",
+            "reports/observability/live-fixes-r6/LF1-16/report.md",
+        ),
+        (
+            "tests/integration/test_dashboard_operator_readability.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    **dict.fromkeys(
+        (
             "reports/observability/live-fixes-r6/LF1-06/checksums.txt",
             "reports/observability/live-fixes-r6/LF1-06/machine_readable_receipt.json",
             "reports/observability/live-fixes-r6/LF1-06/report.md",
@@ -617,6 +642,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/observability/live-fixes-r6/LF1-04/queries.json": (
         GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/observability/live-fixes-r6/LF1-18/report.md": (
         GRAFANA_VARIABLE_REFERENCE_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
