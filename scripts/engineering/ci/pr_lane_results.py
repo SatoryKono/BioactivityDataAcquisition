@@ -133,6 +133,13 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "scripts/ops/observability/grafana/dashboard_context_links.py": (
+        "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+    ),
+    "reports/observability/live-fixes-r6/LF1-17/report.md": (
+        "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     **dict.fromkeys(
         (
             ".codex/skills/py-audit-bot/references/wrapper-contract.md",
@@ -575,6 +582,19 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/audit/nightly-checkout-table.json",
         ),
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-11/contract-evidence.json",
+            "reports/observability/live-fixes-r6/LF1-11/manifest-show.txt",
+            "reports/observability/live-fixes-r6/LF1-11/manifest-validation.json",
+            "reports/observability/live-fixes-r6/LF1-11/manifest.json",
+            "reports/observability/live-fixes-r6/LF1-11/report.md",
+        ),
+        (
+            "tests/unit/interfaces/http/test_manifest_validation_catalog.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
     ),
     "reports/observability/live-fixes-r6/LF1-04/checksums.txt": (
         GRAFANA_SELECTOR_CONTRACT_TEST,
