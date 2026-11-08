@@ -8,9 +8,8 @@
 
 ## Actions Performed
 1. **Structural Dashboard Fixes**:
-   - Replaced explicitly hardcoded `N/A` text and mapping values with `UNKNOWN` to align with the required UNKNOWN behaviour for unrecorded data in panels 9406, 9403, 9460, 9451 of `grafana/dashboards/bioetl-dq-v2.json`.
-   - Adjusted presentation expressions where applicable (e.g. `verdict != 'N/A'` -> `verdict != 'UNKNOWN'`).
-   - Fixed description texts describing "UNKNOWN means the value was not recorded...".
+   - Updated panel 9403 (Inspect Processed Records) in `grafana/dashboards/bioetl-dq-v2.json`: missing values and unrecorded data display as `UNKNOWN`, with the description updated to match.
+   - Panels 9406, 9460, and 9451 were in the audit scope and have no JSON changes in this PR. The verdict filter still excludes `N/A` for checks that do not apply.
 
 2. **Live Data & Execution Matrices**:
    - `docker compose` startup failed with a `preflight_failed` output in incident report logs due to system setup blocks in this sandbox.
