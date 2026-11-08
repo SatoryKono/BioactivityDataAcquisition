@@ -201,6 +201,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
             "scripts/ai/mcp/mcp_context7_wrapper.ps1",
             "scripts/ai/mcp/support/host_transport.mjs",
+            "scripts/ai/mcp/support/invoke_host_transport.ps1",
+            "scripts/ai/mcp/support/invoke_host_transport.sh",
             "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
         ),
         ("tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",),
