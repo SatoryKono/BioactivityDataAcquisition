@@ -1,9 +1,9 @@
 {
   "pass_id": "LF1-06",
-  "base_sha": "a474a4118bd19288c4315c98a0168a863e7b36ad",
+  "base_sha": "9b33adf0174a97ec88a7b95942e6a78eaf40cf1a",
   "target_endpoint": "/ops/control-plane/filter-options",
   "status": "NOT_VERIFIABLE",
-  "reason": "Live observability stack unavailable; connection refused.",
+  "reason": "Docker Compose startup blocked by an overlayfs mount error (invalid argument in containerd-overlayfs cachemounts).",
   "ttl_stale_definition_seconds": 300,
   "ttl_max_age_seconds": 600
 }
