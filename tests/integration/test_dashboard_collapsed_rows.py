@@ -82,19 +82,25 @@ def test_dashboard_rows_match_flat_and_forensic_surfaces() -> None:
         ]
         observed[dashboard_path.name] = len(rows)
         if expected_rows[dashboard_path.name] == 0:
-            assert len(get_dashboard_panels(dashboard)) == (
-                2 if dashboard_path.stem == "bioetl-run-explorer-v1" else 11
-            )
-            if dashboard_path.stem == "bioetl-overview-v2":
-                comparison = next(
-                    panel
-                    for panel in get_dashboard_panels(dashboard)
-                    if panel["id"] == 9483
-                )
+            by_id = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+            if dashboard_path.stem == "bioetl-run-explorer-v1":
+                assert set(by_id) == {1000, 1, 3010}
+            else:
+                assert len(by_id) == 11
+                comparison = by_id[9483]
                 assert comparison["type"] == "table"
-                assert (
-                    comparison["targets"][0]["root_selector"]
-                    == "reconciliation_display"
+                reuse = comparison["targets"][0]
+                assert reuse["datasource"]["uid"] == "-- Dashboard --"
+                assert reuse["withTransforms"] is False
+                donor = by_id[reuse["panelId"]]["targets"][0]
+                assert "/selected-run-status?" in donor["url"]
+                assert "run_id=${run_id}" in donor["url"]
+                assert "$map(reconciliation_display," in donor["root_selector"]
+                assert any(
+                    item["id"] == "filterByValue"
+                    and item["options"]["filters"][0]["config"]["options"]["value"]
+                    == "reconciliation"
+                    for item in comparison["transformations"]
                 )
     assert observed == expected_rows
 
