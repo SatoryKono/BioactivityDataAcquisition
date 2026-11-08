@@ -7,7 +7,10 @@ import {pathToFileURL} from 'node:url';
 
 export const UNMANAGED = 78;
 const names = new Set(['context7', 'brave-search']);
-const normalized = value => value.replaceAll('\\', '/').replace(/\/$/, '').toLowerCase();
+function normalized(value) {
+    const pathValue = process.platform === 'win32' ? value.replaceAll('\\', '/').toLowerCase() : value;
+    return pathValue.replace(/\/$/, '');
+}
 
 export function nativePath(value, platform = process.platform) {
     if (platform !== 'win32' && /^[A-Za-z]:[\\/]/.test(value))

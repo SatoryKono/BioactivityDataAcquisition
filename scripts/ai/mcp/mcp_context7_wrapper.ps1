@@ -13,9 +13,9 @@ if ($env:PC_AGENT_MCP_ROUTES_FILE -or (Get-Item -LiteralPath $mcpHostMarker -For
             if ($env:PATHEXT -notmatch '(?i)(^|;)\.EXE(;|$)') {
                 $env:PATHEXT = ".COM;.EXE;.BAT;.CMD" + $(if ($env:PATHEXT) { ";" + $env:PATHEXT })
             }
-            $mcpHostNode = (Get-Command node.exe -CommandType Application -ErrorAction Stop).Source
+            $mcpHostNode = (Get-Command node.exe -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
         } else {
-            $mcpHostNode = (Get-Command node -CommandType Application -ErrorAction Stop).Source
+            $mcpHostNode = (Get-Command node -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
         }
         & $mcpHostNode (Join-Path $PSScriptRoot "support/host_transport.mjs") --root $mcpHostRoot --server context7 -- @args
         $mcpHostExit = $LASTEXITCODE

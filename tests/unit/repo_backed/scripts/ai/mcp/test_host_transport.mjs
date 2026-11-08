@@ -61,6 +61,13 @@ test('scope filtering, patterns and fixed Git identity are enforced',t=>{
     assert(route.selectRoute(data,path.join(root,'child'),'context7',()=>common));
     assert.equal(route.gitCommonDirectory(root),null);
 });
+test('workspace route matching follows platform case semantics',()=>{
+    const data=policy('/workspace/Approved');
+    assert(route.selectRoute(data,'/workspace/Approved','context7'));
+    const other=route.selectRoute(data,'/workspace/approved','context7');
+    if(process.platform==='win32') assert(other);
+    else assert.equal(other,null);
+});
 test('Windows policy paths map only when a non-Windows client needs them',()=>{
     assert.equal(route.nativePath('D:\\host\\routes.json','linux'),'/mnt/d/host/routes.json');
     assert.equal(route.nativePath('D:\\host\\routes.json','win32'),'D:\\host\\routes.json');
