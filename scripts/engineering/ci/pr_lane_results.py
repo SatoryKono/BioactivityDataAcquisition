@@ -596,6 +596,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
     ),
+    "reports/observability/live-fixes-r6/LF1-02/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/observability/live-fixes-r6/LF1-04/checksums.txt": (
         GRAFANA_SELECTOR_CONTRACT_TEST,
         GRAFANA_VARIABLE_REFERENCE_TEST,
