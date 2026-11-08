@@ -27,4 +27,4 @@ Date: 2026-11-08
 | bioetl-run-explorer-v1 | bioetl-dq-v2 | 4. Data Quality | 4-data-quality | /d/bioetl-dq-v2/4-data-quality?var-workflow=bioetl-test&var-pipeline=pubchem-etl&var-run_type=incremental&var-run_id=00000000-0000-0000-0000-000000000000&${__url_time_range} | PASS |
 | bioetl-run-explorer-v1 | bioetl-incident-v1 | 5. Incident Workspace | 5-incident-workspace | /d/bioetl-incident-v1/5-incident-workspace?var-workflow=bioetl-test&var-pipeline=pubchem-etl&var-run_type=incremental&var-run_id=00000000-0000-0000-0000-000000000000&${__url_time_range} | PASS |
 
-Все 20 переходов успешно протестированы, значения UUID/pipeline/run_type передаются корректно, проблема с `var-run_id=-` на Incident исправлена.
+Матрица относится к верхней навигации. В поставляемом Incident ссылка панели 1000 на DQ включает `${run_id:queryparam}`. Отдельное действие Open domain diagnostics панели 2010 сохраняет `var-run_id=-` и не входит в матрицу. Проверка выполнена по поставляемому JSON, без браузерного подтверждения этих переходов.
