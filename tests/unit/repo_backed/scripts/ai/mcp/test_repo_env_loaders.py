@@ -365,7 +365,7 @@ def test_bash_keeps_openai_and_openrouter_credentials_separate() -> None:
 @POWERSHELL_MARK
 def test_powershell_keeps_openai_and_openrouter_credentials_separate() -> None:
     result = _run_powershell(
-        "Normalize-BioetlRepoEnvAliases; "
+        "Normalize-BioetlRepoEnvAliases; Set-BioetlNeo4jEnvAliases; "
         "[Console]::Out.WriteLine($env:OPENAI_API_KEY); "
         "[Console]::Out.WriteLine($(if ($env:OPENROUTER_API_KEY) "
         "{ $env:OPENROUTER_API_KEY } else { 'unset' }))",
@@ -408,7 +408,7 @@ def test_bash_preserves_distinct_provider_credentials(
 )
 def test_bash_neo4j_auth_normalization(auth: str, expected: tuple[str, str]) -> None:
     result = _run_bash(
-        "normalize_repo_env_aliases && "
+        "normalize_repo_env_aliases && normalize_neo4j_auth_aliases && "
         + _bash_printenv("NEO4J_USERNAME", "NEO4J_PASSWORD"),
         env=_clean_env(NEO4J_AUTH=auth),
     )
@@ -428,7 +428,7 @@ def test_powershell_neo4j_auth_normalization(
     auth: str, expected: tuple[str, str]
 ) -> None:
     result = _run_powershell(
-        "Normalize-BioetlRepoEnvAliases; "
+        "Normalize-BioetlRepoEnvAliases; Set-BioetlNeo4jEnvAliases; "
         "[Console]::Out.WriteLine($env:NEO4J_USERNAME); "
         "[Console]::Out.WriteLine($env:NEO4J_PASSWORD)",
         env=_clean_env(NEO4J_AUTH=auth),
@@ -443,7 +443,7 @@ def test_bash_rejects_malformed_neo4j_auth_without_leaking(
     auth: str, explicit_credentials: bool
 ) -> None:
     result = _run_bash(
-        "normalize_repo_env_aliases",
+        "normalize_neo4j_auth_aliases",
         env=_clean_env(
             NEO4J_AUTH=auth,
             NEO4J_USERNAME="explicit-user" if explicit_credentials else None,
@@ -463,7 +463,7 @@ def test_powershell_rejects_malformed_neo4j_auth_without_leaking(
     auth: str, explicit_credentials: bool
 ) -> None:
     result = _run_powershell(
-        "Normalize-BioetlRepoEnvAliases",
+        "Set-BioetlNeo4jEnvAliases",
         env=_clean_env(
             NEO4J_AUTH=auth,
             NEO4J_USERNAME="explicit-user" if explicit_credentials else None,
@@ -478,7 +478,7 @@ def test_powershell_rejects_malformed_neo4j_auth_without_leaking(
 
 def test_bash_explicit_neo4j_credentials_take_precedence() -> None:
     result = _run_bash(
-        "normalize_repo_env_aliases && "
+        "normalize_repo_env_aliases && normalize_neo4j_auth_aliases && "
         + _bash_printenv("NEO4J_USERNAME", "NEO4J_PASSWORD"),
         env=_clean_env(
             NEO4J_AUTH="packed-user/packed-password",
@@ -493,7 +493,7 @@ def test_bash_explicit_neo4j_credentials_take_precedence() -> None:
 @POWERSHELL_MARK
 def test_powershell_explicit_neo4j_credentials_take_precedence() -> None:
     result = _run_powershell(
-        "Normalize-BioetlRepoEnvAliases; "
+        "Normalize-BioetlRepoEnvAliases; Set-BioetlNeo4jEnvAliases; "
         "[Console]::Out.WriteLine($env:NEO4J_USERNAME); "
         "[Console]::Out.WriteLine($env:NEO4J_PASSWORD)",
         env=_clean_env(
@@ -540,7 +540,7 @@ def test_bash_aliases_github_token_into_pat_when_pat_empty() -> None:
 @POWERSHELL_MARK
 def test_powershell_does_not_copy_pat_into_github_token() -> None:
     result = _run_powershell(
-        "Normalize-BioetlRepoEnvAliases; "
+        "Normalize-BioetlRepoEnvAliases; Set-BioetlNeo4jEnvAliases; "
         "[Console]::Out.WriteLine($env:GITHUB_PERSONAL_ACCESS_TOKEN); "
         "[Console]::Out.WriteLine($(if ($env:GITHUB_TOKEN) "
         "{ $env:GITHUB_TOKEN } else { 'unset' }))",
@@ -557,7 +557,7 @@ def test_powershell_does_not_copy_pat_into_github_token() -> None:
 @POWERSHELL_MARK
 def test_powershell_aliases_github_token_into_pat_when_pat_empty() -> None:
     result = _run_powershell(
-        "Normalize-BioetlRepoEnvAliases; "
+        "Normalize-BioetlRepoEnvAliases; Set-BioetlNeo4jEnvAliases; "
         "[Console]::Out.WriteLine($env:GITHUB_PERSONAL_ACCESS_TOKEN); "
         "[Console]::Out.WriteLine($env:GITHUB_TOKEN)",
         env=_clean_env(
@@ -579,7 +579,7 @@ def test_bash_loader_reads_explicit_fixture_and_skips_local_overlay(
     fixture = tmp_path / "fixture.envdata"
     fixture.write_text("NEO4J_AUTH=file-user/file/password\n", encoding="utf-8")
     result = _run_bash(
-        "load_repo_env_if_present && "
+        "load_repo_env_if_present && normalize_neo4j_auth_aliases && "
         + _bash_printenv("NEO4J_USERNAME", "NEO4J_PASSWORD"),
         env=_clean_env(
             BIOETL_ENV_FILE=str(fixture),
@@ -597,7 +597,7 @@ def test_powershell_loader_reads_explicit_fixture_and_skips_local_overlay(
     fixture = tmp_path / "fixture.envdata"
     fixture.write_text("NEO4J_AUTH=file-user/file/password\n", encoding="utf-8")
     result = _run_powershell(
-        f"Import-BioetlRepoEnv -RepoRoot {_ps_quote(_powershell_path(ROOT))}; "
+        f"Import-BioetlRepoEnv -RepoRoot {_ps_quote(_powershell_path(ROOT))}; Set-BioetlNeo4jEnvAliases; "
         "[Console]::Out.WriteLine($env:NEO4J_USERNAME); "
         "[Console]::Out.WriteLine($env:NEO4J_PASSWORD)",
         env=_clean_env(
