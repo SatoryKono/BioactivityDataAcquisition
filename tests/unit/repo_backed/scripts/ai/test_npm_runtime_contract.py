@@ -230,6 +230,7 @@ def test_shell_filesystem_executes_locked_pin(tmp_path: Path) -> None:
         text=True,
         capture_output=True,
         check=False,
+        env={**os.environ, "NPM_CONFIG_CACHE": str(tmp_path / ".cache/npm-cache")},
     )
     assert result.returncode == 0, result.stderr
     assert "@modelcontextprotocol/server-filesystem@2026.8.31" in result.stdout
