@@ -1107,7 +1107,7 @@
       "response": null,
       "semantic_kind": "http_table",
       "source_kind": "http",
-      "status": "error",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Review Selected-Run Trust"
     },
@@ -1122,7 +1122,7 @@
       "response": null,
       "semantic_kind": "http_table",
       "source_kind": "http",
-      "status": "error",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Processed Records"
     },
@@ -1137,7 +1137,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Review Replay Evidence"
     },
@@ -1152,7 +1152,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Review Manifest Validation"
     },
@@ -1167,7 +1167,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Review Lineage Validation"
     },
@@ -1182,7 +1182,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Review Retention Compliance"
     },
@@ -1197,7 +1197,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Review Checkpoint Validation"
     },
@@ -1212,7 +1212,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Compare Checkpoint Anchors"
     },
@@ -1227,7 +1227,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Review Selected Run Status"
     },
@@ -1242,7 +1242,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "StageInput",
       "title": "Inspect Processed Records"
     },
@@ -1264,7 +1264,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor Scope Status"
     },
@@ -1286,7 +1286,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Inspect Ranked Suspects"
     },
@@ -1308,7 +1308,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor Global Alerts"
     },
@@ -1330,7 +1330,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Alert State History"
     },
@@ -1352,7 +1352,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Inspect Runtime Suspects"
     },
@@ -1374,7 +1374,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Inspect Provider Suspects"
     },
@@ -1396,7 +1396,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Inspect DQ Suspects"
     },
@@ -1418,7 +1418,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Inspect Global Signal Measurements"
     },
@@ -1433,7 +1433,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Review Selected Run Status"
     },
@@ -1455,7 +1455,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor Pipeline Status"
     },
@@ -1477,7 +1477,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Review Runtime Blockers"
     },
@@ -1499,7 +1499,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor Coverage"
     },
@@ -1521,7 +1521,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "B",
       "title": "Monitor Coverage"
     },
@@ -1543,7 +1543,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "C",
       "title": "Monitor Coverage"
     },
@@ -1565,7 +1565,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Review Stage Progress"
     },
@@ -1587,7 +1587,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Stage Backlog Trend"
     },
@@ -1609,7 +1609,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Phase Duration"
     },
@@ -1631,7 +1631,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "B",
       "title": "Track Phase Duration"
     },
@@ -1653,7 +1653,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "C",
       "title": "Track Phase Duration"
     },
@@ -1675,7 +1675,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Pipeline Duration"
     },
@@ -1697,7 +1697,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "B",
       "title": "Track Pipeline Duration"
     },
@@ -1719,7 +1719,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "C",
       "title": "Track Pipeline Duration"
     },
@@ -1741,7 +1741,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor Worst Stage Lag"
     },
@@ -1763,7 +1763,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor Active Blocker Count"
     },
@@ -1785,7 +1785,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor Failed Runs"
     },
@@ -1807,7 +1807,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor Pipeline Alerts"
     },
@@ -1829,7 +1829,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Failed Workflow Runs"
     },
@@ -1851,7 +1851,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor No-Records Runs"
     },
@@ -1873,7 +1873,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Failed Workflow Steps"
     },
@@ -1895,7 +1895,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor Memory Pressure"
     },
@@ -1917,7 +1917,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Review Errors by Stage & Code"
     },
@@ -1939,7 +1939,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Compare Records by Stage & Run Type"
     },
@@ -1961,7 +1961,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor Replay"
     },
@@ -1983,7 +1983,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Checkpoint"
     },
@@ -2005,7 +2005,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor Ledger"
     },
@@ -2027,7 +2027,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor Telemetry"
     },
@@ -2049,7 +2049,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Records by Stage / Interval"
     },
@@ -2071,7 +2071,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Inspect DQ Alert Conditions"
     },
@@ -2093,7 +2093,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Inspect Control Plane Alerts"
     },
@@ -2115,7 +2115,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Inspect Provider Alerts"
     },
@@ -2137,7 +2137,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Inspect Global Provider Alert Conditions"
     },
@@ -2159,7 +2159,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Review Observed Terminal Counters"
     },
@@ -2181,7 +2181,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Inspect Entities Stale Over 24h"
     },
@@ -2203,7 +2203,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Global Read Failures"
     },
@@ -2225,7 +2225,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor Global Read Failures (30m)"
     },
@@ -2247,7 +2247,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Missing Lineage"
     },
@@ -2269,7 +2269,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Lineage Failures"
     },
@@ -2291,7 +2291,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Ledger Failures"
     },
@@ -2313,7 +2313,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Replay Blockers"
     },
@@ -2335,7 +2335,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "J",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2357,7 +2357,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2379,7 +2379,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "H",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2401,7 +2401,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "B",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2423,7 +2423,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "C",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2445,7 +2445,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "D",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2467,7 +2467,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "E",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2489,7 +2489,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "F",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2511,7 +2511,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "I",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2533,7 +2533,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "G",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2555,7 +2555,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Inspect Current Missing Stage Signals"
     },
@@ -2577,7 +2577,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Compare Global Reads by Store"
     },
@@ -2599,7 +2599,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Manifest Failures"
     },
@@ -2621,7 +2621,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Incompatibilities"
     },
@@ -2643,7 +2643,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Unreconstructable"
     },
@@ -2665,7 +2665,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Review Missing Lineage by Layer"
     },
@@ -2687,7 +2687,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Replay Drift"
     },
@@ -2709,7 +2709,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor Manifest (30m)"
     },
@@ -2731,7 +2731,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Global Shutdown Starts"
     },
@@ -2753,7 +2753,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Load Failures"
     },
@@ -2775,7 +2775,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor Ledger (30m)"
     },
@@ -2797,7 +2797,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Global Shutdown Completions"
     },
@@ -2819,7 +2819,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Save Failures"
     },
@@ -2841,7 +2841,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Inspect Telemetry Coverage"
     },
@@ -2863,7 +2863,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "B",
       "title": "Inspect Telemetry Coverage"
     },
@@ -2885,7 +2885,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "C",
       "title": "Inspect Telemetry Coverage"
     },
@@ -2907,7 +2907,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "D",
       "title": "Inspect Telemetry Coverage"
     },
@@ -2929,7 +2929,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "E",
       "title": "Inspect Telemetry Coverage"
     },
@@ -2951,7 +2951,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Global Admin Failures"
     },
@@ -2973,7 +2973,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Global Read Latency"
     },
@@ -2995,7 +2995,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Observed Manifest Write Increments"
     },
@@ -3017,7 +3017,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Peak Replay Lag"
     },
@@ -3039,7 +3039,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Compare Global Audit Write Outcomes"
     },
@@ -3061,7 +3061,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Replay Drift by Type"
     },
@@ -3083,7 +3083,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Stage Lag"
     },
@@ -3105,7 +3105,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Compare Checkpoint Outcomes"
     },
@@ -3127,7 +3127,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Compare Global Audit Query Outcomes"
     },
@@ -3149,7 +3149,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Replay Lag"
     },
@@ -3171,7 +3171,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Compare Ledger Appends by Type & Status"
     },
@@ -3193,7 +3193,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Inspect Stage Expectedness"
     },
@@ -3215,7 +3215,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "B",
       "title": "Inspect Stage Expectedness"
     },
@@ -3237,7 +3237,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Checkpoint Save Latency"
     },
@@ -3259,7 +3259,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "B",
       "title": "Track Checkpoint Save Latency"
     },
@@ -3281,7 +3281,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "C",
       "title": "Track Checkpoint Save Latency"
     },
@@ -3303,7 +3303,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Global Audit Write Latency"
     },
@@ -3325,7 +3325,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "B",
       "title": "Track Global Audit Write Latency"
     },
@@ -3347,7 +3347,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "C",
       "title": "Track Global Audit Write Latency"
     },
@@ -3369,7 +3369,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Global Checkpoint Admin Latency"
     },
@@ -3391,7 +3391,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "B",
       "title": "Track Global Checkpoint Admin Latency"
     },
@@ -3413,7 +3413,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "C",
       "title": "Track Global Checkpoint Admin Latency"
     },
@@ -3435,7 +3435,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Track Global Audit Query Latency"
     },
@@ -3457,7 +3457,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "B",
       "title": "Track Global Audit Query Latency"
     },
@@ -3479,7 +3479,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "C",
       "title": "Track Global Audit Query Latency"
     },
@@ -3501,7 +3501,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Monitor Runtime Error Rate"
     },
@@ -3523,7 +3523,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Compare Lineage Persistence Outcomes"
     },
@@ -3545,7 +3545,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Review Current Workflow Evidence"
     },
@@ -3567,7 +3567,7 @@
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "B",
       "title": "Review Current Workflow Evidence"
     },
@@ -3582,7 +3582,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Review Run Domains"
     },
@@ -3597,7 +3597,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "B",
       "title": "Inspect Selected Run Stages"
     },
@@ -3612,7 +3612,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "ok",
+      "status": "not_run",
       "target_ref_id": "A",
       "title": "Inspect Recent Runs (last 10)"
     }
