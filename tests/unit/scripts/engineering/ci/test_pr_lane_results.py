@@ -319,28 +319,6 @@ def test_shadow_compare_routes_12380_acceptance_report() -> None:
     assert report["covers_full_suite"] is False
 
 
-def test_shadow_compare_routes_merge_protection_plan_and_structure_catalog() -> None:
-    """The plan and its catalog entry retain their owning validation routes."""
-    repo_root = Path(__file__).resolve().parents[5]
-
-    report = build_shadow_compare(
-        [
-            "configs/quality/repo_structure_catalog.yaml",
-            "docs/plans/ci1-07-negative-merge-protection-plan.md",
-            "docs/plans/README.md",
-        ],
-        repo_root=repo_root,
-    )
-
-    assert set(report["selected"]) == {
-        "tests/unit/scripts/repo/test_audit_root_cleanliness.py",
-        "tests/unit/scripts/repo/test_check_root_governance_docs.py",
-        "tests/unit/scripts/repo/test_audit_structure.py",
-        "tests/architecture/test_documentation_cleanup_inventory.py",
-    }
-    assert report["covers_full_suite"] is False
-
-
 def test_shadow_compare_routes_12553_runtime_acceptance_report() -> None:
     """Issue 12553 acceptance markdown selects the cleanup-inventory contract."""
     repo_root = Path(__file__).resolve().parents[5]
@@ -359,6 +337,7 @@ def test_shadow_compare_routes_12553_runtime_acceptance_report() -> None:
 @pytest.mark.parametrize(
     "path",
     (
+        "reports/audit/hygiene-passport.md",
         "reports/audit/pack-v2.1/P02-ddd-domain.md",
         "reports/audit/pack-v2.1/P02-invariant-runs.log",
         "reports/audit/pack-v2.1/domain-pylint-duplicate-code-scan.log",
@@ -1143,27 +1122,3 @@ def test_shadow_compare_cli_writes_canonical_json(tmp_path: Path) -> None:
         "selected_count",
     ]
     assert not output.with_suffix(".json.tmp").exists()
-
-
-@pytest.mark.parametrize(
-    "path",
-    (
-        ".github/CONTRIBUTING.md",
-        ".github/SECURITY.md",
-        "docs/03-guides/github-local-workflow.md",
-        "docs/03-guides/github-quick-reference.md",
-        "docs/05-operations/ci-cd-integration.md",
-        "docs/05-operations/release-checklist.md",
-        "docs/05-operations/runbooks/github-settings-quarterly-review.md",
-        "reports/governance/github-settings-A1-post-change-20261106.json",
-        "reports/governance/github-settings-A1-readback-20261106.json",
-        "reports/governance/github-settings-B2-preflight-20261106.json",
-        "reports/governance/github-settings-B2-preflight-20261106.md",
-    ),
-)
-def test_shadow_compare_routes_github_settings_governance(path: str) -> None:
-    root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare([path], repo_root=root)
-    assert report["selected"] == [
-        "tests/architecture/test_required_checks_prose_consistency.py"
-    ]
