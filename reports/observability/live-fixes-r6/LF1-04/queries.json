@@ -1,0 +1,10 @@
+{
+  "queries": [
+    {
+      "expr": "label_replace(max by(workflow)(bioetl_workflow_scope_input_status{input=\"workflow\",workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"reason\",\"Reason unavailable\",\"\",\"\")"
+    },
+    {
+      "expr": "bioetl_workflow_scope_published_seconds * on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 1000"
+    }
+  ]
+}
