@@ -36,7 +36,9 @@ as a replacement for runtime truth.
 1. Read retrieved context in the order `catalog -> graph -> rag -> source`.
 1. Cross-check important claims with repo search, active docs, configs, tests,
    and accepted ADRs.
-1. Run `python -m memory.tooling.workflow post-task ...` after the task.
+1. Run `python -m memory.tooling.workflow post-task ...` after the task only
+   in authorized `read-write` mode. In `off`/`read-only` mode, skip post-task
+   and session-note creation and report that choice.
 1. Promote only durable lessons, incidents, or decisions.
 
 ## Repository-Owned Contracts
@@ -76,9 +78,9 @@ implicit retention extension, and fail closed on corrupt or mismatched records.
   explicitly says otherwise.
 
 If `pre-task` runs in degraded mode, treat that as a retrieval warning, not as
-permission to skip canonical source verification. Session notes should still be
-created, and catalog context may still be available even when RAG or timeline
-artifacts are absent.
+permission to skip canonical source verification. Session notes may be created only in authorized
+`read-write` mode. Catalog context may still be available even when RAG or
+timeline artifacts are absent.
 
 Canonical full RAG generation writes rebuild-only artifacts to
 `src/memory/derived/rag/manifests/`. The legacy `src/memory/rag/manifests/`

@@ -53,6 +53,10 @@ if [[ -z "${GITHUB_LOCKDOWN_MODE:-}" ]]; then
   export GITHUB_LOCKDOWN_MODE="true"
 fi
 
+# Caller exclusions can tighten the mandatory deny set, never remove it.
+if [[ "${GITHUB_EXCLUDE_TOOLS}" != "${BIOETL_GITHUB_MCP_DEFAULT_EXCLUDE_TOOLS}" ]]; then
+  export GITHUB_EXCLUDE_TOOLS="${GITHUB_EXCLUDE_TOOLS},${BIOETL_GITHUB_MCP_DEFAULT_EXCLUDE_TOOLS}"
+fi
 mcp_exit_if_validate_only "github"
 
 if [[ -n "${BIOETL_GITHUB_MCP_SERVER:-}" ]]; then
@@ -92,7 +96,26 @@ else
   fi
 fi
 
+if [[ "${BIOETL_GITHUB_MCP_ACCESS:-read-only}" == "read-write" && -z "${BIOETL_GITHUB_MCP_SHA256:-}" ]]; then
+  mcp_fail "read-write requires an explicitly approved BIOETL_GITHUB_MCP_SHA256"
+  exit 64
+fi
+if [[ -n "${BIOETL_GITHUB_MCP_SHA256:-}" ]]; then
+  if [[ ! "${BIOETL_GITHUB_MCP_SHA256}" =~ ^[a-fA-F0-9]{64}$ ]]; then
+    mcp_fail "BIOETL_GITHUB_MCP_SHA256 must be a SHA-256 digest"; exit 64
+  fi
+  actual_digest="$(sha256sum -- "${GITHUB_MCP_BIN}")"
+  actual_digest="${actual_digest%% *}"
+  if [[ "${actual_digest,,}" != "${BIOETL_GITHUB_MCP_SHA256,,}" ]]; then
+    mcp_fail "GitHub MCP executable digest does not match approved identity"; exit 64
+  fi
+fi
 stdio_args=(stdio --toolsets "${GITHUB_TOOLSETS}")
+case "${BIOETL_GITHUB_MCP_ACCESS:-read-only}" in
+  read-only) stdio_args+=(--read-only) ;;
+  read-write) ;;
+  *) mcp_fail "BIOETL_GITHUB_MCP_ACCESS must be read-only or read-write"; exit 64 ;;
+esac
 if [[ -n "${GITHUB_EXCLUDE_TOOLS:-}" ]]; then
   stdio_args+=(--exclude-tools "${GITHUB_EXCLUDE_TOOLS}")
 fi
@@ -101,4 +124,13 @@ case "${GITHUB_LOCKDOWN_MODE:-true}" in
   *) stdio_args+=(--lockdown-mode) ;;
 esac
 
-exec "${GITHUB_MCP_BIN}" "${stdio_args[@]}"
+# Do not pass unrelated integration credentials to this server.
+github_env=()
+for key in PATH HOME USERPROFILE SYSTEMROOT WINDIR TEMP TMP TMPDIR \
+  LANG LC_ALL SSL_CERT_FILE SSL_CERT_DIR HTTP_PROXY HTTPS_PROXY NO_PROXY \
+  http_proxy https_proxy no_proxy GITHUB_PERSONAL_ACCESS_TOKEN GITHUB_HOST; do
+  if [[ -n "${!key:-}" ]]; then
+    github_env+=("${key}=${!key}")
+  fi
+done
+exec env -i "${github_env[@]}" "${GITHUB_MCP_BIN}" "${stdio_args[@]}"

@@ -29,7 +29,9 @@ Every wrapper skill must state:
    evidence, and validation gates.
 1. Produce the wrapper-specific output.
 1. Run the smallest sufficient validation set for the touched surface.
-1. Run `python -m memory.tooling.workflow post-task ...`.
+1. Run `python -m memory.tooling.workflow post-task ...` only in authorized
+   `read-write` memory mode. In `off` or `read-only` mode, skip post-task and
+   session-note creation; report the selected mode in the closeout.
 
 ## Output Requirements
 

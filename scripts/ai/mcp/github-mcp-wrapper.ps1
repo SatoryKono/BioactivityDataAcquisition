@@ -49,6 +49,7 @@ if (-not $env:GITHUB_LOCKDOWN_MODE) {
     $env:GITHUB_LOCKDOWN_MODE = "true"
 }
 
+$env:GITHUB_EXCLUDE_TOOLS = (@(($env:GITHUB_EXCLUDE_TOOLS -split ',') + ($defaultExcludeTools -split ',')) | Select-Object -Unique) -join ','
 Exit-McpValidateOnly -ServerName "github"
 
 $githubMcpBin = $null
@@ -91,8 +92,22 @@ if (-not $githubMcpBin) {
     throw "official github-mcp-server binary not found. Install https://github.com/github/github-mcp-server and set BIOETL_GITHUB_MCP_SERVER. The retired npx package @modelcontextprotocol/server-github is not used."
 }
 
+if ($env:BIOETL_GITHUB_MCP_ACCESS -eq 'read-write' -and -not $env:BIOETL_GITHUB_MCP_SHA256) {
+    throw 'read-write requires an explicitly approved BIOETL_GITHUB_MCP_SHA256'
+}
+if ($env:BIOETL_GITHUB_MCP_SHA256) {
+    if ($env:BIOETL_GITHUB_MCP_SHA256 -notmatch '^[a-fA-F0-9]{64}$' -or
+        (Get-FileHash -LiteralPath $githubMcpBin -Algorithm SHA256).Hash -ne $env:BIOETL_GITHUB_MCP_SHA256) {
+        throw 'GitHub MCP executable digest does not match approved identity'
+    }
+}
 $stdioArgs = [System.Collections.Generic.List[string]]::new()
 $stdioArgs.Add("stdio") | Out-Null
+switch ($env:BIOETL_GITHUB_MCP_ACCESS) {
+    { [string]::IsNullOrWhiteSpace($_) -or $_ -eq 'read-only' } { $stdioArgs.Add('--read-only') | Out-Null }
+    'read-write' { }
+    default { throw 'BIOETL_GITHUB_MCP_ACCESS must be read-only or read-write' }
+}
 $stdioArgs.Add("--toolsets") | Out-Null
 $stdioArgs.Add([string]$env:GITHUB_TOOLSETS) | Out-Null
 if ($env:GITHUB_EXCLUDE_TOOLS) {
@@ -104,5 +119,24 @@ switch -Regex ([string]$env:GITHUB_LOCKDOWN_MODE) {
     default { $stdioArgs.Add("--lockdown-mode") | Out-Null }
 }
 
-& $githubMcpBin @($stdioArgs.ToArray())
-exit $LASTEXITCODE
+# Limit the native child's environment while preserving PowerShell's stdio
+# forwarding. A ProcessStartInfo without explicit stream pumps loses MCP I/O.
+$allowedEnv = @('PATH', 'HOME', 'USERPROFILE', 'SYSTEMROOT', 'WINDIR',
+    'TEMP', 'TMP', 'TMPDIR', 'LANG', 'LC_ALL', 'SSL_CERT_FILE', 'SSL_CERT_DIR',
+    'HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY', 'GITHUB_PERSONAL_ACCESS_TOKEN', 'GITHUB_HOST')
+$removedEnv = @{}
+Get-ChildItem Env: | ForEach-Object {
+    if ($_.Name -notin $allowedEnv) {
+        $removedEnv[$_.Name] = $_.Value
+        Remove-Item -LiteralPath "Env:$($_.Name)"
+    }
+}
+try {
+    & $githubMcpBin @($stdioArgs.ToArray())
+    $childExitCode = $LASTEXITCODE
+} finally {
+    foreach ($key in $removedEnv.Keys) {
+        [Environment]::SetEnvironmentVariable($key, $removedEnv[$key], 'Process')
+    }
+}
+exit $childExitCode
