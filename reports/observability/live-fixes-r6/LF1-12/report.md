@@ -3,7 +3,8 @@
 ## 1. Контекст
 
 **Issue:** #12808
-**Exact source/deploy SHA:** 1f7e40be764b10092fd866b8aae750bc977d7e64
+**Source SHA:** 1f7e40be764b10092fd866b8aae750bc977d7e64
+**Deploy SHA:** NOT_VERIFIABLE (live-развёртывание не проверено)
 **UTC:** Sun Nov  8 00:37:36 UTC 2026
 **Зависимости:** LF1-11 / #12807 (ОТКРЫТ)
 
