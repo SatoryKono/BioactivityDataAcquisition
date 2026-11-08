@@ -16,7 +16,7 @@ from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
 from bioetl.composition.control_plane_paths import (
     control_plane_root as _shared_control_plane_root,
 )
-from bioetl.composition.snapshot_serialization import (
+from bioetl.composition.services.effective_config_serializer import (
     to_serializable_mapping as _shared_to_serializable_mapping,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
