@@ -1,7 +1,7 @@
 {
-  "additive_coverage_xml_path": "reports/local/coverage-pr12892-08c5197657.xml",
-  "additive_coverage_xml_sha256": "3046aa189fa7f3cc723845f1ccf1829711c9708fd83460fa94467b42efad5c8a",
-  "additive_measured_module_count": 430,
+  "additive_coverage_xml_path": "reports/local/coverage-pr12892-5861b316-residual.xml",
+  "additive_coverage_xml_sha256": "8942eeb29ebd6fca2714dce1378a851f5597ed262e39fca54aacfbef16c8703b",
+  "additive_measured_module_count": 432,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": "4dc66455506c3529b7ed2450c9131d9d64f9a513b9ca7757b340beac1e3495ce",
@@ -25699,11 +25699,11 @@
       "source_lines": 29
     },
     {
-      "coverage_percent": 0.0,
-      "coverage_status": "uncovered",
-      "covered_lines": 0,
+      "coverage_percent": 95.89,
+      "coverage_status": "partially_covered",
+      "covered_lines": 70,
       "executable_lines": 73,
-      "missing_lines": 73,
+      "missing_lines": 3,
       "module": "bioetl.interfaces.http._run_type_universe_options",
       "path": "src/bioetl/interfaces/http/_run_type_universe_options.py",
       "source_lines": 145
@@ -51811,11 +51811,11 @@
       "source_lines": 29
     },
     {
-      "coverage_percent": 0.0,
-      "coverage_status": "uncovered",
-      "covered_lines": 0,
+      "coverage_percent": 95.89,
+      "coverage_status": "partially_covered",
+      "covered_lines": 70,
       "executable_lines": 73,
-      "missing_lines": 73,
+      "missing_lines": 3,
       "module": "bioetl.interfaces.http._run_type_universe_options",
       "path": "src/bioetl/interfaces/http/_run_type_universe_options.py",
       "source_lines": 145
@@ -52393,18 +52393,12 @@
       "coverage_xml_missing": 0,
       "fully_covered": 2522,
       "no_executable_lines": 2,
-      "partially_covered": 86,
-      "uncovered": 1,
+      "partially_covered": 87,
+      "uncovered": 0,
       "unmeasured": 0
     },
-    "uncovered_module_count": 1,
-    "uncovered_modules": [
-      {
-        "module": "bioetl.interfaces.http._run_type_universe_options",
-        "path": "src/bioetl/interfaces/http/_run_type_universe_options.py",
-        "reason": "coverage_xml_reports_zero_executed_lines"
-      }
-    ],
+    "uncovered_module_count": 0,
+    "uncovered_modules": [],
     "unmeasured_module_count": 0,
     "unmeasured_modules": []
   }
