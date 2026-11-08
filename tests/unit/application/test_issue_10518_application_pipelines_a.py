@@ -1058,6 +1058,23 @@ class TestSummaryRowHelpers:
         ]
         assert [row["leaf_id"] for row in _deduplicate_resolved_rows(rows)] == [10]
 
+    def test_dedupe_prefers_numeric_priority_and_keeps_first_tie(self) -> None:
+        earlier_tie = _summary_row(leaf_id=10, component_id=2)
+        later_tie = _summary_row(leaf_id=10, component_id=2)
+        lower_leaf = _summary_row(leaf_id=3, component_id=None)
+        result = _deduplicate_resolved_rows(
+            [
+                _summary_row(leaf_id=10, component_id=11),
+                _summary_row(leaf_id=10, component_id=None),
+                earlier_tie,
+                lower_leaf,
+                later_tie,
+            ]
+        )
+        assert len(result) == 2
+        assert result[0] is lower_leaf
+        assert result[1] is earlier_tie
+
     def test_is_resolved(self) -> None:
         assert _is_resolved({"classification_status": None})
         assert _is_resolved({})

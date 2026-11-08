@@ -61,13 +61,12 @@ def summarize_target_protein_classification_dependency(
         return pl.DataFrame(schema=_SUMMARY_SCHEMA)
 
     rows_by_target: dict[str, list[dict[str, object]]] = {}
-    # Use to_dicts() directly, as it pushes dict creation down to Rust
-    # which is significantly faster for large DataFrames than iter_rows(named=True).
-    for row in df.to_dicts():
-        target_id = _text_or_none(row.get("target_id"))
-        if target_id is None:
-            continue
-        rows_by_target.setdefault(target_id, []).append(row)
+    # Limit the temporary list and release skipped rows after each slice.
+    for batch in df.iter_slices(n_rows=8_192):
+        for row in batch.to_dicts():
+            target_id = _text_or_none(row.get("target_id"))
+            if target_id is not None:
+                rows_by_target.setdefault(target_id, []).append(row)
     if not rows_by_target:
         return pl.DataFrame(schema=_SUMMARY_SCHEMA)
     if target_type_mapping_data is None:
@@ -184,7 +183,7 @@ def _multifunctional_origin(rows: list[dict[str, object]]) -> str:
 def _deduplicate_resolved_rows(
     rows: list[dict[str, object]],
 ) -> list[dict[str, object]]:
-    parsed_rows = []
+    best_by_leaf: dict[int, tuple[int, dict[str, object]]] = {}
     for row in rows:
         if not _is_resolved(row):
             continue
@@ -194,18 +193,13 @@ def _deduplicate_resolved_rows(
             continue
 
         component_id = _positive_int_or_none(row.get("component_id"))
-        parsed_rows.append(
-            (leaf_id, component_id if component_id is not None else 10**12, row)
-        )
+        priority = component_id if component_id is not None else 10**12
+        previous = best_by_leaf.get(leaf_id)
+        # A stable sort picked the first row when component priorities matched.
+        if previous is None or priority < previous[0]:
+            best_by_leaf[leaf_id] = (priority, row)
 
-    parsed_rows.sort(key=lambda x: (x[0], x[1]))
-
-    deduped: dict[int, dict[str, object]] = {}
-    for leaf_id, _, row in parsed_rows:
-        if leaf_id not in deduped:
-            deduped[leaf_id] = row
-
-    return [deduped[leaf_id] for leaf_id in sorted(deduped)]
+    return [best_by_leaf[leaf_id][1] for leaf_id in sorted(best_by_leaf)]
 
 
 def _is_resolved(row: Mapping[str, object]) -> bool:
