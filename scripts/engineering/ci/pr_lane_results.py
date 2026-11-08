@@ -133,6 +133,13 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "scripts/ops/observability/grafana/dashboard_context_links.py": (
+        "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+    ),
+    "reports/observability/live-fixes-r6/LF1-17/report.md": (
+        "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     **dict.fromkeys(
         (
             "reports/observability/live-fixes-r6/LF1-13/checksums.txt",
