@@ -20,9 +20,9 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "342c266dcee49fb230db82ca62db8b72da369cac636ac692577889fb688888a3",
+    "bioetl-control-plane-v1": "1ee4113c588380ad4343b837b5893f7cd8233c6f5133a7d8e1931ad9f164e368",
     "bioetl-dq-v2": "a45b7f2ba23d086c020c23b11e3e160c286c04865700bfc7fc74b2f7c9c642bd",
-    "bioetl-incident-v1": "716b04a0841cf4ec05762745d721af5b9c89172bdaf5da49a387932c307257ef",
+    "bioetl-incident-v1": "1faa9ac42409fa880391c158d5365f2fd6000d7a24ad7b6f5bf8c6d3e7bf7554",
     "bioetl-overview-v2": "1201ccb716f6528d135ae8f44d161ea8f6cae7163e1471b3fe701807d5cad131",
     "bioetl-run-explorer-v1": "83a094a8bfc1bfd7cd82dc2cc1ff436abb73a12ce89c62679ad014f9738cec12"
   },
@@ -2049,23 +2049,6 @@
       "basis": "preserved-from-json",
       "component": "JSON fallback",
       "dashboard_uid": "bioetl-incident-v1",
-      "disposition": "fallback-only",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-incident-v1",
-      "panel_id": 9460,
-      "panel_title": "Inspect Selected Run Stages",
-      "route": "incident-console",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [],
-        "target_count": 0
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-incident-v1",
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-incident-v1",
@@ -2077,23 +2060,6 @@
         "datasource_uid": "-- Dashboard --",
         "expressions": [],
         "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-incident-v1",
-      "disposition": "fallback-only",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-incident-v1",
-      "panel_id": 9452,
-      "panel_title": "Inspect Selected Run Identity",
-      "route": "incident-console",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [],
-        "target_count": 0
       }
     },
     {
@@ -2114,6 +2080,40 @@
           "bioetl_workflow_scope_published_seconds * on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 1000"
         ],
         "target_count": 2
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-incident-v1",
+      "disposition": "fallback-only",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-incident-v1",
+      "panel_id": 9460,
+      "panel_title": "Inspect Selected Run Stages",
+      "route": "incident-console",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [],
+        "target_count": 0
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-incident-v1",
+      "disposition": "fallback-only",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-incident-v1",
+      "panel_id": 9452,
+      "panel_title": "Inspect Selected Run Identity",
+      "route": "incident-console",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [],
+        "target_count": 0
       }
     },
     {
