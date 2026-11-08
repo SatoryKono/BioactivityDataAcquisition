@@ -22,6 +22,12 @@ Test-McpOptionalToken `
 
 Exit-McpValidateOnly -ServerName "context7"
 
+$sharedClient = Join-Path $repoRoot 'scripts/ops/runtime/mcp/stdio_shared_client.py'
+if ([System.Environment]::OSVersion.Platform -eq [System.PlatformID]::Win32NT -and (Test-Path -LiteralPath $sharedClient)) {
+    & 'C:/Users/Fedor/AppData/Local/Programs/Python/Python313/python.exe' -B $sharedClient context7
+    exit $LASTEXITCODE
+}
+
 # CONTEXT7_API_KEY is inherited by the child; never expose it in process argv.
 # Do not remap stdout — MCP framing must pass through unmodified.
 & npx -y "@upstash/context7-mcp@3.2.4"

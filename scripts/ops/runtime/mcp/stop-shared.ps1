@@ -34,6 +34,12 @@ $selected = if ($Servers.Count -gt 0) {
 $stopped = 0
 
 foreach ($name in $selected) {
+    if ($name -eq 'context7' -and (Test-Path -LiteralPath 'D:/pc-agent/tools/shared-mcp/service-owner.py')) {
+        if ($PSCmdlet.ShouldProcess('shared Context7 owner', 'Drain and stop')) {
+            & 'C:/Users/Fedor/AppData/Local/Programs/Python/Python313/python.exe' -B 'D:/pc-agent/tools/shared-mcp/service-owner.py' context7 stop
+        }
+        continue
+    }
     $pidFile = Join-Path $pidDir "$name.pid"
     if (Test-Path $pidFile) {
         $pidText = (Get-Content $pidFile -Raw).Trim()

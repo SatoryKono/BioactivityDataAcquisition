@@ -131,6 +131,15 @@ foreach ($name in $selected) {
         }
         continue
     }
+    if ($name -eq 'context7' -and (Test-Path -LiteralPath 'D:/pc-agent/tools/shared-mcp/service-owner.py')) {
+        $managedRaw = & 'C:/Users/Fedor/AppData/Local/Programs/Python/Python313/python.exe' -B 'D:/pc-agent/tools/shared-mcp/service-owner.py' context7 status
+        $managedOk = $false
+        if ($LASTEXITCODE -eq 0) { $managed = $managedRaw | ConvertFrom-Json; $managedOk = [bool]$managed.ready }
+        if (-not $managedOk) { $failed++ }
+        $results += [pscustomobject]@{ Server=$name; Port=[int]$entry.port; Url="http://127.0.0.1:$($entry.port)/mcp"; PortOpen=$managedOk; PingOk=$managedOk; Ok=$managedOk; Error=$null }
+        Write-Host "[MANAGED] context7 ready=$managedOk"
+        continue
+    }
     $port = [int]$entry.port
     $path = [string]$entry.path
     if ([string]::IsNullOrWhiteSpace($path)) { $path = '/mcp' }

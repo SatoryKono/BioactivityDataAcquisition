@@ -37,9 +37,13 @@ for arg in "$@"; do
 done
 
 PROXY_PKG="$(python3 -c "import json; print(json.load(open(r'$CATALOG'))['proxy_package'])")"
+if [[ ${#SELECTED[@]} -eq 1 && "${SELECTED[0]}" == "context7" ]] && { [[ -n "${WSL_INTEROP:-}" ]] || grep -qi microsoft /proc/sys/kernel/osrelease 2>/dev/null; }; then
+  echo "Context7 uses the Windows owner; proxy prewarm is unnecessary."
+else
 echo "Pre-warming $PROXY_PKG ..."
 npx -y "$PROXY_PKG" --help >"$LOG_DIR/prewarm.out.log" 2>"$LOG_DIR/prewarm.err.log" || \
   echo "pre-warm warning (see $LOG_DIR/prewarm.err.log)"
+fi
 
 python3 - "$CATALOG" "$ROOT" "$PID_DIR" "$LOG_DIR" "$MODE" "${SELECTED[@]}" <<'PY'
 from __future__ import annotations
@@ -159,6 +163,21 @@ pending: dict[str, tuple[subprocess.Popen[bytes], float, object, object]] = {}
 failed = 0
 
 for name, entry in items:
+    if name == "context7" and (os.environ.get("WSL_INTEROP") or "microsoft" in __import__("platform").release().lower()):
+        try:
+            completed = subprocess.run(["/mnt/c/Users/Fedor/AppData/Local/Programs/Python/Python313/python.exe", "-B",
+                "D:/pc-agent/tools/shared-mcp/service-owner.py", "context7", "ensure"], capture_output=True, text=True)
+        except OSError:
+            failed += 1
+            server_status[name] = {"state": "windows_interop_unavailable_no_fallback"}
+            continue
+        if completed.returncode:
+            failed += 1
+            server_status[name] = {"state": "windows_owner_unavailable"}
+        else:
+            managed = json.loads(completed.stdout)
+            server_status[name] = {"state": "managed_windows", "backend_pid_windows": managed["backend_pid"], "gateway_pid_windows": managed["pid"], "client_transport": "windows_stdio_adapter"}
+        continue
     port = int(entry["port"])
     path = str(entry.get("path") or "/mcp")
     url = f"http://127.0.0.1:{port}{path}"

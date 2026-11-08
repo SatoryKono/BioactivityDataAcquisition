@@ -248,7 +248,7 @@ if ([string]::IsNullOrWhiteSpace($apiKey)) {
     Write-Host 'Auth: BIOETL_MCP_SHARED_API_KEY set (mcp-proxy env auth / clients need X-API-Key)'
 }
 
-if (-not $DryRun -and -not $SkipPrewarm) {
+if (-not $DryRun -and -not $SkipPrewarm -and @($selected | Where-Object { $_ -ne 'context7' }).Count -gt 0) {
     Write-Host "Pre-warming $proxyPkg (cache=$npmCache) ..."
     $warmLog = Join-Path $logDir 'prewarm.err.log'
     $warmOut = Join-Path $logDir 'prewarm.out.log'
@@ -278,6 +278,15 @@ foreach ($name in $selected) {
     if (-not $entry) {
         Write-Warning "Unknown shared server '$name'; skip"
         $failed++
+        continue
+    }
+    if ($name -eq 'context7' -and (Test-Path -LiteralPath 'D:/pc-agent/tools/shared-mcp/service-owner.py')) {
+        if ($DryRun) { Write-Host 'DryRun: shared Context7 owner ensure'; continue }
+        $managedRaw = & 'C:/Users/Fedor/AppData/Local/Programs/Python/Python313/python.exe' -B 'D:/pc-agent/tools/shared-mcp/service-owner.py' context7 ensure
+        if ($LASTEXITCODE -ne 0) { $failed++; continue }
+        $managed = $managedRaw | ConvertFrom-Json
+        $status.servers[$name] = @{ port = [int]$entry.port; state = 'managed_windows'; url = "http://127.0.0.1:$($entry.port)/mcp"; gateway_pid = $managed.pid; backend_pid = $managed.backend_pid }
+        Write-Host "OK shared Context7 backend=$($managed.backend_pid) gateway=$($managed.pid)"
         continue
     }
     $port = [int]$entry.port

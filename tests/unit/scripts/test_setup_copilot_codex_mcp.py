@@ -1229,3 +1229,39 @@ def test_ensure_mcp_shell_reuses_current_config_and_repairs_drift(
     assert repaired_payload["mcpServers"]["filesystem"]["args"][0] == (
         "scripts/ai/mcp/mcp_filesystem_wrapper.sh"
     )
+
+
+def test_machine_local_shared_transport_survives_projection(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    (workspace / ".codex").mkdir(parents=True)
+    bridge = workspace / "scripts" / "shared-client.mjs"
+    bridge.parent.mkdir(parents=True)
+    bridge.write_text("// fixture", encoding="utf-8")
+    entry = {"context7": {"command": "node", "args": ["scripts/shared-client.mjs", "context7"]}}
+    (workspace / ".codex" / "mcp-local-transports.json").write_text(json.dumps(entry), encoding="utf-8")
+    baseline = {"context7": {"command": "legacy-context7"}, "github": {"url": "fixture"}}
+    local = setup_mcp._apply_shared_transport(baseline, transport_mode="shared", workspace_root=workspace)
+    assert local["context7"] == entry["context7"]
+    runtime = setup_mcp._apply_shared_transport(baseline, transport_mode="shared", workspace_root=workspace, absolute_local_paths=True)
+    assert runtime["context7"]["args"][0] == str(bridge.resolve())
+    assert local["github"]["url"] == setup_mcp.MCP_SHARED_SERVER_ENDPOINTS["github"]
+    assert baseline["context7"]["command"] == "legacy-context7"
+
+
+def test_machine_local_shared_transport_rejects_unselected_service(tmp_path: Path) -> None:
+    (tmp_path / ".codex").mkdir()
+    (tmp_path / ".codex" / "mcp-local-transports.json").write_text(
+        json.dumps({"unknown-service": {"command": "node", "args": []}}), encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="outside the selected"):
+        setup_mcp._apply_shared_transport({"context7": {}}, transport_mode="shared", workspace_root=tmp_path)
+
+
+def test_machine_local_transport_does_not_enable_unselected_service(tmp_path: Path) -> None:
+    (tmp_path / ".codex").mkdir()
+    (tmp_path / ".codex" / "mcp-local-transports.json").write_text(
+        json.dumps({"context7": {"command": "node", "args": ["bridge.mjs"]}}), encoding="utf-8"
+    )
+    selected = setup_mcp._apply_shared_transport({"github": {}}, transport_mode="shared", workspace_root=tmp_path)
+    assert "context7" not in selected
+    assert set(selected) == {"github"}

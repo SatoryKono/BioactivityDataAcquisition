@@ -1447,6 +1447,21 @@ def test_adr_analysis_wrapper_startup_contract(
     )
 
 
+def _portable_context7_wrapper(directory: Path, source: Path) -> Path:
+    root = directory / "portable-context7"
+    destination = root / "scripts" / "ai" / "mcp"
+    destination.mkdir(parents=True, exist_ok=True)
+    (destination / "support").mkdir(exist_ok=True)
+    for name in ("load_repo_env.sh", "load_repo_env.ps1", "token_validation.sh", "token_validation.ps1"):
+        shutil.copyfile(MCP_DIR / "support" / name, destination / "support" / name)
+    ops_support = root / "scripts" / "ops" / "support"
+    ops_support.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(ROOT / "scripts" / "ops" / "support" / "load_repo_env.sh", ops_support / "load_repo_env.sh")
+    copied = destination / source.name
+    shutil.copyfile(source, copied)
+    return copied
+
+
 @BASH_MARK
 @pytest.mark.parametrize("api_key", [None, EXAMPLE_CONTEXT7_KEY])
 def test_bash_context7_uses_env_auth_without_argv(
@@ -1465,7 +1480,7 @@ def test_bash_context7_uses_env_auth_without_argv(
         BIOETL_TEST_CAPTURE=str(capture_file),
     )
 
-    result = _run_bash(f"bash {shlex.quote(_bash_lf_script(CONTEXT7_SH))}", env=env)
+    result = _run_bash(f"bash {shlex.quote(_bash_lf_script(_portable_context7_wrapper(tmp_path, CONTEXT7_SH)))}", env=env)
 
     assert result.returncode == 0, result.stderr
     assert result.stdout == ""
@@ -1495,7 +1510,7 @@ def test_powershell_context7_uses_env_auth_without_argv(
         CONTEXT7_API_KEY=api_key,
     )
 
-    result = _run_powershell_file(CONTEXT7_PS1, env=env)
+    result = _run_powershell_file(_portable_context7_wrapper(windows_fixture_dir, CONTEXT7_PS1), env=env)
 
     assert result.returncode == 0, result.stderr
     assert result.stdout == ""

@@ -10,6 +10,8 @@ Does not start the shared plane. Does not commit anything.
 
 from __future__ import annotations
 
+import argparse
+from copy import deepcopy
 import json
 from pathlib import Path
 
@@ -122,9 +124,52 @@ def _write_targets(
         print(f"wrote {target.relative_to(ROOT)} ({server_count} servers)")
 
 
+def selected_payload(payload: dict, entries: dict) -> dict:
+    """Project approved entries only; preserve every unrelated server and setting."""
+    result = deepcopy(payload)
+    for key in ("mcpServers", "servers", "mcp_servers"):
+        servers = result.get(key)
+        if isinstance(servers, dict):
+            for name, entry in entries.items():
+                if name in servers:
+                    previous = servers[name]
+                    projected = deepcopy(entry)
+                    for flag in ("enabled", "disabled", "alwaysAllow", "autoApprove", "enabled_tools", "disabled_tools", "allowedTools", "disabledTools", "startup_timeout_sec", "tool_timeout_sec", "timeout"):
+                        if isinstance(previous, dict) and flag in previous:
+                            projected[flag] = deepcopy(previous[flag])
+                    servers[name] = projected
+            return result
+    raise ValueError("Target has no recognized MCP server map")
+
+
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--selected-entries", type=Path)
+    args = parser.parse_args()
+    if args.selected_entries is not None:
+        entries = json.loads(args.selected_entries.read_text(encoding="utf-8"))
+        selective_targets = (*TARGETS, ROOT / ".codex" / "settings.json", ROOT / ".devin" / "mcp_config.json")
+        for target in selective_targets:
+            if not target.is_file():
+                continue
+            original = target.read_bytes()
+            payload = selected_payload(json.loads(original.decode("utf-8-sig")), entries)
+            encoded = (json.dumps(payload, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+            if encoded == original:
+                continue
+            if target.read_bytes() != original:
+                raise RuntimeError("Concurrent config edit; projection stopped")
+            target.write_bytes(encoded)
+            print(f"projected selected entries: {target}")
+        return 0
     catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
     servers = _catalog_http_servers(catalog)
+    local_file = ROOT / ".codex" / "mcp-local-transports.json"
+    if local_file.is_file():
+        for name, entry in json.loads(local_file.read_text(encoding="utf-8")).items():
+            if name not in servers:
+                raise ValueError("Local transport is outside the shared catalog")
+            servers[name] = deepcopy(entry)
     # Preserve approved remote HTTPS servers from tracked .mcp.json when present.
     _merge_tracked_https_servers(servers, ROOT / _DOT_MCP_JSON)
 

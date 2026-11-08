@@ -395,8 +395,10 @@ def _apply_shared_transport(
     servers: dict[str, dict[str, Any]],
     *,
     transport_mode: str,
+    workspace_root: Path | None = None,
+    absolute_local_paths: bool = False,
 ) -> dict[str, dict[str, Any]]:
-    """Rewrite shared-capable servers to localhost HTTP when mode is shared/hybrid.
+    """Rewrite shared-capable servers, honoring explicit machine-local transports.
 
     Tracked portable projections must call this with transport_mode='stdio' only.
     """
@@ -413,6 +415,26 @@ def _apply_shared_transport(
             continue
         timeout = int(rewritten[name].get("startup_timeout_sec", 30))
         rewritten[name] = _local_http_server(url, startup_timeout_sec=timeout)
+    if workspace_root is not None:
+        local_file = workspace_root / ".codex" / "mcp-local-transports.json"
+        if local_file.is_file():
+            local_entries = json.loads(local_file.read_text(encoding="utf-8"))
+            for name, entry in local_entries.items():
+                if name not in MCP_SHARED_SERVER_ENDPOINTS:
+                    raise ValueError("Local transport is outside the selected shared profile")
+                if name not in rewritten:
+                    continue
+                if not isinstance(entry, dict) or not isinstance(entry.get("command"), str) or not isinstance(entry.get("args"), list):
+                    raise ValueError("Invalid local transport command")
+                projected = deepcopy(entry)
+                if absolute_local_paths and projected["args"]:
+                    first = Path(str(projected["args"][0]))
+                    if not first.is_absolute() and not str(first).startswith("-"):
+                        resolved = (workspace_root / first).resolve()
+                        if not resolved.is_relative_to(workspace_root.resolve()):
+                            raise ValueError("Local transport path escapes workspace")
+                        projected["args"][0] = str(resolved)
+                rewritten[name] = projected
     return rewritten
 
 
@@ -565,6 +587,8 @@ def _codex_runtime_servers(
     servers = _apply_shared_transport(
         deepcopy(_canonical_servers(workspace_root, profile=profile)),
         transport_mode=transport_mode,
+        workspace_root=workspace_root,
+        absolute_local_paths=True,
     )
     xdg_cache_home = os.environ.get("XDG_CACHE_HOME")
     cache_home = (
@@ -762,6 +786,7 @@ def _write_configs(
             profile=profile,
         ),
         transport_mode=transport_mode,
+        workspace_root=workspace_root,
     )
     portable_servers = _apply_tracked_json_compat(full_servers)
     tracked_payload = {
