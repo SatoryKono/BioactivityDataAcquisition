@@ -39,6 +39,8 @@ Timestamp для параметров времени передаётся чер
 
 Отличие: timestamp (отображение/диапазон) здесь не является частью самого `run_id` или алиасом для него. Значение `run_id` подставляется из отдельной переменной, а время контролируется global time picker.
 
+У подписи Selected Run отдельный источник времени. Запрос с `response_shape=options` получает `text` и `value`. Grafana отображает `text` как `__text`, а передаёт UUID из `value` как `__value`. В `control_plane_selector_context.py::_run_option_label` начало запуска берётся из `record.started_at` и форматируется через `format_timestamp_label`; оно входит в подпись перед pipeline, статусом и UUID. Это время запуска и оно не зависит от `${__url_time_range}`, который передаёт диапазон просмотра.
+
 ## 4. Сопоставление source и deployment
 Все 5 дашбордов развёртываются через штатные json-шаблоны. Источники времени (Global Time Range и `${__url_time_range}`) управляются самой Grafana на уровне UI/deploy.
 
