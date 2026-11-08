@@ -23,7 +23,7 @@ from bioetl.composition.services.versioning import (
     CodeRevisionProvenance,
     get_pipeline_version,
 )
-from bioetl.composition.snapshot_serialization import (
+from bioetl.composition.services.effective_config_serializer import (
     to_serializable_mapping,
 )
 from bioetl.domain.filtering.silver_filter_identity import (
