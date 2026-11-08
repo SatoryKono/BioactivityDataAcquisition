@@ -1,0 +1,26 @@
+{
+  "issue": "12801",
+  "pass_id": "LF1-05",
+  "base_sha": "ea77f3012d26cc1a11b8b9fe4609f01bf5550667",
+  "status": "NOT_VERIFIABLE",
+  "reason": "Live observability stack unavailable; connection refused.",
+  "timestamp": "2026-11-08T13:31:05.228157+00:00",
+  "uuid_selections": [
+    {
+      "type": "Positive 1",
+      "uuid": "ee3ce1ed-9487-572f-ae24-c98c6f6e3a37"
+    },
+    {
+      "type": "Positive 2",
+      "uuid": "d7cdb35b-e37a-5767-b30e-aa8dfb60d775"
+    },
+    {
+      "type": "Negative 1",
+      "uuid": "20261102T181217"
+    },
+    {
+      "type": "Negative 2",
+      "uuid": "00000000-0000-0000-0000-000000000000"
+    }
+  ]
+}
