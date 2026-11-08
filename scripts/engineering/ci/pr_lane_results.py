@@ -135,6 +135,61 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     **dict.fromkeys(
         (
+            ".codex/skills/py-audit-bot/references/wrapper-contract.md",
+            ".devin/agent-metrics.json",
+            ".devin/scripts/collect_agent_metrics.py",
+            ".devin/skills/py-audit-bot/references/wrapper-contract.md",
+            ".junie/guidelines.md",
+            ".junie/skills/py-audit-bot/references/wrapper-contract.md",
+            ".mcp.json",
+            ".opencode/agent/review.md",
+            "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+            "docs/00-project/ai/agents/guides/MUSE.md",
+            "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
+            "docs/00-project/ai/skills/local/py-audit-bot/references/wrapper-contract.md",
+            "scripts/ai/.mcp.json",
+            "scripts/ai/codex/helper/ensure-mcp.sh",
+            "scripts/ai/mcp/check_neo4j_memory.sh",
+            "scripts/ai/mcp/github-mcp-wrapper.ps1",
+            "scripts/ai/mcp/github-mcp-wrapper.sh",
+            "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh",
+            "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
+            "scripts/ai/mcp/mcp_code_analyzer_wrapper.sh",
+            "scripts/ai/mcp/mcp_context7_wrapper.sh",
+            "scripts/ai/mcp/mcp_deja_wrapper.sh",
+            "scripts/ai/mcp/mcp_github_actions_wrapper.sh",
+            "scripts/ai/mcp/support/token_validation.sh",
+            "scripts/ai/mcp/test_env_loading.sh",
+            "scripts/ai/mcp/mcp_memory_wrapper.ps1",
+            "scripts/ai/mcp/mcp_memory_wrapper.sh",
+            "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1",
+            "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh",
+            "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1",
+            "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
+            "scripts/ai/mcp/support/load_repo_env.ps1",
+            "scripts/ops/support/load_repo_env.sh",
+            "src/memory/DAILY_WORKFLOW.md",
+        ),
+        (
+            "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
+            "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py",
+            "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+        ),
+    ),
+    "scripts/ops/docker-setup.ps1": (
+        "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
+    ),
+    "src/memory/mcp_server.py": (
+        "tests/unit/memory/test_mcp_server.py",
+        "tests/integration/memory/test_mcp_server_isolation.py",
+    ),
+    "src/memory/mcp_scope.py": (
+        "tests/unit/memory/test_mcp_scope.py",
+        "tests/integration/memory/test_mcp_server_isolation.py",
+    ),
+    "src/memory/storage.py": ("tests/unit/memory/test_atomic_storage.py",),
+    **dict.fromkeys(
+        (
             ".vscode/extensions.json",
             ".vscode/launch.json",
             ".vscode/settings.json",
@@ -518,6 +573,19 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/audit/nightly-checkout-table.json",
         ),
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-11/contract-evidence.json",
+            "reports/observability/live-fixes-r6/LF1-11/manifest-show.txt",
+            "reports/observability/live-fixes-r6/LF1-11/manifest-validation.json",
+            "reports/observability/live-fixes-r6/LF1-11/manifest.json",
+            "reports/observability/live-fixes-r6/LF1-11/report.md",
+        ),
+        (
+            "tests/unit/interfaces/http/test_manifest_validation_catalog.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
     ),
     "reports/audit/comp-004-runtime/verification_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
