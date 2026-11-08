@@ -11874,7 +11874,7 @@
       "type": "row",
       "title": "Inspect Saved Run Evidence",
       "collapsed": true,
-      "description": "Expand for saved stage rows (Inspect Selected Run Stages), domain verdicts (Inspect Selected Run Domains), and full identity (Inspect Selected Run Identity) of the selected Run ID.",
+      "description": "Expand for saved domain trust reasons for the selected Run ID.",
       "gridPos": {
         "x": 0,
         "y": 50,
@@ -11883,29 +11883,12 @@
       },
       "panels": [
         {
-          "id": 9460,
-          "type": "text",
-          "title": "Inspect Selected Run Stages",
-          "description": "SELECTED RUN · Canonical stage table is DQ panel 9460 (rev7 §2.4).",
-          "gridPos": {
-            "x": 0,
-            "y": 51,
-            "w": 24,
-            "h": 8
-          },
-          "transparent": true,
-          "options": {
-            "mode": "markdown",
-            "content": "**Canonical stages:** [Open Inspect Selected Run Stages on Data Quality](/d/bioetl-dq-v2/4-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9460&${__url_time_range})"
-          }
-        },
-        {
           "id": 9451,
           "type": "table",
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
-            "y": 59,
+            "y": 51,
             "w": 24,
             "h": 8
           },
@@ -12154,23 +12137,6 @@
             }
           ],
           "links": []
-        },
-        {
-          "id": 9452,
-          "type": "text",
-          "title": "Inspect Selected Run Identity",
-          "description": "SELECTED RUN · Canonical identity is Overview 9300 (rev7 §2.4).",
-          "gridPos": {
-            "x": 0,
-            "y": 67,
-            "w": 24,
-            "h": 8
-          },
-          "transparent": true,
-          "options": {
-            "mode": "markdown",
-            "content": "**Canonical identity:** [Open Review Run Identity on Overview](/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range})"
-          }
         }
       ]
     },
@@ -12338,6 +12304,40 @@
         }
       ],
       "description": "Expand for current workflow evidence. This table is not the selected Run ID verdict."
+    },
+    {
+      "id": 9460,
+      "type": "text",
+      "title": "Inspect Selected Run Stages",
+      "description": "SELECTED RUN · Canonical stage table is DQ panel 9460 (rev7 §2.4).",
+      "gridPos": {
+        "x": 0,
+        "y": 52,
+        "w": 12,
+        "h": 3
+      },
+      "transparent": true,
+      "options": {
+        "mode": "markdown",
+        "content": "**Canonical stages:** [Open Inspect Selected Run Stages on Data Quality](/d/bioetl-dq-v2/4-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9460&${__url_time_range})"
+      }
+    },
+    {
+      "id": 9452,
+      "type": "text",
+      "title": "Inspect Selected Run Identity",
+      "description": "SELECTED RUN · Canonical identity is Overview 9300 (rev7 §2.4).",
+      "gridPos": {
+        "x": 12,
+        "y": 52,
+        "w": 12,
+        "h": 3
+      },
+      "transparent": true,
+      "options": {
+        "mode": "markdown",
+        "content": "**Canonical identity:** [Open Review Run Identity on Overview](/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range})"
+      }
     }
   ]
 }
