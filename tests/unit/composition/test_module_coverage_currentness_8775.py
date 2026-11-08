@@ -36,7 +36,7 @@ from bioetl.composition.pipeline_runner_request import (
 from bioetl.application.serialization import (
     snapshot_serialization as _snapshot_mapping_support,
 )
-from bioetl.composition.snapshot_serialization import (
+from bioetl.application.serialization.snapshot_serialization import (
     normalize_snapshot,
     to_serializable_mapping,
 )
