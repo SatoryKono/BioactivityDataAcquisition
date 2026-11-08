@@ -41,7 +41,7 @@ def resolve_project_path(value: object) -> str:
     return str((config_path.parent / path).resolve())
 
 keys = [
-    ("EXPECTED_MEMORY_PATH", ("memory", "env", "MEMORY_FILE_PATH")),
+    ("EXPECTED_MEMORY_PATH", ("memory", "env", "MEMORY_SEED_PATH")),
     ("EXPECTED_FETCH_WRAPPER_PATH", ("fetch", "args", 0)),
     ("EXPECTED_GITHUB_WRAPPER_PATH", ("github", "args", 0)),
     ("EXPECTED_DOCKER_WRAPPER_PATH", ("docker", "args", 0)),
