@@ -102,8 +102,8 @@ errors: list[str] = []
 
 memory_entry = servers.get("memory", {})
 memory_env = memory_entry.get("env", {})
-if not memory_entry.get("url") and memory_env.get("MEMORY_FILE_PATH") != "docs/00-project/ai/memory/mcp-memory.json":
-    errors.append("memory file path must be repo-relative docs/00-project/ai/memory/mcp-memory.json")
+if not memory_entry.get("url") and memory_env.get("MEMORY_SEED_PATH") != "docs/00-project/ai/memory/mcp-memory.json":
+    errors.append("memory seed path must be repo-relative docs/00-project/ai/memory/mcp-memory.json")
 
 expected_wrapper_suffixes = (".sh", ".ps1")
 wrapper_stems = {
@@ -191,7 +191,7 @@ for server_name, stem in wrapper_stems.items():
         errors.append(f"{server_name} wrapper command is not on PATH: {command!r}")
 
 portable_path_values = [
-    str(memory_env.get("MEMORY_FILE_PATH", "")),
+    str(memory_env.get("MEMORY_SEED_PATH", "")),
 ]
 for server in servers.values():
     if isinstance(server, dict):
