@@ -18,25 +18,35 @@ from tests.integration._grafana_test_support import (
     get_dashboard_files,
     get_dashboard_panels,
     load_dashboard,
-    resolve_dashboard_target,
 )
 
 pytestmark = pytest.mark.integration
 
 
-def test_dq_history_colors_survive_trailing_missing_samples() -> None:
+def test_dq_canvas_uses_saved_exclusions_frame_without_inventing_rates() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     quality = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9482)
     assert quality["type"] == "canvas"
     assert quality["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    by_id = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     target = quality["targets"][0]
+    assert target["datasource"]["uid"] == "-- Dashboard --"
     assert target["panelId"] == 9002
-    by_id = {panel["id"]: panel for panel in get_dashboard_panels(dashboard)}
-    query = resolve_dashboard_target(by_id, target)
-    assert query["parser"] == "uql"
+    assert target["withTransforms"] is False
+    query = by_id[9002]["targets"][0]
     assert "run_id=${run_id}" in query["url"]
+    assert "contract_exclusions_status" in query["uql"]
+    assert "contract_exclusions_rate != null" in query["uql"]
     assert "excluded UNKNOWN" in query["uql"]
-    assert "exclusions" in query["uql"]
+    frame = quality["transformations"][0]
+    assert frame["id"] == "filterByValue"
+    assert frame["options"]["type"] == "include"
+    assert frame["options"]["filters"] == [
+        {
+            "fieldName": "_bioetl_frame",
+            "config": {"id": "equal", "options": {"value": "exclusions"}},
+        }
+    ]
     assert not any(
         p["id"] == 153
         for p in get_dashboard_panels(

@@ -113,7 +113,7 @@ def reflow_fleet_row(row: dict[str, Any]) -> int:
 def apply_incident(data: dict[str, Any]) -> dict[str, int]:
     saved = _by_id(data, 9450)
     children = {panel["id"]: panel for panel in saved["panels"]}
-    expected = {9451, 9452, 9460, 9463}
+    expected = {DOMAINS_PANEL_ID}
     if children.keys() != expected or len(saved["panels"]) != len(expected):
         raise ValueError(
             f"row 9450 children mismatch: expected {sorted(expected)}, "
@@ -124,15 +124,6 @@ def apply_incident(data: dict[str, Any]) -> dict[str, int]:
     domains = _by_id(data, DOMAINS_PANEL_ID)
     height_before = int((domains.get("gridPos") or {}).get("h") or 0)
     domains.setdefault("gridPos", {})["h"] = DOMAINS_HEIGHT
-    # Keep both canonical handoffs with the saved evidence they describe.
-    # The duration and domain panels provide the data for this group.
-    y = saved["gridPos"]["y"] + 1
-    # Put the two navigation cards on one band so saved evidence keeps
-    # both its scalar and data area density without reducing table space.
-    children[9460]["gridPos"].update(x=0, y=y, w=12, h=3)
-    children[9452]["gridPos"].update(x=12, y=y, w=12, h=3)
-    children[9451]["gridPos"].update(y=y + 3, h=DOMAINS_HEIGHT)
-    children[9463]["gridPos"].update(x=0, y=y + 3 + DOMAINS_HEIGHT, w=5, h=4)
     return {
         "fleet_bands_adjusted": bands,
         "domains_height_before": height_before,

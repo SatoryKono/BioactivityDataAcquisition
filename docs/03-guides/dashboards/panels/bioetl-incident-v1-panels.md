@@ -168,6 +168,7 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 9101 | Review Runtime Blockers | table |
 | 9102 | Monitor Coverage | stat |
 | 2460 | Review Stage Progress | table |
+| 9463 | Review Total Run Duration | stat |
 | 238 | Track Stage Backlog Trend | timeseries |
 | 207 | Track Phase Duration | timeseries |
 | 239 | Track Pipeline Duration | timeseries |
@@ -241,10 +242,9 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 32005 | Browse Global Alerts | row |
 | 22005 | Monitor Global Alerts (Full) | table |
 | 9450 | Inspect Saved Run Evidence | row |
-| 9460 | Inspect Selected Run Stages | text |
 | 9451 | Inspect Selected Run Domains | table |
-| 9452 | Inspect Selected Run Identity | text |
-| 9463 | Review Total Run Duration | stat |
 | 9700 | Inspect Current Workflow Evidence | row |
 | 9701 | Review Current Workflow Evidence | table |
+| 9460 | Inspect Selected Run Stages | text |
+| 9452 | Inspect Selected Run Identity | text |
 <!-- END SHIPPED PANEL INVENTORY -->
