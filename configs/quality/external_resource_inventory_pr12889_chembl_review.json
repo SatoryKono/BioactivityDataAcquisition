@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "catalog_ref": "0a6450ae61c0c5f4d349bfcf7a943f6a606d7c18",
-  "source_ref": "811f505103e73392dad5662441e4eff72815280d",
+  "catalog_ref": "61b120423d35b9630f5fc72fde631a275bdca44f",
+  "source_ref": "daade1ac93d7ab80103c90e271b9cad3842a5e1b",
   "source_reviews": {
     "src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py": "PR #12889 bounds temporary Polars row conversion lists and chooses one resolved row per leaf before sorting distinct leaves. Static review found no change to resource acquisition, lifetime, ownership or shutdown. No live qualification is claimed."
   }
