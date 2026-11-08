@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "description": "Agent usage metrics for Devin runtime optimization",
   "metrics_collection_start": "2026-08-07",
   "last_mcp_analysis": "2026-08-07T09:52:00",
@@ -9,46 +9,51 @@
       "last_used": "2026-08-07T09:30:00",
       "average_duration_ms": 1500,
       "success_rate": 1.0,
-      "common_modes": ["AUDIT"],
-      "typical_scope": ["docs/**", "workflows/**"]
+      "common_modes": [
+        "AUDIT"
+      ],
+      "typical_scope": [
+        "docs/**",
+        "workflows/**"
+      ]
     },
     "py-debug-bot": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0,
-      "success_rate": 0.0,
+      "average_duration_ms": null,
+      "success_rate": null,
       "common_modes": [],
       "typical_scope": []
     },
     "py-config-bot": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0,
-      "success_rate": 0.0,
+      "average_duration_ms": null,
+      "success_rate": null,
       "common_modes": [],
       "typical_scope": []
     },
     "py-doc-bot": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0,
-      "success_rate": 0.0,
+      "average_duration_ms": null,
+      "success_rate": null,
       "common_modes": [],
       "typical_scope": []
     },
     "py-plan-bot": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0,
-      "success_rate": 0.0,
+      "average_duration_ms": null,
+      "success_rate": null,
       "common_modes": [],
       "typical_scope": []
     },
     "py-test-bot": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0,
-      "success_rate": 0.0,
+      "average_duration_ms": null,
+      "success_rate": null,
       "common_modes": [],
       "typical_scope": []
     }
@@ -57,37 +62,37 @@
     "observability-dashboard": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "observability-prometheus": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "technical-designer-mermaid": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "vcr-record": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "verify-architecture": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "research-workflow": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "new-pipeline": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     }
   },
   "workflows": {
@@ -106,20 +111,20 @@
     "review": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0,
-      "success_rate": 0.0
+      "average_duration_ms": null,
+      "success_rate": null
     },
     "pre-commit": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0,
-      "success_rate": 0.0
+      "average_duration_ms": null,
+      "success_rate": null
     },
     "qodo-sync": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0,
-      "success_rate": 0.0
+      "average_duration_ms": null,
+      "success_rate": null
     }
   },
   "mcp_servers": {
@@ -146,87 +151,87 @@
     "docker": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "context7": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "ast-grep": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "mcp-code-interpreter": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "prometheus": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "grafana": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "brave-search": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "neo4j-cypher": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "neo4j-memory": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "mermaid": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "deja": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "adr-analysis": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "mutmut": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "code-analyzer": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "github-actions": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "deepwiki": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     },
     "ref": {
       "call_count": 0,
       "last_used": null,
-      "average_duration_ms": 0
+      "average_duration_ms": null
     }
   }
 }

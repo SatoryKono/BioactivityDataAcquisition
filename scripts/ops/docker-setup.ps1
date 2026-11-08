@@ -36,6 +36,7 @@ function Get-PythonCommand {
 
 function Invoke-Manager {
     param([string[]]$ManagerArgs)
+    if ($ManagerArgs -contains "neo4j") { Set-BioetlNeo4jEnvAliases }
     $Python = Get-PythonCommand
     & $Python $Manager @ManagerArgs
     if ($LASTEXITCODE -ne 0) { throw "Docker runtime manager failed with exit code $LASTEXITCODE." }

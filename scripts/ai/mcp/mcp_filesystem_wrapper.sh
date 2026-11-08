@@ -7,11 +7,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
-mkdir -p "${NPM_CONFIG_CACHE}"
 
 # shellcheck source=./support/token_validation.sh
 source "${SCRIPT_DIR}/support/token_validation.sh"
 mcp_exit_if_validate_only "filesystem"
+mcp_prepare_npm_cache
 
 # Optional extra allowed roots after the repo root (advanced clients).
 exec npx -y "@modelcontextprotocol/server-filesystem@2026.8.31" "${REPO_ROOT}" "$@"
