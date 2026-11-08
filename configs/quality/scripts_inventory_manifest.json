@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-08T00:30:52.600306+00:00",
+  "generated_at": "2026-11-07T22:12:29.791716+00:00",
   "summary": {
     "total_scripts": 715,
     "status_counts": {
@@ -2897,7 +2897,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 747,
+          "line": 720,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3727,7 +3727,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 746,
+          "line": 719,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3788,7 +3788,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 745,
+          "line": 718,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -10656,7 +10656,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 647,
+          "line": 620,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10699,7 +10699,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 760,
+          "line": 733,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -13085,13 +13085,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 607,
+          "line": 628,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 620,
+          "line": 641,
           "source_group": "tests",
           "text": "if path == \"scripts/engineering/dev/zed_mypy.py\":"
         }
@@ -13537,8 +13537,8 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-12-07",
-      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this finalizes the dated CodeRabbit evidence into Markdown and JSON. Keep historical/manual; no Make or workflow callers found."
+      "review_by": "2026-11-05",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
     },
     {
       "path": "scripts/engineering/diagnostics/legacy/coderabbit_20260925/normalize_findings.py",
@@ -13556,8 +13556,8 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-12-07",
-      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this parses the dated audit leaves and writes normalized findings and leaf status. Keep historical/manual; no Make or workflow callers found."
+      "review_by": "2026-11-05",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
     },
     {
       "path": "scripts/engineering/diagnostics/legacy/coderabbit_20260925/triage_findings.py",
@@ -13575,8 +13575,8 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-12-07",
-      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this triages the dated finding set against source snippets and writes the campaign JSON. Keep historical/manual; no Make or workflow callers found."
+      "review_by": "2026-11-05",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
     },
     {
       "path": "scripts/engineering/finances/github_billing_pipeline.py",
@@ -13934,8 +13934,8 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-12-07",
-      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this writes the issue-specific closeout JSON from the coverage inventory. Keep historical/manual; no Make, workflow or QA router callers found."
+      "review_by": "2026-11-05",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
     },
     {
       "path": "scripts/engineering/qa/_tracked_glob.py",
@@ -20484,13 +20484,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 890,
+          "line": 911,
           "source_group": "tests",
           "text": "\"src/bioetl/infrastructure/quality/scoring.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 891,
+          "line": 912,
           "source_group": "tests",
           "text": "\"scripts/engineering/quality/scoring.py\","
         },
@@ -20867,7 +20867,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 858,
+          "line": 831,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -24003,7 +24003,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 994,
+          "line": 967,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -24742,8 +24742,8 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-12-07",
-      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks. 2026-11-07 review: retain behind the scripts.ops router. The host verification workflow imports it and the managed-image tests cover immutable image and complete rootfs comparisons."
+      "review_by": "2026-11-05",
+      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks."
     },
     {
       "path": "scripts/ops/observability/grafana/router_rootfs.py",
@@ -24803,8 +24803,8 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-12-07",
-      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks. 2026-11-07 review: retain behind the scripts.ops router. The Router bridge workflow runs the rootfs tests, which cover trusted extraction and filesystem comparisons."
+      "review_by": "2026-11-05",
+      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks."
     },
     {
       "path": "scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py",
