@@ -61,13 +61,12 @@ def summarize_target_protein_classification_dependency(
         return pl.DataFrame(schema=_SUMMARY_SCHEMA)
 
     rows_by_target: dict[str, list[dict[str, object]]] = {}
-    # Use iter_rows(named=True) instead of materializing the entire list of
-    # dictionaries through to_dicts().
-    for row in df.iter_rows(named=True):
-        target_id = _text_or_none(row.get("target_id"))
-        if target_id is None:
-            continue
-        rows_by_target.setdefault(target_id, []).append(row)
+    # Limit the temporary list and release skipped rows after each slice.
+    for batch in df.iter_slices(n_rows=8_192):
+        for row in batch.to_dicts():
+            target_id = _text_or_none(row.get("target_id"))
+            if target_id is not None:
+                rows_by_target.setdefault(target_id, []).append(row)
     if not rows_by_target:
         return pl.DataFrame(schema=_SUMMARY_SCHEMA)
     if target_type_mapping_data is None:
@@ -184,25 +183,23 @@ def _multifunctional_origin(rows: list[dict[str, object]]) -> str:
 def _deduplicate_resolved_rows(
     rows: list[dict[str, object]],
 ) -> list[dict[str, object]]:
-    deduped: dict[int, dict[str, object]] = {}
-    for row in sorted(rows, key=_classification_sort_key):
+    best_by_leaf: dict[int, tuple[int, dict[str, object]]] = {}
+    for row in rows:
         if not _is_resolved(row):
             continue
+
         leaf_id = _positive_int_or_none(row.get("leaf_id"))
         if leaf_id is None:
             continue
-        deduped.setdefault(leaf_id, row)
-    return [deduped[leaf_id] for leaf_id in sorted(deduped)]
 
+        component_id = _positive_int_or_none(row.get("component_id"))
+        priority = component_id if component_id is not None else 10**12
+        previous = best_by_leaf.get(leaf_id)
+        # A stable sort picked the first row when component priorities matched.
+        if previous is None or priority < previous[0]:
+            best_by_leaf[leaf_id] = (priority, row)
 
-def _classification_sort_key(row: Mapping[str, object]) -> tuple[int, int, int]:
-    leaf_id = _positive_int_or_none(row.get("leaf_id"))
-    component_id = _positive_int_or_none(row.get("component_id"))
-    return (
-        leaf_id if leaf_id is not None else 10**12,
-        component_id if component_id is not None else 10**12,
-        0 if _is_resolved(row) else 1,
-    )
+    return [best_by_leaf[leaf_id][1] for leaf_id in sorted(best_by_leaf)]
 
 
 def _is_resolved(row: Mapping[str, object]) -> bool:
