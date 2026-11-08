@@ -131,7 +131,7 @@ dev = [
     "beautifulsoup4>=4.11.0",
     # mypy exact pin: keeps the type gate reproducible across Linux/Windows CI
     # (same checker version everywhere; avoids per-platform drift). Reviewed 2026-09-18; re-review by 2027-03-18.
-    "mypy==2.4.0",
+    "mypy==2.4.1",
     "types-openpyxl>=3.1",
     "ruff>=0.4",
     "basedpyright>=1.0",
