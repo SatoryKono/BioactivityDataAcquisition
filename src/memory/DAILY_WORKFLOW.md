@@ -142,8 +142,7 @@ question starts from a concrete file path.
 
 ## Post-Task
 
-Run post-task after the source change or audit only in authorized `read-write`
-mode. In `off`/`read-only` mode, skip it and create no persistent notes:
+Run the standard post-task workflow after the source change or audit is done:
 
 Set non-empty `BIOETL_AI_RUNTIME` and `BIOETL_AI_AGENT` first. Durable note
 writes fail closed when either value is absent or `unknown`; legacy records

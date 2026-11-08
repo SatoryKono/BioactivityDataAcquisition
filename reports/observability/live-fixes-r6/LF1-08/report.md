@@ -18,16 +18,18 @@ Using offline dashboard exports from `reports/observability/live-fixes-r6/LF1-01
 * Fails on mapping fields missing in cases where pipeline stages returned 0 fields or omitted optional keys, leading to incomplete joined records across `stage_id`. (Symptom mapped to PR #12785).
 
 ### 3.2 DQ Domains (ID 9406 & 9403)
-* Panel 9406 uses the `backend` parser. The target URL extracted is a dashboard link: `/d/bioetl-run-explorer-v1/1-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}`. It extracts fields such as `_bioetl_frame`, `domain`, `verdict`, `status`, `detail`, `reason`, `reason_display`, `status_display`.
-* Panel 9403 uses both the `json` parser (on `/ops/observability/processed-records`) and `backend` parser.
+* Panel 9406 uses the `backend` parser. The target URL extracted is: `/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}`. It extracts fields such as `_bioetl_frame`, `domain`, `verdict`, `status`, `detail`, `reason`, `reason_display`, `status_display`.
+* Panel 9403 uses both the `json` parser (on `/ops/observability/processed-records`) and `backend` parser (on `/ops/observability/selected-run-status`).
 * Due to isolated environment, live API bodies cannot be inspected. Frame extraction depends completely on Grafana offline definition.
 
 ### 3.3 Incident (ID 2101)
-* Panel 2101 was not found in the `bioetl-incident-v1.json` dashboard export. No data could be extracted.
+* Panel 2101 is located inside `reports/observability/live-fixes-r6/LF1-01/bioetl-incident-v1.json` nested within panel 2100 (Review Selected Run Status).
+* It uses `backend` parser and queries `/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}`.
+* Its JSONata transformations extract nested durations and overall verdicts mapping them to `_bioetl_frame: status`, `domains`, and `duration`.
 
 ### 3.4 Control Plane (ID 9418) & Funnel (ID 9002)
-* Panel 9418 (Target A) parsing payload uses `uql` parser. Target URL extracted is a dashboard link: `/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}`. Field definitions in JSONata map `_bioetl_frame`, `domain`, `verdict`, `status`, `detail`, `reason`.
-* Panel 9002 (Funnel) parsing payload uses `uql` parser on a parsed dashboard URL and fields mapped include `_bioetl_frame`, `domain`, `verdict`, `status`, `reason`.
+* Panel 9418 (Target A) parsing payload uses `uql` parser. Target URL extracted is: `/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}`. Field definitions in JSONata map `_bioetl_frame`, `domain`, `verdict`, `status`, `detail`, `reason`.
+* Panel 9002 (Funnel) parsing payload uses `uql` parser on `/ops/observability/pipeline-run-report-artifact` and fields mapped include `_bioetl_frame`, `stage_id`, `quarantined`, `excluded`, `deduplicated`, `filtered_out`.
 
 ## 4. Closure Passport
 * **[x] Попанельный baseline по двум UUID сохранён**: `PASS` (for offline dashboard structure analysis) / `BLOCKED` (for live UUID query inspection due to offline environment).

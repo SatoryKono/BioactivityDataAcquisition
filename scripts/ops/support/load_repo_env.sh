@@ -173,9 +173,14 @@ normalize_neo4j_auth_aliases() {
 }
 
 normalize_repo_env_aliases() {
-  # Normalization is pure: package managers may create their cache only after
-  # validate-only exits. Never mkdir while merely reading configuration.
+  # Rewrite unusable NPM cache paths (foreign home dirs, missing parents that
+  # cannot be created). Keep the configured value when the directory is writable.
   if [[ -n "${NPM_CONFIG_CACHE:-}" ]]; then
+    if ! mkdir -p "${NPM_CONFIG_CACHE}" 2>/dev/null; then
+      local _npm_fallback="${TMPDIR:-/tmp}/bioetl-npm-cache"
+      export NPM_CONFIG_CACHE="${_npm_fallback}"
+      mkdir -p "${NPM_CONFIG_CACHE}" 2>/dev/null || true
+    fi
     export npm_config_cache="${NPM_CONFIG_CACHE}"
   fi
 
@@ -221,8 +226,7 @@ normalize_repo_env_aliases() {
     fi
   fi
 
-  # Neo4j parsing belongs to its wrappers; unrelated integrations must not
-  # fail because an unused provider has malformed credentials.
+  normalize_neo4j_auth_aliases || return 1
   if [[ -z "${NEO4J_URL:-}" && -n "${NEO4J_URI:-}" ]]; then
     export NEO4J_URL="${NEO4J_URI}"
   fi

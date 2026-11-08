@@ -20,7 +20,6 @@ export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
 export PROJECT_PATH="${REPO_ROOT}"
 
 mcp_exit_if_validate_only "code-analyzer"
-mcp_prepare_npm_cache
 
 # The published npm MCP is the deterministic cross-client runtime. The
 # similarly named PyPI package has a much larger cold install and can exceed

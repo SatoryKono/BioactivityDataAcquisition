@@ -8,7 +8,7 @@
       ],
       "env": {
         "NPM_CONFIG_CACHE": ".cache/npm-cache",
-        "MEMORY_SEED_PATH": "docs/00-project/ai/memory/mcp-memory.json"
+        "MEMORY_FILE_PATH": "docs/00-project/ai/memory/mcp-memory.json"
       }
     },
     "filesystem": {

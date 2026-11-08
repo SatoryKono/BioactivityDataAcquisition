@@ -13,8 +13,6 @@ if [[ "${BIOETL_MCP_VALIDATE_ONLY:-0}" == "1" ]]; then
   mcp_exit_if_validate_only "ast-grep"
 fi
 
-mcp_prepare_npm_cache
-
 # MCP server packages (not plain @ast-grep/cli).
 if npx -y @notprolands/ast-grep-mcp@1.1.1 --stdio "$@"; then
   exit 0

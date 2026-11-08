@@ -535,7 +535,7 @@ def _canonical_servers(
     }
     servers["memory"]["env"] = {
         "NPM_CONFIG_CACHE": npm_cache_dir,
-        "MEMORY_SEED_PATH": str(memory_file_path),
+        "MEMORY_FILE_PATH": str(memory_file_path),
     }
     servers["deja"]["env"] = {"NPM_CONFIG_CACHE": npm_cache_dir}
     servers["adr-analysis"]["env"] = {
