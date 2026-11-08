@@ -100,7 +100,7 @@
 | `docs/reports/audit/phase-profile-41570319793.md` | Working | 0 | archive-after-migration |
 | `docs/reports/ci/main-integrity-m1-m2-report.md` | Working | 0 | archive-after-migration |
 | `docs/reports/ci/stage0_closure.json` | Working | 0 | archive-after-migration |
-| `docs/reports/ci/stage0_closure_report.md` | Working | 0 | archive-after-migration |
+| `docs/reports/ci/stage0_closure_report.md` | Working | 1 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-11.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-16.md` | Working | 0 | archive-after-migration |

@@ -33,6 +33,6 @@
 *   **НЕДОСТАТОЧНО ДАННЫХ:** Невозможно сделать статистически достоверный вывод.
 
 ## 7. Ссылки и зависимости
-*   **Карта переноса:** [статическая карта 0.3](docs/ci/gate-platform-matrix-full.md)
-*   **Акты фазы 0:** [stage0 closure report](docs/reports/ci/stage0_closure_report.md)
+*   **Карта переноса:** [статическая карта 0.3](gate-platform-matrix-full.md)
+*   **Акты фазы 0:** [stage0 closure report](../reports/ci/stage0_closure_report.md)
 *   **Связанные задачи:** CI1-01 (#12828), CI1-04 (#12831), CI1-07 (#12834).
