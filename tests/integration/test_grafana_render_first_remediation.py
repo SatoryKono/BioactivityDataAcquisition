@@ -193,9 +193,32 @@ def test_dq_duplicate_validation_fact_is_removed_and_grid_is_compacted() -> None
 
     assert 12 not in panels
     assert 1 not in panels
-    for panel_id in (9406, 9402, 9403, 9451, 9452):
-        targets = panels[panel_id].get("targets") or []
-        assert any("run_id=" in str(target.get("url") or "") for target in targets)
+    overview = _load("bioetl-overview-v2.json")
+    identity = _panel(overview, 9300)
+    assert identity["type"] == "table"
+    for panel_id in (9402, 9452):
+        handoff = panels[panel_id]
+        assert handoff["type"] == "text"
+        assert not handoff.get("targets")
+        copy = handoff["options"]["content"]
+        assert "/d/bioetl-overview-v2/" in copy
+        assert "viewPanel=9300" in copy
+        assert "${run_id:queryparam}" in copy
+    for owner, panel in (
+        (dashboard, panels[9406]),
+        (dashboard, panels[9403]),
+        (dashboard, panels[9451]),
+        (overview, identity),
+    ):
+        targets = panel["targets"]
+        if panel["datasource"]["uid"] == "-- Dashboard --":
+            targets = [
+                source
+                for target in targets
+                for source in _panel(owner, target["panelId"])["targets"]
+            ]
+        assert targets
+        assert all("run_id=" in target["url"] for target in targets)
 
 
 def test_iteration_2_active_alert_severity_is_not_overridden_by_count() -> None:
@@ -294,13 +317,11 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         "Run Explorer",
         "Replay Readiness",
         "Run Overview",
+        "Data Quality",
         "Incident Workspace",
     )
     for path in sorted(DASHBOARD_DIR.glob("bioetl-*.json")):
         dashboard = _load(path.name)
-        if path.stem == "bioetl-run-explorer-v1":
-            assert 1000 not in {p["id"] for p in dashboard["panels"]}
-            continue
         content = unescape(_panel(dashboard, 1000)["options"]["content"])
         positions = [content.index(title) for title in canonical_titles]
         assert positions == sorted(positions), path.name
@@ -321,18 +342,25 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         assert "flex-wrap:nowrap" in containers[0]["style"]
         anchors = [a for t, a in parser.elements if t == "a"]
         assert len(anchors) == 4
-        current = [a for a in anchors if a.get("aria-current") == "page"]
-        assert len(current) == (0 if path.stem == "bioetl-dq-v2" else 1)
+        current = [
+            (tag, attrs)
+            for tag, attrs in parser.elements
+            if attrs.get("aria-current") == "page"
+        ]
+        assert len(current) == 1
+        tag, selected = current[0]
+        assert tag == "span"
+        assert selected["class"] == "bioetl-nav-current"
+        assert dashboard["title"] in selected["title"]
+        assert "href" not in selected
+        assert "text-decoration:underline" in selected["style"]
+        for chip in [*anchors, selected]:
+            assert "font:600 16px/18px Arial" in chip["style"]
+            assert "overflow-wrap:anywhere" in chip["style"]
+            assert "min-width:0" in chip["style"]
         for anchor in anchors:
-            assert "font:600 16px/18px Arial" in anchor["style"]
-            assert "overflow-wrap:anywhere" in anchor["style"]
-            assert "min-width:0" in anchor["style"]
-            if anchor in current:
-                assert anchor["aria-disabled"] == "true"
-                assert not anchor["href"].startswith("/d/")
-            else:
-                assert "background:#334155" in anchor["style"]
-                assert anchor["href"].startswith("/d/")
+            assert "background:#334155" in anchor["style"]
+            assert anchor["href"].startswith("/d/")
 
 
 def test_rf003_navigation_tokens_meet_wcag_contrast_floors() -> None:
@@ -365,10 +393,21 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
 
     provider = _panel(overview, 9480)
     assert provider["gridPos"]["y"] >= FIRST_WINDOW_Y
-    assert "run_id=${run_id}" in provider["targets"][0]["url"]
+    assert "run_id=${run_id}" in _selected_run_donor(overview, provider)["url"]
     assert _panel(overview, 9481)["gridPos"]["y"] == provider["gridPos"]["y"]
 
     # Workflow overview + Alerts/SLO retired (#6570/#6647).
+
+
+def _selected_run_donor(
+    overview: dict[str, object], panel: dict[str, object]
+) -> dict[str, object]:
+    reuse = panel["targets"][0]
+    assert reuse["datasource"]["uid"] == "-- Dashboard --"
+    assert reuse["withTransforms"] is False
+    target = _panel(overview, reuse["panelId"])["targets"][0]
+    assert "/selected-run-status?" in target["url"]
+    return target
 
 
 def test_rf004_identity_and_scope_are_persistent() -> None:
@@ -384,7 +423,13 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
     }
     overview = _load("bioetl-overview-v2.json")
     identity = _panel(overview, 9300)
-    assert "run_id=${run_id}" in identity["targets"][0]["url"]
+    target = _selected_run_donor(overview, identity)
+    assert "run_id=${run_id}" in target["url"]
+    assert any(
+        item["id"] == "filterByValue"
+        and item["options"]["filters"][0]["config"]["options"]["value"] == "identity"
+        for item in identity["transformations"]
+    )
     assert identity["fieldConfig"]["defaults"]["custom"]["inspect"] is True
     assert {
         "Run ID",
@@ -392,9 +437,7 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
         "Run Type",
         "Started at",
         "Total Run Duration",
-    } <= set(
-        re.findall(r'"parameter":"([^"]+)"', identity["targets"][0]["root_selector"])
-    )
+    } <= set(re.findall(r"'parameter':'([^']+)'", target["root_selector"]))
 
     # Workflow overview + Alerts/SLO retired; ID-card noValue contract remains.
 
@@ -411,7 +454,7 @@ def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
 
     provider = _panel(overview, 9480)
     assert provider["gridPos"]["y"] >= FIRST_WINDOW_Y
-    assert "run_id=${run_id}" in provider["targets"][0]["url"]
+    assert "run_id=${run_id}" in _selected_run_donor(overview, provider)["url"]
     assert _panel(overview, 9481)["gridPos"]["y"] == provider["gridPos"]["y"]
     dq = _load("bioetl-dq-v2.json")
     dq_ids = {panel.get("id") for panel in _iter_panels(list(dq.get("panels", [])))}
@@ -595,7 +638,8 @@ def _override_width(panel: dict[str, object], field_name: str) -> int | None:
 
 def test_operator_critical_tables_expose_full_values() -> None:
     expected_panels = {
-        "bioetl-dq-v2.json": (9406, 9402, 9403),
+        "bioetl-dq-v2.json": (9406, 9403),
+        "bioetl-overview-v2.json": (9300,),
         "bioetl-incident-v1.json": (2010, 2002, 2003, 2004, 2005),
         "bioetl-run-explorer-v1.json": (3010,),
     }

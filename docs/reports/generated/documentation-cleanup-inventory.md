@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4110 |
-| Tracked doc-like files | 4110 |
+| Doc-like files | 4131 |
+| Tracked doc-like files | 4131 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4110 |
+| tracked | 4131 |
 
 ## Lifecycle Counts
 
@@ -28,7 +28,7 @@
 | active_quality_baseline | 125 |
 | closeout_evidence | 168 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 36 |
+| docs_reports_curated_or_historical_report | 37 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 28 |
 | generated_skill_reference_mirror | 19 |
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 324 |
+| working_report | 344 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -55,7 +55,7 @@
 | Archived | 1554 |
 | Canonical | 77 |
 | Generated | 1066 |
-| Working | 654 |
+| Working | 675 |
 
 ## Surface Families
 
@@ -65,13 +65,13 @@
 | archive | 1554 |
 | canonical | 77 |
 | generated | 1066 |
-| working | 654 |
+| working | 675 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 361 |
+| archive-after-migration | 382 |
 | generate-automatically | 1066 |
 | keep | 2683 |
 
@@ -98,6 +98,7 @@
 | `docs/reports/audit/phase-instrumentation-spec.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/phase-profile-41570319793.json` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/phase-profile-41570319793.md` | Working | 0 | archive-after-migration |
+| `docs/reports/ci/main-integrity-m1-m2-report.md` | Working | 0 | archive-after-migration |
 | `docs/reports/ci/stage0_closure.json` | Working | 0 | archive-after-migration |
 | `docs/reports/ci/stage0_closure_report.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
@@ -158,7 +159,6 @@
 | `reports/audit-runs/12107-r07/behavior-obligation-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/handoff.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/independent-review-0fd0768f.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/12107-r07/independent-review-6b1b10a7.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -267,6 +267,7 @@
 | `docs/reports/audit/phase-instrumentation-spec.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/audit/phase-profile-41570319793.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/audit/phase-profile-41570319793.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/ci/main-integrity-m1-m2-report.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/ci/stage0_closure.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/ci/stage0_closure_report.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
@@ -299,7 +300,6 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/evidence/INDEX.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/README.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/issue-12714/bronze_cleanup.txt` | tracked | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 
