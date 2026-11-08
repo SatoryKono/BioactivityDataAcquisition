@@ -875,7 +875,6 @@ import polars as pl
 
 import bioetl.application.pipelines.chembl.target_protein_classification_summary as summ
 from bioetl.application.pipelines.chembl.target_protein_classification_summary import (
-    _classification_sort_key,
     _deduplicate_resolved_rows,
     _int_or_none,
     _is_resolved,
@@ -1064,13 +1063,6 @@ class TestSummaryRowHelpers:
         assert _is_resolved({})
         assert _is_resolved({"classification_status": "resolved"})
         assert not _is_resolved({"classification_status": "quarantined"})
-
-    def test_sort_key_orders_unresolved_last(self) -> None:
-        first = _classification_sort_key(_summary_row(leaf_id=1))
-        last = _classification_sort_key(
-            _summary_row(leaf_id=1, classification_status="quarantined")
-        )
-        assert first < last
 
     def test_text_or_none(self) -> None:
         assert _text_or_none(None) is None

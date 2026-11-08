@@ -61,9 +61,9 @@ def summarize_target_protein_classification_dependency(
         return pl.DataFrame(schema=_SUMMARY_SCHEMA)
 
     rows_by_target: dict[str, list[dict[str, object]]] = {}
-    # Use iter_rows(named=True) instead of materializing the entire list of
-    # dictionaries through to_dicts().
-    for row in df.iter_rows(named=True):
+    # Use to_dicts() directly, as it pushes dict creation down to Rust
+    # which is significantly faster for large DataFrames than iter_rows(named=True).
+    for row in df.to_dicts():
         target_id = _text_or_none(row.get("target_id"))
         if target_id is None:
             continue
@@ -184,25 +184,26 @@ def _multifunctional_origin(rows: list[dict[str, object]]) -> str:
 def _deduplicate_resolved_rows(
     rows: list[dict[str, object]],
 ) -> list[dict[str, object]]:
-    deduped: dict[int, dict[str, object]] = {}
-    for row in sorted(rows, key=_classification_sort_key):
+    parsed_rows = []
+    for row in rows:
         if not _is_resolved(row):
             continue
+
         leaf_id = _positive_int_or_none(row.get("leaf_id"))
         if leaf_id is None:
             continue
-        deduped.setdefault(leaf_id, row)
+
+        component_id = _positive_int_or_none(row.get("component_id"))
+        parsed_rows.append((leaf_id, component_id if component_id is not None else 10**12, row))
+
+    parsed_rows.sort(key=lambda x: (x[0], x[1]))
+
+    deduped: dict[int, dict[str, object]] = {}
+    for leaf_id, _, row in parsed_rows:
+        if leaf_id not in deduped:
+            deduped[leaf_id] = row
+
     return [deduped[leaf_id] for leaf_id in sorted(deduped)]
-
-
-def _classification_sort_key(row: Mapping[str, object]) -> tuple[int, int, int]:
-    leaf_id = _positive_int_or_none(row.get("leaf_id"))
-    component_id = _positive_int_or_none(row.get("component_id"))
-    return (
-        leaf_id if leaf_id is not None else 10**12,
-        component_id if component_id is not None else 10**12,
-        0 if _is_resolved(row) else 1,
-    )
 
 
 def _is_resolved(row: Mapping[str, object]) -> bool:
