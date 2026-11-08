@@ -107,6 +107,7 @@ function wrapperFixture(t,stem,shell){
     fs.mkdirSync(support,{recursive:true});
     const file=path.join(mcp,`mcp_${stem}_wrapper.${shell}`);
     fs.copyFileSync(path.join(sourceMcp,path.basename(file)),file);fs.copyFileSync(helper,path.join(support,'host_transport.mjs'));
+    fs.copyFileSync(path.join(sourceMcp,'support/invoke_host_transport.ps1'),path.join(support,'invoke_host_transport.ps1'));
     fs.writeFileSync(path.join(support,'load_repo_env.ps1'),'function Import-BioetlRepoEnv {}\n');
     fs.writeFileSync(path.join(support,'token_validation.ps1'),'function Test-McpOptionalToken {}\nfunction Test-McpRequiredToken {}\nfunction Exit-McpValidateOnly {}\n');
     fs.writeFileSync(path.join(support,'mcp_docker_prune.ps1'),'function Remove-McpExitedContainers {}\n');

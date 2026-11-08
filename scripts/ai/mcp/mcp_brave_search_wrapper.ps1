@@ -2,29 +2,8 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-# Optional host route is resolved before env/cache/Docker side effects.
-$mcpHostMarker = if ($env:PC_AGENT_MCP_ROUTES_FILE) { $env:PC_AGENT_MCP_ROUTES_FILE } else { Join-Path $HOME ".config/pc-agent/mcp-routes.json" }
-if ($env:PC_AGENT_MCP_ROUTES_FILE -or (Get-Item -LiteralPath $mcpHostMarker -Force -ErrorAction SilentlyContinue)) {
-    $mcpHostRoot = (Resolve-Path (Join-Path $PSScriptRoot "../../..")).Path
-    $mcpHostPathExt = $env:PATHEXT
-    try {
-        # Windows PowerShell needs PATHEXT even with an SDK-filtered environment.
-        if ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT) {
-            if ($env:PATHEXT -notmatch '(?i)(^|;)\.EXE(;|$)') {
-                $env:PATHEXT = ".COM;.EXE;.BAT;.CMD" + $(if ($env:PATHEXT) { ";" + $env:PATHEXT })
-            }
-            $mcpHostNode = (Get-Command node.exe -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
-        } else {
-            $mcpHostNode = (Get-Command node -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
-        }
-        & $mcpHostNode (Join-Path $PSScriptRoot "support/host_transport.mjs") --root $mcpHostRoot --server brave-search -- @args
-        $mcpHostExit = $LASTEXITCODE
-    } finally {
-        $env:PATHEXT = $mcpHostPathExt
-    }
-    if ($mcpHostExit -ne 78) { exit $mcpHostExit }
-}
-Remove-Variable mcpHostMarker -ErrorAction SilentlyContinue
+. (Join-Path $PSScriptRoot "support/invoke_host_transport.ps1") -RouteServer brave-search -RouteArgs $args
+if ($mcpHostExit -ne 78) { exit $mcpHostExit }
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../../..")).Path
 . (Join-Path $PSScriptRoot "support/load_repo_env.ps1")

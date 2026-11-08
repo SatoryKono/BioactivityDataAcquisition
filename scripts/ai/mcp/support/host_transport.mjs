@@ -34,7 +34,7 @@ function readPolicyFile(marker) {
     if (Object.hasOwn(data, 'source')) {
         if (typeof data.source !== 'string' || !data.source) throw new Error('Invalid host route source');
     } else if (!Array.isArray(data.workspaces)) {
-        throw new Error('Invalid workspace route list');
+        throw new TypeError('Invalid workspace route list');
     }
     return data;
 }
