@@ -81,6 +81,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-060](ADR-060-prompt-kernel-and-overlay-architecture.md) | Prompt Kernel and Overlay Architecture | Accepted | Architecture | 2026-08-28 |
 | [ADR-061](ADR-061-persisted-selected-run-assessment.md) | Persisted Selected Run Assessment | Accepted | Observability | 2026-09-16 |
 | [ADR-062](ADR-062-assay-parent-exact-replay.md) | Immutable Composite Parent Merge Replay | Accepted | Replay | 2026-10-03 |
+| [ADR-063](ADR-063-exclude-generated-artifact-tests-from-actions.md) | Exclude Generated Artifact Tests from GitHub Actions | Accepted | CI/CD | 2026-11-07 |
 
 ## ADRs by Category
 

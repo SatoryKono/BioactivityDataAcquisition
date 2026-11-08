@@ -135,6 +135,61 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     **dict.fromkeys(
         (
+            ".codex/skills/py-audit-bot/references/wrapper-contract.md",
+            ".devin/agent-metrics.json",
+            ".devin/scripts/collect_agent_metrics.py",
+            ".devin/skills/py-audit-bot/references/wrapper-contract.md",
+            ".junie/guidelines.md",
+            ".junie/skills/py-audit-bot/references/wrapper-contract.md",
+            ".mcp.json",
+            ".opencode/agent/review.md",
+            "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+            "docs/00-project/ai/agents/guides/MUSE.md",
+            "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
+            "docs/00-project/ai/skills/local/py-audit-bot/references/wrapper-contract.md",
+            "scripts/ai/.mcp.json",
+            "scripts/ai/codex/helper/ensure-mcp.sh",
+            "scripts/ai/mcp/check_neo4j_memory.sh",
+            "scripts/ai/mcp/github-mcp-wrapper.ps1",
+            "scripts/ai/mcp/github-mcp-wrapper.sh",
+            "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh",
+            "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
+            "scripts/ai/mcp/mcp_code_analyzer_wrapper.sh",
+            "scripts/ai/mcp/mcp_context7_wrapper.sh",
+            "scripts/ai/mcp/mcp_deja_wrapper.sh",
+            "scripts/ai/mcp/mcp_github_actions_wrapper.sh",
+            "scripts/ai/mcp/support/token_validation.sh",
+            "scripts/ai/mcp/test_env_loading.sh",
+            "scripts/ai/mcp/mcp_memory_wrapper.ps1",
+            "scripts/ai/mcp/mcp_memory_wrapper.sh",
+            "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1",
+            "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh",
+            "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1",
+            "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
+            "scripts/ai/mcp/support/load_repo_env.ps1",
+            "scripts/ops/support/load_repo_env.sh",
+            "src/memory/DAILY_WORKFLOW.md",
+        ),
+        (
+            "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
+            "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py",
+            "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+        ),
+    ),
+    "scripts/ops/docker-setup.ps1": (
+        "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
+    ),
+    "src/memory/mcp_server.py": (
+        "tests/unit/memory/test_mcp_server.py",
+        "tests/integration/memory/test_mcp_server_isolation.py",
+    ),
+    "src/memory/mcp_scope.py": (
+        "tests/unit/memory/test_mcp_scope.py",
+        "tests/integration/memory/test_mcp_server_isolation.py",
+    ),
+    "src/memory/storage.py": ("tests/unit/memory/test_atomic_storage.py",),
+    **dict.fromkeys(
+        (
             ".vscode/extensions.json",
             ".vscode/launch.json",
             ".vscode/settings.json",
@@ -418,6 +473,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/audit/pack-v2.1/evidence_p12_parity.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
     ),
+    "reports/audit/hygiene-passport.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "docs/reports/audit/N1_SHADOW_STATUS.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
     "src/bioetl/infrastructure/adapters/decorators/README.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
@@ -477,6 +533,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12783_lf06_review.json",
             "configs/quality/external_resource_inventory_pr12786_composite_review.json",
             "configs/quality/external_resource_inventory_pr12782_lf07_review.json",
+            "configs/quality/external_resource_inventory_pr12838_hygiene_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -504,6 +561,45 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/12375_restart_c_no_change_report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12553_runtime_acceptance_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
+    **dict.fromkeys(
+        (
+            "docs/ci/gate-platform-matrix-full.md",
+            "reports/audit/ci1-03-pr-description.txt",
+        ),
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    **dict.fromkeys(
+        (
+            "reports/audit/nightly-checkout-summary.md",
+            "reports/audit/nightly-checkout-table.json",
+        ),
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/observability/live-fixes-r6/LF1-04/checksums.txt": (
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/observability/live-fixes-r6/LF1-04/machine-readable-receipt.json": (
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/observability/live-fixes-r6/LF1-04/panel-9701.json": (
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/observability/live-fixes-r6/LF1-04/queries.json": (
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/observability/live-fixes-r6/LF1-04/report.md": (
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "reports/audit/comp-004-runtime/verification_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS

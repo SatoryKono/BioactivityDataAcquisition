@@ -95,7 +95,7 @@ def extract_fields_from_schema(
     fields: SchemaFields = {}
 
     try:
-        schema_instance = schema_class.to_schema()  # type: ignore[attr-defined]  # tracked(#12721): unjustified type ignore debt
+        schema_instance = schema_class.to_schema()  # type: ignore[attr-defined]  # technical-reason: Pandera DataFrameModel metaclass dynamic attribute
         for col_name, col_info in schema_instance.columns.items():
             dtype_str = str(col_info.dtype) if col_info.dtype else "object"
             dtype_str = simplify_dtype(dtype_str)

@@ -17,6 +17,7 @@ Commands:
     gitleaks-boundaries  Verify Gitleaks false-positive exception boundaries
     neo4j-memory    Check deterministic Neo4j memory ontology invariants
     neo4j-memory-live  Apply deterministic sync and validate live Neo4j drift
+    gate-platform-matrix  Generate or check the GitHub Actions/CircleCI matrix
     docker-timing   Report Docker workflow timing and capacity evidence
     pr-gate-timing  Report PR Gate Complete timing and capacity evidence
     debt-report     Generate weekly quality debt report
@@ -47,6 +48,7 @@ COMMANDS = {
     "e2e-rerun": "check_e2e_rerun_stability.py",
     "neo4j-memory": "check_neo4j_memory_ontology.py",
     "neo4j-memory-live": "check_neo4j_memory_live_audit.py",
+    "gate-platform-matrix": "report_gate_platform_matrix.py",
     "docker-timing": "report_docker_actions_timing.py",
     "pr-gate-timing": "report_pr_gate_timing.py",
     "debt-report": "report_quality_debt_weekly.py",
