@@ -593,6 +593,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/observability/live-fixes-r6/LF1-03/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     **dict.fromkeys(
         (
+            "reports/observability/live-fixes-r6/LF1-16/bioetl-incident-v1.json",
+            "reports/observability/live-fixes-r6/LF1-16/report.json",
+            "reports/observability/live-fixes-r6/LF1-16/report.md",
+        ),
+        (
+            "tests/integration/test_dashboard_operator_readability.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    **dict.fromkeys(
+        (
             "reports/observability/live-fixes-r6/LF1-06/checksums.txt",
             "reports/observability/live-fixes-r6/LF1-06/machine_readable_receipt.json",
             "reports/observability/live-fixes-r6/LF1-06/report.md",
