@@ -186,7 +186,7 @@
   "integral_score": 10.0,
   "interpretation": "excellent",
   "metrics": {
-    "accepted_adr_count": 60,
+    "accepted_adr_count": 61,
     "adr_enforcement_blocking_gap_count": 0,
     "adr_enforcement_manual_exception_count": 0,
     "compatibility_test_file_count": 0,
@@ -225,7 +225,7 @@
   "schema_version": 2,
   "source_artifacts": {
     "adr_enforcement_matrix": {
-      "accepted_adr_count": 60,
+      "accepted_adr_count": 61,
       "blocking_gap_count": 0,
       "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
@@ -250,7 +250,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "f0879fafd634777ad5d4b32367d7e81670c9db5aab86e924bb16b31d1f207764"
+      "source_fingerprint": "f9691ef13512fd61d02846b92aa0aba61ccb7891a3a4977652f9a85a4ecca92c"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -269,7 +269,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "4dc66455506c3529b7ed2450c9131d9d64f9a513b9ca7757b340beac1e3495ce",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "58782c01250de148414fbc14a8171e9f2ac2c89d1f587c23f123a8134d2651bd"
+      "source_tree_sha256": "d9ce17c75ace6e6024b656d31c022395492af5c243acab1f5d8b50678d075d76"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
