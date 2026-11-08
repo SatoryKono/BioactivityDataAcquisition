@@ -626,7 +626,7 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
     # Fraction length is not fixed at six digits: ".123Z" must not feed the zone to $number.
     assert "$substring($t,20,6)" not in incident_selector
     assert "$substringBefore($rest, $zone)" in incident_selector
-    assert "$power(10, $length($digits))" in incident_selector
+    assert "$number('0.' & $digits)" in incident_selector
     assert "$substring($t, 0, 10)" in incident_selector
     assert "($end - $start) / 1000" not in incident_selector
     assert "$end >= $start ? $end - $start : null" in incident_selector
