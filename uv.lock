@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.15' and sys_platform == 'win32'",
@@ -576,7 +576,7 @@ requires-dist = [
     { name = "psutil", marker = "extra == 'dev'", specifier = ">=5.9" },
     { name = "psutil", marker = "extra == 'tests'", specifier = ">=5.9" },
     { name = "pubchempy", specifier = ">=1.0.4" },
-    { name = "pyarrow", specifier = ">=15.0,<26.0" },
+    { name = "pyarrow", specifier = ">=15.0,<27.0" },
     { name = "pydantic", specifier = ">=2.0" },
     { name = "pydantic-settings", specifier = ">=2.14.2" },
     { name = "pydocstyle", marker = "extra == 'dev'", specifier = ">=6.3" },
