@@ -1803,7 +1803,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "e2a31c6fd42a74a6e378c90206ad50c99f9246127ca25b44dfd1fa6c3f0464bf",
+  "source_tree_sha256": "858491e92aafa8a2742051a8a6011cd18a5894bb035a50ff3ad388114671e616",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 69,
