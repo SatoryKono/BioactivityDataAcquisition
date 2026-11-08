@@ -124,6 +124,9 @@ def apply_incident(data: dict[str, Any]) -> dict[str, int]:
     for child in saved["panels"]:
         height = heights[child["id"]]
         child["gridPos"].update(y=y, h=height)
+        if child["id"] == 9463:
+            # Keep the saved-run duration stat denser than the first screen.
+            child["gridPos"].update(x=0, w=5)
         y += height
     return {
         "fleet_bands_adjusted": bands,
