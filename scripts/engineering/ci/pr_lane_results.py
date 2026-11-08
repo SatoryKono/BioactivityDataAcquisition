@@ -135,6 +135,14 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     **dict.fromkeys(
         (
+            "reports/observability/live-fixes-r6/LF1-13/checksums.txt",
+            "reports/observability/live-fixes-r6/LF1-13/machine_readable_receipt.json",
+            "reports/observability/live-fixes-r6/LF1-13/report.md",
+        ),
+        (GRAFANA_SELECTOR_CONTRACT_TEST, *DOCUMENTATION_CLEANUP_INVENTORY_TESTS),
+    ),
+    **dict.fromkeys(
+        (
             ".codex/skills/py-audit-bot/references/wrapper-contract.md",
             ".devin/agent-metrics.json",
             ".devin/scripts/collect_agent_metrics.py",
@@ -473,6 +481,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/audit/pack-v2.1/evidence_p12_parity.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
     ),
+    "reports/audit/hygiene-passport.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "docs/reports/audit/N1_SHADOW_STATUS.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
     "src/bioetl/infrastructure/adapters/decorators/README.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
@@ -532,6 +541,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12783_lf06_review.json",
             "configs/quality/external_resource_inventory_pr12786_composite_review.json",
             "configs/quality/external_resource_inventory_pr12782_lf07_review.json",
+            "configs/quality/external_resource_inventory_pr12838_hygiene_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -576,11 +586,41 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     **dict.fromkeys(
         (
-            "reports/observability/live-fixes-r6/LF1-13/checksums.txt",
-            "reports/observability/live-fixes-r6/LF1-13/machine_readable_receipt.json",
-            "reports/observability/live-fixes-r6/LF1-13/report.md",
+            "reports/observability/live-fixes-r6/LF1-11/contract-evidence.json",
+            "reports/observability/live-fixes-r6/LF1-11/manifest-show.txt",
+            "reports/observability/live-fixes-r6/LF1-11/manifest-validation.json",
+            "reports/observability/live-fixes-r6/LF1-11/manifest.json",
+            "reports/observability/live-fixes-r6/LF1-11/report.md",
         ),
-        (GRAFANA_SELECTOR_CONTRACT_TEST, *DOCUMENTATION_CLEANUP_INVENTORY_TESTS),
+        (
+            "tests/unit/interfaces/http/test_manifest_validation_catalog.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    "reports/observability/live-fixes-r6/LF1-04/checksums.txt": (
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/observability/live-fixes-r6/LF1-04/machine-readable-receipt.json": (
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/observability/live-fixes-r6/LF1-04/panel-9701.json": (
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/observability/live-fixes-r6/LF1-04/queries.json": (
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/observability/live-fixes-r6/LF1-04/report.md": (
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "reports/audit/comp-004-runtime/verification_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
