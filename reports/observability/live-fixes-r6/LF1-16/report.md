@@ -1,7 +1,10 @@
 # LF1-16 Incident Dashboard Verification
 
 ## 1. Context & Setup
-- Source/Deploy SHA: `2540264745315b52f419c2c936603025d9f64754`
+- Base source SHA: `2540264745315b52f419c2c936603025d9f64754`.
+- Fixed source verified statically: `grafana/dashboards/bioetl-incident-v1.json` at `8182923b4a8499ce726ab1fdde3681d66a400232`.
+- Deployment SHA: NOT_VERIFIABLE.
+- The adjacent dashboard export and `report.json` are evidence of the original blocked run. They predate the fix.
 - Time: `2026-11-08T01:15:00Z`
 - Target Panels: 2101 (Status), 9451 (Domains), 9463 (Duration)
 
