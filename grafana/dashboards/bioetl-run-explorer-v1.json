@@ -310,8 +310,8 @@
       "gridPos": {
         "x": 0,
         "y": 0,
-        "w": 24,
-        "h": 2
+        "w": 16,
+        "h": 3
       },
       "options": {
         "mode": "html",
@@ -376,9 +376,9 @@
       "title": "",
       "gridPos": {
         "h": 3,
-        "w": 24,
-        "x": 0,
-        "y": 2
+        "w": 8,
+        "x": 16,
+        "y": 0
       },
       "options": {
         "bioetlDisplayTitle": "Understand Run Scope",
@@ -404,7 +404,7 @@
         "h": 13,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 3
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -579,13 +579,6 @@
                 ]
               },
               {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#93C5FD"
-                }
-              },
-              {
                 "id": "custom.wrapText",
                 "value": true
               },
@@ -599,6 +592,13 @@
               {
                 "id": "custom.tooltip.field",
                 "value": "run_id"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#93C5FD"
+                }
               }
             ]
           },
