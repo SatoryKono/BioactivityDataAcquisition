@@ -18,6 +18,7 @@ from bioetl.interfaces.http.processed_records_table import (
     build_processed_records_table_payload_from_prometheus,
     read_processed_records_run_id,
 )
+from bioetl.interfaces.http.run_report_ops import load_pipeline_run_report_payload
 
 __all__ = ["handle_processed_records_table"]
 
@@ -61,6 +62,10 @@ async def handle_processed_records_table(
                 ),
                 pipeline=pipeline,
                 run_type=run_type,
+                report=load_pipeline_run_report_payload(
+                    pipeline_name=pipeline,
+                    run_id=str(selected_run_id),
+                ),
             )
 
         operation = build_from_ledger

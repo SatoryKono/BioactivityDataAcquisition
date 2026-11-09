@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.interfaces.http import _processed_records_table_support as _support
 
@@ -117,6 +119,7 @@ def build_processed_records_table_payload_from_ledger(
     ledger_entries: tuple[RunLedgerEntry, ...],
     pipeline: str,
     run_type: str | None,
+    report: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
     """Build exact-run accounting rows from RunLedger source-of-truth entries."""
     if not ledger_entries:
@@ -191,6 +194,13 @@ def build_processed_records_table_payload_from_ledger(
                 silver_deduplicated_count
             ),
         }
+    )
+    _support.fill_report_accounting(
+        metric_values,
+        report=report,
+        ledger_entries=ledger_entries,
+        pipeline=pipeline,
+        run_type=run_type,
     )
     return build_processed_records_table_payload(
         metric_values=metric_values,

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Literal
 from uuid import UUID
@@ -157,6 +158,61 @@ _GOLD_PARAMETERS = frozenset(
     if spec.parameter[3:7] == "gold"
 )
 _UNKNOWN_SCOPE = "unknown"
+
+
+def fill_report_accounting(
+    values: dict[str, float | int | None],
+    *,
+    report: Mapping[str, object] | None,
+    ledger_entries: tuple[RunLedgerEntry, ...],
+    pipeline: str,
+    run_type: str | None,
+) -> None:
+    """Fill legacy ledger gaps only from consistent, fully tracked run evidence."""
+    if not report or report.get("tracking_coverage") != "full" or not ledger_entries:
+        return
+    identity, layers = report.get("identity"), report.get("layers")
+    if not isinstance(identity, dict) or not isinstance(layers, dict):
+        return
+    scopes = _selector_tokens(run_type)
+    if (
+        identity.get("pipeline_name") != pipeline
+        or (scopes and identity.get("run_type") not in scopes)
+        or any(str(entry.run_id) != identity.get("run_id") for entry in ledger_entries)
+        or any(
+            entry.manifest_id != identity.get("manifest_id") for entry in ledger_entries
+        )
+    ):
+        return
+    fields = (
+        "bronze_records",
+        "silver_valid",
+        "silver_filtered_out",
+        "silver_quarantined",
+        "silver_skipped",
+        "silver_deduplicated",
+        "gold_written",
+        "gold_excluded_by_contract",
+        "gold_quarantined",
+        "gold_skipped",
+        "gold_deduplicated",
+    )
+    observed: dict[str, int] = {}
+    for spec, field in zip(PROCESSED_RECORDS_ROW_SPECS, fields, strict=True):
+        count = layers.get(field)
+        if type(count) is not int or count < 0:
+            return
+        existing = values.get(spec.metric)
+        if existing is not None and existing != count:
+            return
+        observed[spec.metric] = count
+    # Reject a partial or inconsistent report instead of manufacturing healthy zeros.
+    if (
+        sum(observed[key] for key in _SILVER_METRICS) != observed[_BRONZE_METRIC]
+        or sum(observed[key] for key in _GOLD_METRICS) != observed[_SILVER_VALID_METRIC]
+    ):
+        return
+    values.update(observed)
 
 
 def fetch_processed_record_values(
