@@ -1008,7 +1008,7 @@ _BRONZE_PERCENTAGE_DISPLAY = "percentage of Bronze"
 _PROCESSED_RECORDS_NOVALUE = (
     "SELECT RUN — no exact Run ID selected. Choose this run in Run Explorer."
 )
-_PROCESSED_RECORDS_DESCRIPTION = "SELECTED RUN · Saved accounting: count in is the input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays N/A. N/A means the value was not recorded. Skipped outcomes are hidden. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR."
+_PROCESSED_RECORDS_DESCRIPTION = "SELECTED RUN · Saved accounting: count in is the input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays UNKNOWN. UNKNOWN means the value was not recorded. Skipped outcomes are hidden. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR."
 
 
 def _dq_processed_records(panel: dict[str, Any]) -> None:
@@ -1107,7 +1107,7 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
         "count out",
         "percentage",
     ):
-        _override(panel, field, "noValue", "N/A")
+        _override(panel, field, "noValue", "UNKNOWN")
         _override(
             panel,
             field,
@@ -1116,8 +1116,8 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
                 {
                     "type": "value",
                     "options": {
-                        "UNKNOWN": {"text": "N/A", "color": "gray"},
-                        "No data": {"text": "N/A", "color": "gray"},
+                        "UNKNOWN": {"text": "UNKNOWN", "color": "gray"},
+                        "No data": {"text": "UNKNOWN", "color": "gray"},
                     },
                 }
             ],

@@ -578,6 +578,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12848_http_proxy_review.json",
             "configs/quality/external_resource_inventory_pr12889_chembl_review.json",
             "configs/quality/external_resource_inventory_pr12892_replay_review.json",
+            "configs/quality/external_resource_inventory_pr12916_runtime_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -659,6 +660,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         (GRAFANA_SELECTOR_CONTRACT_TEST, *DOCUMENTATION_CLEANUP_INVENTORY_TESTS),
     ),
+    "reports/observability/live-fixes-r6/LF1-15/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/observability/live-fixes-r6/LF1-04/checksums.txt": (
         GRAFANA_SELECTOR_CONTRACT_TEST,
         GRAFANA_VARIABLE_REFERENCE_TEST,
