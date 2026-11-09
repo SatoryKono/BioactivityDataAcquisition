@@ -1,6 +1,6 @@
 ---
 description: Documentation standards and governance sync
-globs: docs/**/*.md
+globs: ["docs/**/*.md"]
 alwaysApply: false
 ---
 

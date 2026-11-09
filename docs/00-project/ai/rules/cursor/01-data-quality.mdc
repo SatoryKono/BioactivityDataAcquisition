@@ -1,6 +1,7 @@
 ---
 description: BioETL Data Quality — Medallion, Delta Lake, Quarantine
 globs: ["configs/**/*.yaml", "src/**/*.py"]
+alwaysApply: false
 ---
 
 # Medallion Architecture

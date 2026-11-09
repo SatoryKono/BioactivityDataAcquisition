@@ -91,6 +91,23 @@ def test_sync_cursor_rules_excludes_sonarqube_instructions(tmp_path: Path) -> No
     assert not (deploy / "sonarqube_mcp_instructions.mdc").exists()
 
 
+def test_canonical_cursor_rules_declare_apply_mode() -> None:
+    """File-scoped rules must set alwaysApply and quoted globs for Windsurf sync."""
+    root = Path(__file__).resolve().parents[3]
+    rules = sorted((root / "docs/00-project/ai/rules/cursor").glob("*.mdc"))
+    assert rules
+    for path in rules:
+        if path.name == "sonarqube_mcp_instructions.mdc":
+            continue
+        text = path.read_text(encoding="utf-8")
+        assert "alwaysApply:" in text, path.name
+        if "alwaysApply: true" in text.split("---", 2)[1]:
+            continue
+        frontmatter = text.split("---", 2)[1]
+        assert "alwaysApply: false" in frontmatter, path.name
+        assert 'globs: ["' in frontmatter, path.name
+
+
 def test_main_defaults_to_check(tmp_path: Path) -> None:
     """Bare CLI must not deploy into .cursor/rules (#9119)."""
     canonical = tmp_path / sync_cursor_rules.CURSOR_RULE_DOCS_DIR
