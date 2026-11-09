@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-09T06:37:55.147213+00:00",
+  "generated_at": "2026-11-09T06:41:52.533765+00:00",
   "summary": {
     "total_scripts": 718,
     "status_counts": {
@@ -24034,7 +24034,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/03-guides/dashboards/10170-contrast-reflow-pin.md",

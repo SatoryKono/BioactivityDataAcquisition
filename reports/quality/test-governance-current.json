@@ -824,26 +824,7 @@
     }
   },
   "assertless_total_candidates": 69,
-  "budget_violations": [
-    {
-      "actual": 3,
-      "budget": "duplicate_test_names_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_names"
-    },
-    {
-      "actual": 6,
-      "budget": "duplicate_test_name_occurrences_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_name_occurrences"
-    },
-    {
-      "actual": 3,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -988,56 +969,16 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_backend.py:168",
-        "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:23"
-      ],
-      "name": "test_control_plane_table_contracts_are_not_processed_records",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_backend.py:190",
-        "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:45"
-      ],
-      "name": "test_replay_audit_uses_projected_frames_instead_of_donor_rows",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_backend.py:151",
-        "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:6"
-      ],
-      "name": "test_replay_status_panels_resolve_donor_and_explain_empty_values",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    }
-  ],
+  "duplicate_test_name_inventory": [],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 3,
-    "duplicate_occurrences": 6,
+    "cross_file_groups": 0,
+    "duplicate_occurrences": 0,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 3
+    "total_duplicate_names": 0
   },
-  "duplicate_test_name_occurrences": 6,
-  "duplicate_test_names": 3,
+  "duplicate_test_name_occurrences": 0,
+  "duplicate_test_names": 0,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1057,12 +998,8 @@
     ]
   },
   "intentional_no_exception_contract": 68,
-  "markerless_examples": [
-    "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:6",
-    "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:23",
-    "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:45"
-  ],
-  "markerless_test_functions": 3,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -1071,10 +1008,8 @@
     "marked_test_files": 79,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 80,
-    "unmarked_test_files": [
-      "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py"
-    ]
+    "test_files": 79,
+    "unmarked_test_files": []
   },
   "report": {
     "assertion_branch_reachability": {
@@ -1773,56 +1708,16 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_backend.py:168",
-          "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:23"
-        ],
-        "name": "test_control_plane_table_contracts_are_not_processed_records",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_backend.py:190",
-          "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:45"
-        ],
-        "name": "test_replay_audit_uses_projected_frames_instead_of_donor_rows",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_backend.py:151",
-          "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:6"
-        ],
-        "name": "test_replay_status_panels_resolve_donor_and_explain_empty_values",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      }
-    ],
+    "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 3,
-      "duplicate_occurrences": 6,
+      "cross_file_groups": 0,
+      "duplicate_occurrences": 0,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 3
+      "total_duplicate_names": 0
     },
-    "duplicate_test_name_occurrences": 6,
-    "duplicate_test_names": 3,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -1841,12 +1736,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:6",
-      "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:23",
-      "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:45"
-    ],
-    "markerless_test_functions": 3,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -1855,10 +1746,8 @@
       "marked_test_files": 79,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 80,
-      "unmarked_test_files": [
-        "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py"
-      ]
+      "test_files": 79,
+      "unmarked_test_files": []
     },
     "root": ".",
     "test_file_inventory": {
@@ -1866,8 +1755,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3239,
-      "test_python_file_count": 3490,
+      "test_glob_file_count": 3238,
+      "test_python_file_count": 3489,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1907,53 +1796,24 @@
       "top_level_directory_count": 16,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_backend.py:168",
-          "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:23"
-        ],
-        "name": "test_control_plane_table_contracts_are_not_processed_records"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_backend.py:190",
-          "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:45"
-        ],
-        "name": "test_replay_audit_uses_projected_frames_instead_of_donor_rows"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_backend.py:151",
-          "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:6"
-        ],
-        "name": "test_replay_status_panels_resolve_donor_and_explain_empty_values"
-      }
-    ],
-    "total_test_files": 3239,
-    "total_test_functions": 32073,
+    "top_duplicate_test_names": [],
+    "total_test_files": 3238,
+    "total_test_functions": 32070,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "ca9345812b97d882cc39c1b75284a67c6e8e13f321f25355b708e46bc7a46663",
+  "source_tree_sha256": "9c4dad34d34d54521dbfc31fb2ccd8236c081cd42122c244cbb691cae02adef9",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 69,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 6,
-    "duplicate_test_names": 3,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "intentional_no_exception_contract": 68,
-    "markerless_examples": [
-      "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:6",
-      "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:23",
-      "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:45"
-    ],
-    "markerless_test_functions": 3,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -1963,8 +1823,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3239,
-    "test_python_file_count": 3490,
+    "test_glob_file_count": 3238,
+    "test_python_file_count": 3489,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2004,34 +1864,9 @@
     "top_level_directory_count": 16,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_backend.py:168",
-        "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:23"
-      ],
-      "name": "test_control_plane_table_contracts_are_not_processed_records"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_backend.py:190",
-        "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:45"
-      ],
-      "name": "test_replay_audit_uses_projected_frames_instead_of_donor_rows"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_backend.py:151",
-        "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py:6"
-      ],
-      "name": "test_replay_status_panels_resolve_donor_and_explain_empty_values"
-    }
-  ],
-  "total_test_files": 3239,
-  "total_test_functions": 32073,
+  "top_duplicate_test_names": [],
+  "total_test_files": 3238,
+  "total_test_functions": 32070,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

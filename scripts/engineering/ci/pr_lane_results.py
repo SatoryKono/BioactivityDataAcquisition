@@ -687,7 +687,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         (
             "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py",
-            "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_control_plane_frames.py",
+            "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_backend.py",
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
     ),
