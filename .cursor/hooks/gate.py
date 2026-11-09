@@ -200,6 +200,7 @@ def _decide_shell(
     event: Mapping[str, Any],
     branch_lookup: Callable[[str], str | None],
 ) -> dict[str, str]:
+    """Classify a beforeShellExecution event into allow/ask/deny."""
     command = event.get("command")
     if not isinstance(command, str):
         return dict(_DENY_INPUT)
@@ -224,6 +225,7 @@ def _decide_shell(
 
 
 def _decide_pre_tool(event: Mapping[str, Any]) -> dict[str, str]:
+    """Deny protected env/scratch mutations for preToolUse events."""
     tool_name = event.get("tool_name")
     if not isinstance(tool_name, str):
         tool_name = ""
@@ -247,6 +249,7 @@ def _decide_pre_tool(event: Mapping[str, Any]) -> dict[str, str]:
 
 
 def _decide_post_tool(event: Mapping[str, Any]) -> dict[str, str]:
+    """Attach tech-debt context after edits to budget files."""
     tool_name = event.get("tool_name")
     if not isinstance(tool_name, str):
         tool_name = ""
@@ -266,6 +269,7 @@ def _classify_segment(
     cwd: str,
     branch_lookup: Callable[[str], str | None],
 ) -> tuple[str, str, str]:
+    """Return the strongest permission for one shell segment."""
     denies: list[tuple[str, str, str]] = []
     asks: list[tuple[str, str, str]] = []
     for invocation in _git_invocations(segment):
@@ -310,6 +314,7 @@ def _classify_git(
     cwd: str,
     branch_lookup: Callable[[str], str | None],
 ) -> tuple[str, str, str]:
+    """Classify one git invocation for hard resets, hooks, and pushes."""
     parsed = _git_command(tokens)
     if parsed is None:
         return ("allow", "", "")
@@ -369,6 +374,7 @@ def _classify_push(
     cwd: str,
     branch_lookup: Callable[[str], str | None],
 ) -> tuple[str, str, str]:
+    """Deny protected force pushes; ask for other force pushes."""
     if _has_flag(args, "--mirror"):
         return _deny_tuple(
             "git push --mirror запрещён: может принудительно обновить main/master.",
@@ -398,6 +404,7 @@ def _classify_push(
 
 
 def _starts_monitoring(segment: str) -> bool:
+    """True when the segment starts the optional monitoring compose file."""
     if _MONITORING_FILE not in segment:
         return False
     return (
@@ -407,6 +414,7 @@ def _starts_monitoring(segment: str) -> bool:
 
 
 def _segment_write_kind(segment: str, roots: list[str], cwd: str) -> str | None:
+    """Detect env or root-scratch writes in one shell segment."""
     visible = _strip_unquoted_comment(segment)
     redirected = [
         kind
@@ -447,11 +455,13 @@ def _segment_write_kind(segment: str, roots: list[str], cwd: str) -> str | None:
 
 
 def _is_delete_only(tokens: list[str]) -> bool:
+    """True when the tokenized command is a delete/remove family tool."""
     lowered = [token.lower() for token in tokens]
     return any(token in _DELETE_COMMANDS for token in lowered)
 
 
 def _has_sed_inplace(tokens: list[str]) -> bool:
+    """True when sed is invoked with an in-place edit flag."""
     names = {token.lower().replace("\\", "/").rsplit("/", 1)[-1] for token in tokens}
     if "sed" not in names and "sed.exe" not in names:
         return False
@@ -464,6 +474,7 @@ def _has_sed_inplace(tokens: list[str]) -> bool:
 
 
 def _is_file_mutation(tool_name: str, tool_input: Any) -> bool:
+    """True when the tool name/input can mutate workspace files."""
     if tool_name in _READ_ONLY_TOOLS:
         return False
     if tool_name in _MUTATING_TOOLS:
@@ -474,11 +485,13 @@ def _is_file_mutation(tool_name: str, tool_input: Any) -> bool:
 
 
 def _is_debt_path(path: str, roots: list[str]) -> bool:
+    """True when the path ends with a tracked tech-debt budget suffix."""
     relative = _relative_path(path, roots)
     return any(relative.endswith(suffix) for suffix in _DEBT_SUFFIXES)
 
 
 def _path_kind(token: str, roots: list[str], cwd: str = "") -> str | None:
+    """Classify a path token as env, scratch, or unrestricted."""
     relative = _relative_path(token, roots, cwd)
     if not relative or relative.endswith("/"):
         return None
@@ -491,6 +504,7 @@ def _path_kind(token: str, roots: list[str], cwd: str = "") -> str | None:
 
 
 def _relative_path(token: str, roots: list[str], cwd: str = "") -> str:
+    """Normalize a path token relative to workspace roots and cwd."""
     cleaned = token.strip().strip("\"'").replace("\\", "/")
     cleaned = re.sub(r"^\d*>+", "", cleaned)
     if cleaned.startswith("file://"):
@@ -528,6 +542,7 @@ def _relative_path(token: str, roots: list[str], cwd: str = "") -> str:
 
 
 def _iter_paths(value: Any) -> list[str]:
+    """Collect path-like strings from tool input, including patch headers."""
     found: list[str] = []
     if isinstance(value, dict):
         for key, item in value.items():
@@ -546,6 +561,7 @@ def _iter_paths(value: Any) -> list[str]:
 
 
 def _tool_input(value: Any) -> Any:
+    """Parse tool_input when Cursor sends it as a JSON string."""
     if isinstance(value, str):
         try:
             return json.loads(value)
@@ -555,6 +571,7 @@ def _tool_input(value: Any) -> Any:
 
 
 def _workspace_roots(event: Mapping[str, Any]) -> list[str]:
+    """Return string workspace roots from the hook event."""
     roots = event.get("workspace_roots")
     if not isinstance(roots, list):
         return []
@@ -562,6 +579,7 @@ def _workspace_roots(event: Mapping[str, Any]) -> list[str]:
 
 
 def _split_commands(command: str) -> list[str]:
+    """Split a shell line on unquoted ;, |, &&, and || separators."""
     parts: list[str] = []
     buf: list[str] = []
     quote: str | None = None
@@ -596,6 +614,7 @@ def _split_commands(command: str) -> list[str]:
 
 
 def _strip_unquoted_comment(segment: str) -> str:
+    """Drop an unquoted # comment from a shell segment."""
     buf: list[str] = []
     quote: str | None = None
     for char in segment:
@@ -615,6 +634,7 @@ def _strip_unquoted_comment(segment: str) -> str:
 
 
 def _tokenize(segment: str) -> list[str]:
+    """Split a shell segment into whitespace tokens with basic quotes."""
     tokens: list[str] = []
     buf: list[str] = []
     quote: str | None = None
@@ -640,6 +660,7 @@ def _tokenize(segment: str) -> list[str]:
 
 
 def _git_invocations(segment: str) -> list[list[str]]:
+    """Return token lists for git invocations in a segment."""
     tokens = _tokenize(segment)
     if _find_git(tokens) is None:
         return []
@@ -647,6 +668,7 @@ def _git_invocations(segment: str) -> list[list[str]]:
 
 
 def _find_git(tokens: list[str]) -> int | None:
+    """Index of the git executable token, if present."""
     for index, token in enumerate(tokens):
         name = token.replace("\\", "/").rsplit("/", 1)[-1].lower()
         if name in {"git", "git.exe"}:
@@ -655,6 +677,7 @@ def _find_git(tokens: list[str]) -> int | None:
 
 
 def _git_command(tokens: list[str]) -> tuple[str, list[str]] | None:
+    """Return the git subcommand and its args, skipping globals."""
     index = _find_git(tokens)
     if index is None:
         return None
@@ -675,6 +698,7 @@ def _git_command(tokens: list[str]) -> tuple[str, list[str]] | None:
 
 
 def _git_working_directory(tokens: list[str], default_cwd: str) -> str:
+    """Resolve the effective cwd from git -C options."""
     index = _find_git(tokens)
     if index is None:
         return default_cwd
@@ -704,11 +728,13 @@ def _git_working_directory(tokens: list[str], default_cwd: str) -> str:
 
 
 def _submodule_foreach_hard_reset(args: list[str]) -> bool:
+    """True for submodule foreach that runs reset --hard."""
     joined = " ".join(args).lower()
     return "foreach" in joined and "reset" in joined and "--hard" in joined
 
 
 def _push_is_force(args: list[str]) -> bool:
+    """True for force/delete/mirror push flags or +/: refspecs."""
     for arg in args:
         if arg in {
             "-f",
@@ -740,6 +766,7 @@ def _push_is_force(args: list[str]) -> bool:
 
 
 def _push_refspecs(args: list[str]) -> list[str]:
+    """Extract push refspecs from argv after flags and remotes."""
     positional: list[str] = []
     index = 0
     while index < len(args):
@@ -767,6 +794,7 @@ def _push_refspecs(args: list[str]) -> list[str]:
 
 
 def _ref_destination(refspec: str) -> str:
+    """Return the destination branch name from a push refspec."""
     ref = refspec[1:] if refspec.startswith("+") else refspec
     if ":" in ref:
         ref = ref.split(":", 1)[1]
@@ -777,14 +805,17 @@ def _ref_destination(refspec: str) -> str:
 
 
 def _has_flag(args: list[str], flag: str) -> bool:
+    """True when args contain an exact flag or flag=value form."""
     return flag in args or any(arg.startswith(flag + "=") for arg in args)
 
 
 def _has_prefix(args: list[str], prefix: str) -> bool:
+    """True when args contain a prefix or prefix=value form."""
     return any(arg == prefix or arg.startswith(prefix + "=") for arg in args)
 
 
 def _has_short_option(args: list[str], option: str) -> bool:
+    """True when a short option appears alone or in a bundle."""
     for arg in args:
         if arg == f"-{option}":
             return True
@@ -799,6 +830,7 @@ def _has_short_option(args: list[str], option: str) -> bool:
 
 
 def _git_branch(cwd: str) -> str | None:
+    """Read the current branch name for cwd, or None on failure."""
     try:
         completed = subprocess.run(
             ["git", "rev-parse", "--abbrev-ref", "HEAD"],
@@ -817,6 +849,7 @@ def _git_branch(cwd: str) -> str | None:
 
 
 def _deny(user_message: str, agent_message: str) -> dict[str, str]:
+    """Build a deny decision payload for Cursor hooks."""
     return {
         "permission": "deny",
         "user_message": user_message,
@@ -825,11 +858,13 @@ def _deny(user_message: str, agent_message: str) -> dict[str, str]:
 
 
 def _deny_tuple(user_message: str, agent_message: str) -> tuple[str, str, str]:
+    """Build a deny tuple used while classifying shell segments."""
     return ("deny", user_message, agent_message)
 
 
 def _emit(payload: Mapping[str, Any]) -> None:
     # ASCII-escaped JSON keeps stdout encoding independent of the locale.
+    """Write one JSON decision to stdout with locale-safe ASCII escapes."""
     sys.stdout.write(json.dumps(payload, ensure_ascii=True))
     sys.stdout.write("\n")
 
