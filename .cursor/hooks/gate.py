@@ -43,6 +43,7 @@ _MUTATING_TOOLS = frozenset(
         "WriteFile",
     }
 )
+_DELETE_TOOLS = frozenset({"Delete", "Remove"})
 _EDIT_KEYS = frozenset(
     {"contents", "edits", "new_string", "old_string", "patch", "stream"}
 )
@@ -87,6 +88,16 @@ _WRITE_COMMANDS = frozenset(
         "unlink",
     }
 )
+_DELETE_COMMANDS = frozenset(
+    {
+        "del",
+        "erase",
+        "remove-item",
+        "rm",
+        "rmdir",
+        "unlink",
+    }
+)
 _GIT_PATH_WRITES = frozenset({"checkout", "clean", "mv", "restore", "rm"})
 _PUSH_VALUE_OPTIONS = frozenset(
     {"--exec", "--push-option", "--receive-pack", "--repo", "-o"}
@@ -101,10 +112,15 @@ _DEBT_SUFFIXES = (
 _SCRATCH = re.compile(
     r"(?i)^("
     r"_tmp_.+\.py|_cr_.+\.py|_publish_.+\.py|_fail_.+\.txt|_a\.txt|"
-    r"tmp_sub_.+\.txt|temp_closeout\.json|\.tmp_.+|nul"
+    r"tmp_sub_.+\.txt|temp_closeout\.json|\.tmp_.+|nul|"
+    r"test_.+\.py"
     r")$"
 )
-_REDIRECT = re.compile(r"(?i)(?:^|[\s|;&])\d*>{1,2}\s*(\S+)")
+# Accept spaced and attached redirects, including &>.env / x>.env forms.
+_REDIRECT = re.compile(r"(?i)(?:^|[\s|;&]|[^>\s|;&])\d*>{1,2}\s*(\S+)|(?<!>)&>\s*(\S+)")
+_PATCH_PATH = re.compile(
+    r"(?m)^(?:\*\*\* (?:Add|Delete|Update) File: |diff --git a/\S+ b/)(.+)$"
+)
 _DOCKER = re.compile(
     r"(?i)(?<![A-Za-z0-9_-])docker(?:-compose)?(?:\.exe)?(?![A-Za-z0-9_-])"
 )
@@ -129,7 +145,8 @@ SESSION_CONTEXT = (
     "Бюджеты техдолга, exemptions, hotspot thresholds и family caps можно "
     "только уменьшить или оставить. "
     "Не создавать корневой мусор: _tmp_*.py, _cr_*.py, _publish_*.py, "
-    "_fail_*.txt, _a.txt, tmp_sub_*.txt, temp_closeout.json, .tmp_*, nul, NUL. "
+    "_fail_*.txt, _a.txt, tmp_sub_*.txt, temp_closeout.json, .tmp_*, nul, NUL, "
+    "ad-hoc test_*.py в корне. "
     "После правок выполни post-change для затронутой поверхности и перечисли "
     "прогнанные и пропущенные проверки."
 )
@@ -221,7 +238,7 @@ def _decide_pre_tool(event: Mapping[str, Any]) -> dict[str, str]:
                 "Запись .env и .env.* запрещена без явного разрешения в задаче.",
                 "Hook gate denied a write or delete of a secret env file.",
             )
-        if kind == "scratch":
+        if kind == "scratch" and tool_name not in _DELETE_TOOLS:
             return _deny(
                 "Корневой scratch-файл создавать нельзя.",
                 "Hook gate denied a root scratch file.",
@@ -257,7 +274,7 @@ def _classify_segment(
             denies.append(verdict)
         elif verdict[0] == "ask":
             asks.append(verdict)
-    path_kind = _segment_write_kind(segment, roots)
+    path_kind = _segment_write_kind(segment, roots, cwd)
     if path_kind == "env":
         denies.append(
             _deny_tuple(
@@ -297,6 +314,7 @@ def _classify_git(
     if parsed is None:
         return ("allow", "", "")
     subcommand, args = parsed
+    git_cwd = _git_working_directory(tokens, cwd)
     if subcommand == "config":
         return _deny_tuple(
             "git config менять и читать через хук нельзя.",
@@ -307,9 +325,14 @@ def _classify_git(
             "git reset --hard запрещён.",
             "Hook gate denied git reset --hard.",
         )
+    if subcommand == "submodule" and _submodule_foreach_hard_reset(args):
+        return _deny_tuple(
+            "git submodule foreach с reset --hard запрещён.",
+            "Hook gate denied git submodule foreach reset --hard.",
+        )
     if subcommand == "commit" and (
         _has_flag(args, "--no-verify")
-        or "-n" in args
+        or _has_short_option(args, "n")
         or _has_flag(args, "--no-gpg-sign")
     ):
         return _deny_tuple(
@@ -331,7 +354,7 @@ def _classify_git(
             "Hook gate denied interactive git add.",
         )
     if subcommand == "push":
-        return _classify_push(args, cwd, branch_lookup)
+        return _classify_push(args, git_cwd, branch_lookup)
     if subcommand == "commit" and _has_flag(args, "--amend"):
         return (
             "ask",
@@ -346,6 +369,11 @@ def _classify_push(
     cwd: str,
     branch_lookup: Callable[[str], str | None],
 ) -> tuple[str, str, str]:
+    if _has_flag(args, "--mirror"):
+        return _deny_tuple(
+            "git push --mirror запрещён: может принудительно обновить main/master.",
+            "Hook gate denied git push --mirror.",
+        )
     if not _push_is_force(args):
         return ("allow", "", "")
     refspecs = _push_refspecs(args)
@@ -378,27 +406,38 @@ def _starts_monitoring(segment: str) -> bool:
     )
 
 
-def _segment_write_kind(segment: str, roots: list[str]) -> str | None:
+def _segment_write_kind(segment: str, roots: list[str], cwd: str) -> str | None:
     visible = _strip_unquoted_comment(segment)
     redirected = [
         kind
         for match in _REDIRECT.finditer(visible)
-        if (kind := _path_kind(match.group(1).strip("\"'"), roots)) is not None
+        if (
+            kind := _path_kind(
+                next(group for group in match.groups() if group), roots, cwd
+            )
+        )
+        is not None
     ]
     if "env" in redirected:
         return "env"
     if "scratch" in redirected:
         return "scratch"
     tokens = _tokenize(visible)
-    kinds = [kind for token in tokens if (kind := _path_kind(token, roots)) is not None]
+    kinds = [
+        kind for token in tokens if (kind := _path_kind(token, roots, cwd)) is not None
+    ]
     if not kinds:
         return None
     lowered = [token.lower() for token in tokens]
     writes = any(token in _WRITE_COMMANDS for token in lowered)
+    writes = writes or _has_sed_inplace(tokens)
     if _find_git(tokens) is not None:
         parsed = _git_command(tokens)
         writes = writes or (parsed is not None and parsed[0] in _GIT_PATH_WRITES)
     if not writes:
+        return None
+    # Allow cleanup of root scratch; keep env deletes denied.
+    if "scratch" in kinds and "env" not in kinds and _is_delete_only(tokens):
         return None
     if "env" in kinds:
         return "env"
@@ -407,8 +446,25 @@ def _segment_write_kind(segment: str, roots: list[str]) -> str | None:
     return None
 
 
+def _is_delete_only(tokens: list[str]) -> bool:
+    lowered = [token.lower() for token in tokens]
+    return any(token in _DELETE_COMMANDS for token in lowered)
+
+
+def _has_sed_inplace(tokens: list[str]) -> bool:
+    names = {token.lower().replace("\\", "/").rsplit("/", 1)[-1] for token in tokens}
+    if "sed" not in names and "sed.exe" not in names:
+        return False
+    for token in tokens:
+        if token == "-i" or token.startswith("-i") or token == "--in-place":
+            return True
+        if token.startswith("--in-place="):
+            return True
+    return False
+
+
 def _is_file_mutation(tool_name: str, tool_input: Any) -> bool:
-    if tool_name in _READ_ONLY_TOOLS or tool_name.startswith("MCP:"):
+    if tool_name in _READ_ONLY_TOOLS:
         return False
     if tool_name in _MUTATING_TOOLS:
         return True
@@ -422,8 +478,8 @@ def _is_debt_path(path: str, roots: list[str]) -> bool:
     return any(relative.endswith(suffix) for suffix in _DEBT_SUFFIXES)
 
 
-def _path_kind(token: str, roots: list[str]) -> str | None:
-    relative = _relative_path(token, roots)
+def _path_kind(token: str, roots: list[str], cwd: str = "") -> str | None:
+    relative = _relative_path(token, roots, cwd)
     if not relative or relative.endswith("/"):
         return None
     name = relative.rsplit("/", 1)[-1]
@@ -434,7 +490,7 @@ def _path_kind(token: str, roots: list[str]) -> str | None:
     return None
 
 
-def _relative_path(token: str, roots: list[str]) -> str:
+def _relative_path(token: str, roots: list[str], cwd: str = "") -> str:
     cleaned = token.strip().strip("\"'").replace("\\", "/")
     cleaned = re.sub(r"^\d*>+", "", cleaned)
     if cleaned.startswith("file://"):
@@ -446,9 +502,29 @@ def _relative_path(token: str, roots: list[str]) -> str:
         if lowered.startswith(prefix):
             cleaned = cleaned[len(root_norm) + 1 :]
             break
+        if lowered == root_norm.lower():
+            cleaned = ""
+            break
+    else:
+        if (
+            cwd
+            and not cleaned.startswith("/")
+            and not re.match(r"^[A-Za-z]:/", cleaned)
+        ):
+            cwd_rel = _relative_path(cwd, roots)
+            cleaned = f"{cwd_rel}/{cleaned}" if cwd_rel else cleaned
     while cleaned.startswith("./"):
         cleaned = cleaned[2:]
-    return cleaned
+    parts: list[str] = []
+    for part in cleaned.split("/"):
+        if part in {"", "."}:
+            continue
+        if part == "..":
+            if parts:
+                parts.pop()
+            continue
+        parts.append(part)
+    return "/".join(parts)
 
 
 def _iter_paths(value: Any) -> list[str]:
@@ -457,6 +533,10 @@ def _iter_paths(value: Any) -> list[str]:
         for key, item in value.items():
             if key in _PATH_KEYS and isinstance(item, str):
                 found.append(item)
+            elif key == "patch" and isinstance(item, str):
+                found.extend(
+                    match.group(1).strip() for match in _PATCH_PATH.finditer(item)
+                )
             elif isinstance(item, dict | list):
                 found.extend(_iter_paths(item))
     elif isinstance(value, list):
@@ -594,11 +674,67 @@ def _git_command(tokens: list[str]) -> tuple[str, list[str]] | None:
     return None
 
 
+def _git_working_directory(tokens: list[str], default_cwd: str) -> str:
+    index = _find_git(tokens)
+    if index is None:
+        return default_cwd
+    cursor = index + 1
+    last_c: str | None = None
+    while cursor < len(tokens):
+        token = tokens[cursor]
+        if token == "-C" and cursor + 1 < len(tokens):
+            last_c = tokens[cursor + 1]
+            cursor += 2
+            continue
+        if token.startswith("-C") and len(token) > 2:
+            last_c = token[2:]
+            cursor += 1
+            continue
+        if token in {"-c", "--git-dir", "--namespace", "--work-tree"}:
+            cursor += 2
+            continue
+        if token.startswith(("--git-dir=", "--work-tree=", "--namespace=")):
+            cursor += 1
+            continue
+        if token.startswith("-"):
+            cursor += 1
+            continue
+        break
+    return last_c if last_c is not None else default_cwd
+
+
+def _submodule_foreach_hard_reset(args: list[str]) -> bool:
+    joined = " ".join(args).lower()
+    return "foreach" in joined and "reset" in joined and "--hard" in joined
+
+
 def _push_is_force(args: list[str]) -> bool:
     for arg in args:
-        if arg in {"-f", "--force", "--force-if-includes", "--force-with-lease"}:
+        if arg in {
+            "-f",
+            "-d",
+            "--force",
+            "--force-if-includes",
+            "--force-with-lease",
+            "--delete",
+            "--mirror",
+        }:
             return True
-        if arg.startswith(("--force=", "--force-with-lease=")):
+        if arg.startswith(("--force=", "--force-with-lease=", "--mirror=")):
+            return True
+        if arg.startswith("-") and not arg.startswith("--") and len(arg) > 1:
+            letters = arg[1:]
+            if "f" in letters or "d" in letters:
+                return True
+        if not arg.startswith("-") and (
+            arg.startswith("+") or arg.startswith(":") or ":+" in arg
+        ):
+            return True
+        if (
+            not arg.startswith("-")
+            and ":" in arg
+            and arg.split(":", 1)[0].startswith("+")
+        ):
             return True
     return False
 
@@ -619,6 +755,8 @@ def _push_refspecs(args: list[str]) -> list[str]:
             continue
         positional.append(arg)
         index += 1
+    if _has_flag(args, "--delete") or _has_short_option(args, "d"):
+        return positional[1:] if len(positional) >= 2 else positional
     if len(positional) >= 2:
         return positional[1:]
     if len(positional) == 1 and (
@@ -644,6 +782,20 @@ def _has_flag(args: list[str], flag: str) -> bool:
 
 def _has_prefix(args: list[str], prefix: str) -> bool:
     return any(arg == prefix or arg.startswith(prefix + "=") for arg in args)
+
+
+def _has_short_option(args: list[str], option: str) -> bool:
+    for arg in args:
+        if arg == f"-{option}":
+            return True
+        if (
+            arg.startswith("-")
+            and not arg.startswith("--")
+            and len(arg) > 1
+            and option in arg[1:]
+        ):
+            return True
+    return False
 
 
 def _git_branch(cwd: str) -> str | None:
@@ -677,7 +829,8 @@ def _deny_tuple(user_message: str, agent_message: str) -> tuple[str, str, str]:
 
 
 def _emit(payload: Mapping[str, Any]) -> None:
-    sys.stdout.write(json.dumps(payload, ensure_ascii=False))
+    # ASCII-escaped JSON keeps stdout encoding independent of the locale.
+    sys.stdout.write(json.dumps(payload, ensure_ascii=True))
     sys.stdout.write("\n")
 
 
