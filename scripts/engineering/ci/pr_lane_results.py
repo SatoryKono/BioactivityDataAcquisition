@@ -173,8 +173,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "scripts/ai/.mcp.json",
             "scripts/ai/codex/helper/ensure-mcp.sh",
             "scripts/ai/mcp/check_neo4j_memory.sh",
-            "scripts/ai/mcp/github-mcp-wrapper.ps1",
-            "scripts/ai/mcp/github-mcp-wrapper.sh",
             "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh",
             "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
             "scripts/ai/mcp/mcp_code_analyzer_wrapper.sh",
@@ -197,6 +195,29 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py",
             "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
         ),
+    ),
+    **dict.fromkeys(
+        (
+            "scripts/ai/mcp/github-mcp-wrapper.ps1",
+            "scripts/ai/mcp/github-mcp-wrapper.sh",
+            "scripts/ai/mcp/support/github_project_transport.mjs",
+            "tests/unit/repo_backed/scripts/ai/mcp/test_github_project_transport.mjs",
+            "tests/unit/repo_backed/scripts/ai/mcp/test_github_project_transport.py",
+        ),
+        (
+            "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
+            "tests/unit/repo_backed/scripts/ai/mcp/test_github_project_transport.py",
+            "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py",
+            "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+        ),
+    ),
+    **dict.fromkeys(
+        (
+            "scripts/ai/cursor/README.md",
+            "scripts/ai/cursor/setup_skills.sh",
+            "tests/architecture/test_cursor_skill_sync_safety.py",
+        ),
+        ("tests/architecture/test_cursor_skill_sync_safety.py",),
     ),
     **dict.fromkeys(
         (
