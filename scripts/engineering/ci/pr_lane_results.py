@@ -68,7 +68,9 @@ REQUIRED_CHECKS_PROSE_TEST = (
     "tests/architecture/test_required_checks_prose_consistency.py"
 )
 DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
-GRAFANA_METRIC_SEMANTICS_TEST = "tests/integration/test_grafana_dashboard_metric_semantics.py"
+GRAFANA_METRIC_SEMANTICS_TEST = (
+    "tests/integration/test_grafana_dashboard_metric_semantics.py"
+)
 STAGE0_EVIDENCE_TEST = "tests/unit/scripts/engineering/ci/test_stage0_evidence.py"
 MANIFEST_VALIDATION_CATALOG_TEST = (
     "tests/unit/interfaces/http/test_manifest_validation_catalog.py"

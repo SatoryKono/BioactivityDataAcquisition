@@ -54,6 +54,7 @@ _SIGNAL_WITNESSES = {
 }
 _RANKED_EVIDENCE_PANEL = 2010
 _DQ_CONDITIONS_PANEL = 4
+_PROVIDER_CONDITIONS_PANEL = 259
 _RANKED_EVIDENCE_DEPENDENCIES = frozenset(
     {
         "bioetl_incident_ranked_runtime",
@@ -154,33 +155,49 @@ def qualify_empty(
     if not scope:
         return False, evidence
     if panel_id in _WORKFLOW_PANELS:
-        standalone = 'bioetl_standalone_pipeline_universe{pipeline=~"$pipeline",run_type=~"$run_type"}'
-        # A concrete workflow selection must never be excused by standalone data.
-        if substitute("$workflow") != ".*":
-            return False, evidence
-        dependencies = _STANDALONE_DEPENDENCIES
-        if panel_id == 9701:
-            dependencies = dependencies | _WORKFLOW_INPUT_DEPENDENCIES
-        if not _healthy_rules(
-            _response_data(request("/api/v1/rules", {})), "recording", dependencies
-        ):
-            return False, evidence
-        selected = _scope_pairs(scope)
-        return bool(selected) and selected == _scope_pairs(
-            vector(standalone) or []
+        return _workflow_scope_confirms_empty(
+            panel_id, scope, request, vector, substitute
         ), evidence
     if panel_id in _SIGNAL_WITNESSES:
-        if not _signal_metrics_available(panel_id, expr, request):
-            return False, evidence
-        if panel_id == _DQ_CONDITIONS_PANEL and not _dq_operands_present(expr, vector):
-            return False, evidence
-        witnesses = vector(_SIGNAL_WITNESSES[panel_id]) or []
-        return _signal_witness_confirms_empty(panel_id, witnesses), evidence
+        return _qualify_signal_empty(panel_id, expr, request, vector), evidence
     return (
         _event_families_available(expr, request)
         and _event_sample_coverage_confirmed(expr, vector),
         evidence,
     )
+
+
+def _workflow_scope_confirms_empty(
+    panel_id: int,
+    scope: list[dict[str, Any]],
+    request: Callable[..., Any],
+    vector: WitnessVector,
+    substitute: Callable[[str], str],
+) -> bool:
+    if substitute("$workflow") != ".*":
+        return False
+    dependencies = _STANDALONE_DEPENDENCIES
+    if panel_id == 9701:
+        dependencies = dependencies | _WORKFLOW_INPUT_DEPENDENCIES
+    if not _healthy_rules(
+        _response_data(request("/api/v1/rules", {})), "recording", dependencies
+    ):
+        return False
+    standalone = 'bioetl_standalone_pipeline_universe{pipeline=~"$pipeline",run_type=~"$run_type"}'
+    selected = _scope_pairs(scope)
+    return bool(selected) and selected == _scope_pairs(vector(standalone) or [])
+
+
+def _qualify_signal_empty(
+    panel_id: int, expr: str, request: Callable[..., Any], vector: WitnessVector
+) -> bool:
+    if not _signal_metrics_available(panel_id, expr, request):
+        return False
+    if panel_id in {_DQ_CONDITIONS_PANEL, _PROVIDER_CONDITIONS_PANEL}:
+        if not _condition_operands_present(panel_id, expr, vector):
+            return False
+    witnesses = vector(_SIGNAL_WITNESSES[panel_id]) or []
+    return _signal_witness_confirms_empty(panel_id, witnesses)
 
 
 def _scope_pairs(rows: list[dict[str, Any]]) -> set[tuple[str, str]]:
@@ -209,21 +226,24 @@ def _observed_scope(
     return vector(scope) or []
 
 
-def _dq_operands_present(expr: str, vector: WitnessVector) -> bool:
-    operands = set(_METRIC.findall(expr)) - {
-        "bioetl_runtime_pipeline_run_type_universe"
-    }
+def _condition_operands_present(
+    panel_id: int, expr: str, vector: WitnessVector
+) -> bool:
+    operands = re.findall(r"\bsum\(\s*(bioetl_\w+)", expr, re.ASCII)
+    selector = '{pipeline=~"$pipeline"}' if panel_id == _DQ_CONDITIONS_PANEL else ""
     return bool(operands) and all(
-        vector(f'{metric}{{pipeline=~"$pipeline"}}') for metric in sorted(operands)
+        vector(metric + selector) for metric in sorted(set(operands))
     )
 
 
 def _signal_witness_confirms_empty(
     panel_id: int, witnesses: list[dict[str, Any]]
 ) -> bool:
-    if panel_id in {_RANKED_EVIDENCE_PANEL, _DQ_CONDITIONS_PANEL} and any(
-        float(row["value"][1]) > 0 for row in witnesses
-    ):
+    if panel_id in {
+        _RANKED_EVIDENCE_PANEL,
+        _DQ_CONDITIONS_PANEL,
+        _PROVIDER_CONDITIONS_PANEL,
+    } and any(float(row["value"][1]) > 0 for row in witnesses):
         return False
     return bool(witnesses)
 

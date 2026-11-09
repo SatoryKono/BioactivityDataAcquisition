@@ -291,9 +291,25 @@ def test_ranked_evidence_needs_healthy_dependencies_and_no_active_witness(gap):
     assert accepted is (gap is None)
 
 
-@pytest.mark.parametrize("gap", [None, "missing-operand", "active-dq"])
-def test_dq_empty_requires_all_operands_and_no_active_signal(gap):
-    metric = "bioetl_runtime_alert_condition_dq_hard_fail_15m"
+@pytest.mark.parametrize("gap", [None, "missing-operand", "active-signal"])
+@pytest.mark.parametrize(
+    "panel_id, metric, witness",
+    [
+        (
+            4,
+            "bioetl_runtime_alert_condition_dq_hard_fail_15m",
+            "bioetl_dq_current_status",
+        ),
+        (
+            259,
+            "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m",
+            "bioetl_provider_current_status",
+        ),
+    ],
+)
+def test_conditions_empty_requires_all_operands_and_no_active_signal(
+    gap, panel_id, metric, witness
+):
 
     def fetch(url, **_kwargs):
         if urlsplit(url).path.endswith("rules"):
@@ -318,13 +334,13 @@ def test_dq_empty_requires_all_operands_and_no_active_signal(gap):
             ]
         elif query.startswith(metric) and gap == "missing-operand":
             rows = []
-        elif query.startswith("bioetl_dq_current_status") and gap == "active-dq":
+        elif query.startswith(witness) and gap == "active-signal":
             rows = [{"metric": {}, "value": [1, "2"]}]
         return {"status": "success", "data": {"resultType": "vector", "result": rows}}
 
     accepted, _ = qualify_empty(
         dashboard_uid="bioetl-incident-v1",
-        panel_id=4,
+        panel_id=panel_id,
         expr=f"sum({metric})",
         base_url="http://prometheus",
         fetch=fetch,
