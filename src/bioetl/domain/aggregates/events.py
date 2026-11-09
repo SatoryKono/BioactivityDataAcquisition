@@ -22,12 +22,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, fields
 from datetime import datetime
-from enum import Enum
-from math import isfinite
-from uuid import UUID
+from math import inf
 
 from bioetl.domain.deterministic_identity import deterministic_id
-from bioetl.domain.immutability import FrozenDict, FrozenList, deep_freeze_json
+from bioetl.domain.immutability import (
+    deep_freeze_json,
+    validate_event_metadata_snapshot,
+)
 from bioetl.domain.medallion import Layer
 from bioetl.domain.types.identifiers import BatchID, ContentHash, MetaDict, RunID
 
@@ -50,40 +51,6 @@ def _require_layer(value: object, *, event_name: str) -> Layer:
     if isinstance(value, Layer):
         return value
     raise TypeError(f"{event_name}.layer must be a Layer, got {type(value).__name__}")
-
-
-def _validate_metadata_snapshot(value: object) -> None:
-    """Accept immutable identity scalars and recursively snapshottable containers."""
-    if isinstance(value, (dict, FrozenDict)):
-        _validate_metadata_mapping(value)
-        return
-    if isinstance(value, (list, tuple, FrozenList)):
-        for nested in value:
-            _validate_metadata_snapshot(nested)
-        return
-    _validate_metadata_scalar(value)
-
-
-def _validate_metadata_mapping(value: dict[str, object] | FrozenDict) -> None:
-    for key, nested in value.items():
-        if not isinstance(key, str):
-            raise TypeError("Event metadata mappings require string keys")
-        _validate_metadata_snapshot(nested)
-
-
-def _validate_metadata_scalar(value: object) -> None:
-    _validate_metadata_float(value)
-    if isinstance(value, Enum):
-        _validate_metadata_scalar(value.value)
-        return
-    if value is None or isinstance(value, (str, int, float, datetime, UUID)):
-        return
-    raise TypeError(f"Unsupported event metadata value: {type(value).__name__}")
-
-
-def _validate_metadata_float(value: object) -> None:
-    if isinstance(value, float) and not isfinite(value):
-        raise ValueError("Event metadata does not allow NaN or Infinity")
 
 
 @dataclass(frozen=True, slots=True)
@@ -117,11 +84,6 @@ class DomainEvent:
         )
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Pipeline Run Events
-# ──────────────────────────────────────────────────────────────────────────────
-
-
 @dataclass(frozen=True, slots=True)
 class PipelineCompleted(DomainEvent):
     """Event: Pipeline run completed successfully.
@@ -135,6 +97,19 @@ class PipelineCompleted(DomainEvent):
     records_processed: int
     duration_seconds: float
     stages_count: int
+
+    def __post_init__(self) -> None:
+        if self.records_processed < 0:
+            raise ValueError(
+                f"records_processed cannot be negative: {self.records_processed}"
+            )
+        if not 0.0 <= self.duration_seconds < inf:
+            raise ValueError(
+                f"duration_seconds cannot be negative or nonfinite: {self.duration_seconds}"
+            )
+        if self.stages_count < 0:
+            raise ValueError(f"stages_count cannot be negative: {self.stages_count}")
+        DomainEvent.__post_init__(self)
 
 
 @dataclass(frozen=True, slots=True)
@@ -151,6 +126,13 @@ class PipelineFailed(DomainEvent):
     error: str
     error_type: str | None = None
 
+    def __post_init__(self) -> None:
+        if not self.failed_stage:
+            raise ValueError("failed_stage cannot be empty")
+        if not self.error:
+            raise ValueError("error cannot be empty")
+        DomainEvent.__post_init__(self)
+
 
 @dataclass(frozen=True, slots=True)
 class PipelineShutdown(DomainEvent):
@@ -164,10 +146,12 @@ class PipelineShutdown(DomainEvent):
     pipeline_name: str
     records_processed: int
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Batch Events
-# ──────────────────────────────────────────────────────────────────────────────
+    def __post_init__(self) -> None:
+        if self.records_processed < 0:
+            raise ValueError(
+                f"records_processed cannot be negative: {self.records_processed}"
+            )
+        DomainEvent.__post_init__(self)
 
 
 @dataclass(frozen=True, slots=True)
@@ -180,6 +164,11 @@ class BatchCreated(DomainEvent):
     run_id: RunID
     batch_id: BatchID
     record_count: int
+
+    def __post_init__(self) -> None:
+        if self.record_count < 0:
+            raise ValueError(f"record_count cannot be negative: {self.record_count}")
+        DomainEvent.__post_init__(self)
 
 
 @dataclass(frozen=True, slots=True)
@@ -196,6 +185,13 @@ class BatchSealed(DomainEvent):
     valid_count: int
     quarantined_count: int
 
+    def __post_init__(self) -> None:
+        if min(self.record_count, self.valid_count, self.quarantined_count) < 0:
+            raise ValueError("counts must be non-negative")
+        if self.valid_count + self.quarantined_count != self.record_count:
+            raise ValueError("valid_count + quarantined_count must equal record_count")
+        DomainEvent.__post_init__(self)
+
 
 @dataclass(frozen=True, slots=True)
 class BatchWritten(DomainEvent):
@@ -210,6 +206,8 @@ class BatchWritten(DomainEvent):
     record_count: int
 
     def __post_init__(self) -> None:
+        if self.record_count < 0:
+            raise ValueError(f"record_count cannot be negative: {self.record_count}")
         _require_layer(self.layer, event_name=type(self).__name__)
         # Direct call avoids zero-arg super issues with slotted dataclass inheritance.
         DomainEvent.__post_init__(self)
@@ -230,14 +228,14 @@ class BatchFailed(DomainEvent):
     error_type: str | None = None
 
     def __post_init__(self) -> None:
+        if not self.error:
+            raise ValueError("error cannot be empty")
         _require_layer(self.layer, event_name=type(self).__name__)
         # Direct call avoids zero-arg super issues with slotted dataclass inheritance.
         DomainEvent.__post_init__(self)
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Quarantine Events
-# ──────────────────────────────────────────────────────────────────────────────
 
 
 @dataclass(frozen=True, slots=True)
@@ -254,6 +252,11 @@ class RecordQuarantined(DomainEvent):
     error_code: str | None
     error_message: str
     content_hash: ContentHash | None = None
+
+    def __post_init__(self) -> None:
+        if not self.error_message:
+            raise ValueError("error_message cannot be empty")
+        DomainEvent.__post_init__(self)
 
 
 @dataclass(frozen=True, slots=True)
@@ -272,7 +275,9 @@ class QuarantineEntryCreated(DomainEvent):
 
     def __post_init__(self) -> None:
         """Detach nested metadata before identity, including explicit-ID replay."""
-        _validate_metadata_snapshot(self.metadata)
+        if not self.error_code:
+            raise ValueError("error_code cannot be empty")
+        validate_event_metadata_snapshot(self.metadata)
         object.__setattr__(self, "metadata", deep_freeze_json(self.metadata))
         DomainEvent.__post_init__(self)
 
@@ -289,3 +294,8 @@ class QuarantineEntryResolved(DomainEvent):
     entry_id: str
     resolution: str  # "reprocessed", "ignored"
     resolved_by: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.resolution not in ("reprocessed", "ignored"):
+            raise ValueError(f"invalid resolution: {self.resolution}")
+        DomainEvent.__post_init__(self)
