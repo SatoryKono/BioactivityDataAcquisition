@@ -6,6 +6,8 @@ import subprocess
 
 import pytest
 
+pytestmark = pytest.mark.integration
+
 
 def test_managed_github_transport_contract() -> None:
     node = shutil.which("node")
@@ -14,7 +16,7 @@ def test_managed_github_transport_contract() -> None:
     source = Path(__file__).with_suffix(".mjs")
     result = subprocess.run(
         [node, "--test", str(source)],
-        cwd=Path(__file__).resolve().parents[6],
+        cwd=Path(__file__).resolve().parents[2],
         capture_output=True,
         text=True,
         timeout=45,

@@ -1400,9 +1400,10 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     identity, processed = panels[9402], panels[9403]
     assert identity["gridPos"]["w"] == processed["gridPos"]["w"] == 24
-    assert identity["gridPos"]["y"] + identity["gridPos"]["h"] <= 18
-    assert processed["gridPos"]["y"] == 18
-    assert processed["gridPos"]["h"] == 14
+    assert identity["gridPos"]["y"] == 18
+    assert processed["gridPos"]["y"] == 10
+    assert processed["gridPos"]["h"] == 8
+    assert processed["options"]["footer"]["enablePagination"] is True
     assert processed["options"]["cellHeight"] == "sm"
     assert not any(t["id"] == "limit" for t in processed["transformations"])
     _assert_processed_records_target_contract(processed)
