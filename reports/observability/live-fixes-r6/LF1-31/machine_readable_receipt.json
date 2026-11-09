@@ -1,0 +1,37 @@
+{
+  "deploy_sha": "NOT_VERIFIABLE",
+  "generator_change": false,
+  "grafana": "NOT_VERIFIABLE",
+  "historical_manifest": {
+    "catalog": "selected_run_id_not_found",
+    "exact_replay_ready": false,
+    "objects_empty": true,
+    "path": "reports/observability/live-fixes-r6/LF1-11/manifest.json",
+    "replay_readiness_verdict": "rebuild_only",
+    "run_id": "8ed593ce-3b75-56e0-a337-192953048582"
+  },
+  "injection_saved": false,
+  "issue": 12824,
+  "local_ops_http": "http://127.0.0.1:8000",
+  "negative_zero_uuid": {
+    "http": 200,
+    "resolved_via": "selected_run_id_not_found",
+    "run_id": "00000000-0000-0000-0000-000000000000"
+  },
+  "observed_at_utc": "2026-11-09T08:37:00Z",
+  "panel_ids": [
+    9422,
+    9423,
+    9408,
+    9418,
+    9414,
+    9415,
+    9416,
+    9413,
+    9406
+  ],
+  "positive_object_checks": "NOT_RUN",
+  "prometheus": "NOT_VERIFIABLE",
+  "source_sha": "48dc0257ed980decaf0d8bf4c209c7e39309a4c4",
+  "uid": "bioetl-control-plane-v1"
+}
