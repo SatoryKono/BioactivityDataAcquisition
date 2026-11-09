@@ -451,29 +451,6 @@
       "schema_version": 1,
       "trust_statement": "Reviewed live GitHub publication mapping for #12916 squash; identical published and merged Git trees and both ancestry relations verified locally. Not a signature or CI execution receipt.",
       "verification_mode": "live_github"
-    },
-    {
-      "github_pull_request": {
-        "base": {
-          "repo": {
-            "full_name": "SatoryKono/BioactivityDataAcquisition"
-          }
-        },
-        "head": {
-          "sha": "4f3019086abea041562b5e6c61126ce564aa0fc8"
-        },
-        "merge_commit_sha": "65cd22e1406c6a3086e06da1b7e000663002cde0",
-        "merged": true,
-        "number": 12929
-      },
-      "retrieved_at_utc": "2026-11-09T17:43:41.473241+00:00",
-      "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/12929",
-      "reviewed_source_commits": [
-        "0e27c287d79ff231f765f6636c6dd006694e169d"
-      ],
-      "schema_version": 1,
-      "trust_statement": "Reviewed live GitHub publication mapping; identical published and merged Git trees and both ancestry relations verified locally. Not a signature or CI execution receipt.",
-      "verification_mode": "live_github"
     }
   ],
   "schema_version": 1,
