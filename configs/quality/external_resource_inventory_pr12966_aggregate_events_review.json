@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "catalog_ref": "d02a02bbc30efaebaec6ccfa4a98a99f34a06002",
-  "source_ref": "1e0f123295425bdf7c9acf58e4afa8912851f600",
+  "catalog_ref": "951bfe71322e5d055153f1f8ca2a40872c1c69be",
+  "source_ref": "a444a24d40b126fafde4d0aa790df489b3ebb32b",
   "source_reviews": {
     "src/bioetl/domain/aggregates/events.py": "Validate event constructor counts, required failure descriptions and allowed resolution values. No external-resource access or ownership change.",
     "src/bioetl/application/core/_batch_write_events.py": "Use the exception class as fallback for an empty write-failure description. Existing event dispatch and I/O boundaries retained.",
     "src/bioetl/application/observability/observer_context_mixin.py": "Use the exception class as fallback for an empty pipeline-failure description. Existing event dispatch and I/O boundaries retained.",
-    "src/bioetl/domain/aggregates/_event_validation.py": "Extract pure snapshot validators; reject nonfinite durations. No external resources.",
-    "src/bioetl/application/core/_quarantine_write_support.py": "Normalize only empty reasons before persistence and reuse the same reason in emitted events. Existing quarantine port, I/O and metrics ownership retained."
+    "src/bioetl/application/core/_quarantine_write_support.py": "Normalize only empty reasons before persistence and reuse the same reason in emitted events. Existing quarantine port, I/O and metrics ownership retained.",
+    "src/bioetl/domain/_event_validation.py": "Pure event duration and metadata validation extracted outside the capped aggregates package. No external resources."
   },
   "line_updates": {},
   "resource_updates": {},
