@@ -5,6 +5,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from pathlib import PurePosixPath
 
+from bioetl.domain.control_plane.snapshot_field_resolution import (
+    coerce_optional_text as _optional_text,
+)
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 
 
@@ -51,10 +54,3 @@ def _extract_bronze_date(immutable_uri: str) -> str:
             f"segment: '{immutable_uri}'"
         )
     return bronze_date
-
-
-def _optional_text(value: object) -> str | None:
-    if value is None:
-        return None
-    text = str(value).strip()
-    return text or None

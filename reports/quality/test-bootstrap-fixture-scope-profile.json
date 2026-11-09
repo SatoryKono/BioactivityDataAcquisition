@@ -1001,7 +1001,7 @@
   ],
   "current_source_binding": {
     "kind": "source_topology_only",
-    "source_tree_sha256": "4c8efd365cdd90735b375308fe429c27577570d1ce345bfa7d3fce531686f161",
+    "source_tree_sha256": "d1189e8664dec8664cf38cd18813f7481180c91c0884dcb6df7d259a3111184c",
     "test_governance_source_tree_sha256": "cbc1d9ec70de9c4fc5b35edcc8a5028b3617951bbd4e49ce5a5bd5742f8e93e2",
     "test_file_count": 49,
     "test_files": [
