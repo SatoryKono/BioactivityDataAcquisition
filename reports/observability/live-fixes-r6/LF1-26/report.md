@@ -9,7 +9,7 @@ Issue: #12822.
 
 ## Panels
 
-All 15 panels are on `bioetl-incident-v1`. None of their expressions contain `or vector(0)`. `run_id` is not used as a Prometheus label in these expressions. Expected evidence follows the scope of each expression. Panel 238 filters by run type. Panels 256, 908, 8805, 8807, and 112 filter by pipeline. Panels 241, 240, 131, and 135 filter by both pipeline and run type. Panels 8806, 209, 210, 107, and 108 query global series without pipeline, run type, or workflow filters. An absent series is `TELEMETRY MISSING`, not zero. A query failure is outside this `noValue` and was not rendered.
+All 15 panels are on `bioetl-incident-v1`. None of their expressions contain `or vector(0)`. `run_id` is not used as a Prometheus label in these expressions. Expected evidence follows the scope of each expression. Panels 256, 908, 8805, 8807, and 112 filter by pipeline. Panels 238, 241, 240, 131, and 135 filter by both pipeline and run type. Panel 238 also matches the workflow-prefixed pipeline alias. Panels 8806, 209, 210, 107, and 108 query global series without pipeline, run type, or workflow filters. An absent series is `TELEMETRY MISSING`, not zero. A query failure is outside this `noValue` and was not rendered.
 
 | Panel | Title | Metric family on local scrape | Samples | Class |
 | --- | --- | --- | --- | --- |
