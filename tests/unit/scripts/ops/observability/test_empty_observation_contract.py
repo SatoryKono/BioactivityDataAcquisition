@@ -76,12 +76,27 @@ def test_panels_without_qualified_empty_contract_cannot_bypass_review(panel_id):
 
 
 @pytest.mark.parametrize(
-    "workflow, expected", [(".*", True), ("named_workflow", False)]
+    "workflow, mixed, expected",
+    [(".*", False, True), ("named_workflow", False, False), (".*", True, False)],
 )
-def test_standalone_witness_does_not_excuse_concrete_workflow(workflow, expected):
+def test_standalone_witness_must_cover_the_entire_scope(workflow, mixed, expected):
     def fetch(url, **_kwargs):
         query = parse_qs(urlsplit(url).query)["query"][0]
-        rows = [{"metric": {}, "value": [1, "1"]}]
+        rows = [
+            {
+                "metric": {"pipeline": "uniprot", "run_type": "incremental"},
+                "value": [1, "1"],
+            }
+        ]
+        if mixed and query.startswith(
+            "bioetl_runtime_pipeline_run_type_universe_scoped"
+        ):
+            rows.append(
+                {
+                    "metric": {"pipeline": "chembl", "run_type": "incremental"},
+                    "value": [1, "1"],
+                }
+            )
         if query.startswith("up{"):
             rows = [
                 {"metric": {"job": job}, "value": [1, "1"]}
