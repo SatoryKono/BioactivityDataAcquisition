@@ -1,8 +1,6 @@
 ---
 name: "py-debug-bot"
 description: "Execute the read-only BioETL py-debug-bot profile for reproducing, isolating, and analyzing concrete failures. Use when tests, runtime behavior, CI logs, or user-provided stack traces need root-cause diagnosis."
-context: none
-agent: py-debug-bot
 ---
 
 # py-debug-bot
@@ -14,7 +12,6 @@ agent: py-debug-bot
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
-- Read boundary: use the task class in the root runtime contract, then only the slices the normative index names for SCOPE.
 - Primary profile: `../../agents/py-debug-bot.md`
 - Team orchestration: `../../agents/ORCHESTRATION.md`
 - Shared wrapper contract: [../py-audit-bot/references/wrapper-contract.md](../py-audit-bot/references/wrapper-contract.md)

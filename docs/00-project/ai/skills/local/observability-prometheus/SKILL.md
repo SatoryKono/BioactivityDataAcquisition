@@ -7,16 +7,9 @@ ______________________________________________________________________
 ---
 name: "observability-prometheus"
 description: "Create, review, test, or debug BioETL Prometheus alert and recording rules with real metric and label evidence."
-context: none
-agent: general-purpose
-disable-model-invocation: true
 ---
 
 # Observability Prometheus
-
-## Invocation
-
-Invoke only when the user names this skill.
 
 ## Source Of Truth
 
@@ -28,7 +21,6 @@ Invoke only when the user names this skill.
 - Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 
-- Read boundary: use the task class in the root runtime contract, then only the slices the normative index names for SCOPE.
 - Prometheus rules and tests in the repository
 
 ## Workflow
