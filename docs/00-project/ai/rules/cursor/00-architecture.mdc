@@ -1,6 +1,7 @@
 ---
 description: BioETL Architecture — Layers, Ports & Adapters, Import Matrix
 globs: ["src/**/*.py", "tests/**/*.py"]
+alwaysApply: false
 ---
 
 # Layer Architecture (Clean / Ports & Adapters)

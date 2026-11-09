@@ -1,6 +1,7 @@
 ---
 description: BioETL Testing — VCR, E2E, Architecture Tests
 globs: ["tests/**/*.py"]
+alwaysApply: false
 ---
 
 # Testing Levels
