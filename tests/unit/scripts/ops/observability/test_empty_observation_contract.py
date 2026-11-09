@@ -554,3 +554,52 @@ def test_conditions_empty_requires_all_operands_and_no_active_signal(
         timeout=1,
     )
     assert accepted is (gap is None or (panel_id == 259 and gap == "unknown-health"))
+
+
+@pytest.mark.parametrize("raw_count, expected", [(None, True), (1, False), (2, False)])
+def test_empty_runtime_error_rate_requires_no_raw_error_observations(
+    raw_count, expected
+):
+    def fetch(url, **_kwargs):
+        endpoint = urlsplit(url).path
+        if endpoint.endswith("rules"):
+            rule = {
+                "name": "bioetl_runtime_error_rate_30m",
+                "type": "recording",
+                "health": "ok",
+            }
+            return {"status": "success", "data": {"groups": [{"rules": [rule]}]}}
+        if endpoint.endswith("metadata"):
+            return {
+                "status": "success",
+                "data": {"bioetl_errors_total": [{"type": "counter"}]},
+            }
+        query = parse_qs(urlsplit(url).query)["query"][0]
+        rows = [{"metric": {}, "value": [1, "1"]}]
+        if query.startswith("up{job=~"):
+            rows = [
+                {"metric": {"job": job}, "value": [1, "1"]}
+                for job in ("bioetl", "pushgateway", "prometheus")
+            ]
+        elif query.startswith("count_over_time"):
+            assert (
+                query
+                == 'count_over_time(bioetl_errors_total{pipeline=~"$pipeline"}[30m])'
+            )
+            rows = (
+                []
+                if raw_count is None
+                else [{"metric": {}, "value": [1, str(raw_count)]}]
+            )
+        return {"status": "success", "data": {"resultType": "vector", "result": rows}}
+
+    accepted, _ = qualify_empty(
+        dashboard_uid="bioetl-incident-v1",
+        panel_id=220,
+        expr='bioetl_runtime_error_rate_30m{pipeline=~"$pipeline"}',
+        base_url="http://prometheus",
+        fetch=fetch,
+        substitute=lambda value: value,
+        timeout=1,
+    )
+    assert accepted is expected

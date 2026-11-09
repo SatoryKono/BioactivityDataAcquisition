@@ -60,6 +60,7 @@ _DQ_EVENT_INPUTS = {
     "bioetl_runtime_alert_condition_dq_critical_anomaly_30m": 'bioetl_dq_anomaly_detected_total{pipeline=~"$pipeline",severity="critical"}[30m]',
     "bioetl_runtime_alert_condition_silver_validation_failures_30m": 'bioetl_silver_validation_failures_total{pipeline=~"$pipeline"}[30m]',
 }
+_RUNTIME_ERROR_RATE_PANEL = 220
 _PROVIDER_CONDITIONS_PANEL = 259
 _PROVIDER_EVENT_INPUTS = {
     "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m": "bioetl_adapter_request_duration_seconds_bucket[30m]",
@@ -214,6 +215,10 @@ def _qualify_signal_empty(
     if panel_id in {_DQ_CONDITIONS_PANEL, _PROVIDER_CONDITIONS_PANEL}:
         if not _condition_operands_confirmed(panel_id, expr, vector, request):
             return False
+    if panel_id == _RUNTIME_ERROR_RATE_PANEL and not _unobserved_event_input(
+        'bioetl_errors_total{pipeline=~"$pipeline"}[30m]', vector, request
+    ):
+        return False
     witnesses = vector(_SIGNAL_WITNESSES[panel_id]) or []
     return _signal_witness_confirms_empty(panel_id, witnesses)
 
