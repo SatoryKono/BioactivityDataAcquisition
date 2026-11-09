@@ -22,17 +22,17 @@ Using offline dashboard exports from `reports/observability/live-fixes-r6/LF1-01
 * Hypothesis from #12785: missing or optional fields could affect the stage join. The retained configuration does not establish that any fields were lost. This requires a captured input frame and the corresponding transformed output.
 
 ### 3.2 DQ Domains (ID 9406 & 9403)
-* Panel 9406 uses the `backend` parser. The target URL extracted is: `/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}`. It extracts fields such as `_bioetl_frame`, `domain`, `verdict`, `status`, `detail`, `reason`, `reason_display`, `status_display`.
-* Panel 9403 uses the `backend` parser for both targets. Target A queries `/ops/observability/processed-records`; StageInput queries `/ops/observability/selected-run-status`.
+* Panel 9406 uses the `backend` parser. The target URL extracted is: `/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}`. The panel selects `_bioetl_frame = status`, limits to one row and displays `execution_state`, `verdict`, `saved_trust` and `reason_display`.
+* Panel 9403 uses the `backend` parser for both targets. Target A queries `/ops/observability/processed-records`; StageInput queries `/ops/observability/selected-run-status`. The outer join uses `parameter` and presents the input and output counts.
 * Due to isolated environment, live API bodies cannot be inspected. Frame extraction depends completely on Grafana offline definition.
 
 ### 3.3 Incident (ID 2101)
 * Panel 2101 is located inside `reports/observability/live-fixes-r6/LF1-01/bioetl-incident-v1.json` as Review Selected Run Status nested within row 2100 (Inspect Selected Run Summary).
 * It uses `backend` parser and queries `/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}`.
-* Its JSONata transformations extract nested durations and overall verdicts mapping them to `_bioetl_frame: status`, `domains`, and `duration`.
+* The panel selects `_bioetl_frame = status` from the JSONata output, limits to one row and displays `execution_state`, `verdict`, `saved_trust` and `reason_display`.
 
 ### 3.4 Control Plane (ID 9418) & Funnel (ID 9002)
-* Panel 9418 (Target A) parsing payload uses `uql` parser. Target URL extracted is: `/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}`. Field definitions in JSONata map `_bioetl_frame`, `domain`, `verdict`, `status`, `detail`, `reason`.
+* Panel 9418 (Target A) parsing payload uses `uql` parser. Target URL extracted is: `/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}`. JSONata emits `trust`, `replay_readiness` and `replay_checks` frames. The panel filters to `_bioetl_frame = trust`, converts `evidence_observed_at` to time and keeps `processing_status`, `trust_status`, `reasons_display`, `reasons_text`, `evidence_observed_at`, `reasons_count`, `evidence_freshness`, `trust_reasons_action` and `trust_action_note`. The final organize transform hides `reasons_display`, and the panel limits the result to one row.
 * Overview panel 9002 (Review Run Domains) uses the `uql` parser. Target A queries `/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}`. Dashboard links are navigation and are not request targets.
 
 ## 4. Closure Passport
