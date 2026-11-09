@@ -23,7 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field, fields
 from datetime import datetime
 
-from bioetl.domain.aggregates._event_validation import (
+from bioetl.domain._event_validation import (
     validate_duration,
     validate_metadata_snapshot,
 )

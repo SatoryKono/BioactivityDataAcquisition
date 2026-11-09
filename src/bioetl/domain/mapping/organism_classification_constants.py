@@ -153,4 +153,3 @@ KEYWORD_GROUPS: Final[tuple[tuple[CellularityType, tuple[str, ...]], ...]] = (
 )
 
 PARENTHESES_RE: Final[re.Pattern[str]] = re.compile(r"\s*\(.*\)")
-WHITESPACE_RE: Final[re.Pattern[str]] = re.compile(r"\s+")
