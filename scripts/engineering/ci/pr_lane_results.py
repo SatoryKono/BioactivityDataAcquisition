@@ -141,6 +141,7 @@ MCP_SETUP_COPILOT_CODEX_TEST = "tests/unit/scripts/test_setup_copilot_codex_mcp.
 MCP_GITHUB_PROJECT_TRANSPORT_TEST = (
     "tests/unit/repo_backed/scripts/ai/mcp/test_github_project_transport.py"
 )
+CURSOR_SKILL_SYNC_TEST = "tests/architecture/test_cursor_skill_sync_safety.py"
 ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
     "tests/architecture/test_root_hygiene_review_registry.py"
 )
@@ -225,9 +226,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         (
             "scripts/ai/cursor/README.md",
             "scripts/ai/cursor/setup_skills.sh",
-            "tests/architecture/test_cursor_skill_sync_safety.py",
+            CURSOR_SKILL_SYNC_TEST,
         ),
-        ("tests/architecture/test_cursor_skill_sync_safety.py",),
+        (CURSOR_SKILL_SYNC_TEST,),
     ),
     **dict.fromkeys(
         (
@@ -1114,6 +1115,19 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    **dict.fromkeys(
+        (
+            ".codex/skills/",
+            ".devin/skills/",
+            ".junie/skills/",
+            "docs/00-project/ai/grok/skills/",
+            "docs/00-project/ai/skills/local/",
+        ),
+        (
+            CURSOR_SKILL_SYNC_TEST,
+            "tests/unit/repo_backed/scripts/test_check_skills_mirror.py",
+        ),
+    ),
     ".vscode/": ("tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",),
     "docs/03-guides/dashboards/": (
         DOCUMENTATION_SYNC_TEST,

@@ -1,6 +1,8 @@
 ---
 name: "py-test-bot"
 description: "Execute the BioETL py-test-bot profile for focused or broad test planning, failure classification, flaky-test triage, and coverage or regression validation."
+context: none
+agent: py-test-bot
 ---
 
 # py-test-bot
@@ -12,6 +14,7 @@ description: "Execute the BioETL py-test-bot profile for focused or broad test p
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Read boundary: use the task class in the root runtime contract, then only the slices the normative index names for SCOPE.
 - Primary profile: `../../agents/py-test-bot.md`
 - Team orchestration: `../../agents/ORCHESTRATION.md`
 - Shared wrapper contract: [../py-audit-bot/references/wrapper-contract.md](../py-audit-bot/references/wrapper-contract.md)

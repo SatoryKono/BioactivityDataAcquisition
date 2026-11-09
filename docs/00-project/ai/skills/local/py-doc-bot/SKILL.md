@@ -7,6 +7,8 @@ ______________________________________________________________________
 ---
 name: "py-doc-bot"
 description: "Execute the BioETL py-doc-bot profile for documentation updates, drift remediation, focused or broad documentation audits, runtime mirror sync, and validation."
+context: none
+agent: py-doc-bot
 ---
 
 # py-doc-bot
@@ -21,6 +23,7 @@ description: "Execute the BioETL py-doc-bot profile for documentation updates, d
 - Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 
+- Read boundary: use the task class in the root runtime contract, then only the slices the normative index names for SCOPE.
 - Primary profile: `../../agents/py-doc-bot.md`
 - Team orchestration: `../../agents/ORCHESTRATION.md`
 - Shared wrapper contract: [../py-audit-bot/references/wrapper-contract.md](../py-audit-bot/references/wrapper-contract.md)

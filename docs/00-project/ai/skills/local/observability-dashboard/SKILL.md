@@ -7,9 +7,16 @@ ______________________________________________________________________
 ---
 name: "observability-dashboard"
 description: "Edit, render, validate, or debug BioETL Grafana dashboards and their PromQL panels without starting optional monitoring services unless requested."
+context: none
+agent: general-purpose
+disable-model-invocation: true
 ---
 
 # Observability Dashboard
+
+## Invocation
+
+Invoke only when the user names this skill.
 
 ## Source Of Truth
 
@@ -21,6 +28,7 @@ description: "Edit, render, validate, or debug BioETL Grafana dashboards and the
 - Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 
+- Read boundary: use the task class in the root runtime contract, then only the slices the normative index names for SCOPE.
 - Dashboard source: `../../../grafana/dashboards/`
 - Render and validation scripts: `../../../scripts/`
 
