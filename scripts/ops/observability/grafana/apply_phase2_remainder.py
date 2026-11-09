@@ -115,6 +115,7 @@ VIEW_PANEL_BROKEN_REPLAY = "viewPanel=130"
 VIEW_PANEL_REPLAY_CHECKS = "viewPanel=9423"
 _CP_SCOPE_VIEW_PANELS = frozenset({"9423", "9414", "9415", "9416"})
 _RUN_ID_QUERYPARAM = "${run_id:queryparam}"
+_HTML_AMP = "&amp;"
 _RUN_ID_CLEARED = "var-run_id=-"
 _CONTEXT_QUERYPARAMS = (
     f"${{pipeline:queryparam}}&amp;${{run_type:queryparam}}&amp;{_RUN_ID_QUERYPARAM}"
@@ -132,15 +133,32 @@ def _ensure_run_id_on_cp_scope_links(panel: dict[str, Any]) -> None:
         url = link.get("url")
         if not isinstance(url, str) or _RUN_ID_QUERYPARAM in url:
             continue
-        match = re.search(r"(?:^|[?&])viewPanel=(\d+)", url.replace("&amp;", "&"))
+        match = re.search(r"(?:^|[?&])viewPanel=(\d+)", url.replace(_HTML_AMP, "&"))
         if match is None or match.group(1) not in _CP_SCOPE_VIEW_PANELS:
             continue
         needle = f"viewPanel={match.group(1)}"
         link["url"] = url.replace(needle, f"{_RUN_ID_QUERYPARAM}&{needle}")
 
 
+def _is_github_host(url: str) -> bool:
+    """True when the URL host is github.com or a subdomain of it."""
+    host = urlsplit(url).hostname
+    if not host:
+        return False
+    normalized = host.lower().rstrip(".")
+    return normalized == "github.com" or normalized.endswith(".github.com")
+
+
+def _github_docs_or_runbook(url: str) -> bool:
+    normalized = url.replace(_HTML_AMP, "&")
+    if not _is_github_host(normalized):
+        return False
+    path = urlsplit(normalized).path
+    return "/blob/main/docs/" in path or "/runbooks/" in path
+
+
 def _strip_github_grafana_query(url: str) -> str:
-    parts = urlsplit(url.replace("&amp;", "&"))
+    parts = urlsplit(url.replace(_HTML_AMP, "&"))
     if not (parts.query or "${" in url):
         return url
     path_only = urlunsplit((parts.scheme, parts.netloc, parts.path, "", ""))
@@ -183,7 +201,7 @@ def _rewrite_url(url: str) -> str:
     )
     if "${__data.fields.action_path}" in url and "var-pipeline=" in url:
         url = "/${__data.fields.action_path}"
-    if "github.com/" in url and ("blob/main/docs/" in url or "/runbooks/" in url):
+    if _github_docs_or_runbook(url):
         url = _strip_github_grafana_query(url)
     url = url.replace(VIEW_PANEL_BROKEN_REPLAY, VIEW_PANEL_REPLAY_CHECKS)
     # Keep viewPanel=9418 as Selected-Run Trust destination; phase2.5 rewrites

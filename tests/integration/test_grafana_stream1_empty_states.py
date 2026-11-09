@@ -20,6 +20,7 @@ import yaml
 from tests.integration._grafana_test_support import (
     get_dashboard_panels,
     load_dashboard,
+    resolve_dashboard_target,
 )
 
 pytestmark = pytest.mark.integration
@@ -108,8 +109,12 @@ def test_provider_health_fleet_cause_tables_are_retired() -> None:
     assert {9401, 9101, 9102, 9103, 9107, 114}.isdisjoint(panels)
     for panel_id in _PROVIDER_SINGLE_STATE_NO_VALUE_PANEL_IDS:
         panel = panels[panel_id]
-        assert all("expr" not in target for target in panel["targets"])
-        assert all("run_id=${run_id}" in target["url"] for target in panel["targets"])
+        targets = [
+            resolve_dashboard_target(panels, target) for target in panel["targets"]
+        ]
+        assert targets
+        assert all("expr" not in target for target in targets)
+        assert all("run_id=${run_id}" in target["url"] for target in targets)
 
 
 def test_provider_cause_contract_declares_unknown_beside_valid_empty() -> None:
@@ -180,13 +185,24 @@ def test_dq_10253_select_run_novalue_drops_hedge_tails() -> None:
         for panel in get_dashboard_panels(dashboard)
         if isinstance(panel.get("id"), int)
     }
+    guidance = panels[9402]
+    assert guidance["type"] == "text"
+    assert not guidance.get("targets")
+    handoff = guidance["options"]["content"]
+    assert "/d/bioetl-overview-v2/" in handoff
+    assert "viewPanel=9300" in handoff
+    assert "${run_id:queryparam}" in handoff
     expected = {
-        9402: "SELECT RUN — no exact Run ID selected. Choose a run first.",
         9403: (
             "SELECT RUN — no exact Run ID selected. Choose this run in Run Explorer."
         ),
         9406: "UNKNOWN",
     }
+    handoff = panels[9402]
+    assert handoff["type"] == "text"
+    assert not handoff.get("targets")
+    assert "viewPanel=9300" in handoff["options"]["content"]
+    assert "${run_id:queryparam}" in handoff["options"]["content"]
     for panel_id, expected_no_value in expected.items():
         no_value = (
             panels[panel_id].get("fieldConfig", {}).get("defaults", {}).get("noValue")

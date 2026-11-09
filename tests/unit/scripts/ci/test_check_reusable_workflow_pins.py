@@ -50,6 +50,22 @@ def _job_workflow(path: Path, uses: object) -> None:
     _dump(path, {"jobs": {"called": {"uses": uses}}})
 
 
+def test_secret_expression_in_uses_is_not_logged(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    registry = tmp_path / "registry.yaml"
+    workflow = tmp_path / "workflow.yaml"
+    _registry(registry)
+    _step_workflow(workflow, "something/${{ secrets.TOKEN }}")
+
+    assert not pins.check_pins(registry, [workflow], repo_root=tmp_path)
+
+    captured = capsys.readouterr()
+    assert "secrets." not in captured.err
+    assert "TOKEN" not in captured.err
+    assert "[redacted-diagnostic]" in captured.err
+
+
 def test_verified_pin_bump_passes(tmp_path: Path) -> None:
     registry = tmp_path / "registry.yaml"
     workflow = tmp_path / "workflow.yaml"
@@ -245,11 +261,11 @@ def test_local_action_yaml_suffix_passes_and_escape_fails(tmp_path: Path) -> Non
 
 DOCKER_LANE_PIN = (
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml"
-    "@89fbcab7461c6400f8b2df38ebd95375713e7d32"
+    "@fa8d903223efda3c26c19af08933d8a4000b2a7a"
 )
 DOCS_LANE_PIN = (
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml"
-    "@0deeafe064844e467b6c5943430dbfb3b80333ba"
+    "@02888d30cd4e343eeb9778fb8bbea8098591cf3d"
 )
 
 

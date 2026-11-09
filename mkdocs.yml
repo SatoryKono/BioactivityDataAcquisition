@@ -275,6 +275,7 @@ nav:
           - "ADR-059 Package Cohesion Budgets": 02-architecture/decisions/ADR-059-package-cohesion-budgets.md
           - "ADR-061 Persisted Selected Run Assessment": 02-architecture/decisions/ADR-061-persisted-selected-run-assessment.md
           - "ADR-062 Immutable Composite Parent Merge Replay": 02-architecture/decisions/ADR-062-assay-parent-exact-replay.md
+          - "ADR-063 Exclude Generated Artifact Tests from GitHub Actions": 02-architecture/decisions/ADR-063-exclude-generated-artifact-tests-from-actions.md
           - "Infrastructure Config Package Root Sunset": 02-architecture/compatibility/infrastructure-config-package-root-sunset.md
           - "Public API Freeze": 00-project/ai/agents/guides/PUBLIC_API_FREEZE.md
   - Guides:
@@ -514,6 +515,8 @@ nav:
       - Overview: 05-operations/README.md
       - "CI Workflow Map": 05-operations/ci-workflow-map.md
       - "CI/CD Integration": 05-operations/ci-cd-integration.md
+      - "Class Lane Separation Experiment": ci/card-0.10-class-lane-separation.md
+      - "GitHub and CircleCI Gate Platform Matrix": ci/gate-platform-matrix-full.md
       - "Performance Tuning": 05-operations/performance-tuning.md
       - "DQ Investigation Procedures": 05-operations/dq-investigation-procedures.md
       - "Lock Contention Resolution": 05-operations/lock-contention-resolution.md

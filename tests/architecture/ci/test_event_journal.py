@@ -1569,11 +1569,14 @@ def test_redaction_token_is_not_an_unsalted_digest() -> None:
     from scripts.engineering.ci.pytest_event_journal import _redaction_token
 
     secret = "swordfish"
-    unsalted = hashlib.sha256(secret.encode("utf-8")).hexdigest()[:12]
     token = _redaction_token(secret)
     assert token == _redaction_token(secret)
-    assert token != f"[redacted:{unsalted}]"
+    for algorithm in (hashlib.sha256, hashlib.sha384):
+        unsalted = algorithm(secret.encode("utf-8")).hexdigest()[:12]
+        assert token != f"[redacted:{unsalted}]"
     assert secret not in token
+    assert token.startswith("[redacted:")
+    assert token.endswith("]")
 
 
 def test_duplicate_nodeid_is_not_reused(tmp_path: Path) -> None:

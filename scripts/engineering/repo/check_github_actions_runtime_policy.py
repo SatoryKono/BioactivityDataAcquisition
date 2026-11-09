@@ -40,10 +40,12 @@ ALLOWED_USES: dict[str, set[str]] = {
     },
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml": {
         "89fbcab7461c6400f8b2df38ebd95375713e7d32",  # #12417
+        "fa8d903223efda3c26c19af08933d8a4000b2a7a",  # Docker workflow pin
     },
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml": {
         "f377cff40abf52d63220346b9ab64814f3081ca6",  # #12374 docs concurrency
         "0deeafe064844e467b6c5943430dbfb3b80333ba",  # #12565 docs concurrency
+        "02888d30cd4e343eeb9778fb8bbea8098591cf3d",  # docs lane base SHA
     },
     "actions/attest-build-provenance": {
         "977bb373ede98d70efdf65b84cb5f73e068dcc2a",  # v3
@@ -135,12 +137,14 @@ ALLOWED_USES: dict[str, set[str]] = {
         "cdf488f595d80d6e07e03d4674febd5ab45fa938",  # v4.37.9
         "b96794f015dfd88f77b49b1c93e0fa7110f94c63",  # v4.38.0
         "9b3254085494b55a0f7c4c2b3d2d52cc712ce370",  # v4.39.1
+        "33d7b85da1a04171e211befe2c739303b9a4c066",  # v4.39.3
     },
     "github/codeql-action/analyze": {
         "db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28",  # v4.37.8
         "cdf488f595d80d6e07e03d4674febd5ab45fa938",  # v4.37.9
         "b96794f015dfd88f77b49b1c93e0fa7110f94c63",  # v4.38.0
         "9b3254085494b55a0f7c4c2b3d2d52cc712ce370",  # v4.39.1
+        "33d7b85da1a04171e211befe2c739303b9a4c066",  # v4.39.3
     },
     "github/codeql-action/upload-sarif": {
         "8dca8a82e2fa1a2c8908956f711300f9c4a4f4f6",  # v2 (docker.yml Trivy)
@@ -148,6 +152,7 @@ ALLOWED_USES: dict[str, set[str]] = {
         "cdf488f595d80d6e07e03d4674febd5ab45fa938",  # v4.37.9
         "b96794f015dfd88f77b49b1c93e0fa7110f94c63",  # v4.38.0
         "9b3254085494b55a0f7c4c2b3d2d52cc712ce370",  # v4.39.1
+        "33d7b85da1a04171e211befe2c739303b9a4c066",  # v4.39.3
     },
     "google/osv-scanner-action/osv-scanner-action": {
         "6e4298ebc4db23e847df9b2e2de2939d6f066c67",  # v2.5.1
@@ -176,6 +181,7 @@ ALLOWED_USES: dict[str, set[str]] = {
         "cc914d7f3750a2d13d75c7f184a1060aa0e9d482",  # v0.6.4
         "85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e",  # v0.7.1
         "53290badfa369cb0bf7ad16342cb62c2fa47ac7b",  # v0.8.0
+        "45d7276c9ca790aabd705e31ca99c6185c3e76dd",  # v0.8.1
     },
 }
 
@@ -694,11 +700,24 @@ PIN_REGISTRY_PATH = "configs/quality/reusable_action_pins.yaml"
 PIN_WORKFLOW_PATHS: tuple[str, ...] = (".github/workflows/pr-required.yml",)
 _PIN_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 _LOCAL_ACTION_PREFIX = (".github", "actions")
+_PUBLIC_DIAGNOSTIC = re.compile(r"[A-Za-z0-9_./:@!=+(), \-]{1,2000}\Z")
+_SECRET_DIAGNOSTIC = re.compile(r"(?i)secrets?[._]")
+_REDACTED_DIAGNOSTIC = "[redacted-diagnostic]"
+
+
+def _public_diagnostic(error: str) -> str:
+    """Keep stderr free of workflow secret expressions."""
+    if _SECRET_DIAGNOSTIC.search(error):
+        return _REDACTED_DIAGNOSTIC
+    match = _PUBLIC_DIAGNOSTIC.fullmatch(error)
+    if match is None:
+        return _REDACTED_DIAGNOSTIC
+    return match.group(0)
 
 
 def _emit_pin_errors(errors: list[str]) -> None:
     for error in errors:
-        print(error, file=sys.stderr)
+        print(_public_diagnostic(error), file=sys.stderr)
 
 
 def _read_pin_yaml(path: Path, errors: list[str]) -> object | None:
@@ -718,7 +737,9 @@ def _read_pin_yaml(path: Path, errors: list[str]) -> object | None:
     try:
         return yaml.safe_load(text)
     except yaml.YAMLError as exc:
-        errors.append(f"malformed YAML: {path}: {exc}")
+        mark = getattr(exc, "problem_mark", None)
+        location = f":{mark.line + 1}:{mark.column + 1}" if mark is not None else ""
+        errors.append(f"malformed YAML: {path}{location}")
         return None
 
 
@@ -835,9 +856,9 @@ def _check_local_action(uses: str, repo_root: Path, errors: list[str]) -> None:
     errors.append(f"local action {uses} has no action.yml or action.yaml")
 
 
-def _check_docker_pin(uses: str, errors: list[str]) -> None:
+def _check_docker_pin(where: str, errors: list[str]) -> None:
     errors.append(
-        f"docker reference {uses} is not an external action or reusable workflow pin"
+        f"{where} docker reference is not an external action or reusable workflow pin"
     )
 
 
@@ -852,7 +873,7 @@ def _check_step_uses(
         errors.append(f"{where} uses is not a non-empty string")
         return
     if uses.startswith(_DOCKER_SCHEME):
-        _check_docker_pin(uses, errors)
+        _check_docker_pin(where, errors)
         return
     if uses.startswith(("./", "../")):
         _check_local_action(uses, repo_root, errors)
@@ -898,7 +919,7 @@ def _check_reusable_uses(
         errors.append(f"job {job_name} uses is not a non-empty string")
         return
     if uses.startswith(_DOCKER_SCHEME):
-        _check_docker_pin(uses, errors)
+        _check_docker_pin(f"job {job_name}", errors)
         return
     if uses.startswith(("./", "../")):
         errors.append(

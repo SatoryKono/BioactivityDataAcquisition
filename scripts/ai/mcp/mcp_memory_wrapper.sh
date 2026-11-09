@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 memory_mode_is_explicit=0
 requested_memory_mode=""
-if [[ -v BIOETL_AI_MEMORY_MODE ]]; then
+if [[ -n "${BIOETL_AI_MEMORY_MODE:-}" ]]; then
   memory_mode_is_explicit=1
   requested_memory_mode="${BIOETL_AI_MEMORY_MODE}"
 fi
@@ -23,6 +23,15 @@ source "${SCRIPT_DIR}/support/token_validation.sh"
 mcp_exit_if_validate_only "memory"
 
 memory_mode="${BIOETL_AI_MEMORY_MODE:-off}"
+if [[ "${memory_mode_is_explicit}" == "0" ]]; then
+  case "$memory_mode" in
+    \"*\"|\'*\') memory_mode="${memory_mode:1:-1}" ;;
+    *) ;;
+  esac
+fi
+memory_mode="${memory_mode#"${memory_mode%%[![:space:]]*}"}"
+memory_mode="${memory_mode%"${memory_mode##*[![:space:]]}"}"
+memory_mode="${memory_mode:-off}"
 case "${memory_mode}" in
   read-write|readwrite|rw)
     ;;
@@ -37,9 +46,6 @@ case "${memory_mode}" in
     exit 64
     ;;
 esac
-
-export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
-mkdir -p "${NPM_CONFIG_CACHE}"
 
 if [[ -n "${BIOETL_WSL_VENV_DIR:-}" && -x "${BIOETL_WSL_VENV_DIR}/bin/python" ]]; then
   MEMORY_PYTHON="${BIOETL_WSL_VENV_DIR}/bin/python"
@@ -56,11 +62,19 @@ else
 fi
 
 export PYTHONPATH="${REPO_ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}"
-if [[ -z "${MEMORY_FILE_PATH:-}" ]]; then
-  export MEMORY_FILE_PATH="$(
+scope_args=()
+if [[ -n "${MEMORY_FILE_PATH:-}" ]]; then
+  scope_args+=(--target "${MEMORY_FILE_PATH}")
+fi
+export MEMORY_REPO_ROOT="${REPO_ROOT}"
+if ! MEMORY_FILE_PATH="$(
     "${MEMORY_PYTHON}" -m memory.mcp_scope \
       --repo-root "${REPO_ROOT}" \
-      --seed "${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"
-  )"
+      --seed "${MEMORY_SEED_PATH:-${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json}" \
+      ${scope_args[@]+"${scope_args[@]}"}
+  )"; then
+  printf '%s\n' "Memory MCP could not scope its store. Regenerate the MCP configuration with a store under .cache/mcp-memory." >&2
+  exit 78
 fi
+export MEMORY_FILE_PATH
 exec "${MEMORY_PYTHON}" -m memory.mcp_server "$@"

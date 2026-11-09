@@ -15,6 +15,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+import yaml
 
 from scripts.ai.sync import cursor as sync_cursor_rules
 
@@ -89,6 +90,28 @@ def test_sync_cursor_rules_excludes_sonarqube_instructions(tmp_path: Path) -> No
     deploy = tmp_path / sync_cursor_rules.CURSOR_RULES_DIR
     assert (deploy / "00-test.mdc").exists()
     assert not (deploy / "sonarqube_mcp_instructions.mdc").exists()
+
+
+def test_canonical_cursor_rules_declare_apply_mode() -> None:
+    """File-scoped rules must set alwaysApply and quoted globs for Windsurf sync."""
+    root = Path(__file__).resolve().parents[3]
+    rules = sorted((root / "docs/00-project/ai/rules/cursor").glob("*.mdc"))
+    assert rules
+    for path in rules:
+        if path.name == "sonarqube_mcp_instructions.mdc":
+            continue
+        text = path.read_text(encoding="utf-8")
+        parts = text.split("---", 2)
+        assert len(parts) >= 3, path.name
+        meta = yaml.safe_load(parts[1])
+        assert isinstance(meta, dict), path.name
+        assert "alwaysApply" in meta, path.name
+        assert isinstance(meta["alwaysApply"], bool), path.name
+        if meta["alwaysApply"] is True:
+            continue
+        globs = meta.get("globs")
+        assert isinstance(globs, list) and globs, path.name
+        assert all(isinstance(pattern, str) and pattern for pattern in globs), path.name
 
 
 def test_main_defaults_to_check(tmp_path: Path) -> None:

@@ -66,6 +66,9 @@ REQUIRED_CHECKS_PROSE_TEST = (
 )
 DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
 STAGE0_EVIDENCE_TEST = "tests/unit/scripts/engineering/ci/test_stage0_evidence.py"
+MANIFEST_VALIDATION_CATALOG_TEST = (
+    "tests/unit/interfaces/http/test_manifest_validation_catalog.py"
+)
 GRAFANA_SELECTOR_CONTRACT_TEST = "tests/integration/test_grafana_selector_contract.py"
 GRAFANA_VARIABLE_REFERENCE_TEST = "tests/integration/test_grafana_variable_reference.py"
 RUN_REPORT_CONTRACTS_TEST = "tests/unit/domain/run_reports/test_contracts.py"
@@ -128,11 +131,136 @@ EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
 CHECK_DOC_LINKS_GUARDRAILS_TEST = (
     "tests/architecture/test_check_doc_links_guardrails.py"
 )
+MCP_AGENT_AUDIT_REGRESSIONS_TEST = (
+    "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py"
+)
+MCP_REPO_ENV_LOADERS_TEST = (
+    "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py"
+)
+MCP_SETUP_COPILOT_CODEX_TEST = "tests/unit/scripts/test_setup_copilot_codex_mcp.py"
+MCP_GITHUB_PROJECT_TRANSPORT_TEST = (
+    "tests/unit/repo_backed/scripts/ai/mcp/test_github_project_transport.py"
+)
+CURSOR_SKILL_SYNC_TEST = "tests/architecture/test_cursor_skill_sync_safety.py"
+SYNC_CURSOR_RULES_TEST = "tests/unit/scripts/test_sync_cursor_rules.py"
 ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
     "tests/architecture/test_root_hygiene_review_registry.py"
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "scripts/ops/observability/grafana/dashboard_context_links.py": (
+        "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+    ),
+    "reports/observability/live-fixes-r6/LF1-17/report.md": (
+        "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-13/checksums.txt",
+            "reports/observability/live-fixes-r6/LF1-13/machine_readable_receipt.json",
+            "reports/observability/live-fixes-r6/LF1-13/report.md",
+        ),
+        (
+            GRAFANA_SELECTOR_CONTRACT_TEST,
+            "tests/unit/interfaces/http/test_health_server_control_plane_scope_helpers.py",
+            "tests/unit/interfaces/http/test_run_id_resolver.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    **dict.fromkeys(
+        (
+            ".codex/skills/py-audit-bot/references/wrapper-contract.md",
+            ".devin/agent-metrics.json",
+            ".devin/scripts/collect_agent_metrics.py",
+            ".devin/skills/py-audit-bot/references/wrapper-contract.md",
+            ".junie/guidelines.md",
+            ".junie/skills/py-audit-bot/references/wrapper-contract.md",
+            ".mcp.json",
+            ".opencode/agent/review.md",
+            "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+            "docs/00-project/ai/agents/guides/MUSE.md",
+            "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
+            "docs/00-project/ai/skills/local/py-audit-bot/references/wrapper-contract.md",
+            "scripts/ai/.mcp.json",
+            "scripts/ai/codex/helper/ensure-mcp.sh",
+            "scripts/ai/mcp/check_neo4j_memory.sh",
+            "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh",
+            "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
+            "scripts/ai/mcp/mcp_code_analyzer_wrapper.sh",
+            "scripts/ai/mcp/mcp_deja_wrapper.sh",
+            "scripts/ai/mcp/mcp_github_actions_wrapper.sh",
+            "scripts/ai/mcp/support/token_validation.sh",
+            "scripts/ai/mcp/test_env_loading.sh",
+            "scripts/ai/mcp/mcp_memory_wrapper.ps1",
+            "scripts/ai/mcp/mcp_memory_wrapper.sh",
+            "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1",
+            "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh",
+            "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1",
+            "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
+            "scripts/ai/mcp/support/load_repo_env.ps1",
+            "scripts/ops/support/load_repo_env.sh",
+            "src/memory/DAILY_WORKFLOW.md",
+        ),
+        (
+            MCP_AGENT_AUDIT_REGRESSIONS_TEST,
+            MCP_REPO_ENV_LOADERS_TEST,
+            MCP_SETUP_COPILOT_CODEX_TEST,
+        ),
+    ),
+    **dict.fromkeys(
+        (
+            "scripts/ai/mcp/github-mcp-wrapper.ps1",
+            "scripts/ai/mcp/github-mcp-wrapper.sh",
+            "scripts/ai/mcp/support/github_project_transport.mjs",
+            "tests/unit/repo_backed/scripts/ai/mcp/test_github_project_transport.mjs",
+            "tests/unit/repo_backed/scripts/ai/mcp/test_github_project_transport.py",
+        ),
+        (
+            MCP_AGENT_AUDIT_REGRESSIONS_TEST,
+            MCP_GITHUB_PROJECT_TRANSPORT_TEST,
+            MCP_REPO_ENV_LOADERS_TEST,
+            MCP_SETUP_COPILOT_CODEX_TEST,
+        ),
+    ),
+    **dict.fromkeys(
+        (
+            "scripts/ai/cursor/README.md",
+            "scripts/ai/cursor/setup_skills.sh",
+            CURSOR_SKILL_SYNC_TEST,
+        ),
+        (CURSOR_SKILL_SYNC_TEST,),
+    ),
+    **dict.fromkeys(
+        (
+            "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
+            "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
+            "scripts/ai/mcp/mcp_context7_wrapper.ps1",
+            "scripts/ai/mcp/support/host_transport.mjs",
+            "scripts/ai/mcp/support/invoke_host_transport.ps1",
+            "scripts/ai/mcp/support/invoke_host_transport.sh",
+            "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
+        ),
+        ("tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",),
+    ),
+    "scripts/ai/mcp/mcp_context7_wrapper.sh": (
+        MCP_AGENT_AUDIT_REGRESSIONS_TEST,
+        "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",
+        MCP_REPO_ENV_LOADERS_TEST,
+        MCP_SETUP_COPILOT_CODEX_TEST,
+    ),
+    "scripts/ops/docker-setup.ps1": (
+        "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
+    ),
+    "src/memory/mcp_server.py": (
+        "tests/unit/memory/test_mcp_server.py",
+        "tests/integration/memory/test_mcp_server_isolation.py",
+    ),
+    "src/memory/mcp_scope.py": (
+        "tests/unit/memory/test_mcp_scope.py",
+        "tests/integration/memory/test_mcp_server_isolation.py",
+    ),
+    "src/memory/storage.py": ("tests/unit/memory/test_atomic_storage.py",),
     **dict.fromkeys(
         (
             ".vscode/extensions.json",
@@ -317,7 +445,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/04-reference/contracts/run-manifest-ledger.md": (
         "tests/unit/infrastructure/control_plane/test_live_root_manifest_record.py",
-        "tests/unit/interfaces/http/test_manifest_validation_catalog.py",
+        MANIFEST_VALIDATION_CATALOG_TEST,
     ),
     "docs/00-project/RULES.md": (INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,),
     "reports/engineering/SCHEMA-001_execution_evidence.md": (
@@ -411,11 +539,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/audit/pack-v2.1/domain-pylint-duplicate-code-scan.log",
             "reports/audit/pack-v2.1/domain-vulture-dead-code-scan.log",
             "reports/audit/pack-v2.1/P05-interfaces-contracts.md",
+            "reports/audit/pack-v2.1/P13-test-system.md",
         ),
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "reports/audit/pack-v2.1/evidence_p12_parity.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+    ),
+    "reports/audit/hygiene-passport.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "docs/reports/dashboard-ux-checks/2026-11-07.md": (
+        "tests/integration/test_dashboard_ux_report_freshness.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "docs/reports/audit/N1_SHADOW_STATUS.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
     "src/bioetl/infrastructure/adapters/decorators/README.md": (
@@ -476,6 +610,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12783_lf06_review.json",
             "configs/quality/external_resource_inventory_pr12786_composite_review.json",
             "configs/quality/external_resource_inventory_pr12782_lf07_review.json",
+            "configs/quality/external_resource_inventory_pr12838_hygiene_review.json",
+            "configs/quality/external_resource_inventory_pr12848_http_proxy_review.json",
+            "configs/quality/external_resource_inventory_pr12889_chembl_review.json",
+            "configs/quality/external_resource_inventory_pr12892_replay_review.json",
+            "configs/quality/external_resource_inventory_pr12916_runtime_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -502,6 +641,181 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/12375_b_repeat_blocker.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12375_restart_c_no_change_report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12553_runtime_acceptance_report.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
+    **dict.fromkeys(
+        (
+            "docs/ci/gate-platform-matrix-full.md",
+            "reports/audit/ci1-03-pr-description.txt",
+        ),
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    **dict.fromkeys(
+        (
+            "reports/audit/nightly-checkout-summary.md",
+            "reports/audit/nightly-checkout-table.json",
+        ),
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-11/contract-evidence.json",
+            "reports/observability/live-fixes-r6/LF1-11/manifest-show.txt",
+            "reports/observability/live-fixes-r6/LF1-11/manifest-validation.json",
+            "reports/observability/live-fixes-r6/LF1-11/manifest.json",
+            "reports/observability/live-fixes-r6/LF1-11/report.md",
+        ),
+        (
+            MANIFEST_VALIDATION_CATALOG_TEST,
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    "reports/observability/live-fixes-r6/LF1-02/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/observability/live-fixes-r6/LF1-20/report.md": (
+        "tests/integration/test_dux6_residual_contracts.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-28/machine-readable-receipt.json",
+            "reports/observability/live-fixes-r6/LF1-28/report.md",
+        ),
+        (*DOCUMENTATION_CLEANUP_INVENTORY_TESTS,),
+    ),
+    "reports/observability/live-fixes-r6/LF1-23/report.md": (
+        "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-22/checksums.txt",
+            "reports/observability/live-fixes-r6/LF1-22/machine_readable_receipt.json",
+            "reports/observability/live-fixes-r6/LF1-22/report.md",
+        ),
+        (
+            "tests/unit/repo_backed/scripts/ops/observability/test_lint_dashboard_phase2.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-24/checksums.txt",
+            "reports/observability/live-fixes-r6/LF1-24/machine_readable_receipt.json",
+            "reports/observability/live-fixes-r6/LF1-24/report.md",
+        ),
+        (
+            "tests/unit/scripts/ops/observability/test_workflow_scope.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-25/checksums.txt",
+            "reports/observability/live-fixes-r6/LF1-25/machine_readable_receipt.json",
+            "reports/observability/live-fixes-r6/LF1-25/report.md",
+        ),
+        (
+            "tests/unit/interfaces/http/test_selector_options_cache.py",
+            GRAFANA_SELECTOR_CONTRACT_TEST,
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-26/checksums.txt",
+            "reports/observability/live-fixes-r6/LF1-26/machine_readable_receipt.json",
+            "reports/observability/live-fixes-r6/LF1-26/report.md",
+        ),
+        (
+            "tests/integration/test_grafana_empty_state_contracts.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-30/checksums.txt",
+            "reports/observability/live-fixes-r6/LF1-30/machine_readable_receipt.json",
+            "reports/observability/live-fixes-r6/LF1-30/report.md",
+        ),
+        (
+            "tests/unit/interfaces/http/test_run_explorer_selected_state.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-31/checksums.txt",
+            "reports/observability/live-fixes-r6/LF1-31/machine_readable_receipt.json",
+            "reports/observability/live-fixes-r6/LF1-31/report.md",
+        ),
+        (
+            MANIFEST_VALIDATION_CATALOG_TEST,
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    "reports/observability/live-fixes-r6/LF1-14/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/observability/live-fixes-r6/LF1-03/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-16/bioetl-incident-v1.json",
+            "reports/observability/live-fixes-r6/LF1-16/report.json",
+            "reports/observability/live-fixes-r6/LF1-16/report.md",
+        ),
+        (
+            "tests/integration/test_dashboard_operator_readability.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-06/checksums.txt",
+            "reports/observability/live-fixes-r6/LF1-06/machine_readable_receipt.json",
+            "reports/observability/live-fixes-r6/LF1-06/report.md",
+        ),
+        (GRAFANA_SELECTOR_CONTRACT_TEST, *DOCUMENTATION_CLEANUP_INVENTORY_TESTS),
+    ),
+    "reports/observability/live-fixes-r6/LF1-15/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/observability/live-fixes-r6/LF1-04/checksums.txt": (
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/observability/live-fixes-r6/LF1-04/machine-readable-receipt.json": (
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/observability/live-fixes-r6/LF1-04/panel-9701.json": (
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/observability/live-fixes-r6/LF1-04/queries.json": (
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-21/live-panel-audit.json",
+            "reports/observability/live-fixes-r6/LF1-21/report.md",
+        ),
+        (
+            "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py",
+            "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_backend.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    "reports/observability/live-fixes-r6/LF1-18/report.md": (
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/observability/live-fixes-r6/LF1-04/report.md": (
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/audit/comp-004-runtime/verification_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
     **dict.fromkeys(
@@ -809,6 +1123,21 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    **dict.fromkeys(
+        (
+            ".codex/skills/",
+            ".devin/skills/",
+            ".junie/skills/",
+            "docs/00-project/ai/grok/skills/",
+            "docs/00-project/ai/skills/local/",
+        ),
+        (
+            CURSOR_SKILL_SYNC_TEST,
+            "tests/unit/repo_backed/scripts/test_check_skills_mirror.py",
+        ),
+    ),
+    # Canonical Cursor/Windsurf rule docs → sync contract (alwaysApply / globs).
+    "docs/00-project/ai/rules/": (SYNC_CURSOR_RULES_TEST,),
     ".vscode/": ("tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",),
     "docs/03-guides/dashboards/": (
         DOCUMENTATION_SYNC_TEST,

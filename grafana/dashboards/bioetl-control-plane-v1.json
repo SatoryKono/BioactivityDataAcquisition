@@ -417,7 +417,7 @@
       "fieldConfig": {
         "defaults": {
           "unit": "none",
-          "noValue": "UNKNOWN",
+          "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
           "mappings": [
             {
               "type": "value",
@@ -622,7 +622,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "—",
+          "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
           "custom": {
             "align": "left",
             "inspect": true,
@@ -822,6 +822,11 @@
         {
           "title": "Find complete runs",
           "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/control-plane/latest-complete-run?pipeline=${pipeline:percentencode}&run_type=${run_type:percentencode}&run_id=${run_id:percentencode}&workflow=${workflow:percentencode}&error_as_row=1",
+          "targetBlank": true
+        },
+        {
+          "title": "Check BioETL Ops HTTP health",
+          "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
           "targetBlank": true
         }
       ]
