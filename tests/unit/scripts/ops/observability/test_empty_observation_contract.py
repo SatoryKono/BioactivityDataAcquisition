@@ -603,3 +603,43 @@ def test_empty_runtime_error_rate_requires_no_raw_error_observations(
         timeout=1,
     )
     assert accepted is expected
+
+
+@pytest.mark.parametrize("early_sample", [False, True])
+def test_empty_range_checks_samples_before_the_last_step(early_sample):
+    family = "bioetl_shutdown_started_total"
+    bounds = {"start": "0", "end": "3600", "step": "60"}
+
+    def fetch(url, **_kwargs):
+        parsed = urlsplit(url)
+        params = parse_qs(parsed.query)
+        if parsed.path.endswith("metadata"):
+            return {"status": "success", "data": {family: [{"type": "counter"}]}}
+        query = params["query"][0]
+        if query.startswith("count_over_time"):
+            assert parsed.path == "/api/v1/query_range"
+            assert {key: params[key][0] for key in bounds} == bounds
+            rows = [{"metric": {}, "values": [[60, "1"]]}] if early_sample else []
+            return {
+                "status": "success",
+                "data": {"resultType": "matrix", "result": rows},
+            }
+        rows = [{"metric": {}, "value": [3600, "1"]}]
+        if query.startswith("up{job=~"):
+            rows = [
+                {"metric": {"job": job}, "value": [3600, "1"]}
+                for job in ("bioetl", "pushgateway", "prometheus")
+            ]
+        return {"status": "success", "data": {"resultType": "vector", "result": rows}}
+
+    accepted, _ = qualify_empty(
+        dashboard_uid="bioetl-incident-v1",
+        panel_id=209,
+        expr=f"increase({family}[5m])",
+        base_url="http://prometheus",
+        fetch=fetch,
+        substitute=lambda value: value,
+        timeout=1,
+        range_bounds=bounds,
+    )
+    assert accepted is not early_sample

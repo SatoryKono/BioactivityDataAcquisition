@@ -13,7 +13,7 @@ from pathlib import Path
 from time import monotonic, sleep
 from typing import Any, Literal, cast
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote, urlencode, urlsplit, urlunsplit
+from urllib.parse import parse_qs, quote, urlencode, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
 from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_text
@@ -1709,6 +1709,7 @@ def _collect_empty_witnesses(
     rendered_expr: str,
     *,
     historical_reset: bool = False,
+    range_bounds: dict[str, str] | None = None,
 ) -> tuple[bool, list[dict[str, Any]]]:
     from scripts.ops.observability.grafana._empty_observation_contract import (
         qualify_empty,
@@ -1726,7 +1727,16 @@ def _collect_empty_witnesses(
         timeout=config.request_timeout_seconds,
         as_of=_time_window(config)[1] if config.range_to else None,
         historical_reset=historical_reset,
+        range_bounds=range_bounds,
     )
+
+
+def _empty_range_bounds(requests: list[dict[str, Any]]) -> dict[str, str] | None:
+    for request in requests:
+        if request["mode"] == "range":
+            parameters = parse_qs(urlsplit(request["request_url"]).query)
+            return {key: parameters[key][0] for key in ("start", "end", "step")}
+    return None
 
 
 def _qualify_empty_panel(
@@ -1739,7 +1749,10 @@ def _qualify_empty_panel(
     """Verify independent empty-state witnesses without weakening failures."""
     classification = "empty_result"
     try:
-        qualified, witnesses = _collect_empty_witnesses(spec, config, rendered_expr)
+        bounds = _empty_range_bounds(requests)
+        qualified, witnesses = _collect_empty_witnesses(
+            spec, config, rendered_expr, range_bounds=bounds
+        )
         requests.extend(witnesses)
         if qualified:
             classification = "expected_empty"
@@ -1750,6 +1763,7 @@ def _qualify_empty_panel(
                 config,
                 rendered_expr,
                 historical_reset=True,
+                range_bounds=bounds,
             )
             requests.extend(reset_witnesses)
             if reviewed:

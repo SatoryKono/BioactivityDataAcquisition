@@ -143,6 +143,7 @@ def qualify_empty(
     timeout: float,
     as_of: str | None = None,
     historical_reset: bool = False,
+    range_bounds: dict[str, str] | None = None,
 ) -> tuple[bool, list[dict[str, Any]]]:
     """Return acceptance and exact independent witnesses; fail closed on gaps."""
     if dashboard_uid != "bioetl-incident-v1" or empty_state_label(panel_id) is None:
@@ -166,6 +167,13 @@ def qualify_empty(
         payload = request("/api/v1/query", parameters)
         return _vector_result(payload)
 
+    def sample_vector(query: str) -> list[dict[str, Any]] | None:
+        if range_bounds is None:
+            return vector(query)
+        return _matrix_samples(
+            request("/api/v1/query_range", {**range_bounds, "query": substitute(query)})
+        )
+
     scope = _observed_scope(vector)
     if not scope:
         return False, evidence
@@ -176,11 +184,11 @@ def qualify_empty(
             panel_id, scope, request, vector, substitute
         ), evidence
     if panel_id in _SIGNAL_WITNESSES:
-        return _qualify_signal_empty(panel_id, expr, request, vector), evidence
+        return _qualify_signal_empty(panel_id, expr, request, sample_vector), evidence
     return (
         _event_families_available(expr, request)
         and _event_sample_coverage_confirmed(
-            expr, vector, require_reset=historical_reset
+            expr, sample_vector, require_reset=historical_reset
         ),
         evidence,
     )
@@ -387,6 +395,22 @@ def _event_samples_sufficient(
         and (not require_reset or bool(samples))
         and all(float(row["value"][1]) >= 2 for row in samples)
     )
+
+
+def _matrix_samples(payload: Any) -> list[dict[str, Any]] | None:
+    data = _response_data(payload)
+    result = data.get("result")
+    if data.get("resultType") != "matrix" or not isinstance(result, list):
+        return None
+    samples = []
+    for series in result:
+        if not isinstance(series, dict) or not isinstance(series.get("values"), list):
+            return None
+        samples.extend(
+            {"metric": series.get("metric", {}), "value": value}
+            for value in series["values"]
+        )
+    return samples
 
 
 def _vector_result(payload: dict[str, Any]) -> list[dict[str, Any]] | None:

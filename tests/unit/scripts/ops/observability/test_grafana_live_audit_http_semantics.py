@@ -21,7 +21,10 @@ def test_generation_gap_review_keeps_warning_and_requires_evidence(proved, monke
     monkeypatch.setattr(
         audit_subject,
         "_collect_empty_witnesses",
-        lambda *_args, historical_reset=False: (historical_reset and proved, []),
+        lambda *_args, historical_reset=False, **_kwargs: (
+            historical_reset and proved,
+            [],
+        ),
     )
     classification, detail = audit_subject._qualify_empty_panel(
         spec, audit_subject._parse_args([]), "guarded histogram", [], "No estimate"
