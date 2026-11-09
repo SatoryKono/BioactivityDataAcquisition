@@ -119,6 +119,18 @@ switch -Regex ([string]$env:GITHUB_LOCKDOWN_MODE) {
     default { $stdioArgs.Add("--lockdown-mode") | Out-Null }
 }
 
+# Optional machine-local shared GitHub transport, after all project policy checks.
+$githubRouteFile = if ($env:PC_AGENT_GITHUB_PROJECT_ROUTES) { $env:PC_AGENT_GITHUB_PROJECT_ROUTES } else { Join-Path $HOME '.config/pc-agent/github-project-route.json' }
+if ($env:PC_AGENT_GITHUB_PROJECT_ROUTES -or (Test-Path -LiteralPath $githubRouteFile -PathType Leaf)) {
+    $githubTransport = Join-Path $PSScriptRoot 'support/github_project_transport.mjs'
+    if (-not (Test-Path -LiteralPath $githubTransport -PathType Leaf)) { throw 'Managed GitHub transport helper missing' }
+    $githubNode = Get-Command node -ErrorAction Stop
+    $githubApprovedSha = if ($env:BIOETL_GITHUB_MCP_SHA256) { $env:BIOETL_GITHUB_MCP_SHA256 } else { '-' }
+    & $githubNode.Source $githubTransport --root $repoRoot --binary $githubMcpBin --approved-sha $githubApprovedSha -- @($stdioArgs.ToArray())
+    $githubTransportResult = $LASTEXITCODE
+    if ($githubTransportResult -ne 78) { exit $githubTransportResult }
+}
+
 # Limit the native child's environment while preserving PowerShell's stdio
 # forwarding. A ProcessStartInfo without explicit stream pumps loses MCP I/O.
 $allowedEnv = @('PATH', 'HOME', 'USERPROFILE', 'SYSTEMROOT', 'WINDIR',
