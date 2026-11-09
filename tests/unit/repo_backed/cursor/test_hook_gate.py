@@ -1,0 +1,465 @@
+"""Repo-backed unit tests for the Cursor project hook at .cursor/hooks/gate.py."""
+
+from __future__ import annotations
+
+import importlib.util
+import json
+import subprocess
+import sys
+from pathlib import Path
+from types import ModuleType
+
+import pytest
+
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
+
+_ROOT = Path(__file__).resolve().parents[4]
+_GATE_PATH = _ROOT / ".cursor" / "hooks" / "gate.py"
+_HOOKS_PATH = _ROOT / ".cursor" / "hooks.json"
+
+
+class _Empty:
+    def read(self) -> str:
+        return ""
+
+
+def _load_gate() -> ModuleType:
+    spec = importlib.util.spec_from_file_location("cursor_hook_gate", _GATE_PATH)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+_GATE = _load_gate()
+
+
+def _shell(command: str, *, branch: str = "feature") -> dict[str, object]:
+    event = {
+        "hook_event_name": "beforeShellExecution",
+        "command": command,
+        "cwd": str(_ROOT),
+        "workspace_roots": [str(_ROOT)],
+    }
+    decision = _GATE.decide(event, branch_lookup=lambda _cwd: branch)
+    assert isinstance(decision, dict)
+    return decision
+
+
+@pytest.mark.parametrize(
+    ("command", "permission"),
+    [
+        ("git status", "allow"),
+        ("git status & git reset --hard", "deny"),
+        ("git commit -m msg", "allow"),
+        ("git push origin feature", "allow"),
+        ("git reset --soft HEAD~1", "allow"),
+        ("git rebase main", "allow"),
+        ("git add -A", "allow"),
+        ("Get-Content .env", "allow"),
+        ("echo x > src/_tmp_a.py", "allow"),
+        ("Get-Content docker-compose.monitoring.yml", "allow"),
+        ("rm _tmp_notes.py", "allow"),
+        ("/bin/rm _tmp_notes.py", "allow"),
+        ('echo x > "dir with spaces/readme.txt"', "allow"),
+        ("git commit --no-verbose -m x", "allow"),
+        ("git -c foo=bar commit -m x", "allow"),
+        ("git -c commit.gpgSign=true commit -m x", "allow"),
+        ("cat .env > out.txt", "allow"),
+        ("rg -n 'rm' .env", "allow"),
+        ("printf '%s\\n' 'rm' .env", "allow"),
+        ("perl -e 'print' .env", "allow"),
+        ("echo '$(git reset --hard)'", "allow"),
+        ("echo $(cat .env)", "allow"),
+        ("rm $(echo _tmp_notes.py)", "allow"),
+        ("cd tests && touch test_probe.py", "allow"),
+        ("cd tests | touch test_probe.py", "deny"),
+        ("cd missing-dir; touch test_probe.py", "deny"),
+        ("git push --all origin", "allow"),
+        ("git --config-env=user.name=LOGNAME commit -m x", "allow"),
+        ("git config user.name x", "deny"),
+        ("git -C repo config --list", "deny"),
+        ("git reset --hard", "deny"),
+        ('echo "$(git reset --hard)"', "deny"),
+        ("echo `git reset --hard`", "deny"),
+        ("echo ok | git reset --hard", "deny"),
+        ("printf x >|.env", "deny"),
+        ("printf x >| .env", "deny"),
+        ("sudo rm .env", "deny"),
+        ("env rm .env", "deny"),
+        ("git submodule foreach 'git reset --hard'", "deny"),
+        ("git commit --no-verify -m x", "deny"),
+        ("git commit --no-verif -m x", "deny"),
+        ("git commit --no-veri -m x", "deny"),
+        ("git commit -nm x", "deny"),
+        ("git commit -anm msg", "deny"),
+        ("git commit --amend --no-verify", "deny"),
+        ("git commit --no-gpg-sign -m x", "deny"),
+        ("git commit --no-gpg-sig -m x", "deny"),
+        ("git -c core.hooksPath=/dev/null commit -m x", "deny"),
+        ("git -c CORE.HOOKSPATH=/dev/null status", "deny"),
+        ("git -c commit.gpgSign=false commit -m x", "deny"),
+        ("git -c commit.gpgsign=false push origin feature", "deny"),
+        ("git rebase -i HEAD~2", "deny"),
+        ("git add -i", "deny"),
+        ("git push --force origin main", "deny"),
+        ("git push --force-with-lease origin master", "deny"),
+        ("git push -f origin refs/heads/main", "deny"),
+        ("git push -uf origin main", "deny"),
+        ("git push origin +feature:main", "deny"),
+        ("git push origin +main", "deny"),
+        ("git push origin +HEAD:main", "deny"),
+        ("git push origin :main", "deny"),
+        ("git push -d origin main", "deny"),
+        ("git push --mirror origin", "deny"),
+        ("git push --force --all origin", "deny"),
+        ("git push --force --branches origin", "deny"),
+        ("git push --del origin main", "deny"),
+        ("git push --mirr origin", "deny"),
+        ("git push --force-w origin main", "deny"),
+        ('bash -c "rm .env"', "deny"),
+        ("sh -c 'echo x > .env'", "deny"),
+        ('bash -c "git push --force origin main"', "deny"),
+        ("(git push -f origin main)", "deny"),
+        ("{ rm .env; }", "deny"),
+        ("if true; then rm .env; fi", "deny"),
+        ("(rm .env)", "deny"),
+        ("(echo x > .env)", "deny"),
+        ("echo .env | xargs rm", "deny"),
+        ("cat <(rm .env)", "deny"),
+        ("ln -sf x .env", "deny"),
+        ("install src .env", "deny"),
+        ("dd if=x of=.env", "deny"),
+        ("perl -pi -e 's/a/b/' .env", "deny"),
+        ("ri .env", "deny"),
+        ("ni .env", "deny"),
+        ("sc .env x", "deny"),
+        ('pwsh -Command "rm .env"', "deny"),
+        ("git push -f origin 'refs/heads/*:refs/heads/*'", "deny"),
+        ("git push origin +:", "deny"),
+        ("git push -f --all", "deny"),
+        ("git --config-env=core.hooksPath=HOOK_DIR commit -m x", "deny"),
+        ("git --config-env commit.gpgSign=SIGN commit -m x", "deny"),
+        ("printf %s foo#bar > .env", "deny"),
+        ("echo x > .env # note", "deny"),
+        ("git push origin --delete main", "deny"),
+        ("/bin/rm .env", "deny"),
+        ("/usr/bin/tee .env", "deny"),
+        ("rm.exe .env", "deny"),
+        (r".\tee.exe .env", "deny"),
+        ('echo x > "dir with spaces/.env"', "deny"),
+        ('echo x > "dir with spaces/.env.example"', "deny"),
+        ("Set-Content .env x", "deny"),
+        ("Set-Content .env.example x", "deny"),
+        ("echo x > $(echo .env.example)", "deny"),
+        ("Remove-Item .env.local", "deny"),
+        ("echo x > .env", "deny"),
+        ("echo x>.env", "deny"),
+        ("echo x>>.env", "deny"),
+        ("echo x&>.env", "deny"),
+        ("echo x>.env | cat", "deny"),
+        ("git status && echo x > .env", "deny"),
+        ("tee .env", "deny"),
+        ("cp a .env", "deny"),
+        ("cp .env /tmp/env-backup", "allow"),
+        ("cp .env tests/", "deny"),
+        ("printf '%s\\n' 'echo x > .env'", "allow"),
+        ("mv a .env", "deny"),
+        ("echo x > $(echo .env)", "deny"),
+        ('echo x > "$(printf %s .env)"', "deny"),
+        ('cp a "$(echo .env)"', "deny"),
+        ("echo x > `echo .env`", "deny"),
+        ("echo x > >(tee .env)", "deny"),
+        ("cp a $(echo test_probe.py)", "deny"),
+        ("sed -i 's/a/b/' .env", "deny"),
+        ("sed -i 's/a/b/' $(echo .env)", "deny"),
+        ("echo x > _tmp_a.py", "deny"),
+        ("echo x > ./NUL", "deny"),
+        ("echo x > test_probe.py", "deny"),
+        ("echo x > tests/../_tmp_x.py", "deny"),
+        ("git commit --amend -m x", "ask"),
+        ("git push --force origin feature", "ask"),
+        ("git push -f origin feature", "ask"),
+        ("git push -uf origin feature", "ask"),
+        ("git push -f origin HEAD", "ask"),
+        ("docker compose -f docker-compose.monitoring.yml up -d", "ask"),
+    ],
+)
+def test_shell_permission(command: str, permission: str) -> None:
+    assert _shell(command)["permission"] == permission
+
+
+def test_cd_to_parent_then_root_scratch_is_denied() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "beforeShellExecution",
+            "command": "cd .. && touch test_probe.py",
+            "cwd": str(_ROOT / "tests"),
+            "workspace_roots": [str(_ROOT)],
+        },
+        branch_lookup=lambda _cwd: "feature",
+    )
+    assert decision["permission"] == "deny"
+
+
+def test_force_push_of_current_main_is_denied() -> None:
+    decision = _shell("git push --force", branch="main")
+    assert decision["permission"] == "deny"
+
+
+def test_force_push_of_head_on_main_is_denied() -> None:
+    decision = _shell("git push -f origin HEAD", branch="main")
+    assert decision["permission"] == "deny"
+
+
+def test_force_push_of_plus_head_on_main_is_denied() -> None:
+    decision = _shell("git push -f origin +HEAD", branch="main")
+    assert decision["permission"] == "deny"
+
+
+def test_relative_git_c_joins_event_cwd() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "beforeShellExecution",
+            "command": "git -C ../b push -f origin",
+            "cwd": str(_ROOT / "a"),
+            "workspace_roots": [str(_ROOT)],
+        },
+        branch_lookup=lambda cwd: "main" if cwd.endswith("/b") else "feature",
+    )
+    assert decision["permission"] == "deny"
+
+
+def test_force_push_via_c_uses_target_repo_branch() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "beforeShellExecution",
+            "command": "git -C otherrepo push -f origin",
+            "cwd": str(_ROOT),
+            "workspace_roots": [str(_ROOT)],
+        },
+        branch_lookup=lambda cwd: "main" if cwd.endswith("otherrepo") else "feature",
+    )
+    assert decision["permission"] == "deny"
+
+
+def test_read_of_env_file_is_allowed() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "preToolUse",
+            "tool_name": "Read",
+            "tool_input": {"path": str(_ROOT / ".env")},
+            "workspace_roots": [str(_ROOT)],
+        }
+    )
+    assert decision == {"permission": "allow"}
+
+
+@pytest.mark.parametrize("path", [".env.local", ".env.example"])
+def test_write_of_env_file_is_denied(path: str) -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "preToolUse",
+            "tool_name": "Write",
+            "tool_input": {"path": path, "contents": "TOKEN=1"},
+        }
+    )
+    assert decision["permission"] == "deny"
+
+
+def test_delete_of_root_scratch_is_allowed() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "preToolUse",
+            "tool_name": "Delete",
+            "tool_input": {"path": "_tmp_notes.py"},
+        }
+    )
+    assert decision == {"permission": "allow"}
+
+
+def test_write_of_root_scratch_test_module_is_denied() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "preToolUse",
+            "tool_name": "Write",
+            "tool_input": {"path": "test_probe.py", "contents": "pass\n"},
+        }
+    )
+    assert decision["permission"] == "deny"
+
+
+def test_root_test_module_write_is_allowed() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "preToolUse",
+            "tool_name": "Write",
+            "tool_input": {"path": "tests/test_example.py", "contents": "pass\n"},
+        }
+    )
+    assert decision == {"permission": "allow"}
+
+
+def test_apply_patch_move_to_env_is_denied() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "preToolUse",
+            "tool_name": "ApplyPatch",
+            "tool_input": {
+                "patch": "*** Update File: config.txt\n*** Move to: .env\n@@\n-OLD\n+NEW\n",
+            },
+        }
+    )
+    assert decision["permission"] == "deny"
+
+
+def test_apply_patch_move_to_regular_file_is_allowed() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "preToolUse",
+            "tool_name": "ApplyPatch",
+            "tool_input": {
+                "patch": (
+                    "*** Update File: config.txt\n*** Move to: config.bak\n@@\n-OLD\n+NEW\n"
+                ),
+            },
+        }
+    )
+    assert decision == {"permission": "allow"}
+
+
+def test_quoted_absolute_env_redirect_is_denied() -> None:
+    root = "/tmp/dir with spaces"
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "beforeShellExecution",
+            "command": 'echo x > "/tmp/dir with spaces/.env"',
+            "cwd": root,
+            "workspace_roots": [root],
+        },
+        branch_lookup=lambda _cwd: "feature",
+    )
+    assert decision["permission"] == "deny"
+
+
+def test_apply_patch_env_path_is_denied() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "preToolUse",
+            "tool_name": "ApplyPatch",
+            "tool_input": {
+                "patch": "*** Update File: .env\n@@\n-OLD\n+NEW\n",
+            },
+        }
+    )
+    assert decision["permission"] == "deny"
+
+
+def test_mcp_write_env_is_denied() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "preToolUse",
+            "tool_name": "MCP:write_file",
+            "tool_input": {"path": ".env", "contents": "TOKEN=1"},
+        }
+    )
+    assert decision["permission"] == "deny"
+
+
+def test_session_start_adds_russian_context() -> None:
+    decision = _GATE.decide({"hook_event_name": "sessionStart"})
+    context = decision["additional_context"]
+    assert isinstance(context, str)
+    assert "русском" in context
+
+
+def test_debt_file_edit_adds_context() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "postToolUse",
+            "tool_name": "StrReplace",
+            "tool_input": {"path": "configs/quality/debt_scorecard.yaml"},
+        }
+    )
+    assert "additional_context" in decision
+
+
+def test_dashboard_budget_edit_adds_no_context() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "postToolUse",
+            "tool_name": "StrReplace",
+            "tool_input": {
+                "path": "docs/03-guides/dashboards/contracts/layout-budgets.yaml"
+            },
+        }
+    )
+    assert decision == {}
+
+
+def test_empty_stdin_denies(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(sys, "stdin", _Empty())
+    assert _GATE.main() == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["permission"] == "deny"
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("{not-json", {"permission": "deny"}),
+        (json.dumps({"hook_event_name": "unknownEvent"}), {}),
+    ],
+)
+def test_invalid_json_is_denied_and_unknown_event_is_ignored(
+    raw: str,
+    expected: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(sys, "stdin", type("S", (), {"read": lambda self: raw})())
+    assert _GATE.main() == 0
+    payload = json.loads(capsys.readouterr().out)
+    if expected:
+        assert payload["permission"] == expected["permission"]
+    else:
+        assert payload == expected
+
+
+def test_cli_allows_git_status() -> None:
+    completed = subprocess.run(
+        [sys.executable, str(_GATE_PATH)],
+        input=json.dumps(
+            {"hook_event_name": "beforeShellExecution", "command": "git status"}
+        ),
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert completed.returncode == 0
+    assert json.loads(completed.stdout)["permission"] == "allow"
+
+
+def test_hooks_manifest_points_at_existing_script() -> None:
+    payload = json.loads(_HOOKS_PATH.read_text(encoding="utf-8"))
+    assert payload["version"] == 1
+    hooks = payload["hooks"]
+    assert set(hooks) == {
+        "beforeShellExecution",
+        "preToolUse",
+        "sessionStart",
+        "postToolUse",
+    }
+    for name in ("beforeShellExecution", "preToolUse"):
+        entry = hooks[name][0]
+        assert entry["command"] == "python .cursor/hooks/gate.py"
+        assert entry["failClosed"] is True
+        assert "matcher" not in entry
+    for name in ("sessionStart", "postToolUse"):
+        entry = hooks[name][0]
+        assert entry["command"] == "python .cursor/hooks/gate.py"
+        assert "failClosed" not in entry
+    assert _GATE_PATH.is_file()
