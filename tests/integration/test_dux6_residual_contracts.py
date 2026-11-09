@@ -148,8 +148,8 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     description = str(browse.get("description") or "")
     target = (browse.get("targets") or [])[0]
 
-    assert no_value.startswith("UNKNOWN")
-    assert "VALID EMPTY" not in no_value
+    assert no_value.startswith("VALID EMPTY")
+    assert "UNKNOWN" in no_value
     assert "QUERY ERROR" in no_value
     assert "$pipeline" not in no_value
     assert "tree_missing" in description.lower()
