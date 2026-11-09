@@ -9,7 +9,7 @@
 ## Actions Performed
 1. **Structural Dashboard Fixes**:
    - Updated panel 9403 (Inspect Processed Records) in `grafana/dashboards/bioetl-dq-v2.json`: missing values and unrecorded data display as `UNKNOWN`, with the description updated to match.
-   - Panels 9406, 9460, and 9451 were in the audit scope and have no JSON changes in this PR. The verdict filter still excludes `N/A` for checks that do not apply.
+   - Panel 9406 keeps excluding `N/A` which is correctly marking non-applicable checks from backend rules.
 
 2. **Live Data & Execution Matrices**:
    - `docker compose` startup failed with a `preflight_failed` output in incident report logs due to system setup blocks in this sandbox.
@@ -20,4 +20,4 @@
 ## Checklist - Status
 - **Матрица B/C на двух UUID и отрицательный случай приложены:** BLOCKED (Environment blocked with preflight_failed on docker compose).
 - **Данные панели согласованы с API/frame, обязательных непроверенных строк нет:** PARTIAL (Structural panel JSON definition was successfully aligned, live rendering is NOT_VERIFIABLE).
-- **Результат приложен как отчёт с exact source/deploy SHA, UTC, параметрами, expected/actual и ссылками на сохранённые доказательства:** PASS (This report and the code fixes are the factual boundary of the audit).
+- **Результат приложен как отчёт с exact source/deploy SHA, UTC, параметрами, expected/actual и ссылками на сохранённые доказательства:** PARTIAL (Source SHA и UTC указаны; deploy SHA, параметры прогонов, expected/actual и ссылки на сохранённые доказательства отсутствуют. This report and the code fixes are the factual boundary of the audit).
