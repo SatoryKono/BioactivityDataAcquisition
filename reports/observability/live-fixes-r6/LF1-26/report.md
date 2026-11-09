@@ -9,7 +9,7 @@ Issue: #12822.
 
 ## Panels
 
-All 15 panels are on `bioetl-incident-v1`. None of their expressions contain `or vector(0)`. `run_id` is not used as a Prometheus label in these expressions. Expected evidence is the named series for the visible pipeline / run-type / workflow scope. An absent series is `TELEMETRY MISSING`, not zero. A query failure is outside this `noValue` and was not rendered.
+All 15 panels are on `bioetl-incident-v1`. None of their expressions contain `or vector(0)`. `run_id` is not used as a Prometheus label in these expressions. Expected evidence follows the scope of each expression. Panels 238, 256, 241, 240, 908, 131, and 135 use a pipeline selector, with run type or workflow scope where the expression supplies those filters. Panels 8806, 209, 210, 107, 8805, 108, 8807, and 112 query global series. An absent series is `TELEMETRY MISSING`, not zero. A query failure is outside this `noValue` and was not rendered.
 
 | Panel | Title | Metric family on local scrape | Samples | Class |
 | --- | --- | --- | --- | --- |
@@ -29,7 +29,7 @@ All 15 panels are on `bioetl-incident-v1`. None of their expressions contain `or
 | 8807 | Compare Ledger Appends by Type & Status | `bioetl_control_plane_ledger_appends_total` | 0 | absent series on this process; display contract, not a zero |
 | 112 | Compare Lineage Persistence Outcomes | `bioetl_lineage_fragments_emitted_total` | 0 | absent series on this process; display contract, not a zero |
 
-The four `bioetl_control_plane_reads_total` samples are manifest `list_all` misses on this process. They do not prove panel 8806 would show a non-empty range for the dashboard selector. Zero samples mean the family emitted no series here. That is not a measured zero and not a display defect: the panel `noValue` already says the missing series is not a zero.
+The four `bioetl_control_plane_reads_total` samples are manifest `list_all` misses on this process. They do not establish a non-empty Prometheus range for the global query in panel 8806. Zero samples mean the family emitted no series here. That is not a measured zero and not a display defect: the panel `noValue` already says the missing series is not a zero.
 
 Overview, Data Quality, Run Explorer and Replay Readiness have no `noValue` that starts with `TELEMETRY MISSING` in this SHA.
 
