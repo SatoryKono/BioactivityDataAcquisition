@@ -391,6 +391,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/ai/mcp/support/github_project_transport.mjs": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal stdio route dispatcher for GitHub project wrappers.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31"
+    },
     "scripts/ai/mcp/support/host_transport.mjs": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the internal stdio route dispatcher called by the existing Context7 and Brave wrappers. The wrappers remain the configured entrypoints.",
