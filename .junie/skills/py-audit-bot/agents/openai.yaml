@@ -2,3 +2,6 @@ interface:
   display_name: "Py Audit Bot"
   short_description: "Run BioETL audit workflow profile"
   default_prompt: "Use $py-audit-bot for one mode in SCOPE: baseline, final, targeted, review, debt, or reproducibility. Read the role profile. Do not edit files. Done when each finding has a file, a check, and a severity."
+
+policy:
+  allow_implicit_invocation: false

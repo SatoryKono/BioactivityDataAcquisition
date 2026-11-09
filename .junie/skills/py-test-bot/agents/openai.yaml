@@ -1,4 +1,4 @@
 interface:
   display_name: "Py Test Bot"
   short_description: "Run BioETL testing profile"
-  default_prompt: "Use $py-test-bot to fix or add the test in SCOPE. Read the role profile. Write tests in SCOPE. Done when the narrowest pytest command and its result are stated."
+  default_prompt: "Use $py-test-bot to validate tests in SCOPE. Read the role profile. Modify tests only when the task authorizes it. Done when the narrowest pytest command and its result are stated."

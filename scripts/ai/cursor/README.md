@@ -14,6 +14,8 @@ Tracked sources of truth:
 | --- | --- | --- |
 | Cursor rules | `docs/00-project/ai/rules/cursor/*.mdc` | `.cursor/rules/` |
 | Skills | `.codex/skills/**` and `docs/00-project/ai/grok/skills/**` | `.cursor/skills/*` relative symlinks |
+
+Grok operator skills follow the runtime precedence in AGENTS.md. Their Cursor links provide access to operator workflows and do not change the canonical source.
 | MCP portable | `.mcp.json` (stdio, full inventory) | `.cursor/mcp.json` (profiled; default **stable**) |
 
 Policy: `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md`.

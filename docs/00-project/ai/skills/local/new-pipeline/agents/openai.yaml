@@ -2,3 +2,6 @@ interface:
   display_name: "New Pipeline"
   short_description: "Scaffold BioETL pipelines"
   default_prompt: "Use $new-pipeline to scaffold the provider/entity named in SCOPE. Read the pipeline profile. Write config, wiring, and tests for that entity. Done when the skill baseline command passes."
+
+policy:
+  allow_implicit_invocation: false
