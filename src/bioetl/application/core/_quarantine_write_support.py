@@ -20,6 +20,20 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import QuarantinePort
 
 
+_MISSING_QUARANTINE_REASON = "No quarantine reason was provided"
+
+
+def _with_missing_quarantine_reason(
+    request: QuarantineWriteRequest,
+) -> QuarantineWriteRequest:
+    metadata = dict(request.get("metadata") or {})
+    details = metadata.get("error_details")
+    error_details = dict(details) if isinstance(details, dict) else {}
+    error_details["message"] = _MISSING_QUARANTINE_REASON
+    metadata["error_details"] = error_details
+    return {**request, "metadata": metadata}
+
+
 async def write_quarantine_request(
     quarantine: QuarantinePort,
     request: QuarantineWriteRequest,
@@ -58,6 +72,9 @@ async def write_quarantine_request_with_events(
     ingestion_ts: datetime,
 ) -> None:
     """Write a quarantine request and emit its companion events."""
+    if not error_message:
+        request = _with_missing_quarantine_reason(request)
+        error_message = _MISSING_QUARANTINE_REASON
     await write_quarantine_request(quarantine, request)
     emit_quarantine_events(
         emitter=emitter,
@@ -91,6 +108,10 @@ async def write_quarantine_requests_with_events(
             f"lengths; got requests={len(requests)}, error_codes={len(error_codes)}, "
             f"error_messages={len(error_messages)}"
         )
+    requests = [
+        request if message else _with_missing_quarantine_reason(request)
+        for request, message in zip(requests, error_messages, strict=True)
+    ]
     await write_quarantine_requests(quarantine, requests)
     for request, error_code, error_message in zip(
         requests,
@@ -103,7 +124,7 @@ async def write_quarantine_requests_with_events(
             pipeline_name=pipeline_name,
             payload=request["payload"],
             error_code=error_code,
-            error_message=error_message,
+            error_message=error_message or _MISSING_QUARANTINE_REASON,
             batch_id=batch_id,
             run_id=run_id,
             ingestion_ts=ingestion_ts,

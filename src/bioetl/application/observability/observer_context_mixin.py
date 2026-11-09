@@ -203,7 +203,7 @@ class _ObserverContextManagerMixin(_ObserverEventMixinBase):
                     run_id=self._domain_run_id(),
                     pipeline_name=self.pipeline_name,
                     failed_stage="unknown",
-                    error=str(exc_val),
+                    error=str(exc_val) or type(exc_val).__name__,
                     error_type=type(exc_val).__name__,
                 ),
                 phase=LifecyclePhase.CLEANUP,
