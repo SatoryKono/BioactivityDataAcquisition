@@ -20,4 +20,4 @@
 ## Checklist - Status
 - **Матрица B/C на двух UUID и отрицательный случай приложены:** BLOCKED (Environment blocked with preflight_failed on docker compose).
 - **Данные панели согласованы с API/frame, обязательных непроверенных строк нет:** PARTIAL (Structural panel JSON definition was successfully aligned, live rendering is NOT_VERIFIABLE).
-- **Результат приложен как отчёт с exact source/deploy SHA, UTC, параметрами, expected/actual и ссылками на сохранённые доказательства:** PASS (This report and the code fixes are the factual boundary of the audit).
+- **Результат приложен как отчёт с exact source/deploy SHA, UTC, параметрами, expected/actual и ссылками на сохранённые доказательства:** PARTIAL (Source SHA и UTC указаны; deploy SHA, параметры прогонов, expected/actual и ссылки на сохранённые доказательства отсутствуют. This report and the code fixes are the factual boundary of the audit).
