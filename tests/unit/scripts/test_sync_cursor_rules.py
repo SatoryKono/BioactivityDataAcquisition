@@ -257,8 +257,12 @@ def test_deploy_prunes_stale_managed_commands_and_preserves_local_files(
     deploy = tmp_path / sync_cursor_rules.CURSOR_COMMANDS_DIR
     _write_command(canonical, "old.md")
     _write_command(canonical, "invalid.md")
+    _write_command(deploy, "personal.md", body="Local command")
     assert not sync_cursor_rules.sync_cursor_commands(
         root=tmp_path, deploy=True, check_only=False
+    )
+    assert not sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path, deploy=False, check_only=True
     )
     (canonical / "old.md").rename(canonical / "renamed.md")
     _write_command(canonical, "invalid.md", body="Invalid command")

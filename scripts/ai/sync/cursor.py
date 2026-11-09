@@ -221,8 +221,10 @@ def _orphan_command_issues(
     issues: list[str] = []
     canonical_names = {path.name for path in canonical_files}
     for target in _list_md_files(deploy_dir):
-        safe_target = ensure_path_within_root(target, safe_root)
-        if safe_target.name not in canonical_names:
+        if target.name in canonical_names or target.is_symlink():
+            continue
+        safe_target = ensure_path_within_root(target, deploy_dir)
+        if _is_managed_command(safe_target.read_text(encoding="utf-8", errors="replace")):
             issues.append(
                 f"{safe_target.relative_to(safe_root)}: orphan deploy file "
                 "(not in canonical cursor commands)"
