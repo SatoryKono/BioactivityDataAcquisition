@@ -195,7 +195,6 @@ class VacuumSettings:
     enabled: bool | None = None
     retention_days: int = 7
 
-
     @property
     def is_enabled_override(self) -> bool | None:
         """Return explicit vacuum override state, if one was provided."""

@@ -106,11 +106,19 @@ def assemble_filter_config(
 
     return FilterConfigBuilder.build(
         yaml_filter=yaml_filter,
-        cli_csv=ctx.input_filter.source_path if ctx.input_filter.is_csv_mode else None,
-        cli_column=ctx.input_filter.column_name if ctx.input_filter.is_csv_mode else None,
-        cli_field=ctx.input_filter.filter_field if not ctx.input_filter.is_disabled else None,
+        cli_csv=ctx.input_filter.source_path
+        if not ctx.input_filter.is_disabled
+        else None,
+        cli_column=ctx.input_filter.column_name
+        if not ctx.input_filter.is_disabled
+        else None,
+        cli_field=ctx.input_filter.filter_field
+        if not ctx.input_filter.is_disabled
+        else None,
         cli_fallback_column=(
-            ctx.input_filter.fallback_column if ctx.input_filter.is_csv_mode else None
+            ctx.input_filter.fallback_column
+            if not ctx.input_filter.is_disabled
+            else None
         ),
         test_mode=effective_test_mode,
         direct_filter_ids=ctx.input_filter.filter_ids,
