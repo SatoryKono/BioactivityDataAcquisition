@@ -70,6 +70,7 @@ def _dashboard_runtime_environment(
             reports_owner is not None
             and data_owner is not None
             and reports_owner.st_uid > 0
+            and reports_owner.st_gid > 0
             and (reports_owner.st_uid, reports_owner.st_gid)
             == (data_owner.st_uid, data_owner.st_gid)
         ):

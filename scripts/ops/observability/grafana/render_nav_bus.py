@@ -1500,6 +1500,7 @@ def _ensure_exact_replay_readiness_panel(panels: list[object]) -> None:
 
 
 def _set_panel_no_value(panel: dict[str, Any], text: str) -> None:
+    """Stamp the panel empty-state `noValue` text under fieldConfig.defaults."""
     field_config = panel.setdefault("fieldConfig", {})
     if not isinstance(field_config, dict):
         return
@@ -1523,7 +1524,7 @@ def _stamp_exact_replay_panel(panels: list[object]) -> None:
             "request states. N/A is not zero. CURRENT Prometheus does not change this "
             "verdict."
         )
-        _set_panel_no_value(panel, "—")
+        _set_panel_no_value(panel, "UNKNOWN")
         transforms = panel.setdefault("transformations", [])
         if isinstance(transforms, list) and not any(
             isinstance(item, dict) and item.get("id") == "limit" for item in transforms
@@ -2804,7 +2805,9 @@ def _apply_phase25_srs_prr_budget(payload: dict[str, Any], *, current_uid: str) 
     # Phase 2 remainder link/F-13 rules must follow donors so render_nav_bus alone
     # stays the durable path (no separate remainder CLI required).
     for panel in _walk_remainder_panels(payload.get("panels", [])):
-        if current_uid == "bioetl-control-plane-v1" and panel.get("id") in {9422, 9423}:
+        if current_uid == "bioetl-control-plane-v1" and panel.get("id") == 9422:
+            _set_panel_no_value(panel, "UNKNOWN")
+        elif current_uid == "bioetl-control-plane-v1" and panel.get("id") == 9423:
             _set_panel_no_value(
                 panel,
                 "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
