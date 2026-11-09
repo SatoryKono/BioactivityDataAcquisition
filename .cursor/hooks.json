@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "python .cursor/hooks/gate.py",
+        "failClosed": true
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "python .cursor/hooks/gate.py",
+        "failClosed": true
+      }
+    ],
+    "sessionStart": [
+      {
+        "command": "python .cursor/hooks/gate.py"
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "python .cursor/hooks/gate.py"
+      }
+    ]
+  }
+}
