@@ -9,7 +9,7 @@ import pytest
 
 from scripts.ops.runtime.docker import runtime_manager
 
-pytestmark = pytest.mark.repo_backed
+pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize(
@@ -23,8 +23,6 @@ pytestmark = pytest.mark.repo_backed
 def test_runtime_uses_nonroot_report_writer_identity(
     monkeypatch, tmp_path, uid, gid, expected_uid, expected_gid
 ):
-    from types import SimpleNamespace
-
     environment = {}
     monkeypatch.setattr(
         runtime_manager, "os", SimpleNamespace(name="posix", environ=environment)
