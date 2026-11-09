@@ -102,6 +102,7 @@ _SECRET_PREFIX = re.compile(
 # Unquoted assignment values stop at "]". A second pass therefore sees
 # "[redacted:<12 hex>" without the closing bracket.
 _REDACTED_ASSIGNMENT_VALUE = re.compile(r"\[redacted:[0-9a-f]{12}\]?")
+_REDACTION_MARKER = re.compile(r"\[redacted:[0-9a-f]{12}\]")
 _SAFE_ENV_KEYS = frozenset(
     {
         "GITHUB_RUN_ID",
@@ -219,14 +220,14 @@ def _secret_values() -> tuple[str, ...]:
 
 
 def _line_for_storage(line: str, known_secrets: tuple[str, ...]) -> str:
-    """Replace a line that still contains a raw secret.
-
-    Marker text such as ``[redacted:<digest>]`` is removed before the
-    search. A secret that is only a fragment of that marker, for example
-    ``redacted:``, stays in the already-redacted event.
-    """
-    visible = _REDACTED_ASSIGNMENT_VALUE.sub("", line)
-    if any(secret and secret in visible for secret in known_secrets):
+    """Replace a line that still contains a raw secret."""
+    for marker in set(_REDACTION_MARKER.findall(line)):
+        if any(secret and secret in marker for secret in known_secrets):
+            # Re-fingerprint the entire marker so a colliding secret cannot
+            # survive in either its label or its digest.
+            replacement = _redaction_token(marker).replace("[redacted:", "[", 1)
+            line = line.replace(marker, replacement)
+    if any(secret and secret in line for secret in known_secrets):
         blocked = (
             '{"event":"redaction_blocked","schema_version":'
             + str(SCHEMA_VERSION)
