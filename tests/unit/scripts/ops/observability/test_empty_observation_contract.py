@@ -9,10 +9,49 @@ import pytest
 from scripts.ops.observability.grafana._empty_observation_contract import (
     _STANDALONE_DEPENDENCIES,
     _WORKFLOW_INPUT_DEPENDENCIES,
+    _alert_history_available,
     qualify_empty,
 )
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    "gap", [None, "missing-rule", "bad-rule", "outage", "one-sample", "query-error"]
+)
+def test_empty_alert_history_requires_rules_and_observed_service(gap, monkeypatch):
+    monkeypatch.setattr(
+        "scripts.ops.observability.grafana._empty_observation_contract._expected_alert_names",
+        lambda: {"ExampleAlert"},
+    )
+
+    def request(*_args):
+        rules = (
+            []
+            if gap == "missing-rule"
+            else [
+                {
+                    "name": "ExampleAlert",
+                    "type": "alerting",
+                    "health": "err" if gap == "bad-rule" else "ok",
+                }
+            ]
+        )
+        return {"status": "success", "data": {"groups": [{"rules": rules}]}}
+
+    def vector(query):
+        if gap == "query-error":
+            return None
+        value = "1" if query.startswith("min_") or gap == "one-sample" else "20"
+        if query.startswith("min_") and gap == "outage":
+            value = "0"
+        return [{"metric": {}, "value": [1, value]}]
+
+    assert _alert_history_available(
+        'ALERTS{alertstate="firing"} or (ALERTS{alertstate="pending"} * 2)',
+        vector,
+        request,
+    ) is (gap is None)
 
 
 @pytest.mark.parametrize(
@@ -291,11 +330,30 @@ def test_ranked_evidence_needs_healthy_dependencies_and_no_active_witness(gap):
     assert accepted is (gap is None)
 
 
-@pytest.mark.parametrize("gap", [None, "missing-operand", "active-dq"])
+@pytest.mark.parametrize(
+    "gap",
+    [
+        None,
+        "missing-operand",
+        "active-dq",
+        "lazy-event",
+        "single-sample",
+        "raw-query-error",
+        "active-operand",
+    ],
+)
 def test_dq_empty_requires_all_operands_and_no_active_signal(gap):
     metric = "bioetl_runtime_alert_condition_dq_hard_fail_15m"
 
     def fetch(url, **_kwargs):
+        if urlsplit(url).path.endswith("metadata"):
+            family = parse_qs(urlsplit(url).query)["metric"][0]
+            return {
+                "status": "success",
+                "data": {}
+                if gap == "missing-operand"
+                else {family: [{"type": "counter"}]},
+            }
         if urlsplit(url).path.endswith("rules"):
             return {
                 "status": "success",
@@ -316,8 +374,19 @@ def test_dq_empty_requires_all_operands_and_no_active_signal(gap):
                 {"metric": {"job": job}, "value": [1, "1"]}
                 for job in ("bioetl", "pushgateway", "prometheus")
             ]
-        elif query.startswith(metric) and gap == "missing-operand":
+        elif query.startswith(metric) and gap in {
+            "missing-operand",
+            "lazy-event",
+            "single-sample",
+            "raw-query-error",
+        }:
             rows = []
+        elif query.startswith(metric) and gap == "active-operand":
+            rows = [{"metric": {}, "value": [1, "1"]}]
+        elif query.startswith("count_over_time("):
+            if gap == "raw-query-error":
+                return {"status": "error"}
+            rows = [{"metric": {}, "value": [1, "1"]}] if gap == "single-sample" else []
         elif query.startswith("bioetl_dq_current_status") and gap == "active-dq":
             rows = [{"metric": {}, "value": [1, "2"]}]
         return {"status": "success", "data": {"resultType": "vector", "result": rows}}
@@ -331,7 +400,7 @@ def test_dq_empty_requires_all_operands_and_no_active_signal(gap):
         substitute=lambda value: value,
         timeout=1,
     )
-    assert accepted is (gap is None)
+    assert accepted is (gap in {None, "lazy-event"})
 
 
 @pytest.mark.parametrize("resets, expected", [("0", True), ("1", False), (None, False)])
