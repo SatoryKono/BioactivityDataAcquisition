@@ -45,7 +45,11 @@ def test_selected_run_http_aliases_are_resolved() -> None:
     assert rendered == "?pipeline=chembl_assay&run_id=abc&workflow=All"
 
 
-def test_query_error_is_not_successful_nonempty_http_result() -> None:
+@pytest.mark.parametrize(
+    "error_key",
+    ("verdict", "run_verdict", "replay_readiness_now"),
+)
+def test_query_error_is_not_successful_nonempty_http_result(error_key: str) -> None:
     spec = audit_subject.PanelAuditSpec(
         dashboard_uid="bioetl-overview-v2",
         panel_id=9002,
@@ -54,16 +58,41 @@ def test_query_error_is_not_successful_nonempty_http_result() -> None:
         semantic_kind="http_endpoint",
         required=False,
     )
+    payload: dict[str, object] = {
+        error_key: "QUERY ERROR",
+        "reason": "evidence_read_failed",
+        "domains": [{"verdict": "QUERY ERROR"}],
+    }
     status, classification, detail = audit_subject._classify_http_panel_payload(
         spec,
-        {
-            "verdict": "QUERY ERROR",
-            "reason": "evidence_read_failed",
-            "domains": [{"verdict": "QUERY ERROR"}],
-        },
+        payload,
     )
     assert (status, classification) == ("error", "endpoint_execution_error")
     assert "evidence_read_failed" in detail
+
+
+def test_http_table_nested_query_error_is_not_endpoint_failure() -> None:
+    """Row-level QUERY ERROR must not trip the top-level endpoint error keys."""
+    spec = audit_subject.PanelAuditSpec(
+        dashboard_uid="bioetl-overview-v2",
+        panel_id=9100,
+        title="Stage funnel",
+        source_kind="http",
+        semantic_kind="http_table",
+        required=False,
+    )
+    status, classification, detail = audit_subject._classify_http_panel_payload(
+        spec,
+        {
+            "rows": [
+                {"stage_id": "silver", "verdict": "QUERY ERROR"},
+            ],
+        },
+    )
+    assert status == "ok"
+    assert classification == "nonempty_table"
+    assert classification != "endpoint_execution_error"
+    assert "rows" in detail.lower() or "table" in detail.lower()
 
 
 def test_all_regex_scope_keeps_http_catalog_value() -> None:
