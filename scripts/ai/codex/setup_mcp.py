@@ -1360,6 +1360,7 @@ def _render_devin_mcp_payload(workspace_root: Path) -> dict[str, Any]:
             }
     return {"mcpServers": servers}
 
+
 def _portable_projection_mismatch(
     output_root: Path,
     relative: Path,
