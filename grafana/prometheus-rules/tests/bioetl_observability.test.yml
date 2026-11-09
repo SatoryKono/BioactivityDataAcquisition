@@ -2954,6 +2954,8 @@ tests:
     input_series:
       - series: 'bioetl_pipeline_runs_total{pipeline="mapped",run_type="incremental",status="success"}'
         values: '1+0x10'
+      - series: 'bioetl_workflow_pipeline_expected{pipeline="mapped",run_type="incremental",provider="unknown"}'
+        values: '1+0x10'
       - series: 'bioetl_pipeline_runs_total{pipeline="ambiguous",run_type="incremental",status="success"}'
         values: '1+0x10'
       - series: 'bioetl_workflow_pipeline_expected{workflow="backfill",pipeline="mapped",run_type="backfill",provider="uniprot"}'
@@ -2977,3 +2979,22 @@ tests:
         exp_samples:
           - labels: 'bioetl_l0_input_status_selected{input="provider",pipeline="ambiguous",run_type="incremental"}'
             value: 3
+
+  - name: incident failed runs waits for a second publishing sample
+    interval: 1m
+    input_series:
+    - series: bioetl_runtime_pipeline_run_type_universe_scoped{pipeline="example",run_type="incremental"}
+      values: 1+0x3
+    - series: bioetl_pipeline_runs_total{job="bioetl-health",pipeline="example",run_type="incremental",status="failed"}
+      values: 0+0x3
+    - series: bioetl_pipeline_runs_total{job="bioetl",pipeline="example",run_type="incremental",status="failed"}
+      values: _ _ 1 2
+    promql_expr_test:
+    - expr: "(sum(increase(bioetl_pipeline_runs_total{pipeline=~\"example\",run_type=~\"incremental\",status=\"failed\"}[5m])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"example\",run_type=~\"incremental\"}[5m])) > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"example\",run_type=~\"incremental\"}[5m]) unless on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~\"example\",run_type=~\"incremental\",status=\"failed\"}[5m]) >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~\"example\",run_type=~\"incremental\",status=\"failed\"}[5m]) < 2)"
+      eval_time: 2m
+      exp_samples: []
+    - expr: "((sum(increase(bioetl_pipeline_runs_total{pipeline=~\"example\",run_type=~\"incremental\",status=\"failed\"}[5m])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"example\",run_type=~\"incremental\"}[5m])) > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"example\",run_type=~\"incremental\"}[5m]) unless on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~\"example\",run_type=~\"incremental\",status=\"failed\"}[5m]) >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~\"example\",run_type=~\"incremental\",status=\"failed\"}[5m]) < 2)) > bool 0"
+      eval_time: 3m
+      exp_samples:
+      - labels: '{}'
+        value: 1

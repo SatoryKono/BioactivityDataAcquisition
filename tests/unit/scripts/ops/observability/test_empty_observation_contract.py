@@ -152,9 +152,18 @@ def test_standalone_witness_must_cover_the_entire_scope(workflow, mixed, expecte
         "warnings",
         "infos",
         "unhealthy-sibling",
+        "unhealthy-alert",
+        "missing-alert",
     ],
 )
-def test_empty_alert_list_requires_healthy_recording_rule(gap):
+def test_empty_alert_list_requires_healthy_alerting_and_recording_rules(
+    gap, monkeypatch
+):
+    monkeypatch.setattr(
+        "scripts.ops.observability.grafana._empty_observation_contract._expected_alert_names",
+        lambda: {"BioETLPipelineRunFailed"},
+    )
+
     def fetch(url, **_kwargs):
         endpoint = urlsplit(url).path
         if endpoint.endswith("metadata"):
@@ -166,6 +175,14 @@ def test_empty_alert_list_requires_healthy_recording_rule(gap):
                 "health": "err" if gap == "unhealthy" else "ok",
             }
             rules = [] if gap == "missing" else [rule]
+            if gap != "missing-alert":
+                rules.append(
+                    {
+                        "name": "BioETLPipelineRunFailed",
+                        "type": "alerting",
+                        "health": "err" if gap == "unhealthy-alert" else "ok",
+                    }
+                )
             if gap == "unhealthy-sibling":
                 rules.insert(0, {**rule, "health": "err"})
             return {
@@ -241,6 +258,49 @@ def test_ranked_evidence_needs_healthy_dependencies_and_no_active_witness(gap):
         dashboard_uid="bioetl-incident-v1",
         panel_id=2010,
         expr="bioetl_incident_ranked_evidence",
+        base_url="http://prometheus",
+        fetch=fetch,
+        substitute=lambda value: value,
+        timeout=1,
+    )
+    assert accepted is (gap is None)
+
+
+@pytest.mark.parametrize("gap", [None, "missing-operand", "active-dq"])
+def test_dq_empty_requires_all_operands_and_no_active_signal(gap):
+    metric = "bioetl_runtime_alert_condition_dq_hard_fail_15m"
+
+    def fetch(url, **_kwargs):
+        if urlsplit(url).path.endswith("rules"):
+            return {
+                "status": "success",
+                "data": {
+                    "groups": [
+                        {
+                            "rules": [
+                                {"name": metric, "type": "recording", "health": "ok"}
+                            ]
+                        }
+                    ]
+                },
+            }
+        query = parse_qs(urlsplit(url).query)["query"][0]
+        rows = [{"metric": {}, "value": [1, "0"]}]
+        if query.startswith("up{job=~"):
+            rows = [
+                {"metric": {"job": job}, "value": [1, "1"]}
+                for job in ("bioetl", "pushgateway", "prometheus")
+            ]
+        elif query.startswith(metric) and gap == "missing-operand":
+            rows = []
+        elif query.startswith("bioetl_dq_current_status") and gap == "active-dq":
+            rows = [{"metric": {}, "value": [1, "2"]}]
+        return {"status": "success", "data": {"resultType": "vector", "result": rows}}
+
+    accepted, _ = qualify_empty(
+        dashboard_uid="bioetl-incident-v1",
+        panel_id=4,
+        expr=f"sum({metric})",
         base_url="http://prometheus",
         fetch=fetch,
         substitute=lambda value: value,

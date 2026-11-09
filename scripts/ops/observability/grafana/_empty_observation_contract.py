@@ -11,7 +11,10 @@ from __future__ import annotations
 import re
 from typing import Any
 from collections.abc import Callable
+from pathlib import Path
 from urllib.parse import urlencode
+
+import yaml
 
 _EVENT_PANELS = frozenset(
     {
@@ -50,6 +53,7 @@ _SIGNAL_WITNESSES = {
     22011: "bioetl_stage_lag_seconds or bioetl_stage_backlog_records",
 }
 _RANKED_EVIDENCE_PANEL = 2010
+_DQ_CONDITIONS_PANEL = 4
 _RANKED_EVIDENCE_DEPENDENCIES = frozenset(
     {
         "bioetl_incident_ranked_runtime",
@@ -149,6 +153,8 @@ def qualify_empty(
     if panel_id in _SIGNAL_WITNESSES:
         if not _signal_metrics_available(panel_id, expr, request):
             return False, evidence
+        if panel_id == _DQ_CONDITIONS_PANEL and not _dq_operands_present(expr, vector):
+            return False, evidence
         witnesses = vector(_SIGNAL_WITNESSES[panel_id]) or []
         return _signal_witness_confirms_empty(panel_id, witnesses), evidence
     return (
@@ -184,14 +190,50 @@ def _observed_scope(
     return vector(scope) or []
 
 
+def _dq_operands_present(expr: str, vector: WitnessVector) -> bool:
+    operands = set(_METRIC.findall(expr)) - {
+        "bioetl_runtime_pipeline_run_type_universe"
+    }
+    return bool(operands) and all(
+        vector(f'{metric}{{pipeline=~"$pipeline"}}') for metric in sorted(operands)
+    )
+
+
 def _signal_witness_confirms_empty(
     panel_id: int, witnesses: list[dict[str, Any]]
 ) -> bool:
-    if panel_id == _RANKED_EVIDENCE_PANEL and any(
+    if panel_id in {_RANKED_EVIDENCE_PANEL, _DQ_CONDITIONS_PANEL} and any(
         float(row["value"][1]) > 0 for row in witnesses
     ):
         return False
     return bool(witnesses)
+
+
+def _expected_alert_names() -> set[str]:
+    rules_dir = Path(__file__).resolve().parents[4] / "grafana/prometheus-rules"
+    try:
+        return {
+            rule["alert"]
+            for path in sorted(rules_dir.glob("*.yml"))
+            for group in yaml.safe_load(path.read_text(encoding="utf-8"))["groups"]
+            for rule in group["rules"]
+            if "alert" in rule
+        }
+    except (OSError, TypeError, KeyError, yaml.YAMLError):
+        return set()
+
+
+def _healthy_rules(data: dict[str, Any], kind: str, expected: set[str]) -> bool:
+    rules = [
+        rule
+        for group in data.get("groups", [])
+        for rule in group.get("rules", [])
+        if rule.get("type") == kind
+        and (kind == "alerting" or rule.get("name") in expected)
+    ]
+    return expected <= {rule.get("name") for rule in rules} and all(
+        rule.get("health") == "ok" for rule in rules
+    )
 
 
 def _signal_metrics_available(
@@ -207,16 +249,12 @@ def _signal_metrics_available(
         expected_rules.update(_RANKED_EVIDENCE_DEPENDENCIES)
     if expected_rules:
         data = _response_data(request("/api/v1/rules", {}))
-        rules = [
-            rule
-            for group in data.get("groups", [])
-            for rule in group.get("rules", [])
-            if rule.get("type") == "recording" and rule.get("name") in expected_rules
-        ]
-        if not expected_rules <= {rule["name"] for rule in rules} or any(
-            rule.get("health") != "ok" for rule in rules
-        ):
+        if not _healthy_rules(data, "recording", expected_rules):
             return False
+        if panel_id == 2005:
+            alerts = _expected_alert_names()
+            if not alerts or not _healthy_rules(data, "alerting", alerts):
+                return False
     for metric in sorted(raw_metrics):
         data = _response_data(request("/api/v1/metadata", {"metric": metric}))
         if not data.get(metric):

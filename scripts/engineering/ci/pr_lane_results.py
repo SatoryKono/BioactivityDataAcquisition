@@ -68,6 +68,7 @@ REQUIRED_CHECKS_PROSE_TEST = (
     "tests/architecture/test_required_checks_prose_consistency.py"
 )
 DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
+GRAFANA_METRIC_SEMANTICS_TEST = "tests/integration/test_grafana_dashboard_metric_semantics.py"
 STAGE0_EVIDENCE_TEST = "tests/unit/scripts/engineering/ci/test_stage0_evidence.py"
 MANIFEST_VALIDATION_CATALOG_TEST = (
     "tests/unit/interfaces/http/test_manifest_validation_catalog.py"
@@ -161,7 +162,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         (
             "tests/integration/test_prometheus_rules_config.py",
-            "tests/integration/test_grafana_dashboard_metric_semantics.py",
+            GRAFANA_METRIC_SEMANTICS_TEST,
             "tests/architecture/test_observability_metric_governance.py",
             INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
         ),
@@ -1199,7 +1200,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/integration/test_dashboard_variable_dependencies.py",
         "tests/integration/test_grafana_config.py",
         "tests/integration/test_grafana_dashboard_cta_links.py",
-        "tests/integration/test_grafana_dashboard_metric_semantics.py",
+        GRAFANA_METRIC_SEMANTICS_TEST,
         "tests/integration/test_grafana_evidence_readability.py",
         GRAFANA_SELECTOR_CONTRACT_TEST,
         GRAFANA_VARIABLE_REFERENCE_TEST,
@@ -1210,7 +1211,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/integration/test_dashboard_variable_dependencies.py",
         "tests/integration/test_grafana_config.py",
         "tests/integration/test_grafana_dashboard_cta_links.py",
-        "tests/integration/test_grafana_dashboard_metric_semantics.py",
+        GRAFANA_METRIC_SEMANTICS_TEST,
         "tests/integration/test_grafana_dashboard_provisioning.py",
         "tests/integration/test_grafana_evidence_readability.py",
         GRAFANA_SELECTOR_CONTRACT_TEST,

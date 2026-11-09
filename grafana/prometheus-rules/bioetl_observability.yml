@@ -279,11 +279,11 @@ groups:
             * on (pipeline) group_left()
             (
               max by (pipeline) (
-                group by (pipeline, provider) (bioetl_workflow_pipeline_expected)
+                group by (pipeline, provider) (bioetl_workflow_pipeline_expected{pipeline!="",provider!="",provider!="unknown"} > 0)
                 * on (provider) group_left() bioetl_provider_current_status
               )
               and on (pipeline)
-              (count by (pipeline) (group by (pipeline, provider) (bioetl_workflow_pipeline_expected)) == 1)
+              (count by (pipeline) (group by (pipeline, provider) (bioetl_workflow_pipeline_expected{pipeline!="",provider!="",provider!="unknown"} > 0)) == 1)
             )
           )
           or on (pipeline, run_type) (bioetl_overview_pipeline_run_type_universe * 3)
