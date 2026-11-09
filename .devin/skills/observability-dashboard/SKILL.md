@@ -1,20 +1,13 @@
 ---
 name: "observability-dashboard"
 description: "Edit, render, validate, or debug BioETL Grafana dashboards and their PromQL panels without starting optional monitoring services unless requested."
-context: none
-agent: general-purpose
 ---
 
 # Observability Dashboard
 
-## Invocation
-
-Invoke only when the user names this skill.
-
 ## Source Of Truth
 
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
-- Read boundary: use the task class in the root runtime contract, then only the slices the normative index names for SCOPE.
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`

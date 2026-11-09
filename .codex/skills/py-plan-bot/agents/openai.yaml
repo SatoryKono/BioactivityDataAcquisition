@@ -1,7 +1,4 @@
 interface:
   display_name: "Py Plan Bot"
   short_description: "Run BioETL planning profile"
-  default_prompt: "Use $py-plan-bot to sequence SCOPE into code, config, tests, docs, and checks. Read the task class and role profile. Do not edit files. Done when every step maps to an existing path."
-
-policy:
-  allow_implicit_invocation: false
+  default_prompt: "Use $py-plan-bot to sequence a scoped BioETL implementation, refactor, or audit-remediation plan."

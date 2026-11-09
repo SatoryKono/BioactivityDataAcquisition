@@ -1,8 +1,6 @@
 ---
 name: "verify-architecture"
 description: "Run BioETL architecture compliance checks in quick, full, or category mode before commit, PR, merge, or architecture debt closeout."
-context: none
-agent: general-purpose
 ---
 
 # Verify Architecture
@@ -18,7 +16,6 @@ Execute architecture validation checks and report blocking/non-blocking issues.
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
-- Read boundary: use the task class in the root runtime contract, then only the slices the normative index names for SCOPE.
 - Canonical runtime entrypoint: this `SKILL.md`
 - Shared wrapper contract: [../py-audit-bot/references/wrapper-contract.md](../py-audit-bot/references/wrapper-contract.md)
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`

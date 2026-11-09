@@ -1,8 +1,6 @@
 ---
 name: py-audit-bot
 description: Execute BioETL py-audit-bot profile for role-specific workflow and constraints. This skill serves as a convenient entry point for audit tasks.
-context: none
-agent: py-audit-bot
 ---
 
 # py-audit-bot
@@ -14,7 +12,6 @@ agent: py-audit-bot
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
-- Read boundary: use the task class in the root runtime contract, then only the slices the normative index names for SCOPE.
 - Primary profile: `../../agents/py-audit-bot/AGENT.md`
 - Team orchestration: `../../agents/ORCHESTRATION.md`
 - Shared wrapper contract: [references/wrapper-contract.md](./references/wrapper-contract.md)
@@ -23,8 +20,6 @@ agent: py-audit-bot
 - Role memory: `../../../docs/00-project/ai/memory/memory-py-audit-bot.md`
 
 ## Trigger Scope
-
-Invoke only when the user names this skill.
 
 Use this wrapper for read-only baseline, final, or targeted audit work. It is
 not the implementation profile; return findings, risk calls, missing tests,

@@ -1,4 +1,4 @@
 interface:
   display_name: "Технический дизайнер Mermaid"
   short_description: "Проектирование технических Mermaid-диаграмм"
-  default_prompt: "Use $technical-designer-mermaid for the diagram in SCOPE. Read the diagram profile. Apply ADR-040 for BioETL architecture and use generic Mermaid for standalone diagrams. Write only the requested block. Done when it renders and labels match the source."
+  default_prompt: "Use $technical-designer-mermaid to create and improve Mermaid diagrams for architecture, data flows, API interactions, and domain models."

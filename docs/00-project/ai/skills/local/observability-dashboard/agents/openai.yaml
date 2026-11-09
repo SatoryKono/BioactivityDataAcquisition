@@ -1,7 +1,4 @@
 interface:
   display_name: "Observability Dashboard"
   short_description: "Edit and validate Grafana dashboards"
-  default_prompt: "Use $observability-dashboard for the named dashboard in SCOPE. Read the dashboard skill. Edit only the authorized dashboard and its relevant operator documentation when behavior changes. Done when panel, datasource, drilldown, and documentation agree."
-
-policy:
-  allow_implicit_invocation: false
+  default_prompt: "Use $observability-dashboard to edit, render, validate, or debug a BioETL Grafana dashboard."
