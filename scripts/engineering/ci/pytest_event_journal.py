@@ -219,8 +219,14 @@ def _secret_values() -> tuple[str, ...]:
 
 
 def _line_for_storage(line: str, known_secrets: tuple[str, ...]) -> str:
-    """Replace a line that still contains a raw secret."""
-    if any(secret and secret in line for secret in known_secrets):
+    """Replace a line that still contains a raw secret.
+
+    Marker text such as ``[redacted:<digest>]`` is removed before the
+    search. A secret that is only a fragment of that marker, for example
+    ``redacted:``, stays in the already-redacted event.
+    """
+    visible = _REDACTED_ASSIGNMENT_VALUE.sub("", line)
+    if any(secret and secret in visible for secret in known_secrets):
         blocked = (
             '{"event":"redaction_blocked","schema_version":'
             + str(SCHEMA_VERSION)
