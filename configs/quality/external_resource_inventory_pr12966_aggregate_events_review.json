@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "6b53037569790f234c984c1689982a78732dff10",
+  "source_ref": "9281bb398da7e5e72353addb63cbf448fd46eb5e",
+  "source_reviews": {
+    "src/bioetl/domain/aggregates/events.py": "Validate event constructor counts, required failure descriptions and allowed resolution values. No external-resource access or ownership change.",
+    "src/bioetl/application/core/_batch_write_events.py": "Use the exception class as fallback for an empty write-failure description. Existing event dispatch and I/O boundaries retained.",
+    "src/bioetl/application/observability/observer_context_mixin.py": "Use the exception class as fallback for an empty pipeline-failure description. Existing event dispatch and I/O boundaries retained."
+  },
+  "line_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "reference_moves": []
+}
