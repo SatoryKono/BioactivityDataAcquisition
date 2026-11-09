@@ -1,6 +1,11 @@
 """Regression coverage for selected-run tokens and endpoint error semantics."""
 
+import pytest
+
 from scripts.ops.observability.grafana import audit_live_grafana_panels as audit_subject
+
+
+pytestmark = pytest.mark.repo_backed
 
 
 def test_selected_run_http_aliases_are_resolved() -> None:

@@ -6,6 +6,8 @@ import subprocess
 
 import pytest
 
+pytestmark = pytest.mark.repo_backed
+
 
 def test_managed_github_transport_contract() -> None:
     node = shutil.which("node")
