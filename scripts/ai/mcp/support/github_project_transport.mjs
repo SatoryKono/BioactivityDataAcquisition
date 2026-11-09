@@ -176,10 +176,7 @@ function windowsPath(value) {
 }
 
 function resolveManagedCommand(command) {
-  if (!path.isAbsolute(command)) {
-    throw new Error('Managed runtime command must be an absolute path');
-  }
-  if (!exists(command)) {
+  if (path.isAbsolute(command) && !exists(command)) {
     throw new Error('Managed runtime command missing');
   }
   return command;
@@ -335,4 +332,5 @@ if (
     );
     process.exitCode = 1;
   }
+}
 }

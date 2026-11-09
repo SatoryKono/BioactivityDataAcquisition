@@ -291,10 +291,28 @@ def test_tracked_mcp_projections_reject_workstation_paths() -> None:
             encoding="utf-8"
         )
     )["servers"]
+    private_owner_wrappers = {
+        "context7": "mcp_context7_wrapper.sh",
+        "brave-search": "mcp_brave_search_wrapper.sh",
+        "ast-grep": "mcp_ast_grep_wrapper.sh",
+        "github": "github-mcp-wrapper.sh",
+    }
     for server_name, entry in shared_catalog.items():
         server = devin_servers[server_name]
-        assert server["url"] == f"http://127.0.0.1:{entry['port']}{entry['path']}"
-        assert set(server) == {"url"}
+        if server_name in private_owner_wrappers:
+            expected = {
+                key: value
+                for key, value in expected_servers[server_name].items()
+                if key != "type"
+            }
+            assert server == expected
+            assert server["command"] == "bash"
+            assert server["args"] == [
+                "scripts/ai/mcp/" + private_owner_wrappers[server_name]
+            ]
+        else:
+            assert server["url"] == f"http://127.0.0.1:{entry['port']}{entry['path']}"
+            assert set(server) == {"url"}
     assert devin_servers["deepwiki"]["headers"] == {
         "x-deepwiki-api-key": "${env:DEEPWIKI_API_KEY}",
         "x-deepwiki-organisation-id": "${env:DEEPWIKI_ORGANISATION_ID}",
