@@ -10730,7 +10730,10 @@
       "reviewed_source_sha256": {
         "src/bioetl/interfaces/http/processed_records_table.py": "f3b976cf66e7564033ff636dd9ca77302877d6f5a463ca3b12d17fdc53959339"
       },
-      "resource_review": "Reviewed the entire changed processed_records_table.py diff and complete source acquisition census. Missing Gold snapshot keys now remain None instead of synthetic zero, permitting validated report fill. No acquisition, ownership, shutdown, or creation-site expression changes; runtime NOT_RUN_12553 preserved."
+      "resource_review": "Reviewed the entire changed processed_records_table.py diff and complete source acquisition census. Missing Gold snapshot keys now remain None instead of synthetic zero, permitting validated report fill. No acquisition, ownership, shutdown, or creation-site expression changes; runtime NOT_RUN_12553 preserved.",
+      "reviewed_resource_free_sources": {
+        "src/bioetl/interfaces/http/processed_records_table.py": "f3b976cf66e7564033ff636dd9ca77302877d6f5a463ca3b12d17fdc53959339"
+      }
     }
   ],
   "resource_parts": [
