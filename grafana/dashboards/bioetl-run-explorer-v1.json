@@ -618,11 +618,11 @@
               },
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 170
               },
               {
                 "id": "unit",
-                "value": "time:YY-MM-DD:HH:mm"
+                "value": "time:YYYY-MM-DD HH:mm"
               }
             ]
           },
@@ -658,7 +658,7 @@
             "properties": [
               {
                 "id": "custom.minWidth",
-                "value": 150
+                "value": 80
               },
               {
                 "id": "custom.inspect",
@@ -666,7 +666,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 150
+                "value": 80
               },
               {
                 "id": "links",

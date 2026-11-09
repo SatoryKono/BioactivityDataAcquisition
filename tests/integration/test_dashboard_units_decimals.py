@@ -91,12 +91,7 @@ def test_shipped_dashboards_do_not_use_iso_datetime_unit():
                     f"{panel.get('title')!r} still uses dateTimeAsIso"
                 )
                 if unit.startswith("time:") or unit.startswith("dateTime"):
-                    expected = (
-                        "time:YY-MM-DD:HH:mm"
-                        if dashboard_path.name == "bioetl-run-explorer-v1.json"
-                        and panel.get("id") == 3010
-                        else DASHBOARD_DATETIME_UNIT
-                    )
+                    expected = DASHBOARD_DATETIME_UNIT
                     assert unit == expected, (
                         f"{dashboard_path.name}:panel={panel.get('id')} "
                         f"datetime unit must be {DASHBOARD_DATETIME_UNIT}, got {unit!r}"
