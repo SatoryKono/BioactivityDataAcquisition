@@ -6,7 +6,7 @@ import {spawn} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 
 export const UNMANAGED = 78;
-const names = new Set(['context7', 'brave-search']);
+const names = new Set(['context7', 'brave-search', 'ast-grep']);
 function normalized(value) {
     const pathValue = process.platform === 'win32' ? value.replaceAll('\\', '/').toLowerCase() : value;
     return pathValue.replace(/\/$/, '');
@@ -106,8 +106,10 @@ export function selectRoute(data, root, name, commonDirectory = gitCommonDirecto
         if (!Object.hasOwn(scope.entries, name)) continue;
         const entry = scope.entries[name];
         selected = validateEntry(entry);
+        selected.args = selected.args.map(value => value === '{workspace_root}' ? root : value);
     }
-    if (managed && !selected) throw new Error('Managed workspace has no route for the requested server');
+    // Old route policies predate optional ast-grep routing; explicit entries still fail closed.
+    if (managed && !selected && name !== 'ast-grep') throw new Error('Managed workspace has no route for the requested server');
     return selected;
 }
 
