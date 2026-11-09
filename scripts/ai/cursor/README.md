@@ -13,7 +13,7 @@ Tracked sources of truth:
 | Surface | Tracked SSOT | Local deploy |
 | --- | --- | --- |
 | Cursor rules | `docs/00-project/ai/rules/cursor/*.mdc` | `.cursor/rules/` |
-| Skills | `.codex/skills/**` | `.cursor/skills/*` relative symlinks |
+| Skills | `.codex/skills/**` and `docs/00-project/ai/grok/skills/**` | `.cursor/skills/*` relative symlinks |
 | MCP portable | `.mcp.json` (stdio, full inventory) | `.cursor/mcp.json` (profiled; default **stable**) |
 
 Policy: `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md`.
@@ -28,7 +28,7 @@ bash scripts/ai/cursor/setup_cursor.sh
 
 1. Регенерирует `.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`, `.codex/settings.json`
 1. Обновляет `~/.codex/config.toml`
-1. Создаёт **relative** symlink skills: `.cursor/skills/<name>` → `../../.codex/skills/<name>`
+1. Создаёт **relative** symlink skills: `.cursor/skills/<name>` → `../../.codex/skills/<name>` и `../../docs/00-project/ai/grok/skills/<name>`
 1. Prunes stale links (e.g. historical dangling `public`)
 
 Daily MCP default is `--profile stable`. For multi-client heavy plane:
@@ -51,6 +51,6 @@ bash scripts/ai/cursor/setup_skills.sh --project-only
 
 ## Источник истины
 
-- Skills: `.codex/skills/**`
+- Skills: `.codex/skills/**`, operator skills `docs/00-project/ai/grok/skills/**`
 - MCP: `scripts/ai/codex/setup_mcp.py`
 - Cursor rules SSOT: `docs/00-project/ai/rules/cursor/**`

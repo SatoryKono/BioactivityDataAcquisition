@@ -133,4 +133,18 @@ for key in PATH HOME USERPROFILE SYSTEMROOT WINDIR TEMP TMP TMPDIR \
     github_env+=("${key}=${!key}")
   fi
 done
+# Optional machine-local shared GitHub transport, after all project policy checks.
+github_route_file="${PC_AGENT_GITHUB_PROJECT_ROUTES:-${HOME}/.config/pc-agent/github-project-route.json}"
+if [[ -n "${PC_AGENT_GITHUB_PROJECT_ROUTES:-}" || -f "${github_route_file}" ]]; then
+  github_transport="${SCRIPT_DIR}/support/github_project_transport.mjs"
+  [[ -f "${github_transport}" ]] || { mcp_fail "Managed GitHub transport helper missing"; exit 1; }
+  command -v node >/dev/null 2>&1 || { mcp_fail "Managed GitHub transport requires node"; exit 1; }
+  if node "${github_transport}" --root "${REPO_ROOT}" --binary "${GITHUB_MCP_BIN}" --approved-sha "${BIOETL_GITHUB_MCP_SHA256:--}" -- "${stdio_args[@]}"; then
+    exit 0
+  else
+    github_transport_result=$?
+  fi
+  [[ "${github_transport_result}" == "78" ]] || exit "${github_transport_result}"
+fi
+
 exec env -i "${github_env[@]}" "${GITHUB_MCP_BIN}" "${stdio_args[@]}"

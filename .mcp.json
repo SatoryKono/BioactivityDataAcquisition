@@ -49,15 +49,20 @@
       ]
     },
     "context7": {
-      "command": "bash",
+      "type": "stdio",
+      "command": "node",
       "args": [
-        "scripts/ai/mcp/mcp_context7_wrapper.sh"
+        "-e",
+        "const{pathToFileURL}=require('node:url');const p=process.platform==='win32'?'D:/pc-agent/tools/shared-mcp/client-hop.mjs':'/mnt/d/pc-agent/tools/shared-mcp/client-hop.mjs';process.argv=[process.execPath,p,'context7'];import(pathToFileURL(p).href).catch(()=>{process.exitCode=1});"
       ]
     },
     "ast-grep": {
-      "command": "bash",
+      "type": "stdio",
+      "command": "node",
       "args": [
-        "scripts/ai/mcp/mcp_ast_grep_wrapper.sh"
+        "-e",
+        "const{pathToFileURL}=require('node:url');const p=process.platform==='win32'?'D:/pc-agent/tools/shared-mcp/ast-workspace-hop.mjs':'/mnt/d/pc-agent/tools/shared-mcp/ast-workspace-hop.mjs';process.argv=[process.execPath,p,'--root',process.argv[1]];import(pathToFileURL(p).href).catch(()=>{process.exitCode=1});",
+        "D:/github/BioactivityDataAcquisition"
       ]
     },
     "mcp-code-interpreter": {
@@ -79,9 +84,11 @@
       ]
     },
     "brave-search": {
-      "command": "bash",
+      "type": "stdio",
+      "command": "node",
       "args": [
-        "scripts/ai/mcp/mcp_brave_search_wrapper.sh"
+        "-e",
+        "const{pathToFileURL}=require('node:url');const p=process.platform==='win32'?'D:/pc-agent/tools/shared-mcp/client-hop.mjs':'/mnt/d/pc-agent/tools/shared-mcp/client-hop.mjs';process.argv=[process.execPath,p,'brave'];import(pathToFileURL(p).href).catch(()=>{process.exitCode=1});"
       ]
     },
     "neo4j-cypher": {
