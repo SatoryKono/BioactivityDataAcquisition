@@ -824,14 +824,7 @@
     }
   },
   "assertless_total_candidates": 69,
-  "budget_violations": [
-    {
-      "actual": 17,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1005,26 +998,8 @@
     ]
   },
   "intentional_no_exception_contract": 68,
-  "markerless_examples": [
-    "tests/unit/domain/aggregates/test_events_invariants.py:33",
-    "tests/unit/domain/aggregates/test_events_invariants.py:68",
-    "tests/unit/domain/aggregates/test_events_invariants.py:98",
-    "tests/unit/domain/aggregates/test_events_invariants.py:105",
-    "tests/unit/domain/aggregates/test_events_invariants.py:116",
-    "tests/unit/domain/aggregates/test_events_invariants.py:123",
-    "tests/unit/domain/aggregates/test_events_invariants.py:131",
-    "tests/unit/domain/aggregates/test_events_invariants.py:167",
-    "tests/unit/domain/aggregates/test_events_invariants.py:178",
-    "tests/unit/domain/aggregates/test_events_invariants.py:190",
-    "tests/unit/domain/aggregates/test_events_invariants.py:201",
-    "tests/unit/domain/aggregates/test_events_invariants.py:213",
-    "tests/unit/domain/aggregates/test_events_invariants.py:225",
-    "tests/unit/domain/aggregates/test_events_invariants.py:238",
-    "tests/unit/domain/aggregates/test_events_invariants.py:250",
-    "tests/unit/domain/aggregates/test_events_invariants.py:263",
-    "tests/unit/domain/aggregates/test_events_invariants.py:274"
-  ],
-  "markerless_test_functions": 17,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -1761,26 +1736,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/domain/aggregates/test_events_invariants.py:33",
-      "tests/unit/domain/aggregates/test_events_invariants.py:68",
-      "tests/unit/domain/aggregates/test_events_invariants.py:98",
-      "tests/unit/domain/aggregates/test_events_invariants.py:105",
-      "tests/unit/domain/aggregates/test_events_invariants.py:116",
-      "tests/unit/domain/aggregates/test_events_invariants.py:123",
-      "tests/unit/domain/aggregates/test_events_invariants.py:131",
-      "tests/unit/domain/aggregates/test_events_invariants.py:167",
-      "tests/unit/domain/aggregates/test_events_invariants.py:178",
-      "tests/unit/domain/aggregates/test_events_invariants.py:190",
-      "tests/unit/domain/aggregates/test_events_invariants.py:201",
-      "tests/unit/domain/aggregates/test_events_invariants.py:213",
-      "tests/unit/domain/aggregates/test_events_invariants.py:225",
-      "tests/unit/domain/aggregates/test_events_invariants.py:238",
-      "tests/unit/domain/aggregates/test_events_invariants.py:250",
-      "tests/unit/domain/aggregates/test_events_invariants.py:263",
-      "tests/unit/domain/aggregates/test_events_invariants.py:274"
-    ],
-    "markerless_test_functions": 17,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -1841,12 +1798,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3244,
-    "total_test_functions": 32153,
+    "total_test_functions": 32154,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "11626a9ca6e5bca7a8f26109ee40227132c0a5540b0e7190adec028dbfffda6e",
+  "source_tree_sha256": "2777c8a2f492ccb1ea30cca6a4939b9f13fbbc2c76fbe44aca0e165cdae3185f",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 69,
@@ -1855,26 +1812,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 68,
-    "markerless_examples": [
-      "tests/unit/domain/aggregates/test_events_invariants.py:33",
-      "tests/unit/domain/aggregates/test_events_invariants.py:68",
-      "tests/unit/domain/aggregates/test_events_invariants.py:98",
-      "tests/unit/domain/aggregates/test_events_invariants.py:105",
-      "tests/unit/domain/aggregates/test_events_invariants.py:116",
-      "tests/unit/domain/aggregates/test_events_invariants.py:123",
-      "tests/unit/domain/aggregates/test_events_invariants.py:131",
-      "tests/unit/domain/aggregates/test_events_invariants.py:167",
-      "tests/unit/domain/aggregates/test_events_invariants.py:178",
-      "tests/unit/domain/aggregates/test_events_invariants.py:190",
-      "tests/unit/domain/aggregates/test_events_invariants.py:201",
-      "tests/unit/domain/aggregates/test_events_invariants.py:213",
-      "tests/unit/domain/aggregates/test_events_invariants.py:225",
-      "tests/unit/domain/aggregates/test_events_invariants.py:238",
-      "tests/unit/domain/aggregates/test_events_invariants.py:250",
-      "tests/unit/domain/aggregates/test_events_invariants.py:263",
-      "tests/unit/domain/aggregates/test_events_invariants.py:274"
-    ],
-    "markerless_test_functions": 17,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -1927,7 +1866,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3244,
-  "total_test_functions": 32153,
+  "total_test_functions": 32154,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
