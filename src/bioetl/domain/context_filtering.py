@@ -137,17 +137,22 @@ class InputFilterContext:
     @property
     def is_csv_mode(self) -> bool:
         """Check if the input filter is using CSV-based filtering."""
-        return self.enabled and bool(self.source_path)
+        return (
+            self.enabled
+            and not self.multi_filter_ids
+            and not self.filter_ids
+            and bool(self.source_path)
+        )
 
     @property
     def is_direct_ids_mode(self) -> bool:
         """Check if the input filter is using direct IDs filtering."""
-        return self.enabled and self.filter_ids is not None
+        return self.enabled and not self.multi_filter_ids and bool(self.filter_ids)
 
     @property
     def is_multi_ids_mode(self) -> bool:
         """Check if the input filter is using multi-field IDs filtering."""
-        return self.enabled and self.multi_filter_ids is not None
+        return self.enabled and bool(self.multi_filter_ids)
 
     def __post_init__(self) -> None:
         """Validate filter configuration."""
