@@ -16,10 +16,21 @@
       "url": "http://127.0.0.1:8817/mcp"
     },
     "context7": {
-      "url": "http://127.0.0.1:8815/mcp"
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "-e",
+        "const{pathToFileURL}=require('node:url');const p=process.platform==='win32'?'D:/pc-agent/tools/shared-mcp/client-hop.mjs':'/mnt/d/pc-agent/tools/shared-mcp/client-hop.mjs';process.argv=[process.execPath,p,'context7'];import(pathToFileURL(p).href).catch(()=>{process.exitCode=1});"
+      ]
     },
     "ast-grep": {
-      "url": "http://127.0.0.1:8816/mcp"
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "-e",
+        "const{pathToFileURL}=require('node:url');const p=process.platform==='win32'?'D:/pc-agent/tools/shared-mcp/ast-workspace-hop.mjs':'/mnt/d/pc-agent/tools/shared-mcp/ast-workspace-hop.mjs';process.argv=[process.execPath,p,'--root',process.argv[1]];import(pathToFileURL(p).href).catch(()=>{process.exitCode=1});",
+        "D:/github/BioactivityDataAcquisition"
+      ]
     },
     "mcp-code-interpreter": {
       "url": "http://127.0.0.1:8829/mcp"
@@ -31,7 +42,12 @@
       "url": "http://127.0.0.1:8823/mcp"
     },
     "brave-search": {
-      "url": "http://127.0.0.1:8811/mcp"
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "-e",
+        "const{pathToFileURL}=require('node:url');const p=process.platform==='win32'?'D:/pc-agent/tools/shared-mcp/client-hop.mjs':'/mnt/d/pc-agent/tools/shared-mcp/client-hop.mjs';process.argv=[process.execPath,p,'brave'];import(pathToFileURL(p).href).catch(()=>{process.exitCode=1});"
+      ]
     },
     "neo4j-cypher": {
       "url": "http://127.0.0.1:8824/mcp"
