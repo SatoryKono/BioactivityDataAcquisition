@@ -1501,7 +1501,6 @@
         "docs/00-project/ai/prompts/domains.yaml",
         "docs/00-project/ai/prompts/fragments/project-requirements-audit.md",
         "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-        "docs/00-project/ai/skills/local/technical-designer-mermaid/agents/openai.yaml",
         "docs/00-project/ai/skills/local/technical-designer-mermaid/references/patterns.md",
         "docs/00-project/governance/pr-required-check-crosswalk.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
