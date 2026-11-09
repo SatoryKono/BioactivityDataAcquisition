@@ -215,3 +215,12 @@ test('Bash forwards termination to the managed adapter',{skip:process.platform==
     });
     assert.deepEqual(result,{code:143,stdout:'READYTERMINATED'});
 });
+
+test('AST scope substitutes only the complete workspace argument',t=>{
+    const root=fixture(t);
+    const data={workspaces:[{roots:[root],entries:{'ast-grep':{
+        command:process.execPath,args:['--root','{workspace_root}','literal {workspace_root}']
+    }}}]};
+    const selected=route.selectRoute(data,root,'ast-grep');
+    assert.deepEqual(selected.args,['--root',root,'literal {workspace_root}']);
+});

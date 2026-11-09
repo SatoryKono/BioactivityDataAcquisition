@@ -176,3 +176,4 @@ def test_project_sync_retargets_skill_moved_between_codex_and_grok(
     assert result.returncode == 0, result.stderr
     assert stale.is_symlink()
     assert os.readlink(stale) == "../../docs/00-project/ai/grok/skills/migrated"
+
