@@ -133,6 +133,7 @@ SEMANTIC_CLASSIFICATION_POLICY: dict[str, str] = {
     "mixed_query_results": "review_required",
     "nonempty_result": "pass",
     "nonempty_table": "pass",
+    "replay_not_ready": "pass",  # The verdict is valid evidence, even when replay is blocked.
     "resolved_identity": "pass",
     "resolved_numeric": "pass",
     "resolved_zero": "pass",

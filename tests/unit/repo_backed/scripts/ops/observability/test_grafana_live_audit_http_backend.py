@@ -239,3 +239,29 @@ def test_replay_audit_uses_projected_frames_instead_of_donor_rows() -> None:
         "ok",
         "nonempty_table",
     )
+
+
+@pytest.mark.parametrize("verdict", ["BLOCKED", "UNSUPPORTED"])
+def test_replay_negative_verdict_is_valid_audit_evidence(verdict: str) -> None:
+    spec = next(
+        spec
+        for spec in audit_subject.REVIEWED_PANEL_SPECS
+        if spec.dashboard_uid == "bioetl-control-plane-v1" and spec.panel_id == 9422
+    )
+    status, classification, detail = audit_subject._classify_http_panel_payload(
+        spec, {"replay_readiness": [{"verdict": verdict}]}
+    )
+    assert (status, classification) == ("ok", "replay_not_ready")
+    result = audit_subject.AuditResult(
+        dashboard_uid=spec.dashboard_uid,
+        panel_id=spec.panel_id,
+        title=spec.title,
+        source_kind=spec.source_kind,
+        semantic_kind=spec.semantic_kind,
+        status=status,
+        classification=classification,
+        detail=detail,
+        query_preview="",
+        target_ref_id=spec.target_ref_id,
+    )
+    assert audit_subject.semantic_gate_evidence([result])["status"] == "pass"
