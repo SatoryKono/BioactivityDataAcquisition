@@ -422,7 +422,7 @@
             },
             "wrapText": false
           },
-          "noValue": "UNKNOWN — the launches table returned no rows for these filters. QUERY ERROR means the backend request failed, not an empty fleet.",
+          "noValue": "UNKNOWN — required launch evidence is unavailable. QUERY ERROR means the backend request failed, not an empty fleet.",
           "links": [],
           "color": {
             "mode": "fixed",
