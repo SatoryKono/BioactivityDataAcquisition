@@ -12,6 +12,9 @@ from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
 from bioetl.composition.control_plane_paths import (
     control_plane_root,
 )
+from bioetl.domain.control_plane.snapshot_field_resolution import (
+    coerce_optional_text as _coerce_optional_str,
+)
 from bioetl.domain.control_plane import RunInputSnapshotRef
 from bioetl.application.services.control_plane.manifest import (
     input_snapshot_resolution as snapshot_policy,
@@ -107,10 +110,3 @@ def resolve_pipeline_input_snapshot_refs(
             run_id=_coerce_optional_str(getattr(ctx, "replay_of_run_id", None)),
         ),
     )
-
-
-def _coerce_optional_str(value: object | None) -> str | None:
-    if value is None:
-        return None
-    text = str(value).strip()
-    return text or None
