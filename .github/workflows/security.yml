@@ -83,8 +83,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_CONFIG: .gitleaks.toml
+          # GITLEAKS_ENABLE_COMMENTS remains false as we only have contents: read permission
           GITLEAKS_ENABLE_COMMENTS: "false"
-          GITLEAKS_ENABLE_SUMMARY: "false"
+          GITLEAKS_ENABLE_SUMMARY: "true"
 
   osv-scanner:
     runs-on: ubuntu-latest
