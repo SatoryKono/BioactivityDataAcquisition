@@ -326,7 +326,7 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
     PanelAuditSpec(
         dashboard_uid="bioetl-dq-v2",
         panel_id=9403,
-        title=PROCESSED_RECORDS_PANEL_TITLE,
+        title="Inspect Processed Records",
         source_kind="http",
         semantic_kind="http_table",
         target_ref_id="A",
@@ -1384,8 +1384,9 @@ def _classify_http_table_payload(
         "control_plane_identity_evidence_v1",
         "control_plane_validation_evidence_v1",
     )
-    if title == PROCESSED_RECORDS_PANEL_TITLE or (
-        "contract" in payload and not control_plane_table
+    if (
+        title in ("Inspect Processed Records", PROCESSED_RECORDS_PANEL_TITLE)
+        or ("contract" in payload and not control_plane_table)
     ):
         return _classify_processed_records_payload(payload)
     if not control_plane_table and (title == "ID" or "resolved_via" in payload):

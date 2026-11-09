@@ -96,7 +96,7 @@ def test_live_audit_reviewed_specs_cover_semantically_sensitive_panels() -> None
     assert covered[("bioetl-control-plane-v1", 9422)] == "Review Exact Replay Readiness"
     assert covered[("bioetl-control-plane-v1", 9418)] == "Review Selected-Run Trust"
     assert ("bioetl-dq-v2", 9402) not in covered
-    assert covered[("bioetl-dq-v2", 9403)] == "Processed Records"
+    assert covered[("bioetl-dq-v2", 9403)] == "Inspect Processed Records"
     assert ("bioetl-silver-reject-explorer", 3) not in covered
     assert ("bioetl-overview-v2", 9301) not in covered
     assert ("bioetl-runtime", 9403) not in covered
