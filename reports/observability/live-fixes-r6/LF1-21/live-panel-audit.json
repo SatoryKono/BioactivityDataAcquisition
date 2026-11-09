@@ -20,7 +20,7 @@
     },
     "workflow": "All"
   },
-  "generated_at": "2026-11-09T00:31:56.162323+00:00",
+  "generated_at": "2026-11-09T04:01:08.969665+00:00",
   "occurrence_id": "",
   "panel_specs": [
     {
@@ -1305,7 +1305,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=topk%281%2C+bioetl_workflow_scope_priority_by_input%7Bworkflow%3D~%22All%22%2Cpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29&time=1794184315.185047"
+          "request_url": "http://localhost:9090/api/v1/query?query=topk%281%2C+bioetl_workflow_scope_priority_by_input%7Bworkflow%3D~%22All%22%2Cpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29&time=1794196868.004101"
         }
       ],
       "request_url": null,
@@ -1327,7 +1327,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28label_replace%28bioetl_incident_ranked_evidence%2C%22object%22%2C%22%241%22%2C%22object%22%2C%22%28.%2A%29+%2F+%24%22%29%2C%22route_pipeline%22%2C%22.%2A%22%2C%22pipeline%22%2C%22unknown%22%29&time=1794184315.194002"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28label_replace%28bioetl_incident_ranked_evidence%2C%22object%22%2C%22%241%22%2C%22object%22%2C%22%28.%2A%29+%2F+%24%22%29%2C%22route_pipeline%22%2C%22.%2A%22%2C%22pipeline%22%2C%22unknown%22%29&time=1794196868.013577"
         }
       ],
       "request_url": null,
@@ -1349,7 +1349,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28label_replace%28label_replace%28label_replace%28%28label_replace%28label_join%28%28bioetl_incident_alert_priority%7Bprovider%21%3D%22%22%7D+or+%28%28bioetl_incident_alert_priority%7Bprovider%3D%22%22%7D+unless+bioetl_incident_alert_priority%7Bprovider%3D%22%22%2Cpipeline%3D%22%22%2Calertname%3D%22BioETLDockerRuntimeProbeMissing%22%7D%29+%2A+on%28pipeline%29+group_left%28provider%29+%28group+by%28pipeline%2Cprovider%29%28bioetl_workflow_pipeline_expected%7Bpipeline%21%3D%22%22%2Cprovider%21%3D%22%22%2Cprovider%21%3D%22unknown%22%7D+%3E+0%29+and+on%28pipeline%29+%28count+by%28pipeline%29%28group+by%28pipeline%2Cprovider%29%28bioetl_workflow_pipeline_expected%7Bpipeline%21%3D%22%22%2Cprovider%21%3D%22%22%2Cprovider%21%3D%22unknown%22%7D+%3E+0%29%29+%3D%3D+1%29%29%29+or+%28%28bioetl_incident_alert_priority%7Bprovider%3D%22%22%7D+unless+bioetl_incident_alert_priority%7Bprovider%3D%22%22%2Cpipeline%3D%22%22%2Calertname%3D%22BioETLDockerRuntimeProbeMissing%22%7D%29+unless+on%28pipeline%29+%28group+by%28pipeline%2Cprovider%29%28bioetl_workflow_pipeline_expected%7Bpipeline%21%3D%22%22%2Cprovider%21%3D%22%22%2Cprovider%21%3D%22unknown%22%7D+%3E+0%29+and+on%28pipeline%29+%28count+by%28pipeline%29%28group+by%28pipeline%2Cprovider%29%28bioetl_workflow_pipeline_expected%7Bpipeline%21%3D%22%22%2Cprovider%21%3D%22%22%2Cprovider%21%3D%22unknown%22%7D+%3E+0%29%29+%3D%3D+1%29%29%29+or+label_replace%28bioetl_incident_alert_priority%7Bprovider%3D%22%22%2Cpipeline%3D%22%22%2Calertname%3D%22BioETLDockerRuntimeProbeMissing%22%7D%2C%22provider%22%2C%22N%2FA+%E2%80%94+Infrastructure%22%2C%22%22%2C%22%22%29%29%2C%22pipeline_context%22%2C%22%3B%22%2C%22alertname%22%2C%22pipeline%22%29%2C%22pipeline%22%2C%22N%2FA+%E2%80%94+Docker+infrastructure%22%2C%22pipeline_context%22%2C%22BioETLDockerRuntimeProbeMissing%3B%22%29%29%2C%22pipeline%22%2C%22Not+provided%22%2C%22pipeline%22%2C%22%5E%24%22%29%2C%22provider%22%2C%22Not+provided%22%2C%22provider%22%2C%22%5E%24%22%29%2C%22alert_runbook%22%2C%22incident-response%22%2C%22%22%2C%22%22%29%2C%22alert_runbook%22%2C%22docker-stability%22%2C%22alertname%22%2C%22BioETLDockerRuntimeProbeMissing%22%29&time=1794184315.2028"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28label_replace%28label_replace%28label_replace%28%28label_replace%28label_join%28%28bioetl_incident_alert_priority%7Bprovider%21%3D%22%22%7D+or+%28%28bioetl_incident_alert_priority%7Bprovider%3D%22%22%7D+unless+bioetl_incident_alert_priority%7Bprovider%3D%22%22%2Cpipeline%3D%22%22%2Calertname%3D%22BioETLDockerRuntimeProbeMissing%22%7D%29+%2A+on%28pipeline%29+group_left%28provider%29+%28group+by%28pipeline%2Cprovider%29%28bioetl_workflow_pipeline_expected%7Bpipeline%21%3D%22%22%2Cprovider%21%3D%22%22%2Cprovider%21%3D%22unknown%22%7D+%3E+0%29+and+on%28pipeline%29+%28count+by%28pipeline%29%28group+by%28pipeline%2Cprovider%29%28bioetl_workflow_pipeline_expected%7Bpipeline%21%3D%22%22%2Cprovider%21%3D%22%22%2Cprovider%21%3D%22unknown%22%7D+%3E+0%29%29+%3D%3D+1%29%29%29+or+%28%28bioetl_incident_alert_priority%7Bprovider%3D%22%22%7D+unless+bioetl_incident_alert_priority%7Bprovider%3D%22%22%2Cpipeline%3D%22%22%2Calertname%3D%22BioETLDockerRuntimeProbeMissing%22%7D%29+unless+on%28pipeline%29+%28group+by%28pipeline%2Cprovider%29%28bioetl_workflow_pipeline_expected%7Bpipeline%21%3D%22%22%2Cprovider%21%3D%22%22%2Cprovider%21%3D%22unknown%22%7D+%3E+0%29+and+on%28pipeline%29+%28count+by%28pipeline%29%28group+by%28pipeline%2Cprovider%29%28bioetl_workflow_pipeline_expected%7Bpipeline%21%3D%22%22%2Cprovider%21%3D%22%22%2Cprovider%21%3D%22unknown%22%7D+%3E+0%29%29+%3D%3D+1%29%29%29+or+label_replace%28bioetl_incident_alert_priority%7Bprovider%3D%22%22%2Cpipeline%3D%22%22%2Calertname%3D%22BioETLDockerRuntimeProbeMissing%22%7D%2C%22provider%22%2C%22N%2FA+%E2%80%94+Infrastructure%22%2C%22%22%2C%22%22%29%29%2C%22pipeline_context%22%2C%22%3B%22%2C%22alertname%22%2C%22pipeline%22%29%2C%22pipeline%22%2C%22N%2FA+%E2%80%94+Docker+infrastructure%22%2C%22pipeline_context%22%2C%22BioETLDockerRuntimeProbeMissing%3B%22%29%29%2C%22pipeline%22%2C%22Not+provided%22%2C%22pipeline%22%2C%22%5E%24%22%29%2C%22provider%22%2C%22Not+provided%22%2C%22provider%22%2C%22%5E%24%22%29%2C%22alert_runbook%22%2C%22incident-response%22%2C%22%22%2C%22%22%29%2C%22alert_runbook%22%2C%22docker-stability%22%2C%22alertname%22%2C%22BioETLDockerRuntimeProbeMissing%22%29&time=1794196868.023436"
         }
       ],
       "request_url": null,
@@ -1371,7 +1371,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=ALERTS%7Balertstate%3D%22firing%22%7D+or+%28ALERTS%7Balertstate%3D%22pending%22%7D+%2A+2%29&start=1794097915.211294&end=1794184315.211294&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=ALERTS%7Balertstate%3D%22firing%22%7D+or+%28ALERTS%7Balertstate%3D%22pending%22%7D+%2A+2%29&start=1794110468.032471&end=1794196868.032471&step=300.0"
         }
       ],
       "request_url": null,
@@ -1393,7 +1393,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=topk%2810%2C+max+by+%28pipeline%2C+run_type%2C+reason%29+%28bioetl_runtime_current_blocker_reason%29+%3E+0%29&time=1794184315.221748"
+          "request_url": "http://localhost:9090/api/v1/query?query=topk%2810%2C+max+by+%28pipeline%2C+run_type%2C+reason%29+%28bioetl_runtime_current_blocker_reason%29+%3E+0%29&time=1794196868.043847"
         }
       ],
       "request_url": null,
@@ -1415,7 +1415,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=topk%2810%2C+max+by+%28provider%2C+cause%29+%28bioetl_provider_current_cause%29+%3E+0%29&time=1794184315.230263"
+          "request_url": "http://localhost:9090/api/v1/query?query=topk%2810%2C+max+by+%28provider%2C+cause%29+%28bioetl_provider_current_cause%29+%3E+0%29&time=1794196868.053094"
         }
       ],
       "request_url": null,
@@ -1437,7 +1437,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=topk%2810%2C+max+by+%28pipeline%2C+reason%29+%28bioetl_dq_current_reason%29+%3E+0%29&time=1794184315.238429"
+          "request_url": "http://localhost:9090/api/v1/query?query=topk%2810%2C+max+by+%28pipeline%2C+reason%29+%28bioetl_dq_current_reason%29+%3E+0%29&time=1794196868.062385"
         }
       ],
       "request_url": null,
@@ -1459,7 +1459,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=%28label_join%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28max+by+%28pipeline%2C+run_type%2C+stage%29+%28max_over_time%28bioetl_stage_lag_seconds%5B15m%5D%29%29+%3E%3D+300%2C%22signal%22%2C%22stage_lag%22%2C%22%22%2C%22%22%29%2C%22window%22%2C%2215m+maximum%22%2C%22%22%2C%22%22%29%2C%22threshold%22%2C%22%3E%3D+300+s+%2815m+maximum%29%22%2C%22%22%2C%22%22%29%2C%22unit%22%2C%22s%22%2C%22%22%2C%22%22%29%2C%22observation_time%22%2C%22Not+provided%22%2C%22%22%2C%22%22%29%2C%22publication_time%22%2C%22Not+provided%22%2C%22%22%2C%22%22%29%2C%22freshness%22%2C%22Not+verified%3A+observed%2Fpublished+timestamps+not+provided%22%2C%22%22%2C%22%22%29%2C%22scope%22%2C%22+%2F+%22%2C%22pipeline%22%2C%22run_type%22%2C%22stage%22%29%29+or+%28label_join%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28max+by+%28pipeline%2C+run_type%2C+stage%29+%28bioetl_stage_backlog_records%7Bstage%21%3D%22validation%22%7D%29+%3E+0%2C%22signal%22%2C%22stage_backlog%22%2C%22%22%2C%22%22%29%2C%22window%22%2C%22instant%22%2C%22%22%2C%22%22%29%2C%22threshold%22%2C%22%3E+0+records+%28instant%29%22%2C%22%22%2C%22%22%29%2C%22unit%22%2C%22records%22%2C%22%22%2C%22%22%29%2C%22observation_time%22%2C%22Not+provided%22%2C%22%22%2C%22%22%29%2C%22publication_time%22%2C%22Not+provided%22%2C%22%22%2C%22%22%29%2C%22freshness%22%2C%22Not+verified%3A+observed%2Fpublished+timestamps+not+provided%22%2C%22%22%2C%22%22%29%2C%22scope%22%2C%22+%2F+%22%2C%22pipeline%22%2C%22run_type%22%2C%22stage%22%29%29&time=1794184315.246644"
+          "request_url": "http://localhost:9090/api/v1/query?query=%28label_join%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28max+by+%28pipeline%2C+run_type%2C+stage%29+%28max_over_time%28bioetl_stage_lag_seconds%5B15m%5D%29%29+%3E%3D+300%2C%22signal%22%2C%22stage_lag%22%2C%22%22%2C%22%22%29%2C%22window%22%2C%2215m+maximum%22%2C%22%22%2C%22%22%29%2C%22threshold%22%2C%22%3E%3D+300+s+%2815m+maximum%29%22%2C%22%22%2C%22%22%29%2C%22unit%22%2C%22s%22%2C%22%22%2C%22%22%29%2C%22observation_time%22%2C%22Not+provided%22%2C%22%22%2C%22%22%29%2C%22publication_time%22%2C%22Not+provided%22%2C%22%22%2C%22%22%29%2C%22freshness%22%2C%22Not+verified%3A+observed%2Fpublished+timestamps+not+provided%22%2C%22%22%2C%22%22%29%2C%22scope%22%2C%22+%2F+%22%2C%22pipeline%22%2C%22run_type%22%2C%22stage%22%29%29+or+%28label_join%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28max+by+%28pipeline%2C+run_type%2C+stage%29+%28bioetl_stage_backlog_records%7Bstage%21%3D%22validation%22%7D%29+%3E+0%2C%22signal%22%2C%22stage_backlog%22%2C%22%22%2C%22%22%29%2C%22window%22%2C%22instant%22%2C%22%22%2C%22%22%29%2C%22threshold%22%2C%22%3E+0+records+%28instant%29%22%2C%22%22%2C%22%22%29%2C%22unit%22%2C%22records%22%2C%22%22%2C%22%22%29%2C%22observation_time%22%2C%22Not+provided%22%2C%22%22%2C%22%22%29%2C%22publication_time%22%2C%22Not+provided%22%2C%22%22%2C%22%22%29%2C%22freshness%22%2C%22Not+verified%3A+observed%2Fpublished+timestamps+not+provided%22%2C%22%22%2C%22%22%29%2C%22scope%22%2C%22+%2F+%22%2C%22pipeline%22%2C%22run_type%22%2C%22stage%22%29%29&time=1794196868.071593"
         }
       ],
       "request_url": null,
@@ -1496,7 +1496,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=topk%281%2C+bioetl_workflow_scope_priority_by_input%7Bworkflow%3D~%22All%22%2Cpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29&time=1794184315.26225"
+          "request_url": "http://localhost:9090/api/v1/query?query=topk%281%2C+bioetl_workflow_scope_priority_by_input%7Bworkflow%3D~%22All%22%2Cpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29&time=1794196868.088505"
         }
       ],
       "request_url": null,
@@ -1518,7 +1518,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=topk%283%2C+bioetl_runtime_current_blocker_reason_scoped%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29&time=1794184315.270705"
+          "request_url": "http://localhost:9090/api/v1/query?query=topk%283%2C+bioetl_runtime_current_blocker_reason_scoped%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29&time=1794196868.097515"
         }
       ],
       "request_url": null,
@@ -1540,7 +1540,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max%28up%7Bjob%3D%22bioetl%22%7D%29&time=1794184315.279356"
+          "request_url": "http://localhost:9090/api/v1/query?query=max%28up%7Bjob%3D%22bioetl%22%7D%29&time=1794196868.106733"
         }
       ],
       "request_url": null,
@@ -1562,7 +1562,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28min%28bioetl_rt_stage_ratio%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+or+on%28%29+vector%28-1%29%2C%22k%22%2C%22stages%22%2C%22%22%2C%22%22%29+or+label_replace%28bioetl_runtime_trust_gap_active_10m%2C%22k%22%2C%22quality%22%2C%22%22%2C%22%22%29&time=1794184315.287783"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28min%28bioetl_rt_stage_ratio%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+or+on%28%29+vector%28-1%29%2C%22k%22%2C%22stages%22%2C%22%22%2C%22%22%29+or+label_replace%28bioetl_runtime_trust_gap_active_10m%2C%22k%22%2C%22quality%22%2C%22%22%2C%22%22%29&time=1794196868.115886"
         }
       ],
       "request_url": null,
@@ -1584,7 +1584,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_runtime_required_rule_age_seconds&time=1794184315.296185"
+          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_runtime_required_rule_age_seconds&time=1794196868.125032"
         }
       ],
       "request_url": null,
@@ -1606,7 +1606,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_runtime_stage_progress_by_scope%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D&time=1794184315.30469"
+          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_runtime_stage_progress_by_scope%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D&time=1794196868.133954"
         }
       ],
       "request_url": null,
@@ -1628,7 +1628,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=max+by%28stage%29+%28bioetl_stage_backlog_records%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%29&start=1794097915.313127&end=1794184315.313127&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=max+by%28stage%29+%28bioetl_stage_backlog_records%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%29&start=1794110468.142697&end=1794196868.142697&step=300.0"
         }
       ],
       "request_url": null,
@@ -1650,7 +1650,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%2C+phase%2C+status%29+%28rate%28bioetl_phase_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29+unless+on+%28phase%2C+status%29+%28sum+by+%28phase%2C+status%29+%28changes%28bioetl_phase_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097915.321469&end=1794184315.321469&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%2C+phase%2C+status%29+%28rate%28bioetl_phase_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29+unless+on+%28phase%2C+status%29+%28sum+by+%28phase%2C+status%29+%28changes%28bioetl_phase_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.151753&end=1794196868.151753&step=300.0"
         }
       ],
       "request_url": null,
@@ -1672,7 +1672,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+phase%2C+status%29+%28rate%28bioetl_phase_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29+unless+on+%28phase%2C+status%29+%28sum+by+%28phase%2C+status%29+%28changes%28bioetl_phase_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097915.32972&end=1794184315.32972&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+phase%2C+status%29+%28rate%28bioetl_phase_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29+unless+on+%28phase%2C+status%29+%28sum+by+%28phase%2C+status%29+%28changes%28bioetl_phase_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.161011&end=1794196868.161011&step=300.0"
         }
       ],
       "request_url": null,
@@ -1694,7 +1694,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%2C+phase%2C+status%29+%28rate%28bioetl_phase_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29+unless+on+%28phase%2C+status%29+%28sum+by+%28phase%2C+status%29+%28changes%28bioetl_phase_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097915.338001&end=1794184315.338001&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%2C+phase%2C+status%29+%28rate%28bioetl_phase_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29+unless+on+%28phase%2C+status%29+%28sum+by+%28phase%2C+status%29+%28changes%28bioetl_phase_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.16991&end=1794196868.16991&step=300.0"
         }
       ],
       "request_url": null,
@@ -1716,7 +1716,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%2C+stage%2C+status%2C+run_type%29+%28rate%28bioetl_pipeline_duration_seconds_bucket%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29%29+unless+on+%28stage%2C+status%2C+run_type%29+%28sum+by+%28stage%2C+status%2C+run_type%29+%28changes%28bioetl_pipeline_duration_seconds_created%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097915.346411&end=1794184315.346411&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%2C+stage%2C+status%2C+run_type%29+%28rate%28bioetl_pipeline_duration_seconds_bucket%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29%29+unless+on+%28stage%2C+status%2C+run_type%29+%28sum+by+%28stage%2C+status%2C+run_type%29+%28changes%28bioetl_pipeline_duration_seconds_created%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.178904&end=1794196868.178904&step=300.0"
         }
       ],
       "request_url": null,
@@ -1738,7 +1738,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+stage%2C+status%2C+run_type%29+%28rate%28bioetl_pipeline_duration_seconds_bucket%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29%29+unless+on+%28stage%2C+status%2C+run_type%29+%28sum+by+%28stage%2C+status%2C+run_type%29+%28changes%28bioetl_pipeline_duration_seconds_created%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097915.354752&end=1794184315.354752&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+stage%2C+status%2C+run_type%29+%28rate%28bioetl_pipeline_duration_seconds_bucket%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29%29+unless+on+%28stage%2C+status%2C+run_type%29+%28sum+by+%28stage%2C+status%2C+run_type%29+%28changes%28bioetl_pipeline_duration_seconds_created%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.188272&end=1794196868.188272&step=300.0"
         }
       ],
       "request_url": null,
@@ -1760,7 +1760,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%2C+stage%2C+status%2C+run_type%29+%28rate%28bioetl_pipeline_duration_seconds_bucket%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29%29+unless+on+%28stage%2C+status%2C+run_type%29+%28sum+by+%28stage%2C+status%2C+run_type%29+%28changes%28bioetl_pipeline_duration_seconds_created%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097915.363317&end=1794184315.363317&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%2C+stage%2C+status%2C+run_type%29+%28rate%28bioetl_pipeline_duration_seconds_bucket%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29%29+unless+on+%28stage%2C+status%2C+run_type%29+%28sum+by+%28stage%2C+status%2C+run_type%29+%28changes%28bioetl_pipeline_duration_seconds_created%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.197197&end=1794196868.197197&step=300.0"
         }
       ],
       "request_url": null,
@@ -1782,7 +1782,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=max%28max_over_time%28bioetl_stage_lag_seconds%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B15m%5D%29+or+%28%28max_over_time%28bioetl_stage_lag_seconds%7Brun_type%3D~%22incremental%22%7D%5B15m%5D%29%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%29&start=1794097915.372031&end=1794184315.372031&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=max%28max_over_time%28bioetl_stage_lag_seconds%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B15m%5D%29+or+%28%28max_over_time%28bioetl_stage_lag_seconds%7Brun_type%3D~%22incremental%22%7D%5B15m%5D%29%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%29&start=1794110468.20606&end=1794196868.20606&step=300.0"
         }
       ],
       "request_url": null,
@@ -1804,7 +1804,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28%28bioetl_runtime_current_blocker_reason_scoped%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28max%28bioetl_runtime_current_status_trusted%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+%3D%3D+0%29+%2A+0%29%29&start=1794097915.380681&end=1794184315.380681&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28%28bioetl_runtime_current_blocker_reason_scoped%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28max%28bioetl_runtime_current_status_trusted%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+%3D%3D+0%29+%2A+0%29%29&start=1794110468.215432&end=1794196868.215432&step=300.0"
         }
       ],
       "request_url": null,
@@ -1826,7 +1826,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=%28sum%28increase%28bioetl_pipeline_runs_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%2Cstatus%3D%22failed%22%7D%5B24h%5D%29%29+and+%28count%28max_over_time%28bioetl_runtime_pipeline_run_type_universe_scoped%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B24h%5D%29%29+%3E+0%29%29+unless+count%28max_over_time%28bioetl_runtime_pipeline_run_type_universe_scoped%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B24h%5D%29+unless+on+%28pipeline%2C+run_type%29+%28count_over_time%28bioetl_pipeline_runs_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%2Cstatus%3D%22failed%22%7D%5B24h%5D%29+%3E%3D+2%29%29&time=1794184315.389098"
+          "request_url": "http://localhost:9090/api/v1/query?query=%28sum%28increase%28bioetl_pipeline_runs_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%2Cstatus%3D%22failed%22%7D%5B24h%5D%29%29+and+%28count%28max_over_time%28bioetl_runtime_pipeline_run_type_universe_scoped%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B24h%5D%29%29+%3E+0%29%29+unless+count%28max_over_time%28bioetl_runtime_pipeline_run_type_universe_scoped%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B24h%5D%29+unless+on+%28pipeline%2C+run_type%29+%28count_over_time%28bioetl_pipeline_runs_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%2Cstatus%3D%22failed%22%7D%5B24h%5D%29+%3E%3D+2%29%29&time=1794196868.224388"
         }
       ],
       "request_url": null,
@@ -1848,7 +1848,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28bioetl_runtime_pipeline_alert_count%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+and+on%28%29+%28count%28bioetl_runtime_pipeline_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+%3E+bool+0%29&start=1794097915.397435&end=1794184315.397435&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28bioetl_runtime_pipeline_alert_count%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+and+on%28%29+%28count%28bioetl_runtime_pipeline_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+%3E+bool+0%29&start=1794110468.233746&end=1794196868.233746&step=300.0"
         }
       ],
       "request_url": null,
@@ -1870,7 +1870,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum%28increase%28bioetl_workflow_runs_total%7Bworkflow%3D~%22All%22%2Cstatus%3D%22failed%22%7D%5B24h%5D%29%29%29&start=1794097915.405688&end=1794184315.405688&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum%28increase%28bioetl_workflow_runs_total%7Bworkflow%3D~%22All%22%2Cstatus%3D%22failed%22%7D%5B24h%5D%29%29%29&start=1794110468.242611&end=1794196868.242611&step=300.0"
         }
       ],
       "request_url": null,
@@ -1892,7 +1892,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28%28%28sum+by+%28pipeline%2C+run_type%29+%28increase%28bioetl_pipeline_runs_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B30m%5D%29%29+%3E+0%29+unless+on+%28pipeline%2C+run_type%29+%28sum+by+%28pipeline%2C+run_type%29+%28increase%28bioetl_records_processed_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B30m%5D%29%29+%3E+0%29%29%29+or+%28%28count%28bioetl_runtime_pipeline_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+%3E+bool+0%29+%2A+0%29&start=1794097915.414002&end=1794184315.414002&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28%28%28sum+by+%28pipeline%2C+run_type%29+%28increase%28bioetl_pipeline_runs_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B30m%5D%29%29+%3E+0%29+unless+on+%28pipeline%2C+run_type%29+%28sum+by+%28pipeline%2C+run_type%29+%28increase%28bioetl_records_processed_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B30m%5D%29%29+%3E+0%29%29%29+or+%28%28count%28bioetl_runtime_pipeline_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+%3E+bool+0%29+%2A+0%29&start=1794110468.251509&end=1794196868.251509&step=300.0"
         }
       ],
       "request_url": null,
@@ -1914,7 +1914,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum%28increase%28bioetl_workflow_step_events_total%7Bworkflow%3D~%22All%22%2Cstep_kind%3D%22pipeline%22%2Cpipeline_context%3D~%22chembl_target%22%2Crun_type_context%3D~%22incremental%22%2Cstatus%3D%22failed%22%7D%5B24h%5D%29%29%29&start=1794097915.422555&end=1794184315.422555&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum%28increase%28bioetl_workflow_step_events_total%7Bworkflow%3D~%22All%22%2Cstep_kind%3D%22pipeline%22%2Cpipeline_context%3D~%22chembl_target%22%2Crun_type_context%3D~%22incremental%22%2Cstatus%3D%22failed%22%7D%5B24h%5D%29%29%29&start=1794110468.261331&end=1794196868.261331&step=300.0"
         }
       ],
       "request_url": null,
@@ -1936,7 +1936,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=max%28max_over_time%28bioetl_memory_pressure_state%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%7D%5B15m%5D%29%29&start=1794097915.431134&end=1794184315.431134&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=max%28max_over_time%28bioetl_memory_pressure_state%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%7D%5B15m%5D%29%29&start=1794110468.270353&end=1794196868.270353&step=300.0"
         }
       ],
       "request_url": null,
@@ -1958,7 +1958,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=sum+by%28stage%2C+error_code%29+%28increase%28bioetl_errors_total%7Bpipeline%3D~%22chembl_target%22%2Cstage%21~%22none.%2A%22%7D%5B24h%5D%29%29&time=1794184315.439677"
+          "request_url": "http://localhost:9090/api/v1/query?query=sum+by%28stage%2C+error_code%29+%28increase%28bioetl_errors_total%7Bpipeline%3D~%22chembl_target%22%2Cstage%21~%22none.%2A%22%7D%5B24h%5D%29%29&time=1794196868.279283"
         }
       ],
       "request_url": null,
@@ -1980,7 +1980,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=sum+by%28stage%2C+run_type%29+%28increase%28bioetl_records_processed_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%2Cstage%21~%22none.%2A%22%7D%5B24h%5D%29%29&time=1794184315.448501"
+          "request_url": "http://localhost:9090/api/v1/query?query=sum+by%28stage%2C+run_type%29+%28increase%28bioetl_records_processed_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%2Cstage%21~%22none.%2A%22%7D%5B24h%5D%29%29&time=1794196868.288038"
         }
       ],
       "request_url": null,
@@ -2002,7 +2002,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=clamp_max%28max%28bioetl_replay_safety_blockers_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+and+on%28pipeline%2Crun_type%29+%28bioetl_control_plane_telemetry_missing_5m+%3D%3D+0%29%29%2C+2%29&time=1794184315.456892"
+          "request_url": "http://localhost:9090/api/v1/query?query=clamp_max%28max%28bioetl_replay_safety_blockers_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+and+on%28pipeline%2Crun_type%29+%28bioetl_control_plane_telemetry_missing_5m+%3D%3D+0%29%29%2C+2%29&time=1794196868.296774"
         }
       ],
       "request_url": null,
@@ -2024,7 +2024,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max%28bioetl_checkpoint_age_seconds%7Bpipeline%3D~%22chembl_target%22%7D%29&time=1794184315.465357"
+          "request_url": "http://localhost:9090/api/v1/query?query=max%28bioetl_checkpoint_age_seconds%7Bpipeline%3D~%22chembl_target%22%7D%29&time=1794196868.305748"
         }
       ],
       "request_url": null,
@@ -2046,7 +2046,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=clamp_max%28max%28bioetl_manifest_ledger_failures_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+and+on%28pipeline%2Crun_type%29+%28bioetl_control_plane_telemetry_missing_5m+%3D%3D+0%29%29%2C+2%29&time=1794184315.473713"
+          "request_url": "http://localhost:9090/api/v1/query?query=clamp_max%28max%28bioetl_manifest_ledger_failures_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+and+on%28pipeline%2Crun_type%29+%28bioetl_control_plane_telemetry_missing_5m+%3D%3D+0%29%29%2C+2%29&time=1794196868.314939"
         }
       ],
       "request_url": null,
@@ -2068,7 +2068,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=clamp_max%28max%28bioetl_control_plane_telemetry_missing_5m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29%2C+2%29&time=1794184315.481791"
+          "request_url": "http://localhost:9090/api/v1/query?query=clamp_max%28max%28bioetl_control_plane_telemetry_missing_5m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29%2C+2%29&time=1794196868.323948"
         }
       ],
       "request_url": null,
@@ -2090,7 +2090,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by%28stage%29+%28max_over_time%28bioetl_records_processed_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29%29&start=1794097915.490346&end=1794184315.490346&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by%28stage%29+%28max_over_time%28bioetl_records_processed_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29%29&start=1794110468.33276&end=1794196868.33276&step=300.0"
         }
       ],
       "request_url": null,
@@ -2112,7 +2112,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28%28%28%28sum%28bioetl_runtime_alert_condition_dq_soft_threshold_15m%7Bpipeline%3D~%22chembl_target%22%7D%29%29+%2B+%28sum%28bioetl_runtime_alert_condition_dq_hard_fail_15m%7Bpipeline%3D~%22chembl_target%22%7D%29%29+%2B+%28sum%28bioetl_runtime_alert_condition_dq_critical_anomaly_30m%7Bpipeline%3D~%22chembl_target%22%7D%29%29+%2B+%28sum%28bioetl_runtime_alert_condition_silver_validation_failures_30m%7Bpipeline%3D~%22chembl_target%22%7D%29%29%29+and+on%28%29+%28count%28bioetl_runtime_pipeline_run_type_universe%7Bpipeline%3D~%22chembl_target%22%7D%29+%3E+bool+0%29%29%29&start=1794097915.498561&end=1794184315.498561&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28%28%28%28sum%28bioetl_runtime_alert_condition_dq_soft_threshold_15m%7Bpipeline%3D~%22chembl_target%22%7D%29%29+%2B+%28sum%28bioetl_runtime_alert_condition_dq_hard_fail_15m%7Bpipeline%3D~%22chembl_target%22%7D%29%29+%2B+%28sum%28bioetl_runtime_alert_condition_dq_critical_anomaly_30m%7Bpipeline%3D~%22chembl_target%22%7D%29%29+%2B+%28sum%28bioetl_runtime_alert_condition_silver_validation_failures_30m%7Bpipeline%3D~%22chembl_target%22%7D%29%29%29+and+on%28%29+%28count%28bioetl_runtime_pipeline_run_type_universe%7Bpipeline%3D~%22chembl_target%22%7D%29+%3E+bool+0%29%29%29&start=1794110468.341747&end=1794196868.341747&step=300.0"
         }
       ],
       "request_url": null,
@@ -2134,7 +2134,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28bioetl_runtime_control_plane_alert_count%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+and+on%28%29+%28count%28bioetl_runtime_pipeline_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+%3E+bool+0%29&start=1794097915.50715&end=1794184315.50715&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28bioetl_runtime_control_plane_alert_count%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+and+on%28%29+%28count%28bioetl_runtime_pipeline_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+%3E+bool+0%29&start=1794110468.350853&end=1794196868.350853&step=300.0"
         }
       ],
       "request_url": null,
@@ -2156,7 +2156,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28bioetl_runtime_provider_alert_count%7Bprovider%3D~%22chembl%22%7D%29+and+on%28%29+%28count%28bioetl_provider_current_status%7Bprovider%3D~%22chembl%22%7D%29+%3E+bool+0%29&start=1794097915.515499&end=1794184315.515499&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28bioetl_runtime_provider_alert_count%7Bprovider%3D~%22chembl%22%7D%29+and+on%28%29+%28count%28bioetl_provider_current_status%7Bprovider%3D~%22chembl%22%7D%29+%3E+bool+0%29&start=1794110468.360202&end=1794196868.360202&step=300.0"
         }
       ],
       "request_url": null,
@@ -2178,7 +2178,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28%28%28sum%28bioetl_runtime_alert_condition_provider_adapter_latency_high_30m%29%29+%2B+%28sum%28bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m%29%29%29+and+on%28%29+%28count%28bioetl_provider_current_status%29+%3E+bool+0%29%29&start=1794097915.523841&end=1794184315.523841&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28%28%28sum%28bioetl_runtime_alert_condition_provider_adapter_latency_high_30m%29%29+%2B+%28sum%28bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m%29%29%29+and+on%28%29+%28count%28bioetl_provider_current_status%29+%3E+bool+0%29%29&start=1794110468.369377&end=1794196868.369377&step=300.0"
         }
       ],
       "request_url": null,
@@ -2200,7 +2200,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=sum+by+%28terminal_status%29+%28last_over_time%28bioetl_control_plane_terminal_events_total%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29&time=1794184315.532685"
+          "request_url": "http://localhost:9090/api/v1/query?query=sum+by+%28terminal_status%29+%28last_over_time%28bioetl_control_plane_terminal_events_total%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29&time=1794196868.378188"
         }
       ],
       "request_url": null,
@@ -2222,7 +2222,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=sum%28clamp_min%28time%28%29+-+max+by+%28pipeline%2C+entity%29+%28bioetl_data_freshness_seconds%7Bpipeline%3D~%22chembl_target%22%7D%29%2C+0%29+%3E+bool+86400%29+or+%28count%28bioetl_data_freshness_seconds%7Bpipeline%3D~%22chembl_target%22%7D%29+%2A+0%29&time=1794184315.545406"
+          "request_url": "http://localhost:9090/api/v1/query?query=sum%28clamp_min%28time%28%29+-+max+by+%28pipeline%2C+entity%29+%28bioetl_data_freshness_seconds%7Bpipeline%3D~%22chembl_target%22%7D%29%2C+0%29+%3E+bool+86400%29+or+%28count%28bioetl_data_freshness_seconds%7Bpipeline%3D~%22chembl_target%22%7D%29+%2A+0%29&time=1794196868.386967"
         }
       ],
       "request_url": null,
@@ -2244,7 +2244,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_control_plane_reads_total%7Bstatus%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794184315.574177"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_control_plane_reads_total%7Bstatus%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794196868.395731"
         }
       ],
       "request_url": null,
@@ -2266,7 +2266,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=%28%28%28%28sum%28increase%28bioetl_control_plane_reads_total%7Bstatus%3D%22failed%22%7D%5B30m%5D%29%29%29+%2F+clamp_min%28%28sum%28increase%28bioetl_control_plane_reads_total%5B30m%5D%29%29%29%2C+1%29%29+%3E+bool+0.05%29+%2B+%28%28%28sum%28increase%28bioetl_control_plane_reads_total%7Bstatus%3D%22failed%22%7D%5B30m%5D%29%29%29+%2F+clamp_min%28%28sum%28increase%28bioetl_control_plane_reads_total%5B30m%5D%29%29%29%2C+1%29%29+%3E+bool+0.10%29%29&time=1794184315.587466"
+          "request_url": "http://localhost:9090/api/v1/query?query=%28%28%28%28sum%28increase%28bioetl_control_plane_reads_total%7Bstatus%3D%22failed%22%7D%5B30m%5D%29%29%29+%2F+clamp_min%28%28sum%28increase%28bioetl_control_plane_reads_total%5B30m%5D%29%29%29%2C+1%29%29+%3E+bool+0.05%29+%2B+%28%28%28sum%28increase%28bioetl_control_plane_reads_total%7Bstatus%3D%22failed%22%7D%5B30m%5D%29%29%29+%2F+clamp_min%28%28sum%28increase%28bioetl_control_plane_reads_total%5B30m%5D%29%29%29%2C+1%29%29+%3E+bool+0.10%29%29&time=1794196868.404962"
         }
       ],
       "request_url": null,
@@ -2288,7 +2288,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_lineage_refs_missing_total%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29%29%29&time=1794184315.601102"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_lineage_refs_missing_total%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29%29%29&time=1794196868.414048"
         }
       ],
       "request_url": null,
@@ -2310,7 +2310,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_lineage_fragments_emitted_total%7Bpipeline%3D~%22chembl_target%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794184315.614523"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_lineage_fragments_emitted_total%7Bpipeline%3D~%22chembl_target%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794196868.42325"
         }
       ],
       "request_url": null,
@@ -2332,7 +2332,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_control_plane_ledger_appends_total%7Bpipeline%3D~%22chembl_target%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794184315.624382"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_control_plane_ledger_appends_total%7Bpipeline%3D~%22chembl_target%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794196868.432304"
         }
       ],
       "request_url": null,
@@ -2354,7 +2354,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_trust_replay_blocker_events_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B24h%5D%29%29+%2B+sum%28max_over_time%28bioetl_trust_replay_blocker_integrity%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B24h%5D%29+%3E+bool+0%29%29%29&time=1794184315.633119"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_trust_replay_blocker_events_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B24h%5D%29%29+%2B+sum%28max_over_time%28bioetl_trust_replay_blocker_integrity%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B24h%5D%29+%3E+bool+0%29%29%29&time=1794196868.440969"
         }
       ],
       "request_url": null,
@@ -2376,7 +2376,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=topk%2820%2C+bioetl_runtime_current_blocker_reason_scoped%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29&time=1794184315.641993"
+          "request_url": "http://localhost:9090/api/v1/query?query=topk%2820%2C+bioetl_runtime_current_blocker_reason_scoped%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29&time=1794196868.449738"
         }
       ],
       "request_url": null,
@@ -2398,7 +2398,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_pipeline_preflight_failed_15m%7Bpipeline%3D~%22chembl_target%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_pipeline_preflight_failed_15m%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22preflight_failed%22%2C+%22%22%2C+%22%22%29&time=1794184315.650726"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_pipeline_preflight_failed_15m%7Bpipeline%3D~%22chembl_target%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_pipeline_preflight_failed_15m%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22preflight_failed%22%2C+%22%22%2C+%22%22%29&time=1794196868.458489"
         }
       ],
       "request_url": null,
@@ -2420,7 +2420,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m%7Bpipeline%3D~%22chembl_target%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22infrastructure_failed%22%2C+%22%22%2C+%22%22%29&time=1794184315.659206"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m%7Bpipeline%3D~%22chembl_target%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22infrastructure_failed%22%2C+%22%22%2C+%22%22%29&time=1794196868.467746"
         }
       ],
       "request_url": null,
@@ -2442,7 +2442,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_pipeline_runs_failed_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_pipeline_runs_failed_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22runs_failed%22%2C+%22%22%2C+%22%22%29&time=1794184315.667473"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_pipeline_runs_failed_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_pipeline_runs_failed_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22runs_failed%22%2C+%22%22%2C+%22%22%29&time=1794196868.476647"
         }
       ],
       "request_url": null,
@@ -2464,7 +2464,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_stage_backlog_active_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_stage_backlog_active_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22stage_backlog_active%22%2C+%22%22%2C+%22%22%29&time=1794184315.676555"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_stage_backlog_active_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_stage_backlog_active_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22stage_backlog_active%22%2C+%22%22%2C+%22%22%29&time=1794196868.48548"
         }
       ],
       "request_url": null,
@@ -2486,7 +2486,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_stage_lag_high_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_stage_lag_high_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22stage_lag_high%22%2C+%22%22%2C+%22%22%29&time=1794184315.685115"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_stage_lag_high_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_stage_lag_high_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22stage_lag_high%22%2C+%22%22%2C+%22%22%29&time=1794196868.49427"
         }
       ],
       "request_url": null,
@@ -2508,7 +2508,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_gold_write_missing_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_gold_write_missing_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22gold_write_missing%22%2C+%22%22%2C+%22%22%29&time=1794184315.693824"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_gold_write_missing_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_gold_write_missing_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22gold_write_missing%22%2C+%22%22%2C+%22%22%29&time=1794196868.50311"
         }
       ],
       "request_url": null,
@@ -2530,7 +2530,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_no_terminal_run_30m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_no_terminal_run_30m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22no_terminal_run%22%2C+%22%22%2C+%22%22%29&time=1794184315.702398"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_no_terminal_run_30m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_no_terminal_run_30m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22no_terminal_run%22%2C+%22%22%2C+%22%22%29&time=1794196868.512023"
         }
       ],
       "request_url": null,
@@ -2552,7 +2552,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22ingestion_throughput_degraded%22%2C+%22%22%2C+%22%22%29&time=1794184315.711295"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22ingestion_throughput_degraded%22%2C+%22%22%2C+%22%22%29&time=1794196868.521221"
         }
       ],
       "request_url": null,
@@ -2574,7 +2574,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_record_flow_invariant_violated_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_record_flow_invariant_violated_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22flow_invariant_violated%22%2C+%22%22%2C+%22%22%29&time=1794184315.720114"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_record_flow_invariant_violated_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_record_flow_invariant_violated_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22flow_invariant_violated%22%2C+%22%22%2C+%22%22%29&time=1794196868.529958"
         }
       ],
       "request_url": null,
@@ -2596,7 +2596,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_runtime_stage_evidence_detail%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D&time=1794184315.728866"
+          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_runtime_stage_evidence_detail%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D&time=1794196868.538518"
         }
       ],
       "request_url": null,
@@ -2618,7 +2618,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28store%2C+operation%2C+status%29+%28increase%28bioetl_control_plane_reads_total%5B5m%5D%29%29&start=1794097915.737352&end=1794184315.737352&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28store%2C+operation%2C+status%29+%28increase%28bioetl_control_plane_reads_total%5B5m%5D%29%29&start=1794110468.547254&end=1794196868.547254&step=300.0"
         }
       ],
       "request_url": null,
@@ -2640,7 +2640,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_control_plane_manifest_writes_total%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794184315.745915"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_control_plane_manifest_writes_total%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794196868.5559"
         }
       ],
       "request_url": null,
@@ -2662,7 +2662,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_checkpoint_compatibility_events_total%7Bpipeline%3D~%22chembl_target%22%2C+disposition%3D~%22.%2A_incompatible%22%7D%5B24h%5D%29%29%29%29&time=1794184315.755048"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_checkpoint_compatibility_events_total%7Bpipeline%3D~%22chembl_target%22%2C+disposition%3D~%22.%2A_incompatible%22%7D%5B24h%5D%29%29%29%29&time=1794196868.564938"
         }
       ],
       "request_url": null,
@@ -2684,7 +2684,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_replay_reconstructability_events_total%7Bpipeline%3D~%22chembl_target%22%2C+status%3D%22not_reconstructable%22%7D%5B24h%5D%29%29%29%29&time=1794184315.764308"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_replay_reconstructability_events_total%7Bpipeline%3D~%22chembl_target%22%2C+status%3D%22not_reconstructable%22%7D%5B24h%5D%29%29%29%29&time=1794196868.573755"
         }
       ],
       "request_url": null,
@@ -2706,7 +2706,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=sum+by+%28layer%2C+ref_type%29+%28increase%28bioetl_lineage_refs_missing_total%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29&time=1794184315.772899"
+          "request_url": "http://localhost:9090/api/v1/query?query=sum+by+%28layer%2C+ref_type%29+%28increase%28bioetl_lineage_refs_missing_total%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29&time=1794196868.582638"
         }
       ],
       "request_url": null,
@@ -2728,7 +2728,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_replay_drift_events_total%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%7D%5B24h%5D%29%29%29%29&time=1794184315.7814"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_replay_drift_events_total%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%7D%5B24h%5D%29%29%29%29&time=1794196868.591323"
         }
       ],
       "request_url": null,
@@ -2750,7 +2750,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=sum%28bioetl_control_plane_manifest_fail_severity_30m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29&time=1794184315.790026"
+          "request_url": "http://localhost:9090/api/v1/query?query=sum%28bioetl_control_plane_manifest_fail_severity_30m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29&time=1794196868.600113"
         }
       ],
       "request_url": null,
@@ -2772,7 +2772,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum+by%28reason%29+%28increase%28bioetl_shutdown_initiated_total%5B5m%5D%29%29%29&start=1794097915.798695&end=1794184315.798695&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum+by%28reason%29+%28increase%28bioetl_shutdown_initiated_total%5B5m%5D%29%29%29&start=1794110468.608604&end=1794196868.608604&step=300.0"
         }
       ],
       "request_url": null,
@@ -2794,7 +2794,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_checkpoint_load_events_total%7Bpipeline%3D~%22chembl_target%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794184315.80747"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_checkpoint_load_events_total%7Bpipeline%3D~%22chembl_target%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794196868.617631"
         }
       ],
       "request_url": null,
@@ -2816,7 +2816,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=sum%28bioetl_control_plane_ledger_fail_severity_30m%7Bpipeline%3D~%22chembl_target%22%7D%29&time=1794184315.816056"
+          "request_url": "http://localhost:9090/api/v1/query?query=sum%28bioetl_control_plane_ledger_fail_severity_30m%7Bpipeline%3D~%22chembl_target%22%7D%29&time=1794196868.626368"
         }
       ],
       "request_url": null,
@@ -2838,7 +2838,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum+by%28reason%29+%28increase%28bioetl_shutdown_completed_total%5B5m%5D%29%29%29&start=1794097915.825158&end=1794184315.825158&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum+by%28reason%29+%28increase%28bioetl_shutdown_completed_total%5B5m%5D%29%29%29&start=1794110468.634638&end=1794196868.634638&step=300.0"
         }
       ],
       "request_url": null,
@@ -2860,7 +2860,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_checkpoint_save_events_total%7Bpipeline%3D~%22chembl_target%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794184315.83436"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_checkpoint_save_events_total%7Bpipeline%3D~%22chembl_target%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794196868.643113"
         }
       ],
       "request_url": null,
@@ -2882,7 +2882,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+unless+on%28pipeline%2Crun_type%29+sum+by%28pipeline%2Crun_type%29+%28count_over_time%28bioetl_control_plane_manifest_writes_total%5B5m%5D%29%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%2A+0%29%29&time=1794184315.843467"
+          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+unless+on%28pipeline%2Crun_type%29+sum+by%28pipeline%2Crun_type%29+%28count_over_time%28bioetl_control_plane_manifest_writes_total%5B5m%5D%29%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%2A+0%29%29&time=1794196868.651447"
         }
       ],
       "request_url": null,
@@ -2904,7 +2904,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+unless+on%28pipeline%29+sum+by%28pipeline%29+%28count_over_time%28bioetl_control_plane_ledger_appends_total%5B5m%5D%29%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%2A+0%29%29&time=1794184315.852532"
+          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+unless+on%28pipeline%29+sum+by%28pipeline%29+%28count_over_time%28bioetl_control_plane_ledger_appends_total%5B5m%5D%29%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%2A+0%29%29&time=1794196868.659913"
         }
       ],
       "request_url": null,
@@ -2926,7 +2926,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+unless+on%28pipeline%2Crun_type%29+%28count+by%28pipeline%2Crun_type%29+%28group+by%28pipeline%2Crun_type%2Crisk_type%29+%28count_over_time%28bioetl_replay_duplicate_overwrite_risk_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%2Crisk_type%3D~%22duplicate%7Coverwrite%22%7D%5B5m%5D%29%29%29+%3D%3D+2%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%2A+0%29%29&time=1794184315.861945"
+          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+unless+on%28pipeline%2Crun_type%29+%28count+by%28pipeline%2Crun_type%29+%28group+by%28pipeline%2Crun_type%2Crisk_type%29+%28count_over_time%28bioetl_replay_duplicate_overwrite_risk_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%2Crisk_type%3D~%22duplicate%7Coverwrite%22%7D%5B5m%5D%29%29%29+%3D%3D+2%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%2A+0%29%29&time=1794196868.668619"
         }
       ],
       "request_url": null,
@@ -2948,7 +2948,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+unless+on%28pipeline%2Crun_type%29+%28count+by%28pipeline%2Crun_type%29+%28group+by%28pipeline%2Crun_type%2Cintegrity_type%29+%28count_over_time%28bioetl_manifest_ledger_integrity_ratio%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%2Cintegrity_type%3D~%22consistent%7Cinconsistent%22%7D%5B5m%5D%29%29%29+%3D%3D+2%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%2A+0%29%29&time=1794184315.873228"
+          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+unless+on%28pipeline%2Crun_type%29+%28count+by%28pipeline%2Crun_type%29+%28group+by%28pipeline%2Crun_type%2Cintegrity_type%29+%28count_over_time%28bioetl_manifest_ledger_integrity_ratio%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%2Cintegrity_type%3D~%22consistent%7Cinconsistent%22%7D%5B5m%5D%29%29%29+%3D%3D+2%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%2A+0%29%29&time=1794196868.677124"
         }
       ],
       "request_url": null,
@@ -2970,7 +2970,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+unless+on%28pipeline%2Crun_type%29+%28push_time_seconds%7Bjob%3D%22bioetl%22%2Cpipeline%21%3D%22%22%2Crun_type%21%3D%22%22%7D+%3E+0+and+push_time_seconds%7Bjob%3D%22bioetl%22%2Cpipeline%21%3D%22%22%2Crun_type%21%3D%22%22%7D+%3C%3D+time%28%29%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%2A+0%29%29&time=1794184315.882437"
+          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+unless+on%28pipeline%2Crun_type%29+%28push_time_seconds%7Bjob%3D%22bioetl%22%2Cpipeline%21%3D%22%22%2Crun_type%21%3D%22%22%7D+%3E+0+and+push_time_seconds%7Bjob%3D%22bioetl%22%2Cpipeline%21%3D%22%22%2Crun_type%21%3D%22%22%7D+%3C%3D+time%28%29%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%2A+0%29%29&time=1794196868.685529"
         }
       ],
       "request_url": null,
@@ -2992,7 +2992,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_checkpoint_operator_operations_total%7Bstatus%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794184315.891865"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_checkpoint_operator_operations_total%7Bstatus%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794196868.693961"
         }
       ],
       "request_url": null,
@@ -3014,7 +3014,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+store%2C+operation%29+%28increase%28bioetl_control_plane_read_duration_seconds_bucket%7Bstatus%21%3D%22failed%22%7D%5B24h%5D%29%29+unless+on+%28store%2C+operation%29+%28sum+by+%28store%2C+operation%29+%28changes%28bioetl_control_plane_read_duration_seconds_created%7Bstatus%21%3D%22failed%22%7D%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097915.90131&end=1794184315.90131&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+store%2C+operation%29+%28increase%28bioetl_control_plane_read_duration_seconds_bucket%7Bstatus%21%3D%22failed%22%7D%5B24h%5D%29%29+unless+on+%28store%2C+operation%29+%28sum+by+%28store%2C+operation%29+%28changes%28bioetl_control_plane_read_duration_seconds_created%7Bstatus%21%3D%22failed%22%7D%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.702469&end=1794196868.702469&step=300.0"
         }
       ],
       "request_url": null,
@@ -3036,7 +3036,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28status%2C+run_type%29+%28increase%28bioetl_control_plane_manifest_writes_total%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%7D%5B5m%5D%29%29&start=1794097915.910009&end=1794184315.910009&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28status%2C+run_type%29+%28increase%28bioetl_control_plane_manifest_writes_total%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%7D%5B5m%5D%29%29&start=1794110468.711043&end=1794196868.711043&step=300.0"
         }
       ],
       "request_url": null,
@@ -3058,7 +3058,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max%28max_over_time%28bioetl_replay_lag_seconds%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%7D%5B24h%5D%29%29&time=1794184315.918677"
+          "request_url": "http://localhost:9090/api/v1/query?query=max%28max_over_time%28bioetl_replay_lag_seconds%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%7D%5B24h%5D%29%29&time=1794196868.719515"
         }
       ],
       "request_url": null,
@@ -3080,7 +3080,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum+by+%28layer%2C+operation%2C+status%29+%28increase%28bioetl_audit_write_events_total%5B5m%5D%29%29%29&start=1794097915.927161&end=1794184315.927161&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum+by+%28layer%2C+operation%2C+status%29+%28increase%28bioetl_audit_write_events_total%5B5m%5D%29%29%29&start=1794110468.727991&end=1794196868.727991&step=300.0"
         }
       ],
       "request_url": null,
@@ -3102,7 +3102,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28replay_capability%2C+drift_type%2C+status%29+%28increase%28bioetl_replay_drift_events_total%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%7D%5B5m%5D%29%29&start=1794097915.935988&end=1794184315.935988&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28replay_capability%2C+drift_type%2C+status%29+%28increase%28bioetl_replay_drift_events_total%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%7D%5B5m%5D%29%29&start=1794110468.736442&end=1794196868.736442&step=300.0"
         }
       ],
       "request_url": null,
@@ -3124,7 +3124,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=max+by+%28stage%29+%28bioetl_stage_lag_seconds%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29&start=1794097915.944548&end=1794184315.944548&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=max+by+%28stage%29+%28bioetl_stage_lag_seconds%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29&start=1794110468.744968&end=1794196868.744968&step=300.0"
         }
       ],
       "request_url": null,
@@ -3146,7 +3146,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28disposition%29+%28increase%28bioetl_checkpoint_compatibility_events_total%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29&start=1794097915.952857&end=1794184315.952857&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28disposition%29+%28increase%28bioetl_checkpoint_compatibility_events_total%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29&start=1794110468.753569&end=1794196868.753569&step=300.0"
         }
       ],
       "request_url": null,
@@ -3168,7 +3168,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum+by+%28layer_filter%2C+status%29+%28increase%28bioetl_audit_query_events_total%5B5m%5D%29%29%29&start=1794097915.961859&end=1794184315.961859&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum+by+%28layer_filter%2C+status%29+%28increase%28bioetl_audit_query_events_total%5B5m%5D%29%29%29&start=1794110468.762109&end=1794196868.762109&step=300.0"
         }
       ],
       "request_url": null,
@@ -3190,7 +3190,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=max+by+%28replay_capability%2C+status%29+%28bioetl_replay_lag_seconds%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%7D%29&start=1794097915.970278&end=1794184315.970278&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=max+by+%28replay_capability%2C+status%29+%28bioetl_replay_lag_seconds%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%7D%29&start=1794110468.770949&end=1794196868.770949&step=300.0"
         }
       ],
       "request_url": null,
@@ -3212,7 +3212,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28event_type%2C+status%29+%28increase%28bioetl_control_plane_ledger_appends_total%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29&start=1794097915.979259&end=1794184315.979259&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28event_type%2C+status%29+%28increase%28bioetl_control_plane_ledger_appends_total%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29&start=1794110468.780086&end=1794196868.780086&step=300.0"
         }
       ],
       "request_url": null,
@@ -3234,7 +3234,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_pipeline_stage_expected%7Bpipeline%3D~%22chembl_target%22%7D&time=1794184315.987949"
+          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_pipeline_stage_expected%7Bpipeline%3D~%22chembl_target%22%7D&time=1794196868.789023"
         }
       ],
       "request_url": null,
@@ -3256,7 +3256,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max+by+%28pipeline%2C+stage%29+%28max_over_time%28bioetl_stage_records_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B15m%5D%29%29&time=1794184315.996298"
+          "request_url": "http://localhost:9090/api/v1/query?query=max+by+%28pipeline%2C+stage%29+%28max_over_time%28bioetl_stage_records_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B15m%5D%29%29&time=1794196868.797873"
         }
       ],
       "request_url": null,
@@ -3278,7 +3278,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%2C+pipeline%2C+operation%29+%28increase%28bioetl_checkpoint_save_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29+unless+on+%28pipeline%2C+operation%29+%28sum+by+%28pipeline%2C+operation%29+%28changes%28bioetl_checkpoint_save_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097916.004803&end=1794184316.004803&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%2C+pipeline%2C+operation%29+%28increase%28bioetl_checkpoint_save_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29+unless+on+%28pipeline%2C+operation%29+%28sum+by+%28pipeline%2C+operation%29+%28changes%28bioetl_checkpoint_save_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.806694&end=1794196868.806694&step=300.0"
         }
       ],
       "request_url": null,
@@ -3300,7 +3300,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+pipeline%2C+operation%29+%28increase%28bioetl_checkpoint_save_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29+unless+on+%28pipeline%2C+operation%29+%28sum+by+%28pipeline%2C+operation%29+%28changes%28bioetl_checkpoint_save_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097916.013223&end=1794184316.013223&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+pipeline%2C+operation%29+%28increase%28bioetl_checkpoint_save_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29+unless+on+%28pipeline%2C+operation%29+%28sum+by+%28pipeline%2C+operation%29+%28changes%28bioetl_checkpoint_save_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.815913&end=1794196868.815913&step=300.0"
         }
       ],
       "request_url": null,
@@ -3322,7 +3322,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%2C+pipeline%2C+operation%29+%28increase%28bioetl_checkpoint_save_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29+unless+on+%28pipeline%2C+operation%29+%28sum+by+%28pipeline%2C+operation%29+%28changes%28bioetl_checkpoint_save_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097916.021625&end=1794184316.021625&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%2C+pipeline%2C+operation%29+%28increase%28bioetl_checkpoint_save_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29+unless+on+%28pipeline%2C+operation%29+%28sum+by+%28pipeline%2C+operation%29+%28changes%28bioetl_checkpoint_save_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.824976&end=1794196868.824976&step=300.0"
         }
       ],
       "request_url": null,
@@ -3344,7 +3344,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_write_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_write_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097916.030149&end=1794184316.030149&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_write_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_write_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.833809&end=1794196868.833809&step=300.0"
         }
       ],
       "request_url": null,
@@ -3366,7 +3366,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_write_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_write_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097916.038671&end=1794184316.038671&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_write_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_write_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.842626&end=1794196868.842626&step=300.0"
         }
       ],
       "request_url": null,
@@ -3388,7 +3388,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_write_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_write_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097916.047294&end=1794184316.047294&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_write_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_write_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.851404&end=1794196868.851404&step=300.0"
         }
       ],
       "request_url": null,
@@ -3410,7 +3410,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%2C+operation%29+%28increase%28bioetl_checkpoint_operator_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28operation%29+%28sum+by+%28operation%29+%28changes%28bioetl_checkpoint_operator_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097916.055931&end=1794184316.055931&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%2C+operation%29+%28increase%28bioetl_checkpoint_operator_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28operation%29+%28sum+by+%28operation%29+%28changes%28bioetl_checkpoint_operator_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.860212&end=1794196868.860212&step=300.0"
         }
       ],
       "request_url": null,
@@ -3432,7 +3432,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+operation%29+%28increase%28bioetl_checkpoint_operator_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28operation%29+%28sum+by+%28operation%29+%28changes%28bioetl_checkpoint_operator_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097916.064825&end=1794184316.064825&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+operation%29+%28increase%28bioetl_checkpoint_operator_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28operation%29+%28sum+by+%28operation%29+%28changes%28bioetl_checkpoint_operator_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.868896&end=1794196868.868896&step=300.0"
         }
       ],
       "request_url": null,
@@ -3454,7 +3454,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%2C+operation%29+%28increase%28bioetl_checkpoint_operator_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28operation%29+%28sum+by+%28operation%29+%28changes%28bioetl_checkpoint_operator_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097916.073452&end=1794184316.073452&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%2C+operation%29+%28increase%28bioetl_checkpoint_operator_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28operation%29+%28sum+by+%28operation%29+%28changes%28bioetl_checkpoint_operator_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.87764&end=1794196868.87764&step=300.0"
         }
       ],
       "request_url": null,
@@ -3476,7 +3476,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_query_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_query_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097916.081824&end=1794184316.081824&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_query_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_query_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.88658&end=1794196868.88658&step=300.0"
         }
       ],
       "request_url": null,
@@ -3498,7 +3498,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_query_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_query_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097916.090587&end=1794184316.090587&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_query_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_query_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.895342&end=1794196868.895342&step=300.0"
         }
       ],
       "request_url": null,
@@ -3520,7 +3520,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_query_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_query_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794097916.099456&end=1794184316.099456&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_query_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_query_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794110468.904132&end=1794196868.904132&step=300.0"
         }
       ],
       "request_url": null,
@@ -3542,7 +3542,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=max%28bioetl_runtime_error_rate_30m%7Bpipeline%3D~%22chembl_target%22%7D%29&start=1794097916.108322&end=1794184316.108322&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=max%28bioetl_runtime_error_rate_30m%7Bpipeline%3D~%22chembl_target%22%7D%29&start=1794110468.912999&end=1794196868.912999&step=300.0"
         }
       ],
       "request_url": null,
@@ -3564,7 +3564,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28layer%2C+status%29+%28increase%28bioetl_lineage_fragments_emitted_total%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29&start=1794097916.116901&end=1794184316.116901&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28layer%2C+status%29+%28increase%28bioetl_lineage_fragments_emitted_total%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29&start=1794110468.921918&end=1794196868.921918&step=300.0"
         }
       ],
       "request_url": null,
@@ -3586,7 +3586,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28max+by%28workflow%29%28bioetl_workflow_scope_input_status%7Binput%3D%22workflow%22%2Cworkflow%3D~%22All%22%2Cpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29%2C%22reason%22%2C%22Reason+unavailable%22%2C%22%22%2C%22%22%29&time=1794184316.125586"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28max+by%28workflow%29%28bioetl_workflow_scope_input_status%7Binput%3D%22workflow%22%2Cworkflow%3D~%22All%22%2Cpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29%2C%22reason%22%2C%22Reason+unavailable%22%2C%22%22%2C%22%22%29&time=1794196868.931024"
         }
       ],
       "request_url": null,
@@ -3608,7 +3608,7 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_workflow_scope_published_seconds+%2A+on%28workflow%29+group+by%28workflow%29%28bioetl_workflow_scope_universe%7Bworkflow%3D~%22All%22%2Cpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+%2A+1000&time=1794184316.134449"
+          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_workflow_scope_published_seconds+%2A+on%28workflow%29+group+by%28workflow%29%28bioetl_workflow_scope_universe%7Bworkflow%3D~%22All%22%2Cpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+%2A+1000&time=1794196868.940018"
         }
       ],
       "request_url": null,
