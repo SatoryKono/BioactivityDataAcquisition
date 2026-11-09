@@ -151,6 +151,10 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "configs/quality/test_matrix.yaml": (
+        "tests/architecture/test_ci_test_strategy.py",
+        "tests/architecture/test_pytest_sharded_inventory.py",
+    ),
     "scripts/ops/observability/grafana/dashboard_context_links.py": (
         "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
     ),
