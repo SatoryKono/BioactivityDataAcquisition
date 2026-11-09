@@ -107,6 +107,11 @@ def apply_replay_layout(payload: dict) -> None:
             + "&workflow=${workflow:percentencode}&error_as_row=1",
             "targetBlank": True,
         },
+        {
+            "title": "Check BioETL Ops HTTP health",
+            "url": base + "/health/live",
+            "targetBlank": True,
+        },
     ]
     verdict = place(9422, 15, 2, 9, 3)
     verdict["fieldConfig"]["overrides"] = []

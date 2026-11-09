@@ -10,7 +10,7 @@ from uuid import UUID
 import pytest
 from pydantic import BaseModel, ConfigDict
 
-from bioetl.composition.snapshot_serialization import (
+from bioetl.application.serialization.snapshot_serialization import (
     normalize_snapshot,
     to_serializable_mapping,
 )
