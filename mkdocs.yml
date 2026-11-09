@@ -1038,6 +1038,11 @@ nav:
               - "Project Requirements Audit": 00-project/ai/prompts/fragments/project-requirements-audit.md
       - "AI Rules":
           - "Overview": 00-project/ai/rules/README.md
+          - "Cursor Commands":
+              - "Review": 00-project/ai/rules/cursor/commands/review.md
+              - "Post-change": 00-project/ai/rules/cursor/commands/post-change.md
+              - "Pre-commit": 00-project/ai/rules/cursor/commands/pre-commit.md
+              - "Qodo Sync": 00-project/ai/rules/cursor/commands/qodo-sync.md
           - "Unified Rules": 00-project/ai/rules/bioetl-ai-rules.md
       - "Skills":
           - "Overview": 00-project/ai/skills/README.md
