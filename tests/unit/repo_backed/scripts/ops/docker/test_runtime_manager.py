@@ -1890,3 +1890,32 @@ def test_runtime_uses_nonroot_report_writer_identity(
         assert values.get("BIOETL_RUNTIME_UID") == expected
         assert values.get("BIOETL_RUNTIME_GID") == expected
     assert environment == {}
+
+
+def test_dashboard_runtime_environment_skips_missing_bind_dirs(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Missing host bind dirs must not block ownership-optional dispatch."""
+    environment: dict[str, str] = {}
+    monkeypatch.setattr(
+        runtime_manager, "os", SimpleNamespace(name="posix", environ=environment)
+    )
+    monkeypatch.setattr(runtime_manager, "_load_contract", lambda _: {})
+    missing_reports = tmp_path / "missing-reports"
+    missing_data = tmp_path / "missing-data"
+    monkeypatch.setattr(
+        runtime_manager.runtime_preflight,
+        "dashboard_source_environment",
+        lambda *_: {
+            "BIOETL_DASHBOARD_REPORT_ROOT": str(missing_reports),
+            "BIOETL_DASHBOARD_DATA_ROOT": str(missing_data),
+            "BIOETL_RUNTIME_SOURCE_ID": "a" * 64,
+        },
+    )
+    with runtime_manager._dashboard_runtime_environment(
+        tmp_path / "contract"
+    ) as values:
+        assert "BIOETL_RUNTIME_UID" not in values
+        assert "BIOETL_RUNTIME_GID" not in values
+        assert values["BIOETL_RUNTIME_SOURCE_ID"] == "a" * 64
+    assert environment == {}

@@ -355,15 +355,22 @@ _MERGED_PRR = (
     "$ratio := function($s,$n){$s.tracking='full' and $type($s.records_in)='number' "
     "and $type($n)='number' ? ($s.records_in>0 and $n>=0 and $n<=$s.records_in ? "
     "100*$n/$s.records_in : null) : null}; "
-    "$map(funnel, function($s){($excluded := $s.tracking='full' and "
-    "$type($s.removals)='array' ? $sum($append([0], "
-    "$s.removals[outcome='excluded_by_contract'].count)) : null; "
-    "{'_bioetl_frame':'stages', 'stage_id':$s.stage_id, 'records_in':$s.records_in, 'records_out':$s.records_out, 'state':$s.balance_status, 'quarantined':$r($s,'quarantined'), "
-    "'excluded':$r($s,'excluded_by_contract'), "
-    "'deduplicated':$r($s,'deduplicated'), "
-    "'filtered_out':$r($s,'filtered_out'), "
-    "'excluded_pct':$ratio($s,$excluded), "
-    "'saved_pct':$ratio($s,$s.records_out)})}))"
+    # Preserve project_stage_diagnostics() states (UNFINISHED/INCOMPLETE); join
+    # funnel only for removal counters and percentages.
+    "$funnel := $exists(funnel) ? funnel : []; "
+    "$diags := $exists(stage_diagnostics) ? stage_diagnostics : []; "
+    "$map($diags, function($d){($s := $funnel[stage_id=$d.stage_id][0]; "
+    "$excluded := $exists($s) and $s.tracking='full' and $type($s.removals)='array' "
+    "? $sum($append([0], $s.removals[outcome='excluded_by_contract'].count)) : null; "
+    "$merge([$d, {"
+    "'_bioetl_frame':'stages', "
+    "'quarantined': $exists($s) ? $r($s,'quarantined') : null, "
+    "'excluded': $exists($s) ? $r($s,'excluded_by_contract') : null, "
+    "'deduplicated': $exists($s) ? $r($s,'deduplicated') : null, "
+    "'filtered_out': $exists($s) ? $r($s,'filtered_out') : null, "
+    "'excluded_pct': $exists($s) ? $ratio($s,$excluded) : null, "
+    "'saved_pct': $exists($s) ? $ratio($s,$s.records_out) : null"
+    "}]))}))"
 )
 
 # --- DQ donor -------------------------------------------------------------

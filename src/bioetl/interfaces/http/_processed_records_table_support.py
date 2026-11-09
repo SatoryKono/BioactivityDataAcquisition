@@ -159,6 +159,69 @@ _GOLD_PARAMETERS = frozenset(
 )
 _UNKNOWN_SCOPE = "unknown"
 
+_REPORT_LAYER_FIELDS = (
+    "bronze_records",
+    "silver_valid",
+    "silver_filtered_out",
+    "silver_quarantined",
+    "silver_skipped",
+    "silver_deduplicated",
+    "gold_written",
+    "gold_excluded_by_contract",
+    "gold_quarantined",
+    "gold_skipped",
+    "gold_deduplicated",
+)
+
+
+def _report_identity_matches(
+    identity: Mapping[str, object],
+    *,
+    ledger_entries: tuple[RunLedgerEntry, ...],
+    pipeline: str,
+    run_type: str | None,
+) -> bool:
+    """Return True when report identity matches the validated ledger chain."""
+    scopes = _selector_tokens(run_type)
+    if identity.get("pipeline_name") != pipeline:
+        return False
+    if scopes and identity.get("run_type") not in scopes:
+        return False
+    if any(str(entry.run_id) != identity.get("run_id") for entry in ledger_entries):
+        return False
+    # A resumed run includes predecessor manifests; the report belongs to
+    # the current (last) manifest in the validated ledger chain.
+    return ledger_entries[-1].manifest_id == identity.get("manifest_id")
+
+
+def _observed_layer_counts(
+    layers: Mapping[str, object],
+    values: Mapping[str, float | int | None],
+) -> dict[str, int] | None:
+    """Collect non-negative layer counts that do not conflict with known values."""
+    observed: dict[str, int] = {}
+    for spec, field in zip(
+        PROCESSED_RECORDS_ROW_SPECS, _REPORT_LAYER_FIELDS, strict=True
+    ):
+        count = layers.get(field)
+        if type(count) is not int or count < 0:
+            return None
+        existing = values.get(spec.metric)
+        if existing is not None and existing != count:
+            return None
+        observed[spec.metric] = count
+    return observed
+
+
+def _layer_counts_balanced(observed: Mapping[str, int]) -> bool:
+    """Reject incomplete accounting instead of manufacturing healthy zeros."""
+    silver_total = sum(observed[key] for key in _SILVER_METRICS)
+    gold_total = sum(observed[key] for key in _GOLD_METRICS)
+    return (
+        silver_total == observed[_BRONZE_METRIC]
+        and gold_total == observed[_SILVER_VALID_METRIC]
+    )
+
 
 def fill_report_accounting(
     values: dict[str, float | int | None],
@@ -174,43 +237,15 @@ def fill_report_accounting(
     identity, layers = report.get("identity"), report.get("layers")
     if not isinstance(identity, dict) or not isinstance(layers, dict):
         return
-    scopes = _selector_tokens(run_type)
-    if (
-        identity.get("pipeline_name") != pipeline
-        or (scopes and identity.get("run_type") not in scopes)
-        or any(str(entry.run_id) != identity.get("run_id") for entry in ledger_entries)
-        # A resumed run includes predecessor manifests; the report belongs to
-        # the current (last) manifest in the validated ledger chain.
-        or ledger_entries[-1].manifest_id != identity.get("manifest_id")
+    if not _report_identity_matches(
+        identity,
+        ledger_entries=ledger_entries,
+        pipeline=pipeline,
+        run_type=run_type,
     ):
         return
-    fields = (
-        "bronze_records",
-        "silver_valid",
-        "silver_filtered_out",
-        "silver_quarantined",
-        "silver_skipped",
-        "silver_deduplicated",
-        "gold_written",
-        "gold_excluded_by_contract",
-        "gold_quarantined",
-        "gold_skipped",
-        "gold_deduplicated",
-    )
-    observed: dict[str, int] = {}
-    for spec, field in zip(PROCESSED_RECORDS_ROW_SPECS, fields, strict=True):
-        count = layers.get(field)
-        if type(count) is not int or count < 0:
-            return
-        existing = values.get(spec.metric)
-        if existing is not None and existing != count:
-            return
-        observed[spec.metric] = count
-    # Reject incomplete accounting instead of manufacturing healthy zeros.
-    if (
-        sum(observed[key] for key in _SILVER_METRICS) != observed[_BRONZE_METRIC]
-        or sum(observed[key] for key in _GOLD_METRICS) != observed[_SILVER_VALID_METRIC]
-    ):
+    observed = _observed_layer_counts(layers, values)
+    if observed is None or not _layer_counts_balanced(observed):
         return
     values.update(observed)
 

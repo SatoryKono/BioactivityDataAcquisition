@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-09T13:32:24.345578+00:00",
+  "generated_at": "2026-11-09T14:05:24.926124+00:00",
   "summary": {
     "total_scripts": 719,
     "status_counts": {
@@ -88,13 +88,13 @@
       "references": [
         {
           "path": ".codex/skills/agent-debugging/SKILL.md",
-          "line": 36,
+          "line": 30,
           "source_group": "skills",
           "text": "1. Confirm availability with `python -m scripts.ai.agent_tools doctor`."
         },
         {
           "path": ".codex/skills/agent-debugging/SKILL.md",
-          "line": 42,
+          "line": 36,
           "source_group": "skills",
           "text": "python -m scripts.ai.agent_tools debug \\"
         },
@@ -118,13 +118,13 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/agent-debugging/SKILL.md",
-          "line": 45,
+          "line": 39,
           "source_group": "docs",
           "text": "1. Confirm availability with `python -m scripts.ai.agent_tools doctor`."
         },
         {
           "path": "docs/00-project/ai/skills/local/agent-debugging/SKILL.md",
-          "line": 51,
+          "line": 45,
           "source_group": "docs",
           "text": "python -m scripts.ai.agent_tools debug \\"
         },
@@ -2636,13 +2636,13 @@
         },
         {
           "path": "docs/00-project/ai/grok/skills/bioetl-post-change/SKILL.md",
-          "line": 39,
+          "line": 30,
           "source_group": "docs",
           "text": ".\\.venv-win\\Scripts\\python.exe scripts/ai/junie/check_junie_mirror.py --check"
         },
         {
           "path": "docs/00-project/ai/grok/skills/bioetl-session/SKILL.md",
-          "line": 75,
+          "line": 66,
           "source_group": "docs",
           "text": "`.\\.venv-win\\Scripts\\python.exe scripts/ai/junie/check_junie_mirror.py --check`"
         },
@@ -2903,7 +2903,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 953,
+          "line": 960,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3751,7 +3751,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 952,
+          "line": 959,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3812,7 +3812,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 951,
+          "line": 958,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -6668,7 +6668,7 @@
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
-          "line": 124,
+          "line": 121,
           "source_group": "skills",
           "text": "- `python scripts/diagrams/check/check_diagram_visual_smoke.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
         },
@@ -6698,7 +6698,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 131,
+          "line": 128,
           "source_group": "docs",
           "text": "- `python scripts/diagrams/check/check_diagram_visual_smoke.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
         },
@@ -7485,7 +7485,7 @@
         },
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
-          "line": 120,
+          "line": 117,
           "source_group": "skills",
           "text": "- `python scripts/diagrams/lint/lint_diagrams.py docs`"
         },
@@ -7503,7 +7503,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 127,
+          "line": 124,
           "source_group": "docs",
           "text": "- `python scripts/diagrams/lint/lint_diagrams.py docs`"
         },
@@ -8296,7 +8296,7 @@
         },
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
-          "line": 121,
+          "line": 118,
           "source_group": "skills",
           "text": "- `bash scripts/diagrams/validate_mermaid_syntax.sh`"
         },
@@ -8314,7 +8314,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 128,
+          "line": 125,
           "source_group": "docs",
           "text": "- `bash scripts/diagrams/validate_mermaid_syntax.sh`"
         },
@@ -8644,7 +8644,7 @@
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
-          "line": 46,
+          "line": 43,
           "source_group": "skills",
           "text": "Use targeted docs checks such as `python -m scripts.docs check-links` and"
         },
@@ -8686,7 +8686,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/py-doc-bot/SKILL.md",
-          "line": 54,
+          "line": 51,
           "source_group": "docs",
           "text": "Use targeted docs checks such as `python -m scripts.docs check-links` and"
         }
@@ -10864,7 +10864,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 853,
+          "line": 860,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10907,7 +10907,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 966,
+          "line": 973,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -12664,7 +12664,7 @@
         },
         {
           "path": ".codex/skills/py-test-bot/SKILL.md",
-          "line": 50,
+          "line": 47,
           "source_group": "skills",
           "text": "`bash scripts/engineering/dev/run_pytest.sh <tests>`, or the platform-specific"
         },
@@ -19113,7 +19113,7 @@
         },
         {
           "path": ".codex/skills/vcr-record/SKILL.md",
-          "line": 55,
+          "line": 49,
           "source_group": "skills",
           "text": "python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -19205,7 +19205,7 @@
       "references": [
         {
           "path": ".codex/skills/vcr-record/SKILL.md",
-          "line": 55,
+          "line": 49,
           "source_group": "skills",
           "text": "python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -19223,7 +19223,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/vcr-record/SKILL.md",
-          "line": 62,
+          "line": 56,
           "source_group": "docs",
           "text": "python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -21075,7 +21075,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1064,
+          "line": 1071,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23496,7 +23496,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 724,
+          "line": 728,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
@@ -23539,7 +23539,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 728,
+          "line": 732,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import ("
         },
@@ -23778,7 +23778,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/apply_phase25_srs_prr_budget.py",
-          "line": 1343,
+          "line": 1350,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
@@ -23808,7 +23808,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 733,
+          "line": 737,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         }
@@ -24217,7 +24217,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1213,
+          "line": 1220,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -24676,7 +24676,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 2448,
+          "line": 2457,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import recover_renderer as rr"
         },
@@ -25845,7 +25845,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 672,
+          "line": 681,
           "source_group": "scripts",
           "text": "str(ROOT / \"scripts/ops/runtime/docker/docker_runtime_preflight.py\"),"
         },
@@ -26029,7 +26029,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 1541,
+          "line": 1550,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/docker/recover-neo4j.ps1 \""
         }
@@ -26218,13 +26218,13 @@
       "references": [
         {
           "path": ".codex/skills/observability-dashboard/SKILL.md",
-          "line": 57,
+          "line": 49,
           "source_group": "skills",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`."
         },
         {
           "path": "docs/00-project/ai/skills/local/observability-dashboard/SKILL.md",
-          "line": 64,
+          "line": 56,
           "source_group": "docs",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`."
         },
@@ -27311,25 +27311,25 @@
         },
         {
           "path": ".codex/skills/new-pipeline/SKILL.md",
-          "line": 62,
+          "line": 56,
           "source_group": "skills",
           "text": "python -m scripts.schema validate-configs"
         },
         {
           "path": ".codex/skills/new-pipeline/SKILL.md",
-          "line": 63,
+          "line": 57,
           "source_group": "skills",
           "text": "python -m scripts.schema check-invariants"
         },
         {
           "path": ".codex/skills/py-config-bot/SKILL.md",
-          "line": 45,
+          "line": 42,
           "source_group": "skills",
           "text": "Prefer focused config gates such as `python -m scripts.schema validate-configs`,"
         },
         {
           "path": ".codex/skills/py-config-bot/SKILL.md",
-          "line": 46,
+          "line": 43,
           "source_group": "skills",
           "text": "`python -m scripts.schema check-invariants`, or the narrower command named by"
         },

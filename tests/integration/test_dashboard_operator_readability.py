@@ -665,7 +665,11 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
     transforms = ov_panel["transformations"]
     assert not any(t["id"] == "joinByField" for t in transforms)
     assert "records_in" in removal_target["root_selector"]
-    assert "balance_status" in removal_target["root_selector"]
+    assert (
+        "$exists(stage_diagnostics) ? stage_diagnostics : []"
+        in removal_target["root_selector"]
+    )
+    assert "balance_status" not in removal_target["root_selector"]
     include = next(item for item in transforms if item["id"] == "filterFieldsByName")
     assert include["options"]["include"]["names"] == [
         "stage_id",

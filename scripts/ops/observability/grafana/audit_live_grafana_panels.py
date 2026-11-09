@@ -770,13 +770,26 @@ def _time_window(
     return start.isoformat(), end.isoformat()
 
 
-def _substitute_dashboard_tokens(
-    template: str,
+def _prom_all_or_value(value: str, *, prometheus: bool) -> str:
+    """Expand Grafana All selectors to Prometheus regex wildcards when needed."""
+    if prometheus and value == "All":
+        return ".*"
+    return value
+
+
+def _regex_all_or_value(value: str) -> str:
+    """Expand Grafana All selectors for regex token formats."""
+    if value == "All":
+        return ".*"
+    return value
+
+
+def _dashboard_range_tokens(
     config: AuditConfig,
     *,
-    range_hours: int | None = None,
-    prometheus: bool = False,
-) -> str:
+    range_hours: int | None,
+) -> tuple[str, str, float | int, str]:
+    """Return start/end ISO, range seconds, and Grafana $__range literal."""
     effective_range_hours = config.range_hours if range_hours is None else range_hours
     start_iso, end_iso = _time_window(config, range_hours=effective_range_hours)
     if config.range_from and range_hours is None:
@@ -787,38 +800,52 @@ def _substitute_dashboard_tokens(
         ).total_seconds()
         * 1000
     )
-    range_seconds = (
-        range_millis // 1000 if range_millis % 1000 == 0 else range_millis / 1000
-    )
-    range_literal = (
-        f"{range_seconds}s" if config.range_from else f"{effective_range_hours}h"
-    )
-    if config.range_from and range_millis % 1000:
+    if range_millis % 1000 == 0:
+        range_seconds: float | int = range_millis // 1000
+    else:
+        range_seconds = range_millis / 1000
+    if not config.range_from:
+        range_literal = f"{effective_range_hours}h"
+    elif range_millis % 1000:
         range_literal = f"{range_millis}ms"
+    else:
+        range_literal = f"{range_seconds}s"
+    return start_iso, end_iso, range_seconds, range_literal
+
+
+def _substitute_dashboard_tokens(
+    template: str,
+    config: AuditConfig,
+    *,
+    range_hours: int | None = None,
+    prometheus: bool = False,
+) -> str:
+    effective_range_hours = config.range_hours if range_hours is None else range_hours
+    start_iso, end_iso, range_seconds, range_literal = _dashboard_range_tokens(
+        config,
+        range_hours=range_hours,
+    )
+    workflow = _prom_all_or_value(config.workflow, prometheus=prometheus)
+    pipeline = _prom_all_or_value(config.pipeline, prometheus=prometheus)
+    run_type = _prom_all_or_value(config.run_type, prometheus=prometheus)
+    workflow_regex = _regex_all_or_value(config.workflow)
+    pipeline_regex = _regex_all_or_value(config.pipeline)
+    run_type_regex = _regex_all_or_value(config.run_type)
     quarantine_run_id = "" if config.run_id in {"", "-"} else config.run_id
+    range_seconds_token = str(
+        range_seconds if config.range_from else effective_range_hours * 3600
+    )
     replacements = {
         "$read_latency_quantile": str(config.read_latency_quantile),
         "${read_latency_quantile}": str(config.read_latency_quantile),
         "${__timezone}": "UTC",
-        "$workflow": ".*"
-        if prometheus and config.workflow == "All"
-        else config.workflow,
-        "$pipeline": ".*"
-        if prometheus and config.pipeline == "All"
-        else config.pipeline,
-        "$run_type": ".*"
-        if prometheus and config.run_type == "All"
-        else config.run_type,
+        "$workflow": workflow,
+        "$pipeline": pipeline,
+        "$run_type": run_type,
         "$run_id": config.run_id,
-        "${workflow}": ".*"
-        if prometheus and config.workflow == "All"
-        else config.workflow,
-        "${pipeline}": ".*"
-        if prometheus and config.pipeline == "All"
-        else config.pipeline,
-        "${run_type}": ".*"
-        if prometheus and config.run_type == "All"
-        else config.run_type,
+        "${workflow}": workflow,
+        "${pipeline}": pipeline,
+        "${run_type}": run_type,
         "${run_id}": config.run_id,
         "${workflow:queryparam}": quote(config.workflow, safe=""),
         "${pipeline:queryparam}": quote(config.pipeline, safe=""),
@@ -828,9 +855,9 @@ def _substitute_dashboard_tokens(
         "${pipeline:percentencode}": quote(config.pipeline, safe=""),
         "${run_type:percentencode}": quote(config.run_type, safe=""),
         "${run_id:percentencode}": quote(config.run_id, safe=""),
-        "${workflow:regex}": ".*" if config.workflow == "All" else config.workflow,
-        "${pipeline:regex}": ".*" if config.pipeline == "All" else config.pipeline,
-        "${run_type:regex}": ".*" if config.run_type == "All" else config.run_type,
+        "${workflow:regex}": workflow_regex,
+        "${pipeline:regex}": pipeline_regex,
+        "${run_type:regex}": run_type_regex,
         "${run_id:regex}": config.run_id,
         "${pipeline:csv}": config.pipeline,
         "${workflow:csv}": config.workflow,
@@ -878,12 +905,8 @@ def _substitute_dashboard_tokens(
         "${provider_hint:regex}": "chembl",
         "$__range": range_literal,
         "${__range}": range_literal,
-        "${__range_s}": str(
-            range_seconds if config.range_from else effective_range_hours * 3600
-        ),
-        "$__range_s": str(
-            range_seconds if config.range_from else effective_range_hours * 3600
-        ),
+        "${__range_s}": range_seconds_token,
+        "$__range_s": range_seconds_token,
         "${__from}": str(int(datetime.fromisoformat(start_iso).timestamp() * 1000)),
         "${__to}": str(int(datetime.fromisoformat(end_iso).timestamp() * 1000)),
         "$__interval": "5m",
