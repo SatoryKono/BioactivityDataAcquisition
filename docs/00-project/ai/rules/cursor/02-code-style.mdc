@@ -1,6 +1,7 @@
 ---
 description: BioETL Code Style — Python standards, Type hints, Linting
 globs: ["src/**/*.py", "tests/**/*.py"]
+alwaysApply: false
 ---
 
 # Future Annotations (PEP 563)

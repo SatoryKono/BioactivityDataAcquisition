@@ -48,9 +48,10 @@ docs/00-project/ai/rules/
 **Настройка:**
 
 ```bash
-# Скопировать правила в директорию Cursor
-mkdir -p .cursor/rules
-cp docs/00-project/ai/rules/cursor/*.mdc .cursor/rules/
+# Канон: docs/00-project/ai/rules/cursor/*.mdc
+# .cursor/ в gitignore — deploy только локальный
+uv run python -m scripts.ai.sync.cursor --deploy
+uv run python -m scripts.ai.sync.cursor --check
 ```
 
 **Структура `.cursor/rules/`:**
