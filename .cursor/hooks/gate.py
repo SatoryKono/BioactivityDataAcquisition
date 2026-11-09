@@ -218,13 +218,26 @@ def _decide_shell(
         return dict(_DENY_INPUT)
     roots = _workspace_roots(event)
     cwd = event.get("cwd")
-    effective_cwd = cwd if isinstance(cwd, str) else ""
+    initial_cwd = cwd if isinstance(cwd, str) else ""
+    directories = {initial_cwd}
     decisions: list[tuple[str, str, str]] = []
-    for segment in _split_commands(command):
-        decisions.append(
-            _classify_segment(segment, roots, effective_cwd, branch_lookup)
+    for segment, separator in _split_commands(command):
+        decisions.extend(
+            _classify_segment(segment, roots, directory, branch_lookup)
+            for directory in sorted(directories)
         )
-        effective_cwd = _cwd_after_segment(segment, effective_cwd)
+        if separator == "||":
+            directories.add(initial_cwd)
+        elif separator in {"&&", ";", "\n"}:
+            changed = {
+                _cwd_after_segment(segment, directory) for directory in directories
+            }
+            directories = changed if separator == "&&" else directories | changed
+        if len(directories) > 16:
+            return _deny(
+                "Слишком много возможных рабочих каталогов. Разбейте команду.",
+                "Hook gate could not bound shell working directories.",
+            )
     if not decisions:
         return {"permission": "allow"}
     chosen = max(decisions, key=lambda item: _PERMISSION_RANK[item[0]])
@@ -395,7 +408,8 @@ def _classify_push(
 ) -> tuple[str, str, str]:
     """Deny protected force pushes; ask for other force pushes."""
     if _has_flag(args, "--mirror") or (
-        _has_flag(args, "--all") and _push_is_force(args)
+        (_has_flag(args, "--all") or _has_flag(args, "--branches"))
+        and _push_is_force(args)
     ):
         return _deny_tuple(
             "Массовый принудительный push запрещён: может обновить main/master.",
@@ -755,9 +769,9 @@ def _join_cwd(cwd: str, dest: str) -> str:
     return suffix
 
 
-def _split_commands(command: str) -> list[str]:
+def _split_commands(command: str) -> list[tuple[str, str]]:
     """Split a shell line on unquoted ;, |, &&, and || separators."""
-    parts: list[str] = []
+    parts: list[tuple[str, str]] = []
     buf: list[str] = []
     quote: str | None = None
     index = 0
@@ -775,19 +789,19 @@ def _split_commands(command: str) -> list[str]:
             index += 1
             continue
         if command.startswith("&&", index) or command.startswith("||", index):
-            parts.append("".join(buf))
+            parts.append(("".join(buf), command[index : index + 2]))
             buf = []
             index += 2
             continue
         if char in {";", "|", "\n"}:
-            parts.append("".join(buf))
+            parts.append(("".join(buf), char))
             buf = []
             index += 1
             continue
         buf.append(char)
         index += 1
-    parts.append("".join(buf))
-    return [part.strip() for part in parts if part.strip()]
+    parts.append(("".join(buf), ""))
+    return [(part.strip(), separator) for part, separator in parts if part.strip()]
 
 
 def _strip_unquoted_comment(segment: str) -> str:
