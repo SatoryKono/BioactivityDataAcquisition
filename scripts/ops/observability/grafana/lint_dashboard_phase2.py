@@ -364,15 +364,26 @@ def _lint_thresholds(path: Path, panels: list[dict[str, Any]]) -> list[str]:
     ]
 
 
+def _is_github_host(url: str) -> bool:
+    """True when the URL host is github.com or a subdomain of it."""
+    host = urlsplit(url).hostname
+    if not host:
+        return False
+    normalized = host.lower().rstrip(".")
+    return normalized == "github.com" or normalized.endswith(".github.com")
+
+
+def _query_has_grafana_transport(url: str) -> bool:
+    query = urlsplit(url).query
+    return "var-" in query or "${__url_time_range}" in query or "${pipeline" in query
+
+
 def _url_transport_findings(path_name: str, title: str, url: str) -> list[str]:
     findings: list[str] = []
     glued = f"/${{__data.fields.action_path}}{_AMP}"
     if glued in url or glued.replace(_AMP, _AMP_ENTITY) in url:
         findings.append(f"{path_name}: action_path glued with & ({title or url[:60]})")
-    grafana_on_github = "github.com/" in url and (
-        "var-" in url or "${__url_time_range}" in url or "${pipeline" in url
-    )
-    if grafana_on_github:
+    if _is_github_host(url) and _query_has_grafana_transport(url):
         findings.append(f"{path_name}: GitHub URL carries Grafana params ({url[:80]})")
     if title and "Provider Health" in title and "bioetl-overview-v2" in url:
         findings.append(

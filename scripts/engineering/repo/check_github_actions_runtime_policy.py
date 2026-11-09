@@ -700,11 +700,24 @@ PIN_REGISTRY_PATH = "configs/quality/reusable_action_pins.yaml"
 PIN_WORKFLOW_PATHS: tuple[str, ...] = (".github/workflows/pr-required.yml",)
 _PIN_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 _LOCAL_ACTION_PREFIX = (".github", "actions")
+_PUBLIC_DIAGNOSTIC = re.compile(r"[A-Za-z0-9_./:@!=+(), \-]{1,2000}\Z")
+_SECRET_DIAGNOSTIC = re.compile(r"(?i)secrets?[._]")
+_REDACTED_DIAGNOSTIC = "[redacted-diagnostic]"
+
+
+def _public_diagnostic(error: str) -> str:
+    """Keep stderr free of workflow secret expressions."""
+    if _SECRET_DIAGNOSTIC.search(error):
+        return _REDACTED_DIAGNOSTIC
+    match = _PUBLIC_DIAGNOSTIC.fullmatch(error)
+    if match is None:
+        return _REDACTED_DIAGNOSTIC
+    return match.group(0)
 
 
 def _emit_pin_errors(errors: list[str]) -> None:
     for error in errors:
-        print(error, file=sys.stderr)
+        print(_public_diagnostic(error), file=sys.stderr)
 
 
 def _read_pin_yaml(path: Path, errors: list[str]) -> object | None:
@@ -724,7 +737,9 @@ def _read_pin_yaml(path: Path, errors: list[str]) -> object | None:
     try:
         return yaml.safe_load(text)
     except yaml.YAMLError as exc:
-        errors.append(f"malformed YAML: {path}: {exc}")
+        mark = getattr(exc, "problem_mark", None)
+        location = f":{mark.line + 1}:{mark.column + 1}" if mark is not None else ""
+        errors.append(f"malformed YAML: {path}{location}")
         return None
 
 
@@ -841,9 +856,9 @@ def _check_local_action(uses: str, repo_root: Path, errors: list[str]) -> None:
     errors.append(f"local action {uses} has no action.yml or action.yaml")
 
 
-def _check_docker_pin(uses: str, errors: list[str]) -> None:
+def _check_docker_pin(where: str, errors: list[str]) -> None:
     errors.append(
-        f"docker reference {uses} is not an external action or reusable workflow pin"
+        f"{where} docker reference is not an external action or reusable workflow pin"
     )
 
 
@@ -858,7 +873,7 @@ def _check_step_uses(
         errors.append(f"{where} uses is not a non-empty string")
         return
     if uses.startswith(_DOCKER_SCHEME):
-        _check_docker_pin(uses, errors)
+        _check_docker_pin(where, errors)
         return
     if uses.startswith(("./", "../")):
         _check_local_action(uses, repo_root, errors)
@@ -904,7 +919,7 @@ def _check_reusable_uses(
         errors.append(f"job {job_name} uses is not a non-empty string")
         return
     if uses.startswith(_DOCKER_SCHEME):
-        _check_docker_pin(uses, errors)
+        _check_docker_pin(f"job {job_name}", errors)
         return
     if uses.startswith(("./", "../")):
         errors.append(
