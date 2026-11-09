@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-09T15:59:04.022536+00:00",
+  "generated_at": "2026-11-09T16:06:51.873633+00:00",
   "summary": {
     "total_scripts": 719,
     "status_counts": {
@@ -3155,7 +3155,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 124,
+          "line": 117,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\""
         },
@@ -3201,7 +3201,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
@@ -3214,6 +3214,12 @@
           "line": 180,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/mcp_ast_grep_wrapper.sh"
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 60,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
@@ -3287,13 +3293,19 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
           "line": 136,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/mcp_brave_search_wrapper.sh"
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 84,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
@@ -3379,7 +3391,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 143,
+          "line": 136,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\""
         },
@@ -3423,7 +3435,7 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 71,
+          "line": 66,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_interpreter_wrapper.sh\""
         },
@@ -3475,13 +3487,19 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
           "line": 74,
           "source_group": "docs",
           "text": "\"context7\":   { \"type\": \"stdio\", \"command\": \"bash\", \"args\": [\"scripts/ai/mcp/mcp_context7_wrapper.sh\"], \"startup_timeout_sec\": 240, \"mode\": \"optional\" },"
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 54,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
@@ -3543,7 +3561,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 115,
+          "line": 108,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\""
         },
@@ -3858,7 +3876,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 152,
+          "line": 145,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\""
         },
@@ -3932,7 +3950,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 83,
+          "line": 78,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
         },
@@ -4092,7 +4110,7 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 109,
+          "line": 102,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
         },
@@ -4148,7 +4166,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 134,
+          "line": 127,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_mutmut_wrapper.sh\""
         },
@@ -4223,7 +4241,7 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 97,
+          "line": 90,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
         },
@@ -4388,7 +4406,7 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 77,
+          "line": 72,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
         },
@@ -4639,20 +4657,8 @@
       "type": "mjs",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 5,
       "references": [
-        {
-          "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
-          "line": 20,
-          "source_group": "scripts",
-          "text": "& $mcpHostNode (Join-Path $PSScriptRoot \"support/host_transport.mjs\") --root $mcpHostRoot --server ast-grep -- @args"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
-          "line": 12,
-          "source_group": "scripts",
-          "text": "if node \"${mcp_host_dir}/support/host_transport.mjs\" --root \"${mcp_host_root}\" --server ast-grep -- \"$@\"; then"
-        },
         {
           "path": "scripts/ai/mcp/support/invoke_host_transport.ps1",
           "line": 19,
@@ -4826,7 +4832,7 @@
         },
         {
           "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
-          "line": 30,
+          "line": 6,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
         }
@@ -4994,7 +5000,7 @@
         },
         {
           "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
-          "line": 34,
+          "line": 10,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/token_validation.ps1\")"
         },
@@ -5063,13 +5069,13 @@
         },
         {
           "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
-          "line": 25,
+          "line": 8,
           "source_group": "scripts",
           "text": "# shellcheck source=./support/token_validation.sh"
         },
         {
           "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
-          "line": 26,
+          "line": 9,
           "source_group": "scripts",
           "text": "source \"${SCRIPT_DIR}/support/token_validation.sh\""
         }

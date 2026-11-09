@@ -824,14 +824,7 @@
     }
   },
   "assertless_total_candidates": 69,
-  "budget_violations": [
-    {
-      "actual": 3,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1005,12 +998,8 @@
     ]
   },
   "intentional_no_exception_contract": 68,
-  "markerless_examples": [
-    "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:8",
-    "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:44",
-    "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:64"
-  ],
-  "markerless_test_functions": 3,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -1747,12 +1736,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:8",
-      "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:44",
-      "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:64"
-    ],
-    "markerless_test_functions": 3,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -1818,7 +1803,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "c68b74a54a85893f4be31df9ed3197a54004f21feb469a8a990b941c72c6fb50",
+  "source_tree_sha256": "9b1c447b203b14ab52f49a8ecdac5038e749b59c84340ae134bc6b447163e970",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 69,
@@ -1827,12 +1812,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 68,
-    "markerless_examples": [
-      "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:8",
-      "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:44",
-      "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:64"
-    ],
-    "markerless_test_functions": 3,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
