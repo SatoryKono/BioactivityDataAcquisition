@@ -49,6 +49,14 @@ _SIGNAL_WITNESSES = {
     2005: 'up{job="prometheus"}',
     22011: "bioetl_stage_lag_seconds or bioetl_stage_backlog_records",
 }
+_RANKED_EVIDENCE_PANEL = 2010
+_RANKED_EVIDENCE_DEPENDENCIES = frozenset(
+    {
+        "bioetl_incident_ranked_runtime",
+        "bioetl_incident_ranked_provider",
+        "bioetl_incident_ranked_dq",
+    }
+)
 _WORKFLOW_PANELS = frozenset({9701, 9997})
 _METRIC = re.compile(r"\bbioetl_\w+", re.ASCII)
 
@@ -130,9 +138,10 @@ def qualify_empty(
         selected = _scope_pairs(scope)
         return bool(selected) and selected == _scope_pairs(vector(standalone)), evidence
     if panel_id in _SIGNAL_WITNESSES:
-        if not _signal_metrics_available(expr, request):
+        if not _signal_metrics_available(panel_id, expr, request):
             return False, evidence
-        return bool(vector(_SIGNAL_WITNESSES[panel_id])), evidence
+        witnesses = vector(_SIGNAL_WITNESSES[panel_id])
+        return _signal_witness_confirms_empty(panel_id, witnesses), evidence
     return _event_families_available(expr, request), evidence
 
 
@@ -162,13 +171,27 @@ def _observed_scope(
     return vector(scope)
 
 
-def _signal_metrics_available(expr: str, request: Callable[..., Any]) -> bool:
+def _signal_witness_confirms_empty(
+    panel_id: int, witnesses: list[dict[str, Any]]
+) -> bool:
+    if panel_id == _RANKED_EVIDENCE_PANEL and any(
+        float(row["value"][1]) > 0 for row in witnesses
+    ):
+        return False
+    return bool(witnesses)
+
+
+def _signal_metrics_available(
+    panel_id: int, expr: str, request: Callable[..., Any]
+) -> bool:
     """Require healthy recording rules or declared raw metric families."""
     metrics = set(_METRIC.findall(expr))
     if not metrics:
         return False
     raw_metrics = metrics & _RAW_SIGNAL_METRICS
     expected_rules = metrics - raw_metrics
+    if panel_id == _RANKED_EVIDENCE_PANEL:
+        expected_rules.update(_RANKED_EVIDENCE_DEPENDENCIES)
     if expected_rules:
         data = _response_data(request("/api/v1/rules", {}))
         rules = [

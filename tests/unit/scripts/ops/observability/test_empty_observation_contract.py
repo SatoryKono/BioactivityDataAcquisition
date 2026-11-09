@@ -168,3 +168,57 @@ def test_empty_alert_list_requires_healthy_recording_rule(gap):
         timeout=1,
     )
     assert accepted is (gap is None)
+
+
+@pytest.mark.parametrize(
+    "gap", [None, "failed_dependency", "missing_dependency", "active_signal"]
+)
+def test_ranked_evidence_needs_healthy_dependencies_and_no_active_witness(gap):
+    def fetch(url, **_kwargs):
+        if urlsplit(url).path.endswith("rules"):
+            names = [
+                "bioetl_incident_ranked_evidence",
+                "bioetl_incident_ranked_runtime",
+                "bioetl_incident_ranked_provider",
+                "bioetl_incident_ranked_dq",
+            ]
+            if gap == "missing_dependency":
+                names.remove("bioetl_incident_ranked_runtime")
+            rules = [
+                {
+                    "name": name,
+                    "type": "recording",
+                    "health": (
+                        "err"
+                        if gap == "failed_dependency"
+                        and name == "bioetl_incident_ranked_runtime"
+                        else "ok"
+                    ),
+                }
+                for name in names
+            ]
+            return {"status": "success", "data": {"groups": [{"rules": rules}]}}
+        query = parse_qs(urlsplit(url).query)["query"][0]
+        if query.startswith("up{"):
+            rows = [
+                {"metric": {"job": job}, "value": [1, "1"]}
+                for job in ("bioetl", "pushgateway", "prometheus")
+            ]
+        elif query.startswith("bioetl_runtime_pipeline_run_type_universe_scoped"):
+            rows = [{"metric": {"pipeline": "test"}, "value": [1, "1"]}]
+        else:
+            rows = [
+                {"metric": {}, "value": [1, "1" if gap == "active_signal" else "0"]}
+            ]
+        return {"status": "success", "data": {"resultType": "vector", "result": rows}}
+
+    accepted, _ = qualify_empty(
+        dashboard_uid="bioetl-incident-v1",
+        panel_id=2010,
+        expr="bioetl_incident_ranked_evidence",
+        base_url="http://prometheus",
+        fetch=fetch,
+        substitute=lambda value: value,
+        timeout=1,
+    )
+    assert accepted is (gap is None)
