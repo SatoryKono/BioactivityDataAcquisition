@@ -38,4 +38,5 @@ Using offline dashboard exports from `reports/observability/live-fixes-r6/LF1-01
 ## 4. Closure Passport
 * **[x] Попанельный baseline по двум UUID сохранён**: `PASS` (for offline dashboard structure analysis) / `BLOCKED` (for live UUID query inspection due to offline environment).
 * **[x] Причины подтверждены либо обозначены недоказанными**: `PASS`. UQL/JSONata, optional fields, and fractional-second parsing are hypotheses from #12785. The causal mechanism remains `NOT_VERIFIABLE` without a reproduced transformation on captured input.
-* **[x] Результат приложен как отчёт с exact source/deploy SHA**: `PASS`. Documented in this baseline report.
+* **[x] Офлайн-отчёт приложен**: `PASS`. The retained dashboard snapshot is identified by its source SHA above.
+* **[ ] Идентичность развёртывания подтверждена**: `NOT_VERIFIABLE`. The deployed revision and live frames were not captured.
