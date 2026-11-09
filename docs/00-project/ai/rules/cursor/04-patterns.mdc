@@ -1,6 +1,7 @@
 ---
 description: BioETL Patterns — Adapters, Pipelines, Composites
 globs: ["src/**/*.py", "configs/**/*.yaml"]
+alwaysApply: false
 ---
 
 # HTTP Transport (ADR-032)

@@ -1,6 +1,8 @@
 ---
-trigger: model_decision
+trigger: glob
 description: "Documentation standards and governance sync"
+globs:
+  - "docs/**/*.md"
 ---
 
 # Documentation Standards

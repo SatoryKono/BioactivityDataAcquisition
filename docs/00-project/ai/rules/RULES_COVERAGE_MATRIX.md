@@ -91,6 +91,7 @@ uv run python -m scripts.docs check-drift --runtime-mirrors --freshness
 
 | Date | Change |
 | ---- | ------ |
+| 2026-11-09 | File-scoped `.mdc` declare `alwaysApply: false`; `06` globs quoted so Windsurf attaches by glob |
 | 2026-07-16 | Align matrix with RULES v6.1.5 / REQUIREMENTS v1.12 and add explicit §4.5 / REQ-GOV-* coverage |
 | 2026-07-16 | Sync Windsurf/Devin workflows + DeepWiki notes to Qodo extract (66 IDs) |
 | 2026-07-16 | Sync Qodo extract (66 IDs) into `07-qodo-enforcement` + thematic gap-fill (`02`–`06`, `08`, `11`, architecture) |

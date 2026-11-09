@@ -29,6 +29,8 @@ globs:
 | `MERGE` | Upsert by declared primary/business keys + deterministic content identity |
 | `APPEND` | **Only** with explicit machine-readable `idempotency_contract` — append without it is invalid config |
 
+Destructive rebuild/clear and `write_silver_merged` are separate lifecycle APIs; batch `DELETE`/`OVERWRITE` fail before writing.
+
 **MUST NOT:** raw Parquet without `_delta_log/`; `OVERWRITE` as Silver enum.
 
 **ADR-050:** `filters.silver_filters` is **structural admission only**. Semantic buckets (`columns`, `ranges`, `list_lengths`, `list_contains`) in active Silver config **MUST NOT**.

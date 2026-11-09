@@ -142,6 +142,7 @@ MCP_GITHUB_PROJECT_TRANSPORT_TEST = (
     "tests/unit/repo_backed/scripts/ai/mcp/test_github_project_transport.py"
 )
 CURSOR_SKILL_SYNC_TEST = "tests/architecture/test_cursor_skill_sync_safety.py"
+SYNC_CURSOR_RULES_TEST = "tests/unit/scripts/test_sync_cursor_rules.py"
 ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
     "tests/architecture/test_root_hygiene_review_registry.py"
 )
@@ -1144,6 +1145,8 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
             "tests/unit/repo_backed/scripts/test_check_skills_mirror.py",
         ),
     ),
+    # Canonical Cursor/Windsurf rule docs → sync contract (alwaysApply / globs).
+    "docs/00-project/ai/rules/": (SYNC_CURSOR_RULES_TEST,),
     ".vscode/": ("tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",),
     "docs/03-guides/dashboards/": (
         DOCUMENTATION_SYNC_TEST,
