@@ -132,11 +132,12 @@ read_skill_link_target() {
 is_managed_skill_link() {
     local target_root="$1"
     local name="$2"
+    local expected_kind="${3:-}"
     local link_path="$target_root/$name"
     local actual_target kind expected_target absolute_target
     actual_target="$(read_skill_link_target "$link_path")" || return 1
     for kind in codex grok; do
-        [[ -z "${3:-}" || "$kind" == "$3" ]] || continue
+        [[ -z "$expected_kind" || "$kind" == "$expected_kind" ]] || continue
         expected_target="$(relative_skill_source "$target_root" "$name" "$kind")"
         if [[ "$actual_target" == "$expected_target" ]]; then
             return 0
