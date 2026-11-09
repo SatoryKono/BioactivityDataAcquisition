@@ -422,7 +422,7 @@
             },
             "wrapText": false
           },
-          "noValue": "UNKNOWN — the launches table returned no rows for these filters. QUERY ERROR means the backend request failed, not an empty fleet.",
+          "noValue": "VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
           "links": [],
           "color": {
             "mode": "fixed",
