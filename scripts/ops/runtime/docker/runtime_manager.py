@@ -75,18 +75,17 @@ def _publish_matching_bind_owner(
     (root group must not be copied into Compose). Explicit BIOETL_RUNTIME_UID /
     BIOETL_RUNTIME_GID always win over autodetection.
     """
-    if (
-        not _runtime_identity_is_configured(overrides, "BIOETL_RUNTIME_UID")
-        and reports_owner.st_uid > 0
-        and reports_owner.st_uid == data_owner.st_uid
+    for key, attr in (
+        ("BIOETL_RUNTIME_UID", "st_uid"),
+        ("BIOETL_RUNTIME_GID", "st_gid"),
     ):
-        overrides["BIOETL_RUNTIME_UID"] = str(reports_owner.st_uid)
-    if (
-        not _runtime_identity_is_configured(overrides, "BIOETL_RUNTIME_GID")
-        and reports_owner.st_gid > 0
-        and reports_owner.st_gid == data_owner.st_gid
-    ):
-        overrides["BIOETL_RUNTIME_GID"] = str(reports_owner.st_gid)
+        value = getattr(reports_owner, attr)
+        if (
+            not _runtime_identity_is_configured(overrides, key)
+            and value > 0
+            and value == getattr(data_owner, attr)
+        ):
+            overrides[key] = str(value)
 
 
 def _apply_optional_bind_owner_overrides(overrides: dict[str, str]) -> None:
