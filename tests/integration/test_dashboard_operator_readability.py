@@ -385,8 +385,7 @@ def test_datetime_units_are_yyyy_mm_dd_hh_mm() -> None:
                     )
                     if unit != expected:
                         violations.append(
-                            f"{loc} datetime unit must be {expected}, "
-                            f"got {unit!r}"
+                            f"{loc} datetime unit must be {expected}, got {unit!r}"
                         )
     assert not violations, "datetime unit violations:\n" + "\n".join(violations)
 
