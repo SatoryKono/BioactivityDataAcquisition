@@ -117,12 +117,21 @@ _SCRATCH = re.compile(
     r"test_.+\.py"
     r")$"
 )
+# Quoted targets stay intact so "dir with spaces/.env" is not cut at the space.
+_REDIRECT_TARGET = '"[^"]*"|' + r"'[^']*'" + r"|\S+"
 # Accept spaced and attached redirects, including &>.env / x>.env forms.
-_REDIRECT = re.compile(r"(?i)(?:^|[\s|;&]|[^>\s|;&])\d*>{1,2}\s*(\S+)|(?<!>)&>\s*(\S+)")
+_REDIRECT = re.compile(
+    r"(?i)(?:^|[\s|;&]|[^>\s|;&])\d*>{1,2}\s*("
+    + _REDIRECT_TARGET
+    + r")|(?<!>)&>\s*("
+    + _REDIRECT_TARGET
+    + r")"
+)
 _REDIRECT_PREFIX = re.compile(r"\d*>{1,2}$")
 _SUBST_WORD = re.compile(r"[A-Za-z0-9_./\\-]+")
 _PATCH_PATH = re.compile(
-    r"(?m)^(?:\*\*\* (?:Add|Delete|Update) File: |diff --git a/\S+ b/)(.+)$"
+    r"(?m)^(?:\*\*\* (?:Add|Delete|Update) File:\s*|\*\*\* Move to:\s*"
+    r"|diff --git a/\S+ b/)(.+)$"
 )
 _DOCKER = re.compile(
     r"(?i)(?<![A-Za-z0-9_-])docker(?:-compose)?(?:\.exe)?(?![A-Za-z0-9_-])"
@@ -391,8 +400,12 @@ def _classify_push(
     if not _push_is_force(args):
         return ("allow", "", "")
     refspecs = _push_refspecs(args)
-    destinations = [_ref_destination(refspec) for refspec in refspecs]
-    if any(dest in _PROTECTED_BRANCHES for dest in destinations):
+    destinations = [
+        _resolved_push_destination(refspec, cwd, branch_lookup) for refspec in refspecs
+    ]
+    if any(dest in _PROTECTED_BRANCHES for dest in destinations) or any(
+        dest is None for dest in destinations
+    ):
         return _deny_tuple(
             "Принудительный push в main или master запрещён.",
             "Hook gate denied a force push to main or master.",
@@ -455,8 +468,7 @@ def _direct_segment_write_kind(visible: str, roots: list[str], cwd: str) -> str 
     ]
     if not kinds:
         return None
-    lowered = [token.lower() for token in tokens]
-    writes = any(token in _WRITE_COMMANDS for token in lowered)
+    writes = any(_command_basename(token) in _WRITE_COMMANDS for token in tokens)
     writes = writes or _has_sed_inplace(tokens)
     if _find_git(tokens) is not None:
         parsed = _git_command(tokens)
@@ -473,16 +485,23 @@ def _direct_segment_write_kind(visible: str, roots: list[str], cwd: str) -> str 
     return None
 
 
+def _command_basename(token: str) -> str:
+    """Return a lowercase executable name without its directory or .exe."""
+    name = token.replace("\\", "/").rsplit("/", 1)[-1].lower()
+    if name.endswith(".exe"):
+        name = name[:-4]
+    return name
+
+
 def _is_delete_only(tokens: list[str]) -> bool:
     """True when the tokenized command is a delete/remove family tool."""
-    lowered = [token.lower() for token in tokens]
-    return any(token in _DELETE_COMMANDS for token in lowered)
+    return any(_command_basename(token) in _DELETE_COMMANDS for token in tokens)
 
 
 def _has_sed_inplace(tokens: list[str]) -> bool:
     """True when sed is invoked with an in-place edit flag."""
-    names = {token.lower().replace("\\", "/").rsplit("/", 1)[-1] for token in tokens}
-    if "sed" not in names and "sed.exe" not in names:
+    names = {_command_basename(token) for token in tokens}
+    if "sed" not in names:
         return False
     for token in tokens:
         if token == "-i" or token.startswith("-i") or token == "--in-place":
@@ -495,7 +514,7 @@ def _has_sed_inplace(tokens: list[str]) -> bool:
 def _substitution_write_kind(segment: str, roots: list[str], cwd: str) -> str | None:
     """Detect protected writes hidden in command or process substitutions."""
     tokens = _tokenize(segment)
-    writer = any(token.lower() in _WRITE_COMMANDS for token in tokens)
+    writer = any(_command_basename(token) in _WRITE_COMMANDS for token in tokens)
     writer = writer or _has_sed_inplace(tokens)
     delete_only = _is_delete_only(tokens)
     found_scratch = False
@@ -904,6 +923,19 @@ def _ref_destination(refspec: str) -> str:
     if ref.startswith(prefix):
         return ref[len(prefix) :]
     return ref
+
+
+def _resolved_push_destination(
+    refspec: str,
+    cwd: str,
+    branch_lookup: Callable[[str], str | None],
+) -> str | None:
+    """Map a refspec destination, resolving symbolic HEAD to the current branch."""
+    destination = _ref_destination(refspec)
+    if destination != "HEAD":
+        return destination
+    branch = branch_lookup(cwd)
+    return branch or None
 
 
 def _has_flag(args: list[str], flag: str) -> bool:

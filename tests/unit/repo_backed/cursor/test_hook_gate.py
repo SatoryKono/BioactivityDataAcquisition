@@ -60,6 +60,8 @@ def _shell(command: str, *, branch: str = "feature") -> dict[str, object]:
         ("echo x > src/_tmp_a.py", "allow"),
         ("Get-Content docker-compose.monitoring.yml", "allow"),
         ("rm _tmp_notes.py", "allow"),
+        ("/bin/rm _tmp_notes.py", "allow"),
+        ('echo x > "dir with spaces/readme.txt"', "allow"),
         ("git commit --no-verbose -m x", "allow"),
         ("git -c foo=bar commit -m x", "allow"),
         ("git -c commit.gpgSign=true commit -m x", "allow"),
@@ -95,6 +97,12 @@ def _shell(command: str, *, branch: str = "feature") -> dict[str, object]:
         ("git push -d origin main", "deny"),
         ("git push --mirror origin", "deny"),
         ("git push origin --delete main", "deny"),
+        ("/bin/rm .env", "deny"),
+        ("/usr/bin/tee .env", "deny"),
+        ("rm.exe .env", "deny"),
+        (r".\tee.exe .env", "deny"),
+        ('echo x > "dir with spaces/.env"', "deny"),
+        ('echo x > "dir with spaces/.env.example"', "deny"),
         ("Set-Content .env x", "deny"),
         ("Set-Content .env.example x", "deny"),
         ("echo x > $(echo .env.example)", "deny"),
@@ -124,6 +132,7 @@ def _shell(command: str, *, branch: str = "feature") -> dict[str, object]:
         ("git push --force origin feature", "ask"),
         ("git push -f origin feature", "ask"),
         ("git push -uf origin feature", "ask"),
+        ("git push -f origin HEAD", "ask"),
         ("docker compose -f docker-compose.monitoring.yml up -d", "ask"),
     ],
 )
@@ -133,6 +142,16 @@ def test_shell_permission(command: str, permission: str) -> None:
 
 def test_force_push_of_current_main_is_denied() -> None:
     decision = _shell("git push --force", branch="main")
+    assert decision["permission"] == "deny"
+
+
+def test_force_push_of_head_on_main_is_denied() -> None:
+    decision = _shell("git push -f origin HEAD", branch="main")
+    assert decision["permission"] == "deny"
+
+
+def test_force_push_of_plus_head_on_main_is_denied() -> None:
+    decision = _shell("git push -f origin +HEAD", branch="main")
     assert decision["permission"] == "deny"
 
 
@@ -204,6 +223,48 @@ def test_root_test_module_write_is_allowed() -> None:
         }
     )
     assert decision == {"permission": "allow"}
+
+
+def test_apply_patch_move_to_env_is_denied() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "preToolUse",
+            "tool_name": "ApplyPatch",
+            "tool_input": {
+                "patch": "*** Update File: config.txt\n*** Move to: .env\n@@\n-OLD\n+NEW\n",
+            },
+        }
+    )
+    assert decision["permission"] == "deny"
+
+
+def test_apply_patch_move_to_regular_file_is_allowed() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "preToolUse",
+            "tool_name": "ApplyPatch",
+            "tool_input": {
+                "patch": (
+                    "*** Update File: config.txt\n*** Move to: config.bak\n@@\n-OLD\n+NEW\n"
+                ),
+            },
+        }
+    )
+    assert decision == {"permission": "allow"}
+
+
+def test_quoted_absolute_env_redirect_is_denied() -> None:
+    root = "/tmp/dir with spaces"
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "beforeShellExecution",
+            "command": 'echo x > "/tmp/dir with spaces/.env"',
+            "cwd": root,
+            "workspace_roots": [root],
+        },
+        branch_lookup=lambda _cwd: "feature",
+    )
+    assert decision["permission"] == "deny"
 
 
 def test_apply_patch_env_path_is_denied() -> None:
