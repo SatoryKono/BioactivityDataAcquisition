@@ -1112,19 +1112,19 @@
                     }
                   },
                   {
+                    "type": "value",
+                    "options": {
+                      "Saved run evidence; CURRENT and chart coverage are separate": {
+                        "text": "Saved run evidence"
+                      }
+                    }
+                  },
+                  {
                     "type": "regex",
                     "options": {
                       "pattern": "^(Workflow: )?workflow_parent_not_finalized$",
                       "result": {
                         "text": "Parent workflow completion has not been recorded"
-                      }
-                    }
-                  },
-                  {
-                    "type": "value",
-                    "options": {
-                      "Saved run evidence; CURRENT and chart coverage are separate": {
-                        "text": "Saved run evidence"
                       }
                     }
                   }

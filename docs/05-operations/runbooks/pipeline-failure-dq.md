@@ -39,6 +39,48 @@ ______________________________________________________________________
 - Quarantine volume spikes for one pipeline.
 - Generated DQ report or metadata sidecar points to the affected run artifacts.
 
+### Silver filter accounting warning
+
+`BioETLSilverFilterRejectAccountingMismatch` compares cumulative filtered-out
+records with the cumulative sum of the bounded rejection breakdown, scoped by
+`pipeline` and `run_type`. The rule compares both aggregate snapshots at each
+evaluation and retains the latest comparison in the 15-minute window. Equal
+totals before a reset cannot mask unequal totals after it.
+
+A nonzero counter after an idle run is not a new rejection. Do not compare its
+cumulative value with `increase(...[15m])`: an idle but balanced run would warn.
+For triage, compare `bioetl_silver_filter_rejects_stage_total_15m` with
+`bioetl_silver_filter_rejections_breakdown_total_15m`, then inspect the raw counters
+and saved run report. A missing positive counterpart or unequal totals still
+raises the warning after five minutes. Both sides absent remain absent, not a
+measured zero. Do not delete Pushgateway groups or edit run reports to clear it.
+
+The Incident Workspace CURRENT `silver_filter_rejects` reason uses a recent
+positive snapshot with matching Pushgateway publication time, or a counter
+increase in the 15-minute window. A new publication can carry the same count
+as the previous run. The CURRENT `gold_contract_exclusions` reason applies the
+same test to `bioetl_stage_records_total{stage="gold",outcome="excluded_by_contract"}`.
+A retained snapshot stops qualifying when its publication expires. Saved-run
+Data Quality retains the original rejection and exclusion counts and verdicts.
+
+### Empty event observations in Incident Workspace
+
+`NO OBSERVATIONS` is not a measured zero or a healthy verdict. Labelled event
+families (errors, checkpoint, replay, audit and shutdown operations) are lazy:
+before a matching observation they expose metadata but no sample. The live panel
+auditor accepts this state only for explicit event-panel contracts, with all
+BioETL, Pushgateway and Prometheus targets up, an observed pipeline/run-type scope,
+and counter/histogram metadata for every referenced event family. Missing sources,
+undeclared metrics, unknown scopes and response annotations remain unaccepted.
+
+Empty filtered signal tables additionally require their recording rules and
+independent input evidence. Workflow-only panels may be empty for a verified
+standalone scope when Workflow is All; selecting a concrete workflow does not get
+this exemption. Standalone membership is keyed by both pipeline and run type.
+Provider identity is projected from a unique observed pipeline/provider mapping
+across run types; conflicting mappings remain UNKNOWN. Saved run verdicts,
+including provider WARN, are not rewritten by these CURRENT projections.
+
 ### Thresholds
 
 - **Soft Fail**: > 5% errors (Warning).
@@ -104,6 +146,15 @@ is the active surface.
 
 - This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
 - Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
+
+## Failed-run counter coverage
+
+The health-server exporter declares the failed-run counter for each durable
+pipeline/run-type scope during rehydration, using a zero increment. This begins
+observation in the current registry; it neither replays historical failures nor
+resets an existing counter. The failed-run panel still requires at least two
+real scraped samples per selected scope. Until those samples exist it remains
+UNKNOWN. Historical run reports retain their original outcome.
 
 ## Verification
 
