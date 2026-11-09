@@ -381,8 +381,10 @@ class TestProcessedRecordsTable:
 
         rows = {row["parameter"]: row for row in payload["rows"]}
         assert rows["02 silver_valid_records"]["value"] == " 5"
-        assert rows["06 silver_deduplicated_records"]["value"] == (" 0")
-        assert rows["06 silver_deduplicated_records"]["percentage"] == ("0.0%")
+        # Artifact count above snapshot is not a measurable dedup — keep UNKNOWN
+        # instead of inventing a healthy zero that would block report fills.
+        assert rows["06 silver_deduplicated_records"]["value"].strip() == "UNKNOWN"
+        assert rows["06 silver_deduplicated_records"]["percentage"].strip() == "UNKNOWN"
 
     def test_exact_run_payload_uses_run_ledger_artifacts_as_source_of_truth(
         self,
