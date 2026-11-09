@@ -1233,3 +1233,65 @@ def test_live_audit_isolates_non_required_panel_execution_failures(
     assert len(results) == 1
     assert results[0].status == "ok"
     assert results[0].classification == "blocked_unavailable"
+
+
+def test_control_plane_table_contracts_are_not_processed_records() -> None:
+    for panel_id, contract in (
+        (9408, "control_plane_identity_evidence_v1"),
+        (9406, "control_plane_identity_evidence_v1"),
+        (9414, "control_plane_validation_evidence_v1"),
+    ):
+        spec = next(
+            spec
+            for spec in audit_subject.REVIEWED_PANEL_SPECS
+            if spec.dashboard_uid == "bioetl-control-plane-v1"
+            and spec.panel_id == panel_id
+        )
+        assert audit_subject._classify_http_panel_payload(
+            spec,
+            {
+                "contract": contract,
+                "resolved_via": "run_id",
+                "rows": [{"status": "ok"}],
+            },
+        )[:2] == ("ok", "nonempty_table")
+
+
+def test_replay_audit_uses_projected_frames_instead_of_donor_rows() -> None:
+    from bioetl.interfaces.http._selected_run_unavailable import unavailable_status
+
+    specs = {
+        spec.panel_id: spec
+        for spec in audit_subject.REVIEWED_PANEL_SPECS
+        if spec.dashboard_uid == "bioetl-control-plane-v1"
+        and spec.panel_id in (9422, 9423)
+    }
+    for spec in specs.values():
+        missing = unavailable_status("chembl_activity", "-", "НЕТ ЗАПУСКОВ", "empty")
+        assert missing["rows"]
+        assert audit_subject._classify_http_panel_payload(spec, missing)[:2] == (
+            "error",
+            "no_data",
+        )
+        failed = unavailable_status(
+            "chembl_activity", "-", "QUERY ERROR", "backend error"
+        )
+        assert audit_subject._classify_http_panel_payload(spec, failed)[:2] == (
+            "error",
+            "endpoint_execution_error",
+        )
+
+    available = {"replay_readiness": [{"verdict": "READY"}], "rows": [{"domain": "dq"}]}
+    assert audit_subject._classify_http_panel_payload(specs[9422], available)[:2] == (
+        "ok",
+        "nonempty_table",
+    )
+    assert audit_subject._classify_http_panel_payload(specs[9423], available)[:2] == (
+        "error",
+        "no_data",
+    )
+    available["replay_checks"] = [{"code": "identity", "result": "pass"}]
+    assert audit_subject._classify_http_panel_payload(specs[9423], available)[:2] == (
+        "ok",
+        "nonempty_table",
+    )
