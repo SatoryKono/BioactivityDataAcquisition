@@ -775,6 +775,7 @@ def _substitute_dashboard_tokens(
     config: AuditConfig,
     *,
     range_hours: int | None = None,
+    prometheus: bool = False,
 ) -> str:
     effective_range_hours = config.range_hours if range_hours is None else range_hours
     start_iso, end_iso = _time_window(config, range_hours=effective_range_hours)
@@ -799,13 +800,25 @@ def _substitute_dashboard_tokens(
         "$read_latency_quantile": str(config.read_latency_quantile),
         "${read_latency_quantile}": str(config.read_latency_quantile),
         "${__timezone}": "UTC",
-        "$workflow": config.workflow,
-        "$pipeline": config.pipeline,
-        "$run_type": config.run_type,
+        "$workflow": ".*"
+        if prometheus and config.workflow == "All"
+        else config.workflow,
+        "$pipeline": ".*"
+        if prometheus and config.pipeline == "All"
+        else config.pipeline,
+        "$run_type": ".*"
+        if prometheus and config.run_type == "All"
+        else config.run_type,
         "$run_id": config.run_id,
-        "${workflow}": config.workflow,
-        "${pipeline}": config.pipeline,
-        "${run_type}": config.run_type,
+        "${workflow}": ".*"
+        if prometheus and config.workflow == "All"
+        else config.workflow,
+        "${pipeline}": ".*"
+        if prometheus and config.pipeline == "All"
+        else config.pipeline,
+        "${run_type}": ".*"
+        if prometheus and config.run_type == "All"
+        else config.run_type,
         "${run_id}": config.run_id,
         "${workflow:queryparam}": quote(config.workflow, safe=""),
         "${pipeline:queryparam}": quote(config.pipeline, safe=""),
@@ -815,11 +828,16 @@ def _substitute_dashboard_tokens(
         "${pipeline:percentencode}": quote(config.pipeline, safe=""),
         "${run_type:percentencode}": quote(config.run_type, safe=""),
         "${run_id:percentencode}": quote(config.run_id, safe=""),
-        "${workflow:regex}": config.workflow,
-        "${pipeline:regex}": config.pipeline,
-        "${run_type:regex}": config.run_type,
+        "${workflow:regex}": ".*" if config.workflow == "All" else config.workflow,
+        "${pipeline:regex}": ".*" if config.pipeline == "All" else config.pipeline,
+        "${run_type:regex}": ".*" if config.run_type == "All" else config.run_type,
         "${run_id:regex}": config.run_id,
         "${pipeline:csv}": config.pipeline,
+        "${workflow:csv}": config.workflow,
+        "${selected_pipeline:percentencode}": quote(config.pipeline, safe=""),
+        "${selected_run_id:percentencode}": quote(config.run_id, safe=""),
+        "${selected_pipeline}": config.pipeline,
+        "${selected_run_id}": config.run_id,
         "${run_type:csv}": config.run_type,
         "$pipeline_context": config.pipeline,
         "${pipeline_context}": config.pipeline,
@@ -1676,7 +1694,7 @@ def _audit_prometheus_panel(
             query_preview="",
             target_ref_id=spec.target_ref_id,
         )
-    rendered_expr = _substitute_dashboard_tokens(expr, config)
+    rendered_expr = _substitute_dashboard_tokens(expr, config, prometheus=True)
     requests = []
     for mode, query_url in _prometheus_query_urls(target or {}, rendered_expr, config):
         try:
@@ -1769,6 +1787,15 @@ def _classify_http_panel_payload(
     spec: PanelAuditSpec, payload: object
 ) -> tuple[str, str, str]:
     """Return (status, classification, detail) for an HTTP panel payload."""
+    if isinstance(payload, dict) and any(
+        str(payload.get(key, "")).upper() == "QUERY ERROR"
+        for key in ("verdict", "run_verdict", "replay_readiness_now")
+    ):
+        return (
+            "error",
+            "endpoint_execution_error",
+            f"Endpoint assessment failed: {payload.get('reason', 'QUERY ERROR')}",
+        )
     if (
         isinstance(payload, dict)
         and payload.get("contract") == "forensic_endpoint_error_v1"

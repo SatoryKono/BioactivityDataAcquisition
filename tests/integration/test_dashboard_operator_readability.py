@@ -57,7 +57,7 @@ def test_overview_stages_and_quality_are_outside_saved_evidence() -> None:
     provider, stages, quality = (panels[i] for i in (9480, 9460, 9482))
     assert stages["gridPos"]["y"] == provider["gridPos"]["y"] + provider["gridPos"]["h"]
     assert quality["gridPos"] == {**stages["gridPos"], "x": 15, "w": 9}
-    assert stages["datasource"].get("uid") == "-- Mixed --"
+    assert stages["datasource"].get("uid") == "bioetl-ops-http"
     assert 9450 not in panels
     assert 9452 not in {p["id"] for p in get_dashboard_panels(dashboard)}
     assert quality["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
@@ -373,13 +373,7 @@ def test_datetime_units_are_yyyy_mm_dd_hh_mm() -> None:
                     violations.append(f"{loc} forbids {unit!r}")
                     continue
                 if unit.startswith("time:") or unit.startswith("dateTime"):
-                    expected = (
-                        "time:YY-MM-DD:HH:mm"
-                        if path.name == "bioetl-run-explorer-v1.json"
-                        and panel.get("id") == 3010
-                        and label == "Started"
-                        else DASHBOARD_DATETIME_UNIT
-                    )
+                    expected = DASHBOARD_DATETIME_UNIT
                     if unit != expected:
                         violations.append(
                             f"{loc} datetime unit must be {DASHBOARD_DATETIME_UNIT}, "
@@ -659,23 +653,19 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
         item for item in get_dashboard_panels(overview) if item.get("id") == 9460
     )
     targets = ov_panel["targets"]
-    assert [target["refId"] for target in targets] == ["A", "B"]
-    assert targets[0].get("panelId") == 9002
-    removal_target = targets[1]
+    assert [target["refId"] for target in targets] == ["A"]
+    removal_target = targets[0]
     assert removal_target["url"].endswith("format=pipeline_run_report_json")
-    assert removal_target["parser"] == "uql"
+    assert removal_target["parser"] == "backend"
+    assert removal_target["root_selector"] == removal_target["uql"].removeprefix(
+        'parse-json | jsonata "'
+    ).removesuffix('"')
     assert "removals[outcome=" in removal_target["uql"]
     assert "$s.tracking = 'full' ? 0" in removal_target["uql"]
     transforms = ov_panel["transformations"]
-    keep_stage_rows = next(item for item in transforms if item["id"] == "filterByValue")
-    assert keep_stage_rows["options"]["match"] == "any"
-    assert {item["fieldName"] for item in keep_stage_rows["options"]["filters"]} == {
-        "_bioetl_frame",
-        "stage_id",
-    }
-    assert any(item["id"] == "joinByField" for item in transforms)
-    join = next(item for item in transforms if item["id"] == "joinByField")
-    assert join["options"] == {"byField": "stage_id", "mode": "outerTabular"}
+    assert not any(t["id"] == "joinByField" for t in transforms)
+    assert "records_in" in removal_target["root_selector"]
+    assert "balance_status" in removal_target["root_selector"]
     include = next(item for item in transforms if item["id"] == "filterFieldsByName")
     assert include["options"]["include"]["names"] == [
         "stage_id",

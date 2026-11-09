@@ -452,3 +452,135 @@ def test_processed_records_table_support_all_exports_match_contract() -> None:
 
     for name in support.__all__:
         assert hasattr(support, name), f"__all__ exports {name!r} but it does not exist"
+
+
+@pytest.mark.parametrize(
+    "invalid",
+    [
+        None,
+        "coverage",
+        "identity",
+        "manifest",
+        "scope",
+        "missing",
+        "negative",
+        "boolean",
+        "conflict",
+        "balance",
+    ],
+)
+@pytest.mark.parametrize("gold_removal", [0, 1])
+@pytest.mark.parametrize("resumed", [False, True])
+def test_report_fills_legacy_ledger_gaps_only_with_consistent_evidence(
+    invalid, gold_removal, resumed
+):
+    from dataclasses import replace
+    from bioetl.interfaces.http.processed_records_table import (
+        build_processed_records_table_payload_from_ledger,
+    )
+
+    run_id = deterministic_run_uuid_from_callsite("test_processed_records_report")
+    gold = 983 - 3 * gold_removal
+    entry = RunLedgerEntry(
+        entry_id="finished",
+        manifest_id="manifest",
+        run_id=run_id,
+        event_type="run_finished",
+        occurred_at=datetime(2026, 11, 9, tzinfo=UTC),
+        status="success",
+        metrics_snapshot={
+            "records_bronze": 1000,
+            "records_silver": 1000,
+            "records_gold": gold,
+            "records_gold_excluded_by_contract": 17,
+            "records_quarantined": 0,
+            "records_filtered_out": 0,
+        },
+    )
+    report = {
+        "tracking_coverage": "full",
+        "identity": {
+            "pipeline_name": "chembl_assay",
+            "run_id": str(run_id),
+            "manifest_id": "manifest",
+            "run_type": "incremental",
+        },
+        "layers": dict(
+            zip(
+                (
+                    "bronze_records",
+                    "silver_valid",
+                    "silver_filtered_out",
+                    "silver_quarantined",
+                    "silver_skipped",
+                    "silver_deduplicated",
+                    "gold_written",
+                    "gold_excluded_by_contract",
+                    "gold_quarantined",
+                    "gold_skipped",
+                    "gold_deduplicated",
+                ),
+                (
+                    1000,
+                    1000,
+                    0,
+                    0,
+                    0,
+                    0,
+                    gold,
+                    17,
+                    gold_removal,
+                    gold_removal,
+                    gold_removal,
+                ),
+                strict=True,
+            )
+        ),
+    }
+    if invalid == "coverage":
+        report["tracking_coverage"] = "partial"
+    if invalid == "identity":
+        report["identity"]["run_id"] = "another-run"
+    if invalid == "manifest":
+        report["identity"]["manifest_id"] = "another-manifest"
+    if invalid == "scope":
+        report["identity"]["run_type"] = "backfill"
+    if invalid == "missing":
+        del report["layers"]["gold_skipped"]
+    if invalid == "negative":
+        report["layers"]["gold_skipped"] = -1
+    if invalid == "boolean":
+        report["layers"]["gold_skipped"] = False
+    if invalid == "conflict":
+        report["layers"]["gold_written"] = gold - 1
+    if invalid == "balance":
+        report["layers"]["gold_skipped"] = gold_removal + 1
+    entries = (entry,)
+    if resumed:
+        entries = (
+            replace(
+                entry,
+                entry_id="predecessor",
+                manifest_id="previous",
+                metrics_snapshot=None,
+            ),
+            entry,
+        )
+    payload = build_processed_records_table_payload_from_ledger(
+        ledger_entries=entries,
+        pipeline="chembl_assay",
+        run_type="incremental",
+        report=report,
+    )
+    rows = {row["parameter"]: row for row in payload["rows"]}
+    for parameter in (
+        "05 silver_skipped_records",
+        "09 gold_quarantined_records",
+        "10 gold_skipped_records",
+        "11 gold_deduplicated_records",
+    ):
+        expected = 0 if parameter.startswith("05") else gold_removal
+        assert rows[parameter]["value"].strip() == (
+            "UNKNOWN" if invalid else str(expected)
+        )
+    assert rows["07 gold_written_records"]["value"].strip() == str(gold)

@@ -358,7 +358,7 @@ _MERGED_PRR = (
     "$map(funnel, function($s){($excluded := $s.tracking='full' and "
     "$type($s.removals)='array' ? $sum($append([0], "
     "$s.removals[outcome='excluded_by_contract'].count)) : null; "
-    "{'stage_id':$s.stage_id, 'quarantined':$r($s,'quarantined'), "
+    "{'_bioetl_frame':'stages', 'stage_id':$s.stage_id, 'records_in':$s.records_in, 'records_out':$s.records_out, 'state':$s.balance_status, 'quarantined':$r($s,'quarantined'), "
     "'excluded':$r($s,'excluded_by_contract'), "
     "'deduplicated':$r($s,'deduplicated'), "
     "'filtered_out':$r($s,'filtered_out'), "
@@ -912,9 +912,8 @@ def apply_overview(data: dict[str, Any]) -> None:
     _ensure_exclusions_crit_color(_by_id(data, 9482))
 
     stages = _by_id(data, 9460)
-    # Mixed targets: Dashboard DS (stages rows from 9002) + one merged PRR.
-    # Do not filter on ``_bioetl_frame`` alone — that would drop PRR rows.
-    stages["datasource"] = dict(MIXED_DS)
+    # Materialize complete saved stage rows once; mixed-frame joins dropped them.
+    stages["datasource"] = dict(OPS)
     prr_url = (
         "/ops/observability/pipeline-run-report-artifact"
         "?pipeline=${selected_pipeline:percentencode}"
@@ -922,14 +921,13 @@ def apply_overview(data: dict[str, Any]) -> None:
         "&format=pipeline_run_report_json"
     )
     stages["targets"] = [
-        _dash_target(9002),
         {
-            "refId": "B",
+            "refId": "A",
             "type": "json",
             "source": "url",
-            "parser": "uql",
+            "parser": "backend",
             "format": "table",
-            "root_selector": "",
+            "root_selector": _MERGED_PRR,
             "url": prr_url,
             "url_options": {"method": "GET", "data": ""},
             "uql": f'parse-json | jsonata "{_MERGED_PRR}"',
@@ -938,30 +936,6 @@ def apply_overview(data: dict[str, Any]) -> None:
     ]
     # Align with DQ 9460: drop extract exclude; keep canon fields (+ pct extras).
     stages["transformations"] = [
-        {
-            "id": "filterByValue",
-            "options": {
-                "type": "include",
-                "match": "any",
-                "filters": [
-                    {
-                        "fieldName": FRAME,
-                        "config": {
-                            "id": "equal",
-                            "options": {"value": "stages"},
-                        },
-                    },
-                    {
-                        "fieldName": "stage_id",
-                        "config": {"id": "isNotNull", "options": {}},
-                    },
-                ],
-            },
-        },
-        {
-            "id": "joinByField",
-            "options": {"byField": "stage_id", "mode": "outerTabular"},
-        },
         {"id": "limit", "options": {"limitField": 12}},
         {
             "id": "filterFieldsByName",
