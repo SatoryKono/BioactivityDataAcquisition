@@ -138,9 +138,7 @@ MCP_REPO_ENV_LOADERS_TEST = (
     "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py"
 )
 MCP_SETUP_COPILOT_CODEX_TEST = "tests/unit/scripts/test_setup_copilot_codex_mcp.py"
-MCP_GITHUB_PROJECT_TRANSPORT_TEST = (
-    "tests/unit/repo_backed/scripts/ai/mcp/test_github_project_transport.py"
-)
+MCP_GITHUB_PROJECT_TRANSPORT_TEST = "tests/integration/test_github_project_transport.py"
 CURSOR_SKILL_SYNC_TEST = "tests/architecture/test_cursor_skill_sync_safety.py"
 SYNC_CURSOR_RULES_TEST = "tests/unit/scripts/test_sync_cursor_rules.py"
 ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
@@ -148,6 +146,9 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "scripts/ops/observability/grafana/audit_live_grafana_panels.py": (
+        "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py",
+    ),
     "scripts/ops/observability/grafana/dashboard_context_links.py": (
         "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
     ),
@@ -213,8 +214,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "scripts/ai/mcp/github-mcp-wrapper.ps1",
             "scripts/ai/mcp/github-mcp-wrapper.sh",
             "scripts/ai/mcp/support/github_project_transport.mjs",
-            "tests/unit/repo_backed/scripts/ai/mcp/test_github_project_transport.mjs",
-            "tests/unit/repo_backed/scripts/ai/mcp/test_github_project_transport.py",
+            "tests/integration/test_github_project_transport.mjs",
+            MCP_GITHUB_PROJECT_TRANSPORT_TEST,
         ),
         (
             MCP_AGENT_AUDIT_REGRESSIONS_TEST,

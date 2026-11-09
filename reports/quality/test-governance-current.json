@@ -824,7 +824,14 @@
     }
   },
   "assertless_total_candidates": 69,
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 3,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -998,17 +1005,21 @@
     ]
   },
   "intentional_no_exception_contract": 68,
-  "markerless_examples": [],
-  "markerless_test_functions": 0,
+  "markerless_examples": [
+    "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:8",
+    "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:44",
+    "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:64"
+  ],
+  "markerless_test_functions": 3,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 81,
+    "marked_test_files": 79,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 81,
+    "test_files": 79,
     "unmarked_test_files": []
   },
   "report": {
@@ -1736,17 +1747,21 @@
         ".yml"
       ]
     },
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:8",
+      "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:44",
+      "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:64"
+    ],
+    "markerless_test_functions": 3,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 81,
+      "marked_test_files": 79,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 81,
+      "test_files": 79,
       "unmarked_test_files": []
     },
     "root": ".",
@@ -1803,7 +1818,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "1ebf2f39d31b72334268cb7d846284de2c94e6a1166871f2d72f6f78523aa235",
+  "source_tree_sha256": "11d44744c9c3aa5c9d94d19c7cc3caa3393a0b1ea0d58a8a6202665b58497c67",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 69,
@@ -1812,8 +1827,12 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 68,
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:8",
+      "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:44",
+      "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py:64"
+    ],
+    "markerless_test_functions": 3,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0

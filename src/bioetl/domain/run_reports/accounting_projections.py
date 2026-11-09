@@ -2,15 +2,85 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 from bioetl.domain.run_reports.models import BalanceStatus, TrackingCoverage
 
 __all__ = [
+    "REPORT_LAYER_FIELDS",
     "_is_degraded_balance",
     "_is_unknown_balance",
     "_layer_removed_budget",
     "_prefer_conserving_projection",
     "_resolve_balance_status",
+    "reconcile_saved_layer_counts",
 ]
+
+_SILVER_LAYER_FIELDS = (
+    "silver_valid",
+    "silver_filtered_out",
+    "silver_quarantined",
+    "silver_skipped",
+    "silver_deduplicated",
+)
+_GOLD_LAYER_FIELDS = (
+    "gold_written",
+    "gold_excluded_by_contract",
+    "gold_quarantined",
+    "gold_skipped",
+    "gold_deduplicated",
+)
+REPORT_LAYER_FIELDS = ("bronze_records", *_SILVER_LAYER_FIELDS, *_GOLD_LAYER_FIELDS)
+
+
+def reconcile_saved_layer_counts(
+    report: Mapping[str, object] | None,
+    *,
+    run_id: str,
+    manifest_id: str,
+    pipeline: str,
+    run_types: tuple[str, ...],
+    known_counts: Mapping[str, int | float | None],
+) -> dict[str, int]:
+    """Return complete, conserved counts from matching saved-run evidence."""
+    if not report or report.get("tracking_coverage") != "full":
+        return {}
+    identity, layers = report.get("identity"), report.get("layers")
+    if not isinstance(identity, dict) or not isinstance(layers, dict):
+        return {}
+    if (
+        identity.get("run_id") != run_id
+        or identity.get("manifest_id") != manifest_id
+        or identity.get("pipeline_name") != pipeline
+        or (run_types and identity.get("run_type") not in run_types)
+    ):
+        return {}
+    return _conserved_layer_counts(layers, known_counts)
+
+
+def _conserved_layer_counts(
+    layers: Mapping[str, object],
+    known_counts: Mapping[str, int | float | None],
+) -> dict[str, int]:
+    observed: dict[str, int] = {}
+    for field in REPORT_LAYER_FIELDS:
+        count = layers.get(field)
+        known = known_counts.get(field)
+        if (
+            type(count) is not int
+            or count < 0
+            or (known is not None and known != count)
+        ):
+            return {}
+        observed[field] = count
+    if (
+        sum(observed[field] for field in _SILVER_LAYER_FIELDS)
+        != observed["bronze_records"]
+        or sum(observed[field] for field in _GOLD_LAYER_FIELDS)
+        != observed["silver_valid"]
+    ):
+        return {}
+    return observed
 
 
 def _is_unknown_balance(records_in: int, tracking: TrackingCoverage) -> bool:
