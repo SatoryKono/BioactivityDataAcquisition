@@ -1701,6 +1701,48 @@ def _with_query_requests(
     )
 
 
+def _qualify_empty_panel(
+    spec: PanelAuditSpec,
+    config: AuditConfig,
+    rendered_expr: str,
+    requests: list[dict[str, Any]],
+    detail: str,
+) -> tuple[str, str]:
+    """Verify independent empty-state witnesses without weakening failures."""
+    classification = "empty_result"
+    from scripts.ops.observability.grafana._empty_observation_contract import (
+        qualify_empty,
+    )
+
+    try:
+        qualified, witnesses = qualify_empty(
+            dashboard_uid=spec.dashboard_uid,
+            panel_id=spec.panel_id,
+            expr=rendered_expr,
+            base_url=config.prometheus_base_url,
+            fetch=_fetch_json,
+            substitute=lambda query: _substitute_dashboard_tokens(
+                query, config, prometheus=True
+            ),
+            timeout=config.request_timeout_seconds,
+        )
+        requests.extend(witnesses)
+        if qualified:
+            classification = "expected_empty"
+            detail += "; independently verified empty observation contract; no healthy-zero inference"
+    except (
+        HTTPError,
+        URLError,
+        OSError,
+        TimeoutError,
+        ValueError,
+        TypeError,
+        KeyError,
+    ):
+        detail += "; empty-state witnesses unavailable; review remains required"
+    return classification, detail
+
+
 def _audit_prometheus_panel(
     spec: PanelAuditSpec,
     panel: dict[str, Any],
@@ -1757,36 +1799,9 @@ def _audit_prometheus_panel(
         )
     classification, detail = _combine_prometheus_outcomes(requests)
     if classification == "empty_result":
-        from scripts.ops.observability.grafana._empty_observation_contract import (
-            qualify_empty,
+        classification, detail = _qualify_empty_panel(
+            spec, config, rendered_expr, requests, detail
         )
-
-        try:
-            qualified, witnesses = qualify_empty(
-                dashboard_uid=spec.dashboard_uid,
-                panel_id=spec.panel_id,
-                expr=rendered_expr,
-                base_url=config.prometheus_base_url,
-                fetch=_fetch_json,
-                substitute=lambda query: _substitute_dashboard_tokens(
-                    query, config, prometheus=True
-                ),
-                timeout=config.request_timeout_seconds,
-            )
-            requests.extend(witnesses)
-            if qualified:
-                classification = "expected_empty"
-                detail += "; independently verified empty observation contract; no healthy-zero inference"
-        except (
-            HTTPError,
-            URLError,
-            OSError,
-            TimeoutError,
-            ValueError,
-            TypeError,
-            KeyError,
-        ):
-            detail += "; empty-state witnesses unavailable; review remains required"
     if classification == "empty_result" and spec.semantic_kind == "freshness":
         classification = "telemetry_missing"
         detail = (

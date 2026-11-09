@@ -51,7 +51,7 @@ _SIGNAL_WITNESSES = {
     22011: "bioetl_stage_lag_seconds or bioetl_stage_backlog_records",
 }
 _WORKFLOW_PANELS = frozenset({9701, 9997})
-_METRIC = re.compile(r"\bbioetl_[a-zA-Z0-9_]+")
+_METRIC = re.compile(r"\bbioetl_\w+", re.ASCII)
 
 
 def empty_state_label(panel_id: int) -> str | None:
@@ -93,14 +93,7 @@ def qualify_empty(
 
     def vector(query: str) -> list[dict[str, Any]]:
         payload = request("/api/v1/query", {"query": substitute(query)})
-        if (
-            payload.get("status") != "success"
-            or payload.get("warnings")
-            or payload.get("infos")
-        ):
-            return []
-        data = payload.get("data", {})
-        return data.get("result", []) if data.get("resultType") == "vector" else []
+        return _vector_result(payload)
 
     targets = vector('up{job=~"bioetl|pushgateway|prometheus"}')
     if {row.get("metric", {}).get("job") for row in targets} != {
@@ -121,20 +114,32 @@ def qualify_empty(
             return False, evidence
         return bool(vector(standalone)), evidence
     if panel_id in _SIGNAL_WITNESSES:
-        payload = request("/api/v1/rules", {})
-        rules = {
-            rule.get("name"): rule
-            for group in payload.get("data", {}).get("groups", [])
-            for rule in group.get("rules", [])
-        }
-        for metric in set(_METRIC.findall(expr)):
-            if metric in rules and rules[metric].get("health") != "ok":
-                return False, evidence
-            if metric not in rules:
-                metadata = request("/api/v1/metadata", {"metric": metric})
-                if not metadata.get("data", {}).get(metric):
-                    return False, evidence
+        if not _signal_metrics_available(expr, request):
+            return False, evidence
         return bool(vector(_SIGNAL_WITNESSES[panel_id])), evidence
+    return _event_families_available(expr, request), evidence
+
+
+def _signal_metrics_available(expr: str, request: Callable[..., Any]) -> bool:
+    """Require healthy recording rules or declared raw metric families."""
+    payload = request("/api/v1/rules", {})
+    rules = {
+        rule.get("name"): rule
+        for group in payload.get("data", {}).get("groups", [])
+        for rule in group.get("rules", [])
+    }
+    for metric in set(_METRIC.findall(expr)):
+        if metric in rules and rules[metric].get("health") != "ok":
+            return False
+        if metric not in rules:
+            metadata = request("/api/v1/metadata", {"metric": metric})
+            if not metadata.get("data", {}).get(metric):
+                return False
+    return True
+
+
+def _event_families_available(expr: str, request: Callable[..., Any]) -> bool:
+    """Accept only declared counter and histogram event families."""
     metrics = set(_METRIC.findall(expr))
     # These are sparse event panels, not a waiver for arbitrary absent gauges.
     families = set()
@@ -144,14 +149,26 @@ def qualify_empty(
         elif metric.endswith("_total"):
             families.add(metric)
         elif metric != "bioetl_runtime_pipeline_run_type_universe_scoped":
-            return False, evidence
+            return False
     if not families:
-        return False, evidence
+        return False
     for family in sorted(families):
         payload = request("/api/v1/metadata", {"metric": family})
         entries = payload.get("data", {}).get(family, [])
         if payload.get("status") != "success" or not entries:
-            return False, evidence
+            return False
         if any(item.get("type") not in {"counter", "histogram"} for item in entries):
-            return False, evidence
-    return True, evidence
+            return False
+    return True
+
+
+def _vector_result(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    """Reject annotated, unsuccessful and non-vector responses."""
+    if (
+        payload.get("status") != "success"
+        or payload.get("warnings")
+        or payload.get("infos")
+    ):
+        return []
+    data = payload.get("data", {})
+    return data.get("result", []) if data.get("resultType") == "vector" else []
