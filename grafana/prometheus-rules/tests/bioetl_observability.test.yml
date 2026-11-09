@@ -2924,6 +2924,19 @@ tests:
       exp_samples:
       - labels: '{__name__="bioetl_dq_current_reason",action_dashboard_uid="bioetl-dq-v2",action_scope="var-pipeline=uniprot_protein&var-stage=$__all",action_target="data_quality",pipeline="uniprot_protein",reason="gold_contract_exclusions",severity="warn"}'
         value: 1
+  - name: gold-current-zero-snapshot-keeps-recent-exclusions
+    interval: 1m
+    input_series:
+    - series: bioetl_stage_records_total{job="bioetl",pipeline="uniprot_protein",run_type="incremental",stage="gold",outcome="excluded_by_contract"}
+      values: 0+0x4 4+0x3 0+0x11
+    - series: push_time_seconds{job="bioetl",pipeline="uniprot_protein",run_type="incremental"}
+      values: 0+0x4 300+0x3 540+0x11
+    promql_expr_test:
+    - expr: bioetl_dq_current_reason{reason="gold_contract_exclusions"}
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_dq_current_reason",action_dashboard_uid="bioetl-dq-v2",action_scope="var-pipeline=uniprot_protein&var-stage=$__all",action_target="data_quality",pipeline="uniprot_protein",reason="gold_contract_exclusions",severity="warn"}'
+        value: 1
   - name: gold-current-reset-exclusions
     interval: 1m
     input_series:

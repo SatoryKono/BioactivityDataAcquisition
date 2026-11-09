@@ -903,7 +903,7 @@ groups:
             ((max by (pipeline) (max_over_time(bioetl_dq_records_quarantined_total[15m])) > bool 0) or on (pipeline) (bioetl_overview_pipeline_universe * 0))
             +
             ((sum by (pipeline) (
-              (bioetl_silver_filter_rejections_total
+              ((bioetl_silver_filter_rejections_total > 0)
                   and on (job, pipeline, run_type) (
                     (push_time_seconds{job="bioetl",pipeline!="",run_type!=""} > time() - 900)
                     and (push_time_seconds{job="bioetl",pipeline!="",run_type!=""} <= time())
@@ -971,7 +971,7 @@ groups:
           action_dashboard_uid: bioetl-dq-v2
         expr: >-
           label_replace((sum by (pipeline) (
-              (bioetl_silver_filter_rejections_total
+              ((bioetl_silver_filter_rejections_total > 0)
                   and on (job, pipeline, run_type) (
                     (push_time_seconds{job="bioetl",pipeline!="",run_type!=""} > time() - 900)
                     and (push_time_seconds{job="bioetl",pipeline!="",run_type!=""} <= time())
@@ -987,7 +987,7 @@ groups:
           action_dashboard_uid: bioetl-dq-v2
         expr: >-
           label_replace((sum by (pipeline) (
-              (bioetl_stage_records_total{stage="gold",outcome="excluded_by_contract"}
+              ((bioetl_stage_records_total{stage="gold",outcome="excluded_by_contract"} > 0)
                   and on (job, pipeline, run_type) (
                     (push_time_seconds{job="bioetl",pipeline!="",run_type!=""} > time() - 900)
                     and (push_time_seconds{job="bioetl",pipeline!="",run_type!=""} <= time())
