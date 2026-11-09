@@ -102,7 +102,7 @@ def test_rehydrate_increments_pipeline_runs_total_once(tmp_path: Path) -> None:
         1.0,
         {"pipeline": "chembl_assay", "run_type": "backfill"},
     )
-    metrics.increment_counter.assert_called_once_with(
+    metrics.increment_counter.assert_any_call(
         "bioetl_pipeline_runs_total",
         0,
         {
@@ -110,6 +110,12 @@ def test_rehydrate_increments_pipeline_runs_total_once(tmp_path: Path) -> None:
             "run_type": "backfill",
             "status": "success",
         },
+    )
+    assert metrics.increment_counter.call_count == 2
+    metrics.increment_counter.assert_any_call(
+        "bioetl_pipeline_runs_total",
+        0,
+        {"pipeline": "chembl_assay", "run_type": "backfill", "status": "failed"},
     )
     counter_names = [
         call.args[0] for call in metrics.increment_counter.call_args_list if call.args
@@ -150,7 +156,12 @@ def test_rehydrate_seeds_provider_universe_and_stage_series(tmp_path: Path) -> N
                 "run_type": "backfill",
                 "status": "success",
             },
-        )
+        ),
+        (
+            "bioetl_pipeline_runs_total",
+            0,
+            {"pipeline": "chembl_assay", "run_type": "backfill", "status": "failed"},
+        ),
     ]
 
 
@@ -215,10 +226,11 @@ def test_rehydrate_writes_scrape_sample_to_prometheus_registry(
         if line.startswith("bioetl_pipeline_runs_total{")
         and 'pipeline="obs_fill_rehydrate_probe"' in line
     ]
-    assert len(sample_lines) == 1
-    assert 'run_type="backfill"' in sample_lines[0]
-    assert 'status="success"' in sample_lines[0]
-    assert sample_lines[0].rsplit("}", 1)[-1].strip() in {"0", "0.0"}
+    assert len(sample_lines) == 2
+    assert all('run_type="backfill"' in line for line in sample_lines)
+    assert any('status="success"' in line for line in sample_lines)
+    assert any('status="failed"' in line for line in sample_lines)
+    assert all(line.rsplit("}", 1)[-1].strip() in {"0", "0.0"} for line in sample_lines)
     aligned = reconcile_current_metrics_with_run_reports(
         root=tmp_path, exposition=body, store=FileRunReportStoreAdapter()
     )
@@ -561,7 +573,7 @@ def test_rehydrate_reports_metrics_failure_and_allows_retry(tmp_path: Path) -> N
 
     assert recovered.error is None
     assert recovered.pipeline_runs_seeded == 1
-    metrics.increment_counter.assert_called_once()
+    assert metrics.increment_counter.call_count == 2
 
 
 def test_skips_unreadable_and_non_terminal_pipeline_reports(
@@ -602,3 +614,29 @@ def test_skips_unreadable_workflow_report(tmp_path: Path) -> None:
     )
 
     assert anchors == ()
+
+
+def test_rehydrate_preserves_observed_failure_counter(tmp_path: Path) -> None:
+    from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+    from prometheus_client import REGISTRY
+
+    reset_rehydrate_seed_state()
+    pipeline = "obs_rehydrate_existing_failure_probe"
+    _write_report(
+        tmp_path,
+        pipeline=pipeline,
+        run_id="r",
+        run_type="incremental",
+        status="success",
+    )
+    labels = {"pipeline": pipeline, "run_type": "incremental", "status": "failed"}
+    metrics = PrometheusMetrics()
+    metrics.increment_counter("bioetl_pipeline_runs_total", 3, labels)
+    before = REGISTRY.get_sample_value("bioetl_pipeline_runs_total", labels)
+    rehydrate_current_pipeline_run_metrics(
+        metrics, root=tmp_path, store=FileRunReportStoreAdapter()
+    )
+    rehydrate_current_pipeline_run_metrics(
+        metrics, root=tmp_path, store=FileRunReportStoreAdapter()
+    )
+    assert REGISTRY.get_sample_value("bioetl_pipeline_runs_total", labels) == before

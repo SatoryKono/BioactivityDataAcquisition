@@ -68,6 +68,9 @@ REQUIRED_CHECKS_PROSE_TEST = (
     "tests/architecture/test_required_checks_prose_consistency.py"
 )
 DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
+GRAFANA_METRIC_SEMANTICS_TEST = (
+    "tests/integration/test_grafana_dashboard_metric_semantics.py"
+)
 STAGE0_EVIDENCE_TEST = "tests/unit/scripts/engineering/ci/test_stage0_evidence.py"
 MANIFEST_VALIDATION_CATALOG_TEST = (
     "tests/unit/interfaces/http/test_manifest_validation_catalog.py"
@@ -152,6 +155,23 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    **dict.fromkeys(
+        (
+            "configs/quality/promql_max_over_time_counter_policy.yaml",
+            "docs/05-operations/runbooks/pipeline-failure-dq.md",
+            "docs/03-guides/dashboards/panel-contract-inventory.json",
+            "grafana/prometheus-rules/bioetl_observability.yml",
+            "grafana/prometheus-rules/bioetl_workflow_scope.yml",
+            "grafana/prometheus-rules/tests/bioetl_observability.test.yml",
+            "grafana/prometheus-rules/tests/workflow_selector_isolation.test.yml",
+        ),
+        (
+            "tests/integration/test_prometheus_rules_config.py",
+            GRAFANA_METRIC_SEMANTICS_TEST,
+            "tests/architecture/test_observability_metric_governance.py",
+            INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
+        ),
+    ),
     "configs/quality/test_matrix.yaml": (
         "tests/architecture/test_ci_test_strategy.py",
         "tests/architecture/test_pytest_sharded_inventory.py",
@@ -647,6 +667,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12916_runtime_review.json",
             "configs/quality/external_resource_inventory_pr12957_organism_review.json",
             "configs/quality/external_resource_inventory_pr12959_chembl_types_review.json",
+            "configs/quality/external_resource_inventory_pr12965_rehydrate_review.json",
             "configs/quality/external_resource_inventory_pr12966_aggregate_events_review.json",
             "configs/quality/external_resource_inventory_pr12929_class_lane_review.json",
             "configs/quality/external_resource_inventory_pr12929_domain_accounting_review.json",
@@ -1199,7 +1220,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/integration/test_dashboard_variable_dependencies.py",
         "tests/integration/test_grafana_config.py",
         "tests/integration/test_grafana_dashboard_cta_links.py",
-        "tests/integration/test_grafana_dashboard_metric_semantics.py",
+        GRAFANA_METRIC_SEMANTICS_TEST,
         "tests/integration/test_grafana_evidence_readability.py",
         GRAFANA_SELECTOR_CONTRACT_TEST,
         GRAFANA_VARIABLE_REFERENCE_TEST,
@@ -1210,7 +1231,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/integration/test_dashboard_variable_dependencies.py",
         "tests/integration/test_grafana_config.py",
         "tests/integration/test_grafana_dashboard_cta_links.py",
-        "tests/integration/test_grafana_dashboard_metric_semantics.py",
+        GRAFANA_METRIC_SEMANTICS_TEST,
         "tests/integration/test_grafana_dashboard_provisioning.py",
         "tests/integration/test_grafana_evidence_readability.py",
         GRAFANA_SELECTOR_CONTRACT_TEST,

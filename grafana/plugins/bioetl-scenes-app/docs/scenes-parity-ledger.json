@@ -22,8 +22,8 @@
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "4a745d98ffe40f8be0b86525e7525e774b8c055cef2381b09ed8c9d318789be1",
     "bioetl-dq-v2": "09d14af81ba67411b475fbb224c0767cebca5ed9c2f3e51d5d7663b3a8c805b2",
-    "bioetl-incident-v1": "1faa9ac42409fa880391c158d5365f2fd6000d7a24ad7b6f5bf8c6d3e7bf7554",
-    "bioetl-overview-v2": "a445c071d440e45e3862e4e8910ff5c2e535e887d99f4cbe549ce6139c4969b7",
+    "bioetl-incident-v1": "4b46183364032387395158ff90441877fd1daafffc2d3442fc10ea521d8d4839",
+    "bioetl-overview-v2": "e059375476ae464dd77caf76f2c3a8525e78aa92f771853d5487ac58686539b8",
     "bioetl-run-explorer-v1": "6a7abff9203966ed7dd97628131c0a11596702a4eab58da3e8cce52f5334acd1"
   },
   "panels": [
@@ -833,7 +833,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "(sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range])) > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range]) unless on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range]) >= 2))"
+          "(sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range])) > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range]) unless on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range]) >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range]) < 2)"
         ],
         "target_count": 1
       }
@@ -1097,7 +1097,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "((((sum(bioetl_runtime_alert_condition_dq_soft_threshold_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_dq_hard_fail_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_dq_critical_anomaly_30m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_silver_validation_failures_30m{pipeline=~\"$pipeline\"}))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\"}) > bool 0)))"
+          "sum({__name__=~\"bioetl_runtime_alert_condition_dq_soft_threshold_15m|bioetl_runtime_alert_condition_dq_hard_fail_15m|bioetl_runtime_alert_condition_dq_critical_anomaly_30m|bioetl_runtime_alert_condition_silver_validation_failures_30m\",pipeline=~\"$pipeline\"}) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\"}) > bool 0)"
         ],
         "target_count": 1
       }
@@ -1188,7 +1188,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "(((sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m))) and on() (count(bioetl_provider_current_status) > bool 0))"
+          "sum({__name__=~\"bioetl_runtime_alert_condition_provider_adapter_latency_high_30m|bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m\"}) and on() (count(bioetl_provider_current_status) > bool 0)"
         ],
         "target_count": 1
       }

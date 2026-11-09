@@ -2,6 +2,8 @@
 
 from copy import deepcopy
 
+_CUSTOM_WIDTH = "custom.width"
+
 
 def apply_stage_removal_columns(payload: dict) -> None:
     """Join saved report counters without substituting current telemetry."""
@@ -168,7 +170,7 @@ def _provider_evidence_columns(panel: dict) -> None:
     panel["fieldConfig"]["overrides"] = [
         {
             "matcher": {"id": "byName", "options": name},
-            "properties": [{"id": "custom.width", "value": width}],
+            "properties": [{"id": _CUSTOM_WIDTH, "value": width}],
         }
         for name, width in widths.items()
     ]
@@ -316,16 +318,21 @@ def apply_dq_accounting_layout(payload: dict) -> None:
     if payload.get("uid") != "bioetl-dq-v2":
         return
     by_id = {panel["id"]: panel for panel in payload["panels"]}
-    by_id[9402]["gridPos"].update(x=0, y=10, w=24, h=8)
-    by_id[9403]["gridPos"].update(x=0, y=18, w=24, h=14)
+    by_id[9402]["gridPos"].update(x=0, y=18, w=24, h=3)
+    by_id[9403]["gridPos"].update(x=0, y=10, w=24, h=8)
+    by_id[9403]["options"]["footer"]["enablePagination"] = True
     # Old aliases share the renamed numeric column; pin its displayed name only.
     for override in by_id[9403]["fieldConfig"]["overrides"]:
+        if override["matcher"].get("options") == "percentage":
+            for prop in override["properties"]:
+                if prop["id"] == _CUSTOM_WIDTH:
+                    prop["value"] = 200
         if override["matcher"].get("options") in {"value", "value A", "count"}:
             override["properties"] = [
-                prop for prop in override["properties"] if prop["id"] != "custom.width"
+                prop for prop in override["properties"] if prop["id"] != _CUSTOM_WIDTH
             ]
     row = by_id[9450]
-    delta = 32 - row["gridPos"]["y"]
-    row["gridPos"]["y"] = 32
+    delta = 21 - row["gridPos"]["y"]
+    row["gridPos"]["y"] = 21
     for child in row["panels"]:
         child["gridPos"]["y"] += delta

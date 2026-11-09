@@ -271,10 +271,20 @@ groups:
       - record: bioetl_l0_input_status_selected
         labels:
           input: provider
+        # Provider identity belongs to the pipeline, not the workflow run type.
+        # Only project a unique observed mapping; conflicting mappings stay UNKNOWN.
         expr: >-
           max by (pipeline, run_type) (
-            group by (pipeline, run_type, provider) (bioetl_workflow_pipeline_expected)
-            * on (provider) group_left() bioetl_provider_current_status
+            bioetl_overview_pipeline_run_type_universe
+            * on (pipeline) group_left()
+            (
+              max by (pipeline) (
+                group by (pipeline, provider) (bioetl_workflow_pipeline_expected{pipeline!="",provider!="",provider!="unknown"} > 0)
+                * on (provider) group_left() bioetl_provider_current_status
+              )
+              and on (pipeline)
+              (count by (pipeline) (group by (pipeline, provider) (bioetl_workflow_pipeline_expected{pipeline!="",provider!="",provider!="unknown"} > 0)) == 1)
+            )
           )
           or on (pipeline, run_type) (bioetl_overview_pipeline_run_type_universe * 3)
       - record: bioetl_l0_input_status_selected
@@ -486,29 +496,11 @@ groups:
 
       - record: bioetl_workflow_pipeline_verdict_status
         expr: >-
-          (
-            (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed"}[15m])) > bool 0) * 2
-          )
+          (((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed"}[15m])) > bool 0) * 2) > 0)
           or
-          (
-            (
-              (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status!~"success|completed|failed"}[15m])) > bool 0) * 1
-            )
-            unless on (pipeline, run_type)
-            (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed"}[15m])) > bool 0)
-          )
+          ((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status!~"success|completed|failed"}[15m])) > bool 0) > 0)
           or
-          (
-            (
-              (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status=~"success|completed"}[15m])) > bool 0) * 0
-            )
-            unless on (pipeline, run_type)
-            (
-              (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed"}[15m])) > bool 0)
-              or
-              (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status!~"success|completed|failed"}[15m])) > bool 0)
-            )
-          )
+          ((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status=~"success|completed"}[15m])) > 0) * 0)
 
       - record: bioetl_runtime_current_activity_15m
         expr: sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0
@@ -884,6 +876,7 @@ groups:
       - record: bioetl_dq_monitor_disabled_current
         expr: max by (pipeline) (bioetl_dq_monitor_enabled == bool 0) > 0
 
+      # CURRENT rejects are events in the window; retained counters are history.
       - record: bioetl_dq_current_degraded_signals_15m
         expr: >-
           (
@@ -891,7 +884,15 @@ groups:
             +
             ((max by (pipeline) (max_over_time(bioetl_dq_records_quarantined_total[15m])) > bool 0) or on (pipeline) (bioetl_overview_pipeline_universe * 0))
             +
-            ((max by (pipeline) (max_over_time(bioetl_silver_filter_rejections_total[15m])) > bool 0) or on (pipeline) (bioetl_overview_pipeline_universe * 0))
+            ((sum by (pipeline) (
+              ((bioetl_silver_filter_rejections_total > 0)
+                  and on (job, pipeline, run_type) (
+                    (push_time_seconds{job="bioetl",pipeline!="",run_type!=""} > time() - 900)
+                    and (push_time_seconds{job="bioetl",pipeline!="",run_type!=""} <= time())
+                    and (push_time_seconds{job="bioetl",pipeline!="",run_type!=""} > 0)
+                  ))
+              or increase(bioetl_silver_filter_rejections_total[15m])
+            ) > bool 0) or on (pipeline) (bioetl_overview_pipeline_universe * 0))
             +
             (bioetl_dq_monitor_disabled_current or on (pipeline) (bioetl_overview_pipeline_universe * 0))
           ) > bool 0
@@ -951,7 +952,15 @@ groups:
           action_target: data_quality
           action_dashboard_uid: bioetl-dq-v2
         expr: >-
-          label_replace((max by (pipeline) (max_over_time(bioetl_silver_filter_rejections_total[15m])) > bool 0), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace((sum by (pipeline) (
+              ((bioetl_silver_filter_rejections_total > 0)
+                  and on (job, pipeline, run_type) (
+                    (push_time_seconds{job="bioetl",pipeline!="",run_type!=""} > time() - 900)
+                    and (push_time_seconds{job="bioetl",pipeline!="",run_type!=""} <= time())
+                    and (push_time_seconds{job="bioetl",pipeline!="",run_type!=""} > 0)
+                  ))
+              or increase(bioetl_silver_filter_rejections_total[15m])
+            ) > bool 0), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
       - record: bioetl_dq_current_reason
         labels:
           reason: gold_contract_exclusions
@@ -959,7 +968,15 @@ groups:
           action_target: data_quality
           action_dashboard_uid: bioetl-dq-v2
         expr: >-
-          label_replace((max by (pipeline) (max_over_time(bioetl_stage_records_total{stage="gold",outcome="excluded_by_contract"}[15m])) > bool 0), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace((sum by (pipeline) (
+              ((bioetl_stage_records_total{stage="gold",outcome="excluded_by_contract"} > 0)
+                  and on (job, pipeline, run_type) (
+                    (push_time_seconds{job="bioetl",pipeline!="",run_type!=""} > time() - 900)
+                    and (push_time_seconds{job="bioetl",pipeline!="",run_type!=""} <= time())
+                    and (push_time_seconds{job="bioetl",pipeline!="",run_type!=""} > 0)
+                  ))
+              or increase(bioetl_stage_records_total{stage="gold",outcome="excluded_by_contract"}[15m])
+            ) > bool 0), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
       - record: bioetl_dq_current_status
         expr: >-
           (max by (pipeline) (bioetl_dq_current_reason{severity="crit"} > 0) * 2)
@@ -1053,14 +1070,23 @@ groups:
       - record: bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m
         expr: min by (provider) (min_over_time(bioetl_rate_limiter_tokens_available[15m])) < bool 1
 
+      # Use the latest cumulative aggregate, including after a counter reset.
       - record: bioetl_silver_filter_rejects_stage_total_15m
-        expr: sum by (pipeline, run_type) (max_over_time(bioetl_records_processed_total{stage="filtered_out"}[15m]))
+        expr: last_over_time((sum by (pipeline, run_type) (bioetl_records_processed_total{stage="filtered_out"}))[15m:])
 
       - record: bioetl_silver_filter_rejections_breakdown_total_15m
-        expr: sum by (pipeline, run_type) (increase(bioetl_silver_filter_rejections_total[15m]))
+        expr: last_over_time((sum by (pipeline, run_type) (bioetl_silver_filter_rejections_total))[15m:])
 
+      # Compare both aggregates at the same instant before retaining the result.
       - record: bioetl_silver_filter_reject_total_mismatch_15m
-        expr: sum by (pipeline, run_type) (abs((bioetl_silver_filter_rejects_stage_total_15m or (bioetl_silver_filter_rejections_breakdown_total_15m * 0)) - (bioetl_silver_filter_rejections_breakdown_total_15m or (bioetl_silver_filter_rejects_stage_total_15m * 0))) > bool 0)
+        expr: >-
+          last_over_time((
+            abs(
+              ((sum by (pipeline, run_type) (bioetl_records_processed_total{stage="filtered_out"})) or ((sum by (pipeline, run_type) (bioetl_silver_filter_rejections_total)) * 0))
+              -
+              ((sum by (pipeline, run_type) (bioetl_silver_filter_rejections_total)) or ((sum by (pipeline, run_type) (bioetl_records_processed_total{stage="filtered_out"})) * 0))
+            ) > bool 0
+          )[15m:])
 
       - record: bioetl_processed_records_bronze_current
         expr: sum by (pipeline, run_type) (max_over_time(bioetl_stage_records_total{stage="bronze", outcome="records"}[15m]))
