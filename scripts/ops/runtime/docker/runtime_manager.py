@@ -46,6 +46,46 @@ _SECRET_ASSIGNMENT = re.compile(
 _URI_USERINFO = re.compile(r"(://)[^/@\s:]+:[^/@\s]+@")
 
 
+def _optional_path_owner(path: Path) -> os.stat_result | None:
+    """Return path ownership when the bind dir exists; absence stays optional."""
+    try:
+        return path.stat()
+    except OSError:
+        return None
+
+
+def _publish_matching_bind_owner(
+    overrides: dict[str, str],
+    *,
+    reports_owner: os.stat_result,
+    data_owner: os.stat_result,
+) -> None:
+    """Publish UID/GID independently for matching non-root bind owners.
+
+    Matching non-root UID still helps private report binds when GID is 0
+    (root group must not be copied into Compose).
+    """
+    if reports_owner.st_uid > 0 and reports_owner.st_uid == data_owner.st_uid:
+        overrides["BIOETL_RUNTIME_UID"] = str(reports_owner.st_uid)
+    if reports_owner.st_gid > 0 and reports_owner.st_gid == data_owner.st_gid:
+        overrides["BIOETL_RUNTIME_GID"] = str(reports_owner.st_gid)
+
+
+def _apply_optional_bind_owner_overrides(overrides: dict[str, str]) -> None:
+    """Ownership is optional: stop/logs/ensure-networks must still dispatch."""
+    if os.name != "posix":
+        return
+    reports_path = Path(overrides.get("BIOETL_DASHBOARD_REPORT_ROOT", ROOT / "reports"))
+    data_path = Path(overrides.get("BIOETL_DASHBOARD_DATA_ROOT", ROOT / "data"))
+    reports_owner = _optional_path_owner(reports_path)
+    data_owner = _optional_path_owner(data_path)
+    if reports_owner is None or data_owner is None:
+        return
+    _publish_matching_bind_owner(
+        overrides, reports_owner=reports_owner, data_owner=data_owner
+    )
+
+
 @contextmanager
 def _dashboard_runtime_environment(
     contract_path: Path,
@@ -53,26 +93,7 @@ def _dashboard_runtime_environment(
     """Expose one scoped source identity to Compose without touching `.env`."""
     contract = _load_contract(contract_path)
     overrides = runtime_preflight.dashboard_source_environment(ROOT, contract)
-    if os.name == "posix":
-        # Ownership is optional: stop/logs/ensure-networks must still dispatch when
-        # dashboard bind dirs are absent or unreadable on the host.
-        reports_path = Path(
-            overrides.get("BIOETL_DASHBOARD_REPORT_ROOT", ROOT / "reports")
-        )
-        data_path = Path(overrides.get("BIOETL_DASHBOARD_DATA_ROOT", ROOT / "data"))
-        try:
-            reports_owner = reports_path.stat()
-            data_owner = data_path.stat()
-        except OSError:
-            reports_owner = None
-            data_owner = None
-        if reports_owner is not None and data_owner is not None:
-            # Publish UID/GID independently: matching non-root UID still helps
-            # private report binds when GID is 0 (root group must not be copied).
-            if reports_owner.st_uid > 0 and reports_owner.st_uid == data_owner.st_uid:
-                overrides["BIOETL_RUNTIME_UID"] = str(reports_owner.st_uid)
-            if reports_owner.st_gid > 0 and reports_owner.st_gid == data_owner.st_gid:
-                overrides["BIOETL_RUNTIME_GID"] = str(reports_owner.st_gid)
+    _apply_optional_bind_owner_overrides(overrides)
     previous = {name: os.environ.get(name) for name in overrides}
     os.environ.update(overrides)
     try:
