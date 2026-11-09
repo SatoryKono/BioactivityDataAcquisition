@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "65cd22e1406c6a3086e06da1b7e000663002cde0",
+  "source_ref": "bfaa19cfa6f6c2d59ca58dd331b636233d175257",
+  "source_reviews": {
+    "src/bioetl/domain/mapping/organism_classification_constants.py": "Removes one unused whitespace regular expression. Resource definitions and acquisition ownership are unchanged."
+  },
+  "line_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "reference_moves": []
+}

@@ -628,6 +628,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12889_chembl_review.json",
             "configs/quality/external_resource_inventory_pr12892_replay_review.json",
             "configs/quality/external_resource_inventory_pr12916_runtime_review.json",
+            "configs/quality/external_resource_inventory_pr12957_organism_review.json",
             "configs/quality/external_resource_inventory_pr12929_class_lane_review.json",
             "configs/quality/external_resource_inventory_pr12929_domain_accounting_review.json",
             "configs/quality/external_resource_inventory_pr12929_valueerror_review.json",
