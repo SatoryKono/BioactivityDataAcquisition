@@ -1725,6 +1725,7 @@ def _qualify_empty_panel(
                 query, config, prometheus=True
             ),
             timeout=config.request_timeout_seconds,
+            as_of=_time_window(config)[1] if config.range_to else None,
         )
         requests.extend(witnesses)
         if qualified:

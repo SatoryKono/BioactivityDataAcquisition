@@ -28,7 +28,6 @@ _EVENT_PANELS = frozenset(
         134,
         137,
         138,
-        205,
         207,
         209,
         210,
@@ -54,6 +53,27 @@ _WORKFLOW_PANELS = frozenset({9701, 9997})
 _METRIC = re.compile(r"\bbioetl_\w+", re.ASCII)
 
 
+_RAW_SIGNAL_METRICS = frozenset(
+    {
+        "bioetl_stage_backlog_records",
+        "bioetl_stage_lag_seconds",
+        "bioetl_workflow_pipeline_expected",
+    }
+)
+
+
+def _response_data(payload: Any) -> dict[str, Any]:
+    if (
+        not isinstance(payload, dict)
+        or payload.get("status") != "success"
+        or payload.get("warnings")
+        or payload.get("infos")
+    ):
+        return {}
+    data = payload.get("data")
+    return data if isinstance(data, dict) else {}
+
+
 def empty_state_label(panel_id: int) -> str | None:
     """A neutral rendering label; it does not itself qualify audit acceptance."""
     if panel_id == 2010:
@@ -77,6 +97,7 @@ def qualify_empty(
     fetch: Callable[..., Any],
     substitute: Callable[[str], str],
     timeout: float,
+    as_of: str | None = None,
 ) -> tuple[bool, list[dict[str, Any]]]:
     """Return acceptance and exact independent witnesses; fail closed on gaps."""
     if dashboard_uid != "bioetl-incident-v1" or empty_state_label(panel_id) is None:
@@ -92,20 +113,13 @@ def qualify_empty(
         return payload
 
     def vector(query: str) -> list[dict[str, Any]]:
-        payload = request("/api/v1/query", {"query": substitute(query)})
+        parameters = {"query": substitute(query)}
+        if as_of is not None:
+            parameters["time"] = as_of
+        payload = request("/api/v1/query", parameters)
         return _vector_result(payload)
 
-    targets = vector('up{job=~"bioetl|pushgateway|prometheus"}')
-    if {row.get("metric", {}).get("job") for row in targets} != {
-        "bioetl",
-        "pushgateway",
-        "prometheus",
-    }:
-        return False, evidence
-    if any(float(row["value"][1]) != 1 for row in targets):
-        return False, evidence
-    scope = 'bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"$pipeline",run_type=~"$run_type"}'
-    if not vector(scope):
+    if not _scope_available(vector):
         return False, evidence
     if panel_id in _WORKFLOW_PANELS:
         standalone = 'bioetl_standalone_pipeline_universe{pipeline=~"$pipeline",run_type=~"$run_type"}'
@@ -120,21 +134,41 @@ def qualify_empty(
     return _event_families_available(expr, request), evidence
 
 
+def _scope_available(vector: Callable[[str], list[dict[str, Any]]]) -> bool:
+    targets = vector('up{job=~"bioetl|pushgateway|prometheus"}')
+    if {row.get("metric", {}).get("job") for row in targets} != {
+        "bioetl",
+        "pushgateway",
+        "prometheus",
+    } or any(float(row["value"][1]) != 1 for row in targets):
+        return False
+    scope = 'bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"$pipeline",run_type=~"$run_type"}'
+    return bool(vector(scope))
+
+
 def _signal_metrics_available(expr: str, request: Callable[..., Any]) -> bool:
     """Require healthy recording rules or declared raw metric families."""
-    payload = request("/api/v1/rules", {})
-    rules = {
-        rule.get("name"): rule
-        for group in payload.get("data", {}).get("groups", [])
-        for rule in group.get("rules", [])
-    }
-    for metric in set(_METRIC.findall(expr)):
-        if metric in rules and rules[metric].get("health") != "ok":
+    metrics = set(_METRIC.findall(expr))
+    if not metrics:
+        return False
+    raw_metrics = metrics & _RAW_SIGNAL_METRICS
+    expected_rules = metrics - raw_metrics
+    if expected_rules:
+        data = _response_data(request("/api/v1/rules", {}))
+        rules = [
+            rule
+            for group in data.get("groups", [])
+            for rule in group.get("rules", [])
+            if rule.get("type") == "recording" and rule.get("name") in expected_rules
+        ]
+        if not expected_rules <= {rule["name"] for rule in rules} or any(
+            rule.get("health") != "ok" for rule in rules
+        ):
             return False
-        if metric not in rules:
-            metadata = request("/api/v1/metadata", {"metric": metric})
-            if not metadata.get("data", {}).get(metric):
-                return False
+    for metric in sorted(raw_metrics):
+        data = _response_data(request("/api/v1/metadata", {"metric": metric}))
+        if not data.get(metric):
+            return False
     return True
 
 
@@ -153,9 +187,9 @@ def _event_families_available(expr: str, request: Callable[..., Any]) -> bool:
     if not families:
         return False
     for family in sorted(families):
-        payload = request("/api/v1/metadata", {"metric": family})
-        entries = payload.get("data", {}).get(family, [])
-        if payload.get("status") != "success" or not entries:
+        data = _response_data(request("/api/v1/metadata", {"metric": family}))
+        entries = data.get(family, [])
+        if not entries:
             return False
         if any(item.get("type") not in {"counter", "histogram"} for item in entries):
             return False
@@ -164,11 +198,5 @@ def _event_families_available(expr: str, request: Callable[..., Any]) -> bool:
 
 def _vector_result(payload: dict[str, Any]) -> list[dict[str, Any]]:
     """Reject annotated, unsuccessful and non-vector responses."""
-    if (
-        payload.get("status") != "success"
-        or payload.get("warnings")
-        or payload.get("infos")
-    ):
-        return []
-    data = payload.get("data", {})
+    data = _response_data(payload)
     return data.get("result", []) if data.get("resultType") == "vector" else []

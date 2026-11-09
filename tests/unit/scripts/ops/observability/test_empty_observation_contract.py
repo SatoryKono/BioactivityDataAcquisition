@@ -10,7 +10,8 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize(
-    "gap", [None, "down", "scope", "metadata", "annotation", "gauge"]
+    "gap",
+    [None, "down", "scope", "metadata", "annotation", "gauge", "warnings", "infos"],
 )
 def test_empty_event_contract_fails_closed_on_missing_witness(gap):
     def fetch(url, **_kwargs):
@@ -19,10 +20,13 @@ def test_empty_event_contract_fails_closed_on_missing_witness(gap):
             family = params["metric"][0]
             return {
                 "status": "success",
+                "warnings": ["partial metadata"] if gap == "warnings" else [],
+                "infos": ["metadata notice"] if gap == "infos" else [],
                 "data": {}
                 if gap == "metadata"
                 else {family: [{"type": "gauge" if gap == "gauge" else "counter"}]},
             }
+        assert params["time"] == ["2026-11-09T11:30:00+00:00"]
         query = params["query"][0]
         rows = [
             {"metric": {"job": job}, "value": [1, "0" if gap == "down" else "1"]}
@@ -48,15 +52,17 @@ def test_empty_event_contract_fails_closed_on_missing_witness(gap):
         fetch=fetch,
         substitute=lambda value: value,
         timeout=1,
+        as_of="2026-11-09T11:30:00+00:00",
     )
     assert accepted is (gap is None)
     assert evidence
 
 
-def test_unknown_panel_cannot_bypass_review():
+@pytest.mark.parametrize("panel_id", [205, 999])
+def test_panels_without_qualified_empty_contract_cannot_bypass_review(panel_id):
     accepted, evidence = qualify_empty(
         dashboard_uid="bioetl-incident-v1",
-        panel_id=999,
+        panel_id=panel_id,
         expr="absent_metric",
         base_url="http://prometheus",
         fetch=lambda *_a, **_k: pytest.fail(
@@ -95,24 +101,38 @@ def test_standalone_witness_does_not_excuse_concrete_workflow(workflow, expected
     assert accepted is expected
 
 
-@pytest.mark.parametrize("health, expected", [("ok", True), ("err", False)])
-def test_empty_alert_list_requires_healthy_recording_rule(health, expected):
+@pytest.mark.parametrize(
+    "gap",
+    [
+        None,
+        "unhealthy",
+        "missing",
+        "alerting",
+        "error",
+        "warnings",
+        "infos",
+        "unhealthy-sibling",
+    ],
+)
+def test_empty_alert_list_requires_healthy_recording_rule(gap):
     def fetch(url, **_kwargs):
-        if urlsplit(url).path.endswith("rules"):
+        endpoint = urlsplit(url).path
+        if endpoint.endswith("metadata"):
+            pytest.fail("metadata must not substitute a recording rule")
+        if endpoint.endswith("rules"):
+            rule = {
+                "name": "bioetl_incident_alert_priority",
+                "type": "alerting" if gap == "alerting" else "recording",
+                "health": "err" if gap == "unhealthy" else "ok",
+            }
+            rules = [] if gap == "missing" else [rule]
+            if gap == "unhealthy-sibling":
+                rules.insert(0, {**rule, "health": "err"})
             return {
-                "status": "success",
-                "data": {
-                    "groups": [
-                        {
-                            "rules": [
-                                {
-                                    "name": "bioetl_incident_alert_priority",
-                                    "health": health,
-                                }
-                            ]
-                        }
-                    ]
-                },
+                "status": "error" if gap == "error" else "success",
+                "warnings": ["partial"] if gap == "warnings" else [],
+                "infos": ["notice"] if gap == "infos" else [],
+                "data": {"groups": [{"rules": rules}]},
             }
         query = parse_qs(urlsplit(url).query)["query"][0]
         rows = [{"metric": {}, "value": [1, "1"]}]
@@ -132,4 +152,4 @@ def test_empty_alert_list_requires_healthy_recording_rule(health, expected):
         substitute=lambda value: value,
         timeout=1,
     )
-    assert accepted is expected
+    assert accepted is (gap is None)

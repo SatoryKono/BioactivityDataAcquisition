@@ -54,7 +54,6 @@ _PUSHED_SNAPSHOT_COUNTERS = frozenset(
         "bioetl_records_processed_total",
         "bioetl_stage_records_total",
         "bioetl_dq_records_quarantined_total",
-        "bioetl_silver_filter_rejections_total",
     }
 )
 
@@ -881,7 +880,7 @@ def test_runtime_dashboard_recording_rules_exist_and_reference_source_metrics() 
         "bioetl_runtime_alert_condition_provider_retries_exhausted_1h": "bioetl_data_source_retry_exhausted_total",
         "bioetl_silver_filter_rejects_stage_total_15m": "bioetl_records_processed_total",
         "bioetl_silver_filter_rejections_breakdown_total_15m": "bioetl_silver_filter_rejections_total",
-        "bioetl_silver_filter_reject_total_mismatch_15m": "bioetl_silver_filter_rejects_stage_total_15m",
+        "bioetl_silver_filter_reject_total_mismatch_15m": "bioetl_records_processed_total",
         "bioetl_processed_records_bronze_current": "bioetl_stage_records_total",
         "bioetl_processed_records_silver_valid_current": "bioetl_stage_records_total",
         "bioetl_processed_records_silver_quarantined_current": "bioetl_stage_records_total",
@@ -1710,12 +1709,13 @@ def test_silver_filter_reject_accounting_has_reconciliation_rule_and_alert() -> 
         "bioetl_silver_filter_rejections_breakdown_total_15m",
     ):
         expr = record_map[name]["expr"]
-        assert expr.startswith("max_over_time((sum by (pipeline, run_type)")
+        assert expr.startswith("last_over_time((sum by (pipeline, run_type)")
         assert "increase(" not in expr
     mismatch_rule = record_map["bioetl_silver_filter_reject_total_mismatch_15m"]
     mismatch_expr = mismatch_rule.get("expr", "")
-    assert "bioetl_silver_filter_rejects_stage_total_15m" in mismatch_expr
-    assert "bioetl_silver_filter_rejections_breakdown_total_15m" in mismatch_expr
+    assert mismatch_expr.startswith("last_over_time((")
+    assert "bioetl_records_processed_total" in mismatch_expr
+    assert "bioetl_silver_filter_rejections_total" in mismatch_expr
     assert "abs(" in mismatch_expr
     assert "> bool 0" in mismatch_expr
 

@@ -1,6 +1,6 @@
 schema_version: 1
 reviewed_on: '2026-11-09'
-reviewed_expression_count: 30
+reviewed_expression_count: 28
 reviewed_expressions:
 - id: bioetl-incident-v1.json:panel=240:target=A
   metrics:
@@ -35,12 +35,6 @@ reviewed_expressions:
 - id: bioetl_runtime_dashboard_recording:bioetl_dq_current_reason:rule_index=128
   metrics:
   - bioetl_dq_records_quarantined_total
-- id: bioetl_runtime_dashboard_recording:bioetl_silver_filter_rejects_stage_total_15m:rule_index=150
-  metrics:
-  - bioetl_records_processed_total
-- id: bioetl_runtime_dashboard_recording:bioetl_silver_filter_rejections_breakdown_total_15m:rule_index=151
-  metrics:
-  - bioetl_silver_filter_rejections_total
 - id: bioetl_runtime_dashboard_recording:bioetl_processed_records_bronze_current:rule_index=153
   metrics:
   - bioetl_stage_records_total
@@ -110,8 +104,5 @@ allowed_counter_metrics:
     - pushed_snapshot_evidence
     - snapshot_denominator
     - event_presence
-  bioetl_silver_filter_rejections_total:
-    intents:
-    - pushed_snapshot_evidence
 event_delta_function: increase
 exact_multi_run_total_source: RunLedger
