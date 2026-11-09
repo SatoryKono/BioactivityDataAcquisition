@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-11-08"
+last_verified: "2026-11-09"
 freshness_window_days: 7
 owner: quality
 canonical_sources:
@@ -57,12 +57,13 @@ coverage refresh:
 
 ## Freshness note
 
-Re-verified on 2026-11-02 at source commit
-`70c538263eadb13e4f1538f0b7e5d30237a2a660`: the canonical source list and
-historical shard manifest remain present, and `git ls-files 'tests/**/test_*.py'`
-counts 3,208 tracked modules. This is an inventory check only;
-the 2026-10-08 17-shard capture below remains the latest measured coverage
-evidence in this summary.
+Re-verified on 2026-11-09 at source commit
+`82b3d165d87bcb19c1d4214d9ccf7254750687b5`: the canonical source list and historical shard manifest
+remain present. The tracked tree contains 3,238 files with basenames
+matching `test_*.py` under `tests/`, counted from
+`git ls-tree -r --name-only 82b3d165d87bcb19c1d4214d9ccf7254750687b5 -- tests`.
+This inventory check records no test execution or coverage measurement.
+The 2026-10-08 17-shard capture remains the latest measured coverage in this summary.
 
 Re-verified on 2026-10-08 against source HEAD
 `ceedc671b613ec3c2b25bbbae86b8b950719ddb6`. The manifest is complete, all 17
