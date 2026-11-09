@@ -634,6 +634,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
     ),
     "reports/observability/live-fixes-r6/LF1-02/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/observability/live-fixes-r6/LF1-20/report.md": (
+        "tests/integration/test_dux6_residual_contracts.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "reports/observability/live-fixes-r6/LF1-23/report.md": (
         "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
@@ -679,6 +683,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         GRAFANA_SELECTOR_CONTRACT_TEST,
         GRAFANA_VARIABLE_REFERENCE_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-21/live-panel-audit.json",
+            "reports/observability/live-fixes-r6/LF1-21/report.md",
+        ),
+        (
+            "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py",
+            "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_backend.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
     ),
     "reports/observability/live-fixes-r6/LF1-18/report.md": (
         GRAFANA_VARIABLE_REFERENCE_TEST,

@@ -270,7 +270,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     defaults = panel["fieldConfig"]["defaults"]
     defaults.update(
         noValue=(
-            "UNKNOWN — the launches table returned no rows for these filters. "
+            "UNKNOWN — required launch evidence is unavailable. "
             "QUERY ERROR means the backend request failed, not an empty fleet."
         ),
         color={"mode": "fixed", "fixedColor": "#E5E7EB"},
