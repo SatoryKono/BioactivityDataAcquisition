@@ -5,6 +5,9 @@
 * **Goal**: Baseline query inspector setup for Grafana Overviews regarding Data Quality (panels 9406, 9403) and Incident (panel 2101). Additionally verify overview 9002 / Control Plane 9418.
 * **Environment Limitations**: The backend environment is known to be isolated from live observability clusters (as demonstrated in LF1-01 and LF1-05). All live API requests will fail (`NOT_VERIFIABLE` / `BLOCKED`). Verification targets offline dashboard configurations.
 
+* **Retained dashboard snapshot source SHA:** `e54596f903e0b280e2b7e572a1c32ab831590b54`.
+* **Deployment SHA:** `NOT_VERIFIABLE`. The LF1-01 identity receipt does not establish the running backend revision.
+
 ## 2. Methodology
 Using offline dashboard exports from `reports/observability/live-fixes-r6/LF1-01/`:
 - Parse and analyze Query parameters (endpoints, body, parser)
@@ -15,7 +18,7 @@ Using offline dashboard exports from `reports/observability/live-fixes-r6/LF1-01
 ### 3.1 Overview (ID 9460)
 * Overview panel 9460 uses the `uql` parser on the `yesoreyeram-infinity-datasource`.
 * Target URL extracted: `/ops/observability/pipeline-run-report-artifact`
-* Fails on mapping fields missing in cases where pipeline stages returned 0 fields or omitted optional keys, leading to incomplete joined records across `stage_id`. (Symptom mapped to PR #12785).
+* Hypothesis from #12785: missing or optional fields could affect the stage join. The retained configuration does not establish that any fields were lost. This requires a captured input frame and the corresponding transformed output.
 
 ### 3.2 DQ Domains (ID 9406 & 9403)
 * Panel 9406 uses the `backend` parser. The target URL extracted is: `/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}`. It extracts fields such as `_bioetl_frame`, `domain`, `verdict`, `status`, `detail`, `reason`, `reason_display`, `status_display`.
@@ -33,5 +36,5 @@ Using offline dashboard exports from `reports/observability/live-fixes-r6/LF1-01
 
 ## 4. Closure Passport
 * **[x] Попанельный baseline по двум UUID сохранён**: `PASS` (for offline dashboard structure analysis) / `BLOCKED` (for live UUID query inspection due to offline environment).
-* **[x] Причины подтверждены либо обозначены недоказанными**: `PASS`. Symptom mapping (zero fields issue/parsing fraction seconds) isolated to UQL JSONata transform and backend schema inconsistencies in #12785.
+* **[x] Причины подтверждены либо обозначены недоказанными**: `PASS`. UQL/JSONata, optional fields, and fractional-second parsing are hypotheses from #12785. The causal mechanism remains `NOT_VERIFIABLE` without a reproduced transformation on captured input.
 * **[x] Результат приложен как отчёт с exact source/deploy SHA**: `PASS`. Documented in this baseline report.
