@@ -190,7 +190,7 @@ def apply_replay_readiness_design(payload: dict) -> None:
             ],
             "fieldConfig": {
                 "defaults": {
-                    "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
+                    "noValue": "—",
                     "custom": {
                         "align": "left",
                         "inspect": True,
