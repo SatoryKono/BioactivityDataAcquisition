@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "catalog_ref": "65cd22e1406c6a3086e06da1b7e000663002cde0",
-  "source_ref": "072967a53d5d3ad072fa724982677d810a9463e3",
+  "source_ref": "ee42bea8b174a6d675fdce015a34b8b9b734e386",
   "source_reviews": {
     "src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py": "Typed constructor forwarding and resolution-factory annotations only. Existing delegates, runtime object construction, and acquisition ownership are unchanged."
   },
