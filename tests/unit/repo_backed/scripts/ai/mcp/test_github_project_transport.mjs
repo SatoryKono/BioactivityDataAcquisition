@@ -64,7 +64,7 @@ test('unmanaged scope does not dispatch',async t=>{
 test('symlink checkout outside managed scope stays unmanaged',async t=>{
     const f=fixture(t);
     const linkRoot=path.join(f.tmp,'linked-repo');
-    fs.symlinkSync(repo,linkRoot);
+    fs.symlinkSync(repo,linkRoot,process.platform==='win32'?'junction':'dir');
     f.policy.workspaces[0].roots=[f.tmp];
     fs.writeFileSync(f.marker,JSON.stringify(f.policy));
     assert.equal(await dispatch({...f.options,root:linkRoot}),UNMANAGED);

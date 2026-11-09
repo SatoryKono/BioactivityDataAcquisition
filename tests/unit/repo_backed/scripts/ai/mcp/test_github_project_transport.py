@@ -7,6 +7,7 @@ import subprocess
 import pytest
 
 
+@pytest.mark.unit
 def test_managed_github_transport_contract() -> None:
     node = shutil.which("node")
     if not node:
