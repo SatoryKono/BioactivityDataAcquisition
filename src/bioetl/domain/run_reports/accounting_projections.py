@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import TypeGuard
 
 from bioetl.domain.run_reports.models import BalanceStatus, TrackingCoverage
 
@@ -43,19 +44,56 @@ def reconcile_saved_layer_counts(
     known_counts: Mapping[str, int | float | None],
 ) -> dict[str, int]:
     """Return complete, conserved counts from matching saved-run evidence."""
-    if not report or report.get("tracking_coverage") != "full":
+    sections = _saved_report_sections(report)
+    if sections is None:
         return {}
-    identity, layers = report.get("identity"), report.get("layers")
-    if not isinstance(identity, dict) or not isinstance(layers, dict):
-        return {}
-    if (
-        identity.get("run_id") != run_id
-        or identity.get("manifest_id") != manifest_id
-        or identity.get("pipeline_name") != pipeline
-        or (run_types and identity.get("run_type") not in run_types)
-    ):
+    identity, layers = sections
+    expected_identity = {
+        "run_id": run_id,
+        "manifest_id": manifest_id,
+        "pipeline_name": pipeline,
+    }
+    if not _saved_identity_matches(identity, expected_identity, run_types):
         return {}
     return _conserved_layer_counts(layers, known_counts)
+
+
+def _saved_report_sections(
+    report: Mapping[str, object] | None,
+) -> tuple[Mapping[str, object], Mapping[str, object]] | None:
+    """Read the two required sections only from fully tracked evidence."""
+    if not report or report.get("tracking_coverage") != "full":
+        return None
+    identity, layers = report.get("identity"), report.get("layers")
+    if not isinstance(identity, dict) or not isinstance(layers, dict):
+        return None
+    return identity, layers
+
+
+def _saved_identity_matches(
+    identity: Mapping[str, object],
+    expected: Mapping[str, str],
+    run_types: tuple[str, ...],
+) -> bool:
+    """Match the selected run, manifest, pipeline and optional run-type scope."""
+    if any(identity.get(field) != value for field, value in expected.items()):
+        return False
+    return not run_types or identity.get("run_type") in run_types
+
+
+def _valid_saved_count(count: object, known: int | float | None) -> TypeGuard[int]:
+    """Accept explicit nonnegative integers consistent with ledger evidence."""
+    return type(count) is int and count >= 0 and (known is None or known == count)
+
+
+def _saved_layers_balance(observed: Mapping[str, int]) -> bool:
+    """Conserve records independently across Silver and Gold."""
+    silver_total = sum(observed[field] for field in _SILVER_LAYER_FIELDS)
+    gold_total = sum(observed[field] for field in _GOLD_LAYER_FIELDS)
+    return (
+        silver_total == observed["bronze_records"]
+        and gold_total == observed["silver_valid"]
+    )
 
 
 def _conserved_layer_counts(
@@ -66,19 +104,10 @@ def _conserved_layer_counts(
     for field in REPORT_LAYER_FIELDS:
         count = layers.get(field)
         known = known_counts.get(field)
-        if (
-            type(count) is not int
-            or count < 0
-            or (known is not None and known != count)
-        ):
+        if not _valid_saved_count(count, known):
             return {}
         observed[field] = count
-    if (
-        sum(observed[field] for field in _SILVER_LAYER_FIELDS)
-        != observed["bronze_records"]
-        or sum(observed[field] for field in _GOLD_LAYER_FIELDS)
-        != observed["silver_valid"]
-    ):
+    if not _saved_layers_balance(observed):
         return {}
     return observed
 
