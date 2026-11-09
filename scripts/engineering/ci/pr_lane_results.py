@@ -241,8 +241,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     **dict.fromkeys(
         (
-            "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
-            "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
             "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
             "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
             "scripts/ai/mcp/mcp_context7_wrapper.ps1",
@@ -252,14 +250,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
         ),
         ("tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",),
-    ),
-    **dict.fromkeys(
-        (
-            ".devin/mcp_config.json",
-            "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-            "scripts/ops/runtime/mcp/apply-shared-to-devin.py",
-        ),
-        ("tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",),
     ),
     "scripts/ai/mcp/mcp_context7_wrapper.sh": (
         MCP_AGENT_AUDIT_REGRESSIONS_TEST,
