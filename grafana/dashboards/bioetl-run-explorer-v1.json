@@ -622,7 +622,7 @@
               },
               {
                 "id": "unit",
-                "value": "time:YYYY-MM-DD HH:mm"
+                "value": "time:YY-MM-DD:HH:mm"
               }
             ]
           },
