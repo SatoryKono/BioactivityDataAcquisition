@@ -31,3 +31,25 @@ def test_shadow_compare_routes_dashboard_docs_and_json() -> None:
         "tests/integration/test_dashboard_variable_dependencies.py"
         in report["selected"]
     )
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "configs/quality/promql_max_over_time_counter_policy.yaml",
+        "docs/05-operations/runbooks/pipeline-failure-dq.md",
+        "docs/03-guides/dashboards/panel-contract-inventory.json",
+        "grafana/prometheus-rules/bioetl_observability.yml",
+        "grafana/prometheus-rules/bioetl_workflow_scope.yml",
+        "grafana/prometheus-rules/tests/bioetl_observability.test.yml",
+        "grafana/prometheus-rules/tests/workflow_selector_isolation.test.yml",
+    ],
+)
+def test_observability_remediation_paths_have_strict_test_routes(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert "tests/integration/test_prometheus_rules_config.py" in report["selected"]
+    assert (
+        "tests/architecture/test_observability_metric_governance.py"
+        in report["selected"]
+    )

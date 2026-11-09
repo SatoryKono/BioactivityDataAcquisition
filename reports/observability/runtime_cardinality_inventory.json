@@ -131,9 +131,7 @@
     "bioetl_runtime_trust_gap_status_10m",
     "bioetl_scope_publication_status",
     "bioetl_silver_filter_reject_total_mismatch_15m",
-    "bioetl_silver_filter_rejections_breakdown_total_15m",
     "bioetl_silver_filter_rejections_total",
-    "bioetl_silver_filter_rejects_stage_total_15m",
     "bioetl_silver_validation_failures_total",
     "bioetl_stage_backlog_records",
     "bioetl_stage_lag_seconds",
@@ -395,7 +393,9 @@
     "bioetl_silver_filter_reject_field_total",
     "bioetl_silver_filter_reject_reason_total",
     "bioetl_silver_filter_reject_total_mismatch_15m",
+    "bioetl_silver_filter_rejections_breakdown_total_15m",
     "bioetl_silver_filter_rejections_total",
+    "bioetl_silver_filter_rejects_stage_total_15m",
     "bioetl_silver_merge_failures_total",
     "bioetl_silver_merge_retries_total",
     "bioetl_silver_optimize_start_total",
@@ -2313,10 +2313,16 @@
       "docs/04-reference/observability/alerting-guide.md",
       "grafana/README.md"
     ],
+    "bioetl_silver_filter_rejections_breakdown_total_15m": [
+      "docs/05-operations/runbooks/pipeline-failure-dq.md"
+    ],
     "bioetl_silver_filter_rejections_total": [
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
+    ],
+    "bioetl_silver_filter_rejects_stage_total_15m": [
+      "docs/05-operations/runbooks/pipeline-failure-dq.md"
     ],
     "bioetl_silver_merge_failures_total": [
       "docs/04-reference/observability/metrics-catalog.md"
@@ -2371,6 +2377,7 @@
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
+      "docs/05-operations/runbooks/pipeline-failure-dq.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
@@ -3843,13 +3850,7 @@
     "bioetl_silver_filter_reject_total_mismatch_15m": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
-    "bioetl_silver_filter_rejections_breakdown_total_15m": [
-      "grafana/prometheus-rules/bioetl_observability.yml"
-    ],
     "bioetl_silver_filter_rejections_total": [
-      "grafana/prometheus-rules/bioetl_observability.yml"
-    ],
-    "bioetl_silver_filter_rejects_stage_total_15m": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_silver_validation_failures_total": [

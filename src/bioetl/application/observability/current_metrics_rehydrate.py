@@ -223,7 +223,13 @@ def _seed_pipeline_runs_total(metrics: MetricsPort, anchor: PipelineRunSnapshot)
     # preserves any failures already recorded in this registry.
     if anchor.status != "failed":
         metrics.increment_counter(
-            "bioetl_pipeline_runs_total", 0, dict(labels, status="failed")
+            "bioetl_pipeline_runs_total",
+            0,
+            {
+                "pipeline": anchor.pipeline,
+                "run_type": anchor.run_type,
+                "status": "failed",
+            },
         )
     seeded_keys.add(key)
     return 1
