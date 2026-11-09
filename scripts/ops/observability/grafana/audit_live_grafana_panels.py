@@ -1384,9 +1384,8 @@ def _classify_http_table_payload(
         "control_plane_identity_evidence_v1",
         "control_plane_validation_evidence_v1",
     )
-    if (
-        title in ("Inspect Processed Records", PROCESSED_RECORDS_PANEL_TITLE)
-        or ("contract" in payload and not control_plane_table)
+    if title in ("Inspect Processed Records", PROCESSED_RECORDS_PANEL_TITLE) or (
+        "contract" in payload and not control_plane_table
     ):
         return _classify_processed_records_payload(payload)
     if not control_plane_table and (title == "ID" or "resolved_via" in payload):
