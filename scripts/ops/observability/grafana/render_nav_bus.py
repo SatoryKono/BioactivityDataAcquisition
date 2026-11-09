@@ -2749,6 +2749,17 @@ def apply_to_dashboard(
     _migrate_grafana_schema42(payload)
     _neutralize_mapped_status_thresholds(payload)
     _remove_dead_organize_renames(payload)
+    if current_uid == "bioetl-incident-v1":
+        from scripts.ops.observability.grafana._empty_observation_contract import (
+            empty_state_label,
+        )
+
+        for panel in _walk_panels(payload.get("panels", [])):
+            label = empty_state_label(panel.get("id", -1))
+            if label and panel.get("id") in {2005, 2010}:
+                panel.setdefault("fieldConfig", {}).setdefault("defaults", {})[
+                    "noValue"
+                ] = label
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

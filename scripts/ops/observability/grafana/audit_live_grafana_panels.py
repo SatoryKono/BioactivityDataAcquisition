@@ -13,7 +13,7 @@ from pathlib import Path
 from time import monotonic, sleep
 from typing import Any, Literal, cast
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote, urlencode, urlsplit, urlunsplit
+from urllib.parse import parse_qs, quote, urlencode, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
 from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_text
@@ -140,6 +140,7 @@ SEMANTIC_CLASSIFICATION_POLICY: dict[str, str] = {
     "expected_empty": "pass",
     "unknown_result": "review_required",
     "telemetry_missing": "review_required_unless_explicitly_reviewed",
+    "verified_historical_generation_gap": "review_required_unless_explicitly_reviewed",
 }
 _SEMANTIC_CLASSIFICATION_ALIASES = {
     "invalid_shape": "query_invalid",
@@ -157,6 +158,9 @@ _REVIEWED_SEMANTIC_OUTCOMES = frozenset(
     {
         ("bioetl-dq-v2", 8, "telemetry_missing"),
         ("bioetl-dq-v2", 101, "telemetry_missing"),
+        ("bioetl-incident-v1", 105, "verified_historical_generation_gap"),
+        ("bioetl-incident-v1", 207, "verified_historical_generation_gap"),
+        ("bioetl-incident-v1", 239, "verified_historical_generation_gap"),
     }
 )
 
@@ -1140,7 +1144,11 @@ def _classify_prometheus_payload(payload: object) -> tuple[str, str]:
     else:
         return ("invalid_shape", f"Unsupported Prometheus resultType={result_type!r}")
     annotations = [name for name in ("infos", "warnings") if payload.get(name)]
-    if annotations and classification in {"zero_result", "nonzero_result"}:
+    if annotations and classification in {
+        "zero_result",
+        "nonzero_result",
+        "empty_result",
+    }:
         return (
             "annotated_result",
             f"{detail}; Prometheus {'/'.join(annotations)} require review; see full response",
@@ -1697,6 +1705,85 @@ def _with_query_requests(
     )
 
 
+def _collect_empty_witnesses(
+    spec: PanelAuditSpec,
+    config: AuditConfig,
+    rendered_expr: str,
+    *,
+    historical_reset: bool = False,
+    range_bounds: dict[str, str] | None = None,
+) -> tuple[bool, list[dict[str, Any]]]:
+    from scripts.ops.observability.grafana._empty_observation_contract import (
+        qualify_empty,
+    )
+
+    return qualify_empty(
+        dashboard_uid=spec.dashboard_uid,
+        panel_id=spec.panel_id,
+        expr=rendered_expr,
+        base_url=config.prometheus_base_url,
+        fetch=_fetch_json,
+        substitute=lambda query: _substitute_dashboard_tokens(
+            query, config, prometheus=True
+        ),
+        timeout=config.request_timeout_seconds,
+        as_of=_time_window(config)[1] if config.range_to else None,
+        historical_reset=historical_reset,
+        range_bounds=range_bounds,
+    )
+
+
+def _empty_range_bounds(requests: list[dict[str, Any]]) -> dict[str, str] | None:
+    for request in requests:
+        if request["mode"] == "range":
+            parameters = parse_qs(urlsplit(request["request_url"]).query)
+            return {key: parameters[key][0] for key in ("start", "end", "step")}
+    return None
+
+
+def _qualify_empty_panel(
+    spec: PanelAuditSpec,
+    config: AuditConfig,
+    rendered_expr: str,
+    requests: list[dict[str, Any]],
+    detail: str,
+) -> tuple[str, str]:
+    """Verify independent empty-state witnesses without weakening failures."""
+    classification = "empty_result"
+    try:
+        bounds = _empty_range_bounds(requests)
+        qualified, witnesses = _collect_empty_witnesses(
+            spec, config, rendered_expr, range_bounds=bounds
+        )
+        requests.extend(witnesses)
+        if qualified:
+            classification = "expected_empty"
+            detail += "; independently verified empty observation contract; no healthy-zero inference"
+        elif spec.panel_id in {105, 207, 239}:
+            reviewed, reset_witnesses = _collect_empty_witnesses(
+                spec,
+                config,
+                rendered_expr,
+                historical_reset=True,
+                range_bounds=bounds,
+            )
+            requests.extend(reset_witnesses)
+            if reviewed:
+                classification = "verified_historical_generation_gap"
+                detail += "; WARN: observed histogram generation change; quantile intentionally unavailable; historical gap retained"
+    except (
+        HTTPError,
+        URLError,
+        OSError,
+        TimeoutError,
+        ValueError,
+        TypeError,
+        KeyError,
+    ):
+        detail += "; empty-state witnesses unavailable; review remains required"
+    return classification, detail
+
+
 def _audit_prometheus_panel(
     spec: PanelAuditSpec,
     panel: dict[str, Any],
@@ -1752,6 +1839,10 @@ def _audit_prometheus_panel(
             }
         )
     classification, detail = _combine_prometheus_outcomes(requests)
+    if classification == "empty_result":
+        classification, detail = _qualify_empty_panel(
+            spec, config, rendered_expr, requests, detail
+        )
     if classification == "empty_result" and spec.semantic_kind == "freshness":
         classification = "telemetry_missing"
         detail = (

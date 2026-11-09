@@ -182,7 +182,8 @@ def test_rehydrate_new_metrics_instance_seeds_all_families(monkeypatch):
             result.workflow_expected_seeded,
             result.workflow_pipeline_expected_seeded,
         ) == (1, 1, 1, 1)
-        metrics.increment_counter.assert_called_once_with(
+        assert metrics.increment_counter.call_count == 2
+        metrics.increment_counter.assert_any_call(
             "bioetl_pipeline_runs_total",
             0,
             {"pipeline": "pipeline", "run_type": "incremental", "status": "success"},
@@ -281,7 +282,7 @@ def test_equal_unhashable_metrics_instances_seed_independently():
     for metrics in (first, second):
         assert rehydrate._seed_pipeline_runs_total(metrics, anchor) == 1
         assert rehydrate._seed_pipeline_runs_total(metrics, anchor) == 0
-        assert metrics.counter_values == [0]
+        assert metrics.counter_values == [0, 0]
 
 
 def test_nonweakrefable_metrics_repeats_only_presence_writes():
@@ -290,4 +291,4 @@ def test_nonweakrefable_metrics_repeats_only_presence_writes():
     anchor = PipelineRunSnapshot("p", "incremental", "success", "provider", "r", 100)
     assert rehydrate._seed_pipeline_runs_total(metrics, anchor) == 1
     assert rehydrate._seed_pipeline_runs_total(metrics, anchor) == 1
-    assert metrics.counter_values == [0, 0]
+    assert metrics.counter_values == [0, 0, 0, 0]

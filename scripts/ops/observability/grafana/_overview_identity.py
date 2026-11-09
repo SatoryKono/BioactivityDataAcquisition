@@ -1,6 +1,7 @@
 """Compact, persisted identity for the Overview first window."""
 
 CUSTOM_WIDTH = "custom.width"
+OVERALL_VERDICT = "Overall verdict"
 
 
 def apply_overview_identity(payload: dict) -> None:
@@ -15,14 +16,14 @@ def apply_overview_identity(payload: dict) -> None:
     for pid in (9002, 9603):
         by_id[pid]["options"]["cellHeight"] = "sm"
     # Preserve the shipped 200% CSS budget and leave Reason flexible.
-    widths = {"Overall verdict": 60, "Processing": 95, "Trust": 60, "Result": 80}
+    widths = {OVERALL_VERDICT: 60, "Processing": 95, "Trust": 60, "Result": 80}
     for override in by_id[9603]["fieldConfig"]["overrides"]:
         field = override["matcher"].get("options")
         if field not in widths and field != "Status":
             continue
         props = override["properties"]
         width = widths.get(field)
-        if field == "Overall verdict" and not any(
+        if field == OVERALL_VERDICT and not any(
             prop.get("id") == "displayName" for prop in props
         ):
             width = None
@@ -119,17 +120,53 @@ def apply_overview_identity(payload: dict) -> None:
     ]
 
 
-def apply_saved_evidence_readability(payload: dict) -> None:
-    """Present saved domains and full identity without redundant table columns."""
-    if payload.get("uid") != "bioetl-overview-v2":
-        return
-    row = next(p for p in payload["panels"] if p.get("id") == 9450)
-    row["panels"] = [p for p in row["panels"] if p.get("id") != 9451]
-    row["description"] = (
-        "Expand for full saved identity of the selected Run ID. Stages are shown above."
-    )
-    panels = {p["id"]: p for p in row["panels"]}
-    overview = {p["id"]: p for p in payload["panels"]}
+def _tune_saved_status_properties(name: str, properties: list[dict]) -> None:
+    for prop in properties:
+        if prop["id"] == CUSTOM_WIDTH and name in {"Processing", "Trust"}:
+            prop["value"] = 95 if name == "Processing" else 60
+        if prop["id"] == "mappings" and name == "Reason":
+            mapping = {
+                "type": "value",
+                "options": {
+                    "Saved run evidence; CURRENT and chart coverage are separate": {
+                        "text": "Saved run evidence"
+                    }
+                },
+            }
+            if mapping not in prop["value"]:
+                prop["value"].append(mapping)
+
+
+def _tune_saved_status_overrides(overrides: list[dict]) -> None:
+    for item in overrides:
+        name = item["matcher"].get("options")
+        _tune_saved_status_properties(name, item["properties"])
+    verdict_override = {
+        "matcher": {"id": "byName", "options": OVERALL_VERDICT},
+        "properties": [
+            {"id": "displayName", "value": "Verdict"},
+            {"id": CUSTOM_WIDTH, "value": 60},
+        ],
+    }
+    if verdict_override not in overrides:
+        overrides.append(verdict_override)
+
+
+def _link_saved_status(overrides: list[dict]) -> None:
+    for item in overrides:
+        if item["matcher"].get("options") == "Status":
+            for prop in item["properties"]:
+                if prop["id"] == "links":
+                    prop["value"] = [
+                        {
+                            "title": "Open saved run report",
+                            "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+                            "targetBlank": True,
+                        }
+                    ]
+
+
+def _link_saved_evidence(overview: dict) -> None:
     for pid in (9002, 9603):
         for item in overview[pid]["fieldConfig"]["overrides"]:
             if item["matcher"].get("options") == "Reason":
@@ -147,17 +184,22 @@ def apply_saved_evidence_readability(payload: dict) -> None:
                         },
                     }
                 )
-    for item in overview[9002]["fieldConfig"]["overrides"]:
-        if item["matcher"].get("options") == "Status":
-            for prop in item["properties"]:
-                if prop["id"] == "links":
-                    prop["value"] = [
-                        {
-                            "title": "Open saved run report",
-                            "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
-                            "targetBlank": True,
-                        }
-                    ]
+    _link_saved_status(overview[9002]["fieldConfig"]["overrides"])
+
+
+def apply_saved_evidence_readability(payload: dict) -> None:
+    """Present saved domains and full identity without redundant table columns."""
+    if payload.get("uid") != "bioetl-overview-v2":
+        return
+    row = next(p for p in payload["panels"] if p.get("id") == 9450)
+    row["panels"] = [p for p in row["panels"] if p.get("id") != 9451]
+    row["description"] = (
+        "Expand for full saved identity of the selected Run ID. Stages are shown above."
+    )
+    panels = {p["id"]: p for p in row["panels"]}
+    overview = {p["id"]: p for p in payload["panels"]}
+    _tune_saved_status_overrides(overview[9603]["fieldConfig"]["overrides"])
+    _link_saved_evidence(overview)
     stages = panels[9460]
     provider = next(p for p in payload["panels"] if p.get("id") == 9480)
     stages["gridPos"]["w"] = provider["gridPos"]["w"]

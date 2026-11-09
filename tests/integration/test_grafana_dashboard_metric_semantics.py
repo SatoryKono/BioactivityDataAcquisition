@@ -61,7 +61,10 @@ RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
 MAX_OVER_TIME_COUNTER_POLICY_PATH = Path(
     "configs/quality/promql_max_over_time_counter_policy.yaml"
 )
-_MAX_OVER_TIME_METRIC_RE = re.compile(r"max_over_time\(\s*([a-zA-Z_:][a-zA-Z0-9_:]*)")
+_MAX_OVER_TIME_METRIC_RE = re.compile(
+    r"max_over_time\(\s*(?:\(\s*sum\s+by\s*\([^)]*\)\s*\(\s*)?"
+    r"([a-zA-Z_:][a-zA-Z0-9_:]*)"
+)
 _PROCESSED_RECORDS_DASHBOARDS = ("bioetl-dq-v2.json",)
 
 _PROCESSED_RECORDS_PARAMETER_LABELS = (
@@ -1389,7 +1392,12 @@ def test_all_max_over_time_counter_expressions_are_reviewed() -> None:
 
     for source, matched, expression in reviewed:
         if "bioetl_silver_filter_rejections_total" in matched:
-            assert "> bool 0" in expression or "> 0" in expression, source
+            assert source.endswith(
+                "bioetl_silver_filter_rejections_breakdown_total_15m:rule_index=151"
+            ), source
+            assert expression.startswith(
+                "max_over_time((sum by (pipeline, run_type)"
+            ), source
 
 
 @pytest.mark.parametrize("dashboard_name", _PROCESSED_RECORDS_DASHBOARDS)
