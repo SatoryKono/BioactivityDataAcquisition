@@ -46,21 +46,23 @@ def test_event_counters_have_correct_units_decimals():
 DASHBOARD_DATETIME_UNIT = "time:YYYY-MM-DD HH:mm"
 
 
-def _iter_field_units(panel: dict) -> list[str]:
-    """Collect default and override unit strings from one panel."""
-    units: list[str] = []
+def _iter_field_units(panel: dict) -> list[tuple[str, str | None]]:
+    """Collect units with exact-name override labels when available."""
+    units: list[tuple[str, str | None]] = []
     defaults = (panel.get("fieldConfig") or {}).get("defaults") or {}
     default_unit = defaults.get("unit")
     if isinstance(default_unit, str) and default_unit:
-        units.append(default_unit)
+        units.append((default_unit, None))
     for override in (panel.get("fieldConfig") or {}).get("overrides") or []:
         if not isinstance(override, dict):
             continue
+        matcher = override.get("matcher") or {}
+        label = matcher.get("options") if matcher.get("id") == "byName" else None
         for prop in override.get("properties") or []:
             if isinstance(prop, dict) and prop.get("id") == "unit":
                 value = prop.get("value")
                 if isinstance(value, str) and value:
-                    units.append(value)
+                    units.append((value, label))
     return units
 
 
@@ -85,16 +87,25 @@ def test_shipped_dashboards_do_not_use_iso_datetime_unit():
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         for panel in get_dashboard_panels(dashboard):
-            for unit in _iter_field_units(panel):
+            for unit, label in _iter_field_units(panel):
                 assert unit != "dateTimeAsIso", (
                     f"{dashboard_path.name}:panel={panel.get('id')} "
                     f"{panel.get('title')!r} still uses dateTimeAsIso"
                 )
                 if unit.startswith("time:") or unit.startswith("dateTime"):
-                    expected = DASHBOARD_DATETIME_UNIT
+                    is_recent_run_started = (
+                        dashboard_path.stem == "bioetl-run-explorer-v1"
+                        and panel.get("id") == 3010
+                        and label == "Started"
+                    )
+                    expected = (
+                        "time:YY-MM-DD:HH:mm"
+                        if is_recent_run_started
+                        else DASHBOARD_DATETIME_UNIT
+                    )
                     assert unit == expected, (
                         f"{dashboard_path.name}:panel={panel.get('id')} "
-                        f"datetime unit must be {DASHBOARD_DATETIME_UNIT}, got {unit!r}"
+                        f"field={label!r} datetime unit must be {expected}, got {unit!r}"
                     )
 
 
@@ -116,7 +127,7 @@ def test_trust_evidence_observed_at_is_converted_to_time():
         and conversion.get("destinationType") == "time"
         for conversion in conversions
     )
-    units = _iter_field_units(panel)
+    units = [unit for unit, _ in _iter_field_units(panel)]
     assert DASHBOARD_DATETIME_UNIT in units
 
 
