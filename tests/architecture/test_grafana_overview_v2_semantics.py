@@ -51,8 +51,10 @@ def test_overview_v2_semantics_contract():
         assert targets and targets[0].get("panelId") == 9002
         assert (targets[0].get("datasource") or {}).get("uid") == "-- Dashboard --"
     stages = by_id[9460].get("targets", [])
-    assert stages and stages[0].get("panelId") == 9002
-    assert any("pipeline-run-report-artifact" in (t.get("url") or "") for t in stages)
+    assert len(stages) == 1 and stages[0]["parser"] == "backend"
+    assert "selected-run-status?pipeline=${selected_pipeline:percentencode}" in stages[0]["url"]
+    assert "stage_diagnostics" in stages[0]["root_selector"]
+    assert "quality_evidence.funnel" in stages[0]["root_selector"]
 
     nav_links = list(d.get("links", []))
     links_blob = ""

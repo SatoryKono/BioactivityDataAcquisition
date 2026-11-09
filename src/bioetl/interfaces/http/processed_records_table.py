@@ -6,6 +6,7 @@ from collections.abc import Mapping
 
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.interfaces.http import _processed_records_table_support as _support
+from bioetl.interfaces.http._processed_records_report import fill_report_accounting
 
 ProcessedRecordRowSpec = _support.ProcessedRecordRowSpec
 PROCESSED_RECORDS_ROW_SPECS = _support.PROCESSED_RECORDS_ROW_SPECS
@@ -195,7 +196,7 @@ def build_processed_records_table_payload_from_ledger(
             ),
         }
     )
-    _support.fill_report_accounting(
+    fill_report_accounting(
         metric_values,
         report=report,
         ledger_entries=ledger_entries,

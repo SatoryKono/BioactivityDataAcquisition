@@ -147,6 +147,10 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "docker-compose.yml": (
+        "tests/architecture/test_docker_runtime_contracts.py",
+        "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
+    ),
     "scripts/ops/observability/grafana/dashboard_context_links.py": (
         "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
     ),
@@ -1136,6 +1140,10 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         ),
     ),
     ".vscode/": ("tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",),
+    "docs/reports/dashboard-ux-checks/": (
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+        "tests/integration/test_dashboard_operator_readability.py",
+    ),
     "docs/03-guides/dashboards/": (
         DOCUMENTATION_SYNC_TEST,
         GRAFANA_SELECTOR_CONTRACT_TEST,
