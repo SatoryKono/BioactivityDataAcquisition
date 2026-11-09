@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "catalog_ref": "cfd1ff78dab5c45b98dbd84620edd91eb4a46aee",
-  "source_ref": "5c9d76665152686c8f24e68188e027b97175baaf",
+  "catalog_ref": "951bfe71322e5d055153f1f8ca2a40872c1c69be",
+  "source_ref": "842934595285abe912ef5864d583396a1340bcfa",
   "source_reviews": {
     "src/bioetl/composition/bootstrap/runtime/assembly.py": "Use the domain predicate for the existing filter-enabled guard while preserving all builder overrides.",
     "src/bioetl/composition/runtime_builders/inputs_resolution_orchestration.py": "Use the domain predicate for the same logging flag. Resource acquisition is unchanged.",
