@@ -183,7 +183,49 @@ def test_sync_cursor_commands_check_reports_orphan(tmp_path: Path) -> None:
         check_only=True,
     )
 
-    assert any("orphan deploy file" in issue and "local-only.md" in issue for issue in issues)
+    assert any(
+        "orphan deploy file" in issue and "local-only.md" in issue for issue in issues
+    )
+
+
+def test_sync_cursor_commands_deploy_removes_orphan(tmp_path: Path) -> None:
+    canonical = tmp_path / sync_cursor_rules.CURSOR_COMMAND_DOCS_DIR
+    deploy = tmp_path / sync_cursor_rules.CURSOR_COMMANDS_DIR
+    _write_command(canonical, "review.md")
+    _write_command(deploy, "review.md")
+    _write_command(deploy, "old-review.md")
+
+    issues = sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path,
+        deploy=True,
+        check_only=False,
+    )
+
+    assert issues == []
+    assert (deploy / "review.md").is_file()
+    assert not (deploy / "old-review.md").exists()
+
+
+def test_sync_cursor_commands_deploy_removes_copy_failing_token_check(
+    tmp_path: Path,
+) -> None:
+    canonical = tmp_path / sync_cursor_rules.CURSOR_COMMAND_DOCS_DIR
+    deploy = tmp_path / sync_cursor_rules.CURSOR_COMMANDS_DIR
+    _write_command(canonical, "review.md")
+    _write_command(canonical, "bare.md", body="---\ndescription: bare\n---\n\n# bare\n")
+    _write_command(deploy, "bare.md")
+
+    issues = sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path,
+        deploy=True,
+        check_only=False,
+    )
+
+    assert any(
+        "bare.md" in issue and "missing governance token" in issue for issue in issues
+    )
+    assert (deploy / "review.md").is_file()
+    assert not (deploy / "bare.md").exists()
 
 
 def test_sync_cursor_commands_skips_file_missing_governance_token(
@@ -200,7 +242,9 @@ def test_sync_cursor_commands_skips_file_missing_governance_token(
     )
 
     deploy = tmp_path / sync_cursor_rules.CURSOR_COMMANDS_DIR
-    assert any("bare.md" in issue and "missing governance token" in issue for issue in issues)
+    assert any(
+        "bare.md" in issue and "missing governance token" in issue for issue in issues
+    )
     assert (deploy / "review.md").is_file()
     assert not (deploy / "bare.md").exists()
 

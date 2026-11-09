@@ -194,6 +194,21 @@ def _orphan_command_issues(
     return issues
 
 
+def _remove_undeployed_commands(
+    *,
+    deploy_dir: Path,
+    keep_names: set[str],
+    safe_root: Path,
+) -> None:
+    """Delete project command copies that are no longer in the canonical set."""
+    from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+    for target in _list_md_files(deploy_dir):
+        safe_target = ensure_path_within_root(target, safe_root)
+        if safe_target.name not in keep_names:
+            safe_target.unlink()
+
+
 def sync_cursor_commands(
     *,
     root: Path,
@@ -202,7 +217,11 @@ def sync_cursor_commands(
 ) -> list[str]:
     """Copy or verify project slash commands.
 
-    Files that omit governance tokens are not deployed.
+    Files that omit governance tokens are not deployed. Deploy removes
+    ``*.md`` copies in ``.cursor/commands`` that are absent from the
+    deployed canonical set, including renamed commands and copies whose
+    source no longer passes the token check. Personal commands belong in
+    the user Cursor scope, not in this project directory.
     """
     from scripts.engineering.common.repo_paths import ensure_path_within_root
 
@@ -219,11 +238,14 @@ def sync_cursor_commands(
         return [f"No cursor commands found in {canonical_dir}"]
 
     issues: list[str] = []
+    deployed_names: set[str] = set()
     verify_mode = check_only or not deploy
     for source in canonical_files:
         safe_source = ensure_path_within_root(source, safe_root)
-        content = safe_source.read_text(  # NOSONAR - confined by ensure_path_within_root
-            encoding="utf-8"
+        content = (
+            safe_source.read_text(  # NOSONAR - confined by ensure_path_within_root
+                encoding="utf-8"
+            )
         )
         token_issues = _command_governance_issues(safe_source, content)
         issues.extend(token_issues)
@@ -240,6 +262,7 @@ def sync_cursor_commands(
             )
             continue
         _atomic_copy(safe_source, target, allowed_root=safe_root)
+        deployed_names.add(safe_source.name)
 
     if verify_mode:
         issues.extend(
@@ -248,6 +271,12 @@ def sync_cursor_commands(
                 canonical_files=canonical_files,
                 safe_root=safe_root,
             )
+        )
+    else:
+        _remove_undeployed_commands(
+            deploy_dir=deploy_dir,
+            keep_names=deployed_names,
+            safe_root=safe_root,
         )
     return issues
 
