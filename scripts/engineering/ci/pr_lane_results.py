@@ -142,6 +142,9 @@ MCP_REPO_ENV_LOADERS_TEST = (
 )
 MCP_SETUP_COPILOT_CODEX_TEST = "tests/unit/scripts/test_setup_copilot_codex_mcp.py"
 MCP_GITHUB_PROJECT_TRANSPORT_TEST = "tests/integration/test_github_project_transport.py"
+MCP_HOST_TRANSPORT_DISPATCH_TEST = (
+    "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py"
+)
 CURSOR_SKILL_SYNC_TEST = "tests/architecture/test_cursor_skill_sync_safety.py"
 SYNC_CURSOR_RULES_TEST = "tests/unit/scripts/test_sync_cursor_rules.py"
 ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
@@ -249,7 +252,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "scripts/ai/mcp/support/invoke_host_transport.sh",
             "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
         ),
-        ("tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",),
+        (MCP_HOST_TRANSPORT_DISPATCH_TEST,),
     ),
     **dict.fromkeys(
         (
@@ -266,7 +269,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         (
             MCP_AGENT_AUDIT_REGRESSIONS_TEST,
-            "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",
+            MCP_HOST_TRANSPORT_DISPATCH_TEST,
             MCP_REPO_ENV_LOADERS_TEST,
             MCP_SETUP_COPILOT_CODEX_TEST,
         ),
