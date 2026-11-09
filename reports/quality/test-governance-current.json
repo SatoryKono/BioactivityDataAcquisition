@@ -824,7 +824,14 @@
     }
   },
   "assertless_total_candidates": 69,
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 17,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -998,8 +1005,26 @@
     ]
   },
   "intentional_no_exception_contract": 68,
-  "markerless_examples": [],
-  "markerless_test_functions": 0,
+  "markerless_examples": [
+    "tests/unit/domain/aggregates/test_events_invariants.py:33",
+    "tests/unit/domain/aggregates/test_events_invariants.py:68",
+    "tests/unit/domain/aggregates/test_events_invariants.py:98",
+    "tests/unit/domain/aggregates/test_events_invariants.py:105",
+    "tests/unit/domain/aggregates/test_events_invariants.py:116",
+    "tests/unit/domain/aggregates/test_events_invariants.py:123",
+    "tests/unit/domain/aggregates/test_events_invariants.py:131",
+    "tests/unit/domain/aggregates/test_events_invariants.py:167",
+    "tests/unit/domain/aggregates/test_events_invariants.py:178",
+    "tests/unit/domain/aggregates/test_events_invariants.py:190",
+    "tests/unit/domain/aggregates/test_events_invariants.py:201",
+    "tests/unit/domain/aggregates/test_events_invariants.py:213",
+    "tests/unit/domain/aggregates/test_events_invariants.py:225",
+    "tests/unit/domain/aggregates/test_events_invariants.py:238",
+    "tests/unit/domain/aggregates/test_events_invariants.py:250",
+    "tests/unit/domain/aggregates/test_events_invariants.py:263",
+    "tests/unit/domain/aggregates/test_events_invariants.py:274"
+  ],
+  "markerless_test_functions": 17,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -1736,8 +1761,26 @@
         ".yml"
       ]
     },
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/domain/aggregates/test_events_invariants.py:33",
+      "tests/unit/domain/aggregates/test_events_invariants.py:68",
+      "tests/unit/domain/aggregates/test_events_invariants.py:98",
+      "tests/unit/domain/aggregates/test_events_invariants.py:105",
+      "tests/unit/domain/aggregates/test_events_invariants.py:116",
+      "tests/unit/domain/aggregates/test_events_invariants.py:123",
+      "tests/unit/domain/aggregates/test_events_invariants.py:131",
+      "tests/unit/domain/aggregates/test_events_invariants.py:167",
+      "tests/unit/domain/aggregates/test_events_invariants.py:178",
+      "tests/unit/domain/aggregates/test_events_invariants.py:190",
+      "tests/unit/domain/aggregates/test_events_invariants.py:201",
+      "tests/unit/domain/aggregates/test_events_invariants.py:213",
+      "tests/unit/domain/aggregates/test_events_invariants.py:225",
+      "tests/unit/domain/aggregates/test_events_invariants.py:238",
+      "tests/unit/domain/aggregates/test_events_invariants.py:250",
+      "tests/unit/domain/aggregates/test_events_invariants.py:263",
+      "tests/unit/domain/aggregates/test_events_invariants.py:274"
+    ],
+    "markerless_test_functions": 17,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -1755,8 +1798,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3243,
-      "test_python_file_count": 3494,
+      "test_glob_file_count": 3244,
+      "test_python_file_count": 3495,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1797,13 +1840,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3243,
-    "total_test_functions": 32123,
+    "total_test_files": 3244,
+    "total_test_functions": 32153,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "fbe0b660c08572265006e8cacbc2bdba53e5f8b97a8f07f3374e7efdd13efd85",
+  "source_tree_sha256": "11626a9ca6e5bca7a8f26109ee40227132c0a5540b0e7190adec028dbfffda6e",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 69,
@@ -1812,8 +1855,26 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 68,
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/domain/aggregates/test_events_invariants.py:33",
+      "tests/unit/domain/aggregates/test_events_invariants.py:68",
+      "tests/unit/domain/aggregates/test_events_invariants.py:98",
+      "tests/unit/domain/aggregates/test_events_invariants.py:105",
+      "tests/unit/domain/aggregates/test_events_invariants.py:116",
+      "tests/unit/domain/aggregates/test_events_invariants.py:123",
+      "tests/unit/domain/aggregates/test_events_invariants.py:131",
+      "tests/unit/domain/aggregates/test_events_invariants.py:167",
+      "tests/unit/domain/aggregates/test_events_invariants.py:178",
+      "tests/unit/domain/aggregates/test_events_invariants.py:190",
+      "tests/unit/domain/aggregates/test_events_invariants.py:201",
+      "tests/unit/domain/aggregates/test_events_invariants.py:213",
+      "tests/unit/domain/aggregates/test_events_invariants.py:225",
+      "tests/unit/domain/aggregates/test_events_invariants.py:238",
+      "tests/unit/domain/aggregates/test_events_invariants.py:250",
+      "tests/unit/domain/aggregates/test_events_invariants.py:263",
+      "tests/unit/domain/aggregates/test_events_invariants.py:274"
+    ],
+    "markerless_test_functions": 17,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -1823,8 +1884,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3243,
-    "test_python_file_count": 3494,
+    "test_glob_file_count": 3244,
+    "test_python_file_count": 3495,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -1865,8 +1926,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3243,
-  "total_test_functions": 32123,
+  "total_test_files": 3244,
+  "total_test_functions": 32153,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
