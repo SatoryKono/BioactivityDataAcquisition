@@ -9,7 +9,7 @@
 ## Actions Performed
 1. **Structural Dashboard Fixes**:
    - Updated panel 9403 (Inspect Processed Records) in `grafana/dashboards/bioetl-dq-v2.json`: missing values and unrecorded data display as `UNKNOWN`, with the description updated to match.
-   - Panel 9406 keeps excluding `N/A` which is correctly marking non-applicable checks from backend rules.
+   - Panels 9406, 9460, and 9451 were in the audit scope and have no JSON changes in this PR. The verdict filter still excludes `N/A` for checks that do not apply.
 
 2. **Live Data & Execution Matrices**:
    - `docker compose` startup failed with a `preflight_failed` output in incident report logs due to system setup blocks in this sandbox.
