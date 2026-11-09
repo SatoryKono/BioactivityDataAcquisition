@@ -595,3 +595,55 @@ def test_report_fills_legacy_ledger_gaps_only_with_consistent_evidence(
     )
     assert rows["07 gold_written_records"]["value"].strip() == str(gold)
     assert rows["08 gold_excluded_by_contract_records"]["value"].strip() == "17"
+
+
+def test_report_fill_maps_positive_silver_filtered_and_quarantined() -> None:
+    """Distinct positive silver removals must land on the matching table rows."""
+    from bioetl.interfaces.http.processed_records_table import (
+        build_processed_records_table_payload_from_ledger,
+    )
+
+    run_id = deterministic_run_uuid_from_callsite("test_processed_records_report_pos")
+    entry = RunLedgerEntry(
+        entry_id="finished",
+        manifest_id="manifest",
+        run_id=run_id,
+        event_type="run_finished",
+        occurred_at=datetime(2026, 11, 9, tzinfo=UTC),
+        status="success",
+        metrics_snapshot={
+            "records_bronze": 1000,
+            "records_silver": 995,
+        },
+    )
+    report = {
+        "tracking_coverage": "full",
+        "identity": {
+            "pipeline_name": "chembl_assay",
+            "run_id": str(run_id),
+            "manifest_id": "manifest",
+            "run_type": "incremental",
+        },
+        "layers": {
+            "bronze_records": 1000,
+            "silver_valid": 995,
+            "silver_filtered_out": 2,
+            "silver_quarantined": 3,
+            "silver_skipped": 0,
+            "silver_deduplicated": 0,
+            "gold_written": 978,
+            "gold_excluded_by_contract": 17,
+            "gold_quarantined": 0,
+            "gold_skipped": 0,
+            "gold_deduplicated": 0,
+        },
+    }
+    payload = build_processed_records_table_payload_from_ledger(
+        ledger_entries=(entry,),
+        pipeline="chembl_assay",
+        run_type="incremental",
+        report=report,
+    )
+    rows = {row["parameter"]: row for row in payload["rows"]}
+    assert rows["03 silver_filtered_out_records"]["value"].strip() == "2"
+    assert rows["04 silver_quarantined_records"]["value"].strip() == "3"
