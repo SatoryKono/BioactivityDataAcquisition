@@ -32,8 +32,9 @@ def test_run_explorer_processing_status_fits_zoom_with_inspectable_run_id() -> N
         }
         for override in panel["fieldConfig"]["overrides"]
     }
-    assert fields["Overview"]["custom.width"] == 150
-    assert fields["Overview"]["custom.minWidth"] == 150
+    assert fields["Overview"]["custom.width"] == 80
+    assert fields["Overview"]["custom.minWidth"] == 80
+    assert fields["Started"]["unit"] == "time:YY-MM-DD:HH:mm"
     assert fields["Run ID"]["custom.width"] == 110
     assert fields["Run ID"]["custom.inspect"] is True
     assert fields["Run ID"]["custom.wrapText"] is False

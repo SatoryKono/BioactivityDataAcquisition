@@ -1,5 +1,7 @@
 """Compact, persisted identity for the Overview first window."""
 
+CUSTOM_WIDTH = "custom.width"
+
 
 def apply_overview_identity(payload: dict) -> None:
     """Keep only the compact exact-run identity on Overview."""
@@ -12,28 +14,24 @@ def apply_overview_identity(payload: dict) -> None:
     identity["gridPos"].update(x=15, y=10, w=9, h=8)
     for pid in (9002, 9603):
         by_id[pid]["options"]["cellHeight"] = "sm"
-    # Fixed status widths must fit the existing 200% CSS budget; Reason stays flexible.
-    # F-15 titles: Processing / Overall verdict / Trust (aligned with DQ/Incident).
-    # Keep property order when width is already correct so workflow_scope stays
-    # idempotent for saved-run panel 9603 (test_workflow_scope).
+    # Preserve the shipped 200% CSS budget and leave Reason flexible.
+    widths = {"Overall verdict": 60, "Processing": 95, "Trust": 60, "Result": 80}
     for override in by_id[9603]["fieldConfig"]["overrides"]:
         field = override["matcher"].get("options")
-        if field not in {"Overall verdict", "Processing", "Trust", "Status", "Result"}:
+        if field not in widths and field != "Status":
             continue
         props = override["properties"]
-        width_props = [prop for prop in props if prop.get("id") == "custom.width"]
-        if field in {"Processing", "Trust", "Result"}:
-            if len(width_props) == 1 and width_props[0].get("value") == 80:
-                continue
+        width = widths.get(field)
+        if field == "Overall verdict" and not any(
+            prop.get("id") == "displayName" for prop in props
+        ):
+            width = None
+        current = [prop for prop in props if prop.get("id") == CUSTOM_WIDTH]
+        expected = [] if width is None else [{"id": CUSTOM_WIDTH, "value": width}]
+        if current != expected:
             override["properties"] = [
-                prop for prop in props if prop.get("id") != "custom.width"
-            ]
-            override["properties"].append({"id": "custom.width", "value": 80})
-            continue
-        if width_props:
-            override["properties"] = [
-                prop for prop in props if prop.get("id") != "custom.width"
-            ]
+                prop for prop in props if prop.get("id") != CUSTOM_WIDTH
+            ] + expected
     # Provider evidence is now local. Keep the three domain actions discoverable
     # without forwarding legacy provider selectors that Overview does not own.
     links = by_id[9002]["fieldConfig"]["defaults"].setdefault("links", [])
@@ -104,7 +102,7 @@ def apply_overview_identity(payload: dict) -> None:
         "overrides": [
             {
                 "matcher": {"id": "byName", "options": "Parameter"},
-                "properties": [{"id": "custom.width", "value": 125}],
+                "properties": [{"id": CUSTOM_WIDTH, "value": 125}],
             }
         ],
     }
@@ -246,7 +244,7 @@ def apply_saved_evidence_readability(payload: dict) -> None:
         wrapText=True,
     )
     identity["fieldConfig"]["overrides"] = [
-        override("Parameter", [{"id": "custom.width", "value": 210}]),
+        override("Parameter", [{"id": CUSTOM_WIDTH, "value": 210}]),
         override(
             "Value",
             [
@@ -328,7 +326,7 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
                 "matcher": {"id": "byRegexp", "options": f"^({field})( [BC])?$"},
                 "properties": [
                     {"id": "displayName", "value": label},
-                    {"id": "custom.width", "value": width},
+                    {"id": CUSTOM_WIDTH, "value": width},
                 ],
             }
         )
@@ -349,7 +347,7 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
     stages["fieldConfig"]["defaults"]["custom"]["minWidth"] = 50
     for override in stages["fieldConfig"]["overrides"]:
         override["properties"] = [
-            prop for prop in override["properties"] if prop["id"] != "custom.width"
+            prop for prop in override["properties"] if prop["id"] != CUSTOM_WIDTH
         ]
     row["panels"] = [p for p in row["panels"] if p.get("id") != 9460]
     row["gridPos"]["y"] = y + 6
