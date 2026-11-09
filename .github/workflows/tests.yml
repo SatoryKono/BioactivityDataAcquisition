@@ -925,7 +925,7 @@ jobs:
       matrix:
         test-group:
           - name: product
-            path: tests/unit/repo_backed/application/ tests/unit/repo_backed/composition/ tests/unit/repo_backed/contracts/ tests/unit/repo_backed/coverage_gap/ tests/unit/repo_backed/domain/ tests/unit/repo_backed/infrastructure/ tests/unit/repo_backed/interfaces/
+            path: tests/unit/repo_backed/application/ tests/unit/repo_backed/composition/ tests/unit/repo_backed/contracts/ tests/unit/repo_backed/coverage_gap/ tests/unit/repo_backed/cursor/ tests/unit/repo_backed/domain/ tests/unit/repo_backed/infrastructure/ tests/unit/repo_backed/interfaces/
           - name: tooling
             path: tests/unit/repo_backed/scripts/ tests/unit/repo_backed/tools/ --ignore=tests/unit/repo_backed/scripts/ops/
           - name: ops

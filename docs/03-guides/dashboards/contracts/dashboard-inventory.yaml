@@ -44,7 +44,6 @@ dashboards:
     data_sources:
       - Prometheus
       - Grafana
-      - Mixed
       - BioETL Ops HTTP
     panel_count: 11
     key_panels:

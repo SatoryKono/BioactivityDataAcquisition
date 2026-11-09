@@ -393,7 +393,7 @@
     },
     "scripts/ai/mcp/support/github_project_transport.mjs": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the internal stdio route dispatcher for GitHub project wrappers.",
+      "next_step": "Retain as the internal GitHub stdio transport invoked after repository policy checks by the GitHub MCP wrappers. The wrappers remain the configured entrypoints.",
       "owner": "@bioetl-platform",
       "review_by": "2027-01-31"
     },

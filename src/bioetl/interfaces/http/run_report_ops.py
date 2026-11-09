@@ -338,8 +338,9 @@ def _load_versioned_payload(
         return None
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, UnicodeDecodeError, OSError):
-        # Partial writes / corrupt artifacts must not 500 the ops surface.
+    except (ValueError, UnicodeDecodeError, OSError):
+        # Partial writes / corrupt artifacts / oversized JSON ints must not
+        # 500 the ops surface (ValueError covers JSONDecodeError).
         return None
     accepted = {expected_schema}
     if expected_schema == "pipeline_run_report_v1":

@@ -408,3 +408,21 @@ Final targeted promtool runtime/recovered-rule suite: SUCCESS. Live browser
 confirmed Pipeline Status OK, stage coverage 100%, and separate orange DEGRADED
 monitoring quality, with all four coverage values visible without panel scrolling.
 Runtime mirrors and src/bioetl were not modified; full repository tests were not run.
+
+
+## 2026-11-09 — runtime access and audit correctness
+
+Private report/checkpoint readers now follow the non-root host writer identity under the managed POSIX runtime. Dashboard empty-state, date and table readability fixes are covered by the UX verification note `docs/reports/dashboard-ux-checks/2026-11-09.md`. Missing saved counts remain UNKNOWN; see the verification limits before claiming full live acceptance.
+
+## 2026-11-09 — exact-run accounting and final audit
+
+Processed Records supplements incomplete legacy ledger snapshots with explicit
+counts from the saved report only when full tracking, run and current manifest
+identity, selectors, existing ledger values, and both layer balances agree.
+Resumed runs may include predecessor manifests. Missing or contradictory evidence
+remains UNKNOWN; original reports and ledger entries are not rewritten.
+
+Overview now materializes complete saved stage rows with the Infinity backend
+parser, avoiding a mixed-frame join that discarded them. The live auditor interpolates All
+as a wildcard for unformatted Prometheus selectors while preserving HTTP selector
+values. Empty monitoring series still require review; they are not healthy zeros.

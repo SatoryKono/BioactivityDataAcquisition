@@ -355,15 +355,22 @@ _MERGED_PRR = (
     "$ratio := function($s,$n){$s.tracking='full' and $type($s.records_in)='number' "
     "and $type($n)='number' ? ($s.records_in>0 and $n>=0 and $n<=$s.records_in ? "
     "100*$n/$s.records_in : null) : null}; "
-    "$map(funnel, function($s){($excluded := $s.tracking='full' and "
-    "$type($s.removals)='array' ? $sum($append([0], "
-    "$s.removals[outcome='excluded_by_contract'].count)) : null; "
-    "{'stage_id':$s.stage_id, 'quarantined':$r($s,'quarantined'), "
-    "'excluded':$r($s,'excluded_by_contract'), "
-    "'deduplicated':$r($s,'deduplicated'), "
-    "'filtered_out':$r($s,'filtered_out'), "
-    "'excluded_pct':$ratio($s,$excluded), "
-    "'saved_pct':$ratio($s,$s.records_out)})}))"
+    # Preserve project_stage_diagnostics() states (UNFINISHED/INCOMPLETE); join
+    # funnel only for removal counters and percentages.
+    "$funnel := $exists(quality_evidence.funnel) ? quality_evidence.funnel : []; "
+    "$diags := $exists(stage_diagnostics) ? stage_diagnostics : []; "
+    "$map($diags, function($d){($s := $funnel[stage_id=$d.stage_id][0]; "
+    "$excluded := $exists($s) and $s.tracking='full' and $type($s.removals)='array' "
+    "? $sum($append([0], $s.removals[outcome='excluded_by_contract'].count)) : null; "
+    "$merge([$d, {"
+    "'_bioetl_frame':'stages', "
+    "'quarantined': $exists($s) ? $r($s,'quarantined') : null, "
+    "'excluded': $exists($s) ? $r($s,'excluded_by_contract') : null, "
+    "'deduplicated': $exists($s) ? $r($s,'deduplicated') : null, "
+    "'filtered_out': $exists($s) ? $r($s,'filtered_out') : null, "
+    "'excluded_pct': $exists($s) ? $ratio($s,$excluded) : null, "
+    "'saved_pct': $exists($s) ? $ratio($s,$s.records_out) : null"
+    "}]))}))"
 )
 
 # --- DQ donor -------------------------------------------------------------
@@ -912,24 +919,22 @@ def apply_overview(data: dict[str, Any]) -> None:
     _ensure_exclusions_crit_color(_by_id(data, 9482))
 
     stages = _by_id(data, 9460)
-    # Mixed targets: Dashboard DS (stages rows from 9002) + one merged PRR.
-    # Do not filter on ``_bioetl_frame`` alone — that would drop PRR rows.
-    stages["datasource"] = dict(MIXED_DS)
+    # Materialize complete saved stage rows once; mixed-frame joins dropped them.
+    stages["datasource"] = dict(OPS)
     prr_url = (
-        "/ops/observability/pipeline-run-report-artifact"
+        "/ops/observability/selected-run-status"
         "?pipeline=${selected_pipeline:percentencode}"
         "&run_id=${selected_run_id:percentencode}"
-        "&format=pipeline_run_report_json"
+        "&run_type=${run_type:csv}&workflow=${workflow:csv}"
     )
     stages["targets"] = [
-        _dash_target(9002),
         {
-            "refId": "B",
+            "refId": "A",
             "type": "json",
             "source": "url",
-            "parser": "uql",
+            "parser": "backend",
             "format": "table",
-            "root_selector": "",
+            "root_selector": _MERGED_PRR,
             "url": prr_url,
             "url_options": {"method": "GET", "data": ""},
             "uql": f'parse-json | jsonata "{_MERGED_PRR}"',
@@ -938,30 +943,6 @@ def apply_overview(data: dict[str, Any]) -> None:
     ]
     # Align with DQ 9460: drop extract exclude; keep canon fields (+ pct extras).
     stages["transformations"] = [
-        {
-            "id": "filterByValue",
-            "options": {
-                "type": "include",
-                "match": "any",
-                "filters": [
-                    {
-                        "fieldName": FRAME,
-                        "config": {
-                            "id": "equal",
-                            "options": {"value": "stages"},
-                        },
-                    },
-                    {
-                        "fieldName": "stage_id",
-                        "config": {"id": "isNotNull", "options": {}},
-                    },
-                ],
-            },
-        },
-        {
-            "id": "joinByField",
-            "options": {"byField": "stage_id", "mode": "outerTabular"},
-        },
         {"id": "limit", "options": {"limitField": 12}},
         {
             "id": "filterFieldsByName",

@@ -664,8 +664,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_CONFIG: .gitleaks.toml
+          # The job summary uses the scan report without requesting PR write permission.
           GITLEAKS_ENABLE_COMMENTS: "false"
-          GITLEAKS_ENABLE_SUMMARY: "false"
+          GITLEAKS_ENABLE_SUMMARY: "true"
 
       - name: Run OSV-Scanner
         id: osv-scan

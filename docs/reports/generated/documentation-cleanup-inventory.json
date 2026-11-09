@@ -96341,6 +96341,34 @@
       "lifecycle": "docs_reports_curated_or_historical_report",
       "outbound_links": 0,
       "owner": "BioETL Team",
+      "path": "docs/reports/dashboard-ux-checks/2026-11-09.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "docs_reports_curated_or_historical_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
       "path": "docs/reports/dashboard-ux-checks/README.md",
       "recommended_action": "archive-after-migration",
       "root_doc_kind": null,
@@ -117444,7 +117472,7 @@
       "active_quality_baseline": 125,
       "closeout_evidence": 168,
       "docs_reports_curated_entrypoint": 2,
-      "docs_reports_curated_or_historical_report": 38,
+      "docs_reports_curated_or_historical_report": 39,
       "docs_reports_generated_or_route_owned": 7,
       "docs_reports_retention_sensitive_evidence": 28,
       "generated_skill_reference_mirror": 19,
@@ -117457,7 +117485,7 @@
       "working_report": 376
     },
     "by_recommended_action": {
-      "archive-after-migration": 415,
+      "archive-after-migration": 416,
       "generate-automatically": 1066,
       "keep": 2683
     },
@@ -117484,7 +117512,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 751,
+      "reports": 752,
       "security": 2
     },
     "by_status": {
@@ -117492,19 +117520,19 @@
       "Archived": 1554,
       "Canonical": 77,
       "Generated": 1066,
-      "Working": 708
+      "Working": 709
     },
     "by_surface_family": {
       "active": 759,
       "archive": 1554,
       "canonical": 77,
       "generated": 1066,
-      "working": 708
+      "working": 709
     },
     "by_tracking_state": {
-      "tracked": 4164
+      "tracked": 4165
     },
-    "docs_reports_local_count": 75,
+    "docs_reports_local_count": 76,
     "duplicate_group_count": 80,
     "generated_route_count": 76,
     "generated_without_route_count": 214,
@@ -117515,8 +117543,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4164,
+    "total_doc_like": 4165,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4164
+    "total_doc_like_tracked": 4165
   }
 }
