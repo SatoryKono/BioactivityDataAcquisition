@@ -219,21 +219,50 @@ def _secret_values() -> tuple[str, ...]:
     return tuple(sorted(values, key=len, reverse=True))
 
 
+def _secret_needles(secret: str) -> tuple[str, ...]:
+    """Return the raw secret and its JSON-escaped form.
+
+    ``json.dumps(..., ensure_ascii=True)`` turns a quote or newline into
+    ``\\"`` or ``\\n``. The stored line then no longer contains the raw
+    value, but parsing the line restores it.
+    """
+    encoded = json.dumps(secret, ensure_ascii=True)
+    fragment = encoded[1:-1]
+    if not fragment or fragment == secret:
+        return (secret,)
+    return (secret, fragment)
+
+
+def _contains_known_secret(text: str, known_secrets: tuple[str, ...]) -> bool:
+    """True when text still holds a secret or its JSON encoding."""
+    for secret in known_secrets:
+        if not secret:
+            continue
+        if any(needle and needle in text for needle in _secret_needles(secret)):
+            return True
+    return False
+
+
 def _line_for_storage(line: str, known_secrets: tuple[str, ...]) -> str:
-    """Replace a line that still contains a raw secret."""
+    """Replace a line that still contains a raw secret.
+
+    A marker that itself contains a secret is re-fingerprinted so the
+    label and digest cannot preserve it. A quote or newline inside a
+    secret is matched in its JSON-escaped form as well.
+    """
     for marker in set(_REDACTION_MARKER.findall(line)):
-        if any(secret and secret in marker for secret in known_secrets):
+        if _contains_known_secret(marker, known_secrets):
             # Re-fingerprint the entire marker so a colliding secret cannot
             # survive in either its label or its digest.
             replacement = _redaction_token(marker).replace("[redacted:", "[", 1)
             line = line.replace(marker, replacement)
-    if any(secret and secret in line for secret in known_secrets):
+    if _contains_known_secret(line, known_secrets):
         blocked = (
             '{"event":"redaction_blocked","schema_version":'
             + str(SCHEMA_VERSION)
             + "}\n"
         )
-        if any(secret and secret in blocked for secret in known_secrets):
+        if _contains_known_secret(blocked, known_secrets):
             return "{}\n"
         return blocked
     return line
@@ -302,7 +331,7 @@ def _redact_secret_value(value: Any, secrets: tuple[str, ...]) -> Any:
             _redact_text(str(key), secrets): _redact_secret_value(item, secrets)
             for key, item in value.items()
         }
-    if isinstance(value, list):
+    if isinstance(value, (list, tuple)):
         return [_redact_secret_value(item, secrets) for item in value]
     if value is None:
         return None
@@ -320,7 +349,7 @@ def _redact_structured(value: Any, secrets: tuple[str, ...]) -> Any:
             else:
                 redacted[safe_name] = _redact_structured(item, secrets)
         return redacted
-    if isinstance(value, list):
+    if isinstance(value, (list, tuple)):
         return [_redact_structured(item, secrets) for item in value]
     if isinstance(value, str):
         return _redact_text(value, secrets)

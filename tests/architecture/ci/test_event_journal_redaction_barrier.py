@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -61,3 +62,36 @@ def test_record_retains_event_when_secret_matches_redaction_label(
     event = json.loads(text)
     assert event["event"] == "session_start"
     assert event["password"] != secret
+
+
+def test_line_for_storage_blocks_a_json_escaped_secret() -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    secret = 'quote"secret\nnext'
+    line = json.dumps({"notes": secret}, ensure_ascii=True) + "\n"
+    assert secret not in line
+    stored = journal._line_for_storage(line, (secret,))
+    assert stored == '{"event":"redaction_blocked","schema_version":1}\n'
+    assert secret not in stored
+    assert "quote" not in stored
+
+
+def test_record_redacts_a_secret_nested_in_a_tuple(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    secret = 'quote"secret'
+    monkeypatch.setenv("BIOETL_UNIT_PASSWORD", secret)
+    path = tmp_path / "receipt.jsonl"
+    plugin = journal.EventJournalPlugin(None, path, _identity())
+    plugin.record("session_start", {"notes": (secret,)})
+    assert plugin._file is not None
+    plugin._file.close()
+    text = path.read_text(encoding="utf-8")
+    payload = json.loads(text)
+    assert payload["event"] == "session_start"
+    assert re.fullmatch(r"\[redacted:[0-9a-f]{12}\]", payload["notes"][0])
+    visible = re.sub(r"\[redacted:[0-9a-f]{12}\]", "", text)
+    assert secret not in visible
+    assert json.dumps(secret, ensure_ascii=True)[1:-1] not in visible
