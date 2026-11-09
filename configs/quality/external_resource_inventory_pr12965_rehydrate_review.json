@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "cfd1ff78dab5c45b98dbd84620edd91eb4a46aee",
+  "source_ref": "4367ce6d1d6c290bc58bcb0c83f5ffd12cfb6d53",
+  "source_reviews": {
+    "src/bioetl/application/observability/current_metrics_rehydrate.py": "Seed a zero failed outcome for the current metrics registry through the existing MetricsPort. No resource acquisition or ownership changes."
+  },
+  "line_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "reference_moves": []
+}
