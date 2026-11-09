@@ -52,7 +52,10 @@ def test_overview_v2_semantics_contract():
         assert (targets[0].get("datasource") or {}).get("uid") == "-- Dashboard --"
     stages = by_id[9460].get("targets", [])
     assert len(stages) == 1 and stages[0]["parser"] == "backend"
-    assert "selected-run-status?pipeline=${selected_pipeline:percentencode}" in stages[0]["url"]
+    assert (
+        "selected-run-status?pipeline=${selected_pipeline:percentencode}"
+        in stages[0]["url"]
+    )
     assert "stage_diagnostics" in stages[0]["root_selector"]
     assert "quality_evidence.funnel" in stages[0]["root_selector"]
 

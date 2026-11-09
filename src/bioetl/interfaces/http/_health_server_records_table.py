@@ -56,9 +56,7 @@ async def handle_processed_records_table(
             # Empty ledger entries stay UNKNOWN (DASH-STATE-001). Prometheus
             # current metrics are pipeline/run_type aggregates and MUST NOT
             # be presented as the selected UUID (DASH-SCOPE-001 / DASH-DATA-002).
-            ledger_entries = tuple(
-                run_ledger.list_entries_by_run_id(selected_run_id)
-            )
+            ledger_entries = tuple(run_ledger.list_entries_by_run_id(selected_run_id))
             # Saved-report fill is unused when the ledger is empty — skip I/O.
             report = (
                 load_pipeline_run_report_payload(

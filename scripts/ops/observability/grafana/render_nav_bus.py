@@ -2767,9 +2767,7 @@ def apply_to_dashboard(
 
 _CP_EXACT_REPLAY_NO_VALUE: dict[int, str] = {
     9422: "UNKNOWN",
-    9423: (
-        "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
-    ),
+    9423: ("SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."),
 }
 
 

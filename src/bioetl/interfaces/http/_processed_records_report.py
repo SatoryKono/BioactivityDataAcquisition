@@ -1,4 +1,5 @@
 """Reconcile explicit saved-report counts with the selected run ledger."""
+
 from __future__ import annotations
 
 from collections.abc import Mapping
@@ -102,4 +103,3 @@ def fill_report_accounting(
     if observed is None or not _layer_counts_balanced(observed):
         return
     values.update(observed)
-

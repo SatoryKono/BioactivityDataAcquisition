@@ -590,6 +590,8 @@ def test_report_fills_legacy_ledger_gaps_only_with_consistent_evidence(
         )
     # Ledger-backed rows must survive rejected report fills unchanged.
     assert rows["01 bronze_records"]["value"].strip() == "1 000"
-    assert rows["02 silver_valid_records"]["value"].strip() == f"{silver:,}".replace(",", " ")
+    assert rows["02 silver_valid_records"]["value"].strip() == f"{silver:,}".replace(
+        ",", " "
+    )
     assert rows["07 gold_written_records"]["value"].strip() == str(gold)
     assert rows["08 gold_excluded_by_contract_records"]["value"].strip() == "17"
