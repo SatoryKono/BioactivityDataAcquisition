@@ -170,7 +170,9 @@ def build_processed_records_table_payload_from_ledger(
         latest_snapshot.get("records_silver") if latest_snapshot is not None else None
     )
     silver_artifact_count = artifact_counts.get("silver")
-    silver_deduplicated_count = 0
+    # Leave None when dedup cannot be measured — a synthetic 0 would block
+    # fill_report_accounting from applying a consistent saved-report layer set.
+    silver_deduplicated_count: int | None = None
     if (
         isinstance(silver_snapshot_count, int)
         and isinstance(silver_artifact_count, int)

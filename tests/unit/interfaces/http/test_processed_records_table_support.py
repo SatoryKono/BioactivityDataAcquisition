@@ -469,10 +469,11 @@ def test_processed_records_table_support_all_exports_match_contract() -> None:
         "balance",
     ],
 )
+@pytest.mark.parametrize("silver_removal", [0, 1])
 @pytest.mark.parametrize("gold_removal", [0, 1])
 @pytest.mark.parametrize("resumed", [False, True])
 def test_report_fills_legacy_ledger_gaps_only_with_consistent_evidence(
-    invalid, gold_removal, resumed
+    invalid, gold_removal, resumed, silver_removal
 ):
     from dataclasses import replace
     from bioetl.interfaces.http.processed_records_table import (
@@ -480,7 +481,8 @@ def test_report_fills_legacy_ledger_gaps_only_with_consistent_evidence(
     )
 
     run_id = deterministic_run_uuid_from_callsite("test_processed_records_report")
-    gold = 983 - 3 * gold_removal
+    silver = 1000 - silver_removal
+    gold = silver - 17 - 3 * gold_removal
     entry = RunLedgerEntry(
         entry_id="finished",
         manifest_id="manifest",
@@ -490,7 +492,7 @@ def test_report_fills_legacy_ledger_gaps_only_with_consistent_evidence(
         status="success",
         metrics_snapshot={
             "records_bronze": 1000,
-            "records_silver": 1000,
+            "records_silver": silver,
             "records_gold": gold,
             "records_gold_excluded_by_contract": 17,
             "records_quarantined": 0,
@@ -522,11 +524,11 @@ def test_report_fills_legacy_ledger_gaps_only_with_consistent_evidence(
                 ),
                 (
                     1000,
-                    1000,
+                    silver,
                     0,
                     0,
                     0,
-                    0,
+                    silver_removal,
                     gold,
                     17,
                     gold_removal,
@@ -575,16 +577,19 @@ def test_report_fills_legacy_ledger_gaps_only_with_consistent_evidence(
     rows = {row["parameter"]: row for row in payload["rows"]}
     for parameter in (
         "05 silver_skipped_records",
+        "06 silver_deduplicated_records",
         "09 gold_quarantined_records",
         "10 gold_skipped_records",
         "11 gold_deduplicated_records",
     ):
         expected = 0 if parameter.startswith("05") else gold_removal
+        if parameter.startswith("06"):
+            expected = silver_removal
         assert rows[parameter]["value"].strip() == (
             "UNKNOWN" if invalid else str(expected)
         )
     # Ledger-backed rows must survive rejected report fills unchanged.
     assert rows["01 bronze_records"]["value"].strip() == "1 000"
-    assert rows["02 silver_valid_records"]["value"].strip() == "1 000"
+    assert rows["02 silver_valid_records"]["value"].strip() == f"{silver:,}".replace(",", " ")
     assert rows["07 gold_written_records"]["value"].strip() == str(gold)
     assert rows["08 gold_excluded_by_contract_records"]["value"].strip() == "17"
