@@ -259,6 +259,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "scripts/ops/docker-setup.ps1": (
         "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
+        "tests/unit/repo_backed/scripts/ops/docker/test_runtime_identity.py",
     ),
     "src/memory/mcp_server.py": (
         "tests/unit/memory/test_mcp_server.py",
@@ -930,6 +931,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docker-compose.yml": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
+        "tests/unit/repo_backed/scripts/ops/docker/test_runtime_identity.py",
     ),
     "docker-compose.monitoring.yml": (
         DOCKER_RUNTIME_CONTRACT_TEST,
