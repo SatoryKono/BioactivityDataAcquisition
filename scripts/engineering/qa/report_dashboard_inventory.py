@@ -28,7 +28,7 @@ DASHBOARD_INVENTORY_CONTRACT = Path(
 PROVISIONING_CONFIG = Path("grafana/provisioning/dashboards/bioetl.yaml")
 VOLATILE_ROOT_KEYS = frozenset({"id", "version"})
 VOLATILE_PANEL_KEYS = frozenset({"pluginVersion"})
-_PANEL_COUNT_TEXT = re.compile(r"^[0-9]+$")
+_PANEL_COUNT_TEXT = re.compile(r"^\d+$", re.ASCII)
 QUARANTINE_EXPLORER_DATASOURCE = "Quarantine Explorer"
 DATASOURCE_ORDER = {
     "Prometheus": 0,

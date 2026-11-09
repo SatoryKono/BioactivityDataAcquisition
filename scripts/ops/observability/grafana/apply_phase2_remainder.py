@@ -115,6 +115,7 @@ VIEW_PANEL_BROKEN_REPLAY = "viewPanel=130"
 VIEW_PANEL_REPLAY_CHECKS = "viewPanel=9423"
 _CP_SCOPE_VIEW_PANELS = frozenset({"9423", "9414", "9415", "9416"})
 _RUN_ID_QUERYPARAM = "${run_id:queryparam}"
+_HTML_AMP = "&amp;"
 _RUN_ID_CLEARED = "var-run_id=-"
 _CONTEXT_QUERYPARAMS = (
     f"${{pipeline:queryparam}}&amp;${{run_type:queryparam}}&amp;{_RUN_ID_QUERYPARAM}"
@@ -132,7 +133,7 @@ def _ensure_run_id_on_cp_scope_links(panel: dict[str, Any]) -> None:
         url = link.get("url")
         if not isinstance(url, str) or _RUN_ID_QUERYPARAM in url:
             continue
-        match = re.search(r"(?:^|[?&])viewPanel=(\d+)", url.replace("&amp;", "&"))
+        match = re.search(r"(?:^|[?&])viewPanel=(\d+)", url.replace(_HTML_AMP, "&"))
         if match is None or match.group(1) not in _CP_SCOPE_VIEW_PANELS:
             continue
         needle = f"viewPanel={match.group(1)}"
@@ -149,7 +150,7 @@ def _is_github_host(url: str) -> bool:
 
 
 def _github_docs_or_runbook(url: str) -> bool:
-    normalized = url.replace("&amp;", "&")
+    normalized = url.replace(_HTML_AMP, "&")
     if not _is_github_host(normalized):
         return False
     path = urlsplit(normalized).path
@@ -157,7 +158,7 @@ def _github_docs_or_runbook(url: str) -> bool:
 
 
 def _strip_github_grafana_query(url: str) -> str:
-    parts = urlsplit(url.replace("&amp;", "&"))
+    parts = urlsplit(url.replace(_HTML_AMP, "&"))
     if not (parts.query or "${" in url):
         return url
     path_only = urlunsplit((parts.scheme, parts.netloc, parts.path, "", ""))
