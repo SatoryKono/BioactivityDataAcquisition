@@ -4,14 +4,14 @@
     "grafana_base_url": "http://localhost:3000",
     "loki_base_url": "http://localhost:3100",
     "loki_range_hours": 1,
-    "pipeline": "All",
+    "pipeline": "chembl_target",
     "prometheus_base_url": "http://localhost:9090",
     "prometheus_step_seconds": 300.0,
     "range_hours": 24,
     "read_latency_quantile": 0.95,
     "request_timeout_seconds": 15.0,
-    "run_id": "f003-abc",
-    "run_type": "All",
+    "run_id": "-",
+    "run_type": "incremental",
     "tempo_base_url": "http://localhost:3200",
     "time_range": {
       "from": "",
@@ -20,8 +20,8 @@
     },
     "workflow": "All"
   },
-  "generated_at": "2026-11-08T01:35:49.928156+00:00",
-  "occurrence_id": "",
+  "generated_at": "2026-11-08T19:27:13.957672+00:00",
+  "occurrence_id": "LF1-16-JULES",
   "panel_specs": [
     {
       "dashboard_uid": "bioetl-control-plane-v1",
@@ -1107,7 +1107,7 @@
       "response": null,
       "semantic_kind": "http_table",
       "source_kind": "http",
-      "status": "not_run",
+      "status": "error",
       "target_ref_id": "A",
       "title": "Review Selected-Run Trust"
     },
@@ -1122,7 +1122,7 @@
       "response": null,
       "semantic_kind": "http_table",
       "source_kind": "http",
-      "status": "not_run",
+      "status": "error",
       "target_ref_id": "A",
       "title": "Processed Records"
     },
@@ -1137,7 +1137,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Review Replay Evidence"
     },
@@ -1152,7 +1152,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Review Manifest Validation"
     },
@@ -1167,7 +1167,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Review Lineage Validation"
     },
@@ -1182,7 +1182,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Review Retention Compliance"
     },
@@ -1197,7 +1197,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Review Checkpoint Validation"
     },
@@ -1212,7 +1212,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Compare Checkpoint Anchors"
     },
@@ -1227,7 +1227,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Review Selected Run Status"
     },
@@ -1242,7 +1242,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "StageInput",
       "title": "Inspect Processed Records"
     },
@@ -1257,14 +1257,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=topk%281%2C+bioetl_workflow_scope_priority_by_input%7Bworkflow%3D~%22All%22%2Cpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%29&time=1794101749.187899"
+          "request_url": "http://localhost:9090/api/v1/query?query=topk%281%2C+bioetl_workflow_scope_priority_by_input%7Bworkflow%3D~%22All%22%2Cpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29&time=1794166033.082065"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor Scope Status"
     },
@@ -1279,14 +1279,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28label_replace%28bioetl_incident_ranked_evidence%2C%22object%22%2C%22%241%22%2C%22object%22%2C%22%28.%2A%29+%2F+%24%22%29%2C%22route_pipeline%22%2C%22.%2A%22%2C%22pipeline%22%2C%22unknown%22%29&time=1794101749.194741"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28label_replace%28bioetl_incident_ranked_evidence%2C%22object%22%2C%22%241%22%2C%22object%22%2C%22%28.%2A%29+%2F+%24%22%29%2C%22route_pipeline%22%2C%22.%2A%22%2C%22pipeline%22%2C%22unknown%22%29&time=1794166033.090769"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Inspect Ranked Suspects"
     },
@@ -1301,14 +1301,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28label_replace%28label_replace%28label_replace%28%28label_replace%28label_join%28%28bioetl_incident_alert_priority%7Bprovider%21%3D%22%22%7D+or+%28%28bioetl_incident_alert_priority%7Bprovider%3D%22%22%7D+unless+bioetl_incident_alert_priority%7Bprovider%3D%22%22%2Cpipeline%3D%22%22%2Calertname%3D%22BioETLDockerRuntimeProbeMissing%22%7D%29+%2A+on%28pipeline%29+group_left%28provider%29+%28group+by%28pipeline%2Cprovider%29%28bioetl_workflow_pipeline_expected%7Bpipeline%21%3D%22%22%2Cprovider%21%3D%22%22%2Cprovider%21%3D%22unknown%22%7D+%3E+0%29+and+on%28pipeline%29+%28count+by%28pipeline%29%28group+by%28pipeline%2Cprovider%29%28bioetl_workflow_pipeline_expected%7Bpipeline%21%3D%22%22%2Cprovider%21%3D%22%22%2Cprovider%21%3D%22unknown%22%7D+%3E+0%29%29+%3D%3D+1%29%29%29+or+%28%28bioetl_incident_alert_priority%7Bprovider%3D%22%22%7D+unless+bioetl_incident_alert_priority%7Bprovider%3D%22%22%2Cpipeline%3D%22%22%2Calertname%3D%22BioETLDockerRuntimeProbeMissing%22%7D%29+unless+on%28pipeline%29+%28group+by%28pipeline%2Cprovider%29%28bioetl_workflow_pipeline_expected%7Bpipeline%21%3D%22%22%2Cprovider%21%3D%22%22%2Cprovider%21%3D%22unknown%22%7D+%3E+0%29+and+on%28pipeline%29+%28count+by%28pipeline%29%28group+by%28pipeline%2Cprovider%29%28bioetl_workflow_pipeline_expected%7Bpipeline%21%3D%22%22%2Cprovider%21%3D%22%22%2Cprovider%21%3D%22unknown%22%7D+%3E+0%29%29+%3D%3D+1%29%29%29+or+label_replace%28bioetl_incident_alert_priority%7Bprovider%3D%22%22%2Cpipeline%3D%22%22%2Calertname%3D%22BioETLDockerRuntimeProbeMissing%22%7D%2C%22provider%22%2C%22N%2FA+%E2%80%94+Infrastructure%22%2C%22%22%2C%22%22%29%29%2C%22pipeline_context%22%2C%22%3B%22%2C%22alertname%22%2C%22pipeline%22%29%2C%22pipeline%22%2C%22N%2FA+%E2%80%94+Docker+infrastructure%22%2C%22pipeline_context%22%2C%22BioETLDockerRuntimeProbeMissing%3B%22%29%29%2C%22pipeline%22%2C%22Not+provided%22%2C%22pipeline%22%2C%22%5E%24%22%29%2C%22provider%22%2C%22Not+provided%22%2C%22provider%22%2C%22%5E%24%22%29%2C%22alert_runbook%22%2C%22incident-response%22%2C%22%22%2C%22%22%29%2C%22alert_runbook%22%2C%22docker-stability%22%2C%22alertname%22%2C%22BioETLDockerRuntimeProbeMissing%22%29&time=1794101749.201528"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28label_replace%28label_replace%28label_replace%28%28label_replace%28label_join%28%28bioetl_incident_alert_priority%7Bprovider%21%3D%22%22%7D+or+%28%28bioetl_incident_alert_priority%7Bprovider%3D%22%22%7D+unless+bioetl_incident_alert_priority%7Bprovider%3D%22%22%2Cpipeline%3D%22%22%2Calertname%3D%22BioETLDockerRuntimeProbeMissing%22%7D%29+%2A+on%28pipeline%29+group_left%28provider%29+%28group+by%28pipeline%2Cprovider%29%28bioetl_workflow_pipeline_expected%7Bpipeline%21%3D%22%22%2Cprovider%21%3D%22%22%2Cprovider%21%3D%22unknown%22%7D+%3E+0%29+and+on%28pipeline%29+%28count+by%28pipeline%29%28group+by%28pipeline%2Cprovider%29%28bioetl_workflow_pipeline_expected%7Bpipeline%21%3D%22%22%2Cprovider%21%3D%22%22%2Cprovider%21%3D%22unknown%22%7D+%3E+0%29%29+%3D%3D+1%29%29%29+or+%28%28bioetl_incident_alert_priority%7Bprovider%3D%22%22%7D+unless+bioetl_incident_alert_priority%7Bprovider%3D%22%22%2Cpipeline%3D%22%22%2Calertname%3D%22BioETLDockerRuntimeProbeMissing%22%7D%29+unless+on%28pipeline%29+%28group+by%28pipeline%2Cprovider%29%28bioetl_workflow_pipeline_expected%7Bpipeline%21%3D%22%22%2Cprovider%21%3D%22%22%2Cprovider%21%3D%22unknown%22%7D+%3E+0%29+and+on%28pipeline%29+%28count+by%28pipeline%29%28group+by%28pipeline%2Cprovider%29%28bioetl_workflow_pipeline_expected%7Bpipeline%21%3D%22%22%2Cprovider%21%3D%22%22%2Cprovider%21%3D%22unknown%22%7D+%3E+0%29%29+%3D%3D+1%29%29%29+or+label_replace%28bioetl_incident_alert_priority%7Bprovider%3D%22%22%2Cpipeline%3D%22%22%2Calertname%3D%22BioETLDockerRuntimeProbeMissing%22%7D%2C%22provider%22%2C%22N%2FA+%E2%80%94+Infrastructure%22%2C%22%22%2C%22%22%29%29%2C%22pipeline_context%22%2C%22%3B%22%2C%22alertname%22%2C%22pipeline%22%29%2C%22pipeline%22%2C%22N%2FA+%E2%80%94+Docker+infrastructure%22%2C%22pipeline_context%22%2C%22BioETLDockerRuntimeProbeMissing%3B%22%29%29%2C%22pipeline%22%2C%22Not+provided%22%2C%22pipeline%22%2C%22%5E%24%22%29%2C%22provider%22%2C%22Not+provided%22%2C%22provider%22%2C%22%5E%24%22%29%2C%22alert_runbook%22%2C%22incident-response%22%2C%22%22%2C%22%22%29%2C%22alert_runbook%22%2C%22docker-stability%22%2C%22alertname%22%2C%22BioETLDockerRuntimeProbeMissing%22%29&time=1794166033.098925"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor Global Alerts"
     },
@@ -1323,14 +1323,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=ALERTS%7Balertstate%3D%22firing%22%7D+or+%28ALERTS%7Balertstate%3D%22pending%22%7D+%2A+2%29&start=1794015349.208359&end=1794101749.208359&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=ALERTS%7Balertstate%3D%22firing%22%7D+or+%28ALERTS%7Balertstate%3D%22pending%22%7D+%2A+2%29&start=1794079633.106957&end=1794166033.106957&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Alert State History"
     },
@@ -1345,14 +1345,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=topk%2810%2C+max+by+%28pipeline%2C+run_type%2C+reason%29+%28bioetl_runtime_current_blocker_reason%29+%3E+0%29&time=1794101749.21814"
+          "request_url": "http://localhost:9090/api/v1/query?query=topk%2810%2C+max+by+%28pipeline%2C+run_type%2C+reason%29+%28bioetl_runtime_current_blocker_reason%29+%3E+0%29&time=1794166033.117241"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Inspect Runtime Suspects"
     },
@@ -1367,14 +1367,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=topk%2810%2C+max+by+%28provider%2C+cause%29+%28bioetl_provider_current_cause%29+%3E+0%29&time=1794101749.225462"
+          "request_url": "http://localhost:9090/api/v1/query?query=topk%2810%2C+max+by+%28provider%2C+cause%29+%28bioetl_provider_current_cause%29+%3E+0%29&time=1794166033.125219"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Inspect Provider Suspects"
     },
@@ -1389,14 +1389,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=topk%2810%2C+max+by+%28pipeline%2C+reason%29+%28bioetl_dq_current_reason%29+%3E+0%29&time=1794101749.232396"
+          "request_url": "http://localhost:9090/api/v1/query?query=topk%2810%2C+max+by+%28pipeline%2C+reason%29+%28bioetl_dq_current_reason%29+%3E+0%29&time=1794166033.133407"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Inspect DQ Suspects"
     },
@@ -1411,14 +1411,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=%28label_join%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28max+by+%28pipeline%2C+run_type%2C+stage%29+%28max_over_time%28bioetl_stage_lag_seconds%5B15m%5D%29%29+%3E%3D+300%2C%22signal%22%2C%22stage_lag%22%2C%22%22%2C%22%22%29%2C%22window%22%2C%2215m+maximum%22%2C%22%22%2C%22%22%29%2C%22threshold%22%2C%22%3E%3D+300+s+%2815m+maximum%29%22%2C%22%22%2C%22%22%29%2C%22unit%22%2C%22s%22%2C%22%22%2C%22%22%29%2C%22observation_time%22%2C%22Not+provided%22%2C%22%22%2C%22%22%29%2C%22publication_time%22%2C%22Not+provided%22%2C%22%22%2C%22%22%29%2C%22freshness%22%2C%22Not+verified%3A+observed%2Fpublished+timestamps+not+provided%22%2C%22%22%2C%22%22%29%2C%22scope%22%2C%22+%2F+%22%2C%22pipeline%22%2C%22run_type%22%2C%22stage%22%29%29+or+%28label_join%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28max+by+%28pipeline%2C+run_type%2C+stage%29+%28bioetl_stage_backlog_records%7Bstage%21%3D%22validation%22%7D%29+%3E+0%2C%22signal%22%2C%22stage_backlog%22%2C%22%22%2C%22%22%29%2C%22window%22%2C%22instant%22%2C%22%22%2C%22%22%29%2C%22threshold%22%2C%22%3E+0+records+%28instant%29%22%2C%22%22%2C%22%22%29%2C%22unit%22%2C%22records%22%2C%22%22%2C%22%22%29%2C%22observation_time%22%2C%22Not+provided%22%2C%22%22%2C%22%22%29%2C%22publication_time%22%2C%22Not+provided%22%2C%22%22%2C%22%22%29%2C%22freshness%22%2C%22Not+verified%3A+observed%2Fpublished+timestamps+not+provided%22%2C%22%22%2C%22%22%29%2C%22scope%22%2C%22+%2F+%22%2C%22pipeline%22%2C%22run_type%22%2C%22stage%22%29%29&time=1794101749.239405"
+          "request_url": "http://localhost:9090/api/v1/query?query=%28label_join%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28max+by+%28pipeline%2C+run_type%2C+stage%29+%28max_over_time%28bioetl_stage_lag_seconds%5B15m%5D%29%29+%3E%3D+300%2C%22signal%22%2C%22stage_lag%22%2C%22%22%2C%22%22%29%2C%22window%22%2C%2215m+maximum%22%2C%22%22%2C%22%22%29%2C%22threshold%22%2C%22%3E%3D+300+s+%2815m+maximum%29%22%2C%22%22%2C%22%22%29%2C%22unit%22%2C%22s%22%2C%22%22%2C%22%22%29%2C%22observation_time%22%2C%22Not+provided%22%2C%22%22%2C%22%22%29%2C%22publication_time%22%2C%22Not+provided%22%2C%22%22%2C%22%22%29%2C%22freshness%22%2C%22Not+verified%3A+observed%2Fpublished+timestamps+not+provided%22%2C%22%22%2C%22%22%29%2C%22scope%22%2C%22+%2F+%22%2C%22pipeline%22%2C%22run_type%22%2C%22stage%22%29%29+or+%28label_join%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28label_replace%28max+by+%28pipeline%2C+run_type%2C+stage%29+%28bioetl_stage_backlog_records%7Bstage%21%3D%22validation%22%7D%29+%3E+0%2C%22signal%22%2C%22stage_backlog%22%2C%22%22%2C%22%22%29%2C%22window%22%2C%22instant%22%2C%22%22%2C%22%22%29%2C%22threshold%22%2C%22%3E+0+records+%28instant%29%22%2C%22%22%2C%22%22%29%2C%22unit%22%2C%22records%22%2C%22%22%2C%22%22%29%2C%22observation_time%22%2C%22Not+provided%22%2C%22%22%2C%22%22%29%2C%22publication_time%22%2C%22Not+provided%22%2C%22%22%2C%22%22%29%2C%22freshness%22%2C%22Not+verified%3A+observed%2Fpublished+timestamps+not+provided%22%2C%22%22%2C%22%22%29%2C%22scope%22%2C%22+%2F+%22%2C%22pipeline%22%2C%22run_type%22%2C%22stage%22%29%29&time=1794166033.141511"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Inspect Global Signal Measurements"
     },
@@ -1433,7 +1433,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Review Selected Run Status"
     },
@@ -1448,14 +1448,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=topk%281%2C+bioetl_workflow_scope_priority_by_input%7Bworkflow%3D~%22All%22%2Cpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%29&time=1794101749.252495"
+          "request_url": "http://localhost:9090/api/v1/query?query=topk%281%2C+bioetl_workflow_scope_priority_by_input%7Bworkflow%3D~%22All%22%2Cpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29&time=1794166033.15702"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor Pipeline Status"
     },
@@ -1470,14 +1470,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=topk%283%2C+bioetl_runtime_current_blocker_reason_scoped%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+%3E+0%29&time=1794101749.259247"
+          "request_url": "http://localhost:9090/api/v1/query?query=topk%283%2C+bioetl_runtime_current_blocker_reason_scoped%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29&time=1794166033.165151"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Review Runtime Blockers"
     },
@@ -1492,14 +1492,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max%28up%7Bjob%3D%22bioetl%22%7D%29&time=1794101749.265904"
+          "request_url": "http://localhost:9090/api/v1/query?query=max%28up%7Bjob%3D%22bioetl%22%7D%29&time=1794166033.173377"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor Coverage"
     },
@@ -1514,14 +1514,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28min%28bioetl_rt_stage_ratio%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%29+or+on%28%29+vector%28-1%29%2C%22k%22%2C%22stages%22%2C%22%22%2C%22%22%29+or+label_replace%28bioetl_runtime_trust_gap_active_10m%2C%22k%22%2C%22quality%22%2C%22%22%2C%22%22%29&time=1794101749.272533"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28min%28bioetl_rt_stage_ratio%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+or+on%28%29+vector%28-1%29%2C%22k%22%2C%22stages%22%2C%22%22%2C%22%22%29+or+label_replace%28bioetl_runtime_trust_gap_active_10m%2C%22k%22%2C%22quality%22%2C%22%22%2C%22%22%29&time=1794166033.181406"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "B",
       "title": "Monitor Coverage"
     },
@@ -1536,14 +1536,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_runtime_required_rule_age_seconds&time=1794101749.279549"
+          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_runtime_required_rule_age_seconds&time=1794166033.189392"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "C",
       "title": "Monitor Coverage"
     },
@@ -1558,14 +1558,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_runtime_stage_progress_by_scope%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D&time=1794101749.286174"
+          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_runtime_stage_progress_by_scope%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D&time=1794166033.197748"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Review Stage Progress"
     },
@@ -1580,14 +1580,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=max+by%28stage%29+%28bioetl_stage_backlog_records%7Bpipeline%3D~%22%28All%7Cworkflow_All%29%22%2Crun_type%3D~%22All%22%7D%29&start=1794015349.292764&end=1794101749.292764&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=max+by%28stage%29+%28bioetl_stage_backlog_records%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%29&start=1794079633.205506&end=1794166033.205506&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Stage Backlog Trend"
     },
@@ -1602,14 +1602,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%2C+phase%2C+status%29+%28rate%28bioetl_phase_duration_seconds_bucket%7Bpipeline%3D~%22All%22%7D%5B5m%5D%29%29+unless+on+%28phase%2C+status%29+%28sum+by+%28phase%2C+status%29+%28changes%28bioetl_phase_duration_seconds_created%7Bpipeline%3D~%22All%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.299388&end=1794101749.299388&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%2C+phase%2C+status%29+%28rate%28bioetl_phase_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29+unless+on+%28phase%2C+status%29+%28sum+by+%28phase%2C+status%29+%28changes%28bioetl_phase_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.213368&end=1794166033.213368&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Phase Duration"
     },
@@ -1624,14 +1624,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+phase%2C+status%29+%28rate%28bioetl_phase_duration_seconds_bucket%7Bpipeline%3D~%22All%22%7D%5B5m%5D%29%29+unless+on+%28phase%2C+status%29+%28sum+by+%28phase%2C+status%29+%28changes%28bioetl_phase_duration_seconds_created%7Bpipeline%3D~%22All%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.306059&end=1794101749.306059&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+phase%2C+status%29+%28rate%28bioetl_phase_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29+unless+on+%28phase%2C+status%29+%28sum+by+%28phase%2C+status%29+%28changes%28bioetl_phase_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.221303&end=1794166033.221303&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "B",
       "title": "Track Phase Duration"
     },
@@ -1646,14 +1646,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%2C+phase%2C+status%29+%28rate%28bioetl_phase_duration_seconds_bucket%7Bpipeline%3D~%22All%22%7D%5B5m%5D%29%29+unless+on+%28phase%2C+status%29+%28sum+by+%28phase%2C+status%29+%28changes%28bioetl_phase_duration_seconds_created%7Bpipeline%3D~%22All%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.312712&end=1794101749.312712&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%2C+phase%2C+status%29+%28rate%28bioetl_phase_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29+unless+on+%28phase%2C+status%29+%28sum+by+%28phase%2C+status%29+%28changes%28bioetl_phase_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.22939&end=1794166033.22939&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "C",
       "title": "Track Phase Duration"
     },
@@ -1668,14 +1668,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%2C+stage%2C+status%2C+run_type%29+%28rate%28bioetl_pipeline_duration_seconds_bucket%7Bpipeline%3D~%22%28All%7Cworkflow_All%29%22%2Crun_type%3D~%22All%22%7D%5B5m%5D%29%29+unless+on+%28stage%2C+status%2C+run_type%29+%28sum+by+%28stage%2C+status%2C+run_type%29+%28changes%28bioetl_pipeline_duration_seconds_created%7Bpipeline%3D~%22%28All%7Cworkflow_All%29%22%2Crun_type%3D~%22All%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.319429&end=1794101749.319429&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%2C+stage%2C+status%2C+run_type%29+%28rate%28bioetl_pipeline_duration_seconds_bucket%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29%29+unless+on+%28stage%2C+status%2C+run_type%29+%28sum+by+%28stage%2C+status%2C+run_type%29+%28changes%28bioetl_pipeline_duration_seconds_created%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.237312&end=1794166033.237312&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Pipeline Duration"
     },
@@ -1690,14 +1690,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+stage%2C+status%2C+run_type%29+%28rate%28bioetl_pipeline_duration_seconds_bucket%7Bpipeline%3D~%22%28All%7Cworkflow_All%29%22%2Crun_type%3D~%22All%22%7D%5B5m%5D%29%29+unless+on+%28stage%2C+status%2C+run_type%29+%28sum+by+%28stage%2C+status%2C+run_type%29+%28changes%28bioetl_pipeline_duration_seconds_created%7Bpipeline%3D~%22%28All%7Cworkflow_All%29%22%2Crun_type%3D~%22All%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.326398&end=1794101749.326398&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+stage%2C+status%2C+run_type%29+%28rate%28bioetl_pipeline_duration_seconds_bucket%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29%29+unless+on+%28stage%2C+status%2C+run_type%29+%28sum+by+%28stage%2C+status%2C+run_type%29+%28changes%28bioetl_pipeline_duration_seconds_created%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.245412&end=1794166033.245412&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "B",
       "title": "Track Pipeline Duration"
     },
@@ -1712,14 +1712,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%2C+stage%2C+status%2C+run_type%29+%28rate%28bioetl_pipeline_duration_seconds_bucket%7Bpipeline%3D~%22%28All%7Cworkflow_All%29%22%2Crun_type%3D~%22All%22%7D%5B5m%5D%29%29+unless+on+%28stage%2C+status%2C+run_type%29+%28sum+by+%28stage%2C+status%2C+run_type%29+%28changes%28bioetl_pipeline_duration_seconds_created%7Bpipeline%3D~%22%28All%7Cworkflow_All%29%22%2Crun_type%3D~%22All%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.333341&end=1794101749.333341&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%2C+stage%2C+status%2C+run_type%29+%28rate%28bioetl_pipeline_duration_seconds_bucket%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29%29+unless+on+%28stage%2C+status%2C+run_type%29+%28sum+by+%28stage%2C+status%2C+run_type%29+%28changes%28bioetl_pipeline_duration_seconds_created%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.25355&end=1794166033.25355&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "C",
       "title": "Track Pipeline Duration"
     },
@@ -1734,14 +1734,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=max%28max_over_time%28bioetl_stage_lag_seconds%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%5B15m%5D%29+or+%28%28max_over_time%28bioetl_stage_lag_seconds%7Brun_type%3D~%22All%22%7D%5B15m%5D%29%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22All%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%29&start=1794015349.339913&end=1794101749.339913&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=max%28max_over_time%28bioetl_stage_lag_seconds%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B15m%5D%29+or+%28%28max_over_time%28bioetl_stage_lag_seconds%7Brun_type%3D~%22incremental%22%7D%5B15m%5D%29%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%29&start=1794079633.261726&end=1794166033.261726&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor Worst Stage Lag"
     },
@@ -1756,14 +1756,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28%28bioetl_runtime_current_blocker_reason_scoped%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+%3E+0%29+or+%28%28max%28bioetl_runtime_current_status_trusted%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%29+%3D%3D+0%29+%2A+0%29%29&start=1794015349.346998&end=1794101749.346998&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28%28bioetl_runtime_current_blocker_reason_scoped%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28max%28bioetl_runtime_current_status_trusted%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+%3D%3D+0%29+%2A+0%29%29&start=1794079633.269753&end=1794166033.269753&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor Active Blocker Count"
     },
@@ -1778,14 +1778,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=%28sum%28increase%28bioetl_pipeline_runs_total%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%2Cstatus%3D%22failed%22%7D%5B24h%5D%29%29+and+%28count%28max_over_time%28bioetl_runtime_pipeline_run_type_universe_scoped%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%5B24h%5D%29%29+%3E+0%29%29+unless+count%28max_over_time%28bioetl_runtime_pipeline_run_type_universe_scoped%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%5B24h%5D%29+unless+on+%28pipeline%2C+run_type%29+%28count_over_time%28bioetl_pipeline_runs_total%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%2Cstatus%3D%22failed%22%7D%5B24h%5D%29+%3E%3D+2%29%29&time=1794101749.353613"
+          "request_url": "http://localhost:9090/api/v1/query?query=%28sum%28increase%28bioetl_pipeline_runs_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%2Cstatus%3D%22failed%22%7D%5B24h%5D%29%29+and+%28count%28max_over_time%28bioetl_runtime_pipeline_run_type_universe_scoped%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B24h%5D%29%29+%3E+0%29%29+unless+count%28max_over_time%28bioetl_runtime_pipeline_run_type_universe_scoped%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B24h%5D%29+unless+on+%28pipeline%2C+run_type%29+%28count_over_time%28bioetl_pipeline_runs_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%2Cstatus%3D%22failed%22%7D%5B24h%5D%29+%3E%3D+2%29%29&time=1794166033.277936"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor Failed Runs"
     },
@@ -1800,14 +1800,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28bioetl_runtime_pipeline_alert_count%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%29+and+on%28%29+%28count%28bioetl_runtime_pipeline_run_type_universe%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%29+%3E+bool+0%29&start=1794015349.36033&end=1794101749.36033&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28bioetl_runtime_pipeline_alert_count%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+and+on%28%29+%28count%28bioetl_runtime_pipeline_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+%3E+bool+0%29&start=1794079633.285997&end=1794166033.285997&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor Pipeline Alerts"
     },
@@ -1822,14 +1822,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum%28increase%28bioetl_workflow_runs_total%7Bworkflow%3D~%22All%22%2Cstatus%3D%22failed%22%7D%5B24h%5D%29%29%29&start=1794015349.366852&end=1794101749.366852&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum%28increase%28bioetl_workflow_runs_total%7Bworkflow%3D~%22All%22%2Cstatus%3D%22failed%22%7D%5B24h%5D%29%29%29&start=1794079633.29457&end=1794166033.29457&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Failed Workflow Runs"
     },
@@ -1844,14 +1844,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28%28%28sum+by+%28pipeline%2C+run_type%29+%28increase%28bioetl_pipeline_runs_total%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%5B30m%5D%29%29+%3E+0%29+unless+on+%28pipeline%2C+run_type%29+%28sum+by+%28pipeline%2C+run_type%29+%28increase%28bioetl_records_processed_total%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%5B30m%5D%29%29+%3E+0%29%29%29+or+%28%28count%28bioetl_runtime_pipeline_run_type_universe%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%29+%3E+bool+0%29+%2A+0%29&start=1794015349.373433&end=1794101749.373433&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28%28%28sum+by+%28pipeline%2C+run_type%29+%28increase%28bioetl_pipeline_runs_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B30m%5D%29%29+%3E+0%29+unless+on+%28pipeline%2C+run_type%29+%28sum+by+%28pipeline%2C+run_type%29+%28increase%28bioetl_records_processed_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B30m%5D%29%29+%3E+0%29%29%29+or+%28%28count%28bioetl_runtime_pipeline_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+%3E+bool+0%29+%2A+0%29&start=1794079633.302529&end=1794166033.302529&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor No-Records Runs"
     },
@@ -1866,14 +1866,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum%28increase%28bioetl_workflow_step_events_total%7Bworkflow%3D~%22All%22%2Cstep_kind%3D%22pipeline%22%2Cpipeline_context%3D~%22All%22%2Crun_type_context%3D~%22All%22%2Cstatus%3D%22failed%22%7D%5B24h%5D%29%29%29&start=1794015349.380182&end=1794101749.380182&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum%28increase%28bioetl_workflow_step_events_total%7Bworkflow%3D~%22All%22%2Cstep_kind%3D%22pipeline%22%2Cpipeline_context%3D~%22chembl_target%22%2Crun_type_context%3D~%22incremental%22%2Cstatus%3D%22failed%22%7D%5B24h%5D%29%29%29&start=1794079633.310589&end=1794166033.310589&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Failed Workflow Steps"
     },
@@ -1888,14 +1888,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=max%28max_over_time%28bioetl_memory_pressure_state%7Bpipeline%3D~%22%28All%7Cworkflow_All%29%22%7D%5B15m%5D%29%29&start=1794015349.386779&end=1794101749.386779&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=max%28max_over_time%28bioetl_memory_pressure_state%7Bpipeline%3D~%22%28chembl_target%7Cworkflow_chembl_target%29%22%7D%5B15m%5D%29%29&start=1794079633.31848&end=1794166033.31848&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor Memory Pressure"
     },
@@ -1910,14 +1910,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=sum+by%28stage%2C+error_code%29+%28increase%28bioetl_errors_total%7Bpipeline%3D~%22All%22%2Cstage%21~%22none.%2A%22%7D%5B24h%5D%29%29&time=1794101749.393597"
+          "request_url": "http://localhost:9090/api/v1/query?query=sum+by%28stage%2C+error_code%29+%28increase%28bioetl_errors_total%7Bpipeline%3D~%22chembl_target%22%2Cstage%21~%22none.%2A%22%7D%5B24h%5D%29%29&time=1794166033.326526"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Review Errors by Stage & Code"
     },
@@ -1932,14 +1932,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=sum+by%28stage%2C+run_type%29+%28increase%28bioetl_records_processed_total%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%2Cstage%21~%22none.%2A%22%7D%5B24h%5D%29%29&time=1794101749.400118"
+          "request_url": "http://localhost:9090/api/v1/query?query=sum+by%28stage%2C+run_type%29+%28increase%28bioetl_records_processed_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%2Cstage%21~%22none.%2A%22%7D%5B24h%5D%29%29&time=1794166033.334474"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Compare Records by Stage & Run Type"
     },
@@ -1954,14 +1954,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=clamp_max%28max%28bioetl_replay_safety_blockers_15m%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+and+on%28pipeline%2Crun_type%29+%28bioetl_control_plane_telemetry_missing_5m+%3D%3D+0%29%29%2C+2%29&time=1794101749.406854"
+          "request_url": "http://localhost:9090/api/v1/query?query=clamp_max%28max%28bioetl_replay_safety_blockers_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+and+on%28pipeline%2Crun_type%29+%28bioetl_control_plane_telemetry_missing_5m+%3D%3D+0%29%29%2C+2%29&time=1794166033.342659"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor Replay"
     },
@@ -1976,14 +1976,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max%28bioetl_checkpoint_age_seconds%7Bpipeline%3D~%22All%22%7D%29&time=1794101749.413399"
+          "request_url": "http://localhost:9090/api/v1/query?query=max%28bioetl_checkpoint_age_seconds%7Bpipeline%3D~%22chembl_target%22%7D%29&time=1794166033.3505"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Checkpoint"
     },
@@ -1998,14 +1998,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=clamp_max%28max%28bioetl_manifest_ledger_failures_15m%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+and+on%28pipeline%2Crun_type%29+%28bioetl_control_plane_telemetry_missing_5m+%3D%3D+0%29%29%2C+2%29&time=1794101749.419831"
+          "request_url": "http://localhost:9090/api/v1/query?query=clamp_max%28max%28bioetl_manifest_ledger_failures_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+and+on%28pipeline%2Crun_type%29+%28bioetl_control_plane_telemetry_missing_5m+%3D%3D+0%29%29%2C+2%29&time=1794166033.358326"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor Ledger"
     },
@@ -2020,14 +2020,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=clamp_max%28max%28bioetl_control_plane_telemetry_missing_5m%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%29%2C+2%29&time=1794101749.426419"
+          "request_url": "http://localhost:9090/api/v1/query?query=clamp_max%28max%28bioetl_control_plane_telemetry_missing_5m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29%2C+2%29&time=1794166033.366714"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor Telemetry"
     },
@@ -2042,14 +2042,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by%28stage%29+%28max_over_time%28bioetl_records_processed_total%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%5B5m%5D%29%29&start=1794015349.433283&end=1794101749.433283&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by%28stage%29+%28max_over_time%28bioetl_records_processed_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B5m%5D%29%29&start=1794079633.374785&end=1794166033.374785&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Records by Stage / Interval"
     },
@@ -2064,14 +2064,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28%28%28%28sum%28bioetl_runtime_alert_condition_dq_soft_threshold_15m%7Bpipeline%3D~%22All%22%7D%29%29+%2B+%28sum%28bioetl_runtime_alert_condition_dq_hard_fail_15m%7Bpipeline%3D~%22All%22%7D%29%29+%2B+%28sum%28bioetl_runtime_alert_condition_dq_critical_anomaly_30m%7Bpipeline%3D~%22All%22%7D%29%29+%2B+%28sum%28bioetl_runtime_alert_condition_silver_validation_failures_30m%7Bpipeline%3D~%22All%22%7D%29%29%29+and+on%28%29+%28count%28bioetl_runtime_pipeline_run_type_universe%7Bpipeline%3D~%22All%22%7D%29+%3E+bool+0%29%29%29&start=1794015349.439845&end=1794101749.439845&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28%28%28%28sum%28bioetl_runtime_alert_condition_dq_soft_threshold_15m%7Bpipeline%3D~%22chembl_target%22%7D%29%29+%2B+%28sum%28bioetl_runtime_alert_condition_dq_hard_fail_15m%7Bpipeline%3D~%22chembl_target%22%7D%29%29+%2B+%28sum%28bioetl_runtime_alert_condition_dq_critical_anomaly_30m%7Bpipeline%3D~%22chembl_target%22%7D%29%29+%2B+%28sum%28bioetl_runtime_alert_condition_silver_validation_failures_30m%7Bpipeline%3D~%22chembl_target%22%7D%29%29%29+and+on%28%29+%28count%28bioetl_runtime_pipeline_run_type_universe%7Bpipeline%3D~%22chembl_target%22%7D%29+%3E+bool+0%29%29%29&start=1794079633.382685&end=1794166033.382685&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Inspect DQ Alert Conditions"
     },
@@ -2086,14 +2086,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28bioetl_runtime_control_plane_alert_count%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%29+and+on%28%29+%28count%28bioetl_runtime_pipeline_run_type_universe%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%29+%3E+bool+0%29&start=1794015349.446405&end=1794101749.446405&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28bioetl_runtime_control_plane_alert_count%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+and+on%28%29+%28count%28bioetl_runtime_pipeline_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+%3E+bool+0%29&start=1794079633.390637&end=1794166033.390637&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Inspect Control Plane Alerts"
     },
@@ -2108,14 +2108,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28bioetl_runtime_provider_alert_count%7Bprovider%3D~%22chembl%22%7D%29+and+on%28%29+%28count%28bioetl_provider_current_status%7Bprovider%3D~%22chembl%22%7D%29+%3E+bool+0%29&start=1794015349.453208&end=1794101749.453208&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum%28bioetl_runtime_provider_alert_count%7Bprovider%3D~%22chembl%22%7D%29+and+on%28%29+%28count%28bioetl_provider_current_status%7Bprovider%3D~%22chembl%22%7D%29+%3E+bool+0%29&start=1794079633.398845&end=1794166033.398845&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Inspect Provider Alerts"
     },
@@ -2130,14 +2130,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28%28%28sum%28bioetl_runtime_alert_condition_provider_adapter_latency_high_30m%29%29+%2B+%28sum%28bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m%29%29%29+and+on%28%29+%28count%28bioetl_provider_current_status%29+%3E+bool+0%29%29&start=1794015349.459717&end=1794101749.459717&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28%28%28sum%28bioetl_runtime_alert_condition_provider_adapter_latency_high_30m%29%29+%2B+%28sum%28bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m%29%29%29+and+on%28%29+%28count%28bioetl_provider_current_status%29+%3E+bool+0%29%29&start=1794079633.406889&end=1794166033.406889&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Inspect Global Provider Alert Conditions"
     },
@@ -2152,14 +2152,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=sum+by+%28terminal_status%29+%28last_over_time%28bioetl_control_plane_terminal_events_total%7Bpipeline%3D~%22All%22%7D%5B24h%5D%29%29&time=1794101749.466565"
+          "request_url": "http://localhost:9090/api/v1/query?query=sum+by+%28terminal_status%29+%28last_over_time%28bioetl_control_plane_terminal_events_total%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29&time=1794166033.414856"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Review Observed Terminal Counters"
     },
@@ -2174,14 +2174,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=sum%28clamp_min%28time%28%29+-+max+by+%28pipeline%2C+entity%29+%28bioetl_data_freshness_seconds%7Bpipeline%3D~%22All%22%7D%29%2C+0%29+%3E+bool+86400%29+or+%28count%28bioetl_data_freshness_seconds%7Bpipeline%3D~%22All%22%7D%29+%2A+0%29&time=1794101749.473794"
+          "request_url": "http://localhost:9090/api/v1/query?query=sum%28clamp_min%28time%28%29+-+max+by+%28pipeline%2C+entity%29+%28bioetl_data_freshness_seconds%7Bpipeline%3D~%22chembl_target%22%7D%29%2C+0%29+%3E+bool+86400%29+or+%28count%28bioetl_data_freshness_seconds%7Bpipeline%3D~%22chembl_target%22%7D%29+%2A+0%29&time=1794166033.422919"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Inspect Entities Stale Over 24h"
     },
@@ -2196,14 +2196,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_control_plane_reads_total%7Bstatus%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794101749.480528"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_control_plane_reads_total%7Bstatus%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794166033.430872"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Global Read Failures"
     },
@@ -2218,14 +2218,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=%28%28%28%28sum%28increase%28bioetl_control_plane_reads_total%7Bstatus%3D%22failed%22%7D%5B30m%5D%29%29%29+%2F+clamp_min%28%28sum%28increase%28bioetl_control_plane_reads_total%5B30m%5D%29%29%29%2C+1%29%29+%3E+bool+0.05%29+%2B+%28%28%28sum%28increase%28bioetl_control_plane_reads_total%7Bstatus%3D%22failed%22%7D%5B30m%5D%29%29%29+%2F+clamp_min%28%28sum%28increase%28bioetl_control_plane_reads_total%5B30m%5D%29%29%29%2C+1%29%29+%3E+bool+0.10%29%29&time=1794101749.487351"
+          "request_url": "http://localhost:9090/api/v1/query?query=%28%28%28%28sum%28increase%28bioetl_control_plane_reads_total%7Bstatus%3D%22failed%22%7D%5B30m%5D%29%29%29+%2F+clamp_min%28%28sum%28increase%28bioetl_control_plane_reads_total%5B30m%5D%29%29%29%2C+1%29%29+%3E+bool+0.05%29+%2B+%28%28%28sum%28increase%28bioetl_control_plane_reads_total%7Bstatus%3D%22failed%22%7D%5B30m%5D%29%29%29+%2F+clamp_min%28%28sum%28increase%28bioetl_control_plane_reads_total%5B30m%5D%29%29%29%2C+1%29%29+%3E+bool+0.10%29%29&time=1794166033.438748"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor Global Read Failures (30m)"
     },
@@ -2240,14 +2240,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_lineage_refs_missing_total%7Bpipeline%3D~%22All%22%7D%5B24h%5D%29%29%29%29&time=1794101749.49404"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_lineage_refs_missing_total%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29%29%29&time=1794166033.446853"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Missing Lineage"
     },
@@ -2262,14 +2262,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_lineage_fragments_emitted_total%7Bpipeline%3D~%22All%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794101749.500612"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_lineage_fragments_emitted_total%7Bpipeline%3D~%22chembl_target%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794166033.454942"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Lineage Failures"
     },
@@ -2284,14 +2284,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_control_plane_ledger_appends_total%7Bpipeline%3D~%22All%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794101749.507352"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_control_plane_ledger_appends_total%7Bpipeline%3D~%22chembl_target%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794166033.46298"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Ledger Failures"
     },
@@ -2306,14 +2306,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_trust_replay_blocker_events_total%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%5B24h%5D%29%29+%2B+sum%28max_over_time%28bioetl_trust_replay_blocker_integrity%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%5B24h%5D%29+%3E+bool+0%29%29%29&time=1794101749.514515"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_trust_replay_blocker_events_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B24h%5D%29%29+%2B+sum%28max_over_time%28bioetl_trust_replay_blocker_integrity%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B24h%5D%29+%3E+bool+0%29%29%29&time=1794166033.470934"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Replay Blockers"
     },
@@ -2328,14 +2328,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=topk%2820%2C+bioetl_runtime_current_blocker_reason_scoped%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+%3E+0%29&time=1794101749.521112"
+          "request_url": "http://localhost:9090/api/v1/query?query=topk%2820%2C+bioetl_runtime_current_blocker_reason_scoped%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29&time=1794166033.478827"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "J",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2350,14 +2350,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_pipeline_preflight_failed_15m%7Bpipeline%3D~%22All%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_pipeline_preflight_failed_15m%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22All%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22preflight_failed%22%2C+%22%22%2C+%22%22%29&time=1794101749.527755"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_pipeline_preflight_failed_15m%7Bpipeline%3D~%22chembl_target%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_pipeline_preflight_failed_15m%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22preflight_failed%22%2C+%22%22%2C+%22%22%29&time=1794166033.486733"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2372,14 +2372,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m%7Bpipeline%3D~%22All%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22All%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22infrastructure_failed%22%2C+%22%22%2C+%22%22%29&time=1794101749.534595"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m%7Bpipeline%3D~%22chembl_target%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22infrastructure_failed%22%2C+%22%22%2C+%22%22%29&time=1794166033.495274"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "H",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2394,14 +2394,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_pipeline_runs_failed_15m%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_pipeline_runs_failed_15m%7Brun_type%3D~%22All%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22All%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22runs_failed%22%2C+%22%22%2C+%22%22%29&time=1794101749.541615"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_pipeline_runs_failed_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_pipeline_runs_failed_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22runs_failed%22%2C+%22%22%2C+%22%22%29&time=1794166033.503328"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "B",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2416,14 +2416,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_stage_backlog_active_15m%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_stage_backlog_active_15m%7Brun_type%3D~%22All%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22All%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22stage_backlog_active%22%2C+%22%22%2C+%22%22%29&time=1794101749.548216"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_stage_backlog_active_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_stage_backlog_active_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22stage_backlog_active%22%2C+%22%22%2C+%22%22%29&time=1794166033.511268"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "C",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2438,14 +2438,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_stage_lag_high_15m%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_stage_lag_high_15m%7Brun_type%3D~%22All%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22All%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22stage_lag_high%22%2C+%22%22%2C+%22%22%29&time=1794101749.55494"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_stage_lag_high_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_stage_lag_high_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22stage_lag_high%22%2C+%22%22%2C+%22%22%29&time=1794166033.519607"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "D",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2460,14 +2460,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_gold_write_missing_15m%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_gold_write_missing_15m%7Brun_type%3D~%22All%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22All%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22gold_write_missing%22%2C+%22%22%2C+%22%22%29&time=1794101749.561701"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_gold_write_missing_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_gold_write_missing_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22gold_write_missing%22%2C+%22%22%2C+%22%22%29&time=1794166033.527686"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "E",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2482,14 +2482,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_no_terminal_run_30m%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_no_terminal_run_30m%7Brun_type%3D~%22All%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22All%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22no_terminal_run%22%2C+%22%22%2C+%22%22%29&time=1794101749.568549"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_no_terminal_run_30m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_no_terminal_run_30m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22no_terminal_run%22%2C+%22%22%2C+%22%22%29&time=1794166033.535687"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "F",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2504,14 +2504,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m%7Brun_type%3D~%22All%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22All%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22ingestion_throughput_degraded%22%2C+%22%22%2C+%22%22%29&time=1794101749.575197"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22ingestion_throughput_degraded%22%2C+%22%22%2C+%22%22%29&time=1794166033.543837"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "I",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2526,14 +2526,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_record_flow_invariant_violated_15m%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_record_flow_invariant_violated_15m%7Brun_type%3D~%22All%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22All%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22flow_invariant_violated%22%2C+%22%22%2C+%22%22%29&time=1794101749.581957"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28%28bioetl_runtime_alert_condition_record_flow_invariant_violated_15m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%3E+0%29+or+%28%28%28bioetl_runtime_alert_condition_record_flow_invariant_violated_15m%7Brun_type%3D~%22incremental%22%7D%29+%3E+0%29+and+on%28pipeline%29+label_replace%28label_replace%28vector%281%29%2C+%22pipeline_raw%22%2C+%22chembl_target%22%2C+%22%22%2C+%22%22%29%2C+%22pipeline%22%2C+%22%241%22%2C+%22pipeline_raw%22%2C+%22%5E%28%3F%3Aworkflow_%29%3F%28.%2A%29%24%22%29%29%2C+%22blocker%22%2C+%22flow_invariant_violated%22%2C+%22%22%2C+%22%22%29&time=1794166033.551804"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "G",
       "title": "Inspect Active Runtime Blocker Detail"
     },
@@ -2548,14 +2548,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_runtime_stage_evidence_detail%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D&time=1794101749.589129"
+          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_runtime_stage_evidence_detail%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D&time=1794166033.559934"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Inspect Current Missing Stage Signals"
     },
@@ -2570,14 +2570,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28store%2C+operation%2C+status%29+%28increase%28bioetl_control_plane_reads_total%5B5m%5D%29%29&start=1794015349.595762&end=1794101749.595762&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28store%2C+operation%2C+status%29+%28increase%28bioetl_control_plane_reads_total%5B5m%5D%29%29&start=1794079633.568037&end=1794166033.568037&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Compare Global Reads by Store"
     },
@@ -2592,14 +2592,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_control_plane_manifest_writes_total%7Bpipeline%3D~%22All%22%2C+run_type%3D~%22All%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794101749.602654"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_control_plane_manifest_writes_total%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794166033.5761"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Manifest Failures"
     },
@@ -2614,14 +2614,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_checkpoint_compatibility_events_total%7Bpipeline%3D~%22All%22%2C+disposition%3D~%22.%2A_incompatible%22%7D%5B24h%5D%29%29%29%29&time=1794101749.609685"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_checkpoint_compatibility_events_total%7Bpipeline%3D~%22chembl_target%22%2C+disposition%3D~%22.%2A_incompatible%22%7D%5B24h%5D%29%29%29%29&time=1794166033.584302"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Incompatibilities"
     },
@@ -2636,14 +2636,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_replay_reconstructability_events_total%7Bpipeline%3D~%22All%22%2C+status%3D%22not_reconstructable%22%7D%5B24h%5D%29%29%29%29&time=1794101749.616477"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_replay_reconstructability_events_total%7Bpipeline%3D~%22chembl_target%22%2C+status%3D%22not_reconstructable%22%7D%5B24h%5D%29%29%29%29&time=1794166033.59236"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Unreconstructable"
     },
@@ -2658,14 +2658,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=sum+by+%28layer%2C+ref_type%29+%28increase%28bioetl_lineage_refs_missing_total%7Bpipeline%3D~%22All%22%7D%5B24h%5D%29%29&time=1794101749.623367"
+          "request_url": "http://localhost:9090/api/v1/query?query=sum+by+%28layer%2C+ref_type%29+%28increase%28bioetl_lineage_refs_missing_total%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29&time=1794166033.600308"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Review Missing Lineage by Layer"
     },
@@ -2680,14 +2680,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_replay_drift_events_total%7Bpipeline%3D~%22All%22%2C+run_type%3D~%22All%22%7D%5B24h%5D%29%29%29%29&time=1794101749.630009"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_replay_drift_events_total%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%7D%5B24h%5D%29%29%29%29&time=1794166033.608552"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Replay Drift"
     },
@@ -2702,14 +2702,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=sum%28bioetl_control_plane_manifest_fail_severity_30m%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%29&time=1794101749.636702"
+          "request_url": "http://localhost:9090/api/v1/query?query=sum%28bioetl_control_plane_manifest_fail_severity_30m%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29&time=1794166033.61638"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor Manifest (30m)"
     },
@@ -2724,14 +2724,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum+by%28reason%29+%28increase%28bioetl_shutdown_initiated_total%5B5m%5D%29%29%29&start=1794015349.643422&end=1794101749.643422&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum+by%28reason%29+%28increase%28bioetl_shutdown_initiated_total%5B5m%5D%29%29%29&start=1794079633.624548&end=1794166033.624548&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Global Shutdown Starts"
     },
@@ -2746,14 +2746,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_checkpoint_load_events_total%7Bpipeline%3D~%22All%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794101749.650082"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_checkpoint_load_events_total%7Bpipeline%3D~%22chembl_target%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794166033.632619"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Load Failures"
     },
@@ -2768,14 +2768,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=sum%28bioetl_control_plane_ledger_fail_severity_30m%7Bpipeline%3D~%22All%22%7D%29&time=1794101749.656736"
+          "request_url": "http://localhost:9090/api/v1/query?query=sum%28bioetl_control_plane_ledger_fail_severity_30m%7Bpipeline%3D~%22chembl_target%22%7D%29&time=1794166033.640844"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor Ledger (30m)"
     },
@@ -2790,14 +2790,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum+by%28reason%29+%28increase%28bioetl_shutdown_completed_total%5B5m%5D%29%29%29&start=1794015349.663617&end=1794101749.663617&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum+by%28reason%29+%28increase%28bioetl_shutdown_completed_total%5B5m%5D%29%29%29&start=1794079633.648944&end=1794166033.648944&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Global Shutdown Completions"
     },
@@ -2812,14 +2812,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_checkpoint_save_events_total%7Bpipeline%3D~%22All%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794101749.670343"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_checkpoint_save_events_total%7Bpipeline%3D~%22chembl_target%22%2C+status%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794166033.657138"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Save Failures"
     },
@@ -2834,14 +2834,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+unless+on%28pipeline%2Crun_type%29+sum+by%28pipeline%2Crun_type%29+%28count_over_time%28bioetl_control_plane_manifest_writes_total%5B5m%5D%29%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+%2A+0%29%29&time=1794101749.677352"
+          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+unless+on%28pipeline%2Crun_type%29+sum+by%28pipeline%2Crun_type%29+%28count_over_time%28bioetl_control_plane_manifest_writes_total%5B5m%5D%29%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%2A+0%29%29&time=1794166033.665057"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Inspect Telemetry Coverage"
     },
@@ -2856,14 +2856,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+unless+on%28pipeline%29+sum+by%28pipeline%29+%28count_over_time%28bioetl_control_plane_ledger_appends_total%5B5m%5D%29%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+%2A+0%29%29&time=1794101749.684316"
+          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+unless+on%28pipeline%29+sum+by%28pipeline%29+%28count_over_time%28bioetl_control_plane_ledger_appends_total%5B5m%5D%29%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%2A+0%29%29&time=1794166033.672952"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "B",
       "title": "Inspect Telemetry Coverage"
     },
@@ -2878,14 +2878,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+unless+on%28pipeline%2Crun_type%29+%28count+by%28pipeline%2Crun_type%29+%28group+by%28pipeline%2Crun_type%2Crisk_type%29+%28count_over_time%28bioetl_replay_duplicate_overwrite_risk_total%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%2Crisk_type%3D~%22duplicate%7Coverwrite%22%7D%5B5m%5D%29%29%29+%3D%3D+2%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+%2A+0%29%29&time=1794101749.691409"
+          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+unless+on%28pipeline%2Crun_type%29+%28count+by%28pipeline%2Crun_type%29+%28group+by%28pipeline%2Crun_type%2Crisk_type%29+%28count_over_time%28bioetl_replay_duplicate_overwrite_risk_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%2Crisk_type%3D~%22duplicate%7Coverwrite%22%7D%5B5m%5D%29%29%29+%3D%3D+2%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%2A+0%29%29&time=1794166033.681122"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "C",
       "title": "Inspect Telemetry Coverage"
     },
@@ -2900,14 +2900,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+unless+on%28pipeline%2Crun_type%29+%28count+by%28pipeline%2Crun_type%29+%28group+by%28pipeline%2Crun_type%2Cintegrity_type%29+%28count_over_time%28bioetl_manifest_ledger_integrity_ratio%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%2Cintegrity_type%3D~%22consistent%7Cinconsistent%22%7D%5B5m%5D%29%29%29+%3D%3D+2%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+%2A+0%29%29&time=1794101749.698081"
+          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+unless+on%28pipeline%2Crun_type%29+%28count+by%28pipeline%2Crun_type%29+%28group+by%28pipeline%2Crun_type%2Cintegrity_type%29+%28count_over_time%28bioetl_manifest_ledger_integrity_ratio%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%2Cintegrity_type%3D~%22consistent%7Cinconsistent%22%7D%5B5m%5D%29%29%29+%3D%3D+2%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%2A+0%29%29&time=1794166033.689043"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "D",
       "title": "Inspect Telemetry Coverage"
     },
@@ -2922,14 +2922,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+unless+on%28pipeline%2Crun_type%29+%28push_time_seconds%7Bjob%3D%22bioetl%22%2Cpipeline%21%3D%22%22%2Crun_type%21%3D%22%22%7D+%3E+0+and+push_time_seconds%7Bjob%3D%22bioetl%22%2Cpipeline%21%3D%22%22%2Crun_type%21%3D%22%22%7D+%3C%3D+time%28%29%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D+%2A+0%29%29&time=1794101749.705166"
+          "request_url": "http://localhost:9090/api/v1/query?query=max%28%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+unless+on%28pipeline%2Crun_type%29+%28push_time_seconds%7Bjob%3D%22bioetl%22%2Cpipeline%21%3D%22%22%2Crun_type%21%3D%22%22%7D+%3E+0+and+push_time_seconds%7Bjob%3D%22bioetl%22%2Cpipeline%21%3D%22%22%2Crun_type%21%3D%22%22%7D+%3C%3D+time%28%29%29%29+or+%28bioetl_control_plane_run_type_universe%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D+%2A+0%29%29&time=1794166033.697321"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "E",
       "title": "Inspect Telemetry Coverage"
     },
@@ -2944,14 +2944,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_checkpoint_operator_operations_total%7Bstatus%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794101749.7124"
+          "request_url": "http://localhost:9090/api/v1/query?query=round%28%28sum%28increase%28bioetl_checkpoint_operator_operations_total%7Bstatus%3D%22failed%22%7D%5B24h%5D%29%29%29%29&time=1794166033.705301"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Global Admin Failures"
     },
@@ -2966,14 +2966,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+store%2C+operation%29+%28increase%28bioetl_control_plane_read_duration_seconds_bucket%7Bstatus%21%3D%22failed%22%7D%5B24h%5D%29%29+unless+on+%28store%2C+operation%29+%28sum+by+%28store%2C+operation%29+%28changes%28bioetl_control_plane_read_duration_seconds_created%7Bstatus%21%3D%22failed%22%7D%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.718932&end=1794101749.718932&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+store%2C+operation%29+%28increase%28bioetl_control_plane_read_duration_seconds_bucket%7Bstatus%21%3D%22failed%22%7D%5B24h%5D%29%29+unless+on+%28store%2C+operation%29+%28sum+by+%28store%2C+operation%29+%28changes%28bioetl_control_plane_read_duration_seconds_created%7Bstatus%21%3D%22failed%22%7D%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.713343&end=1794166033.713343&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Global Read Latency"
     },
@@ -2988,14 +2988,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28status%2C+run_type%29+%28increase%28bioetl_control_plane_manifest_writes_total%7Bpipeline%3D~%22All%22%2C+run_type%3D~%22All%22%7D%5B5m%5D%29%29&start=1794015349.725638&end=1794101749.725638&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28status%2C+run_type%29+%28increase%28bioetl_control_plane_manifest_writes_total%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%7D%5B5m%5D%29%29&start=1794079633.721574&end=1794166033.721574&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Observed Manifest Write Increments"
     },
@@ -3010,14 +3010,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max%28max_over_time%28bioetl_replay_lag_seconds%7Bpipeline%3D~%22All%22%2C+run_type%3D~%22All%22%7D%5B24h%5D%29%29&time=1794101749.732265"
+          "request_url": "http://localhost:9090/api/v1/query?query=max%28max_over_time%28bioetl_replay_lag_seconds%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%7D%5B24h%5D%29%29&time=1794166033.729511"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Peak Replay Lag"
     },
@@ -3032,14 +3032,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum+by+%28layer%2C+operation%2C+status%29+%28increase%28bioetl_audit_write_events_total%5B5m%5D%29%29%29&start=1794015349.739013&end=1794101749.739013&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum+by+%28layer%2C+operation%2C+status%29+%28increase%28bioetl_audit_write_events_total%5B5m%5D%29%29%29&start=1794079633.737562&end=1794166033.737562&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Compare Global Audit Write Outcomes"
     },
@@ -3054,14 +3054,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28replay_capability%2C+drift_type%2C+status%29+%28increase%28bioetl_replay_drift_events_total%7Bpipeline%3D~%22All%22%2C+run_type%3D~%22All%22%7D%5B5m%5D%29%29&start=1794015349.7459&end=1794101749.7459&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28replay_capability%2C+drift_type%2C+status%29+%28increase%28bioetl_replay_drift_events_total%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%7D%5B5m%5D%29%29&start=1794079633.745447&end=1794166033.745447&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Replay Drift by Type"
     },
@@ -3076,14 +3076,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=max+by+%28stage%29+%28bioetl_stage_lag_seconds%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%29&start=1794015349.752795&end=1794101749.752795&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=max+by+%28stage%29+%28bioetl_stage_lag_seconds%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29&start=1794079633.753307&end=1794166033.753307&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Stage Lag"
     },
@@ -3098,14 +3098,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28disposition%29+%28increase%28bioetl_checkpoint_compatibility_events_total%7Bpipeline%3D~%22All%22%7D%5B5m%5D%29%29&start=1794015349.759649&end=1794101749.759649&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28disposition%29+%28increase%28bioetl_checkpoint_compatibility_events_total%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29&start=1794079633.761203&end=1794166033.761203&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Compare Checkpoint Outcomes"
     },
@@ -3120,14 +3120,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum+by+%28layer_filter%2C+status%29+%28increase%28bioetl_audit_query_events_total%5B5m%5D%29%29%29&start=1794015349.766536&end=1794101749.766536&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=round%28sum+by+%28layer_filter%2C+status%29+%28increase%28bioetl_audit_query_events_total%5B5m%5D%29%29%29&start=1794079633.769098&end=1794166033.769098&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Compare Global Audit Query Outcomes"
     },
@@ -3142,14 +3142,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=max+by+%28replay_capability%2C+status%29+%28bioetl_replay_lag_seconds%7Bpipeline%3D~%22All%22%2C+run_type%3D~%22All%22%7D%29&start=1794015349.772992&end=1794101749.772992&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=max+by+%28replay_capability%2C+status%29+%28bioetl_replay_lag_seconds%7Bpipeline%3D~%22chembl_target%22%2C+run_type%3D~%22incremental%22%7D%29&start=1794079633.777093&end=1794166033.777093&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Replay Lag"
     },
@@ -3164,14 +3164,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28event_type%2C+status%29+%28increase%28bioetl_control_plane_ledger_appends_total%7Bpipeline%3D~%22All%22%7D%5B5m%5D%29%29&start=1794015349.779729&end=1794101749.779729&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28event_type%2C+status%29+%28increase%28bioetl_control_plane_ledger_appends_total%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29&start=1794079633.784767&end=1794166033.784767&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Compare Ledger Appends by Type & Status"
     },
@@ -3186,14 +3186,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_pipeline_stage_expected%7Bpipeline%3D~%22All%22%7D&time=1794101749.786573"
+          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_pipeline_stage_expected%7Bpipeline%3D~%22chembl_target%22%7D&time=1794166033.793072"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Inspect Stage Expectedness"
     },
@@ -3208,14 +3208,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=max+by+%28pipeline%2C+stage%29+%28max_over_time%28bioetl_stage_records_total%7Bpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%5B15m%5D%29%29&time=1794101749.793601"
+          "request_url": "http://localhost:9090/api/v1/query?query=max+by+%28pipeline%2C+stage%29+%28max_over_time%28bioetl_stage_records_total%7Bpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%5B15m%5D%29%29&time=1794166033.801344"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "B",
       "title": "Inspect Stage Expectedness"
     },
@@ -3230,14 +3230,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%2C+pipeline%2C+operation%29+%28increase%28bioetl_checkpoint_save_duration_seconds_bucket%7Bpipeline%3D~%22All%22%7D%5B24h%5D%29%29+unless+on+%28pipeline%2C+operation%29+%28sum+by+%28pipeline%2C+operation%29+%28changes%28bioetl_checkpoint_save_duration_seconds_created%7Bpipeline%3D~%22All%22%7D%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.800498&end=1794101749.800498&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%2C+pipeline%2C+operation%29+%28increase%28bioetl_checkpoint_save_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29+unless+on+%28pipeline%2C+operation%29+%28sum+by+%28pipeline%2C+operation%29+%28changes%28bioetl_checkpoint_save_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.809571&end=1794166033.809571&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Checkpoint Save Latency"
     },
@@ -3252,14 +3252,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+pipeline%2C+operation%29+%28increase%28bioetl_checkpoint_save_duration_seconds_bucket%7Bpipeline%3D~%22All%22%7D%5B24h%5D%29%29+unless+on+%28pipeline%2C+operation%29+%28sum+by+%28pipeline%2C+operation%29+%28changes%28bioetl_checkpoint_save_duration_seconds_created%7Bpipeline%3D~%22All%22%7D%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.807262&end=1794101749.807262&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+pipeline%2C+operation%29+%28increase%28bioetl_checkpoint_save_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29+unless+on+%28pipeline%2C+operation%29+%28sum+by+%28pipeline%2C+operation%29+%28changes%28bioetl_checkpoint_save_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.817544&end=1794166033.817544&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "B",
       "title": "Track Checkpoint Save Latency"
     },
@@ -3274,14 +3274,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%2C+pipeline%2C+operation%29+%28increase%28bioetl_checkpoint_save_duration_seconds_bucket%7Bpipeline%3D~%22All%22%7D%5B24h%5D%29%29+unless+on+%28pipeline%2C+operation%29+%28sum+by+%28pipeline%2C+operation%29+%28changes%28bioetl_checkpoint_save_duration_seconds_created%7Bpipeline%3D~%22All%22%7D%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.814591&end=1794101749.814591&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%2C+pipeline%2C+operation%29+%28increase%28bioetl_checkpoint_save_duration_seconds_bucket%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29%29+unless+on+%28pipeline%2C+operation%29+%28sum+by+%28pipeline%2C+operation%29+%28changes%28bioetl_checkpoint_save_duration_seconds_created%7Bpipeline%3D~%22chembl_target%22%7D%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.825818&end=1794166033.825818&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "C",
       "title": "Track Checkpoint Save Latency"
     },
@@ -3296,14 +3296,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_write_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_write_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.821348&end=1794101749.821348&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_write_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_write_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.833788&end=1794166033.833788&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Global Audit Write Latency"
     },
@@ -3318,14 +3318,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_write_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_write_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.828049&end=1794101749.828049&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_write_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_write_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.841882&end=1794166033.841882&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "B",
       "title": "Track Global Audit Write Latency"
     },
@@ -3340,14 +3340,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_write_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_write_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.835069&end=1794101749.835069&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_write_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_write_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.849945&end=1794166033.849945&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "C",
       "title": "Track Global Audit Write Latency"
     },
@@ -3362,14 +3362,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%2C+operation%29+%28increase%28bioetl_checkpoint_operator_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28operation%29+%28sum+by+%28operation%29+%28changes%28bioetl_checkpoint_operator_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.842118&end=1794101749.842118&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%2C+operation%29+%28increase%28bioetl_checkpoint_operator_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28operation%29+%28sum+by+%28operation%29+%28changes%28bioetl_checkpoint_operator_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.857903&end=1794166033.857903&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Global Checkpoint Admin Latency"
     },
@@ -3384,14 +3384,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+operation%29+%28increase%28bioetl_checkpoint_operator_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28operation%29+%28sum+by+%28operation%29+%28changes%28bioetl_checkpoint_operator_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.849181&end=1794101749.849181&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%2C+operation%29+%28increase%28bioetl_checkpoint_operator_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28operation%29+%28sum+by+%28operation%29+%28changes%28bioetl_checkpoint_operator_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.866025&end=1794166033.866025&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "B",
       "title": "Track Global Checkpoint Admin Latency"
     },
@@ -3406,14 +3406,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%2C+operation%29+%28increase%28bioetl_checkpoint_operator_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28operation%29+%28sum+by+%28operation%29+%28changes%28bioetl_checkpoint_operator_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.855935&end=1794101749.855935&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%2C+operation%29+%28increase%28bioetl_checkpoint_operator_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28operation%29+%28sum+by+%28operation%29+%28changes%28bioetl_checkpoint_operator_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.874194&end=1794166033.874194&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "C",
       "title": "Track Global Checkpoint Admin Latency"
     },
@@ -3428,14 +3428,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_query_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_query_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.862806&end=1794101749.862806&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.50%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_query_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_query_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.882161&end=1794166033.882161&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Track Global Audit Query Latency"
     },
@@ -3450,14 +3450,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_query_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_query_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.869672&end=1794101749.869672&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.95%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_query_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_query_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.890481&end=1794166033.890481&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "B",
       "title": "Track Global Audit Query Latency"
     },
@@ -3472,14 +3472,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_query_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_query_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794015349.876574&end=1794101749.876574&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=%28histogram_quantile%280.99%2C+%28sum+by+%28le%29+%28increase%28bioetl_audit_query_duration_seconds_bucket%5B24h%5D%29%29+unless+on+%28%29+%28sum+%28changes%28bioetl_audit_query_duration_seconds_created%5B24h%5D%29+%3E+0%29%29%29%29%29+%3E%3D+0&start=1794079633.898698&end=1794166033.898698&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "C",
       "title": "Track Global Audit Query Latency"
     },
@@ -3494,14 +3494,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=max%28bioetl_runtime_error_rate_30m%7Bpipeline%3D~%22All%22%7D%29&start=1794015349.883331&end=1794101749.883331&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=max%28bioetl_runtime_error_rate_30m%7Bpipeline%3D~%22chembl_target%22%7D%29&start=1794079633.906728&end=1794166033.906728&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Monitor Runtime Error Rate"
     },
@@ -3516,14 +3516,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "range",
-          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28layer%2C+status%29+%28increase%28bioetl_lineage_fragments_emitted_total%7Bpipeline%3D~%22All%22%7D%5B5m%5D%29%29&start=1794015349.890319&end=1794101749.890319&step=300.0"
+          "request_url": "http://localhost:9090/api/v1/query_range?query=sum+by+%28layer%2C+status%29+%28increase%28bioetl_lineage_fragments_emitted_total%7Bpipeline%3D~%22chembl_target%22%7D%5B5m%5D%29%29&start=1794079633.914905&end=1794166033.914905&step=300.0"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Compare Lineage Persistence Outcomes"
     },
@@ -3538,14 +3538,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28max+by%28workflow%29%28bioetl_workflow_scope_input_status%7Binput%3D%22workflow%22%2Cworkflow%3D~%22All%22%2Cpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%29%2C%22reason%22%2C%22Reason+unavailable%22%2C%22%22%2C%22%22%29&time=1794101749.897175"
+          "request_url": "http://localhost:9090/api/v1/query?query=label_replace%28max+by%28workflow%29%28bioetl_workflow_scope_input_status%7Binput%3D%22workflow%22%2Cworkflow%3D~%22All%22%2Cpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29%2C%22reason%22%2C%22Reason+unavailable%22%2C%22%22%2C%22%22%29&time=1794166033.922901"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Review Current Workflow Evidence"
     },
@@ -3560,14 +3560,14 @@
           "classification": "blocked_unavailable",
           "detail": "Panel audit target could not be executed: <urlopen error [Errno 111] Connection refused>",
           "mode": "instant",
-          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_workflow_scope_published_seconds+%2A+on%28workflow%29+group+by%28workflow%29%28bioetl_workflow_scope_universe%7Bworkflow%3D~%22All%22%2Cpipeline%3D~%22All%22%2Crun_type%3D~%22All%22%7D%29+%2A+1000&time=1794101749.903932"
+          "request_url": "http://localhost:9090/api/v1/query?query=bioetl_workflow_scope_published_seconds+%2A+on%28workflow%29+group+by%28workflow%29%28bioetl_workflow_scope_universe%7Bworkflow%3D~%22All%22%2Cpipeline%3D~%22chembl_target%22%2Crun_type%3D~%22incremental%22%7D%29+%2A+1000&time=1794166033.930814"
         }
       ],
       "request_url": null,
       "response": null,
       "semantic_kind": "prometheus_query",
       "source_kind": "prometheus",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "B",
       "title": "Review Current Workflow Evidence"
     },
@@ -3582,7 +3582,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Review Run Domains"
     },
@@ -3597,7 +3597,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "B",
       "title": "Inspect Selected Run Stages"
     },
@@ -3612,7 +3612,7 @@
       "response": null,
       "semantic_kind": "http_endpoint",
       "source_kind": "http",
-      "status": "not_run",
+      "status": "ok",
       "target_ref_id": "A",
       "title": "Inspect Recent Runs (last 10)"
     }
