@@ -121,7 +121,8 @@ def _write_command(path: Path, name: str, *, body: str | None = None) -> None:
         tokens = "\n".join(
             f"- {token}" for token in sync_cursor_rules.COMMAND_GOVERNANCE_TOKENS
         )
-        payload = f"---\ndescription: test\n---\n\n{tokens}\n"
+        marker = sync_cursor_rules.MANAGED_COMMAND_MARKER
+        payload = f"---\ndescription: test\n---\n\n{tokens}\n\n{marker}\n"
     (path / name).write_text(payload, encoding="utf-8", newline="\n")
 
 
@@ -247,6 +248,33 @@ def test_sync_cursor_commands_skips_file_missing_governance_token(
     )
     assert (deploy / "review.md").is_file()
     assert not (deploy / "bare.md").exists()
+
+
+def test_deploy_prunes_stale_managed_commands_and_preserves_local_files(
+    tmp_path: Path,
+) -> None:
+    canonical = tmp_path / sync_cursor_rules.CURSOR_COMMAND_DOCS_DIR
+    deploy = tmp_path / sync_cursor_rules.CURSOR_COMMANDS_DIR
+    _write_command(canonical, "old.md")
+    _write_command(canonical, "invalid.md")
+    assert not sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path, deploy=True, check_only=False
+    )
+    (canonical / "old.md").rename(canonical / "renamed.md")
+    _write_command(canonical, "invalid.md", body="Invalid command")
+    _write_command(deploy, "local.md", body="Personal command")
+    _write_command(canonical, "local.md")
+
+    issues = sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path, deploy=True, check_only=False
+    )
+
+    assert any("invalid.md" in issue for issue in issues)
+    assert any("unmarked local command preserved" in issue for issue in issues)
+    assert (deploy / "renamed.md").is_file()
+    assert not (deploy / "old.md").exists()
+    assert not (deploy / "invalid.md").exists()
+    assert (deploy / "local.md").read_text(encoding="utf-8") == "Personal command"
 
 
 def test_canonical_cursor_commands_include_governance_tokens() -> None:

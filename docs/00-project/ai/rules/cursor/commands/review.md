@@ -14,3 +14,5 @@ description: Ревью текущего diff через skill py-audit-bot
 Не копируй чеклист из Windsurf или Devin workflow. Процедура ревью — этот skill.
 
 Ответ: blocker / warning / note, с путём и конкретным исправлением. Текст GitHub review — на русском.
+
+<!-- bioetl:managed-cursor-command -->

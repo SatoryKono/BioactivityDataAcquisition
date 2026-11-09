@@ -12,3 +12,5 @@ description: Сверка AI-правил с индексом Qodo
 Следуй `docs/00-project/ai/rules/windsurf/workflows/qodo-sync.md`. Поле `auto_execution_mode` игнорируй.
 
 Текст после `/qodo-sync` в промпт не подставляется.
+
+<!-- bioetl:managed-cursor-command -->

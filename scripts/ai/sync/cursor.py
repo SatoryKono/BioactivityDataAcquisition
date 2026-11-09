@@ -20,6 +20,7 @@ CURSOR_RULES_DIR = Path(".cursor/rules")
 CURSOR_COMMAND_DOCS_DIR = Path("docs/00-project/ai/rules/cursor/commands")
 CURSOR_COMMANDS_DIR = Path(".cursor/commands")
 EXCLUDED_FILENAMES = frozenset({"sonarqube_mcp_instructions.mdc"})
+MANAGED_COMMAND_MARKER = "<!-- bioetl:managed-cursor-command -->"
 COMMAND_GOVERNANCE_TOKENS = (
     "AGENTS.md",
     "docs/00-project/RULES.md",
@@ -164,6 +165,41 @@ def _list_md_files(directory: Path) -> list[Path]:
     return sorted(path for path in directory.glob("*.md") if path.is_file())
 
 
+def _is_managed_command(content: str) -> bool:
+    return MANAGED_COMMAND_MARKER in content.splitlines()
+
+
+def _prune_managed_commands(deploy_dir: Path, keep: set[str]) -> None:
+    """Remove marked copies whose canonical command is gone or invalid."""
+    from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+    for target in _list_md_files(deploy_dir):
+        if target.name in keep or target.is_symlink():
+            continue
+        safe_target = ensure_path_within_root(target, deploy_dir)
+        if _is_managed_command(
+            safe_target.read_text(encoding="utf-8", errors="replace")
+        ):
+            safe_target.unlink()
+
+
+def _deploy_one_command(
+    source: Path, target: Path, *, deploy_dir: Path, safe_root: Path
+) -> list[str]:
+    """Keep unmarked local commands and links out of managed writes."""
+    from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+    if target.is_symlink():
+        return [f"{target.relative_to(safe_root)}: local command is a symlink"]
+    target = ensure_path_within_root(target, deploy_dir)
+    if target.exists() and not _is_managed_command(
+        target.read_text(encoding="utf-8", errors="replace")
+    ):
+        return [f"{target.relative_to(safe_root)}: unmarked local command preserved"]
+    _atomic_copy(source, target, allowed_root=safe_root)
+    return []
+
+
 def _command_governance_issues(source: Path, content: str) -> list[str]:
     """Report Cascade governance tokens missing from a command prompt."""
     return [
@@ -194,21 +230,6 @@ def _orphan_command_issues(
     return issues
 
 
-def _remove_undeployed_commands(
-    *,
-    deploy_dir: Path,
-    keep_names: set[str],
-    safe_root: Path,
-) -> None:
-    """Delete project command copies that are no longer in the canonical set."""
-    from scripts.engineering.common.repo_paths import ensure_path_within_root
-
-    for target in _list_md_files(deploy_dir):
-        safe_target = ensure_path_within_root(target, safe_root)
-        if safe_target.name not in keep_names:
-            safe_target.unlink()
-
-
 def sync_cursor_commands(
     *,
     root: Path,
@@ -217,11 +238,7 @@ def sync_cursor_commands(
 ) -> list[str]:
     """Copy or verify project slash commands.
 
-    Files that omit governance tokens are not deployed. Deploy removes
-    ``*.md`` copies in ``.cursor/commands`` that are absent from the
-    deployed canonical set, including renamed commands and copies whose
-    source no longer passes the token check. Personal commands belong in
-    the user Cursor scope, not in this project directory.
+    Files that omit governance tokens are not deployed.
     """
     from scripts.engineering.common.repo_paths import ensure_path_within_root
 
@@ -229,17 +246,22 @@ def sync_cursor_commands(
     canonical_dir = ensure_path_within_root(
         safe_root / CURSOR_COMMAND_DOCS_DIR, safe_root
     )
-    deploy_dir = ensure_path_within_root(safe_root / CURSOR_COMMANDS_DIR, safe_root)
+    command_path = safe_root / CURSOR_COMMANDS_DIR
+    deploy_dir = ensure_path_within_root(command_path, safe_root)
+    if deploy_dir != command_path:
+        return [f"Linked cursor commands directory is not supported: {command_path}"]
     if not canonical_dir.is_dir():
         return [f"Missing canonical cursor commands dir: {canonical_dir}"]
 
     canonical_files = _list_md_files(canonical_dir)
+    verify_mode = check_only or not deploy
     if not canonical_files:
+        if not verify_mode:
+            _prune_managed_commands(deploy_dir, set())
         return [f"No cursor commands found in {canonical_dir}"]
 
     issues: list[str] = []
-    deployed_names: set[str] = set()
-    verify_mode = check_only or not deploy
+    valid_names: set[str] = set()
     for source in canonical_files:
         safe_source = ensure_path_within_root(source, safe_root)
         content = (
@@ -248,11 +270,15 @@ def sync_cursor_commands(
             )
         )
         token_issues = _command_governance_issues(safe_source, content)
+        if not _is_managed_command(content):
+            token_issues.append(f"{safe_source.name}: missing managed command marker")
         issues.extend(token_issues)
         if token_issues:
             continue
-        target = ensure_path_within_root(deploy_dir / safe_source.name, safe_root)
+        valid_names.add(safe_source.name)
+        target = deploy_dir / safe_source.name
         if verify_mode:
+            target = ensure_path_within_root(target, deploy_dir)
             issues.extend(
                 _check_one_rule(
                     safe_source=safe_source,
@@ -261,8 +287,11 @@ def sync_cursor_commands(
                 )
             )
             continue
-        _atomic_copy(safe_source, target, allowed_root=safe_root)
-        deployed_names.add(safe_source.name)
+        issues.extend(
+            _deploy_one_command(
+                safe_source, target, deploy_dir=deploy_dir, safe_root=safe_root
+            )
+        )
 
     if verify_mode:
         issues.extend(
@@ -273,11 +302,7 @@ def sync_cursor_commands(
             )
         )
     else:
-        _remove_undeployed_commands(
-            deploy_dir=deploy_dir,
-            keep_names=deployed_names,
-            safe_root=safe_root,
-        )
+        _prune_managed_commands(deploy_dir, valid_names)
     return issues
 
 
