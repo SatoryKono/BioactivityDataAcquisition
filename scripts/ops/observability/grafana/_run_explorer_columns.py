@@ -51,9 +51,9 @@ _COLUMNS = {
     "provider": ("Provider", 85, 50),
     # Phase 4.3: Run ID ≥110; trim siblings so first-window 200% CSS budget holds.
     "run_label": (_RUN_ID_LABEL, 110, 50),
-    "started_at": ("Started", 100, 50),
+    "started_at": ("Started", 170, 50),
     "duration_display": ("Duration", 70, 50),
-    "status": ("Overview", 150, 150),
+    "status": ("Overview", 80, 80),
     "saved_evidence_status": ("Saved Evidence", None, 90),
     "data_quality_status": (_DATA_QUALITY, None, 90),
     "replay_readiness_status": (_REPLAY_READINESS, 125, 90),

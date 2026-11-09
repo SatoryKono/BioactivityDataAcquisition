@@ -271,7 +271,8 @@ def test_run_explorer_flex_columns_omit_custom_width() -> None:
     assert widths["Replay Readiness"] == 125
     assert widths["Run ID"] == 110
     assert min_widths["Run ID"] == 50
-    assert widths["Overview"] == min_widths["Overview"] == 150
+    assert widths["Started"] == 170
+    assert widths["Overview"] == min_widths["Overview"] == 80
     visible_width = sum(width for field, width in widths.items() if field not in hidden)
     budget = (1366 // 2) * panel["gridPos"]["w"] // 24 - 40
     assert visible_width <= budget
