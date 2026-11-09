@@ -6,9 +6,12 @@ from collections.abc import Mapping
 from pathlib import PurePosixPath
 
 from bioetl.domain.control_plane.snapshot_field_resolution import (
-    coerce_optional_text as _optional_text,
+    coerce_optional_text as _coerce_optional_text,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
+
+# Explicit re-export for sibling runtime_builders importers (no_implicit_reexport).
+_optional_text = _coerce_optional_text
 
 
 def _validated_ledger_snapshot_uri(
