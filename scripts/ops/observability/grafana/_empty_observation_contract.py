@@ -234,9 +234,9 @@ def _qualify_signal_empty(
     if (
         panel_id == 242
         and "bioetl_runtime_alert_condition_pipeline_runs_failed_15m" in expr
+        and not _unobserved_failed_blocker_input(vector, request)
     ):
-        if not _unobserved_failed_blocker_input(vector, request):
-            return False
+        return False
     witnesses = vector(_SIGNAL_WITNESSES[panel_id]) or []
     return _signal_witness_confirms_empty(panel_id, witnesses)
 
