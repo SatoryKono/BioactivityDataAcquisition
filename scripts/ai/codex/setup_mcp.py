@@ -1337,16 +1337,18 @@ def _render_portable_mcp_payload(workspace_root: Path) -> dict[str, Any]:
 
 
 def _render_devin_mcp_payload(workspace_root: Path) -> dict[str, Any]:
-    """Canonical full Devin inventory using shared HTTP and Devin env syntax."""
-    servers = _apply_shared_transport(
-        _canonical_servers(
-            workspace_root,
-            portable_workspace_paths=True,
-            profile=DEVIN_TRACKED_PROFILE,
-            wrapper_platform="posix",
-        ),
-        transport_mode="shared",
+    """Full Devin inventory with portable private-owner bootstraps and HTTP peers."""
+    canonical = _canonical_servers(
+        workspace_root,
+        portable_workspace_paths=True,
+        profile=DEVIN_TRACKED_PROFILE,
+        wrapper_platform="posix",
     )
+    servers = _apply_shared_transport(deepcopy(canonical), transport_mode="shared")
+    # These wrappers select scoped/private owners without exposing local bearer
+    # credentials or embedding workstation paths in tracked configuration.
+    for name in ("context7", "brave-search", "ast-grep", "github"):
+        servers[name] = deepcopy(canonical[name])
     for server in servers.values():
         server.pop("type", None)
         server.pop("startup_timeout_sec", None)
@@ -1357,7 +1359,6 @@ def _render_devin_mcp_payload(workspace_root: Path) -> dict[str, Any]:
                 for header, env_name in env_http_headers.items()
             }
     return {"mcpServers": servers}
-
 
 def _portable_projection_mismatch(
     output_root: Path,
