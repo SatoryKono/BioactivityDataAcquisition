@@ -93,6 +93,7 @@ _EVENT_RANGE = re.compile(
     re.ASCII,
 )
 _SCOPE_METRIC = "bioetl_runtime_pipeline_run_type_universe_scoped"
+_RULES_ENDPOINT = "/api/v1/rules"
 type WitnessVector = Callable[[str], list[dict[str, Any]] | None]
 
 
