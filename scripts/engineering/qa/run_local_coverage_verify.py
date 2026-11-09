@@ -62,6 +62,7 @@ SHARDS = (
             "tests/unit/repo_backed/composition/",
             "tests/unit/repo_backed/contracts/",
             "tests/unit/repo_backed/coverage_gap/",
+            "tests/unit/repo_backed/cursor/",
             "tests/unit/repo_backed/domain/",
             "tests/unit/repo_backed/infrastructure/",
             "tests/unit/repo_backed/interfaces/",

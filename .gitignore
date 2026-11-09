@@ -363,7 +363,16 @@ reports/quality/coderabbit/**/auth.*
 !.agents/skills/*/
 .agents/skills/*/*
 !.agents/skills/*/SKILL.md
+# Cursor state stays local. Project hooks are the curated tracked slice:
+# .cursor/hooks.json and .cursor/hooks/gate.py. Rules, MCP, and skills
+# remain machine-local and are not loaded from git.
 .cursor/
+!/.cursor/
+/.cursor/*
+!/.cursor/hooks.json
+!/.cursor/hooks/
+/.cursor/hooks/*
+!/.cursor/hooks/gate.py
 .sonarlint/
 .trae/
 .windsurf/

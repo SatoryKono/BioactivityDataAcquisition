@@ -1019,6 +1019,9 @@ repo_backed_unit_test_exceptions:
     and run in the repo-backed-unit lane, not unit-fast.
   review_date: "2026-09-30"
   entries:
+    - path: tests/unit/repo_backed/cursor/test_hook_gate.py
+      target_lane: repo-backed-unit
+      protected_surface: .cursor/hooks.json + .cursor/hooks/gate.py project Cursor hook contract
     - path: tests/unit/repo_backed/scripts/ai/agent_tools/test_install_contracts.py
       target_lane: repo-backed-unit
       protected_surface: pyproject.toml + uv.lock + scripts/engineering/dev/setup_env_{wsl.sh,windows.ps1} optional AgentDebugX/ProofAgent installer contracts
