@@ -108,7 +108,8 @@ export function selectRoute(data, root, name, commonDirectory = gitCommonDirecto
         selected = validateEntry(entry);
         selected.args = selected.args.map(value => value === '{workspace_root}' ? root : value);
     }
-    if (managed && !selected) throw new Error('Managed workspace has no route for the requested server');
+    // Old route policies predate optional ast-grep routing; explicit entries still fail closed.
+    if (managed && !selected && name !== 'ast-grep') throw new Error('Managed workspace has no route for the requested server');
     return selected;
 }
 

@@ -67,8 +67,9 @@ This policy applies to:
 1. Treat `.devin/config.json` as portable tracked Devin project settings and
    `.devin/mcp_config.json` as the portable tracked Devin MCP projection. The
    setup generator preserves only project keys supported by current Devin CLI
-   and writes the canonical 21-server shared HTTP payload to the dedicated MCP
-   file.
+   and writes the sanctioned mixed-transport inventory to the dedicated MCP
+   file. The local overlay preserves scoped stdio routes while applying
+   daily-mode settings to optional servers.
 1. Devin starts repository work in its cloned workspace and root environment
    commands from the repository root. Relative MCP filesystem, cache, memory,
    and wrapper arguments therefore use that repository root as their execution

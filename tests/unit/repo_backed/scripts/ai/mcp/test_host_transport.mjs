@@ -25,6 +25,7 @@ function json(file,data){fs.mkdirSync(path.dirname(file),{recursive:true});fs.wr
 function policy(root,code=0){return {workspaces:[{roots:[root],entries:{
     context7:{command:process.execPath,args:['-e',`process.stdout.write('PROTOCOL_SENTINEL');process.exitCode=${code}`]},
     'brave-search':{command:process.execPath,args:['-e',`process.stdout.write('PROTOCOL_SENTINEL');process.exitCode=${code}`]},
+    'ast-grep':{command:process.execPath,args:['-e',`process.stdout.write('PROTOCOL_SENTINEL');process.exitCode=${code}`]},
 }}]};}
 function invoke(root,marker,extra=[],updates={}){
     const env={...process.env,PC_AGENT_MCP_ROUTES_FILE:marker,BIOETL_MCP_VALIDATE_ONLY:'0',...updates};
@@ -130,7 +131,7 @@ function wrapperRun(f,marker,shell,extra=[],updates={},input=undefined){
     return spawnSync(shell==='ps1'?ps:bash,shell==='ps1'?['-NoLogo','-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',f.driver,f.file,...extra]:[f.driver,f.file,...extra],
         {env,input,encoding:'utf8',windowsHide:true,timeout:20000,cwd:fixtures});
 }
-for(const shell of ['ps1','sh'])for(const stem of ['context7','brave_search']){
+for(const shell of ['ps1','sh'])for(const stem of ['context7','brave_search','ast_grep']){
     test(`${stem}.${shell}: route runs before legacy side effects and preserves stdout`,{skip:!shellAvailable[shell]},t=>{
         const f=wrapperFixture(t,stem,shell),marker=path.join(f.root,'policy.json');json(marker,policy(f.root));
         fs.writeFileSync(path.join(f.support,`load_repo_env.${shell}`),shell==='ps1'?'throw "LEGACY_SIDE_EFFECT"\n':'exit 93\n');
@@ -158,11 +159,28 @@ for(const shell of ['ps1','sh'])for(const stem of ['context7','brave_search']){
     });
     test(`${stem}.${shell}: protocol input is forwarded to the managed adapter`,{skip:!shellAvailable[shell]},t=>{
         const f=wrapperFixture(t,stem,shell),marker=path.join(f.root,'policy.json');
-        const data=policy(f.root);const name=stem==='context7'?'context7':'brave-search';
+        const data=policy(f.root);const name=stem.replace('_','-');
         data.workspaces[0].entries[name].args=['-e',"process.stdin.on('data',b=>process.stdout.write(b))"];
         json(marker,data);const payload='{"jsonrpc":"2.0","id":1,"method":"initialize"}\n';
         const result=wrapperRun(f,marker,shell,[],{PATHEXT:undefined,OS:undefined},payload);
         assert.equal(result.status,0,result.stderr);assert.equal(result.stdout,payload);
+    });
+}
+
+for(const shell of ['ps1','sh']){
+    test(`ast_grep.${shell}: old policy without an AST route preserves local fallback`,{skip:!shellAvailable[shell]},t=>{
+        const f=wrapperFixture(t,'ast_grep',shell),marker=path.join(f.root,'policy.json');
+        const data=policy(f.root);
+        delete data.workspaces[0].entries['ast-grep'];
+        json(marker,data);
+        const fallback=wrapperRun(f,marker,shell);
+        assert.equal(fallback.status,0,fallback.stderr);
+        assert.equal(fallback.stdout,'LEGACY_SENTINEL');
+        data.workspaces[0].entries['ast-grep']={disabled:true};
+        json(marker,data);
+        const disabled=wrapperRun(f,marker,shell);
+        assert.equal(disabled.status,1);
+        assert.equal(disabled.stdout,'');
     });
 }
 

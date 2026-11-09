@@ -15,6 +15,7 @@ from __future__ import annotations
 import pytest
 
 import json
+import runpy
 import os
 import re
 from pathlib import Path
@@ -358,6 +359,17 @@ def test_devin_launch_contract_uses_project_discovery() -> None:
     assert "--config .devin/config.json" not in makefile
     assert '"mcp_config.local.json"' in materializer
     assert '"config.local.json"' not in materializer
+
+    materializer_path = root / "scripts/ops/runtime/mcp/apply-shared-to-devin.py"
+    project = json.loads((root / ".devin/mcp_config.json").read_text(encoding="utf-8"))
+    build_local_servers = runpy.run_path(str(materializer_path))["build_local_servers"]
+    overlay = build_local_servers()
+    for name in ("github", "context7", "ast-grep", "brave-search"):
+        assert overlay[name]["command"] == project["mcpServers"][name]["command"]
+        assert overlay[name]["args"] == project["mcpServers"][name]["args"]
+        assert "url" not in overlay[name]
+    assert overlay["brave-search"]["disabled"] is True
+    assert "disabled" not in build_local_servers(include_optional=True)["brave-search"]
 
 
 def test_setup_router_is_the_supported_public_entrypoint() -> None:
