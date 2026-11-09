@@ -412,7 +412,7 @@ Runtime mirrors and src/bioetl were not modified; full repository tests were not
 
 ## 2026-11-09 — runtime access and audit correctness
 
-Private report/checkpoint readers now follow the non-root host writer identity under the managed POSIX runtime. Dashboard empty-state, date and table readability fixes are covered by the [UX verification note](../../reports/dashboard-ux-checks/2026-11-09.md). Missing saved counts remain UNKNOWN; see the verification limits before claiming full live acceptance.
+Private report/checkpoint readers now follow the non-root host writer identity under the managed POSIX runtime. Dashboard empty-state, date and table readability fixes are covered by the UX verification note under `docs/reports/dashboard-ux-checks/2026-11-09.md`. Missing saved counts remain UNKNOWN; see the verification limits before claiming full live acceptance.
 
 ## 2026-11-09 — exact-run accounting and final audit
 

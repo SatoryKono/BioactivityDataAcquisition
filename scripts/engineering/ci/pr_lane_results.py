@@ -550,6 +550,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/integration/test_dashboard_ux_report_freshness.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
+    "docs/reports/dashboard-ux-checks/2026-11-09.md": (
+        "tests/integration/test_dashboard_ux_report_freshness.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "docs/reports/audit/N1_SHADOW_STATUS.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
     "src/bioetl/infrastructure/adapters/decorators/README.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
@@ -910,6 +914,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         BRACES_BACKPORT_TEST,
         DASHBOARD_SCENES_CONTRACT_TEST,
         RESIDUAL_OSV_TEST,
+    ),
+    "docker-compose.yml": (
+        DOCKER_RUNTIME_CONTRACT_TEST,
+        "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
     ),
     "docker-compose.monitoring.yml": (
         DOCKER_RUNTIME_CONTRACT_TEST,

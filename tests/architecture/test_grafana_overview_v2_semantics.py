@@ -51,8 +51,17 @@ def test_overview_v2_semantics_contract():
         assert targets and targets[0].get("panelId") == 9002
         assert (targets[0].get("datasource") or {}).get("uid") == "-- Dashboard --"
     stages = by_id[9460].get("targets", [])
-    assert stages and stages[0].get("panelId") == 9002
-    assert any("pipeline-run-report-artifact" in (t.get("url") or "") for t in stages)
+    assert stages
+    # Stages use the projected selected-run-status payload (stage_diagnostics),
+    # not a Dashboard-DS join onto donor 9002 / raw report artifact.
+    assert stages[0].get("panelId") is None
+    assert all(
+        "selected-run-status" in (target.get("url") or "") for target in stages
+    )
+    assert not any(
+        "pipeline-run-report-artifact" in (target.get("url") or "")
+        for target in stages
+    )
 
     nav_links = list(d.get("links", []))
     links_blob = ""

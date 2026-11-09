@@ -816,10 +816,17 @@ oversized_test_module_inventory:
       owner: application-pipelines
       target_split: PubMed transformer classification and normalization scenarios
     - path: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
-      lines: 1240
+      lines: 1218
       owner: observability-dashboards
       target_split: Grafana live audit tooling functional families
   completed_splits:
+    - issue_ref: "#12929"
+      source: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
+      source_lines_after_split: 1218
+      extracted_surface: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_semantics.py
+      extracted_surface_lines: 82
+      owner: observability-dashboards
+      note: Split HTTP alias/query-error semantics out of live-audit tooling to stay under tracked lines.
     - issue_ref: "#4505"
       source: tests/integration/test_grafana_config.py
       source_lines_after_split: 1698
