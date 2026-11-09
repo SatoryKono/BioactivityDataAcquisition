@@ -125,7 +125,7 @@ jobs:
               'fast-other': ['tests/unit/', '--ignore=tests/unit/domain/', '--ignore=tests/unit/application/', '--ignore=tests/unit/infrastructure/', '--ignore=tests/unit/scripts/', '--ignore=tests/unit/repo_backed/'],
               'repo-tooling': ['tests/unit/repo_backed/scripts/', 'tests/unit/repo_backed/tools/', '--ignore=tests/unit/repo_backed/scripts/ops/'],
               'repo-ops': ['tests/unit/repo_backed/scripts/ops/'],
-              'repo-product': ['tests/unit/repo_backed/application/', 'tests/unit/repo_backed/composition/', 'tests/unit/repo_backed/contracts/', 'tests/unit/repo_backed/coverage_gap/', 'tests/unit/repo_backed/domain/', 'tests/unit/repo_backed/infrastructure/', 'tests/unit/repo_backed/interfaces/'],
+              'repo-product': ['tests/unit/repo_backed/application/', 'tests/unit/repo_backed/composition/', 'tests/unit/repo_backed/contracts/', 'tests/unit/repo_backed/coverage_gap/', 'tests/unit/repo_backed/cursor/', 'tests/unit/repo_backed/domain/', 'tests/unit/repo_backed/infrastructure/', 'tests/unit/repo_backed/interfaces/'],
               'tooling-passport': ['tests/unit/scripts/docs/passports/'],
               'tooling-debt': ['tests/unit/scripts/qa/test_report_debt_governance_gates.py'],
               'tooling-other': ['tests/unit/scripts/', '--ignore=tests/unit/scripts/docs/passports/', '--ignore=tests/unit/scripts/qa/test_report_debt_governance_gates.py'],
