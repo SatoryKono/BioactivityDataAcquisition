@@ -68,6 +68,9 @@ def _shell(command: str, *, branch: str = "feature") -> dict[str, object]:
         ("cat .env > out.txt", "allow"),
         ("echo $(cat .env)", "allow"),
         ("rm $(echo _tmp_notes.py)", "allow"),
+        ("cd tests && touch test_probe.py", "allow"),
+        ("git push --all origin", "allow"),
+        ("git --config-env=user.name=LOGNAME commit -m x", "allow"),
         ("git config user.name x", "deny"),
         ("git -C repo config --list", "deny"),
         ("git reset --hard", "deny"),
@@ -96,6 +99,12 @@ def _shell(command: str, *, branch: str = "feature") -> dict[str, object]:
         ("git push origin :main", "deny"),
         ("git push -d origin main", "deny"),
         ("git push --mirror origin", "deny"),
+        ("git push --force --all origin", "deny"),
+        ("git push -f --all", "deny"),
+        ("git --config-env=core.hooksPath=HOOK_DIR commit -m x", "deny"),
+        ("git --config-env commit.gpgSign=SIGN commit -m x", "deny"),
+        ("printf %s foo#bar > .env", "deny"),
+        ("echo x > .env # note", "deny"),
         ("git push origin --delete main", "deny"),
         ("/bin/rm .env", "deny"),
         ("/usr/bin/tee .env", "deny"),
@@ -138,6 +147,19 @@ def _shell(command: str, *, branch: str = "feature") -> dict[str, object]:
 )
 def test_shell_permission(command: str, permission: str) -> None:
     assert _shell(command)["permission"] == permission
+
+
+def test_cd_to_parent_then_root_scratch_is_denied() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "beforeShellExecution",
+            "command": "cd .. && touch test_probe.py",
+            "cwd": str(_ROOT / "tests"),
+            "workspace_roots": [str(_ROOT)],
+        },
+        branch_lookup=lambda _cwd: "feature",
+    )
+    assert decision["permission"] == "deny"
 
 
 def test_force_push_of_current_main_is_denied() -> None:

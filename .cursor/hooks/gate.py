@@ -218,11 +218,13 @@ def _decide_shell(
         return dict(_DENY_INPUT)
     roots = _workspace_roots(event)
     cwd = event.get("cwd")
-    cwd_text = cwd if isinstance(cwd, str) else ""
-    decisions = [
-        _classify_segment(segment, roots, cwd_text, branch_lookup)
-        for segment in _split_commands(command)
-    ]
+    effective_cwd = cwd if isinstance(cwd, str) else ""
+    decisions: list[tuple[str, str, str]] = []
+    for segment in _split_commands(command):
+        decisions.append(
+            _classify_segment(segment, roots, effective_cwd, branch_lookup)
+        )
+        effective_cwd = _cwd_after_segment(segment, effective_cwd)
     if not decisions:
         return {"permission": "allow"}
     chosen = max(decisions, key=lambda item: _PERMISSION_RANK[item[0]])
@@ -392,10 +394,12 @@ def _classify_push(
     branch_lookup: Callable[[str], str | None],
 ) -> tuple[str, str, str]:
     """Deny protected force pushes; ask for other force pushes."""
-    if _has_flag(args, "--mirror"):
+    if _has_flag(args, "--mirror") or (
+        _has_flag(args, "--all") and _push_is_force(args)
+    ):
         return _deny_tuple(
-            "git push --mirror запрещён: может принудительно обновить main/master.",
-            "Hook gate denied git push --mirror.",
+            "Массовый принудительный push запрещён: может обновить main/master.",
+            "Hook gate denied git push --mirror or force --all.",
         )
     if not _push_is_force(args):
         return ("allow", "", "")
@@ -699,6 +703,58 @@ def _workspace_roots(event: Mapping[str, Any]) -> list[str]:
     return [root for root in roots if isinstance(root, str)]
 
 
+def _cwd_after_segment(segment: str, cwd: str) -> str:
+    """Return cwd after a cd in this segment, otherwise the same cwd."""
+    tokens = _tokenize(_strip_unquoted_comment(segment))
+    target = _cd_target(tokens)
+    if not target:
+        return cwd
+    return _join_cwd(cwd, target)
+
+
+def _cd_target(tokens: list[str]) -> str | None:
+    """Return the cd path, or None when the segment is not cd."""
+    if not tokens or _command_basename(tokens[0]) != "cd":
+        return None
+    index = 0
+    args = tokens[1:]
+    while index < len(args):
+        arg = args[index]
+        if arg == "--":
+            if index + 1 < len(args):
+                return args[index + 1]
+            return ""
+        if arg.startswith("-"):
+            index += 1
+            continue
+        return arg
+    return ""
+
+
+def _join_cwd(cwd: str, dest: str) -> str:
+    """Join dest onto cwd and collapse . and .. components."""
+    cleaned = dest.replace("\\", "/")
+    if cleaned.startswith("/") or re.match(r"^[A-Za-z]:/", cleaned):
+        joined = cleaned
+    else:
+        base = cwd.replace("\\", "/").rstrip("/")
+        joined = f"{base}/{cleaned}" if base else cleaned
+    absolute = joined.startswith("/")
+    parts: list[str] = []
+    for part in joined.split("/"):
+        if part in {"", "."}:
+            continue
+        if part == "..":
+            if parts:
+                parts.pop()
+            continue
+        parts.append(part)
+    suffix = "/".join(parts)
+    if absolute:
+        return f"/{suffix}" if suffix else "/"
+    return suffix
+
+
 def _split_commands(command: str) -> list[str]:
     """Split a shell line on unquoted ;, |, &&, and || separators."""
     parts: list[str] = []
@@ -735,23 +791,32 @@ def _split_commands(command: str) -> list[str]:
 
 
 def _strip_unquoted_comment(segment: str) -> str:
-    """Drop an unquoted # comment from a shell segment."""
+    """Drop an unquoted # comment that begins a shell word."""
     buf: list[str] = []
     quote: str | None = None
+    previous = ""
     for char in segment:
         if quote is not None:
             buf.append(char)
             if char == quote:
                 quote = None
+            previous = char
             continue
         if char in {'"', "'"}:
             quote = char
             buf.append(char)
+            previous = char
             continue
-        if char == "#":
+        if char == "#" and _starts_shell_word(previous):
             break
         buf.append(char)
+        previous = char
     return "".join(buf)
+
+
+def _starts_shell_word(previous: str) -> bool:
+    """True when the next character begins a new shell word."""
+    return not previous or previous.isspace() or previous in ";&|<>()"
 
 
 def _tokenize(segment: str) -> list[str]:
@@ -805,10 +870,19 @@ def _git_command(tokens: list[str]) -> tuple[str, list[str]] | None:
     cursor = index + 1
     while cursor < len(tokens):
         token = tokens[cursor]
-        if token in {"-C", "-c", "--git-dir", "--namespace", "--work-tree"}:
+        if token in {
+            "-C",
+            "-c",
+            "--config-env",
+            "--git-dir",
+            "--namespace",
+            "--work-tree",
+        }:
             cursor += 2
             continue
-        if token.startswith(("--git-dir=", "--work-tree=", "--namespace=")):
+        if token.startswith(
+            ("--config-env=", "--git-dir=", "--work-tree=", "--namespace=")
+        ):
             cursor += 1
             continue
         if token.startswith("-"):
@@ -835,10 +909,12 @@ def _git_working_directory(tokens: list[str], default_cwd: str) -> str:
             last_c = token[2:]
             cursor += 1
             continue
-        if token in {"-c", "--git-dir", "--namespace", "--work-tree"}:
+        if token in {"-c", "--config-env", "--git-dir", "--namespace", "--work-tree"}:
             cursor += 2
             continue
-        if token.startswith(("--git-dir=", "--work-tree=", "--namespace=")):
+        if token.startswith(
+            ("--config-env=", "--git-dir=", "--work-tree=", "--namespace=")
+        ):
             cursor += 1
             continue
         if token.startswith("-"):
@@ -974,6 +1050,18 @@ def _git_global_config(tokens: list[str]) -> list[tuple[str, str]]:
                 configs.append(assignment)
             cursor += 2
             continue
+        if token == "--config-env" and cursor + 1 < len(tokens):
+            assignment = _config_env_assignment(tokens[cursor + 1])
+            if assignment is not None:
+                configs.append(assignment)
+            cursor += 2
+            continue
+        if token.startswith("--config-env="):
+            assignment = _config_env_assignment(token[len("--config-env=") :])
+            if assignment is not None:
+                configs.append(assignment)
+            cursor += 1
+            continue
         if token in {"-C", "--git-dir", "--namespace", "--work-tree"}:
             cursor += 2
             continue
@@ -996,6 +1084,15 @@ def _config_assignment(token: str) -> tuple[str, str] | None:
     if not key:
         return None
     return key, value.strip().lower()
+
+
+def _config_env_assignment(token: str) -> tuple[str, str] | None:
+    """Parse a --config-env name=envvar pair. The env value is not visible."""
+    key = token.split("=", 1)[0].strip().lower()
+    if not key:
+        return None
+    # Empty value is fail-closed: commit.gpgSign="" is treated as off.
+    return key, ""
 
 
 def _has_prefix(args: list[str], prefix: str) -> bool:
