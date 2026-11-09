@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-09T17:04:51.115624+00:00",
+  "generated_at": "2026-11-09T17:08:20.254195+00:00",
   "summary": {
     "total_scripts": 719,
     "status_counts": {
@@ -26151,7 +26151,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 93,
+      "reference_count": 94,
       "references": [
         {
           "path": "Makefile",
