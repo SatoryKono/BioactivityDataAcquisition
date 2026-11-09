@@ -53,7 +53,6 @@ _SIGNAL_WITNESSES = {
     22011: "bioetl_stage_lag_seconds or bioetl_stage_backlog_records",
 }
 _RANKED_EVIDENCE_PANEL = 2010
-_RULES_ENDPOINT = "/api/v1/rules"
 _DQ_CONDITIONS_PANEL = 4
 _DQ_EVENT_INPUTS = {
     "bioetl_runtime_alert_condition_dq_soft_threshold_15m": 'bioetl_dq_soft_threshold_exceeded_total{pipeline=~"$pipeline"}[15m]',
