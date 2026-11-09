@@ -10634,7 +10634,7 @@
     "catalog_ref": "ee6555aeac278a3d69094bab917055968c742b47",
     "source_ref": "57a4a8d6cc1f88e4f7283cea53426d1b81e50426",
     "baseline_source_ref": "daade1ac93d7ab80103c90e271b9cad3842a5e1b",
-    "review_sha256": "6f3f596c0389f0b69a996125d292672e7e816cd90ed1ee9ee62674a197745de7",
+    "review_sha256": "b52e2dc480f767232aba80ae1ef5c242936983ea4e893aa9320ef5a079b476dd",
     "production_file_count": 2611,
     "definition_count": 207,
     "creation_site_count": 548,
@@ -10701,13 +10701,6 @@
       "to_commit": "f5e6350ed2df24cd938d53fb140896e03e0a628d",
       "reviewed_resource_free_sources": {
         "src/bioetl/infrastructure/adapters/pubmed/_extended_record.py": "fbefbdc7b05caadd14edbaccfc0a4907171c064ab87e90775449c1d4a105bd5e"
-      }
-    },
-    {
-      "from_commit": "788696fc344e134f666a7acd81718bef779fc2ef",
-      "to_commit": "57a4a8d6cc1f88e4f7283cea53426d1b81e50426",
-      "reviewed_resource_free_sources": {
-        "src/bioetl/composition/runtime_builders/_exact_replay_snapshot_evidence.py": "357769f496fbe140059bae30374f964152e3a4e2d3b4c8e9ce84d229eaa97ae4"
       }
     }
   ],

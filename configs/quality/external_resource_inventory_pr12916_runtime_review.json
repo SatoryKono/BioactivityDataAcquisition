@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "catalog_ref": "ee6555aeac278a3d69094bab917055968c742b47",
-  "source_ref": "788696fc344e134f666a7acd81718bef779fc2ef",
+  "source_ref": "57a4a8d6cc1f88e4f7283cea53426d1b81e50426",
   "source_reviews": {
-    "src/bioetl/composition/runtime_builders/_exact_replay_snapshot_evidence.py": "Reuses the domain text normalizer with identical coercion behavior. No resource acquisition or lifecycle change.",
+    "src/bioetl/composition/runtime_builders/_exact_replay_snapshot_evidence.py": "Reuse the same domain normalizer through an explicit typed export. No resource operation or lifecycle change.",
     "src/bioetl/composition/runtime_builders/_runner_control_plane_policy.py": "Exports the same three policy implementations directly. No acquisition or lifecycle change.",
     "src/bioetl/composition/runtime_builders/input_snapshot_resolution.py": "Reuses the domain text normalizer. Snapshot lookup and resource ownership remain unchanged."
   }
