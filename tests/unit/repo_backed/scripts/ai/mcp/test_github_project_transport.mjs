@@ -18,8 +18,22 @@ const common=fs.realpathSync(path.resolve(repo,commonResult.stdout.trim()));
 const keys=['GITHUB_PERSONAL_ACCESS_TOKEN','GITHUB_HOST','HTTP_PROXY','HTTPS_PROXY','NO_PROXY','SSL_CERT_FILE','SSL_CERT_DIR','OTHER_SECRET'];
 const envKeys=[...keys,...keys.map(x=>x.toLowerCase())];
 const oldEnv=Object.fromEntries(envKeys.map(k=>[k,process.env[k]]));
-test.beforeEach(()=>{for(const key of envKeys)delete process.env[key];process.env.GITHUB_PERSONAL_ACCESS_TOKEN='ghp_OFFLINE_PROTOCOL_FIXTURE_123456';process.env.OTHER_SECRET='OFFLINE_UNRELATED';});
-test.afterEach(()=>{for(const key of envKeys){if(oldEnv[key]===undefined)delete process.env[key];else process.env[key]=oldEnv[key];}});
+test.beforeEach(()=>{
+    for(const key of envKeys){
+        delete process.env[key];
+    }
+    process.env.GITHUB_PERSONAL_ACCESS_TOKEN='ghp_OFFLINE_PROTOCOL_FIXTURE_123456';
+    process.env.OTHER_SECRET='OFFLINE_UNRELATED';
+});
+test.afterEach(()=>{
+    for(const key of envKeys){
+        if(oldEnv[key]===undefined){
+            delete process.env[key];
+        }else{
+            process.env[key]=oldEnv[key];
+        }
+    }
+});
 
 function fixture(t,code=0){
     const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'bioetl-github-transport-'));

@@ -131,6 +131,16 @@ EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
 CHECK_DOC_LINKS_GUARDRAILS_TEST = (
     "tests/architecture/test_check_doc_links_guardrails.py"
 )
+MCP_AGENT_AUDIT_REGRESSIONS_TEST = (
+    "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py"
+)
+MCP_REPO_ENV_LOADERS_TEST = (
+    "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py"
+)
+MCP_SETUP_COPILOT_CODEX_TEST = "tests/unit/scripts/test_setup_copilot_codex_mcp.py"
+MCP_GITHUB_PROJECT_TRANSPORT_TEST = (
+    "tests/unit/repo_backed/scripts/ai/mcp/test_github_project_transport.py"
+)
 ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
     "tests/architecture/test_root_hygiene_review_registry.py"
 )
@@ -191,9 +201,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "src/memory/DAILY_WORKFLOW.md",
         ),
         (
-            "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-            "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py",
-            "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+            MCP_AGENT_AUDIT_REGRESSIONS_TEST,
+            MCP_REPO_ENV_LOADERS_TEST,
+            MCP_SETUP_COPILOT_CODEX_TEST,
         ),
     ),
     **dict.fromkeys(
@@ -205,10 +215,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/unit/repo_backed/scripts/ai/mcp/test_github_project_transport.py",
         ),
         (
-            "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-            "tests/unit/repo_backed/scripts/ai/mcp/test_github_project_transport.py",
-            "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py",
-            "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+            MCP_AGENT_AUDIT_REGRESSIONS_TEST,
+            MCP_GITHUB_PROJECT_TRANSPORT_TEST,
+            MCP_REPO_ENV_LOADERS_TEST,
+            MCP_SETUP_COPILOT_CODEX_TEST,
         ),
     ),
     **dict.fromkeys(
@@ -232,10 +242,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ("tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",),
     ),
     "scripts/ai/mcp/mcp_context7_wrapper.sh": (
-        "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
+        MCP_AGENT_AUDIT_REGRESSIONS_TEST,
         "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",
-        "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py",
-        "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+        MCP_REPO_ENV_LOADERS_TEST,
+        MCP_SETUP_COPILOT_CODEX_TEST,
     ),
     "scripts/ops/docker-setup.ps1": (
         "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
