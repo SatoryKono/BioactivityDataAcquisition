@@ -246,10 +246,7 @@ def test_trust_layout_preserves_scalar_area_and_detail_rows() -> None:
     readiness = next(panel for panel in panels if panel.get("id") == 9422)
     assert readiness["gridPos"] == {"x": 15, "y": 3, "w": 9, "h": 3}
     assert readiness["links"] == []
-    assert (
-        readiness["fieldConfig"]["defaults"]["noValue"]
-        == "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
-    )
+    assert readiness["fieldConfig"]["defaults"]["noValue"] == "—"
     assert trust["gridPos"]["y"] == retention["gridPos"]["y"] == 6
     assert trust["gridPos"]["h"] == retention["gridPos"]["h"] == 8
     assert trust["targets"][0]["url"].count("error_as_row=1") == 1

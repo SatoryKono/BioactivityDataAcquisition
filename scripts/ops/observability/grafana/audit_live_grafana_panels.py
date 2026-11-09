@@ -1379,16 +1379,61 @@ def _classify_http_table_payload(
 ) -> tuple[str, str]:
     if not isinstance(payload, dict):
         return ("invalid_shape", "HTTP table payload is not a JSON object")
-    if title == PROCESSED_RECORDS_PANEL_TITLE or "contract" in payload:
+    contract = payload.get("contract")
+    control_plane_table = contract in (
+        "control_plane_identity_evidence_v1",
+        "control_plane_validation_evidence_v1",
+    )
+    if title == PROCESSED_RECORDS_PANEL_TITLE or (
+        "contract" in payload and not control_plane_table
+    ):
         return _classify_processed_records_payload(payload)
-    if title == "ID" or "resolved_via" in payload:
+    if not control_plane_table and (title == "ID" or "resolved_via" in payload):
         return _classify_identity_payload(payload)
     rows = payload.get("rows")
     if not isinstance(rows, list):
         return ("invalid_shape", "HTTP table payload missing rows list")
+    if control_plane_table and any(not isinstance(row, dict) for row in rows):
+        return ("invalid_shape", "Control Plane evidence must contain object rows")
+    if control_plane_table and payload.get("resolved_via") == "selection_required":
+        return ("expected_empty", "SELECT RUN — Control Plane evidence needs a run")
     if not rows:
         return ("empty_result", "HTTP table payload returned no rows")
     return ("nonempty_table", "HTTP table payload returned rows")
+
+
+def _classify_replay_table(payload: object, *, panel_id: int) -> tuple[str, str]:
+    if not isinstance(payload, dict):
+        return ("invalid_shape", "Replay evidence must be a JSON object")
+    readiness = payload.get("replay_readiness")
+    if not isinstance(readiness, list) or len(readiness) != 1:
+        return ("invalid_shape", "Replay readiness must contain one verdict row")
+    row = readiness[0]
+    verdict = row.get("verdict") if isinstance(row, dict) else None
+    if verdict in ("SELECT RUN", "НЕТ ЗАПУСКОВ"):
+        return ("no_data", f"{verdict}: no selected replay evidence")
+    if verdict == "QUERY ERROR":
+        return ("endpoint_execution_error", "Replay readiness reports a query error")
+    if verdict in ("INSUFFICIENT", "UNKNOWN", "INCOMPLETE"):
+        return ("no_data", f"{verdict}: replay evidence is incomplete")
+    if verdict not in ("READY", "BLOCKED", "UNSUPPORTED"):
+        return ("invalid_shape", "Replay readiness row lacks a recognized verdict")
+    if panel_id == 9423:
+        checks = payload.get("replay_checks")
+        if not isinstance(checks, list) or not checks:
+            return ("no_data", "Replay checks contain no evidence rows")
+        if not all(
+            isinstance(check, dict)
+            and isinstance(check.get("code"), str)
+            and check.get("result") in ("pass", "fail", "unknown", "n/a")
+            for check in checks
+        ):
+            return ("invalid_shape", "Replay checks have malformed evidence rows")
+        if all(check["result"] in ("unknown", "n/a") for check in checks):
+            return ("no_data", "Replay checks contain no evaluated results")
+    if verdict != "READY":
+        return ("replay_not_ready", f"Replay verdict: {verdict}")
+    return ("nonempty_table", "Replay evidence frame returned rows")
 
 
 def _classify_http_endpoint_payload(payload: object) -> tuple[str, str]:
@@ -1689,6 +1734,7 @@ def _audit_prometheus_panel(
 _HTTP_TABLE_ERROR_CLASSIFICATIONS = frozenset(
     {
         "empty_result",
+        "endpoint_execution_error",
         "invalid_shape",
         "no_data",
         "partial_data",
@@ -1718,7 +1764,17 @@ def _classify_http_panel_payload(
         )
         return status, classification, detail
     if spec.semantic_kind == "http_table":
-        classification, detail = _classify_http_table_payload(payload, title=spec.title)
+        if spec.dashboard_uid == "bioetl-control-plane-v1" and spec.panel_id in (
+            9422,
+            9423,
+        ):
+            classification, detail = _classify_replay_table(
+                payload, panel_id=spec.panel_id
+            )
+        else:
+            classification, detail = _classify_http_table_payload(
+                payload, title=spec.title
+            )
         status = (
             "error" if classification in _HTTP_TABLE_ERROR_CLASSIFICATIONS else "ok"
         )
