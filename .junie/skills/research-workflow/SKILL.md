@@ -3,18 +3,12 @@ name: research-workflow
 description: "Use for structured research, deep investigation, traceable evidence, and multi-stream synthesis with explicit decisions and constrained specifications. Single router: select work via --phase initialize|evidence|synthesis|decisions|specs|complete; phase bodies live in references/phases/."
 context: fork
 agent: general-purpose
-disable-model-invocation: true
 ---
 
 # Research Workflow (router)
 
-## Invocation
-
-Invoke only when the user names this skill.
-
 ## Source Of Truth
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
-- Read boundary: use the task class in the root runtime contract, then only the slices the normative index names for SCOPE.
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`

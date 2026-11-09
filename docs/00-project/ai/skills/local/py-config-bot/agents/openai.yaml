@@ -1,4 +1,4 @@
 interface:
   display_name: "Py Config Bot"
   short_description: "Run BioETL config profile"
-  default_prompt: "Use $py-config-bot to check YAML, Pandera, and column_order in SCOPE. Read the role profile. Write those config and schema files. Done when contract and config name the same fields."
+  default_prompt: "Use $py-config-bot to validate or remediate BioETL configs, schemas, and generated config artifacts."

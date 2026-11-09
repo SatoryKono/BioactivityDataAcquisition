@@ -1,7 +1,5 @@
 interface:
   display_name: "Agent Debugging"
   short_description: "Run safe deterministic agent diagnostics"
-  default_prompt: "Use $agent-debugging on the given trajectory in SCOPE via scripts.ai.agent_tools. Read the adapter contract. Write only under reports/ai/agent-tools. Done when the adapter report and reproduction command are present."
+  default_prompt: "Use $agent-debugging to inspect a bounded AI-agent trajectory through the safe BioETL adapter and confirm findings with repository-native checks."
 
-policy:
-  allow_implicit_invocation: false

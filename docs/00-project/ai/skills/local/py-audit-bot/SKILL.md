@@ -7,9 +7,6 @@ ______________________________________________________________________
 ---
 name: "py-audit-bot"
 description: "Execute the BioETL py-audit-bot profile for baseline, final, targeted, review, debt, or reproducibility audits. Use when the user asks for an audit/review gate or independent compliance check."
-context: none
-agent: py-audit-bot
-disable-model-invocation: true
 ---
 
 # py-audit-bot
@@ -24,7 +21,6 @@ disable-model-invocation: true
 - Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 
-- Read boundary: use the task class in the root runtime contract, then only the slices the normative index names for SCOPE.
 - Primary profile: `../../agents/py-audit-bot.md`
 - Team orchestration: `../../agents/ORCHESTRATION.md`
 - Shared wrapper contract: [references/wrapper-contract.md](./references/wrapper-contract.md)
@@ -32,8 +28,6 @@ disable-model-invocation: true
 - Role memory: `../../../docs/00-project/ai/memory/memory-py-audit-bot.md`
 
 ## Trigger Scope
-
-Invoke only when the user names this skill.
 
 Use this wrapper for read-only baseline, final, or targeted audit work. It is
 not the implementation profile; return findings, risk calls, missing tests,

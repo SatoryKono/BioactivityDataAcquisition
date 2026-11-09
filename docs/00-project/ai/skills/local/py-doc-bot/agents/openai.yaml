@@ -1,4 +1,4 @@
 interface:
   display_name: "Py Doc Bot"
   short_description: "Run BioETL docs workflow profile"
-  default_prompt: "Use $py-doc-bot to sync the listed docs in SCOPE to code. Read the role profile. Write those docs. Done when each changed claim cites a file."
+  default_prompt: "Use $py-doc-bot to update BioETL documentation, validate claims, and sync runtime mirrors."

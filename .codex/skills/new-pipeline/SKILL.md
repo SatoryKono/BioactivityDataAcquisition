@@ -1,9 +1,6 @@
 ---
 name: "new-pipeline"
 description: "Scaffold a new BioETL provider/entity pipeline with configs, transformer registration, docs, tests, and baseline verification checks. Use only when the user asks to add a new provider/entity pipeline or extend the pipeline catalog."
-context: none
-agent: general-purpose
-disable-model-invocation: true
 ---
 
 # New Pipeline
@@ -19,15 +16,12 @@ Create a new ETL pipeline for a provider/entity pair in BioETL.
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
-- Read boundary: use the task class in the root runtime contract, then only the slices the normative index names for SCOPE.
 - Canonical runtime entrypoint: this `SKILL.md`
 - Shared wrapper contract: [../py-audit-bot/references/wrapper-contract.md](../py-audit-bot/references/wrapper-contract.md)
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
 ## Trigger Scope
-
-Invoke only when the user names this skill.
 
 Use this wrapper for a new provider/entity pipeline, not for normal pipeline bug
 fixes. Confirm provider, entity, source API, expected medallion layers, and
