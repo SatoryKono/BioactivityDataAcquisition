@@ -149,6 +149,22 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    **dict.fromkeys(
+        (
+            "grafana/prometheus-rules/bioetl_observability.yml",
+            "grafana/prometheus-rules/bioetl_workflow_scope.yml",
+            "grafana/prometheus-rules/tests/bioetl_observability.test.yml",
+            "grafana/prometheus-rules/tests/workflow_selector_isolation.test.yml",
+            "docs/05-operations/runbooks/pipeline-failure-dq.md",
+        ),
+        ("tests/integration/test_prometheus_rules_config.py",),
+    ),
+    "docs/03-guides/dashboards/panel-contract-inventory.json": (
+        "tests/architecture/test_observability_metric_governance.py",
+    ),
+    "configs/quality/promql_max_over_time_counter_policy.yaml": (
+        "tests/integration/test_grafana_dashboard_metric_semantics.py",
+    ),
     "configs/quality/test_matrix.yaml": (
         "tests/architecture/test_ci_test_strategy.py",
         "tests/architecture/test_pytest_sharded_inventory.py",
