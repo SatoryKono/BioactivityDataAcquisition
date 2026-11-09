@@ -1321,7 +1321,11 @@ def _classify_http_table_payload(
 ) -> tuple[str, str]:
     if not isinstance(payload, dict):
         return ("invalid_shape", "HTTP table payload is not a JSON object")
-    if title == "Inspect Processed Records" or title == PROCESSED_RECORDS_PANEL_TITLE or "contract" in payload:
+    if (
+        title == "Inspect Processed Records"
+        or title == PROCESSED_RECORDS_PANEL_TITLE
+        or "contract" in payload
+    ):
         return _classify_processed_records_payload(payload)
     if title == "ID" or "resolved_via" in payload:
         return _classify_identity_payload(payload)
