@@ -638,6 +638,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/integration/test_dux6_residual_contracts.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
+    "reports/observability/live-fixes-r6/LF1-23/report.md": (
+        "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "reports/observability/live-fixes-r6/LF1-14/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/observability/live-fixes-r6/LF1-03/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     **dict.fromkeys(
