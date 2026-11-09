@@ -1270,6 +1270,8 @@ tests:
     input_series:
       - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="shutdown"}'
         values: "0+0x10 1+0x10"
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="failed"}'
+        values: "0+0x20"
     promql_expr_test:
       - expr: bioetl_workflow_pipeline_verdict_status{pipeline="chembl",run_type="incremental"}
         eval_time: 16m
@@ -2998,3 +3000,23 @@ tests:
       exp_samples:
       - labels: '{}'
         value: 1
+
+  - name: alert history requires self scrape coverage across the window
+    interval: 15s
+    input_series:
+    - series: up{job="prometheus",instance="complete"}
+      values: 1+0x40
+    - series: up{job="prometheus",instance="late"}
+      values: _x37 1 1 1
+    - series: up{job="prometheus",instance="outage"}
+      values: 1+0x10 _x20 1+0x9
+    promql_expr_test:
+    - expr: (count_over_time((min_over_time(up{job="prometheus"}[45s]) == 1)[10m:30s]) / scalar(count_over_time(vector(1)[10m:30s]))) == bool 1
+      eval_time: 10m
+      exp_samples:
+      - labels: '{instance="complete",job="prometheus"}'
+        value: 1
+      - labels: '{instance="late",job="prometheus"}'
+        value: 0
+      - labels: '{instance="outage",job="prometheus"}'
+        value: 0

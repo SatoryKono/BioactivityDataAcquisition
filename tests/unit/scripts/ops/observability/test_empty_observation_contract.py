@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 import pytest
@@ -12,6 +14,8 @@ from scripts.ops.observability.grafana._empty_observation_contract import (
     _STANDALONE_DEPENDENCIES,
     _WORKFLOW_INPUT_DEPENDENCIES,
     _alert_history_available,
+    _DQ_EVENT_INPUTS,
+    _PROVIDER_EVENT_INPUTS,
     qualify_empty,
 )
 
@@ -19,7 +23,7 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize(
-    "gap", [None, "missing-rule", "bad-rule", "outage", "one-sample", "query-error"]
+    "gap", [None, "missing-rule", "bad-rule", "outage", "late-start", "query-error"]
 )
 def test_empty_alert_history_requires_rules_and_observed_service(gap, monkeypatch):
     monkeypatch.setattr(
@@ -44,9 +48,9 @@ def test_empty_alert_history_requires_rules_and_observed_service(gap, monkeypatc
     def vector(query):
         if gap == "query-error":
             return None
-        value = "1" if query.startswith("min_") or gap == "one-sample" else "20"
-        if query.startswith("min_") and gap == "outage":
-            value = "0"
+        assert 'min_over_time(up{job="prometheus"}[45s])' in query
+        assert "scalar(count_over_time(vector(1)[$__range:30s]))" in query
+        value = {"outage": "0.75", "late-start": "0.002"}.get(gap, "1")
         return [{"metric": {}, "value": [1, value]}]
 
     assert _alert_history_available(
@@ -715,3 +719,120 @@ def test_historical_boundary_requires_later_samples_for_each_series(counts, expe
     )
     rows.append({"metric": {"pipeline": "other"}, "value": [0, "1"]})
     assert not _event_samples_sufficient(rows, require_reset=True)
+
+
+@pytest.mark.parametrize("raw_count", [None, 1])
+def test_empty_failed_blocker_requires_no_raw_event_observations(raw_count):
+    metric = "bioetl_runtime_alert_condition_pipeline_runs_failed_15m"
+
+    def fetch(url, **_kwargs):
+        endpoint = urlsplit(url).path
+        if endpoint.endswith("rules"):
+            rule = {"name": metric, "type": "recording", "health": "ok"}
+            return {"status": "success", "data": {"groups": [{"rules": [rule]}]}}
+        if endpoint.endswith("metadata"):
+            return {
+                "status": "success",
+                "data": {"bioetl_pipeline_runs_total": [{"type": "counter"}]},
+            }
+        query = parse_qs(urlsplit(url).query)["query"][0]
+        rows = [{"metric": {}, "value": [1, "0"]}]
+        if query.startswith("up{job=~"):
+            rows = [
+                {"metric": {"job": job}, "value": [1, "1"]}
+                for job in ("bioetl", "pushgateway", "prometheus")
+            ]
+        elif query.startswith("(count_over_time"):
+            assert 'pipeline=~"$pipeline"' in query
+            assert "< 2 or increase(" in query
+            assert "^(?:workflow_)?(.*)$" in query
+            rows = (
+                []
+                if raw_count is None
+                else [{"metric": {}, "value": [1, str(raw_count)]}]
+            )
+        return {"status": "success", "data": {"resultType": "vector", "result": rows}}
+
+    accepted, _ = qualify_empty(
+        dashboard_uid="bioetl-incident-v1",
+        panel_id=242,
+        expr=f"{metric} > 0",
+        base_url="http://prometheus",
+        fetch=fetch,
+        substitute=lambda value: value,
+        timeout=1,
+    )
+    assert accepted is (raw_count is None)
+
+
+def _shipped_panel_expression(panel_id):
+    root = Path(__file__).resolve().parents[5]
+    dashboard = json.loads(
+        (root / "grafana/dashboards/bioetl-incident-v1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    panels = list(dashboard["panels"])
+    while panels:
+        panel = panels.pop()
+        if panel.get("id") == panel_id:
+            return panel["targets"][0]["expr"]
+        panels.extend(panel.get("panels", []))
+    pytest.fail(f"Panel {panel_id} was not found")
+
+
+@pytest.mark.parametrize("panel_id", [4, 259])
+def test_shipped_condition_selectors_check_every_operand(panel_id):
+    sources = _DQ_EVENT_INPUTS if panel_id == 4 else _PROVIDER_EVENT_INPUTS
+    witness = (
+        "bioetl_dq_current_status"
+        if panel_id == 4
+        else "bioetl_provider_current_status"
+    )
+    rules = set(sources) | {"bioetl_runtime_pipeline_run_type_universe", witness}
+    queried = set()
+
+    def fetch(url, **_kwargs):
+        params = parse_qs(urlsplit(url).query)
+        if urlsplit(url).path.endswith("rules"):
+            return {
+                "status": "success",
+                "data": {
+                    "groups": [
+                        {
+                            "rules": [
+                                {"name": name, "type": "recording", "health": "ok"}
+                                for name in rules
+                            ]
+                        }
+                    ]
+                },
+            }
+        if urlsplit(url).path.endswith("metadata"):
+            family = params["metric"][0]
+            return {"status": "success", "data": {family: [{"type": "counter"}]}}
+        query = params["query"][0]
+        rows = [{"metric": {}, "value": [1, "3" if panel_id == 259 else "0"]}]
+        if query.startswith("up{job=~"):
+            rows = [
+                {"metric": {"job": job}, "value": [1, "1"]}
+                for job in ("bioetl", "pushgateway", "prometheus")
+            ]
+        elif query.startswith("count_over_time("):
+            rows = []
+        elif query.split("{", 1)[0] in sources:
+            queried.add(query.split("{", 1)[0])
+            rows = []
+        return {"status": "success", "data": {"resultType": "vector", "result": rows}}
+
+    accepted, _ = qualify_empty(
+        dashboard_uid="bioetl-incident-v1",
+        panel_id=panel_id,
+        expr=_shipped_panel_expression(panel_id),
+        base_url="http://prometheus",
+        fetch=fetch,
+        substitute=lambda value: value,
+        timeout=1,
+    )
+    assert accepted
+    assert queried == set(sources)

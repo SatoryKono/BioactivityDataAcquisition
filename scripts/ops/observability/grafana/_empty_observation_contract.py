@@ -87,6 +87,10 @@ _WORKFLOW_INPUT_DEPENDENCIES = {
     "bioetl_workflow_scope_qualified_status",
 }
 _METRIC = re.compile(r"\bbioetl_\w+", re.ASCII)
+_CONDITION_SUM_OPERAND = re.compile(
+    r'\bsum\(\s*(?:(bioetl_\w+)|\{\s*__name__\s*=~\s*"(bioetl_\w+(?:\|bioetl_\w+)*)")',
+    re.ASCII,
+)
 _EVENT_RANGE = re.compile(
     r"\b(increase|rate|changes)\(\s*"
     r"(bioetl_\w+)((?:\{[^}]*\})?\s*\[[^\]]+\])\s*\)",
@@ -227,6 +231,12 @@ def _qualify_signal_empty(
         'bioetl_errors_total{pipeline=~"$pipeline"}[30m]', vector, request
     ):
         return False
+    if (
+        panel_id == 242
+        and "bioetl_runtime_alert_condition_pipeline_runs_failed_15m" in expr
+    ):
+        if not _unobserved_failed_blocker_input(vector, request):
+            return False
     witnesses = vector(_SIGNAL_WITNESSES[panel_id]) or []
     return _signal_witness_confirms_empty(panel_id, witnesses)
 
@@ -446,21 +456,24 @@ def _alert_history_available(
         _response_data(request(_RULES_ENDPOINT, {})), "alerting", expected
     ):
         return False
-    healthy = vector('min_over_time(up{job="prometheus"}[$__range])')
-    samples = vector('count_over_time(up{job="prometheus"}[$__range])')
-    return (
-        bool(healthy)
-        and bool(samples)
-        and all(float(row["value"][1]) == 1 for row in healthy)
-        and all(float(row["value"][1]) >= 2 for row in samples)
+    # Probe at 30-second steps against the default 15-second self-scrape.
+    # A 45-second lookback tolerates scrape jitter without excusing long gaps.
+    coverage = vector(
+        'count_over_time((min_over_time(up{job="prometheus"}[45s]) == 1)[$__range:30s])'
+        " / scalar(count_over_time(vector(1)[$__range:30s]))"
     )
+    return bool(coverage) and all(float(row["value"][1]) == 1 for row in coverage)
 
 
 def _condition_operands_confirmed(
     panel_id: int, expr: str, vector: WitnessVector, request: Callable[..., Any]
 ) -> bool:
     """Reject hidden active signals; prove absent lazy events at their raw source."""
-    operands = set(re.findall(r"\bsum\(\s*(bioetl_\w+)", expr, re.ASCII))
+    operands = {
+        name
+        for bare, alternatives in _CONDITION_SUM_OPERAND.findall(expr)
+        for name in (bare or alternatives).split("|")
+    }
     is_dq = panel_id == _DQ_CONDITIONS_PANEL
     sources = _DQ_EVENT_INPUTS if is_dq else _PROVIDER_EVENT_INPUTS
     selector = '{pipeline=~"$pipeline"}' if is_dq else ""
@@ -473,6 +486,27 @@ def _condition_operands_confirmed(
         if not rows and not _unobserved_event_input(sources[metric], vector, request):
             return False
     return True
+
+
+def _unobserved_failed_blocker_input(
+    vector: WitnessVector, request: Callable[..., Any]
+) -> bool:
+    source = 'bioetl_pipeline_runs_total{status="failed",run_type=~"$run_type"}[15m]'
+    if not _event_families_available(source, request):
+        return False
+    # A complete zero is valid for a threshold query. Partial or growing
+    # sources require review, including the dashboard's workflow-prefix fallback.
+    scoped = source.replace("{", '{pipeline=~"$pipeline",', 1)
+    direct = f"(count_over_time({scoped}) < 2 or increase({scoped}) > 0)"
+    fallback = f"(count_over_time({source}) < 2 or increase({source}) > 0)"
+    return (
+        vector(
+            f"{direct} or ({fallback} and on (pipeline) "
+            'label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+            '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))'
+        )
+        == []
+    )
 
 
 def _unobserved_event_input(
