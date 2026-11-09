@@ -120,23 +120,27 @@ def apply_overview_identity(payload: dict) -> None:
     ]
 
 
+def _tune_saved_status_properties(name: str, properties: list[dict]) -> None:
+    for prop in properties:
+        if prop["id"] == CUSTOM_WIDTH and name in {"Processing", "Trust"}:
+            prop["value"] = 95 if name == "Processing" else 60
+        if prop["id"] == "mappings" and name == "Reason":
+            mapping = {
+                "type": "value",
+                "options": {
+                    "Saved run evidence; CURRENT and chart coverage are separate": {
+                        "text": "Saved run evidence"
+                    }
+                },
+            }
+            if mapping not in prop["value"]:
+                prop["value"].append(mapping)
+
+
 def _tune_saved_status_overrides(overrides: list[dict]) -> None:
     for item in overrides:
         name = item["matcher"].get("options")
-        for prop in item["properties"]:
-            if prop["id"] == CUSTOM_WIDTH and name in {"Processing", "Trust"}:
-                prop["value"] = 95 if name == "Processing" else 60
-            if prop["id"] == "mappings" and name == "Reason":
-                mapping = {
-                    "type": "value",
-                    "options": {
-                        "Saved run evidence; CURRENT and chart coverage are separate": {
-                            "text": "Saved run evidence"
-                        }
-                    },
-                }
-                if mapping not in prop["value"]:
-                    prop["value"].append(mapping)
+        _tune_saved_status_properties(name, item["properties"])
     verdict_override = {
         "matcher": {"id": "byName", "options": OVERALL_VERDICT},
         "properties": [
@@ -146,6 +150,20 @@ def _tune_saved_status_overrides(overrides: list[dict]) -> None:
     }
     if verdict_override not in overrides:
         overrides.append(verdict_override)
+
+
+def _link_saved_status(overrides: list[dict]) -> None:
+    for item in overrides:
+        if item["matcher"].get("options") == "Status":
+            for prop in item["properties"]:
+                if prop["id"] == "links":
+                    prop["value"] = [
+                        {
+                            "title": "Open saved run report",
+                            "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+                            "targetBlank": True,
+                        }
+                    ]
 
 
 def _link_saved_evidence(overview: dict) -> None:
@@ -166,17 +184,7 @@ def _link_saved_evidence(overview: dict) -> None:
                         },
                     }
                 )
-    for item in overview[9002]["fieldConfig"]["overrides"]:
-        if item["matcher"].get("options") == "Status":
-            for prop in item["properties"]:
-                if prop["id"] == "links":
-                    prop["value"] = [
-                        {
-                            "title": "Open saved run report",
-                            "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
-                            "targetBlank": True,
-                        }
-                    ]
+    _link_saved_status(overview[9002]["fieldConfig"]["overrides"])
 
 
 def apply_saved_evidence_readability(payload: dict) -> None:
