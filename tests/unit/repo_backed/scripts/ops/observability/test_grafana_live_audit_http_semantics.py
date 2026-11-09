@@ -1,30 +1,3 @@
-# pyright: reportArgumentType=false
-# pyright: reportAttributeAccessIssue=false
-# pyright: reportCallIssue=false
-# pyright: reportIndexIssue=false
-# pyright: reportMissingTypeArgument=false
-# pyright: reportGeneralTypeIssues=false
-# pyright: reportOptionalMemberAccess=false
-# pyright: reportOperatorIssue=false
-# pyright: reportAbstractUsage=false
-# pyright: reportUndefinedVariable=false
-# pyright: reportPossiblyUnboundVariable=false
-# pyright: reportTypedDictNotRequiredAccess=false
-# pyright: reportOptionalSubscript=false
-# pyright: reportOptionalOperand=false
-# pyright: reportOptionalCall=false
-# pyright: reportOptionalIterable=false
-# pyright: reportIncompatibleMethodOverride=false
-# pyright: reportIncompatibleVariableOverride=false
-# pyright: reportUninitializedInstanceVariable=false
-# pyright: reportReturnType=false
-# pyright: reportInvalidCast=false
-# pyright: reportAssignmentType=false
-# pyright: reportImplicitAbstractClass=false
-# pyright: reportFunctionMemberAccess=false
-# pyright: reportConstantRedefinition=false
-# pyright: reportInvalidTypeForm=false
-# PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
 from __future__ import annotations
 
 import pytest
@@ -46,8 +19,7 @@ def test_selected_run_http_aliases_are_resolved() -> None:
 
 
 @pytest.mark.parametrize(
-    "error_key",
-    ("verdict", "run_verdict", "replay_readiness_now"),
+    "error_key", ("verdict", "run_verdict", "replay_readiness_now")
 )
 def test_query_error_is_not_successful_nonempty_http_result(error_key: str) -> None:
     spec = audit_subject.PanelAuditSpec(
@@ -83,11 +55,7 @@ def test_http_table_nested_query_error_is_not_endpoint_failure() -> None:
     )
     status, classification, detail = audit_subject._classify_http_panel_payload(
         spec,
-        {
-            "rows": [
-                {"stage_id": "silver", "verdict": "QUERY ERROR"},
-            ],
-        },
+        {"rows": [{"stage_id": "silver", "verdict": "QUERY ERROR"}]},
     )
     assert status == "ok"
     assert classification == "nonempty_table"
