@@ -6,6 +6,11 @@ services:
       context: .
       dockerfile: Dockerfile.bioetl
     container_name: bioetl
+    # Match a non-root host writer for private atomic report/checkpoint files.
+    # runtime_manager supplies these IDs on POSIX; standalone defaults stay 999.
+    user: "${BIOETL_RUNTIME_UID:-999}:${BIOETL_RUNTIME_GID:-999}"
+    tmpfs:
+      - "/tmp:rw,noexec,nosuid,size=64m,mode=0700,uid=${BIOETL_RUNTIME_UID:-999},gid=${BIOETL_RUNTIME_GID:-999}"
     # Health/metrics only. Quarantine Explorer HTTP UI was removed from the
     # default Docker surface (see docs/DOCKER_QUICKSTART.md).
     entrypoint: ["bioetl"]

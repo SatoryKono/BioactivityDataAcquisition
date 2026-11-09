@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "6b7647c7011f4790c4244fcd051250bcacb6b107",
+  "source_ref": "b1cc3b5f7dc9f1f0e859df141a2c547eabad04b7",
+  "source_reviews": {
+    "src/bioetl/domain/run_reports/accounting_projections.py": "Pure evidence checks over in-memory dictionaries and integer totals. No external resource acquisitions, offloads or ownership changes.",
+    "src/bioetl/interfaces/http/_processed_records_report.py": "Metric key translation and pure domain call over supplied report and ledger values. No file, socket, subprocess or cleanup ownership."
+  },
+  "line_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "reference_moves": []
+}

@@ -332,9 +332,9 @@ def test_overview_queries_are_backed_by_expected_records_and_metrics() -> None:
     assert (
         "selected-run-status?pipeline=${pipeline}&run_id=${run_id}" in all_expressions
     )
-    # Phase 2.5: stages PRR uses selected_* funnel vars (merged B/C target).
+    # Stages use the canonical diagnostics projection with exact selected identity.
     assert (
-        "pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}"
+        "selected-run-status?pipeline=${selected_pipeline:percentencode}"
         in all_expressions
     )
 

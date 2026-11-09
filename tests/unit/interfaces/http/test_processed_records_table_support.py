@@ -452,3 +452,262 @@ def test_processed_records_table_support_all_exports_match_contract() -> None:
 
     for name in support.__all__:
         assert hasattr(support, name), f"__all__ exports {name!r} but it does not exist"
+
+
+@pytest.mark.parametrize(
+    "invalid",
+    [
+        None,
+        "coverage",
+        "identity",
+        "manifest",
+        "scope",
+        "missing",
+        "negative",
+        "boolean",
+        "conflict",
+        "balance",
+    ],
+)
+@pytest.mark.parametrize("silver_removal", [0, 1])
+@pytest.mark.parametrize("gold_removal", [0, 1])
+@pytest.mark.parametrize("resumed", [False, True])
+def test_report_fills_legacy_ledger_gaps_only_with_consistent_evidence(
+    invalid, gold_removal, resumed, silver_removal
+):
+    from dataclasses import replace
+    from bioetl.interfaces.http.processed_records_table import (
+        build_processed_records_table_payload_from_ledger,
+    )
+
+    run_id = deterministic_run_uuid_from_callsite("test_processed_records_report")
+    silver = 1000 - silver_removal
+    gold = silver - 17 - 3 * gold_removal
+    entry = RunLedgerEntry(
+        entry_id="finished",
+        manifest_id="manifest",
+        run_id=run_id,
+        event_type="run_finished",
+        occurred_at=datetime(2026, 11, 9, tzinfo=UTC),
+        status="success",
+        metrics_snapshot={
+            "records_bronze": 1000,
+            "records_silver": silver,
+            "records_gold": gold,
+            "records_gold_excluded_by_contract": 17,
+            "records_quarantined": 0,
+            "records_filtered_out": 0,
+        },
+    )
+    report = {
+        "tracking_coverage": "full",
+        "identity": {
+            "pipeline_name": "chembl_assay",
+            "run_id": str(run_id),
+            "manifest_id": "manifest",
+            "run_type": "incremental",
+        },
+        "layers": dict(
+            zip(
+                (
+                    "bronze_records",
+                    "silver_valid",
+                    "silver_filtered_out",
+                    "silver_quarantined",
+                    "silver_skipped",
+                    "silver_deduplicated",
+                    "gold_written",
+                    "gold_excluded_by_contract",
+                    "gold_quarantined",
+                    "gold_skipped",
+                    "gold_deduplicated",
+                ),
+                (
+                    1000,
+                    silver,
+                    0,
+                    0,
+                    0,
+                    silver_removal,
+                    gold,
+                    17,
+                    gold_removal,
+                    gold_removal,
+                    gold_removal,
+                ),
+                strict=True,
+            )
+        ),
+    }
+    if invalid == "coverage":
+        report["tracking_coverage"] = "partial"
+    if invalid == "identity":
+        report["identity"]["run_id"] = "another-run"
+    if invalid == "manifest":
+        report["identity"]["manifest_id"] = "another-manifest"
+    if invalid == "scope":
+        report["identity"]["run_type"] = "backfill"
+    if invalid == "missing":
+        del report["layers"]["gold_skipped"]
+    if invalid == "negative":
+        report["layers"]["gold_skipped"] = -1
+    if invalid == "boolean":
+        report["layers"]["gold_skipped"] = False
+    if invalid == "conflict":
+        report["layers"]["gold_written"] = gold - 1
+    if invalid == "balance":
+        report["layers"]["gold_skipped"] = gold_removal + 1
+    entries = (entry,)
+    if resumed:
+        entries = (
+            replace(
+                entry,
+                entry_id="predecessor",
+                manifest_id="previous",
+                metrics_snapshot=None,
+            ),
+            entry,
+        )
+    payload = build_processed_records_table_payload_from_ledger(
+        ledger_entries=entries,
+        pipeline="chembl_assay",
+        run_type="incremental",
+        report=report,
+    )
+    rows = {row["parameter"]: row for row in payload["rows"]}
+    for parameter in (
+        "05 silver_skipped_records",
+        "06 silver_deduplicated_records",
+        "09 gold_quarantined_records",
+        "10 gold_skipped_records",
+        "11 gold_deduplicated_records",
+    ):
+        expected = 0 if parameter.startswith("05") else gold_removal
+        if parameter.startswith("06"):
+            expected = silver_removal
+        assert rows[parameter]["value"].strip() == (
+            "UNKNOWN" if invalid else str(expected)
+        )
+    # Ledger-backed rows must survive rejected report fills unchanged.
+    assert rows["01 bronze_records"]["value"].strip() == "1 000"
+    assert rows["02 silver_valid_records"]["value"].strip() == f"{silver:,}".replace(
+        ",", " "
+    )
+    assert rows["07 gold_written_records"]["value"].strip() == str(gold)
+    assert rows["08 gold_excluded_by_contract_records"]["value"].strip() == "17"
+
+
+def test_report_fill_maps_positive_silver_filtered_and_quarantined() -> None:
+    """Distinct positive silver removals must land on the matching table rows."""
+    from bioetl.interfaces.http.processed_records_table import (
+        build_processed_records_table_payload_from_ledger,
+    )
+
+    run_id = deterministic_run_uuid_from_callsite("test_processed_records_report_pos")
+    entry = RunLedgerEntry(
+        entry_id="finished",
+        manifest_id="manifest",
+        run_id=run_id,
+        event_type="run_finished",
+        occurred_at=datetime(2026, 11, 9, tzinfo=UTC),
+        status="success",
+        metrics_snapshot={
+            "records_bronze": 1000,
+            "records_silver": 995,
+        },
+    )
+    report = {
+        "tracking_coverage": "full",
+        "identity": {
+            "pipeline_name": "chembl_assay",
+            "run_id": str(run_id),
+            "manifest_id": "manifest",
+            "run_type": "incremental",
+        },
+        "layers": {
+            "bronze_records": 1000,
+            "silver_valid": 995,
+            "silver_filtered_out": 2,
+            "silver_quarantined": 3,
+            "silver_skipped": 0,
+            "silver_deduplicated": 0,
+            "gold_written": 978,
+            "gold_excluded_by_contract": 17,
+            "gold_quarantined": 0,
+            "gold_skipped": 0,
+            "gold_deduplicated": 0,
+        },
+    }
+    payload = build_processed_records_table_payload_from_ledger(
+        ledger_entries=(entry,),
+        pipeline="chembl_assay",
+        run_type="incremental",
+        report=report,
+    )
+    rows = {row["parameter"]: row for row in payload["rows"]}
+    assert rows["03 silver_filtered_out_records"]["value"].strip() == "2"
+    assert rows["04 silver_quarantined_records"]["value"].strip() == "3"
+
+
+def test_report_fill_keeps_saved_silver_dedup_when_snapshot_equals_artifact() -> None:
+    """Computed snapshot−artifact must not reject a conserved saved-report dedup."""
+    from bioetl.interfaces.http.processed_records_table import (
+        build_processed_records_table_payload_from_ledger,
+    )
+
+    run_id = deterministic_run_uuid_from_callsite("test_processed_records_dedup_sep")
+    finished = RunLedgerEntry(
+        entry_id="finished",
+        manifest_id="manifest",
+        run_id=run_id,
+        event_type="run_finished",
+        occurred_at=datetime(2026, 11, 9, tzinfo=UTC),
+        status="success",
+        metrics_snapshot={
+            "records_bronze": 100,
+            "records_silver": 90,
+        },
+    )
+    silver_artifact = RunLedgerEntry(
+        entry_id="silver-artifact",
+        manifest_id="manifest",
+        run_id=run_id,
+        event_type=ARTIFACT_PUBLISHED_EVENT,
+        occurred_at=datetime(2026, 11, 9, 0, 1, tzinfo=UTC),
+        stage="silver",
+        status="published",
+        details={"stage": "silver", "record_count": 90},
+    )
+    report = {
+        "tracking_coverage": "full",
+        "identity": {
+            "pipeline_name": "chembl_assay",
+            "run_id": str(run_id),
+            "manifest_id": "manifest",
+            "run_type": "incremental",
+        },
+        "layers": {
+            "bronze_records": 100,
+            "silver_valid": 90,
+            "silver_filtered_out": 0,
+            "silver_quarantined": 0,
+            "silver_skipped": 0,
+            "silver_deduplicated": 10,
+            "gold_written": 90,
+            "gold_excluded_by_contract": 0,
+            "gold_quarantined": 0,
+            "gold_skipped": 0,
+            "gold_deduplicated": 0,
+        },
+    }
+    payload = build_processed_records_table_payload_from_ledger(
+        ledger_entries=(finished, silver_artifact),
+        pipeline="chembl_assay",
+        run_type="incremental",
+        report=report,
+    )
+    rows = {row["parameter"]: row for row in payload["rows"]}
+    assert rows["06 silver_deduplicated_records"]["value"].strip() == "10"
+    assert rows["03 silver_filtered_out_records"]["value"].strip() == "0"
+    assert rows["04 silver_quarantined_records"]["value"].strip() == "0"
+    assert rows["07 gold_written_records"]["value"].strip() == "90"
