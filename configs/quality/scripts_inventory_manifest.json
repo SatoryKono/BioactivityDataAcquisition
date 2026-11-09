@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-09T14:05:24.926124+00:00",
+  "generated_at": "2026-11-09T14:11:19.328359+00:00",
   "summary": {
     "total_scripts": 719,
     "status_counts": {
@@ -23496,7 +23496,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 728,
+          "line": 729,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
@@ -23539,7 +23539,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 732,
+          "line": 733,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import ("
         },
@@ -23808,7 +23808,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 737,
+          "line": 738,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         }
