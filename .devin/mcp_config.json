@@ -10,16 +10,30 @@
       "url": "http://127.0.0.1:8821/mcp"
     },
     "github": {
-      "url": "http://127.0.0.1:8820/mcp"
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/github-mcp-wrapper.sh"
+      ],
+      "env": {
+        "GITHUB_TOOLSETS": "context,issues,pull_requests,repos,users,actions,code_security,dependabot,notifications",
+        "GITHUB_EXCLUDE_TOOLS": "create_or_update_file,push_files,delete_file,fork_repository,create_repository,merge_pull_request,actions_run_trigger",
+        "GITHUB_LOCKDOWN_MODE": "true"
+      }
     },
     "docker": {
       "url": "http://127.0.0.1:8817/mcp"
     },
     "context7": {
-      "url": "http://127.0.0.1:8815/mcp"
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_context7_wrapper.sh"
+      ]
     },
     "ast-grep": {
-      "url": "http://127.0.0.1:8816/mcp"
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_ast_grep_wrapper.sh"
+      ]
     },
     "mcp-code-interpreter": {
       "url": "http://127.0.0.1:8829/mcp"
@@ -31,7 +45,10 @@
       "url": "http://127.0.0.1:8823/mcp"
     },
     "brave-search": {
-      "url": "http://127.0.0.1:8811/mcp"
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_brave_search_wrapper.sh"
+      ]
     },
     "neo4j-cypher": {
       "url": "http://127.0.0.1:8824/mcp"

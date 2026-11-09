@@ -45,7 +45,7 @@ This policy applies to:
 | `.kimi-code/local.toml` | no | local-only/untracked Kimi project overlay | written automatically by Kimi (`/add-dir`); holds `[workspace]` `additional_dir` absolute paths; gitignored |
 | `~/.kimi-code/config.toml` | no | user-owned/generated Kimi runtime config | model/provider preference, `default_permission_mode`, `[[permission.rules]]`, hooks; API keys via `api_key_env` names only |
 | `.devin/config.json` | yes | tracked Devin project settings | contains only current project-level settings (`permissions`, `read_config_from`, optional hooks, and CLI metadata); MCP servers do not live here in Devin CLI `v3000.3+` |
-| `.devin/mcp_config.json` | yes | tracked active Devin MCP projection | full sanctioned inventory; local servers use shared localhost HTTP and remote servers use Devin `${env:VAR}` header expansion |
+| `.devin/mcp_config.json` | yes | tracked active Devin MCP projection | full sanctioned inventory; credentialed/scoped owners use portable stdio bootstraps, other local peers use shared localhost HTTP, and remote servers use Devin `${env:VAR}` header expansion |
 | `.devin/mcp_config.local.json` | no | generated machine-local Devin MCP overlay | gitignored daily override; marks optional servers disabled without changing the tracked inventory |
 | `.claude/**` | no | unavailable in current checkout | not an active source for Codex/Gemini behavior in this program |
 
@@ -67,8 +67,9 @@ This policy applies to:
 1. Treat `.devin/config.json` as portable tracked Devin project settings and
    `.devin/mcp_config.json` as the portable tracked Devin MCP projection. The
    setup generator preserves only project keys supported by current Devin CLI
-   and writes the canonical 21-server shared HTTP payload to the dedicated MCP
-   file.
+   and writes the sanctioned mixed-transport inventory to the dedicated MCP
+   file. The local overlay preserves scoped stdio routes while applying
+   daily-mode settings to optional servers.
 1. Devin starts repository work in its cloned workspace and root environment
    commands from the repository root. Relative MCP filesystem, cache, memory,
    and wrapper arguments therefore use that repository root as their execution
