@@ -66,7 +66,9 @@ REQUIRED_CHECKS_PROSE_TEST = (
 )
 DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
 STAGE0_EVIDENCE_TEST = "tests/unit/scripts/engineering/ci/test_stage0_evidence.py"
-MANIFEST_VALIDATION_CATALOG_TEST = "tests/unit/interfaces/http/test_manifest_validation_catalog.py"
+MANIFEST_VALIDATION_CATALOG_TEST = (
+    "tests/unit/interfaces/http/test_manifest_validation_catalog.py"
+)
 GRAFANA_SELECTOR_CONTRACT_TEST = "tests/integration/test_grafana_selector_contract.py"
 GRAFANA_VARIABLE_REFERENCE_TEST = "tests/integration/test_grafana_variable_reference.py"
 RUN_REPORT_CONTRACTS_TEST = "tests/unit/domain/run_reports/test_contracts.py"
