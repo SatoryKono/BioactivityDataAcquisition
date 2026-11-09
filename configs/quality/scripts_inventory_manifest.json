@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-09T17:10:44.298531+00:00",
+  "generated_at": "2026-11-09T18:24:45.291306+00:00",
   "summary": {
     "total_scripts": 719,
     "status_counts": {
@@ -23631,7 +23631,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_overview_identity.py",
-          "line": 370,
+          "line": 366,
           "source_group": "scripts",
           "text": "from ._overview_quality import exclusion_quality_expression"
         }
