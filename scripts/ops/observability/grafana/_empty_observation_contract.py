@@ -53,6 +53,7 @@ _SIGNAL_WITNESSES = {
     22011: "bioetl_stage_lag_seconds or bioetl_stage_backlog_records",
 }
 _RANKED_EVIDENCE_PANEL = 2010
+_RULES_ENDPOINT = "/api/v1/rules"
 _DQ_CONDITIONS_PANEL = 4
 _DQ_EVENT_INPUTS = {
     "bioetl_runtime_alert_condition_dq_soft_threshold_15m": 'bioetl_dq_soft_threshold_exceeded_total{pipeline=~"$pipeline"}[15m]',
@@ -140,9 +141,12 @@ def qualify_empty(
     substitute: Callable[[str], str],
     timeout: float,
     as_of: str | None = None,
+    historical_reset: bool = False,
 ) -> tuple[bool, list[dict[str, Any]]]:
     """Return acceptance and exact independent witnesses; fail closed on gaps."""
     if dashboard_uid != "bioetl-incident-v1" or empty_state_label(panel_id) is None:
+        return False, []
+    if historical_reset and not _checkpoint_generation_guard(panel_id, expr):
         return False, []
     evidence: list[dict[str, Any]] = []
 
@@ -174,7 +178,9 @@ def qualify_empty(
         return _qualify_signal_empty(panel_id, expr, request, vector), evidence
     return (
         _event_families_available(expr, request)
-        and _event_sample_coverage_confirmed(expr, vector),
+        and _event_sample_coverage_confirmed(
+            expr, vector, require_reset=historical_reset
+        ),
         evidence,
     )
 
@@ -192,7 +198,7 @@ def _workflow_scope_confirms_empty(
     if panel_id == 9701:
         dependencies = dependencies | _WORKFLOW_INPUT_DEPENDENCIES
     if not _healthy_rules(
-        _response_data(request("/api/v1/rules", {})), "recording", dependencies
+        _response_data(request(_RULES_ENDPOINT, {})), "recording", dependencies
     ):
         return False
     standalone = 'bioetl_standalone_pipeline_universe{pipeline=~"$pipeline",run_type=~"$run_type"}'
@@ -294,7 +300,7 @@ def _signal_metrics_available(
     if panel_id == _RANKED_EVIDENCE_PANEL:
         expected_rules.update(_RANKED_EVIDENCE_DEPENDENCIES)
     if expected_rules:
-        data = _response_data(request("/api/v1/rules", {}))
+        data = _response_data(request(_RULES_ENDPOINT, {}))
         if not _healthy_rules(data, "recording", expected_rules):
             return False
         if panel_id == 2005:
@@ -332,22 +338,50 @@ def _event_families_available(expr: str, request: Callable[..., Any]) -> bool:
     return True
 
 
-def _event_sample_coverage_confirmed(expr: str, vector: WitnessVector) -> bool:
+def _checkpoint_generation_guard(panel_id: int, expr: str) -> bool:
+    return (
+        panel_id == 105
+        and "histogram_quantile(" in expr
+        and "unless on (pipeline, operation)" in expr
+        and set(_METRIC.findall(expr))
+        == {
+            "bioetl_checkpoint_save_duration_seconds_bucket",
+            "bioetl_checkpoint_save_duration_seconds_created",
+        }
+        and bool(re.search(r"changes\([^)]*\)\s*>\s*0", expr))
+    )
+
+
+def _event_sample_coverage_confirmed(
+    expr: str, vector: WitnessVector, *, require_reset: bool = False
+) -> bool:
     """A known event series needs two samples in the panel's own selector window."""
     selectors = set(_EVENT_RANGE.findall(expr))
     if not selectors or set(_METRIC.findall(expr)) - {_SCOPE_METRIC} != {
         metric for _, metric, _ in selectors
     }:
         return False
+    reset_observed = False
     for operation, metric, window in sorted(selectors):
         samples = vector(f"count_over_time({metric}{window})")
-        if samples is None or any(float(row["value"][1]) < 2 for row in samples):
+        if not _event_samples_sufficient(samples, require_reset=require_reset):
             return False
         if operation == "changes" and metric.endswith("_created"):
             resets = vector(f"changes({metric}{window})")
-            if resets is None or any(float(row["value"][1]) > 0 for row in resets):
+            if resets is None:
                 return False
-    return True
+            reset_observed |= any(float(row["value"][1]) > 0 for row in resets)
+    return reset_observed if require_reset else not reset_observed
+
+
+def _event_samples_sufficient(
+    samples: list[dict[str, Any]] | None, *, require_reset: bool
+) -> bool:
+    return (
+        samples is not None
+        and (not require_reset or bool(samples))
+        and all(float(row["value"][1]) >= 2 for row in samples)
+    )
 
 
 def _vector_result(payload: dict[str, Any]) -> list[dict[str, Any]] | None:
@@ -368,7 +402,7 @@ def _alert_history_available(
         return False
     expected = _expected_alert_names()
     if not expected or not _healthy_rules(
-        _response_data(request("/api/v1/rules", {})), "alerting", expected
+        _response_data(request(_RULES_ENDPOINT, {})), "alerting", expected
     ):
         return False
     healthy = vector('min_over_time(up{job="prometheus"}[$__range])')

@@ -437,6 +437,61 @@ def test_empty_histogram_rejects_resets_and_failed_reset_queries(resets, expecte
 
 
 @pytest.mark.parametrize(
+    "gap",
+    [
+        None,
+        "no-reset",
+        "single-sample",
+        "missing-buckets",
+        "query-error",
+        "wrong-panel",
+    ],
+)
+def test_reviewed_generation_gap_requires_reset_and_complete_raw_evidence(gap):
+    family = "bioetl_checkpoint_save_duration_seconds"
+
+    def fetch(url, **_kwargs):
+        params = parse_qs(urlsplit(url).query)
+        if "metadata" in url:
+            return {"status": "success", "data": {family: [{"type": "histogram"}]}}
+        query = params["query"][0]
+        rows = [{"metric": {}, "value": [1, "10"]}]
+        if query.startswith("up{"):
+            rows = [
+                {"metric": {"job": job}, "value": [1, "1"]}
+                for job in ("bioetl", "pushgateway", "prometheus")
+            ]
+        elif query.startswith("changes("):
+            if gap == "query-error":
+                return {"status": "error"}
+            rows = [{"metric": {}, "value": [1, "0" if gap == "no-reset" else "1"]}]
+        elif query.startswith("count_over_time(") and "_bucket" in query:
+            rows = (
+                []
+                if gap == "missing-buckets"
+                else [
+                    {
+                        "metric": {},
+                        "value": [1, "1" if gap == "single-sample" else "10"],
+                    }
+                ]
+            )
+        return {"status": "success", "data": {"resultType": "vector", "result": rows}}
+
+    accepted, _ = qualify_empty(
+        dashboard_uid="bioetl-incident-v1",
+        panel_id=106 if gap == "wrong-panel" else 105,
+        expr=f"histogram_quantile(0.5, sum by (le, pipeline, operation) (increase({family}_bucket[24h])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes({family}_created[24h]) > 0)))",
+        base_url="http://prometheus",
+        fetch=fetch,
+        substitute=lambda value: value,
+        timeout=1,
+        historical_reset=True,
+    )
+    assert accepted is (gap is None)
+
+
+@pytest.mark.parametrize(
     "gap", [None, "missing-operand", "active-signal", "unknown-health"]
 )
 @pytest.mark.parametrize(

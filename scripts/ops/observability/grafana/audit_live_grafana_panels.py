@@ -140,6 +140,7 @@ SEMANTIC_CLASSIFICATION_POLICY: dict[str, str] = {
     "expected_empty": "pass",
     "unknown_result": "review_required",
     "telemetry_missing": "review_required_unless_explicitly_reviewed",
+    "verified_historical_generation_gap": "review_required_unless_explicitly_reviewed",
 }
 _SEMANTIC_CLASSIFICATION_ALIASES = {
     "invalid_shape": "query_invalid",
@@ -157,6 +158,7 @@ _REVIEWED_SEMANTIC_OUTCOMES = frozenset(
     {
         ("bioetl-dq-v2", 8, "telemetry_missing"),
         ("bioetl-dq-v2", 101, "telemetry_missing"),
+        ("bioetl-incident-v1", 105, "verified_historical_generation_gap"),
     }
 )
 
@@ -1701,6 +1703,32 @@ def _with_query_requests(
     )
 
 
+def _collect_empty_witnesses(
+    spec: PanelAuditSpec,
+    config: AuditConfig,
+    rendered_expr: str,
+    *,
+    historical_reset: bool = False,
+) -> tuple[bool, list[dict[str, Any]]]:
+    from scripts.ops.observability.grafana._empty_observation_contract import (
+        qualify_empty,
+    )
+
+    return qualify_empty(
+        dashboard_uid=spec.dashboard_uid,
+        panel_id=spec.panel_id,
+        expr=rendered_expr,
+        base_url=config.prometheus_base_url,
+        fetch=_fetch_json,
+        substitute=lambda query: _substitute_dashboard_tokens(
+            query, config, prometheus=True
+        ),
+        timeout=config.request_timeout_seconds,
+        as_of=_time_window(config)[1] if config.range_to else None,
+        historical_reset=historical_reset,
+    )
+
+
 def _qualify_empty_panel(
     spec: PanelAuditSpec,
     config: AuditConfig,
@@ -1710,27 +1738,23 @@ def _qualify_empty_panel(
 ) -> tuple[str, str]:
     """Verify independent empty-state witnesses without weakening failures."""
     classification = "empty_result"
-    from scripts.ops.observability.grafana._empty_observation_contract import (
-        qualify_empty,
-    )
-
     try:
-        qualified, witnesses = qualify_empty(
-            dashboard_uid=spec.dashboard_uid,
-            panel_id=spec.panel_id,
-            expr=rendered_expr,
-            base_url=config.prometheus_base_url,
-            fetch=_fetch_json,
-            substitute=lambda query: _substitute_dashboard_tokens(
-                query, config, prometheus=True
-            ),
-            timeout=config.request_timeout_seconds,
-            as_of=_time_window(config)[1] if config.range_to else None,
-        )
+        qualified, witnesses = _collect_empty_witnesses(spec, config, rendered_expr)
         requests.extend(witnesses)
         if qualified:
             classification = "expected_empty"
             detail += "; independently verified empty observation contract; no healthy-zero inference"
+        elif spec.panel_id == 105:
+            reviewed, reset_witnesses = _collect_empty_witnesses(
+                spec,
+                config,
+                rendered_expr,
+                historical_reset=True,
+            )
+            requests.extend(reset_witnesses)
+            if reviewed:
+                classification = "verified_historical_generation_gap"
+                detail += "; WARN: observed histogram generation change; quantile intentionally unavailable; historical gap retained"
     except (
         HTTPError,
         URLError,
