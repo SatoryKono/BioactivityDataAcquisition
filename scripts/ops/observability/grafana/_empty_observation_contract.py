@@ -60,6 +60,11 @@ _DQ_EVENT_INPUTS = {
     "bioetl_runtime_alert_condition_dq_critical_anomaly_30m": 'bioetl_dq_anomaly_detected_total{pipeline=~"$pipeline",severity="critical"}[30m]',
     "bioetl_runtime_alert_condition_silver_validation_failures_30m": 'bioetl_silver_validation_failures_total{pipeline=~"$pipeline"}[30m]',
 }
+_PROVIDER_CONDITIONS_PANEL = 259
+_PROVIDER_EVENT_INPUTS = {
+    "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m": "bioetl_adapter_request_duration_seconds_bucket[30m]",
+    "bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m": "bioetl_rate_limiter_wait_seconds_bucket[30m]",
+}
 _RANKED_EVIDENCE_DEPENDENCIES = frozenset(
     {
         "bioetl_incident_ranked_runtime",
@@ -162,18 +167,11 @@ def qualify_empty(
     if panel_id == 2006:
         return _alert_history_available(expr, vector, request), evidence
     if panel_id in _WORKFLOW_PANELS:
-        return _standalone_confirmed(
-            panel_id, scope, substitute, vector, request
+        return _workflow_scope_confirms_empty(
+            panel_id, scope, request, vector, substitute
         ), evidence
     if panel_id in _SIGNAL_WITNESSES:
-        if not _signal_metrics_available(panel_id, expr, request):
-            return False, evidence
-        if panel_id == _DQ_CONDITIONS_PANEL and not _dq_operands_confirmed(
-            expr, vector, request
-        ):
-            return False, evidence
-        witnesses = vector(_SIGNAL_WITNESSES[panel_id]) or []
-        return _signal_witness_confirms_empty(panel_id, witnesses), evidence
+        return _qualify_signal_empty(panel_id, expr, request, vector), evidence
     return (
         _event_families_available(expr, request)
         and _event_sample_coverage_confirmed(expr, vector),
@@ -181,14 +179,13 @@ def qualify_empty(
     )
 
 
-def _standalone_confirmed(
+def _workflow_scope_confirms_empty(
     panel_id: int,
     scope: list[dict[str, Any]],
-    substitute: Callable[[str], str],
-    vector: WitnessVector,
     request: Callable[..., Any],
+    vector: WitnessVector,
+    substitute: Callable[[str], str],
 ) -> bool:
-    # A concrete workflow selection must never be excused by standalone data.
     if substitute("$workflow") != ".*":
         return False
     dependencies = _STANDALONE_DEPENDENCIES
@@ -198,29 +195,21 @@ def _standalone_confirmed(
         _response_data(request("/api/v1/rules", {})), "recording", dependencies
     ):
         return False
-    selected = _scope_pairs(scope)
     standalone = 'bioetl_standalone_pipeline_universe{pipeline=~"$pipeline",run_type=~"$run_type"}'
+    selected = _scope_pairs(scope)
     return bool(selected) and selected == _scope_pairs(vector(standalone) or [])
 
 
-def _alert_history_available(
-    expr: str, vector: WitnessVector, request: Callable[..., Any]
+def _qualify_signal_empty(
+    panel_id: int, expr: str, request: Callable[..., Any], vector: WitnessVector
 ) -> bool:
-    if expr != 'ALERTS{alertstate="firing"} or (ALERTS{alertstate="pending"} * 2)':
+    if not _signal_metrics_available(panel_id, expr, request):
         return False
-    expected = _expected_alert_names()
-    if not expected or not _healthy_rules(
-        _response_data(request("/api/v1/rules", {})), "alerting", expected
-    ):
-        return False
-    healthy = vector('min_over_time(up{job="prometheus"}[$__range])')
-    samples = vector('count_over_time(up{job="prometheus"}[$__range])')
-    return (
-        bool(healthy)
-        and bool(samples)
-        and all(float(row["value"][1]) == 1 for row in healthy)
-        and all(float(row["value"][1]) >= 2 for row in samples)
-    )
+    if panel_id in {_DQ_CONDITIONS_PANEL, _PROVIDER_CONDITIONS_PANEL}:
+        if not _condition_operands_confirmed(panel_id, expr, vector, request):
+            return False
+    witnesses = vector(_SIGNAL_WITNESSES[panel_id]) or []
+    return _signal_witness_confirms_empty(panel_id, witnesses)
 
 
 def _scope_pairs(rows: list[dict[str, Any]]) -> set[tuple[str, str]]:
@@ -249,36 +238,19 @@ def _observed_scope(
     return vector(scope) or []
 
 
-def _dq_operands_confirmed(
-    expr: str, vector: WitnessVector, request: Callable[..., Any]
-) -> bool:
-    """Reject hidden active signals; prove absent lazy events at their raw source."""
-    operands = set(_METRIC.findall(expr)) - {
-        "bioetl_runtime_pipeline_run_type_universe"
-    }
-    if not operands or operands - _DQ_EVENT_INPUTS.keys():
-        return False
-    for metric in sorted(operands):
-        rows = vector(f'{metric}{{pipeline=~"$pipeline"}}')
-        if rows is None or any(float(row["value"][1]) != 0 for row in rows):
-            return False
-        if not rows:
-            source = _DQ_EVENT_INPUTS[metric]
-            if not _event_families_available(source, request):
-                return False
-            # Any raw samples with an absent derived condition require review:
-            # this includes one-sample windows and rule evaluation lag.
-            if vector(f"count_over_time({source})") != []:
-                return False
-    return True
-
-
 def _signal_witness_confirms_empty(
     panel_id: int, witnesses: list[dict[str, Any]]
 ) -> bool:
-    if panel_id in {_RANKED_EVIDENCE_PANEL, _DQ_CONDITIONS_PANEL} and any(
-        float(row["value"][1]) > 0 for row in witnesses
-    ):
+    if panel_id == _PROVIDER_CONDITIONS_PANEL:
+        # Independent operand evidence proves no latency/wait observations.
+        # UNKNOWN health is retained; it is not an observed alert condition.
+        return bool(witnesses) and all(
+            float(row["value"][1]) in {0, 3} for row in witnesses
+        )
+    if panel_id in {
+        _RANKED_EVIDENCE_PANEL,
+        _DQ_CONDITIONS_PANEL,
+    } and any(float(row["value"][1]) > 0 for row in witnesses):
         return False
     return bool(witnesses)
 
@@ -386,4 +358,54 @@ def _vector_result(payload: dict[str, Any]) -> list[dict[str, Any]] | None:
         result
         if data.get("resultType") == "vector" and isinstance(result, list)
         else None
+    )
+
+
+def _alert_history_available(
+    expr: str, vector: WitnessVector, request: Callable[..., Any]
+) -> bool:
+    if expr != 'ALERTS{alertstate="firing"} or (ALERTS{alertstate="pending"} * 2)':
+        return False
+    expected = _expected_alert_names()
+    if not expected or not _healthy_rules(
+        _response_data(request("/api/v1/rules", {})), "alerting", expected
+    ):
+        return False
+    healthy = vector('min_over_time(up{job="prometheus"}[$__range])')
+    samples = vector('count_over_time(up{job="prometheus"}[$__range])')
+    return (
+        bool(healthy)
+        and bool(samples)
+        and all(float(row["value"][1]) == 1 for row in healthy)
+        and all(float(row["value"][1]) >= 2 for row in samples)
+    )
+
+
+def _condition_operands_confirmed(
+    panel_id: int, expr: str, vector: WitnessVector, request: Callable[..., Any]
+) -> bool:
+    """Reject hidden active signals; prove absent lazy events at their raw source."""
+    operands = set(re.findall(r"\bsum\(\s*(bioetl_\w+)", expr, re.ASCII))
+    is_dq = panel_id == _DQ_CONDITIONS_PANEL
+    sources = _DQ_EVENT_INPUTS if is_dq else _PROVIDER_EVENT_INPUTS
+    selector = '{pipeline=~"$pipeline"}' if is_dq else ""
+    if not operands or operands - sources.keys():
+        return False
+    for metric in sorted(operands):
+        rows = vector(metric + selector)
+        if rows is None or any(float(row["value"][1]) != 0 for row in rows):
+            return False
+        if not rows and not _unobserved_event_input(sources[metric], vector, request):
+            return False
+    return True
+
+
+def _unobserved_event_input(
+    source: str, vector: WitnessVector, request: Callable[..., Any]
+) -> bool:
+    # Any raw samples with an absent derived condition require review,
+    # including one-sample windows and rule evaluation lag.
+    return (
+        _event_families_available(source, request)
+        and vector(f"count_over_time({source})") == []
     )

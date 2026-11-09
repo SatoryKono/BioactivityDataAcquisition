@@ -434,3 +434,68 @@ def test_empty_histogram_rejects_resets_and_failed_reset_queries(resets, expecte
         timeout=1,
     )
     assert accepted is expected
+
+
+@pytest.mark.parametrize(
+    "gap", [None, "missing-operand", "active-signal", "unknown-health"]
+)
+@pytest.mark.parametrize(
+    "panel_id, metric, witness",
+    [
+        (
+            4,
+            "bioetl_runtime_alert_condition_dq_hard_fail_15m",
+            "bioetl_dq_current_status",
+        ),
+        (
+            259,
+            "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m",
+            "bioetl_provider_current_status",
+        ),
+    ],
+)
+def test_conditions_empty_requires_all_operands_and_no_active_signal(
+    gap, panel_id, metric, witness
+):
+
+    def fetch(url, **_kwargs):
+        if urlsplit(url).path.endswith("metadata"):
+            return {"status": "success", "data": {}}
+        if urlsplit(url).path.endswith("rules"):
+            return {
+                "status": "success",
+                "data": {
+                    "groups": [
+                        {
+                            "rules": [
+                                {"name": metric, "type": "recording", "health": "ok"}
+                            ]
+                        }
+                    ]
+                },
+            }
+        query = parse_qs(urlsplit(url).query)["query"][0]
+        rows = [{"metric": {}, "value": [1, "0"]}]
+        if query.startswith("up{job=~"):
+            rows = [
+                {"metric": {"job": job}, "value": [1, "1"]}
+                for job in ("bioetl", "pushgateway", "prometheus")
+            ]
+        elif query.startswith(metric) and gap == "missing-operand":
+            rows = []
+        elif query.startswith(witness) and gap == "active-signal":
+            rows = [{"metric": {}, "value": [1, "2"]}]
+        elif query.startswith(witness) and gap == "unknown-health":
+            rows = [{"metric": {}, "value": [1, "3"]}]
+        return {"status": "success", "data": {"resultType": "vector", "result": rows}}
+
+    accepted, _ = qualify_empty(
+        dashboard_uid="bioetl-incident-v1",
+        panel_id=panel_id,
+        expr=f"sum({metric})",
+        base_url="http://prometheus",
+        fetch=fetch,
+        substitute=lambda value: value,
+        timeout=1,
+    )
+    assert accepted is (gap is None or (panel_id == 259 and gap == "unknown-health"))
