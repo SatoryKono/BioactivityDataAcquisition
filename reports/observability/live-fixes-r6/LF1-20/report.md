@@ -1,14 +1,20 @@
-# LF1-20 Report: bioetl-run-explorer-v1 status panel inventory
+# LF1-20 Run Explorer status evidence
 
-## Execution Environment
-- Environment = compose (NOT production)
-- Date: 2026-11-09
-- Source Commit: 8b4ab5cb9e644e91977e2543b2f08ca9c1c1139f
+Scope: offline check of the changed panel in `bioetl-run-explorer-v1`.
+The dashboard source checked here is `de6e8f701cc9722a68a64232ef1bb9dfe42fa246`.
+Deployment SHA and live panel matrix: `NOT_VERIFIABLE`.
 
-## Findings
-The live verification via compose stack failed to start.
-`docker compose up -d` returned exit code 1 with an "operation not permitted" error on overlayfs within the sandbox environment.
+## Panel 3010
 
-## Status Updates
-- Mapping for `noValue` in panel `3010` was updated to accurately reflect `VALID EMPTY`.
-- Live panel requests marked as `NOT_VERIFIABLE` due to blocked sandbox operations.
+- Title: Inspect Recent Runs (last 10).
+- Query references: A.
+- Generated noValue: UNKNOWN — required launch evidence is unavailable. QUERY ERROR means the backend request failed, not an empty fleet.
+- Default value mappings: `[]`.
+- Default thresholds: `null`.
+- The checked UID does not contain panels 9481 or 9604.
+
+The local generator and owning checks verify the static JSON and its Scenes
+ledger. Four historical browser checks skipped because the saved render
+artifact was unavailable. No live HTTP response or panel color was observed.
+The success, valid empty, missing evidence, not found and request failure
+matrix remains pending for live acceptance.
