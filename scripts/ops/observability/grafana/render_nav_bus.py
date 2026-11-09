@@ -1523,7 +1523,7 @@ def _stamp_exact_replay_panel(panels: list[object]) -> None:
             "request states. N/A is not zero. CURRENT Prometheus does not change this "
             "verdict."
         )
-        _set_panel_no_value(panel, "—")
+        _set_panel_no_value(panel, "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.")
         transforms = panel.setdefault("transformations", [])
         if isinstance(transforms, list) and not any(
             isinstance(item, dict) and item.get("id") == "limit" for item in transforms
