@@ -1,0 +1,8 @@
+{
+  "issue": "LF1-27",
+  "base_sha": "80a08487102ee58e97c89b9005843ac757cf441a",
+  "timestamp": "2026-11-09T10:21:06Z",
+  "environment": "compose (NOT production)",
+  "status": "NOT_VERIFIABLE",
+  "reason": "blocked_backend_unavailable"
+}
