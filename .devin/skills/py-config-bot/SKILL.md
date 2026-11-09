@@ -1,6 +1,8 @@
 ---
 name: py-config-bot
 description: Execute BioETL py-config-bot profile for role-specific workflow and constraints. This skill serves as a convenient entry point for configuration tasks.
+context: none
+agent: py-config-bot
 ---
 
 # py-config-bot
@@ -12,6 +14,7 @@ description: Execute BioETL py-config-bot profile for role-specific workflow and
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Read boundary: use the task class in the root runtime contract, then only the slices the normative index names for SCOPE.
 - Primary profile: `../../agents/py-config-bot/AGENT.md`
 - Team orchestration: `../../agents/ORCHESTRATION.md`
 - Shared wrapper contract: [../py-audit-bot/references/wrapper-contract.md](../py-audit-bot/references/wrapper-contract.md)

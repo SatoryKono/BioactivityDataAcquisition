@@ -1,4 +1,4 @@
 interface:
   display_name: "Py Debug Bot"
   short_description: "Run BioETL debug workflow profile"
-  default_prompt: "Use $py-debug-bot to reproduce, isolate, identify root cause, and provide remediation guidance for a concrete BioETL failure."
+  default_prompt: "Use $py-debug-bot to find the cause of the failure in SCOPE. Read the role profile. Do not edit files. Done when cause, reproduction command, and fix boundary are stated."

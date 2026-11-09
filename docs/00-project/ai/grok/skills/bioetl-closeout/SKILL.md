@@ -1,6 +1,9 @@
 ---
 name: bioetl-closeout
 description: Close BioETL GitHub issues with evidence against origin/main. Use for issue closeout, VERIFIED_ALREADY_RESOLVED, PR ship, or /bioetl-closeout.
+context: none
+agent: general-purpose
+disable-model-invocation: true
 ---
 
 # BioETL issue closeout
@@ -10,9 +13,18 @@ Operator runbook: `docs/00-project/ai/agents/guides/grok-operator-runbook.md`.
 
 ## When to use
 
+Invoke only when the user names this skill.
+
 - Operator lists issue numbers to close or verify
 - Need evidence-only close because main already fixed the root cause
 - Ship PR + issue comments after a fix
+
+## Launch
+
+- Goal: Judge each issue against origin/main.
+- SCOPE: the issue list.
+- Read: this skill and origin/main.
+- Done: each verdict has a SHA, a path, and a command.
 
 ## Procedure
 

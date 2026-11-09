@@ -1,13 +1,20 @@
 ---
 name: "observability-prometheus"
 description: "Create, review, test, or debug BioETL Prometheus alert and recording rules with real metric and label evidence."
+context: none
+agent: general-purpose
 ---
 
 # Observability Prometheus
 
+## Invocation
+
+Invoke only when the user names this skill.
+
 ## Source Of Truth
 
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Read boundary: use the task class in the root runtime contract, then only the slices the normative index names for SCOPE.
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`

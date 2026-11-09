@@ -7,6 +7,9 @@ ______________________________________________________________________
 ---
 name: "agent-debugging"
 description: "Diagnose a concrete AI-agent trajectory with BioETL's safe optional AgentDebugX adapter, and optionally collect ProofAgent advisory evidence. Use only when a reproducible trajectory or bounded change scope exists."
+context: none
+agent: general-purpose
+disable-model-invocation: true
 ---
 
 # Agent Debugging
@@ -21,10 +24,13 @@ description: "Diagnose a concrete AI-agent trajectory with BioETL's safe optiona
 - Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 
+- Read boundary: use the task class in the root runtime contract, then only the slices the normative index names for SCOPE.
 - Safe adapter: `../../../scripts/ai/agent_tools/README.md`
 - Shared contract: [references/advisory-contract.md](./references/advisory-contract.md)
 
 ## Trigger Scope
+
+Invoke only when the user names this skill.
 
 Use this skill when an AI-agent trajectory, tool-routing failure, repeated agent
 error, or bounded change surface needs deterministic diagnostic evidence.
