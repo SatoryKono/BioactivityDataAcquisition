@@ -417,7 +417,7 @@
       "fieldConfig": {
         "defaults": {
           "unit": "none",
-          "noValue": "UNKNOWN",
+          "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
           "mappings": [
             {
               "type": "value",
@@ -622,7 +622,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "—",
+          "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
           "custom": {
             "align": "left",
             "inspect": true,
