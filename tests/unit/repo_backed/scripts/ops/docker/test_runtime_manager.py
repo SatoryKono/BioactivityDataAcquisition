@@ -1919,3 +1919,41 @@ def test_dashboard_runtime_environment_skips_missing_bind_dirs(
         assert "BIOETL_RUNTIME_GID" not in values
         assert values["BIOETL_RUNTIME_SOURCE_ID"] == "a" * 64
     assert environment == {}
+
+
+def test_dashboard_runtime_environment_skips_owner_mismatch(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Divergent reports/data owners must not publish BIOETL_RUNTIME_UID/GID."""
+    environment: dict[str, str] = {}
+    reports_path = tmp_path / "reports"
+    data_path = tmp_path / "data"
+    reports_path.mkdir()
+    data_path.mkdir()
+    monkeypatch.setattr(
+        runtime_manager, "os", SimpleNamespace(name="posix", environ=environment)
+    )
+    monkeypatch.setattr(runtime_manager, "_load_contract", lambda _: {})
+    monkeypatch.setattr(
+        runtime_manager.runtime_preflight,
+        "dashboard_source_environment",
+        lambda *_: {
+            "BIOETL_DASHBOARD_REPORT_ROOT": str(reports_path),
+            "BIOETL_DASHBOARD_DATA_ROOT": str(data_path),
+        },
+    )
+
+    def _stat_for_path(self: Path) -> SimpleNamespace:
+        if self == reports_path:
+            return SimpleNamespace(st_uid=1000, st_gid=1000)
+        if self == data_path:
+            return SimpleNamespace(st_uid=1001, st_gid=1001)
+        raise FileNotFoundError(self)
+
+    monkeypatch.setattr(Path, "stat", _stat_for_path)
+    with runtime_manager._dashboard_runtime_environment(
+        tmp_path / "contract"
+    ) as values:
+        assert "BIOETL_RUNTIME_UID" not in values
+        assert "BIOETL_RUNTIME_GID" not in values
+    assert environment == {}
