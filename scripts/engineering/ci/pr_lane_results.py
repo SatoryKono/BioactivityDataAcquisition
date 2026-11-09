@@ -259,17 +259,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         ("tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",),
     ),
-    "scripts/ai/mcp/mcp_ast_grep_wrapper.sh": (
-        MCP_AGENT_AUDIT_REGRESSIONS_TEST,
-        "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",
-        MCP_REPO_ENV_LOADERS_TEST,
-        MCP_SETUP_COPILOT_CODEX_TEST,
-    ),
-    "scripts/ai/mcp/mcp_context7_wrapper.sh": (
-        MCP_AGENT_AUDIT_REGRESSIONS_TEST,
-        "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",
-        MCP_REPO_ENV_LOADERS_TEST,
-        MCP_SETUP_COPILOT_CODEX_TEST,
+    **dict.fromkeys(
+        (
+            "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
+            "scripts/ai/mcp/mcp_context7_wrapper.sh",
+        ),
+        (
+            MCP_AGENT_AUDIT_REGRESSIONS_TEST,
+            "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",
+            MCP_REPO_ENV_LOADERS_TEST,
+            MCP_SETUP_COPILOT_CODEX_TEST,
+        ),
     ),
     "scripts/ops/docker-setup.ps1": (
         "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
