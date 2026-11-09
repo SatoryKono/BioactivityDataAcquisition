@@ -1390,22 +1390,37 @@ def test_pr_required_fetch_depth_keeps_class_lane_history() -> None:
     """Class lane must see base...head. Shallow clones stay on history-free jobs."""
     jobs = _load_yaml(ROOT / ".github/workflows/pr-required.yml")["jobs"]
 
-    def checkout_depth(job_name: str) -> int:
-        step = next(
+    def checkout_steps(job_name: str) -> list[dict[str, Any]]:
+        return [
             step
             for step in jobs[job_name]["steps"]
             if str(step.get("uses", "")).startswith("actions/checkout@")
-        )
-        return int(step["with"]["fetch-depth"])
+        ]
+
+    def checkout_depth(job_name: str) -> int:
+        return int(checkout_steps(job_name)[0]["with"]["fetch-depth"])
 
     assert checkout_depth("classify-changes") == 0
-    assert checkout_depth("class-lane") == 0
     assert checkout_depth("fast-governance") == 1
     assert checkout_depth("pr-gate-complete") == 1
 
-    class_lane_checkout = next(
-        step
-        for step in jobs["class-lane"]["steps"]
-        if str(step.get("uses", "")).startswith("actions/checkout@")
+    pull_request, dispatch = checkout_steps("class-lane")
+    assert pull_request["if"] == "github.event_name == 'pull_request'"
+    assert pull_request["with"]["persist-credentials"] is False
+    assert (
+        pull_request["with"]["ref"]
+        == "${{ needs['classify-changes'].outputs.head_sha }}"
     )
-    assert class_lane_checkout["with"]["filter"] == "blob:none"
+    assert int(pull_request["with"]["fetch-depth"]) == 0
+    assert pull_request["with"]["filter"] == "blob:none"
+    assert dispatch["if"] == "github.event_name == 'workflow_dispatch'"
+    assert dispatch["with"]["ref"] == "${{ github.sha }}"
+    assert "needs" not in str(dispatch["with"]["ref"])
+    assert "head_sha" not in str(dispatch["with"]["ref"])
+    assert dispatch["with"]["persist-credentials"] is False
+    assert int(dispatch["with"]["fetch-depth"]) == 0
+    assert dispatch["with"]["filter"] == "blob:none"
+    setup_node = next(
+        step for step in jobs["class-lane"]["steps"] if step.get("id") == "setup-node"
+    )
+    assert "cache" not in (setup_node.get("with") or {})
