@@ -175,7 +175,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh",
             "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
             "scripts/ai/mcp/mcp_code_analyzer_wrapper.sh",
-            "scripts/ai/mcp/mcp_context7_wrapper.sh",
             "scripts/ai/mcp/mcp_deja_wrapper.sh",
             "scripts/ai/mcp/mcp_github_actions_wrapper.sh",
             "scripts/ai/mcp/support/token_validation.sh",
@@ -195,6 +194,24 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py",
             "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
         ),
+    ),
+    **dict.fromkeys(
+        (
+            "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
+            "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
+            "scripts/ai/mcp/mcp_context7_wrapper.ps1",
+            "scripts/ai/mcp/support/host_transport.mjs",
+            "scripts/ai/mcp/support/invoke_host_transport.ps1",
+            "scripts/ai/mcp/support/invoke_host_transport.sh",
+            "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
+        ),
+        ("tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",),
+    ),
+    "scripts/ai/mcp/mcp_context7_wrapper.sh": (
+        "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
+        "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",
+        "tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py",
+        "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
     ),
     "scripts/ops/docker-setup.ps1": (
         "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
@@ -561,6 +578,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12848_http_proxy_review.json",
             "configs/quality/external_resource_inventory_pr12889_chembl_review.json",
             "configs/quality/external_resource_inventory_pr12892_replay_review.json",
+            "configs/quality/external_resource_inventory_pr12916_runtime_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -617,6 +635,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
     ),
     "reports/observability/live-fixes-r6/LF1-02/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/observability/live-fixes-r6/LF1-20/report.md": (
+        "tests/integration/test_dux6_residual_contracts.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/observability/live-fixes-r6/LF1-23/report.md": (
+        "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "reports/observability/live-fixes-r6/LF1-14/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/observability/live-fixes-r6/LF1-03/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     **dict.fromkeys(
@@ -638,6 +664,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         (GRAFANA_SELECTOR_CONTRACT_TEST, *DOCUMENTATION_CLEANUP_INVENTORY_TESTS),
     ),
+    "reports/observability/live-fixes-r6/LF1-15/report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/observability/live-fixes-r6/LF1-04/checksums.txt": (
         GRAFANA_SELECTOR_CONTRACT_TEST,
         GRAFANA_VARIABLE_REFERENCE_TEST,
@@ -657,6 +684,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         GRAFANA_SELECTOR_CONTRACT_TEST,
         GRAFANA_VARIABLE_REFERENCE_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    **dict.fromkeys(
+        (
+            "reports/observability/live-fixes-r6/LF1-21/live-panel-audit.json",
+            "reports/observability/live-fixes-r6/LF1-21/report.md",
+        ),
+        (
+            "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py",
+            "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_backend.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
     ),
     "reports/observability/live-fixes-r6/LF1-18/report.md": (
         GRAFANA_VARIABLE_REFERENCE_TEST,
