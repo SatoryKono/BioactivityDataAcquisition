@@ -1860,3 +1860,33 @@ def test_recovery_is_bounded_to_three_attempts_and_writes_one_incident(
     assert incident["recent_logs"]["captured"] is True
     # recovery_history records start (and wait when reached) rows
     assert len(incident["recovery_history"]) >= 3
+
+
+@pytest.mark.parametrize("owner,expected", [(1000, "1000"), (0, None)])
+def test_runtime_uses_nonroot_report_writer_identity(
+    monkeypatch, tmp_path, owner, expected
+):
+    from types import SimpleNamespace
+
+    environment = {}
+    monkeypatch.setattr(
+        runtime_manager, "os", SimpleNamespace(name="posix", environ=environment)
+    )
+    monkeypatch.setattr(runtime_manager, "_load_contract", lambda _: {})
+    monkeypatch.setattr(
+        runtime_manager.runtime_preflight,
+        "dashboard_source_environment",
+        lambda *_: {
+            "BIOETL_DASHBOARD_REPORT_ROOT": str(tmp_path / "reports"),
+            "BIOETL_DASHBOARD_DATA_ROOT": str(tmp_path / "data"),
+        },
+    )
+    monkeypatch.setattr(
+        Path, "stat", lambda _: SimpleNamespace(st_uid=owner, st_gid=owner)
+    )
+    with runtime_manager._dashboard_runtime_environment(
+        tmp_path / "contract"
+    ) as values:
+        assert values.get("BIOETL_RUNTIME_UID") == expected
+        assert values.get("BIOETL_RUNTIME_GID") == expected
+    assert environment == {}

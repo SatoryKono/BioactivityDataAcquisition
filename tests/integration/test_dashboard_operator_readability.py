@@ -373,13 +373,7 @@ def test_datetime_units_are_yyyy_mm_dd_hh_mm() -> None:
                     violations.append(f"{loc} forbids {unit!r}")
                     continue
                 if unit.startswith("time:") or unit.startswith("dateTime"):
-                    expected = (
-                        "time:YY-MM-DD:HH:mm"
-                        if path.name == "bioetl-run-explorer-v1.json"
-                        and panel.get("id") == 3010
-                        and label == "Started"
-                        else DASHBOARD_DATETIME_UNIT
-                    )
+                    expected = DASHBOARD_DATETIME_UNIT
                     if unit != expected:
                         violations.append(
                             f"{loc} datetime unit must be {DASHBOARD_DATETIME_UNIT}, "

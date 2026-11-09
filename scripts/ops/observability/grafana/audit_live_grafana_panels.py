@@ -815,11 +815,16 @@ def _substitute_dashboard_tokens(
         "${pipeline:percentencode}": quote(config.pipeline, safe=""),
         "${run_type:percentencode}": quote(config.run_type, safe=""),
         "${run_id:percentencode}": quote(config.run_id, safe=""),
-        "${workflow:regex}": config.workflow,
-        "${pipeline:regex}": config.pipeline,
-        "${run_type:regex}": config.run_type,
+        "${workflow:regex}": ".*" if config.workflow == "All" else config.workflow,
+        "${pipeline:regex}": ".*" if config.pipeline == "All" else config.pipeline,
+        "${run_type:regex}": ".*" if config.run_type == "All" else config.run_type,
         "${run_id:regex}": config.run_id,
         "${pipeline:csv}": config.pipeline,
+        "${workflow:csv}": config.workflow,
+        "${selected_pipeline:percentencode}": quote(config.pipeline, safe=""),
+        "${selected_run_id:percentencode}": quote(config.run_id, safe=""),
+        "${selected_pipeline}": config.pipeline,
+        "${selected_run_id}": config.run_id,
         "${run_type:csv}": config.run_type,
         "$pipeline_context": config.pipeline,
         "${pipeline_context}": config.pipeline,
@@ -1769,6 +1774,15 @@ def _classify_http_panel_payload(
     spec: PanelAuditSpec, payload: object
 ) -> tuple[str, str, str]:
     """Return (status, classification, detail) for an HTTP panel payload."""
+    if isinstance(payload, dict) and any(
+        str(payload.get(key, "")).upper() == "QUERY ERROR"
+        for key in ("verdict", "run_verdict", "replay_readiness_now")
+    ):
+        return (
+            "error",
+            "endpoint_execution_error",
+            f"Endpoint assessment failed: {payload.get('reason', 'QUERY ERROR')}",
+        )
     if (
         isinstance(payload, dict)
         and payload.get("contract") == "forensic_endpoint_error_v1"

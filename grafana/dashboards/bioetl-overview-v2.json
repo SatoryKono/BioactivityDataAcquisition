@@ -1020,7 +1020,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 80
+                "value": 95
               },
               {
                 "id": "links",
@@ -1119,6 +1119,14 @@
                         "text": "Parent workflow completion has not been recorded"
                       }
                     }
+                  },
+                  {
+                    "type": "value",
+                    "options": {
+                      "Saved run evidence; CURRENT and chart coverage are separate": {
+                        "text": "Saved run evidence"
+                      }
+                    }
                   }
                 ]
               },
@@ -1151,7 +1159,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 80
+                "value": 60
               },
               {
                 "id": "links",
@@ -1174,6 +1182,22 @@
                     }
                   }
                 ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Overall verdict"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Verdict"
+              },
+              {
+                "id": "custom.width",
+                "value": 60
               }
             ]
           }

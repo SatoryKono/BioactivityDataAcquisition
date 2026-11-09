@@ -53,6 +53,21 @@ def _dashboard_runtime_environment(
     """Expose one scoped source identity to Compose without touching `.env`."""
     contract = _load_contract(contract_path)
     overrides = runtime_preflight.dashboard_source_environment(ROOT, contract)
+    if os.name == "posix":
+        reports_path = Path(
+            overrides.get("BIOETL_DASHBOARD_REPORT_ROOT", ROOT / "reports")
+        )
+        data_path = Path(overrides.get("BIOETL_DASHBOARD_DATA_ROOT", ROOT / "data"))
+        reports_owner = reports_path.stat()
+        data_owner = data_path.stat()
+        if reports_owner.st_uid > 0 and (
+            reports_owner.st_uid,
+            reports_owner.st_gid,
+        ) == (data_owner.st_uid, data_owner.st_gid):
+            overrides.update(
+                BIOETL_RUNTIME_UID=str(reports_owner.st_uid),
+                BIOETL_RUNTIME_GID=str(reports_owner.st_gid),
+            )
     previous = {name: os.environ.get(name) for name in overrides}
     os.environ.update(overrides)
     try:
