@@ -1008,10 +1008,8 @@
     "marked_test_files": 80,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 81,
-    "unmarked_test_files": [
-      "tests/unit/repo_backed/scripts/ai/mcp/test_github_project_transport.py"
-    ]
+    "test_files": 80,
+    "unmarked_test_files": []
   },
   "report": {
     "assertion_branch_reachability": {
@@ -1748,10 +1746,8 @@
       "marked_test_files": 80,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 81,
-      "unmarked_test_files": [
-        "tests/unit/repo_backed/scripts/ai/mcp/test_github_project_transport.py"
-      ]
+      "test_files": 80,
+      "unmarked_test_files": []
     },
     "root": ".",
     "test_file_inventory": {
@@ -1807,7 +1803,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "76ec373668bcc9a9cc337281081f58a49084790843ebf3e1f259397bca3dfa9c",
+  "source_tree_sha256": "e4c8426a37e8a54fb2c893b5f378964daded7034eda3ac3c293cf1f66d4950bc",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 69,

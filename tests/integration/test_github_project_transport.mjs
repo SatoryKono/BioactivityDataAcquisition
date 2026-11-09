@@ -6,9 +6,9 @@ import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {spawnSync} from 'node:child_process';
 
-const helper=process.env.BIOETL_TEST_GITHUB_HELPER||fileURLToPath(new URL('../../../../../../scripts/ai/mcp/support/github_project_transport.mjs',import.meta.url));
+const helper=process.env.BIOETL_TEST_GITHUB_HELPER||fileURLToPath(new URL('../../scripts/ai/mcp/support/github_project_transport.mjs',import.meta.url));
 const {dispatch,UNMANAGED}=await import(pathToFileURL(helper));
-const repo=process.env.BIOETL_TEST_REPO_ROOT||fileURLToPath(new URL('../../../../../../',import.meta.url));
+const repo=process.env.BIOETL_TEST_REPO_ROOT||fileURLToPath(new URL('../../',import.meta.url));
 const gitCandidates=['/usr/bin/git','/bin/git','C:/Program Files/Git/cmd/git.exe','C:/Program Files/Git/bin/git.exe'];
 const gitBinary=gitCandidates.find(candidate=>{try{return fs.statSync(candidate).isFile();}catch{return false;}});
 assert.ok(gitBinary,'Git binary must be available on a fixed path');
