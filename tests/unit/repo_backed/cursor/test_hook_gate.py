@@ -57,7 +57,6 @@ def _shell(command: str, *, branch: str = "feature") -> dict[str, object]:
         ("git rebase main", "allow"),
         ("git add -A", "allow"),
         ("Get-Content .env", "allow"),
-        ("Set-Content .env.example x", "allow"),
         ("echo x > src/_tmp_a.py", "allow"),
         ("Get-Content docker-compose.monitoring.yml", "allow"),
         ("rm _tmp_notes.py", "allow"),
@@ -66,7 +65,6 @@ def _shell(command: str, *, branch: str = "feature") -> dict[str, object]:
         ("git -c commit.gpgSign=true commit -m x", "allow"),
         ("cat .env > out.txt", "allow"),
         ("echo $(cat .env)", "allow"),
-        ("echo x > $(echo .env.example)", "allow"),
         ("rm $(echo _tmp_notes.py)", "allow"),
         ("git config user.name x", "deny"),
         ("git -C repo config --list", "deny"),
@@ -98,6 +96,8 @@ def _shell(command: str, *, branch: str = "feature") -> dict[str, object]:
         ("git push --mirror origin", "deny"),
         ("git push origin --delete main", "deny"),
         ("Set-Content .env x", "deny"),
+        ("Set-Content .env.example x", "deny"),
+        ("echo x > $(echo .env.example)", "deny"),
         ("Remove-Item .env.local", "deny"),
         ("echo x > .env", "deny"),
         ("echo x>.env", "deny"),
@@ -161,12 +161,13 @@ def test_read_of_env_file_is_allowed() -> None:
     assert decision == {"permission": "allow"}
 
 
-def test_write_of_env_file_is_denied() -> None:
+@pytest.mark.parametrize("path", [".env.local", ".env.example"])
+def test_write_of_env_file_is_denied(path: str) -> None:
     decision = _GATE.decide(
         {
             "hook_event_name": "preToolUse",
             "tool_name": "Write",
-            "tool_input": {"path": ".env.local", "contents": "TOKEN=1"},
+            "tool_input": {"path": path, "contents": "TOKEN=1"},
         }
     )
     assert decision["permission"] == "deny"

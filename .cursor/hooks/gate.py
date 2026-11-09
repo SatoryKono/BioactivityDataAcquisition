@@ -143,7 +143,7 @@ _DENY_INPUT: dict[str, str] = {
 SESSION_CONTEXT = (
     "В этом репозитории ответы пользователю на русском. "
     "Не создавать, не менять, не переименовывать и не удалять .env и .env.* "
-    "без явного разрешения в этой задаче. .env.example можно менять. "
+    "без явного разрешения в этой задаче. "
     "Чтение .env разрешено. "
     "Бюджеты техдолга, exemptions, hotspot thresholds и family caps можно "
     "только уменьшить или оставить. "
@@ -598,7 +598,7 @@ def _path_kind(token: str, roots: list[str], cwd: str = "") -> str | None:
     if not relative or relative.endswith("/"):
         return None
     name = relative.rsplit("/", 1)[-1]
-    if name == ".env" or (name.startswith(".env.") and name != ".env.example"):
+    if name == ".env" or name.startswith(".env."):
         return "env"
     if "/" not in relative and _SCRATCH.fullmatch(name):
         return "scratch"
