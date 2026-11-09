@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-09T21:16:04.314500+00:00",
+  "generated_at": "2026-11-09T20:31:17.523992+00:00",
   "summary": {
     "total_scripts": 719,
     "status_counts": {
@@ -14,7 +14,7 @@
       "ci": 74,
       "docs": 292,
       "other": 16,
-      "scripts": 610,
+      "scripts": 612,
       "skills": 13,
       "tests": 534
     }
@@ -693,7 +693,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 194,
+          "line": 197,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/ensure-mcp.sh\","
         }
@@ -1369,25 +1369,25 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 150,
+          "line": 151,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \\"
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 193,
+          "line": 194,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/run-codex.sh mcp-setup"
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 196,
+          "line": 197,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/run-codex.sh mcp-static"
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 199,
+          "line": 200,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \\"
         },
@@ -1732,19 +1732,37 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
-          "line": 224,
+          "line": 226,
           "source_group": "docs",
           "text": "- **Cursor onboarding** -> after clone run `bash scripts/ai/cursor/setup_cursor.sh`"
         },
         {
+          "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
+          "line": 233,
+          "source_group": "docs",
+          "text": "`.cursor/commands/`. `setup_cursor.sh` does not install rules or commands."
+        },
+        {
+          "path": "docs/00-project/ai/rules/README.md",
+          "line": 78,
+          "source_group": "docs",
+          "text": "**Команды (`/`):** канон `docs/00-project/ai/rules/cursor/commands/*.md`, локальный деплой `.cursor/commands/`. Тот же `python -m scripts.ai.sync.cursor --deploy`. Имена: `/review`, `/post-change`, `/"
+        },
+        {
           "path": "scripts/ai/cursor/README.md",
-          "line": 26,
+          "line": 27,
           "source_group": "scripts",
           "text": "bash scripts/ai/cursor/setup_cursor.sh"
+        },
+        {
+          "path": "scripts/ai/cursor/README.md",
+          "line": 60,
+          "source_group": "scripts",
+          "text": "- Cursor commands SSOT: `docs/00-project/ai/rules/cursor/commands/*.md` (`python -m scripts.ai.sync.cursor --deploy`; не входит в `setup_cursor.sh`)"
         }
       ]
     },
@@ -1757,13 +1775,13 @@
       "references": [
         {
           "path": "scripts/ai/cursor/README.md",
-          "line": 46,
+          "line": 47,
           "source_group": "scripts",
           "text": "bash scripts/ai/cursor/setup_skills.sh"
         },
         {
           "path": "scripts/ai/cursor/README.md",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "bash scripts/ai/cursor/setup_skills.sh --project-only"
         },
@@ -1775,7 +1793,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 237,
+          "line": 239,
           "source_group": "scripts",
           "text": "\"scripts/ai/cursor/setup_skills.sh\","
         },
@@ -2903,7 +2921,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 983,
+          "line": 1002,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -2979,7 +2997,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 247,
+          "line": 248,
           "source_group": "docs",
           "text": "`scripts/ai/mcp/export_mcp_env_from_dotenv.ps1` can export already configured"
         },
@@ -3022,13 +3040,13 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 221,
+          "line": 223,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\","
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 374,
+          "line": 404,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         },
@@ -3057,7 +3075,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
@@ -3085,13 +3103,19 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 222,
+          "line": 224,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\","
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 371,
+          "line": 299,
+          "source_group": "tests",
+          "text": "\"github\": \"github-mcp-wrapper.sh\","
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 401,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         },
@@ -3100,12 +3124,6 @@
           "line": 62,
           "source_group": "tests",
           "text": "shell_wrapper = _read(\"scripts/ai/mcp/github-mcp-wrapper.sh\")"
-        },
-        {
-          "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 99,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\": \"mcp_validate_required_token\","
         }
       ]
     },
@@ -3161,7 +3179,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 196,
+          "line": 199,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\","
         },
@@ -3182,8 +3200,14 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 246,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.ps1\","
+        },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_wrappers.py",
           "line": 44,
@@ -3201,7 +3225,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
@@ -3229,9 +3253,15 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 197,
+          "line": 267,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\","
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 298,
+          "source_group": "tests",
+          "text": "\"ast-grep\": \"mcp_ast_grep_wrapper.sh\","
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
@@ -3254,7 +3284,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 244,
+          "line": 247,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\","
         },
@@ -3293,7 +3323,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
@@ -3315,9 +3345,15 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 245,
+          "line": 248,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\","
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 297,
+          "source_group": "tests",
+          "text": "\"brave-search\": \"mcp_brave_search_wrapper.sh\","
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
@@ -3336,12 +3372,6 @@
           "line": 354,
           "source_group": "tests",
           "text": "not in sources[\"mcp_brave_search_wrapper.sh\"]"
-        },
-        {
-          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 365,
-          "source_group": "tests",
-          "text": "assert \"-e BRAVE_API_KEY\" in sources[\"mcp_brave_search_wrapper.sh\"]"
         }
       ]
     },
@@ -3397,7 +3427,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 198,
+          "line": 200,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\","
         }
@@ -3460,7 +3490,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 246,
+          "line": 249,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.ps1\","
         },
@@ -3487,7 +3517,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
@@ -3509,9 +3539,15 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 254,
+          "line": 268,
           "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\": ("
+          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\","
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 296,
+          "source_group": "tests",
+          "text": "\"context7\": \"mcp_context7_wrapper.sh\","
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
@@ -3567,7 +3603,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 199,
+          "line": 201,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\","
         }
@@ -3751,7 +3787,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 982,
+          "line": 1001,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3812,7 +3848,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 981,
+          "line": 1000,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -3882,7 +3918,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 200,
+          "line": 202,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\","
         },
@@ -3995,7 +4031,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 203,
+          "line": 205,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.ps1\","
         },
@@ -4007,7 +4043,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 204,
+          "line": 205,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
         }
@@ -4034,7 +4070,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 204,
+          "line": 206,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\","
         },
@@ -4046,7 +4082,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 204,
+          "line": 205,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
         },
@@ -4210,7 +4246,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 205,
+          "line": 207,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\","
         },
@@ -4253,7 +4289,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 206,
+          "line": 208,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\","
         },
@@ -4286,7 +4322,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 207,
+          "line": 209,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\","
         },
@@ -4636,7 +4672,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 223,
+          "line": 225,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/github_project_transport.mjs\","
         },
@@ -4673,7 +4709,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 247,
+          "line": 250,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/host_transport.mjs\","
         },
@@ -4685,7 +4721,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
-          "line": 109,
+          "line": 110,
           "source_group": "tests",
           "text": "fs.copyFileSync(path.join(sourceMcp,path.basename(file)),file);fs.copyFileSync(helper,path.join(support,'host_transport.mjs'));"
         }
@@ -4700,8 +4736,14 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
+        {
+          "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
+          "line": 5,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/invoke_host_transport.ps1\") -RouteServer ast-grep -RouteArgs $args"
+        },
         {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
           "line": 5,
@@ -4716,13 +4758,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 248,
+          "line": 251,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/invoke_host_transport.ps1\","
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
-          "line": 110,
+          "line": 111,
           "source_group": "tests",
           "text": "for(const name of ['invoke_host_transport.ps1','invoke_host_transport.sh']){"
         }
@@ -4737,8 +4779,20 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 8,
       "references": [
+        {
+          "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
+          "line": 4,
+          "source_group": "scripts",
+          "text": "# shellcheck source=./support/invoke_host_transport.sh"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "source \"$(dirname -- \"${BASH_SOURCE[0]}\")/support/invoke_host_transport.sh\""
+        },
         {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
           "line": 4,
@@ -4765,13 +4819,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 249,
+          "line": 252,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/invoke_host_transport.sh\","
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
-          "line": 110,
+          "line": 111,
           "source_group": "tests",
           "text": "for(const name of ['invoke_host_transport.ps1','invoke_host_transport.sh']){"
         }
@@ -4790,7 +4844,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 244,
+          "line": 245,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/load_repo_env.ps1`"
         },
@@ -4832,7 +4886,7 @@
         },
         {
           "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
-          "line": 6,
+          "line": 9,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
         }
@@ -4910,7 +4964,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
-          "line": 115,
+          "line": 116,
           "source_group": "tests",
           "text": "fs.writeFileSync(path.join(support,'mcp_docker_prune.ps1'),'function Remove-McpExitedContainers {}\\n');"
         },
@@ -4955,7 +5009,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
-          "line": 118,
+          "line": 119,
           "source_group": "tests",
           "text": "fs.writeFileSync(path.join(support,'mcp_docker_prune.sh'),'remove_mcp_exited_containers() { :; }\\n');"
         },
@@ -4976,7 +5030,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 280,
+          "line": 281,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.ps1`"
         },
@@ -5000,7 +5054,7 @@
         },
         {
           "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
-          "line": 10,
+          "line": 13,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/token_validation.ps1\")"
         },
@@ -5033,7 +5087,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 279,
+          "line": 280,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.sh`"
         },
@@ -5069,13 +5123,13 @@
         },
         {
           "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
-          "line": 8,
+          "line": 17,
           "source_group": "scripts",
           "text": "# shellcheck source=./support/token_validation.sh"
         },
         {
           "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
-          "line": 9,
+          "line": 18,
           "source_group": "scripts",
           "text": "source \"${SCRIPT_DIR}/support/token_validation.sh\""
         }
@@ -5212,7 +5266,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 202,
+          "line": 204,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/test_env_loading.sh\","
         },
@@ -5684,8 +5738,20 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 18,
       "references": [
+        {
+          "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
+          "line": 34,
+          "source_group": "docs",
+          "text": "| `.cursor/commands/**` | Cursor command deploy surface | Machine-local deploy target | Deploy only | Generated by `python -m scripts.ai.sync.cursor --deploy` |"
+        },
+        {
+          "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
+          "line": 232,
+          "source_group": "docs",
+          "text": "`python -m scripts.ai.sync.cursor --deploy` into gitignored"
+        },
         {
           "path": "docs/00-project/ai/rules/README.md",
           "line": 53,
@@ -5700,37 +5766,25 @@
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 103,
+          "line": 78,
+          "source_group": "docs",
+          "text": "**Команды (`/`):** канон `docs/00-project/ai/rules/cursor/commands/*.md`, локальный деплой `.cursor/commands/`. Тот же `python -m scripts.ai.sync.cursor --deploy`. Имена: `/review`, `/post-change`, `/"
+        },
+        {
+          "path": "docs/00-project/ai/rules/README.md",
+          "line": 105,
           "source_group": "docs",
           "text": "2. `python -m scripts.ai.sync.cursor --deploy` + `python -m scripts.ai.sync.windsurf`"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 182,
+          "line": 184,
           "source_group": "docs",
           "text": "uv run python -m scripts.ai.sync.cursor --deploy"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 193,
-          "source_group": "docs",
-          "text": "uv run python -m scripts.ai.sync.cursor --deploy"
-        },
-        {
-          "path": "docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
-          "line": 77,
-          "source_group": "docs",
-          "text": "| Cursor IDE | `.cursor/rules/*.mdc` | `scripts/ai/sync/cursor.py --deploy` |"
-        },
-        {
-          "path": "docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
-          "line": 85,
-          "source_group": "docs",
-          "text": "uv run python -m scripts.ai.sync.cursor --check"
-        },
-        {
-          "path": "docs/00-project/ai/rules/cursor/07-qodo-enforcement.mdc",
-          "line": 83,
+          "line": 195,
           "source_group": "docs",
           "text": "uv run python -m scripts.ai.sync.cursor --deploy"
         }
@@ -5738,7 +5792,7 @@
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded manual mirror-sync utility for Cursor rule deploy surfaces while docs expose the direct script path; promote it into a governed AI-rules workflow or retire it once tracked mirrors no longer need explicit sync execution."
+      "next_step": "Retain only as a bounded manual mirror-sync utility for Cursor rule and project-command deploy surfaces while docs expose the direct script path; promote it into a governed AI-rules workflow or retire it once tracked mirrors no longer need explicit sync execution."
     },
     {
       "path": "scripts/ai/sync/governance.py",
@@ -5749,13 +5803,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
-          "line": 134,
+          "line": 136,
           "source_group": "docs",
           "text": "governance anchors, use `scripts/ai/sync/governance.py --check` before"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 181,
+          "line": 183,
           "source_group": "docs",
           "text": "uv run python -m scripts.ai.sync.governance"
         },
@@ -5873,37 +5927,37 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
-          "line": 33,
+          "line": 35,
           "source_group": "docs",
           "text": "| `docs/00-project/ai/rules/windsurf/**` | Windsurf/Cascade rules mirror | Derived from `cursor/` via sync script | Regenerate via `scripts/ai/sync/windsurf.py` | `.md` rules + workflows for Cascade |"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 86,
+          "line": 88,
           "source_group": "docs",
           "text": "uv run python -m scripts.ai.sync.windsurf"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 89,
+          "line": 91,
           "source_group": "docs",
           "text": "uv run python -m scripts.ai.sync.windsurf --check"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 103,
+          "line": 105,
           "source_group": "docs",
           "text": "2. `python -m scripts.ai.sync.cursor --deploy` + `python -m scripts.ai.sync.windsurf`"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 183,
+          "line": 185,
           "source_group": "docs",
           "text": "uv run python -m scripts.ai.sync.windsurf"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 194,
+          "line": 196,
           "source_group": "docs",
           "text": "uv run python -m scripts.ai.sync.windsurf"
         },
@@ -10864,7 +10918,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 878,
+          "line": 897,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10907,7 +10961,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 996,
+          "line": 1015,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -11876,7 +11930,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 311,
+      "reference_count": 315,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -13269,7 +13323,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 513,
+          "line": 530,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -21075,7 +21129,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1094,
+          "line": 1113,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -24099,7 +24153,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 156,
+          "line": 159,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\": ("
         },
@@ -24217,7 +24271,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1249,
+          "line": 1273,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -24385,7 +24439,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 159,
+          "line": 162,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/dashboard_context_links.py\": ("
         },
@@ -25684,7 +25738,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 207,
+          "line": 208,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j"
         },
@@ -25758,13 +25812,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 209,
+          "line": 210,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1 -IncludeGatewayHint"
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 229,
+          "line": 230,
           "source_group": "docs",
           "text": "after reconnects run `cleanup-mcp-orphans.ps1` or `ensure-stable.ps1`."
         },
@@ -25915,7 +25969,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 229,
+          "line": 230,
           "source_group": "docs",
           "text": "after reconnects run `cleanup-mcp-orphans.ps1` or `ensure-stable.ps1`."
         },
@@ -26313,7 +26367,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": "Makefile",
@@ -26328,6 +26382,12 @@
           "text": "- `scripts/ops/runtime/mcp/apply-shared-to-devin.py`"
         },
         {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 261,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/runtime/mcp/apply-shared-to-devin.py\","
+        },
+        {
           "path": "scripts/ops/runtime/mcp/OPERATOR.md",
           "line": 35,
           "source_group": "scripts",
@@ -26335,9 +26395,15 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 333,
+          "line": 352,
           "source_group": "tests",
           "text": "root / \"scripts/ops/runtime/mcp/apply-shared-to-devin.py\""
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 363,
+          "source_group": "tests",
+          "text": "materializer_path = root / \"scripts/ops/runtime/mcp/apply-shared-to-devin.py\""
         }
       ]
     },
@@ -26499,7 +26565,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 230,
+          "line": 231,
           "source_group": "docs",
           "text": "Alternatively run the **shared HTTP plane** (`start-shared.ps1` +"
         },
@@ -27071,7 +27137,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 243,
+          "line": 244,
           "source_group": "docs",
           "text": "- `scripts/ops/support/load_repo_env.sh`"
         },
@@ -27095,7 +27161,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 210,
+          "line": 212,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/load_repo_env.sh\","
         },

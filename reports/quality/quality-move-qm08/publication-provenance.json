@@ -474,6 +474,52 @@
       "schema_version": 1,
       "trust_statement": "Reviewed live GitHub publication mapping; identical published and merged Git trees and both ancestry relations verified locally. Not a signature or CI execution receipt.",
       "verification_mode": "live_github"
+    },
+    {
+      "github_pull_request": {
+        "base": {
+          "repo": {
+            "full_name": "SatoryKono/BioactivityDataAcquisition"
+          }
+        },
+        "head": {
+          "sha": "89edf5cf2c267640fbccafddd399a3bb8ad03e8f"
+        },
+        "merge_commit_sha": "cfd1ff78dab5c45b98dbd84620edd91eb4a46aee",
+        "merged": true,
+        "number": 12959
+      },
+      "retrieved_at_utc": "2026-11-09T18:53:49.716263+00:00",
+      "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/12959",
+      "reviewed_source_commits": [
+        "ee42bea8b174a6d675fdce015a34b8b9b734e386"
+      ],
+      "schema_version": 1,
+      "trust_statement": "Reviewed live GitHub publication mapping; identical published and merged Git trees and both ancestry relations verified locally. Not a signature or CI execution receipt.",
+      "verification_mode": "live_github"
+    },
+    {
+      "github_pull_request": {
+        "base": {
+          "repo": {
+            "full_name": "SatoryKono/BioactivityDataAcquisition"
+          }
+        },
+        "head": {
+          "sha": "e5223b44d03401810266a3691973e149936568c9"
+        },
+        "merge_commit_sha": "951bfe71322e5d055153f1f8ca2a40872c1c69be",
+        "merged": true,
+        "number": 12957
+      },
+      "retrieved_at_utc": "2026-11-09T20:12:36.365559+00:00",
+      "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/12957",
+      "reviewed_source_commits": [
+        "9d75e17cf1052376402b08a691c2e43769774ca6"
+      ],
+      "schema_version": 1,
+      "trust_statement": "Reviewed live GitHub publication mapping; identical published and merged Git trees and both ancestry relations verified locally. Not a signature or CI execution receipt.",
+      "verification_mode": "live_github"
     }
   ],
   "schema_version": 1,

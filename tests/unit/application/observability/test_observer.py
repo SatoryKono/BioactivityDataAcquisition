@@ -35,6 +35,7 @@ Tests cover:
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from time import monotonic
 from unittest.mock import MagicMock, patch
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
@@ -509,7 +510,7 @@ def test_observer_captures_startup_timing_anchor(
 ) -> None:
     """Observer startup must use the shared runtime timing seam."""
     started_at = datetime(2026, 4, 13, 8, 0, 0, tzinfo=UTC)
-    started_monotonic = 1234.5
+    started_monotonic = monotonic()
     capture_anchor_mock.return_value = (started_at, started_monotonic)
 
     observer = PipelineObserver(
