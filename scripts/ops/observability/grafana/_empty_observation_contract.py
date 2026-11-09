@@ -59,6 +59,13 @@ _RANKED_EVIDENCE_DEPENDENCIES = frozenset(
 )
 _WORKFLOW_PANELS = frozenset({9701, 9997})
 _METRIC = re.compile(r"\bbioetl_\w+", re.ASCII)
+_EVENT_RANGE = re.compile(
+    r"\b(?:increase|rate|changes)\(\s*"
+    r"(bioetl_\w+)((?:\{[^}]*\})?\s*\[[^\]]+\])\s*\)",
+    re.ASCII,
+)
+_SCOPE_METRIC = "bioetl_runtime_pipeline_run_type_universe_scoped"
+type WitnessVector = Callable[[str], list[dict[str, Any]] | None]
 
 
 _RAW_SIGNAL_METRICS = frozenset(
@@ -120,7 +127,7 @@ def qualify_empty(
         )
         return payload
 
-    def vector(query: str) -> list[dict[str, Any]]:
+    def vector(query: str) -> list[dict[str, Any]] | None:
         parameters = {"query": substitute(query)}
         if as_of is not None:
             parameters["time"] = as_of
@@ -136,13 +143,19 @@ def qualify_empty(
         if substitute("$workflow") != ".*":
             return False, evidence
         selected = _scope_pairs(scope)
-        return bool(selected) and selected == _scope_pairs(vector(standalone)), evidence
+        return bool(selected) and selected == _scope_pairs(
+            vector(standalone) or []
+        ), evidence
     if panel_id in _SIGNAL_WITNESSES:
         if not _signal_metrics_available(panel_id, expr, request):
             return False, evidence
-        witnesses = vector(_SIGNAL_WITNESSES[panel_id])
+        witnesses = vector(_SIGNAL_WITNESSES[panel_id]) or []
         return _signal_witness_confirms_empty(panel_id, witnesses), evidence
-    return _event_families_available(expr, request), evidence
+    return (
+        _event_families_available(expr, request)
+        and _event_sample_coverage_confirmed(expr, vector),
+        evidence,
+    )
 
 
 def _scope_pairs(rows: list[dict[str, Any]]) -> set[tuple[str, str]]:
@@ -158,9 +171,9 @@ def _scope_pairs(rows: list[dict[str, Any]]) -> set[tuple[str, str]]:
 
 
 def _observed_scope(
-    vector: Callable[[str], list[dict[str, Any]]],
+    vector: WitnessVector,
 ) -> list[dict[str, Any]]:
-    targets = vector('up{job=~"bioetl|pushgateway|prometheus"}')
+    targets = vector('up{job=~"bioetl|pushgateway|prometheus"}') or []
     if {row.get("metric", {}).get("job") for row in targets} != {
         "bioetl",
         "pushgateway",
@@ -168,7 +181,7 @@ def _observed_scope(
     } or any(float(row["value"][1]) != 1 for row in targets):
         return []
     scope = 'bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"$pipeline",run_type=~"$run_type"}'
-    return vector(scope)
+    return vector(scope) or []
 
 
 def _signal_witness_confirms_empty(
@@ -221,7 +234,7 @@ def _event_families_available(expr: str, request: Callable[..., Any]) -> bool:
             families.add(metric.rsplit("_", 1)[0])
         elif metric.endswith("_total"):
             families.add(metric)
-        elif metric != "bioetl_runtime_pipeline_run_type_universe_scoped":
+        elif metric != _SCOPE_METRIC:
             return False
     if not families:
         return False
@@ -235,7 +248,26 @@ def _event_families_available(expr: str, request: Callable[..., Any]) -> bool:
     return True
 
 
-def _vector_result(payload: dict[str, Any]) -> list[dict[str, Any]]:
-    """Reject annotated, unsuccessful and non-vector responses."""
+def _event_sample_coverage_confirmed(expr: str, vector: WitnessVector) -> bool:
+    """A known event series needs two samples in the panel's own selector window."""
+    selectors = set(_EVENT_RANGE.findall(expr))
+    if not selectors or set(_METRIC.findall(expr)) - {_SCOPE_METRIC} != {
+        metric for metric, _ in selectors
+    }:
+        return False
+    for metric, window in sorted(selectors):
+        samples = vector(f"count_over_time({metric}{window})")
+        if samples is None or any(float(row["value"][1]) < 2 for row in samples):
+            return False
+    return True
+
+
+def _vector_result(payload: dict[str, Any]) -> list[dict[str, Any]] | None:
+    """Distinguish verified empty vectors from unsuccessful or annotated replies."""
     data = _response_data(payload)
-    return data.get("result", []) if data.get("resultType") == "vector" else []
+    result = data.get("result")
+    return (
+        result
+        if data.get("resultType") == "vector" and isinstance(result, list)
+        else None
+    )

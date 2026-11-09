@@ -11,7 +11,18 @@ pytestmark = pytest.mark.unit
 
 @pytest.mark.parametrize(
     "gap",
-    [None, "down", "scope", "metadata", "annotation", "gauge", "warnings", "infos"],
+    [
+        None,
+        "down",
+        "scope",
+        "metadata",
+        "annotation",
+        "gauge",
+        "warnings",
+        "infos",
+        "single-sample",
+        "sample-query-error",
+    ],
 )
 def test_empty_event_contract_fails_closed_on_missing_witness(gap):
     def fetch(url, **_kwargs):
@@ -28,6 +39,20 @@ def test_empty_event_contract_fails_closed_on_missing_witness(gap):
             }
         assert params["time"] == ["2026-11-09T11:30:00+00:00"]
         query = params["query"][0]
+        if query.startswith("count_over_time("):
+            assert (
+                query
+                == 'count_over_time(bioetl_audit_write_events_total{operation="commit"}[1h])'
+            )
+            return {
+                "status": "error" if gap == "sample-query-error" else "success",
+                "data": {
+                    "resultType": "vector",
+                    "result": [{"metric": {}, "value": [1, "1"]}]
+                    if gap == "single-sample"
+                    else [],
+                },
+            }
         rows = [
             {"metric": {"job": job}, "value": [1, "0" if gap == "down" else "1"]}
             for job in ("bioetl", "pushgateway", "prometheus")
@@ -47,7 +72,7 @@ def test_empty_event_contract_fails_closed_on_missing_witness(gap):
     accepted, evidence = qualify_empty(
         dashboard_uid="bioetl-incident-v1",
         panel_id=107,
-        expr="sum(increase(bioetl_audit_write_events_total[1h]))",
+        expr='sum(increase(bioetl_audit_write_events_total{operation="commit"}[1h]))',
         base_url="http://prometheus",
         fetch=fetch,
         substitute=lambda value: value,

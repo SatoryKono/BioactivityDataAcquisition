@@ -120,18 +120,8 @@ def apply_overview_identity(payload: dict) -> None:
     ]
 
 
-def apply_saved_evidence_readability(payload: dict) -> None:
-    """Present saved domains and full identity without redundant table columns."""
-    if payload.get("uid") != "bioetl-overview-v2":
-        return
-    row = next(p for p in payload["panels"] if p.get("id") == 9450)
-    row["panels"] = [p for p in row["panels"] if p.get("id") != 9451]
-    row["description"] = (
-        "Expand for full saved identity of the selected Run ID. Stages are shown above."
-    )
-    panels = {p["id"]: p for p in row["panels"]}
-    overview = {p["id"]: p for p in payload["panels"]}
-    for item in overview[9603]["fieldConfig"]["overrides"]:
+def _tune_saved_status_overrides(overrides: list[dict]) -> None:
+    for item in overrides:
         name = item["matcher"].get("options")
         for prop in item["properties"]:
             if prop["id"] == CUSTOM_WIDTH and name in {"Processing", "Trust"}:
@@ -154,8 +144,11 @@ def apply_saved_evidence_readability(payload: dict) -> None:
             {"id": CUSTOM_WIDTH, "value": 60},
         ],
     }
-    if verdict_override not in overview[9603]["fieldConfig"]["overrides"]:
-        overview[9603]["fieldConfig"]["overrides"].append(verdict_override)
+    if verdict_override not in overrides:
+        overrides.append(verdict_override)
+
+
+def _link_saved_evidence(overview: dict) -> None:
     for pid in (9002, 9603):
         for item in overview[pid]["fieldConfig"]["overrides"]:
             if item["matcher"].get("options") == "Reason":
@@ -184,6 +177,21 @@ def apply_saved_evidence_readability(payload: dict) -> None:
                             "targetBlank": True,
                         }
                     ]
+
+
+def apply_saved_evidence_readability(payload: dict) -> None:
+    """Present saved domains and full identity without redundant table columns."""
+    if payload.get("uid") != "bioetl-overview-v2":
+        return
+    row = next(p for p in payload["panels"] if p.get("id") == 9450)
+    row["panels"] = [p for p in row["panels"] if p.get("id") != 9451]
+    row["description"] = (
+        "Expand for full saved identity of the selected Run ID. Stages are shown above."
+    )
+    panels = {p["id"]: p for p in row["panels"]}
+    overview = {p["id"]: p for p in payload["panels"]}
+    _tune_saved_status_overrides(overview[9603]["fieldConfig"]["overrides"])
+    _link_saved_evidence(overview)
     stages = panels[9460]
     provider = next(p for p in payload["panels"] if p.get("id") == 9480)
     stages["gridPos"]["w"] = provider["gridPos"]["w"]
