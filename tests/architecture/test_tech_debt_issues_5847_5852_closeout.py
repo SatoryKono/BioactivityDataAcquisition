@@ -135,11 +135,14 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
     # Its tracked surface is the Code Assist repo file only.
     # `.vscode` is the same curated editor-metadata class as `.zed` (catalog
     # approved_roots); counting it would silently inflate the closeout baseline.
+    # `.cursor` is the curated editor hooks/rules surface (catalog approved_roots);
+    # tracking `.cursor/hooks/**` must not inflate the closeout baseline.
     assert (
         len(
             root_dirs
             - {
                 ".claude",
+                ".cursor",
                 ".devin",
                 ".zed",
                 ".opencode",
