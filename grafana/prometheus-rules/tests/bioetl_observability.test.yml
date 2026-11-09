@@ -895,7 +895,7 @@ tests:
       - series: 'bioetl_records_processed_total{pipeline="chembl_assay",stage="bronze",run_type="backfill"}'
         values: "1000+0x20"
       - series: 'bioetl_stage_records_total{pipeline="chembl_assay",run_type="backfill",stage="gold",outcome="excluded_by_contract"}'
-        values: "17+0x20"
+        values: "0+0x9 17+0x10"
       - series: 'bioetl_stage_records_total{pipeline="chembl_assay",run_type="backfill",stage="gold",outcome="written"}'
         values: "983+0x20"
       - series: 'bioetl_overview_pipeline_universe{pipeline="chembl_assay"}'
@@ -2719,3 +2719,178 @@ tests:
       exp_samples:
       - labels: '{__name__="bioetl_runtime_current_status_trusted",pipeline="chembl_assay",run_type="backfill"}'
         value: 0
+
+  # Cumulative snapshot parity: idle counters, reset generations and missing data.
+  - name: silver-reject-balanced-idle-nonzero
+    interval: 1m
+    input_series:
+    - series: bioetl_records_processed_total{pipeline="uniprot_protein",run_type="incremental",stage="filtered_out"}
+      values: 3+0x20
+    - series: bioetl_silver_filter_rejections_total{pipeline="uniprot_protein",run_type="incremental",reason_code="a",rule_type="other",field="other"}
+      values: 1+0x20
+    - series: bioetl_silver_filter_rejections_total{pipeline="uniprot_protein",run_type="incremental",reason_code="b",rule_type="other",field="other"}
+      values: 2+0x20
+    promql_expr_test:
+    - expr: bioetl_silver_filter_reject_total_mismatch_15m
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_silver_filter_reject_total_mismatch_15m",pipeline="uniprot_protein",run_type="incremental"}'
+        value: 0
+    alert_rule_test:
+    - eval_time: 10m
+      alertname: BioETLSilverFilterRejectAccountingMismatch
+      exp_alerts: []
+  - name: silver-reject-reset-with-redistributed-reasons
+    interval: 1m
+    input_series:
+    - series: bioetl_records_processed_total{pipeline="uniprot_protein",run_type="incremental",stage="filtered_out"}
+      values: 8+0x4 5+0x15
+    - series: bioetl_silver_filter_rejections_total{pipeline="uniprot_protein",run_type="incremental",reason_code="a"}
+      values: 8+0x4 0+0x15
+    - series: bioetl_silver_filter_rejections_total{pipeline="uniprot_protein",run_type="incremental",reason_code="b"}
+      values: 0+0x4 5+0x15
+    promql_expr_test:
+    - expr: bioetl_silver_filter_reject_total_mismatch_15m
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_silver_filter_reject_total_mismatch_15m",pipeline="uniprot_protein",run_type="incremental"}'
+        value: 0
+    alert_rule_test:
+    - eval_time: 10m
+      alertname: BioETLSilverFilterRejectAccountingMismatch
+      exp_alerts: []
+  - name: silver-reject-real-nonzero-disagreement
+    interval: 1m
+    input_series:
+    - series: bioetl_records_processed_total{pipeline="uniprot_protein",run_type="incremental",stage="filtered_out"}
+      values: 5+0x20
+    - series: bioetl_silver_filter_rejections_total{pipeline="uniprot_protein",run_type="incremental",reason_code="a"}
+      values: 2+0x20
+    promql_expr_test:
+    - expr: bioetl_silver_filter_reject_total_mismatch_15m
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_silver_filter_reject_total_mismatch_15m",pipeline="uniprot_protein",run_type="incremental"}'
+        value: 1
+    alert_rule_test:
+    - eval_time: 10m
+      alertname: BioETLSilverFilterRejectAccountingMismatch
+      exp_alerts:
+      - exp_labels:
+          pipeline: uniprot_protein
+          run_type: incremental
+          severity: warning
+        exp_annotations:
+          summary: Silver filter reject accounting mismatch detected
+          description: Filtered-out stage totals and bounded Silver rejection breakdown totals diverged for pipeline=uniprot_protein run_type=incremental
+            in the last 15m.
+          runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
+  - name: silver-reject-missing-stage
+    interval: 1m
+    input_series:
+    - series: bioetl_silver_filter_rejections_total{pipeline="uniprot_protein",run_type="incremental",reason_code="a"}
+      values: 2+0x20
+    promql_expr_test:
+    - expr: bioetl_silver_filter_reject_total_mismatch_15m
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_silver_filter_reject_total_mismatch_15m",pipeline="uniprot_protein",run_type="incremental"}'
+        value: 1
+  - name: silver-reject-measured-zero
+    interval: 1m
+    input_series:
+    - series: bioetl_records_processed_total{pipeline="uniprot_protein",run_type="incremental",stage="filtered_out"}
+      values: 0+0x20
+    - series: bioetl_silver_filter_rejections_total{pipeline="uniprot_protein",run_type="incremental",reason_code="a"}
+      values: 0+0x20
+    promql_expr_test:
+    - expr: bioetl_silver_filter_reject_total_mismatch_15m
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_silver_filter_reject_total_mismatch_15m",pipeline="uniprot_protein",run_type="incremental"}'
+        value: 0
+    alert_rule_test:
+    - eval_time: 10m
+      alertname: BioETLSilverFilterRejectAccountingMismatch
+      exp_alerts: []
+  - name: silver-reject-absent-is-not-measured-zero
+    interval: 1m
+    input_series: []
+    promql_expr_test:
+    - expr: bioetl_silver_filter_reject_total_mismatch_15m
+      eval_time: 10m
+      exp_samples: []
+    alert_rule_test:
+    - eval_time: 10m
+      alertname: BioETLSilverFilterRejectAccountingMismatch
+      exp_alerts: []
+
+  # CURRENT is event-window activity, not a sticky historical counter.
+  - name: silver-current-idle-retained-counter
+    interval: 1m
+    input_series:
+    - series: bioetl_silver_filter_rejections_total{pipeline="uniprot_protein",run_type="incremental",reason_code="other"}
+      values: 3+0x20
+    promql_expr_test:
+    - expr: bioetl_dq_current_reason{reason="silver_filter_rejects"}
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_dq_current_reason",action_dashboard_uid="bioetl-dq-v2",action_scope="var-pipeline=uniprot_protein&var-stage=$__all",action_target="data_quality",pipeline="uniprot_protein",reason="silver_filter_rejects",severity="warn"}'
+        value: 0
+  - name: silver-current-recent-rejections
+    interval: 1m
+    input_series:
+    - series: bioetl_silver_filter_rejections_total{pipeline="uniprot_protein",run_type="incremental",reason_code="other"}
+      values: 0+0x4 3+0x15
+    promql_expr_test:
+    - expr: bioetl_dq_current_reason{reason="silver_filter_rejects"}
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_dq_current_reason",action_dashboard_uid="bioetl-dq-v2",action_scope="var-pipeline=uniprot_protein&var-stage=$__all",action_target="data_quality",pipeline="uniprot_protein",reason="silver_filter_rejects",severity="warn"}'
+        value: 1
+  - name: silver-current-counter-reset-rejections
+    interval: 1m
+    input_series:
+    - series: bioetl_silver_filter_rejections_total{pipeline="uniprot_protein",run_type="incremental",reason_code="other"}
+      values: 3+0x4 0 2+0x14
+    promql_expr_test:
+    - expr: bioetl_dq_current_reason{reason="silver_filter_rejects"}
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_dq_current_reason",action_dashboard_uid="bioetl-dq-v2",action_scope="var-pipeline=uniprot_protein&var-stage=$__all",action_target="data_quality",pipeline="uniprot_protein",reason="silver_filter_rejects",severity="warn"}'
+        value: 1
+
+  # Gold CURRENT warnings follow recent events; saved totals remain intact.
+  - name: gold-current-idle-retained-counter
+    interval: 1m
+    input_series:
+    - series: bioetl_stage_records_total{pipeline="uniprot_protein",run_type="incremental",stage="gold",outcome="excluded_by_contract"}
+      values: 4+0x20
+    promql_expr_test:
+    - expr: bioetl_dq_current_reason{reason="gold_contract_exclusions"}
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_dq_current_reason",action_dashboard_uid="bioetl-dq-v2",action_scope="var-pipeline=uniprot_protein&var-stage=$__all",action_target="data_quality",pipeline="uniprot_protein",reason="gold_contract_exclusions",severity="warn"}'
+        value: 0
+  - name: gold-current-recent-exclusions
+    interval: 1m
+    input_series:
+    - series: bioetl_stage_records_total{pipeline="uniprot_protein",run_type="incremental",stage="gold",outcome="excluded_by_contract"}
+      values: 0+0x4 4+0x15
+    promql_expr_test:
+    - expr: bioetl_dq_current_reason{reason="gold_contract_exclusions"}
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_dq_current_reason",action_dashboard_uid="bioetl-dq-v2",action_scope="var-pipeline=uniprot_protein&var-stage=$__all",action_target="data_quality",pipeline="uniprot_protein",reason="gold_contract_exclusions",severity="warn"}'
+        value: 1
+  - name: gold-current-reset-exclusions
+    interval: 1m
+    input_series:
+    - series: bioetl_stage_records_total{pipeline="uniprot_protein",run_type="incremental",stage="gold",outcome="excluded_by_contract"}
+      values: 4+0x4 0 2+0x14
+    promql_expr_test:
+    - expr: bioetl_dq_current_reason{reason="gold_contract_exclusions"}
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_dq_current_reason",action_dashboard_uid="bioetl-dq-v2",action_scope="var-pipeline=uniprot_protein&var-stage=$__all",action_target="data_quality",pipeline="uniprot_protein",reason="gold_contract_exclusions",severity="warn"}'
+        value: 1

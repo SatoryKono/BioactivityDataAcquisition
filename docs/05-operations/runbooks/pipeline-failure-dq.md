@@ -39,6 +39,30 @@ ______________________________________________________________________
 - Quarantine volume spikes for one pipeline.
 - Generated DQ report or metadata sidecar points to the affected run artifacts.
 
+### Silver filter accounting warning
+
+`BioETLSilverFilterRejectAccountingMismatch` compares cumulative filtered-out
+records with the cumulative sum of the bounded rejection breakdown, scoped by
+`pipeline` and `run_type`. Both sides use the maximum aggregate snapshot observed
+in the same 15-minute window. Aggregate reason/field series before taking the
+window maximum so counter resets do not mix maxima from different generations.
+
+A nonzero counter after an idle run is not a new rejection. Do not compare its
+cumulative value with `increase(...[15m])`: an idle but balanced run would warn.
+For triage, compare `bioetl_silver_filter_rejects_stage_total_15m` with
+`bioetl_silver_filter_rejections_breakdown_total_15m`, then inspect the raw counters
+and saved run report. A missing positive counterpart or unequal totals still
+raises the warning after five minutes. Both sides absent remain absent, not a
+measured zero. Do not delete Pushgateway groups or edit run reports to clear it.
+
+The Incident Workspace CURRENT `silver_filter_rejects` reason instead uses
+`increase(bioetl_silver_filter_rejections_total[15m])`: it warns on recent events,
+including counter resets, rather than retained historical rejects. Saved-run
+Data Quality views retain the original rejection counts and verdicts. The
+CURRENT `gold_contract_exclusions` reason follows the same event-window rule
+for `bioetl_stage_records_total{stage="gold",outcome="excluded_by_contract"}`;
+current-window warnings do not erase saved Gold exclusion totals.
+
 ### Thresholds
 
 - **Soft Fail**: > 5% errors (Warning).

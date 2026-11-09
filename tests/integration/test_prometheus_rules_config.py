@@ -39,7 +39,8 @@ _PROMQL_LABEL_MATCHER_RE = re.compile(r'([a-zA-Z_]\w*)\s*(=~|=|!=|!~)\s*"')
 _PROMQL_BIOETL_METRIC_TOKEN_RE = re.compile(r"\b(bioetl_[a-z0-9_]+)\b")
 _PROMQL_QUOTED_STRING_RE = re.compile(r'"(?:\\.|[^"\\])*"')
 _MAX_OVER_COUNTER_RE = re.compile(
-    r"max_over_time\(\s*([a-zA-Z_:][a-zA-Z0-9_:]*_total)(?=\{|\[)"
+    r"max_over_time\(\s*(?:\(\s*sum\s+by\s*\([^)]*\)\s*\(\s*)?"
+    r"([a-zA-Z_:][a-zA-Z0-9_:]*_total)(?=\{|\[|\))"
 )
 _EVENT_DELTA_COUNTERS = frozenset(
     {
@@ -1478,7 +1479,7 @@ def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None
     assert "bioetl_dq_monitor_enabled == bool 0" in monitor_disabled_expr
     assert "bioetl_runtime_alert_condition_dq_soft_threshold_15m" in degraded_expr
     assert "max_over_time(bioetl_dq_records_quarantined_total[15m])" in degraded_expr
-    assert "max_over_time(bioetl_silver_filter_rejections_total[15m])" in degraded_expr
+    assert "increase(bioetl_silver_filter_rejections_total[15m])" in degraded_expr
     assert "bioetl_overview_pipeline_universe * 0" in degraded_expr
     assert "bioetl_dq_monitor_disabled_current" in degraded_expr
     assert 'bioetl_dq_current_reason{severity="crit"}' in status_expr
@@ -1494,6 +1495,7 @@ def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None
     assert len(contract_exclude_reason_rules) == 1
     assert contract_exclude_reason_rules[0].get("labels", {}).get("severity") == "warn"
     assert "excluded_by_contract" in contract_exclude_reason_rules[0].get("expr", "")
+    assert "increase(" in contract_exclude_reason_rules[0]["expr"]
     assert (
         dq_disabled_reason_rules[0].get("expr", "")
         == 'label_replace((bioetl_dq_monitor_disabled_current), "action_scope", '
@@ -1703,6 +1705,13 @@ def test_silver_filter_reject_accounting_has_reconciliation_rule_and_alert() -> 
 
     assert "bioetl_silver_filter_rejects_stage_total_15m" in record_map
     assert "bioetl_silver_filter_rejections_breakdown_total_15m" in record_map
+    for name in (
+        "bioetl_silver_filter_rejects_stage_total_15m",
+        "bioetl_silver_filter_rejections_breakdown_total_15m",
+    ):
+        expr = record_map[name]["expr"]
+        assert expr.startswith("max_over_time((sum by (pipeline, run_type)")
+        assert "increase(" not in expr
     mismatch_rule = record_map["bioetl_silver_filter_reject_total_mismatch_15m"]
     mismatch_expr = mismatch_rule.get("expr", "")
     assert "bioetl_silver_filter_rejects_stage_total_15m" in mismatch_expr
