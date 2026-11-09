@@ -119,14 +119,16 @@ def qualify_empty(
         payload = request("/api/v1/query", parameters)
         return _vector_result(payload)
 
-    if not _scope_available(vector):
+    scope = _observed_scope(vector)
+    if not scope:
         return False, evidence
     if panel_id in _WORKFLOW_PANELS:
         standalone = 'bioetl_standalone_pipeline_universe{pipeline=~"$pipeline",run_type=~"$run_type"}'
         # A concrete workflow selection must never be excused by standalone data.
         if substitute("$workflow") != ".*":
             return False, evidence
-        return bool(vector(standalone)), evidence
+        selected = _scope_pairs(scope)
+        return bool(selected) and selected == _scope_pairs(vector(standalone)), evidence
     if panel_id in _SIGNAL_WITNESSES:
         if not _signal_metrics_available(expr, request):
             return False, evidence
@@ -134,16 +136,30 @@ def qualify_empty(
     return _event_families_available(expr, request), evidence
 
 
-def _scope_available(vector: Callable[[str], list[dict[str, Any]]]) -> bool:
+def _scope_pairs(rows: list[dict[str, Any]]) -> set[tuple[str, str]]:
+    pairs = set()
+    for row in rows:
+        labels = row.get("metric", {})
+        pipeline = labels.get("pipeline")
+        run_type = labels.get("run_type")
+        if not pipeline or not run_type:
+            return set()
+        pairs.add((pipeline, run_type))
+    return pairs
+
+
+def _observed_scope(
+    vector: Callable[[str], list[dict[str, Any]]],
+) -> list[dict[str, Any]]:
     targets = vector('up{job=~"bioetl|pushgateway|prometheus"}')
     if {row.get("metric", {}).get("job") for row in targets} != {
         "bioetl",
         "pushgateway",
         "prometheus",
     } or any(float(row["value"][1]) != 1 for row in targets):
-        return False
+        return []
     scope = 'bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"$pipeline",run_type=~"$run_type"}'
-    return bool(vector(scope))
+    return vector(scope)
 
 
 def _signal_metrics_available(expr: str, request: Callable[..., Any]) -> bool:

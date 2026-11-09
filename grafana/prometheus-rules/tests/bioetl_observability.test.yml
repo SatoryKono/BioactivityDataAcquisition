@@ -2848,11 +2848,11 @@ tests:
     interval: 1m
     input_series:
     - series: bioetl_silver_filter_rejections_total{job="bioetl",pipeline="uniprot_protein",run_type="incremental",reason_code="a"}
-      values: _ _ _ _ _ 5+0x20
+      values: _ _ _ _ _ 5+0x40
     - series: bioetl_stage_records_total{job="bioetl",pipeline="uniprot_protein",run_type="incremental",stage="gold",outcome="excluded_by_contract"}
-      values: _ _ _ _ _ 2+0x20
+      values: _ _ _ _ _ 2+0x40
     - series: push_time_seconds{job="bioetl",pipeline="uniprot_protein",run_type="incremental"}
-      values: _ _ _ _ _ 300+0x20
+      values: _ _ _ _ _ 300+0x19 1500+0x20
     promql_expr_test:
     - expr: sum(bioetl_dq_current_reason{reason=~"silver_filter_rejects|gold_contract_exclusions"})
       eval_time: 7m
@@ -2862,6 +2862,11 @@ tests:
     - expr: bioetl_dq_current_reason{reason=~"silver_filter_rejects|gold_contract_exclusions"} > 0
       eval_time: 20m
       exp_samples: []
+    - expr: sum(bioetl_dq_current_reason{reason=~"silver_filter_rejects|gold_contract_exclusions"})
+      eval_time: 26m
+      exp_samples:
+      - labels: '{}'
+        value: 2
   - name: silver-current-idle-retained-counter
     interval: 1m
     input_series:
