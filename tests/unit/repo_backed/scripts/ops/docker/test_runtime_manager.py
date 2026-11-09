@@ -1964,14 +1964,22 @@ def test_dashboard_runtime_environment_skips_owner_mismatch(
     assert environment == {}
 
 
+@pytest.mark.parametrize(
+    ("explicit", "detected"),
+    [
+        ({"BIOETL_RUNTIME_UID": "2000", "BIOETL_RUNTIME_GID": "2000"}, {}),
+        ({"BIOETL_RUNTIME_UID": "2000"}, {"BIOETL_RUNTIME_GID": "1000"}),
+        ({"BIOETL_RUNTIME_GID": "2000"}, {"BIOETL_RUNTIME_UID": "1000"}),
+    ],
+)
 def test_dashboard_runtime_environment_preserves_explicit_runtime_identity(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    explicit: dict[str, str],
+    detected: dict[str, str],
 ) -> None:
-    """Explicit BIOETL_RUNTIME_UID/GID must win over matching bind owners."""
-    environment: dict[str, str] = {
-        "BIOETL_RUNTIME_UID": "2000",
-        "BIOETL_RUNTIME_GID": "2000",
-    }
+    """Keep explicit fields, infer only unset ones, and restore environment."""
+    environment = dict(explicit)
     reports_path = tmp_path / "reports"
     data_path = tmp_path / "data"
     reports_path.mkdir()
@@ -1991,47 +1999,11 @@ def test_dashboard_runtime_environment_preserves_explicit_runtime_identity(
     monkeypatch.setattr(
         Path, "stat", lambda _: SimpleNamespace(st_uid=1000, st_gid=1000)
     )
-    with runtime_manager._dashboard_runtime_environment(
-        tmp_path / "contract"
-    ) as values:
-        assert "BIOETL_RUNTIME_UID" not in values
-        assert "BIOETL_RUNTIME_GID" not in values
-        assert environment["BIOETL_RUNTIME_UID"] == "2000"
-        assert environment["BIOETL_RUNTIME_GID"] == "2000"
-    assert environment == {
-        "BIOETL_RUNTIME_UID": "2000",
-        "BIOETL_RUNTIME_GID": "2000",
-    }
-
-
-def test_dashboard_runtime_environment_autodetects_unset_gid_only(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
-    """UID/GID autodetection is independent when only one field is explicit."""
-    environment: dict[str, str] = {"BIOETL_RUNTIME_UID": "2000"}
-    reports_path = tmp_path / "reports"
-    data_path = tmp_path / "data"
-    reports_path.mkdir()
-    data_path.mkdir()
-    monkeypatch.setattr(
-        runtime_manager, "os", SimpleNamespace(name="posix", environ=environment)
-    )
-    monkeypatch.setattr(runtime_manager, "_load_contract", lambda _: {})
-    monkeypatch.setattr(
-        runtime_manager.runtime_preflight,
-        "dashboard_source_environment",
-        lambda *_: {
-            "BIOETL_DASHBOARD_REPORT_ROOT": str(reports_path),
-            "BIOETL_DASHBOARD_DATA_ROOT": str(data_path),
-        },
-    )
-    monkeypatch.setattr(
-        Path, "stat", lambda _: SimpleNamespace(st_uid=1000, st_gid=1000)
-    )
-    with runtime_manager._dashboard_runtime_environment(
-        tmp_path / "contract"
-    ) as values:
-        assert "BIOETL_RUNTIME_UID" not in values
-        assert values.get("BIOETL_RUNTIME_GID") == "1000"
-        assert environment["BIOETL_RUNTIME_UID"] == "2000"
-        assert environment["BIOETL_RUNTIME_GID"] == "1000"
+    with runtime_manager._dashboard_runtime_environment(tmp_path / "contract") as values:
+        for key in explicit:
+            assert key not in values
+        for key, value in detected.items():
+            assert values[key] == value
+        for key, value in (explicit | detected).items():
+            assert environment[key] == value
+    assert environment == explicit
