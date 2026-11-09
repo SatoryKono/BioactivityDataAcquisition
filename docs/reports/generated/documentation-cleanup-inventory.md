@@ -95,9 +95,9 @@
 | `docs/reports/audit/N1_SHADOW_STATUS.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/github_settings_inventory.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/pack-v2.1/evidence-collection/alertmanager_delivery_verification.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audit/phase-instrumentation-spec.md` | Working | 0 | archive-after-migration |
+| `docs/reports/audit/phase-instrumentation-spec.md` | Working | 2 | archive-after-migration |
 | `docs/reports/audit/phase-profile-41570319793.json` | Working | 0 | archive-after-migration |
-| `docs/reports/audit/phase-profile-41570319793.md` | Working | 0 | archive-after-migration |
+| `docs/reports/audit/phase-profile-41570319793.md` | Working | 1 | archive-after-migration |
 | `docs/reports/ci/main-integrity-m1-m2-report.md` | Working | 0 | archive-after-migration |
 | `docs/reports/ci/stage0_closure.json` | Working | 0 | archive-after-migration |
 | `docs/reports/ci/stage0_closure_report.md` | Working | 0 | archive-after-migration |
