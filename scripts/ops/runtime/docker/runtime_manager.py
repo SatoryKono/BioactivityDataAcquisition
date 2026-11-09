@@ -54,16 +54,25 @@ def _dashboard_runtime_environment(
     contract = _load_contract(contract_path)
     overrides = runtime_preflight.dashboard_source_environment(ROOT, contract)
     if os.name == "posix":
+        # Ownership is optional: stop/logs/ensure-networks must still dispatch when
+        # dashboard bind dirs are absent or unreadable on the host.
         reports_path = Path(
             overrides.get("BIOETL_DASHBOARD_REPORT_ROOT", ROOT / "reports")
         )
         data_path = Path(overrides.get("BIOETL_DASHBOARD_DATA_ROOT", ROOT / "data"))
-        reports_owner = reports_path.stat()
-        data_owner = data_path.stat()
-        if reports_owner.st_uid > 0 and (
-            reports_owner.st_uid,
-            reports_owner.st_gid,
-        ) == (data_owner.st_uid, data_owner.st_gid):
+        try:
+            reports_owner = reports_path.stat()
+            data_owner = data_path.stat()
+        except OSError:
+            reports_owner = None
+            data_owner = None
+        if (
+            reports_owner is not None
+            and data_owner is not None
+            and reports_owner.st_uid > 0
+            and (reports_owner.st_uid, reports_owner.st_gid)
+            == (data_owner.st_uid, data_owner.st_gid)
+        ):
             overrides.update(
                 BIOETL_RUNTIME_UID=str(reports_owner.st_uid),
                 BIOETL_RUNTIME_GID=str(reports_owner.st_gid),
