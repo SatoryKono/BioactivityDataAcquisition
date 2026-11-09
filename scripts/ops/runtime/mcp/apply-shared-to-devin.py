@@ -72,7 +72,9 @@ def build_local_servers(
             continue
         entry = cast(JsonObject, entry_raw)
         is_daily = entry.get("daily", True) is not False
-        rendered = _http_entry(_endpoint(entry))
+        rendered = servers.get(name, {})
+        if not isinstance(rendered.get("command"), str):
+            rendered = _http_entry(_endpoint(entry))
         if not include_optional and not is_daily:
             rendered["disabled"] = True
         servers[name] = rendered

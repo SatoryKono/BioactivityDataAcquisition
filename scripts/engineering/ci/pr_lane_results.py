@@ -142,6 +142,9 @@ MCP_REPO_ENV_LOADERS_TEST = (
 )
 MCP_SETUP_COPILOT_CODEX_TEST = "tests/unit/scripts/test_setup_copilot_codex_mcp.py"
 MCP_GITHUB_PROJECT_TRANSPORT_TEST = "tests/integration/test_github_project_transport.py"
+MCP_HOST_TRANSPORT_DISPATCH_TEST = (
+    "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py"
+)
 CURSOR_SKILL_SYNC_TEST = "tests/architecture/test_cursor_skill_sync_safety.py"
 SYNC_CURSOR_RULES_TEST = "tests/unit/scripts/test_sync_cursor_rules.py"
 ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
@@ -194,7 +197,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "scripts/ai/codex/helper/ensure-mcp.sh",
             "scripts/ai/mcp/check_neo4j_memory.sh",
             "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh",
-            "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
             "scripts/ai/mcp/mcp_code_analyzer_wrapper.sh",
             "scripts/ai/mcp/mcp_deja_wrapper.sh",
             "scripts/ai/mcp/mcp_github_actions_wrapper.sh",
@@ -241,6 +243,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     **dict.fromkeys(
         (
+            "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
             "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
             "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
             "scripts/ai/mcp/mcp_context7_wrapper.ps1",
@@ -249,13 +252,27 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "scripts/ai/mcp/support/invoke_host_transport.sh",
             "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport.mjs",
         ),
-        ("tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",),
+        (MCP_HOST_TRANSPORT_DISPATCH_TEST,),
     ),
-    "scripts/ai/mcp/mcp_context7_wrapper.sh": (
-        MCP_AGENT_AUDIT_REGRESSIONS_TEST,
-        "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py",
-        MCP_REPO_ENV_LOADERS_TEST,
-        MCP_SETUP_COPILOT_CODEX_TEST,
+    **dict.fromkeys(
+        (
+            ".devin/mcp_config.json",
+            "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
+            "scripts/ops/runtime/mcp/apply-shared-to-devin.py",
+        ),
+        ("tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",),
+    ),
+    **dict.fromkeys(
+        (
+            "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
+            "scripts/ai/mcp/mcp_context7_wrapper.sh",
+        ),
+        (
+            MCP_AGENT_AUDIT_REGRESSIONS_TEST,
+            MCP_HOST_TRANSPORT_DISPATCH_TEST,
+            MCP_REPO_ENV_LOADERS_TEST,
+            MCP_SETUP_COPILOT_CODEX_TEST,
+        ),
     ),
     "scripts/ops/docker-setup.ps1": (
         "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
@@ -629,6 +646,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12892_replay_review.json",
             "configs/quality/external_resource_inventory_pr12916_runtime_review.json",
             "configs/quality/external_resource_inventory_pr12957_organism_review.json",
+            "configs/quality/external_resource_inventory_pr12960_context_review.json",
             "configs/quality/external_resource_inventory_pr12959_chembl_types_review.json",
             "configs/quality/external_resource_inventory_pr12929_class_lane_review.json",
             "configs/quality/external_resource_inventory_pr12929_domain_accounting_review.json",
