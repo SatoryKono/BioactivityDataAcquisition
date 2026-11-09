@@ -194,6 +194,7 @@ tracked_suite_inventory:
     - tests/integration/test_dux4_scope_title_helpers.py
     - tests/integration/test_dux5_residual_contracts.py
     - tests/integration/test_dux6_residual_contracts.py
+    - tests/integration/test_github_project_transport.py
     - tests/integration/test_grafana_control_plane_variables.py
     - tests/integration/test_health_replay_production_bootstrap.py
     - tests/integration/test_incident_explanations.py

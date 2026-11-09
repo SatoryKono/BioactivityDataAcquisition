@@ -57,9 +57,7 @@ def test_http_table_nested_query_error_is_not_endpoint_failure() -> None:
         spec,
         {"rows": [{"stage_id": "silver", "verdict": "QUERY ERROR"}]},
     )
-    assert status == "ok"
-    assert classification == "nonempty_table"
-    assert classification != "endpoint_execution_error"
+    assert (status, classification) == ("ok", "nonempty_table")
     assert "rows" in detail.lower() or "table" in detail.lower()
 
 
