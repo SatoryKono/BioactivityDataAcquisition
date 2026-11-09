@@ -1999,7 +1999,9 @@ def test_dashboard_runtime_environment_preserves_explicit_runtime_identity(
     monkeypatch.setattr(
         Path, "stat", lambda _: SimpleNamespace(st_uid=1000, st_gid=1000)
     )
-    with runtime_manager._dashboard_runtime_environment(tmp_path / "contract") as values:
+    with runtime_manager._dashboard_runtime_environment(
+        tmp_path / "contract"
+    ) as values:
         for key in explicit:
             assert key not in values
         for key, value in detected.items():
