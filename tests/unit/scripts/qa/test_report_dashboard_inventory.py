@@ -432,6 +432,22 @@ def test_sync_contract_rejects_roster_drift_without_writing(
     assert path.read_bytes() == before
 
 
+def test_sync_contract_rejects_non_numeric_panel_count(tmp_path, monkeypatch):
+    path = tmp_path / "inventory.yaml"
+    path.write_text(
+        yaml.safe_dump({"dashboards": [{"uid": "sample", "panel_count": 1}]}),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(inventory, "DASHBOARD_INVENTORY_CONTRACT", path)
+    before = path.read_bytes()
+    with pytest.raises(ValueError, match="panel_count"):
+        inventory.sync_inventory_panel_counts(
+            [{"uid": "sample", "panel_count": "../etc/passwd"}]
+        )
+    assert path.read_bytes() == before
+    assert not path.with_name(path.name + ".tmp").exists()
+
+
 def test_ops_http_uid_uses_reviewed_datasource_name():
     assert (
         inventory._normalize_datasource_ref(

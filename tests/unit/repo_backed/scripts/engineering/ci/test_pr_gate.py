@@ -43,6 +43,7 @@ def test_classify_cli_preserves_artifact_and_optional_github_outputs(
         monkeypatch.setenv("GITHUB_OUTPUT", str(output))
     monkeypatch.setattr(pr_gate, "load_catalog", lambda _: _catalog())
     monkeypatch.setattr(pr_gate, "collect_changed_files", lambda **_: ["docs/guide.md"])
+    monkeypatch.setattr(pr_gate, "_REPO_ROOT", tmp_path)
     args = argparse.Namespace(
         catalog=tmp_path / "catalog.yaml",
         artifact=artifact,
@@ -278,7 +279,58 @@ def test_catalog_rejects_not_applicable_for_always_required(tmp_path: Any) -> No
     path.write_text(yaml.safe_dump(catalog), encoding="utf-8")
 
     with pytest.raises(CatalogError, match="always_required"):
-        load_catalog(path)
+        load_catalog(path, root=tmp_path)
+
+
+def test_load_catalog_reads_a_file_inside_the_root(tmp_path: Path) -> None:
+    import yaml
+
+    path = tmp_path / "nested" / "catalog.yaml"
+    path.parent.mkdir()
+    path.write_text(yaml.safe_dump(_catalog()), encoding="utf-8")
+
+    loaded = load_catalog(path, root=tmp_path)
+
+    assert loaded["version"] == 2
+    assert loaded["aggregator"] == "pr-gate-complete"
+
+
+def test_load_catalog_rejects_paths_outside_the_root(tmp_path: Path) -> None:
+    import yaml
+
+    root = tmp_path / "repo"
+    root.mkdir()
+    outside = tmp_path / "outside.yaml"
+    outside.write_text(yaml.safe_dump(_catalog()), encoding="utf-8")
+
+    with pytest.raises(CatalogError, match="escapes repository"):
+        load_catalog(outside, root=root)
+    with pytest.raises(CatalogError, match="escapes repository"):
+        load_catalog(Path("../outside.yaml"), root=root)
+
+
+def test_classify_command_rejects_artifact_outside_the_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    outside = tmp_path / "outside.json"
+    monkeypatch.setattr(pr_gate, "_REPO_ROOT", repo)
+    monkeypatch.setattr(pr_gate, "load_catalog", lambda _: _catalog())
+    monkeypatch.setattr(pr_gate, "collect_changed_files", lambda **_: [])
+    args = argparse.Namespace(
+        catalog=repo / "catalog.yaml",
+        artifact=outside,
+        event_name="pull_request",
+        base_sha="b" * 40,
+        before_sha="",
+        head_sha=HEAD_SHA,
+    )
+
+    with pytest.raises(CatalogError, match="escapes repository"):
+        pr_gate._classify_command(args)
+
+    assert not outside.exists()
 
 
 def test_live_catalog_classifies_grafana_reports_and_test_fixtures() -> None:

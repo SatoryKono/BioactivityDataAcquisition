@@ -18,6 +18,7 @@ NOT_APPLICABLE = "not_applicable"
 SUCCESS = "success"
 SKIPPED = "skipped"
 ZERO_SHA = "0" * 40
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
 class CatalogError(ValueError):
@@ -88,9 +89,27 @@ def _validate_gate(gate: dict[str, Any], *, index: int, seen: set[str]) -> None:
         raise CatalogError(f"{gate_id}: sha_binding must be true")
 
 
-def load_catalog(path: Path) -> dict[str, Any]:
+def _path_inside_root(candidate: Path, *, root: Path | None = None) -> Path:
+    """Resolve a CLI path and reject anything outside the repository root."""
+    base = _REPO_ROOT if root is None else root
+    root_resolved = base.resolve()
+    resolved = (
+        candidate.resolve()
+        if candidate.is_absolute()
+        else (root_resolved / candidate).resolve()
+    )
+    if not resolved.is_relative_to(root_resolved):
+        raise CatalogError(f"path escapes repository: {candidate}")
+    return resolved
+
+
+def load_catalog(path: Path, *, root: Path | None = None) -> dict[str, Any]:
     """Load and validate the canonical required-check catalog."""
-    data = _as_dict(yaml.safe_load(path.read_text(encoding="utf-8")), label="catalog")
+    bounded = _path_inside_root(path, root=root)
+    data = _as_dict(
+        yaml.safe_load(bounded.read_text(encoding="utf-8")),
+        label="catalog",
+    )
     if data.get("schema_version") != 1:
         raise CatalogError("schema_version must be 1")
     if not isinstance(data.get("version"), int) or data["version"] < 1:
@@ -471,8 +490,9 @@ def _classify_command(args: argparse.Namespace) -> int:
         head_sha=args.head_sha,
         require_physical_parity=getattr(args, "require_physical_parity", False),
     )
-    args.artifact.parent.mkdir(parents=True, exist_ok=True)
-    args.artifact.write_text(
+    artifact = _path_inside_root(args.artifact)
+    artifact.parent.mkdir(parents=True, exist_ok=True)
+    artifact.write_text(
         json.dumps(matrix, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )

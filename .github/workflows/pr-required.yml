@@ -16,6 +16,9 @@ name: PR Gate Complete
 # diff argument (#11181). Leaf reusable workflows are pinned to a full commit
 # SHA of trusted main (#11232). docker-lane and docs-lane are the job-level
 # reusable workflow calls, and their SHAs are in the pin registry.
+# class-lane checks out the PR head only on pull_request. workflow_dispatch
+# checks out github.sha, so a job output cannot select the tree that writes
+# the default-branch cache.
 # fast-governance checks out the PR head and, after setup, runs the
 # repo-side pin checker. That checker is not an independent trust boundary:
 # a hostile PR can rewrite the coordinator, the checker, and the registry
@@ -309,14 +312,25 @@ jobs:
       contents: read
       pull-requests: read
     steps:
-      - name: Checkout
+      - name: Checkout pull request head
         id: checkout
+        if: github.event_name == 'pull_request'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           ref: ${{ needs['classify-changes'].outputs.head_sha }}
           # Affected pytest runs `git diff base...head`, and gitleaks scans
           # commits. fetch-depth 1 makes that diff exit 128.
+          fetch-depth: 0
+          filter: blob:none
+
+      - name: Checkout dispatched commit
+        id: checkout-dispatch
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
           fetch-depth: 0
           filter: blob:none
 
@@ -690,8 +704,6 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: "20"
-          cache: npm
-          cache-dependency-path: .github/tooling/jscpd/package-lock.json
 
       - name: Run jscpd for duplication detection
         id: jscpd

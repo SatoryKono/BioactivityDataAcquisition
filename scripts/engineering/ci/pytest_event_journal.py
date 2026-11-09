@@ -33,7 +33,9 @@ whole directory. Receipt bytes must be strict UTF-8. Every event must
 carry integer ``schema_version`` equal to ``SCHEMA_VERSION``; a missing
 or different version damages the receipt. A close-error marker that is
 empty, unreadable, or not valid UTF-8 also damages it. Redaction tokens
-are keyed outside the receipt. A later session-finish hook that raises
+are keyed outside the receipt. A line that still contains a raw secret is
+replaced with a fixed ``redaction_blocked`` record and is not a complete
+event. A later session-finish hook that raises
 or changes the exit status is stored as ``hook_error`` and keeps the
 pass from being complete. An intermediate ``rerun`` report is an attempt,
 not a damaged classification. Each duplicate keeps its own terminal retry.
@@ -177,10 +179,11 @@ def _adopt_worker_redaction_key(config: Any) -> None:
 
 
 def _redaction_token(secret: str) -> str:
+    """Return a process-keyed fingerprint, not a password hash."""
     digest = hmac.new(
         ensure_redaction_key().encode("utf-8"),
         secret.encode("utf-8"),
-        hashlib.sha256,
+        hashlib.sha384,
     ).hexdigest()[:12]
     return f"[redacted:{digest}]"
 
@@ -213,6 +216,20 @@ def _secret_values() -> tuple[str, ...]:
         if len(value) >= 8 and _SECRET_KEY.search(key) is not None
     }
     return tuple(sorted(values, key=len, reverse=True))
+
+
+def _line_for_storage(line: str, known_secrets: tuple[str, ...]) -> str:
+    """Replace a line that still contains a raw secret."""
+    if any(secret and secret in line for secret in known_secrets):
+        blocked = (
+            '{"event":"redaction_blocked","schema_version":'
+            + str(SCHEMA_VERSION)
+            + "}\n"
+        )
+        if any(secret and secret in blocked for secret in known_secrets):
+            return "{}\n"
+        return blocked
+    return line
 
 
 def _redact_text(text: str, secrets: tuple[str, ...]) -> str:
@@ -416,7 +433,10 @@ class EventJournalPlugin:
         redacted_data = _redact_structured(data, self.secrets)
         if isinstance(redacted_data, dict):
             payload.update(redacted_data)
-        line = json.dumps(payload, sort_keys=True, ensure_ascii=True) + "\n"
+        line = _line_for_storage(
+            json.dumps(payload, sort_keys=True, ensure_ascii=True) + "\n",
+            self.secrets,
+        )
         try:
             self._file.write(line)
             self._file.flush()

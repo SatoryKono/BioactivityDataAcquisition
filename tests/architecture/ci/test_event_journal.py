@@ -1569,11 +1569,36 @@ def test_redaction_token_is_not_an_unsalted_digest() -> None:
     from scripts.engineering.ci.pytest_event_journal import _redaction_token
 
     secret = "swordfish"
-    unsalted = hashlib.sha256(secret.encode("utf-8")).hexdigest()[:12]
     token = _redaction_token(secret)
     assert token == _redaction_token(secret)
-    assert token != f"[redacted:{unsalted}]"
+    for algorithm in (hashlib.sha256, hashlib.sha384):
+        unsalted = algorithm(secret.encode("utf-8")).hexdigest()[:12]
+        assert token != f"[redacted:{unsalted}]"
     assert secret not in token
+    assert token.startswith("[redacted:")
+    assert token.endswith("]")
+
+
+def test_record_replaces_a_line_that_still_contains_a_secret(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    secret = "swordfish-secret"
+    monkeypatch.setenv("BIOETL_UNIT_PASSWORD", secret)
+    path = tmp_path / "receipt.jsonl"
+    plugin = journal.EventJournalPlugin(
+        None,
+        path,
+        _identity(role="controller", worker_id="controller"),
+    )
+    monkeypatch.setattr(journal, "_redact_structured", lambda value, _secrets: value)
+    plugin.record("session_start", {"password": secret})
+    assert plugin._file is not None
+    plugin._file.close()
+    text = path.read_text(encoding="utf-8")
+    assert secret not in text
+    assert text == '{"event":"redaction_blocked","schema_version":1}\n'
 
 
 def test_duplicate_nodeid_is_not_reused(tmp_path: Path) -> None:

@@ -50,6 +50,22 @@ def _job_workflow(path: Path, uses: object) -> None:
     _dump(path, {"jobs": {"called": {"uses": uses}}})
 
 
+def test_secret_expression_in_uses_is_not_logged(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    registry = tmp_path / "registry.yaml"
+    workflow = tmp_path / "workflow.yaml"
+    _registry(registry)
+    _step_workflow(workflow, "something/${{ secrets.TOKEN }}")
+
+    assert not pins.check_pins(registry, [workflow], repo_root=tmp_path)
+
+    captured = capsys.readouterr()
+    assert "secrets." not in captured.err
+    assert "TOKEN" not in captured.err
+    assert "[redacted-diagnostic]" in captured.err
+
+
 def test_verified_pin_bump_passes(tmp_path: Path) -> None:
     registry = tmp_path / "registry.yaml"
     workflow = tmp_path / "workflow.yaml"
