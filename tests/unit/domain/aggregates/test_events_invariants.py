@@ -17,6 +17,9 @@ from bioetl.domain.types import RunID, BatchID, ContentHash
 from bioetl.domain.medallion import Layer
 
 
+pytestmark = pytest.mark.unit
+
+
 def _ts():
     return datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC)
 
@@ -275,4 +278,18 @@ def test_quarantine_entry_resolved_invalid():
     with pytest.raises(ValueError, match="invalid resolution: unknown"):
         QuarantineEntryResolved(
             occurred_at=_ts(), run_id=_run_id(), entry_id="e1", resolution="unknown"
+        )
+
+
+@pytest.mark.parametrize("duration", [float("nan"), float("inf"), float("-inf")])
+def test_pipeline_completed_rejects_nonfinite_duration_with_explicit_id(duration):
+    with pytest.raises(ValueError, match="duration_seconds"):
+        PipelineCompleted(
+            occurred_at=_ts(),
+            event_id="explicit",
+            run_id=_run_id(),
+            pipeline_name="pipeline",
+            records_processed=0,
+            duration_seconds=duration,
+            stages_count=0,
         )

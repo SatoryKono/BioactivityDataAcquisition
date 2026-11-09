@@ -297,12 +297,17 @@ class TestQuarantineManagerBulkWrites:
         )
 
     @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "batch, reason", [(False, "bad value"), (False, ""), (True, "")]
+    )
     async def test_quarantine_record_emits_typed_quarantine_events(
         self,
         quarantine_port: MagicMock,
         metrics: MagicMock,
+        batch: bool,
+        reason: str,
     ) -> None:
-        """Single-record quarantine should publish creation and quarantine events."""
+        """Quarantine metadata and emitted events share the reason."""
         event_emitter = MagicMock()
         manager = QuarantineRuntimeService(
             quarantine_port=quarantine_port,
@@ -314,14 +319,25 @@ class TestQuarantineManagerBulkWrites:
         run_id = deterministic_run_uuid_from_callsite("test_quarantine_manager")
         ingestion_ts = datetime(2026, 3, 10, 12, 0, 0, tzinfo=UTC)
 
-        await manager.quarantine_record(
-            record={"activity_id": "1"},
-            error_type=ErrorType.INVALID_DATA,
-            batch_id=batch_id,
-            error_details="bad value",
-            run_id=run_id,
-            ingestion_ts=ingestion_ts,
-        )
+        record = {"activity_id": "1"}
+        if batch:
+            await manager.quarantine_records(
+                [(record, ErrorType.INVALID_DATA, reason)],
+                batch_id,
+                run_id=run_id,
+                ingestion_ts=ingestion_ts,
+            )
+            metadata = quarantine_port.write_many.await_args.args[0][0]["metadata"]
+        else:
+            await manager.quarantine_record(
+                record=record,
+                error_type=ErrorType.INVALID_DATA,
+                batch_id=batch_id,
+                error_details=reason,
+                run_id=run_id,
+                ingestion_ts=ingestion_ts,
+            )
+            metadata = quarantine_port.write.await_args.kwargs["metadata"]
 
         emitted_events = [
             call.args[0] for call in event_emitter.emit_domain_event.call_args_list
@@ -329,7 +345,13 @@ class TestQuarantineManagerBulkWrites:
         assert any(
             isinstance(event, QuarantineEntryCreated) for event in emitted_events
         )
-        assert any(isinstance(event, RecordQuarantined) for event in emitted_events)
+        record_event = next(
+            event for event in emitted_events if isinstance(event, RecordQuarantined)
+        )
+        assert record_event.error_message
+        assert record_event.error_message == metadata["error_details"]["message"]
+        if reason:
+            assert record_event.error_message == reason
 
     @pytest.mark.asyncio
     async def test_quarantine_record_prefers_activity_id_over_shared_record_id(
