@@ -66,6 +66,7 @@ REQUIRED_CHECKS_PROSE_TEST = (
 )
 DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
 STAGE0_EVIDENCE_TEST = "tests/unit/scripts/engineering/ci/test_stage0_evidence.py"
+MANIFEST_VALIDATION_CATALOG_TEST = "tests/unit/interfaces/http/test_manifest_validation_catalog.py"
 GRAFANA_SELECTOR_CONTRACT_TEST = "tests/integration/test_grafana_selector_contract.py"
 GRAFANA_VARIABLE_REFERENCE_TEST = "tests/integration/test_grafana_variable_reference.py"
 RUN_REPORT_CONTRACTS_TEST = "tests/unit/domain/run_reports/test_contracts.py"
@@ -409,7 +410,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/04-reference/contracts/run-manifest-ledger.md": (
         "tests/unit/infrastructure/control_plane/test_live_root_manifest_record.py",
-        "tests/unit/interfaces/http/test_manifest_validation_catalog.py",
+        MANIFEST_VALIDATION_CATALOG_TEST,
     ),
     "docs/00-project/RULES.md": (INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,),
     "reports/engineering/SCHEMA-001_execution_evidence.md": (
@@ -630,7 +631,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/observability/live-fixes-r6/LF1-11/report.md",
         ),
         (
-            "tests/unit/interfaces/http/test_manifest_validation_catalog.py",
+            MANIFEST_VALIDATION_CATALOG_TEST,
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
     ),
@@ -706,7 +707,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/observability/live-fixes-r6/LF1-31/report.md",
         ),
         (
-            "tests/unit/interfaces/http/test_manifest_validation_catalog.py",
+            MANIFEST_VALIDATION_CATALOG_TEST,
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
     ),
