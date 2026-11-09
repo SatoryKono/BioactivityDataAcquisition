@@ -1,8 +1,8 @@
 # LF1-16 Incident Dashboard Verification
 
 ## 1. Context & Setup
-- Source/Deploy SHA: `8182923b4a8499ce726ab1fdde3681d66a400232`
-- Time: `2026-11-08T01:15:00Z`
+- Source SHA: `9b33adf0174a97ec88a7b95942e6a78eaf40cf1a`
+- Time: `2026-11-08T19:19:00Z`
 - Target Panels: 2101 (Status), 9451 (Domains), 9463 (Duration)
 
 ## 2. Matrix Testing
@@ -11,15 +11,11 @@
 - Unresolved: `-` (Empty stage fallback checked)
 
 **Status & Findings**
-- Matrix execution blocked by `blocked_backend_unavailable` (backend server not up).
-- JSONata syntax error resolved (fraction parsing `$frac` was using division which isn't valid for strings, corrected to string concatenation: `0.123` -> `$number('0.' & $digits)`).
+- Matrix execution blocked by `blocked_backend_unavailable` (backend server not up) and `blocked_unavailable` due to sandbox limitations where docker backend is inaccessible.
 
 ## 3. Results (Checklist)
-- [ ] Matrix B/C on two UUIDs and negative case. (Blocked via backend; partial execution verified syntax fix).
-- [ ] Panel data aligned with API/frame (checked syntax and semantic correctness).
-- [ ] Expected/Actual output logged below.
+- [ ] Matrix B/C on two UUIDs and the negative case: `NOT_VERIFIABLE`. The backend was unavailable and the selected-run cases were not executed.
+- [ ] Panel data aligned with API/frame: `NOT_VERIFIABLE`. The blocked audit did not produce the responses or frames needed for comparison.
+- [ ] Exact deploy SHA and expected/actual evidence: `NOT_VERIFIABLE`. This report records the source SHA, UTC time, parameters, and blocked audit. The deployed revision and expected/actual comparison require evidence from a live run.
 
-*Note: Blocked live checks (like panel 2101) were recorded as INCOMPLETE/NOT_RUN instead of PASS.*
-
-## 4. Discrepancy Notice
-Could not fully test live queries due to backend unavailability, but JSONata error was definitively identified and addressed.
+The JSON records the blocked audit. Its semantic gate is `fail`. A top-level `ok` on an optional result describes its non-blocking disposition. Treat rows classified `blocked_backend_unavailable` or `blocked_unavailable` as unavailable when reusing this report. Selected-run frames and deployed revision still require evidence from a live run.
