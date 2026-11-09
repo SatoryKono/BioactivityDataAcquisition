@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-09T18:25:33.522841+00:00",
+  "generated_at": "2026-11-09T18:34:03.710968+00:00",
   "summary": {
     "total_scripts": 720,
     "status_counts": {
@@ -16,7 +16,7 @@
       "other": 16,
       "scripts": 611,
       "skills": 13,
-      "tests": 534
+      "tests": 535
     }
   },
   "scripts": [
@@ -23480,7 +23480,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/audit_live_grafana_panels.py",
@@ -23493,6 +23493,12 @@
           "line": 2753,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._empty_observation_contract import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_empty_observation_contract.py",
+          "line": 7,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana._empty_observation_contract import qualify_empty"
         }
       ]
     },
