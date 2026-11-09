@@ -54,7 +54,7 @@
       "lifetime": "process-scoped singleton; each acquisition lasts for one collector with block",
       "creation_sites": [
         {
-          "source_commit": "57a4a8d6cc1f88e4f7283cea53426d1b81e50426",
+          "source_commit": "522ced32377195b9c2df9cd39ae711a3715dbbdb",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -68,7 +68,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "57a4a8d6cc1f88e4f7283cea53426d1b81e50426",
+          "source_commit": "522ced32377195b9c2df9cd39ae711a3715dbbdb",
           "source_blob": "d5aa2dc103b334fc0a1fef4f03cf225aaad3212d",
           "content_sha256": "04529f6059663600e405e54b150068d4582a9033e2fc776ea5c5b85de0cac544",
           "file": "src/bioetl/composition/observability_runtime.py",
@@ -80,7 +80,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "57a4a8d6cc1f88e4f7283cea53426d1b81e50426",
+          "source_commit": "522ced32377195b9c2df9cd39ae711a3715dbbdb",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -92,7 +92,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "57a4a8d6cc1f88e4f7283cea53426d1b81e50426",
+          "source_commit": "522ced32377195b9c2df9cd39ae711a3715dbbdb",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -102,7 +102,7 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "57a4a8d6cc1f88e4f7283cea53426d1b81e50426",
+          "source_commit": "522ced32377195b9c2df9cd39ae711a3715dbbdb",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -165,7 +165,7 @@
       "lifetime": "One descriptor and exclusive lock per live catalog critical section.",
       "creation_sites": [
         {
-          "source_commit": "57a4a8d6cc1f88e4f7283cea53426d1b81e50426",
+          "source_commit": "522ced32377195b9c2df9cd39ae711a3715dbbdb",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -177,7 +177,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "57a4a8d6cc1f88e4f7283cea53426d1b81e50426",
+          "source_commit": "522ced32377195b9c2df9cd39ae711a3715dbbdb",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -189,7 +189,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "57a4a8d6cc1f88e4f7283cea53426d1b81e50426",
+          "source_commit": "522ced32377195b9c2df9cd39ae711a3715dbbdb",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -203,7 +203,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "57a4a8d6cc1f88e4f7283cea53426d1b81e50426",
+          "source_commit": "522ced32377195b9c2df9cd39ae711a3715dbbdb",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -215,7 +215,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "57a4a8d6cc1f88e4f7283cea53426d1b81e50426",
+          "source_commit": "522ced32377195b9c2df9cd39ae711a3715dbbdb",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -227,7 +227,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "57a4a8d6cc1f88e4f7283cea53426d1b81e50426",
+          "source_commit": "522ced32377195b9c2df9cd39ae711a3715dbbdb",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -241,7 +241,7 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "57a4a8d6cc1f88e4f7283cea53426d1b81e50426",
+          "source_commit": "522ced32377195b9c2df9cd39ae711a3715dbbdb",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -253,7 +253,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "57a4a8d6cc1f88e4f7283cea53426d1b81e50426",
+          "source_commit": "522ced32377195b9c2df9cd39ae711a3715dbbdb",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
