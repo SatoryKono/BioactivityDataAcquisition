@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
-from typing import TYPE_CHECKING, Required, TypedDict, Unpack
+from typing import Any, TYPE_CHECKING
 
 from bioetl.application.services.protein.classification_resolution import (
     InvalidRecordPolicy,
@@ -22,27 +22,9 @@ from bioetl.infrastructure.adapters.chembl.target_protein_classification_data_so
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from bioetl.domain.mapping.protein_class_target_type import (
         ProteinClassTargetTypeMappingData,
     )
-    from bioetl.domain.ports import DeltaReaderPort, LoggerPort
-    from bioetl.infrastructure.adapters.chembl.target_protein_classification_loading_mixin import (
-        IndexBuilder,
-        TargetIdResolver,
-    )
-
-
-class _SnapshotSourceArgs(TypedDict, total=False):
-    delta_reader: Required[DeltaReaderPort]
-    logger: Required[LoggerPort]
-    invalid_record_policy: str
-    target_type_mapping_data: ProteinClassTargetTypeMappingData | None
-    resolution_factory: Callable[..., object] | None
-    entity_type: str
-    index_builder: IndexBuilder
-    target_id_resolver: TargetIdResolver
 
 
 def _resolution_factory(
@@ -65,7 +47,7 @@ def _resolution_factory(
 class TargetProteinClassificationSnapshotDataSource(_SnapshotDataSource):
     """Inject the application resolution service into the infrastructure source."""
 
-    def __init__(self, **kwargs: Unpack[_SnapshotSourceArgs]) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         kwargs.setdefault("resolution_factory", _resolution_factory)
         kwargs.setdefault("entity_type", _TARGET_PROTEIN_CLASSIFICATION_ENTITY_TYPE)
         kwargs.setdefault("index_builder", build_target_component_indexes)

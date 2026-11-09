@@ -99,19 +99,6 @@ allowed_categories:
   - snapshot_refresh_write_mode
   - temporary_known_failure
 entries:
-  - path: tests/integration/test_github_project_transport.py
-    suite: integration
-    category: conditional_environment_guard
-    owner: "@bioetl-platform"
-    linked_issue: "#12929"
-    lifecycle: permanent_policy
-    reviewed_skip_calls: 1
-    vcr_related: false
-    review_date: "2026-11-09"
-    rationale: >
-      Existing Node.js availability guard moved with the transport contract from
-      the unit suite. The nine protocol scenarios run when Node.js is available;
-      no network credentials or provider calls are required.
   - path: tests/contract/_gold_schema_snapshot_registry.py
     suite: contract
     category: snapshot_refresh_write_mode
