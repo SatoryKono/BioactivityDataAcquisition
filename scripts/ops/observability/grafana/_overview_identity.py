@@ -1,6 +1,7 @@
 """Compact, persisted identity for the Overview first window."""
 
 CUSTOM_WIDTH = "custom.width"
+OVERALL_VERDICT = "Overall verdict"
 
 
 def apply_overview_identity(payload: dict) -> None:
@@ -15,14 +16,14 @@ def apply_overview_identity(payload: dict) -> None:
     for pid in (9002, 9603):
         by_id[pid]["options"]["cellHeight"] = "sm"
     # Preserve the shipped 200% CSS budget and leave Reason flexible.
-    widths = {"Overall verdict": 60, "Processing": 95, "Trust": 60, "Result": 80}
+    widths = {OVERALL_VERDICT: 60, "Processing": 95, "Trust": 60, "Result": 80}
     for override in by_id[9603]["fieldConfig"]["overrides"]:
         field = override["matcher"].get("options")
         if field not in widths and field != "Status":
             continue
         props = override["properties"]
         width = widths.get(field)
-        if field == "Overall verdict" and not any(
+        if field == OVERALL_VERDICT and not any(
             prop.get("id") == "displayName" for prop in props
         ):
             width = None
@@ -133,7 +134,7 @@ def apply_saved_evidence_readability(payload: dict) -> None:
     for item in overview[9603]["fieldConfig"]["overrides"]:
         name = item["matcher"].get("options")
         for prop in item["properties"]:
-            if prop["id"] == "custom.width" and name in {"Processing", "Trust"}:
+            if prop["id"] == CUSTOM_WIDTH and name in {"Processing", "Trust"}:
                 prop["value"] = 95 if name == "Processing" else 60
             if prop["id"] == "mappings" and name == "Reason":
                 mapping = {
@@ -147,10 +148,10 @@ def apply_saved_evidence_readability(payload: dict) -> None:
                 if mapping not in prop["value"]:
                     prop["value"].append(mapping)
     verdict_override = {
-        "matcher": {"id": "byName", "options": "Overall verdict"},
+        "matcher": {"id": "byName", "options": OVERALL_VERDICT},
         "properties": [
             {"id": "displayName", "value": "Verdict"},
-            {"id": "custom.width", "value": 60},
+            {"id": CUSTOM_WIDTH, "value": 60},
         ],
     }
     if verdict_override not in overview[9603]["fieldConfig"]["overrides"]:
