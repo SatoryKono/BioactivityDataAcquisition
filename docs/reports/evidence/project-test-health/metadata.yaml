@@ -2,15 +2,14 @@ version: 1
 policy_scope: non_canonical_evidence_summary
 summary_path: docs/reports/evidence/project-test-health/SUMMARY.md
 owner: "@bioetl-quality"
-last_verified: "2026-11-09"
+last_verified: "2026-11-02"
 freshness_window_days: 30
 verification_scope: tracked_test_module_inventory
-source_ref: 82b3d165d87bcb19c1d4214d9ccf7254750687b5
+source_ref: e5cfda36c8320c8bd4fc31bfd2c8cfea8ff6a44d
 test_module_inventory:
-  # Run in a checkout of source_ref.
   command: "git ls-files 'tests/**/test_*.py' | wc -l"
-  count: 3238
-  counted_on: "2026-11-09"
+  count: 3209
+  counted_on: "2026-11-02"
   full_evidence_snapshot_date: "2026-03-23"
 allowed_interpretation: backlog_signal_only
 canonical_sources:
