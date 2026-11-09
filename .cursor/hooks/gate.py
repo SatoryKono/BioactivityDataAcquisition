@@ -16,6 +16,7 @@ from collections.abc import Callable, Mapping
 from typing import Any
 
 _PROTECTED_BRANCHES = frozenset({"main", "master"})
+_GPG_SIGN_OFF = frozenset({"", "0", "false", "no", "off"})
 _READ_ONLY_TOOLS = frozenset(
     {
         "AwaitShell",
@@ -118,6 +119,8 @@ _SCRATCH = re.compile(
 )
 # Accept spaced and attached redirects, including &>.env / x>.env forms.
 _REDIRECT = re.compile(r"(?i)(?:^|[\s|;&]|[^>\s|;&])\d*>{1,2}\s*(\S+)|(?<!>)&>\s*(\S+)")
+_REDIRECT_PREFIX = re.compile(r"\d*>{1,2}$")
+_SUBST_WORD = re.compile(r"[A-Za-z0-9_./\\-]+")
 _PATCH_PATH = re.compile(
     r"(?m)^(?:\*\*\* (?:Add|Delete|Update) File: |diff --git a/\S+ b/)(.+)$"
 )
@@ -315,6 +318,11 @@ def _classify_git(
     branch_lookup: Callable[[str], str | None],
 ) -> tuple[str, str, str]:
     """Classify one git invocation for hard resets, hooks, and pushes."""
+    if _git_config_disables_hooks(tokens):
+        return _deny_tuple(
+            "git -c core.hooksPath или commit.gpgSign=false запрещён.",
+            "Hook gate denied git -c core.hooksPath or commit.gpgSign=false.",
+        )
     parsed = _git_command(tokens)
     if parsed is None:
         return ("allow", "", "")
@@ -336,9 +344,9 @@ def _classify_git(
             "Hook gate denied git submodule foreach reset --hard.",
         )
     if subcommand == "commit" and (
-        _has_flag(args, "--no-verify")
+        any(_is_abbreviated_option(arg, "--no-verify", "--no-veri") for arg in args)
         or _has_short_option(args, "n")
-        or _has_flag(args, "--no-gpg-sign")
+        or any(_is_abbreviated_option(arg, "--no-gpg-sign", "--no-g") for arg in args)
     ):
         return _deny_tuple(
             "git commit без хуков или без подписи запрещён.",
@@ -416,6 +424,17 @@ def _starts_monitoring(segment: str) -> bool:
 def _segment_write_kind(segment: str, roots: list[str], cwd: str) -> str | None:
     """Detect env or root-scratch writes in one shell segment."""
     visible = _strip_unquoted_comment(segment)
+    direct = _direct_segment_write_kind(visible, roots, cwd)
+    nested = _substitution_write_kind(visible, roots, cwd)
+    if direct == "env" or nested == "env":
+        return "env"
+    if direct == "scratch" or nested == "scratch":
+        return "scratch"
+    return None
+
+
+def _direct_segment_write_kind(visible: str, roots: list[str], cwd: str) -> str | None:
+    """Detect env or scratch writes without expanding substitutions."""
     redirected = [
         kind
         for match in _REDIRECT.finditer(visible)
@@ -471,6 +490,89 @@ def _has_sed_inplace(tokens: list[str]) -> bool:
         if token.startswith("--in-place="):
             return True
     return False
+
+
+def _substitution_write_kind(segment: str, roots: list[str], cwd: str) -> str | None:
+    """Detect protected writes hidden in command or process substitutions."""
+    tokens = _tokenize(segment)
+    writer = any(token.lower() in _WRITE_COMMANDS for token in tokens)
+    writer = writer or _has_sed_inplace(tokens)
+    delete_only = _is_delete_only(tokens)
+    found_scratch = False
+    for start, body in _iter_substitution_bodies(segment):
+        inner = _segment_write_kind(body, roots, cwd)
+        if inner == "env":
+            return "env"
+        if inner == "scratch":
+            return "scratch"
+        kind = _protected_kind_in_text(body, roots, cwd)
+        if kind is None:
+            continue
+        if not _preceded_by_redirect(segment, start) and not writer:
+            continue
+        if kind == "env":
+            return "env"
+        found_scratch = True
+    if found_scratch and not delete_only:
+        return "scratch"
+    return None
+
+
+def _iter_substitution_bodies(segment: str) -> list[tuple[int, str]]:
+    """Return substitution start indexes and their inner text."""
+    bodies: list[tuple[int, str]] = []
+    index = 0
+    while index < len(segment):
+        if segment.startswith("$(", index) or segment.startswith(">(", index):
+            body_start = index + 2
+            depth = 1
+            cursor = body_start
+            while cursor < len(segment) and depth:
+                if segment.startswith("$(", cursor) or segment.startswith(">(", cursor):
+                    depth += 1
+                    cursor += 2
+                    continue
+                if segment[cursor] == "(":
+                    depth += 1
+                elif segment[cursor] == ")":
+                    depth -= 1
+                    if depth == 0:
+                        bodies.append((index, segment[body_start:cursor]))
+                        index = cursor
+                        break
+                cursor += 1
+            index += 1
+            continue
+        if segment[index] == "`":
+            end = segment.find("`", index + 1)
+            if end != -1:
+                bodies.append((index, segment[index + 1 : end]))
+                index = end + 1
+                continue
+        index += 1
+    return bodies
+
+
+def _preceded_by_redirect(segment: str, start: int) -> bool:
+    """True when a substitution is the target of a redirect operator."""
+    prefix = segment[:start].rstrip()
+    if prefix.endswith(("'", '"')):
+        prefix = prefix[:-1].rstrip()
+    return _REDIRECT_PREFIX.search(prefix) is not None
+
+
+def _protected_kind_in_text(text: str, roots: list[str], cwd: str) -> str | None:
+    """Return env or scratch when text contains a protected path token."""
+    found_scratch = False
+    for token in _SUBST_WORD.findall(text):
+        kind = _path_kind(token, roots, cwd)
+        if kind == "env":
+            return "env"
+        if kind == "scratch":
+            found_scratch = True
+    if found_scratch:
+        return "scratch"
+    return None
 
 
 def _is_file_mutation(tool_name: str, tool_input: Any) -> bool:
@@ -807,6 +909,61 @@ def _ref_destination(refspec: str) -> str:
 def _has_flag(args: list[str], flag: str) -> bool:
     """True when args contain an exact flag or flag=value form."""
     return flag in args or any(arg.startswith(flag + "=") for arg in args)
+
+
+def _is_abbreviated_option(arg: str, canonical: str, minimum: str) -> bool:
+    """True when arg is canonical or a unique abbreviation of at least minimum."""
+    token = arg.split("=", 1)[0]
+    return token.startswith(minimum) and canonical.startswith(token)
+
+
+def _git_config_disables_hooks(tokens: list[str]) -> bool:
+    """True when git -c points hooks elsewhere or turns commit signing off."""
+    for key, value in _git_global_config(tokens):
+        if key == "core.hookspath":
+            return True
+        if key == "commit.gpgsign" and value in _GPG_SIGN_OFF:
+            return True
+    return False
+
+
+def _git_global_config(tokens: list[str]) -> list[tuple[str, str]]:
+    """Return global git -c assignments that appear before the subcommand."""
+    index = _find_git(tokens)
+    if index is None:
+        return []
+    cursor = index + 1
+    configs: list[tuple[str, str]] = []
+    while cursor < len(tokens):
+        token = tokens[cursor]
+        if token == "-c" and cursor + 1 < len(tokens):
+            assignment = _config_assignment(tokens[cursor + 1])
+            if assignment is not None:
+                configs.append(assignment)
+            cursor += 2
+            continue
+        if token in {"-C", "--git-dir", "--namespace", "--work-tree"}:
+            cursor += 2
+            continue
+        if token.startswith(("--git-dir=", "--work-tree=", "--namespace=")):
+            cursor += 1
+            continue
+        if token.startswith("-"):
+            cursor += 1
+            continue
+        break
+    return configs
+
+
+def _config_assignment(token: str) -> tuple[str, str] | None:
+    """Parse a git -c name=value token into a lowercase pair."""
+    if "=" not in token:
+        return None
+    key, value = token.split("=", 1)
+    key = key.strip().lower()
+    if not key:
+        return None
+    return key, value.strip().lower()
 
 
 def _has_prefix(args: list[str], prefix: str) -> bool:
