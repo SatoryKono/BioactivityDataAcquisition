@@ -274,11 +274,9 @@ link_skill() {
         fi
         return 0
     fi
-    if path_exists "$link_path"; then
-        if ! remove_managed_skill_link "$target_root" "$name"; then
-            report_collision "$link_path" "expected a removable managed skill link"
-            return 1
-        fi
+    if path_exists "$link_path" && ! remove_managed_skill_link "$target_root" "$name"; then
+        report_collision "$link_path" "expected a removable managed skill link"
+        return 1
     fi
     create_skill_link "$link_path" "$link_target" "$source_path"
 }
