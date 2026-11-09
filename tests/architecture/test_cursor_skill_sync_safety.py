@@ -153,3 +153,26 @@ def test_project_sync_links_grok_operator_skills_and_keeps_them(
         == "../../docs/00-project/ai/grok/skills/bioetl-session"
     )
     assert not (cursor_home / "skills").exists()
+
+
+def test_project_sync_retargets_skill_moved_between_codex_and_grok(
+    tmp_path: Path,
+) -> None:
+    repo, script, cursor_home = _sandbox(tmp_path, "migrated")
+    project_skills = repo / ".cursor/skills"
+    project_skills.mkdir(parents=True)
+    stale = project_skills / "migrated"
+    stale.symlink_to("../../.codex/skills/migrated")
+    shutil.rmtree(repo / ".codex/skills/migrated")
+    grok_skill = repo / "docs/00-project/ai/grok/skills/migrated"
+    grok_skill.mkdir(parents=True)
+    (grok_skill / "SKILL.md").write_text(
+        "---\nname: migrated\n---\n",
+        encoding="utf-8",
+    )
+
+    result = _run_sync(repo, script, cursor_home, "--project-only")
+
+    assert result.returncode == 0, result.stderr
+    assert stale.is_symlink()
+    assert os.readlink(stale) == "../../docs/00-project/ai/grok/skills/migrated"
