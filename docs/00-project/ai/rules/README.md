@@ -75,6 +75,8 @@ uv run python -m scripts.ai.sync.cursor --check
 - Рефакторинге
 - Code review
 
+**Команды (`/`):** канон `docs/00-project/ai/rules/cursor/commands/*.md`, локальный деплой `.cursor/commands/`. Тот же `python -m scripts.ai.sync.cursor --deploy`. Имена: `/review`, `/post-change`, `/pre-commit`, `/qodo-sync`. Это короткие алиасы: ревью и post-change вызывают skills `py-audit-bot` и `bioetl-post-change`, pre-commit и qodo-sync следуют Windsurf workflow. `setup_cursor.sh` команды не ставит. Личные команды держите в пользовательском scope Cursor: каталог `.cursor/commands/` полностью управляется деплоем.
+
 ### B. Windsurf Cascade
 
 **SSOT:** `docs/00-project/ai/rules/cursor/*.mdc`
