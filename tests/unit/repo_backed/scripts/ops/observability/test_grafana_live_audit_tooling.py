@@ -1166,6 +1166,23 @@ def test_run_id_independent_metric_panels_disclose_scope() -> None:
     assert missing_scope == []
 
 
+def test_replay_status_panels_resolve_donor_and_explain_empty_values() -> None:
+    specs = {
+        spec.panel_id: spec
+        for spec in audit_subject.effective_panel_specs()
+        if spec.dashboard_uid == "bioetl-control-plane-v1"
+    }
+    for panel_id in (9422, 9423):
+        spec = specs[panel_id]
+        panel = audit_subject._find_panel(spec)
+        target = audit_subject._select_target(panel, spec, field="url")
+        assert target is not None
+        assert target["url"].startswith("/ops/observability/selected-run-status?")
+        assert panel["fieldConfig"]["defaults"]["noValue"] == (
+            "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
+        )
+
+
 def test_workflow_overview_dashboard_is_not_in_shipping_surface() -> None:
     """Retired epic #6647: bioetl-workflow-overview.json must stay off shipped set."""
     dashboard_path = Path("grafana/dashboards/bioetl-workflow-overview.json")
