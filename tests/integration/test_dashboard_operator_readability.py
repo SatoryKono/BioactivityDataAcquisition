@@ -655,7 +655,8 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
     targets = ov_panel["targets"]
     assert [target["refId"] for target in targets] == ["A"]
     removal_target = targets[0]
-    assert removal_target["url"].endswith("format=pipeline_run_report_json")
+    assert removal_target["url"].startswith("/ops/observability/selected-run-status?")
+    assert "quality_evidence.funnel" in removal_target["root_selector"]
     assert removal_target["parser"] == "backend"
     assert removal_target["root_selector"] == removal_target["uql"].removeprefix(
         'parse-json | jsonata "'

@@ -357,7 +357,7 @@ _MERGED_PRR = (
     "100*$n/$s.records_in : null) : null}; "
     # Preserve project_stage_diagnostics() states (UNFINISHED/INCOMPLETE); join
     # funnel only for removal counters and percentages.
-    "$funnel := $exists(funnel) ? funnel : []; "
+    "$funnel := $exists(quality_evidence.funnel) ? quality_evidence.funnel : []; "
     "$diags := $exists(stage_diagnostics) ? stage_diagnostics : []; "
     "$map($diags, function($d){($s := $funnel[stage_id=$d.stage_id][0]; "
     "$excluded := $exists($s) and $s.tracking='full' and $type($s.removals)='array' "
@@ -922,10 +922,10 @@ def apply_overview(data: dict[str, Any]) -> None:
     # Materialize complete saved stage rows once; mixed-frame joins dropped them.
     stages["datasource"] = dict(OPS)
     prr_url = (
-        "/ops/observability/pipeline-run-report-artifact"
+        "/ops/observability/selected-run-status"
         "?pipeline=${selected_pipeline:percentencode}"
         "&run_id=${selected_run_id:percentencode}"
-        "&format=pipeline_run_report_json"
+        "&run_type=${run_type:csv}&workflow=${workflow:csv}"
     )
     stages["targets"] = [
         {
