@@ -159,7 +159,6 @@ _GOLD_PARAMETERS = frozenset(
 _UNKNOWN_SCOPE = "unknown"
 
 
-
 def fetch_processed_record_values(
     *,
     prometheus_base_url: str,
