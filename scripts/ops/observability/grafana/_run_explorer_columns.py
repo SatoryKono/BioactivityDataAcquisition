@@ -392,7 +392,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
                 {"id": "color", "value": {"mode": "fixed", "fixedColor": "#93C5FD"}}
             )
         if name == "Started":
-            properties.append({"id": "unit", "value": "time:YYYY-MM-DD HH:mm"})
+            properties.append({"id": "unit", "value": "time:YY-MM-DD:HH:mm"})
         if name == "Workflow":
             properties.append(
                 {
