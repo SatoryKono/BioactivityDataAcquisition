@@ -6089,7 +6089,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows Data Quality handoff conditions for the selected Pipeline. Zero means no condition is firing only when DQ telemetry is present; UNKNOWN is inconclusive. Open Data Quality for rule, threshold, and Silver reject evidence. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
+          "description": "TIME RANGE · Shows Data Quality handoff conditions for the selected Pipeline. Zero means no condition is firing only when DQ telemetry is present; UNKNOWN is inconclusive. Open Data Quality for rule, threshold, and Silver reject evidence. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. Counts observed condition series; uninstantiated event families do not erase other observed conditions. Missing all observations remains no data.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -6169,7 +6169,7 @@
           },
           "targets": [
             {
-              "expr": "((((sum(bioetl_runtime_alert_condition_dq_soft_threshold_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_dq_hard_fail_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_dq_critical_anomaly_30m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_silver_validation_failures_30m{pipeline=~\"$pipeline\"}))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\"}) > bool 0)))",
+              "expr": "sum({__name__=~\"bioetl_runtime_alert_condition_dq_soft_threshold_15m|bioetl_runtime_alert_condition_dq_hard_fail_15m|bioetl_runtime_alert_condition_dq_critical_anomaly_30m|bioetl_runtime_alert_condition_silver_validation_failures_30m\",pipeline=~\"$pipeline\"}) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\"}) > bool 0)",
               "refId": "A",
               "datasource": {
                 "type": "prometheus",
@@ -6444,7 +6444,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows global provider-independent latency and rate-limiter conditions. Pipeline and Run Type filters do not affect this panel. Zero is valid only when provider telemetry exists; UNKNOWN means the global provider anchor is missing",
+          "description": "TIME RANGE · Shows global provider-independent latency and rate-limiter conditions. Pipeline and Run Type filters do not affect this panel. Zero is valid only when provider telemetry exists; UNKNOWN means the global provider anchor is missing. Counts observed condition series; uninstantiated event families do not erase other observed conditions. Missing all observations remains no data.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -6525,7 +6525,7 @@
           },
           "targets": [
             {
-              "expr": "(((sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m))) and on() (count(bioetl_provider_current_status) > bool 0))",
+              "expr": "sum({__name__=~\"bioetl_runtime_alert_condition_provider_adapter_latency_high_30m|bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m\"}) and on() (count(bioetl_provider_current_status) > bool 0)",
               "refId": "A",
               "datasource": {
                 "type": "prometheus",

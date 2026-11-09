@@ -143,6 +143,7 @@ def qualify_empty(
     timeout: float,
     as_of: str | None = None,
     historical_reset: bool = False,
+    range_bounds: dict[str, str] | None = None,
 ) -> tuple[bool, list[dict[str, Any]]]:
     """Return acceptance and exact independent witnesses; fail closed on gaps."""
     if dashboard_uid != "bioetl-incident-v1" or empty_state_label(panel_id) is None:
@@ -166,6 +167,13 @@ def qualify_empty(
         payload = request("/api/v1/query", parameters)
         return _vector_result(payload)
 
+    def sample_vector(query: str) -> list[dict[str, Any]] | None:
+        if range_bounds is None:
+            return vector(query)
+        return _matrix_samples(
+            request("/api/v1/query_range", {**range_bounds, "query": substitute(query)})
+        )
+
     scope = _observed_scope(vector)
     if not scope:
         return False, evidence
@@ -176,11 +184,11 @@ def qualify_empty(
             panel_id, scope, request, vector, substitute
         ), evidence
     if panel_id in _SIGNAL_WITNESSES:
-        return _qualify_signal_empty(panel_id, expr, request, vector), evidence
+        return _qualify_signal_empty(panel_id, expr, request, sample_vector), evidence
     return (
         _event_families_available(expr, request)
         and _event_sample_coverage_confirmed(
-            expr, vector, require_reset=historical_reset
+            expr, sample_vector, require_reset=historical_reset
         ),
         evidence,
     )
@@ -344,16 +352,22 @@ def _event_families_available(expr: str, request: Callable[..., Any]) -> bool:
 
 
 def _checkpoint_generation_guard(panel_id: int, expr: str) -> bool:
+    guards = {
+        105: ("bioetl_checkpoint_save_duration_seconds", "pipeline, operation"),
+        207: ("bioetl_phase_duration_seconds", "phase, status"),
+        239: ("bioetl_pipeline_duration_seconds", "stage, status, run_type"),
+    }
+    family, labels = guards.get(panel_id, ("", ""))
     return (
-        panel_id == 105
+        bool(family)
         and "histogram_quantile(" in expr
-        and "unless on (pipeline, operation)" in expr
+        and f"unless on ({labels})" in expr
         and set(_METRIC.findall(expr))
         == {
-            "bioetl_checkpoint_save_duration_seconds_bucket",
-            "bioetl_checkpoint_save_duration_seconds_created",
+            f"{family}_bucket",
+            f"{family}_created",
         }
-        and bool(re.search(r"changes\([^)]*\)\s*>\s*0", expr))
+        and bool(re.search(r"changes\(.+?\)\s*>\s*0", expr))
     )
 
 
@@ -382,11 +396,33 @@ def _event_sample_coverage_confirmed(
 def _event_samples_sufficient(
     samples: list[dict[str, Any]] | None, *, require_reset: bool
 ) -> bool:
-    return (
-        samples is not None
-        and (not require_reset or bool(samples))
-        and all(float(row["value"][1]) >= 2 for row in samples)
-    )
+    if samples is None or (require_reset and not samples):
+        return False
+    if not require_reset:
+        return all(float(row["value"][1]) >= 2 for row in samples)
+    # A historical creation boundary may have one sample; every distinct
+    # series must subsequently have enough observations to verify its reset.
+    coverage: dict[tuple, float] = {}
+    for row in samples:
+        key = tuple(sorted(row.get("metric", {}).items()))
+        coverage[key] = max(coverage.get(key, 0), float(row["value"][1]))
+    return all(count >= 2 for count in coverage.values())
+
+
+def _matrix_samples(payload: Any) -> list[dict[str, Any]] | None:
+    data = _response_data(payload)
+    result = data.get("result")
+    if data.get("resultType") != "matrix" or not isinstance(result, list):
+        return None
+    samples = []
+    for series in result:
+        if not isinstance(series, dict) or not isinstance(series.get("values"), list):
+            return None
+        samples.extend(
+            {"metric": series.get("metric", {}), "value": value}
+            for value in series["values"]
+        )
+    return samples
 
 
 def _vector_result(payload: dict[str, Any]) -> list[dict[str, Any]] | None:

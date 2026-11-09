@@ -449,8 +449,17 @@ def test_empty_histogram_rejects_resets_and_failed_reset_queries(resets, expecte
         "wrong-panel",
     ],
 )
-def test_reviewed_generation_gap_requires_reset_and_complete_raw_evidence(gap):
-    family = "bioetl_checkpoint_save_duration_seconds"
+@pytest.mark.parametrize(
+    "panel_id,family,labels",
+    [
+        (105, "bioetl_checkpoint_save_duration_seconds", "pipeline, operation"),
+        (207, "bioetl_phase_duration_seconds", "phase, status"),
+        (239, "bioetl_pipeline_duration_seconds", "stage, status, run_type"),
+    ],
+)
+def test_reviewed_generation_gap_requires_reset_and_complete_raw_evidence(
+    gap, panel_id, family, labels
+):
 
     def fetch(url, **_kwargs):
         params = parse_qs(urlsplit(url).query)
@@ -482,8 +491,8 @@ def test_reviewed_generation_gap_requires_reset_and_complete_raw_evidence(gap):
 
     accepted, _ = qualify_empty(
         dashboard_uid="bioetl-incident-v1",
-        panel_id=106 if gap == "wrong-panel" else 105,
-        expr=f"histogram_quantile(0.5, sum by (le, pipeline, operation) (increase({family}_bucket[24h])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes({family}_created[24h]) > 0)))",
+        panel_id=106 if gap == "wrong-panel" else panel_id,
+        expr=f"histogram_quantile(0.5, sum by (le, {labels}) (increase({family}_bucket[24h])) unless on ({labels}) (sum by ({labels}) (changes({family}_created[24h]) > 0)))",
         base_url="http://prometheus",
         fetch=fetch,
         substitute=lambda value: value,
@@ -621,7 +630,10 @@ def test_generation_gap_review_keeps_warning_and_requires_evidence(proved, monke
     monkeypatch.setattr(
         audit_subject,
         "_collect_empty_witnesses",
-        lambda *_args, historical_reset=False: (historical_reset and proved, []),
+        lambda *_args, historical_reset=False, **_kwargs: (
+            historical_reset and proved,
+            [],
+        ),
     )
     classification, detail = audit_subject._qualify_empty_panel(
         spec, audit_subject._parse_args([]), "guarded histogram", [], "No estimate"
@@ -643,3 +655,63 @@ def test_generation_gap_review_keeps_warning_and_requires_evidence(proved, monke
     if proved:
         assert "WARN" in detail
         assert gate["panel_outcomes"][0]["decision"] == "pass_reviewed"
+
+
+@pytest.mark.parametrize("early_sample", [False, True])
+def test_empty_range_checks_samples_before_the_last_step(early_sample):
+    family = "bioetl_shutdown_started_total"
+    bounds = {"start": "0", "end": "3600", "step": "60"}
+
+    def fetch(url, **_kwargs):
+        parsed = urlsplit(url)
+        params = parse_qs(parsed.query)
+        if parsed.path.endswith("metadata"):
+            return {"status": "success", "data": {family: [{"type": "counter"}]}}
+        query = params["query"][0]
+        if query.startswith("count_over_time"):
+            assert parsed.path == "/api/v1/query_range"
+            assert {key: params[key][0] for key in bounds} == bounds
+            rows = [{"metric": {}, "values": [[60, "1"]]}] if early_sample else []
+            return {
+                "status": "success",
+                "data": {"resultType": "matrix", "result": rows},
+            }
+        rows = [{"metric": {}, "value": [3600, "1"]}]
+        if query.startswith("up{job=~"):
+            rows = [
+                {"metric": {"job": job}, "value": [3600, "1"]}
+                for job in ("bioetl", "pushgateway", "prometheus")
+            ]
+        return {"status": "success", "data": {"resultType": "vector", "result": rows}}
+
+    accepted, _ = qualify_empty(
+        dashboard_uid="bioetl-incident-v1",
+        panel_id=209,
+        expr=f"increase({family}[5m])",
+        base_url="http://prometheus",
+        fetch=fetch,
+        substitute=lambda value: value,
+        timeout=1,
+        range_bounds=bounds,
+    )
+    assert accepted is not early_sample
+
+
+@pytest.mark.parametrize(
+    "counts, expected", [([1, 2], True), ([1], False), ([2], True)]
+)
+def test_historical_boundary_requires_later_samples_for_each_series(counts, expected):
+    from scripts.ops.observability.grafana._empty_observation_contract import (
+        _event_samples_sufficient,
+    )
+
+    rows = [
+        {"metric": {"pipeline": "p"}, "value": [i, str(n)]}
+        for i, n in enumerate(counts)
+    ]
+    assert _event_samples_sufficient(rows, require_reset=True) is expected
+    assert _event_samples_sufficient(rows, require_reset=False) is all(
+        n >= 2 for n in counts
+    )
+    rows.append({"metric": {"pipeline": "other"}, "value": [0, "1"]})
+    assert not _event_samples_sufficient(rows, require_reset=True)
