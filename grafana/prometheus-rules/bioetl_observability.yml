@@ -271,10 +271,20 @@ groups:
       - record: bioetl_l0_input_status_selected
         labels:
           input: provider
+        # Provider identity belongs to the pipeline, not the workflow run type.
+        # Only project a unique observed mapping; conflicting mappings stay UNKNOWN.
         expr: >-
           max by (pipeline, run_type) (
-            group by (pipeline, run_type, provider) (bioetl_workflow_pipeline_expected)
-            * on (provider) group_left() bioetl_provider_current_status
+            bioetl_overview_pipeline_run_type_universe
+            * on (pipeline) group_left()
+            (
+              max by (pipeline) (
+                group by (pipeline, provider) (bioetl_workflow_pipeline_expected)
+                * on (provider) group_left() bioetl_provider_current_status
+              )
+              and on (pipeline)
+              (count by (pipeline) (group by (pipeline, provider) (bioetl_workflow_pipeline_expected)) == 1)
+            )
           )
           or on (pipeline, run_type) (bioetl_overview_pipeline_run_type_universe * 3)
       - record: bioetl_l0_input_status_selected

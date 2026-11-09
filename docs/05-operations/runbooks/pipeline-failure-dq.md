@@ -63,6 +63,24 @@ CURRENT `gold_contract_exclusions` reason follows the same event-window rule
 for `bioetl_stage_records_total{stage="gold",outcome="excluded_by_contract"}`;
 current-window warnings do not erase saved Gold exclusion totals.
 
+### Empty event observations in Incident Workspace
+
+`NO OBSERVATIONS` is not a measured zero or a healthy verdict. Labelled event
+families (errors, checkpoint, replay, audit and shutdown operations) are lazy:
+before a matching observation they expose metadata but no sample. The live panel
+auditor accepts this state only for explicit event-panel contracts, with all
+BioETL, Pushgateway and Prometheus targets up, an observed pipeline/run-type scope,
+and counter/histogram metadata for every referenced event family. Missing sources,
+undeclared metrics, unknown scopes and response annotations remain unaccepted.
+
+Empty filtered signal tables additionally require their recording rules and
+independent input evidence. Workflow-only panels may be empty for a verified
+standalone scope when Workflow is All; selecting a concrete workflow does not get
+this exemption. Standalone membership is keyed by both pipeline and run type.
+Provider identity is projected from a unique observed pipeline/provider mapping
+across run types; conflicting mappings remain UNKNOWN. Saved run verdicts,
+including provider WARN, are not rewritten by these CURRENT projections.
+
 ### Thresholds
 
 - **Soft Fail**: > 5% errors (Warning).

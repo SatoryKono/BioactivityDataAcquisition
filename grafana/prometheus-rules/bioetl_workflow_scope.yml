@@ -166,7 +166,7 @@ groups:
   interval: 30s
   rules:
   - record: bioetl_standalone_pipeline_universe
-    expr: bioetl_overview_pipeline_run_type_universe unless on (pipeline) group by (pipeline) (bioetl_workflow_scope_universe)
+    expr: bioetl_overview_pipeline_run_type_universe unless on (pipeline, run_type) group by (pipeline, run_type) (bioetl_workflow_scope_universe)
   - record: bioetl_workflow_scope_action
     labels:
       workflow: __standalone__

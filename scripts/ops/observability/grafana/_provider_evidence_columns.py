@@ -316,16 +316,21 @@ def apply_dq_accounting_layout(payload: dict) -> None:
     if payload.get("uid") != "bioetl-dq-v2":
         return
     by_id = {panel["id"]: panel for panel in payload["panels"]}
-    by_id[9402]["gridPos"].update(x=0, y=10, w=24, h=8)
-    by_id[9403]["gridPos"].update(x=0, y=18, w=24, h=14)
+    by_id[9402]["gridPos"].update(x=0, y=18, w=24, h=3)
+    by_id[9403]["gridPos"].update(x=0, y=10, w=24, h=8)
+    by_id[9403]["options"]["footer"]["enablePagination"] = True
     # Old aliases share the renamed numeric column; pin its displayed name only.
     for override in by_id[9403]["fieldConfig"]["overrides"]:
+        if override["matcher"].get("options") == "percentage":
+            for prop in override["properties"]:
+                if prop["id"] == "custom.width":
+                    prop["value"] = 200
         if override["matcher"].get("options") in {"value", "value A", "count"}:
             override["properties"] = [
                 prop for prop in override["properties"] if prop["id"] != "custom.width"
             ]
     row = by_id[9450]
-    delta = 32 - row["gridPos"]["y"]
-    row["gridPos"]["y"] = 32
+    delta = 21 - row["gridPos"]["y"]
+    row["gridPos"]["y"] = 21
     for child in row["panels"]:
         child["gridPos"]["y"] += delta

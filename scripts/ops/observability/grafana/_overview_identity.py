@@ -132,6 +132,31 @@ def apply_saved_evidence_readability(payload: dict) -> None:
     )
     panels = {p["id"]: p for p in row["panels"]}
     overview = {p["id"]: p for p in payload["panels"]}
+    for item in overview[9603]["fieldConfig"]["overrides"]:
+        name = item["matcher"].get("options")
+        for prop in item["properties"]:
+            if prop["id"] == "custom.width" and name in {"Processing", "Trust"}:
+                prop["value"] = 95 if name == "Processing" else 60
+            if prop["id"] == "mappings" and name == "Reason":
+                mapping = {
+                    "type": "value",
+                    "options": {
+                        "Saved run evidence; CURRENT and chart coverage are separate": {
+                            "text": "Saved run evidence"
+                        }
+                    },
+                }
+                if mapping not in prop["value"]:
+                    prop["value"].append(mapping)
+    verdict_override = {
+        "matcher": {"id": "byName", "options": "Overall verdict"},
+        "properties": [
+            {"id": "displayName", "value": "Verdict"},
+            {"id": "custom.width", "value": 60},
+        ],
+    }
+    if verdict_override not in overview[9603]["fieldConfig"]["overrides"]:
+        overview[9603]["fieldConfig"]["overrides"].append(verdict_override)
     for pid in (9002, 9603):
         for item in overview[pid]["fieldConfig"]["overrides"]:
             if item["matcher"].get("options") == "Reason":
