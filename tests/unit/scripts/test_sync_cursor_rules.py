@@ -281,6 +281,32 @@ def test_deploy_prunes_stale_managed_commands_and_preserves_local_files(
     assert (deploy / "local.md").read_text(encoding="utf-8") == "Personal command"
 
 
+def test_prune_continues_after_an_unremovable_managed_command(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    canonical = tmp_path / sync_cursor_rules.CURSOR_COMMAND_DOCS_DIR
+    deploy = tmp_path / sync_cursor_rules.CURSOR_COMMANDS_DIR
+    _write_command(canonical, "review.md")
+    _write_command(deploy, "a-locked.md")
+    _write_command(deploy, "z-stale.md")
+    unlink = Path.unlink
+
+    def unlink_or_raise(path: Path, *, missing_ok: bool = False) -> None:
+        if path.name == "a-locked.md":
+            raise PermissionError("test fixture: command locked")
+        unlink(path, missing_ok=missing_ok)
+
+    monkeypatch.setattr(Path, "unlink", unlink_or_raise)
+    issues = sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path, deploy=True, check_only=False
+    )
+
+    assert len(issues) == 1
+    assert "a-locked.md: unable to prune command" in issues[0]
+    assert (deploy / "a-locked.md").is_file()
+    assert not (deploy / "z-stale.md").exists()
+
+
 def test_canonical_cursor_commands_include_governance_tokens() -> None:
     root = Path(__file__).resolve().parents[3]
     commands = sorted((root / sync_cursor_rules.CURSOR_COMMAND_DOCS_DIR).glob("*.md"))

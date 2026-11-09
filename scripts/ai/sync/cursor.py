@@ -169,18 +169,22 @@ def _is_managed_command(content: str) -> bool:
     return MANAGED_COMMAND_MARKER in content.splitlines()
 
 
-def _prune_managed_commands(deploy_dir: Path, keep: set[str]) -> None:
+def _prune_managed_commands(deploy_dir: Path, keep: set[str]) -> list[str]:
     """Remove marked copies whose canonical command is gone or invalid."""
     from scripts.engineering.common.repo_paths import ensure_path_within_root
 
+    issues = []
     for target in _list_md_files(deploy_dir):
-        if target.name in keep or target.is_symlink():
-            continue
-        safe_target = ensure_path_within_root(target, deploy_dir)
-        if _is_managed_command(
-            safe_target.read_text(encoding="utf-8", errors="replace")
-        ):
-            safe_target.unlink()
+        try:
+            if target.name in keep or target.is_symlink():
+                continue
+            safe_target = ensure_path_within_root(target, deploy_dir)
+            content = safe_target.read_text(encoding="utf-8", errors="replace")
+            if _is_managed_command(content):
+                safe_target.unlink(missing_ok=True)
+        except (OSError, ValueError) as exc:
+            issues.append(f"{target.name}: unable to prune command: {exc}")
+    return issues
 
 
 def _deploy_one_command(
@@ -260,9 +264,10 @@ def sync_cursor_commands(
     canonical_files = _list_md_files(canonical_dir)
     verify_mode = check_only or not deploy
     if not canonical_files:
+        issues = [f"No cursor commands found in {canonical_dir}"]
         if not verify_mode:
-            _prune_managed_commands(deploy_dir, set())
-        return [f"No cursor commands found in {canonical_dir}"]
+            issues.extend(_prune_managed_commands(deploy_dir, set()))
+        return issues
 
     issues: list[str] = []
     valid_names: set[str] = set()
@@ -306,7 +311,7 @@ def sync_cursor_commands(
             )
         )
     else:
-        _prune_managed_commands(deploy_dir, valid_names)
+        issues.extend(_prune_managed_commands(deploy_dir, valid_names))
     return issues
 
 
