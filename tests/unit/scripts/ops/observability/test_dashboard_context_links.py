@@ -135,6 +135,7 @@ def test_action_normalization_preserves_rank_query_and_visible_column() -> None:
     assert {"id": "custom.width", "value": 105} in properties
     link = next(prop["value"][0] for prop in properties if prop["id"] == "links")
     assert "${__data.fields.route_pipeline:percentencode}" in link["url"]
+    assert "var-run_id=-" in link["url"]
     assert (
         "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}"
         not in link["url"]

@@ -391,6 +391,24 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/ai/mcp/support/host_transport.mjs": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal stdio route dispatcher called by the existing Context7 and Brave wrappers. The wrappers remain the configured entrypoints.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31"
+    },
+    "scripts/ai/mcp/support/invoke_host_transport.ps1": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal host route launcher for the Context7 and Brave wrappers.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31"
+    },
+    "scripts/ai/mcp/support/invoke_host_transport.sh": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal host route launcher for the Context7 and Brave wrappers.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-31"
+    },
     "scripts/ai/mcp/support/uv_resolver.ps1": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the internal PowerShell uvx resolution and proxy-cleanup helper shared by MCP wrappers; keep it supporting unless command resolution becomes a standalone governed MCP command.",
@@ -994,20 +1012,20 @@
     "scripts/engineering/diagnostics/legacy/coderabbit_20260925/build_relevance_report.py": {
       "decision": "legacy_manual_utility",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-05",
-      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
+      "review_by": "2026-12-07",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this finalizes the dated CodeRabbit evidence into Markdown and JSON. Keep historical/manual; no Make or workflow callers found."
     },
     "scripts/engineering/diagnostics/legacy/coderabbit_20260925/normalize_findings.py": {
       "decision": "legacy_manual_utility",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-05",
-      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
+      "review_by": "2026-12-07",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this parses the dated audit leaves and writes normalized findings and leaf status. Keep historical/manual; no Make or workflow callers found."
     },
     "scripts/engineering/diagnostics/legacy/coderabbit_20260925/triage_findings.py": {
       "decision": "legacy_manual_utility",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-05",
-      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
+      "review_by": "2026-12-07",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this triages the dated finding set against source snippets and writes the campaign JSON. Keep historical/manual; no Make or workflow callers found."
     },
     "scripts/engineering/finances/github_billing_pipeline.py": {
       "decision": "shared_helper_module",
@@ -1072,8 +1090,8 @@
     "scripts/engineering/qa/_refresh_issue5376_live_metrics.py": {
       "decision": "legacy_manual_utility",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-05",
-      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
+      "review_by": "2026-12-07",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this writes the issue-specific closeout JSON from the coverage inventory. Keep historical/manual; no Make, workflow or QA router callers found."
     },
     "scripts/engineering/qa/_tracked_glob.py": {
       "decision": "shared_helper_module",
@@ -2014,14 +2032,14 @@
     "scripts/ops/observability/grafana/router_managed_image.py": {
       "decision": "shared_helper_module",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-05",
-      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks."
+      "review_by": "2026-12-07",
+      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks. 2026-11-07 review: retain behind the scripts.ops router. The host verification workflow imports it and the managed-image tests cover immutable image and complete rootfs comparisons."
     },
     "scripts/ops/observability/grafana/router_rootfs.py": {
       "decision": "shared_helper_module",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-05",
-      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks."
+      "review_by": "2026-12-07",
+      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks. 2026-11-07 review: retain behind the scripts.ops router. The Router bridge workflow runs the rootfs tests, which cover trusted extraction and filesystem comparisons."
     },
     "scripts/ops/observability/grafana/run_grafana_render_matrix.py": {
       "decision": "shared_helper_module",

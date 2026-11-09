@@ -14,8 +14,10 @@ from pathlib import Path
 
 import pytest
 
+from scripts.ops.observability.grafana.dashboard_context_links import DASHBOARD_TITLES
 from tests.integration._grafana_test_support import (
     _collect_dashboard_links,
+    get_dashboard_navigation_links,
     get_dashboard_panels,
     load_dashboard,
 )
@@ -43,6 +45,7 @@ def test_cross_scope_links_use_required_titles():
     for (source_uid, target_uid), allowed_titles in required_transitions.items():
         dashboard = load_dashboard(Path("grafana/dashboards") / f"{source_uid}.json")
         links = _collect_dashboard_links(dashboard)
+        nav_ids = {id(link) for link in get_dashboard_navigation_links(dashboard)}
 
         for link in links:
             url = str(link.get("url", ""))
@@ -50,6 +53,10 @@ def test_cross_scope_links_use_required_titles():
 
             # Check if this link targets the expected dashboard
             if f"/d/{target_uid}/" in url:
+                if id(link) in nav_ids:
+                    assert title == DASHBOARD_TITLES[target_uid]
+                    assert "${run_id:queryparam}" in url
+                    continue
                 # Check if title matches one of the allowed patterns
                 title_matches = any(allowed in title for allowed in allowed_titles)
                 assert title_matches, (
@@ -128,7 +135,11 @@ def test_provider_health_descriptions_separate_global_and_selected_scope() -> No
         assert description.startswith("SELECTED RUN")
         assert "saved" in description.lower()
         assert "UNKNOWN" in description
-        url = saved[pid]["targets"][0]["url"]
+        target = saved[pid]["targets"][0]
+        assert target["datasource"]["uid"] == "-- Dashboard --"
+        assert target["panelId"] == 9002
+        assert target["withTransforms"] is False
+        url = saved[9002]["targets"][0]["url"]
         assert url.startswith("/ops/observability/selected-run-status?")
         assert "run_id=${run_id}" in url
     assert "not live fleet health" in saved[9481]["description"]
