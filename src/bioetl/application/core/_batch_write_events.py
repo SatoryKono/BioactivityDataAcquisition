@@ -71,7 +71,7 @@ def emit_domain_event(
         if logger is not None:
             logger.warning(
                 "domain_event_emit_failed",
-                error=str(error),
+                error=str(error) or type(error).__name__,
                 error_type=type(error).__name__,
                 event_type=type(event).__name__,
             )
@@ -121,7 +121,7 @@ def emit_batch_failed(
             run_id=run_id,
             batch_id=batch_id,
             layer=Layer(layer),
-            error=str(error),
+            error=str(error) or type(error).__name__,
             error_type=type(error).__name__,
         ),
         logger=logger,
