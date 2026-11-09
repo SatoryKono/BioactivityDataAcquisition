@@ -1862,9 +1862,16 @@ def test_recovery_is_bounded_to_three_attempts_and_writes_one_incident(
     assert len(incident["recovery_history"]) >= 3
 
 
-@pytest.mark.parametrize("owner,expected", [(1000, "1000"), (0, None)])
+@pytest.mark.parametrize(
+    "uid,gid,expected_uid,expected_gid",
+    [
+        (1000, 1000, "1000", "1000"),
+        (1000, 0, "1000", None),
+        (0, 0, None, None),
+    ],
+)
 def test_runtime_uses_nonroot_report_writer_identity(
-    monkeypatch, tmp_path, owner, expected
+    monkeypatch, tmp_path, uid, gid, expected_uid, expected_gid
 ):
     from types import SimpleNamespace
 
@@ -1881,14 +1888,12 @@ def test_runtime_uses_nonroot_report_writer_identity(
             "BIOETL_DASHBOARD_DATA_ROOT": str(tmp_path / "data"),
         },
     )
-    monkeypatch.setattr(
-        Path, "stat", lambda _: SimpleNamespace(st_uid=owner, st_gid=owner)
-    )
+    monkeypatch.setattr(Path, "stat", lambda _: SimpleNamespace(st_uid=uid, st_gid=gid))
     with runtime_manager._dashboard_runtime_environment(
         tmp_path / "contract"
     ) as values:
-        assert values.get("BIOETL_RUNTIME_UID") == expected
-        assert values.get("BIOETL_RUNTIME_GID") == expected
+        assert values.get("BIOETL_RUNTIME_UID") == expected_uid
+        assert values.get("BIOETL_RUNTIME_GID") == expected_gid
     assert environment == {}
 
 

@@ -343,6 +343,60 @@ class TestProcessedRecordsTable:
         assert rows["08 gold_excluded_by_contract_records"]["value"] == (" 1")
         assert rows["07 gold_written_records"]["row_status"] == ""
 
+    def test_incomplete_snapshot_missing_gold_keys_allows_report_fill(
+        self,
+    ) -> None:
+        """Absent gold snapshot keys stay None so a consistent report can fill."""
+        run_id = deterministic_run_uuid_from_callsite("test_processed_records_table")
+        payload = build_processed_records_table_payload_from_ledger(
+            pipeline="chembl_target",
+            run_type="backfill",
+            ledger_entries=(
+                RunLedgerEntry(
+                    entry_id="finished",
+                    manifest_id="manifest-chembl-target",
+                    run_id=run_id,
+                    event_type="run_finished",
+                    occurred_at=datetime(2026, 5, 29, 17, 37, tzinfo=UTC),
+                    status="success",
+                    metrics_snapshot={
+                        "records_bronze": 100,
+                        "records_silver": 90,
+                        "records_quarantined": 5,
+                        "records_filtered_out": 5,
+                    },
+                ),
+            ),
+            report={
+                "tracking_coverage": "full",
+                "identity": {
+                    "pipeline_name": "chembl_target",
+                    "run_id": str(run_id),
+                    "manifest_id": "manifest-chembl-target",
+                    "run_type": "backfill",
+                },
+                "layers": {
+                    "bronze_records": 100,
+                    "silver_valid": 90,
+                    "silver_filtered_out": 5,
+                    "silver_quarantined": 5,
+                    "silver_skipped": 0,
+                    "silver_deduplicated": 0,
+                    "gold_written": 80,
+                    "gold_excluded_by_contract": 10,
+                    "gold_quarantined": 0,
+                    "gold_skipped": 0,
+                    "gold_deduplicated": 0,
+                },
+            },
+        )
+
+        rows = {row["parameter"]: row for row in payload["rows"]}
+        assert rows["07 gold_written_records"]["value"].strip() == "80"
+        assert rows["08 gold_excluded_by_contract_records"]["value"].strip() == "10"
+        assert rows["05 silver_skipped_records"]["value"].strip() == "0"
+        assert rows["06 silver_deduplicated_records"]["value"].strip() == "0"
+
     def test_ledger_artifact_count_above_snapshot_does_not_deduplicate(
         self,
     ) -> None:

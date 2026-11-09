@@ -155,12 +155,13 @@ def build_processed_records_table_payload_from_ledger(
                 "bioetl_processed_records_silver_filtered_out_current": (
                     latest_snapshot.get("records_filtered_out")
                 ),
+                # Missing snapshot keys stay None — a synthetic 0 would conflict
+                # with a consistent saved-report fill in fill_report_accounting.
                 "bioetl_processed_records_gold_written_current": latest_snapshot.get(
                     "records_gold",
-                    0,
                 ),
                 "bioetl_processed_records_gold_excluded_by_contract_current": (
-                    latest_snapshot.get("records_gold_excluded_by_contract", 0)
+                    latest_snapshot.get("records_gold_excluded_by_contract")
                 ),
             }
         )

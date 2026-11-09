@@ -66,18 +66,13 @@ def _dashboard_runtime_environment(
         except OSError:
             reports_owner = None
             data_owner = None
-        if (
-            reports_owner is not None
-            and data_owner is not None
-            and reports_owner.st_uid > 0
-            and reports_owner.st_gid > 0
-            and (reports_owner.st_uid, reports_owner.st_gid)
-            == (data_owner.st_uid, data_owner.st_gid)
-        ):
-            overrides.update(
-                BIOETL_RUNTIME_UID=str(reports_owner.st_uid),
-                BIOETL_RUNTIME_GID=str(reports_owner.st_gid),
-            )
+        if reports_owner is not None and data_owner is not None:
+            # Publish UID/GID independently: matching non-root UID still helps
+            # private report binds when GID is 0 (root group must not be copied).
+            if reports_owner.st_uid > 0 and reports_owner.st_uid == data_owner.st_uid:
+                overrides["BIOETL_RUNTIME_UID"] = str(reports_owner.st_uid)
+            if reports_owner.st_gid > 0 and reports_owner.st_gid == data_owner.st_gid:
+                overrides["BIOETL_RUNTIME_GID"] = str(reports_owner.st_gid)
     previous = {name: os.environ.get(name) for name in overrides}
     os.environ.update(overrides)
     try:
