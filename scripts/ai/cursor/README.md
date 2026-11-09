@@ -13,6 +13,7 @@ Tracked sources of truth:
 | Surface | Tracked SSOT | Local deploy |
 | --- | --- | --- |
 | Cursor rules | `docs/00-project/ai/rules/cursor/*.mdc` | `.cursor/rules/` |
+| Cursor commands | `docs/00-project/ai/rules/cursor/commands/*.md` | `.cursor/commands/` via `python -m scripts.ai.sync.cursor --deploy` |
 | Skills | `.codex/skills/**` and `docs/00-project/ai/grok/skills/**` | `.cursor/skills/*` relative symlinks |
 | MCP portable | `.mcp.json` (stdio, full inventory) | `.cursor/mcp.json` (profiled; default **stable**) |
 
@@ -55,4 +56,5 @@ bash scripts/ai/cursor/setup_skills.sh --project-only
 
 - Skills: `.codex/skills/**`, operator skills `docs/00-project/ai/grok/skills/**`
 - MCP: `scripts/ai/codex/setup_mcp.py`
-- Cursor rules SSOT: `docs/00-project/ai/rules/cursor/**`
+- Cursor rules SSOT: `docs/00-project/ai/rules/cursor/*.mdc`
+- Cursor commands SSOT: `docs/00-project/ai/rules/cursor/commands/*.md` (`python -m scripts.ai.sync.cursor --deploy`; не входит в `setup_cursor.sh`)

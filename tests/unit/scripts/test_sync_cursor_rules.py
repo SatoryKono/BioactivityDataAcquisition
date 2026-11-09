@@ -8,7 +8,7 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Unit tests for Cursor rules deploy sync."""
+"""Unit tests for Cursor rules and project-command deploy sync."""
 
 from __future__ import annotations
 
@@ -112,6 +112,216 @@ def test_canonical_cursor_rules_declare_apply_mode() -> None:
         globs = meta.get("globs")
         assert isinstance(globs, list) and globs, path.name
         assert all(isinstance(pattern, str) and pattern for pattern in globs), path.name
+
+
+def _write_command(path: Path, name: str, *, body: str | None = None) -> None:
+    path.mkdir(parents=True, exist_ok=True)
+    payload = body
+    if payload is None:
+        tokens = "\n".join(
+            f"- {token}" for token in sync_cursor_rules.COMMAND_GOVERNANCE_TOKENS
+        )
+        marker = sync_cursor_rules.MANAGED_COMMAND_MARKER
+        payload = f"---\ndescription: test\n---\n\n{tokens}\n\n{marker}\n"
+    (path / name).write_text(payload, encoding="utf-8", newline="\n")
+
+
+def test_sync_cursor_commands_deploy_copies_canonical_files(tmp_path: Path) -> None:
+    canonical = tmp_path / sync_cursor_rules.CURSOR_COMMAND_DOCS_DIR
+    _write_command(canonical, "review.md")
+
+    issues = sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path,
+        deploy=True,
+        check_only=False,
+    )
+
+    assert issues == []
+    deployed = tmp_path / sync_cursor_rules.CURSOR_COMMANDS_DIR / "review.md"
+    assert deployed.read_text(encoding="utf-8") == (canonical / "review.md").read_text(
+        encoding="utf-8"
+    )
+
+
+def test_sync_cursor_commands_check_reports_missing_deploy(tmp_path: Path) -> None:
+    canonical = tmp_path / sync_cursor_rules.CURSOR_COMMAND_DOCS_DIR
+    _write_command(canonical, "review.md")
+
+    issues = sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path,
+        deploy=False,
+        check_only=True,
+    )
+
+    assert any("missing" in issue for issue in issues)
+
+
+def test_sync_cursor_commands_check_reports_out_of_sync(tmp_path: Path) -> None:
+    canonical = tmp_path / sync_cursor_rules.CURSOR_COMMAND_DOCS_DIR
+    deploy = tmp_path / sync_cursor_rules.CURSOR_COMMANDS_DIR
+    _write_command(canonical, "review.md")
+    _write_command(deploy, "review.md", body="---\ndescription: stale\n---\n")
+
+    issues = sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path,
+        deploy=False,
+        check_only=True,
+    )
+
+    assert any("out of sync" in issue for issue in issues)
+
+
+def test_sync_cursor_commands_check_reports_orphan(tmp_path: Path) -> None:
+    canonical = tmp_path / sync_cursor_rules.CURSOR_COMMAND_DOCS_DIR
+    deploy = tmp_path / sync_cursor_rules.CURSOR_COMMANDS_DIR
+    _write_command(canonical, "review.md")
+    _write_command(deploy, "review.md")
+    _write_command(deploy, "local-only.md")
+
+    issues = sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path,
+        deploy=False,
+        check_only=True,
+    )
+
+    assert any(
+        "orphan deploy file" in issue and "local-only.md" in issue for issue in issues
+    )
+
+
+def test_sync_cursor_commands_deploy_removes_orphan(tmp_path: Path) -> None:
+    canonical = tmp_path / sync_cursor_rules.CURSOR_COMMAND_DOCS_DIR
+    deploy = tmp_path / sync_cursor_rules.CURSOR_COMMANDS_DIR
+    _write_command(canonical, "review.md")
+    _write_command(deploy, "review.md")
+    _write_command(deploy, "old-review.md")
+
+    issues = sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path,
+        deploy=True,
+        check_only=False,
+    )
+
+    assert issues == []
+    assert (deploy / "review.md").is_file()
+    assert not (deploy / "old-review.md").exists()
+
+
+def test_sync_cursor_commands_deploy_removes_copy_failing_token_check(
+    tmp_path: Path,
+) -> None:
+    canonical = tmp_path / sync_cursor_rules.CURSOR_COMMAND_DOCS_DIR
+    deploy = tmp_path / sync_cursor_rules.CURSOR_COMMANDS_DIR
+    _write_command(canonical, "review.md")
+    _write_command(canonical, "bare.md", body="---\ndescription: bare\n---\n\n# bare\n")
+    _write_command(deploy, "bare.md")
+
+    issues = sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path,
+        deploy=True,
+        check_only=False,
+    )
+
+    assert any(
+        "bare.md" in issue and "missing governance token" in issue for issue in issues
+    )
+    assert (deploy / "review.md").is_file()
+    assert not (deploy / "bare.md").exists()
+
+
+def test_sync_cursor_commands_skips_file_missing_governance_token(
+    tmp_path: Path,
+) -> None:
+    canonical = tmp_path / sync_cursor_rules.CURSOR_COMMAND_DOCS_DIR
+    _write_command(canonical, "review.md")
+    _write_command(canonical, "bare.md", body="---\ndescription: bare\n---\n\n# bare\n")
+
+    issues = sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path,
+        deploy=True,
+        check_only=False,
+    )
+
+    deploy = tmp_path / sync_cursor_rules.CURSOR_COMMANDS_DIR
+    assert any(
+        "bare.md" in issue and "missing governance token" in issue for issue in issues
+    )
+    assert (deploy / "review.md").is_file()
+    assert not (deploy / "bare.md").exists()
+
+
+def test_deploy_prunes_stale_managed_commands_and_preserves_local_files(
+    tmp_path: Path,
+) -> None:
+    canonical = tmp_path / sync_cursor_rules.CURSOR_COMMAND_DOCS_DIR
+    deploy = tmp_path / sync_cursor_rules.CURSOR_COMMANDS_DIR
+    _write_command(canonical, "old.md")
+    _write_command(canonical, "invalid.md")
+    _write_command(deploy, "personal.md", body="Local command")
+    assert not sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path, deploy=True, check_only=False
+    )
+    assert not sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path, deploy=False, check_only=True
+    )
+    (canonical / "old.md").rename(canonical / "renamed.md")
+    _write_command(canonical, "invalid.md", body="Invalid command")
+    _write_command(deploy, "local.md", body="Personal command")
+    _write_command(canonical, "local.md")
+
+    issues = sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path, deploy=True, check_only=False
+    )
+
+    assert any("invalid.md" in issue for issue in issues)
+    assert any("unmarked local command preserved" in issue for issue in issues)
+    assert (deploy / "renamed.md").is_file()
+    assert not (deploy / "old.md").exists()
+    assert not (deploy / "invalid.md").exists()
+    assert (deploy / "local.md").read_text(encoding="utf-8") == "Personal command"
+
+
+def test_prune_continues_after_an_unremovable_managed_command(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    canonical = tmp_path / sync_cursor_rules.CURSOR_COMMAND_DOCS_DIR
+    deploy = tmp_path / sync_cursor_rules.CURSOR_COMMANDS_DIR
+    _write_command(canonical, "review.md")
+    _write_command(deploy, "a-locked.md")
+    _write_command(deploy, "z-stale.md")
+    unlink = Path.unlink
+
+    def unlink_or_raise(path: Path, *, missing_ok: bool = False) -> None:
+        if path.name == "a-locked.md":
+            raise PermissionError("test fixture: command locked")
+        unlink(path, missing_ok=missing_ok)
+
+    monkeypatch.setattr(Path, "unlink", unlink_or_raise)
+    issues = sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path, deploy=True, check_only=False
+    )
+
+    assert len(issues) == 1
+    assert "a-locked.md: unable to prune command" in issues[0]
+    assert (deploy / "a-locked.md").is_file()
+    assert not (deploy / "z-stale.md").exists()
+
+
+def test_canonical_cursor_commands_include_governance_tokens() -> None:
+    root = Path(__file__).resolve().parents[3]
+    commands = sorted((root / sync_cursor_rules.CURSOR_COMMAND_DOCS_DIR).glob("*.md"))
+    assert [path.name for path in commands] == [
+        "post-change.md",
+        "pre-commit.md",
+        "qodo-sync.md",
+        "review.md",
+    ]
+    for path in commands:
+        text = path.read_text(encoding="utf-8")
+        frontmatter = text.split("---", 2)[1]
+        assert "auto_execution_mode" not in frontmatter
+        for token in sync_cursor_rules.COMMAND_GOVERNANCE_TOKENS:
+            assert token in text, path.name
 
 
 def test_main_defaults_to_check(tmp_path: Path) -> None:
