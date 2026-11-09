@@ -495,7 +495,7 @@
     },
     "scripts/ai/sync/cursor.py": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain only as a bounded manual mirror-sync utility for Cursor rule deploy surfaces while docs expose the direct script path; promote it into a governed AI-rules workflow or retire it once tracked mirrors no longer need explicit sync execution.",
+      "next_step": "Retain only as a bounded manual mirror-sync utility for Cursor rule and project-command deploy surfaces while docs expose the direct script path; promote it into a governed AI-rules workflow or retire it once tracked mirrors no longer need explicit sync execution.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },

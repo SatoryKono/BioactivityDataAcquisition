@@ -47,7 +47,7 @@ This workflow executes per master.md matrix:
 ## SSOT
 
 - Rule content canonical source: `docs/00-project/ai/rules/cursor/*.mdc`
-- Cursor deploy: `.cursor/rules/` via `scripts/ai/sync/cursor.py --deploy`
+- Cursor deploy: `.cursor/rules/` and `.cursor/commands/` via `scripts/ai/sync/cursor.py --deploy`
 - Windsurf/Cascade: `docs/00-project/ai/rules/windsurf/` via `scripts/ai/sync/windsurf.py`
 - Devin workflows: `.devin/workflows/` (tracked; keep parity with Cascade `review`, `post-change`, `pre-commit`, `qodo-sync`, plus specialized `audit-documents`)
 - Devin DeepWiki: `.devin/wiki.json` (derived navigation; not normative)
