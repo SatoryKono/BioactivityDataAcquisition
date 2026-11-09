@@ -1,10 +1,16 @@
 """Empty event observations require independent source and scope evidence."""
 
+from __future__ import annotations
+
 from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
-from scripts.ops.observability.grafana._empty_observation_contract import qualify_empty
+from scripts.ops.observability.grafana._empty_observation_contract import (
+    _STANDALONE_DEPENDENCIES,
+    _WORKFLOW_INPUT_DEPENDENCIES,
+    qualify_empty,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -101,11 +107,30 @@ def test_panels_without_qualified_empty_contract_cannot_bypass_review(panel_id):
 
 
 @pytest.mark.parametrize(
-    "workflow, mixed, expected",
-    [(".*", False, True), ("named_workflow", False, False), (".*", True, False)],
+    "workflow, mixed, gap, expected",
+    [
+        (".*", False, None, True),
+        ("named_workflow", False, None, False),
+        (".*", True, None, False),
+        (".*", False, "missing", False),
+        (".*", False, "unhealthy", False),
+    ],
 )
-def test_standalone_witness_must_cover_the_entire_scope(workflow, mixed, expected):
+def test_standalone_witness_must_cover_the_entire_scope(workflow, mixed, gap, expected):
     def fetch(url, **_kwargs):
+        if urlsplit(url).path.endswith("rules"):
+            rules = [
+                {
+                    "name": name,
+                    "type": "recording",
+                    "health": "err"
+                    if gap == "unhealthy" and name == "bioetl_workflow_scope_universe"
+                    else "ok",
+                }
+                for name in _STANDALONE_DEPENDENCIES | _WORKFLOW_INPUT_DEPENDENCIES
+                if gap != "missing" or name != "bioetl_workflow_scope_universe"
+            ]
+            return {"status": "success", "data": {"groups": [{"rules": rules}]}}
         query = parse_qs(urlsplit(url).query)["query"][0]
         rows = [
             {
@@ -307,3 +332,36 @@ def test_dq_empty_requires_all_operands_and_no_active_signal(gap):
         timeout=1,
     )
     assert accepted is (gap is None)
+
+
+@pytest.mark.parametrize("resets, expected", [("0", True), ("1", False), (None, False)])
+def test_empty_histogram_rejects_resets_and_failed_reset_queries(resets, expected):
+    metric = "bioetl_checkpoint_save_duration_seconds"
+
+    def fetch(url, **_kwargs):
+        params = parse_qs(urlsplit(url).query)
+        if "metadata" in url:
+            return {"status": "success", "data": {metric: [{"type": "histogram"}]}}
+        query = params["query"][0]
+        rows = [{"metric": {}, "value": [1, "6"]}]
+        if query.startswith("up{job=~"):
+            rows = [
+                {"metric": {"job": job}, "value": [1, "1"]}
+                for job in ("bioetl", "pushgateway", "prometheus")
+            ]
+        if query.startswith("changes("):
+            if resets is None:
+                return {"status": "error"}
+            rows = [{"metric": {}, "value": [1, resets]}]
+        return {"status": "success", "data": {"resultType": "vector", "result": rows}}
+
+    accepted, _ = qualify_empty(
+        dashboard_uid="bioetl-incident-v1",
+        panel_id=105,
+        expr=f"increase({metric}_bucket[1h]) unless (changes({metric}_created[1h]) > 0)",
+        base_url="http://prometheus",
+        fetch=fetch,
+        substitute=lambda value: value,
+        timeout=1,
+    )
+    assert accepted is expected

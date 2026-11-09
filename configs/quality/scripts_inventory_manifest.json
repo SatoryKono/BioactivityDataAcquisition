@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-09T20:14:13.696377+00:00",
+  "generated_at": "2026-11-09T20:17:47.915235+00:00",
   "summary": {
     "total_scripts": 720,
     "status_counts": {
@@ -23514,9 +23514,9 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_empty_observation_contract.py",
-          "line": 7,
+          "line": 9,
           "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana._empty_observation_contract import qualify_empty"
+          "text": "from scripts.ops.observability.grafana._empty_observation_contract import ("
         }
       ],
       "owner": "@bioetl-observability",

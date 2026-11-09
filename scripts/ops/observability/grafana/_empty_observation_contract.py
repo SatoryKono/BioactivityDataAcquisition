@@ -62,9 +62,21 @@ _RANKED_EVIDENCE_DEPENDENCIES = frozenset(
     }
 )
 _WORKFLOW_PANELS = frozenset({9701, 9997})
+_STANDALONE_DEPENDENCIES = {
+    "bioetl_overview_pipeline_run_type_universe",
+    "bioetl_standalone_pipeline_universe",
+    "bioetl_workflow_scope_universe",
+}
+_WORKFLOW_INPUT_DEPENDENCIES = {
+    "bioetl_workflow_scope_input_status",
+    "bioetl_workflow_scope_published_seconds",
+    "bioetl_workflow_scope_status",
+    "bioetl_workflow_scope_status_priority",
+    "bioetl_workflow_scope_qualified_status",
+}
 _METRIC = re.compile(r"\bbioetl_\w+", re.ASCII)
 _EVENT_RANGE = re.compile(
-    r"\b(?:increase|rate|changes)\(\s*"
+    r"\b(increase|rate|changes)\(\s*"
     r"(bioetl_\w+)((?:\{[^}]*\})?\s*\[[^\]]+\])\s*\)",
     re.ASCII,
 )
@@ -145,6 +157,13 @@ def qualify_empty(
         standalone = 'bioetl_standalone_pipeline_universe{pipeline=~"$pipeline",run_type=~"$run_type"}'
         # A concrete workflow selection must never be excused by standalone data.
         if substitute("$workflow") != ".*":
+            return False, evidence
+        dependencies = _STANDALONE_DEPENDENCIES
+        if panel_id == 9701:
+            dependencies = dependencies | _WORKFLOW_INPUT_DEPENDENCIES
+        if not _healthy_rules(
+            _response_data(request("/api/v1/rules", {})), "recording", dependencies
+        ):
             return False, evidence
         selected = _scope_pairs(scope)
         return bool(selected) and selected == _scope_pairs(
@@ -290,13 +309,17 @@ def _event_sample_coverage_confirmed(expr: str, vector: WitnessVector) -> bool:
     """A known event series needs two samples in the panel's own selector window."""
     selectors = set(_EVENT_RANGE.findall(expr))
     if not selectors or set(_METRIC.findall(expr)) - {_SCOPE_METRIC} != {
-        metric for metric, _ in selectors
+        metric for _, metric, _ in selectors
     }:
         return False
-    for metric, window in sorted(selectors):
+    for operation, metric, window in sorted(selectors):
         samples = vector(f"count_over_time({metric}{window})")
         if samples is None or any(float(row["value"][1]) < 2 for row in samples):
             return False
+        if operation == "changes" and metric.endswith("_created"):
+            resets = vector(f"changes({metric}{window})")
+            if resets is None or any(float(row["value"][1]) > 0 for row in resets):
+                return False
     return True
 
 
