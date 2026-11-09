@@ -13,6 +13,7 @@ import re
 import subprocess
 import sys
 from collections.abc import Callable, Mapping
+from pathlib import Path
 from typing import Any
 
 _PROTECTED_BRANCHES = frozenset({"main", "master"})
@@ -118,15 +119,7 @@ _SCRATCH = re.compile(
     r")$"
 )
 # Quoted targets stay intact so "dir with spaces/.env" is not cut at the space.
-_REDIRECT_TARGET = '"[^"]*"|' + r"'[^']*'" + r"|\S+"
-# Accept spaced and attached redirects, including &>.env / x>.env forms.
-_REDIRECT = re.compile(
-    r"(?i)(?:^|[\s|;&]|[^>\s|;&])\d*>{1,2}\s*("
-    + _REDIRECT_TARGET
-    + r")|(?<!>)&>\s*("
-    + _REDIRECT_TARGET
-    + r")"
-)
+_REDIRECT_TARGET = re.compile(r"""\s*("[^"]*"|'[^']*'|\S+)""")
 _REDIRECT_PREFIX = re.compile(r"\d*>{1,2}$")
 _SUBST_WORD = re.compile(r"[A-Za-z0-9_./\\-]+")
 _PATCH_PATH = re.compile(
@@ -421,8 +414,8 @@ def _classify_push(
     destinations = [
         _resolved_push_destination(refspec, cwd, branch_lookup) for refspec in refspecs
     ]
-    if any(dest in _PROTECTED_BRANCHES for dest in destinations) or any(
-        dest is None for dest in destinations
+    if any(
+        not dest or dest in _PROTECTED_BRANCHES or "*" in dest for dest in destinations
     ):
         return _deny_tuple(
             "Принудительный push в main или master запрещён.",
@@ -468,13 +461,8 @@ def _direct_segment_write_kind(visible: str, roots: list[str], cwd: str) -> str 
     """Detect env or scratch writes without expanding substitutions."""
     redirected = [
         kind
-        for match in _REDIRECT.finditer(visible)
-        if (
-            kind := _path_kind(
-                next(group for group in match.groups() if group), roots, cwd
-            )
-        )
-        is not None
+        for target in _redirect_targets(visible)
+        if (kind := _path_kind(target, roots, cwd)) is not None
     ]
     if "env" in redirected:
         return "env"
@@ -482,7 +470,9 @@ def _direct_segment_write_kind(visible: str, roots: list[str], cwd: str) -> str 
         return "scratch"
     tokens = _tokenize(visible)
     kinds = [
-        kind for token in tokens if (kind := _path_kind(token, roots, cwd)) is not None
+        kind
+        for token in _mutation_operands(tokens, cwd)
+        if (kind := _path_kind(token, roots, cwd)) is not None
     ]
     if not kinds:
         return None
@@ -501,6 +491,26 @@ def _direct_segment_write_kind(visible: str, roots: list[str], cwd: str) -> str 
     if "scratch" in kinds:
         return "scratch"
     return None
+
+
+def _mutation_operands(tokens: list[str], cwd: str) -> list[str]:
+    """For simple cp, only its destination can change; other forms stay conservative."""
+    if not tokens or _command_basename(tokens[0]) != "cp":
+        return tokens
+    operands = tokens[1:]
+    if operands[:1] == ["--"]:
+        operands = operands[1:]
+    if len(operands) != 2 or any(operand.startswith("-") for operand in operands):
+        return tokens
+    source, destination = operands
+    destination_path = Path(cwd) / destination
+    if destination.endswith(("/", "\\")) or destination_path.is_dir():
+        return [destination, _join_cwd(destination, _command_filename(source))]
+    return [destination]
+
+
+def _command_filename(token: str) -> str:
+    return token.replace("\\", "/").rsplit("/", 1)[-1]
 
 
 def _command_basename(token: str) -> str:
@@ -769,22 +779,45 @@ def _join_cwd(cwd: str, dest: str) -> str:
     return suffix
 
 
+def _unquoted_shell_indexes(command: str) -> set[int]:
+    """Return indexes outside single/double quotes and backslash escapes."""
+    indexes: set[int] = set()
+    quote: str | None = None
+    escaped = False
+    for index, char in enumerate(command):
+        if escaped:
+            escaped = False
+        elif char == "\\" and quote != "'":
+            escaped = True
+        elif quote is not None:
+            if char == quote:
+                quote = None
+        elif char in {"'", '"'}:
+            quote = char
+        else:
+            indexes.add(index)
+    return indexes
+
+
+def _redirect_targets(command: str) -> list[str]:
+    return [
+        match.group(1)
+        for index in sorted(_unquoted_shell_indexes(command))
+        if command[index] == ">"
+        and not command.startswith(">>", index)
+        and (match := _REDIRECT_TARGET.match(command, index + 1)) is not None
+    ]
+
+
 def _split_commands(command: str) -> list[tuple[str, str]]:
     """Split a shell line on unquoted ;, |, &&, and || separators."""
     parts: list[tuple[str, str]] = []
     buf: list[str] = []
-    quote: str | None = None
+    unquoted = _unquoted_shell_indexes(command)
     index = 0
     while index < len(command):
         char = command[index]
-        if quote is not None:
-            buf.append(char)
-            if char == quote:
-                quote = None
-            index += 1
-            continue
-        if char in {'"', "'"}:
-            quote = char
+        if index not in unquoted:
             buf.append(char)
             index += 1
             continue
@@ -793,7 +826,11 @@ def _split_commands(command: str) -> list[tuple[str, str]]:
             buf = []
             index += 2
             continue
-        if char in {";", "|", "\n"}:
+        if char in {";", "|", "\n"} or (
+            char == "&"
+            and not command.startswith("&>", index)
+            and (index == 0 or command[index - 1] not in "<>")
+        ):
             parts.append(("".join(buf), char))
             buf = []
             index += 1
