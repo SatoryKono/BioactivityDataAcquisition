@@ -54,6 +54,15 @@ def _optional_path_owner(path: Path) -> os.stat_result | None:
         return None
 
 
+def _runtime_identity_is_configured(overrides: dict[str, str], key: str) -> bool:
+    """True when operator/contract already pinned this Compose identity field."""
+    configured = overrides.get(key)
+    if configured is not None and configured != "":
+        return True
+    environ_value = os.environ.get(key)
+    return environ_value is not None and environ_value != ""
+
+
 def _publish_matching_bind_owner(
     overrides: dict[str, str],
     *,
@@ -63,11 +72,20 @@ def _publish_matching_bind_owner(
     """Publish UID/GID independently for matching non-root bind owners.
 
     Matching non-root UID still helps private report binds when GID is 0
-    (root group must not be copied into Compose).
+    (root group must not be copied into Compose). Explicit BIOETL_RUNTIME_UID /
+    BIOETL_RUNTIME_GID always win over autodetection.
     """
-    if reports_owner.st_uid > 0 and reports_owner.st_uid == data_owner.st_uid:
+    if (
+        not _runtime_identity_is_configured(overrides, "BIOETL_RUNTIME_UID")
+        and reports_owner.st_uid > 0
+        and reports_owner.st_uid == data_owner.st_uid
+    ):
         overrides["BIOETL_RUNTIME_UID"] = str(reports_owner.st_uid)
-    if reports_owner.st_gid > 0 and reports_owner.st_gid == data_owner.st_gid:
+    if (
+        not _runtime_identity_is_configured(overrides, "BIOETL_RUNTIME_GID")
+        and reports_owner.st_gid > 0
+        and reports_owner.st_gid == data_owner.st_gid
+    ):
         overrides["BIOETL_RUNTIME_GID"] = str(reports_owner.st_gid)
 
 
