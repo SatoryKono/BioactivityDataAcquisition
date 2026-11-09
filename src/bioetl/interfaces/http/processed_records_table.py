@@ -171,15 +171,16 @@ def build_processed_records_table_payload_from_ledger(
         latest_snapshot.get("records_silver") if latest_snapshot is not None else None
     )
     silver_artifact_count = artifact_counts.get("silver")
-    # Leave None when dedup cannot be measured — a synthetic 0 would block
-    # fill_report_accounting from applying a consistent saved-report layer set.
-    silver_deduplicated_count: int | None = None
+    # Snapshot−artifact is display-only. records_silver is already the
+    # post-save confirmed Silver count, so the difference is NOT ledger
+    # evidence and must not enter known_counts for report reconciliation.
+    silver_deduplicated_display: int | None = None
     if (
         isinstance(silver_snapshot_count, int)
         and isinstance(silver_artifact_count, int)
         and silver_snapshot_count >= silver_artifact_count
     ):
-        silver_deduplicated_count = silver_snapshot_count - silver_artifact_count
+        silver_deduplicated_display = silver_snapshot_count - silver_artifact_count
     metric_values.update(
         {
             "bioetl_processed_records_bronze_current": artifact_counts.get(
@@ -194,9 +195,6 @@ def build_processed_records_table_payload_from_ledger(
                 "gold",
                 metric_values["bioetl_processed_records_gold_written_current"],
             ),
-            "bioetl_processed_records_silver_deduplicated_current": (
-                silver_deduplicated_count
-            ),
         }
     )
     fill_report_accounting(
@@ -206,6 +204,12 @@ def build_processed_records_table_payload_from_ledger(
         pipeline=pipeline,
         run_type=run_type,
     )
+    dedup_metric = "bioetl_processed_records_silver_deduplicated_current"
+    if (
+        metric_values.get(dedup_metric) is None
+        and silver_deduplicated_display is not None
+    ):
+        metric_values[dedup_metric] = silver_deduplicated_display
     return build_processed_records_table_payload(
         metric_values=metric_values,
         pipeline=pipeline,

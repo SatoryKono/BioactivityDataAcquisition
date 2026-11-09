@@ -647,3 +647,67 @@ def test_report_fill_maps_positive_silver_filtered_and_quarantined() -> None:
     rows = {row["parameter"]: row for row in payload["rows"]}
     assert rows["03 silver_filtered_out_records"]["value"].strip() == "2"
     assert rows["04 silver_quarantined_records"]["value"].strip() == "3"
+
+
+def test_report_fill_keeps_saved_silver_dedup_when_snapshot_equals_artifact() -> None:
+    """Computed snapshot−artifact must not reject a conserved saved-report dedup."""
+    from bioetl.interfaces.http.processed_records_table import (
+        build_processed_records_table_payload_from_ledger,
+    )
+
+    run_id = deterministic_run_uuid_from_callsite("test_processed_records_dedup_sep")
+    finished = RunLedgerEntry(
+        entry_id="finished",
+        manifest_id="manifest",
+        run_id=run_id,
+        event_type="run_finished",
+        occurred_at=datetime(2026, 11, 9, tzinfo=UTC),
+        status="success",
+        metrics_snapshot={
+            "records_bronze": 100,
+            "records_silver": 90,
+        },
+    )
+    silver_artifact = RunLedgerEntry(
+        entry_id="silver-artifact",
+        manifest_id="manifest",
+        run_id=run_id,
+        event_type=ARTIFACT_PUBLISHED_EVENT,
+        occurred_at=datetime(2026, 11, 9, 0, 1, tzinfo=UTC),
+        stage="silver",
+        status="published",
+        details={"stage": "silver", "record_count": 90},
+    )
+    report = {
+        "tracking_coverage": "full",
+        "identity": {
+            "pipeline_name": "chembl_assay",
+            "run_id": str(run_id),
+            "manifest_id": "manifest",
+            "run_type": "incremental",
+        },
+        "layers": {
+            "bronze_records": 100,
+            "silver_valid": 90,
+            "silver_filtered_out": 0,
+            "silver_quarantined": 0,
+            "silver_skipped": 0,
+            "silver_deduplicated": 10,
+            "gold_written": 90,
+            "gold_excluded_by_contract": 0,
+            "gold_quarantined": 0,
+            "gold_skipped": 0,
+            "gold_deduplicated": 0,
+        },
+    }
+    payload = build_processed_records_table_payload_from_ledger(
+        ledger_entries=(finished, silver_artifact),
+        pipeline="chembl_assay",
+        run_type="incremental",
+        report=report,
+    )
+    rows = {row["parameter"]: row for row in payload["rows"]}
+    assert rows["06 silver_deduplicated_records"]["value"].strip() == "10"
+    assert rows["03 silver_filtered_out_records"]["value"].strip() == "0"
+    assert rows["04 silver_quarantined_records"]["value"].strip() == "0"
+    assert rows["07 gold_written_records"]["value"].strip() == "90"
