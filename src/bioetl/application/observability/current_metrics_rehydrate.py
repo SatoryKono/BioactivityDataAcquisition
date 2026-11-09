@@ -218,6 +218,13 @@ def _seed_pipeline_runs_total(metrics: MetricsPort, anchor: PipelineRunSnapshot)
             "status": anchor.status,
         },
     )
+    # Declare the failed outcome for this observed scope in the current exporter.
+    # This starts sampling now, does not replay historical events, and inc(0)
+    # preserves any failures already recorded in this registry.
+    if anchor.status != "failed":
+        metrics.increment_counter(
+            "bioetl_pipeline_runs_total", 0, dict(labels, status="failed")
+        )
     seeded_keys.add(key)
     return 1
 

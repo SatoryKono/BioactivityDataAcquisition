@@ -147,6 +147,15 @@ is the active surface.
 - This runbook MUST be executed within the priority and runtime profile declared in the YAML header.
 - Operators SHOULD preserve evidence, commands, and follow-up actions in the Verification and Post-incident sections.
 
+## Failed-run counter coverage
+
+The health-server exporter declares the failed-run counter for each durable
+pipeline/run-type scope during rehydration, using a zero increment. This begins
+observation in the current registry; it neither replays historical failures nor
+resets an existing counter. The failed-run panel still requires at least two
+real scraped samples per selected scope. Until those samples exist it remains
+UNKNOWN. Historical run reports retain their original outcome.
+
 ## Verification
 
 - Confirm the triggering condition is cleared or understood with evidence.
