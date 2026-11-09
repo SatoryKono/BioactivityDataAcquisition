@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "catalog_ref": "951bfe71322e5d055153f1f8ca2a40872c1c69be",
-  "source_ref": "a444a24d40b126fafde4d0aa790df489b3ebb32b",
+  "source_ref": "11bfac73242c8073693506a9b23dc755ebd64a7f",
   "source_reviews": {
     "src/bioetl/domain/aggregates/events.py": "Validate event constructor counts, required failure descriptions and allowed resolution values. No external-resource access or ownership change.",
     "src/bioetl/application/core/_batch_write_events.py": "Use the exception class as fallback for an empty write-failure description. Existing event dispatch and I/O boundaries retained.",
     "src/bioetl/application/observability/observer_context_mixin.py": "Use the exception class as fallback for an empty pipeline-failure description. Existing event dispatch and I/O boundaries retained.",
     "src/bioetl/application/core/_quarantine_write_support.py": "Normalize only empty reasons before persistence and reuse the same reason in emitted events. Existing quarantine port, I/O and metrics ownership retained.",
-    "src/bioetl/domain/_event_validation.py": "Pure event duration and metadata validation extracted outside the capped aggregates package. No external resources."
+    "src/bioetl/domain/immutability.py": "Reuse the existing immutable snapshot module for the event metadata validator. No external-resource access."
   },
   "line_updates": {},
   "resource_updates": {},
