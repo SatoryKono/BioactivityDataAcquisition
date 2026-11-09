@@ -15,6 +15,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+import yaml
 
 from scripts.ai.sync import cursor as sync_cursor_rules
 
@@ -100,12 +101,17 @@ def test_canonical_cursor_rules_declare_apply_mode() -> None:
         if path.name == "sonarqube_mcp_instructions.mdc":
             continue
         text = path.read_text(encoding="utf-8")
-        assert "alwaysApply:" in text, path.name
-        if "alwaysApply: true" in text.split("---", 2)[1]:
+        parts = text.split("---", 2)
+        assert len(parts) >= 3, path.name
+        meta = yaml.safe_load(parts[1])
+        assert isinstance(meta, dict), path.name
+        assert "alwaysApply" in meta, path.name
+        assert isinstance(meta["alwaysApply"], bool), path.name
+        if meta["alwaysApply"] is True:
             continue
-        frontmatter = text.split("---", 2)[1]
-        assert "alwaysApply: false" in frontmatter, path.name
-        assert 'globs: ["' in frontmatter, path.name
+        globs = meta.get("globs")
+        assert isinstance(globs, list) and globs, path.name
+        assert all(isinstance(pattern, str) and pattern for pattern in globs), path.name
 
 
 def test_main_defaults_to_check(tmp_path: Path) -> None:
