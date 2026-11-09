@@ -6,6 +6,8 @@ from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
+from scripts.ops.observability.grafana import audit_live_grafana_panels as audit_subject
+
 from scripts.ops.observability.grafana._empty_observation_contract import (
     _STANDALONE_DEPENDENCIES,
     _WORKFLOW_INPUT_DEPENDENCIES,
@@ -603,3 +605,41 @@ def test_empty_runtime_error_rate_requires_no_raw_error_observations(
         timeout=1,
     )
     assert accepted is expected
+
+
+@pytest.mark.parametrize("proved", [True, False])
+def test_generation_gap_review_keeps_warning_and_requires_evidence(proved, monkeypatch):
+    spec = audit_subject.PanelAuditSpec(
+        dashboard_uid="bioetl-incident-v1",
+        panel_id=105,
+        title="Checkpoint latency",
+        source_kind="prometheus",
+        semantic_kind="prometheus_query",
+        target_ref_id="A",
+    )
+    monkeypatch.setattr(audit_subject, "effective_panel_specs", lambda: (spec,))
+    monkeypatch.setattr(
+        audit_subject,
+        "_collect_empty_witnesses",
+        lambda *_args, historical_reset=False: (historical_reset and proved, []),
+    )
+    classification, detail = audit_subject._qualify_empty_panel(
+        spec, audit_subject._parse_args([]), "guarded histogram", [], "No estimate"
+    )
+    result = audit_subject.AuditResult(
+        dashboard_uid=spec.dashboard_uid,
+        panel_id=105,
+        title=spec.title,
+        source_kind=spec.source_kind,
+        semantic_kind=spec.semantic_kind,
+        status="ok",
+        classification=classification,
+        detail=detail,
+        query_preview="guarded histogram",
+        target_ref_id="A",
+    )
+    gate = audit_subject.semantic_gate_evidence([result])
+    assert gate["status"] == ("pass" if proved else "review_required")
+    if proved:
+        assert "WARN" in detail
+        assert gate["panel_outcomes"][0]["decision"] == "pass_reviewed"
