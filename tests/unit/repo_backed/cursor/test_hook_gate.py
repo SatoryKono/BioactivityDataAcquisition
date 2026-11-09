@@ -69,6 +69,7 @@ def _shell(command: str, *, branch: str = "feature") -> dict[str, object]:
         ("cat .env > out.txt", "allow"),
         ("rg -n 'rm' .env", "allow"),
         ("printf '%s\\n' 'rm' .env", "allow"),
+        ("perl -e 'print' .env", "allow"),
         ("echo '$(git reset --hard)'", "allow"),
         ("echo $(cat .env)", "allow"),
         ("rm $(echo _tmp_notes.py)", "allow"),
@@ -114,6 +115,27 @@ def _shell(command: str, *, branch: str = "feature") -> dict[str, object]:
         ("git push --mirror origin", "deny"),
         ("git push --force --all origin", "deny"),
         ("git push --force --branches origin", "deny"),
+        ("git push --del origin main", "deny"),
+        ("git push --mirr origin", "deny"),
+        ("git push --force-w origin main", "deny"),
+        ('bash -c "rm .env"', "deny"),
+        ("sh -c 'echo x > .env'", "deny"),
+        ('bash -c "git push --force origin main"', "deny"),
+        ("(git push -f origin main)", "deny"),
+        ("{ rm .env; }", "deny"),
+        ("if true; then rm .env; fi", "deny"),
+        ("(rm .env)", "deny"),
+        ("(echo x > .env)", "deny"),
+        ("echo .env | xargs rm", "deny"),
+        ("cat <(rm .env)", "deny"),
+        ("ln -sf x .env", "deny"),
+        ("install src .env", "deny"),
+        ("dd if=x of=.env", "deny"),
+        ("perl -pi -e 's/a/b/' .env", "deny"),
+        ("ri .env", "deny"),
+        ("ni .env", "deny"),
+        ("sc .env x", "deny"),
+        ('pwsh -Command "rm .env"', "deny"),
         ("git push -f origin 'refs/heads/*:refs/heads/*'", "deny"),
         ("git push origin +:", "deny"),
         ("git push -f --all", "deny"),
@@ -193,6 +215,19 @@ def test_force_push_of_head_on_main_is_denied() -> None:
 
 def test_force_push_of_plus_head_on_main_is_denied() -> None:
     decision = _shell("git push -f origin +HEAD", branch="main")
+    assert decision["permission"] == "deny"
+
+
+def test_relative_git_c_joins_event_cwd() -> None:
+    decision = _GATE.decide(
+        {
+            "hook_event_name": "beforeShellExecution",
+            "command": "git -C ../b push -f origin",
+            "cwd": str(_ROOT / "a"),
+            "workspace_roots": [str(_ROOT)],
+        },
+        branch_lookup=lambda cwd: "main" if cwd.endswith("/b") else "feature",
+    )
     assert decision["permission"] == "deny"
 
 
@@ -373,24 +408,25 @@ def test_empty_stdin_denies(
 
 
 @pytest.mark.parametrize(
-    "raw",
+    ("raw", "expected"),
     [
-        "{not-json",
-        json.dumps({"hook_event_name": "unknownEvent"}),
+        ("{not-json", {"permission": "deny"}),
+        (json.dumps({"hook_event_name": "unknownEvent"}), {}),
     ],
 )
-def test_invalid_or_unknown_event_is_fail_closed(
+def test_invalid_json_is_denied_and_unknown_event_is_ignored(
     raw: str,
+    expected: dict[str, object],
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     monkeypatch.setattr(sys, "stdin", type("S", (), {"read": lambda self: raw})())
     assert _GATE.main() == 0
     payload = json.loads(capsys.readouterr().out)
-    if "not-json" in raw:
-        assert payload["permission"] == "deny"
+    if expected:
+        assert payload["permission"] == expected["permission"]
     else:
-        assert payload == {}
+        assert payload == expected
 
 
 def test_cli_allows_git_status() -> None:

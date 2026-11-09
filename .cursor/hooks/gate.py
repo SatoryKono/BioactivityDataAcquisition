@@ -64,24 +64,35 @@ _PATH_KEYS = frozenset(
 )
 _WRITE_COMMANDS = frozenset(
     {
+        "ac",
         "add-content",
+        "clc",
         "clear-content",
         "copy",
         "copy-item",
         "cp",
+        "cpi",
+        "dd",
         "del",
         "erase",
+        "install",
+        "ln",
+        "mi",
         "move",
         "move-item",
         "mv",
         "new-item",
+        "ni",
         "out-file",
         "remove-item",
         "ren",
         "rename",
         "rename-item",
+        "ri",
         "rm",
         "rmdir",
+        "rni",
+        "sc",
         "set-content",
         "tee",
         "tee-object",
@@ -95,14 +106,45 @@ _DELETE_COMMANDS = frozenset(
         "del",
         "erase",
         "remove-item",
+        "ri",
         "rm",
         "rmdir",
         "unlink",
     }
 )
 _COMMAND_WRAPPERS = frozenset(
-    {"command", "env", "exec", "nice", "nohup", "sudo", "time"}
+    {"command", "env", "exec", "nice", "nohup", "sudo", "time", "xargs"}
 )
+_SHELL_KEYWORDS = frozenset(
+    {
+        "!",
+        "case",
+        "do",
+        "done",
+        "elif",
+        "else",
+        "esac",
+        "fi",
+        "for",
+        "if",
+        "in",
+        "then",
+        "until",
+        "while",
+    }
+)
+_SHELL_INTERPRETERS = frozenset(
+    {"bash", "cmd", "dash", "powershell", "pwsh", "sh", "zsh"}
+)
+_SHELL_SCRIPT_FLAGS = {
+    "bash": frozenset({"-c"}),
+    "cmd": frozenset({"/c", "-c"}),
+    "dash": frozenset({"-c"}),
+    "powershell": frozenset({"-c", "-command", "/c"}),
+    "pwsh": frozenset({"-c", "-command", "/c"}),
+    "sh": frozenset({"-c"}),
+    "zsh": frozenset({"-c"}),
+}
 _WRAPPER_VALUE_FLAGS = {
     "env": frozenset({"-u", "--unset", "-C", "--chdir", "-S", "--split-string"}),
     "exec": frozenset({"-a", "--argv0"}),
@@ -130,6 +172,26 @@ _WRAPPER_VALUE_FLAGS = {
         }
     ),
     "time": frozenset({"-f", "-o", "--format", "--output"}),
+    "xargs": frozenset(
+        {
+            "-E",
+            "-I",
+            "-L",
+            "-P",
+            "-a",
+            "-d",
+            "-e",
+            "-n",
+            "-s",
+            "--arg-file",
+            "--delimiter",
+            "--max-args",
+            "--max-chars",
+            "--max-lines",
+            "--max-procs",
+            "--replace",
+        }
+    ),
 }
 _NON_EXECUTING_FLAGS = {"command": frozenset({"-v", "-V"})}
 _ASSIGNMENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
@@ -265,11 +327,25 @@ def _classify_shell(
     """Classify a shell command, including separators and cwd changes."""
     directories = {initial_cwd}
     decisions: list[tuple[str, str, str]] = []
+    carried: set[str] = set()
     for segment, separator in _split_commands(command):
+        if _xargs_writer(segment) and "env" in carried:
+            decisions.append(_protected_write_decision("env"))
+        elif (
+            _xargs_writer(segment)
+            and "scratch" in carried
+            and not _is_delete_only(_tokenize(_strip_unquoted_comment(segment)))
+        ):
+            decisions.append(_protected_write_decision("scratch"))
         decisions.extend(
             _classify_segment(segment, roots, directory, branch_lookup)
             for directory in sorted(directories)
         )
+        if separator == "|":
+            for directory in directories:
+                carried |= _segment_path_kinds(segment, roots, directory)
+        else:
+            carried = set()
         if separator == "||":
             directories.add(initial_cwd)
         elif separator in {"&&", ";", "\n"}:
@@ -348,6 +424,13 @@ def _classify_segment(
         if verdict[0] == "deny":
             denies.append(verdict)
         elif verdict[0] == "ask":
+            asks.append(verdict)
+    script = _interpreter_script(segment)
+    if script:
+        verdict = _classify_shell(script, roots, cwd, branch_lookup)
+        if verdict is not None and verdict[0] == "deny":
+            denies.append(verdict)
+        elif verdict is not None and verdict[0] == "ask":
             asks.append(verdict)
     path_kind = _segment_write_kind(segment, roots, cwd)
     if path_kind == "env":
@@ -451,8 +534,11 @@ def _classify_push(
     branch_lookup: Callable[[str], str | None],
 ) -> tuple[str, str, str]:
     """Deny protected force pushes; ask for other force pushes."""
-    if _has_flag(args, "--mirror") or (
-        (_has_flag(args, "--all") or _has_flag(args, "--branches"))
+    if _has_push_option(args, "--mirror", "--mir") or (
+        (
+            _has_push_option(args, "--all", "--al")
+            or _has_push_option(args, "--branches", "--br")
+        )
         and _push_is_force(args)
     ):
         return _deny_tuple(
@@ -522,6 +608,10 @@ def _direct_segment_write_kind(visible: str, roots: list[str], cwd: str) -> str 
     tokens = _tokenize(visible)
     resolved = _resolved_command(tokens)
     invocation = [resolved[0], *resolved[1]] if resolved is not None else []
+    if resolved is not None and resolved[0] == "dd":
+        invocation.extend(
+            arg.split("=", 1)[1] for arg in resolved[1] if arg.startswith("of=")
+        )
     kinds = [
         kind
         for token in _mutation_operands(invocation, cwd)
@@ -530,7 +620,9 @@ def _direct_segment_write_kind(visible: str, roots: list[str], cwd: str) -> str 
     if not kinds:
         return None
     writes = resolved is not None and (
-        resolved[0] in _WRITE_COMMANDS or _has_sed_inplace(tokens)
+        resolved[0] in _WRITE_COMMANDS
+        or _has_sed_inplace(tokens)
+        or _has_perl_inplace(tokens)
     )
     if _find_git(tokens) is not None:
         parsed = _git_command(tokens)
@@ -575,11 +667,20 @@ def _command_basename(token: str) -> str:
     return name
 
 
+def _clean_word(token: str) -> str:
+    """Drop shell grouping characters around one word."""
+    return token.lstrip("({").rstrip(")}")
+
+
 def _resolved_command(tokens: list[str]) -> tuple[str, list[str]] | None:
-    """Return argv0 and its args after assignments and known wrappers."""
+    """Return argv0 and its args after assignments, keywords, and wrappers."""
+    cleaned = [word for token in tokens if (word := _clean_word(token))]
     index = 0
-    while index < len(tokens) and _ASSIGNMENT.match(tokens[index]):
+    while index < len(cleaned) and (
+        _ASSIGNMENT.match(cleaned[index]) or cleaned[index].lower() in _SHELL_KEYWORDS
+    ):
         index += 1
+    tokens = cleaned
     while index < len(tokens):
         name = _command_basename(tokens[index])
         if name not in _COMMAND_WRAPPERS:
@@ -631,12 +732,81 @@ def _has_sed_inplace(tokens: list[str]) -> bool:
     )
 
 
+def _has_perl_inplace(tokens: list[str]) -> bool:
+    """True when perl is invoked with an in-place edit flag."""
+    resolved = _resolved_command(tokens)
+    if resolved is None or resolved[0] != "perl":
+        return False
+    for arg in resolved[1]:
+        if arg == "-i" or arg.startswith("-i"):
+            return True
+        if arg.startswith("-") and not arg.startswith("--") and "i" in arg[1:]:
+            return True
+    return False
+
+
+def _interpreter_script(segment: str) -> str | None:
+    """Return the script string passed to bash -c, pwsh -Command, or cmd /c."""
+    tokens = _tokenize(_strip_unquoted_comment(segment))
+    resolved = _resolved_command(tokens)
+    if resolved is None or resolved[0] not in _SHELL_INTERPRETERS:
+        return None
+    flags = _SHELL_SCRIPT_FLAGS[resolved[0]]
+    args = resolved[1]
+    for index, arg in enumerate(args[:-1]):
+        if arg.lower() in flags:
+            return args[index + 1]
+    return None
+
+
+def _xargs_writer(segment: str) -> bool:
+    """True when xargs runs a write or delete command."""
+    tokens = _tokenize(_strip_unquoted_comment(segment))
+    if not tokens or _command_basename(_clean_word(tokens[0])) != "xargs":
+        return False
+    resolved = _resolved_command(tokens)
+    if resolved is None:
+        return False
+    return (
+        resolved[0] in _WRITE_COMMANDS
+        or resolved[0] in _DELETE_COMMANDS
+        or _has_sed_inplace(tokens)
+        or _has_perl_inplace(tokens)
+    )
+
+
+def _segment_path_kinds(segment: str, roots: list[str], cwd: str) -> set[str]:
+    """Return protected path kinds mentioned in one segment."""
+    visible = _strip_unquoted_comment(segment)
+    return {
+        kind
+        for token in _tokenize(visible)
+        if (kind := _path_kind(token, roots, cwd)) is not None
+    }
+
+
+def _protected_write_decision(kind: str) -> tuple[str, str, str]:
+    """Deny tuple for an env or scratch write."""
+    if kind == "env":
+        return _deny_tuple(
+            "Команда записывает или удаляет .env / .env.*.",
+            "Hook gate denied a shell write of a secret env file.",
+        )
+    return _deny_tuple(
+        "Команда создаёт корневой scratch-файл. "
+        "Для подавления вывода в PowerShell используй $null.",
+        "Hook gate denied a root scratch file. Use $null instead of nul.",
+    )
+
+
 def _substitution_write_kind(segment: str, roots: list[str], cwd: str) -> str | None:
     """Detect protected writes hidden in command or process substitutions."""
     tokens = _tokenize(segment)
     resolved = _resolved_command(tokens)
     name = resolved[0] if resolved is not None else ""
-    writer = name in _WRITE_COMMANDS or _has_sed_inplace(tokens)
+    writer = (
+        name in _WRITE_COMMANDS or _has_sed_inplace(tokens) or _has_perl_inplace(tokens)
+    )
     delete_only = name in _DELETE_COMMANDS
     found_scratch = False
     for start, body in _iter_substitution_bodies(segment):
@@ -682,12 +852,20 @@ def _iter_substitution_bodies(segment: str) -> list[tuple[int, str]]:
             quote = '"'
             index += 1
             continue
-        if segment.startswith("$(", index) or segment.startswith(">(", index):
+        if (
+            segment.startswith("$(", index)
+            or segment.startswith(">(", index)
+            or segment.startswith("<(", index)
+        ):
             body_start = index + 2
             depth = 1
             cursor = body_start
             while cursor < len(segment) and depth:
-                if segment.startswith("$(", cursor) or segment.startswith(">(", cursor):
+                if (
+                    segment.startswith("$(", cursor)
+                    or segment.startswith(">(", cursor)
+                    or segment.startswith("<(", cursor)
+                ):
                     depth += 1
                     cursor += 2
                     continue
@@ -753,6 +931,9 @@ def _is_debt_path(path: str, roots: list[str]) -> bool:
 
 def _path_kind(token: str, roots: list[str], cwd: str = "") -> str | None:
     """Classify a path token as env, scratch, or unrestricted."""
+    token = _clean_word(token)
+    if not token:
+        return None
     relative = _relative_path(token, roots, cwd)
     if not relative or relative.endswith("/"):
         return None
@@ -1019,7 +1200,7 @@ def _tokenize(segment: str) -> list[str]:
 
 def _git_invocations(segment: str) -> list[list[str]]:
     """Return token lists for git invocations in a segment."""
-    tokens = _tokenize(segment)
+    tokens = [word for token in _tokenize(segment) if (word := _clean_word(token))]
     if _find_git(tokens) is None:
         return []
     return [tokens]
@@ -1028,8 +1209,7 @@ def _git_invocations(segment: str) -> list[list[str]]:
 def _find_git(tokens: list[str]) -> int | None:
     """Index of the git executable token, if present."""
     for index, token in enumerate(tokens):
-        name = token.replace("\\", "/").rsplit("/", 1)[-1].lower()
-        if name in {"git", "git.exe"}:
+        if _command_basename(_clean_word(token)) == "git":
             return index
     return None
 
@@ -1070,15 +1250,15 @@ def _git_working_directory(tokens: list[str], default_cwd: str) -> str:
     if index is None:
         return default_cwd
     cursor = index + 1
-    last_c: str | None = None
+    effective = default_cwd
     while cursor < len(tokens):
         token = tokens[cursor]
         if token == "-C" and cursor + 1 < len(tokens):
-            last_c = tokens[cursor + 1]
+            effective = _join_cwd(effective, tokens[cursor + 1])
             cursor += 2
             continue
         if token.startswith("-C") and len(token) > 2:
-            last_c = token[2:]
+            effective = _join_cwd(effective, token[2:])
             cursor += 1
             continue
         if token in {"-c", "--config-env", "--git-dir", "--namespace", "--work-tree"}:
@@ -1093,7 +1273,7 @@ def _git_working_directory(tokens: list[str], default_cwd: str) -> str:
             cursor += 1
             continue
         break
-    return last_c if last_c is not None else default_cwd
+    return effective
 
 
 def _submodule_foreach_hard_reset(args: list[str]) -> bool:
@@ -1105,6 +1285,17 @@ def _submodule_foreach_hard_reset(args: list[str]) -> bool:
 def _push_is_force(args: list[str]) -> bool:
     """True for force/delete/mirror push flags or +/: refspecs."""
     for arg in args:
+        if arg.startswith("--") and any(
+            _is_abbreviated_option(arg, canonical, minimum)
+            for canonical, minimum in (
+                ("--delete", "--del"),
+                ("--force", "--force"),
+                ("--force-if-includes", "--force-i"),
+                ("--force-with-lease", "--force-w"),
+                ("--mirror", "--mir"),
+            )
+        ):
+            return True
         if arg in {
             "-f",
             "-d",
@@ -1151,7 +1342,7 @@ def _push_refspecs(args: list[str]) -> list[str]:
             continue
         positional.append(arg)
         index += 1
-    if _has_flag(args, "--delete") or _has_short_option(args, "d"):
+    if _has_push_option(args, "--delete", "--del") or _has_short_option(args, "d"):
         return positional[1:] if len(positional) >= 2 else positional
     if len(positional) >= 2:
         return positional[1:]
@@ -1184,6 +1375,11 @@ def _resolved_push_destination(
         return destination
     branch = branch_lookup(cwd)
     return branch or None
+
+
+def _has_push_option(args: list[str], canonical: str, minimum: str) -> bool:
+    """True when args contain a git push long option or its abbreviation."""
+    return any(_is_abbreviated_option(arg, canonical, minimum) for arg in args)
 
 
 def _has_flag(args: list[str], flag: str) -> bool:
