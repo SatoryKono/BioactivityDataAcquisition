@@ -459,6 +459,23 @@ def test_load_malformed_json_returns_none(tmp_path: Path) -> None:
     )
 
 
+def test_load_oversized_json_int_returns_none(tmp_path: Path) -> None:
+    """Oversized JSON integers raise ValueError — keep ledger fills fail-closed."""
+    target = (
+        tmp_path / "pipeline" / "chembl_activity" / "run1" / "pipeline-run-report.json"
+    )
+    target.parent.mkdir(parents=True)
+    target.write_text('{"n": ' + ("1" * 5000) + "}", encoding="utf-8")
+    assert (
+        load_pipeline_run_report_payload(
+            run_id="run1",
+            pipeline_name="chembl_activity",
+            root=tmp_path,
+        )
+        is None
+    )
+
+
 def test_list_pipeline_run_reports(tmp_path: Path) -> None:
     target = (
         tmp_path / "pipeline" / "chembl_activity" / "run1" / "pipeline-run-report.json"

@@ -3650,14 +3650,15 @@
       "kind": "http",
       "panel_id": 9460,
       "panel_title": "Inspect Selected Run Stages",
-      "query": "/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+      "query": "/ops/observability/selected-run-status?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&run_type=${run_type:csv}&workflow=${workflow:csv}",
       "query_tokens": [
-        "/ops/observability/pipeline-run-report-artifact",
+        "/ops/observability/selected-run-status",
         "pipeline",
         "run_id",
-        "format"
+        "run_type",
+        "workflow"
       ],
-      "ref_id": "B",
+      "ref_id": "A",
       "runbook_urls": [],
       "thresholds": [],
       "unit": "none"

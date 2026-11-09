@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.interfaces.http import _processed_records_table_support as _support
+from bioetl.interfaces.http._processed_records_report import fill_report_accounting
 
 ProcessedRecordRowSpec = _support.ProcessedRecordRowSpec
 PROCESSED_RECORDS_ROW_SPECS = _support.PROCESSED_RECORDS_ROW_SPECS
@@ -117,6 +120,7 @@ def build_processed_records_table_payload_from_ledger(
     ledger_entries: tuple[RunLedgerEntry, ...],
     pipeline: str,
     run_type: str | None,
+    report: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
     """Build exact-run accounting rows from RunLedger source-of-truth entries."""
     if not ledger_entries:
@@ -151,12 +155,13 @@ def build_processed_records_table_payload_from_ledger(
                 "bioetl_processed_records_silver_filtered_out_current": (
                     latest_snapshot.get("records_filtered_out")
                 ),
+                # Missing snapshot keys stay None — a synthetic 0 would conflict
+                # with a consistent saved-report fill in fill_report_accounting.
                 "bioetl_processed_records_gold_written_current": latest_snapshot.get(
                     "records_gold",
-                    0,
                 ),
                 "bioetl_processed_records_gold_excluded_by_contract_current": (
-                    latest_snapshot.get("records_gold_excluded_by_contract", 0)
+                    latest_snapshot.get("records_gold_excluded_by_contract")
                 ),
             }
         )
@@ -166,13 +171,16 @@ def build_processed_records_table_payload_from_ledger(
         latest_snapshot.get("records_silver") if latest_snapshot is not None else None
     )
     silver_artifact_count = artifact_counts.get("silver")
-    silver_deduplicated_count = 0
+    # Snapshot−artifact is display-only. records_silver is already the
+    # post-save confirmed Silver count, so the difference is NOT ledger
+    # evidence and must not enter known_counts for report reconciliation.
+    silver_deduplicated_display: int | None = None
     if (
         isinstance(silver_snapshot_count, int)
         and isinstance(silver_artifact_count, int)
         and silver_snapshot_count >= silver_artifact_count
     ):
-        silver_deduplicated_count = silver_snapshot_count - silver_artifact_count
+        silver_deduplicated_display = silver_snapshot_count - silver_artifact_count
     metric_values.update(
         {
             "bioetl_processed_records_bronze_current": artifact_counts.get(
@@ -187,11 +195,21 @@ def build_processed_records_table_payload_from_ledger(
                 "gold",
                 metric_values["bioetl_processed_records_gold_written_current"],
             ),
-            "bioetl_processed_records_silver_deduplicated_current": (
-                silver_deduplicated_count
-            ),
         }
     )
+    fill_report_accounting(
+        metric_values,
+        report=report,
+        ledger_entries=ledger_entries,
+        pipeline=pipeline,
+        run_type=run_type,
+    )
+    dedup_metric = "bioetl_processed_records_silver_deduplicated_current"
+    if (
+        metric_values.get(dedup_metric) is None
+        and silver_deduplicated_display is not None
+    ):
+        metric_values[dedup_metric] = silver_deduplicated_display
     return build_processed_records_table_payload(
         metric_values=metric_values,
         pipeline=pipeline,

@@ -1500,6 +1500,7 @@ def _ensure_exact_replay_readiness_panel(panels: list[object]) -> None:
 
 
 def _set_panel_no_value(panel: dict[str, Any], text: str) -> None:
+    """Stamp the panel empty-state `noValue` text under fieldConfig.defaults."""
     field_config = panel.setdefault("fieldConfig", {})
     if not isinstance(field_config, dict):
         return
@@ -1523,7 +1524,7 @@ def _stamp_exact_replay_panel(panels: list[object]) -> None:
             "request states. N/A is not zero. CURRENT Prometheus does not change this "
             "verdict."
         )
-        _set_panel_no_value(panel, "—")
+        _set_panel_no_value(panel, "UNKNOWN")
         transforms = panel.setdefault("transformations", [])
         if isinstance(transforms, list) and not any(
             isinstance(item, dict) and item.get("id") == "limit" for item in transforms
@@ -2764,6 +2765,22 @@ def apply_to_dashboard(
     return True
 
 
+_CP_EXACT_REPLAY_NO_VALUE: dict[int, str] = {
+    9422: "UNKNOWN",
+    9423: ("SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."),
+}
+
+
+def _stamp_control_plane_exact_replay_no_value(panel: dict[str, Any]) -> None:
+    """Keep panel 9422 UNKNOWN distinct from 9423 SELECT RUN / QUERY ERROR copy."""
+    panel_id = panel.get("id")
+    if not isinstance(panel_id, int):
+        return
+    text = _CP_EXACT_REPLAY_NO_VALUE.get(panel_id)
+    if text is not None:
+        _set_panel_no_value(panel, text)
+
+
 def _apply_phase25_srs_prr_budget(payload: dict[str, Any], *, current_uid: str) -> None:
     """Re-apply Phase 2.5 donors after nav/layout builders (idempotent)."""
     from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
@@ -2804,11 +2821,8 @@ def _apply_phase25_srs_prr_budget(payload: dict[str, Any], *, current_uid: str) 
     # Phase 2 remainder link/F-13 rules must follow donors so render_nav_bus alone
     # stays the durable path (no separate remainder CLI required).
     for panel in _walk_remainder_panels(payload.get("panels", [])):
-        if current_uid == "bioetl-control-plane-v1" and panel.get("id") in {9422, 9423}:
-            _set_panel_no_value(
-                panel,
-                "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
-            )
+        if current_uid == "bioetl-control-plane-v1":
+            _stamp_control_plane_exact_replay_no_value(panel)
         if panel.get("id") == 9400:
             _move_data_links_to_panel_links(panel)
             if current_uid == "bioetl-control-plane-v1":

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "522ced32377195b9c2df9cd39ae711a3715dbbdb",
+  "source_ref": "522ced32377195b9c2df9cd39ae711a3715dbbdb",
+  "source_reviews": {
+    "src/bioetl/interfaces/http/_health_server_records_table.py": "Reviewed report=load_pipeline_run_report_payload wiring into ledger-backed processed-records payload. asyncio.to_thread(operation) exclusion site retained; line shift only. No new acquisition owner.",
+    "src/bioetl/interfaces/http/_processed_records_table_support.py": "Extracted fill_report_accounting helpers to a sibling module under the interfaces LOC hard limit. Re-exports the same fill_report_accounting contract; no sockets/files/subprocess/locks added.",
+    "src/bioetl/interfaces/http/_processed_records_report_accounting.py": "New pure report-accounting helper moved from _processed_records_table_support. No resource acquisition, executor offload, or cleanup ownership.",
+    "src/bioetl/interfaces/http/processed_records_table.py": "Reviewed tip-side processed-records table changes that remain ledger/Prometheus composition only. No new acquisition sites."
+  },
+  "line_updates": {
+    "src/bioetl/interfaces/http/_health_server_records_table.py": {
+      "81": 86
+    }
+  },
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "reference_moves": []
+}

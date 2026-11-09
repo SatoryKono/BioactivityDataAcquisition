@@ -46,6 +46,63 @@ _SECRET_ASSIGNMENT = re.compile(
 _URI_USERINFO = re.compile(r"(://)[^/@\s:]+:[^/@\s]+@")
 
 
+def _optional_path_owner(path: Path) -> os.stat_result | None:
+    """Return path ownership when the bind dir exists; absence stays optional."""
+    try:
+        return path.stat()
+    except OSError:
+        return None
+
+
+def _runtime_identity_is_configured(overrides: dict[str, str], key: str) -> bool:
+    """True when operator/contract already pinned this Compose identity field."""
+    configured = overrides.get(key)
+    if configured is not None and configured != "":
+        return True
+    environ_value = os.environ.get(key)
+    return environ_value is not None and environ_value != ""
+
+
+def _publish_matching_bind_owner(
+    overrides: dict[str, str],
+    *,
+    reports_owner: os.stat_result,
+    data_owner: os.stat_result,
+) -> None:
+    """Publish UID/GID independently for matching non-root bind owners.
+
+    Matching non-root UID still helps private report binds when GID is 0
+    (root group must not be copied into Compose). Explicit BIOETL_RUNTIME_UID /
+    BIOETL_RUNTIME_GID always win over autodetection.
+    """
+    for key, attr in (
+        ("BIOETL_RUNTIME_UID", "st_uid"),
+        ("BIOETL_RUNTIME_GID", "st_gid"),
+    ):
+        value = getattr(reports_owner, attr)
+        if (
+            not _runtime_identity_is_configured(overrides, key)
+            and value > 0
+            and value == getattr(data_owner, attr)
+        ):
+            overrides[key] = str(value)
+
+
+def _apply_optional_bind_owner_overrides(overrides: dict[str, str]) -> None:
+    """Ownership is optional: stop/logs/ensure-networks must still dispatch."""
+    if os.name != "posix":
+        return
+    reports_path = Path(overrides.get("BIOETL_DASHBOARD_REPORT_ROOT", ROOT / "reports"))
+    data_path = Path(overrides.get("BIOETL_DASHBOARD_DATA_ROOT", ROOT / "data"))
+    reports_owner = _optional_path_owner(reports_path)
+    data_owner = _optional_path_owner(data_path)
+    if reports_owner is None or data_owner is None:
+        return
+    _publish_matching_bind_owner(
+        overrides, reports_owner=reports_owner, data_owner=data_owner
+    )
+
+
 @contextmanager
 def _dashboard_runtime_environment(
     contract_path: Path,
@@ -53,6 +110,7 @@ def _dashboard_runtime_environment(
     """Expose one scoped source identity to Compose without touching `.env`."""
     contract = _load_contract(contract_path)
     overrides = runtime_preflight.dashboard_source_environment(ROOT, contract)
+    _apply_optional_bind_owner_overrides(overrides)
     previous = {name: os.environ.get(name) for name in overrides}
     os.environ.update(overrides)
     try:
