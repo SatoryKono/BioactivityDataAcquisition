@@ -128,3 +128,28 @@ def test_dry_run_reports_actions_without_creating_skill_roots(
     assert "create:" in result.stdout
     assert not (repo / ".cursor/skills").exists()
     assert not (cursor_home / "skills").exists()
+
+
+def test_project_sync_links_grok_operator_skills_and_keeps_them(
+    tmp_path: Path,
+) -> None:
+    repo, script, cursor_home = _sandbox(tmp_path, "active")
+    grok_skill = repo / "docs/00-project/ai/grok/skills/bioetl-session"
+    grok_skill.mkdir(parents=True)
+    (grok_skill / "SKILL.md").write_text(
+        "---\nname: bioetl-session\n---\n",
+        encoding="utf-8",
+    )
+
+    first = _run_sync(repo, script, cursor_home, "--project-only")
+    second = _run_sync(repo, script, cursor_home, "--project-only")
+
+    project_skills = repo / ".cursor/skills"
+    assert first.returncode == 0, first.stderr
+    assert second.returncode == 0, second.stderr
+    assert os.readlink(project_skills / "active") == "../../.codex/skills/active"
+    assert (
+        os.readlink(project_skills / "bioetl-session")
+        == "../../docs/00-project/ai/grok/skills/bioetl-session"
+    )
+    assert not (cursor_home / "skills").exists()

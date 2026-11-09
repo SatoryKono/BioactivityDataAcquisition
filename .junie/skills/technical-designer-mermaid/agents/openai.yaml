@@ -1,4 +1,4 @@
 interface:
   display_name: "Технический дизайнер Mermaid"
   short_description: "Проектирование технических Mermaid-диаграмм"
-  default_prompt: "Use $technical-designer-mermaid to create and improve Mermaid diagrams for architecture, data flows, API interactions, and domain models."
+  default_prompt: "Use $technical-designer-mermaid to draw one ADR-040 diagram for the named flow in SCOPE. Read the diagram profile. Write that Mermaid block. Done when it renders and labels match code."

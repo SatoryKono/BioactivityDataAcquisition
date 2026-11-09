@@ -1,6 +1,8 @@
 ---
 name: technical-designer-mermaid
 description: Design technical diagrams in Mermaid syntax for architecture, data flows, API interactions, domain models, and process behavior. Supports generic Mermaid tasks and BioETL project mode with ADR-040 compliance, lint/render workflow, and repository file conventions. Use when users ask for Mermaid diagrams, mention common typos like "merimad/merimd", convert text/design docs into diagrams, or improve existing Mermaid blocks.
+context: none
+agent: general-purpose
 ---
 
 # Technical Designer Mermaid
@@ -11,6 +13,7 @@ description: Design technical diagrams in Mermaid syntax for architecture, data 
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Read boundary: use the task class in the root runtime contract, then only the slices the normative index names for SCOPE.
 
 ## Overview
 

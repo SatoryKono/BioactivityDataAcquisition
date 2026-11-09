@@ -25,6 +25,9 @@ Every wrapper skill must state:
    use `BIOETL_AI_MEMORY_MODE=off` per `AGENTS.md` instead of the full
    pre-task RAG.
 1. Read the primary profile or workflow file named by the wrapper.
+   The Source Of Truth links to project rules, requirements, and accepted ADRs
+   are an index. Open those documents only when `NORMATIVE_SOURCES.md` names
+   the slice for SCOPE.
 1. Use repo search to find related tests, docs, configs, contracts, mirrors,
    evidence, and validation gates.
 1. Produce the wrapper-specific output.

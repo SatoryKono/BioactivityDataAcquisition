@@ -1,6 +1,8 @@
 ---
 name: bioetl-session
 description: Bootstrap a BioETL Grok session — read order, Windows venv, branch safety, mode routing. Use when starting work, /bioetl-session, or when the operator has not locked SCOPE/MODE.
+context: none
+agent: general-purpose
 ---
 
 # BioETL session bootstrap
@@ -12,6 +14,13 @@ Not runtime SSOT. Follow `AGENTS.md` precedence when anything conflicts.
 - New Grok session on BioETL
 - Operator gave a goal but not a full paste template
 - Need to choose implement / audit / closeout / plan-only / ci-rebind
+
+## Launch
+
+- Goal: Lock TASK, MODE, SCOPE, and WORK_BRANCH.
+- SCOPE: the operator goal.
+- Read: the AGENTS.md task-class row.
+- Done: mode and branch are named.
 
 ## Mandatory steps
 

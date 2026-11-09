@@ -1,4 +1,4 @@
 interface:
   display_name: "VCR Record"
   short_description: "Manage BioETL VCR cassettes"
-  default_prompt: "Use $vcr-record to record, validate, update, or clean BioETL VCR cassettes safely."
+  default_prompt: "Use $vcr-record to record or check the cassette for the named test in SCOPE. Read the cassette workflow. Write only tests/fixtures/vcr. Done when the cassette path is clean and vcr-record=none holds."
