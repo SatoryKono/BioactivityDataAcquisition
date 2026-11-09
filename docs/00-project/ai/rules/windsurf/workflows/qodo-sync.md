@@ -27,6 +27,6 @@ Compare tracked AI rules with Qodo platform rules for `SatoryKono/BioactivityDat
 ## SSOT
 
 - Rule content canonical source: `docs/00-project/ai/rules/cursor/*.mdc`
-- Cursor deploy: `.cursor/rules/` via `scripts/ai/sync/cursor.py --deploy`
+- Cursor deploy: `.cursor/rules/` and `.cursor/commands/` via `scripts/ai/sync/cursor.py --deploy`
 - Windsurf deploy: derived via `scripts/ai/sync/windsurf.py`
 - Devin workflows: `.devin/workflows/` (tracked parity with Cascade `review`, `post-change`, `pre-commit`, `qodo-sync`, plus specialized `audit-documents`)

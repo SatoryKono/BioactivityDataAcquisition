@@ -1170,6 +1170,11 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     ),
     # Canonical Cursor/Windsurf rule docs → sync contract (alwaysApply / globs).
     "docs/00-project/ai/rules/": (SYNC_CURSOR_RULES_TEST,),
+    ".devin/workflows/qodo-sync.md": (SYNC_CURSOR_RULES_TEST,),
+    "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md": (
+        SYNC_CURSOR_RULES_TEST,
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+    ),
     ".vscode/": (TECH_DEBT_5847_5852_CLOSEOUT_TEST,),
     ".cursor/": (
         TECH_DEBT_5847_5852_CLOSEOUT_TEST,
