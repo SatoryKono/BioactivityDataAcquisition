@@ -92,6 +92,7 @@ _EVENT_RANGE = re.compile(
     re.ASCII,
 )
 _SCOPE_METRIC = "bioetl_runtime_pipeline_run_type_universe_scoped"
+_RULES_ENDPOINT = "/api/v1/rules"
 type WitnessVector = Callable[[str], list[dict[str, Any]] | None]
 
 
@@ -192,7 +193,7 @@ def _workflow_scope_confirms_empty(
     if panel_id == 9701:
         dependencies = dependencies | _WORKFLOW_INPUT_DEPENDENCIES
     if not _healthy_rules(
-        _response_data(request("/api/v1/rules", {})), "recording", dependencies
+        _response_data(request(_RULES_ENDPOINT, {})), "recording", dependencies
     ):
         return False
     standalone = 'bioetl_standalone_pipeline_universe{pipeline=~"$pipeline",run_type=~"$run_type"}'
@@ -294,7 +295,7 @@ def _signal_metrics_available(
     if panel_id == _RANKED_EVIDENCE_PANEL:
         expected_rules.update(_RANKED_EVIDENCE_DEPENDENCIES)
     if expected_rules:
-        data = _response_data(request("/api/v1/rules", {}))
+        data = _response_data(request(_RULES_ENDPOINT, {}))
         if not _healthy_rules(data, "recording", expected_rules):
             return False
         if panel_id == 2005:
@@ -368,7 +369,7 @@ def _alert_history_available(
         return False
     expected = _expected_alert_names()
     if not expected or not _healthy_rules(
-        _response_data(request("/api/v1/rules", {})), "alerting", expected
+        _response_data(request(_RULES_ENDPOINT, {})), "alerting", expected
     ):
         return False
     healthy = vector('min_over_time(up{job="prometheus"}[$__range])')
