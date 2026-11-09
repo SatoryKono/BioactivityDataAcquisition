@@ -1,7 +1,7 @@
 interface:
   display_name: "Research Workflow"
   short_description: "Run traceable evidence-to-spec research"
-  default_prompt: "Use $research-workflow for one phase in SCOPE: initialize, evidence, synthesis, decisions, specs, or complete. Read that phase reference. Write only that phase artifact. Done when the phase schema is filled."
+  default_prompt: "Use $research-workflow for SCOPE with --phase initialize|evidence|synthesis|decisions|specs|complete. Single phase: read that phase reference, write only its artifact, done when its schema and gates pass. complete: run initialize→evidence→synthesis→decisions→specs in order; for each phase read its reference, write its artifact, and verify its completion gates. Done when the full ledger exists."
 
 policy:
   allow_implicit_invocation: false
