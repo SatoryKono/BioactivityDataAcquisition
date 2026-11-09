@@ -22,13 +22,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, fields
 from datetime import datetime
+from math import inf
 
-from bioetl.domain._event_validation import (
-    validate_duration,
-    validate_metadata_snapshot,
-)
 from bioetl.domain.deterministic_identity import deterministic_id
-from bioetl.domain.immutability import deep_freeze_json
+from bioetl.domain.immutability import (
+    deep_freeze_json,
+    validate_event_metadata_snapshot,
+)
 from bioetl.domain.medallion import Layer
 from bioetl.domain.types.identifiers import BatchID, ContentHash, MetaDict, RunID
 
@@ -84,9 +84,6 @@ class DomainEvent:
         )
 
 
-# Pipeline Run Events
-
-
 @dataclass(frozen=True, slots=True)
 class PipelineCompleted(DomainEvent):
     """Event: Pipeline run completed successfully.
@@ -106,7 +103,10 @@ class PipelineCompleted(DomainEvent):
             raise ValueError(
                 f"records_processed cannot be negative: {self.records_processed}"
             )
-        validate_duration(self.duration_seconds)
+        if not 0.0 <= self.duration_seconds < inf:
+            raise ValueError(
+                f"duration_seconds cannot be negative or nonfinite: {self.duration_seconds}"
+            )
         if self.stages_count < 0:
             raise ValueError(f"stages_count cannot be negative: {self.stages_count}")
         DomainEvent.__post_init__(self)
@@ -152,9 +152,6 @@ class PipelineShutdown(DomainEvent):
                 f"records_processed cannot be negative: {self.records_processed}"
             )
         DomainEvent.__post_init__(self)
-
-
-# Batch Events
 
 
 @dataclass(frozen=True, slots=True)
@@ -280,7 +277,7 @@ class QuarantineEntryCreated(DomainEvent):
         """Detach nested metadata before identity, including explicit-ID replay."""
         if not self.error_code:
             raise ValueError("error_code cannot be empty")
-        validate_metadata_snapshot(self.metadata)
+        validate_event_metadata_snapshot(self.metadata)
         object.__setattr__(self, "metadata", deep_freeze_json(self.metadata))
         DomainEvent.__post_init__(self)
 
