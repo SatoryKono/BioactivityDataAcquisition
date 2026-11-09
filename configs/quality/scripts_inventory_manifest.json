@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-09T18:34:03.710968+00:00",
+  "generated_at": "2026-11-09T18:37:14.654562+00:00",
   "summary": {
     "total_scripts": 720,
     "status_counts": {
-      "active": 335,
-      "supporting": 383,
+      "active": 334,
+      "supporting": 384,
       "temporary_diagnostic": 2
     },
     "reference_group_coverage": {
@@ -23478,7 +23478,7 @@
     {
       "path": "scripts/ops/observability/grafana/_empty_observation_contract.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -23500,7 +23500,11 @@
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._empty_observation_contract import qualify_empty"
         }
-      ]
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-14",
+      "next_step": "Keep empty-state witness contracts internal to the live auditor and dashboard generator. This module has no standalone CLI or deployment entrypoint."
     },
     {
       "path": "scripts/ops/observability/grafana/_evidence_readability.py",
