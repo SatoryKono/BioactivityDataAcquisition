@@ -1,0 +1,19 @@
+{
+  "deploy_sha": "NOT_VERIFIABLE",
+  "generator_change": false,
+  "grafana": "NOT_VERIFIABLE",
+  "injection_saved": false,
+  "issue": 12820,
+  "local_ops_http": "http://127.0.0.1:8000",
+  "null_mapped_to_ok": false,
+  "observed_at_utc": "2026-11-09T08:35:23Z",
+  "panels_9481_9604_on_uid": false,
+  "prometheus": "NOT_VERIFIABLE",
+  "rendered_color": "NOT_VERIFIABLE",
+  "source_sha": "48dc0257ed980decaf0d8bf4c209c7e39309a4c4",
+  "uid": "bioetl-incident-v1",
+  "workflow_zero_display_panel_ids": [
+    9996,
+    9997
+  ]
+}
