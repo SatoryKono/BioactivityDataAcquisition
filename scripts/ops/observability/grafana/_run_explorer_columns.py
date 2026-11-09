@@ -184,28 +184,32 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         return
     _apply_run_explorer_templating(payload)
     panels = {panel["id"]: panel for panel in payload["panels"]}
-    # Keep helper copy at its two-row minimum and place table 3010 below it.
-    panels[1]["gridPos"]["h"] = 3
-    content = panels[1]["options"]["content"].replace(
-        "Select a Run ID to view details.", "Select a status to view details."
+    # Reserve three rows for both the navigation and scope banner side by side.
+    # Keeping them stacked would push the 13-row table beyond its first window.
+    if nav := panels.get(1000):
+        nav["gridPos"].update(x=0, y=0, w=16, h=3)
+        panels[1]["gridPos"].update(x=16, y=0, w=8, h=3)
+    else:
+        panels[1]["gridPos"].update(x=0, y=0, w=24, h=3)
+    panels[1]["options"]["content"] = (
+        '<div style="padding:4px 10px;border-left:4px solid #6b7280;'
+        "font-size:16px;line-height:20px;white-space:normal;"
+        'overflow-wrap:anywhere;box-sizing:border-box">'
+        '<a href="/d/bioetl-run-explorer-v1/1-run-explorer?'
+        "var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*"
+        '&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}">'
+        "<strong>Reset filters</strong></a><br>"
+        "Last 10 launches · independent of the time range"
+        "</div>"
     )
-    content = content.replace(
-        "var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=",
-        "var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=",
-    )
-    content = content.replace(
-        "var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-",
-        "var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-",
-    )
-    panels[1]["options"]["content"] = content
     panel = panels[3010]
-    panel["gridPos"].update(y=4, h=13)
+    panel["gridPos"].update(y=3, h=13)
     panel["description"] = (
         "GLOBAL · BROWSE the launch catalog filtered by Workflow/Pipeline/Run Type. "
         "Last 10 launches, newest Started first, independent of the time range. "
         "Workflow and Pipeline open passports. Run ID opens the persisted Report. "
-        "The full UUID wraps inside the column and is repeated on the cell tooltip "
-        "and in cell inspection, so reading it does not depend on widening the column. "
+        "The full UUID is available in the cell tooltip "
+        "and cell inspection without widening the column or wrapping the row. "
         "Overview is processing status, not replay readiness. "
         "Saved Evidence, Data Quality and Replay Readiness use exact-run verified evidence. "
         "N/A means unsupported/legacy assessment. INCOMPLETE means missing required evidence. "
@@ -266,7 +270,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     defaults = panel["fieldConfig"]["defaults"]
     defaults.update(
         noValue=(
-            "UNKNOWN — the launches table returned no rows for these filters. "
+            "UNKNOWN — required launch evidence is unavailable. "
             "QUERY ERROR means the backend request failed, not an empty fleet."
         ),
         color={"mode": "fixed", "fixedColor": "#E5E7EB"},
@@ -345,10 +349,10 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         if name == _RUN_ID_LABEL:
             properties.extend(
                 [
-                    {"id": "custom.wrapText", "value": True},
+                    {"id": "custom.wrapText", "value": False},
                     {
                         "id": _CELL_OPTIONS_ID,
-                        "value": {"type": "auto", "wrapText": True},
+                        "value": {"type": "auto", "wrapText": False},
                     },
                     {"id": "custom.tooltip.field", "value": "run_id"},
                 ]

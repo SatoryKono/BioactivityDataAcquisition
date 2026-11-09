@@ -2,13 +2,19 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from dataclasses import is_dataclass, replace
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import UUID
 
 from bioetl.composition.control_plane_paths import control_plane_root
+from bioetl.composition.runtime_builders._cached_bronze_binding import (
+    bind_cached_bronze_context as bind_cached_bronze_context,
+)
+from bioetl.composition.runtime_builders._exact_replay_snapshot_evidence import (
+    _extract_bronze_date,
+    _optional_text,
+    _validated_ledger_snapshot_uri,
+)
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import INPUT_SNAPSHOT_PUBLISHED_EVENT
@@ -50,33 +56,6 @@ def resolve_exact_replay_cached_bronze_context(
         path=str(bronze_root),
         date=bronze_date,
     )
-
-
-def bind_cached_bronze_context[T](
-    ctx: T,
-    cached_bronze: CachedBronzeContext,
-) -> T:
-    """Attach cached Bronze inputs while preserving the concrete context type."""
-    current = getattr(ctx, "cached_bronze", None)
-    if current == cached_bronze:
-        return ctx
-    if is_dataclass(ctx):
-        if isinstance(ctx, type):
-            raise TypeError("cached_bronze binding requires a dataclass instance")
-        return replace(ctx, cached_bronze=cached_bronze)
-    try:
-        object.__setattr__(ctx, "cached_bronze", cached_bronze)
-        return ctx
-    except (AttributeError, TypeError):
-        pass
-    try:
-        setattr(ctx, "cached_bronze", cached_bronze)  # noqa: B010 - generic dynamic host
-        return ctx
-    except (AttributeError, TypeError) as exc:
-        raise TypeError(
-            "PipelineRunContext does not support cached_bronze binding; "
-            "use a dataclass or mutable context host"
-        ) from exc
 
 
 def _resolve_replay_parent_manifest(
@@ -163,28 +142,6 @@ def _collect_ledger_bronze_dates(
     return _collect_manifest_bronze_dates(manifest)
 
 
-def _validated_ledger_snapshot_uri(
-    *,
-    manifest: RunManifest,
-    entry: RunLedgerEntry,
-) -> str | None:
-    """Validate one ledger snapshot event and return its immutable URI."""
-    details = entry.details if isinstance(entry.details, Mapping) else {}
-    provider = _optional_text(details.get("provider"))
-    entity = _optional_text(details.get("entity"))
-    if provider is not None and provider != manifest.provider:
-        raise RuntimeError(
-            "Exact replay parent snapshot provider mismatch between ledger "
-            f"('{provider}') and manifest ('{manifest.provider}')"
-        )
-    if entity is not None and entity != manifest.entity:
-        raise RuntimeError(
-            "Exact replay parent snapshot entity mismatch between ledger "
-            f"('{entity}') and manifest ('{manifest.entity}')"
-        )
-    return _optional_text(details.get("immutable_uri"))
-
-
 def _collect_manifest_bronze_dates(manifest: RunManifest) -> tuple[str, ...]:
     """Collect the compatibility fallback dates from manifest source refs."""
     dates: set[str] = set()
@@ -203,33 +160,3 @@ def _collect_manifest_bronze_dates(manifest: RunManifest) -> tuple[str, ...]:
                 )
             dates.add(_extract_bronze_date(snapshot.immutable_uri))
     return tuple(sorted(dates))
-
-
-def _extract_bronze_date(immutable_uri: str) -> str:
-    prefix = "bronze://"
-    if not immutable_uri.startswith(prefix):
-        raise RuntimeError(
-            "Exact replay parent snapshot immutable_uri must use bronze:// "
-            f"for cached Bronze reconstruction, got '{immutable_uri}'"
-        )
-    relative = immutable_uri[len(prefix) :]
-    normalized = PurePosixPath(relative)
-    if not normalized.parts:
-        raise RuntimeError(
-            "Exact replay parent snapshot immutable_uri is missing Bronze date "
-            f"segment: '{immutable_uri}'"
-        )
-    bronze_date = str(normalized.parts[0]).strip()
-    if not bronze_date:
-        raise RuntimeError(
-            "Exact replay parent snapshot immutable_uri has an empty Bronze date "
-            f"segment: '{immutable_uri}'"
-        )
-    return bronze_date
-
-
-def _optional_text(value: object) -> str | None:
-    if value is None:
-        return None
-    text = str(value).strip()
-    return text or None

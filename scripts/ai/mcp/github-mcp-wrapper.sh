@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Official github/github-mcp-server launch policy for BioETL GitHub MCP (#10262).
 # The retired npx package @modelcontextprotocol/server-github is not a fallback.
+# After project policy checks, an optional machine-local shared transport may run
+# via scripts/ai/mcp/support/github_project_transport.mjs when
+# PC_AGENT_GITHUB_PROJECT_ROUTES or ~/.config/pc-agent/github-project-route.json
+# is present; exit 78 falls back to the native binary.
 
 set -euo pipefail
 
@@ -53,6 +57,10 @@ if [[ -z "${GITHUB_LOCKDOWN_MODE:-}" ]]; then
   export GITHUB_LOCKDOWN_MODE="true"
 fi
 
+# Caller exclusions can tighten the mandatory deny set, never remove it.
+if [[ "${GITHUB_EXCLUDE_TOOLS}" != "${BIOETL_GITHUB_MCP_DEFAULT_EXCLUDE_TOOLS}" ]]; then
+  export GITHUB_EXCLUDE_TOOLS="${GITHUB_EXCLUDE_TOOLS},${BIOETL_GITHUB_MCP_DEFAULT_EXCLUDE_TOOLS}"
+fi
 mcp_exit_if_validate_only "github"
 
 if [[ -n "${BIOETL_GITHUB_MCP_SERVER:-}" ]]; then
@@ -92,7 +100,26 @@ else
   fi
 fi
 
+if [[ "${BIOETL_GITHUB_MCP_ACCESS:-read-only}" == "read-write" && -z "${BIOETL_GITHUB_MCP_SHA256:-}" ]]; then
+  mcp_fail "read-write requires an explicitly approved BIOETL_GITHUB_MCP_SHA256"
+  exit 64
+fi
+if [[ -n "${BIOETL_GITHUB_MCP_SHA256:-}" ]]; then
+  if [[ ! "${BIOETL_GITHUB_MCP_SHA256}" =~ ^[a-fA-F0-9]{64}$ ]]; then
+    mcp_fail "BIOETL_GITHUB_MCP_SHA256 must be a SHA-256 digest"; exit 64
+  fi
+  actual_digest="$(sha256sum -- "${GITHUB_MCP_BIN}")"
+  actual_digest="${actual_digest%% *}"
+  if [[ "${actual_digest,,}" != "${BIOETL_GITHUB_MCP_SHA256,,}" ]]; then
+    mcp_fail "GitHub MCP executable digest does not match approved identity"; exit 64
+  fi
+fi
 stdio_args=(stdio --toolsets "${GITHUB_TOOLSETS}")
+case "${BIOETL_GITHUB_MCP_ACCESS:-read-only}" in
+  read-only) stdio_args+=(--read-only) ;;
+  read-write) ;;
+  *) mcp_fail "BIOETL_GITHUB_MCP_ACCESS must be read-only or read-write"; exit 64 ;;
+esac
 if [[ -n "${GITHUB_EXCLUDE_TOOLS:-}" ]]; then
   stdio_args+=(--exclude-tools "${GITHUB_EXCLUDE_TOOLS}")
 fi
@@ -101,4 +128,27 @@ case "${GITHUB_LOCKDOWN_MODE:-true}" in
   *) stdio_args+=(--lockdown-mode) ;;
 esac
 
-exec "${GITHUB_MCP_BIN}" "${stdio_args[@]}"
+# Do not pass unrelated integration credentials to this server.
+github_env=()
+for key in PATH HOME USERPROFILE SYSTEMROOT WINDIR TEMP TMP TMPDIR \
+  LANG LC_ALL SSL_CERT_FILE SSL_CERT_DIR HTTP_PROXY HTTPS_PROXY NO_PROXY \
+  http_proxy https_proxy no_proxy GITHUB_PERSONAL_ACCESS_TOKEN GITHUB_HOST; do
+  if [[ -n "${!key:-}" ]]; then
+    github_env+=("${key}=${!key}")
+  fi
+done
+# Optional machine-local shared GitHub transport, after all project policy checks.
+github_route_file="${PC_AGENT_GITHUB_PROJECT_ROUTES:-${HOME}/.config/pc-agent/github-project-route.json}"
+if [[ -n "${PC_AGENT_GITHUB_PROJECT_ROUTES:-}" || -f "${github_route_file}" ]]; then
+  github_transport="${SCRIPT_DIR}/support/github_project_transport.mjs"
+  [[ -f "${github_transport}" ]] || { mcp_fail "Managed GitHub transport helper missing"; exit 1; }
+  command -v node >/dev/null 2>&1 || { mcp_fail "Managed GitHub transport requires node"; exit 1; }
+  if node "${github_transport}" --root "${REPO_ROOT}" --binary "${GITHUB_MCP_BIN}" --approved-sha "${BIOETL_GITHUB_MCP_SHA256:--}" -- "${stdio_args[@]}"; then
+    exit 0
+  else
+    github_transport_result=$?
+  fi
+  [[ "${github_transport_result}" == "78" ]] || exit "${github_transport_result}"
+fi
+
+exec env -i "${github_env[@]}" "${GITHUB_MCP_BIN}" "${stdio_args[@]}"

@@ -28,6 +28,7 @@ DASHBOARD_INVENTORY_CONTRACT = Path(
 PROVISIONING_CONFIG = Path("grafana/provisioning/dashboards/bioetl.yaml")
 VOLATILE_ROOT_KEYS = frozenset({"id", "version"})
 VOLATILE_PANEL_KEYS = frozenset({"pluginVersion"})
+_PANEL_COUNT_TEXT = re.compile(r"^\d+$", re.ASCII)
 QUARANTINE_EXPLORER_DATASOURCE = "Quarantine Explorer"
 DATASOURCE_ORDER = {
     "Prometheus": 0,
@@ -980,20 +981,24 @@ def sync_inventory_panel_counts(inventory: list[DashboardInventoryItem]) -> None
     for entry in dashboards.value:
         fields = {key.value: node for key, node in entry.value}
         count = fields["panel_count"]
-        edits.append(
-            (
-                count.start_mark.index,
-                count.end_mark.index,
-                str(actual[fields["uid"].value]),
+        count_text = str(actual[fields["uid"].value])
+        if _PANEL_COUNT_TEXT.fullmatch(count_text) is None:
+            raise ValueError(
+                "dashboard-inventory: panel_count must be an unsigned integer"
             )
-        )
+        edits.append((count.start_mark.index, count.end_mark.index, count_text))
     rendered = original
     for start, end, value in sorted(edits, reverse=True):
         rendered = rendered[:start] + value + rendered[end:]
     if rendered != original:
-        temporary = DASHBOARD_INVENTORY_CONTRACT.with_suffix(".yaml.tmp")
+        destination = DASHBOARD_INVENTORY_CONTRACT.resolve()
+        temporary = destination.with_name(destination.name + ".tmp")
+        if temporary.parent != destination.parent:
+            raise ValueError(
+                "dashboard-inventory: temporary path left the contract directory"
+            )
         temporary.write_text(rendered, encoding="utf-8")
-        temporary.replace(DASHBOARD_INVENTORY_CONTRACT)
+        temporary.replace(destination)
 
 
 def main(argv: list[str] | None = None) -> int:

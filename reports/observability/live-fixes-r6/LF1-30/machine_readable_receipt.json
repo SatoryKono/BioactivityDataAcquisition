@@ -1,0 +1,21 @@
+{
+  "data_backed_panel_ids": [
+    3010
+  ],
+  "deploy_sha": "NOT_VERIFIABLE",
+  "generator_change": false,
+  "grafana": "NOT_VERIFIABLE",
+  "index_state": "tree_missing",
+  "injection_saved": false,
+  "issue": 12823,
+  "local_ops_http": "http://127.0.0.1:8000",
+  "observed_at_utc": "2026-11-09T08:37:00Z",
+  "positive_matrix": "NOT_RUN",
+  "prometheus": "NOT_VERIFIABLE",
+  "source_sha": "48dc0257ed980decaf0d8bf4c209c7e39309a4c4",
+  "uid": "bioetl-run-explorer-v1",
+  "uuids": [
+    "ee3ce1ed-9487-572f-ae24-c98c6f6e3a37",
+    "d7cdb35b-e37a-5767-b30e-aa8dfb60d775"
+  ]
+}

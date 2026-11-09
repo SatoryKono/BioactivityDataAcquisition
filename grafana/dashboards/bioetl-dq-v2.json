@@ -837,7 +837,7 @@
         "type": "yesoreyeram-infinity-datasource",
         "uid": "bioetl-ops-http"
       },
-      "description": "SELECTED RUN · Saved accounting: count in is the input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays N/A. N/A means the value was not recorded. Skipped outcomes are hidden. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+      "description": "SELECTED RUN · Saved accounting: count in is the input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays UNKNOWN. UNKNOWN means the value was not recorded. Skipped outcomes are hidden. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -968,7 +968,7 @@
               },
               {
                 "id": "noValue",
-                "value": "N/A"
+                "value": "UNKNOWN"
               },
               {
                 "id": "mappings",
@@ -977,11 +977,11 @@
                     "type": "value",
                     "options": {
                       "UNKNOWN": {
-                        "text": "N/A",
+                        "text": "UNKNOWN",
                         "color": "gray"
                       },
                       "No data": {
-                        "text": "N/A",
+                        "text": "UNKNOWN",
                         "color": "gray"
                       }
                     }
@@ -1024,7 +1024,7 @@
               },
               {
                 "id": "noValue",
-                "value": "N/A"
+                "value": "UNKNOWN"
               },
               {
                 "id": "mappings",
@@ -1033,11 +1033,11 @@
                     "type": "value",
                     "options": {
                       "UNKNOWN": {
-                        "text": "N/A",
+                        "text": "UNKNOWN",
                         "color": "gray"
                       },
                       "No data": {
-                        "text": "N/A",
+                        "text": "UNKNOWN",
                         "color": "gray"
                       }
                     }
@@ -1134,7 +1134,7 @@
               },
               {
                 "id": "noValue",
-                "value": "N/A"
+                "value": "UNKNOWN"
               },
               {
                 "id": "mappings",
@@ -1143,11 +1143,11 @@
                     "type": "value",
                     "options": {
                       "No data": {
-                        "text": "N/A",
+                        "text": "UNKNOWN",
                         "color": "gray"
                       },
                       "UNKNOWN": {
-                        "text": "N/A",
+                        "text": "UNKNOWN",
                         "color": "gray"
                       }
                     }
@@ -1182,7 +1182,7 @@
               },
               {
                 "id": "noValue",
-                "value": "N/A"
+                "value": "UNKNOWN"
               },
               {
                 "id": "mappings",
@@ -1191,11 +1191,11 @@
                     "type": "value",
                     "options": {
                       "UNKNOWN": {
-                        "text": "N/A",
+                        "text": "UNKNOWN",
                         "color": "gray"
                       },
                       "No data": {
-                        "text": "N/A",
+                        "text": "UNKNOWN",
                         "color": "gray"
                       }
                     }
@@ -1220,7 +1220,7 @@
               },
               {
                 "id": "noValue",
-                "value": "N/A"
+                "value": "UNKNOWN"
               },
               {
                 "id": "mappings",
@@ -1229,11 +1229,11 @@
                     "type": "value",
                     "options": {
                       "UNKNOWN": {
-                        "text": "N/A",
+                        "text": "UNKNOWN",
                         "color": "gray"
                       },
                       "No data": {
-                        "text": "N/A",
+                        "text": "UNKNOWN",
                         "color": "gray"
                       }
                     }
@@ -1250,7 +1250,7 @@
             "properties": [
               {
                 "id": "noValue",
-                "value": "N/A"
+                "value": "UNKNOWN"
               },
               {
                 "id": "mappings",
@@ -1259,11 +1259,11 @@
                     "type": "value",
                     "options": {
                       "UNKNOWN": {
-                        "text": "N/A",
+                        "text": "UNKNOWN",
                         "color": "gray"
                       },
                       "No data": {
-                        "text": "N/A",
+                        "text": "UNKNOWN",
                         "color": "gray"
                       }
                     }
@@ -1284,7 +1284,7 @@
               },
               {
                 "id": "noValue",
-                "value": "N/A"
+                "value": "UNKNOWN"
               },
               {
                 "id": "mappings",
@@ -1293,11 +1293,11 @@
                     "type": "value",
                     "options": {
                       "UNKNOWN": {
-                        "text": "N/A",
+                        "text": "UNKNOWN",
                         "color": "gray"
                       },
                       "No data": {
-                        "text": "N/A",
+                        "text": "UNKNOWN",
                         "color": "gray"
                       }
                     }

@@ -1,0 +1,51 @@
+{
+  "cases": [
+    {
+      "http": 200,
+      "name": "valid_empty",
+      "reason": "no_runs_in_scope",
+      "verdict": "НЕТ ЗАПУСКОВ"
+    },
+    {
+      "http": 200,
+      "name": "not_found",
+      "reason": "run_not_found",
+      "verdict": "UNKNOWN"
+    },
+    {
+      "http": 400,
+      "name": "missing_pipeline"
+    },
+    {
+      "http": 404,
+      "name": "unknown_path"
+    },
+    {
+      "error": "connection_refused",
+      "http": null,
+      "name": "closed_port"
+    },
+    {
+      "index_state": "tree_missing",
+      "name": "saved_success",
+      "status": "NOT_RUN"
+    }
+  ],
+  "deploy_sha": "NOT_VERIFIABLE",
+  "generator_change": false,
+  "grafana": "NOT_VERIFIABLE",
+  "injection_saved": false,
+  "issue": 12818,
+  "local_ops_http": "http://127.0.0.1:8000",
+  "observed_at_utc": "2026-11-09T08:35:23Z",
+  "prometheus": "NOT_VERIFIABLE",
+  "rendered_color": "NOT_VERIFIABLE",
+  "source_sha": "48dc0257ed980decaf0d8bf4c209c7e39309a4c4",
+  "status_panel_ids": [
+    9604,
+    9603,
+    9481,
+    9482
+  ],
+  "uid": "bioetl-overview-v2"
+}

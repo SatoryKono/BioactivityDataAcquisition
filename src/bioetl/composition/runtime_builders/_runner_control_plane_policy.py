@@ -4,15 +4,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders._runner_control_plane_policy_support import (
-    requires_artifact_publication_closure as _requires_artifact_publication_closure_impl,
-    resolve_required_artifact_lineage_layers as _resolve_required_artifact_lineage_layers,
+    requires_artifact_publication_closure as requires_artifact_publication_closure,
+    resolve_required_artifact_lineage_layers as resolve_required_artifact_lineage_layers,
     validate_artifact_recorder_attachment as _validate_artifact_recorder_attachment,
     validate_manifest_persistence_requirements as _validate_manifest_persistence_requirements,
     validate_required_persistence_profile as _validate_required_persistence_profile,
-    validate_strict_data_root_policy as _validate_strict_data_root_policy,
+    validate_strict_data_root_policy as validate_strict_data_root_policy,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
@@ -20,26 +19,12 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     normalize_required_persistence_profile,
 )
 
-if TYPE_CHECKING:
-    from bioetl.infrastructure.config.settings_api import Settings
-
 
 @dataclass(frozen=True, slots=True)
 class ResolvedRunnerControlPlanePolicy:
     manifest_enabled: bool
     ledger_enabled: bool
     required_profile: str
-
-
-def resolve_required_artifact_lineage_layers(
-    *,
-    yaml_config: object | None,
-    skip_gold: bool = False,
-) -> tuple[tuple[str, ...], tuple[str, ...]]:
-    return _resolve_required_artifact_lineage_layers(
-        yaml_config=yaml_config,
-        skip_gold=skip_gold,
-    )
 
 
 def validate_manifest_persistence_requirements(
@@ -60,23 +45,6 @@ def validate_manifest_persistence_requirements(
 
 
 validate_required_persistence_profile = _validate_required_persistence_profile
-
-
-def validate_strict_data_root_policy(
-    *,
-    settings: Settings,
-    required_profile: object,
-    exact_replay: bool = False,
-) -> None:
-    _validate_strict_data_root_policy(
-        settings=settings,
-        required_profile=required_profile,
-        exact_replay=exact_replay,
-    )
-
-
-def requires_artifact_publication_closure(required_profile: object) -> bool:
-    return _requires_artifact_publication_closure_impl(required_profile)
 
 
 def validate_artifact_recorder_attachment(

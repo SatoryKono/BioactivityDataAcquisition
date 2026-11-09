@@ -16,6 +16,7 @@ from tests.integration._grafana_test_support import (
     get_dashboard_files,
     get_dashboard_panels,
     load_dashboard,
+    resolve_dashboard_target,
     materialize_expanded,
 )
 
@@ -82,9 +83,11 @@ def test_dashboard_rows_match_flat_and_forensic_surfaces() -> None:
         ]
         observed[dashboard_path.name] = len(rows)
         if expected_rows[dashboard_path.name] == 0:
-            assert len(get_dashboard_panels(dashboard)) == (
-                2 if dashboard_path.stem == "bioetl-run-explorer-v1" else 11
-            )
+            flat_panels = get_dashboard_panels(dashboard)
+            if dashboard_path.stem == "bioetl-run-explorer-v1":
+                assert [panel["id"] for panel in flat_panels] == [1000, 1, 3010]
+            else:
+                assert len(flat_panels) == 11
             if dashboard_path.stem == "bioetl-overview-v2":
                 comparison = next(
                     panel
@@ -92,10 +95,30 @@ def test_dashboard_rows_match_flat_and_forensic_surfaces() -> None:
                     if panel["id"] == 9483
                 )
                 assert comparison["type"] == "table"
-                assert (
-                    comparison["targets"][0]["root_selector"]
-                    == "reconciliation_display"
-                )
+                by_id = {
+                    panel["id"]: panel for panel in get_dashboard_panels(dashboard)
+                }
+                target = comparison["targets"][0]
+                assert target["panelId"] == 9002
+                source = resolve_dashboard_target(by_id, target)
+                assert "reconciliation_display" in source["root_selector"]
+                assert "run_id=${run_id}" in source["url"]
+                assert comparison["transformations"][0] == {
+                    "id": "filterByValue",
+                    "options": {
+                        "type": "include",
+                        "match": "all",
+                        "filters": [
+                            {
+                                "fieldName": "_bioetl_frame",
+                                "config": {
+                                    "id": "equal",
+                                    "options": {"value": "reconciliation"},
+                                },
+                            }
+                        ],
+                    },
+                }
     assert observed == expected_rows
 
 

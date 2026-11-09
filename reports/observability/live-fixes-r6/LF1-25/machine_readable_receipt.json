@@ -1,0 +1,30 @@
+{
+  "after_options": {
+    "item_text": "НЕТ ЗАПУСКОВ",
+    "item_value": "-",
+    "observed_at": "2026-11-09T08:36:29.659723+00:00",
+    "snapshot_id": "9f4170c8aa8990f399849ffa3cb5dc1476c756f6e3f4142bd9eb98f2f71aa425",
+    "stale_suffix": false,
+    "state": "fresh"
+  },
+  "before": {
+    "snapshot_id": null,
+    "state": "unavailable"
+  },
+  "deploy_sha": "NOT_VERIFIABLE",
+  "fresh_seconds": 300.0,
+  "generator_change": false,
+  "grafana": "NOT_VERIFIABLE",
+  "injection_saved": false,
+  "isolated_stale_test": {
+    "nodeid": "tests/unit/interfaces/http/test_selector_options_cache.py::test_stale_is_immediate_under_saturation_and_expires",
+    "result": "passed"
+  },
+  "issue": 12821,
+  "local_ops_http": "http://127.0.0.1:8000",
+  "max_age_seconds": 600.0,
+  "new_uuid": "NOT_RUN",
+  "observed_at_utc": "2026-11-09T08:36:29.659723Z",
+  "prometheus": "NOT_VERIFIABLE",
+  "source_sha": "48dc0257ed980decaf0d8bf4c209c7e39309a4c4"
+}

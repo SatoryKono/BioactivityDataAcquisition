@@ -365,27 +365,22 @@ dashboards:
         render_profiles: *id001
       '9402':
         title: Inspect Run Identity
-        role: forensic_table
-        tier: 3
+        role: guidance
+        tier: 4
         scope: selected_run
         scope_class: selected_run
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
         - N/A
-        - VALID_EMPTY
-        - UNKNOWN
-        - ERROR
-        - TELEMETRY_ABSENT
         required_copy:
-        - evidence_scope
-        - no_data
+        - operator_guidance
         fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id001
+        - not_applicable
+        render_profiles: &id004
+        - full_dark
+        - full_light
+        - zoom_200
       '9403':
         title: Inspect Processed Records
         role: forensic_table
@@ -429,7 +424,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: &id004
+        render_profiles: &id005
         - full_dark
         - full_light
         - zoom_200
@@ -475,27 +470,19 @@ dashboards:
         render_profiles: *id003
       '9452':
         title: Inspect Selected Run Identity
-        role: forensic_table
-        tier: 3
+        role: guidance
+        tier: 4
         scope: selected_run
         scope_class: selected_run
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
         - N/A
-        - VALID_EMPTY
-        - UNKNOWN
-        - ERROR
-        - TELEMETRY_ABSENT
         required_copy:
-        - evidence_scope
-        - no_data
+        - operator_guidance
         fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id003
+        - not_applicable
+        render_profiles: *id004
       '9460':
         title: Inspect Selected Run Stages
         role: forensic_table
@@ -2236,7 +2223,7 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: *id004
+        render_profiles: *id005
       '2101':
         title: Review Selected Run Status
         role: evidence_table
@@ -2258,7 +2245,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id004
+        render_profiles: *id005
       '2460':
         title: Review Stage Progress
         role: forensic_table
@@ -2635,53 +2622,34 @@ dashboards:
         render_profiles: *id003
       '9452':
         title: Inspect Selected Run Identity
-        role: forensic_table
-        tier: 3
+        role: guidance
+        tier: 4
         scope: selected_run
         scope_class: selected_run
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
         - N/A
-        - VALID_EMPTY
-        - UNKNOWN
-        - ERROR
-        - TELEMETRY_ABSENT
         required_copy:
-        - evidence_scope
-        - no_data
+        - operator_guidance
         fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id003
+        - not_applicable
+        render_profiles: *id004
       '9460':
         title: Inspect Selected Run Stages
-        role: forensic_table
-        tier: 3
+        role: guidance
+        tier: 4
         scope: selected_run
         scope_class: selected_run
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
         - N/A
-        - VALID_EMPTY
-        - UNKNOWN
-        - ERROR
-        - TELEMETRY_ABSENT
         required_copy:
-        - evidence_scope
-        - no_data
+        - operator_guidance
         fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles:
-        - full_dark
-        - full_light
-        - zoom_200
+        - not_applicable
+        render_profiles: *id004
       '9463':
         title: Review Total Run Duration
         role: indicator
@@ -2709,7 +2677,7 @@ dashboards:
         - crit
         - telemetry_absent
         - backend_error
-        render_profiles: &id009
+        render_profiles: &id010
         - full_dark
         - full_light
         - zoom_200
@@ -2755,7 +2723,7 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: &id005
+        render_profiles: &id006
         - full_dark
         - full_light
         - zoom_200
@@ -2780,7 +2748,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id005
+        render_profiles: *id006
       '9991':
         title: ''
         role: guidance
@@ -2902,7 +2870,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: &id006
+        render_profiles: &id007
         - full_dark
         - full_light
         - zoom_200
@@ -2927,7 +2895,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id006
+        render_profiles: *id007
       '22011':
         title: Inspect Global Signal Measurements
         role: forensic_table
@@ -2967,7 +2935,7 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: &id007
+        render_profiles: &id008
         - full_dark
         - full_light
         - zoom_200
@@ -2985,7 +2953,7 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: *id007
+        render_profiles: *id008
   bioetl-overview-v2:
     panels:
       '99':
@@ -3115,7 +3083,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: &id008
+        render_profiles: &id009
         - full_dark
         - full_light
         - zoom_200
@@ -3146,7 +3114,7 @@ dashboards:
         - crit
         - telemetry_absent
         - backend_error
-        render_profiles: *id008
+        render_profiles: *id009
       '9482':
         title: Review Contract Exclusions
         role: indicator
@@ -3224,7 +3192,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id004
+        render_profiles: *id005
       '9604':
         title: Review Overall Verdict
         role: indicator
@@ -3252,7 +3220,7 @@ dashboards:
         - crit
         - telemetry_absent
         - backend_error
-        render_profiles: *id009
+        render_profiles: *id010
   bioetl-run-explorer-v1:
     panels:
       '1':

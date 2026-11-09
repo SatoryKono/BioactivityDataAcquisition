@@ -111,6 +111,14 @@ def reflow_fleet_row(row: dict[str, Any]) -> int:
 
 
 def apply_incident(data: dict[str, Any]) -> dict[str, int]:
+    saved = _by_id(data, 9450)
+    children = {panel["id"]: panel for panel in saved["panels"]}
+    expected = {DOMAINS_PANEL_ID}
+    if children.keys() != expected or len(saved["panels"]) != len(expected):
+        raise ValueError(
+            f"row 9450 children mismatch: expected {sorted(expected)}, "
+            f"got {sorted(panel['id'] for panel in saved['panels'])}"
+        )
     row = _by_id(data, FLEET_ROW_ID)
     bands = reflow_fleet_row(row)
     domains = _by_id(data, DOMAINS_PANEL_ID)

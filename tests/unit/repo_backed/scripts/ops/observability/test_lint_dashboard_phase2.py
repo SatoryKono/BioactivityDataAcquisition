@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from scripts.ops.observability.grafana import lint_dashboard_phase2 as lint
+from scripts.ops.observability.grafana.apply_phase2_remainder import _rewrite_url
 from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
     _assert_donor_jsonata_balanced,
     _CP_DONOR,
@@ -103,6 +104,43 @@ def test_value_mapping_status_text_is_recognized() -> None:
     assert lint._mapping_has_status_token(
         {"type": "value", "options": {"0": {"text": "UNKNOWN"}}}
     )
+
+
+def test_github_host_grafana_params_are_flagged_only_on_the_real_host() -> None:
+    leaked = lint._url_transport_findings(
+        "board.json",
+        "runbook",
+        "https://github.com/org/repo/blob/main/docs/runbook?var-pipeline=chembl",
+    )
+    assert any("GitHub URL carries Grafana params" in item for item in leaked)
+
+    template = lint._url_transport_findings(
+        "board.json",
+        "runbook",
+        "https://github.com/org/repo?${__url_time_range}",
+    )
+    assert any("GitHub URL carries Grafana params" in item for item in template)
+
+    for url in (
+        "https://evil.example/github.com/?var-x=1",
+        "https://github.com.evil/org/repo?var-pipeline=chembl",
+        "https://github.com/org/repo/blob/main/docs/runbook",
+    ):
+        findings = lint._url_transport_findings("board.json", "runbook", url)
+        assert findings == [], url
+
+
+def test_rewrite_strips_grafana_query_only_for_github_docs_and_runbooks() -> None:
+    docs = "https://github.com/org/repo/blob/main/docs/runbook?var-pipeline=chembl"
+    assert _rewrite_url(docs) == "https://github.com/org/repo/blob/main/docs/runbook"
+    runbook = "https://github.com/org/repo/runbooks/foo.md?${__url_time_range}"
+    assert _rewrite_url(runbook) == "https://github.com/org/repo/runbooks/foo.md"
+    untouched = (
+        "https://evil.example/github.com/?var-pipeline=1",
+        "https://github.com.evil/blob/main/docs/runbook?var-pipeline=1",
+    )
+    for url in untouched:
+        assert _rewrite_url(url) == url
 
 
 def test_parse_dashboard_view_panel_when_not_first_query_param() -> None:
