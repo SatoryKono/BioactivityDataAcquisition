@@ -100,6 +100,39 @@ _DELETE_COMMANDS = frozenset(
         "unlink",
     }
 )
+_COMMAND_WRAPPERS = frozenset(
+    {"command", "env", "exec", "nice", "nohup", "sudo", "time"}
+)
+_WRAPPER_VALUE_FLAGS = {
+    "env": frozenset({"-u", "--unset", "-C", "--chdir", "-S", "--split-string"}),
+    "exec": frozenset({"-a", "--argv0"}),
+    "nice": frozenset({"-n", "--adjustment"}),
+    "sudo": frozenset(
+        {
+            "-C",
+            "-D",
+            "-T",
+            "-g",
+            "-h",
+            "-p",
+            "-r",
+            "-t",
+            "-u",
+            "--chdir",
+            "--close-from",
+            "--group",
+            "--host",
+            "--other-user",
+            "--prompt",
+            "--role",
+            "--type",
+            "--user",
+        }
+    ),
+    "time": frozenset({"-f", "-o", "--format", "--output"}),
+}
+_NON_EXECUTING_FLAGS = {"command": frozenset({"-v", "-V"})}
+_ASSIGNMENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
 _GIT_PATH_WRITES = frozenset({"checkout", "clean", "mv", "restore", "rm"})
 _PUSH_VALUE_OPTIONS = frozenset(
     {"--exec", "--push-option", "--receive-pack", "--repo", "-o"}
@@ -120,7 +153,7 @@ _SCRATCH = re.compile(
 )
 # Quoted targets stay intact so "dir with spaces/.env" is not cut at the space.
 _REDIRECT_TARGET = re.compile(r"""\s*("[^"]*"|'[^']*'|\S+)""")
-_REDIRECT_PREFIX = re.compile(r"\d*>{1,2}$")
+_REDIRECT_PREFIX = re.compile(r"\d*>{1,2}\|?$")
 _SUBST_WORD = re.compile(r"[A-Za-z0-9_./\\-]+")
 _PATCH_PATH = re.compile(
     r"(?m)^(?:\*\*\* (?:Add|Delete|Update) File:\s*|\*\*\* Move to:\s*"
@@ -212,6 +245,24 @@ def _decide_shell(
     roots = _workspace_roots(event)
     cwd = event.get("cwd")
     initial_cwd = cwd if isinstance(cwd, str) else ""
+    chosen = _classify_shell(command, roots, initial_cwd, branch_lookup)
+    if chosen is None or chosen[0] == "allow":
+        return {"permission": "allow"}
+    permission, user_message, agent_message = chosen
+    return {
+        "permission": permission,
+        "user_message": user_message,
+        "agent_message": agent_message,
+    }
+
+
+def _classify_shell(
+    command: str,
+    roots: list[str],
+    initial_cwd: str,
+    branch_lookup: Callable[[str], str | None],
+) -> tuple[str, str, str] | None:
+    """Classify a shell command, including separators and cwd changes."""
     directories = {initial_cwd}
     decisions: list[tuple[str, str, str]] = []
     for segment, separator in _split_commands(command):
@@ -227,21 +278,13 @@ def _decide_shell(
             }
             directories = changed if separator == "&&" else directories | changed
         if len(directories) > 16:
-            return _deny(
+            return _deny_tuple(
                 "Слишком много возможных рабочих каталогов. Разбейте команду.",
                 "Hook gate could not bound shell working directories.",
             )
     if not decisions:
-        return {"permission": "allow"}
-    chosen = max(decisions, key=lambda item: _PERMISSION_RANK[item[0]])
-    permission, user_message, agent_message = chosen
-    if permission == "allow":
-        return {"permission": "allow"}
-    return {
-        "permission": permission,
-        "user_message": user_message,
-        "agent_message": agent_message,
-    }
+        return None
+    return max(decisions, key=lambda item: _PERMISSION_RANK[item[0]])
 
 
 def _decide_pre_tool(event: Mapping[str, Any]) -> dict[str, str]:
@@ -294,6 +337,14 @@ def _classify_segment(
     asks: list[tuple[str, str, str]] = []
     for invocation in _git_invocations(segment):
         verdict = _classify_git(invocation, cwd, branch_lookup)
+        if verdict[0] == "deny":
+            denies.append(verdict)
+        elif verdict[0] == "ask":
+            asks.append(verdict)
+    for _start, body in _iter_substitution_bodies(segment):
+        verdict = _classify_shell(body, roots, cwd, branch_lookup)
+        if verdict is None or verdict[0] == "allow":
+            continue
         if verdict[0] == "deny":
             denies.append(verdict)
         elif verdict[0] == "ask":
@@ -469,15 +520,18 @@ def _direct_segment_write_kind(visible: str, roots: list[str], cwd: str) -> str 
     if "scratch" in redirected:
         return "scratch"
     tokens = _tokenize(visible)
+    resolved = _resolved_command(tokens)
+    invocation = [resolved[0], *resolved[1]] if resolved is not None else []
     kinds = [
         kind
-        for token in _mutation_operands(tokens, cwd)
+        for token in _mutation_operands(invocation, cwd)
         if (kind := _path_kind(token, roots, cwd)) is not None
     ]
     if not kinds:
         return None
-    writes = any(_command_basename(token) in _WRITE_COMMANDS for token in tokens)
-    writes = writes or _has_sed_inplace(tokens)
+    writes = resolved is not None and (
+        resolved[0] in _WRITE_COMMANDS or _has_sed_inplace(tokens)
+    )
     if _find_git(tokens) is not None:
         parsed = _git_command(tokens)
         writes = writes or (parsed is not None and parsed[0] in _GIT_PATH_WRITES)
@@ -521,30 +575,69 @@ def _command_basename(token: str) -> str:
     return name
 
 
+def _resolved_command(tokens: list[str]) -> tuple[str, list[str]] | None:
+    """Return argv0 and its args after assignments and known wrappers."""
+    index = 0
+    while index < len(tokens) and _ASSIGNMENT.match(tokens[index]):
+        index += 1
+    while index < len(tokens):
+        name = _command_basename(tokens[index])
+        if name not in _COMMAND_WRAPPERS:
+            return name, tokens[index + 1 :]
+        index = _skip_wrapper_args(name, tokens, index + 1)
+        if index is None:
+            return None
+    return None
+
+
+def _skip_wrapper_args(name: str, tokens: list[str], index: int) -> int | None:
+    """Skip wrapper options. None means the wrapper does not run a command."""
+    value_flags = _WRAPPER_VALUE_FLAGS.get(name, frozenset())
+    blocked = _NON_EXECUTING_FLAGS.get(name, frozenset())
+    while index < len(tokens):
+        arg = tokens[index]
+        if arg == "--":
+            return index + 1
+        if name == "env" and _ASSIGNMENT.match(arg):
+            index += 1
+            continue
+        if arg in blocked:
+            return None
+        if arg in value_flags:
+            index += 2
+            continue
+        if arg.startswith("--") and "=" in arg and arg.split("=", 1)[0] in blocked:
+            return None
+        if arg.startswith("-"):
+            index += 1
+            continue
+        return index
+    return index
+
+
 def _is_delete_only(tokens: list[str]) -> bool:
-    """True when the tokenized command is a delete/remove family tool."""
-    return any(_command_basename(token) in _DELETE_COMMANDS for token in tokens)
+    """True when the resolved command is a delete/remove family tool."""
+    resolved = _resolved_command(tokens)
+    return resolved is not None and resolved[0] in _DELETE_COMMANDS
 
 
 def _has_sed_inplace(tokens: list[str]) -> bool:
-    """True when sed is invoked with an in-place edit flag."""
-    names = {_command_basename(token) for token in tokens}
-    if "sed" not in names:
+    """True when the resolved command is sed with an in-place edit flag."""
+    resolved = _resolved_command(tokens)
+    if resolved is None or resolved[0] != "sed":
         return False
-    for token in tokens:
-        if token == "-i" or token.startswith("-i") or token == "--in-place":
-            return True
-        if token.startswith("--in-place="):
-            return True
-    return False
+    return any(
+        arg == "-i" or arg.startswith(("-i", "--in-place")) for arg in resolved[1]
+    )
 
 
 def _substitution_write_kind(segment: str, roots: list[str], cwd: str) -> str | None:
     """Detect protected writes hidden in command or process substitutions."""
     tokens = _tokenize(segment)
-    writer = any(_command_basename(token) in _WRITE_COMMANDS for token in tokens)
-    writer = writer or _has_sed_inplace(tokens)
-    delete_only = _is_delete_only(tokens)
+    resolved = _resolved_command(tokens)
+    name = resolved[0] if resolved is not None else ""
+    writer = name in _WRITE_COMMANDS or _has_sed_inplace(tokens)
+    delete_only = name in _DELETE_COMMANDS
     found_scratch = False
     for start, body in _iter_substitution_bodies(segment):
         inner = _segment_write_kind(body, roots, cwd)
@@ -566,10 +659,29 @@ def _substitution_write_kind(segment: str, roots: list[str], cwd: str) -> str | 
 
 
 def _iter_substitution_bodies(segment: str) -> list[tuple[int, str]]:
-    """Return substitution start indexes and their inner text."""
+    """Return executable substitution starts and their inner text."""
     bodies: list[tuple[int, str]] = []
     index = 0
+    quote: str | None = None
     while index < len(segment):
+        char = segment[index]
+        if quote == "'":
+            if char == "'":
+                quote = None
+            index += 1
+            continue
+        if quote == '"' and char == '"':
+            quote = None
+            index += 1
+            continue
+        if quote is None and char == "'":
+            quote = "'"
+            index += 1
+            continue
+        if quote is None and char == '"':
+            quote = '"'
+            index += 1
+            continue
         if segment.startswith("$(", index) or segment.startswith(">(", index):
             body_start = index + 2
             depth = 1
@@ -800,13 +912,18 @@ def _unquoted_shell_indexes(command: str) -> set[int]:
 
 
 def _redirect_targets(command: str) -> list[str]:
-    return [
-        match.group(1)
-        for index in sorted(_unquoted_shell_indexes(command))
-        if command[index] == ">"
-        and not command.startswith(">>", index)
-        and (match := _REDIRECT_TARGET.match(command, index + 1)) is not None
-    ]
+    """Return redirect targets. >| is one noclobber operator, not a pipe."""
+    targets: list[str] = []
+    for index in sorted(_unquoted_shell_indexes(command)):
+        if command[index] != ">" or command.startswith(">>", index):
+            continue
+        cursor = index + 1
+        if cursor < len(command) and command[cursor] == "|":
+            cursor += 1
+        match = _REDIRECT_TARGET.match(command, cursor)
+        if match is not None:
+            targets.append(match.group(1))
+    return targets
 
 
 def _split_commands(command: str) -> list[tuple[str, str]]:
@@ -825,6 +942,10 @@ def _split_commands(command: str) -> list[tuple[str, str]]:
             parts.append(("".join(buf), command[index : index + 2]))
             buf = []
             index += 2
+            continue
+        if char == "|" and index > 0 and command[index - 1] == ">":
+            buf.append(char)
+            index += 1
             continue
         if char in {";", "|", "\n"} or (
             char == "&"
