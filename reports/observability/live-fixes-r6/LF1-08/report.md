@@ -16,8 +16,9 @@ Using offline dashboard exports from `reports/observability/live-fixes-r6/LF1-01
 ## 3. Results (Offline Dashboard Inspections)
 
 ### 3.1 Overview (ID 9460)
-* Overview panel 9460 uses the `uql` parser on the `yesoreyeram-infinity-datasource`.
-* Target URL extracted: `/ops/observability/pipeline-run-report-artifact`
+* Target A reads panel 9002 through the shared Dashboard datasource with `withTransforms: false`. It supplies `state`, `reason`, `records_in`, `records_out`, and `duration_seconds`.
+* Target B uses the Infinity datasource with the `uql` parser and requests `/ops/observability/pipeline-run-report-artifact`.
+* The `joinByField` transformation combines A and B by `stage_id` in `outerTabular` mode.
 * Hypothesis from #12785: missing or optional fields could affect the stage join. The retained configuration does not establish that any fields were lost. This requires a captured input frame and the corresponding transformed output.
 
 ### 3.2 DQ Domains (ID 9406 & 9403)
