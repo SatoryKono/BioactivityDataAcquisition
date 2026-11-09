@@ -22,6 +22,8 @@ Project links are relative:
 The Grok set is the operator skills under docs/00-project/ai/grok/skills.
 Only links managed by this script are replaced or pruned. Existing files,
 directories, and unrelated symlinks make the sync fail closed.
+On Windows, if symlink creation is denied, the script creates a directory
+junction to the same source.
 EOF
     return 0
 }
@@ -73,6 +75,16 @@ relative_skill_source() {
     printf '%s\n' "$SKILLS_SOURCE_DIR/$name"
 }
 
+absolute_skill_source() {
+    local name="$1"
+    local kind="$2"
+    if [[ "$kind" == "grok" ]]; then
+        printf '%s\n' "$GROK_SKILLS_SOURCE_DIR/$name"
+        return 0
+    fi
+    printf '%s\n' "$SKILLS_SOURCE_DIR/$name"
+}
+
 skill_source_present() {
     local name="$1"
     [[ -d "$SKILLS_SOURCE_DIR/$name" || -d "$GROK_SKILLS_SOURCE_DIR/$name" ]]
@@ -83,27 +95,95 @@ path_exists() {
     [[ -e "$path" || -L "$path" ]]
 }
 
-is_expected_skill_link() {
-    local target_root="$1"
-    local name="$2"
-    local kind="$3"
-    local link_path="$target_root/$name"
-    local expected_target actual_target
-    [[ -L "$link_path" ]] || return 1
-    expected_target="$(relative_skill_source "$target_root" "$name" "$kind")"
-    actual_target="$(readlink -- "$link_path")" || return 1
-    [[ "$actual_target" == "$expected_target" ]]
+link_targets_match() {
+    local actual="$1"
+    local expected="$2"
+    local actual_unix expected_unix
+    [[ "$actual" == "$expected" ]] && return 0
+    if ! command -v cygpath >/dev/null 2>&1; then
+        return 1
+    fi
+    case "$actual" in
+        /*|[A-Za-z]:*)
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+    actual_unix="$(cygpath -u "$actual" 2>/dev/null || true)"
+    expected_unix="$(cygpath -u "$expected" 2>/dev/null || true)"
+    [[ -n "$actual_unix" && "$actual_unix" == "$expected_unix" ]]
+}
+
+read_skill_link_target() {
+    local link_path="$1"
+    if [[ -L "$link_path" ]]; then
+        readlink -- "$link_path"
+        return
+    fi
+    [[ -d "$link_path" ]] && command -v cygpath >/dev/null 2>&1 &&
+        command -v powershell.exe >/dev/null 2>&1 || return 1
+    BIOETL_CURSOR_LINK="$(cygpath -w "$link_path")" \
+        powershell.exe -NoProfile -NonInteractive -Command \
+        '$item = Get-Item -LiteralPath $env:BIOETL_CURSOR_LINK -Force -ErrorAction Stop; if ($item.LinkType -ne "Junction") { exit 1 }; [Console]::WriteLine([string]($item.Target | Select-Object -First 1))' |
+        tr -d '\r'
 }
 
 is_managed_skill_link() {
     local target_root="$1"
     local name="$2"
-    local kind
+    local expected_kind="${3:-}"
+    local link_path="$target_root/$name"
+    local actual_target kind expected_target absolute_target
+    actual_target="$(read_skill_link_target "$link_path")" || return 1
     for kind in codex grok; do
-        if is_expected_skill_link "$target_root" "$name" "$kind"; then
+        [[ -z "$expected_kind" || "$kind" == "$expected_kind" ]] || continue
+        expected_target="$(relative_skill_source "$target_root" "$name" "$kind")"
+        if [[ "$actual_target" == "$expected_target" ]]; then
+            return 0
+        fi
+        absolute_target="$(absolute_skill_source "$name" "$kind")"
+        if link_targets_match "$actual_target" "$absolute_target"; then
             return 0
         fi
     done
+    return 1
+}
+
+remove_managed_skill_link() {
+    local target_root="$1" name="$2"
+    local link_path="$target_root/$name"
+    is_managed_skill_link "$target_root" "$name" || return 1
+    if [[ -L "$link_path" ]]; then
+        rm -- "$link_path"
+    else
+        BIOETL_CURSOR_LINK="$(cygpath -w "$link_path")" \
+            powershell.exe -NoProfile -NonInteractive -Command \
+            '$ErrorActionPreference = "Stop"; $item = Get-Item -LiteralPath $env:BIOETL_CURSOR_LINK -Force; if ($item.LinkType -ne "Junction") { exit 1 }; [IO.Directory]::Delete($item.FullName)'
+    fi
+}
+
+create_skill_link() {
+    local link_path="$1"
+    local link_target="$2"
+    local source_path="$3"
+    local win_link win_target
+    if MSYS=winsymlinks:nativestrict ln -s "$link_target" "$link_path" 2>/dev/null; then
+        return 0
+    fi
+    if ! command -v cygpath >/dev/null 2>&1 || ! command -v powershell.exe >/dev/null 2>&1; then
+        echo "Failed to link $link_path -> $link_target" >&2
+        return 1
+    fi
+    win_link="$(cygpath -w "$link_path")"
+    win_target="$(cygpath -w "$source_path")"
+    if BIOETL_CURSOR_LINK="$win_link" BIOETL_CURSOR_TARGET="$win_target" \
+        powershell.exe -NoProfile -NonInteractive -Command \
+        'New-Item -ItemType Junction -Path $env:BIOETL_CURSOR_LINK -Target $env:BIOETL_CURSOR_TARGET -ErrorAction Stop | Out-Null'; then
+        echo "Junction (symlink privilege unavailable): $link_path" >&2
+        return 0
+    fi
+    echo "Failed to link $link_path -> $link_target" >&2
     return 1
 }
 
@@ -116,7 +196,7 @@ report_collision() {
 
 preflight_target_root() {
     local target_root="$1"
-    if [[ -L "$target_root" ]]; then
+    if read_skill_link_target "$target_root" >/dev/null; then
         report_collision "$target_root" "skill root is a symlink"
         return 1
     fi
@@ -180,7 +260,7 @@ link_skill() {
         return 0
     fi
     link_target="$(relative_skill_source "$target_root" "$name" "$kind")"
-    if is_expected_skill_link "$target_root" "$name" "$kind"; then
+    if is_managed_skill_link "$target_root" "$name" "$kind"; then
         if [[ "$DRY_RUN" -eq 1 ]]; then
             echo "  keep managed: $link_path -> $link_target"
         fi
@@ -194,14 +274,11 @@ link_skill() {
         fi
         return 0
     fi
-    if path_exists "$link_path"; then
-        if ! is_managed_skill_link "$target_root" "$name"; then
-            report_collision "$link_path" "expected a managed skill symlink"
-            return 1
-        fi
-        rm -- "$link_path"
+    if path_exists "$link_path" && ! remove_managed_skill_link "$target_root" "$name"; then
+        report_collision "$link_path" "expected a removable managed skill link"
+        return 1
     fi
-    ln -s "$link_target" "$link_path"
+    create_skill_link "$link_path" "$link_target" "$source_path"
 }
 
 prune_stale_project_links() {
@@ -215,7 +292,7 @@ prune_stale_project_links() {
             if [[ "$DRY_RUN" -eq 1 ]]; then
                 echo "  prune managed stale: $entry"
             else
-                rm -- "$entry"
+                remove_managed_skill_link "$target_root" "$name" || return 1
                 echo "Pruned stale skill link: $entry"
             fi
         fi

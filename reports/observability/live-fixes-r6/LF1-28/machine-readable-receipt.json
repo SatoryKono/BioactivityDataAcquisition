@@ -8,6 +8,6 @@
   "environment": "compose (NOT production)",
   "local_tests": "N/A",
   "ci": "N/A",
-  "deployment": "N/A",
+  "deployment": "NOT_VERIFIABLE",
   "live": "NOT_VERIFIABLE"
 }
