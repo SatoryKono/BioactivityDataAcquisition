@@ -320,7 +320,6 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
         source_kind="http",
         semantic_kind="http_table",
     ),
-
     # bioetl-overview-v2#9301 (Processed Records) no longer exists on the
     # shipped Overview surface; the reviewed HTTP-table coverage now lives on
     # Replay Readiness evidence/checks and Data Quality specs below.
@@ -1479,8 +1478,16 @@ def _classify_tempo_search_payload(payload: object) -> tuple[str, str]:
     return ("nonempty_result", "Tempo returned trace search evidence")
 
 
-def _resolve_dashboard_target(dashboard_uid: str, panel_id: int, field: str) -> dict[str, Any] | None:
-    panel_spec = PanelAuditSpec(dashboard_uid=dashboard_uid, panel_id=panel_id, title="", source_kind="http", semantic_kind="http_table")
+def _resolve_dashboard_target(
+    dashboard_uid: str, panel_id: int, field: str
+) -> dict[str, Any] | None:
+    panel_spec = PanelAuditSpec(
+        dashboard_uid=dashboard_uid,
+        panel_id=panel_id,
+        title="",
+        source_kind="http",
+        semantic_kind="http_table",
+    )
     try:
         parent_panel = _find_panel(panel_spec)
         targets = cast(list[dict[str, Any]], parent_panel.get("targets", []))
@@ -1490,6 +1497,7 @@ def _resolve_dashboard_target(dashboard_uid: str, panel_id: int, field: str) -> 
     except LookupError:
         pass
     return None
+
 
 def _select_target(
     panel: dict[str, Any],
@@ -1508,7 +1516,9 @@ def _select_target(
         if isinstance(value, str) and value:
             return target
         if target.get("panelId") is not None:
-            resolved = _resolve_dashboard_target(spec.dashboard_uid, target["panelId"], field)
+            resolved = _resolve_dashboard_target(
+                spec.dashboard_uid, target["panelId"], field
+            )
             if resolved is not None:
                 return resolved
     return None
