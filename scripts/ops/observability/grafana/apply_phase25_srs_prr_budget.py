@@ -257,15 +257,61 @@ _OV_PROVIDER = (
 )
 
 _OV_STAGES = _tag_rows("stage_diagnostics", "stages")
-_OV_RECON = _tag_rows("reconciliation_display", "reconciliation")
+# A missing or empty reconciliation array must not throw (that blanks the whole
+# donor) and must not render as a silent empty table.
+_OV_RECON = (
+    "($recon := $type(reconciliation_display) = 'array' ? reconciliation_display : []; "
+    "$count($recon) > 0 ? "
+    "$map($recon, function($row){$merge([$row, {'_bioetl_frame': 'reconciliation'}])}) : "
+    "[{'step_id': '—', 'mode': 'нет данных', 'scope': '—', 'pins': '—', 'limit': '—', "
+    "'result': verdict = 'SELECT RUN' ? 'не применимо' : "
+    "(verdict = 'НЕТ ЗАПУСКОВ' ? 'нет записей' : 'нет данных'), "
+    "'meaning': verdict = 'SELECT RUN' ? 'не применимо — no Run ID selected' : "
+    "(verdict = 'НЕТ ЗАПУСКОВ' ? 'нет записей — no runs in scope' : "
+    "'нет данных — FK comparison rows were not returned'), "
+    "'_bioetl_frame': 'reconciliation'}])"
+)
 _OV_EXCL = (
     f"[{{'status': (verdict='{_SELECT_RUN}' or verdict='{_NO_RUNS}') ? verdict : "
-    f"contract_exclusions_status, "
+    f"($exists(contract_exclusions_status) and contract_exclusions_status != '' "
+    f"? contract_exclusions_status : 'нет данных'), "
     f"'detail': contract_exclusions_rate != null ? "
     f"'excluded ' & $string($round(contract_exclusions_rate*100,2)) & '%' : "
-    f"(verdict='{_SELECT_RUN}' ? 'Choose a run' : "
-    f"(verdict='{_NO_RUNS}' ? 'No runs in scope' : 'excluded UNKNOWN')), "
+    f"(verdict='{_SELECT_RUN}' ? 'не применимо — Choose a run' : "
+    f"(verdict='{_NO_RUNS}' ? 'нет записей — No runs in scope' : "
+    f"'нет данных — excluded UNKNOWN')), "
     f"'{FRAME}': 'exclusions'}}]"
+)
+# Zero checkpoint rows are a successful empty frame. Grafana then draws a blank
+# table, which cannot be told apart from a broken query.
+_CHECKPOINT_EMPTY_ROWS = (
+    "($listed := $type(rows) = 'array' ? rows : []; "
+    "$count($listed) > 0 ? $listed : [{"
+    "'anchor': '—', "
+    "'status': (($exists(message) and message != '') or "
+    "($exists(status) and (status = 'scope_resolve_timeout' or "
+    "status = 'evidence_build_timeout'))) ? 'нет данных' : "
+    "(($exists(selected_run_id) and selected_run_id != '' and "
+    "selected_run_id != '-' and selected_run_id != 'All') ? "
+    "(($exists(checkpoint_compare) and checkpoint_compare.status = 'MISSING') ? "
+    "'нет записей' : 'нет данных') : 'не применимо'), "
+    "'current_value_full': ($exists(message) and message != '') ? message : "
+    "(($exists(status) and (status = 'scope_resolve_timeout' or "
+    "status = 'evidence_build_timeout')) ? "
+    "'нет данных — checkpoint comparison request timed out' : "
+    "(($exists(selected_run_id) and selected_run_id != '' and "
+    "selected_run_id != '-' and selected_run_id != 'All') ? "
+    "(($exists(checkpoint_compare) and checkpoint_compare.status = 'MISSING') ? "
+    "'нет записей — checkpoint anchors were not recorded for this run' : "
+    "'нет данных — checkpoint comparison returned no rows') : "
+    "'не применимо — no Run ID selected')), "
+    "'checkpoint_value_full': '—'"
+    "}])"
+)
+_READ_LATENCY_DESCRIPTION = (
+    "Quantile selector for Track Global Read Latency, not a duration. "
+    "p95 stores histogram quantile 0.95. The chart unit is seconds; "
+    "0.95 is the quantile, not the latency."
 )
 
 
@@ -326,6 +372,12 @@ _DONOR_SCHEMA = (
             "trust_reasons_action",
             "trust_action_note",
             "result",
+            "step_id",
+            "mode",
+            "scope",
+            "pins",
+            "limit",
+            "meaning",
             "check_id",
             "replay_ready",
             "readiness",
@@ -546,6 +598,9 @@ def _jsonata_brackets_balanced(expression: str) -> bool:
 def _assert_donor_jsonata_balanced() -> None:
     donors = {
         "_OV_DONOR": _OV_DONOR,
+        "_OV_RECON": _OV_RECON,
+        "_OV_EXCL": _OV_EXCL,
+        "_CHECKPOINT_EMPTY_ROWS": _CHECKPOINT_EMPTY_ROWS,
         "_DQ_DONOR": _DQ_DONOR,
         "_INC_DONOR": _INC_DONOR,
         "_CP_DONOR": _CP_DONOR,
@@ -582,6 +637,9 @@ def _ensure_selection_status_value_maps(
     required = {
         _SELECT_RUN: {"text": _SELECT_RUN, "color": "gray"},
         _NO_RUNS: {"text": _NO_RUNS, "color": "gray"},
+        "нет данных": {"text": "нет данных", "color": "gray"},
+        "нет записей": {"text": "нет записей", "color": "gray"},
+        "не применимо": {"text": "не применимо", "color": "gray"},
     }
     changed = False
     value_maps = [
@@ -928,6 +986,7 @@ def apply_overview(data: dict[str, Any]) -> None:
         )
 
     _ensure_exclusions_crit_color(_by_id(data, 9482))
+    _stamp_overview_empty_reasons(data)
 
     stages = _by_id(data, 9460)
     # Materialize complete saved stage rows once; mixed-frame joins dropped them.
@@ -1217,6 +1276,7 @@ def apply_incident(data: dict[str, Any]) -> None:
     for x, panel in zip((0, 12), handoffs, strict=True):
         panel["gridPos"].update(x=x, y=y, w=12, h=3)
     root.extend(handoffs)
+    _stamp_read_latency_context(data)
 
 
 def _cp_trust_donor_transforms() -> list[dict[str, Any]]:
@@ -1315,6 +1375,87 @@ def _rewrite_trust_self_links(overrides: list[Any]) -> None:
                 _rewrite_link_urls(prop.get("value") or [])
 
 
+def _stamp_checkpoint_empty_rows(data: dict[str, Any]) -> None:
+    """Give Compare Checkpoint Anchors a row when the frame would be blank."""
+    panel = _by_id(data, 9406)
+    if panel.get("title") != "Compare Checkpoint Anchors":
+        return
+    for target in panel.get("targets") or []:
+        if isinstance(target, dict) and "root_selector" in target:
+            target["root_selector"] = _CHECKPOINT_EMPTY_ROWS
+    description = str(panel.get("description") or "")
+    note = (
+        " A blank grid is not used: не применимо means no Run ID is selected, "
+        "нет записей means this run recorded no checkpoint anchors, "
+        "нет данных means the comparison payload is missing or the request timed out."
+    )
+    if "нет записей" not in description:
+        panel["description"] = description + note
+
+
+def _stamp_read_latency_context(data: dict[str, Any]) -> None:
+    """Label p95 = 0.95 as a quantile and mark the chart unit as seconds."""
+    templating = data.get("templating") or {}
+    for variable in templating.get("list") or []:
+        if not isinstance(variable, dict):
+            continue
+        if variable.get("name") != "read_latency_quantile":
+            continue
+        variable["label"] = "Read latency quantile"
+        variable["description"] = _READ_LATENCY_DESCRIPTION
+        variable["query"] = (
+            "p50 quantile : 0.50, p95 quantile : 0.95, p99 quantile : 0.99"
+        )
+        variable["options"] = [
+            {"selected": False, "text": "p50 quantile", "value": "0.50"},
+            {"selected": True, "text": "p95 quantile", "value": "0.95"},
+            {"selected": False, "text": "p99 quantile", "value": "0.99"},
+        ]
+        variable["current"] = {
+            "selected": True,
+            "text": "p95 quantile",
+            "value": "0.95",
+        }
+    panel = _by_id(data, 111)
+    defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
+    custom = defaults.setdefault("custom", {})
+    if isinstance(custom, dict):
+        custom["axisLabel"] = "seconds"
+    description = str(panel.get("description") or "")
+    prefix = (
+        "Unit: seconds. Read latency quantile p95 = 0.95 selects the histogram "
+        "quantile; it is not the latency reading. "
+    )
+    if not description.startswith("Unit: seconds."):
+        panel["description"] = prefix + description
+    for target in panel.get("targets") or []:
+        legend = target.get("legendFormat")
+        if isinstance(legend, str) and "seconds" not in legend:
+            target["legendFormat"] = f"{legend} · seconds"
+
+
+def _stamp_overview_empty_reasons(data: dict[str, Any]) -> None:
+    """Name the explicit empty states on the two Overview panels."""
+    exclusions = _by_id(data, 9482)
+    exclusion_note = (
+        " Empty evidence shows нет данных (excluded UNKNOWN), "
+        "не применимо when no Run ID is selected, "
+        "or нет записей when the catalog has no runs."
+    )
+    exclusion_description = str(exclusions.get("description") or "")
+    if "нет данных (excluded UNKNOWN)" not in exclusion_description:
+        exclusions["description"] = exclusion_description + exclusion_note
+    reconciliation = _by_id(data, 9483)
+    reconciliation_note = (
+        " An empty comparison is not a blank table: не применимо means no Run ID "
+        "is selected, нет записей means no runs are in scope, нет данных means "
+        "FK comparison rows were not returned."
+    )
+    reconciliation_description = str(reconciliation.get("description") or "")
+    if "FK comparison rows were not returned" not in reconciliation_description:
+        reconciliation["description"] = reconciliation_description + reconciliation_note
+
+
 def apply_control_plane(data: dict[str, Any]) -> None:
     donor = _by_id(data, 9418)
     donor["datasource"] = dict(OPS)
@@ -1333,6 +1474,7 @@ def apply_control_plane(data: dict[str, Any]) -> None:
         _prepend_frame_filter(panel, frame)
 
     _ensure_field_projection(_by_id(data, 9423), _REPLAY_CHECK_FIELDS)
+    _stamp_checkpoint_empty_rows(data)
 
 
 def inventory(data: dict[str, Any]) -> tuple[int, int]:

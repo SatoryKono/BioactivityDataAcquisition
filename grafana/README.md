@@ -2966,3 +2966,44 @@ availability, and historical manifests must not be rewritten for a green UI.
 | `5. Incident Workspace`, panel `2001` | `Stage lag/backlog measurements` | Same dashboard, panel `22011` | Verify selected workflow, pipeline, run type and run ID. Compare the time range and record how Grafana represents it after navigation. | `NOT_RUN` (live instance unavailable) |
 | `1. Run Explorer` | `Reset filters` | `1. Run Explorer` | Verify the documented selector reset and compare the effective time range. Record refresh separately from the link parameters. | `NOT_RUN` (live instance unavailable) |
 | Any domain diagnostics | `Open domain diagnostics` | Domain Diagnostics | URL free of `&UNKNOWN&` literal. | `NOT_RUN` (live instance unavailable) |
+
+### Dashboard hygiene (LA-15) / issue #12949
+
+Canonical generation is the five boards numbered 1–5. Titles and Grafana title slugs:
+
+| UID | Title | Slug |
+| :--- | :--- | :--- |
+| `bioetl-run-explorer-v1` | `1. Run Explorer` | `1-run-explorer` |
+| `bioetl-control-plane-v1` | `2. Replay Readiness` | `2-replay-readiness` |
+| `bioetl-overview-v2` | `3. Run Overview` | `3-run-overview` |
+| `bioetl-dq-v2` | `4. Data Quality` | `4-data-quality` |
+| `bioetl-incident-v1` | `5. Incident Workspace` | `5-incident-workspace` |
+
+Isolated 100000 stays legacy / «не использовать». It is not a provisioned JSON file and is not emitted by `scripts/ops/observability/grafana/`.
+
+**D-11 slug backlink check** (repository, before any slug edit):
+
+*   Active handoffs already use `/d/bioetl-control-plane-v1/2-replay-readiness`. Generators: `render_nav_bus.py`, `_replay_readiness_design.py`, `_latest_complete_run_panel.py`, `_gr_db_corrections.py`, `_run_explorer_columns.py`, `_dashboard_state_followup.py`, `apply_phase2_remainder.py`. `dashboard_context_links.PATH_BY_UID` derives the same slug from the title `2. Replay Readiness`.
+*   No shipped dashboard JSON and no generator URL references UID `bioetl-isolated-replay-100000` or the path slug `1-trust`.
+*   Dated capture receipts under `docs/reports/dashboard-ux-checks/assets/2026-09-23-*` still contain `/d/bioetl-control-plane-v1/1-trust` and `vis23-1-trust`. Those files are historical evidence, not navigation targets, and were not rewritten.
+*   LA-10 click targets in the table above use `2. Replay Readiness` and `5. Incident Workspace`. They do not use `1-trust` or `6-incident-workspace`. Leaving the canonical slug on `2-replay-readiness` keeps those links intact.
+*   **Live remainder `NOT_VERIFIABLE`:** the working URL `/d/bioetl-isolated-replay-100000/1-trust` is an untracked Isolated board. This checkout cannot re-save that Grafana slug. An operator must confirm the live board is unused or retitle it so Grafana publishes a slug other than `1-trust`, then click the LA-10 rows above.
+
+**A-08 empty panels** (repository):
+
+*   `Compare Checkpoint Anchors` (control plane `9406`) root selector returns one explicit row when `rows` is empty: `не применимо` (no Run ID), `нет записей` (run recorded no checkpoint anchors), `нет данных` (payload missing or request timed out). The reason is in the Current column.
+*   `Review Contract Exclusions` (overview `9482`) never leaves status empty. Missing evidence is `нет данных` with detail `excluded UNKNOWN`; no Run ID is `не применимо`; empty catalog is `нет записей`.
+*   `Review FK Comparison Scope` (overview `9483`) gets the reconciliation columns on every donor row. A missing or empty `reconciliation_display` emits one state row instead of failing the donor or drawing a blank table.
+*   **Live remainder `NOT_VERIFIABLE`:** panels on the live Grafana instance were not opened.
+
+**N-P Incident title** (repository):
+
+*   Shipped title is `5. Incident Workspace`. The `6.` prefix belongs to the retired seven-board generation and to the live Isolated copy. Canonical entry points (`DASHBOARD_TITLES`, navigation bus, this file) use 1–5.
+*   **Live remainder `NOT_VERIFIABLE`:** Isolated Incident Workspace still titled with `6.` on the live instance cannot be renamed from this checkout.
+
+**N-L Read latency** (repository):
+
+*   Incident variable label is `Read latency quantile`. Option text is `p95 quantile`; the value stays `0.95` because `histogram_quantile` needs that number. The description states that `0.95` is the quantile, not the latency.
+*   Panel `111` `Track Global Read Latency` keeps unit `s`, sets axis label `seconds`, and suffixes the legend with `seconds`.
+*   Replay Readiness JSON has no read-latency panel. The Isolated replay copy is not in the repository.
+*   **Live remainder `NOT_VERIFIABLE`:** Replay Isolated and the live Incident board were not rendered.
