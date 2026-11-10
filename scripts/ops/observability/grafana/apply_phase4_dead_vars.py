@@ -166,16 +166,41 @@ def _prune_dead_renames(data: dict[str, Any]) -> int:
 
 def _ensure_timepicker(data: dict[str, Any]) -> bool:
     """Align ``timepicker.refresh_intervals`` to the shared Phase 4.4 list."""
+    changed = False
+
+    # Enforce refresh
+    if data.get("refresh") != "60s":
+        data["refresh"] = "60s"
+        changed = True
+
+    # Enforce time
+    if data.get("time") != {"from": "now-12h", "to": "now"}:
+        data["time"] = {"from": "now-12h", "to": "now"}
+        changed = True
+
     timepicker = data.setdefault("timepicker", {})
     if not isinstance(timepicker, dict):
         data["timepicker"] = {"refresh_intervals": list(_REFRESH_INTERVALS)}
-        return True
-    current = timepicker.get("refresh_intervals")
-    desired = list(_REFRESH_INTERVALS)
-    if current == desired:
-        return False
-    timepicker["refresh_intervals"] = desired
-    return True
+        changed = True
+    else:
+        current = timepicker.get("refresh_intervals")
+        desired = list(_REFRESH_INTERVALS)
+        if current != desired:
+            timepicker["refresh_intervals"] = desired
+            changed = True
+
+    # Enforce Run Type default
+    templating = data.get("templating", {}).get("list")
+    if isinstance(templating, list):
+        for var in templating:
+            if isinstance(var, dict) and var.get("name") == "run_type":
+                current_var = var.get("current")
+                desired_current = {"selected": True, "text": "All", "value": "$__all"}
+                if current_var != desired_current:
+                    var["current"] = desired_current
+                    changed = True
+
+    return changed
 
 
 def apply_dashboard_data(
