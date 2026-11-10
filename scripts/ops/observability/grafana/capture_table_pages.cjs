@@ -121,6 +121,15 @@ function unitDisplayLabel(unit) {
   return unit;
 }
 
+function trimFractionalZeros(fixed) {
+  const dot = fixed.indexOf('.');
+  if (dot < 0) return fixed;
+  let end = fixed.length;
+  while (end > dot + 1 && fixed.charAt(end - 1) === '0') end -= 1;
+  if (end === dot + 1) return fixed.slice(0, dot);
+  return fixed.slice(0, end);
+}
+
 function unitDisplayCandidates(raw, fmt) {
   const label = unitDisplayLabel(fmt.unit);
   if (label == null || !Number.isFinite(raw)) return [];
@@ -128,7 +137,7 @@ function unitDisplayCandidates(raw, fmt) {
   const out = new Set();
   for (const decimals of places) {
     const fixed = decimals === 0 ? String(Math.round(raw)) : raw.toFixed(decimals);
-    const trimmed = fixed.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
+    const trimmed = trimFractionalZeros(fixed);
     for (const body of new Set([fixed, trimmed, String(raw)])) {
       out.add(`${body} ${label}`);
       out.add(`${body}${label}`);
