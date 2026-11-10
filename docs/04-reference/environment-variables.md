@@ -88,23 +88,17 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | `BIOETL_PUBMED_API_KEY` | PubMed API key for higher rate limits | - | No |
-| `BIOETL_DEFAULT_EMAIL` | Technical contact email via `Settings.default_email` (PubMed/NCBI tool id, Crossref/OpenAlex mailto / polite pool, and other biblio adapters). Pipeline YAML `source.email` overrides when set | `default@example.com` | No |
+| `BIOETL_DEFAULT_EMAIL` | Technical email for NCBI API tool identification | `default@example.com` | No |
 
 ### Semantic Scholar
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `BIOETL_SEMANTICSCHOLAR_API_KEY` | Semantic Scholar API key | No |
 
-### Crossref
-Crossref polite-pool / mailto contact is **not** read from a `BIOETL_CROSSREF_EMAIL` environment variable. Runtime resolution uses `_resolve_biblio_contact_email()` → `pipeline_config.source.email` when present, otherwise `Settings.default_email` (set via `BIOETL_DEFAULT_EMAIL` above).
-
 ## Observability
-
-Log output format is **not** controlled by a `BIOETL_LOG_FORMAT` environment variable. Runtime bootstrap (`logger_bootstrap` / observability builder) calls `configure_logging(json_format=True, ...)`, so JSON is fixed unless a caller passes `json_format` in code.
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| `BIOETL_LOG_FILE` | Explicit log file sink override read by `logging_config._resolve_log_file_path`. Empty string disables the file sink; unset falls back to `reports/logs/bioetl.log` outside pytest | `reports/logs/bioetl.log` | No |
 | `BIOETL_METRICS_PORT` | Prometheus metrics endpoint port | `8000` | No |
 | `BIOETL_METRICS_ENABLED` | Flat `Settings.metrics_enabled`. Used only when `observability` is absent, and shown in settings info. Standard runtime bootstrap does not let this override `Settings.observability.metrics_enabled` | `True` | No |
 | `BIOETL_METRICS_ADDR` | Prometheus metrics endpoint address | `0.0.0.0` | No |

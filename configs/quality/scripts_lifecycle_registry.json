@@ -1879,18 +1879,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
-    "scripts/ops/observability/grafana/_table_wrapping.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Keep table-wrapping transforms internal to render_nav_bus. This module has no standalone CLI or deployment entrypoint; keep it supporting so active_script_count_max does not grow.",
-      "owner": "@bioetl-observability",
-      "review_by": "2026-12-14"
-    },
-    "scripts/ops/observability/grafana/_v2_model_parity.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Keep v2 model parity checks internal to capture_provenance. This module has no standalone CLI or deployment entrypoint; keep it supporting so active_script_count_max does not grow.",
-      "owner": "@bioetl-observability",
-      "review_by": "2026-12-14"
-    },
     "scripts/ops/observability/grafana/_visual_usability.py": {
       "decision": "shared_helper_module",
       "next_step": "Keep the visual-audit transformations internal to render_nav_bus. This module has no standalone CLI or deployment entrypoint.",

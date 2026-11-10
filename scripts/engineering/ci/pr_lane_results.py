@@ -105,10 +105,6 @@ TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
 BENCHMARK_EVIDENCE_TESTS: tuple[str, ...] = (
     "tests/unit/repo_backed/scripts/qa/test_validate_benchmark_evidence_repo.py",
 )
-GRAFANA_CONTEXT_LINKS_TEST = (
-    "tests/unit/scripts/ops/observability/test_dashboard_context_links.py"
-)
-
 DOCUMENTATION_CLEANUP_INVENTORY_TESTS: tuple[str, ...] = (
     DOCUMENTATION_CLEANUP_INVENTORY_TEST,
 )
@@ -184,36 +180,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py",
     ),
     "scripts/ops/observability/grafana/dashboard_context_links.py": (
-        GRAFANA_CONTEXT_LINKS_TEST,
-    ),
-    **dict.fromkeys(
-        ("docs/05-operations/runbooks/observability-checklist.md", "grafana/README.md"),
-        (
-            GRAFANA_CONTEXT_LINKS_TEST,
-            "tests/unit/scripts/ops/observability/test_grafana_nav_bus.py",
-            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
-        ),
-    ),
-    **dict.fromkeys(
-        (
-            "reports/review/grafana-full-tables-20261110/audit.json",
-            "reports/review/grafana-full-tables-20261110/chembl_protein_class-overview.png",
-            "reports/review/grafana-full-tables-20261110/uniprot_protein-overview.png",
-            "scripts/ops/observability/grafana/capture_table_pages.cjs",
-            "scripts/ops/observability/grafana/capture_tall_panel.cjs",
-            "scripts/ops/observability/grafana/native_browser_zoom.cjs",
-            "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs",
-        ),
-        (
-            "tests/unit/scripts/ops/observability/test_grafana_browser_model_observer.py",
-            "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
-            "tests/unit/scripts/ops/observability/test_grafana_immutable_capture.py",
-            "tests/unit/scripts/ops/observability/test_table_capture_coverage.py",
-            "tests/integration/test_dashboard_first_window_noscroll.py",
-        ),
+        "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
     ),
     "reports/observability/live-fixes-r6/LF1-17/report.md": (
-        GRAFANA_CONTEXT_LINKS_TEST,
+        "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     **dict.fromkeys(
@@ -698,7 +668,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12957_organism_review.json",
             "configs/quality/external_resource_inventory_pr12959_chembl_types_review.json",
             "configs/quality/external_resource_inventory_pr12965_rehydrate_review.json",
-            "configs/quality/external_resource_inventory_pr12977_review.json",
             "configs/quality/external_resource_inventory_pr12966_aggregate_events_review.json",
             "configs/quality/external_resource_inventory_pr12929_class_lane_review.json",
             "configs/quality/external_resource_inventory_pr12929_domain_accounting_review.json",
@@ -728,24 +697,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/test_failure_analysis.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12375_b_repeat_blocker.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12375_restart_c_no_change_report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
-    **dict.fromkeys(
-        (
-            "reports/audit-runs/12553-runtime-acceptance/README.md",
-            "reports/audit-runs/12553-runtime-acceptance/glob-walk-normal-junit.xml",
-            "reports/audit-runs/12553-runtime-acceptance/glob-walk-normal-stdout.txt",
-            "reports/audit-runs/12553-runtime-acceptance/negative-control-junit.xml",
-            "reports/audit-runs/12553-runtime-acceptance/negative-control-stdout.txt",
-            "reports/audit-runs/12553-runtime-acceptance/reentrant-lock-normal-junit.xml",
-            "reports/audit-runs/12553-runtime-acceptance/review-controls-junit.xml",
-            "reports/audit-runs/12553-runtime-acceptance/review-controls-stdout.txt",
-        ),
-        (
-            "tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_glob_walk.py",
-            "tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock.py",
-            "tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock_negative.py",
-            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
-        ),
-    ),
     "reports/12553_runtime_acceptance_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),

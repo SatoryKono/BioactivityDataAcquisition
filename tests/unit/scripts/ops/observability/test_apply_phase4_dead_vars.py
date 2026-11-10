@@ -144,28 +144,3 @@ def test_drops_unused_selected_vars_on_incident() -> None:
     names = [var["name"] for var in payload["templating"]["list"]]
     assert names == ["workflow"]
     assert set(removed) == {"selected_run_id", "selected_pipeline"}
-
-
-def test_dashboard_defaults_report_real_changes_and_are_idempotent() -> None:
-    payload = {
-        "refresh": "5m",
-        "time": {"from": "now-1h", "to": "now"},
-        "timepicker": {"refresh_intervals": list(phase4._REFRESH_INTERVALS)},
-        "templating": {
-            "list": [{"name": "run_type", "current": {"value": "backfill"}}]
-        },
-        "panels": [],
-    }
-    apply = phase4.apply_dashboard_data
-    assert apply(payload, path_name=phase4.FILE_INCIDENT) == (
-        [],
-        ["refresh", "time", "templating.run_type.current"],
-    )
-    assert payload["refresh"] == "60s"
-    assert payload["time"] == {"from": "now-12h", "to": "now"}
-    assert payload["templating"]["list"][0]["current"] == {
-        "selected": True,
-        "text": "All",
-        "value": "$__all",
-    }
-    assert apply(payload, path_name=phase4.FILE_INCIDENT) == ([], [])

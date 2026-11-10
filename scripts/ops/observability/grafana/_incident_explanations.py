@@ -36,9 +36,7 @@ def explain_incident(panels: dict[int, dict], override) -> None:
         '<div style="font-size:16px;line-height:1.2">Rule triggered; cause not confirmed. '
         "Read the ranked suspect first. Fleet blockers and time-range charts are "
         "in Pipeline fleet and range on this page. PENDING has not fired. "
-        '<a href="/d/bioetl-incident-v1/5-incident-workspace?viewPanel=22011'
-        "&${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}"
-        '&${run_id:queryparam}&${__url_time_range}">'
+        '<a href="/d/bioetl-incident-v1/5-incident-workspace?viewPanel=22011&from=${__from}&to=${__to}">'
         "Stage lag/backlog measurements</a>.</div>"
     )
     for panel_id, description in (

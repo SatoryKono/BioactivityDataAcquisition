@@ -237,8 +237,7 @@ def model_errors(source: dict, evidence: object) -> list[str]:
     if not isinstance(evidence, dict):
         return ["missing provisioned model evidence"]
     loaded = evidence.get("loaded")
-    v2 = evidence.get("v2")
-    if not isinstance(loaded, list) or (not loaded and not isinstance(v2, dict)):
+    if not isinstance(loaded, list) or not loaded:
         return ["missing browser-loaded model"]
     errors = []
     for label, model in [
@@ -250,63 +249,7 @@ def model_errors(source: dict, evidence: object) -> list[str]:
             source
         ):
             errors.append(f"{label} provisioned model differs from source")
-    if v2 is not None:
-        errors.extend(_v2_model_errors(source, evidence, v2))
     return errors
-
-
-def _v2_phase_errors(
-    source: dict, evidence: dict, model: object, before: object
-) -> list[str]:
-    from scripts.ops.observability.grafana._v2_model_parity import semantic_errors
-
-    if not isinstance(model, dict):
-        return ["missing v2 model"]
-    metadata, spec = model.get("metadata"), model.get("spec")
-    if not isinstance(metadata, dict) or not isinstance(spec, dict):
-        return ["invalid v2 identity/schema"]
-    errors = []
-    valid = (
-        model.get("kind") == "DashboardWithAccessInfo"
-        and model.get("apiVersion") == "dashboard.grafana.app/v2"
-        and metadata.get("name") == source.get("uid")
-        and metadata.get("resourceVersion")
-        and isinstance(spec.get("elements"), dict)
-        and isinstance(spec.get("layout"), dict)
-    )
-    if not valid:
-        errors.append("invalid v2 identity/schema")
-    for legacy_phase in ("before", "after"):
-        version = (evidence.get(legacy_phase) or {}).get("version")
-        if version is None or metadata.get("generation") != version:
-            errors.append(
-                f"v2 generation differs from {legacy_phase} provisioned model"
-            )
-    if model != before:
-        errors.append("v2 model differs from bracketing API read")
-    errors.extend(semantic_errors(source, spec))
-    return errors
-
-
-def _v2_model_errors(source: dict, evidence: dict, v2: object) -> list[str]:
-    """Bind every converted browser model to the exact source semantics."""
-    if (
-        not isinstance(v2, dict)
-        or not isinstance(v2.get("loaded"), list)
-        or not v2["loaded"]
-    ):
-        return ["missing browser-loaded v2 model"]
-    before = v2.get("before")
-    phases = [
-        ("before", before),
-        *[("loaded", m) for m in v2["loaded"]],
-        ("after", v2.get("after")),
-    ]
-    return [
-        f"{phase} {error}"
-        for phase, model in phases
-        for error in _v2_phase_errors(source, evidence, model, before)
-    ]
 
 
 def attachment_errors(root: Path, evidence: object) -> list[str]:
@@ -343,14 +286,6 @@ def dashboard_attachment_errors(root: Path, dashboard: dict) -> list[str]:
     attachments.extend(dashboard.get("scrollCapture", {}).get("tiles", []))
     for table in dashboard.get("tablePagination", []):
         attachments.extend(table.get("pages", []))
-        for page in table.get("pages", []):
-            attachments.extend(page.get("viewportTiles", []))
-            attachments.extend(page.get("scrollTiles", []))
-            for tile in page.get("scrollTiles", []):
-                attachments.extend(tile.get("viewportTiles", []))
-            attachments.extend(
-                v for v in page.get("inspectedValues", []) if v.get("file")
-            )
     for control in dashboard.get("seriesControls", []):
         attachments.extend(control.get("entries", []))
     return [

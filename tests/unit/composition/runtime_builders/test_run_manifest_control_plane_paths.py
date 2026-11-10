@@ -66,7 +66,7 @@ def test_resolve_data_root_falls_back_when_local_data_is_unusable(
 ) -> None:
     monkeypatch.chdir(tmp_path)
     fallback = tmp_path / "private"
-    monkeypatch.setattr(subject, "private_fallback_data_root", lambda: fallback)
+    monkeypatch.setattr(subject, "_private_fallback_data_root", lambda: fallback)
     if failure_mode == "mkdir":
         (tmp_path / "data").write_text("not-a-directory", encoding="utf-8")
     else:
@@ -93,7 +93,7 @@ def test_private_fallback_uses_uid_scoped_temp_when_home_cache_fails(
     monkeypatch.setattr(subject.os, "getuid", lambda: 42, raising=False)
     monkeypatch.setattr(subject, "_prepare_private_runtime_dir", prepare)
 
-    assert subject.private_fallback_data_root() == fallback
+    assert subject._private_fallback_data_root() == fallback
     assert calls == [preferred, fallback]
 
 

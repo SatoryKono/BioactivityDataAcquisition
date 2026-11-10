@@ -161,13 +161,13 @@ def resolve_data_root_with_mode(settings: Settings) -> tuple[Path, DataRootMode]
     try:
         candidate.mkdir(parents=True, exist_ok=True)
     except OSError:
-        return private_fallback_data_root_with_mode()
+        return _private_fallback_data_root_with_mode()
     if not os.access(candidate, os.W_OK):
-        return private_fallback_data_root_with_mode()
+        return _private_fallback_data_root_with_mode()
     return candidate, "repo_default"
 
 
-def private_fallback_data_root() -> Path:
+def _private_fallback_data_root() -> Path:
     """Named seam for the user-private fallback data root (test monkeypatch)."""
     preferred = Path.home() / ".cache" / "bioetl-data"
     try:
@@ -178,9 +178,9 @@ def private_fallback_data_root() -> Path:
         return _prepare_private_runtime_dir(fallback)
 
 
-def private_fallback_data_root_with_mode() -> tuple[Path, DataRootMode]:
+def _private_fallback_data_root_with_mode() -> tuple[Path, DataRootMode]:
     """Return private fallback path via the monkeypatchable seam + mode class."""
-    path = private_fallback_data_root()
+    path = _private_fallback_data_root()
     preferred = Path.home() / ".cache" / "bioetl-data"
     try:
         if path.resolve() == preferred.resolve():
@@ -195,11 +195,11 @@ def _prepare_private_runtime_dir(path: Path) -> Path:
     path.mkdir(parents=True, exist_ok=True, mode=0o700)
     with suppress(OSError):
         path.chmod(0o700)
-    assert_private_runtime_dir(path)
+    _assert_private_runtime_dir(path)
     return path
 
 
-def assert_private_runtime_dir(path: Path) -> None:
+def _assert_private_runtime_dir(path: Path) -> None:
     """Fail closed when the private runtime directory is not owner-private."""
     if not path.is_dir():
         raise OSError(f"private runtime path is not a directory: {path}")

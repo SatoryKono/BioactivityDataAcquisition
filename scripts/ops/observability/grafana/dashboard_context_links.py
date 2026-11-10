@@ -27,7 +27,6 @@ SEVEN_UIDS: tuple[str, ...] = (
 # slug is the title slug (verified 2026-11-05 against /api/search): alphanumeric
 # runs lowercased, every other character a hyphen, empty chunks dropped.
 DASHBOARD_TITLES: dict[str, str] = {
-    # v2 is canonical. Isolated 100000 is legacy / «не использовать»
     "bioetl-run-explorer-v1": "1. Run Explorer",
     "bioetl-control-plane-v1": "2. Replay Readiness",
     "bioetl-overview-v2": "3. Run Overview",
@@ -146,7 +145,7 @@ def build_handoff_url(
         run_id = RUN_ID_TEMPLATE
         provider = (
             "$provider"
-            if source_uid in {"bioetl-overview-v2", "bioetl-incident-v1"}
+            if source_uid in {"bioetl-provider-health-v2", "bioetl-incident-v1"}
             else GRAFANA_ALL
         )
         stage = GRAFANA_ALL
@@ -512,7 +511,7 @@ def _fix_panel(panel: dict, uid: str) -> None:
     if uid == "bioetl-incident-v1" and panel.get("id") == 2010:
         _fix_ranked_links(panel)
     if (uid, panel.get("id")) in {
-        ("bioetl-overview-v2", 9107),
+        ("bioetl-provider-health-v2", 9107),
         ("bioetl-runtime", 9102),
     }:
         _fix_runbook_link(panel)

@@ -558,7 +558,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Start Incident Triage",
-        "content": "<div style=\"font-size:16px;line-height:1.2\">Rule triggered; cause not confirmed. Read the ranked suspect first. Fleet blockers and time-range charts are in Pipeline fleet and range on this page. PENDING has not fired. <a href=\"/d/bioetl-incident-v1/5-incident-workspace?viewPanel=22011&amp;${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Stage lag/backlog measurements</a>.</div>"
+        "content": "<div style=\"font-size:16px;line-height:1.2\">Rule triggered; cause not confirmed. Read the ranked suspect first. Fleet blockers and time-range charts are in Pipeline fleet and range on this page. PENDING has not fired. <a href=\"/d/bioetl-incident-v1/5-incident-workspace?viewPanel=22011&from=${__from}&to=${__to}\">Stage lag/backlog measurements</a>.</div>"
       },
       "links": [
         {
@@ -728,8 +728,7 @@
             "inspect": true,
             "hidden": true,
             "minWidth": 50,
-            "wrapText": false,
-            "wrapHeaderText": true
+            "wrapText": false
           },
           "color": {
             "mode": "fixed",
@@ -782,7 +781,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 80
+                "value": 50
               }
             ]
           },
@@ -1178,8 +1177,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto",
-                  "wrapText": false
+                  "type": "auto"
                 }
               },
               {
@@ -1272,8 +1270,7 @@
             },
             "inspect": true,
             "minWidth": 50,
-            "wrapText": false,
-            "wrapHeaderText": true
+            "wrapText": false
           },
           "color": {
             "mode": "fixed",
@@ -1316,8 +1313,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background",
-                  "wrapText": false
+                  "type": "color-background"
                 }
               },
               {
@@ -1390,8 +1386,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text",
-                  "wrapText": false
+                  "type": "color-text"
                 }
               },
               {
@@ -1749,8 +1744,7 @@
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false,
-                "wrapHeaderText": true
+                "wrapText": false
               },
               "color": {
                 "mode": "thresholds"
@@ -1810,8 +1804,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "mode": "basic",
-                      "wrapText": false
+                      "mode": "basic"
                     }
                   },
                   {
@@ -1986,12 +1979,10 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50,
-                "wrapText": true,
-                "wrapHeaderText": true
+                "minWidth": 50
               },
               "color": {
                 "mode": "thresholds"
@@ -2051,8 +2042,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "mode": "basic",
-                      "wrapText": false
+                      "mode": "basic"
                     }
                   },
                   {
@@ -2105,7 +2095,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   }
                 ]
@@ -2120,7 +2110,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   }
                 ]
@@ -2194,8 +2184,7 @@
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false,
-                "wrapHeaderText": true
+                "wrapText": false
               },
               "color": {
                 "mode": "thresholds"
@@ -2282,8 +2271,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "mode": "basic",
-                      "wrapText": false
+                      "mode": "basic"
                     }
                   },
                   {
@@ -2442,8 +2430,7 @@
                 "cellOptions": {
                   "type": "auto",
                   "wrapText": true
-                },
-                "wrapHeaderText": true
+                }
               }
             },
             "overrides": [
@@ -2618,7 +2605,7 @@
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
           },
-          "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is Source unavailable. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+          "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
           "fieldConfig": {
             "defaults": {
               "noValue": "UNKNOWN",
@@ -2630,8 +2617,7 @@
                   "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50,
-                "wrapHeaderText": true
+                "minWidth": 50
               },
               "links": [
                 {
@@ -2757,14 +2743,6 @@
                           },
                           "archive_evidence_not_recorded": {
                             "text": "No verified archive"
-                          }
-                        }
-                      },
-                      {
-                        "type": "value",
-                        "options": {
-                          "Provider: run_preflight_provider_observation": {
-                            "text": "Provider: saved preflight observation"
                           }
                         }
                       }
@@ -3066,12 +3044,11 @@
                 "align": "auto",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
-                "wrapText": true,
-                "minWidth": 50,
-                "wrapHeaderText": true
+                "wrapText": false,
+                "minWidth": 50
               },
               "mappings": [
                 {
@@ -3150,8 +3127,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "mode": "basic",
-                      "wrapText": false
+                      "mode": "basic"
                     }
                   }
                 ]
@@ -3258,8 +3234,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "mode": "basic",
-                      "wrapText": false
+                      "mode": "basic"
                     }
                   },
                   {
@@ -3332,7 +3307,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -3759,11 +3734,10 @@
                 "inspect": true,
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
-                "wrapText": true,
-                "minWidth": 50,
-                "wrapHeaderText": true
+                "wrapText": false,
+                "minWidth": 50
               },
               "unit": "short"
             },
@@ -3977,7 +3951,7 @@
           "id": 9463,
           "type": "stat",
           "title": "Review Total Run Duration",
-          "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing. No selection stays SELECT RUN; missing timestamps stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
+          "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing. No selection stays SELECT RUN; missing timestamps stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
           "gridPos": {
             "x": 0,
             "y": 67,
@@ -5205,13 +5179,7 @@
                 "align": "auto",
                 "displayMode": "auto",
                 "inspect": true,
-                "minWidth": 50,
-                "wrapText": true,
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
-                },
-                "wrapHeaderText": true
+                "minWidth": 50
               },
               "mappings": [
                 {
@@ -5411,13 +5379,7 @@
               "decimals": 0,
               "custom": {
                 "inspect": true,
-                "minWidth": 50,
-                "wrapText": true,
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
-                },
-                "wrapHeaderText": true
+                "minWidth": 50
               },
               "links": [
                 {
@@ -6597,13 +6559,7 @@
               "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)",
               "custom": {
                 "inspect": true,
-                "minWidth": 50,
-                "wrapText": true,
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
-                },
-                "wrapHeaderText": true
+                "minWidth": 50
               },
               "decimals": 0
             },
@@ -7372,13 +7328,10 @@
               "custom": {
                 "align": "auto",
                 "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
+                  "type": "auto"
                 },
                 "inspect": true,
-                "minWidth": 50,
-                "wrapText": true,
-                "wrapHeaderText": true
+                "minWidth": 50
               },
               "mappings": [
                 {
@@ -7656,10 +7609,9 @@
                 "minWidth": 50,
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
-                "wrapText": true,
-                "wrapHeaderText": true
+                "wrapText": false
               },
               "noValue": "UNKNOWN — stage coverage unavailable",
               "unit": "none"
@@ -8224,13 +8176,7 @@
               "noValue": "No missing-lineage reference samples in range. Empty means no sampled lineage-missing events or absent telemetry, not proof of full lineage closure.",
               "custom": {
                 "inspect": true,
-                "minWidth": 50,
-                "wrapText": true,
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
-                },
-                "wrapHeaderText": true
+                "minWidth": 50
               }
             },
             "overrides": [
@@ -10026,12 +9972,11 @@
                 "align": "auto",
                 "cellOptions": {
                   "type": "color-text",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
-                "wrapText": true,
-                "minWidth": 50,
-                "wrapHeaderText": true
+                "wrapText": false,
+                "minWidth": 50
               },
               "mappings": [
                 {
@@ -10096,8 +10041,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text",
-                      "wrapText": false
+                      "type": "color-text"
                     }
                   },
                   {
@@ -10145,8 +10089,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
-                      "wrapText": false
+                      "type": "auto"
                     }
                   },
                   {
@@ -11044,7 +10987,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "—",
+              "noValue": "UNKNOWN",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -11054,8 +10997,7 @@
                 "inspect": true,
                 "hidden": true,
                 "minWidth": 50,
-                "wrapText": false,
-                "wrapHeaderText": true
+                "wrapText": false
               },
               "color": {
                 "mode": "fixed",
@@ -11108,7 +11050,7 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 80
+                    "value": 50
                   }
                 ]
               },
@@ -11264,13 +11206,13 @@
                   },
                   {
                     "id": "custom.wrapText",
-                    "value": false
+                    "value": true
                   },
                   {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   },
                   {
@@ -11354,13 +11296,13 @@
                   },
                   {
                     "id": "custom.wrapText",
-                    "value": false
+                    "value": true
                   },
                   {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   }
                 ]
@@ -11544,13 +11486,13 @@
                   },
                   {
                     "id": "custom.wrapText",
-                    "value": false
+                    "value": true
                   },
                   {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   }
                 ]
@@ -11617,7 +11559,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "NO MATCHING SIGNALS",
+              "noValue": "UNKNOWN",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -11626,8 +11568,7 @@
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false,
-                "wrapHeaderText": true
+                "wrapText": false
               },
               "color": {
                 "mode": "fixed",
@@ -11670,8 +11611,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text",
-                      "wrapText": false
+                      "type": "color-text"
                     }
                   },
                   {
@@ -11744,8 +11684,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text",
-                      "wrapText": false
+                      "type": "color-text"
                     }
                   },
                   {
@@ -11978,8 +11917,7 @@
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false,
-                "wrapHeaderText": true
+                "wrapText": false
               }
             },
             "overrides": [
@@ -12297,8 +12235,7 @@
                   "type": "auto",
                   "wrapText": true
                 },
-                "minWidth": 50,
-                "wrapHeaderText": true
+                "minWidth": 50
               },
               "noValue": "UNKNOWN",
               "unit": "none"
@@ -12381,8 +12318,8 @@
       },
       "transparent": true,
       "options": {
-        "mode": "html",
-        "content": "<div style=\"font-size:16px;line-height:1.5\"><strong>Canonical stages:</strong> <a href=\"/d/bioetl-dq-v2/4-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9460&${__url_time_range}\">Open Inspect Selected Run Stages on Data Quality</a></div>"
+        "mode": "markdown",
+        "content": "**Canonical stages:** [Open Inspect Selected Run Stages on Data Quality](/d/bioetl-dq-v2/4-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9460&${__url_time_range})"
       }
     },
     {
@@ -12398,8 +12335,8 @@
       },
       "transparent": true,
       "options": {
-        "mode": "html",
-        "content": "<div style=\"font-size:16px;line-height:1.5\"><strong>Canonical identity:</strong> <a href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range}\">Open Review Run Identity on Overview</a></div>"
+        "mode": "markdown",
+        "content": "**Canonical identity:** [Open Review Run Identity on Overview](/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range})"
       }
     }
   ]

@@ -15,7 +15,6 @@
     "@remix-run/router": "1.23.4",
     "uuid": "11.1.1",
     "nanoid": "5.1.6",
-    "conventional-changelog-conventionalcommits": "10.4.0",
-    "minimatch": "11.0.5"
+    "conventional-changelog-conventionalcommits": "10.4.0"
   }
 }

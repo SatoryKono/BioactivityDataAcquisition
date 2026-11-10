@@ -49,9 +49,6 @@ retired dashboards must be removed explicitly after backup.
 
 ## Shipped dashboard surface (2026-07-28)
 
-**РЕШЕНИЕ**: поколение v2 — КАНОНИЧНОЕ. Isolated 100000 помечается legacy / «не использовать» во всех точках входа.
-
-
 **Five** dashboards under `grafana/dashboards/` (portfolio cap ≤7):
 
 0. `bioetl-control-plane-v1` — Trust / Control Plane Explorer
@@ -2692,7 +2689,6 @@ Machine mapping: `docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`.
 | 2. Overview | `bioetl-overview-v2` | Prometheus + BioETL Ops HTTP | L0 answer, L1 cards, collapsed Alert/SLO triage |
 | 3. Data Quality | `bioetl-dq-v2` | Prometheus + BioETL Ops HTTP | DQ current/range, quarantine aggregates |
 | 4. Incident Workspace | `bioetl-incident-v1` | Prometheus | Multi-domain suspects + ALERTS support |
-| Prometheus Stats | `rpfmFFz7z` | Prometheus | Instance-only (untracked). Superseded by Prometheus 2.0 Stats. |
 | Run Explorer | `bioetl-run-explorer-v1` | BioETL Ops HTTP | Exact-run identity (never Prom `run_id` labels) |
 
 `Inspect Recent Runs` (`3010`) is a filesystem index, not Prometheus.
@@ -2935,12 +2931,3 @@ an explicit `launch_context.archive_policy` with boolean `required: false`
 and a nonempty `policy_ref`. Only that referenced policy permits N/A. A local
 retention plan or successful cached run cannot establish external archive
 availability, and historical manifests must not be rewritten for a green UI.
-
-
-## Appendix: Live Instance Incident Reports
-
-### Prometheus Stats Dashboard (UID: rpfmFFz7z) - No Data Incident (LA-08)
-*   **Status:** `NOT_VERIFIABLE` in repository.
-*   **Diagnosis:** Dashboard is instance-only and is not tracked in this repository.
-*   **Evidence of Absence:** Exhaustive searches across the repository for UID `rpfmFFz7z`, `Prometheus Stats`, `Local Storage Memory Series`, `Internal Storage Queue Length`, `Samples ingested (rate-5m)`, and `Rule Eval Duration` yielded zero results in tracked JSON dashboard definitions and provisioning configurations.
-*   **Action Required (Live Instance):** 4 of 7 panels show "No data" despite a live Prometheus instance, whereas "Prometheus 2.0 Stats" is fully populated. Remediation (fixing metric names/queries to match the current Prometheus version, or applying a legacy deprecation notice forwarding to "Prometheus 2.0 Stats") must be executed directly on the live Grafana instance by an operator, as the asset does not exist in version control.

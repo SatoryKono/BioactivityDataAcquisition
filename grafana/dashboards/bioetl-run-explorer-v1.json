@@ -420,8 +420,7 @@
               "type": "auto",
               "wrapText": false
             },
-            "wrapText": false,
-            "wrapHeaderText": true
+            "wrapText": false
           },
           "noValue": "UNKNOWN — required launch evidence is unavailable. QUERY ERROR means the backend request failed, not an empty fleet.",
           "links": [],
@@ -466,13 +465,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto",
-                  "wrapText": false
+                  "type": "auto"
                 }
-              },
-              {
-                "id": "custom.width",
-                "value": 80
               }
             ]
           },
@@ -507,10 +501,6 @@
                   "mode": "fixed",
                   "fixedColor": "#93C5FD"
                 }
-              },
-              {
-                "id": "custom.width",
-                "value": 210
               }
             ]
           },

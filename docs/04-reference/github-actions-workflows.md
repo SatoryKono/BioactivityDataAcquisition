@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.7
+Version: 1.0.6
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-11-10'
+  Last verified: '2026-10-16'
 
 ______________________________________________________________________
 
@@ -96,7 +96,7 @@ new spend/safety decision.
 | `router-v7-bridge.yml` | `Router 7 bridge candidate` | `workflow_dispatch` | `active` | `active` | Path-filtered migration candidate tests, browser build, and dependency audit; host acceptance remains separate |
 | `root-hygiene.yml` | `Root Hygiene` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Root-surface cleanliness and governance checks |
 | `schema-governance.yml` | `Schema Governance` | `workflow_call` | `active` | `active` | Generated artifacts, schema parity, schema drift |
-| `codeql.yml` | `CodeQL` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Advanced Python CodeQL SAST; default setup off. Monday Nightly still calls it; dispatch scans the selected ref without waiting for Monday |
+| `codeql.yml` | `CodeQL` | `workflow_call` | `active` | `active` | Advanced Python CodeQL SAST; default setup off |
 | `dependency-review.yml` | `Dependency review` | `workflow_dispatch` | `active` | `active` | PR-time HIGH/CRITICAL dependency review on lockfile/manifest changes |
 | `security.yml` | `Security Scans` | `workflow_call` | `active` | `active` | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |
 | `zizmor.yml` | `zizmor` | `workflow_call`, `workflow_dispatch` | `active` | `active` | High-confidence GitHub Actions YAML audit |

@@ -716,7 +716,7 @@ def test_run_manifest_data_root_helpers_cover_explicit_and_fallback_modes(
             else path
         ),
     )
-    assert data_roots.private_fallback_data_root_with_mode()[1] == "tmp"
+    assert data_roots._private_fallback_data_root_with_mode()[1] == "tmp"
     monkeypatch.setattr(
         data_roots.Path,
         "mkdir",
@@ -726,7 +726,7 @@ def test_run_manifest_data_root_helpers_cover_explicit_and_fallback_modes(
     )
     monkeypatch.setattr(
         data_roots,
-        "private_fallback_data_root_with_mode",
+        "_private_fallback_data_root_with_mode",
         lambda: (Path("/tmp/x"), "private_cache"),
     )
     assert (
@@ -740,7 +740,7 @@ def test_run_manifest_data_root_helpers_cover_explicit_and_fallback_modes(
     monkeypatch.setattr(data_roots.os, "access", lambda path, mode: False)
     monkeypatch.setattr(
         data_roots,
-        "private_fallback_data_root_with_mode",
+        "_private_fallback_data_root_with_mode",
         lambda: (Path("/tmp/y"), "tmp"),
     )
     assert data_roots.resolve_data_root_mode(SimpleNamespace(data_dir=None)) == "tmp"
@@ -756,7 +756,7 @@ def test_run_manifest_data_root_helpers_cover_planned_artifacts_and_private_root
         "_prepare_private_runtime_dir",
         lambda path: prepared.append(path) or path,
     )
-    result = data_roots.private_fallback_data_root()
+    result = data_roots._private_fallback_data_root()
     assert prepared
     assert result == prepared[0]
 
@@ -787,7 +787,7 @@ def test_run_manifest_data_root_helpers_cover_planned_artifacts_and_private_root
 def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    original_private_fallback = data_roots.private_fallback_data_root
+    original_private_fallback = data_roots._private_fallback_data_root
     original_prepare_private_runtime_dir = data_roots._prepare_private_runtime_dir
     assert data_roots.resolve_data_root(SimpleNamespace(data_dir="/explicit")) == Path(
         "/explicit"
@@ -801,7 +801,7 @@ def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
         ),
     )
     monkeypatch.setattr(
-        data_roots, "private_fallback_data_root", lambda: Path("/tmp/private")
+        data_roots, "_private_fallback_data_root", lambda: Path("/tmp/private")
     )
     assert data_roots.resolve_data_root(SimpleNamespace(data_dir=None)) == Path(
         "/tmp/private"
@@ -816,7 +816,7 @@ def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
     )
 
     monkeypatch.setattr(
-        data_roots, "private_fallback_data_root", original_private_fallback
+        data_roots, "_private_fallback_data_root", original_private_fallback
     )
     prepared: list[Path] = []
     monkeypatch.setattr(
@@ -824,7 +824,7 @@ def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
         "_prepare_private_runtime_dir",
         lambda path: prepared.append(path) or path,
     )
-    resolved = data_roots.private_fallback_data_root()
+    resolved = data_roots._private_fallback_data_root()
     assert resolved == prepared[0]
     assert ".cache" in str(prepared[0])
 
@@ -837,7 +837,7 @@ def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
             else path
         ),
     )
-    tmp_fallback = data_roots.private_fallback_data_root()
+    tmp_fallback = data_roots._private_fallback_data_root()
     assert "bioetl-data-" in str(tmp_fallback)
 
     chmod_calls: list[tuple[Path, int]] = []
