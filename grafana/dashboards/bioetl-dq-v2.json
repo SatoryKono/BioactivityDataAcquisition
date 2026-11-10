@@ -495,7 +495,7 @@
         "type": "yesoreyeram-infinity-datasource",
         "uid": "bioetl-ops-http"
       },
-      "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+      "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is Source unavailable. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
@@ -508,7 +508,8 @@
             },
             "inspect": true,
             "wrapText": false,
-            "minWidth": 50
+            "minWidth": 50,
+            "wrapHeaderText": true
           },
           "links": [
             {
@@ -819,8 +820,8 @@
       },
       "transparent": true,
       "options": {
-        "mode": "markdown",
-        "content": "**Canonical identity:** [Open Review Run Identity on Overview](/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range})\n\nDQ no longer duplicates identity tables (F-16)."
+        "mode": "html",
+        "content": "<div style=\"font-size:16px;line-height:1.5\"><strong>Canonical identity:</strong> <a href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range}\">Open Review Run Identity on Overview</a><br>DQ no longer duplicates identity tables (F-16).</div>"
       }
     },
     {
@@ -837,16 +838,19 @@
         "type": "yesoreyeram-infinity-datasource",
         "uid": "bioetl-ops-http"
       },
-      "description": "SELECTED RUN · Saved accounting: count in is the input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays UNKNOWN. UNKNOWN means the value was not recorded. Skipped outcomes are hidden. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+      "description": "SELECTED RUN · Saved accounting: count in is the input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays UNKNOWN. UNKNOWN means the value was not recorded. Skipped outcomes are hidden. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "fieldConfig": {
         "defaults": {
           "custom": {
             "align": "left",
             "cellOptions": {
-              "type": "auto"
+              "type": "auto",
+              "wrapText": true
             },
             "inspect": true,
-            "minWidth": 50
+            "minWidth": 50,
+            "wrapText": true,
+            "wrapHeaderText": true
           },
           "decimals": 0,
           "unit": "none",
@@ -1442,7 +1446,7 @@
             "type": "datasource",
             "uid": "-- Dashboard --"
           },
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is Source unavailable. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -1461,7 +1465,8 @@
                   "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapHeaderText": true
               }
             },
             "overrides": [
@@ -1762,7 +1767,8 @@
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": false,
+                "wrapHeaderText": true
               }
             },
             "overrides": [
@@ -1996,8 +2002,8 @@
           },
           "transparent": true,
           "options": {
-            "mode": "markdown",
-            "content": "**Canonical identity:** [Open Review Run Identity on Overview](/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range})"
+            "mode": "html",
+            "content": "<div style=\"font-size:16px;line-height:1.5\"><strong>Canonical identity:</strong> <a href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range}\">Open Review Run Identity on Overview</a></div>"
           }
         }
       ]

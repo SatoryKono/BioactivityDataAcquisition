@@ -89,9 +89,19 @@ async function capturePageScreenshot(page, options) {
 
 async function captureElementScreenshot(page, element, options) {
   if (!page.nativeZoomEvidence) return element.screenshot(options);
-  await element.scrollIntoViewIfNeeded();
+  // Pagination focus can leave the panel behind Grafana's sticky toolbar.
+  // Center the real scroll surface before cropping; never capture a partial box.
+  await element.evaluate(el => el.scrollIntoView({block:'center',inline:'nearest'}));
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   const clip = await element.boundingBox();
   if (!clip) throw new Error('Native panel capture requires a visible bounding box');
+  const viewport = await page.evaluate(() => ({width:innerWidth,height:innerHeight}));
+  if ((clip.y < 0 || clip.y+clip.height > viewport.height+1) && clip.x >= 0 && clip.x+clip.width <= viewport.width+1) {
+    return require('./capture_tall_panel.cjs').captureTallPanel(page,element,options,capturePageScreenshot);
+  }
+  if (clip.x < 0 || clip.y < 0 || clip.x+clip.width > viewport.width+1 || clip.y+clip.height > viewport.height+1) {
+    throw new Error('Native panel capture would clip content outside the viewport');
+  }
   return capturePageScreenshot(page, {...options, clip});
 }
 
