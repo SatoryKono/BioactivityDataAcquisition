@@ -83,9 +83,11 @@ def _explain_ranked_suspects(panels: dict[int, dict], override) -> None:
         )
         if pid == 2010:
             panel["targets"][0]["expr"] = (
-                "label_replace(label_replace(bioetl_incident_ranked_evidence,"
+                "label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,"
                 '"object","$1","object","(.*) / $"),'
-                '"route_pipeline",".*","pipeline","unknown")'
+                '"route_pipeline",".*","pipeline","unknown"),'
+                '"owner","See runbook","owner","^$"),'
+                '"next_step","See runbook","next_step","^$")'
             )
         else:
             panel["targets"][0].pop("expr", None)
@@ -104,12 +106,32 @@ def _explain_ranked_suspects(panels: dict[int, dict], override) -> None:
         override(panel, "Confidence", "displayName", "Cause verification")
         override(panel, "Confidence", _WIDTH, 155)
         override(panel, "Confidence", "noValue", "Not verified")
+        override(panel, "Confidence", "custom.cellOptions", {"type": "color-text", "wrapText": False})
         override(
             panel,
             "Confidence",
             "mappings",
-            [{"type": "value", "options": {"UNVERIFIED": {"text": "Not verified"}}}],
+            [{"type": "value", "options": {
+                "UNVERIFIED": {"text": "Not verified"},
+                "UNVERIFIED_STALE": {"text": "Not verified", "color": "orange"}
+            }}],
         )
+        for field in ("owner", "next_step"):
+            display = "Owner" if field == "owner" else "Next step"
+            override(panel, field, "displayName", display)
+            override(panel, field, "noValue", "See runbook")
+            override(panel, field, "custom.cellOptions", {"type": "auto", "wrapText": False})
+
+            # Explicitly remove custom.hidden=True and add custom.hidden=False
+            overrides = panel.get("fieldConfig", {}).get("overrides", [])
+            field_override = next((o for o in overrides if o.get("matcher", {}).get("options") == field), None)
+            if field_override:
+                props = field_override.get("properties", [])
+                props[:] = [p for p in props if p.get("id") != "custom.hidden"]
+                props.append({"id": "custom.hidden", "value": False})
+            else:
+                override(panel, field, "custom.hidden", False)
+
         override(
             panel,
             "Action",
