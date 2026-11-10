@@ -558,7 +558,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Start Incident Triage",
-        "content": "<div style=\"font-size:16px;line-height:1.2\">Rule triggered; cause not confirmed. Read the ranked suspect first. Fleet blockers and time-range charts are in Pipeline fleet and range on this page. PENDING has not fired. <a href=\"/d/bioetl-incident-v1/5-incident-workspace?viewPanel=22011&from=${__from}&to=${__to}\">Stage lag/backlog measurements</a>.</div>"
+        "content": "<div style=\"font-size:16px;line-height:1.2\">Rule triggered; cause not confirmed. Read the ranked suspect first. Fleet blockers and time-range charts are in Pipeline fleet and range on this page. PENDING has not fired. <a href=\"/d/bioetl-incident-v1/5-incident-workspace?viewPanel=22011&amp;${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Stage lag/backlog measurements</a>.</div>"
       },
       "links": [
         {
@@ -728,7 +728,8 @@
             "inspect": true,
             "hidden": true,
             "minWidth": 50,
-            "wrapText": false
+            "wrapText": false,
+            "wrapHeaderText": true
           },
           "color": {
             "mode": "fixed",
@@ -781,7 +782,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 50
+                "value": 80
               }
             ]
           },
@@ -1177,7 +1178,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": false
                 }
               },
               {
@@ -1270,7 +1272,8 @@
             },
             "inspect": true,
             "minWidth": 50,
-            "wrapText": false
+            "wrapText": false,
+            "wrapHeaderText": true
           },
           "color": {
             "mode": "fixed",
@@ -1313,7 +1316,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background"
+                  "type": "color-background",
+                  "wrapText": false
                 }
               },
               {
@@ -1386,7 +1390,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text"
+                  "type": "color-text",
+                  "wrapText": false
                 }
               },
               {
@@ -1744,7 +1749,8 @@
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": false,
+                "wrapHeaderText": true
               },
               "color": {
                 "mode": "thresholds"
@@ -1804,7 +1810,8 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "mode": "basic"
+                      "mode": "basic",
+                      "wrapText": false
                     }
                   },
                   {
@@ -1979,10 +1986,12 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": true,
+                "wrapHeaderText": true
               },
               "color": {
                 "mode": "thresholds"
@@ -2042,7 +2051,8 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "mode": "basic"
+                      "mode": "basic",
+                      "wrapText": false
                     }
                   },
                   {
@@ -2095,7 +2105,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -2110,7 +2120,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -2184,7 +2194,8 @@
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": false,
+                "wrapHeaderText": true
               },
               "color": {
                 "mode": "thresholds"
@@ -2271,7 +2282,8 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "mode": "basic"
+                      "mode": "basic",
+                      "wrapText": false
                     }
                   },
                   {
@@ -2430,7 +2442,8 @@
                 "cellOptions": {
                   "type": "auto",
                   "wrapText": true
-                }
+                },
+                "wrapHeaderText": true
               }
             },
             "overrides": [
@@ -2617,7 +2630,8 @@
                   "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapHeaderText": true
               },
               "links": [
                 {
@@ -2743,6 +2757,14 @@
                           },
                           "archive_evidence_not_recorded": {
                             "text": "No verified archive"
+                          }
+                        }
+                      },
+                      {
+                        "type": "value",
+                        "options": {
+                          "Provider: run_preflight_provider_observation": {
+                            "text": "Provider: saved preflight observation"
                           }
                         }
                       }
@@ -3044,11 +3066,12 @@
                 "align": "auto",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 },
                 "inspect": true,
-                "wrapText": false,
-                "minWidth": 50
+                "wrapText": true,
+                "minWidth": 50,
+                "wrapHeaderText": true
               },
               "mappings": [
                 {
@@ -3127,7 +3150,8 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "mode": "basic"
+                      "mode": "basic",
+                      "wrapText": false
                     }
                   }
                 ]
@@ -3234,7 +3258,8 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "mode": "basic"
+                      "mode": "basic",
+                      "wrapText": false
                     }
                   },
                   {
@@ -3307,7 +3332,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   }
                 ]
@@ -3734,10 +3759,11 @@
                 "inspect": true,
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 },
-                "wrapText": false,
-                "minWidth": 50
+                "wrapText": true,
+                "minWidth": 50,
+                "wrapHeaderText": true
               },
               "unit": "short"
             },
@@ -5179,7 +5205,13 @@
                 "align": "auto",
                 "displayMode": "auto",
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": true,
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                },
+                "wrapHeaderText": true
               },
               "mappings": [
                 {
@@ -5379,7 +5411,13 @@
               "decimals": 0,
               "custom": {
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": true,
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                },
+                "wrapHeaderText": true
               },
               "links": [
                 {
@@ -6559,7 +6597,13 @@
               "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)",
               "custom": {
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": true,
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                },
+                "wrapHeaderText": true
               },
               "decimals": 0
             },
@@ -7328,10 +7372,13 @@
               "custom": {
                 "align": "auto",
                 "cellOptions": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": true
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": true,
+                "wrapHeaderText": true
               },
               "mappings": [
                 {
@@ -7609,9 +7656,10 @@
                 "minWidth": 50,
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 },
-                "wrapText": false
+                "wrapText": true,
+                "wrapHeaderText": true
               },
               "noValue": "UNKNOWN — stage coverage unavailable",
               "unit": "none"
@@ -8176,7 +8224,13 @@
               "noValue": "No missing-lineage reference samples in range. Empty means no sampled lineage-missing events or absent telemetry, not proof of full lineage closure.",
               "custom": {
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": true,
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                },
+                "wrapHeaderText": true
               }
             },
             "overrides": [
@@ -9972,11 +10026,12 @@
                 "align": "auto",
                 "cellOptions": {
                   "type": "color-text",
-                  "wrapText": false
+                  "wrapText": true
                 },
                 "inspect": true,
-                "wrapText": false,
-                "minWidth": 50
+                "wrapText": true,
+                "minWidth": 50,
+                "wrapHeaderText": true
               },
               "mappings": [
                 {
@@ -10041,7 +10096,8 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text"
+                      "type": "color-text",
+                      "wrapText": false
                     }
                   },
                   {
@@ -10089,7 +10145,8 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto"
+                      "type": "auto",
+                      "wrapText": false
                     }
                   },
                   {
@@ -10987,7 +11044,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "UNKNOWN",
+              "noValue": "—",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -10997,7 +11054,8 @@
                 "inspect": true,
                 "hidden": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": false,
+                "wrapHeaderText": true
               },
               "color": {
                 "mode": "fixed",
@@ -11050,7 +11108,7 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 50
+                    "value": 80
                   }
                 ]
               },
@@ -11206,13 +11264,13 @@
                   },
                   {
                     "id": "custom.wrapText",
-                    "value": true
+                    "value": false
                   },
                   {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -11296,13 +11354,13 @@
                   },
                   {
                     "id": "custom.wrapText",
-                    "value": true
+                    "value": false
                   },
                   {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -11486,13 +11544,13 @@
                   },
                   {
                     "id": "custom.wrapText",
-                    "value": true
+                    "value": false
                   },
                   {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -11559,7 +11617,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "UNKNOWN",
+              "noValue": "NO MATCHING SIGNALS",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -11568,7 +11626,8 @@
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": false,
+                "wrapHeaderText": true
               },
               "color": {
                 "mode": "fixed",
@@ -11611,7 +11670,8 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text"
+                      "type": "color-text",
+                      "wrapText": false
                     }
                   },
                   {
@@ -11638,7 +11698,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   },
                   {
@@ -11684,7 +11744,8 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text"
+                      "type": "color-text",
+                      "wrapText": false
                     }
                   },
                   {
@@ -11917,7 +11978,8 @@
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": false,
+                "wrapHeaderText": true
               }
             },
             "overrides": [
@@ -12235,7 +12297,8 @@
                   "type": "auto",
                   "wrapText": true
                 },
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapHeaderText": true
               },
               "noValue": "UNKNOWN",
               "unit": "none"
@@ -12318,8 +12381,8 @@
       },
       "transparent": true,
       "options": {
-        "mode": "markdown",
-        "content": "**Canonical stages:** [Open Inspect Selected Run Stages on Data Quality](/d/bioetl-dq-v2/4-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9460&${__url_time_range})"
+        "mode": "html",
+        "content": "<div style=\"font-size:16px;line-height:1.5\"><strong>Canonical stages:</strong> <a href=\"/d/bioetl-dq-v2/4-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9460&${__url_time_range}\">Open Inspect Selected Run Stages on Data Quality</a></div>"
       }
     },
     {
@@ -12335,8 +12398,8 @@
       },
       "transparent": true,
       "options": {
-        "mode": "markdown",
-        "content": "**Canonical identity:** [Open Review Run Identity on Overview](/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range})"
+        "mode": "html",
+        "content": "<div style=\"font-size:16px;line-height:1.5\"><strong>Canonical identity:</strong> <a href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range}\">Open Review Run Identity on Overview</a></div>"
       }
     }
   ]

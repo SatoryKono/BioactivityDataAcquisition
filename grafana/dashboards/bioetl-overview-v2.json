@@ -659,7 +659,8 @@
             },
             "inspect": true,
             "minWidth": 50,
-            "wrapText": false
+            "wrapText": false,
+            "wrapHeaderText": true
           },
           "links": [
             {
@@ -932,7 +933,8 @@
             },
             "inspect": true,
             "wrapText": false,
-            "minWidth": 50
+            "minWidth": 50,
+            "wrapHeaderText": true
           },
           "links": [
             {
@@ -1127,6 +1129,14 @@
                         "text": "Parent workflow completion has not been recorded"
                       }
                     }
+                  },
+                  {
+                    "type": "value",
+                    "options": {
+                      "Provider: run_preflight_provider_observation": {
+                        "text": "Provider: saved preflight observation"
+                      }
+                    }
                   }
                 ]
               },
@@ -1317,7 +1327,8 @@
               "type": "auto",
               "wrapText": true
             },
-            "minWidth": 50
+            "minWidth": 50,
+            "wrapHeaderText": true
           }
         },
         "overrides": [
@@ -1439,7 +1450,8 @@
               "wrapText": true
             },
             "inspect": true,
-            "minWidth": 50
+            "minWidth": 50,
+            "wrapHeaderText": true
           }
         },
         "overrides": [
@@ -1814,7 +1826,8 @@
               "wrapText": false
             },
             "inspect": true,
-            "minWidth": 50
+            "minWidth": 50,
+            "wrapHeaderText": true
           }
         },
         "overrides": [
@@ -2477,7 +2490,8 @@
             "cellOptions": {
               "type": "auto",
               "wrapText": true
-            }
+            },
+            "wrapHeaderText": true
           }
         },
         "overrides": []

@@ -1,0 +1,1353 @@
+{
+  "audit_date": "2026-11-10",
+  "capture_base_head": "29cc5700ab31eb947da7b57100b617a6a2854b2d",
+  "validated_source_commit": "9e173a016e03f967ad54b1015534df2562223317",
+  "source_state_at_capture": "dirty working tree",
+  "visual_review": "PASS",
+  "live_audit": {
+    "uniprot_protein": {
+      "sha256": "60a38728f84eca638a6783208209c70f120707c6703224dfc23cea758a4d1a42",
+      "queries": 121,
+      "gate": "pass",
+      "generated_at": "2026-11-10T06:31:44.807963+00:00",
+      "saved_verdict": "OK"
+    },
+    "chembl_protein_class": {
+      "sha256": "b97d569ab475af04fd17edfb547cef9b5f3a2b82b226146d069c3c4a0d52f64f",
+      "queries": 121,
+      "gate": "pass",
+      "generated_at": "2026-11-10T06:31:50.874001+00:00",
+      "saved_verdict": "WARN"
+    }
+  },
+  "healthy_targets": 5,
+  "healthy_rules": 303,
+  "historical_warn_preserved": true,
+  "queries_and_transformations_unchanged": true,
+  "limitations": [
+    "Long unbroken hashes and paths retain native bounded cells; full Inspect value captures verified against cell text.",
+    "Historical WARN, UNKNOWN, NO OBSERVATIONS, TELEMETRY MISSING and STALE catalog labels retained; visual PASS is not a claim of complete historical telemetry."
+  ],
+  "ci": "Reported separately on final PR HEAD; this is local audit evidence",
+  "archive_sha256": "9e200b9f1ba7b9dfde17ef70597c7c5dc6965619197cbe4533b00fa4f0b46e82",
+  "dashboards": {
+    "bioetl-control-plane-v1": {
+      "path": "grafana/dashboards/bioetl-control-plane-v1.json",
+      "git_blob_sha256": "ccbcfed48f32c49302cb570b9a38ed27daaf7d1a8a6a44eb7f1dd3bd6e3c2933",
+      "capture_file_sha256": "b269e96e3196736cb9f513b50e946b09f45f274c2653e8dc7023c7da01ba01ad",
+      "v2_generation": 101
+    },
+    "bioetl-dq-v2": {
+      "path": "grafana/dashboards/bioetl-dq-v2.json",
+      "git_blob_sha256": "48ad448f398ff24d84dd05d6184e354e7aad23dec74b3fe3ac5b25c5fce9947f",
+      "capture_file_sha256": "258221010f246d6a24c534a7ddc2f9ea6e79f6ef26cbe93b8c5b8b20e820b888",
+      "v2_generation": 98
+    },
+    "bioetl-incident-v1": {
+      "path": "grafana/dashboards/bioetl-incident-v1.json",
+      "git_blob_sha256": "3a5d92943d7b9a51373ad024ea50bfbda0cb663416126e3f2f604fa179315e41",
+      "capture_file_sha256": "07a3c609d9a2ef9d645611d28fa510401129356701d2a4fe81a0e07b18ed35c0",
+      "v2_generation": 111
+    },
+    "bioetl-overview-v2": {
+      "path": "grafana/dashboards/bioetl-overview-v2.json",
+      "git_blob_sha256": "f3b8966e86a62b41d7c8d5738f839a6d7d57b84841316418a8d0e8094c1d1838",
+      "capture_file_sha256": "eb5e1ba7f81c83a1653c5f4d59f38ff33234bb7ff8cf63d83e7ae4418ea8c843",
+      "v2_generation": 160
+    },
+    "bioetl-run-explorer-v1": {
+      "path": "grafana/dashboards/bioetl-run-explorer-v1.json",
+      "git_blob_sha256": "8eb6fb738679c74736ef60278ccd0352d9a1368d7993034d1e2d02be37d6779c",
+      "capture_file_sha256": "f5508a1aad9868881d6da8fba359d8d2a85f46c4b684acc50c5ceac843a428b8",
+      "v2_generation": 95
+    }
+  },
+  "pipelines": {
+    "chembl_protein_class": {
+      "counts": {
+        "dashboards": 5,
+        "tables": 39,
+        "pages": 50,
+        "scroll_tiles": 18,
+        "inspected_values": 18,
+        "expanded_rows": 11,
+        "viewport_tiles": 19
+      },
+      "timeline_pages": 6,
+      "tables": [
+        {
+          "dashboard": "bioetl-control-plane-v1",
+          "panel": 9423,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": "1 - 9 of 9 rows",
+              "sha256": "6b5640bb51813b6ce99b2e0566ed152eb626199555c1bda69c8f01c3d5284a14",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-control-plane-v1",
+          "panel": 9408,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": "1 - 5 of 44 rows",
+              "sha256": "92907db8019d9d521e32a62deaebdeb7ba7cb18b7b5e91a9a2222c8f7116142a",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            },
+            {
+              "page": 2,
+              "summary": "6 - 10 of 44 rows",
+              "sha256": "92f7a3bc74af800199ab3924a05afd6aa5b1f4642755087bc514ab256c38f2a2",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            },
+            {
+              "page": 3,
+              "summary": "11 - 15 of 44 rows",
+              "sha256": "9c7ec1a2bdffb6bae54ba87dbc91aca231062ca770d65e5ced1671c6c384d923",
+              "scroll_tiles": 0,
+              "inspected_values": 2
+            },
+            {
+              "page": 4,
+              "summary": "16 - 20 of 44 rows",
+              "sha256": "7c4e63b1035bec79db19452ecbef7f1be9b1ac7734d8307f7e1cdb8f5a119d68",
+              "scroll_tiles": 0,
+              "inspected_values": 3
+            },
+            {
+              "page": 5,
+              "summary": "21 - 25 of 44 rows",
+              "sha256": "4a11d518b0f0b1fd8a6e3bab89c050618981a08de56de4c49065bd36e0a5d74e",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            },
+            {
+              "page": 6,
+              "summary": "26 - 30 of 44 rows",
+              "sha256": "ad30ba0c8063be9d0b76f0b3bbfb5cd3ed1e9af2f36f02e3b804fb02fe9e31d2",
+              "scroll_tiles": 2,
+              "inspected_values": 1
+            },
+            {
+              "page": 7,
+              "summary": "31 - 35 of 44 rows",
+              "sha256": "a9cbf22b4faead791da67cb306422cce28375eab09d90d283b6ab14de2e6cbe0",
+              "scroll_tiles": 0,
+              "inspected_values": 2
+            },
+            {
+              "page": 8,
+              "summary": "36 - 40 of 44 rows",
+              "sha256": "226f088f13e025cb93ef986c70d33eb12c55bdb1d891da96468204d6c1fc1b37",
+              "scroll_tiles": 0,
+              "inspected_values": 2
+            },
+            {
+              "page": 9,
+              "summary": "41 - 44 of 44 rows",
+              "sha256": "53ee40bc0e085dc89ff15c468149e0bc14f68c69913fc198b14bb884f7b3c777",
+              "scroll_tiles": 2,
+              "inspected_values": 4
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-control-plane-v1",
+          "panel": 9418,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "3c352e268fadfe446b93ebe9f8695f2e3b0837fc37b0e093ee1327198d22cd19",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-control-plane-v1",
+          "panel": 9414,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "6ef2382face071c3861554d9a8869b4fcf2a6a5950bd3438778b1223dc21d157",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-control-plane-v1",
+          "panel": 9415,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "59b0647d96994c7b85039f00862e435a6d8ed0fe872b6dc25eef83dee863cb0f",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-control-plane-v1",
+          "panel": 9416,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "d9baab56be2cd1ed97ca33ecba33f7ada9a70e976cbd01004975f7e6c1b1fb6b",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-control-plane-v1",
+          "panel": 9413,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "396cd181bf054b784b0a0d5397c222370878ca8e2f9c0f871211215eb2402a82",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-control-plane-v1",
+          "panel": 9406,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": "1 - 5 of 6 rows",
+              "sha256": "9aeec0f4a04c6caa2272bc69560b24cf262b0225a0b9d78eeedcce303d488eea",
+              "scroll_tiles": 0,
+              "inspected_values": 3
+            },
+            {
+              "page": 2,
+              "summary": "6 - 6 of 6 rows",
+              "sha256": "8cfd6ab937f7f437ede7042bf9168fdfc8486020c979bf56e69f84bfabeb41c6",
+              "scroll_tiles": 0,
+              "inspected_values": 1
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-dq-v2",
+          "panel": 9406,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "33cdc26c7eab8b46ab50878c3a46da3f6e4fb03d1e97409f5ace48b0fa2adc15",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-dq-v2",
+          "panel": 9403,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": "1 - 3 of 9 rows",
+              "sha256": "8397d3f4cd5d087e8807b951ea88a5c47079e8c8570ecf88309a0d56184339d3",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            },
+            {
+              "page": 2,
+              "summary": "4 - 6 of 9 rows",
+              "sha256": "d5bf198e55fa450da92fab6f9bf7d97520f24da2dc9d326f6fb928bb2374a99f",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            },
+            {
+              "page": 3,
+              "summary": "7 - 9 of 9 rows",
+              "sha256": "6fb4ca019cd29ef3234330cf90edd6f32a89513cc480c4019e0f4f86ca52659e",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-dq-v2",
+          "panel": 9460,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "4087ae63e597d4bc19914b4f8c60548855243b82e0c592f1706d3eba3b151ec4",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-dq-v2",
+          "panel": 9451,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "3d71725ef02d26730311e4d14012b08d6545eb927c1bf1dabf6df399ee742faa",
+              "scroll_tiles": 3,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 2010,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "d53bb4b2a279d3f929a3951e802c1fa1c37ad1ab5f24f6c07eec2fe81082d4a1",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 2005,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "55ca8b1c7ec1d750d2b2ebe7a3974da311c7f0d9012052bf15e02dbfe18558fb",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 2002,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "19d1464ac80dd8c9e69dcd937e97556cb83499733e1f2981646b05670c27baf5",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 2003,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "1b395f60074a5fcf0cf7ee61ef34e68266963e4ee4caa9b7f5dd663e547dc7f5",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 2004,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "5e379eda54eef2b4d0aaf5b330b7ca4bb54d9a5e133711cdfb7df964b10215b0",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 22011,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "032307d60d1361f92f253d48ff1aaab44933ba44c4f6d69495aafe2e0d606a3c",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 2101,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "80bbba0e9d98a83824eb1de90e8b1695dd8eb0699de9f6b27978ed64fcf69874",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 9101,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "8a2690d71c2a152af6a96e9b38dc015e5839277ff2e8c40308f26918c67ffbb8",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 2460,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "baa10bfab19569f59f95ad54fef7807af247f7d6a6ccc95e7c491da650e75f4e",
+              "scroll_tiles": 2,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 256,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "b1a9dfabd27ae8102d5840fa25094f2988126a391d335b00f6e7652f868d1121",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 241,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "fcca685d4bfd6f9c63c6ec07e014b0c351dcf3653380ffa8f7cdcd956ababb2e",
+              "scroll_tiles": 2,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 908,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "dad1bde834f72d239c6b9a94dfda664757ef965112ec7598a30393c864c35d71",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 242,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "05b4914e7c65d0b94caac606ba030a6449acbc9e2e97b59f22c3fcca31480d15",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 2461,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": "1 - 1 of 1 rows",
+              "sha256": "adbffda1390a0cdc8ac613ba4a75240574c7acf65b6617110a26f753bb1cd820",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 138,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "9baad9839579e7c87bfb96d6b1c9479aa92f9a6ba2b791a53b96960b938c3c93",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 243,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "ea04ffe0931cf19a287e35827a99dded0e872a9b098e750a5083d2f67751cb98",
+              "scroll_tiles": 2,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 22010,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "8fc179f0d57040630a0e89fd90b15ef09bff0057e00187406e23b807f83d2f14",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 22005,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "90854e77371f40d7ebc54962a1a24aea11400f19f9a44ae9fa5a494ca6c72588",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 9451,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "3d71725ef02d26730311e4d14012b08d6545eb927c1bf1dabf6df399ee742faa",
+              "scroll_tiles": 3,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 9701,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "5419451ed20fd0b14adb9910f518d8a4cc471202f6c3306faf8f3c07f0e0475c",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-overview-v2",
+          "panel": 9002,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "167d05763e72672be399df4da72df824ade134c8250d426a7d003b66c00f7023",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-overview-v2",
+          "panel": 9603,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "1dd006ac9bf07d9a8b88f171213c5ae5d5663155239f8e832543fcf2a008d33e",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-overview-v2",
+          "panel": 9300,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "3f63f24dbe25bdbfb3fb2279917c1377f487cb16b7d8bfcd24f864e9fbed49f8",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-overview-v2",
+          "panel": 9480,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "bafb984d1487bde654185ab100736c250899f3087ac9ba31d039cb3ff8360887",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-overview-v2",
+          "panel": 9460,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "97b51a2424430c75bf8b6b8275f9af89255e929144c74df41c2da8df0bdc609c",
+              "scroll_tiles": 2,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-overview-v2",
+          "panel": 9483,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": "1 - 1 of 1 rows",
+              "sha256": "d967a805897fce242fae64c3ba8de532a54bd5e9e1c9abb3ae8d42846971a1eb",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-run-explorer-v1",
+          "panel": 3010,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "8a756e0a4b459cd645f69235c7ec700339e44deea1a2d1130110fd60c53e3576",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        }
+      ],
+      "screenshots": [
+        {
+          "file": "chembl_protein_class-overview.png",
+          "sha256": "6a7335efa387cbb3bb2de39257ac59f957d92b7f89563ed59c4d2f2fdd11a27f"
+        }
+      ]
+    },
+    "uniprot_protein": {
+      "counts": {
+        "dashboards": 5,
+        "tables": 39,
+        "pages": 50,
+        "scroll_tiles": 22,
+        "inspected_values": 19,
+        "expanded_rows": 11,
+        "viewport_tiles": 19
+      },
+      "timeline_pages": 6,
+      "tables": [
+        {
+          "dashboard": "bioetl-control-plane-v1",
+          "panel": 9423,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": "1 - 9 of 9 rows",
+              "sha256": "6b5640bb51813b6ce99b2e0566ed152eb626199555c1bda69c8f01c3d5284a14",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-control-plane-v1",
+          "panel": 9408,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": "1 - 5 of 44 rows",
+              "sha256": "92907db8019d9d521e32a62deaebdeb7ba7cb18b7b5e91a9a2222c8f7116142a",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            },
+            {
+              "page": 2,
+              "summary": "6 - 10 of 44 rows",
+              "sha256": "92f7a3bc74af800199ab3924a05afd6aa5b1f4642755087bc514ab256c38f2a2",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            },
+            {
+              "page": 3,
+              "summary": "11 - 15 of 44 rows",
+              "sha256": "f4b7e8aaaf184b9b2972737a42c64da1e7ba28acee195ab26b64cb8488bf7dd1",
+              "scroll_tiles": 0,
+              "inspected_values": 2
+            },
+            {
+              "page": 4,
+              "summary": "16 - 20 of 44 rows",
+              "sha256": "0369f9fb60680afc87717109cdf0d1c3aed1055363b00befe1c99004f0855e35",
+              "scroll_tiles": 0,
+              "inspected_values": 3
+            },
+            {
+              "page": 5,
+              "summary": "21 - 25 of 44 rows",
+              "sha256": "45709a4306c48ea0ef6b4297f718c8a04cdae826c359cf63a2b25469df6d9526",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            },
+            {
+              "page": 6,
+              "summary": "26 - 30 of 44 rows",
+              "sha256": "590f2b74b20216d035a4be56a221bc6db50fce82dc0638f7764c7805c3b10d1c",
+              "scroll_tiles": 2,
+              "inspected_values": 1
+            },
+            {
+              "page": 7,
+              "summary": "31 - 35 of 44 rows",
+              "sha256": "e5c953ca9db8eec4a87e6b3b8e55dc449d4bb38b76a6a5877298b7a078994f06",
+              "scroll_tiles": 2,
+              "inspected_values": 2
+            },
+            {
+              "page": 8,
+              "summary": "36 - 40 of 44 rows",
+              "sha256": "0a0628ea943236262518a81460ec6935b757551f32008d2c123de4e8b5052bff",
+              "scroll_tiles": 2,
+              "inspected_values": 2
+            },
+            {
+              "page": 9,
+              "summary": "41 - 44 of 44 rows",
+              "sha256": "2ea94665a0079c20b383ae092255718321c25cbb3eea80a03bcfacd2ef6faa8d",
+              "scroll_tiles": 2,
+              "inspected_values": 4
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-control-plane-v1",
+          "panel": 9418,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "6c864c5d44a091e508382c39c59d8256f99f4d63f3e72ba73995b3b9caf8a7ae",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-control-plane-v1",
+          "panel": 9414,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "6ef2382face071c3861554d9a8869b4fcf2a6a5950bd3438778b1223dc21d157",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-control-plane-v1",
+          "panel": 9415,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "59b0647d96994c7b85039f00862e435a6d8ed0fe872b6dc25eef83dee863cb0f",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-control-plane-v1",
+          "panel": 9416,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "d9baab56be2cd1ed97ca33ecba33f7ada9a70e976cbd01004975f7e6c1b1fb6b",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-control-plane-v1",
+          "panel": 9413,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "396cd181bf054b784b0a0d5397c222370878ca8e2f9c0f871211215eb2402a82",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-control-plane-v1",
+          "panel": 9406,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": "1 - 5 of 6 rows",
+              "sha256": "90c5f8e8a16dd249aca88af2cda45bebfa17088985cf918b86cd4bba081ff0cc",
+              "scroll_tiles": 0,
+              "inspected_values": 3
+            },
+            {
+              "page": 2,
+              "summary": "6 - 6 of 6 rows",
+              "sha256": "a61760716c3cec981bf862aa7494cd1b69309f9f01b337e089ea06b57e5ef736",
+              "scroll_tiles": 0,
+              "inspected_values": 1
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-dq-v2",
+          "panel": 9406,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "311632ae10667be710be8b0fed75f649bc607eff1e2bd0f6950aa8a7cd753e08",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-dq-v2",
+          "panel": 9403,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": "1 - 3 of 9 rows",
+              "sha256": "a6777d10501e22be40a74d3565db85dbfeda764cbdfcd991cb0a392a1b7a265d",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            },
+            {
+              "page": 2,
+              "summary": "4 - 6 of 9 rows",
+              "sha256": "7ff77bb1e174a22fe2d9a83324842baa4fb312eb522755117e8b9bfee9d44e20",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            },
+            {
+              "page": 3,
+              "summary": "7 - 9 of 9 rows",
+              "sha256": "82771b1ad1b9077fdff72672a8d41f3921ed3f24eb77d34b652efb0556b79506",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-dq-v2",
+          "panel": 9460,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "7096ae2ce1ce6922591c616827817ff6e63c68dcebe17cdf2229a7bac906634c",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-dq-v2",
+          "panel": 9451,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "3d71725ef02d26730311e4d14012b08d6545eb927c1bf1dabf6df399ee742faa",
+              "scroll_tiles": 3,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 2010,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "d53bb4b2a279d3f929a3951e802c1fa1c37ad1ab5f24f6c07eec2fe81082d4a1",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 2005,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "55ca8b1c7ec1d750d2b2ebe7a3974da311c7f0d9012052bf15e02dbfe18558fb",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 2002,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "19d1464ac80dd8c9e69dcd937e97556cb83499733e1f2981646b05670c27baf5",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 2003,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "1b395f60074a5fcf0cf7ee61ef34e68266963e4ee4caa9b7f5dd663e547dc7f5",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 2004,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "5e379eda54eef2b4d0aaf5b330b7ca4bb54d9a5e133711cdfb7df964b10215b0",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 22011,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "032307d60d1361f92f253d48ff1aaab44933ba44c4f6d69495aafe2e0d606a3c",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 2101,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "8e36f8c855a8277ed72dcd9ed6ff9262308515f98feb170a947cf3170ece404c",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 9101,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "8a2690d71c2a152af6a96e9b38dc015e5839277ff2e8c40308f26918c67ffbb8",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 2460,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "453a9f59dc0d9431c53a9b82cd4e52421e47fa0ca54510e1a7c1ac137781b959",
+              "scroll_tiles": 2,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 256,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "b1a9dfabd27ae8102d5840fa25094f2988126a391d335b00f6e7652f868d1121",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 241,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "aae44df5f04a7d1c95cec5bbdbf78e23a26e374264ad278e165cfc2785beba6f",
+              "scroll_tiles": 2,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 908,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "dad1bde834f72d239c6b9a94dfda664757ef965112ec7598a30393c864c35d71",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 242,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "05b4914e7c65d0b94caac606ba030a6449acbc9e2e97b59f22c3fcca31480d15",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 2461,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": "1 - 1 of 1 rows",
+              "sha256": "010dca4337611be0d2252e3ef28118e3b3c885490509f4791e3328a27c9589f9",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 138,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "9baad9839579e7c87bfb96d6b1c9479aa92f9a6ba2b791a53b96960b938c3c93",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 243,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "0b3664035624023f202568d36ac7efc2d68fae2b93684eb641132fe7ad298063",
+              "scroll_tiles": 2,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 22010,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "8fc179f0d57040630a0e89fd90b15ef09bff0057e00187406e23b807f83d2f14",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 22005,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "90854e77371f40d7ebc54962a1a24aea11400f19f9a44ae9fa5a494ca6c72588",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 9451,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "3d71725ef02d26730311e4d14012b08d6545eb927c1bf1dabf6df399ee742faa",
+              "scroll_tiles": 3,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-incident-v1",
+          "panel": 9701,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "5419451ed20fd0b14adb9910f518d8a4cc471202f6c3306faf8f3c07f0e0475c",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-overview-v2",
+          "panel": 9002,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "c0291bcdee4ecc2572e031674adde352cde9f962a8076655da51e3d6c4c8a94b",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-overview-v2",
+          "panel": 9603,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "7f91933e844db6f10bd6f64e5659cc9cec11e73bb0077b6d166fa0eead899081",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-overview-v2",
+          "panel": 9300,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "7967292bc9b1a3136eead32615edcc33c120560863b8ddaf20ba068b7e23edfe",
+              "scroll_tiles": 0,
+              "inspected_values": 1
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-overview-v2",
+          "panel": 9480,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "6e0efc478b668a20ceb089d6d8e9a86556833247d8054787133a3494309f5579",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-overview-v2",
+          "panel": 9460,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "22b8705525112a041da2dc6b7610a04a61c032cb76aa5bed439c0c5e45d10e52",
+              "scroll_tiles": 2,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-overview-v2",
+          "panel": 9483,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": "1 - 1 of 1 rows",
+              "sha256": "d967a805897fce242fae64c3ba8de532a54bd5e9e1c9abb3ae8d42846971a1eb",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        },
+        {
+          "dashboard": "bioetl-run-explorer-v1",
+          "panel": 3010,
+          "status": "COMPLETE",
+          "pages": [
+            {
+              "page": 1,
+              "summary": null,
+              "sha256": "136f681d99eec4ba955ee70ccef8c23e63a72361f7a64422ab0abb50a79c8523",
+              "scroll_tiles": 0,
+              "inspected_values": 0
+            }
+          ]
+        }
+      ],
+      "screenshots": [
+        {
+          "file": "uniprot_protein-overview.png",
+          "sha256": "27d55467095f5251384d80f72e233e2d88e6f7be835d4632120bcbafe95b6a0a"
+        }
+      ]
+    }
+  }
+}
