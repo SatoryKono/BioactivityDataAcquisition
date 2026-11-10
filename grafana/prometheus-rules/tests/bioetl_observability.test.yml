@@ -1817,7 +1817,7 @@ tests:
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[6h]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[6h]) unless
         on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h]) < 2)
       eval_time: 6h
       exp_samples:
       - labels: '{}'
@@ -1825,7 +1825,7 @@ tests:
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[15m]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[15m]) unless
         on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m]) < 2)
       eval_time: 6h
       exp_samples:
       - labels: '{}'
@@ -1845,7 +1845,7 @@ tests:
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[6h]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[6h]) unless
         on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h]) < 2)
       eval_time: 6h
       exp_samples:
       - labels: '{}'
@@ -1853,7 +1853,7 @@ tests:
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[15m]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[15m]) unless
         on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m]) < 2)
       eval_time: 6h
       exp_samples:
       - labels: '{}'
@@ -1873,7 +1873,7 @@ tests:
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[6h]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[6h]) unless
         on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h]) < 2)
       eval_time: 6h
       exp_samples:
       - labels: '{}'
@@ -1881,7 +1881,7 @@ tests:
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[15m]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[15m]) unless
         on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m]) < 2)
       eval_time: 6h
       exp_samples:
       - labels: '{}'
@@ -1899,13 +1899,13 @@ tests:
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[6h]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[6h]) unless
         on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h]) < 2)
       eval_time: 6h
       exp_samples: []
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[15m]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[15m]) unless
         on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m]) < 2)
       eval_time: 6h
       exp_samples: []
   - name: runtime-selected-window-single-sample
@@ -1923,13 +1923,13 @@ tests:
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[6h]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[6h]) unless
         on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h]) < 2)
       eval_time: 6h
       exp_samples: []
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[15m]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[15m]) unless
         on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m]) < 2)
       eval_time: 6h
       exp_samples: []
   - name: runtime-selected-window-stale-counter
@@ -1947,7 +1947,7 @@ tests:
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[6h]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[6h]) unless
         on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h]) < 2)
       eval_time: 6h
       exp_samples:
       - labels: '{}'
@@ -1955,7 +1955,7 @@ tests:
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[15m]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[15m]) unless
         on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m]) < 2)
       eval_time: 6h
       exp_samples: []
   - name: runtime-selected-window-multi-missing-counter
@@ -1975,13 +1975,13 @@ tests:
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[6h])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)"}[6h]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)"}[6h])
         unless on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[6h])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[6h]) < 2)
       eval_time: 6h
       exp_samples: []
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[15m])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)"}[15m]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)"}[15m])
         unless on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[15m])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[15m]) < 2)
       eval_time: 6h
       exp_samples: []
   - name: runtime-selected-window-multi-single-sample
@@ -2003,13 +2003,13 @@ tests:
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[6h])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)"}[6h]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)"}[6h])
         unless on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[6h])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[6h]) < 2)
       eval_time: 6h
       exp_samples: []
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[15m])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)"}[15m]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)"}[15m])
         unless on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[15m])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[15m]) < 2)
       eval_time: 6h
       exp_samples: []
   - name: runtime-selected-window-multi-complete
@@ -2031,7 +2031,7 @@ tests:
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[6h])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)"}[6h]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)"}[6h])
         unless on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[6h])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[6h]) < 2)
       eval_time: 6h
       exp_samples:
       - labels: '{}'
@@ -2039,7 +2039,7 @@ tests:
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[15m])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)"}[15m]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)"}[15m])
         unless on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[15m])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"(backfill|incremental)",status="failed"}[15m]) < 2)
       eval_time: 6h
       exp_samples:
       - labels: '{}'
@@ -2057,7 +2057,7 @@ tests:
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[6h]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[6h]) unless
         on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[6h]) < 2)
       eval_time: 6h
       exp_samples:
       - labels: '{}'
@@ -2065,7 +2065,7 @@ tests:
     - expr: (sum(increase(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[15m]))
         > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~"chembl_assay",run_type=~"backfill"}[15m]) unless
         on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m])
-        >= 2))
+        >= 2)) unless count(count_over_time(bioetl_pipeline_runs_total{pipeline=~"chembl_assay",run_type=~"backfill",status="failed"}[15m]) < 2)
       eval_time: 6h
       exp_samples:
       - labels: '{}'
