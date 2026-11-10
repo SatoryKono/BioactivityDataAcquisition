@@ -34,7 +34,7 @@ dashboards:
     - Open Run Explorer
     basis_tokens:
     - SELECTED RUN
-    - QUERY ERROR
+    - Source unavailable
   bioetl-incident-v1:
     question: What is the highest-confidence active suspect, and which current/global runtime, provider, or control-plane
       evidence explains it?

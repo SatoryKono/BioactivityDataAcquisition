@@ -470,21 +470,38 @@ def _build_observability_row_children(
         "id": 8810,
         "type": "text",
         "title": "Review Observability States",
-        "gridPos": {"x": 0, "y": row["gridPos"]["y"] + 1, "w": 24, "h": 14},
-        "options": {"mode": "markdown", "content": OBSERVABILITY_LEGEND},
+        "gridPos": {"x": 0, "y": row["gridPos"]["y"] + 1, "w": 12, "h": 2},
+        "description": OBSERVABILITY_LEGEND,
+        "options": {
+            "mode": "html",
+            "content": (
+                '<div style="font-size:16px;line-height:1.2">'
+                "OK · WARN · CRIT / FIRING · UNKNOWN · NO OBSERVATIONS · "
+                "TELEMETRY MISSING · Not verified · Blank / No data — never assume zero. "
+                "Sources and actions: panel info.</div>"
+            ),
+        },
     }
-    y = legend["gridPos"]["y"] + legend["gridPos"]["h"]
+    top = legend["gridPos"]["y"]
+    geometry = {
+        894: {"x": 12, "y": top, "w": 8, "h": 2},
+        9102: {"x": 0, "y": top + 2, "w": 8, "h": 3},
+        907: {"x": 8, "y": top + 2, "w": 7, "h": 3},
+        9491: {"x": 15, "y": top + 2, "w": 8, "h": 3},
+    }
     for panel_id in OBSERVABILITY_PANEL_IDS:
         panel = signals.get(panel_id)
         if panel is None:
             continue
-        panel["gridPos"] = {
-            "x": 0,
-            "y": y,
-            "w": 24,
-            "h": max(4, panel.get("gridPos", {}).get("h", 4)),
-        }
-        y += panel["gridPos"]["h"]
+        panel["gridPos"] = geometry[panel_id]
+        if panel_id == 894:
+            content = panel.get("options", {}).get("content", "")
+            if "Coverage is not success" not in content:
+                panel["description"] = content
+            panel["options"] = {
+                "mode": "html",
+                "content": '<div style="font-size:16px;line-height:1.2">Coverage is not success. Limits: panel info.</div>',
+            }
         children.append(panel)
     return [legend, *children]
 

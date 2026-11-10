@@ -204,7 +204,10 @@ def test_incident_observability_row_and_legend_are_separate_from_fleet() -> None
     assert row["gridPos"]["y"] + 1 == fleet["gridPos"]["y"]
     assert {p["id"] for p in row["panels"]} == {8810, 9102, 907, 894, 9491}
     _assert_panels_stay_in_grid_without_overlap(row["panels"], context="Observability")
-    legend = next(p for p in row["panels"] if p["id"] == 8810)["options"]["content"]
+    legend_panel = next(p for p in row["panels"] if p["id"] == 8810)
+    assert "| State | Source / meaning | Next action |" in legend_panel["description"]
+    assert "Restore emission, scraping or rules" in legend_panel["description"]
+    legend = legend_panel["options"]["content"]
     for state in (
         "OK",
         "WARN",
