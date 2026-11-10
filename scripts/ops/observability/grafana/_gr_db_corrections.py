@@ -850,8 +850,8 @@ def _organize_trust_reasons(trust: dict[str, Any]) -> None:
     for transform in trust.get("transformations", []):
         if transform.get("id") == "organize":
             options = transform["options"]
-            # options.setdefault("excludeByName", {})["reasons_display"] = True
-            # options["renameByName"].pop("reasons_display", None)
+            options.setdefault("excludeByName", {})["reasons_display"] = True
+            options["renameByName"].pop("reasons_display", None)
             options["renameByName"]["reasons_count"] = "Reason count"
             options["renameByName"]["processing_status"] = "Processing result"
             options["renameByName"]["trust_status"] = "Saved trust verdict"

@@ -27,6 +27,7 @@ SEVEN_UIDS: tuple[str, ...] = (
 # slug is the title slug (verified 2026-11-05 against /api/search): alphanumeric
 # runs lowercased, every other character a hyphen, empty chunks dropped.
 DASHBOARD_TITLES: dict[str, str] = {
+    # v2 is canonical. Isolated 100000 is legacy / «не использовать»
     "bioetl-run-explorer-v1": "1. Run Explorer",
     "bioetl-control-plane-v1": "2. Replay Readiness",
     "bioetl-overview-v2": "3. Run Overview",

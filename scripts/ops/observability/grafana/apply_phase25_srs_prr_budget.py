@@ -1259,7 +1259,7 @@ def _cp_trust_donor_transforms() -> list[dict[str, Any]]:
                     "evidence_observed_at": "Assessed at",
                     "reasons_count": "Reason count",
                 },
-                "excludeByName": {},
+                "excludeByName": {"reasons_display": True},
             },
         },
         {"id": "limit", "options": {"limitField": 1}},

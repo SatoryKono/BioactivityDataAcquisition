@@ -15,6 +15,9 @@ ______________________________________________________________________
 
 # Observability Checklist
 
+**Note**: Поколение v2 дашбордов является каноничным. Isolated 100000 помечается legacy / «не использовать».
+
+
 ## Trigger
 
 - Run this checklist to verify logs, metrics, alerts, and dashboards for the local BioETL runtime.
