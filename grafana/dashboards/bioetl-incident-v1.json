@@ -2914,12 +2914,13 @@
           "gridPos": {
             "x": 0,
             "y": 48,
-            "w": 24,
-            "h": 14
+            "w": 12,
+            "h": 2
           },
+          "description": "### Observability states — source and next action\n\nIncident severity and evidence quality are separate. A telemetry CRIT describes visibility.\n\n| State | Source / meaning | Next action |\n| --- | --- | --- |\n| OK | Observed health inputs satisfy healthy criteria | Confirm coverage, then monitor |\n| WARN | Observed warning threshold | Inspect domain and threshold |\n| CRIT / FIRING | Critical threshold / firing alert rule; cause unproven | Triage domain evidence; verify cause |\n| UNKNOWN | Absent verdict, source unavailable or query failed | Inspect query, selectors and source |\n| NO OBSERVATIONS | No events with producer, scope and event-family witnesses verified | Confirm scope/window; check witnesses |\n| TELEMETRY MISSING | Required series, scrape or rule evidence absent | Restore emission, scraping or rules |\n| Not verified | UNVERIFIED cause or missing observation/publication timestamps | Verify cause and freshness in domain evidence |\n| Blank / No data | Empty frame or missing field; no verdict | Inspect query and scope; never assume zero |\n\nReal zero requires an observed sample. VALID EMPTY requires documented witnesses.\nPRESENT means coverage, not success; DEGRADED is a monitoring warning.\nNot provided means missing attribute; PENDING means an alert awaiting its firing duration.\nCURRENT / GLOBAL evidence does not attest a selected historical Run ID.\nContract: docs/03-guides/dashboards/contracts/observability-states.md (LA-13; shared with LA-04 / LA-05).\n",
           "options": {
-            "mode": "markdown",
-            "content": "### Observability states — source and next action\n\nIncident severity and evidence quality are separate. A telemetry CRIT describes visibility.\n\n| State | Source / meaning | Next action |\n| --- | --- | --- |\n| OK | Observed health inputs satisfy healthy criteria | Confirm coverage, then monitor |\n| WARN | Observed warning threshold | Inspect domain and threshold |\n| CRIT / FIRING | Critical threshold / firing alert rule; cause unproven | Triage domain evidence; verify cause |\n| UNKNOWN | Absent verdict, source unavailable or query failed | Inspect query, selectors and source |\n| NO OBSERVATIONS | No events with producer, scope and event-family witnesses verified | Confirm scope/window; check witnesses |\n| TELEMETRY MISSING | Required series, scrape or rule evidence absent | Restore emission, scraping or rules |\n| Not verified | UNVERIFIED cause or missing observation/publication timestamps | Verify cause and freshness in domain evidence |\n| Blank / No data | Empty frame or missing field; no verdict | Inspect query and scope; never assume zero |\n\nReal zero requires an observed sample. VALID EMPTY requires documented witnesses.\nPRESENT means coverage, not success; DEGRADED is a monitoring warning.\nNot provided means missing attribute; PENDING means an alert awaiting its firing duration.\nCURRENT / GLOBAL evidence does not attest a selected historical Run ID.\nContract: docs/03-guides/dashboards/contracts/observability-states.md (LA-13; shared with LA-04 / LA-05).\n"
+            "mode": "html",
+            "content": "<div style=\"font-size:16px;line-height:1.2\">OK · WARN · CRIT / FIRING · UNKNOWN · NO OBSERVATIONS · TELEMETRY MISSING · Not verified · Blank / No data — never assume zero. Sources and actions: panel info.</div>"
           }
         },
         {
@@ -3111,9 +3112,9 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 62,
-            "w": 24,
-            "h": 7
+            "y": 50,
+            "w": 8,
+            "h": 3
           },
           "id": 9102,
           "options": {
@@ -3241,10 +3242,10 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 0,
-            "y": 69,
-            "w": 24,
-            "h": 4
+            "x": 8,
+            "y": 50,
+            "w": 7,
+            "h": 3
           },
           "id": 907,
           "options": {
@@ -3289,19 +3290,19 @@
         },
         {
           "gridPos": {
-            "x": 0,
-            "y": 73,
-            "w": 24,
-            "h": 5
+            "x": 12,
+            "y": 48,
+            "w": 8,
+            "h": 2
           },
           "id": 894,
           "options": {
-            "content": "<div style=\"font-size:16px;line-height:1.4\">Coverage contract<ul style=\"margin:6px 0 0 22px;padding:0\"><li style=\"font-size:16px\">Replay duplicate/overwrite risk is covered by bounded <code style=\"font-size:16px\">risk_type</code> telemetry.</li><li style=\"font-size:16px\">Manifest-to-ledger referential integrity is covered by complementary <code style=\"font-size:16px\">consistent</code> / <code style=\"font-size:16px\">inconsistent</code> ratio series.</li><li style=\"font-size:16px\">A zero blocker verdict is trustworthy only while the telemetry-coverage card is complete.</li></ul></div>",
-            "mode": "html"
+            "mode": "html",
+            "content": "<div style=\"font-size:16px;line-height:1.2\">Coverage is not success. Limits: panel info.</div>"
           },
           "title": "Review Coverage Limits",
           "type": "text",
-          "description": "Lists replay-safety conditions that this dashboard cannot fully prove. An empty blocker count is trustworthy only within the observed telemetry coverage.",
+          "description": "<div style=\"font-size:16px;line-height:1.4\">Coverage contract<ul style=\"margin:6px 0 0 22px;padding:0\"><li style=\"font-size:16px\">Replay duplicate/overwrite risk is covered by bounded <code style=\"font-size:16px\">risk_type</code> telemetry.</li><li style=\"font-size:16px\">Manifest-to-ledger referential integrity is covered by complementary <code style=\"font-size:16px\">consistent</code> / <code style=\"font-size:16px\">inconsistent</code> ratio series.</li><li style=\"font-size:16px\">A zero blocker verdict is trustworthy only while the telemetry-coverage card is complete.</li></ul></div>",
           "fieldConfig": {
             "defaults": {
               "links": [
@@ -3363,10 +3364,10 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 0,
-            "y": 78,
-            "w": 24,
-            "h": 8
+            "x": 15,
+            "y": 50,
+            "w": 8,
+            "h": 3
           },
           "id": 9491,
           "options": {
@@ -11307,13 +11308,13 @@
                   },
                   {
                     "id": "custom.wrapText",
-                    "value": false
+                    "value": true
                   },
                   {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   },
                   {
@@ -11397,13 +11398,13 @@
                   },
                   {
                     "id": "custom.wrapText",
-                    "value": false
+                    "value": true
                   },
                   {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   }
                 ]
@@ -11587,13 +11588,13 @@
                   },
                   {
                     "id": "custom.wrapText",
-                    "value": false
+                    "value": true
                   },
                   {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   }
                 ]

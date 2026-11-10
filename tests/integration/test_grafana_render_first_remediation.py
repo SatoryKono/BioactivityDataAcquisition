@@ -952,6 +952,7 @@ def test_incident_alert_count_and_dq_reason_have_honest_table_semantics() -> Non
     assert overrides["Signal"]["custom.cellOptions"] == {
         "type": "color-text",
         "mode": "basic",
+        "wrapText": False,
     }
     assert "reason" not in overrides
     visible_width = int(overrides["Pipeline"]["custom.width"]) + int(

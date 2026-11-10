@@ -69,7 +69,7 @@ def test_dashboard_rows_match_flat_and_forensic_surfaces() -> None:
     expected_rows = {
         "bioetl-control-plane-v1.json": 2,
         "bioetl-dq-v2.json": 1,
-        "bioetl-incident-v1.json": 8,
+        "bioetl-incident-v1.json": 9,
         "bioetl-overview-v2.json": 0,
         "bioetl-run-explorer-v1.json": 0,
     }

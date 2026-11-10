@@ -469,10 +469,6 @@
                   "type": "auto",
                   "wrapText": false
                 }
-              },
-              {
-                "id": "custom.width",
-                "value": 80
               }
             ]
           },
@@ -507,10 +503,6 @@
                   "mode": "fixed",
                   "fixedColor": "#93C5FD"
                 }
-              },
-              {
-                "id": "custom.width",
-                "value": 210
               }
             ]
           },

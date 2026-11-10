@@ -557,6 +557,7 @@ def test_runtime_row_sequence_is_fixed_detect_localize_escalate() -> None:
         (2020, "Review Alert Evidence"),
         (2099, "Domain Suspect Details · GLOBAL / CURRENT"),
         (2100, "Inspect Selected Run Summary"),
+        (8809, "Observability Signals"),
         (8808, "Pipeline fleet and range, not this Run ID"),
         (32010, "Browse Global Suspects"),
         (32005, "Browse Global Alerts"),
