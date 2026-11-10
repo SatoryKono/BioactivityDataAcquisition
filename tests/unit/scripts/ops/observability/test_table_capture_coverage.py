@@ -216,15 +216,19 @@ const fs=require('fs');
 const path=require('path');
 const {captureTablePages}=require(process.argv[1]);
 const zoom=require(path.join(path.dirname(process.argv[1]),'native_browser_zoom.cjs'));
-zoom.captureElementScreenshot=async(page,root,options)=>{
-  const b=Buffer.from('tile');fs.writeFileSync(options.path,b);return b;
-};
 zoom.capturePageScreenshot=async(page,options)=>{
   const b=Buffer.from('inspect');fs.writeFileSync(options.path,b);return b;
 };
 let scrollY=0;
+const tileScrollAtShot=[];
+zoom.captureElementScreenshot=async(page,root,options)=>{
+  tileScrollAtShot.push(scrollY);
+  const b=Buffer.from('tile-'+scrollY);fs.writeFileSync(options.path,b);return b;
+};
+let inspecting=null;
 const cellFor=text=>({
-  count:async()=>1,evaluate:async()=>text,scrollIntoViewIfNeeded:async()=>{},
+  count:async()=>1,evaluate:async()=>text,
+  scrollIntoViewIfNeeded:async()=>{scrollY=999;inspecting=text;},
   hover:async()=>{},getByRole:()=>({count:async()=>1,click:async()=>{}}),
 });
 const root={
@@ -234,7 +238,7 @@ const root={
     if(sel==='[role="grid"]')return{count:async()=>1,nth:()=>({
       evaluate:async(fn,arg)=>{
         if(arg===undefined)return {w:100,h:100,sw:100,sh:200,x:0,y:0};
-        scrollY=arg.y;
+        scrollY=arg.y;inspecting=null;
       },
     })};
     if(sel==='[role="gridcell"]')return{filter:({hasText})=>{
@@ -248,11 +252,11 @@ const root={
     cells:[{text:scrollY>0?'hidden-row':'visible-row',clipped:true,role:'gridcell'}],
     summary:null,
     scrollers:[{clientWidth:100,clientHeight:100,scrollWidth:100,scrollHeight:200,
-      scrollLeft:0,scrollTop:scrollY}],
+      scrollLeft:0,scrollTop:scrollY===999?0:scrollY}],
   }),
   getByRole:()=>({count:async()=>0}),
 };
-const pre={waitFor:async()=>{},innerText:async()=>scrollY>0?'hidden-row':'visible-row'};
+const pre={waitFor:async()=>{},innerText:async()=>inspecting||(scrollY>0?'hidden-row':'visible-row')};
 const dialog={filter(){return this;},locator:()=>pre};
 const page={
   locator:()=>root,
@@ -264,7 +268,7 @@ const page={
     dashboard:{uid:'test',firstWindowPanels:[],tablePanels:[{id:1,type:'table'}]},
     outputDir:process.argv[2],pngEvidence:()=>({bytes:4}),timeout:1000,
   });
-  console.log(JSON.stringify({results}));
+  console.log(JSON.stringify({results,tileScrollAtShot}));
 })().catch(error=>console.log(JSON.stringify({error:error.message})));
 """
     result = subprocess.run(
@@ -288,11 +292,18 @@ const page={
     assert "error" not in evidence, evidence
     table = evidence["results"][0]
     assert table["status"] == "COMPLETE"
-    statuses = {
-        item["text"]: item["status"] for item in table["pages"][0]["inspectedValues"]
-    }
+    page = table["pages"][0]
+    statuses = {item["text"]: item["status"] for item in page["inspectedValues"]}
     assert statuses["visible-row"] == "VERIFIED"
     assert statuses["hidden-row"] == "VERIFIED"
+    files = [item["file"] for item in page["inspectedValues"] if item.get("file")]
+    assert len(files) == len(set(files))
+    assert {Path(f).name for f in files} == {
+        "page-1-inspect-1.png",
+        "page-1-inspect-2.png",
+    }
+    # Tile PNGs must be taken at declared scroll offsets, not after Inspect.
+    assert 999 not in evidence["tileScrollAtShot"]
 
 
 @pytest.mark.parametrize(

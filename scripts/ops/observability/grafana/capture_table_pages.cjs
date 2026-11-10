@@ -57,16 +57,18 @@ async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,t
         await grid.evaluate((el,{x,y})=>{el.scrollLeft=x;el.scrollTop=y;},{x,y});
         await page.waitForTimeout(150);
         const evidence=await root.evaluate(tableEvidence);
+        // Tile PNG must match recorded scroll offsets before Inspect moves the grid.
+        const file=path.join(dir,`page-${index}-scroll-${tiles.length+1}.png`);
+        const bytes=await require('./native_browser_zoom.cjs').captureElementScreenshot(page,root,{path:file,animations:'disabled',timeout});
+        tiles.push({grid:g,x,y,...evidence,file:path.relative(outputDir,file),...pngEvidence(bytes),viewportTiles:(bytes.viewportTiles || []).map(t=>({...t,file:path.relative(outputDir,t.file)}))});
         // Inspect while virtualized rows for this tile are still mounted.
         if (inspect) {
           inspectedValues = mergeInspected(
             inspectedValues,
             await inspect(evidence.cells),
           );
+          await grid.evaluate((el,{x,y})=>{el.scrollLeft=x;el.scrollTop=y;},{x,y});
         }
-        const file=path.join(dir,`page-${index}-scroll-${tiles.length+1}.png`);
-        const bytes=await require('./native_browser_zoom.cjs').captureElementScreenshot(page,root,{path:file,animations:'disabled',timeout});
-        tiles.push({grid:g,x,y,...evidence,file:path.relative(outputDir,file),...pngEvidence(bytes),viewportTiles:(bytes.viewportTiles || []).map(t=>({...t,file:path.relative(outputDir,t.file)}))});
       });
     } finally {
       await grid.evaluate((el,{x,y})=>{el.scrollLeft=x;el.scrollTop=y;},size);
@@ -75,9 +77,10 @@ async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,t
   return {tiles, inspectedValues};
 }
 
-async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pngEvidence,timeout,noValue,seen}) {
+async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pngEvidence,timeout,noValue,seen,inspectCounter}) {
   const results=[];
   const known = seen instanceof Set ? seen : new Set(seen || []);
+  const counter = inspectCounter || {n: 0};
   const values=[...new Set(cells.filter(c=>c.clipped && c.role!=='columnheader').map(c=>c.text))]
     .filter(text => !known.has(text));
   await sequential(values, async text => {
@@ -103,7 +106,8 @@ async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pn
       const observed=await value.innerText();
       const mappedEmpty=observed==='' && noValue===text;
       if(observed!==text && !mappedEmpty)throw new Error('Inspect value differs from the captured table cell');
-      const file=path.join(dir,`page-${index}-inspect-${results.length+1}.png`);
+      counter.n += 1;
+      const file=path.join(dir,`page-${index}-inspect-${counter.n}.png`);
       const bytes=await require('./native_browser_zoom.cjs').capturePageScreenshot(page,{path:file,animations:'disabled',timeout});
       results.push({text,observed,status:mappedEmpty?'VERIFIED_NO_VALUE_MAPPING':'VERIFIED',file:path.relative(outputDir,file),...pngEvidence(bytes),viewportTiles:(bytes.viewportTiles || []).map(t=>({...t,file:path.relative(outputDir,t.file)}))});
     } finally {
@@ -134,7 +138,8 @@ async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeo
       const bytes=await require('./native_browser_zoom.cjs').captureElementScreenshot(page,root,
         {path:file,animations:'disabled',timeout});
       const seen = new Set();
-      const inspectOpts = {dir,index,outputDir,pngEvidence,timeout,noValue:panel.noValue,seen};
+      const inspectCounter = {n: 0};
+      const inspectOpts = {dir,index,outputDir,pngEvidence,timeout,noValue:panel.noValue,seen,inspectCounter};
       // Inspect the initial viewport before any scroll restore can unmount rows.
       let inspectedValues = await captureInspectedValues(page,root,evidence.cells,inspectOpts);
       const scrollCapture = await captureScrollTiles(page,root,{
