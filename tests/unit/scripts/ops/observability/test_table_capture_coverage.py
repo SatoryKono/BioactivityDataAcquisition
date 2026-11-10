@@ -326,9 +326,7 @@ def test_acceptance_rejects_incomplete_inspect(inspect_status, passes):
                     {
                         "page": 1,
                         "scrollers": [],
-                        "inspectedValues": [
-                            {"text": "x", "status": inspect_status}
-                        ],
+                        "inspectedValues": [{"text": "x", "status": inspect_status}],
                     }
                 ],
             }
