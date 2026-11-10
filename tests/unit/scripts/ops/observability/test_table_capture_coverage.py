@@ -202,3 +202,125 @@ captureInspectedValues(page,root,[{text:'value',clipped:true,role:'gridcell'}],
         value = evidence["results"][0]
         assert value["observed"] == raw
         assert value["status"] == ("VERIFIED" if raw else "VERIFIED_NO_VALUE_MAPPING")
+
+
+def test_inspect_runs_before_scroll_restore_and_rejects_unmounted(
+    tmp_path: Path,
+) -> None:
+    """Clipped off-viewport cells must be inspected while still mounted."""
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    program = r"""
+const fs=require('fs');
+const path=require('path');
+const {captureTablePages}=require(process.argv[1]);
+const zoom=require(path.join(path.dirname(process.argv[1]),'native_browser_zoom.cjs'));
+zoom.captureElementScreenshot=async(page,root,options)=>{
+  const b=Buffer.from('tile');fs.writeFileSync(options.path,b);return b;
+};
+zoom.capturePageScreenshot=async(page,options)=>{
+  const b=Buffer.from('inspect');fs.writeFileSync(options.path,b);return b;
+};
+let scrollY=0;
+const cellFor=text=>({
+  count:async()=>1,evaluate:async()=>text,scrollIntoViewIfNeeded:async()=>{},
+  hover:async()=>{},getByRole:()=>({count:async()=>1,click:async()=>{}}),
+});
+const root={
+  first(){return this;},scrollIntoViewIfNeeded:async()=>{},waitFor:async()=>{},
+  innerText:async()=>'panel',
+  locator:sel=>{
+    if(sel==='[role="grid"]')return{count:async()=>1,nth:()=>({
+      evaluate:async(fn,arg)=>{
+        if(arg===undefined)return {w:100,h:100,sw:100,sh:200,x:0,y:0};
+        scrollY=arg.y;
+      },
+    })};
+    if(sel==='[role="gridcell"]')return{filter:({hasText})=>{
+      const text=scrollY>0?'hidden-row':'visible-row';
+      if(!hasText.test(text))return{first:()=>({count:async()=>0})};
+      return{first:()=>cellFor(text)};
+    }};
+    return{count:async()=>0};
+  },
+  evaluate:async()=>({
+    cells:[{text:scrollY>0?'hidden-row':'visible-row',clipped:true,role:'gridcell'}],
+    summary:null,
+    scrollers:[{clientWidth:100,clientHeight:100,scrollWidth:100,scrollHeight:200,
+      scrollLeft:0,scrollTop:scrollY}],
+  }),
+  getByRole:()=>({count:async()=>0}),
+};
+const pre={waitFor:async()=>{},innerText:async()=>scrollY>0?'hidden-row':'visible-row'};
+const dialog={filter(){return this;},locator:()=>pre};
+const page={
+  locator:()=>root,
+  waitForTimeout:async()=>{},
+  getByRole:role=>role==='dialog'?dialog:{waitFor:async()=>{},click:async()=>{}},
+};
+(async()=>{
+  const results=await captureTablePages(page,{
+    dashboard:{uid:'test',firstWindowPanels:[],tablePanels:[{id:1,type:'table'}]},
+    outputDir:process.argv[2],pngEvidence:()=>({bytes:4}),timeout:1000,
+  });
+  console.log(JSON.stringify({results}));
+})().catch(error=>console.log(JSON.stringify({error:error.message})));
+"""
+    result = subprocess.run(
+        [
+            node,
+            "-e",
+            program,
+            str(
+                Path(
+                    "scripts/ops/observability/grafana/capture_table_pages.cjs"
+                ).resolve()
+            ),
+            str(tmp_path),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    evidence = json.loads(result.stdout)
+    assert "error" not in evidence, evidence
+    table = evidence["results"][0]
+    assert table["status"] == "COMPLETE"
+    statuses = {
+        item["text"]: item["status"] for item in table["pages"][0]["inspectedValues"]
+    }
+    assert statuses["visible-row"] == "VERIFIED"
+    assert statuses["hidden-row"] == "VERIFIED"
+
+
+@pytest.mark.parametrize(
+    "inspect_status,passes",
+    [
+        ("VERIFIED", True),
+        ("CELL_NOT_MOUNTED", False),
+        ("INSPECT_UNAVAILABLE", False),
+    ],
+)
+def test_acceptance_rejects_incomplete_inspect(inspect_status, passes):
+    from scripts.ops.observability.grafana.capture_acceptance import _table_page_reasons
+
+    dashboard = {
+        "tablePagination": [
+            {
+                "panelId": 1,
+                "status": "COMPLETE",
+                "pages": [
+                    {
+                        "page": 1,
+                        "scrollers": [],
+                        "inspectedValues": [
+                            {"text": "x", "status": inspect_status}
+                        ],
+                    }
+                ],
+            }
+        ]
+    }
+    assert (not _table_page_reasons(dashboard)) is passes

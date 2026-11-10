@@ -226,6 +226,13 @@ def _table_page_reasons(dashboard: dict) -> list[str]:
         if table.get("status") not in {"COMPLETE", "NOT_PAGINATED"}:
             reasons.append(f"incomplete table pagination: {table.get('panelId')}")
         for page in table.get("pages", []):
+            if any(
+                item.get("status") in {"CELL_NOT_MOUNTED", "INSPECT_UNAVAILABLE"}
+                for item in page.get("inspectedValues", [])
+            ):
+                reasons.append(
+                    f"incomplete table inspect: {table.get('panelId')}/{page.get('page')}"
+                )
             for index, scroller in enumerate(page.get("scrollers", [])):
                 if any(
                     scroller.get(f"scroll{axis}", 0)

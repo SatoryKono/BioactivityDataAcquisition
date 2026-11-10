@@ -25,9 +25,19 @@ function tableEvidence(el) {
   };
 }
 
-async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,timeout}) {
+function mergeInspected(existing, next) {
+  const byText = new Map(existing.map(item => [item.text, item]));
+  for (const item of next) {
+    const prior = byText.get(item.text);
+    if (!prior || prior.status === 'CELL_NOT_MOUNTED') byText.set(item.text, item);
+  }
+  return [...byText.values()];
+}
+
+async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,timeout,inspect}) {
   const grids=root.locator('[role="grid"]');
   const tiles=[];
+  let inspectedValues=[];
   await sequential(Array.from({length:await grids.count()},(_,i)=>i), async g => {
     const grid=grids.nth(g);
     const size=await grid.evaluate(el=>({w:el.clientWidth,h:el.clientHeight,
@@ -47,6 +57,13 @@ async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,t
         await grid.evaluate((el,{x,y})=>{el.scrollLeft=x;el.scrollTop=y;},{x,y});
         await page.waitForTimeout(150);
         const evidence=await root.evaluate(tableEvidence);
+        // Inspect while virtualized rows for this tile are still mounted.
+        if (inspect) {
+          inspectedValues = mergeInspected(
+            inspectedValues,
+            await inspect(evidence.cells),
+          );
+        }
         const file=path.join(dir,`page-${index}-scroll-${tiles.length+1}.png`);
         const bytes=await require('./native_browser_zoom.cjs').captureElementScreenshot(page,root,{path:file,animations:'disabled',timeout});
         tiles.push({grid:g,x,y,...evidence,file:path.relative(outputDir,file),...pngEvidence(bytes),viewportTiles:(bytes.viewportTiles || []).map(t=>({...t,file:path.relative(outputDir,t.file)}))});
@@ -55,13 +72,16 @@ async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,t
       await grid.evaluate((el,{x,y})=>{el.scrollLeft=x;el.scrollTop=y;},size);
     }
   });
-  return tiles;
+  return {tiles, inspectedValues};
 }
 
-async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pngEvidence,timeout,noValue}) {
+async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pngEvidence,timeout,noValue,seen}) {
   const results=[];
-  const values=[...new Set(cells.filter(c=>c.clipped && c.role!=='columnheader').map(c=>c.text))];
+  const known = seen instanceof Set ? seen : new Set(seen || []);
+  const values=[...new Set(cells.filter(c=>c.clipped && c.role!=='columnheader').map(c=>c.text))]
+    .filter(text => !known.has(text));
   await sequential(values, async text => {
+    known.add(text);
     // The accessible name also contains the Inspect button's label.
     const cell=root.locator('[role="gridcell"]').filter({hasText:new RegExp('^'+text.replace(/[.*+?^${}()|[\]\\]/g,String.raw`\$&`)+'$')}).first();
     if(!await cell.count()){
@@ -113,29 +133,53 @@ async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeo
       const file=path.join(dir,`page-${index}.png`);
       const bytes=await require('./native_browser_zoom.cjs').captureElementScreenshot(page,root,
         {path:file,animations:'disabled',timeout});
-      const scrollTiles=await captureScrollTiles(page,root,{dir,index,outputDir,pngEvidence,timeout});
-      const inspectedValues=await captureInspectedValues(page,root,
-        [ ...evidence.cells, ...scrollTiles.flatMap(t=>t.cells)],{dir,index,outputDir,pngEvidence,timeout,noValue:panel.noValue});
-      pages.push({page:index,...evidence,scrollTiles,inspectedValues,file:path.relative(outputDir,file),...pngEvidence(bytes),viewportTiles:(bytes.viewportTiles || []).map(t=>({...t,file:path.relative(outputDir,t.file)}))});
-      if (!paginated || await next.isDisabled()) return;
+      const seen = new Set();
+      const inspectOpts = {dir,index,outputDir,pngEvidence,timeout,noValue:panel.noValue,seen};
+      // Inspect the initial viewport before any scroll restore can unmount rows.
+      let inspectedValues = await captureInspectedValues(page,root,evidence.cells,inspectOpts);
+      const scrollCapture = await captureScrollTiles(page,root,{
+        dir,index,outputDir,pngEvidence,timeout,
+        inspect: cells => captureInspectedValues(page,root,cells,inspectOpts),
+      });
+      inspectedValues = mergeInspected(inspectedValues, scrollCapture.inspectedValues);
+      const incompleteInspect = inspectedValues.some(
+        item => item.status === 'CELL_NOT_MOUNTED' || item.status === 'INSPECT_UNAVAILABLE',
+      );
+      pages.push({
+        page:index,...evidence,scrollTiles:scrollCapture.tiles,inspectedValues,
+        file:path.relative(outputDir,file),...pngEvidence(bytes),
+        viewportTiles:(bytes.viewportTiles || []).map(t=>({...t,file:path.relative(outputDir,t.file)})),
+      });
+      if (!paginated || await next.isDisabled()) {
+        return {incompleteInspect};
+      }
       const before = await root.innerText();
       await next.focus();
       await page.keyboard.press('Enter');
       await page.waitForFunction(({id,before}) =>
         document.querySelector(`[data-viz-panel-key="panel-${id}"]`)?.innerText !== before,
         {id:panel.id,before},{timeout:transitionTimeout});
-      await capturePage(index+1);
+      const nested = await capturePage(index+1);
+      return {incompleteInspect: incompleteInspect || nested.incompleteInspect};
     }
     async function restorePage(remaining) {
       if(remaining<=0 || await previous.isDisabled())return;
       await previous.click(); await page.waitForTimeout(100);
       await restorePage(remaining-1);
     }
-    try {await capturePage(1);}
+    let incompleteInspect = false;
+    try {
+      const outcome = await capturePage(1);
+      incompleteInspect = Boolean(outcome?.incompleteInspect);
+    }
     finally {if(paginated)await restorePage(100);}
-    results.push({panelId:panel.id,title:panel.title,paginated,status:'COMPLETE',
-      method:'native next-page button activated with Enter; original first page restored',pages});
+    results.push({
+      panelId:panel.id,title:panel.title,paginated,
+      status: incompleteInspect ? 'INCOMPLETE_INSPECT' : 'COMPLETE',
+      method:'native next-page button activated with Enter; original first page restored; Inspect runs before scroll restore',
+      pages,
+    });
   });
   return results;
 }
-module.exports={captureTablePages,captureInspectedValues};
+module.exports={captureTablePages,captureInspectedValues,captureScrollTiles,mergeInspected};
