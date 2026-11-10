@@ -41,7 +41,9 @@ def test_incident_observability_check_is_read_only_and_detects_drift(
     assert dashboard.read_bytes() == drifted
     assert nav_bus.apply_to_dashboard(dashboard, current_uid="bioetl-incident-v1")
     # Writes may use native Windows newlines; compare the serialized content.
-    assert dashboard.read_text(encoding="utf-8") == before.decode().replace("\r\n", "\n")
+    assert dashboard.read_text(encoding="utf-8") == before.decode().replace(
+        "\r\n", "\n"
+    )
 
 
 @pytest.mark.parametrize("root_signals", [False, True])
