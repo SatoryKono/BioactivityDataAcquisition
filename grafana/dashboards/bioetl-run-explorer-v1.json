@@ -418,9 +418,10 @@
             "minWidth": 50,
             "cellOptions": {
               "type": "auto",
-              "wrapText": false
+              "wrapText": true
             },
-            "wrapText": false
+            "wrapText": true,
+            "wrapHeaderText": true
           },
           "noValue": "UNKNOWN — required launch evidence is unavailable. QUERY ERROR means the backend request failed, not an empty fleet.",
           "links": [],
@@ -465,8 +466,13 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": true
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 80
               }
             ]
           },
@@ -501,6 +507,10 @@
                   "mode": "fixed",
                   "fixedColor": "#93C5FD"
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 210
               }
             ]
           },
@@ -580,13 +590,13 @@
               },
               {
                 "id": "custom.wrapText",
-                "value": false
+                "value": true
               },
               {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
@@ -684,7 +694,7 @@
                 "value": {
                   "type": "color-text",
                   "mode": "basic",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
@@ -805,7 +815,7 @@
                 "value": {
                   "type": "color-text",
                   "mode": "basic",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
@@ -926,7 +936,7 @@
                 "value": {
                   "type": "color-text",
                   "mode": "basic",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
@@ -1051,7 +1061,7 @@
                 "value": {
                   "type": "color-text",
                   "mode": "basic",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {

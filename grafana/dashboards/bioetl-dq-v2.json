@@ -504,11 +504,12 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": false
+              "wrapText": true
             },
             "inspect": true,
-            "wrapText": false,
-            "minWidth": 50
+            "wrapText": true,
+            "minWidth": 50,
+            "wrapHeaderText": true
           },
           "links": [
             {
@@ -528,13 +529,13 @@
             "properties": [
               {
                 "id": "custom.wrapText",
-                "value": false
+                "value": true
               },
               {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 }
               }
             ]
@@ -547,13 +548,13 @@
             "properties": [
               {
                 "id": "custom.wrapText",
-                "value": false
+                "value": true
               },
               {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
@@ -588,13 +589,13 @@
             "properties": [
               {
                 "id": "custom.wrapText",
-                "value": false
+                "value": true
               },
               {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
@@ -819,8 +820,8 @@
       },
       "transparent": true,
       "options": {
-        "mode": "markdown",
-        "content": "**Canonical identity:** [Open Review Run Identity on Overview](/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range})\n\nDQ no longer duplicates identity tables (F-16)."
+        "mode": "html",
+        "content": "<div style=\"font-size:16px;line-height:1.5\"><strong>Canonical identity:</strong> <a href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range}\">Open Review Run Identity on Overview</a><br>DQ no longer duplicates identity tables (F-16).</div>"
       }
     },
     {
@@ -843,10 +844,13 @@
           "custom": {
             "align": "left",
             "cellOptions": {
-              "type": "auto"
+              "type": "auto",
+              "wrapText": true
             },
             "inspect": true,
-            "minWidth": 50
+            "minWidth": 50,
+            "wrapText": true,
+            "wrapHeaderText": true
           },
           "decimals": 0,
           "unit": "none",
@@ -929,7 +933,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
@@ -956,7 +960,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
@@ -1004,7 +1008,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
@@ -1069,7 +1073,7 @@
                 "value": {
                   "type": "color-text",
                   "applyToRow": true,
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
@@ -1122,7 +1126,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
@@ -1458,10 +1462,12 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": true,
+                "wrapHeaderText": true
               }
             },
             "overrides": [
@@ -1758,11 +1764,12 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": true,
+                "wrapHeaderText": true
               }
             },
             "overrides": [
@@ -1996,8 +2003,8 @@
           },
           "transparent": true,
           "options": {
-            "mode": "markdown",
-            "content": "**Canonical identity:** [Open Review Run Identity on Overview](/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range})"
+            "mode": "html",
+            "content": "<div style=\"font-size:16px;line-height:1.5\"><strong>Canonical identity:</strong> <a href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range}\">Open Review Run Identity on Overview</a></div>"
           }
         }
       ]

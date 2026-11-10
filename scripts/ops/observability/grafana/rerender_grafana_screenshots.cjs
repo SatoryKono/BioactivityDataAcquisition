@@ -851,6 +851,7 @@ function dashboardEntryFromPayload(payload) {
     url: `/d/${uid}/${slug}`,
     file: `${uid}.png`,
     requiredPanels,
+    tablePanels: requiredPanels.filter(panel => panel.type === "table"),
     navigationHtml: navigationPanels[0]?.options?.content || "",
     navigationExpected: navigationPanels.length === 1,
     firstWindowPanels: selectContainmentPanels(panels, CONFIG.navigationOnly).map(summarizeFirstWindowPanel),
@@ -939,6 +940,8 @@ async function expandCollapsedRows(page, dashboard, index, total) {
   );
   let expanded = 0;
   dashboard.rowExpansion = [];
+  // Network idle can precede Grafana's asynchronous scene construction.
+  await page.locator('[data-viz-panel-key]').first().waitFor({state:'visible',timeout:CONFIG.timeoutMs});
   for (const title of titles.slice().reverse()) {
     const clicked = await tryExpandCollapsedRow(page, title, index, total, dashboard.uid);
     dashboard.rowExpansion.push({title, clicked});
@@ -1808,7 +1811,11 @@ function navigationValidationFromDom({expectedNavigationHtml = "", expectedLinkC
     const canonicalLinksMatch = expectedLinks.length > 0 &&
       links.length === expectedLinks.length && links.every((link, index) =>
         name(link) === name(expectedLinks[index]) &&
-        link.getAttribute("title") === expectedLinks[index].getAttribute("title"));
+        (expectedLinks[index].matches('span.bioetl-nav-current')
+          // Grafana sanitizes title/aria attributes on spans, but not anchors.
+          ? link.matches('span.bioetl-nav-current') && !link.hasAttribute('href')
+          : link.matches('a.bioetl-nav-link[href]') &&
+            link.getAttribute("title") === expectedLinks[index].getAttribute("title")));
     const panelRect = panel?.getBoundingClientRect() || null;
     const navRect = nav?.getBoundingClientRect() || null;
     const linkRects = links.map((link) => link.getBoundingClientRect());
@@ -1858,7 +1865,8 @@ function navigationValidationFromDom({expectedNavigationHtml = "", expectedLinkC
       panelFound: Boolean(panel),
       navigationFound: Boolean(nav),
       titleFound: Boolean(title),
-      linkNamesPresent: links.every(link => Boolean(link.textContent?.trim()) && Boolean(link.getAttribute('title'))),
+      linkNamesPresent: links.every(link => Boolean(link.textContent?.trim()) &&
+        (link.matches('span.bioetl-nav-current') || Boolean(link.getAttribute('title')))),
       linkCount: links.length,
       expectedLinkCount: expectedLinks.length,
       linkNames,
@@ -2426,10 +2434,15 @@ function browserDashboardResponseKind(responseUrl, baseUrl, uid) {
   if (url.pathname === `/api/dashboards/uid/${encodeURIComponent(uid)}`) return "legacy";
   const resource = url.pathname.match(/^\/apis\/dashboard\.grafana\.app\/v1beta1\/namespaces\/[^/]+\/dashboards\/([^/]+)\/dto$/);
   if (resource && decodeURIComponent(resource[1]) === uid) return "grafana-v1beta1-dto";
+  const v2 = url.pathname.match(/^\/apis\/dashboard\.grafana\.app\/v2\/namespaces\/[^/]+\/dashboards\/([^/]+)\/dto$/);
+  if (v2 && decodeURIComponent(v2[1]) === uid) return "grafana-v2-dto";
   return null;
 }
 
 function normalizeBrowserDashboardPayload(payload, kind, uid) {
+  if (kind === "grafana-v2-dto" && payload?.kind === "DashboardWithAccessInfo" &&
+      payload?.apiVersion === "dashboard.grafana.app/v2" && payload?.metadata?.name === uid &&
+      payload.spec?.elements && payload.spec?.layout) return payload;
   if (kind === "legacy" && payload?.dashboard?.uid === uid) return payload.dashboard;
   if (kind === "grafana-v1beta1-dto" &&
       payload?.kind === "DashboardWithAccessInfo" &&
@@ -2471,7 +2484,14 @@ async function renderDashboard(page, dashboard, index, total) {
       observedModels.push((async () => {
         if (!response.ok()) throw new Error(`Browser dashboard response failed: ${response.status()}`);
         const payload = await response.json();
-        dashboard.provisionedModel.loaded.push(normalizeBrowserDashboardPayload(payload, kind, dashboard.uid));
+        const model = normalizeBrowserDashboardPayload(payload, kind, dashboard.uid);
+        if (kind === 'grafana-v2-dto') {
+          const before = await page.request.get(response.url());
+          if (!before.ok()) throw new Error('Browser v2 model bracket read failed');
+          dashboard.provisionedModel.v2 = {url:response.url(),before:await before.json(),loaded:[model]};
+        } else {
+          dashboard.provisionedModel.loaded.push(model);
+        }
       })().catch(error => {
         dashboard.provisionedModel.loadedResponseErrors.push(String(error?.message ?? error));
       }));
@@ -2597,6 +2617,14 @@ async function renderDashboard(page, dashboard, index, total) {
   }
   await setDashboardScrollPosition(page, 0);
   dashboard.provisionedModel.after = await readModel();
+  if (dashboard.provisionedModel.v2) {
+    const response = await page.request.get(dashboard.provisionedModel.v2.url);
+    if (!response.ok()) throw new Error('Browser v2 model final read failed');
+    dashboard.provisionedModel.v2.after = await response.json();
+  }
+  if (!dashboard.provisionedModel.loaded.length && !dashboard.provisionedModel.v2?.loaded?.length) {
+    throw new Error('No actual browser-loaded dashboard model was observed');
+  }
   if (dashboard.actualTheme !== CONFIG.theme) {
     throw new Error(
       `Theme verification failed for ${dashboard.uid}: requested=${CONFIG.theme} actual=${dashboard.actualTheme}`,

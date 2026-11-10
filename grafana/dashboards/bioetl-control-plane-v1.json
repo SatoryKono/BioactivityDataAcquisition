@@ -631,7 +631,8 @@
               "type": "auto",
               "wrapText": true
             },
-            "minWidth": 50
+            "minWidth": 50,
+            "wrapHeaderText": true
           }
         },
         "overrides": [
@@ -670,8 +671,13 @@
           "noValue": "UNKNOWN",
           "custom": {
             "inspect": true,
-            "wrapText": false,
-            "minWidth": 50
+            "wrapText": true,
+            "minWidth": 50,
+            "wrapHeaderText": true,
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": true
+            }
           }
         },
         "overrides": [
@@ -852,11 +858,12 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": false
+              "wrapText": true
             },
             "inspect": true,
             "minWidth": 50,
-            "wrapText": false
+            "wrapText": true,
+            "wrapHeaderText": true
           },
           "unit": "none",
           "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
@@ -923,7 +930,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": true
                 }
               },
               {
@@ -949,7 +957,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": true
                 }
               },
               {
@@ -975,7 +984,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": true
                 }
               },
               {
@@ -1005,7 +1015,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": true
                 }
               }
             ]
@@ -1039,7 +1050,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text"
+                  "type": "color-text",
+                  "wrapText": true
                 }
               },
               {
@@ -1099,7 +1111,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text"
+                  "type": "color-text",
+                  "wrapText": true
                 }
               },
               {
@@ -1182,7 +1195,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": true
                 }
               },
               {
@@ -1401,11 +1415,12 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": true,
+                "wrapHeaderText": true
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
@@ -1455,7 +1470,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   },
                   {
@@ -1703,11 +1718,12 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": true,
+                "wrapHeaderText": true
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
@@ -2023,10 +2039,12 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": true,
+                "wrapHeaderText": true
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed. HTTP 504 is a query error, not an empty result.",
@@ -2051,7 +2069,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   },
                   {
@@ -2098,7 +2116,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   },
                   {
@@ -2159,7 +2177,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   },
                   {
@@ -2422,7 +2440,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   },
                   {
@@ -2583,7 +2601,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   }
                 ]
@@ -2740,11 +2758,12 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": true,
+                "wrapHeaderText": true
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
@@ -2794,7 +2813,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   },
                   {
@@ -3042,11 +3061,12 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": true,
+                "wrapHeaderText": true
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
@@ -3323,7 +3343,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   }
                 ]
@@ -3342,7 +3362,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   },
                   {
@@ -3365,7 +3385,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   },
                   {
@@ -3396,7 +3416,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   },
                   {
@@ -3425,7 +3445,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   }
                 ]
@@ -3444,7 +3464,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   }
                 ]
@@ -3459,7 +3479,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   },
                   {

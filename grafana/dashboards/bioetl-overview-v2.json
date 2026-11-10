@@ -641,7 +641,7 @@
         "x": 0,
         "y": 5,
         "w": 15,
-        "h": 8
+        "h": 10
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -655,11 +655,12 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": false
+              "wrapText": true
             },
             "inspect": true,
             "minWidth": 50,
-            "wrapText": false
+            "wrapText": true,
+            "wrapHeaderText": true
           },
           "links": [
             {
@@ -928,11 +929,12 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": false
+              "wrapText": true
             },
             "inspect": true,
-            "wrapText": false,
-            "minWidth": 50
+            "wrapText": true,
+            "minWidth": 50,
+            "wrapHeaderText": true
           },
           "links": [
             {
@@ -1015,7 +1017,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
@@ -1125,6 +1127,14 @@
                       "pattern": "^(Workflow: )?workflow_parent_not_finalized$",
                       "result": {
                         "text": "Parent workflow completion has not been recorded"
+                      }
+                    }
+                  },
+                  {
+                    "type": "value",
+                    "options": {
+                      "Provider: run_preflight_provider_observation": {
+                        "text": "Provider: saved preflight observation"
                       }
                     }
                   }
@@ -1317,7 +1327,8 @@
               "type": "auto",
               "wrapText": true
             },
-            "minWidth": 50
+            "minWidth": 50,
+            "wrapHeaderText": true
           }
         },
         "overrides": [
@@ -1439,7 +1450,9 @@
               "wrapText": true
             },
             "inspect": true,
-            "minWidth": 50
+            "minWidth": 50,
+            "wrapText": true,
+            "wrapHeaderText": true
           }
         },
         "overrides": [
@@ -1811,10 +1824,12 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": false
+              "wrapText": true
             },
             "inspect": true,
-            "minWidth": 50
+            "minWidth": 50,
+            "wrapText": true,
+            "wrapHeaderText": true
           }
         },
         "overrides": [
@@ -2477,7 +2492,8 @@
             "cellOptions": {
               "type": "auto",
               "wrapText": true
-            }
+            },
+            "wrapHeaderText": true
           }
         },
         "overrides": []

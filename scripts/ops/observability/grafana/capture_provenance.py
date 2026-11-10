@@ -237,7 +237,8 @@ def model_errors(source: dict, evidence: object) -> list[str]:
     if not isinstance(evidence, dict):
         return ["missing provisioned model evidence"]
     loaded = evidence.get("loaded")
-    if not isinstance(loaded, list) or not loaded:
+    v2 = evidence.get("v2")
+    if not isinstance(loaded, list) or (not loaded and not isinstance(v2, dict)):
         return ["missing browser-loaded model"]
     errors = []
     for label, model in [
@@ -249,6 +250,51 @@ def model_errors(source: dict, evidence: object) -> list[str]:
             source
         ):
             errors.append(f"{label} provisioned model differs from source")
+    if v2 is not None:
+        errors.extend(_v2_model_errors(source, evidence, v2))
+    return errors
+
+
+def _v2_model_errors(source: dict, evidence: dict, v2: object) -> list[str]:
+    """Bind Grafana's converted v2 spec to the same provisioned v1 generation."""
+    if (
+        not isinstance(v2, dict)
+        or not isinstance(v2.get("loaded"), list)
+        or not v2["loaded"]
+    ):
+        return ["missing browser-loaded v2 model"]
+    errors = []
+    before = v2.get("before")
+    for phase, model in [
+        ("before", before),
+        *[("loaded", m) for m in v2["loaded"]],
+        ("after", v2.get("after")),
+    ]:
+        if not isinstance(model, dict):
+            errors.append(f"missing {phase} v2 model")
+            continue
+        metadata = model.get("metadata") or {}
+        spec = model.get("spec") or {}
+        if not isinstance(metadata, dict) or not isinstance(spec, dict):
+            errors.append(f"invalid {phase} v2 identity/schema")
+            continue
+        if (
+            model.get("kind") != "DashboardWithAccessInfo"
+            or model.get("apiVersion") != "dashboard.grafana.app/v2"
+            or metadata.get("name") != source.get("uid")
+            or not metadata.get("resourceVersion")
+            or not isinstance(spec.get("elements"), dict)
+            or not isinstance(spec.get("layout"), dict)
+        ):
+            errors.append(f"invalid {phase} v2 identity/schema")
+        for legacy_phase in ("before", "after"):
+            version = (evidence.get(legacy_phase) or {}).get("version")
+            if version is None or metadata.get("generation") != version:
+                errors.append(
+                    f"{phase} v2 generation differs from {legacy_phase} provisioned model"
+                )
+        if model != before:
+            errors.append(f"{phase} v2 model differs from bracketing API read")
     return errors
 
 
@@ -286,6 +332,11 @@ def dashboard_attachment_errors(root: Path, dashboard: dict) -> list[str]:
     attachments.extend(dashboard.get("scrollCapture", {}).get("tiles", []))
     for table in dashboard.get("tablePagination", []):
         attachments.extend(table.get("pages", []))
+        for page in table.get("pages", []):
+            attachments.extend(page.get("scrollTiles", []))
+            attachments.extend(
+                v for v in page.get("inspectedValues", []) if v.get("file")
+            )
     for control in dashboard.get("seriesControls", []):
         attachments.extend(control.get("entries", []))
     return [

@@ -19,6 +19,7 @@ Does not start Docker, touch ``.env``, or inflate tech-debt budgets.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -826,7 +827,16 @@ def _replace_with_handoff(
             "description": description,
             "gridPos": grid,
             "transparent": True,
-            "options": {"mode": "markdown", "content": content},
+            "options": {
+                "mode": "html",
+                "content": '<div style="font-size:16px;line-height:1.5">'
+                + re.sub(
+                    r"\[([^\]]+)\]\(([^)]+)\)",
+                    r'<a href="\2">\1</a>',
+                    re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", content),
+                ).replace("\n\n", "<br>")
+                + "</div>",
+            },
         }
     )
 

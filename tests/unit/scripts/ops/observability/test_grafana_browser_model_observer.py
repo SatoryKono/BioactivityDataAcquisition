@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import copy
 import os
 from pathlib import Path
 import subprocess
@@ -37,6 +38,7 @@ const loaded = normalize(dto,kind(dtoUrl,base,uid),uid);
 const preserved = JSON.stringify(loaded) === JSON.stringify({...spec,uid});
 const routes = {
   dto:kind(dtoUrl+'?x=1',base,uid),legacy:kind(legacyUrl,base,uid),
+  v2:kind(dtoUrl.replace('v1beta1','v2'),base,uid),
   foreignOrigin:kind(dtoUrl.replace(base,'http://foreign.example'),base,uid),
   foreignUid:kind(dtoUrl.replace(uid,'foreign'),base,uid),
   unrelated:kind(`${base}/api/annotations?dashboardUID=${uid}`,base,uid),
@@ -81,6 +83,7 @@ console.log(JSON.stringify({preserved,loadedUid:loaded.uid,schemaVersion:loaded.
     assert observed["schemaVersion"] == 42
     assert observed["routes"] == {
         "dto": "grafana-v1beta1-dto",
+        "v2": "grafana-v2-dto",
         "legacy": "legacy",
         "foreignOrigin": None,
         "foreignUid": None,
@@ -107,3 +110,50 @@ def test_browser_migration_remains_a_source_parity_failure():
     assert model_errors(source, {"before": source, "loaded": [], "after": source}) == [
         "missing browser-loaded model"
     ]
+
+
+def _v2_evidence():
+    source = {"uid": "example", "version": 7, "panels": []}
+    dto = {
+        "kind": "DashboardWithAccessInfo",
+        "apiVersion": "dashboard.grafana.app/v2",
+        "metadata": {"name": "example", "generation": 7, "resourceVersion": "123"},
+        "spec": {"elements": {}, "layout": {}},
+    }
+    return source, {
+        "before": source,
+        "loaded": [],
+        "after": source,
+        "v2": {
+            "before": copy.deepcopy(dto),
+            "loaded": [copy.deepcopy(dto)],
+            "after": copy.deepcopy(dto),
+        },
+    }
+
+
+def test_v2_browser_model_matches_same_provisioned_generation():
+    source, evidence = _v2_evidence()
+    assert model_errors(source, evidence) == []
+
+
+@pytest.mark.parametrize("phase", ["before", "loaded", "after"])
+@pytest.mark.parametrize(
+    "mutation", ["missing", "query", "uid", "generation", "resource", "schema"]
+)
+def test_v2_substitution_or_missing_evidence_fails(phase, mutation):
+    source, evidence = _v2_evidence()
+    model = evidence["v2"][phase][0] if phase == "loaded" else evidence["v2"][phase]
+    if mutation == "missing":
+        evidence["v2"][phase] = [] if phase == "loaded" else None
+    elif mutation == "query":
+        model["spec"]["elements"] = {"panel": {"expr": "vector(0)"}}
+    elif mutation == "uid":
+        model["metadata"]["name"] = "foreign"
+    elif mutation == "generation":
+        model["metadata"]["generation"] = 8
+    elif mutation == "resource":
+        del model["metadata"]["resourceVersion"]
+    else:
+        model["metadata"] = ["invalid"]
+    assert model_errors(source, evidence)
