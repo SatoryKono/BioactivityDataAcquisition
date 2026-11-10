@@ -2425,7 +2425,7 @@ def apply_to_dashboard(
         payload["panels"] = [
             panel
             for panel in payload["panels"]
-            if panel.get("id") not in {9480, 9481, 9460, 9461}
+            if panel.get("id") not in {9480, 9481, 9460, 9461, 2005, 32005}
         ]
         for panel in payload["panels"]:
             if panel.get("id") == 9450:
@@ -2799,6 +2799,15 @@ def apply_to_dashboard(
         _pack_fleet_children(fleet)
         reflow_fleet_row(fleet)
         _pack_incident_tail_rows(payload)
+    if current_uid == "bioetl-overview-v2":
+        from scripts.ops.observability.grafana._overview_global_alerts import (
+            embed_global_alerts,
+        )
+
+        incident = json.loads(
+            (DASH_DIR / "bioetl-incident-v1.json").read_text(encoding="utf-8")
+        )
+        embed_global_alerts(payload, incident)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:
@@ -3028,7 +3037,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     ok = True
-    for item in BUS:
+    # Render the global-alert donor before its Overview consumer.
+    for item in sorted(BUS, key=lambda item: item["uid"] != "bioetl-incident-v1"):
         uid = item["uid"]
         filename = FILE_BY_UID[uid]
         path = ensure_path_within_root(DASH_DIR / filename, DASH_DIR)

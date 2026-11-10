@@ -2,10 +2,38 @@
 
 **Dashboard file:** `grafana/dashboards/bioetl-overview-v2.json`
 
-Run Overview assesses one persisted Run ID. Time range and CURRENT fleet status
-never prove this run succeeded. Live runtime/provider/control-plane metrics are
-in Incident Workspace. Missing selection is SELECT RUN; absent evidence is
-UNKNOWN or INCOMPLETE; failed requests remain QUERY ERROR.
+Run Overview separates two scopes. Saved evidence assesses one persisted Run ID;
+missing selection is SELECT RUN, absent evidence is UNKNOWN or INCOMPLETE, and
+failed requests remain QUERY ERROR. GLOBAL / CURRENT alerts assess the fleet
+independently of that selection. They never prove this run succeeded or change
+its saved verdict. Incident Workspace owns incident triage and fleet diagnostics.
+
+## Monitor Global Alerts — LA-06 (#12940)
+
+Panel `2005` is an always-expanded root table at `y=19`, copied by
+`render_nav_bus` from Incident Workspace's global alert donor. It reads the
+existing `bioetl_incident_global_alerts` recording rule, which evaluates the
+same expression as the donor. Its query does not
+use Run ID, Pipeline, Provider, Workflow or Run Type selections. The summary
+retains the donor's descending priority order and two-row limit, so critical
+fleet alerts remain visible even when no saved run can be assessed. The
+`Open Incident Workspace (all global alerts)` action resets the destination to
+all workflows/pipelines/run types and Run ID `-`, retaining the time range.
+
+Collapsed row `32005` holds full table `22005`. It reads raw frames from local
+panel `2005` through the Dashboard datasource with `withTransforms=false` and
+has no row limit. Expanding it makes every alert available without changing the
+selected-run context. Provider and stage blocks move together six rows down;
+their sizes, relative placement, queries and the upper saved-run layout remain.
+
+Local validation covers JSON, query independence, donor parity, complete-list
+access, non-overlapping geometry and regeneration. Live v2 rendering with
+BioETLPipelineInfrastructureValidationFailed and BioETLDataFreshnessLagCritical
+is NOT_VERIFIABLE under owner decision 175. Isolated 100000 remains an operating
+legacy generation; its Overview JSON/generator is absent from this checkout.
+Updating its assets requires the actual export, followed by import and the same
+no-selection critical-alert and navigation checks. Neither generation has been
+live-validated by this change.
 
 ## Review Run Identity
 
@@ -83,6 +111,9 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 9002 | Review Run Domains | table |
 | 9603 | Review Selected Run Status | table |
 | 9300 | Review Run Identity | table |
+| 32005 | Browse Global Alerts | row |
+| 22005 | Monitor Global Alerts (Full) | table |
+| 2005 | Monitor Global Alerts | table |
 | 9480 | Review Provider Evidence | table |
 | 9481 | Review Provider Check | stat |
 | 9460 | Inspect Selected Run Stages | table |

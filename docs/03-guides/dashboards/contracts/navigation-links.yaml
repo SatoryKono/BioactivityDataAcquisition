@@ -159,6 +159,16 @@ forbidden_dashboard_link_vars_by_target_uid:
   - manifest_id
   - execution_fingerprint
 preserved_identity_handoff:
+  overview_global_alert_reset:
+    source_uid: bioetl-overview-v2
+    target_uid: bioetl-incident-v1
+    title: Open Incident Workspace (all global alerts)
+    view_panel: 22005
+    required_values:
+      workflow: $__all
+      pipeline: $__all
+      run_type: $__all
+      run_id: '-'
   catalog_reset:
     target_uid: bioetl-run-explorer-v1
     required_values:
