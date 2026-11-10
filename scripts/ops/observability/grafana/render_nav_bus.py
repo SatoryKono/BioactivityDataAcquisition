@@ -2724,9 +2724,9 @@ def apply_to_dashboard(
         panel = pending.pop()
         pending.extend(panel.get("panels", []))
         description = panel.get("description", "")
-        if "Handoff: Provider Health" in description:
+        if "Handoff: CURRENT provider signals in Pipeline fleet and range on this page; saved Provider Evidence is in Run Overview." in description:
             panel["description"] = description.replace(
-                "Handoff: Provider Health",
+                "Handoff: CURRENT provider signals in Pipeline fleet and range on this page; saved Provider Evidence is in Run Overview.",
                 "Handoff: CURRENT provider signals in Pipeline fleet and range on this page; "
                 "saved Provider Evidence is in Run Overview.",
             )

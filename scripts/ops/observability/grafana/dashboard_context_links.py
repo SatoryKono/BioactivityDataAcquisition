@@ -145,7 +145,7 @@ def build_handoff_url(
         run_id = RUN_ID_TEMPLATE
         provider = (
             "$provider"
-            if source_uid in {"bioetl-provider-health-v2", "bioetl-incident-v1"}
+            if source_uid in {"bioetl-overview-v2", "bioetl-incident-v1"}
             else GRAFANA_ALL
         )
         stage = GRAFANA_ALL
@@ -511,7 +511,7 @@ def _fix_panel(panel: dict, uid: str) -> None:
     if uid == "bioetl-incident-v1" and panel.get("id") == 2010:
         _fix_ranked_links(panel)
     if (uid, panel.get("id")) in {
-        ("bioetl-provider-health-v2", 9107),
+        ("bioetl-overview-v2", 9107),
         ("bioetl-runtime", 9102),
     }:
         _fix_runbook_link(panel)
@@ -549,7 +549,7 @@ def retire_runtime_links(node: object) -> None:
     elif isinstance(node, dict):
         for key, value in node.items():
             if isinstance(value, str):
-                for retired_uid in ("bioetl-runtime", "bioetl-provider-health-v2"):
+                for retired_uid in ("bioetl-runtime", "bioetl-overview-v2"):
                     if retired_uid in value:
                         value = re.sub(
                             rf"/d/{retired_uid}(?:/[^?\s\"<>]+)?",
