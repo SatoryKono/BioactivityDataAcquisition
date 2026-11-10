@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "0fb97d523a8d2e921d135affe59cd49efc6e9a91",
+  "source_ref": "203b12adb76517c38397e703e2e781c723d8a79e",
+  "source_reviews": {
+    "src/bioetl/composition/bootstrap/runtime/assembly.py": "Use the domain predicate for the existing filter-enabled guard while preserving all builder overrides.",
+    "src/bioetl/composition/runtime_builders/inputs_resolution_orchestration.py": "Use the domain predicate for the same logging flag. Resource acquisition is unchanged.",
+    "src/bioetl/domain/context_filtering.py": "Add pure predicates to existing data classes. No resource acquisition.",
+    "src/bioetl/domain/context_run.py": "Delegate existing filter and vacuum properties to the corresponding context predicates. No resource acquisition."
+  },
+  "line_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "reference_moves": []
+}
