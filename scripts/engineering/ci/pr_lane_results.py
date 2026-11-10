@@ -182,6 +182,23 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/ops/observability/grafana/dashboard_context_links.py": (
         "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
     ),
+    **dict.fromkeys(
+        (
+            "reports/review/grafana-full-tables-20261110/audit.json",
+            "reports/review/grafana-full-tables-20261110/chembl_protein_class-overview.png",
+            "reports/review/grafana-full-tables-20261110/uniprot_protein-overview.png",
+            "scripts/ops/observability/grafana/capture_table_pages.cjs",
+            "scripts/ops/observability/grafana/native_browser_zoom.cjs",
+            "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs",
+        ),
+        (
+            "tests/unit/scripts/ops/observability/test_grafana_browser_model_observer.py",
+            "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
+            "tests/unit/scripts/ops/observability/test_grafana_immutable_capture.py",
+            "tests/unit/scripts/ops/observability/test_table_capture_coverage.py",
+            "tests/integration/test_dashboard_first_window_noscroll.py",
+        ),
+    ),
     "reports/observability/live-fixes-r6/LF1-17/report.md": (
         "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,

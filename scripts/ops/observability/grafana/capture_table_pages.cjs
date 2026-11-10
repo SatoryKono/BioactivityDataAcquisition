@@ -8,6 +8,7 @@ const sequential = (items, action) => items.reduce(
 
 function tableEvidence(el) {
   const rect = node => {const r=node.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};};
+  const grids = [...el.querySelectorAll('[role="grid"]')];
   return {
     cells:[...el.querySelectorAll('[role="cell"], [role="gridcell"], [role="columnheader"]')].map(cell=>({
       role:cell.getAttribute('role'),text:cell.textContent,bbox:rect(cell),
@@ -17,7 +18,7 @@ function tableEvidence(el) {
       links:[...cell.querySelectorAll('a[href]')].map(a=>({text:a.textContent,href:a.href,title:a.title,tabIndex:a.tabIndex})),
     })),
     scrollers:[...el.querySelectorAll('[role="grid"],.scrollbar-view,[data-testid*="scrollbar viewport"]')].map(s=>({
-      bbox:rect(s),clientHeight:s.clientHeight,scrollHeight:s.scrollHeight,clientWidth:s.clientWidth,scrollWidth:s.scrollWidth,
+      grid:grids.indexOf(s),bbox:rect(s),clientHeight:s.clientHeight,scrollHeight:s.scrollHeight,clientWidth:s.clientWidth,scrollWidth:s.scrollWidth,
       scrollTop:s.scrollTop,scrollLeft:s.scrollLeft,
     })),
     summary:(/\b\d+\s*[-–]\s*\d+ of \d+ rows\b/).exec(el.innerText)?.[0] || null,
