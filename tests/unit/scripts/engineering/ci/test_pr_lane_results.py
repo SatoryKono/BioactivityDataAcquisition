@@ -361,9 +361,12 @@ def test_shadow_compare_routes_pack_v21_stage_audit_reports(path: str) -> None:
 def test_shadow_compare_routes_secret_scanner_policy(path: str) -> None:
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare([path], repo_root=repo_root)
-    assert report["selected"] == [
-        "tests/architecture/test_secret_shape_and_operator_guide_contracts.py"
-    ]
+    expected = ["tests/architecture/test_secret_shape_and_operator_guide_contracts.py"]
+    if path == ".gitleaks.toml":
+        expected.append(
+            "tests/unit/scripts/engineering/qa/test_runtime_acceptance_12553.py"
+        )
+    assert report["selected"] == expected
     assert report["covers_full_suite"] is False
 
 

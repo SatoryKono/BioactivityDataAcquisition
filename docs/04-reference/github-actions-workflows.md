@@ -24,7 +24,7 @@ transport uses `github/codeql-action/upload-sarif`.
 
 ## Purpose
 
-This page is the canonical published inventory of the **58** live GitHub Actions
+This page is the canonical published inventory of the **59** live GitHub Actions
 workflow files tracked under `.github/workflows/` on the default branch.
 The count is derived from those tracked `*.yml` files; it is not a separately
 maintained target and it is **not** equal to the GitHub Actions API
@@ -34,7 +34,7 @@ Live GET `2026-09-17`: API `total_count` is **79**.
 
 | Bucket | Count | Meaning |
 | --- | --- | --- |
-| Tracked `.github/workflows/*.yml` | 58 | Canonical inventory on `main`; this page |
+| Tracked `.github/workflows/*.yml` | 59 | Canonical inventory on `main`; this page |
 | GitHub-hosted `dynamic/**` | 10 | Dependabot, CodeQL default, agent reviewers; not PR gates |
 | GitHub-only orphan temp/codex IDs | 16 | Files left `main`; `disabled_manually` after #10265 |
 | GitHub-only residual deleted files | 3 | Former tracked workflows; `disabled_manually`; not gates |
@@ -110,6 +110,8 @@ new spend/safety decision.
 | `type-checking.yml` | `Type Checking (Strict)` | `workflow_call`, `push`, `workflow_dispatch` | `active` | `active` | Strict mypy lane; push to `main` saves the incremental cache |
 | `validate-vendored-mermaid-assets.yml` | `Validate vendored Mermaid assets` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Vendored Mermaid asset presence check |
 | `coderabbit.yml` | `CodeRabbit` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | CodeRabbit CLI automated code review |
+
+| `runtime-acceptance-12553.yml` | `Runtime acceptance 12553 exact head` | `push`, `workflow_dispatch` | `active` | `active` | Exact-head owning-suite evidence for #12553; output outside checkout, artifact SHA in name; retire after acceptance |
 
 ### Scheduled / periodic workflows
 
