@@ -52,10 +52,15 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 22011 | Inspect Global Signal Measurements |
 | bioetl-incident-v1.json | 2100 | Inspect Selected Run Summary |
 | bioetl-incident-v1.json | 2101 | Review Selected Run Status |
+| bioetl-incident-v1.json | 8809 | Observability Signals |
+| bioetl-incident-v1.json | 8810 | Review Observability States |
+| bioetl-incident-v1.json | 9102 | Monitor Coverage |
+| bioetl-incident-v1.json | 907 | Monitor Telemetry |
+| bioetl-incident-v1.json | 894 | Review Coverage Limits |
+| bioetl-incident-v1.json | 9491 | Inspect Telemetry Coverage |
 | bioetl-incident-v1.json | 8808 | Pipeline fleet and range, not this Run ID |
 | bioetl-incident-v1.json | 18940 | Monitor Pipeline Status |
 | bioetl-incident-v1.json | 9101 | Review Runtime Blockers |
-| bioetl-incident-v1.json | 9102 | Monitor Coverage |
 | bioetl-incident-v1.json | 2460 | Review Stage Progress |
 | bioetl-incident-v1.json | 9463 | Review Total Run Duration |
 | bioetl-incident-v1.json | 238 | Track Stage Backlog Trend |
@@ -75,14 +80,12 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 891 | Monitor Replay |
 | bioetl-incident-v1.json | 892 | Track Checkpoint |
 | bioetl-incident-v1.json | 893 | Monitor Ledger |
-| bioetl-incident-v1.json | 907 | Monitor Telemetry |
 | bioetl-incident-v1.json | 2542 | Review Cross-Domain Handoffs |
 | bioetl-incident-v1.json | 240 | Track Records by Stage / Interval |
 | bioetl-incident-v1.json | 4 | Inspect DQ Alert Conditions |
 | bioetl-incident-v1.json | 5 | Inspect Control Plane Alerts |
 | bioetl-incident-v1.json | 6 | Inspect Provider Alerts |
 | bioetl-incident-v1.json | 9991 | Start Pipeline Triage |
-| bioetl-incident-v1.json | 894 | Review Coverage Limits |
 | bioetl-incident-v1.json | 259 | Inspect Global Provider Alert Conditions |
 | bioetl-incident-v1.json | 908 | Review Observed Terminal Counters |
 | bioetl-incident-v1.json | 7 | Inspect Entities Stale Over 24h |
@@ -107,7 +110,6 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 133 | Monitor Ledger (30m) |
 | bioetl-incident-v1.json | 210 | Track Global Shutdown Completions |
 | bioetl-incident-v1.json | 102 | Track Save Failures |
-| bioetl-incident-v1.json | 9491 | Inspect Telemetry Coverage |
 | bioetl-incident-v1.json | 103 | Track Global Admin Failures |
 | bioetl-incident-v1.json | 111 | Track Global Read Latency |
 | bioetl-incident-v1.json | 131 | Track Observed Manifest Write Increments |
