@@ -116,3 +116,20 @@ def test_prometheus_only_profile_preserves_uids_without_query_targets() -> None:
         for item in _walk_objects(fallback):
             assert "datasource" not in item
             assert not item.get("targets")
+
+
+@pytest.mark.parametrize("profile", ["dashboards", "dashboards-prometheus-only"])
+def test_grafana_home_opens_the_provisioned_incident_workspace(profile: str) -> None:
+    compose_file = Path("docker-compose.monitoring.yml")
+    compose = yaml.safe_load(compose_file.read_text(encoding="utf-8"))
+    environment = compose["services"]["grafana"]["environment"]
+    dashboard_file = Path("grafana") / profile / "bioetl-incident-v1.json"
+    dashboard = json.loads(dashboard_file.read_text(encoding="utf-8"))
+    assert dashboard["uid"] == "bioetl-incident-v1"
+    assert f"GF_USERS_HOME_PAGE=/d/{dashboard['uid']}" in environment
+
+    provider_file = Path("grafana/provisioning") / profile / "bioetl.yaml"
+    providers = yaml.safe_load(provider_file.read_text(encoding="utf-8"))
+    assert f"/var/lib/grafana/{profile}/{dashboard_file.name}" in _provider_paths(
+        providers
+    )
