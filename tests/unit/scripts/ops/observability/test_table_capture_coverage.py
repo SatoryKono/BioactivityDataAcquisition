@@ -35,7 +35,7 @@ const roots=Object.fromEntries([1,2].map(id=>[id,{
     focus:async()=>{active=id;},click:async()=>{states[id]--;}})
 }]));
 const page={locator:selector=>roots[Number(selector.match(/panel-(\d+)/)[1])],
-  keyboard:{press:async()=>{if(!stalled)states[active]++;}},
+  keyboard:{press:async()=>{states[active]++;}},
   waitForTimeout:async()=>{},waitForFunction:async()=>{if(stalled)throw Error('page did not advance');}};
 (async()=>{
  try {
@@ -43,7 +43,7 @@ const page={locator:selector=>roots[Number(selector.match(/panel-(\d+)/)[1])],
     tablePanels:[{id:1,type:'table'},{id:2,type:'table'}]},outputDir:process.argv[2],
     pngEvidence:()=>({bytes:4}),timeout:50});
   console.log(JSON.stringify({results,states}));
- }catch(error){console.log(JSON.stringify({error:error.message}));}
+ }catch(error){console.log(JSON.stringify({error:error.message,states}));}
 })();
 """
     result = subprocess.run(
@@ -67,6 +67,7 @@ const page={locator:selector=>roots[Number(selector.match(/panel-(\d+)/)[1])],
     evidence = json.loads(result.stdout)
     if stalled:
         assert evidence["error"] == "page did not advance"
+        assert evidence["states"] == {"1": 0, "2": 0}
         return
     assert [len(t["pages"]) for t in evidence["results"]] == [2, 1]
     assert all(t["status"] == "COMPLETE" for t in evidence["results"])

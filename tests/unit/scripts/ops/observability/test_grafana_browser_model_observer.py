@@ -165,7 +165,7 @@ def test_v2_substitution_or_missing_evidence_fails(phase, mutation):
     assert model_errors(source, evidence)
 
 
-@pytest.mark.parametrize("mutation", [None, "missing", "query"])
+@pytest.mark.parametrize("mutation", [None, "missing", "query", "layout"])
 def test_consistent_v2_snapshots_still_require_source_panel_parity(mutation):
     source, evidence = _v2_evidence()
     source["panels"] = [
@@ -193,6 +193,20 @@ def test_consistent_v2_snapshots_still_require_source_panel_parity(mutation):
                         ]
                     }
                 },
+            },
+        }
+    if mutation != "layout":
+        dto["spec"]["layout"] = {
+            "kind": "GridLayout",
+            "spec": {
+                "items": [
+                    {
+                        "kind": "GridLayoutItem",
+                        "spec": {
+                            "element": {"kind": "ElementReference", "name": "panel-1"}
+                        },
+                    }
+                ]
             },
         }
     evidence["v2"]["loaded"] = [copy.deepcopy(dto)]

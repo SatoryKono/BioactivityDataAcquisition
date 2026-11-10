@@ -262,13 +262,26 @@ def _classic_panels(panels: list[dict]):
         yield from _classic_panels(panel.get("panels", []))
 
 
+def _v2_layout_references(value: object):
+    if isinstance(value, dict):
+        if value.get("kind") == "ElementReference" and isinstance(
+            value.get("name"), str
+        ):
+            yield value["name"]
+        for child in value.values():
+            yield from _v2_layout_references(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from _v2_layout_references(child)
+
+
 def _v2_panel_errors(source: dict, spec: dict) -> list[str]:
     expected = {
         panel["id"]: panel for panel in _classic_panels(source.get("panels", []))
     }
     elements = spec["elements"]
     actual = {}
-    for element in elements.values():
+    for key, element in elements.items():
         if not isinstance(element, dict):
             return ["invalid v2 dashboard element"]
         if element.get("kind") != "Panel":
@@ -278,28 +291,38 @@ def _v2_panel_errors(source: dict, spec: dict) -> list[str]:
             return ["invalid v2 panel identity"]
         if panel["id"] in actual:
             return ["duplicate v2 panel identity"]
-        actual[panel["id"]] = panel
+        actual[panel["id"]] = (key, panel)
     if expected.keys() != actual.keys():
         return ["v2 panel identities differ from source"]
 
     errors = []
+    layout_refs = set(_v2_layout_references(spec["layout"]))
+    if layout_refs != {key for key, _ in actual.values()}:
+        errors.append("v2 layout references differ from source panels")
     for panel_id, classic in expected.items():
-        panel = actual[panel_id]
-        group = panel.get("data", {}).get("spec", {})
-        queries = group.get("queries", [])
+        _, panel = actual[panel_id]
+        data = panel.get("data", {})
+        group = data.get("spec", {}) if isinstance(data, dict) else None
+        queries = group.get("queries", []) if isinstance(group, dict) else None
         targets = classic.get("targets", [])
-        if len(queries) != len(targets) or any(
-            not _v2_query_matches(target, query)
-            for target, query in zip(targets, queries, strict=False)
+        if (
+            not isinstance(queries, list)
+            or len(queries) != len(targets)
+            or any(
+                not _v2_query_matches(target, query)
+                for target, query in zip(targets, queries, strict=False)
+            )
         ):
             errors.append(f"v2 panel {panel_id} queries differ from source")
     return errors
 
 
 def _v2_query_matches(target: dict, query: dict) -> bool:
-    entry = query.get("spec", {})
-    data_query = entry.get("query", {})
-    payload = data_query.get("spec", {})
+    entry = query.get("spec") if isinstance(query, dict) else None
+    data_query = entry.get("query") if isinstance(entry, dict) else None
+    payload = data_query.get("spec") if isinstance(data_query, dict) else None
+    if not isinstance(entry, dict) or not isinstance(payload, dict):
+        return False
     return (
         entry.get("refId") == target.get("refId")
         and bool(entry.get("hidden")) == bool(target.get("hide"))
@@ -326,33 +349,40 @@ def _v2_model_errors(source: dict, evidence: dict, v2: object) -> list[str]:
         *[("loaded", m) for m in v2["loaded"]],
         ("after", v2.get("after")),
     ]:
-        if not isinstance(model, dict):
-            errors.append(f"missing {phase} v2 model")
-            continue
-        metadata = model.get("metadata") or {}
-        spec = model.get("spec") or {}
-        if not isinstance(metadata, dict) or not isinstance(spec, dict):
-            errors.append(f"invalid {phase} v2 identity/schema")
-            continue
-        if (
-            model.get("kind") != "DashboardWithAccessInfo"
-            or model.get("apiVersion") != "dashboard.grafana.app/v2"
-            or metadata.get("name") != source.get("uid")
-            or not metadata.get("resourceVersion")
-            or not isinstance(spec.get("elements"), dict)
-            or not isinstance(spec.get("layout"), dict)
-        ):
-            errors.append(f"invalid {phase} v2 identity/schema")
-        elif phase == "before":
-            errors.extend(_v2_panel_errors(source, spec))
-        for legacy_phase in ("before", "after"):
-            version = (evidence.get(legacy_phase) or {}).get("version")
-            if version is None or metadata.get("generation") != version:
-                errors.append(
-                    f"{phase} v2 generation differs from {legacy_phase} provisioned model"
-                )
-        if model != before:
+        errors.extend(_v2_phase_errors(source, evidence, phase, model))
+        if isinstance(model, dict) and model != before:
             errors.append(f"{phase} v2 model differs from bracketing API read")
+    return errors
+
+
+def _v2_phase_errors(
+    source: dict, evidence: dict, phase: str, model: object
+) -> list[str]:
+    if not isinstance(model, dict):
+        return [f"missing {phase} v2 model"]
+    metadata = model.get("metadata") or {}
+    spec = model.get("spec") or {}
+    if not isinstance(metadata, dict) or not isinstance(spec, dict):
+        return [f"invalid {phase} v2 identity/schema"]
+    errors = []
+    if (
+        model.get("kind") != "DashboardWithAccessInfo"
+        or model.get("apiVersion") != "dashboard.grafana.app/v2"
+        or metadata.get("name") != source.get("uid")
+        or not metadata.get("resourceVersion")
+        or not isinstance(spec.get("elements"), dict)
+        or not isinstance(spec.get("layout"), dict)
+    ):
+        errors.append(f"invalid {phase} v2 identity/schema")
+    elif phase == "before":
+        errors.extend(_v2_panel_errors(source, spec))
+    for legacy_phase in ("before", "after"):
+        legacy = evidence.get(legacy_phase)
+        version = legacy.get("version") if isinstance(legacy, dict) else None
+        if version is None or metadata.get("generation") != version:
+            errors.append(
+                f"{phase} v2 generation differs from {legacy_phase} provisioned model"
+            )
     return errors
 
 

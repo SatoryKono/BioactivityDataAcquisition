@@ -87,8 +87,75 @@ async function capturePageScreenshot(page, options) {
   } finally {await cdp.detach();}
 }
 
+function alignElementSlice(element, offset) {
+  const scrollParents = [];
+  for (let parent = element.parentElement; parent && parent !== document.documentElement; parent = parent.parentElement) {
+    if (parent !== document.scrollingElement && /^(auto|scroll|hidden)$/.test(getComputedStyle(parent).overflowY)) {
+      scrollParents.push(parent);
+      parent.scrollTop += element.getBoundingClientRect().top + offset -
+        parent.getBoundingClientRect().top - parent.clientTop;
+    }
+  }
+  window.scrollBy(0, element.getBoundingClientRect().top + offset);
+  const bounds = element.getBoundingClientRect();
+  const top = bounds.top + offset;
+  const visibleTop = Math.max(0, ...scrollParents.map(parent => parent.getBoundingClientRect().top + parent.clientTop));
+  const bottom = Math.min(bounds.bottom, innerHeight, ...scrollParents.map(parent =>
+    parent.getBoundingClientRect().top + parent.clientTop + parent.clientHeight));
+  if (top < visibleTop || top >= bottom || bounds.left < 0 || bounds.right > innerWidth) {
+    throw new Error('Native table slices cannot cover the complete element');
+  }
+  return {x: bounds.left, y: top, width: bounds.width, height: bottom - top};
+}
+
+async function captureTallTable(page, element, options, bounds) {
+  const factor = page.nativeZoomEvidence.actualFactor;
+  const width = Math.round(bounds.width * factor);
+  const height = Math.round(bounds.height * factor);
+  const slices = [];
+  async function captureFrom(pixelOffset) {
+    if (pixelOffset >= height) return;
+    if (slices.length >= 100) throw new Error('Native table capture exceeded 100 vertical slices');
+    const clip = await element.evaluate(alignElementSlice, pixelOffset / factor);
+    const pixels = Math.min(height - pixelOffset, Math.floor(clip.height * factor));
+    if (pixels <= 0) throw new Error('Native table slice has no visible pixels');
+    const png = await capturePageScreenshot(page, {clip: {...clip, height: pixels / factor}});
+    slices.push({offset: pixelOffset, pixels, png: png.toString('base64')});
+    await captureFrom(pixelOffset + pixels);
+  }
+  try {
+    await captureFrom(0);
+    const encoded = await page.evaluate(async ({width, height, slices}) => {
+      const canvas = new OffscreenCanvas(width, height);
+      const context = canvas.getContext('2d');
+      await Promise.all(slices.map(async ({offset, pixels, png}) => {
+        const image = new Image();
+        image.src = 'data:image/png;base64,' + png;
+        await image.decode();
+        if (image.width !== width || image.height !== pixels) {
+          throw new Error('Native table slice dimensions differ from its measured viewport');
+        }
+        context.drawImage(image, 0, offset);
+      }));
+      const blob = await canvas.convertToBlob({type:'image/png'});
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }, {width, height, slices});
+    const bytes = Buffer.from(encoded, 'base64');
+    if (options.path) await fs.promises.writeFile(options.path, bytes);
+    return bytes;
+  } finally {
+    await element.evaluate(el => el.scrollIntoView({block:'center',inline:'nearest'}));
+  }
+}
+
 async function captureElementScreenshot(page, element, options) {
-  if (!page.nativeZoomEvidence) return element.screenshot(options);
+  const {allowVerticalTiles, ...screenshotOptions} = options;
+  if (!page.nativeZoomEvidence) return element.screenshot(screenshotOptions);
   // Pagination focus can leave the panel behind Grafana's sticky toolbar.
   // Center the real scroll surface before cropping; never capture a partial box.
   await element.evaluate(el => el.scrollIntoView({block:'center',inline:'nearest'}));
@@ -96,6 +163,9 @@ async function captureElementScreenshot(page, element, options) {
   const clip = await element.boundingBox();
   if (!clip) throw new Error('Native panel capture requires a visible bounding box');
   const viewport = await page.evaluate(() => ({width:innerWidth,height:innerHeight}));
+  if (allowVerticalTiles && clip.height > viewport.height) {
+    return captureTallTable(page, element, options, clip);
+  }
   if (clip.x < 0 || clip.y < 0 || clip.x+clip.width > viewport.width+1 || clip.y+clip.height > viewport.height+1) {
     throw new Error('Native panel capture would clip content outside the viewport');
   }
