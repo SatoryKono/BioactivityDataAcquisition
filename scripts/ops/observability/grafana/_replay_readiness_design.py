@@ -105,7 +105,12 @@ def apply_replay_readiness_design(payload: dict) -> None:
                 {
                     "type": "value",
                     "options": {
-                        state: {"text": state, "color": color}
+                        state: {
+                            "text": "Source unavailable"
+                            if state == "QUERY ERROR"
+                            else state,
+                            "color": color,
+                        }
                         for state, color in colors.items()
                     },
                 },

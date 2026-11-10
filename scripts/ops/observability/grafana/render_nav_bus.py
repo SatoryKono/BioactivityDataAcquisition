@@ -43,10 +43,11 @@ CUSTOM_WIDTH = "custom.width"
 _SELECT_RUN_OR_SOURCE_UNAVAILABLE = (
     "SELECT RUN if no Run ID is selected. Source unavailable if the request failed."
 )
+_LEGACY_HTTP_FAILURE_COPY = "Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response."
+_HTTP_FAILURE_COPY = "Backend failure indicates an unavailable source and must not be interpreted as an empty successful response."
 HTTP_EVIDENCE_STATES = (
     "VALID EMPTY means an empty successful response; it does not replace "
-    "UNKNOWN for missing required evidence. Backend failure renders as "
-    "QUERY ERROR and must not be interpreted as an empty successful response."
+    f"UNKNOWN for missing required evidence. {_HTTP_FAILURE_COPY}"
 )
 
 # Full portfolio bus. Order is the five-dashboard numbering.
@@ -2728,6 +2729,11 @@ def apply_to_dashboard(
         panel = pending.pop()
         pending.extend(panel.get("panels", []))
         description = panel.get("description", "")
+        if _LEGACY_HTTP_FAILURE_COPY in description:
+            description = description.replace(
+                _LEGACY_HTTP_FAILURE_COPY, _HTTP_FAILURE_COPY
+            )
+            panel["description"] = description
         # Migrate legacy Provider Health handoff copy; keep matching the old
         # phrase so reintroduced donor text is rewritten on the next render.
         if "Handoff: Provider Health" in description:

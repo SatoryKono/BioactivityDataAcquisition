@@ -2618,7 +2618,7 @@
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
           },
-          "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is Source unavailable. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+          "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is Source unavailable. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
           "fieldConfig": {
             "defaults": {
               "noValue": "UNKNOWN",
@@ -3981,7 +3981,7 @@
           "id": 9463,
           "type": "stat",
           "title": "Review Total Run Duration",
-          "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing. No selection stays SELECT RUN; missing timestamps stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
+          "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing. No selection stays SELECT RUN; missing timestamps stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
           "gridPos": {
             "x": 0,
             "y": 67,
@@ -11961,7 +11961,7 @@
             "type": "datasource",
             "uid": "-- Dashboard --"
           },
-          "description": "SELECTED RUN · Domain verdicts of this Run ID; this is not the page status. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+          "description": "SELECTED RUN · Domain verdicts of this Run ID; this is not the page status. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
