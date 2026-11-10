@@ -111,7 +111,7 @@ new spend/safety decision.
 | `validate-vendored-mermaid-assets.yml` | `Validate vendored Mermaid assets` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Vendored Mermaid asset presence check |
 | `coderabbit.yml` | `CodeRabbit` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | CodeRabbit CLI automated code review |
 
-| `runtime-acceptance-12553.yml` | `Runtime acceptance 12553 exact head` | `push`, `workflow_dispatch` | `not queried` | `branch-scoped diagnostic` | Exact-head owning-suite evidence for #12553; output outside checkout, artifact SHA in name; retire after acceptance |
+| `runtime-acceptance-12553.yml` | `Runtime acceptance 12553 exact head` | `push`, `workflow_dispatch` | `active` | `active` | Exact-head owning-suite evidence for #12553; output outside checkout, artifact SHA in name; retire after acceptance |
 
 ### Scheduled / periodic workflows
 

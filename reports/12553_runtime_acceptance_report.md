@@ -3,6 +3,18 @@
 Acceptance remains partial pending independent verification. Issue #12553 remains open.
 Static inventory runtime_result stays NOT_RUN_12553; K2 code and K3 validator/tests are unchanged.
 
+## Packaging and review remediation
+
+The full local machine bundle is in evidence.zip under the bundle directory,
+with evidence.zip.sha256 beside it. All filenames cited below are archive
+entries unless they are baseline loose files. Exact-head CI still uploads the
+separate raw files. This preserves the canonical documentation inventory from
+main without excluding this task from any documentation gate.
+
+The registry now rejects unbound observer versions and confirms lock boundaries
+only after successful, non-skipped execution of all five control tests. The
+build function is split into focused helpers; quality thresholds are unchanged.
+
 ## K1: command evidence
 
 Bundle: reports/audit-runs/12553-runtime-acceptance/.

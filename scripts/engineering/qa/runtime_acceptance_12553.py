@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import zipfile
 from datetime import UTC, datetime
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -21,6 +22,91 @@ BUNDLE = Path(
         "BIOETL_12553_BUNDLE", str(ROOT / "reports/audit-runs/12553-runtime-acceptance")
     )
 )
+ARCHIVE = "evidence.zip"
+
+
+def evidence_names(root: Path) -> set[str]:
+    """List loose and archived evidence without extracting into the checkout."""
+    names = {p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file()}
+    if (root / ARCHIVE).exists():
+        with zipfile.ZipFile(root / ARCHIVE) as archive:
+            names.update(archive.namelist())
+    return names
+
+
+def evidence_exists(name: str, root: Path) -> bool:
+    return name in evidence_names(root)
+
+
+def read_evidence(name: str, root: Path) -> bytes:
+    """Prefer the current run's loose file, then preserved archived bytes."""
+    path = root / name
+    if path.is_file():
+        return path.read_bytes()
+    if not (root / ARCHIVE).exists():
+        raise FileNotFoundError(path)
+    with zipfile.ZipFile(root / ARCHIVE) as archive:
+        try:
+            return archive.read(name)
+        except KeyError as exc:
+            raise FileNotFoundError(path) from exc
+
+
+def pack(baseline_names: set[str] | None = None) -> None:
+    """Preserve raw evidence while keeping machine logs out of the docs catalog."""
+    excluded = {ARCHIVE, ARCHIVE + ".sha256"}
+    names = evidence_names(BUNDLE) - excluded
+    payload = {name: read_evidence(name, BUNDLE) for name in names}
+    checksums = {
+        name: hashlib.sha256(data).hexdigest()
+        for name, data in sorted(payload.items())
+        if name != "artifact-sha256.json"
+    }
+    payload["artifact-sha256.json"] = (json.dumps(checksums, indent=2) + "\n").encode()
+    with zipfile.ZipFile(
+        BUNDLE / ARCHIVE, "w", compression=zipfile.ZIP_DEFLATED
+    ) as archive:
+        for name, data in sorted(payload.items()):
+            info = zipfile.ZipInfo(name)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            archive.writestr(info, data)
+    digest = hashlib.sha256((BUNDLE / ARCHIVE).read_bytes()).hexdigest()
+    (BUNDLE / (ARCHIVE + ".sha256")).write_text(
+        f"{digest}  {ARCHIVE}\n", encoding="ascii"
+    )
+    if baseline_names is None:
+        prefix = BUNDLE.relative_to(ROOT).as_posix() + "/"
+        baseline_names = {
+            p.removeprefix(prefix)
+            for p in git(
+                "ls-tree", "-r", "--name-only", "origin/main", "--", prefix
+            ).splitlines()
+        }
+    for path in BUNDLE.rglob("*"):
+        name = path.relative_to(BUNDLE).as_posix()
+        if path.suffix in {".txt", ".json", ".md"} and name not in baseline_names:
+            path.unlink()
+
+
+def verify(root: Path) -> None:
+    """Verify the published byte representation, including archived trace targets."""
+    archive = root / ARCHIVE
+    if archive.exists():
+        expected = (root / (ARCHIVE + ".sha256")).read_text().split()[0]
+        if hashlib.sha256(archive.read_bytes()).hexdigest() != expected:
+            raise ValueError("evidence archive checksum mismatch")
+    manifest = json.loads(read_evidence("artifact-sha256.json", root))
+    for name, digest in manifest.items():
+        if hashlib.sha256(read_evidence(name, root)).hexdigest() != digest:
+            raise ValueError(f"evidence checksum mismatch: {name}")
+    register = json.loads(read_evidence("coverage-register.json", root))
+    if len({row["identity"] for row in register["resources"]}) != 207:
+        raise ValueError("evidence register must account for 207 resources")
+    for row in register["resources"]:
+        for name in row["trace_refs"]:
+            if not evidence_exists(name, root):
+                raise ValueError(f"missing trace: {name}")
+    print(f"verified {len(manifest)} evidence files and 207 resource identities")
 
 
 def inputs(argv: list[str]) -> dict[str, str]:
@@ -121,9 +207,7 @@ def qualify() -> int:
         "review-controls",
     ):
         name = "qualified-" + previous
-        recorded = json.loads(
-            (historical / f"{previous}-command.json").read_text(encoding="utf-8")
-        )
+        recorded = json.loads(read_evidence(f"{previous}-command.json", historical))
         argv = [sys.executable, *recorded["argv"][1:]]
         argv = [
             "--junitxml=" + str(BUNDLE / f"{name}-junit.xml")
@@ -164,6 +248,12 @@ def main() -> int:
         return 0
     if args.name == "qualify":
         return qualify()
+    if args.name == "pack":
+        pack()
+        return 0
+    if args.name == "verify":
+        verify(BUNDLE)
+        return 0
     argv = args.argv[1:] if args.argv[:1] == ["--"] else args.argv
     if not argv:
         parser.error("command required after --")

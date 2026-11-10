@@ -9,10 +9,18 @@ from __future__ import annotations
 import hashlib
 import gzip
 import json
+import re
+import xml.etree.ElementTree as ET
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from scripts.engineering.qa.runtime_acceptance_12553 import BUNDLE, ROOT
+from scripts.engineering.qa.runtime_acceptance_12553 import (
+    BUNDLE,
+    ROOT,
+    evidence_exists,
+    evidence_names,
+    read_evidence,
+)
 
 RUNS = (
     "files-config-final",
@@ -48,6 +56,188 @@ LIMITS = {
 }
 
 
+LOCK_TESTS = {
+    "test_reentrant_lock_normal_acquisition_and_release",
+    "test_reentrant_lock_error_release",
+    "test_missing_release_detectable",
+    "test_directory_walk_normal",
+    "test_directory_glob_normal",
+}
+
+
+def _event_path(run: str) -> Path:
+    candidates = (
+        f"qualified-{run}-events.json.gz",
+        f"{run}-events.json.gz",
+        f"{run}-events.json",
+    )
+    return next(
+        (BUNDLE / name for name in candidates if evidence_exists(name, BUNDLE)),
+        BUNDLE / candidates[0],
+    )
+
+
+def _observer_provenance(path: Path) -> dict:
+    receipt_path = BUNDLE / (path.name.split("-events.json")[0] + "-command.json")
+    receipt = json.loads(read_evidence(receipt_path.name, BUNDLE))
+    observer = "tests/helpers/runtime_acceptance_12553.py"
+    expected = hashlib.sha256((ROOT / observer).read_bytes()).hexdigest()
+    if receipt.get("input_sha256", {}).get(observer) != expected:
+        raise ValueError(f"unqualified observer version: {receipt_path.name}")
+    for field in ("head_sha", "tree_sha"):
+        if re.fullmatch(r"[0-9a-f]{40}", str(receipt.get(field))) is None:
+            raise ValueError(f"missing Git identity: {receipt_path.name}")
+    return {
+        "command": receipt_path.name,
+        "head_sha": receipt["head_sha"],
+        "tree_sha": receipt["tree_sha"],
+        "observer_sha256": expected,
+        "trace": path.name,
+        "trace_sha256": hashlib.sha256(read_evidence(path.name, BUNDLE)).hexdigest(),
+    }
+
+
+def _observations(identities: set[str]) -> tuple[dict, list[dict]]:
+    evidence: dict[str, list[dict]] = defaultdict(list)
+    provenance = []
+    for run in RUNS:
+        path = _event_path(run)
+        raw = read_evidence(path.name, BUNDLE)
+        payload = json.loads(gzip.decompress(raw) if path.suffix == ".gz" else raw)
+        for index, event in enumerate(payload["events"]):
+            for identity in event["identities"]:
+                if identity not in identities:
+                    raise ValueError(f"unknown observed resource: {identity}")
+                evidence[identity].append(
+                    {**event, "trace": f"{path.name}#/events/{index}"}
+                )
+        provenance.append(_observer_provenance(path))
+    return evidence, provenance
+
+
+def _successful_control(prefix: str) -> bool:
+    receipt = json.loads(read_evidence(f"{prefix}-command.json", BUNDLE))
+    exit_code = int(read_evidence(f"{prefix}-exit-code.txt", BUNDLE))
+    if (
+        receipt.get("exit_code") != 0
+        or exit_code != 0
+        or receipt.get("timed_out") is not False
+    ):
+        return False
+    if not read_evidence(f"{prefix}-stdout.txt", BUNDLE):
+        return False
+    root = ET.fromstring(read_evidence(f"{prefix}-junit.xml", BUNDLE))
+    suites = list(root.iter("testsuite"))
+    if not suites or any(
+        int(s.get(k, "0")) for s in suites for k in ("failures", "errors", "skipped")
+    ):
+        return False
+    cases = list(root.iter("testcase"))
+    return (
+        len(cases) == len(LOCK_TESTS)
+        and {case.get("name") for case in cases} == LOCK_TESTS
+        and all(len(case) == 0 for case in cases)
+        and sum(int(s.get("tests", "0")) for s in suites) == len(LOCK_TESTS)
+    )
+
+
+def lock_control() -> tuple[bool, list[str]]:
+    """An absent, failed, skipped or malformed control cannot assert a boundary."""
+    qualified = any(
+        name.startswith("qualified-review-controls-") for name in evidence_names(BUNDLE)
+    )
+    prefix = "qualified-review-controls" if qualified else "review-controls"
+    refs = [f"{prefix}-stdout.txt", f"{prefix}-junit.xml"]
+    try:
+        passed = _successful_control(prefix)
+    except (OSError, ValueError, KeyError, TypeError, ET.ParseError):
+        passed = False
+    return passed, [name for name in refs if evidence_exists(name, BUNDLE)]
+
+
+def _remaining(event: dict) -> bool:
+    return (
+        event.get("closed_after_teardown") is False
+        or event.get("done_after_teardown") is False
+        or event.get("remaining_threads", 0) > 0
+        or (
+            event.get("event") == "executor-created"
+            and not event.get("shutdown_after_teardown")
+        )
+    )
+
+
+def _reason(
+    resource: dict, observed: list[dict], missing: list[str], lock_passed: bool
+) -> str:
+    if resource["identity"] == "diagnostics.metric_inventory.reentrant-lock":
+        if lock_passed:
+            return "Normal/error lock assertions and monkeypatch negative control pass; inner collector is substituted. Owner cancellation/deadline/retry boundaries are not measured."
+        return "Lock review control is missing, failed, skipped or malformed; normal/error boundaries and negative control are NOT_VERIFIABLE."
+    if observed:
+        return (
+            "Allocation/teardown observations exist, but not all before/use/close error, owner cancellation, deadline and retry barriers are measured. "
+            f"Unobserved creation sites: {len(missing)}."
+        )
+    return LIMITS.get(
+        resource["type"],
+        "No real allocation/close event at this exact site in the selected owning suites. A mocked or unexercised creator path cannot certify resource shutdown.",
+    )
+
+
+def _event_indexes(observed: list[dict]) -> dict[str, list[int]]:
+    indexes: dict[str, list[int]] = defaultdict(list)
+    for event in observed:
+        name, _, pointer = event["trace"].partition("#")
+        indexes[name].append(int(pointer.rsplit("/", 1)[-1]))
+    return dict(indexes)
+
+
+def _scenario_rows(resource: dict, reason: str, lock_passed: bool) -> dict:
+    scenarios = {
+        name: {
+            **scenario,
+            "register_result": "NOT_VERIFIABLE",
+            "reason": reason + " Required barrier: " + scenario["observation"],
+        }
+        for name, scenario in resource["scenarios"].items()
+    }
+    if lock_passed:
+        for name in ("normal", "error"):
+            scenarios[name]["register_result"] = "ASSERTED_LOCK_BOUNDARY"
+    return scenarios
+
+
+def _resource_row(
+    resource: dict, observed: list[dict], control: tuple[bool, list[str]]
+) -> dict:
+    expected_sites = {f"{s['file']}:{s['line']}" for s in resource["creation_sites"]}
+    observed_sites = {s for e in observed for s in e["sites"]}
+    missing = sorted(expected_sites - observed_sites)
+    is_lock = resource["identity"] == "diagnostics.metric_inventory.reentrant-lock"
+    lock_passed = is_lock and control[0]
+    reason = _reason(resource, observed, missing, lock_passed)
+    indexes = _event_indexes(observed)
+    return {
+        "identity": resource["identity"],
+        "family": resource["type"],
+        "status": "EXECUTED_PARTIAL" if observed or lock_passed else "NOT_VERIFIABLE",
+        "reason": reason,
+        "creator": resource["creator"],
+        "owner": resource["owner"],
+        "closer": resource["closer"],
+        "shutdown_contract": resource["shutdown_contract"],
+        "creation_sites": sorted(expected_sites),
+        "unobserved_sites": missing,
+        "observed_event_count": len(observed),
+        "observed_sites": sorted(observed_sites),
+        "trace_refs": control[1] if is_lock else sorted(indexes),
+        "event_indexes": indexes,
+        "remaining_observations": [e["trace"] for e in observed if _remaining(e)],
+        "scenarios": _scenario_rows(resource, reason, lock_passed),
+    }
+
+
 def build() -> dict:
     """Require every inventory identity and preserve exact scenario expectations."""
     catalog = ROOT / "configs/quality/external_resource_inventory.json"
@@ -62,104 +252,9 @@ def build() -> dict:
     identities = {r["identity"] for r in resources}
     if len(resources) != 207 or len(identities) != 207:
         raise ValueError("expected exactly 207 unique inventory resources")
-    evidence: dict[str, list[dict]] = defaultdict(list)
-    for run in RUNS:
-        path = BUNDLE / f"{run}-events.json"
-        qualified = BUNDLE / f"qualified-{run}-events.json.gz"
-        if qualified.exists():
-            path = qualified
-        elif path.with_suffix(".json.gz").exists():
-            path = path.with_suffix(".json.gz")
-        raw = (
-            gzip.decompress(path.read_bytes())
-            if path.suffix == ".gz"
-            else path.read_bytes()
-        )
-        payload = json.loads(raw)
-        for index, event in enumerate(payload["events"]):
-            for identity in event["identities"]:
-                if identity not in identities:
-                    raise ValueError(f"unknown observed resource: {identity}")
-                evidence[identity].append(
-                    {"trace": f"{path.name}#/events/{index}", **event}
-                )
-    rows = []
-    for resource in resources:
-        identity = resource["identity"]
-        observed = evidence[identity]
-        expected_sites = {
-            f"{s['file']}:{s['line']}" for s in resource["creation_sites"]
-        }
-        observed_sites = {s for e in observed for s in e["sites"]}
-        missing = sorted(expected_sites - observed_sites)
-        reason = LIMITS.get(
-            resource["type"],
-            "No real allocation/close event at this exact site in the selected owning suites. A mocked or unexercised creator path cannot certify resource shutdown.",
-        )
-        if observed:
-            reason = (
-                "Allocation/teardown observations exist, but not all before/use/close error, owner cancellation, deadline and retry barriers are measured. "
-                f"Unobserved creation sites: {len(missing)}."
-            )
-        boundary = identity == "diagnostics.metric_inventory.reentrant-lock"
-        if boundary:
-            reason = "Normal/error lock assertions and monkeypatch negative control pass; inner collector is substituted. Owner cancellation/deadline/retry boundaries are not measured."
-        remaining = [
-            e["trace"]
-            for e in observed
-            if e.get("closed_after_teardown") is False
-            or e.get("done_after_teardown") is False
-            or e.get("remaining_threads", 0) > 0
-            or (
-                e.get("event") == "executor-created"
-                and not e.get("shutdown_after_teardown")
-            )
-        ]
-        row = {
-            "identity": identity,
-            "family": resource["type"],
-            "status": "EXECUTED_PARTIAL" if observed or boundary else "NOT_VERIFIABLE",
-            "reason": reason,
-            "creator": resource["creator"],
-            "owner": resource["owner"],
-            "closer": resource["closer"],
-            "shutdown_contract": resource["shutdown_contract"],
-            "creation_sites": sorted(expected_sites),
-            "unobserved_sites": missing,
-            "observed_event_count": len(observed),
-            "observed_sites": sorted(observed_sites),
-            "trace_refs": sorted({e["trace"].split("#")[0] for e in observed}),
-            "event_indexes": {
-                filename: [
-                    int(e["trace"].split("/")[-1])
-                    for e in observed
-                    if e["trace"].startswith(filename + "#")
-                ]
-                for filename in sorted({e["trace"].split("#")[0] for e in observed})
-            },
-            "remaining_observations": remaining,
-            "scenarios": {
-                name: {
-                    **scenario,
-                    "register_result": "NOT_VERIFIABLE",
-                    "reason": reason + " Required barrier: " + scenario["observation"],
-                }
-                for name, scenario in resource["scenarios"].items()
-            },
-        }
-        if boundary:
-            prefix = (
-                "qualified-review-controls"
-                if (BUNDLE / "qualified-review-controls-stdout.txt").exists()
-                else "review-controls"
-            )
-            row["trace_refs"] = [
-                f"{prefix}-stdout.txt",
-                f"{prefix}-junit.xml",
-            ]
-            for name in ("normal", "error"):
-                row["scenarios"][name]["register_result"] = "ASSERTED_LOCK_BOUNDARY"
-        rows.append(row)
+    evidence, provenance = _observations(identities)
+    control = lock_control()
+    rows = [_resource_row(r, evidence[r["identity"]], control) for r in resources]
     inputs = [catalog, *(ROOT / part["file"] for part in inventory["resource_parts"])]
     return {
         "issue": 12553,
@@ -170,6 +265,7 @@ def build() -> dict:
             p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
             for p in inputs
         },
+        "observation_provenance": provenance,
         "families": dict(sorted(Counter(r["family"] for r in rows).items())),
         "status_counts": dict(Counter(r["status"] for r in rows)),
         "resources": rows,

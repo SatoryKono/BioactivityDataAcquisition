@@ -2,6 +2,19 @@
 
 This is an evidence bundle, not a declaration that issue 12553 is accepted.
 
+The complete machine bundle is preserved in evidence.zip, with SHA256 in
+evidence.zip.sha256. Every stdout/stderr, command/exit receipt, registry and hash
+manifest remains a separate named file inside that archive. Existing baseline
+files stay loose; new JSON.gz observations also remain directly accessible.
+The archive avoids adding machine logs to the human documentation inventory;
+canonical generated inventories remain identical to main. The reader accepts
+both loose CI output and archived local evidence without extracting into Git.
+
+The register validates the source hash of each executed observer and records
+per-run provenance. Lock normal/error assertions require exit 0, a valid JUnit
+with all five expected tests and no failures, errors or skips. Missing/failed
+qualified controls cannot fall back to an older successful run.
+
 Every captured command has stdout, stderr (including genuinely empty streams),
 exit-code and command JSON. Failed attempts are retained. JUnit is supplementary.
 .gitattributes preserves raw stream bytes across Git checkout; the checksum

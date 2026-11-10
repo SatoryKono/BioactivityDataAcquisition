@@ -1,5 +1,0 @@
-Documentation Drift Report
-============================================================
-No drift detected. Documentation is in sync with code.
-
-Summary: 0 errors, 0 warnings
