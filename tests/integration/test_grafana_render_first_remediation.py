@@ -926,6 +926,7 @@ def test_incident_alert_count_and_dq_reason_have_honest_table_semantics() -> Non
     assert overrides["Signal"]["custom.cellOptions"] == {
         "type": "color-text",
         "mode": "basic",
+        "wrapText": False,
     }
     assert "reason" not in overrides
     visible_width = int(overrides["Pipeline"]["custom.width"]) + int(
@@ -1089,8 +1090,8 @@ def test_run_explorer_index_is_disk_last_ten_not_time_range() -> None:
 def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     recent = _panel(explorer, 3010)
-    assert _override_width(recent, "Workflow") is None
-    assert _override_width(recent, "Pipeline") is None
+    assert _override_width(recent, "Workflow") == 80
+    assert _override_width(recent, "Pipeline") == 210
     assert recent["fieldConfig"]["defaults"]["custom"]["minWidth"] == 50
     assert recent["options"]["footer"]["enablePagination"] is False
     assert (_override_width(recent, "Run ID") or 0) <= 340
