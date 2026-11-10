@@ -105,6 +105,8 @@ TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
 BENCHMARK_EVIDENCE_TESTS: tuple[str, ...] = (
     "tests/unit/repo_backed/scripts/qa/test_validate_benchmark_evidence_repo.py",
 )
+GRAFANA_CONTEXT_LINKS_TEST = "tests/unit/scripts/ops/observability/test_dashboard_context_links.py"
+
 DOCUMENTATION_CLEANUP_INVENTORY_TESTS: tuple[str, ...] = (
     DOCUMENTATION_CLEANUP_INVENTORY_TEST,
 )
@@ -180,18 +182,18 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/ops/observability/test_grafana_live_audit_http_semantics.py",
     ),
     "scripts/ops/observability/grafana/dashboard_context_links.py": (
-        "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+        GRAFANA_CONTEXT_LINKS_TEST,
     ),
     **dict.fromkeys(
         ("docs/05-operations/runbooks/observability-checklist.md", "grafana/README.md"),
         (
-            "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+            GRAFANA_CONTEXT_LINKS_TEST,
             "tests/unit/scripts/ops/observability/test_grafana_nav_bus.py",
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
     ),
     "reports/observability/live-fixes-r6/LF1-17/report.md": (
-        "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+        GRAFANA_CONTEXT_LINKS_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     **dict.fromkeys(
