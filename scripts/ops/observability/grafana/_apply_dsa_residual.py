@@ -457,6 +457,38 @@ def _detach_observability_panels(
     return [p for p in root if p.get("id") not in OBSERVABILITY_PANEL_IDS]
 
 
+def _build_observability_row_children(
+    row: dict[str, Any], signals: dict[int, dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Legend plus relocated signal panels stacked under the Observability row."""
+    children = [
+        panel
+        for panel in row.get("panels", [])
+        if panel.get("id") not in {*OBSERVABILITY_PANEL_IDS, 8810}
+    ]
+    legend = {
+        "id": 8810,
+        "type": "text",
+        "title": "Review Observability States",
+        "gridPos": {"x": 0, "y": row["gridPos"]["y"] + 1, "w": 24, "h": 14},
+        "options": {"mode": "markdown", "content": OBSERVABILITY_LEGEND},
+    }
+    y = legend["gridPos"]["y"] + legend["gridPos"]["h"]
+    for panel_id in OBSERVABILITY_PANEL_IDS:
+        panel = signals.get(panel_id)
+        if panel is None:
+            continue
+        panel["gridPos"] = {
+            "x": 0,
+            "y": y,
+            "w": 24,
+            "h": max(4, panel.get("gridPos", {}).get("h", 4)),
+        }
+        y += panel["gridPos"]["h"]
+        children.append(panel)
+    return [legend, *children]
+
+
 def apply_observability_states(data: dict[str, Any]) -> None:
     """Separate visibility evidence without changing queries or dropping panels."""
     root = data.get("panels") or []
@@ -479,30 +511,7 @@ def apply_observability_states(data: dict[str, Any]) -> None:
             "coverage and telemetry limits. Missing evidence is never a measured zero."
         ),
     )
-    children = [
-        p
-        for p in row.get("panels", [])
-        if p.get("id") not in {*OBSERVABILITY_PANEL_IDS, 8810}
-    ]
-    legend = {
-        "id": 8810,
-        "type": "text",
-        "title": "Review Observability States",
-        "gridPos": {"x": 0, "y": row["gridPos"]["y"] + 1, "w": 24, "h": 14},
-        "options": {"mode": "markdown", "content": OBSERVABILITY_LEGEND},
-    }
-    y = legend["gridPos"]["y"] + legend["gridPos"]["h"]
-    for pid in OBSERVABILITY_PANEL_IDS:
-        if (panel := signals.get(pid)) is not None:
-            panel["gridPos"] = {
-                "x": 0,
-                "y": y,
-                "w": 24,
-                "h": max(4, panel.get("gridPos", {}).get("h", 4)),
-            }
-            y += panel["gridPos"]["h"]
-            children.append(panel)
-    row["panels"] = [legend, *children]
+    row["panels"] = _build_observability_row_children(row, signals)
 
 
 def apply_incident() -> None:

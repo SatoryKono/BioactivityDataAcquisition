@@ -22,7 +22,7 @@
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "7629ce6a3f558d1b298813d86f1357576fc1a682d701652e809363996128c834",
     "bioetl-dq-v2": "cafe0a18fd54d358948aca6b79e09753b25fd32fa5e49870538b0e84f856c1b2",
-    "bioetl-incident-v1": "a1ebe1158b4907872f1803682295a2d8faf41bccbcf42c484fbdfc36bf4fab18",
+    "bioetl-incident-v1": "d94454266ef3655beb019da1a859e7dae193d9a6d41113c0e67f594cd21d53c9",
     "bioetl-overview-v2": "c63cf8d243ba86e905db78a9bcb9add93fd1d7b3fe0adaeaad63d765347eb7d5",
     "bioetl-run-explorer-v1": "914279afc9b057434229bcbcf2fb42d8920d5f681801a3fef13977b4528bc43e"
   },
@@ -612,6 +612,103 @@
       "basis": "preserved-from-json",
       "component": "JSON fallback",
       "dashboard_uid": "bioetl-incident-v1",
+      "disposition": "fallback-only",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-incident-v1",
+      "panel_id": 8810,
+      "panel_title": "Review Observability States",
+      "route": "incident-console",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [],
+        "target_count": 0
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-incident-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-incident-v1",
+      "panel_id": 9102,
+      "panel_title": "Monitor Coverage",
+      "route": "incident-console",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "max(up{job=\"bioetl\"})",
+          "label_replace(min(bioetl_rt_stage_ratio{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() vector(-1),\"k\",\"stages\",\"\",\"\") or label_replace(bioetl_runtime_trust_gap_active_10m,\"k\",\"quality\",\"\",\"\")",
+          "bioetl_runtime_required_rule_age_seconds"
+        ],
+        "target_count": 3
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-incident-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-incident-v1",
+      "panel_id": 907,
+      "panel_title": "Monitor Telemetry",
+      "route": "incident-console",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "clamp_max(max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}), 2)"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-incident-v1",
+      "disposition": "fallback-only",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-incident-v1",
+      "panel_id": 894,
+      "panel_title": "Review Coverage Limits",
+      "route": "incident-console",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [],
+        "target_count": 0
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-incident-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-incident-v1",
+      "panel_id": 9491,
+      "panel_title": "Inspect Telemetry Coverage",
+      "route": "incident-console",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) sum by(pipeline,run_type) (count_over_time(bioetl_control_plane_manifest_writes_total[5m]))) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+          "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline) sum by(pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m]))) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+          "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type) (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",risk_type=~\"duplicate|overwrite\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+          "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type) (count_over_time(bioetl_manifest_ledger_integrity_ratio{pipeline=~\"$pipeline\",run_type=~\"$run_type\",integrity_type=~\"consistent|inconsistent\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+          "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} > 0 and push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} <= time())) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))"
+        ],
+        "target_count": 5
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-incident-v1",
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-incident-v1",
@@ -644,27 +741,6 @@
           "topk(3, bioetl_runtime_current_blocker_reason_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0)"
         ],
         "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-incident-v1",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-incident-v1",
-      "panel_id": 9102,
-      "panel_title": "Monitor Coverage",
-      "route": "incident-console",
-      "source": {
-        "datasource_type": "prometheus",
-        "datasource_uid": "prometheus",
-        "expressions": [
-          "max(up{job=\"bioetl\"})",
-          "label_replace(min(bioetl_rt_stage_ratio{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() vector(-1),\"k\",\"stages\",\"\",\"\") or label_replace(bioetl_runtime_trust_gap_active_10m,\"k\",\"quality\",\"\",\"\")",
-          "bioetl_runtime_required_rule_age_seconds"
-        ],
-        "target_count": 3
       }
     },
     {
@@ -1032,25 +1108,6 @@
       "basis": "preserved-from-json",
       "component": "JSON fallback",
       "dashboard_uid": "bioetl-incident-v1",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-incident-v1",
-      "panel_id": 907,
-      "panel_title": "Monitor Telemetry",
-      "route": "incident-console",
-      "source": {
-        "datasource_type": "prometheus",
-        "datasource_uid": "prometheus",
-        "expressions": [
-          "clamp_max(max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}), 2)"
-        ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-incident-v1",
       "disposition": "fallback-only",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-incident-v1",
@@ -1149,23 +1206,6 @@
       "json_fallback": "/d/bioetl-incident-v1",
       "panel_id": 9991,
       "panel_title": "Start Pipeline Triage",
-      "route": "incident-console",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [],
-        "target_count": 0
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-incident-v1",
-      "disposition": "fallback-only",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-incident-v1",
-      "panel_id": 894,
-      "panel_title": "Review Coverage Limits",
       "route": "incident-console",
       "source": {
         "datasource_type": null,
@@ -1635,29 +1675,6 @@
           "round((sum(increase(bioetl_checkpoint_save_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))"
         ],
         "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-incident-v1",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-incident-v1",
-      "panel_id": 9491,
-      "panel_title": "Inspect Telemetry Coverage",
-      "route": "incident-console",
-      "source": {
-        "datasource_type": "prometheus",
-        "datasource_uid": "prometheus",
-        "expressions": [
-          "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) sum by(pipeline,run_type) (count_over_time(bioetl_control_plane_manifest_writes_total[5m]))) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
-          "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline) sum by(pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m]))) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
-          "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type) (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",risk_type=~\"duplicate|overwrite\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
-          "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type) (count_over_time(bioetl_manifest_ledger_integrity_ratio{pipeline=~\"$pipeline\",run_type=~\"$run_type\",integrity_type=~\"consistent|inconsistent\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
-          "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} > 0 and push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} <= time())) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))"
-        ],
-        "target_count": 5
       }
     },
     {
@@ -2367,7 +2384,7 @@
     "dashboard_uid_count": 5,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 125,
+    "panel_disposition_count": 126,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],
