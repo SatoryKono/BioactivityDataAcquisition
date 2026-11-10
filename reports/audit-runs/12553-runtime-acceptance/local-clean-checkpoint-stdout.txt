@@ -1,0 +1,5 @@
+ M docs/02-architecture/generated/module-dependency-map.json
+ M docs/02-architecture/generated/module-dependency-map.md
+ M reports/quality/dead-code-inventory.json
+ M reports/quality/dead-code-inventory.md
+ M reports/quality/module-coverage-inventory.json
