@@ -45,7 +45,9 @@ def _strip_value_wrap_property(prop: dict, *, keep: bool) -> None:
     value["wrapText"] = bool(keep and value.get("wrapText", keep))
 
 
-def _strip_stale_value_wrap(overrides: list[dict]) -> None:
+def _strip_stale_value_wrap(
+    overrides: list[dict], *, preserve_evidence: bool = False
+) -> None:
     """Drop blanket value-wrap left by earlier helper revisions.
 
     Specialized builders set intentional wraps (e.g. Reason) before this runs.
@@ -53,7 +55,9 @@ def _strip_stale_value_wrap(overrides: list[dict]) -> None:
     """
     for override in overrides:
         name = override.get("matcher", {}).get("options")
-        keep = name in _VALUE_WRAP_FIELDS
+        keep = name in _VALUE_WRAP_FIELDS or (
+            preserve_evidence and name in {"Signal", "Object", "Details"}
+        )
         for prop in override.get("properties", []):
             _strip_value_wrap_property(prop, keep=keep)
 
@@ -119,7 +123,11 @@ def _wrap_table(panel: dict) -> None:
         options["enablePagination"] = True
         options.setdefault("footer", {})["enablePagination"] = True
     overrides = panel.setdefault("fieldConfig", {}).get("overrides", [])
-    _strip_stale_value_wrap(overrides)
+    _strip_stale_value_wrap(overrides, preserve_evidence=panel.get("id") == 22010)
+    if panel.get("id") == 9416:
+        panel["fieldConfig"]["defaults"]["custom"].setdefault("cellOptions", {})[
+            "wrapText"
+        ] = False
     _rank_width(overrides)
     if panel.get("id") == 3010:
         _pipeline_widths(overrides)

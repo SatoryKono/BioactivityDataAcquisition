@@ -318,7 +318,7 @@ def _trust(p: dict[int, dict]) -> None:
         # gr_db_corrections (125); sibling trust tables stay at 220.
         check_width = 125 if pid == 9416 else 220
         _table(p[pid], {"check": check_width, "status": 110})
-        _override(p[pid], "reason", _HIDDEN, True)
+        _override(p[pid], "reason", _HIDDEN, pid != 9416)
         _override(p[pid], "reason_display", _HIDDEN, True)
         _override(p[pid], "detail", "displayName", "Reason")
         _override(p[pid], "check", "displayName", "Check")
