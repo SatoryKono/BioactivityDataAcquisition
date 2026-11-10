@@ -16,7 +16,9 @@ async function captureTallPanel(page,element,options,capture) {
     await element.evaluate((el,target)=>{
       const parent=document.querySelector('[data-bioetl-panel-scroll]');
       const p=parent.getBoundingClientRect(),r=el.getBoundingClientRect();
+      // Sticky/fixed chrome outside the panel only — ignore the panel header itself.
       const top=[...parent.querySelectorAll('*')].reduce((edge,node)=>{
+        if(node===el || el.contains(node))return edge;
         const b=node.getBoundingClientRect(),style=getComputedStyle(node);
         return ['sticky','fixed'].includes(style.position) && b.top>=0 && b.top<innerHeight/2 && b.width>innerWidth/2 ? Math.max(edge,b.bottom):edge;
       },Math.max(0,p.top));
@@ -27,6 +29,7 @@ async function captureTallPanel(page,element,options,capture) {
       const r=el.getBoundingClientRect();
       const parent=document.querySelector('[data-bioetl-panel-scroll]'),p=parent.getBoundingClientRect();
       const top=[...parent.querySelectorAll('*')].reduce((edge,node)=>{
+        if(node===el || el.contains(node))return edge;
         const style=getComputedStyle(node),b=node.getBoundingClientRect();
         return ['sticky','fixed'].includes(style.position) && b.top>=0 && b.top<innerHeight/2 && b.width>innerWidth/2 ? Math.max(edge,b.bottom):edge;
       },Math.max(0,p.top));

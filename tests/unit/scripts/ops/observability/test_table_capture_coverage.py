@@ -155,25 +155,43 @@ console.log(JSON.stringify(result.tablePanels));
     assert [p["id"] for p in json.loads(result.stdout)] == [2]
 
 
-@pytest.mark.parametrize("raw", ["value", "", "unexpected"])
-def test_inspector_reads_dialog_and_separates_empty_mapping(tmp_path, raw):
+@pytest.mark.parametrize(
+    ("raw", "displayed", "expect"),
+    [
+        ("value", "value", "VERIFIED"),
+        ("", "value", "VERIFIED_NO_VALUE_MAPPING"),
+        (
+            "Provider: run_preflight_provider_observation",
+            "Provider: saved preflight observation",
+            "VERIFIED_VALUE_MAPPING",
+        ),
+        ("unexpected", "value", None),
+    ],
+)
+def test_inspector_reads_dialog_and_separates_empty_mapping(
+    tmp_path, raw, displayed, expect
+):
     node = shutil.which("node")
     if node is None:
         pytest.skip("Node.js is unavailable")
     program = r"""
 const {captureInspectedValues}=require(process.argv[1]);
 const raw=process.argv[3];
-const cell={count:async()=>1,evaluate:async()=> 'value',scrollIntoViewIfNeeded:async()=>{},hover:async()=>{},
+const displayed=process.argv[4];
+const cell={count:async()=>1,evaluate:async()=> displayed,scrollIntoViewIfNeeded:async()=>{},hover:async()=>{},
   getByRole:()=>({count:async()=>1,click:async()=>{}})};
 const root={locator:()=>({filter:({hasText})=>{
-  if(!hasText.test('value') || hasText.test('value-extra'))throw Error('Non-exact cell lookup');
+  if(!hasText.test(displayed) || hasText.test(displayed+'-extra'))throw Error('Non-exact cell lookup');
   return {first:()=>cell};}})};
 const pre={waitFor:async()=>{},innerText:async()=>raw};
 const dialog={filter(){return this;},locator:selector=>{if(selector!=='pre')throw Error('Not dialog text');return pre;}};
 const page={getByRole:role=>role==='dialog'?dialog:{waitFor:async()=>{},click:async()=>{}},
   screenshot:async()=>Buffer.from('test')};
-captureInspectedValues(page,root,[{text:'value',clipped:true,role:'gridcell'}],
- {dir:process.argv[2],index:1,outputDir:process.argv[2],pngEvidence:()=>({}),timeout:100,noValue:'value'})
+const valueMappings=[{type:'value',raw:'Provider: run_preflight_provider_observation',
+  display:'Provider: saved preflight observation'}];
+captureInspectedValues(page,root,[{text:displayed,clipped:true,role:'gridcell'}],
+ {dir:process.argv[2],index:1,outputDir:process.argv[2],pngEvidence:()=>({}),timeout:100,
+  noValue:'value',valueMappings})
  .then(results=>console.log(JSON.stringify({results})))
  .catch(error=>console.log(JSON.stringify({error:error.message})));
 """
@@ -189,6 +207,7 @@ captureInspectedValues(page,root,[{text:'value',clipped:true,role:'gridcell'}],
             ),
             str(tmp_path),
             raw,
+            displayed,
         ],
         check=True,
         capture_output=True,
@@ -196,12 +215,19 @@ captureInspectedValues(page,root,[{text:'value',clipped:true,role:'gridcell'}],
         timeout=15,
     )
     evidence = json.loads(result.stdout)
-    if raw == "unexpected":
+    if expect is None:
         assert "differs" in evidence["error"]
     else:
         value = evidence["results"][0]
         assert value["observed"] == raw
-        assert value["status"] == ("VERIFIED" if raw else "VERIFIED_NO_VALUE_MAPPING")
+        assert value["text"] == displayed
+        assert value["status"] == expect
+        if expect == "VERIFIED_VALUE_MAPPING":
+            assert value["mapping"] == {
+                "raw": raw,
+                "display": displayed,
+                "type": "value",
+            }
 
 
 def test_inspect_runs_before_scroll_restore_and_rejects_unmounted(

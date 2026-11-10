@@ -34,6 +34,63 @@ function mergeInspected(existing, next) {
   return [...byText.values()];
 }
 
+function collectValueMappings(fieldConfig) {
+  const pairs = [];
+  const push = (list) => {
+    for (const mapping of list || []) {
+      if (!mapping || typeof mapping !== 'object') continue;
+      if (mapping.type === 'value' && mapping.options && typeof mapping.options === 'object') {
+        for (const [raw, cfg] of Object.entries(mapping.options)) {
+          if (cfg && typeof cfg.text === 'string') pairs.push({type: 'value', raw, display: cfg.text});
+        }
+      }
+      if (
+        mapping.type === 'regex'
+        && typeof mapping.options?.pattern === 'string'
+        && typeof mapping.options?.result?.text === 'string'
+      ) {
+        pairs.push({
+          type: 'regex',
+          pattern: mapping.options.pattern,
+          display: mapping.options.result.text,
+        });
+      }
+    }
+  };
+  push(fieldConfig?.defaults?.mappings);
+  for (const override of fieldConfig?.overrides || []) {
+    for (const prop of override.properties || []) {
+      if (prop?.id === 'mappings') push(prop.value);
+    }
+  }
+  return pairs;
+}
+
+function inspectMatchesCell(observed, displayed, {noValue, valueMappings}) {
+  if (observed === displayed) return {status: 'VERIFIED'};
+  if (observed === '' && noValue === displayed) {
+    return {status: 'VERIFIED_NO_VALUE_MAPPING', mapping: {raw: observed, display: displayed, type: 'noValue'}};
+  }
+  for (const mapping of valueMappings || []) {
+    if (mapping.type === 'value' && mapping.raw === observed && mapping.display === displayed) {
+      return {status: 'VERIFIED_VALUE_MAPPING', mapping: {raw: observed, display: displayed, type: 'value'}};
+    }
+    if (mapping.type === 'regex' && mapping.display === displayed) {
+      try {
+        if (new RegExp(mapping.pattern).test(observed)) {
+          return {
+            status: 'VERIFIED_VALUE_MAPPING',
+            mapping: {raw: observed, display: displayed, type: 'regex', pattern: mapping.pattern},
+          };
+        }
+      } catch {
+        // Invalid dashboard regex is not a capture failure mode here.
+      }
+    }
+  }
+  return null;
+}
+
 async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,timeout,inspect}) {
   const grids=root.locator('[role="grid"]');
   const tiles=[];
@@ -77,7 +134,7 @@ async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,t
   return {tiles, inspectedValues};
 }
 
-async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pngEvidence,timeout,noValue,seen,inspectCounter}) {
+async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pngEvidence,timeout,noValue,valueMappings,seen,inspectCounter}) {
   const results=[];
   const known = seen instanceof Set ? seen : new Set(seen || []);
   const counter = inspectCounter || {n: 0};
@@ -105,12 +162,17 @@ async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pn
       const value=dialog.locator('pre');
       await value.waitFor({state:'visible',timeout});
       const observed=await value.innerText();
-      const mappedEmpty=observed==='' && noValue===text;
-      if(observed!==text && !mappedEmpty)throw new Error('Inspect value differs from the captured table cell');
+      const match=inspectMatchesCell(observed, text, {noValue, valueMappings});
+      if(!match)throw new Error('Inspect value differs from the captured table cell');
       counter.n += 1;
       const file=path.join(dir,`page-${index}-inspect-${counter.n}.png`);
       const bytes=await require('./native_browser_zoom.cjs').capturePageScreenshot(page,{path:file,animations:'disabled',timeout});
-      results.push({text,observed,status:mappedEmpty?'VERIFIED_NO_VALUE_MAPPING':'VERIFIED',file:path.relative(outputDir,file),...pngEvidence(bytes),viewportTiles:(bytes.viewportTiles || []).map(t=>({...t,file:path.relative(outputDir,t.file)}))});
+      results.push({
+        text,observed,status:match.status,
+        ...(match.mapping ? {mapping: match.mapping} : {}),
+        file:path.relative(outputDir,file),...pngEvidence(bytes),
+        viewportTiles:(bytes.viewportTiles || []).map(t=>({...t,file:path.relative(outputDir,t.file)})),
+      });
     } finally {
       await page.getByRole('button',{name:'Close',exact:true}).click();
     }
@@ -140,7 +202,12 @@ async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeo
         {path:file,animations:'disabled',timeout});
       const seen = new Set();
       const inspectCounter = {n: 0};
-      const inspectOpts = {dir,index,outputDir,pngEvidence,timeout,noValue:panel.noValue,seen,inspectCounter};
+      const inspectOpts = {
+        dir,index,outputDir,pngEvidence,timeout,
+        noValue:panel.noValue,
+        valueMappings:panel.valueMappings || [],
+        seen,inspectCounter,
+      };
       // Inspect the initial viewport before any scroll restore can unmount rows.
       let inspectedValues = await captureInspectedValues(page,root,evidence.cells,inspectOpts);
       const scrollCapture = await captureScrollTiles(page,root,{
@@ -188,4 +255,11 @@ async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeo
   });
   return results;
 }
-module.exports={captureTablePages,captureInspectedValues,captureScrollTiles,mergeInspected};
+module.exports={
+  captureTablePages,
+  captureInspectedValues,
+  captureScrollTiles,
+  mergeInspected,
+  collectValueMappings,
+  inspectMatchesCell,
+};
