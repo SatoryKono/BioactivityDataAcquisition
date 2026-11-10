@@ -40,6 +40,9 @@ if __package__ in {None, ""}:
         sys.path.insert(0, root_str)
 DASH_DIR = ROOT / "grafana" / "dashboards"
 CUSTOM_WIDTH = "custom.width"
+_SELECT_RUN_OR_SOURCE_UNAVAILABLE = (
+    "SELECT RUN if no Run ID is selected. Source unavailable if the request failed."
+)
 HTTP_EVIDENCE_STATES = (
     "VALID EMPTY means an empty successful response; it does not replace "
     "UNKNOWN for missing required evidence. Backend failure renders as "
@@ -1318,7 +1321,7 @@ def _stamp_aggregate_trust(by_id: dict[object, dict[str, Any]]) -> None:
     footer["enablePagination"] = True
     field_config = panel.setdefault("fieldConfig", {})
     field_config.setdefault("defaults", {})["noValue"] = (
-        "SELECT RUN if no Run ID is selected. Source unavailable if the request failed."
+        _SELECT_RUN_OR_SOURCE_UNAVAILABLE
     )
     display_names = {
         "processing_status": "Processing result",
@@ -1651,9 +1654,7 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
             "and read Review Processed Records for this Run ID. An empty identity "
             "table is not zero records."
         )
-    request_empty = (
-        "SELECT RUN if no Run ID is selected. Source unavailable if the request failed."
-    )
+    request_empty = _SELECT_RUN_OR_SOURCE_UNAVAILABLE
     for panel_id in (9413, 9414, 9415, 9417):
         panel = by_id.get(panel_id)
         if isinstance(panel, dict):
@@ -1678,9 +1679,7 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
             "It lists replay signals that stay outside saved-run evidence."
         )
         _set_panel_no_value(uncovered, "—")
-    request_empty = (
-        "SELECT RUN if no Run ID is selected. Source unavailable if the request failed."
-    )
+    request_empty = _SELECT_RUN_OR_SOURCE_UNAVAILABLE
     for panel_id in (9402, 9405, 9406, 9407, 9408, 9409, 9410, 9411):
         panel = by_id.get(panel_id)
         if isinstance(panel, dict):
@@ -2788,7 +2787,7 @@ def apply_to_dashboard(
 
 _CP_EXACT_REPLAY_NO_VALUE: dict[int, str] = {
     9422: "UNKNOWN",
-    9423: ("SELECT RUN if no Run ID is selected. Source unavailable if the request failed."),
+    9423: (_SELECT_RUN_OR_SOURCE_UNAVAILABLE),
 }
 
 

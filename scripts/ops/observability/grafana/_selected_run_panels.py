@@ -525,9 +525,7 @@ def _append_saved_run_evidence_row(
         )
         children.append(deepcopy(summary))
     else:
-        empty = (
-            "SELECT RUN if no Run ID is selected. Source unavailable if the request failed."
-        )
+        empty = "SELECT RUN if no Run ID is selected. Source unavailable if the request failed."
         details["description"] = (
             "SELECTED RUN · Domain reasons for this Run ID. "
             "Open this table from View trust reasons only when the reason count is greater than zero."
