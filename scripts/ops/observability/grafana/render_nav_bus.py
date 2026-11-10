@@ -384,7 +384,7 @@ def _document_required_http_evidence(payload: dict[str, Any]) -> None:
     }.get(payload.get("uid"), set())
     explanation = (
         " Empty is a coverage gap: required saved evidence is missing, not a pass. "
-        "Request failure is QUERY ERROR."
+        "Request failure is Source unavailable."
     )
     for panel in _walk_panels(payload.get("panels", [])):
         if panel.get("id") in required_panels:
@@ -1317,7 +1317,7 @@ def _stamp_aggregate_trust(by_id: dict[object, dict[str, Any]]) -> None:
     footer["enablePagination"] = True
     field_config = panel.setdefault("fieldConfig", {})
     field_config.setdefault("defaults", {})["noValue"] = (
-        "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
+        "SELECT RUN if no Run ID is selected. Source unavailable if the request failed."
     )
     display_names = {
         "processing_status": "Processing result",
@@ -1651,7 +1651,7 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
             "table is not zero records."
         )
     request_empty = (
-        "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
+        "SELECT RUN if no Run ID is selected. Source unavailable if the request failed."
     )
     for panel_id in (9413, 9414, 9415, 9417):
         panel = by_id.get(panel_id)
@@ -1678,7 +1678,7 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
         )
         _set_panel_no_value(uncovered, "—")
     request_empty = (
-        "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
+        "SELECT RUN if no Run ID is selected. Source unavailable if the request failed."
     )
     for panel_id in (9402, 9405, 9406, 9407, 9408, 9409, 9410, 9411):
         panel = by_id.get(panel_id)
@@ -2778,7 +2778,7 @@ def apply_to_dashboard(
 
 _CP_EXACT_REPLAY_NO_VALUE: dict[int, str] = {
     9422: "UNKNOWN",
-    9423: ("SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."),
+    9423: ("SELECT RUN if no Run ID is selected. Source unavailable if the request failed."),
 }
 
 

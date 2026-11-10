@@ -409,7 +409,7 @@ def _retain_selected_run_overview(payload: dict) -> None:
         panel["description"] = (
             "SELECTED RUN · Saved evidence for the selected Run ID. "
             "UNKNOWN means the saved assessment is missing, not a healthy empty run. "
-            "A request failure is QUERY ERROR."
+            "A request failure is Source unavailable."
         )
     _place_selected_run_window(payload["panels"])
     _lift_overview_identity(payload)

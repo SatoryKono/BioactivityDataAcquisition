@@ -65,7 +65,7 @@ def apply_replay_readiness_design(payload: dict) -> None:
         "SELECTED RUN · Saved exact-replay assessment, not CURRENT health. "
         "OK/WARN/CRIT palette: READY=OK, INSUFFICIENT=WARN, BLOCKED=CRIT. "
         "UNSUPPORTED/UNKNOWN/INCOMPLETE are gray. SELECT RUN means no Run ID is "
-        "selected; QUERY ERROR means backend unavailable or request failure. "
+        "selected; Source unavailable means backend unavailable or request failure. "
         "UNKNOWN means no assessed value, never READY. Open replay checks for basis."
     )
     card["options"] = {
@@ -159,7 +159,7 @@ def apply_replay_readiness_design(payload: dict) -> None:
                 "SELECTED RUN · One row per readiness check for this Run ID. "
                 "Fail blocks replay. Unknown is not a pass. "
                 "Valid-empty check output stays VALID EMPTY. "
-                "Request failure is QUERY ERROR."
+                "Request failure is Source unavailable."
             ),
             "datasource": card["datasource"],
             "targets": [target],

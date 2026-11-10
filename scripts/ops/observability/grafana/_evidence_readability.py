@@ -678,7 +678,7 @@ _DQ_DOMAINS_DESCRIPTION = (
 _DQ_IDENTITY_DESCRIPTION = (
     "SELECTED RUN · Full identifiers of this Run ID; the short table is Inspect "
     "Run Identity on the first screen. Missing checks are INCOMPLETE; missing "
-    "selection is SELECT RUN; request failure is QUERY ERROR. N/A means "
+    "selection is SELECT RUN; request failure is Source unavailable. N/A means "
     "explicitly inapplicable. VALID EMPTY is an empty successful query. This "
     "saved verdict does not authorize replay."
 )
