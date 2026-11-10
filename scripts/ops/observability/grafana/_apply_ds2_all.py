@@ -239,6 +239,9 @@ def _incident_handoff_urls() -> dict[int, str]:
         2003: (
             "/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}"
             "&var-workflow=${workflow}"
+            "&var-pipeline=${pipeline}"
+            "&var-run_type=${run_type}"
+            "&var-run_id=${run_id}"
         ),
         2004: (
             "/d/bioetl-dq-v2/bioetl-dq-v2?${__url_time_range}"
@@ -276,7 +279,7 @@ def _incident_domain_links() -> list[JsonObject]:
             "url": (
                 "/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}"
                 "&var-workflow=${workflow}&var-pipeline=${pipeline}"
-                "&var-run_type=${run_type}"
+                "&var-run_type=${run_type}&var-run_id=${run_id}"
             ),
             "targetBlank": False,
         },
@@ -620,6 +623,7 @@ def _provider_context_link() -> JsonObject:
             "/d/bioetl-overview-v2/bioetl-overview-v2"
             "?${__url_time_range}&var-workflow=${workflow}"
             "&var-pipeline=${pipeline}&var-run_type=${run_type}"
+            "&var-run_id=${run_id}"
         ),
         "targetBlank": False,
     }
