@@ -38,7 +38,10 @@ Global Run Explorer navigation deliberately resets Workflow, Pipeline and Run
 Type to `.*`, Run ID to `-`, and Lookup Run ID to empty, while retaining time.
 Row selection carries the concrete row identity; it never borrows another row's
 Run ID. Provider evidence is local to Run Overview panel `9480`; current fleet
-and range signals belong to Incident Workspace. Retired Runtime and Provider
+and range diagnostics belong to Incident Workspace. Overview also embeds the
+global alert summary and full list (LA-06); its Incident action explicitly resets
+Workflow/Pipeline/Run Type to All and Run ID to `-`, preserving time. This action
+does not depend on the selected run. Retired Runtime and Provider
 Health UIDs are historical references, not active destinations.
 
 Links retain visible names and native tooltips after sanitization. The header

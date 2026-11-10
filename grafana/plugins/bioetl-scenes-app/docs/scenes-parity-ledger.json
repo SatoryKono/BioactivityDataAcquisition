@@ -23,7 +23,7 @@
     "bioetl-control-plane-v1": "e156b942d21f9008efe4fd07b44f1c4a92f32cc60c7cc6ab8480441e1a3e41c5",
     "bioetl-dq-v2": "febb6b61d62465dc82959b560982f4e7f736b3d479f6e2aa997ca9b55a881d1a",
     "bioetl-incident-v1": "5828e923dbb9a3ea13bd3cf5328ff8a983829b4069b61c39089a00997c79eb1e",
-    "bioetl-overview-v2": "33b0aacd03b63f2428a027c852b046db2d6e252b11db0c28e53712fbdc3438eb",
+    "bioetl-overview-v2": "72e85be382a0a006b7da8abe7965d06b65a4cfec0cb51b900c4d7e81a302ef83",
     "bioetl-run-explorer-v1": "94b964452f158d6c9eb6a714e884c38e550f5f2e877ad24c1fd9eac690305c63"
   },
   "panels": [
@@ -2239,6 +2239,42 @@
     },
     {
       "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-overview-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-overview-v2",
+      "panel_id": 22005,
+      "panel_title": "Monitor Global Alerts (Full)",
+      "route": "dependency-health",
+      "source": {
+        "datasource_type": "datasource",
+        "datasource_uid": "-- Dashboard --",
+        "expressions": [],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-overview-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-overview-v2",
+      "panel_id": 2005,
+      "panel_title": "Monitor Global Alerts",
+      "route": "dependency-health",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "bioetl_incident_global_alerts"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
       "component": "Context Bar",
       "dashboard_uid": "bioetl-overview-v2",
       "disposition": "route-primary",
@@ -2384,7 +2420,7 @@
     "dashboard_uid_count": 5,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 126,
+    "panel_disposition_count": 128,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],
