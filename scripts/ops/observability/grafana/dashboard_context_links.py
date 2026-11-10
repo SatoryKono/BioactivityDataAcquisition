@@ -27,7 +27,6 @@ SEVEN_UIDS: tuple[str, ...] = (
 # slug is the title slug (verified 2026-11-05 against /api/search): alphanumeric
 # runs lowercased, every other character a hyphen, empty chunks dropped.
 DASHBOARD_TITLES: dict[str, str] = {
-    # v2 is canonical. Isolated 100000 is legacy / «не использовать»
     "bioetl-run-explorer-v1": "1. Run Explorer",
     "bioetl-control-plane-v1": "2. Replay Readiness",
     "bioetl-overview-v2": "3. Run Overview",
@@ -550,7 +549,7 @@ def retire_runtime_links(node: object) -> None:
     elif isinstance(node, dict):
         for key, value in node.items():
             if isinstance(value, str):
-                for retired_uid in ("bioetl-runtime", "bioetl-provider-health-v2"):
+                for retired_uid in ("bioetl-runtime", "bioetl-overview-v2"):
                     if retired_uid in value:
                         value = re.sub(
                             rf"/d/{retired_uid}(?:/[^?\s\"<>]+)?",
