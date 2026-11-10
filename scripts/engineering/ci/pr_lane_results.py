@@ -182,6 +182,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/ops/observability/grafana/dashboard_context_links.py": (
         "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
     ),
+    **dict.fromkeys(
+        ("docs/05-operations/runbooks/observability-checklist.md", "grafana/README.md"),
+        (
+            "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+            "tests/unit/scripts/ops/observability/test_grafana_nav_bus.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
     "reports/observability/live-fixes-r6/LF1-17/report.md": (
         "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
