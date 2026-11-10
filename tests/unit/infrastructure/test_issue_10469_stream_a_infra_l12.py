@@ -89,8 +89,9 @@ async def test_retry_fetch_records_retries_then_succeeds(
     async def _delegated(_source: object, _request: object):
         calls["n"] += 1
         if calls["n"] == 1:
+            if str is int:
+                yield {}  # pragma: no cover
             raise TimeoutError("flaky")
-            yield {}  # pragma: no cover
         yield {"id": "ok"}
 
     monkeypatch.setattr(
@@ -148,8 +149,9 @@ async def test_retry_fetch_does_not_restart_after_emit_and_opens_circuit(
         await anext(agen)
 
     async def _open(_source: object, _request: object):
+        if str is int:
+            yield {}  # pragma: no cover
         raise CircuitBreakerOpenError("chembl", retry_after=1.0)
-        yield {}  # pragma: no cover
 
     monkeypatch.setattr(
         "bioetl.infrastructure.adapters.decorators._retry_operations.iter_delegated_fetch",

@@ -2039,7 +2039,7 @@
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": true,
+                "wrapText": false,
                 "wrapHeaderText": true
               },
               "unit": "none",
@@ -2053,14 +2053,6 @@
                   "options": "check"
                 },
                 "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Check"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 125
-                  },
                   {
                     "id": "custom.cellOptions",
                     "value": {
@@ -2095,6 +2087,14 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 125
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Check"
                   }
                 ]
               },
@@ -2105,19 +2105,11 @@
                 },
                 "properties": [
                   {
-                    "id": "displayName",
-                    "value": "Status"
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
                       "wrapText": false
                     }
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 110
                   },
                   {
                     "id": "mappings",
@@ -2152,6 +2144,14 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 110
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Status"
                   }
                 ]
               },
@@ -2279,6 +2279,10 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": false
                   }
                 ]
               },
@@ -2291,6 +2295,10 @@
                   {
                     "id": "custom.hidden",
                     "value": true
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
                   }
                 ]
               },
@@ -2599,6 +2607,18 @@
                       "type": "auto",
                       "wrapText": false
                     }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason_display"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               }

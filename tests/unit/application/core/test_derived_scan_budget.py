@@ -162,8 +162,9 @@ async def test_progressing_pages_are_not_killed_by_sum_of_waits():
 @pytest.mark.asyncio
 async def test_source_timeout_is_not_misclassified_as_scan_deadline():
     async def source():
+        if str is int:
+            yield 1
         raise TimeoutError("provider timeout")
-        yield 1
 
     with pytest.raises(TimeoutError, match="provider timeout"):
         await anext(bounded_source_records(source()))

@@ -162,7 +162,7 @@ def test_serializer_snapshot_and_reconstructability() -> None:
     payload = _to_jsonable(
         {
             "when": stamp,
-            "disp": DQDisposition("pass") if False else next(iter(DQDisposition)),
+            "disp": next(iter(DQDisposition)),
             "item": _Item(1),
             "seq": (1, 2),
         }

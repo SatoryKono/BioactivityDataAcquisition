@@ -23,7 +23,6 @@ from tests.integration._grafana_test_support import (
     get_dashboard_files,
     get_dashboard_panels,
     get_panel_expressions,
-    get_row_child_panels,
     load_dashboard,
 )
 
@@ -267,105 +266,6 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
     ):
         assert title not in panels
     return
-    compact_evidence = {
-        "Track Runtime Blockers": (9018, "bioetl_l1_runtime_blocker_status"),
-        "Track Data Quality Status": (9019, "bioetl_l1_dq_status"),
-        "Track Gold Lifecycle": (9020, "bioetl_l1_gold_lifecycle_status"),
-        "Review Failed Runs": (9010, "bioetl_pipeline_runs_total"),
-        "Review Recent Non-success Terminal Runs": (9011, "bioetl_pipeline_runs_total"),
-    }
-    disclosure_by_panel = {
-        "Track Runtime Blockers": "Domain Status Tracks",
-        "Track Data Quality Status": "Domain Status Tracks",
-        "Track Gold Lifecycle": "Domain Status Tracks",
-        "Review Failed Runs": "Inspect Range Evidence",
-        "Review Recent Non-success Terminal Runs": "Inspect Range Evidence",
-    }
-
-    for dashboard_path in (Path("grafana/dashboards/bioetl-overview-v2.json"),):
-        dashboard = load_dashboard(dashboard_path)
-        panels = {
-            panel.get("title"): panel
-            for panel in get_dashboard_panels(dashboard)
-            if panel.get("title")
-        }
-        max_first_answer_y = max(
-            panels[title].get("gridPos", {}).get("y", 0)
-            for title in first_answer_titles
-        )
-        disclosure_rows = {
-            title: next(
-                panel
-                for panel in dashboard.get("panels", [])
-                if panel.get("title") == title
-            )
-            for title in set(disclosure_by_panel.values())
-        }
-        disclosure_children = {
-            title: {
-                panel.get("title"): panel
-                for panel in get_row_child_panels(dashboard, title)
-                if panel.get("title")
-            }
-            for title in disclosure_rows
-        }
-        for row in disclosure_rows.values():
-            assert row.get("type") == "row"
-            assert row.get("collapsed") is (
-                row.get("title")
-                in {
-                    "Domain Status Tracks",
-                    "Inspect Range Evidence",
-                    "Inspect Alerts",
-                }
-            )
-            assert row.get("gridPos", {}).get("y", 0) > max_first_answer_y
-        for panel_title, row_title in disclosure_by_panel.items():
-            assert panel_title in disclosure_children[row_title]
-
-        for panel_title, (panel_id, expected_metric) in compact_evidence.items():
-            row_title = disclosure_by_panel[panel_title]
-            row = disclosure_rows[row_title]
-            panel = disclosure_children[row_title][panel_title]
-            expressions = [
-                target.get("expr", "")
-                for target in panel.get("targets", [])
-                if isinstance(target.get("expr"), str)
-            ]
-            description = str(panel.get("description", "")).lower()
-            data_links = panel.get("options", {}).get("dataLinks", [])
-
-            assert panel.get("id") == panel_id, dashboard_path
-            assert panel.get("gridPos", {}).get("y", 0) > row.get("gridPos", {}).get(
-                "y", 0
-            )
-            assert any(expected_metric in expr for expr in expressions), dashboard_path
-            assert all(
-                forbidden not in "\n".join(expressions)
-                for forbidden in (
-                    "run_id",
-                    "quarantine_run_id",
-                    "payload_hash",
-                    "error_message",
-                )
-            )
-            assert "selected range" in description
-            assert (
-                "does not determine l0 status or first action" in description
-                or "does not determine current fleet health" in description
-                or "is not proof that current fleet health is ok" in description
-                or "absence is not proof that current fleet health is ok" in description
-                or "not proof that current fleet health is ok" in description
-            )
-            assert data_links
-            assert all(
-                str(link.get("title", "")).startswith("Open ") for link in data_links
-            )
-
-        for panel_title in ("Monitor Scope Health", "Review First Action"):
-            assert "$__range" not in "\n".join(
-                get_panel_expressions(panels[panel_title])
-            )
 
 
 @pytest.mark.parametrize(
@@ -912,18 +812,6 @@ def test_provider_failure_rate_panel_uses_neutral_zero_and_policy_thresholds() -
     assert panel is None
     return
 
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    assert defaults.get("unit") == "percentunit"
-    assert defaults.get("min") == 0
-    assert defaults.get("max") == 1
-    assert defaults.get("thresholds", {}).get("steps") == [
-        {"color": "gray", "value": None},
-        {"color": "orange", "value": 0.05},
-        {"color": "red", "value": 0.2},
-    ]
-    assert panel.get("type") == "stat"
-    assert "selected range" in str(panel.get("description", "")).lower()
-
 
 def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
@@ -938,29 +826,6 @@ def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> No
     assert panel is None
     return
 
-    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert any("bioetl_provider_current_status" in expr for expr in expressions)
-    assert all("or vector(0)" not in expr for expr in expressions), (
-        "Provider severity matrix must preserve UNKNOWN/NO DATA instead of synthetic OK"
-    )
-
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    # Null/missing stays gray (not healthy green); explicit 0 remains OK/green.
-    assert defaults.get("thresholds", {}).get("steps") == [
-        {"color": "gray", "value": None},
-        {"color": "green", "value": 0},
-        {"color": "orange", "value": 1},
-        {"color": "red", "value": 2},
-        {"color": "gray", "value": 3},
-    ]
-    special_mappings = [
-        mapping.get("options", {})
-        for mapping in defaults.get("mappings", [])
-        if mapping.get("type") == "special"
-    ]
-    matches = {mapping.get("match") for mapping in special_mappings}
-    assert {"null", "nan"} <= matches
-
 
 def test_provider_telemetry_freshness_fails_closed_when_status_is_missing() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
@@ -974,43 +839,6 @@ def test_provider_telemetry_freshness_fails_closed_when_status_is_missing() -> N
     )
     assert panel is None
     return
-
-    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert len(expressions) == 1
-    expression = expressions[0]
-    # Current first-screen freshness is a presence gate on projected current status.
-    assert "bioetl_provider_current_status" in expression
-    assert 'provider=~"$provider"' in expression
-    assert "or vector(0)" not in expression
-    assert "> bool 0" not in expression
-
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    assert defaults.get("unit") == "none"
-    assert defaults.get("thresholds", {}).get("steps") == [
-        {"color": "green", "value": None},
-        {"color": "orange", "value": 1},
-        {"color": "red", "value": 2},
-    ]
-    value_mapping = next(
-        mapping
-        for mapping in defaults.get("mappings", [])
-        if mapping.get("type") == "value"
-    )
-    assert value_mapping["options"]["0"]["text"] == "PRESENT"
-    assert "1" not in value_mapping["options"]
-    assert "Alias mapping: PRESENT=OK" in str(panel.get("description", ""))
-    special_mapping = next(
-        mapping
-        for mapping in defaults.get("mappings", [])
-        if mapping.get("type") == "special"
-    )
-    assert special_mapping["options"]["match"] == "null"
-    assert special_mapping["options"]["result"]["text"] == "UNKNOWN"
-    assert panel.get("options", {}).get("colorMode") == "value"
-
-    description = str(panel.get("description", "")).lower()
-    assert "telemetry" in description
-    assert "unknown" in description or "fail-closed" in description
 
 
 def test_provider_critical_table_keeps_severity_only_scope() -> None:
@@ -1027,31 +855,6 @@ def test_provider_critical_table_keeps_severity_only_scope() -> None:
     assert panel is None
     return
 
-    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert len(expressions) == 1
-    assert (
-        "topk(4, max by (provider) (bioetl_provider_current_status) >= 1)"
-        in expressions[0]
-    )
-    assert "VALID EMPTY" in expressions[0]
-    assert "unless on(provider)" in expressions[0]
-    assert "bioetl_provider_health_status" in expressions[0]
-    assert "or vector(0)" not in expressions[0]
-
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    # Null/missing stays gray (not healthy green); explicit 0 remains OK/green.
-    assert defaults.get("thresholds", {}).get("steps") == [
-        {"color": "gray", "value": None},
-        {"color": "green", "value": 0},
-        {"color": "orange", "value": 1},
-        {"color": "red", "value": 2},
-        {"color": "gray", "value": 3},
-    ]
-
-    description = str(panel.get("description", ""))
-    assert "VALID EMPTY requires every observed" in description
-    assert "provider-status" in description.lower() or "current" in description.lower()
-
 
 def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
     """Raw provider status panel must preserve UNKNOWN for known providers with no sample."""
@@ -1067,30 +870,6 @@ def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
     assert panel is None
     return
 
-    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert any("bioetl_provider_health_status" in expr for expr in expressions)
-    assert any(
-        "bioetl_provider_health_check_provider_universe_15m" in expr
-        for expr in expressions
-    )
-    assert any("${__range_s}s" in expr for expr in expressions)
-    assert all("or vector(0)" not in expr for expr in expressions), (
-        "Provider raw status panel must fail closed to UNKNOWN, not synthetic OK"
-    )
-
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    special_mappings = [
-        mapping.get("options", {})
-        for mapping in defaults.get("mappings", [])
-        if mapping.get("type") == "special"
-    ]
-    matches = {mapping.get("match") for mapping in special_mappings}
-    assert {"null", "nan"} <= matches
-    description = str(panel.get("description", "")).lower()
-    assert "raw provider health enum evidence" in description
-    assert "status is unknown" in description
-    assert "not the canonical first-screen verdict" in description
-
 
 def test_provider_top_causes_panel_preserves_canonical_cause_only_semantics() -> None:
     """Provider top causes must not fabricate synthetic rows when canonical causes are absent."""
@@ -1105,24 +884,6 @@ def test_provider_top_causes_panel_preserves_canonical_cause_only_semantics() ->
     )
     assert panel is None
     return
-
-    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert any("bioetl_provider_current_cause" in expr for expr in expressions)
-    assert all(
-        "bioetl_provider_current_status >= 1" not in expr for expr in expressions
-    )
-    assert all("status_without_projected_cause" not in expr for expr in expressions)
-    assert all("unless on (provider)" not in expr for expr in expressions)
-
-    combined = " ".join(
-        (
-            str(panel.get("description", "")),
-            str(panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")),
-        )
-    )
-    combined_lower = combined.lower()
-    assert "top current causes" in combined_lower
-    assert "degradation" in combined_lower
 
 
 def test_provider_diagnostic_panels_preserve_no_data_for_tokens_and_circuit_breakers() -> (
@@ -1148,29 +909,6 @@ def test_provider_diagnostic_panels_preserve_no_data_for_tokens_and_circuit_brea
     assert set(expectations).isdisjoint(present)
     return
 
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") in expectations
-    }
-    assert set(panels) == set(expectations)
-
-    trips = panels["Track Global Circuit-Breaker Trips"]
-    assert trips["fieldConfig"]["defaults"]["custom"]["showPoints"] == "always"
-    assert trips["options"]["legend"]["showLegend"] is True
-    assert trips["options"]["legend"]["displayMode"] != "hidden"
-
-    for panel_title, (required_snippet, forbidden_snippet) in expectations.items():
-        expressions = [
-            target.get("expr", "")
-            for target in panels[panel_title].get("targets", [])
-            if isinstance(target.get("expr"), str)
-        ]
-        assert any(required_snippet in expr for expr in expressions)
-        assert all(forbidden_snippet not in expr for expr in expressions), (
-            f"Panel '{panel_title}' must preserve diagnostic no-data instead of synthetic fallback"
-        )
-
 
 def test_provider_optional_telemetry_panels_explain_empty_samples_do_not_refute_status() -> (
     None
@@ -1187,29 +925,6 @@ def test_provider_optional_telemetry_panels_explain_empty_samples_do_not_refute_
     assert set(expectations).isdisjoint(present)
     return
 
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") in expectations
-    }
-    assert panels.keys() == expectations.keys()
-
-    for title, token in expectations.items():
-        combined = " ".join(
-            (
-                str(panels[title].get("description", "")),
-                str(
-                    panels[title]
-                    .get("fieldConfig", {})
-                    .get("defaults", {})
-                    .get("noValue", "")
-                ),
-            )
-        ).lower()
-        assert token in combined, (
-            f"{title} must explain its empty optional-telemetry semantics"
-        )
-
 
 def test_provider_degraded_checks_panel_uses_neutral_evidence_thresholds() -> None:
     """Selected-range degraded-count evidence must not reuse current-severity thresholds."""
@@ -1224,11 +939,6 @@ def test_provider_degraded_checks_panel_uses_neutral_evidence_thresholds() -> No
     )
     assert panel is None
     return
-
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    assert defaults.get("thresholds", {}).get("steps") == [
-        {"color": "text", "value": None}
-    ]
 
 
 def test_dq_selected_range_evidence_panels_use_neutral_thresholds() -> None:

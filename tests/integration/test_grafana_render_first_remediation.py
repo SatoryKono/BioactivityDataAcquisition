@@ -239,32 +239,6 @@ def test_iteration_2_active_alert_severity_is_not_overridden_by_count() -> None:
         for panel in _iter_panels(list(overview.get("panels", [])))
     )
     return
-    panel = _panel(overview, 9601)
-    overrides = panel["fieldConfig"]["overrides"]
-    by_name = {
-        override["matcher"]["options"]: override
-        for override in overrides
-        if override["matcher"]["id"] == "byName"
-    }
-
-    count_properties = {
-        prop["id"]: prop["value"] for prop in by_name["Value"]["properties"]
-    }
-    assert count_properties["displayName"] == "Active Alerts"
-    assert count_properties["custom.cellOptions"] == {
-        "type": "auto",
-        "applyToRow": False,
-    }
-
-    severity_properties = {
-        prop["id"]: prop["value"] for prop in by_name["Severity"]["properties"]
-    }
-    mappings = severity_properties["mappings"]
-    assert [mapping["options"]["result"]["text"] for mapping in mappings] == [
-        "CRITICAL",
-        "WARNING",
-    ]
-    assert not any(override["matcher"]["id"] == "byRegexp" for override in overrides)
 
 
 def test_iteration_2_runtime_valid_empty_frames_are_semantic_tables() -> None:
@@ -1084,6 +1058,22 @@ def _override_width(panel: dict[str, object], matcher: str) -> int | None:
     return None
 
 
+def _override_min_width(panel: dict[str, object], matcher: str) -> int | None:
+    field_config = panel.get("fieldConfig")
+    if not isinstance(field_config, dict):
+        return None
+    for item in field_config.get("overrides") or []:
+        if not isinstance(item, dict):
+            continue
+        options = str((item.get("matcher") or {}).get("options") or "")
+        if matcher not in options:
+            continue
+        for prop in item.get("properties") or []:
+            if isinstance(prop, dict) and prop.get("id") == "custom.minWidth":
+                return int(prop.get("value") or 0)
+    return None
+
+
 def _override_novalue(panel: dict[str, object], matcher: str) -> str | None:
     field_config = panel.get("fieldConfig")
     if not isinstance(field_config, dict):
@@ -1116,8 +1106,11 @@ def test_run_explorer_index_is_disk_last_ten_not_time_range() -> None:
 def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     recent = _panel(explorer, 3010)
+    # Workflow/Pipeline stay flex (minWidth floor only) so 200% width budget holds.
     assert _override_width(recent, "Workflow") is None
     assert _override_width(recent, "Pipeline") is None
+    assert _override_min_width(recent, "Workflow") == 80
+    assert _override_min_width(recent, "Pipeline") == 210
     assert recent["fieldConfig"]["defaults"]["custom"]["minWidth"] == 50
     assert recent["options"]["footer"]["enablePagination"] is False
     assert (_override_width(recent, "Run ID") or 0) <= 340

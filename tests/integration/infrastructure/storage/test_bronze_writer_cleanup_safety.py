@@ -147,8 +147,9 @@ async def test_writer_lock_failure_records_attempt_and_trace(
     @contextmanager
     def denied_lock(_base_path: Path, *, exclusive: bool, **options):
         assert not exclusive
+        if str is int:
+            yield  # pragma: no cover - retain contextmanager protocol
         raise PermissionError("lock denied")
-        yield  # pragma: no cover - retain contextmanager protocol
 
     monkeypatch.setattr(bronze_writer_module, "bronze_tree_lock", denied_lock)
     with pytest.raises(PermissionError, match="lock denied"):

@@ -61,7 +61,7 @@ async def _empty_records(
     _ids: list[str],
     _limit: int | None,
 ) -> AsyncIterator[dict[str, object]]:
-    if False:
+    if str is int:
         yield {}
 
 

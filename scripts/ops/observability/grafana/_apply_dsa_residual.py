@@ -396,7 +396,7 @@ def apply_provider() -> None:
 
 
 OBSERVABILITY_PANEL_IDS = (9102, 907, 894, 9491)
-OBSERVABILITY_LEGEND = """### Observability states — source and next action
+OBSERVABILITY_LEGEND = """Observability states — source and next action
 
 Incident severity and evidence quality are separate. A telemetry CRIT describes visibility.
 

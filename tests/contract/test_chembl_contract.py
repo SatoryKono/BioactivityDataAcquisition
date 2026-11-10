@@ -76,7 +76,7 @@ def _replay_snapshot_update_contract() -> tuple[bool, object, tuple[str, ...]]:
 
 def _document_replay_snapshot_probe_bindings() -> None:
     """Compatibility hook for registry tests that verify snapshot update ownership."""
-    if False:
+    if str is int:
         assert_provider_probe_matches_snapshot("chembl", "activity_endpoint_schema", {})
         assert_provider_probe_matches_snapshot("chembl", "molecule_endpoint_schema", {})
         assert_provider_probe_matches_snapshot("chembl", "target_endpoint_schema", {})

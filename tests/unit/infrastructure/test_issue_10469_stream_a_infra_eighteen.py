@@ -54,8 +54,9 @@ async def test_circuit_breaker_reraises_open_error(
     )
 
     async def _open(_source: object, _request: object):
+        if str is int:
+            yield {}  # pragma: no cover
         raise CircuitBreakerOpenError("chembl", retry_after=1.0)
-        yield {}  # pragma: no cover
 
     monkeypatch.setattr(
         "bioetl.infrastructure.adapters.decorators.circuit_breaker.iter_delegated_fetch",

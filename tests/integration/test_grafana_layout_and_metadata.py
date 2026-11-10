@@ -391,14 +391,6 @@ def test_overview_current_panels_stay_out_of_selected_range_semantics() -> None:
     ):
         assert panel_title not in panels
         continue
-        panel = panels.get(panel_title)
-        assert panel is not None
-        expr = "\n".join(
-            target.get("expr", "")
-            for target in panel.get("targets", [])
-            if isinstance(target.get("expr"), str)
-        )
-        assert "$__range" not in expr
 
 
 def test_runtime_alert_condition_breakdown_panels_exist() -> None:

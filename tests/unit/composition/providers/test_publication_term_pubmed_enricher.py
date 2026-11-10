@@ -156,8 +156,9 @@ async def test_enrich_many_reraises_when_pubmed_fetch_fails() -> None:
 
     class _FailingPubmed:
         async def fetch_filtered(self, **kwargs: object):
+            if str is int:
+                yield {}  # pragma: no cover
             raise RuntimeError("ncbi down")
-            yield {}  # pragma: no cover
 
     logger = MagicMock()
     enricher = PubMedPublicationTermEnrichmentService(
@@ -203,8 +204,9 @@ def test_parse_pubmed_mesh_xml_rejects_entities(xml_text: str) -> None:
 async def test_enrich_many_propagates_programming_errors() -> None:
     class BrokenSource:
         async def fetch_filtered(self, **kwargs: object):
+            if str is int:
+                yield {}
             raise TypeError("invalid provider contract")
-            yield {}
 
     logger = MagicMock()
     enricher = PubMedPublicationTermEnrichmentService(BrokenSource(), logger)

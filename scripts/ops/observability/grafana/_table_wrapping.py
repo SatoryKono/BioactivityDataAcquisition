@@ -72,12 +72,24 @@ def _rank_width(overrides: list[dict]) -> None:
 
 
 def _pipeline_widths(overrides: list[dict]) -> None:
-    # First-window identities share the remaining width at 200% browser zoom.
-    for override in overrides:
-        if override.get("matcher", {}).get("options") in {"Pipeline", "Workflow"}:
-            override["properties"] = [
-                prop for prop in override["properties"] if prop["id"] != WIDTH
-            ]
+    # Underscored identifiers need a readable floor, but must stay flex columns:
+    # custom.width on Workflow/Pipeline blows the first-window 200% CSS budget.
+    min_width = "custom.minWidth"
+    for name, width in (("Pipeline", 210), ("Workflow", 80)):
+        override = next(
+            (
+                o
+                for o in overrides
+                if o.get("matcher") == {"id": "byName", "options": name}
+            ),
+            None,
+        )
+        if override is None:
+            continue
+        override["properties"] = [
+            p for p in override["properties"] if p["id"] not in {WIDTH, min_width}
+        ]
+        override["properties"].append({"id": min_width, "value": width})
 
 
 def _provider_reason(overrides: list[dict]) -> None:

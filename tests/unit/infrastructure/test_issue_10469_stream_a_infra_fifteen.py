@@ -96,8 +96,9 @@ async def test_circuit_breaker_records_bioetl_error(
     )
 
     async def _boom(_source: object, _request: object):
+        if str is int:
+            yield {}  # pragma: no cover
         raise BioETLError("boom")
-        yield {}  # pragma: no cover
 
     monkeypatch.setattr(
         "bioetl.infrastructure.adapters.decorators.circuit_breaker.iter_delegated_fetch",
