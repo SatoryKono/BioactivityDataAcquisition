@@ -73108,8 +73108,8 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [
-        "review-controls-stdout.txt",
-        "review-controls-junit.xml"
+        "qualified-review-controls-stdout.txt",
+        "qualified-review-controls-junit.xml"
       ],
       "event_indexes": {},
       "remaining_observations": [],

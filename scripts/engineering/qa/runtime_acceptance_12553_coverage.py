@@ -148,9 +148,14 @@ def build() -> dict:
             },
         }
         if boundary:
+            prefix = (
+                "qualified-review-controls"
+                if (BUNDLE / "qualified-review-controls-stdout.txt").exists()
+                else "review-controls"
+            )
             row["trace_refs"] = [
-                "review-controls-stdout.txt",
-                "review-controls-junit.xml",
+                f"{prefix}-stdout.txt",
+                f"{prefix}-junit.xml",
             ]
             for name in ("normal", "error"):
                 row["scenarios"][name]["register_result"] = "ASSERTED_LOCK_BOUNDARY"

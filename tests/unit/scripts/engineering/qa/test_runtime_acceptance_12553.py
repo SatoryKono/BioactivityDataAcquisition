@@ -44,6 +44,7 @@ def test_register_accounts_for_every_identity_without_changing_inventory():
     for row in rows:
         assert row["reason"]
         assert row["trace_refs"] or row["status"] == "NOT_VERIFIABLE"
+        assert all((coverage.BUNDLE / ref).is_file() for ref in row["trace_refs"])
         assert set(row["scenarios"]) == {
             "normal",
             "error",
