@@ -63,7 +63,7 @@ async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pn
   const values=[...new Set(cells.filter(c=>c.clipped && c.role!=='columnheader').map(c=>c.text))];
   await sequential(values, async text => {
     // The accessible name also contains the Inspect button's label.
-    const cell=root.locator('[role="gridcell"]').filter({hasText:new RegExp('^'+text.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$')}).first();
+    const cell=root.locator('[role="gridcell"]').filter({hasText:new RegExp('^'+text.replace(/[.*+?^${}()|[\]\\]/g,String.raw`\$&`)+'$')}).first();
     if(!await cell.count()){
       results.push({text,status:'CELL_NOT_MOUNTED'});return;
     }
