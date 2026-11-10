@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
