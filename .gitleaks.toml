@@ -298,6 +298,78 @@ regexes = [
     '''^(?:\n)?[ \t]*x\-amz\-apigw\-id:[ \t]*Fz_WbG9FvHcEQxw=[ \t]*\r?$''',
 ]
 
+# #12553: all 834 matches were verified as actual source-file SHA256 values.
+# Bind the exception to exact reviewed receipt paths AND exact source/hash pairs.
+# No whole-file, commit, fingerprint or arbitrary-hex exemption is added.
+[[rules.allowlists]]
+description = "Reviewed #12553 source SHA256 fields in 26 historical command receipts"
+condition = "AND"
+regexTarget = "line"
+paths = [
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/artifact\-refresh\-check\-after\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/artifact\-refresh\-check\-before\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/artifact\-refresh\-final\-check\-after\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/artifact\-refresh\-final\-check\-before\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/artifact\-refresh\-final\-update\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/artifact\-refresh\-update\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/docs\-drift\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/docs\-links\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/docs\-links\-final\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/docs\-links\-verified\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/evidence\-contracts\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/final\-register\-contracts\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/full\-tree\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/lint\-final\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/local\-clean\-checkpoint\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/local\-clean\-checkpoint\-final\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/portable\-trace\-reference\-contract\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/qualified\-evidence\-contracts\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/qualified\-files\-config\-final\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/qualified\-health\-composition\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/qualified\-http\-telemetry\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/qualified\-review\-controls\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/qualified\-storage\-export\-final\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/qualified\-tasks\-executors\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/runtime\-versions\-command\.json$''',
+    '''^reports/audit\-runs/12553\-runtime\-acceptance/yaml\-contract\-command\.json$''',
+]
+regexes = [
+    '''^(?:\n)?[ \t]*"src/bioetl/application/composite/dependency_key_resolvers\.py": "5e0718476ea4e197cec6b4565388d51cf5627e49fedeb0f30f12c090786fce4d",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/application/composite/helpers/dependency_chained_key_resolver\.py": "a5dd4208de41a72010e3de5f3018f68ad24d8a9fd00a4149b8f2655dfc14b406",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/application/composite/join_key_normalization\.py": "316510e972abe8340552d57d2af1e41ca6c10f832119810d5244d6c0c44cf2c5",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/application/composite/join_key_resolution\.py": "d4df988c5daabfccb6012c6ba1fb748f71bba129a2f89fc5b1afb263ef9b3e8a",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/application/composite/key_extractor\.py": "c267bebb1a9aa8099dbbbe8e45044a298582416ffcbb242cbc7c18d9ad420d24",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/application/composite/runner_pkg/runner_key_flow\.py": "9f908091db70043a5fe9c2167ea7458e76b66c8b3183a4912097ff0ece09e05b",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/application/composite/runtime_wiring_api\.py": "8e0948342142257d829535b07ee53873004c17fef6dd0f8d925dc9e716cad214",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/application/core/factory_wiring_api\.py": "70d9e4d85058e1c70f71da7336e48a8d1da19c470c303d6bbfbb91a3974cac39",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/application/services/ops/admin_runtime_api\.py": "78ce9413bc23bb6c79d1600522e81fb5d1fc5a7ce82f7327d81cf46ff36f6212",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/control_plane_service_access\.py": "6765782557eabd68f7324f278990eb200cb962876d425928be9fa9fe25bb0df3",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/execution_api\.py": "fcf544245d2c0c967445608314e9b3b268764403036febb751887a17d448a319",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/factories/observability_api\.py": "732146b950e5a36c56a3bdaf80c9e7bbd39e51aa6d8f99b3eb01677f4c7379f0",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/health_api\.py": "73f608706edf44ade28d53641960c9bb811a9913cd336827ed597768af9890ff",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/health_service_access\.py": "a8dad35c715940e8d639ed6168be211ed195e0097f5d6f3b5fd2e49eb266539e",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/maintenance_api\.py": "a08b95b198a1ab51ceeaa66547ec7df0f219266479e9a418d6ef614fd60e3053",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/registry_api\.py": "0bc6debe57206e2044048deb9a9b7fe6389c475bb08094af180cfe880cb79c7b",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/_config_access_loaders\.py": "ca76981450d2733dd9f00eb5171941e3662494ad5cf19834ad7933de7b3b4cd3",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/_effective_config_secret_support\.py": "00d2c6315dc65285b71e382863ad616717e2e1a6b22455717f5617f8d086453b",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/config_access\.py": "e594d4f50bcbb469051b56ce98f63689fbf313d7fedbeeb2baa5e34a87cef4aa",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/domain/exceptions/internal_auth\.py": "372ee1f65a11ef48ff3a4753ca769fc5be00867586c5687783551d9fb8537410",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/domain/normalization/join_keys\.py": "a935e92a84a60cc37549a2d594f842b2acfc88974e398ae6df47086d4bcdd0ec",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/domain/normalization/open_access\.py": "c6d24b9effb865505bc6d864f6e3bfe36c86b18c00468e21c3e11cf3bedac43e",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/adapters/common/_api_request_sanitize\.py": "96737879a6e9e244f89e29e7d3c3312e48766d08f63c31f8c87b6ed56feb274b",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/config/composite_config_api\.py": "7cc7af7a581e19eb9f32ee78b00f43d630832f7afea3e60e210ed637588431b2",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/config/pipeline_config_api\.py": "62311e806c9d744b70bd5616fcea6dd5e4cb0287973be9acab91d873271eb2f3",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/config/settings_api\.py": "d008f1baff13c42e3175da9878e4cd3b8aee7bd832d02c5df93479e9abbb5796",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/config/workflow_config_api\.py": "0a113d5234eaedb149194fd04bc955d0c3a9797eb056173a65ba429065932260",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/storage/base_delta_writer_access\.py": "1f3415965e7357c2ff5a01ed72316927c22de04b1b0f8d486818b54df3cf82fc",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/interfaces/cli/commands/domains/maintenance/service_access\.py": "dccd333fa3c9ccdbafcddfbb1899b4ddb69f42c8b1a43331ba392db6c304a2e8",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/interfaces/cli/commands/domains/quarantine/runtime_access\.py": "60ed5b66baf2fcc19c119ec52e4e57e7877179def8d83e4652422c1103008fed",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/interfaces/cli/commands/domains/run/service_access\.py": "732796d383c05f5ec39b7674464b6085742db51a28c93532d913626dc80bac7d",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"tests/helpers/secret_fingerprints\.py": "fe8e0ef6909e4631017ec2d238dd892f4973b3d9300d50a86813a841a8ecf141",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"tests/unit/infrastructure/config/test_composite_config_api\.py": "8bc6c08136abc555e727d5310f54d55a88390b06394e9f2a6a704e5bbaf5803c",?[ \t\r\n]*$''',
+    '''^(?:\n)?[ \t]*"tests/unit/infrastructure/config/test_workflow_config_api\.py": "699361215123e7a4b949019cd62c1171c1c380e18f9a8f269a57eb174f37c696",?[ \t\r\n]*$''',
+]
+
 [[rules]]
 id = "curl-auth-header"
 [[rules.allowlists]]

@@ -337,6 +337,7 @@ acceptance gates; workflow deletion is no longer a completion criterion.
 | `type-checking-cold.yml` | Type Checking (Strict Cold Control) | Strict mypy cold control without cache |
 | `type-checking.yml` | Type Checking (Strict) | basedpyright / type gates |
 | `zizmor.yml` | zizmor | High-confidence GitHub Actions YAML audit |
+| `runtime-acceptance-12553.yml` | Runtime acceptance 12553 exact head | Task-branch push/manual diagnostic only; raw evidence outside checkout; retire after acceptance |
 
 ## Keep-disabled catalog (#10263)
 
