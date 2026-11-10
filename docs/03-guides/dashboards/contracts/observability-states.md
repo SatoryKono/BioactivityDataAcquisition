@@ -7,15 +7,19 @@ telemetry presence proves the cause of an incident.
 
 | State | Meaning | Signal source / evidence | Operator action |
 | --- | --- | --- | --- |
-| OK | Observed health inputs satisfy their healthy criteria in the stated scope. | Mapped current status gauges, with required inputs present; numeric 0 in the status enum. | Continue monitoring; inspect coverage before trusting an empty incident table. |
-| WARN | Observed inputs meet a warning threshold. | Current status enum 1 or a documented panel warning threshold. | Inspect the indicated domain and threshold in the same scope. |
-| CRIT | Observed inputs meet a critical threshold. Severity describes the panel's subject: a telemetry CRIT is a visibility problem. | Current status enum 2 or a documented critical threshold. | Triage domain evidence; if in Observability Signals, restore visibility before concluding product failure. |
+| OK | Observed health inputs satisfy their healthy criteria in the stated scope. | Mapped current status gauges, with required inputs present. | Continue monitoring; inspect coverage before trusting an empty incident table. |
+| WARN | Observed inputs meet a warning threshold. | Mapped current status gauges or a documented panel warning threshold. | Inspect the indicated domain and threshold in the same scope. |
+| CRIT | Observed inputs meet a critical threshold. Severity describes the panel's subject: a telemetry CRIT is a visibility problem. | Mapped current status gauges or a documented critical threshold. | Triage domain evidence; if in Observability Signals, restore visibility before concluding product failure. |
 | FIRING | An alert rule currently evaluates as firing; causality is not established. | Prometheus ALERTS with alertstate=firing. | Open rule/domain evidence; verify the cause independently (LA-04). |
 | UNKNOWN | Required evidence cannot establish a verdict. It is not a measured zero. | Null/absent status gauge, unknown enum, unavailable source or failed query. | Check query errors, source availability, selectors and required inputs. |
 | NO OBSERVATIONS | No matching events in the stated scope/window, with producer availability, observed scope and declared event families verified. | Evidence-gated lazy-event query; status gauges do not qualify merely because they are absent. | Confirm scope/window and witnesses; if witnesses are missing, investigate missing telemetry (LA-05). |
 | TELEMETRY MISSING | Expected measurement or evidence is absent; product health is unresolved. | Missing required series, scrape or recording-rule coverage; telemetry coverage panels. | Check producer emission, scrape targets, rule evaluation and selector/query alignment (LA-05). |
 | Not verified | The cause or freshness assertion has not been verified, even if severity is CRIT. | Raw UNVERIFIED cause verification, or unavailable observation/publication timestamps. | Follow domain evidence to verify cause and timestamps; never infer verification from a firing rule (LA-04). |
 | Blank / No data | A rendering outcome without a semantic verdict; never automatically OK or zero. | Empty result/frame, missing field, query error, unavailable source or no selected context. | Inspect query/frame, scope and source health. Classify as NO OBSERVATIONS only with its witnesses; otherwise UNKNOWN or TELEMETRY MISSING. |
+
+Numeric encodings are source-specific: use the panel's labelled value mapping,
+not a shared numeric enum. In particular, workflow input priority and domain
+status gauges have different encodings.
 
 Real zero requires an actual observed sample and its unit, scope and window.
 Do not insert synthetic zeroes to hide missing evidence. `VALID_EMPTY` / `VALID
