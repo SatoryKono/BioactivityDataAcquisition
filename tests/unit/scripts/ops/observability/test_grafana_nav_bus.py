@@ -16,6 +16,65 @@ from scripts.ops.observability.grafana import render_nav_bus as nav_bus
 pytestmark = pytest.mark.unit
 
 
+def test_incident_observability_check_is_read_only_and_detects_drift(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Regression: retain row 8809 on read, including its migrated metrics."""
+    source = nav_bus.DASH_DIR / "bioetl-incident-v1.json"
+    dashboard = tmp_path / source.name
+    dashboard.write_bytes(source.read_bytes())
+    monkeypatch.setattr(nav_bus, "DASH_DIR", tmp_path)
+    before = dashboard.read_bytes()
+    assert nav_bus.apply_to_dashboard(
+        dashboard, current_uid="bioetl-incident-v1", check=True
+    )
+    assert dashboard.read_bytes() == before
+    payload = json.loads(before)
+    row = next(p for p in payload["panels"] if p["id"] == 8809)
+    row["title"] = "Wrong visibility label"
+    dashboard.write_text(json.dumps(payload), encoding="utf-8")
+    drifted = dashboard.read_bytes()
+    assert not nav_bus.apply_to_dashboard(
+        dashboard, current_uid="bioetl-incident-v1", check=True
+    )
+    assert dashboard.read_bytes() == drifted
+    assert nav_bus.apply_to_dashboard(dashboard, current_uid="bioetl-incident-v1")
+    assert dashboard.read_bytes() == before
+
+
+@pytest.mark.parametrize("root_signals", [False, True])
+def test_observability_migration_preserves_sources_and_is_idempotent(
+    root_signals: bool,
+) -> None:
+    from copy import deepcopy
+    from scripts.ops.observability.grafana._apply_dsa_residual import (
+        OBSERVABILITY_PANEL_IDS,
+        apply_observability_states,
+    )
+
+    signals = [
+        dict(
+            _panel(pid, "stat", y=21 + i * 4, height=4),
+            targets=[{"expr": f"source_{pid}"}],
+        )
+        for i, pid in enumerate(OBSERVABILITY_PANEL_IDS)
+    ]
+    fleet = _panel(8808, "row", y=20, height=1, nested=[] if root_signals else signals)
+    payload = {"panels": [*signals, fleet] if root_signals else [fleet]}
+    apply_observability_states(payload)
+    row, fleet = payload["panels"]
+    assert row["id"] == 8809
+    assert row["gridPos"]["y"] < fleet["gridPos"]["y"]
+    assert not fleet["panels"]
+    assert {p["id"]: p["targets"] for p in row["panels"] if "targets" in p} == {
+        p["id"]: p["targets"] for p in signals
+    }
+    before = deepcopy(payload)
+    apply_observability_states(payload)
+    assert payload == before
+
+
 def test_run_explorer_processing_status_fits_zoom_with_inspectable_run_id() -> None:
     from scripts.ops.observability.grafana._run_explorer_columns import (
         apply_run_explorer_columns,
