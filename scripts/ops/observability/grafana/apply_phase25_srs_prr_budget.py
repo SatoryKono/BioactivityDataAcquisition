@@ -301,7 +301,7 @@ _CHECKPOINT_EMPTY_ROWS = (
     "$timeout or $msg ? "
     "($count($listed) > 0 ? $listed : [$state('нет данных', "
     "$msg ? message : 'нет данных — checkpoint comparison request timed out')]) : "
-    "(!$hasRun ? [$state('не применимо', 'не применимо — no Run ID selected')] : "
+    "($not($hasRun) ? [$state('не применимо', 'не применимо — no Run ID selected')] : "
     "(($exists(checkpoint_compare) and checkpoint_compare.status = 'MISSING') ? "
     "$append($listed, [$state('нет записей', "
     "'нет записей — checkpoint anchors were not recorded for this run')]) : "
@@ -1395,8 +1395,8 @@ def _stamp_checkpoint_empty_rows(data: dict[str, Any]) -> None:
         panel["description"] = description + note
 
 
-def _stamp_read_latency_context(data: dict[str, Any]) -> None:
-    """Label p95 = 0.95 as a quantile; keep unit=s without fixed seconds labels."""
+def _stamp_read_latency_quantile(data: dict[str, Any]) -> None:
+    """Describe the selected histogram quantile independently of its duration."""
     templating = data.get("templating") or {}
     for variable in templating.get("list") or []:
         if not isinstance(variable, dict):
@@ -1418,6 +1418,11 @@ def _stamp_read_latency_context(data: dict[str, Any]) -> None:
             "text": "p95 quantile",
             "value": "0.95",
         }
+
+
+def _stamp_read_latency_context(data: dict[str, Any]) -> None:
+    """Keep duration labels consistent with Grafana auto-scaled seconds."""
+    _stamp_read_latency_quantile(data)
     panel = _by_id(data, 111)
     defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
     defaults["unit"] = "s"
