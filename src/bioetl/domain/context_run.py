@@ -143,7 +143,7 @@ class PipelineRunContext:
     @property
     def has_input_filter(self) -> bool:
         """Check if input filtering is enabled."""
-        return bool(self.input_filter.enabled)
+        return not self.input_filter.is_disabled
 
     @property
     def has_cached_bronze(self) -> bool:
@@ -153,8 +153,7 @@ class PipelineRunContext:
     @property
     def vacuum_enabled_override(self) -> bool | None:
         """Return the explicit vacuum override, if one was provided."""
-        enabled = self.vacuum.enabled
-        return None if enabled is None else bool(enabled)
+        return self.vacuum.is_enabled_override
 
     def log_correlation_fields(self) -> dict[str, str]:
         """Return the mandatory bound logging fields for one pipeline run."""

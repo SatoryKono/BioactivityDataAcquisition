@@ -36,6 +36,7 @@ from unittest.mock import MagicMock, patch
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 
+from bioetl.domain.context import InputFilterContext
 from bioetl.composition.runtime_builders import _run_manifest_builder_policy
 from bioetl.composition.runtime_builders import runner_builder
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
@@ -166,7 +167,7 @@ def _build_context(**overrides: object) -> SimpleNamespace:
         "skip_gold": False,
         "start_offset": None,
         "exact_replay": False,
-        "input_filter": SimpleNamespace(enabled=False),
+        "input_filter": InputFilterContext.disabled(),
         "workflow_run_id": None,
         "workflow_name": None,
         "workflow_step_id": None,
