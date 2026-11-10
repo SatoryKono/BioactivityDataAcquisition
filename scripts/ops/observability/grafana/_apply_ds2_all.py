@@ -237,9 +237,11 @@ def _incident_handoff_urls() -> dict[int, str]:
             "&var-run_type=${run_type}"
         ),
         2003: (
-            "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}"
+            "/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}"
             "&var-workflow=${workflow}"
-            "&var-provider=${__data.fields.provider:percentencode}"
+            "&var-pipeline=${pipeline}"
+            "&var-run_type=${run_type}"
+            "&var-run_id=${run_id}"
         ),
         2004: (
             "/d/bioetl-dq-v2/bioetl-dq-v2?${__url_time_range}"
@@ -273,12 +275,11 @@ def _incident_domain_links() -> list[JsonObject]:
             "targetBlank": False,
         },
         {
-            "title": "Open Provider Health",
+            "title": "Open Provider Evidence",
             "url": (
-                "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}"
+                "/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}"
                 "&var-workflow=${workflow}&var-pipeline=${pipeline}"
-                "&var-run_type=${run_type}"
-                "&var-provider=${__data.fields.provider:percentencode}"
+                "&var-run_type=${run_type}&var-run_id=${run_id}"
             ),
             "targetBlank": False,
         },
@@ -619,10 +620,10 @@ def _provider_context_link() -> JsonObject:
     return {
         "title": "Open selected provider context",
         "url": (
-            "/d/bioetl-provider-health-v2/bioetl-provider-health-v2"
+            "/d/bioetl-overview-v2/bioetl-overview-v2"
             "?${__url_time_range}&var-workflow=${workflow}"
-            "&var-provider=${__data.fields.provider:percentencode}"
             "&var-pipeline=${pipeline}&var-run_type=${run_type}"
+            "&var-run_id=${run_id}"
         ),
         "targetBlank": False,
     }
@@ -693,9 +694,9 @@ def fix_dq_provider_run() -> None:
     _fix_dq_panels(dq)
     save_dash("bioetl-dq-v2.json", dq)
 
-    ph = load_dash("bioetl-provider-health-v2.json")
+    ph = load_dash("bioetl-overview-v2.json")
     _fix_provider_health_panels(ph)
-    save_dash("bioetl-provider-health-v2.json", ph)
+    save_dash("bioetl-overview-v2.json", ph)
 
     run_explorer = load_dash("bioetl-run-explorer-v1.json")
     _fix_run_explorer_panels(run_explorer)

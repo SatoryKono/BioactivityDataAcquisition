@@ -62,15 +62,17 @@ if (!entry.navigationExpected || html !== source.panels.find(panel => panel.id =
 const rect = {left:0,right:1000,top:0,bottom:100,height:100};
 let focusVisible = true;
 let panelRect = rect;
-function link(text, title) {
+function link(text, title, current = false) {
   return {textContent:text,scrollWidth:100,clientWidth:100,scrollHeight:20,clientHeight:20,
     getAttribute:key => key === 'title' ? title : null,
+    hasAttribute:key => key === 'href' && !current,
+    matches:selector => current ? selector === 'span.bioetl-nav-current' : selector === 'a.bioetl-nav-link[href]',
     getBoundingClientRect:() => rect,closest:() => nav,
     focus() {document.activeElement = this;}};
 }
 const canonical = [...html.matchAll(/<(?:a|span)\b([^>]*)>([^<]*)<\/(?:a|span)>/g)]
   .filter(match => match[1].includes('bioetl-nav-link') || match[1].includes('bioetl-nav-current'))
-  .map(match => link(match[2], match[1].match(/title="([^"]*)"/)[1]));
+  .map(match => link(match[2], match[1].match(/title="([^"]*)"/)[1], match[1].includes('bioetl-nav-current')));
 let actual = canonical;
 const nav = {querySelectorAll:() => actual,querySelector:() => actual[0],getBoundingClientRect:() => rect};
 const panel = {querySelector:selector => selector === '.bioetl-nav' ? nav : null,
@@ -82,6 +84,10 @@ global.getComputedStyle = () => ({outlineStyle:'solid',outlineWidth:'2px',
   outlineColor:focusVisible ? 'rgb(255,255,255)' : 'rgba(255,255,255,0)',boxShadow:'none'});
 const check = () => validate({expectedNavigationHtml:html});
 const good = check();
+actual = canonical.map(item => item.matches('span.bioetl-nav-current')
+  ? link(item.textContent, null, true) : item);
+const sanitizedCurrent = check();
+actual = canonical;
 const explicitCount = validate({expectedNavigationHtml:html,expectedLinkCount:entry.navigationLinkCount});
 const wrongCount = validate({expectedNavigationHtml:html,expectedLinkCount:entry.navigationLinkCount + 1});
 actual = canonical.slice(0,-1);
@@ -100,10 +106,11 @@ panelRect = {...rect,right:900};
 const overflow = check();
 panelRect = rect;
 const absentContract = validate();
-console.log(JSON.stringify({good,explicitCount,wrongCount,missing,extra,foreign,wrongTitle,invisibleFocus,overflow,absentContract}));
+console.log(JSON.stringify({good,sanitizedCurrent,explicitCount,wrongCount,missing,extra,foreign,wrongTitle,invisibleFocus,overflow,absentContract}));
 """)
     result = json.loads(output)
     assert result["good"]["status"] == "ok"
+    assert result["sanitizedCurrent"]["status"] == "ok"
     assert result["explicitCount"]["status"] == "ok"
     assert result["wrongCount"]["status"] == "error"
     assert result["good"]["linkCount"] == result["good"]["expectedLinkCount"] == 5
