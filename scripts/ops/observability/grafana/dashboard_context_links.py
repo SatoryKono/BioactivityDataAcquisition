@@ -549,7 +549,7 @@ def retire_runtime_links(node: object) -> None:
     elif isinstance(node, dict):
         for key, value in node.items():
             if isinstance(value, str):
-                for retired_uid in ("bioetl-runtime", "bioetl-overview-v2"):
+                for retired_uid in ("bioetl-runtime", "bioetl-provider-health-v2"):
                     if retired_uid in value:
                         value = re.sub(
                             rf"/d/{retired_uid}(?:/[^?\s\"<>]+)?",
