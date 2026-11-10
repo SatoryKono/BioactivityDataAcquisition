@@ -46,8 +46,8 @@ from bioetl.composition.runtime_builders._run_manifest_snapshot_resolution impor
     resolve_replay_parentage_mapping_value,
 )
 from bioetl.composition.runtime_builders.run_manifest_data_roots import (
-    _assert_private_runtime_dir,
-    _private_fallback_data_root_with_mode,
+    assert_private_runtime_dir,
+    private_fallback_data_root_with_mode,
 )
 
 pytestmark = pytest.mark.unit
@@ -61,17 +61,17 @@ def test_private_data_root_and_runtime_dir_errors(
             raise OSError("resolve failed")
 
     monkeypatch.setattr(
-        "bioetl.composition.runtime_builders.run_manifest_data_roots._private_fallback_data_root",
+        "bioetl.composition.runtime_builders.run_manifest_data_roots.private_fallback_data_root",
         lambda: _BoomPath(),
     )
-    path, mode = _private_fallback_data_root_with_mode()
+    path, mode = private_fallback_data_root_with_mode()
     assert mode == "tmp"
     assert path is not None
 
     file_path = tmp_path / "not-a-dir"
     file_path.write_text("x", encoding="utf-8")
     with pytest.raises(OSError, match="not a directory"):
-        _assert_private_runtime_dir(file_path)
+        assert_private_runtime_dir(file_path)
 
     class _FakeRuntimePath:
         def __init__(self, *, stat_value: object | BaseException) -> None:
@@ -92,7 +92,7 @@ def test_private_data_root_and_runtime_dir_errors(
             return "fake-runtime"
 
     with pytest.raises(OSError, match="unable to stat"):
-        _assert_private_runtime_dir(
+        assert_private_runtime_dir(
             _FakeRuntimePath(stat_value=OSError("stat failed"))  # type: ignore[arg-type]
         )
 
@@ -100,7 +100,7 @@ def test_private_data_root_and_runtime_dir_errors(
         raise TypeError("no uid")
 
     monkeypatch.setattr(os, "getuid", _getuid_type_error, raising=False)
-    _assert_private_runtime_dir(
+    assert_private_runtime_dir(
         _FakeRuntimePath(stat_value=SimpleNamespace(st_uid=1, st_mode=0o40700))  # type: ignore[arg-type]
     )
 
@@ -110,7 +110,7 @@ def test_private_data_root_and_runtime_dir_errors(
 
     monkeypatch.setattr(os, "getuid", lambda: 7, raising=False)
     with pytest.raises(OSError, match="not owned by current user"):
-        _assert_private_runtime_dir(
+        assert_private_runtime_dir(
             _FakeRuntimePath(stat_value=_UidMismatch())  # type: ignore[arg-type]
         )
 
@@ -120,7 +120,7 @@ def test_private_data_root_and_runtime_dir_errors(
 
     monkeypatch.setattr(os, "name", "posix")
     with pytest.raises(OSError, match="not owner-private"):
-        _assert_private_runtime_dir(
+        assert_private_runtime_dir(
             _FakeRuntimePath(stat_value=_WorldWritable())  # type: ignore[arg-type]
         )
 
