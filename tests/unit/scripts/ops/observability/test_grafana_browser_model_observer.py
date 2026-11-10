@@ -35,6 +35,10 @@ const base = 'http://localhost:3003';
 const dtoUrl = `${base}/apis/dashboard.grafana.app/v1beta1/namespaces/default/dashboards/${uid}/dto`;
 const legacyUrl = `${base}/api/dashboards/uid/${uid}`;
 const loaded = normalize(dto,kind(dtoUrl,base,uid),uid);
+const v2 = {...dto,apiVersion:'dashboard.grafana.app/v2',spec:{elements:{},layout:{}}};
+const v2Preserved = normalize(v2,'grafana-v2-dto',uid) === v2;
+let v2ArrayRejected = false;
+try {normalize({...v2,spec:{elements:[],layout:{}}},'grafana-v2-dto',uid);} catch {v2ArrayRejected=true;}
 const preserved = JSON.stringify(loaded) === JSON.stringify({...spec,uid});
 const routes = {
   dto:kind(dtoUrl+'?x=1',base,uid),legacy:kind(legacyUrl,base,uid),
@@ -56,7 +60,7 @@ for (const [label,value] of [
 }
 let foreignLegacyRejected=false;
 try {normalize({dashboard:{...source,uid:'foreign'}},'legacy',uid);} catch {foreignLegacyRejected=true;}
-console.log(JSON.stringify({preserved,loadedUid:loaded.uid,schemaVersion:loaded.schemaVersion,routes,rejected,
+console.log(JSON.stringify({preserved,v2Preserved,v2ArrayRejected,loadedUid:loaded.uid,schemaVersion:loaded.schemaVersion,routes,rejected,
   foreignLegacyRejected,legacyPreserved:normalize({dashboard:source},'legacy',uid)===source}));
 """
     result = subprocess.run(
@@ -79,6 +83,8 @@ console.log(JSON.stringify({preserved,loadedUid:loaded.uid,schemaVersion:loaded.
     assert result.returncode == 0, result.stderr
     observed = json.loads(result.stdout)
     assert observed["preserved"] is True
+    assert observed["v2Preserved"] is True
+    assert observed["v2ArrayRejected"] is True
     assert observed["loadedUid"] == "bioetl-overview-v2"
     assert observed["schemaVersion"] == 42
     assert observed["routes"] == {

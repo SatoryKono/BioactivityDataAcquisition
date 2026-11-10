@@ -2440,9 +2440,10 @@ function browserDashboardResponseKind(responseUrl, baseUrl, uid) {
 }
 
 function normalizeBrowserDashboardPayload(payload, kind, uid) {
+  const object = value => value && typeof value === 'object' && !Array.isArray(value);
   if (kind === "grafana-v2-dto" && payload?.kind === "DashboardWithAccessInfo" &&
       payload?.apiVersion === "dashboard.grafana.app/v2" && payload?.metadata?.name === uid &&
-      payload.spec?.elements && payload.spec?.layout) return payload;
+      object(payload.spec?.elements) && object(payload.spec?.layout)) return payload;
   if (kind === "legacy" && payload?.dashboard?.uid === uid) return payload.dashboard;
   if (kind === "grafana-v1beta1-dto" &&
       payload?.kind === "DashboardWithAccessInfo" &&
@@ -2488,7 +2489,13 @@ async function renderDashboard(page, dashboard, index, total) {
         if (kind === 'grafana-v2-dto') {
           const before = await page.request.get(response.url());
           if (!before.ok()) throw new Error('Browser v2 model bracket read failed');
-          dashboard.provisionedModel.v2 = {url:response.url(),before:await before.json(),loaded:[model]};
+          const bracket = await before.json();
+          if (dashboard.provisionedModel.v2) {
+            // Retain every browser response so a later refresh cannot hide drift.
+            dashboard.provisionedModel.v2.loaded.push(model);
+          } else {
+            dashboard.provisionedModel.v2 = {url:response.url(),before:bracket,loaded:[model]};
+          }
         } else {
           dashboard.provisionedModel.loaded.push(model);
         }
