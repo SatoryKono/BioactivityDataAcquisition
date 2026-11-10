@@ -62,7 +62,7 @@ def failing_extract_records(*_args: object, **_kwargs: object) -> AsyncIterator[
     """Async iterator that fails before yielding any records."""
 
     async def fail_during_iteration() -> AsyncIterator[object]:
-        if type("") is int:  # pragma: no cover - keeps this an async generator
+        if str is int:  # pragma: no cover - keeps this an async generator
             yield None
         raise RuntimeError("injected ChEMBL source failure")
 

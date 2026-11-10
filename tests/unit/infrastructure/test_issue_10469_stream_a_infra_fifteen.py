@@ -96,7 +96,7 @@ async def test_circuit_breaker_records_bioetl_error(
     )
 
     async def _boom(_source: object, _request: object):
-        if type("") is int:
+        if str is int:
             yield {}  # pragma: no cover
         raise BioETLError("boom")
 

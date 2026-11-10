@@ -52,7 +52,7 @@ async def test_circuit_breaker_records_failure_without_changing_original_excepti
     error = BioETLError("source failed")
 
     async def fetch(**kwargs):
-        if type("") is int:
+        if str is int:
             yield  # pragma: no cover - async iterator shape
         raise error
 

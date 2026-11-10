@@ -156,7 +156,7 @@ async def test_enrich_many_reraises_when_pubmed_fetch_fails() -> None:
 
     class _FailingPubmed:
         async def fetch_filtered(self, **kwargs: object):
-            if type("") is int:
+            if str is int:
                 yield {}  # pragma: no cover
             raise RuntimeError("ncbi down")
 
@@ -204,7 +204,7 @@ def test_parse_pubmed_mesh_xml_rejects_entities(xml_text: str) -> None:
 async def test_enrich_many_propagates_programming_errors() -> None:
     class BrokenSource:
         async def fetch_filtered(self, **kwargs: object):
-            if type("") is int:
+            if str is int:
                 yield {}
             raise TypeError("invalid provider contract")
 

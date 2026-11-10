@@ -23,7 +23,6 @@ from tests.integration._grafana_test_support import (
     get_dashboard_files,
     get_dashboard_panels,
     get_panel_expressions,
-    get_row_child_panels,
     load_dashboard,
 )
 

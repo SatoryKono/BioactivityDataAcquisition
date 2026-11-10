@@ -219,7 +219,7 @@ async def test_openalex_filter_flow_query_and_health_aclose() -> None:
 
         async def fetch_filtered(self, *_args: object, **_kwargs: object):
             yield {"id": "filtered"}
-            if type("") is int:
+            if str is int:
                 yield  # pragma: no cover
             return
 

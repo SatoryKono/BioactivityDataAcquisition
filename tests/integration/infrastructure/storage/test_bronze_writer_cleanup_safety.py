@@ -147,7 +147,7 @@ async def test_writer_lock_failure_records_attempt_and_trace(
     @contextmanager
     def denied_lock(_base_path: Path, *, exclusive: bool, **options):
         assert not exclusive
-        if type("") is int:
+        if str is int:
             yield  # pragma: no cover - retain contextmanager protocol
         raise PermissionError("lock denied")
 

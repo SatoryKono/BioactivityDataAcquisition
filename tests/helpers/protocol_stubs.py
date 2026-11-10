@@ -121,9 +121,9 @@ class AsyncEmptyDataSource:
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         del entity_type, limit, query, filter_ids, filter_field, offset
-        if type("") is int:  # pragma: no cover - typing aid for async generator
+        if str is int:  # pragma: no cover - typing aid for async generator
             yield {}
-        if type("") is int:
+        if str is int:
             yield  # pragma: no cover
         return
 

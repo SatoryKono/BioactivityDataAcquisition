@@ -64,7 +64,7 @@ def _replay_snapshot_update_contract() -> tuple[bool, object, tuple[str, ...]]:
 
 def _document_replay_snapshot_probe_bindings() -> None:
     """Compatibility hook for registry tests that verify snapshot update ownership."""
-    if type("") is int:
+    if str is int:
         assert_provider_probe_matches_snapshot(
             "semanticscholar", "paper_search_endpoint", {}
         )
