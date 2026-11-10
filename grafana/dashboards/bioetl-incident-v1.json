@@ -10987,7 +10987,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "—",
+              "noValue": "UNKNOWN",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -11559,7 +11559,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "NO MATCHING SIGNALS",
+              "noValue": "UNKNOWN",
               "custom": {
                 "align": "left",
                 "cellOptions": {

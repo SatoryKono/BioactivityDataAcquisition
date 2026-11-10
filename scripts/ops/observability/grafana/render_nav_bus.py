@@ -48,7 +48,6 @@ HTTP_EVIDENCE_STATES = (
 
 # Full portfolio bus. Order is the five-dashboard numbering.
 _BUS_UIDS: tuple[str, ...] = (
-    # v2 is canonical. Isolated 100000 is legacy / «не использовать»
     "bioetl-run-explorer-v1",
     "bioetl-control-plane-v1",
     "bioetl-overview-v2",
@@ -1399,6 +1398,7 @@ def _stamp_trust_override(override: dict[str, Any]) -> None:
         )
     if field == "reasons_text":
         _set_override_value(override, "noValue", "—")
+        _set_override_value(override, "custom.hidden", False)
         _set_override_value(
             override,
             "custom.cellOptions",
@@ -2725,8 +2725,6 @@ def apply_to_dashboard(
         panel = pending.pop()
         pending.extend(panel.get("panels", []))
         description = panel.get("description", "")
-        # Migrate legacy Provider Health handoff copy; keep matching the old
-        # phrase so reintroduced donor text is rewritten on the next render.
         if "Handoff: Provider Health" in description:
             panel["description"] = description.replace(
                 "Handoff: Provider Health",
