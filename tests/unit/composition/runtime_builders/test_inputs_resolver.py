@@ -40,6 +40,7 @@ from tests.helpers.deterministic_ids import (
 import pytest
 
 import bioetl.infrastructure.control_plane.file_run_ledger_store as run_ledger_store_module
+from bioetl.domain.context import InputFilterContext
 from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import inputs_runtime_assembly as _assembly
 from bioetl.application.services.control_plane import RunLedgerService
@@ -86,17 +87,7 @@ def _make_context(**overrides: object) -> SimpleNamespace:
             bronze_path=None,
             bronze_date=None,
         ),
-        "input_filter": SimpleNamespace(
-            enabled=False,
-            source_path=None,
-            column_name=None,
-            filter_field=None,
-            fallback_column=None,
-            filter_ids=(),
-            fallback_mapping=None,
-            multi_filter_ids=None,
-            valid_combinations=None,
-        ),
+        "input_filter": InputFilterContext.disabled(),
     }
     base.update(overrides)
     return SimpleNamespace(**base)
@@ -425,16 +416,8 @@ def test_prepare_runner_inputs_adjusts_batch_size_from_source_config_when_filter
 
     result = inputs_resolver.prepare_runner_inputs(
         ctx=_make_context(
-            input_filter=SimpleNamespace(
-                enabled=True,
-                source_path="ids.csv",
-                column_name="chembl_id",
-                filter_field="chembl_id",
-                fallback_column=None,
-                filter_ids=(),
-                fallback_mapping=None,
-                multi_filter_ids=None,
-                valid_combinations=None,
+            input_filter=InputFilterContext.from_csv(
+                "ids.csv", "chembl_id", "chembl_id"
             )
         ),
         get_settings_fn=lambda: settings,
