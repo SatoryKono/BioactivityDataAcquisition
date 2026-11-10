@@ -226,9 +226,3 @@ allowlists:
     rationale: Collapsed Pipeline fleet and range row moved from Pipeline Diagnostics. It is below-fold
       fleet evidence, not a first-screen scalar group.
     retire_when: fleet signals are represented by first-window scalar cards on Incident
-  - dashboard: bioetl-incident-v1.json
-    id: 8809
-    owner: '@bioetl-observability'
-    rationale: Collapsed Observability Signals row (LA-13 legend plus coverage/telemetry). Below-fold
-      visibility evidence, not a first-screen scalar group.
-    retire_when: observability coverage is represented by first-window scalar cards on Incident
