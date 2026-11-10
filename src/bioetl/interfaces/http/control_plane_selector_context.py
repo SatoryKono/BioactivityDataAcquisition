@@ -156,6 +156,7 @@ def _run_option_labels(
     records: tuple[SelectorRecord, ...],
     *,
     timezone: str = "UTC",
+    selected_run_id: str | None = None,
 ) -> dict[str, object]:
     """Label run_id options from the manifest catalog only.
 
@@ -165,18 +166,24 @@ def _run_option_labels(
     merged catalog is complete.
     """
     by_id = {record.run_id: record for record in records}
-    items = [
-        {
-            "text": _run_option_label(
-                value,
-                by_id.get(value),
-                timezone=timezone,
-                empty_catalog=False,
-            ),
+    items: list[dict[str, str]] = []
+    for i, value in enumerate(values):
+        label = _run_option_label(
+            value,
+            by_id.get(value),
+            timezone=timezone,
+            empty_catalog=False,
+        )
+        if value != RUN_ID_NO_SELECTION and "UNKNOWN" not in label:
+            if not selected_run_id and i == 0:
+                label += " (показан последний запуск; контекст выбран автоматически)"
+            elif value == selected_run_id:
+                label += " (явный выбор оператора)"
+
+        items.append({
+            "text": label,
             "value": value,
-        }
-        for value in values
-    ]
+        })
     return {"items": items}
 
 
@@ -268,7 +275,7 @@ def build_selector_filter_options_payload(
         fallback_value=run_id_policy.fallback_value,
     )
     if response_shape == "options" and dimension == "run_id":
-        return _run_option_labels(values, option_records, timezone=timezone)
+        return _run_option_labels(values, option_records, timezone=timezone, selected_run_id=selected_run_id)
     return _filter_options_response(
         response_shape=response_shape,
         dimension=dimension,

@@ -204,7 +204,10 @@ _DQ_SCOPE_DESCRIPTION = (
 _DQ_SCOPE_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;'
     'line-height:1.2;white-space:normal;overflow-wrap:anywhere"><div style="max-width:96ch">'
-    "SELECTED RUN · Saved evidence for the selected Run ID. "
+    "SELECTED RUN · Saved evidence for the selected Run ID.<br>"
+    '<span style="font-size:16px;color:#9ca3af;display:block;margin-top:2px;">'
+    "${run_id:text}"
+    "</span>"
     "CURRENT pipeline status and TIME RANGE scores are not on this page. "
     "A time-range value never proves this run."
     "</div></div>"
