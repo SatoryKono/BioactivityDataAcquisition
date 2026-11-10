@@ -266,6 +266,8 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
     ):
         assert title not in panels
     return
+
+
 @pytest.mark.parametrize(
     "dashboard_name",
     [
@@ -810,6 +812,7 @@ def test_provider_failure_rate_panel_uses_neutral_zero_and_policy_thresholds() -
     assert panel is None
     return
 
+
 def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panel = next(
@@ -823,6 +826,7 @@ def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> No
     assert panel is None
     return
 
+
 def test_provider_telemetry_freshness_fails_closed_when_status_is_missing() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panel = next(
@@ -835,6 +839,7 @@ def test_provider_telemetry_freshness_fails_closed_when_status_is_missing() -> N
     )
     assert panel is None
     return
+
 
 def test_provider_critical_table_keeps_severity_only_scope() -> None:
     """Critical providers table must only show active degraded/failing rows."""
@@ -850,6 +855,7 @@ def test_provider_critical_table_keeps_severity_only_scope() -> None:
     assert panel is None
     return
 
+
 def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
     """Raw provider status panel must preserve UNKNOWN for known providers with no sample."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
@@ -864,6 +870,7 @@ def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
     assert panel is None
     return
 
+
 def test_provider_top_causes_panel_preserves_canonical_cause_only_semantics() -> None:
     """Provider top causes must not fabricate synthetic rows when canonical causes are absent."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
@@ -877,6 +884,7 @@ def test_provider_top_causes_panel_preserves_canonical_cause_only_semantics() ->
     )
     assert panel is None
     return
+
 
 def test_provider_diagnostic_panels_preserve_no_data_for_tokens_and_circuit_breakers() -> (
     None
@@ -901,6 +909,7 @@ def test_provider_diagnostic_panels_preserve_no_data_for_tokens_and_circuit_brea
     assert set(expectations).isdisjoint(present)
     return
 
+
 def test_provider_optional_telemetry_panels_explain_empty_samples_do_not_refute_status() -> (
     None
 ):
@@ -916,6 +925,7 @@ def test_provider_optional_telemetry_panels_explain_empty_samples_do_not_refute_
     assert set(expectations).isdisjoint(present)
     return
 
+
 def test_provider_degraded_checks_panel_uses_neutral_evidence_thresholds() -> None:
     """Selected-range degraded-count evidence must not reuse current-severity thresholds."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
@@ -929,6 +939,7 @@ def test_provider_degraded_checks_panel_uses_neutral_evidence_thresholds() -> No
     )
     assert panel is None
     return
+
 
 def test_dq_selected_range_evidence_panels_use_neutral_thresholds() -> None:
     """TIME RANGE evidence cards are not on the selected-run page."""

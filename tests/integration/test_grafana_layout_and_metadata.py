@@ -360,6 +360,8 @@ def test_overview_current_panels_stay_out_of_selected_range_semantics() -> None:
     ):
         assert panel_title not in panels
         continue
+
+
 def test_runtime_alert_condition_breakdown_panels_exist() -> None:
     """Runtime must expose localization panels in addition to summary cards."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))

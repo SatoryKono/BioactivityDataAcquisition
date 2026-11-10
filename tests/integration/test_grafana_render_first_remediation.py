@@ -239,6 +239,8 @@ def test_iteration_2_active_alert_severity_is_not_overridden_by_count() -> None:
         for panel in _iter_panels(list(overview.get("panels", [])))
     )
     return
+
+
 def test_iteration_2_runtime_valid_empty_frames_are_semantic_tables() -> None:
     """#10251: empty Stage tables fail closed without synthetic vector(0)."""
     dashboard = _load("bioetl-incident-v1.json")
