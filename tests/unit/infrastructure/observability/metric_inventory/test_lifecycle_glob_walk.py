@@ -25,6 +25,6 @@ def test_directory_glob_normal(tmp_path: Path) -> None:
         / "infrastructure"
         / "observability"
         / "_metrics_defs_a.py"
-    ).write_text("c=1", encoding="utf-8")
-    result = set(metric_inventory_scan._scan_registered_metric_names(tmp_path))
-    assert isinstance(result, set)
+    ).write_text('metric = "bioetl_lifecycle_probe"\n', encoding="utf-8")
+    result = metric_inventory_scan._scan_registered_metric_names(tmp_path)
+    assert result == {"bioetl_lifecycle_probe"}

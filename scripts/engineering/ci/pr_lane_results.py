@@ -705,6 +705,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/audit-runs/12553-runtime-acceptance/negative-control-junit.xml",
             "reports/audit-runs/12553-runtime-acceptance/negative-control-stdout.txt",
             "reports/audit-runs/12553-runtime-acceptance/reentrant-lock-normal-junit.xml",
+            "reports/audit-runs/12553-runtime-acceptance/review-controls-junit.xml",
+            "reports/audit-runs/12553-runtime-acceptance/review-controls-stdout.txt",
         ),
         (
             "tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_glob_walk.py",

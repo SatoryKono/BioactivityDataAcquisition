@@ -39,3 +39,16 @@ NOT_VERIFIABLE cases:
 Cancellation, timeout and retry cannot be natively tested within the sandbox environment since the metrics discovery loops are synchronous, blocking operations in standard python without independent cancellation boundaries or retry policies. The python GIL and synchronous I/O prevent these from being explicitly cancelled or timing out.
 
 This update satisfies the requested missing criteria.
+
+## Review-control rerun
+
+The negative control runs the existing release assertion with an isolated lock
+whose context-manager exit omits release. The collector entry point is unchanged.
+The test expects the explicit `missing-release` assertion and releases the
+isolated lock during cleanup. The glob control requires the metric written to
+the fixture file to appear in the scan result.
+
+The rerun of the five metric-inventory lifecycle tests is recorded in
+`reports/audit-runs/12553-runtime-acceptance/review-controls-junit.xml` and
+`reports/audit-runs/12553-runtime-acceptance/review-controls-stdout.txt`.
+Earlier logs remain the record of the original test revision.
