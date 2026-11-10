@@ -41,6 +41,7 @@ VIEW_PANEL_TRUST_SELF = "viewPanel=9418"
 VIEW_PANEL_TRUST_SIBLING = "viewPanel=9414"
 _SELECT_RUN = "SELECT RUN"
 _NO_RUNS = "НЕТ ЗАПУСКОВ"
+_NO_RECORDS = "нет записей"
 
 OV_IDENTITY = (
     "/d/bioetl-overview-v2/3-run-overview"
@@ -638,7 +639,7 @@ def _ensure_selection_status_value_maps(
         _SELECT_RUN: {"text": _SELECT_RUN, "color": "gray"},
         _NO_RUNS: {"text": _NO_RUNS, "color": "gray"},
         "нет данных": {"text": "нет данных", "color": "gray"},
-        "нет записей": {"text": "нет записей", "color": "gray"},
+        _NO_RECORDS: {"text": _NO_RECORDS, "color": "gray"},
         "не применимо": {"text": "не применимо", "color": "gray"},
     }
     changed = False
@@ -1389,7 +1390,7 @@ def _stamp_checkpoint_empty_rows(data: dict[str, Any]) -> None:
         "нет записей means this run recorded no checkpoint anchors, "
         "нет данных means the comparison payload is missing or the request timed out."
     )
-    if "нет записей" not in description:
+    if _NO_RECORDS not in description:
         panel["description"] = description + note
 
 
