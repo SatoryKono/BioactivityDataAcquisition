@@ -2952,7 +2952,7 @@ availability, and historical manifests must not be rewritten for a green UI.
     *   `Provider Health` link updated to `Open Provider Evidence` targeting `bioetl-overview-v2`. Removed hardcoded `var-provider=chembl` and `var-pipeline_context=.*`.
     *   `Inspect all trust reasons` link viewPanel corrected from `9414` to `9418` (`Trust`).
     *   `Open domain diagnostics` link template fixed to remove garbage `&UNKNOWN&` parameter.
-    *   Transitions normalized to preserve context (variables, time range, `refresh=60s`). Addressed `Stage lag/backlog measurements`, `Incident Workspace` self-link, and `Reset filters` (Run Explorer).
+    *   Shipped links pass the time range through `${__url_time_range}`. The Stage lag link passes the selected dashboard variables, while Reset filters explicitly resets them. Dashboard settings define the 60-second refresh default. Live refresh behavior and the resulting time representation remain unverified.
 *   **Evidence of Code Updates:** Dashboard JSON files updated and re-generated successfully by standard scripts in PR #12981. They match canonical codebase assets.
 *   **Action Required (Live Instance):** Execute the click-test protocol detailed below to verify navigation.
 
@@ -2960,9 +2960,9 @@ availability, and historical manifests must not be rewritten for a green UI.
 
 | Source Panel / Context | Data Link Label | Expected Target | Expected Context Preservation | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| `Incident Workspace` (Isolated) | `Open Provider Evidence` | `2. Overview` (`bioetl-overview-v2`) | Variables retained, NO override to `chembl` or rogue regex. | `NOT_RUN` (live instance unavailable) |
-| `Replay Readiness` (Isolated) | `Inspect all trust reasons` | Panel `9418` (`Trust`) | Run selection preserved. | `NOT_RUN` (live instance unavailable) |
-| `Incident Workspace` (Isolated) | `6. Incident Workspace` (Self-link) | `4. Incident Workspace` | Preserves `refresh=60s`. Provider selection unmodified. | `NOT_RUN` (live instance unavailable) |
-| Data Quality / Runtime / etc. | `Stage lag/backlog measurements` | Relevant Panel / Dashboard | Variables preserved (not just `provider`). Relative time range retained (no swap to absolute). | `NOT_RUN` (live instance unavailable) |
-| `Run Explorer` | `Reset filters` | `Run Explorer` | Preserves `refresh=60s`. | `NOT_RUN` (live instance unavailable) |
+| `5. Incident Workspace` | `Open Provider Evidence` | `3. Run Overview` (`bioetl-overview-v2`), panel `9480` | Variables retained, NO override to `chembl` or rogue regex. | `NOT_RUN` (live instance unavailable) |
+| `2. Replay Readiness` | `Inspect all trust reasons` | Panel `9418` (`Trust`) | Run selection preserved. | `NOT_RUN` (live instance unavailable) |
+| `5. Incident Workspace` navigation bar | Current-page item `5. Incident Workspace` | Same dashboard, current-page indicator | The item is rendered as a non-clickable current-page marker. Verify no navigation or selector changes. | `NOT_RUN` (live instance unavailable) |
+| `5. Incident Workspace`, panel `2001` | `Stage lag/backlog measurements` | Same dashboard, panel `22011` | Verify selected workflow, pipeline, run type and run ID. Compare the time range and record how Grafana represents it after navigation. | `NOT_RUN` (live instance unavailable) |
+| `1. Run Explorer` | `Reset filters` | `1. Run Explorer` | Verify the documented selector reset and compare the effective time range. Record refresh separately from the link parameters. | `NOT_RUN` (live instance unavailable) |
 | Any domain diagnostics | `Open domain diagnostics` | Domain Diagnostics | URL free of `&UNKNOWN&` literal. | `NOT_RUN` (live instance unavailable) |
