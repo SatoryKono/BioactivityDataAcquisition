@@ -57,3 +57,14 @@ are preserved, including failures. The final stable sequence is 1/0/0. Successfu
 refresh is measured before the mandatory restoration of generated files to main.
 The branch-scoped workflow produces separate exact-head evidence; its published
 artifact result must be verified, rather than inferred from this README.
+
+Gitleaks history remediation: all 834 generic-api-key matches were checked as
+actual public source-file SHA256 values (34 source/hash pairs, 26 receipts).
+The rule-specific AND exception names only those exact paths and exact values;
+no commit, file-wide or arbitrary-hex exception is used. Native Gitleaks 8.24.3
+history scan with the main config reports 834 findings; with the reviewed config
+it reports zero. An unreviewed 64-hex value in the same source-key slot still
+produces a finding. See gitleaks-controls-summary.json and the separate command,
+stdout/stderr and exit files inside the archive. The relative-directory positive
+control exits 0 and negative control exits 1 by design; earlier absolute-directory
+attempts remain recorded and are not presented as passing controls.

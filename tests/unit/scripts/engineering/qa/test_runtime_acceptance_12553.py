@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 import hashlib
 import io
+import re
+import tomllib
 import sys
 import xml.etree.ElementTree as ET
 
@@ -241,3 +243,66 @@ def test_observer_records_allocation_failure_without_inventing_handle(
         observer._observe_open(io.open)(tmp_path / "missing.txt")
     assert not observer.HANDLES
     assert observer.EVENTS[0]["event"] == "allocation-error"
+
+
+def _runtime_metadata_exception():
+    config = tomllib.loads(
+        (capture.ROOT / ".gitleaks.toml").read_text(encoding="utf-8")
+    )
+    generic = next(rule for rule in config["rules"] if rule["id"] == "generic-api-key")
+    entry = next(
+        a
+        for a in generic["allowlists"]
+        if a["description"].startswith("Reviewed #12553")
+    )
+    assert config["extend"]["useDefault"] is True
+    assert entry["condition"] == "AND"
+    assert entry["regexTarget"] == "line"
+    assert not entry.get("commits")
+    assert not entry.get("stopwords")
+    assert len(entry["paths"]) == 26
+    assert len(entry["regexes"]) == 34
+    return entry
+
+
+def _runtime_metadata_allowed(path, line):
+    entry = _runtime_metadata_exception()
+    return any(re.search(pattern, path) for pattern in entry["paths"]) and any(
+        re.search(pattern, line) for pattern in entry["regexes"]
+    )
+
+
+def test_reviewed_source_digest_is_allowed_only_in_its_receipt():
+    receipt = json.loads(
+        capture.read_evidence("evidence-contracts-command.json", capture.BUNDLE)
+    )
+    source = "src/bioetl/application/composite/dependency_key_resolvers.py"
+    value = receipt["input_sha256"][source]
+    line = json.dumps(source) + ": " + json.dumps(value) + ","
+    path = "reports/audit-runs/12553-runtime-acceptance/evidence-contracts-command.json"
+    assert _runtime_metadata_allowed(path, line)
+    assert _runtime_metadata_allowed(path, "\n    " + line + "\r\n")
+    assert not _runtime_metadata_allowed(
+        "reports/audit-runs/unrelated/evidence-contracts-command.json", line
+    )
+    assert not _runtime_metadata_allowed(
+        path.replace("evidence-contracts", "unreviewed"), line
+    )
+
+
+def test_unreviewed_credentials_are_not_hidden_by_digest_exception():
+    receipt = json.loads(
+        capture.read_evidence("evidence-contracts-command.json", capture.BUNDLE)
+    )
+    source = "src/bioetl/application/composite/dependency_key_resolvers.py"
+    known_digest = receipt["input_sha256"][source]
+    path = "reports/audit-runs/12553-runtime-acceptance/evidence-contracts-command.json"
+    unknown_value = hashlib.sha256(b"controlled-unreviewed-value").hexdigest()
+    assert not _runtime_metadata_allowed(
+        path, json.dumps(source) + ": " + json.dumps(unknown_value)
+    )
+    assert not _runtime_metadata_allowed(path, '"api_key": ' + json.dumps(known_digest))
+    assert not _runtime_metadata_allowed(
+        path,
+        json.dumps("src/bioetl/unreviewed_api.py") + ": " + json.dumps(known_digest),
+    )

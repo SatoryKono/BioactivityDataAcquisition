@@ -369,6 +369,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     ".gitleaks.toml": (
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
+        RUNTIME_ACCEPTANCE_12553_TEST,
     ),
     ".dockerignore": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "mkdocs.yml": (DOCUMENTATION_SYNC_TEST,),

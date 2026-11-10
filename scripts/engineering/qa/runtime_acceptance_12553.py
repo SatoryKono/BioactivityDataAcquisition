@@ -115,6 +115,7 @@ def inputs(argv: list[str]) -> dict[str, str]:
         Path(__file__),
         ROOT / "tests/helpers/runtime_acceptance_12553.py",
         ROOT / "pyproject.toml",
+        ROOT / ".gitleaks.toml",
         ROOT / "tests/conftest.py",
     }
     paths.update((ROOT / "src/bioetl").rglob("*.py"))
