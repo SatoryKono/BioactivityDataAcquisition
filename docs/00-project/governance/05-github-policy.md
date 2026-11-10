@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.2.18
+Version: 1.2.19
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-10-16'
+  Last verified: '2026-11-10'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md and ADR-047 | Last updated: 2026-09-11*
+*Synced with RULES.md and ADR-047 | Last updated: 2026-11-10*
 
 ______________________________________________________________________
 
@@ -151,7 +151,7 @@ alert ownership.
 | Configuration owner | Advanced workflow `.github/workflows/codeql.yml` |
 | Languages | Python, Actions (`build-mode: none`) |
 | Token permissions | Workflow `contents: read`; job `security-events: write` for SARIF upload |
-| Cadence | Push/PR (docs-ignored paths excluded) plus weekly Monday `17 4 * * 1` UTC |
+| Cadence | Monday Nightly via `workflow_call`, plus manual `workflow_dispatch` on the selected ref |
 | Alert triage owner | BioETL Team (security lane); CODEOWNERS fallback `@SatoryKono` |
 | Alert triage cadence | Weekly on Monday, together with OpenSSF Scorecard |
 | Duplicate scans | Forbidden. Default setup stays off. |
