@@ -349,6 +349,7 @@ nav:
           - "Operator UX v2": 03-guides/dashboards/operator-ux-v2.md
           - "Scenes Dual Path": 03-guides/dashboards/scenes-dual-path.md
           - "Verdict Ontology": 03-guides/dashboards/verdict-ontology.md
+          - "Observability States": 03-guides/dashboards/contracts/observability-states.md
           - "Panels":
               - "Panels Guide": 03-guides/dashboards/panels/dashboard-panels-guide.md
               - "Overview v2 Panels": 03-guides/dashboards/panels/bioetl-overview-v2-panels.md

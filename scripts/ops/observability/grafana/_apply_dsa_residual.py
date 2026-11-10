@@ -395,6 +395,125 @@ def apply_provider() -> None:
     print("provider ok")
 
 
+OBSERVABILITY_PANEL_IDS = (9102, 907, 894, 9491)
+OBSERVABILITY_LEGEND = """### Observability states — source and next action
+
+Incident severity and evidence quality are separate. A telemetry CRIT describes visibility.
+
+| State | Source / meaning | Next action |
+| --- | --- | --- |
+| OK | Observed health inputs satisfy healthy criteria | Confirm coverage, then monitor |
+| WARN | Observed warning threshold | Inspect domain and threshold |
+| CRIT / FIRING | Critical threshold / firing alert rule; cause unproven | Triage domain evidence; verify cause |
+| UNKNOWN | Absent verdict, source unavailable or query failed | Inspect query, selectors and source |
+| NO OBSERVATIONS | No events with producer, scope and event-family witnesses verified | Confirm scope/window; check witnesses |
+| TELEMETRY MISSING | Required series, scrape or rule evidence absent | Restore emission, scraping or rules |
+| Not verified | UNVERIFIED cause or missing observation/publication timestamps | Verify cause and freshness in domain evidence |
+| Blank / No data | Empty frame or missing field; no verdict | Inspect query and scope; never assume zero |
+
+Real zero requires an observed sample. VALID EMPTY requires documented witnesses.
+PRESENT means coverage, not success; DEGRADED is a monitoring warning.
+Not provided means missing attribute; PENDING means an alert awaiting its firing duration.
+CURRENT / GLOBAL evidence does not attest a selected historical Run ID.
+Contract: docs/03-guides/dashboards/contracts/observability-states.md (LA-13; shared with LA-04 / LA-05).
+"""
+
+
+def _ensure_observability_row(
+    root: list[dict[str, Any]],
+    fleet: dict[str, Any],
+) -> dict[str, Any]:
+    """Insert a disclosure header while preserving existing panel geometry."""
+    row = next((p for p in root if p.get("id") == 8809), None)
+    if row is not None:
+        return row
+    row_y = fleet["gridPos"]["y"]
+    for panel in root:
+        if panel.get("gridPos", {}).get("y", -1) >= row_y:
+            for descendant in walk([panel]):
+                descendant["gridPos"]["y"] += 1
+    row = {
+        "id": 8809,
+        "type": "row",
+        "panels": [],
+        "gridPos": {"x": 0, "y": row_y, "w": 24, "h": 1},
+    }
+    root.insert(root.index(fleet), row)
+    return row
+
+
+def _detach_observability_panels(
+    root: list[dict[str, Any]],
+    row: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Remove migrated copies from their old parents, retaining the new row."""
+    for panel in walk(root):
+        if panel.get("type") == "row" and panel is not row:
+            panel["panels"] = [
+                p
+                for p in panel.get("panels", [])
+                if p.get("id") not in OBSERVABILITY_PANEL_IDS
+            ]
+    return [p for p in root if p.get("id") not in OBSERVABILITY_PANEL_IDS]
+
+
+def _build_observability_row_children(
+    row: dict[str, Any], signals: dict[int, dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Legend plus relocated signal panels stacked under the Observability row."""
+    children = [
+        panel
+        for panel in row.get("panels", [])
+        if panel.get("id") not in {*OBSERVABILITY_PANEL_IDS, 8810}
+    ]
+    legend = {
+        "id": 8810,
+        "type": "text",
+        "title": "Review Observability States",
+        "gridPos": {"x": 0, "y": row["gridPos"]["y"] + 1, "w": 24, "h": 14},
+        "options": {"mode": "markdown", "content": OBSERVABILITY_LEGEND},
+    }
+    y = legend["gridPos"]["y"] + legend["gridPos"]["h"]
+    for panel_id in OBSERVABILITY_PANEL_IDS:
+        panel = signals.get(panel_id)
+        if panel is None:
+            continue
+        panel["gridPos"] = {
+            "x": 0,
+            "y": y,
+            "w": 24,
+            "h": max(4, panel.get("gridPos", {}).get("h", 4)),
+        }
+        y += panel["gridPos"]["h"]
+        children.append(panel)
+    return [legend, *children]
+
+
+def apply_observability_states(data: dict[str, Any]) -> None:
+    """Separate visibility evidence without changing queries or dropping panels."""
+    root = data.get("panels") or []
+    fleet = next((p for p in root if p.get("id") == 8808), None)
+    if fleet is None:
+        return
+    signals = {p["id"]: p for p in walk(root) if p.get("id") in OBSERVABILITY_PANEL_IDS}
+    row = _ensure_observability_row(root, fleet)
+    # Keep the existing row during check-mode reads; never strip its children
+    # before comparing the generated dashboard with its on-disk source.
+    data["panels"] = _detach_observability_panels(root, row)
+    root = data["panels"]
+    root.remove(row)
+    root.insert(root.index(fleet), row)
+    row.update(
+        title="Observability Signals",
+        collapsed=True,
+        description=(
+            "Visibility evidence, separate from product incidents. Expand for the state legend, "
+            "coverage and telemetry limits. Missing evidence is never a measured zero."
+        ),
+    )
+    row["panels"] = _build_observability_row_children(row, signals)
+
+
 def apply_incident() -> None:
     inc = load("bioetl-incident-v1.json")
     set_desc(
@@ -453,6 +572,7 @@ def apply_incident() -> None:
     dom = by_id(inc, 2099)
     if dom is not None:
         dom["title"] = "Domain suspect detail (forensics; collapsed)"
+    apply_observability_states(inc)
     save("bioetl-incident-v1.json", inc)
     print("incident ok")
 

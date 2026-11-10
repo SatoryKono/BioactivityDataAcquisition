@@ -163,10 +163,15 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 22011 | Inspect Global Signal Measurements | table |
 | 2100 | Inspect Selected Run Summary | row |
 | 2101 | Review Selected Run Status | table |
+| 8809 | Observability Signals | row |
+| 8810 | Review Observability States | text |
+| 9102 | Monitor Coverage | stat |
+| 907 | Monitor Telemetry | stat |
+| 894 | Review Coverage Limits | text |
+| 9491 | Inspect Telemetry Coverage | stat |
 | 8808 | Pipeline fleet and range, not this Run ID | row |
 | 18940 | Monitor Pipeline Status | stat |
 | 9101 | Review Runtime Blockers | table |
-| 9102 | Monitor Coverage | stat |
 | 2460 | Review Stage Progress | table |
 | 9463 | Review Total Run Duration | stat |
 | 238 | Track Stage Backlog Trend | timeseries |
@@ -186,14 +191,12 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 891 | Monitor Replay | stat |
 | 892 | Track Checkpoint | stat |
 | 893 | Monitor Ledger | stat |
-| 907 | Monitor Telemetry | stat |
 | 2542 | Review Cross-Domain Handoffs | text |
 | 240 | Track Records by Stage / Interval | timeseries |
 | 4 | Inspect DQ Alert Conditions | stat |
 | 5 | Inspect Control Plane Alerts | stat |
 | 6 | Inspect Provider Alerts | stat |
 | 9991 | Start Pipeline Triage | text |
-| 894 | Review Coverage Limits | text |
 | 259 | Inspect Global Provider Alert Conditions | stat |
 | 908 | Review Observed Terminal Counters | table |
 | 7 | Inspect Entities Stale Over 24h | stat |
@@ -218,7 +221,6 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 133 | Monitor Ledger (30m) | stat |
 | 210 | Track Global Shutdown Completions | timeseries |
 | 102 | Track Save Failures | stat |
-| 9491 | Inspect Telemetry Coverage | stat |
 | 103 | Track Global Admin Failures | stat |
 | 111 | Track Global Read Latency | timeseries |
 | 131 | Track Observed Manifest Write Increments | timeseries |

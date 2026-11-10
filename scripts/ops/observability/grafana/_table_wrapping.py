@@ -109,6 +109,11 @@ def _provider_reason(overrides: list[dict]) -> None:
 
 def _wrap_table(panel: dict) -> None:
     _wrap_header_defaults(panel)
+    if panel.get("id") in {138, 241, 243, 256, 908}:
+        # Expanded Incident evidence has no row cap: keep every row reachable.
+        options = panel.setdefault("options", {})
+        options["enablePagination"] = True
+        options.setdefault("footer", {})["enablePagination"] = True
     overrides = panel.setdefault("fieldConfig", {}).get("overrides", [])
     _strip_stale_value_wrap(overrides)
     _rank_width(overrides)
