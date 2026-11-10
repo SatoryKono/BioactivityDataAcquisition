@@ -309,8 +309,7 @@ def test_reconcile_optional_layer_and_artifact_refs() -> None:
     with pytest.raises(ValueError, match="silver"):
         rec._optional_layer({"source_layer": "bronze"}, "source_layer", default=None)
     payload: dict[str, object] = {}
-    if True:
-        payload["artifact_refs"] = [{"id": "a"}]
+    payload["artifact_refs"] = [{"id": "a"}]
     assert payload["artifact_refs"]
     rec._record_reconcile_destructive_commit(
         None,

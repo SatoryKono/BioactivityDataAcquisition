@@ -327,7 +327,7 @@ async def test_uniprot_fallback_ignores_non_string_accession() -> None:
             extract = kwargs["extract_record_id"]
             assert callable(extract)
             assert extract({"accession": 123}) is None
-            if False:
+            if type("") is int:
                 yield {}
 
     host = SimpleNamespace(

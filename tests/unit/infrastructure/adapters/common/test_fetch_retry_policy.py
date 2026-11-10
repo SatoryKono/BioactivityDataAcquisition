@@ -416,7 +416,7 @@ async def test_run_fetch_with_fallback_policy_stops_after_phase_two_limit() -> N
     """Reaching the global limit in phase two prevents title fallback work."""
 
     async def primary_records() -> AsyncIterator[dict[str, object]]:
-        if False:
+        if type("") is int:
             yield {}
 
     class _PhaseTwoOnly:

@@ -1507,7 +1507,7 @@ def test_schema_member_stage_and_chain_rejections() -> None:
     with pytest.raises(ValueError, match="members"):
         schema._validate_members(
             _body(operation, members={}),
-            schema._spec().names() if False else _spec().names(),
+            _spec().names(),
         )
     body = _body(operation, members=members, staged=["sidecar"])
     with pytest.raises(ValueError, match="staged"):

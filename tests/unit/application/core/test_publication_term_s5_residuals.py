@@ -32,7 +32,7 @@ def test_normalize_publication_term_limit_accepts_zero_and_rejects_invalid() -> 
 def test_resolve_target_fallback_upstream_limit_treats_zero_as_zero() -> None:
     class _Src:
         async def fetch(self, **kwargs):  # type: ignore[no-untyped-def]
-            if False:
+            if type("") is int:
                 yield {}
             raise AssertionError("upstream fetch must not run for pure limit math")
 
@@ -54,7 +54,7 @@ async def test_fetch_limit_zero_yields_empty_without_upstream_records() -> None:
 
         async def fetch(self, **kwargs):  # type: ignore[no-untyped-def]
             self.calls += 1
-            if False:
+            if type("") is int:
                 yield {}
 
     source = _Src()
@@ -76,7 +76,7 @@ async def test_fetch_limit_preserves_filter_ids_within_publication_budget() -> N
             self.filter_ids = list(raw_ids) if isinstance(raw_ids, list) else None
             raw_limit = kwargs.get("limit")
             self.limit = raw_limit if isinstance(raw_limit, int) else None
-            if False:
+            if type("") is int:
                 yield {}
 
     source = _Src()

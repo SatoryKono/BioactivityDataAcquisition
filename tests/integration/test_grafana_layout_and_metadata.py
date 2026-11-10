@@ -360,16 +360,6 @@ def test_overview_current_panels_stay_out_of_selected_range_semantics() -> None:
     ):
         assert panel_title not in panels
         continue
-        panel = panels.get(panel_title)
-        assert panel is not None
-        expr = "\n".join(
-            target.get("expr", "")
-            for target in panel.get("targets", [])
-            if isinstance(target.get("expr"), str)
-        )
-        assert "$__range" not in expr
-
-
 def test_runtime_alert_condition_breakdown_panels_exist() -> None:
     """Runtime must expose localization panels in addition to summary cards."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))

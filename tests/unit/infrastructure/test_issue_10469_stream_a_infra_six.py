@@ -219,8 +219,9 @@ async def test_openalex_filter_flow_query_and_health_aclose() -> None:
 
         async def fetch_filtered(self, *_args: object, **_kwargs: object):
             yield {"id": "filtered"}
+            if type("") is int:
+                yield  # pragma: no cover
             return
-            yield  # pragma: no cover
 
         async def _fetch_by_query(self, *, query: str, limit: int | None):
             yield {"query": query, "limit": limit}

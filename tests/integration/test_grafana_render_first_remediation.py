@@ -239,34 +239,6 @@ def test_iteration_2_active_alert_severity_is_not_overridden_by_count() -> None:
         for panel in _iter_panels(list(overview.get("panels", [])))
     )
     return
-    panel = _panel(overview, 9601)
-    overrides = panel["fieldConfig"]["overrides"]
-    by_name = {
-        override["matcher"]["options"]: override
-        for override in overrides
-        if override["matcher"]["id"] == "byName"
-    }
-
-    count_properties = {
-        prop["id"]: prop["value"] for prop in by_name["Value"]["properties"]
-    }
-    assert count_properties["displayName"] == "Active Alerts"
-    assert count_properties["custom.cellOptions"] == {
-        "type": "auto",
-        "applyToRow": False,
-    }
-
-    severity_properties = {
-        prop["id"]: prop["value"] for prop in by_name["Severity"]["properties"]
-    }
-    mappings = severity_properties["mappings"]
-    assert [mapping["options"]["result"]["text"] for mapping in mappings] == [
-        "CRITICAL",
-        "WARNING",
-    ]
-    assert not any(override["matcher"]["id"] == "byRegexp" for override in overrides)
-
-
 def test_iteration_2_runtime_valid_empty_frames_are_semantic_tables() -> None:
     """#10251: empty Stage tables fail closed without synthetic vector(0)."""
     dashboard = _load("bioetl-incident-v1.json")

@@ -88,8 +88,6 @@ def test_checkpoint_non_fatal_errors_catches_instances() -> None:
             raise instance
         except CHECKPOINT_NON_FATAL_ERRORS:
             pass  # expected
-        else:
-            pytest.fail(f"{exc_type} was not caught by CHECKPOINT_NON_FATAL_ERRORS")
 
 
 # ---------------------------------------------------------------------------
