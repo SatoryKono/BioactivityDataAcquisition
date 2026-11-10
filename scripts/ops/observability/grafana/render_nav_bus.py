@@ -2466,6 +2466,7 @@ def apply_to_dashboard(
         panel for panel in payload.get("panels", []) if panel.get("id") != 9450
     ]
     from scripts.ops.observability.grafana.dashboard_context_links import (
+        _rewrite_links,
         normalize_dashboard_actions,
         finalize_dashboard_links,
         retire_runtime_links,
@@ -2533,6 +2534,9 @@ def apply_to_dashboard(
     )
 
     apply_evidence_readability(payload)
+    # explain_incident stamps HTML hrefs after the early normalize_dashboard_actions
+    # pass; re-run content/url serialization so All/`.*` selection stays encoded.
+    _rewrite_links(payload)
     from scripts.ops.observability.grafana._workflow_scope import apply_workflow_scope
 
     apply_workflow_scope(payload)
