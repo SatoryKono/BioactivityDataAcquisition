@@ -44,7 +44,7 @@ from bioetl.domain.composite.aggregation import (
 
 def _rows_by_key(df: pl.DataFrame, key: str) -> dict[str, dict[str, object]]:
     """Build deterministic key->row mapping for assertion-friendly lookups."""
-    return {str(row[key]): row for row in df.iter_rows(named=True)}
+    return {str(row[key]): row for row in df.to_dicts()}
 
 
 @pytest.fixture

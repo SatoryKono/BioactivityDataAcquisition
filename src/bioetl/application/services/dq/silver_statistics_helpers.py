@@ -287,7 +287,7 @@ def profile_categorical_column(
         return CategoricalDistribution(
             top_values=tuple(
                 _categorical_top_value_row(row, col=col, row_count=len(df))
-                for row in value_counts.iter_rows(named=True)
+                for row in value_counts.to_dicts()
             ),
             cardinality=cardinality,
         )

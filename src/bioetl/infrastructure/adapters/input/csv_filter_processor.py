@@ -117,7 +117,7 @@ class CsvFilterProcessor:
             Количество записей только с заголовком (без основного ID).
         """
         title_only_count = 0
-        for row in df.iter_rows(named=True):
+        for row in df.to_dicts():
             primary_str = (
                 str(row.get(primary_column, "")).strip()
                 if row.get(primary_column)
