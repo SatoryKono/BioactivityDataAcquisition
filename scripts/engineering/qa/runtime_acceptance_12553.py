@@ -23,6 +23,8 @@ BUNDLE = Path(
     )
 )
 ARCHIVE = "evidence.zip"
+ARCHIVE_SHA256 = ARCHIVE + ".sha256"
+ARTIFACT_MANIFEST = "artifact-sha256.json"
 
 
 def evidence_names(root: Path) -> set[str]:
@@ -54,15 +56,15 @@ def read_evidence(name: str, root: Path) -> bytes:
 
 def pack(baseline_names: set[str] | None = None) -> None:
     """Preserve raw evidence while keeping machine logs out of the docs catalog."""
-    excluded = {ARCHIVE, ARCHIVE + ".sha256"}
+    excluded = {ARCHIVE, ARCHIVE_SHA256}
     names = evidence_names(BUNDLE) - excluded
     payload = {name: read_evidence(name, BUNDLE) for name in names}
     checksums = {
         name: hashlib.sha256(data).hexdigest()
         for name, data in sorted(payload.items())
-        if name != "artifact-sha256.json"
+        if name != ARTIFACT_MANIFEST
     }
-    payload["artifact-sha256.json"] = (json.dumps(checksums, indent=2) + "\n").encode()
+    payload[ARTIFACT_MANIFEST] = (json.dumps(checksums, indent=2) + "\n").encode()
     with zipfile.ZipFile(
         BUNDLE / ARCHIVE, "w", compression=zipfile.ZIP_DEFLATED
     ) as archive:
@@ -71,9 +73,7 @@ def pack(baseline_names: set[str] | None = None) -> None:
             info.compress_type = zipfile.ZIP_DEFLATED
             archive.writestr(info, data)
     digest = hashlib.sha256((BUNDLE / ARCHIVE).read_bytes()).hexdigest()
-    (BUNDLE / (ARCHIVE + ".sha256")).write_text(
-        f"{digest}  {ARCHIVE}\n", encoding="ascii"
-    )
+    (BUNDLE / (ARCHIVE_SHA256)).write_text(f"{digest}  {ARCHIVE}\n", encoding="ascii")
     if baseline_names is None:
         prefix = BUNDLE.relative_to(ROOT).as_posix() + "/"
         baseline_names = {
@@ -92,10 +92,10 @@ def verify(root: Path) -> None:
     """Verify the published byte representation, including archived trace targets."""
     archive = root / ARCHIVE
     if archive.exists():
-        expected = (root / (ARCHIVE + ".sha256")).read_text().split()[0]
+        expected = (root / (ARCHIVE_SHA256)).read_text().split()[0]
         if hashlib.sha256(archive.read_bytes()).hexdigest() != expected:
             raise ValueError("evidence archive checksum mismatch")
-    manifest = json.loads(read_evidence("artifact-sha256.json", root))
+    manifest = json.loads(read_evidence(ARTIFACT_MANIFEST, root))
     for name, digest in manifest.items():
         if hashlib.sha256(read_evidence(name, root)).hexdigest() != digest:
             raise ValueError(f"evidence checksum mismatch: {name}")
@@ -187,9 +187,9 @@ def hashes() -> None:
     rows = {
         p.relative_to(BUNDLE).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
         for p in sorted(BUNDLE.rglob("*"))
-        if p.is_file() and p.name != "artifact-sha256.json"
+        if p.is_file() and p.name != ARTIFACT_MANIFEST
     }
-    (BUNDLE / "artifact-sha256.json").write_text(
+    (BUNDLE / ARTIFACT_MANIFEST).write_text(
         json.dumps(rows, indent=2) + "\n", encoding="utf-8"
     )
 

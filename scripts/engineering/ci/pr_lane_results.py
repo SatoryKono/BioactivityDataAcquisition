@@ -158,12 +158,17 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
     "tests/architecture/test_root_hygiene_review_registry.py"
 )
 
+RUNTIME_ACCEPTANCE_12553_TEST = (
+    "tests/unit/scripts/engineering/qa/test_runtime_acceptance_12553.py"
+)
+
+
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".github/workflows/runtime-acceptance-12553.yml": (
         "tests/architecture/test_github_actions_runtime_policy.py",
         "tests/architecture/test_gha_disabled_map_10263.py",
         "tests/architecture/test_actions_artifact_storage_policy.py",
-        "tests/unit/scripts/engineering/qa/test_runtime_acceptance_12553.py",
+        RUNTIME_ACCEPTANCE_12553_TEST,
     ),
     **dict.fromkeys(
         (
@@ -171,7 +176,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "scripts/engineering/qa/runtime_acceptance_12553_coverage.py",
             "tests/helpers/runtime_acceptance_12553.py",
         ),
-        ("tests/unit/scripts/engineering/qa/test_runtime_acceptance_12553.py",),
+        (RUNTIME_ACCEPTANCE_12553_TEST,),
     ),
     **dict.fromkeys(
         (
@@ -1249,7 +1254,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "reports/audit-runs/12553-runtime-acceptance/": (
-        "tests/unit/scripts/engineering/qa/test_runtime_acceptance_12553.py",
+        RUNTIME_ACCEPTANCE_12553_TEST,
         "tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_glob_walk.py",
         "tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock.py",
         "tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock_negative.py",
