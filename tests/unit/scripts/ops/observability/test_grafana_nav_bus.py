@@ -16,6 +16,28 @@ from scripts.ops.observability.grafana import render_nav_bus as nav_bus
 pytestmark = pytest.mark.unit
 
 
+def test_incident_tail_packs_cards_with_rows_without_gaps_or_drift() -> None:
+    from copy import deepcopy
+
+    fixed = _panel(
+        2020, "row", y=17, height=1, nested=[_panel(2007, "text", y=18, height=29)]
+    )
+    visibility = _panel(8809, "row", y=56, height=1, nested=[])
+    fleet = _panel(8808, "row", y=57, height=1, nested=[])
+    cards = [_panel(pid, "text", y=53, height=3) for pid in (9460, 9452)]
+    for x, panel in zip((0, 12), cards, strict=True):
+        panel["gridPos"].update(x=x, w=12)
+    payload = {
+        "uid": "bioetl-incident-v1",
+        "panels": [fixed, visibility, fleet, *cards],
+    }
+    nav_bus._pack_incident_tail_rows(payload)
+    assert [p["gridPos"]["y"] for p in (visibility, fleet, *cards)] == [47, 48, 49, 49]
+    before = deepcopy(payload)
+    nav_bus._pack_incident_tail_rows(payload)
+    assert payload == before
+
+
 def test_incident_observability_check_is_read_only_and_detects_drift(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

@@ -21,6 +21,11 @@ Numeric encodings are source-specific: use the panel's labelled value mapping,
 not a shared numeric enum. In particular, workflow input priority and domain
 status gauges have different encodings.
 
+| Panel / source | Numeric mapping |
+| --- | --- |
+| Monitor Scope Status (9401), Monitor Pipeline Status (18940): `bioetl_workflow_scope_priority_by_input` | 0=OK, 1=UNKNOWN, 2=WARN, 3=CRIT; null=UNKNOWN |
+| Monitor Telemetry (907): clamped `bioetl_control_plane_telemetry_missing_5m` | 0=OK, 1=WARN, >=2=CRIT; null=UNKNOWN. These are missing telemetry groups, not failed runs. |
+
 Real zero requires an actual observed sample and its unit, scope and window.
 Do not insert synthetic zeroes to hide missing evidence. `VALID_EMPTY` / `VALID
 EMPTY` is justified empty output only with the panel's documented evidence
