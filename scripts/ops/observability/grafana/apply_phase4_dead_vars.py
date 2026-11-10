@@ -189,17 +189,23 @@ def _ensure_timepicker(data: dict[str, Any]) -> bool:
             timepicker["refresh_intervals"] = desired
             changed = True
 
-    # Enforce Run Type default
-    templating = data.get("templating", {}).get("list")
-    if isinstance(templating, list):
-        for var in templating:
-            if isinstance(var, dict) and var.get("name") == "run_type":
-                current_var = var.get("current")
-                desired_current = {"selected": True, "text": "All", "value": "$__all"}
-                if current_var != desired_current:
-                    var["current"] = desired_current
-                    changed = True
+    return _ensure_run_type_default(data) or changed
 
+
+def _ensure_run_type_default(data: dict[str, Any]) -> bool:
+    variables = data.get("templating", {}).get("list")
+    if not isinstance(variables, list):
+        return False
+    changed = False
+    desired = {"selected": True, "text": "All", "value": "$__all"}
+    for variable in variables:
+        if (
+            isinstance(variable, dict)
+            and variable.get("name") == "run_type"
+            and variable.get("current") != desired
+        ):
+            variable["current"] = desired.copy()
+            changed = True
     return changed
 
 
