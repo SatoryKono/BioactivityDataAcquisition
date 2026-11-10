@@ -306,6 +306,60 @@ const page={
     assert 999 not in evidence["tileScrollAtShot"]
 
 
+def test_cell_not_mounted_retries_on_later_scroll_tile(tmp_path: Path) -> None:
+    """CELL_NOT_MOUNTED must not permanently block Inspect on later tiles."""
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    program = r"""
+const fs=require('fs');
+const path=require('path');
+const {captureInspectedValues,mergeInspected}=require(process.argv[1]);
+const zoom=require(path.join(path.dirname(process.argv[1]),'native_browser_zoom.cjs'));
+zoom.capturePageScreenshot=async(page,options)=>{
+  const b=Buffer.from('inspect');fs.writeFileSync(options.path,b);return b;
+};
+let mounted=false;
+const cell={
+  count:async()=>mounted?1:0,evaluate:async()=>'delayed',
+  scrollIntoViewIfNeeded:async()=>{},hover:async()=>{},
+  getByRole:()=>({count:async()=>1,click:async()=>{}}),
+};
+const root={locator:()=>({filter:()=>({first:()=>cell})})};
+const pre={waitFor:async()=>{},innerText:async()=>'delayed'};
+const dialog={filter(){return this;},locator:()=>pre};
+const page={getByRole:role=>role==='dialog'?dialog:{waitFor:async()=>{},click:async()=>{}}};
+const opts={dir:process.argv[2],index:1,outputDir:process.argv[2],pngEvidence:()=>({}),
+  timeout:100,noValue:null,seen:new Set(),inspectCounter:{n:0}};
+(async()=>{
+  const first=await captureInspectedValues(page,root,[{text:'delayed',clipped:true,role:'gridcell'}],opts);
+  mounted=true;
+  const second=await captureInspectedValues(page,root,[{text:'delayed',clipped:true,role:'gridcell'}],opts);
+  console.log(JSON.stringify({merged:mergeInspected(first,second)}));
+})().catch(error=>console.log(JSON.stringify({error:error.message})));
+"""
+    result = subprocess.run(
+        [
+            node,
+            "-e",
+            program,
+            str(
+                Path(
+                    "scripts/ops/observability/grafana/capture_table_pages.cjs"
+                ).resolve()
+            ),
+            str(tmp_path),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    evidence = json.loads(result.stdout)
+    assert "error" not in evidence, evidence
+    assert evidence["merged"][0]["status"] == "VERIFIED"
+
+
 @pytest.mark.parametrize(
     "inspect_status,passes",
     [

@@ -84,12 +84,13 @@ async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pn
   const values=[...new Set(cells.filter(c=>c.clipped && c.role!=='columnheader').map(c=>c.text))]
     .filter(text => !known.has(text));
   await sequential(values, async text => {
-    known.add(text);
     // The accessible name also contains the Inspect button's label.
     const cell=root.locator('[role="gridcell"]').filter({hasText:new RegExp('^'+text.replace(/[.*+?^${}()|[\]\\]/g,String.raw`\$&`)+'$')}).first();
     if(!await cell.count()){
+      // Leave unseen so a later scroll tile can still mount and Inspect this value.
       results.push({text,status:'CELL_NOT_MOUNTED'});return;
     }
+    known.add(text);
     if(await cell.evaluate(el=>el.textContent)!==text)throw new Error('Selected cell differs from requested value');
     await cell.scrollIntoViewIfNeeded({timeout});
     await cell.hover();
