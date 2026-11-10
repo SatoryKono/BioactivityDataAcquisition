@@ -619,7 +619,19 @@ def _stamp_select_run_column_maps(
         if not field:
             continue
         _override(panel, field, "links", [])
-        _override(panel, field, "mappings", select_run_map)
+        if field == verdict:
+            verdict_options = {
+                **select_run_map[0]["options"],
+                "QUERY ERROR": {"text": "Source unavailable", "color": "red"},
+            }
+            _override(
+                panel,
+                field,
+                "mappings",
+                [{"type": "value", "options": verdict_options}],
+            )
+        else:
+            _override(panel, field, "mappings", select_run_map)
 
 
 def _stamp_legacy_rules_evidence_overrides(panel: dict, rename: dict[str, str]) -> None:

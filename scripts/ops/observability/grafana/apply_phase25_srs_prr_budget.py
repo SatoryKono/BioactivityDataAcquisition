@@ -899,13 +899,12 @@ def apply_overview(data: dict[str, Any]) -> None:
     defaults = check.setdefault("fieldConfig", {}).setdefault("defaults", {})
     mappings = defaults.setdefault("mappings", [])
     if mappings and isinstance(mappings[0].get("options"), dict):
-        # F-03 / §1.2: Cached Bronze → —; request failure must stay QUERY ERROR
-        # (not UNKNOWN) so operators do not treat transport failure as N/A.
+        # Preserve the red failure color for the projected value and legacy frames.
         options = mappings[0]["options"]
         options.setdefault("—", {"text": "—", "color": "gray"})
-        options.setdefault(
-            "QUERY ERROR", {"text": "Source unavailable", "color": "red"}
-        )
+        unavailable = {"text": "Source unavailable", "color": "red"}
+        options["QUERY ERROR"] = unavailable
+        options["Source unavailable"] = unavailable
     recon = _by_id(data, 9483)
     if not any(t.get("id") == "organize" for t in recon.get("transformations") or []):
         recon.setdefault("transformations", []).append(

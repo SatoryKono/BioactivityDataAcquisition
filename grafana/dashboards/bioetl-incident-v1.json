@@ -2698,6 +2698,10 @@
                             "text": "—",
                             "color": "text"
                           },
+                          "QUERY ERROR": {
+                            "text": "Source unavailable",
+                            "color": "red"
+                          },
                           "НЕТ ЗАПУСКОВ": {
                             "text": "НЕТ ЗАПУСКОВ",
                             "color": "gray"

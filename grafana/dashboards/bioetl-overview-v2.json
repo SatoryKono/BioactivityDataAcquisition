@@ -576,7 +576,7 @@
                   "color": "gray"
                 },
                 "QUERY ERROR": {
-                  "text": "QUERY ERROR",
+                  "text": "Source unavailable",
                   "color": "red"
                 },
                 "SELECT RUN": {
@@ -982,6 +982,10 @@
                       "SELECT RUN": {
                         "text": "—",
                         "color": "text"
+                      },
+                      "QUERY ERROR": {
+                        "text": "Source unavailable",
+                        "color": "red"
                       },
                       "НЕТ ЗАПУСКОВ": {
                         "text": "НЕТ ЗАПУСКОВ",
@@ -1715,6 +1719,10 @@
                 "INCOMPLETE": {
                   "text": "INCOMPLETE",
                   "color": "orange"
+                },
+                "Source unavailable": {
+                  "text": "Source unavailable",
+                  "color": "red"
                 }
               }
             },

@@ -115,7 +115,12 @@ def apply_overall_verdict(payload: dict) -> None:
                     {
                         "type": "value",
                         "options": {
-                            value: {"text": value, "color": color}
+                            value: {
+                                "text": "Source unavailable"
+                                if value == "QUERY ERROR"
+                                else value,
+                                "color": color,
+                            }
                             for value, color in {
                                 "OK": "green",
                                 "WARN": "yellow",
