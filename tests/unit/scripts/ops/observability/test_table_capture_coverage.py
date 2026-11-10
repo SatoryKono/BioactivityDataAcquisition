@@ -82,7 +82,7 @@ const roots=Object.fromEntries([1,2].map(id=>[id,{
     focus:async()=>{active=id;},click:async()=>{states[id]--;}})
 }]));
 const page={locator:selector=>roots[Number(selector.match(/panel-(\d+)/)[1])],
-  keyboard:{press:async()=>{if(!stalled)states[active]++;}},
+  keyboard:{press:async()=>{states[active]++;}},
   waitForTimeout:async()=>{},waitForFunction:async(fn,args,options)=>{
     if(!(options.timeout>0))throw Error('unbounded transition timeout');
     if(stalled)throw Error('page did not advance');}};
