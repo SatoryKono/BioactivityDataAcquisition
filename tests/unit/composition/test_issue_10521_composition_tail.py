@@ -44,7 +44,7 @@ from bioetl.composition.runtime_builders.config_access import (
     load_dq_config_for_pipeline,
 )
 from bioetl.composition.runtime_builders.run_manifest_data_roots import (
-    _private_fallback_data_root_with_mode,
+    private_fallback_data_root_with_mode,
 )
 from bioetl.composition.services.effective_config_serializer import (
     EffectiveConfigSerializer,
@@ -406,10 +406,10 @@ def test_exact_replay_and_small_seams(monkeypatch: pytest.MonkeyPatch) -> None:
 
     preferred = Path.home() / ".cache" / "bioetl-data"
     monkeypatch.setattr(
-        "bioetl.composition.runtime_builders.run_manifest_data_roots._private_fallback_data_root",
+        "bioetl.composition.runtime_builders.run_manifest_data_roots.private_fallback_data_root",
         lambda: preferred,
     )
-    path, mode = _private_fallback_data_root_with_mode()
+    path, mode = private_fallback_data_root_with_mode()
     assert mode in {"private_cache", "tmp"}
     assert path == preferred or mode == "tmp"
 

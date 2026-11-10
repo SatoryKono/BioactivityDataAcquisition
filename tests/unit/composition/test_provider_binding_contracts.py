@@ -111,7 +111,7 @@ def test_windows_private_directory_check_does_not_apply_posix_mode_policy(
     tmp_path, monkeypatch
 ):
     monkeypatch.setattr(run_manifest_data_roots, "os", SimpleNamespace(name="nt"))
-    assert run_manifest_data_roots._assert_private_runtime_dir(tmp_path) is None
+    assert run_manifest_data_roots.assert_private_runtime_dir(tmp_path) is None
 
 
 def test_non_strict_cached_bronze_defers_validation_until_manifest_is_persisted(
