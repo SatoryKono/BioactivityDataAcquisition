@@ -418,9 +418,9 @@
             "minWidth": 50,
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
-            "wrapText": true,
+            "wrapText": false,
             "wrapHeaderText": true
           },
           "noValue": "UNKNOWN — required launch evidence is unavailable. QUERY ERROR means the backend request failed, not an empty fleet.",
@@ -467,7 +467,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -590,13 +590,13 @@
               },
               {
                 "id": "custom.wrapText",
-                "value": true
+                "value": false
               },
               {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -694,7 +694,7 @@
                 "value": {
                   "type": "color-text",
                   "mode": "basic",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -815,7 +815,7 @@
                 "value": {
                   "type": "color-text",
                   "mode": "basic",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -936,7 +936,7 @@
                 "value": {
                   "type": "color-text",
                   "mode": "basic",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -1061,7 +1061,7 @@
                 "value": {
                   "type": "color-text",
                   "mode": "basic",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {

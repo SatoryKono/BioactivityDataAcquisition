@@ -641,7 +641,7 @@
         "x": 0,
         "y": 5,
         "w": 15,
-        "h": 10
+        "h": 8
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -655,11 +655,11 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
             "inspect": true,
             "minWidth": 50,
-            "wrapText": true,
+            "wrapText": false,
             "wrapHeaderText": true
           },
           "links": [
@@ -929,10 +929,10 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
             "inspect": true,
-            "wrapText": true,
+            "wrapText": false,
             "minWidth": 50,
             "wrapHeaderText": true
           },
@@ -1017,7 +1017,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -1451,7 +1451,6 @@
             },
             "inspect": true,
             "minWidth": 50,
-            "wrapText": true,
             "wrapHeaderText": true
           }
         },
@@ -1824,11 +1823,10 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
             "inspect": true,
             "minWidth": 50,
-            "wrapText": true,
             "wrapHeaderText": true
           }
         },

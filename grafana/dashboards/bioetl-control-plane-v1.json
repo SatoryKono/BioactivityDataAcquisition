@@ -671,13 +671,9 @@
           "noValue": "UNKNOWN",
           "custom": {
             "inspect": true,
-            "wrapText": true,
+            "wrapText": false,
             "minWidth": 50,
-            "wrapHeaderText": true,
-            "cellOptions": {
-              "type": "auto",
-              "wrapText": true
-            }
+            "wrapHeaderText": true
           }
         },
         "overrides": [
@@ -858,11 +854,11 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
             "inspect": true,
             "minWidth": 50,
-            "wrapText": true,
+            "wrapText": false,
             "wrapHeaderText": true
           },
           "unit": "none",
@@ -931,7 +927,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -958,7 +954,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -985,7 +981,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -1016,7 +1012,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               }
             ]
@@ -1051,7 +1047,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -1112,7 +1108,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -1196,7 +1192,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -1415,11 +1411,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": true,
+                "wrapText": false,
                 "wrapHeaderText": true
               },
               "unit": "none",
@@ -1718,11 +1714,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": true,
+                "wrapText": false,
                 "wrapHeaderText": true
               },
               "unit": "none",
@@ -1769,7 +1765,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -1869,7 +1865,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -2069,7 +2065,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -2116,7 +2112,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -2177,7 +2173,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -2440,7 +2436,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -2601,7 +2597,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -2758,11 +2754,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": true,
+                "wrapText": false,
                 "wrapHeaderText": true
               },
               "unit": "none",
@@ -3061,11 +3057,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": true,
+                "wrapText": false,
                 "wrapHeaderText": true
               },
               "unit": "none",
@@ -3343,7 +3339,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -3362,7 +3358,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -3385,7 +3381,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -3416,7 +3412,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -3445,7 +3441,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -3464,7 +3460,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -3479,7 +3475,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
