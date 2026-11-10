@@ -163,7 +163,7 @@ def test_replay_status_panels_resolve_donor_and_explain_empty_values() -> None:
         assert panel["fieldConfig"]["defaults"]["noValue"] == (
             "UNKNOWN"
             if panel_id == 9422
-            else "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
+            else "SELECT RUN if no Run ID is selected. Source unavailable if the request failed."
         )
 
 

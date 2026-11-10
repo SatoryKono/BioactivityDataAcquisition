@@ -68,7 +68,7 @@ def test_provider_status_uses_filtered_vectors_in_severity_order():
     assert value_maps["QUERY ERROR"]["color"] == "red"
     description = panel["description"]
     assert "not live fleet health" in description
-    assert "QUERY ERROR" in description
+    assert "Source unavailable" in description
     assert "VALID EMPTY" in description
     assert "SELECT RUN" in description
     # Align with Review Provider Evidence: Cached Bronze → —, not raw check_result.

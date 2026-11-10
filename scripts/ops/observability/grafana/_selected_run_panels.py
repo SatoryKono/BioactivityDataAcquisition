@@ -9,7 +9,7 @@ from scripts.ops.observability.grafana.dashboard_context_links import build_hand
 STATUS_URL = "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
 DESCRIPTION = (
     "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; "
-    "missing selection is SELECT RUN; request failure is QUERY ERROR. "
+    "missing selection is SELECT RUN; request failure is Source unavailable. "
     "N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. "
     "This saved verdict does not authorize replay."
 )
@@ -307,7 +307,7 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
             "A recorded zero stays 0. An unknown count is empty, not 0. "
             "UNFINISHED means no terminal event. "
             "Prometheus does not change this table. "
-            "Request failure is QUERY ERROR."
+            "Request failure is Source unavailable."
         ),
         "options": {
             "showHeader": True,
@@ -525,9 +525,7 @@ def _append_saved_run_evidence_row(
         )
         children.append(deepcopy(summary))
     else:
-        empty = (
-            "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
-        )
+        empty = "SELECT RUN if no Run ID is selected. Source unavailable if the request failed."
         details["description"] = (
             "SELECTED RUN · Domain reasons for this Run ID. "
             "Open this table from View trust reasons only when the reason count is greater than zero."
@@ -619,7 +617,7 @@ def _provider_check_panel(
         "SELECTED RUN · Saved provider check for this Run ID. "
         "PRESENT means applicable saved evidence exists, not that the check passed. "
         "Run ID is always set on this dashboard. A report without a provider id is not OK. "
-        "Valid-empty evidence stays VALID EMPTY. Request failure is QUERY ERROR."
+        "Valid-empty evidence stays VALID EMPTY. Request failure is Source unavailable."
     )
     panel["targets"][0]["root_selector"] = "provider_checks"
     labels = {
@@ -703,7 +701,7 @@ def _style_provider_check(panels: list[dict]) -> None:
         "Cached Bronze (provider API not called) shows —. Missing evidence stays "
         "UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health."
         " SELECT RUN means no Run ID is selected. VALID EMPTY means no saved "
-        "provider check. QUERY ERROR means backend unavailable or request failure."
+        "provider check. Source unavailable means backend unavailable or request failure."
     )
     # Align with Review Provider Evidence: display field, not raw check_result.
     review["transformations"] = [
@@ -738,7 +736,7 @@ def _style_provider_check(panels: list[dict]) -> None:
                         "FAIL": {"text": "FAIL", "color": "red"},
                         "FAILING": {"text": "FAILING", "color": "red"},
                         "CRIT": {"text": "CRIT", "color": "red"},
-                        "QUERY ERROR": {"text": "QUERY ERROR", "color": "red"},
+                        "QUERY ERROR": {"text": "Source unavailable", "color": "red"},
                         "UNKNOWN": {"text": "UNKNOWN", "color": "gray"},
                         "N/A": {"text": "N/A", "color": "gray"},
                         "—": {"text": "—", "color": "gray"},

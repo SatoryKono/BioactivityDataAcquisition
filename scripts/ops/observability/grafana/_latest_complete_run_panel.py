@@ -32,7 +32,7 @@ def stamp_latest_complete_run_panel(panels: list[object]) -> None:
             "defaults": {
                 "noValue": (
                     "SELECT RUN if no Run ID is selected. "
-                    "QUERY ERROR if the request failed."
+                    "Source unavailable if the request failed."
                 ),
                 # Grafana's table auto-height reads the first string cell's
                 # .length without a null guard when default wrapText is true.
