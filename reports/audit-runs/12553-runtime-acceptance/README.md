@@ -36,3 +36,11 @@ Historical 12106-s4/s5/s6 crash notes were inspected, not rerun or promoted to
 current-head shutdown proof. No 12469/12479 raw bundle was found by the bounded
 tracked reports-path search; their applicability is NOT_VERIFIABLE here. Native
 commit/crash sweeps are not duplicated by this change.
+
+The current qualified-* reruns include input hashes and are preferred by the
+register. JSON.gz files are lossless gzip encodings of JSON; event indexes still
+address the decompressed events array. Both refresh sequences and their exits
+are preserved, including failures. The final stable sequence is 1/0/0. Successful
+refresh is measured before the mandatory restoration of generated files to main.
+The branch-scoped workflow produces separate exact-head evidence; its published
+artifact result must be verified, rather than inferred from this README.

@@ -11,6 +11,7 @@ import asyncio
 import builtins
 from concurrent.futures import ThreadPoolExecutor
 import functools
+import gzip
 import io
 import json
 import os
@@ -220,7 +221,7 @@ def pytest_runtest_logreport(report):
 def pytest_sessionfinish(exitstatus):
     PATCH.undo()
     output = Path(os.environ["BIOETL_12553_EVENTS"])
-    output.write_text(
+    encoded = (
         json.dumps(
             {
                 "pytest_exit_code": int(exitstatus),
@@ -229,6 +230,8 @@ def pytest_sessionfinish(exitstatus):
             },
             indent=2,
         )
-        + "\n",
-        encoding="utf-8",
+        + "\n"
+    ).encode("utf-8")
+    output.write_bytes(
+        gzip.compress(encoded, mtime=0) if output.suffix == ".gz" else encoded
     )

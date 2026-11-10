@@ -7,6 +7,7 @@ neither a green suite nor a matching test name certifies all scenario barriers.
 from __future__ import annotations
 
 import hashlib
+import gzip
 import json
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -64,7 +65,17 @@ def build() -> dict:
     evidence: dict[str, list[dict]] = defaultdict(list)
     for run in RUNS:
         path = BUNDLE / f"{run}-events.json"
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        qualified = BUNDLE / f"qualified-{run}-events.json.gz"
+        if qualified.exists():
+            path = qualified
+        elif path.with_suffix(".json.gz").exists():
+            path = path.with_suffix(".json.gz")
+        raw = (
+            gzip.decompress(path.read_bytes())
+            if path.suffix == ".gz"
+            else path.read_bytes()
+        )
+        payload = json.loads(raw)
         for index, event in enumerate(payload["events"]):
             for identity in event["identities"]:
                 if identity not in identities:
@@ -119,12 +130,12 @@ def build() -> dict:
             "observed_sites": sorted(observed_sites),
             "trace_refs": sorted({e["trace"].split("#")[0] for e in observed}),
             "event_indexes": {
-                run: [
+                filename: [
                     int(e["trace"].split("/")[-1])
                     for e in observed
-                    if e["trace"].startswith(run + "-events.json#")
+                    if e["trace"].startswith(filename + "#")
                 ]
-                for run in RUNS
+                for filename in sorted({e["trace"].split("#")[0] for e in observed})
             },
             "remaining_observations": remaining,
             "scenarios": {

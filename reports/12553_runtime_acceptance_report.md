@@ -34,10 +34,45 @@ sites. All five original scenario expectations are retained. Traces observe real
 file/task/executor/iterator lifetimes. Full scenario-barrier acceptance remains
 NOT_VERIFIABLE; a green test or a test name is not promoted to runtime PASS.
 
-## K5: work in progress
+## K5: actual refresh evidence
 
-Actual ARTIFACT_REFRESH check/update/check and final status will follow.
-No clean-tree or successful refresh claim is made before those commands run.
+The original artifact-refresh-check-before/update/check-after sequence exited
+1/0/1; its final failure reported test-governance input drift while the observer
+was still being finalized. Those genuine failure logs are retained.
+The stable artifact-refresh-final-check-before/update/check-after sequence
+exited 1/0/0, with CHECK: governance artifacts current in the final stdout.
+All six commands have separate raw stdout/stderr and exit-code/command files.
+Generated outputs are restored to origin/main after validation, as explicitly
+required by the task. The successful refresh describes the measured temporary
+generated state; it does not assert freshness after restoration.
+Local clean-status evidence is captured at a committed checkpoint; exact final
+head status and SHA/tree are recorded by the branch-scoped CI artifact.
+
+## Validation and boundaries
+
+Latest local owning groups: files/config 862 passed, 7 skipped; tasks/executors
+85 passed; storage/export 159 passed, 4 skipped; HTTP/telemetry 232 passed;
+health/composition 1016 passed, 4 skipped; unchanged review controls 5 passed.
+Windows skips include fcntl and symlink privileges and remain explicit.
+Evidence contracts plus unchanged K3 tests: 132 passed. Final gzip-register
+contracts: 3 passed. Ruff, full docs links, docs drift and full-tree gate passed.
+Earlier docs-links failures caused by the new workflow catalog entry are retained;
+docs-links-verified is the successful full rerun. Runtime mirrors are untouched;
+no mirror synchronization is needed. Debt budgets are unchanged after restoration.
+Memory pre-task was read-only; no memory post-task/session note was written.
+
+## Exact published-head evidence
+
+.github/workflows/runtime-acceptance-12553.yml checks out github.sha explicitly
+and reruns the owning suites with outputs outside the checkout. Its uploaded
+artifact runtime-12553-<full SHA> contains the same bundle path, checked-head-sha.txt,
+checked-tree-sha.txt, source/fixture/harness hashes, coverage register, streams,
+exit codes and final-worktree-status-stdout.txt. The PR passport supplies the
+actual run/artifact URL and result once observed. Merely adding this workflow
+is not proof it ran or passed. It has no production endpoint dependency and
+its job is restricted to the task branch. Retire it after issue acceptance.
+Structured observations are stored losslessly as JSON.gz to keep raw trace
+content while reducing checkout size.
 
 ## Revision semantics
 

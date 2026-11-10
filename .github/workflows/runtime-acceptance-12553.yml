@@ -1,0 +1,51 @@
+name: Runtime acceptance 12553 exact head
+
+on:
+  push:
+    branches: [codex/12553-runtime-evidence]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: runtime-12553-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  evidence:
+    if: github.ref == 'refs/heads/codex/12553-runtime-evidence'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: src:.
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Keep evidence outside the checked tree
+        run: echo "BIOETL_12553_BUNDLE=$RUNNER_TEMP/12553-evidence/reports/audit-runs/12553-runtime-acceptance" >> "$GITHUB_ENV"
+      - uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: '3.13'
+          uv-extras: dev tracing
+      - name: Execute owning suites at the checked head
+        run: .venv/bin/python -m scripts.engineering.qa.runtime_acceptance_12553 qualify
+      - name: Account for every inventory identity
+        if: always()
+        run: .venv/bin/python -m scripts.engineering.qa.runtime_acceptance_12553_coverage
+      - name: Record final identity, status and checksums
+        if: always()
+        run: |
+          .venv/bin/python -c 'from scripts.engineering.qa.runtime_acceptance_12553 import capture; raise SystemExit(capture("final-worktree-status", ["git", "status", "--porcelain=v1", "--untracked-files=normal"]))'
+          .venv/bin/python -m scripts.engineering.qa.runtime_acceptance_12553 hashes
+          test -z "$(git status --porcelain=v1 --untracked-files=normal)"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: runtime-12553-${{ github.sha }}
+          path: ${{ runner.temp }}/12553-evidence/
+          if-no-files-found: error
+          retention-days: 30

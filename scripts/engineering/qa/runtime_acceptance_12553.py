@@ -16,7 +16,11 @@ import sys
 from datetime import UTC, datetime
 
 ROOT = Path(__file__).resolve().parents[3]
-BUNDLE = ROOT / "reports/audit-runs/12553-runtime-acceptance"
+BUNDLE = Path(
+    os.environ.get(
+        "BIOETL_12553_BUNDLE", str(ROOT / "reports/audit-runs/12553-runtime-acceptance")
+    )
+)
 
 
 def inputs(argv: list[str]) -> dict[str, str]:
@@ -104,6 +108,50 @@ def hashes() -> None:
     )
 
 
+def qualify() -> int:
+    """Replay owning suites on this exact HEAD, with external output in CI."""
+    historical = ROOT / "reports/audit-runs/12553-runtime-acceptance"
+    codes = []
+    for previous in (
+        "files-config-final",
+        "tasks-executors",
+        "storage-export-final",
+        "http-telemetry",
+        "health-composition",
+        "review-controls",
+    ):
+        name = "qualified-" + previous
+        recorded = json.loads(
+            (historical / f"{previous}-command.json").read_text(encoding="utf-8")
+        )
+        argv = [sys.executable, *recorded["argv"][1:]]
+        argv = [
+            "--junitxml=" + str(BUNDLE / f"{name}-junit.xml")
+            if arg.startswith("--junitxml=")
+            else arg
+            for arg in argv
+        ]
+        os.environ["BIOETL_12553_EVENTS"] = str(BUNDLE / f"{name}-events.json.gz")
+        codes.append(capture(name, argv))
+    (BUNDLE / "checked-head-sha.txt").write_text(
+        git("rev-parse", "HEAD") + "\n", encoding="ascii"
+    )
+    (BUNDLE / "checked-tree-sha.txt").write_text(
+        git("rev-parse", "HEAD^{tree}") + "\n", encoding="ascii"
+    )
+    codes.append(
+        capture(
+            "runtime-versions",
+            [
+                sys.executable,
+                "-c",
+                "import importlib.metadata as m,json,platform;print(json.dumps({'python':platform.python_version(),'packages':sorted((d.metadata['Name'],d.version) for d in m.distributions())},indent=2))",
+            ],
+        )
+    )
+    return int(any(codes))
+
+
 def main() -> int:
     """Run one named command or refresh the evidence checksum manifest."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -114,6 +162,8 @@ def main() -> int:
     if args.name == "hashes":
         hashes()
         return 0
+    if args.name == "qualify":
+        return qualify()
     argv = args.argv[1:] if args.argv[:1] == ["--"] else args.argv
     if not argv:
         parser.error("command required after --")

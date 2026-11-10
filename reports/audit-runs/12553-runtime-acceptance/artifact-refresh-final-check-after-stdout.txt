@@ -1,0 +1,18 @@
+source-tree manifest ok: 23a8ac2301617976bcadedf996c126ce463b24469a94fab44c7692f06cc603a9
+[module-coverage-inventory] artifact is current
+[ok] architecture dependency docs are up to date
+[ok] hotspot-family baseline artifacts are up to date
+[dead-code-inventory] PASS: artifacts are up to date
+[ok] live residual snapshot non-growth holds: D:\github\BioactivityDataAcquisition-worktrees\cursor-rules-file-scope\reports\quality\live-residual-snapshot.json
+..                                                                       [100%]
++ D:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_source_tree_manifest --check
++ D:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_module_coverage_inventory --check --allow-missing-coverage-xml
++ D:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.generate_architecture_dependency_map --check
++ D:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_test_governance_audit --check
++ D:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_hotspot_family_baseline --check
++ D:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_dead_code_inventory --check
++ D:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_live_residual_snapshot --check
++ D:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_architecture_debt_remote_main_baseline --check
++ D:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa report-debt-governance-gates --check
++ D:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m pytest tests/architecture/test_module_coverage_inventory_freshness.py::test_module_coverage_inventory_source_tree_hash_is_current tests/architecture/test_quality_debt_scorecard.py::test_debt_scorecard_hotspot_family_metrics_match_committed_baseline -q --tb=no
+CHECK: governance artifacts current

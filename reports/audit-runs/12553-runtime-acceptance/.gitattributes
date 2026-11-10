@@ -1,3 +1,1 @@
-*.txt -text
-*.xml -text
-*.json -text
+* -text

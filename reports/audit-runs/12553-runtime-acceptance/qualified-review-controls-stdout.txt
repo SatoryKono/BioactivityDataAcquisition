@@ -1,0 +1,28 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.2.0, pluggy-1.6.0 -- D:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe
+hypothesis profile 'default'
+benchmark: 5.3.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: D:\github\BioactivityDataAcquisition-worktrees\cursor-rules-file-scope
+configfile: pyproject.toml
+plugins: anyio-4.14.2, hypothesis-6.170.13, archon-0.0.7, asyncio-1.4.1, benchmark-5.3.0, cov-7.1.0, recording-0.14.0, timeout-2.4.0, xdist-3.8.0, respx-0.23.1, syrupy-6.1.1, typeguard-4.5.2
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=module, asyncio_default_test_loop_scope=module
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 5 items
+
+tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock.py::test_reentrant_lock_normal_acquisition_and_release PASSED [ 20%]
+tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock.py::test_reentrant_lock_error_release PASSED [ 40%]
+tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock_negative.py::test_missing_release_detectable PASSED [ 60%]
+tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_glob_walk.py::test_directory_walk_normal PASSED [ 80%]
+tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_glob_walk.py::test_directory_glob_normal PASSED [100%]
+
+=================================== PASSES ====================================
+- generated xml file: D:\github\BioactivityDataAcquisition-worktrees\cursor-rules-file-scope\reports\audit-runs\12553-runtime-acceptance\qualified-review-controls-junit.xml -
+=========================== short test summary info ===========================
+PASSED tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock.py::test_reentrant_lock_normal_acquisition_and_release
+PASSED tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock.py::test_reentrant_lock_error_release
+PASSED tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock_negative.py::test_missing_release_detectable
+PASSED tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_glob_walk.py::test_directory_walk_normal
+PASSED tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_glob_walk.py::test_directory_glob_normal
+============================== 5 passed in 1.94s ==============================

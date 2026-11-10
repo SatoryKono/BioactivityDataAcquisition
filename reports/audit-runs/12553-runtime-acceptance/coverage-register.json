@@ -72,16 +72,12 @@
         "src/bioetl/application/composite/coordinator_planning.py:137"
       ],
       "trace_refs": [
-        "tasks-executors-events.json"
+        "qualified-tasks-executors-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [
+        "qualified-tasks-executors-events.json.gz": [
           50034
-        ],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -147,17 +143,13 @@
         "src/bioetl/application/core/batch_execution/run_service.py:89"
       ],
       "trace_refs": [
-        "tasks-executors-events.json"
+        "qualified-tasks-executors-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [
+        "qualified-tasks-executors-events.json.gz": [
           50032,
           50033
-        ],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -223,11 +215,10 @@
         "src/bioetl/application/core/derived_scan_budget.py:168"
       ],
       "trace_refs": [
-        "tasks-executors-events.json"
+        "qualified-tasks-executors-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [
+        "qualified-tasks-executors-events.json.gz": [
           0,
           1,
           2,
@@ -50251,10 +50242,7 @@
           50020,
           50021,
           50022
-        ],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -50320,11 +50308,10 @@
         "src/bioetl/application/core/lifecycle/heartbeat.py:81"
       ],
       "trace_refs": [
-        "tasks-executors-events.json"
+        "qualified-tasks-executors-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [
+        "qualified-tasks-executors-events.json.gz": [
           50023,
           50024,
           50025,
@@ -50334,10 +50321,7 @@
           50029,
           50030,
           50031
-        ],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -50403,13 +50387,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -50474,13 +50452,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -50545,13 +50517,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -50929,13 +50895,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -51006,10 +50966,10 @@
         "src/bioetl/infrastructure/audit/_file_audit_readers.py:99"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           490,
           491,
           492,
@@ -51059,11 +51019,7 @@
           546,
           547,
           548
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -51129,13 +51085,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -51200,13 +51150,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -51273,13 +51217,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -51344,13 +51282,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -51415,13 +51347,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -51486,13 +51412,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -51557,13 +51477,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -51628,13 +51542,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -51699,13 +51607,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -51770,13 +51672,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -51846,13 +51742,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -51919,13 +51809,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -51990,13 +51874,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -52061,16 +51939,12 @@
         "src/bioetl/composition/runtime_builders/cached_bronze_snapshot_support.py:33"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           2906
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -52136,16 +52010,12 @@
         "src/bioetl/composition/runtime_builders/cached_bronze_snapshot_support.py:85"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           2907
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -52211,13 +52081,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -52282,19 +52146,15 @@
         "src/bioetl/infrastructure/config/_composite_dq_externalization.py:41"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           15,
           21,
           23,
           25
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -52360,16 +52220,12 @@
         "src/bioetl/infrastructure/config/_composite_shared_policy_externalization.py:33"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           14
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -52435,11 +52291,11 @@
         "src/bioetl/infrastructure/config/base_config_loader.py:39"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           0,
           1,
           2,
@@ -52647,10 +52503,7 @@
           2072,
           2073
         ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           258,
           259,
           260,
@@ -53317,20 +53170,16 @@
         "src/bioetl/infrastructure/config/chembl_policy_registry_loader.py:250"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           8,
           9,
           10,
           11,
           12
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -53396,10 +53245,10 @@
         "src/bioetl/infrastructure/config/composite_config_api.py:80"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           13,
           16,
           17,
@@ -53409,11 +53258,7 @@
           22,
           24,
           26
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -53482,10 +53327,10 @@
         "src/bioetl/infrastructure/config/contract_registry_loader.py:65"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           54,
           56,
           58,
@@ -53523,11 +53368,7 @@
           2925,
           2926,
           2928
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -53593,13 +53434,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -53664,13 +53499,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -53735,10 +53564,10 @@
         "src/bioetl/infrastructure/config/entity_filter_metadata_registry.py:20"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           28,
           33,
           76,
@@ -53748,11 +53577,7 @@
           176,
           274,
           278
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -53818,17 +53643,13 @@
         "src/bioetl/infrastructure/config/enum_file_loader.py:56"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           177,
           178
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -53894,10 +53715,10 @@
         "src/bioetl/infrastructure/config/field_group_loader.py:54"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           179,
           180,
           181,
@@ -53914,11 +53735,7 @@
           192,
           193,
           194
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -53984,20 +53801,16 @@
         "src/bioetl/infrastructure/config/pipeline_config_api.py:62"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           27,
           29,
           38,
           39,
           75
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -54063,19 +53876,15 @@
         "src/bioetl/infrastructure/config/protein_class_target_type_loader.py:33"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           288,
           289,
           290,
           291
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -54141,16 +53950,12 @@
         "src/bioetl/infrastructure/config/publication_controlled_vocabulary_loader.py:44"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           292
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -54216,17 +54021,13 @@
         "src/bioetl/infrastructure/config/publication_type_classification_loader.py:47"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           293,
           294
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -54292,16 +54093,12 @@
         "src/bioetl/infrastructure/config/repository_source_environment.py:19"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           295
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -54367,10 +54164,10 @@
         "src/bioetl/infrastructure/config/workflow_config_api.py:80"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           296,
           297,
           298,
@@ -54435,11 +54232,7 @@
           357,
           358,
           359
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -54512,10 +54305,10 @@
         "src/bioetl/infrastructure/control_plane/_file_lineage_index.py:41"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           2898,
           2984,
           2986,
@@ -54546,11 +54339,7 @@
           3038,
           3045,
           3047
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -54619,13 +54408,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -54714,10 +54497,10 @@
         "src/bioetl/infrastructure/control_plane/_file_run_ledger_queries.py:81"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           574,
           575,
           576,
@@ -54819,11 +54602,7 @@
           4251,
           4253,
           4254
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -54895,19 +54674,15 @@
         "src/bioetl/infrastructure/control_plane/_file_run_manifest_persistence.py:213"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           4139,
           4148,
           4182,
           4241
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -54982,11 +54757,11 @@
         "src/bioetl/infrastructure/control_plane/_raw_run_manifest_inspection.py:67"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           2922,
           2924,
           3615,
@@ -55004,10 +54779,7 @@
           3674,
           3675
         ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           1069
         ]
       },
@@ -55091,10 +54863,10 @@
         "src/bioetl/infrastructure/control_plane/_run_manifest_scope_index.py:71"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           3187,
           3188,
           3193,
@@ -55313,11 +55085,7 @@
           4242,
           4243,
           4244
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -55385,10 +55153,10 @@
         "src/bioetl/infrastructure/control_plane/archive_assessment.py:84"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           690,
           827,
           1007,
@@ -55398,11 +55166,7 @@
           1643,
           1791,
           1928
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -55468,13 +55232,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -55548,11 +55306,11 @@
         "src/bioetl/infrastructure/control_plane/archive_run_reports.py:69"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           607,
           608,
           610,
@@ -56111,10 +55869,7 @@
           2749,
           2750
         ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           2951,
           2959,
           2967,
@@ -56211,10 +55966,10 @@
         "src/bioetl/infrastructure/control_plane/artifact_byte_comparison.py:51"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           549,
           550,
           551,
@@ -56223,11 +55978,7 @@
           554,
           555,
           556
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -56302,10 +56053,10 @@
         "src/bioetl/infrastructure/control_plane/file_archive_store.py:79"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           606,
           617,
           618,
@@ -57558,11 +57309,7 @@
           2767,
           2768,
           2769
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -57633,12 +57380,12 @@
         "src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_payloads.py:50"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json",
-        "storage-export-final-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz",
+        "qualified-storage-export-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           2772,
           2773,
           2776,
@@ -57718,18 +57465,16 @@
           4294,
           4295
         ],
-        "tasks-executors": [],
-        "storage-export-final": [
-          33,
-          34,
-          35
-        ],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           1031,
           1032,
           1033,
           1034
+        ],
+        "qualified-storage-export-final-events.json.gz": [
+          33,
+          34,
+          35
         ]
       },
       "remaining_observations": [],
@@ -57808,11 +57553,11 @@
         "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py:89"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           595,
           598,
           602,
@@ -57852,10 +57597,7 @@
           3793,
           3802
         ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           3320
         ]
       },
@@ -57923,13 +57665,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -57998,16 +57734,12 @@
         "src/bioetl/infrastructure/control_plane/file_historical_replay_universe_store.py:49"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           2981
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -58088,10 +57820,10 @@
         "src/bioetl/infrastructure/control_plane/file_lineage_store.py:356"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           2985,
           2987,
           2989,
@@ -58116,11 +57848,7 @@
           3042,
           3046,
           3048
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -58190,13 +57918,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -58265,19 +57987,15 @@
         "src/bioetl/infrastructure/control_plane/file_provider_health_evidence.py:99"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           3605,
           3606,
           3607,
           3608
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -58348,13 +58066,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -58433,10 +58145,10 @@
         "src/bioetl/infrastructure/control_plane/file_workflow_execution_state_store.py:131"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           4276,
           4277,
           4278,
@@ -58447,11 +58159,7 @@
           4283,
           4287,
           4288
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -58527,20 +58235,16 @@
         "src/bioetl/infrastructure/control_plane/file_workflow_ledger_store.py:157"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           3494,
           3495,
           3496,
           4290,
           4291
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -58608,13 +58312,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -58686,10 +58384,10 @@
         "src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py:220"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           4317,
           4318,
           4319,
@@ -58698,11 +58396,7 @@
           4322,
           4323,
           4325
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -58774,11 +58468,11 @@
         "src/bioetl/infrastructure/control_plane/replay_object_verifier.py:29"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           3679,
           3680,
           3683,
@@ -58850,10 +58544,7 @@
           3814,
           3815
         ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           3321,
           3322
         ]
@@ -58928,13 +58619,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -59005,12 +58690,10 @@
         "src/bioetl/infrastructure/export/csv_exporter_io_ops.py:32"
       ],
       "trace_refs": [
-        "storage-export-final-events.json"
+        "qualified-storage-export-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [
+        "qualified-storage-export-final-events.json.gz": [
           51,
           52,
           53,
@@ -59072,9 +58755,7 @@
           111,
           112,
           113
-        ],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -59146,13 +58827,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -59220,13 +58895,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -59291,13 +58960,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -59369,12 +59032,10 @@
         "src/bioetl/infrastructure/export/debug_export_ops.py:66"
       ],
       "trace_refs": [
-        "storage-export-final-events.json"
+        "qualified-storage-export-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [
+        "qualified-storage-export-final-events.json.gz": [
           114,
           116,
           117,
@@ -59538,9 +59199,7 @@
           345,
           347,
           348
-        ],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -59606,13 +59265,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -59681,16 +59334,12 @@
         "src/bioetl/infrastructure/export/export_writer_adapter.py:73"
       ],
       "trace_refs": [
-        "storage-export-final-events.json"
+        "qualified-storage-export-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [
+        "qualified-storage-export-final-events.json.gz": [
           351
-        ],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -59756,13 +59405,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -59827,13 +59470,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -59901,20 +59538,17 @@
         "src/bioetl/interfaces/http/_selected_run_artifact_probes.py:158"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           2062,
           2063,
           2069,
           2070
         ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           1418,
           1419,
           1438,
@@ -60208,20 +59842,17 @@
         "src/bioetl/interfaces/http/_selected_run_report_assessment.py:155"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           2060,
           2061,
           2067,
           2068
         ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           7,
           8,
           16,
@@ -60592,13 +60223,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -60663,13 +60288,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -60740,14 +60359,10 @@
         "src/bioetl/interfaces/http/run_report_ops.py:340"
       ],
       "trace_refs": [
-        "health-composition-events.json"
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           1293,
           1294,
           1295,
@@ -60841,13 +60456,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -60912,13 +60521,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -60983,13 +60586,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -61054,21 +60651,17 @@
         "src/bioetl/infrastructure/adapters/http/health.py:111"
       ],
       "trace_refs": [
-        "http-telemetry-events.json"
+        "qualified-http-telemetry-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [
+        "qualified-http-telemetry-events.json.gz": [
           0,
           1,
           2,
           3,
           4,
           5
-        ],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -61134,13 +60727,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -61205,13 +60792,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -61279,13 +60860,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -61350,10 +60925,10 @@
         "src/bioetl/infrastructure/audit/_file_audit_io.py:78"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           499,
           503,
           508,
@@ -61364,11 +60939,7 @@
           537,
           540,
           545
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -61436,13 +61007,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -61510,13 +61075,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -61584,10 +61143,10 @@
         "src/bioetl/infrastructure/checkpoint/metrics_rehydrate.py:71"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           457,
           459,
           463,
@@ -61599,11 +61158,7 @@
           487,
           489,
           3609
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -61669,18 +61224,14 @@
         "src/bioetl/infrastructure/config/contract_registry_loader.py:70"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           57,
           61,
           63
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -61746,12 +61297,12 @@
         "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_bronze_refs.py:62"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json",
-        "storage-export-final-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz",
+        "qualified-storage-export-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           2877,
           2881,
           2884,
@@ -61764,13 +61315,11 @@
           3512,
           3513
         ],
-        "tasks-executors": [],
-        "storage-export-final": [
-          31
-        ],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           1029
+        ],
+        "qualified-storage-export-final-events.json.gz": [
+          31
         ]
       },
       "remaining_observations": [],
@@ -61837,13 +61386,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -61908,12 +61451,12 @@
         "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_refs.py:130"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json",
-        "storage-export-final-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz",
+        "qualified-storage-export-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           2878,
           2882,
           2885,
@@ -61927,13 +61470,11 @@
           3506,
           3511
         ],
-        "tasks-executors": [],
-        "storage-export-final": [
-          32
-        ],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           1030
+        ],
+        "qualified-storage-export-final-events.json.gz": [
+          32
         ]
       },
       "remaining_observations": [],
@@ -62003,10 +61544,10 @@
         "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_surfaces.py:41"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           2770,
           2771,
           2774,
@@ -62072,11 +61613,7 @@
           2875,
           3051,
           3052
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -62142,21 +61679,17 @@
         "src/bioetl/infrastructure/control_plane/_file_run_ledger_queries.py:322"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           3137,
           3139,
           3144,
           3600,
           4250,
           4252
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -62222,13 +61755,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -62293,11 +61820,11 @@
         "src/bioetl/infrastructure/control_plane/archive_run_reports.py:55"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           609,
           613,
           636,
@@ -62417,10 +61944,7 @@
           2736,
           2748
         ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           3002,
           3123,
           3202,
@@ -62492,10 +62016,10 @@
         "src/bioetl/infrastructure/control_plane/file_archive_store.py:160"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           605,
           641,
           667,
@@ -62599,11 +62123,7 @@
           2678,
           2712,
           2744
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -62669,10 +62189,10 @@
         "src/bioetl/infrastructure/control_plane/file_archive_store.py:240"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           647,
           673,
           704,
@@ -62739,11 +62259,7 @@
           2685,
           2718,
           2751
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -62809,13 +62325,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -62880,17 +62390,13 @@
         "src/bioetl/infrastructure/control_plane/file_historical_replay_universe_store.py:44"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           2980,
           2982
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -62956,13 +62462,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -63027,11 +62527,11 @@
         "src/bioetl/infrastructure/control_plane/file_run_manifest_store.py:323"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           562,
           571,
           3294,
@@ -63046,10 +62546,7 @@
           4207,
           4228
         ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           1066,
           1537,
           1560
@@ -63119,11 +62616,11 @@
         "src/bioetl/infrastructure/control_plane/file_run_manifest_store.py:316"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           561,
           570,
           3293,
@@ -63138,10 +62635,7 @@
           4206,
           4227
         ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           1065,
           1536,
           1559
@@ -63211,20 +62705,16 @@
         "src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py:164"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           4264,
           4297,
           4299,
           4302,
           4304
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -63290,20 +62780,16 @@
         "src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py:141"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           4263,
           4296,
           4298,
           4301,
           4303
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -63369,18 +62855,14 @@
         "src/bioetl/infrastructure/export/csv_exporter.py:137"
       ],
       "trace_refs": [
-        "storage-export-final-events.json"
+        "qualified-storage-export-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [
+        "qualified-storage-export-final-events.json.gz": [
           104,
           105,
           349
-        ],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -63446,13 +62928,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -63527,13 +63003,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -63598,13 +63068,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -63669,18 +63133,14 @@
         "src/bioetl/infrastructure/locking/memory_lock.py:60"
       ],
       "trace_refs": [
-        "storage-export-final-events.json"
+        "qualified-storage-export-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [
+        "qualified-storage-export-final-events.json.gz": [
           352,
           353,
           354
-        ],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -63746,13 +63206,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -63817,13 +63271,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -63888,13 +63336,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -63961,13 +63403,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -64047,13 +63483,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -64118,13 +63548,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -64189,13 +63613,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -64265,13 +63683,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -64336,19 +63748,15 @@
         "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py:56"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           1988
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [
-        "files-config-final-events.json#/events/1988"
+        "qualified-files-config-final-events.json.gz#/events/1988"
       ],
       "scenarios": {
         "normal": {
@@ -64413,13 +63821,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -64491,18 +63893,14 @@
         "src/bioetl/infrastructure/storage/bronze_writer.py:299"
       ],
       "trace_refs": [
-        "storage-export-final-events.json"
+        "qualified-storage-export-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [
+        "qualified-storage-export-final-events.json.gz": [
           355,
           356,
           357
-        ],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -64568,13 +63966,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -64639,13 +64031,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -64710,13 +64096,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -64781,12 +64161,12 @@
         "src/bioetl/infrastructure/storage/file_metadata_index.py:67"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json",
-        "storage-export-final-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz",
+        "qualified-storage-export-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           563,
           564,
           572,
@@ -64975,26 +64355,7 @@
           4312,
           4315
         ],
-        "tasks-executors": [],
-        "storage-export-final": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12,
-          13,
-          14
-        ],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           1067,
           1068,
           1187,
@@ -65070,7 +64431,7 @@
           1538,
           1540,
           1561,
-          1562,
+          1563,
           1577,
           1578,
           1581,
@@ -65092,6 +64453,23 @@
           3192,
           3318,
           3319
+        ],
+        "qualified-storage-export-final-events.json.gz": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
         ]
       },
       "remaining_observations": [],
@@ -65158,13 +64536,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -65229,13 +64601,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -65300,13 +64666,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -65371,13 +64731,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -65442,13 +64796,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -65513,13 +64861,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -65584,13 +64926,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -65655,13 +64991,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -65726,13 +65056,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -65797,17 +65121,13 @@
         "src/bioetl/infrastructure/storage/support/checkpoint_writer.py:209"
       ],
       "trace_refs": [
-        "storage-export-final-events.json"
+        "qualified-storage-export-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [
+        "qualified-storage-export-final-events.json.gz": [
           24,
           25
-        ],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -65873,13 +65193,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -65947,13 +65261,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -66023,13 +65331,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -66097,13 +65399,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -66168,13 +65464,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -66239,13 +65529,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -66310,13 +65594,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -66381,14 +65659,10 @@
         "src/bioetl/interfaces/http/_control_plane_selector_records.py:85"
       ],
       "trace_refs": [
-        "health-composition-events.json"
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           244,
           245,
           246,
@@ -66472,14 +65746,10 @@
         "src/bioetl/interfaces/http/_forensic_request_budget.py:177"
       ],
       "trace_refs": [
-        "health-composition-events.json"
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           252,
           262,
           263,
@@ -66600,7 +65870,7 @@
           1529,
           1539,
           1552,
-          1563,
+          1562,
           1573,
           1574,
           1575,
@@ -66733,13 +66003,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -66806,14 +66070,10 @@
         "src/bioetl/interfaces/http/_health_server_filter_options_payload.py:89"
       ],
       "trace_refs": [
-        "health-composition-events.json"
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           297,
           298,
           315,
@@ -67016,14 +66276,10 @@
         "src/bioetl/interfaces/http/_report_selector_options.py:281"
       ],
       "trace_refs": [
-        "health-composition-events.json"
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           503,
           1476,
           1478
@@ -67093,14 +66349,10 @@
         "src/bioetl/interfaces/http/_run_explorer_snapshot.py:170"
       ],
       "trace_refs": [
-        "health-composition-events.json"
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           304,
           324,
           343,
@@ -67227,14 +66479,10 @@
         "src/bioetl/interfaces/http/_selector_catalog.py:105"
       ],
       "trace_refs": [
-        "health-composition-events.json"
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           301,
           302,
           319,
@@ -67425,14 +66673,10 @@
         "src/bioetl/interfaces/http/_selector_catalog.py:86"
       ],
       "trace_refs": [
-        "health-composition-events.json"
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           299,
           317,
           337,
@@ -67561,14 +66805,10 @@
         "src/bioetl/interfaces/http/_selector_catalog.py:59"
       ],
       "trace_refs": [
-        "health-composition-events.json"
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           300,
           318,
           338,
@@ -67736,13 +66976,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -67807,14 +67041,10 @@
         "src/bioetl/interfaces/http/_selector_options_cache.py:123"
       ],
       "trace_refs": [
-        "health-composition-events.json"
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           295,
           313,
           333,
@@ -67958,14 +67188,10 @@
         "src/bioetl/interfaces/http/health_server.py:286"
       ],
       "trace_refs": [
-        "health-composition-events.json"
+        "qualified-health-composition-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           283,
           293,
           294,
@@ -68138,13 +67364,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -68212,13 +67432,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -68283,13 +67497,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -68356,13 +67564,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -68430,13 +67632,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -68510,13 +67706,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -68581,13 +67771,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -68660,13 +67844,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -68737,13 +67915,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -68818,12 +67990,12 @@
         "src/bioetl/infrastructure/storage/run_report_store_adapter.py:83"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json",
-        "storage-export-final-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz",
+        "qualified-storage-export-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           1990,
           1993,
           2541,
@@ -68831,12 +68003,7 @@
           2612,
           2615
         ],
-        "tasks-executors": [],
-        "storage-export-final": [
-          15
-        ],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           1,
           4,
           10,
@@ -69145,6 +68312,9 @@
           3347,
           3358,
           3361
+        ],
+        "qualified-storage-export-final-events.json.gz": [
+          15
         ]
       },
       "remaining_observations": [],
@@ -69211,13 +68381,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -69298,12 +68462,12 @@
         "src/bioetl/infrastructure/storage/support/checkpoint_writer.py:183"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json",
-        "storage-export-final-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz",
+        "qualified-storage-export-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           557,
           558,
           559,
@@ -70015,111 +69179,7 @@
           4316,
           4324
         ],
-        "tasks-executors": [],
-        "storage-export-final": [
-          16,
-          17,
-          18,
-          19,
-          20,
-          21,
-          22,
-          23,
-          26,
-          27,
-          28,
-          29,
-          36,
-          37,
-          38,
-          39,
-          40,
-          41,
-          42,
-          43,
-          44,
-          45,
-          46,
-          47,
-          48,
-          49,
-          50,
-          115,
-          119,
-          123,
-          127,
-          131,
-          135,
-          139,
-          143,
-          147,
-          151,
-          153,
-          157,
-          161,
-          165,
-          169,
-          173,
-          177,
-          181,
-          185,
-          189,
-          191,
-          195,
-          199,
-          203,
-          207,
-          211,
-          215,
-          219,
-          223,
-          227,
-          229,
-          233,
-          237,
-          241,
-          245,
-          249,
-          253,
-          257,
-          261,
-          265,
-          267,
-          271,
-          275,
-          279,
-          283,
-          287,
-          291,
-          295,
-          299,
-          302,
-          305,
-          306,
-          307,
-          308,
-          309,
-          310,
-          311,
-          312,
-          313,
-          314,
-          315,
-          316,
-          318,
-          322,
-          325,
-          327,
-          331,
-          334,
-          336,
-          340,
-          344,
-          346,
-          350
-        ],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           0,
           2,
           3,
@@ -70865,6 +69925,108 @@
           3360,
           3362,
           3363
+        ],
+        "qualified-storage-export-final-events.json.gz": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          26,
+          27,
+          28,
+          29,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50,
+          115,
+          119,
+          123,
+          127,
+          131,
+          135,
+          139,
+          143,
+          147,
+          151,
+          153,
+          157,
+          161,
+          165,
+          169,
+          173,
+          177,
+          181,
+          185,
+          189,
+          191,
+          195,
+          199,
+          203,
+          207,
+          211,
+          215,
+          219,
+          223,
+          227,
+          229,
+          233,
+          237,
+          241,
+          245,
+          249,
+          253,
+          257,
+          261,
+          265,
+          267,
+          271,
+          275,
+          279,
+          283,
+          287,
+          291,
+          295,
+          299,
+          302,
+          305,
+          306,
+          307,
+          308,
+          309,
+          310,
+          311,
+          312,
+          313,
+          314,
+          315,
+          316,
+          318,
+          322,
+          325,
+          327,
+          331,
+          334,
+          336,
+          340,
+          344,
+          346,
+          350
         ]
       },
       "remaining_observations": [],
@@ -70937,13 +70099,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -71016,13 +70172,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -71099,13 +70249,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -71246,13 +70390,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -71317,13 +70455,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -71394,13 +70526,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -71477,12 +70603,12 @@
         "src/bioetl/infrastructure/checkpoint/_local_checkpoint_io.py:55"
       ],
       "trace_refs": [
-        "files-config-final-events.json",
-        "health-composition-events.json",
-        "storage-export-final-events.json"
+        "qualified-files-config-final-events.json.gz",
+        "qualified-health-composition-events.json.gz",
+        "qualified-storage-export-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           360,
           361,
           362,
@@ -71605,12 +70731,7 @@
           488,
           3610
         ],
-        "tasks-executors": [],
-        "storage-export-final": [
-          30
-        ],
-        "http-telemetry": [],
-        "health-composition": [
+        "qualified-health-composition-events.json.gz": [
           286,
           287,
           288,
@@ -71870,6 +70991,9 @@
           1023,
           1027,
           1028
+        ],
+        "qualified-storage-export-final-events.json.gz": [
+          30
         ]
       },
       "remaining_observations": [],
@@ -71936,13 +71060,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -72010,13 +71128,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -72084,13 +71196,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -72155,13 +71261,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -72237,13 +71337,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -72334,13 +71428,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -72405,13 +71493,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -72511,13 +71593,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -72588,13 +71664,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -72663,13 +71733,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -72740,13 +71804,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -72811,13 +71869,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -72887,13 +71939,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -72966,13 +72012,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -73037,13 +72077,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -73108,13 +72142,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -73181,13 +72209,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -73252,13 +72274,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -73323,13 +72339,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -73394,13 +72404,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -73465,13 +72469,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -73543,13 +72541,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -73620,13 +72612,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -73691,13 +72677,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -73768,13 +72748,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -73870,10 +72844,10 @@
         "src/bioetl/infrastructure/observability/metric_inventory_scan.py:188"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           4328,
           4330,
           4331,
@@ -73920,11 +72894,7 @@
           4374,
           4375,
           4376
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -73990,16 +72960,12 @@
         "src/bioetl/infrastructure/observability/metric_inventory_discovery.py:43"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           4326
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -74068,19 +73034,15 @@
         "src/bioetl/infrastructure/observability/metric_inventory_scan.py:186"
       ],
       "trace_refs": [
-        "files-config-final-events.json"
+        "qualified-files-config-final-events.json.gz"
       ],
       "event_indexes": {
-        "files-config-final": [
+        "qualified-files-config-final-events.json.gz": [
           4327,
           4329,
           4345,
           4361
-        ],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
+        ]
       },
       "remaining_observations": [],
       "scenarios": {
@@ -74149,13 +73111,7 @@
         "review-controls-stdout.txt",
         "review-controls-junit.xml"
       ],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
@@ -74226,13 +73182,7 @@
       "observed_event_count": 0,
       "observed_sites": [],
       "trace_refs": [],
-      "event_indexes": {
-        "files-config-final": [],
-        "tasks-executors": [],
-        "storage-export-final": [],
-        "http-telemetry": [],
-        "health-composition": []
-      },
+      "event_indexes": {},
       "remaining_observations": [],
       "scenarios": {
         "normal": {
