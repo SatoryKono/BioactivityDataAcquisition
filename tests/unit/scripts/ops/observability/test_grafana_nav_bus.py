@@ -16,6 +16,20 @@ from scripts.ops.observability.grafana import render_nav_bus as nav_bus
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("panel_id", [138, 241, 243, 256, 908])
+def test_incident_unbounded_evidence_tables_keep_all_rows_accessible(
+    panel_id: int,
+) -> None:
+    from scripts.ops.observability.grafana._table_wrapping import apply_table_wrapping
+
+    panel = {"id": panel_id, "type": "table", "targets": [{"expr": "source_metric"}]}
+    apply_table_wrapping([panel])
+    assert panel["options"]["enablePagination"] is True
+    assert panel["options"]["footer"]["enablePagination"] is True
+    assert panel["targets"] == [{"expr": "source_metric"}]
+    assert not panel.get("transformations")
+
+
 def test_incident_tail_packs_cards_with_rows_without_gaps_or_drift() -> None:
     from copy import deepcopy
 

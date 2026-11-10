@@ -5621,7 +5621,8 @@
                 "sum"
               ],
               "countRows": false,
-              "fields": ""
+              "fields": "",
+              "enablePagination": true
             },
             "dataLinks": [
               {
@@ -5630,7 +5631,8 @@
                 "targetBlank": false,
                 "includeVars": false
               }
-            ]
+            ],
+            "enablePagination": true
           },
           "targets": [
             {
@@ -5772,7 +5774,8 @@
           "options": {
             "showHeader": true,
             "footer": {
-              "show": false
+              "show": false,
+              "enablePagination": true
             },
             "cellHeight": "sm",
             "dataLinks": [
@@ -5782,7 +5785,8 @@
                 "targetBlank": false,
                 "includeVars": false
               }
-            ]
+            ],
+            "enablePagination": true
           },
           "targets": [
             {
@@ -6795,8 +6799,10 @@
                 "sum"
               ],
               "countRows": false,
-              "fields": ""
-            }
+              "fields": "",
+              "enablePagination": true
+            },
+            "enablePagination": true
           },
           "targets": [
             {
@@ -8470,8 +8476,10 @@
                 "sum"
               ],
               "countRows": false,
-              "fields": ""
-            }
+              "fields": "",
+              "enablePagination": true
+            },
+            "enablePagination": true
           },
           "targets": [
             {
@@ -10332,9 +10340,11 @@
               "reducer": [
                 "sum"
               ],
-              "show": false
+              "show": false,
+              "enablePagination": true
             },
-            "showHeader": true
+            "showHeader": true,
+            "enablePagination": true
           },
           "pluginVersion": "10.4.0",
           "targets": [
