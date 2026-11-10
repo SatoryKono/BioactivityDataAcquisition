@@ -5,6 +5,7 @@ permissions:
 
 on:
   workflow_call:
+  workflow_dispatch:
 
 concurrency:
   group: codeql-${{ github.event.pull_request.number || github.sha }}
