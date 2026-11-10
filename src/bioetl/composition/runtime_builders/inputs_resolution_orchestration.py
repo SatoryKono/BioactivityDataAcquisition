@@ -100,7 +100,7 @@ def resolve_runner_filter_config(
     _log_filter_config(
         observability=observability,
         filter_config=filter_config,
-        from_cli=ctx.input_filter.enabled,
+        from_cli=not ctx.input_filter.is_disabled,
     )
     adjust_batch_size_for_filter_fn(
         yaml_config=yaml_config,
