@@ -49,9 +49,6 @@ retired dashboards must be removed explicitly after backup.
 
 ## Shipped dashboard surface (2026-07-28)
 
-**РЕШЕНИЕ**: поколение v2 — КАНОНИЧНОЕ. Isolated 100000 помечается legacy / «не использовать» во всех точках входа.
-
-
 **Five** dashboards under `grafana/dashboards/` (portfolio cap ≤7):
 
 0. `bioetl-control-plane-v1` — Trust / Control Plane Explorer
