@@ -78,14 +78,16 @@ def test_overview_stages_and_quality_are_outside_saved_evidence() -> None:
     assert "contract_exclusions_status" in donor["root_selector"]
     assert "contract_exclusions_status" in donor["uql"]
     # A1 SELECT RUN and A2 empty catalog must not collapse into UNKNOWN.
+    # Missing exclusion evidence stays the explicit «нет данных» state.
     select_guard = (
         "(verdict='SELECT RUN' or verdict='НЕТ ЗАПУСКОВ') ? verdict : "
-        "contract_exclusions_status"
+        "($exists(contract_exclusions_status) and contract_exclusions_status != '' "
+        "? contract_exclusions_status : 'нет данных')"
     )
     assert select_guard in donor["root_selector"]
     assert select_guard in donor["uql"]
-    assert "Choose a run" in donor["root_selector"]
-    assert "No runs in scope" in donor["root_selector"]
+    assert "не применимо — Choose a run" in donor["root_selector"]
+    assert "нет записей — No runs in scope" in donor["root_selector"]
     value_maps = [
         item.get("options") or {}
         for item in quality["fieldConfig"]["defaults"]["mappings"]
