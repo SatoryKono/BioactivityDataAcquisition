@@ -263,7 +263,10 @@ _OV_STAGES = _tag_rows("stage_diagnostics", "stages")
 _OV_RECON = (
     "($recon := $type(reconciliation_display) = 'array' ? reconciliation_display : []; "
     "$count($recon) > 0 ? "
-    "$map($recon, function($row){$merge([$row, {'_bioetl_frame': 'reconciliation'}])}) : "
+    "$map($recon, function($row){$merge([$row, "
+    "($row.result = 'UNKNOWN' and $row.meaning = 'no_runs_in_scope') ? "
+    "{'result': 'нет записей', 'meaning': 'нет записей — no runs in scope'} : {}, "
+    "{'_bioetl_frame': 'reconciliation'}])}) : "
     "[{'step_id': '—', 'mode': 'нет данных', 'scope': '—', 'pins': '—', 'limit': '—', "
     "'result': verdict = 'SELECT RUN' ? 'не применимо' : "
     "(verdict = 'НЕТ ЗАПУСКОВ' ? 'нет записей' : 'нет данных'), "

@@ -3004,6 +3004,6 @@ Isolated 100000 stays legacy / «не использовать». It is not a pr
 **N-L Read latency** (repository):
 
 *   Incident variable label is `Read latency quantile`. Option text is `p95 quantile`; the value stays `0.95` because `histogram_quantile` needs that number. The description states that `0.95` is the quantile, not the latency.
-*   Panel `111` `Track Global Read Latency` keeps unit `s`, sets axis label `seconds`, and suffixes the legend with `seconds`.
+*   Panel `111` `Track Global Read Latency` keeps unit `s` with auto-scaling (Grafana may display sub-second samples as `ms`); fixed axis and legend labels in `seconds` are removed.
 *   Replay Readiness JSON has no read-latency panel. The Isolated replay copy is not in the repository.
 *   **Live remainder `NOT_VERIFIABLE`:** Replay Isolated and the live Incident board were not rendered.
