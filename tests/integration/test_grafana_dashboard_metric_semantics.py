@@ -399,7 +399,7 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         "count in",
         "count out",
         "UNKNOWN",
-        "QUERY ERROR",
+        "Source unavailable",
     ):
         assert token in description
     assert "Skipped outcomes are hidden" in description
@@ -1415,7 +1415,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert processed["options"]["cellHeight"] == "sm"
     assert not any(t["id"] == "limit" for t in processed["transformations"])
     _assert_processed_records_target_contract(processed)
-    assert "QUERY ERROR" in processed["description"]
+    assert "Source unavailable" in processed["description"]
     assert processed["fieldConfig"]["defaults"]["custom"]["inspect"] is True
     organize = next(
         t["options"] for t in processed["transformations"] if t["id"] == "organize"
