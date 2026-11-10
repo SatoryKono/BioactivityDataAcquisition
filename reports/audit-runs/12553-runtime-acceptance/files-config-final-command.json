@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "-p",
+    "no:cacheprovider",
+    "-p",
+    "tests.helpers.runtime_acceptance_12553",
+    "-vv",
+    "-rA",
+    "-o",
+    "addopts=",
+    "--junitxml=reports/audit-runs/12553-runtime-acceptance/files-config-final-junit.xml",
+    "tests/unit/infrastructure/config",
+    "tests/unit/infrastructure/checkpoint",
+    "tests/unit/infrastructure/audit",
+    "tests/unit/infrastructure/control_plane",
+    "tests/unit/infrastructure/observability/metric_inventory"
+  ],
+  "cwd": "D:\\github\\BioactivityDataAcquisition-worktrees\\cursor-rules-file-scope",
+  "head_sha": "09f2c03181f3edf1b8368eeedb85cd3e2e613e39",
+  "tree_sha": "865839f988029e9a495e668b65f63d9c1bff5e7c",
+  "status_before": "?? tests/helpers/runtime_acceptance_12553.py",
+  "started_utc": "2026-11-10T17:21:25.799388+00:00",
+  "timeout_seconds": 600,
+  "timed_out": false,
+  "exit_code": 0,
+  "finished_utc": "2026-11-10T17:22:02.516753+00:00"
+}

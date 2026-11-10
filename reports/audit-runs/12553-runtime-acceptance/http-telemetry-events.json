@@ -1,0 +1,1245 @@
+{
+  "pytest_exit_code": 0,
+  "events": [
+    {
+      "node": "tests/unit/infrastructure/adapters/http/test_provider_scope.py::test_parallel_enrichers_share_two_attempts_and_keep_each_result[False]",
+      "identities": [
+        "infrastructure.adapters.http.health.HealthProbeCoordinator.run.task"
+      ],
+      "sites": [
+        "src/bioetl/infrastructure/adapters/http/health.py:111"
+      ],
+      "event": "task-created",
+      "handle_id": "task-0",
+      "done_after_teardown": true,
+      "cancelled_after_teardown": false
+    },
+    {
+      "node": "tests/unit/infrastructure/adapters/http/test_provider_scope.py::test_parallel_enrichers_share_two_attempts_and_keep_each_result[False]",
+      "identities": [
+        "infrastructure.adapters.http.health.HealthProbeCoordinator.run.task"
+      ],
+      "sites": [
+        "src/bioetl/infrastructure/adapters/http/health.py:111"
+      ],
+      "event": "task-created",
+      "handle_id": "task-1",
+      "done_after_teardown": true,
+      "cancelled_after_teardown": false
+    },
+    {
+      "node": "tests/unit/infrastructure/adapters/http/test_provider_scope.py::test_parallel_enrichers_share_two_attempts_and_keep_each_result[True]",
+      "identities": [
+        "infrastructure.adapters.http.health.HealthProbeCoordinator.run.task"
+      ],
+      "sites": [
+        "src/bioetl/infrastructure/adapters/http/health.py:111"
+      ],
+      "event": "task-created",
+      "handle_id": "task-2",
+      "done_after_teardown": true,
+      "cancelled_after_teardown": false
+    },
+    {
+      "node": "tests/unit/infrastructure/adapters/http/test_provider_scope.py::test_parallel_enrichers_share_two_attempts_and_keep_each_result[True]",
+      "identities": [
+        "infrastructure.adapters.http.health.HealthProbeCoordinator.run.task"
+      ],
+      "sites": [
+        "src/bioetl/infrastructure/adapters/http/health.py:111"
+      ],
+      "event": "task-created",
+      "handle_id": "task-3",
+      "done_after_teardown": true,
+      "cancelled_after_teardown": false
+    },
+    {
+      "node": "tests/unit/infrastructure/adapters/http/test_provider_scope.py::test_cancelled_waiter_does_not_cancel_other_child",
+      "identities": [
+        "infrastructure.adapters.http.health.HealthProbeCoordinator.run.task"
+      ],
+      "sites": [
+        "src/bioetl/infrastructure/adapters/http/health.py:111"
+      ],
+      "event": "task-created",
+      "handle_id": "task-4",
+      "done_after_teardown": true,
+      "cancelled_after_teardown": false
+    },
+    {
+      "node": "tests/unit/infrastructure/adapters/http/test_provider_scope.py::test_last_cancelled_waiter_drains_the_probe",
+      "identities": [
+        "infrastructure.adapters.http.health.HealthProbeCoordinator.run.task"
+      ],
+      "sites": [
+        "src/bioetl/infrastructure/adapters/http/health.py:111"
+      ],
+      "event": "task-created",
+      "handle_id": "task-5",
+      "done_after_teardown": true,
+      "cancelled_after_teardown": true
+    }
+  ],
+  "outcomes": {
+    "tests/unit/infrastructure/adapters/http/test_client_context_mixin.py::test_aenter_initializes_httpx_client_with_expected_headers": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_context_mixin.py::test_aenter_omits_optional_headers_when_values_absent": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_context_mixin.py::test_aexit_closes_client_and_resets_reference": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_context_mixin.py::test_read_timeout_uses_default_multiplier": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_context_mixin.py::test_read_timeout_uses_custom_multiplier": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_context_mixin.py::test_aenter_passes_explicit_trust_env_flag_to_httpx": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_context_mixin.py::test_reentrant_aenter_reuses_existing_client_until_outer_exit": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_context_mixin.py::test_get_client_raises_when_context_not_entered": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retries.py::test_unified_client_retries_on_protocol_error": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retries.py::test_unified_client_exhausts_retries_on_protocol_error": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retries.py::test_unified_client_bounds_timeout_attempts": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retries.py::test_unified_client_propagates_cancellation_without_retry": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::TestHTTPClientRetryRefactoring::test_should_continue_retry_on_success_response": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::TestHTTPClientRetryRefactoring::test_should_continue_retry_on_retryable_outcome": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::TestHTTPClientRetryRefactoring::test_should_continue_retry_on_non_retryable_outcome": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::TestHTTPClientRetryRefactoring::test_should_continue_retry_edge_cases": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::TestHTTPClientRetryRefactoring::test_request_with_retry_integration": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::TestHTTPClientRetryRefactoring::test_request_with_retry_exhausted": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::test_retry_after_supports_seconds_and_http_date_deterministically[7-now0-7.0]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::test_retry_after_supports_seconds_and_http_date_deterministically[999999-now1-60.0]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::test_retry_after_supports_seconds_and_http_date_deterministically[nan-now2-1.0]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::test_retry_after_supports_seconds_and_http_date_deterministically[inf-now3-1.0]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::test_retry_after_supports_seconds_and_http_date_deterministically[-1-now4-1.0]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::test_retry_after_supports_seconds_and_http_date_deterministically[bad date-now5-1.0]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::test_retry_after_supports_seconds_and_http_date_deterministically[-now6-1.0]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::test_retry_after_supports_seconds_and_http_date_deterministically[Wed, 21 Oct 2015 07:27:00 GMT-now7-0.0]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::test_retry_after_supports_seconds_and_http_date_deterministically[Wed, 21 Oct 2099 07:28:00 GMT-now8-60.0]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::test_retry_after_supports_seconds_and_http_date_deterministically[Wed, 21 Oct 2015 07:28:00 GMT-now9-5.0]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthState::test_default_state": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthState::test_thresholds": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorStateTransitions::test_healthy_to_degraded_on_first_error": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorStateTransitions::test_degraded_after_two_errors": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorStateTransitions::test_degraded_to_unhealthy_on_third_error": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorStateTransitions::test_unhealthy_to_degraded_on_success": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorStateTransitions::test_degraded_to_healthy_after_success": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorStateTransitions::test_success_resets_error_count": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorStateTransitions::test_independent_provider_states": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorHealthCheck::test_unhealthy_health_check_transitions_to_unhealthy": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorHealthCheck::test_healthy_health_check_recovers_from_unhealthy": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorHealthCheck::test_healthy_health_check_recovers_from_degraded": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorHealthCheck::test_degraded_health_check_maintains_state": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorMetrics::test_emits_metric_on_error": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorMetrics::test_emits_metric_on_success": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorMetrics::test_emits_metric_on_health_check": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorMetrics::test_restore_provider_health_status_ignores_unknown_metric": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorMetrics::test_metric_values_match_rules_md": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestHealthCheckObservabilityCounters::test_emit_health_check_observability_counts_degraded_separately": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestHealthCheckObservabilityCounters::test_emit_health_check_observability_counts_unhealthy_as_failure": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestHealthCheckObservabilityCounters::test_emit_health_check_observability_uses_seconds_histogram": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorAdaptiveParams::test_healthy_returns_normal_params": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorAdaptiveParams::test_degraded_returns_doubled_timeout_halved_batch": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorAdaptiveParams::test_unhealthy_returns_aggressive_throttling": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorGetAllStates::test_get_all_states_empty": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorGetAllStates::test_get_all_states_multiple_providers": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestHealthAdjustedConfig::test_apply_timeout_multiplies": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestHealthAdjustedConfig::test_apply_batch_size_divides": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestHealthAdjustedConfig::test_apply_batch_size_respects_minimum": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthTracker::test_status_property": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthTracker::test_consecutive_failures_property": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthTracker::test_is_healthy_method": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthTracker::test_is_unhealthy_method": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthTracker::test_should_pause_pipeline": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthTracker::test_record_success_delegates": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthTracker::test_record_error_delegates": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthTracker::test_get_adjusted_config": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorUpdateFromResult::test_updates_state_from_result": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorUpdateFromResult::test_emits_latency_metric": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestProviderHealthMonitorUpdateFromResult::test_logs_p2_alert_on_unhealthy": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestGetAdjustedConfig::test_healthy_config": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestGetAdjustedConfig::test_degraded_config": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_health_monitor.py::TestGetAdjustedConfig::test_unhealthy_config": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientInit::test_h_t_t_p_client_init__init_with_defaults__4a739e1a": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientInit::test_init_with_run_id": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientInit::test_init_with_custom_user_agent": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientInit::test_init_with_contact_email": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientContextManager::test_aenter_creates_client": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientContextManager::test_aexit_closes_client": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientContextManager::test_nested_context_reuses_single_async_client": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientContextManager::test_aenter_with_run_id_sets_header": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientContextManager::test_aenter_sets_default_user_agent": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientContextManager::test_aenter_sets_custom_user_agent": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientContextManager::test_aenter_appends_contact_email_to_user_agent": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientContextManager::test_aenter_with_custom_user_agent_and_email": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientGetClient::test_get_client_returns_client_in_context": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientRequestMethods::test_manual_redirect_mode_returns_3xx_without_following_location": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientRequestMethods::test_get_success": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientRequestMethods::test_get_with_params_and_headers": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientRequestMethods::test_post_with_json": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientRequestMethods::test_head_request": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientRequestMethods::test_circuit_breaker_open_error_propagates": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientRequestMethods::test_retry_exhausted_raises_error": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientRequestMethods::test_retry_budget_limits_retry_storms": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientRequestMethods::test_retryable_status_triggers_retry": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientRequestMethods::test_unified_http_client_outgoing_transport_headers[default-ua-without-correlation]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientRequestMethods::test_unified_http_client_outgoing_transport_headers[custom-ua-without-correlation]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientRequestMethods::test_unified_http_client_outgoing_transport_headers[default-ua-with-correlation]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientRequestMethods::test_unified_http_client_outgoing_transport_headers[custom-ua-with-correlation]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientObservability::test_successful_request_creates_span": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientObservability::test_successful_request_records_metrics": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientObservability::test_retry_records_retry_counter": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientObservability::test_error_records_error_counter": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientObservability::test_circuit_breaker_open_logs_warning": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientGetClient::test_get_client_raises_when_not_in_context": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientObservability::test_default_observability_uses_noop": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_http_client.py::TestUnifiedHTTPClientObservability::test_provider_attribute_set": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_pagination.py::test_paginated_fetch_basic": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_pagination.py::test_paginated_fetch_with_limit": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_pagination.py::test_paginated_fetch_empty": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_pagination.py::test_paginated_fetch_empty_page_with_cursor": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_pagination.py::test_paginated_fetch_stops_on_repeated_cursor": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_pagination.py::test_paginated_fetch_respects_max_pages": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_pagination.py::test_paginated_fetch_warns_on_max_pages_truncation": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_pagination.py::test_paginated_fetch_warns_on_repeated_cursor": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_pagination.py::test_paginated_fetch_warns_before_refetching_initial_cursor": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_pagination.py::test_paginated_fetch_limit_wins_over_repeated_cursor": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_pagination.py::test_paginated_fetch_no_warning_on_clean_end": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_provider_scope.py::test_provider_resources_are_shared_only_inside_one_execution": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_provider_scope.py::test_parallel_enrichers_share_two_attempts_and_keep_each_result[False]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_provider_scope.py::test_parallel_enrichers_share_two_attempts_and_keep_each_result[True]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_provider_scope.py::test_cancelled_waiter_does_not_cancel_other_child": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_provider_scope.py::test_adapter_two_transport_timeouts_preserve_admission_timing": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_provider_scope.py::test_last_cancelled_waiter_drains_the_probe": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_request_timing.py::test_health_transport_deadline_excludes_admission_wait": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_request_timing.py::test_transport_timeout_remains_a_real_failure": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_request_timing.py::test_cancellation_during_admission_never_calls_transport": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_request_timing.py::test_anonymous_semanticscholar_batch_retries_keep_100_second_floor[0]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_request_timing.py::test_anonymous_semanticscholar_batch_retries_keep_100_second_floor[250]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_request_timing.py::test_anonymous_semanticscholar_batch_retries_keep_100_second_floor[invalid]": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_request_timing.py::test_health_retry_after_delays_following_data_request": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_request_timing.py::test_excessive_retry_after_stops_without_early_retry": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_request_timing.py::test_forbidden_is_not_retried": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_request_timing.py::test_concurrent_health_and_data_share_one_bucket": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_request_timing.py::test_circuit_opens_then_recovers_without_reset": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_request_timing.py::test_cancellation_during_transport_is_not_a_retry": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_retry_config.py::TestRetryConfig::test_config_retry_config__default_values__0e25d664": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_retry_config.py::TestRetryConfig::test_calculate_delay_first_attempt": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_retry_config.py::TestRetryConfig::test_calculate_delay_second_attempt": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_retry_config.py::TestRetryConfig::test_calculate_delay_third_attempt": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_retry_config.py::TestRetryConfig::test_calculate_delay_respects_max_delay": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_retry_config.py::TestRetryConfig::test_is_retryable_status": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_retry_config.py::TestRetryConfig::test_is_retryable_exception": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_retry_config.py::TestRetryConfig::test_custom_retryable_statuses": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_retry_config.py::TestRetryConfig::test_jitter_same_input_same_output": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_retry_config.py::TestRetryConfig::test_jitter_different_urls_different_output": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_retry_config.py::TestRetryConfig::test_jitter_cross_process_stability": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_retry_config.py::TestRetryConfig::test_is_last_attempt": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_retry_config.py::TestRetryConfig::test_effective_retry_budget": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/adapters/http/test_retry_config.py::TestRetryConfig::test_clamp_retry_after": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestConfigureLogging::test_configure_json_format": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestConfigureLogging::test_configure_console_format": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestConfigureLogging::test_configure_already_configured_returns_false": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestConfigureLogging::test_configure_with_force_reconfigures": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestConfigureLogging::test_configure_format_mismatch_no_reconfigure": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestConfigureLogging::test_configure_different_log_levels": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestConfigureLogging::test_configure_writes_logs_to_file_when_env_set": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestConfigureLogging::test_configure_uses_default_runtime_log_file_outside_pytest": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestConfigureLogging::test_configure_formats_foreign_stdlib_logs_as_json": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestConfigureLogging::test_pagination_warning_preserves_fields_in_rendered_json": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestConfigureLogging::test_foreign_stdlib_extras_are_preserved_in_rendered_json": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestIsLoggingConfigured::test_returns_false_initially": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestIsLoggingConfigured::test_returns_true_after_configure": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestResetLoggingConfig::test_reset_clears_configuration": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestResetLoggingConfig::test_reset_allows_reconfigure": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestSecretFilterProcessor::test_masks_api_key": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestSecretFilterProcessor::test_masks_authorization_header": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestSecretFilterProcessor::test_masks_password": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestSecretFilterProcessor::test_masks_token": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestSecretFilterProcessor::test_masks_aws_key": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestSecretFilterProcessor::test_preserves_non_secret_values": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestSecretFilterProcessor::test_handles_non_string_values": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestSecretFilterProcessor::test_handles_nested_dict": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestSecretFilterProcessor::test_masks_bearer_token": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestTraceContextProcessor::test_noop_without_trace_identifiers": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestTraceContextProcessor::test_injects_trace_and_span_ids_when_available": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestTraceContextProcessor::test_keeps_existing_trace_fields": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestTraceContextProcessor::test_trace_lookup_does_not_import_opentelemetry_when_unloaded": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestTraceContextProcessor::test_trace_lookup_uses_loaded_opentelemetry_trace_module": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestMaskSecrets::test_non_string_returns_unchanged": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestMaskSecrets::test_empty_string_unchanged": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestMaskSecrets::test_safe_string_unchanged": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestModuleExports::test_config_module_exports__all_exports__562eaff9": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_logging_config.py::TestModuleExports::test_exports_are_callable": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestNoOpTracingReExport::test_noop_tracing_importable": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestNoOpTracingReExport::test_noop_tracing_is_same": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestModuleImports::test_otel_available_defined": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestModuleImports::test_opentelemetry_tracer_class_defined": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerWithoutOTEL::test_init_raises_without_otel": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerWithOTEL::test_tracer_available": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerWithOTEL::test_sets_service_name_resource_attribute": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerWithOTEL::test_prefers_otel_service_name_env": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerClose::test_close_is_idempotent__test_open_telemetry_tracer_close_infrastructure_observability_test_tracing_158": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTelemetryExporterSelection::test_extract_endpoint_host_handles_urls_ipv6_and_host_port": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTelemetryExporterSelection::test_otlp_endpoint_prefers_trace_specific_env": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTelemetryExporterSelection::test_otlp_insecure_prefers_trace_specific_env": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTelemetryExporterSelection::test_build_exporter_falls_back_to_console_when_otlp_unavailable": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTelemetryExporterSelection::test_build_exporter_loads_otlp_class_lazily": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTelemetryExporterSelection::test_local_otlp_endpoint_defaults_to_insecure": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTelemetryExporterSelection::test_explicit_insecure_override_wins_for_local_endpoint": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTelemetryExporterSelection::test_parse_bool_env_rejects_falsey_values": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTelemetryExporterSelection::test_get_otlp_endpoint_returns_none_when_env_is_unset": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTelemetryExporterSelection::test_explicit_insecure_override_without_endpoint_is_honored": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTelemetryExporterSelection::test_remote_otlp_endpoint_does_not_default_to_insecure": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerErrorPaths::test_flush_swallows_provider_errors": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerErrorPaths::test_close_marks_tracer_closed_when_shutdown_fails": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerErrorPaths::test_insecure_override_without_endpoint_is_forwarded": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerErrorPaths::test_flush_returns_without_provider_call_after_close": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTracingProtocolAndSpanBranchPaths::test_span_handle_methods_are_noops_before_enter": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTracingProtocolAndSpanBranchPaths::test_tracer_adapter_defaults_attributes_to_empty_dict": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTracingProtocolAndSpanBranchPaths::test_protocol_method_bodies_are_runtime_safe": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTracingImportFallbackBranches::test_module_marks_otlp_unavailable_when_exporter_import_fails": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTracingImportFallbackBranches::test_module_does_not_import_otlp_grpc_eagerly": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTracingImportFallbackBranches::test_module_marks_otel_unavailable_when_base_import_fails": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTracingImportFallbackBranches::test_module_marks_otlp_unavailable_when_distribution_missing": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerSpanAdapter::test_start_as_current_span_returns_span_like_handle": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerSpanAdapter::test_repeated_initialization_keeps_provider_and_context_ownership_local": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestModuleAll::test_tracing_module_all__all_exports__de104c4e": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTracingIntegration::test_noop_tracing_usable_as_fallback": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTracingIntegration::test_factory_pattern": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOTLPAvailability::test_otlp_available_flag_defined": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOTLPAvailability::test_otlp_exporter_class_cache_populated_after_load": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTelemetryExporterResolution::test_prefers_insecure_for_local_tempo_when_env_unspecified": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestTelemetryExporterResolution::test_respects_explicit_insecure_override": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerGetTracer::test_get_tracer_returns_tracer": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerGetTracer::test_get_tracer_with_different_names": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerCloseExceptionHandling::test_close_handles_force_flush_exception": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerCloseExceptionHandling::test_close_handles_shutdown_exception": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerWithMockedOTEL::test_init_raises_importerror_when_otel_not_available": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerWithMockedOTEL::test_tracer_with_console_exporter_when_otlp_unavailable": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerServiceName::test_default_service_name": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py::TestOpenTelemetryTracerServiceName::test_custom_service_name": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing_additional.py::test_resolve_service_name_falls_back_to_constructor_default": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    },
+    "tests/unit/infrastructure/observability/test_tracing_additional.py::test_non_local_otlp_endpoint_does_not_force_insecure": {
+      "setup": "passed",
+      "call": "passed",
+      "teardown": "passed"
+    }
+  }
+}

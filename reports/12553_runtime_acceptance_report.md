@@ -26,11 +26,18 @@ collector and establish the lock boundary, not execution of every inner resource
 scripts/engineering/qa/external_resource_inventory.py and its tests are unchanged.
 Execution is reported separately, never by replacing NOT_RUN_12553 in the inventory.
 
-## K4 and K5: work in progress
+## K4: complete accounting, partial execution
 
-The 207-resource register and actual ARTIFACT_REFRESH check/update/check logs
-will follow in subsequent commits. No complete lifecycle or clean-tree claim
-is made at this intermediate stage.
+coverage-register.json and coverage-register.md account for all 207 resources:
+85 EXECUTED_PARTIAL and 122 NOT_VERIFIABLE, with individual reasons and source
+sites. All five original scenario expectations are retained. Traces observe real
+file/task/executor/iterator lifetimes. Full scenario-barrier acceptance remains
+NOT_VERIFIABLE; a green test or a test name is not promoted to runtime PASS.
+
+## K5: work in progress
+
+Actual ARTIFACT_REFRESH check/update/check and final status will follow.
+No clean-tree or successful refresh claim is made before those commands run.
 
 ## Revision semantics
 

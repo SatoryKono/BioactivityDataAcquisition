@@ -19,6 +19,31 @@ ROOT = Path(__file__).resolve().parents[3]
 BUNDLE = ROOT / "reports/audit-runs/12553-runtime-acceptance"
 
 
+def inputs(argv: list[str]) -> dict[str, str]:
+    """Bind executed fixtures, harness and source without reading secret files."""
+    paths = {
+        Path(__file__),
+        ROOT / "tests/helpers/runtime_acceptance_12553.py",
+        ROOT / "pyproject.toml",
+        ROOT / "tests/conftest.py",
+    }
+    paths.update((ROOT / "src/bioetl").rglob("*.py"))
+    paths.update((ROOT / "configs/quality/external_resource_inventory").glob("*.json"))
+    paths.add(ROOT / "configs/quality/external_resource_inventory.json")
+    paths.update((ROOT / "tests/helpers").rglob("*.py"))
+    for arg in argv:
+        path = ROOT / arg.split("::")[0]
+        if path.is_file() and path.suffix == ".py":
+            paths.add(path)
+        elif path.is_dir() and path.is_relative_to(ROOT / "tests"):
+            paths.update(path.rglob("*.py"))
+    return {
+        p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in sorted(paths)
+        if p.is_file()
+    }
+
+
 def git(*args: str) -> str:
     """Read Git identity without including environment values."""
     return subprocess.check_output(["git", *args], cwd=ROOT).decode().strip()
@@ -40,6 +65,7 @@ def capture(name: str, argv: list[str], timeout: int = 600) -> int:
         "status_before": git("status", "--porcelain=v1", "--untracked-files=normal"),
         "started_utc": datetime.now(UTC).isoformat(),
         "timeout_seconds": timeout,
+        "input_sha256": inputs(argv),
     }
     env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUTF8="1")
     with (BUNDLE / f"{name}-stdout.txt").open("wb") as out:
