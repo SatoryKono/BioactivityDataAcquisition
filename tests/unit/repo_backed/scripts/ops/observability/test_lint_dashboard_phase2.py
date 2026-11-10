@@ -288,8 +288,9 @@ def test_non_digit_mapping_requires_status_token() -> None:
 def test_overview_exclusions_status_preserves_select_run() -> None:
     """A1 SELECT RUN and A2 empty catalog must not collapse into UNKNOWN."""
     assert "verdict='SELECT RUN' or verdict='НЕТ ЗАПУСКОВ'" in _OV_EXCL
-    assert "verdict='SELECT RUN' ? 'Choose a run'" in _OV_EXCL
-    assert "verdict='НЕТ ЗАПУСКОВ' ? 'No runs in scope'" in _OV_EXCL
+    assert "verdict='SELECT RUN' ? 'не применимо — Choose a run'" in _OV_EXCL
+    assert "verdict='НЕТ ЗАПУСКОВ' ? 'нет записей — No runs in scope'" in _OV_EXCL
+    assert "'нет данных'" in _OV_EXCL
     assert _OV_EXCL in _OV_DONOR
 
 
