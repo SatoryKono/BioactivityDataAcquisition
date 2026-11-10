@@ -49,7 +49,7 @@ async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,t
         const evidence=await root.evaluate(tableEvidence);
         const file=path.join(dir,`page-${index}-scroll-${tiles.length+1}.png`);
         const bytes=await require('./native_browser_zoom.cjs').captureElementScreenshot(page,root,{path:file,animations:'disabled',timeout});
-        tiles.push({grid:g,x,y,...evidence,file:path.relative(outputDir,file),...pngEvidence(bytes)});
+        tiles.push({grid:g,x,y,...evidence,file:path.relative(outputDir,file),...pngEvidence(bytes),viewportTiles:(bytes.viewportTiles || []).map(t=>({...t,file:path.relative(outputDir,t.file)}))});
       });
     } finally {
       await grid.evaluate((el,{x,y})=>{el.scrollLeft=x;el.scrollTop=y;},size);
@@ -58,15 +58,16 @@ async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,t
   return tiles;
 }
 
-async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pngEvidence,timeout}) {
+async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pngEvidence,timeout,noValue}) {
   const results=[];
   const values=[...new Set(cells.filter(c=>c.clipped && c.role!=='columnheader').map(c=>c.text))];
   await sequential(values, async text => {
     // The accessible name also contains the Inspect button's label.
-    const cell=root.locator('[role="gridcell"]').filter({hasText:text}).first();
+    const cell=root.locator('[role="gridcell"]').filter({hasText:new RegExp('^'+text.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$')}).first();
     if(!await cell.count()){
       results.push({text,status:'CELL_NOT_MOUNTED'});return;
     }
+    if(await cell.evaluate(el=>el.textContent)!==text)throw new Error('Selected cell differs from requested value');
     await cell.scrollIntoViewIfNeeded({timeout});
     await cell.hover();
     const inspect=cell.getByRole('button',{name:'Inspect value',exact:true});
@@ -76,13 +77,15 @@ async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pn
     await inspect.click();
     try {
       await page.getByRole('tab',{name:'Plain text',exact:true}).waitFor({state:'visible',timeout});
-      const value=page.getByText(text,{exact:true}).last();
+      const dialog=page.getByRole('dialog').filter({has:page.getByRole('tab',{name:'Plain text',exact:true})});
+      const value=dialog.locator('pre');
       await value.waitFor({state:'visible',timeout});
       const observed=await value.innerText();
-      if(observed!==text)throw new Error('Inspect value differs from the captured table cell');
+      const mappedEmpty=observed==='' && noValue===text;
+      if(observed!==text && !mappedEmpty)throw new Error('Inspect value differs from the captured table cell');
       const file=path.join(dir,`page-${index}-inspect-${results.length+1}.png`);
       const bytes=await require('./native_browser_zoom.cjs').capturePageScreenshot(page,{path:file,animations:'disabled',timeout});
-      results.push({text,observed,status:'VERIFIED',file:path.relative(outputDir,file),...pngEvidence(bytes)});
+      results.push({text,observed,status:mappedEmpty?'VERIFIED_NO_VALUE_MAPPING':'VERIFIED',file:path.relative(outputDir,file),...pngEvidence(bytes),viewportTiles:(bytes.viewportTiles || []).map(t=>({...t,file:path.relative(outputDir,t.file)}))});
     } finally {
       await page.getByRole('button',{name:'Close',exact:true}).click();
     }
@@ -112,8 +115,8 @@ async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeo
         {path:file,animations:'disabled',timeout});
       const scrollTiles=await captureScrollTiles(page,root,{dir,index,outputDir,pngEvidence,timeout});
       const inspectedValues=await captureInspectedValues(page,root,
-        [ ...evidence.cells, ...scrollTiles.flatMap(t=>t.cells)],{dir,index,outputDir,pngEvidence,timeout});
-      pages.push({page:index,...evidence,scrollTiles,inspectedValues,file:path.relative(outputDir,file),...pngEvidence(bytes)});
+        [ ...evidence.cells, ...scrollTiles.flatMap(t=>t.cells)],{dir,index,outputDir,pngEvidence,timeout,noValue:panel.noValue});
+      pages.push({page:index,...evidence,scrollTiles,inspectedValues,file:path.relative(outputDir,file),...pngEvidence(bytes),viewportTiles:(bytes.viewportTiles || []).map(t=>({...t,file:path.relative(outputDir,t.file)}))});
       if (!paginated || await next.isDisabled()) return;
       const before = await root.innerText();
       await next.focus();
@@ -123,16 +126,16 @@ async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeo
         {id:panel.id,before},{timeout:transitionTimeout});
       await capturePage(index+1);
     }
-    await capturePage(1);
     async function restorePage(remaining) {
       if(remaining<=0 || await previous.isDisabled())return;
       await previous.click(); await page.waitForTimeout(100);
       await restorePage(remaining-1);
     }
-    if(paginated)await restorePage(pages.length);
+    try {await capturePage(1);}
+    finally {if(paginated)await restorePage(100);}
     results.push({panelId:panel.id,title:panel.title,paginated,status:'COMPLETE',
       method:'native next-page button activated with Enter; original first page restored',pages});
   });
   return results;
 }
-module.exports={captureTablePages};
+module.exports={captureTablePages,captureInspectedValues};

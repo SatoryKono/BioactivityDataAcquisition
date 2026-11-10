@@ -344,7 +344,10 @@ def dashboard_attachment_errors(root: Path, dashboard: dict) -> list[str]:
     for table in dashboard.get("tablePagination", []):
         attachments.extend(table.get("pages", []))
         for page in table.get("pages", []):
+            attachments.extend(page.get("viewportTiles", []))
             attachments.extend(page.get("scrollTiles", []))
+            for tile in page.get("scrollTiles", []):
+                attachments.extend(tile.get("viewportTiles", []))
             attachments.extend(
                 v for v in page.get("inspectedValues", []) if v.get("file")
             )

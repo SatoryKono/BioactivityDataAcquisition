@@ -270,7 +270,9 @@ def test_consistent_v2_snapshots_still_require_source_panel_parity(mutation):
     if mutation == "missing":
         dto["spec"]["elements"] = {}
     elif mutation == "query":
-        dto["spec"]["elements"]["panel-1"]["spec"]["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]["expr"] = "vector(0)"
+        dto["spec"]["elements"]["panel-1"]["spec"]["data"]["spec"]["queries"][0][
+            "spec"
+        ]["query"]["spec"]["expr"] = "vector(0)"
     evidence["v2"]["loaded"] = [copy.deepcopy(dto)]
     evidence["v2"]["after"] = copy.deepcopy(dto)
     assert bool(model_errors(source, evidence)) is (mutation is not None)

@@ -718,6 +718,7 @@ function summarizeRequiredPanel(panel) {
     id: panel.id,
     title: panelDisplayTitle(panel),
     type: typeof panel.type === "string" ? panel.type : "unknown",
+    noValue: panel.fieldConfig?.defaults?.noValue,
     gridPos: summarizeFirstWindowPanel(panel).gridPos,
   };
 }

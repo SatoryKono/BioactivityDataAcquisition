@@ -58,7 +58,7 @@ def test_scroll_acceptance_requires_complete_two_dimensional_coverage(
         assert _table_page_reasons(wrong)
 
 
-@pytest.mark.parametrize("stalled", [False, True])
+@pytest.mark.parametrize("stalled", [False, True, "capture_error"])
 def test_detail_and_unpaginated_tables_are_captured(
     tmp_path: Path, stalled: bool
 ) -> None:
@@ -70,12 +70,13 @@ const fs=require('fs');
 const {captureTablePages}=require(process.argv[1]);
 let active; const states={1:0,2:0};
 const stalled=process.argv[3]==='true';
+const captureError=process.argv[3]==='capture_error';
 const roots=Object.fromEntries([1,2].map(id=>[id,{
   first(){return this;},scrollIntoViewIfNeeded:async()=>{},waitFor:async()=>{},
   locator:()=>({count:async()=>0}),
   innerText:async()=>`${id}:${states[id]}`,
   evaluate:async()=>({cells:[{text:`row ${states[id]+1}`}],summary:null,scrollers:[]}),
-  screenshot:async options=>{const b=Buffer.from('test');fs.writeFileSync(options.path,b);return b;},
+  screenshot:async options=>{if(captureError && states[id]===1)throw Error('capture failed');const b=Buffer.from('test');fs.writeFileSync(options.path,b);return b;},
   getByRole:(role,{name})=>({count:async()=>id===1?1:0,
     isDisabled:async()=>name==='next page'?states[id]===1:states[id]===0,
     focus:async()=>{active=id;},click:async()=>{states[id]--;}})
@@ -91,7 +92,7 @@ const page={locator:selector=>roots[Number(selector.match(/panel-(\d+)/)[1])],
     tablePanels:[{id:1,type:'table'},{id:2,type:'table'}]},outputDir:process.argv[2],
     pngEvidence:()=>({bytes:4}),timeout:0});
   console.log(JSON.stringify({results,states}));
- }catch(error){console.log(JSON.stringify({error:error.message}));}
+ }catch(error){console.log(JSON.stringify({error:error.message,states}));}
 })();
 """
     result = subprocess.run(
@@ -114,7 +115,10 @@ const page={locator:selector=>roots[Number(selector.match(/panel-(\d+)/)[1])],
     )
     evidence = json.loads(result.stdout)
     if stalled:
-        assert evidence["error"] == "page did not advance"
+        assert evidence["error"] == (
+            "capture failed" if stalled == "capture_error" else "page did not advance"
+        )
+        assert evidence["states"] == {"1": 0, "2": 0}
         return
     assert [len(t["pages"]) for t in evidence["results"]] == [2, 1]
     assert all(t["status"] == "COMPLETE" for t in evidence["results"])
@@ -149,3 +153,52 @@ console.log(JSON.stringify(result.tablePanels));
         timeout=15,
     )
     assert [p["id"] for p in json.loads(result.stdout)] == [2]
+
+
+@pytest.mark.parametrize("raw", ["value", "", "unexpected"])
+def test_inspector_reads_dialog_and_separates_empty_mapping(tmp_path, raw):
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    program = r"""
+const {captureInspectedValues}=require(process.argv[1]);
+const raw=process.argv[3];
+const cell={count:async()=>1,evaluate:async()=> 'value',scrollIntoViewIfNeeded:async()=>{},hover:async()=>{},
+  getByRole:()=>({count:async()=>1,click:async()=>{}})};
+const root={locator:()=>({filter:({hasText})=>{
+  if(!hasText.test('value') || hasText.test('value-extra'))throw Error('Non-exact cell lookup');
+  return {first:()=>cell};}})};
+const pre={waitFor:async()=>{},innerText:async()=>raw};
+const dialog={filter(){return this;},locator:selector=>{if(selector!=='pre')throw Error('Not dialog text');return pre;}};
+const page={getByRole:role=>role==='dialog'?dialog:{waitFor:async()=>{},click:async()=>{}},
+  screenshot:async()=>Buffer.from('test')};
+captureInspectedValues(page,root,[{text:'value',clipped:true,role:'gridcell'}],
+ {dir:process.argv[2],index:1,outputDir:process.argv[2],pngEvidence:()=>({}),timeout:100,noValue:'value'})
+ .then(results=>console.log(JSON.stringify({results})))
+ .catch(error=>console.log(JSON.stringify({error:error.message})));
+"""
+    result = subprocess.run(
+        [
+            node,
+            "-e",
+            program,
+            str(
+                Path(
+                    "scripts/ops/observability/grafana/capture_table_pages.cjs"
+                ).resolve()
+            ),
+            str(tmp_path),
+            raw,
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    evidence = json.loads(result.stdout)
+    if raw == "unexpected":
+        assert "differs" in evidence["error"]
+    else:
+        value = evidence["results"][0]
+        assert value["observed"] == raw
+        assert value["status"] == ("VERIFIED" if raw else "VERIFIED_NO_VALUE_MAPPING")
