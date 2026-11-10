@@ -646,6 +646,12 @@ def matrix_coverage(
 
 def main(argv: list[str] | None = None) -> int:
     """Write an immutable assessment directory for explicit immutable manifests."""
+    from scripts.engineering.common.repo_paths import (
+        confined_io_path,
+        read_bytes_confined,
+        read_text_confined,
+        write_text_confined,
+    )
     from scripts.ops.observability.grafana.capture_provenance import verify_capture
 
     parser = argparse.ArgumentParser(description=__doc__)
@@ -655,20 +661,49 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--cue-review", type=Path)
     parser.add_argument("--require-native-browser-zoom", action="store_true")
     args = parser.parse_args(argv)
+    # S8707: rebuild CLI/LLM paths under a trusted root before any filesystem sink.
+    repo_root = confined_io_path(args.repo_root, allow_external_absolute=True)
+    manifest_paths = [
+        confined_io_path(path, root=repo_root, allow_external_absolute=True)
+        for path in args.manifests
+    ]
+    output_dir = confined_io_path(
+        args.output_dir, root=repo_root, allow_external_absolute=True
+    )
+    cue_review_path = (
+        None
+        if args.cue_review is None
+        else confined_io_path(
+            args.cue_review, root=repo_root, allow_external_absolute=True
+        )
+    )
     shipped = Path(__file__).resolve().parents[4] / "grafana" / "dashboards"
-    output_dir = args.output_dir.resolve()
     if output_dir.is_relative_to(shipped) or shipped.is_relative_to(output_dir):
         raise ValueError("assessment output must not overwrite shipped dashboard JSON")
-    args.output_dir.mkdir(parents=True, exist_ok=False)
-    manifests = [json.loads(p.read_text(encoding="utf-8")) for p in args.manifests]
-    provenance = [verify_capture(p, repo_root=args.repo_root) for p in args.manifests]
+    output_dir.mkdir(parents=True, exist_ok=False)  # NOSONAR - confined_io_path
+    manifests = [
+        json.loads(
+            read_text_confined(path, root=repo_root, allow_external_absolute=True)
+        )
+        for path in manifest_paths
+    ]
+    provenance = [verify_capture(path, repo_root=repo_root) for path in manifest_paths]
     references = [
-        {"file": str(p), "sha256": hashlib.sha256(p.read_bytes()).hexdigest()}
-        for p in args.manifests
+        {
+            "file": str(path),
+            "sha256": hashlib.sha256(
+                read_bytes_confined(path, root=repo_root, allow_external_absolute=True)
+            ).hexdigest(),
+        }
+        for path in manifest_paths
     ]
     review = (
-        json.loads(args.cue_review.read_text(encoding="utf-8"))
-        if args.cue_review
+        json.loads(
+            read_text_confined(
+                cue_review_path, root=repo_root, allow_external_absolute=True
+            )
+        )
+        if cue_review_path is not None
         else None
     )
     review_errors = (
@@ -723,8 +758,11 @@ def main(argv: list[str] | None = None) -> int:
         },
     }
     for name, payload in outputs.items():
-        (args.output_dir / name).write_text(
-            json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        write_text_confined(
+            output_dir / name,
+            json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+            root=output_dir,
+            allow_external_absolute=True,
         )
     return 0 if outputs["accessibility-status.json"]["status"] == "PASS" else 1
 
