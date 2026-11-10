@@ -255,6 +255,62 @@ def model_errors(source: dict, evidence: object) -> list[str]:
     return errors
 
 
+def _classic_panels(panels: list[dict]):
+    for panel in panels:
+        if panel.get("type") != "row":
+            yield panel
+        yield from _classic_panels(panel.get("panels", []))
+
+
+def _v2_panel_errors(source: dict, spec: dict) -> list[str]:
+    expected = {
+        panel["id"]: panel for panel in _classic_panels(source.get("panels", []))
+    }
+    elements = spec["elements"]
+    actual = {}
+    for element in elements.values():
+        if not isinstance(element, dict):
+            return ["invalid v2 dashboard element"]
+        if element.get("kind") != "Panel":
+            continue
+        panel = element.get("spec")
+        if not isinstance(panel, dict) or type(panel.get("id")) is not int:
+            return ["invalid v2 panel identity"]
+        if panel["id"] in actual:
+            return ["duplicate v2 panel identity"]
+        actual[panel["id"]] = panel
+    if expected.keys() != actual.keys():
+        return ["v2 panel identities differ from source"]
+
+    errors = []
+    for panel_id, classic in expected.items():
+        panel = actual[panel_id]
+        group = panel.get("data", {}).get("spec", {})
+        queries = group.get("queries", [])
+        targets = classic.get("targets", [])
+        if len(queries) != len(targets) or any(
+            not _v2_query_matches(target, query)
+            for target, query in zip(targets, queries, strict=False)
+        ):
+            errors.append(f"v2 panel {panel_id} queries differ from source")
+    return errors
+
+
+def _v2_query_matches(target: dict, query: dict) -> bool:
+    entry = query.get("spec", {})
+    data_query = entry.get("query", {})
+    payload = data_query.get("spec", {})
+    return (
+        entry.get("refId") == target.get("refId")
+        and bool(entry.get("hidden")) == bool(target.get("hide"))
+        and all(
+            key in payload and payload[key] == value
+            for key, value in target.items()
+            if key not in {"refId", "datasource", "hide"}
+        )
+    )
+
+
 def _v2_model_errors(source: dict, evidence: dict, v2: object) -> list[str]:
     """Bind Grafana's converted v2 spec to the same provisioned v1 generation."""
     if (
@@ -287,6 +343,8 @@ def _v2_model_errors(source: dict, evidence: dict, v2: object) -> list[str]:
             or not isinstance(spec.get("layout"), dict)
         ):
             errors.append(f"invalid {phase} v2 identity/schema")
+        elif phase == "before":
+            errors.extend(_v2_panel_errors(source, spec))
         for legacy_phase in ("before", "after"):
             version = (evidence.get(legacy_phase) or {}).get("version")
             if version is None or metadata.get("generation") != version:

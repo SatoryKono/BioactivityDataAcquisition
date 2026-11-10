@@ -8,6 +8,7 @@ import json
 import math
 from collections import Counter
 from pathlib import Path
+import itertools
 
 
 def contrast_summary(pairs: list[dict]) -> dict:
@@ -156,6 +157,54 @@ def _terminal_capture_reasons(dashboard: dict, first: set[int]) -> list[str]:
     return reasons
 
 
+def _scroll_tiles_cover(scroller: dict, tiles: list[dict]) -> bool:
+    grid = scroller.get("grid", -1)
+    if grid < 0:
+        return False
+    width, height = scroller["clientWidth"], scroller["clientHeight"]
+    extent_x, extent_y = scroller["scrollWidth"], scroller["scrollHeight"]
+    if min(width, height) <= 0:
+        return False
+
+    offsets = set()
+    for tile in tiles:
+        if tile.get("grid") != grid or not tile.get("file"):
+            continue
+        for observed in tile.get("scrollers", []):
+            if observed.get("grid") != grid:
+                continue
+            if any(
+                observed.get(key) != scroller[key]
+                for key in (
+                    "clientWidth",
+                    "clientHeight",
+                    "scrollWidth",
+                    "scrollHeight",
+                )
+            ):
+                continue
+            x, y = observed.get("scrollLeft"), observed.get("scrollTop")
+            if (
+                isinstance(x, (int, float))
+                and isinstance(y, (int, float))
+                and 0 <= x <= max(0, extent_x - width) + 2
+                and 0 <= y <= max(0, extent_y - height) + 2
+            ):
+                offsets.add((x, y))
+
+    rows = sorted({0, extent_y} | {v for _, y in offsets for v in (y, y + height)})
+    for top, bottom in itertools.pairwise(rows):
+        if bottom - top <= 2:
+            continue
+        reach = 0
+        for x, y in sorted(offsets):
+            if y <= top and y + height >= bottom and x <= reach + 2:
+                reach = max(reach, x + width)
+        if reach < extent_x - 2:
+            return False
+    return bool(offsets)
+
+
 def _table_page_reasons(dashboard: dict) -> list[str]:
     reasons = []
     for table in dashboard.get("tablePagination", []):
@@ -167,7 +216,7 @@ def _table_page_reasons(dashboard: dict) -> list[str]:
                     scroller.get(f"scroll{axis}", 0)
                     > scroller.get(f"client{axis}", 0) + 2
                     for axis in ("Width", "Height")
-                ):
+                ) and not _scroll_tiles_cover(scroller, page.get("scrollTiles", [])):
                     reasons.append(
                         f"table page overflow: {table.get('panelId')}/{page.get('page')}"
                     )

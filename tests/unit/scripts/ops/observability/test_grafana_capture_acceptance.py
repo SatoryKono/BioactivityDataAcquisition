@@ -241,3 +241,37 @@ def test_isolated_canvas_measurement_resolves_occlusion_but_preserves_failure():
     assert result[0]["status"] == "FAIL"
     assert result[0]["measured_frames"] == 1
     assert result[0]["observed_frames"] == 2
+
+
+@pytest.mark.parametrize(
+    "observed,expected", [((0, 40), True), ((0, 10), False), ((), False)]
+)
+def test_table_scroll_tiles_cover_actual_offsets(observed, expected):
+    from scripts.ops.observability.grafana.capture_acceptance import _table_page_reasons
+
+    scroller = {
+        "grid": 0,
+        "clientWidth": 50,
+        "scrollWidth": 50,
+        "clientHeight": 60,
+        "scrollHeight": 100,
+    }
+    tiles = [
+        {
+            "grid": 0,
+            "x": 0,
+            "y": 40,
+            "file": f"{offset}.png",
+            "scrollers": [{**scroller, "scrollLeft": 0, "scrollTop": offset}],
+        }
+        for offset in observed
+    ]
+    dashboard = {
+        "tablePagination": [
+            {
+                "status": "COMPLETE",
+                "pages": [{"scrollers": [scroller], "scrollTiles": tiles}],
+            }
+        ]
+    }
+    assert (not _table_page_reasons(dashboard)) is expected

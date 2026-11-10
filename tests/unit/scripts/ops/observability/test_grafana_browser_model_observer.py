@@ -163,3 +163,38 @@ def test_v2_substitution_or_missing_evidence_fails(phase, mutation):
     else:
         model["metadata"] = ["invalid"]
     assert model_errors(source, evidence)
+
+
+@pytest.mark.parametrize("mutation", [None, "missing", "query"])
+def test_consistent_v2_snapshots_still_require_source_panel_parity(mutation):
+    source, evidence = _v2_evidence()
+    source["panels"] = [
+        {"id": 1, "type": "timeseries", "targets": [{"refId": "A", "expr": "up"}]}
+    ]
+    dto = evidence["v2"]["before"]
+    if mutation != "missing":
+        dto["spec"]["elements"]["panel-1"] = {
+            "kind": "Panel",
+            "spec": {
+                "id": 1,
+                "data": {
+                    "spec": {
+                        "queries": [
+                            {
+                                "spec": {
+                                    "refId": "A",
+                                    "query": {
+                                        "spec": {
+                                            "expr": "vector(0)" if mutation else "up"
+                                        }
+                                    },
+                                }
+                            }
+                        ]
+                    }
+                },
+            },
+        }
+    evidence["v2"]["loaded"] = [copy.deepcopy(dto)]
+    evidence["v2"]["after"] = copy.deepcopy(dto)
+    assert bool(model_errors(source, evidence)) is (mutation is not None)
