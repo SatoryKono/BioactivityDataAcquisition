@@ -74,9 +74,8 @@ def test_overview_dashboard_identity_and_primary_question() -> None:
 
     assert dashboard.get("title") == "3. Run Overview"
     assert dashboard.get("uid") == "bioetl-overview-v2"
-    assert "Run ID is always selected" in description
-    assert "not on Overview" in description
-    assert "CURRENT fleet panels" in description
+    assert "GLOBAL / CURRENT" in description
+    assert "including without a selected run" in description
     assert "that run only" in content.lower()
     assert "unknown" in content.lower()
 
@@ -195,7 +194,9 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     # Provider and stage evidence remain accessible below the primary verdict.
     assert panels["Review Provider Evidence"]["id"] == 9480
     assert panels["Inspect Selected Run Stages"]["id"] == 9460
-    assert all(panel.get("type") != "row" for panel in _dashboard()["panels"])
+    rows = [panel for panel in _dashboard()["panels"] if panel.get("type") == "row"]
+    assert [panel["id"] for panel in rows] == [32005]
+    assert rows[0]["collapsed"] is True
 
 
 def test_status_and_next_action_preserve_current_status_semantics() -> None:
@@ -347,15 +348,15 @@ def test_overview_timelines_use_all_labels_and_hide_clipped_in_band_text() -> No
     return
 
 
-def test_overview_keeps_only_panels_that_assess_the_selected_run() -> None:
-    """#11268: Run ID is always set, so fleet and range panels are not on Overview."""
+def test_overview_separates_saved_run_evidence_from_global_alerts() -> None:
+    """LA-06: global alerts coexist with unchanged selected-run evidence."""
     panels = {panel.get("id"): panel for panel in get_dashboard_panels(_dashboard())}
     removed = {214, 215, 9601, 9031, 9010, 9011, 9003, 9007, 20215, 9701}
-    kept = {99, 9603, 9002, 9300, 9604, 9460, 9480, 9481, 9482}
+    kept = {99, 9603, 9002, 9300, 9604, 9460, 9480, 9481, 9482, 2005, 32005, 22005}
     for panel_id in removed:
         assert panel_id not in panels
     for panel_id in kept:
         assert panel_id in panels
-    assert "Run ID is always selected" in str(_dashboard().get("description"))
+    assert "including without a selected run" in str(_dashboard().get("description"))
     assert panels[9603]["gridPos"]["y"] == panels[9002]["gridPos"]["y"]
     assert panels[9603]["gridPos"]["y"] < 12
