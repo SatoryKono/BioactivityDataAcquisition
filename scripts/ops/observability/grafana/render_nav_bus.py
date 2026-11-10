@@ -998,7 +998,7 @@ def _shift_panel_tree(panel: dict[str, Any], *, delta: int) -> None:
             grid["y"] = int(grid["y"]) + delta
 
 
-_INCIDENT_TAIL_ROW_ORDER = (8808, 32010, 32005, 9450, 9700)
+_INCIDENT_TAIL_ROW_ORDER = (8809, 8808, 32010, 32005, 9450, 9700)
 
 
 def _pack_incident_tail_rows(payload: dict[str, Any]) -> None:
@@ -2775,6 +2775,19 @@ def apply_to_dashboard(
     from scripts.ops.observability.grafana._table_wrapping import apply_table_wrapping
 
     apply_table_wrapping(payload.get("panels", []))
+    if current_uid == "bioetl-incident-v1":
+        from scripts.ops.observability.grafana._apply_dsa_residual import (
+            apply_observability_states,
+        )
+        from scripts.ops.observability.grafana.apply_phase4_reflow import (
+            reflow_fleet_row,
+        )
+
+        apply_observability_states(payload)
+        fleet = next(p for p in payload["panels"] if p.get("id") == 8808)
+        _pack_fleet_children(fleet)
+        reflow_fleet_row(fleet)
+        _pack_incident_tail_rows(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

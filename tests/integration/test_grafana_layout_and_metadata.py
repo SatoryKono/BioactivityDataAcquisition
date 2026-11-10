@@ -147,7 +147,8 @@ def test_runtime_detect_row_stays_below_first_window_tables() -> None:
     assert row["collapsed"] is True
     assert row["gridPos"]["y"] >= FIRST_WINDOW_Y
     ids = {p["id"] for p in get_dashboard_panels({"panels": row["panels"]})}
-    assert {9101, 9102, 242, 205, 9996, 9997} <= ids
+    assert {9101, 242, 205, 9996, 9997} <= ids
+    assert not {9102, 907, 894, 9491} & ids
     assert (
         next(p for p in dashboard["panels"] if p["id"] == 2010)["gridPos"]["y"]
         < FIRST_WINDOW_Y
@@ -183,13 +184,40 @@ def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
 def test_runtime_telemetry_gap_panel_keeps_readable_first_screen_width() -> None:
     """Coverage and failed-run counters stay discoverable in fleet disclosure."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
-    row = next(p for p in dashboard["panels"] if p["id"] == 8808)
-    panels = {p["id"]: p for p in get_dashboard_panels({"panels": row["panels"]})}
+    row = next(p for p in dashboard["panels"] if p["id"] == 8809)
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     assert row["collapsed"] is True
     assert panels[9102]["gridPos"]["w"] >= 4
     assert panels[9102]["title"] == "Monitor Coverage"
     assert "bioetl_pipeline_runs_total" in str(panels[205]["targets"])
     assert panels[9102]["gridPos"]["y"] > row["gridPos"]["y"]
+
+
+def test_incident_observability_row_and_legend_are_separate_from_fleet() -> None:
+    """Visibility has a discoverable legend and cannot be mistaken for fleet severity."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
+    root = dashboard["panels"]
+    row = next(p for p in root if p["id"] == 8809)
+    fleet = next(p for p in root if p["id"] == 8808)
+    assert root.index(row) + 1 == root.index(fleet)
+    assert row["title"] == "Observability Signals"
+    assert row["gridPos"]["y"] + 1 == fleet["gridPos"]["y"]
+    assert {p["id"] for p in row["panels"]} == {8810, 9102, 907, 894, 9491}
+    _assert_panels_stay_in_grid_without_overlap(row["panels"], context="Observability")
+    legend = next(p for p in row["panels"] if p["id"] == 8810)["options"]["content"]
+    for state in (
+        "OK",
+        "WARN",
+        "CRIT",
+        "FIRING",
+        "UNKNOWN",
+        "NO OBSERVATIONS",
+        "TELEMETRY MISSING",
+        "Not verified",
+        "Blank / No data",
+    ):
+        assert state in legend
+    assert "never assume zero" in legend
 
 
 def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping() -> (
