@@ -95,10 +95,17 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 |----------|-------------|----------|
 | `BIOETL_SEMANTICSCHOLAR_API_KEY` | Semantic Scholar API key | No |
 
+### Crossref
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `BIOETL_CROSSREF_EMAIL` | Email for Crossref polite pool | No |
+
 ## Observability
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
+| `BIOETL_LOG_FORMAT` | Log format (`json` / `text`) | `json` | No |
+| `BIOETL_LOG_FILE` | Log file path | `reports/logs/bioetl.log` | No |
 | `BIOETL_METRICS_PORT` | Prometheus metrics endpoint port | `8000` | No |
 | `BIOETL_METRICS_ENABLED` | Flat `Settings.metrics_enabled`. Used only when `observability` is absent, and shown in settings info. Standard runtime bootstrap does not let this override `Settings.observability.metrics_enabled` | `True` | No |
 | `BIOETL_METRICS_ADDR` | Prometheus metrics endpoint address | `0.0.0.0` | No |
