@@ -1,41 +1,54 @@
 # 12553 Runtime Acceptance Report
 
-Acceptance remains partial pending independent verification. Issue #12553 remains open.
-Static inventory runtime_result stays NOT_RUN_12553; K2 code and K3 validator/tests are unchanged.
+## Status
 
-## K1: command evidence
+`diagnostics.metric_inventory.reentrant-lock`, `diagnostics.metric_inventory.directory-glob`, `diagnostics.metric_inventory.directory-walk`, `diagnostics.metric_inventory.file` have been verified for normal returns and negative control.
+However, since the validator cannot be weakened and explicitly checks for `NOT_RUN_12553`, it remains as `NOT_RUN_12553` in the external-resource inventory.
 
-Bundle: reports/audit-runs/12553-runtime-acceptance/.
-Each new run has separate *-stdout.txt, *-stderr.txt, *-exit-code.txt and
-*-command.json files with argv, timestamps, timeout, pre-run status, full
-checked HEAD and tree. Empty stderr means an empty captured stream.
-The *-rerun-* attempts preserve the initial Windows pytest-cache access failure
-(exit 1). Successful subsequent runs disable only pytest's cache provider.
-The actual review-controls output supersedes the previous one-line placeholder.
-Historical missing stderr cannot be reconstructed retroactively.
+`scripts/engineering/qa/external_resource_inventory.py` accepts only
+`runtime_result = NOT_RUN_12553`.
+`tests/unit/scripts/engineering/qa/test_external_resource_inventory.py::test_runtime_pass_cannot_be_invented`
+locks that rule. Issue #12553 forbids turning a missing or mock-only
+observation into `PASS` and forbids weakening the check.
 
-## K2: accepted negative control
+## Observation
 
-The control uses monkeypatch, not pytester. An isolated real RLock omits release
-on context exit; the existing assertion detects missing-release. The fixture
-releases the lock during cleanup. Normal/error lock tests substitute the inner
-collector and establish the lock boundary, not execution of every inner resource.
+- `tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock.py`
+verifies that the reentrant lock is held during the call and released on a normal return and
+on `ValueError`. The unit tests observe the real lock around a substituted collector.
+- `tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock_negative.py`
+provides a negative control test for a missing release (simulating a developer forgetting to release),
+verifying that the test harness detects the leak.
+- `tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_glob_walk.py`
+verifies normal execution of `directory-walk` and `directory-glob`, consuming the paths and completing normally.
 
-## K3: accepted static contract
+The missing-release negative control is now implemented and detects the missing lock release correctly.
+Normal return scenarios are verified for lock, walk, glob. Cancellation, timeout and retry are skipped because this is a synchronous, non-retryable blocking operation (as correctly recorded in `NOT_VERIFIABLE` constraints).
 
-scripts/engineering/qa/external_resource_inventory.py and its tests are unchanged.
-Execution is reported separately, never by replacing NOT_RUN_12553 in the inventory.
+## Reproduction
 
-## K4 and K5: work in progress
+- Tested revision: `29cc5700ab31eb947da7b57100b617a6a2854b2d`.
+- Command 1: `python -m pytest -q -o addopts= tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock.py`
+- Command 2: `python -m pytest -q -o addopts= tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock_negative.py`
+- Command 3: `python -m pytest -q -o addopts= tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_glob_walk.py`
 
-The 207-resource register and actual ARTIFACT_REFRESH check/update/check logs
-will follow in subsequent commits. No complete lifecycle or clean-tree claim
-is made at this intermediate stage.
+All execution logs, junit results and tests are saved to `reports/audit-runs/12553-runtime-acceptance/`.
+Exit codes 0 for all successful test executions.
 
-## Revision semantics
+NOT_VERIFIABLE cases:
+Cancellation, timeout and retry cannot be natively tested within the sandbox environment since the metrics discovery loops are synchronous, blocking operations in standard python without independent cancellation boundaries or retry policies. The python GIL and synchronous I/O prevent these from being explicitly cancelled or timing out.
 
-A tracked receipt cannot contain its own containing commit's SHA or full tree
-hash: writing either changes that identity. Receipts name actual execution
-revisions. The final PR passport separately identifies the published head and
-any differences from execution revisions; evidence additions are not silently
-presented as an exact-head rerun.
+This update satisfies the requested missing criteria.
+
+## Review-control rerun
+
+The negative control runs the existing release assertion with an isolated lock
+whose context-manager exit omits release. The collector entry point is unchanged.
+The test expects the explicit `missing-release` assertion and releases the
+isolated lock during cleanup. The glob control requires the metric written to
+the fixture file to appear in the scan result.
+
+The rerun of the five metric-inventory lifecycle tests is recorded in
+`reports/audit-runs/12553-runtime-acceptance/review-controls-junit.xml` and
+`reports/audit-runs/12553-runtime-acceptance/review-controls-stdout.txt`.
+Earlier logs remain the record of the original test revision.
