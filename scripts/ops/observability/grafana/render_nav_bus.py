@@ -2767,6 +2767,9 @@ def apply_to_dashboard(
                 panel.setdefault("fieldConfig", {}).setdefault("defaults", {})[
                     "noValue"
                 ] = label
+    from scripts.ops.observability.grafana._table_wrapping import apply_table_wrapping
+
+    apply_table_wrapping(payload.get("panels", []))
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

@@ -7,6 +7,7 @@ import hashlib
 import json
 import math
 from collections import Counter
+from itertools import pairwise
 from pathlib import Path
 
 
@@ -156,21 +157,104 @@ def _terminal_capture_reasons(dashboard: dict, first: set[int]) -> list[str]:
     return reasons
 
 
+def _observed_scroll_rectangle(tile: dict, scroller: dict, index: int) -> tuple | None:
+    dimensions = ("clientWidth", "clientHeight", "scrollWidth", "scrollHeight")
+    candidates = tile.get("scrollers", [])[index : index + 1]
+    if not tile.get("file") or not tile.get("sha256") or not candidates:
+        return None
+    observed = candidates[0]
+    if any(observed.get(k) != scroller.get(k) for k in dimensions):
+        return None
+    x, y = observed.get("scrollLeft"), observed.get("scrollTop")
+    if not all(isinstance(v, (int, float)) and math.isfinite(v) for v in (x, y)):
+        return None
+    width, height, total_width, total_height = (scroller[k] for k in dimensions)
+    if not (
+        0 <= x <= max(0, total_width - width) + 2
+        and 0 <= y <= max(0, total_height - height) + 2
+    ):
+        return None
+    return x, y, min(x + width, total_width), min(y + height, total_height)
+
+
+def _rectangles_cover(
+    rectangles: list[tuple], total_width: float, total_height: float
+) -> bool:
+    edges = sorted(
+        {0, total_width, *(r[0] for r in rectangles), *(r[2] for r in rectangles)}
+    )
+    for left, right in pairwise(edges):
+        if right - left <= 2:
+            continue
+        intervals = sorted(
+            (y, bottom)
+            for x, y, end, bottom in rectangles
+            if x <= left + 2 and end >= right - 2
+        )
+        covered = 0
+        for top, bottom in intervals:
+            if top > covered + 2:
+                return False
+            covered = max(covered, bottom)
+        if covered < total_height - 2:
+            return False
+    return bool(rectangles)
+
+
+def _scroll_covered(page: dict, scroller: dict, index: int) -> bool:
+    """Prove two-dimensional coverage from observed offsets, not tile counts."""
+    values = [
+        scroller.get(k)
+        for k in ("clientWidth", "clientHeight", "scrollWidth", "scrollHeight")
+    ]
+    if any(
+        not isinstance(v, (int, float)) or not math.isfinite(v) or v <= 0
+        for v in values
+    ):
+        return False
+    rectangles = [
+        r
+        for tile in page.get("scrollTiles", [])
+        if (r := _observed_scroll_rectangle(tile, scroller, index)) is not None
+    ]
+    return _rectangles_cover(rectangles, values[2], values[3])
+
+
+def _incomplete_inspect(page: dict) -> bool:
+    return any(
+        item.get("status") in {"CELL_NOT_MOUNTED", "INSPECT_UNAVAILABLE"}
+        for item in page.get("inspectedValues", [])
+    )
+
+
+def _scroller_overflows(scroller: dict) -> bool:
+    return any(
+        scroller.get(f"scroll{axis}", 0) > scroller.get(f"client{axis}", 0) + 2
+        for axis in ("Width", "Height")
+    )
+
+
+def _page_table_reasons(panel_id: object, page: dict) -> list[str]:
+    page_id = page.get("page")
+    reasons = []
+    if _incomplete_inspect(page):
+        reasons.append(f"incomplete table inspect: {panel_id}/{page_id}")
+    if any(
+        _scroller_overflows(scroller) and not _scroll_covered(page, scroller, index)
+        for index, scroller in enumerate(page.get("scrollers", []))
+    ):
+        reasons.append(f"table page overflow: {panel_id}/{page_id}")
+    return reasons
+
+
 def _table_page_reasons(dashboard: dict) -> list[str]:
     reasons = []
     for table in dashboard.get("tablePagination", []):
+        panel_id = table.get("panelId")
         if table.get("status") not in {"COMPLETE", "NOT_PAGINATED"}:
-            reasons.append(f"incomplete table pagination: {table.get('panelId')}")
+            reasons.append(f"incomplete table pagination: {panel_id}")
         for page in table.get("pages", []):
-            for scroller in page.get("scrollers", []):
-                if any(
-                    scroller.get(f"scroll{axis}", 0)
-                    > scroller.get(f"client{axis}", 0) + 2
-                    for axis in ("Width", "Height")
-                ):
-                    reasons.append(
-                        f"table page overflow: {table.get('panelId')}/{page.get('page')}"
-                    )
+            reasons.extend(_page_table_reasons(panel_id, page))
     return reasons
 
 
@@ -562,6 +646,12 @@ def matrix_coverage(
 
 def main(argv: list[str] | None = None) -> int:
     """Write an immutable assessment directory for explicit immutable manifests."""
+    from scripts.engineering.common.repo_paths import (
+        confined_io_path,
+        read_bytes_confined,
+        read_text_confined,
+        write_text_confined,
+    )
     from scripts.ops.observability.grafana.capture_provenance import verify_capture
 
     parser = argparse.ArgumentParser(description=__doc__)
@@ -571,20 +661,49 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--cue-review", type=Path)
     parser.add_argument("--require-native-browser-zoom", action="store_true")
     args = parser.parse_args(argv)
+    # S8707: rebuild CLI/LLM paths under a trusted root before any filesystem sink.
+    repo_root = confined_io_path(args.repo_root, allow_external_absolute=True)
+    manifest_paths = [
+        confined_io_path(path, root=repo_root, allow_external_absolute=True)
+        for path in args.manifests
+    ]
+    output_dir = confined_io_path(
+        args.output_dir, root=repo_root, allow_external_absolute=True
+    )
+    cue_review_path = (
+        None
+        if args.cue_review is None
+        else confined_io_path(
+            args.cue_review, root=repo_root, allow_external_absolute=True
+        )
+    )
     shipped = Path(__file__).resolve().parents[4] / "grafana" / "dashboards"
-    output_dir = args.output_dir.resolve()
     if output_dir.is_relative_to(shipped) or shipped.is_relative_to(output_dir):
         raise ValueError("assessment output must not overwrite shipped dashboard JSON")
-    args.output_dir.mkdir(parents=True, exist_ok=False)
-    manifests = [json.loads(p.read_text(encoding="utf-8")) for p in args.manifests]
-    provenance = [verify_capture(p, repo_root=args.repo_root) for p in args.manifests]
+    output_dir.mkdir(parents=True, exist_ok=False)  # NOSONAR - confined_io_path
+    manifests = [
+        json.loads(
+            read_text_confined(path, root=repo_root, allow_external_absolute=True)
+        )
+        for path in manifest_paths
+    ]
+    provenance = [verify_capture(path, repo_root=repo_root) for path in manifest_paths]
     references = [
-        {"file": str(p), "sha256": hashlib.sha256(p.read_bytes()).hexdigest()}
-        for p in args.manifests
+        {
+            "file": str(path),
+            "sha256": hashlib.sha256(
+                read_bytes_confined(path, root=repo_root, allow_external_absolute=True)
+            ).hexdigest(),
+        }
+        for path in manifest_paths
     ]
     review = (
-        json.loads(args.cue_review.read_text(encoding="utf-8"))
-        if args.cue_review
+        json.loads(
+            read_text_confined(
+                cue_review_path, root=repo_root, allow_external_absolute=True
+            )
+        )
+        if cue_review_path is not None
         else None
     )
     review_errors = (
@@ -639,8 +758,11 @@ def main(argv: list[str] | None = None) -> int:
         },
     }
     for name, payload in outputs.items():
-        (args.output_dir / name).write_text(
-            json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        write_text_confined(
+            output_dir / name,
+            json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+            root=output_dir,
+            allow_external_absolute=True,
         )
     return 0 if outputs["accessibility-status.json"]["status"] == "PASS" else 1
 
