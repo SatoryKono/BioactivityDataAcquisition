@@ -27,7 +27,7 @@ def test_reentrant_lock_normal_acquisition_and_release(
     metric_inventory.collect_metric_inventory(tmp_path)
 
     assert lock_acquired is True
-    assert not metric_inventory._COLLECTION_LOCK._is_owned()
+    assert not metric_inventory._COLLECTION_LOCK._is_owned(), "missing-release"
 
 
 def test_reentrant_lock_error_release(
