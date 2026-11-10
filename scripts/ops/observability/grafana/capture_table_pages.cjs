@@ -34,59 +34,86 @@ function mergeInspected(existing, next) {
   return [...byText.values()];
 }
 
+function valueMappingEntries(mapping) {
+  if (mapping?.type !== 'value' || typeof mapping.options !== 'object' || !mapping.options) {
+    return [];
+  }
+  return Object.entries(mapping.options)
+    .filter(([, cfg]) => cfg && typeof cfg.text === 'string')
+    .map(([raw, cfg]) => ({type: 'value', raw, display: cfg.text}));
+}
+
+function regexMappingEntry(mapping) {
+  const pattern = mapping?.options?.pattern;
+  const display = mapping?.options?.result?.text;
+  if (mapping?.type !== 'regex' || typeof pattern !== 'string' || typeof display !== 'string') {
+    return null;
+  }
+  return {type: 'regex', pattern, display};
+}
+
+function appendMappingList(pairs, list) {
+  for (const mapping of list || []) {
+    if (!mapping || typeof mapping !== 'object') continue;
+    pairs.push(...valueMappingEntries(mapping));
+    const regex = regexMappingEntry(mapping);
+    if (regex) pairs.push(regex);
+  }
+}
+
 function collectValueMappings(fieldConfig) {
   const pairs = [];
-  const push = (list) => {
-    for (const mapping of list || []) {
-      if (!mapping || typeof mapping !== 'object') continue;
-      if (mapping.type === 'value' && mapping.options && typeof mapping.options === 'object') {
-        for (const [raw, cfg] of Object.entries(mapping.options)) {
-          if (cfg && typeof cfg.text === 'string') pairs.push({type: 'value', raw, display: cfg.text});
-        }
-      }
-      if (
-        mapping.type === 'regex'
-        && typeof mapping.options?.pattern === 'string'
-        && typeof mapping.options?.result?.text === 'string'
-      ) {
-        pairs.push({
-          type: 'regex',
-          pattern: mapping.options.pattern,
-          display: mapping.options.result.text,
-        });
-      }
-    }
-  };
-  push(fieldConfig?.defaults?.mappings);
+  appendMappingList(pairs, fieldConfig?.defaults?.mappings);
   for (const override of fieldConfig?.overrides || []) {
     for (const prop of override.properties || []) {
-      if (prop?.id === 'mappings') push(prop.value);
+      if (prop?.id === 'mappings') appendMappingList(pairs, prop.value);
     }
   }
   return pairs;
 }
 
-function inspectMatchesCell(observed, displayed, {noValue, valueMappings}) {
+function matchExactOrNoValue(observed, displayed, noValue) {
   if (observed === displayed) return {status: 'VERIFIED'};
   if (observed === '' && noValue === displayed) {
-    return {status: 'VERIFIED_NO_VALUE_MAPPING', mapping: {raw: observed, display: displayed, type: 'noValue'}};
+    return {
+      status: 'VERIFIED_NO_VALUE_MAPPING',
+      mapping: {raw: observed, display: displayed, type: 'noValue'},
+    };
   }
+  return null;
+}
+
+function matchValueMapping(observed, displayed, mapping) {
+  if (mapping.type !== 'value' || mapping.raw !== observed || mapping.display !== displayed) {
+    return null;
+  }
+  return {
+    status: 'VERIFIED_VALUE_MAPPING',
+    mapping: {raw: observed, display: displayed, type: 'value'},
+  };
+}
+
+function matchRegexMapping(observed, displayed, mapping) {
+  if (mapping.type !== 'regex' || mapping.display !== displayed) return null;
+  try {
+    if (!new RegExp(mapping.pattern).test(observed)) return null;
+  } catch {
+    // Invalid dashboard regex is not a capture failure mode here.
+    return null;
+  }
+  return {
+    status: 'VERIFIED_VALUE_MAPPING',
+    mapping: {raw: observed, display: displayed, type: 'regex', pattern: mapping.pattern},
+  };
+}
+
+function inspectMatchesCell(observed, displayed, {noValue, valueMappings}) {
+  const direct = matchExactOrNoValue(observed, displayed, noValue);
+  if (direct) return direct;
   for (const mapping of valueMappings || []) {
-    if (mapping.type === 'value' && mapping.raw === observed && mapping.display === displayed) {
-      return {status: 'VERIFIED_VALUE_MAPPING', mapping: {raw: observed, display: displayed, type: 'value'}};
-    }
-    if (mapping.type === 'regex' && mapping.display === displayed) {
-      try {
-        if (new RegExp(mapping.pattern).test(observed)) {
-          return {
-            status: 'VERIFIED_VALUE_MAPPING',
-            mapping: {raw: observed, display: displayed, type: 'regex', pattern: mapping.pattern},
-          };
-        }
-      } catch {
-        // Invalid dashboard regex is not a capture failure mode here.
-      }
-    }
+    const matched = matchValueMapping(observed, displayed, mapping)
+      || matchRegexMapping(observed, displayed, mapping);
+    if (matched) return matched;
   }
   return null;
 }
