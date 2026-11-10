@@ -158,7 +158,14 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
         if filename == "bioetl-control-plane-v1.json":
             assert panels[9422]["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
             assert "SELECT RUN" in panels[9422]["description"]
-            assert "QUERY ERROR" in panels[9422]["description"]
+            assert "Source unavailable" in panels[9422]["description"]
+            value_map = panels[9422]["fieldConfig"]["defaults"]["mappings"][0][
+                "options"
+            ]
+            assert value_map["QUERY ERROR"] == {
+                "text": "Source unavailable",
+                "color": "red",
+            }
 
 
 def test_current_status_recording_rules_are_canonicalized() -> None:

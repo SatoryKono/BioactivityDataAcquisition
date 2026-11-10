@@ -384,6 +384,10 @@ def test_f03_overview_provider_check_maps_query_error() -> None:
     )
     assert "QUERY ERROR" in value_options
     assert value_options["QUERY ERROR"]["color"] == "red"
+    assert value_options["Source unavailable"] == {
+        "text": "Source unavailable",
+        "color": "red",
+    }
     assert "—" in value_options
 
 
@@ -434,3 +438,25 @@ def test_seed_dc6_pipeline_run_report_writes_matching_identity(
     assert payload["identity"]["pipeline_name"] == "chembl_assay"
     assert payload["identity"]["workflow_id"] == "chembl_baseline"
     assert (tmp_path / "pipeline" / "chembl_assay" / "_latest.json").is_file()
+
+
+def test_dq_verdicts_display_source_unavailable_without_changing_raw_state() -> None:
+    root = Path("grafana/dashboards")
+    overview = _panel_by_id(
+        json.loads((root / "bioetl-overview-v2.json").read_bytes()), 9604
+    )
+    dq = _panel_by_id(json.loads((root / "bioetl-dq-v2.json").read_bytes()), 9406)
+    expected = {"text": "Source unavailable", "color": "red"}
+    assert (
+        overview["fieldConfig"]["defaults"]["mappings"][0]["options"]["QUERY ERROR"]
+        == expected
+    )
+    verdict = next(
+        item
+        for item in dq["fieldConfig"]["overrides"]
+        if item["matcher"] == {"id": "byName", "options": "Overall verdict"}
+    )
+    mappings = next(
+        item["value"] for item in verdict["properties"] if item["id"] == "mappings"
+    )
+    assert mappings[0]["options"]["QUERY ERROR"] == expected
