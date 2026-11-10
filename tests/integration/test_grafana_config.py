@@ -1434,7 +1434,7 @@ def test_provider_health_panel_114_description_disallows_zero_as_healthy() -> No
     panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9481)
     assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
     assert "Missing evidence stays UNKNOWN" in panel["description"]
-    assert "QUERY ERROR" in panel["description"]
+    assert "Source unavailable" in panel["description"]
     assert "vector(0)" not in json.dumps(panel)
 
 

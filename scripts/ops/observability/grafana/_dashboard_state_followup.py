@@ -340,7 +340,7 @@ def _stamp_trust_table(panel: dict[str, Any]) -> None:
     panel["links"] = [
         {
             "title": "Inspect all trust reasons",
-            "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
+            "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9418&${__url_time_range}",
             "includeVars": False,
             "targetBlank": False,
         }
@@ -470,7 +470,7 @@ def _ensure_stage_panel(by_id: dict[int, dict[str, Any]]) -> None:
             "SUCCESS with missing stage evidence stays INCOMPLETE. "
             "A recorded zero stays 0. An unknown count is empty, not 0. "
             "UNFINISHED means no terminal event. Prometheus does not change this table. "
-            "Request failure is QUERY ERROR."
+            "Request failure is Source unavailable."
         ),
         "gridPos": {"x": 0, "y": 16, "w": 24, "h": 8},
         "datasource": "BioETL Ops HTTP",

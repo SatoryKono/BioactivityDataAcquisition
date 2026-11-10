@@ -619,7 +619,19 @@ def _stamp_select_run_column_maps(
         if not field:
             continue
         _override(panel, field, "links", [])
-        _override(panel, field, "mappings", select_run_map)
+        if field == verdict:
+            verdict_options = {
+                **select_run_map[0]["options"],
+                "QUERY ERROR": {"text": "Source unavailable", "color": "red"},
+            }
+            _override(
+                panel,
+                field,
+                "mappings",
+                [{"type": "value", "options": verdict_options}],
+            )
+        else:
+            _override(panel, field, "mappings", select_run_map)
 
 
 def _stamp_legacy_rules_evidence_overrides(panel: dict, rename: dict[str, str]) -> None:
@@ -678,7 +690,7 @@ _DQ_DOMAINS_DESCRIPTION = (
 _DQ_IDENTITY_DESCRIPTION = (
     "SELECTED RUN · Full identifiers of this Run ID; the short table is Inspect "
     "Run Identity on the first screen. Missing checks are INCOMPLETE; missing "
-    "selection is SELECT RUN; request failure is QUERY ERROR. N/A means "
+    "selection is SELECT RUN; request failure is Source unavailable. N/A means "
     "explicitly inapplicable. VALID EMPTY is an empty successful query. This "
     "saved verdict does not authorize replay."
 )

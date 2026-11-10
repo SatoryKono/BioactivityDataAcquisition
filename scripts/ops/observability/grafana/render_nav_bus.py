@@ -40,10 +40,14 @@ if __package__ in {None, ""}:
         sys.path.insert(0, root_str)
 DASH_DIR = ROOT / "grafana" / "dashboards"
 CUSTOM_WIDTH = "custom.width"
+_SELECT_RUN_OR_SOURCE_UNAVAILABLE = (
+    "SELECT RUN if no Run ID is selected. Source unavailable if the request failed."
+)
+_LEGACY_HTTP_FAILURE_COPY = "Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response."
+_HTTP_FAILURE_COPY = "Backend failure indicates an unavailable source and must not be interpreted as an empty successful response."
 HTTP_EVIDENCE_STATES = (
     "VALID EMPTY means an empty successful response; it does not replace "
-    "UNKNOWN for missing required evidence. Backend failure renders as "
-    "QUERY ERROR and must not be interpreted as an empty successful response."
+    f"UNKNOWN for missing required evidence. {_HTTP_FAILURE_COPY}"
 )
 
 # Full portfolio bus. Order is the five-dashboard numbering.
@@ -385,7 +389,7 @@ def _document_required_http_evidence(payload: dict[str, Any]) -> None:
     }.get(payload.get("uid"), set())
     explanation = (
         " Empty is a coverage gap: required saved evidence is missing, not a pass. "
-        "Request failure is QUERY ERROR."
+        "Request failure is Source unavailable."
     )
     for panel in _walk_panels(payload.get("panels", [])):
         if panel.get("id") in required_panels:
@@ -994,7 +998,24 @@ def _shift_panel_tree(panel: dict[str, Any], *, delta: int) -> None:
             grid["y"] = int(grid["y"]) + delta
 
 
-_INCIDENT_TAIL_ROW_ORDER = (8808, 32010, 32005, 9450, 9700)
+_INCIDENT_TAIL_ROW_ORDER = (8809, 8808, 32010, 32005, 9450, 9700)
+_INCIDENT_TAIL_CARD_IDS = frozenset({9460, 9452})
+
+
+def _incident_tail_cursor(panels: list[dict[str, Any]], tail_ids: set[int]) -> int:
+    """Find the end of fixed content, excluding all generated tail bands."""
+    cursor = 0
+    for panel in panels:
+        if not isinstance(panel, dict) or id(panel) in tail_ids:
+            continue
+        if panel.get("id") in _INCIDENT_TAIL_CARD_IDS:
+            continue
+        for descendant in _walk_panels([panel]):
+            geometry = _panel_geometry(descendant)
+            if geometry is not None:
+                _, y, height = geometry
+                cursor = max(cursor, y + height)
+    return cursor
 
 
 def _pack_incident_tail_rows(payload: dict[str, Any]) -> None:
@@ -1011,24 +1032,18 @@ def _pack_incident_tail_rows(payload: dict[str, Any]) -> None:
     ]
     tail_ids = {id(panel) for panel in tail}
     tail.sort(key=lambda panel: _INCIDENT_TAIL_ROW_ORDER.index(panel.get("id")))
-    cursor = 0
-    for panel in panels:
-        if id(panel) in tail_ids or not isinstance(panel, dict):
-            continue
-        for descendant in _walk_panels([panel]):
-            grid = descendant.get("gridPos")
-            if (
-                isinstance(grid, dict)
-                and isinstance(grid.get("y"), int)
-                and isinstance(grid.get("h"), int)
-            ):
-                cursor = max(cursor, grid["y"] + grid["h"])
+    cursor = _incident_tail_cursor(panels, tail_ids)
     for row in tail:
         grid = row.get("gridPos")
         if not isinstance(grid, dict) or not isinstance(grid.get("y"), int):
             continue
         _shift_panel_tree(row, delta=cursor - int(grid["y"]))
         cursor += int(grid.get("h") or 1)
+    # These two half-width cards share the band immediately after the rows.
+    # Excluding them from the initial cursor avoids retaining their old gap.
+    for panel in panels:
+        if panel.get("id") in _INCIDENT_TAIL_CARD_IDS:
+            _shift_panel_tree(panel, delta=cursor - panel["gridPos"]["y"])
 
 
 def _pack_control_plane_rows(root: list[dict[str, Any]]) -> None:
@@ -1318,7 +1333,7 @@ def _stamp_aggregate_trust(by_id: dict[object, dict[str, Any]]) -> None:
     footer["enablePagination"] = True
     field_config = panel.setdefault("fieldConfig", {})
     field_config.setdefault("defaults", {})["noValue"] = (
-        "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
+        _SELECT_RUN_OR_SOURCE_UNAVAILABLE
     )
     display_names = {
         "processing_status": "Processing result",
@@ -1651,9 +1666,7 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
             "and read Review Processed Records for this Run ID. An empty identity "
             "table is not zero records."
         )
-    request_empty = (
-        "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
-    )
+    request_empty = _SELECT_RUN_OR_SOURCE_UNAVAILABLE
     for panel_id in (9413, 9414, 9415, 9417):
         panel = by_id.get(panel_id)
         if isinstance(panel, dict):
@@ -1678,9 +1691,7 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
             "It lists replay signals that stay outside saved-run evidence."
         )
         _set_panel_no_value(uncovered, "—")
-    request_empty = (
-        "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
-    )
+    request_empty = _SELECT_RUN_OR_SOURCE_UNAVAILABLE
     for panel_id in (9402, 9405, 9406, 9407, 9408, 9409, 9410, 9411):
         panel = by_id.get(panel_id)
         if isinstance(panel, dict):
@@ -2466,6 +2477,7 @@ def apply_to_dashboard(
         panel for panel in payload.get("panels", []) if panel.get("id") != 9450
     ]
     from scripts.ops.observability.grafana.dashboard_context_links import (
+        _rewrite_links,
         normalize_dashboard_actions,
         finalize_dashboard_links,
         retire_runtime_links,
@@ -2533,6 +2545,9 @@ def apply_to_dashboard(
     )
 
     apply_evidence_readability(payload)
+    # explain_incident stamps HTML hrefs after the early normalize_dashboard_actions
+    # pass; re-run content/url serialization so All/`.*` selection stays encoded.
+    _rewrite_links(payload)
     from scripts.ops.observability.grafana._workflow_scope import apply_workflow_scope
 
     apply_workflow_scope(payload)
@@ -2725,6 +2740,13 @@ def apply_to_dashboard(
         panel = pending.pop()
         pending.extend(panel.get("panels", []))
         description = panel.get("description", "")
+        if _LEGACY_HTTP_FAILURE_COPY in description:
+            description = description.replace(
+                _LEGACY_HTTP_FAILURE_COPY, _HTTP_FAILURE_COPY
+            )
+            panel["description"] = description
+        # Migrate legacy Provider Health handoff copy; keep matching the old
+        # phrase so reintroduced donor text is rewritten on the next render.
         if "Handoff: Provider Health" in description:
             panel["description"] = description.replace(
                 "Handoff: Provider Health",
@@ -2761,6 +2783,22 @@ def apply_to_dashboard(
                 panel.setdefault("fieldConfig", {}).setdefault("defaults", {})[
                     "noValue"
                 ] = label
+    from scripts.ops.observability.grafana._table_wrapping import apply_table_wrapping
+
+    apply_table_wrapping(payload.get("panels", []))
+    if current_uid == "bioetl-incident-v1":
+        from scripts.ops.observability.grafana._apply_dsa_residual import (
+            apply_observability_states,
+        )
+        from scripts.ops.observability.grafana.apply_phase4_reflow import (
+            reflow_fleet_row,
+        )
+
+        apply_observability_states(payload)
+        fleet = next(p for p in payload["panels"] if p.get("id") == 8808)
+        _pack_fleet_children(fleet)
+        reflow_fleet_row(fleet)
+        _pack_incident_tail_rows(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:
@@ -2779,7 +2817,7 @@ def apply_to_dashboard(
 
 _CP_EXACT_REPLAY_NO_VALUE: dict[int, str] = {
     9422: "UNKNOWN",
-    9423: ("SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."),
+    9423: (_SELECT_RUN_OR_SOURCE_UNAVAILABLE),
 }
 
 

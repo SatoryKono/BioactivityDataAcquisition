@@ -466,7 +466,7 @@ def run_explorer_depth() -> None:
             "content": (
                 "1. **1. Trust** — resume/replay safety for this family.\n"
                 "2. **5. Data Quality** — quarantine aggregates (not record forensics).\n"
-                "3. **6. Incident Workspace** — multi-domain suspects.\n"
+                "3. **5. Incident Workspace** — multi-domain suspects.\n"
                 "4. **CLI** — `bioetl run-manifest show <run-id>` · "
                 "`bioetl quarantine inspect --pipeline <pipeline>`.\n"
             ),

@@ -34,6 +34,7 @@ from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
+from bioetl.domain.context import InputFilterContext
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
     LegacyRunnerBuilderOverrides,
     resolve_runner_builder_wiring,
@@ -192,7 +193,7 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
         dry_run=False,
         skip_gold=False,
         start_offset=None,
-        input_filter=SimpleNamespace(enabled=False),
+        input_filter=InputFilterContext.disabled(),
         workflow_run_id=None,
         workflow_name=None,
         workflow_step_id=None,

@@ -395,7 +395,7 @@
         "type": "datasource",
         "uid": "-- Dashboard --"
       },
-      "description": "SELECTED RUN · Saved exact-replay assessment, not CURRENT health. OK/WARN/CRIT palette: READY=OK, INSUFFICIENT=WARN, BLOCKED=CRIT. UNSUPPORTED/UNKNOWN/INCOMPLETE are gray. SELECT RUN means no Run ID is selected; QUERY ERROR means backend unavailable or request failure. UNKNOWN means no assessed value, never READY. Open replay checks for basis. Occurrence-only versus semantic drift still requires exact-run evidence; current write-risk telemetry is not proof for this run. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+      "description": "SELECTED RUN · Saved exact-replay assessment, not CURRENT health. OK/WARN/CRIT palette: READY=OK, INSUFFICIENT=WARN, BLOCKED=CRIT. UNSUPPORTED/UNKNOWN/INCOMPLETE are gray. SELECT RUN means no Run ID is selected; Source unavailable means backend unavailable or request failure. UNKNOWN means no assessed value, never READY. Open replay checks for basis. Occurrence-only versus semantic drift still requires exact-run evidence; current write-risk telemetry is not proof for this run. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
       "options": {
         "reduceOptions": {
           "values": true,
@@ -443,7 +443,7 @@
                   "color": "#555555"
                 },
                 "QUERY ERROR": {
-                  "text": "QUERY ERROR",
+                  "text": "Source unavailable",
                   "color": "red"
                 },
                 "UNKNOWN": {
@@ -540,7 +540,7 @@
       "id": 9423,
       "type": "table",
       "title": "Review Exact Replay Checks",
-      "description": "SELECTED RUN · One row per readiness check for this Run ID. Fail blocks replay. Unknown is not a pass. Valid-empty check output stays VALID EMPTY. Request failure is QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+      "description": "SELECTED RUN · One row per readiness check for this Run ID. Fail blocks replay. Unknown is not a pass. Valid-empty check output stays VALID EMPTY. Request failure is QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
       "datasource": {
         "type": "datasource",
         "uid": "-- Dashboard --"
@@ -622,7 +622,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
+          "noValue": "SELECT RUN if no Run ID is selected. Source unavailable if the request failed.",
           "custom": {
             "align": "left",
             "inspect": true,
@@ -631,7 +631,8 @@
               "type": "auto",
               "wrapText": true
             },
-            "minWidth": 50
+            "minWidth": 50,
+            "wrapHeaderText": true
           }
         },
         "overrides": [
@@ -664,14 +665,15 @@
         "type": "yesoreyeram-infinity-datasource",
         "uid": "bioetl-ops-http"
       },
-      "description": "SELECTED RUN · All identity anchors, missing first. Presence is not verification. VALID EMPTY means the successful response contains no anchors. Exact Replay Checks determines readiness. Inspect a value to copy it in full. No rows is not a pass; missing evidence is UNKNOWN and failed requests are QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+      "description": "SELECTED RUN · All identity anchors, missing first. Presence is not verification. VALID EMPTY means the successful response contains no anchors. Exact Replay Checks determines readiness. Inspect a value to copy it in full. No rows is not a pass; missing evidence is UNKNOWN and failed requests are QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
           "custom": {
             "inspect": true,
             "wrapText": false,
-            "minWidth": 50
+            "minWidth": 50,
+            "wrapHeaderText": true
           }
         },
         "overrides": [
@@ -845,7 +847,7 @@
         "type": "yesoreyeram-infinity-datasource",
         "uid": "bioetl-ops-http"
       },
-      "description": "SELECTED RUN · processing_status is the saved ETL outcome. trust_status is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+      "description": "SELECTED RUN · processing_status is the saved ETL outcome. trust_status is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -856,7 +858,8 @@
             },
             "inspect": true,
             "minWidth": 50,
-            "wrapText": false
+            "wrapText": false,
+            "wrapHeaderText": true
           },
           "unit": "none",
           "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
@@ -923,7 +926,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": false
                 }
               },
               {
@@ -949,7 +953,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": false
                 }
               },
               {
@@ -975,7 +980,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": false
                 }
               },
               {
@@ -1005,7 +1011,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": false
                 }
               }
             ]
@@ -1039,7 +1046,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text"
+                  "type": "color-text",
+                  "wrapText": false
                 }
               },
               {
@@ -1099,7 +1107,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text"
+                  "type": "color-text",
+                  "wrapText": false
                 }
               },
               {
@@ -1182,7 +1191,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": false
                 }
               },
               {
@@ -1371,7 +1381,7 @@
       "links": [
         {
           "title": "Inspect all trust reasons",
-          "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
+          "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9418&${__url_time_range}",
           "includeVars": false,
           "targetBlank": false
         }
@@ -1394,7 +1404,7 @@
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
           },
-          "description": "SELECTED RUN · Manifest parse, structure, schema version, and contract compatibility for this Run ID. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+          "description": "SELECTED RUN · Manifest parse, structure, schema version, and contract compatibility for this Run ID. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -1405,7 +1415,8 @@
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": false,
+                "wrapHeaderText": true
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
@@ -1455,7 +1466,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   },
                   {
@@ -1696,7 +1707,7 @@
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
           },
-          "description": "SELECTED RUN · Lineage closure, identity consistency, cycle freedom, and persistence profile for this Run ID. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+          "description": "SELECTED RUN · Lineage closure, identity consistency, cycle freedom, and persistence profile for this Run ID. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -1707,7 +1718,8 @@
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": false,
+                "wrapHeaderText": true
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
@@ -1753,7 +1765,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -1853,7 +1865,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -2016,17 +2028,19 @@
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
           },
-          "description": "SELECTED RUN · Five retention rows for this Run ID: policy, evidence floor, required evidence, snapshot evidence, and archive. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK. Archive N/A means a referenced policy does not require archiving; it is not proof of an archive. Archive verified means local copies and restore evidence passed current hash and identity checks. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+          "description": "SELECTED RUN · Five retention rows for this Run ID: policy, evidence floor, required evidence, snapshot evidence, and archive. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK. Archive N/A means a referenced policy does not require archiving; it is not proof of an archive. Archive verified means local copies and restore evidence passed current hash and identity checks. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
           "fieldConfig": {
             "defaults": {
               "custom": {
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": true,
+                "wrapHeaderText": true
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed. HTTP 504 is a query error, not an empty result.",
@@ -2733,7 +2747,7 @@
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
           },
-          "description": "SELECTED RUN · Checkpoint parse, schema, checksum, and required identity anchors for this Run ID. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+          "description": "SELECTED RUN · Checkpoint parse, schema, checksum, and required identity anchors for this Run ID. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2744,7 +2758,8 @@
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": false,
+                "wrapHeaderText": true
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
@@ -2794,7 +2809,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   },
                   {
@@ -3035,7 +3050,7 @@
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
           },
-          "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+          "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3046,7 +3061,8 @@
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": false,
+                "wrapHeaderText": true
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",

@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import pytest
 
+from bioetl.domain.context import InputFilterContext
 from bioetl.composition.runtime_builders import (
     inputs_runtime_assembly,
 )
@@ -87,16 +88,8 @@ def test_build_pipeline_runner_forces_skip_gold_when_sink_disabled(
 def test_assemble_filter_config_passes_cli_overrides_when_enabled() -> None:
     ctx = SimpleNamespace(
         ignore_yaml_filter=False,
-        input_filter=SimpleNamespace(
-            enabled=True,
-            source_path="ids.csv",
-            column_name="compound_id",
-            filter_field="compound_id",
-            fallback_column="legacy_id",
-            filter_ids=["1", "2"],
-            fallback_mapping={"1": "A"},
-            multi_filter_ids={"compound_id": ["1"]},
-            valid_combinations=[{"compound_id": "1"}],
+        input_filter=InputFilterContext.from_csv(
+            "ids.csv", "compound_id", "compound_id", fallback_column="legacy_id"
         ),
     )
     sentinel = object()

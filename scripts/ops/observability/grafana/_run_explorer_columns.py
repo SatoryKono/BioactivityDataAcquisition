@@ -23,6 +23,7 @@ _RENAMES = {
     "4. Provider Health": "Provider Health",
     "5. Data Quality": _DATA_QUALITY,
 }
+_QUERY_ERROR = "QUERY ERROR"
 _COLORS = {
     "OK": "#73BF69",
     "WARN": "#F2CC0C",
@@ -30,7 +31,7 @@ _COLORS = {
     "INCOMPLETE": "#FF9830",
     "IN PROGRESS": "#5794F2",
     "N/A": "#9CA3AF",
-    "QUERY ERROR": "#F2495C",
+    _QUERY_ERROR: "#F2495C",
     "success": "#73BF69",
     "failed": "#F2495C",
     "fail": "#F2495C",
@@ -115,7 +116,12 @@ def apply_overall_verdict(payload: dict) -> None:
                     {
                         "type": "value",
                         "options": {
-                            value: {"text": value, "color": color}
+                            value: {
+                                "text": "Source unavailable"
+                                if value == _QUERY_ERROR
+                                else value,
+                                "color": color,
+                            }
                             for value, color in {
                                 "OK": "green",
                                 "WARN": "yellow",
@@ -123,7 +129,7 @@ def apply_overall_verdict(payload: dict) -> None:
                                 "INCOMPLETE": "orange",
                                 "UNKNOWN": "gray",
                                 "N/A": "gray",
-                                "QUERY ERROR": "red",
+                                _QUERY_ERROR: "red",
                                 "SELECT RUN": "gray",
                                 _NO_RUNS_LABEL: "gray",
                             }.items()

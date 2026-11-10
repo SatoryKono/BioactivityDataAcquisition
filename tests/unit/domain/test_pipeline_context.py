@@ -502,6 +502,44 @@ class TestRunContextValidationAndProperties:
         with pytest.raises(ValueError, match="source_path is required"):
             InputFilterContext.from_csv("", "accession", "accession")
 
+    @pytest.mark.parametrize(
+        ("enabled", "source", "direct_ids", "multi_ids", "mode"),
+        [
+            (True, "ids.csv", ("A",), {"doi": ("A",)}, "multi"),
+            (True, "ids.csv", ("A",), None, "direct"),
+            (True, "ids.csv", (), None, "csv"),
+            (True, "", (), None, None),
+            (True, "", ("A",), None, "direct"),
+            (False, "ids.csv", ("A",), {"doi": ("A",)}, None),
+        ],
+    )
+    def test_input_filter_mode_precedence(
+        self,
+        enabled: bool,
+        source: str,
+        direct_ids: tuple[str, ...],
+        multi_ids: dict[str, tuple[str, ...]] | None,
+        mode: str | None,
+    ) -> None:
+        context = InputFilterContext(
+            enabled=enabled,
+            source_path=source,
+            column_name="id",
+            filter_field="doi",
+            filter_ids=direct_ids,
+            multi_filter_ids=multi_ids,
+        )
+        assert context.is_disabled is (not enabled)
+        assert context.is_csv_mode is (mode == "csv")
+        assert context.is_direct_ids_mode is (mode == "direct")
+        assert context.is_multi_ids_mode is (mode == "multi")
+
+    @pytest.mark.parametrize("enabled", [None, False, True])
+    def test_vacuum_enabled_override_preserves_tristate(
+        self, enabled: bool | None
+    ) -> None:
+        assert VacuumSettings(enabled=enabled).is_enabled_override is enabled
+
     def test_vacuum_config_validation(self) -> None:
         with pytest.raises(ValueError, match="retention_days must be positive"):
             VacuumSettings(enabled=True, retention_days=0)

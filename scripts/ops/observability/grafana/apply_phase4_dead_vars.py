@@ -166,16 +166,48 @@ def _prune_dead_renames(data: dict[str, Any]) -> int:
 
 def _ensure_timepicker(data: dict[str, Any]) -> bool:
     """Align ``timepicker.refresh_intervals`` to the shared Phase 4.4 list."""
-    timepicker = data.setdefault("timepicker", {})
-    if not isinstance(timepicker, dict):
-        data["timepicker"] = {"refresh_intervals": list(_REFRESH_INTERVALS)}
-        return True
-    current = timepicker.get("refresh_intervals")
     desired = list(_REFRESH_INTERVALS)
-    if current == desired:
+    timepicker = data.get("timepicker")
+    if not isinstance(timepicker, dict):
+        data["timepicker"] = {"refresh_intervals": desired}
+        return True
+    if timepicker.get("refresh_intervals") == desired:
         return False
     timepicker["refresh_intervals"] = desired
     return True
+
+
+def _normalize_dashboard_defaults(data: dict[str, Any]) -> list[str]:
+    changed = []
+    for key, desired in (
+        ("refresh", "60s"),
+        ("time", {"from": "now-12h", "to": "now"}),
+    ):
+        if data.get(key) != desired:
+            data[key] = desired
+            changed.append(key)
+    if _ensure_timepicker(data):
+        changed.append("timepicker.refresh_intervals")
+    if _ensure_run_type_default(data):
+        changed.append("templating.run_type.current")
+    return changed
+
+
+def _ensure_run_type_default(data: dict[str, Any]) -> bool:
+    variables = data.get("templating", {}).get("list")
+    if not isinstance(variables, list):
+        return False
+    changed = False
+    desired = {"selected": True, "text": "All", "value": "$__all"}
+    for variable in variables:
+        if (
+            isinstance(variable, dict)
+            and variable.get("name") == "run_type"
+            and variable.get("current") != desired
+        ):
+            variable["current"] = desired.copy()
+            changed = True
+    return changed
 
 
 def apply_dashboard_data(
@@ -189,8 +221,7 @@ def apply_dashboard_data(
     pruned = _prune_dead_renames(data)
     if pruned:
         cleared.append(f"renameByName:pruned={pruned}")
-    if _ensure_timepicker(data):
-        cleared.append("timepicker.refresh_intervals")
+    cleared.extend(_normalize_dashboard_defaults(data))
     return removed, cleared
 
 

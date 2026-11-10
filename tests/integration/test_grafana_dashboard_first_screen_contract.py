@@ -158,7 +158,14 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
         if filename == "bioetl-control-plane-v1.json":
             assert panels[9422]["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
             assert "SELECT RUN" in panels[9422]["description"]
-            assert "QUERY ERROR" in panels[9422]["description"]
+            assert "Source unavailable" in panels[9422]["description"]
+            value_map = panels[9422]["fieldConfig"]["defaults"]["mappings"][0][
+                "options"
+            ]
+            assert value_map["QUERY ERROR"] == {
+                "text": "Source unavailable",
+                "color": "red",
+            }
 
 
 def test_current_status_recording_rules_are_canonicalized() -> None:
@@ -349,9 +356,12 @@ def test_required_trust_markers_stay_visible_on_target_dashboards() -> None:
         assert panel is not None, (
             f"{dashboard_name} must expose required trust marker {panel_title!r}"
         )
-        fleet_row = next(row for row in dashboard["panels"] if row.get("id") == 8808)
-        assert fleet_row["collapsed"] is True
-        assert panel["id"] in {p["id"] for p in get_dashboard_panels(fleet_row)}
+        visibility_row = next(
+            row for row in dashboard["panels"] if row.get("id") == 8809
+        )
+        assert visibility_row["collapsed"] is True
+        assert visibility_row["title"] == "Observability Signals"
+        assert panel["id"] in {p["id"] for p in get_dashboard_panels(visibility_row)}
         assert panel.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
             "UNKNOWN"
         )
@@ -426,7 +436,11 @@ def test_provider_and_dq_range_evidence_panels_are_below_first_screen() -> None:
     row = next(p for p in incident["panels"] if p["id"] == 8808)
     assert row["collapsed"] and row["gridPos"]["y"] >= FIRST_WINDOW_Y
     ids = {p["id"] for p in get_dashboard_panels(row)}
-    assert {111, 205, 9101, 9102, 9996, 9997}.issubset(ids)
+    assert {111, 205, 9101, 9996, 9997}.issubset(ids)
+    assert 9102 not in ids
+    visibility = next(p for p in incident["panels"] if p["id"] == 8809)
+    assert visibility["collapsed"] and visibility["gridPos"]["y"] >= FIRST_WINDOW_Y
+    assert 9102 in {p["id"] for p in get_dashboard_panels(visibility)}
     for filename in ("bioetl-overview-v2.json", "bioetl-dq-v2.json"):
         dashboard = load_dashboard(_DASHBOARD_DIR / filename)
         first = [
