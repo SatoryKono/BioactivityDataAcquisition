@@ -2913,7 +2913,7 @@
           "title": "Review Observability States",
           "gridPos": {
             "x": 0,
-            "y": 57,
+            "y": 48,
             "w": 24,
             "h": 14
           },
@@ -3111,7 +3111,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 71,
+            "y": 62,
             "w": 24,
             "h": 7
           },
@@ -3242,7 +3242,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 78,
+            "y": 69,
             "w": 24,
             "h": 4
           },
@@ -3290,7 +3290,7 @@
         {
           "gridPos": {
             "x": 0,
-            "y": 82,
+            "y": 73,
             "w": 24,
             "h": 5
           },
@@ -3364,7 +3364,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 87,
+            "y": 78,
             "w": 24,
             "h": 8
           },
@@ -3446,7 +3446,7 @@
       ],
       "gridPos": {
         "x": 0,
-        "y": 56,
+        "y": 47,
         "w": 24,
         "h": 1
       },
@@ -3461,7 +3461,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 57,
+        "y": 48,
         "w": 24,
         "h": 1
       },
@@ -3475,7 +3475,7 @@
             "h": 3,
             "w": 8,
             "x": 0,
-            "y": 58
+            "y": 49
           },
           "datasource": {
             "type": "prometheus",
@@ -3979,7 +3979,7 @@
             "h": 7,
             "w": 16,
             "x": 8,
-            "y": 58
+            "y": 49
           },
           "id": 9101,
           "options": {
@@ -4227,7 +4227,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 65,
+            "y": 56,
             "w": 24,
             "h": 5
           },
@@ -4280,7 +4280,7 @@
           "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing. No selection stays SELECT RUN; missing timestamps stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
           "gridPos": {
             "x": 0,
-            "y": 70,
+            "y": 61,
             "w": 24,
             "h": 3
           },
@@ -4463,7 +4463,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 73,
+            "y": 64,
             "w": 24,
             "h": 10
           },
@@ -4544,7 +4544,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 83,
+            "y": 74,
             "w": 12,
             "h": 6
           },
@@ -4640,7 +4640,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 83,
+            "y": 74,
             "w": 12,
             "h": 6
           },
@@ -4697,7 +4697,7 @@
           "title": "Review Runtime Escalation",
           "gridPos": {
             "x": 0,
-            "y": 89,
+            "y": 80,
             "w": 24,
             "h": 3
           },
@@ -4756,7 +4756,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 92,
+            "y": 83,
             "w": 8,
             "h": 4
           },
@@ -4849,7 +4849,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 92,
+            "y": 83,
             "w": 8,
             "h": 4
           },
@@ -4939,7 +4939,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 92,
+            "y": 83,
             "w": 8,
             "h": 4
           },
@@ -5031,7 +5031,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 96,
+            "y": 87,
             "w": 10,
             "h": 4
           },
@@ -5136,7 +5136,7 @@
           },
           "gridPos": {
             "x": 10,
-            "y": 96,
+            "y": 87,
             "w": 14,
             "h": 4
           },
@@ -5221,7 +5221,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 100,
+            "y": 91,
             "w": 10,
             "h": 4
           },
@@ -5326,7 +5326,7 @@
           },
           "gridPos": {
             "x": 10,
-            "y": 100,
+            "y": 91,
             "w": 14,
             "h": 4
           },
@@ -5427,7 +5427,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 104,
+            "y": 95,
             "w": 10,
             "h": 4
           },
@@ -5598,7 +5598,7 @@
           },
           "gridPos": {
             "x": 10,
-            "y": 104,
+            "y": 95,
             "w": 14,
             "h": 6
           },
@@ -5766,7 +5766,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 110,
+            "y": 101,
             "w": 13,
             "h": 6
           },
@@ -5892,7 +5892,7 @@
             "h": 4,
             "w": 5,
             "x": 13,
-            "y": 110
+            "y": 101
           },
           "id": 891,
           "options": {
@@ -5985,7 +5985,7 @@
             "h": 4,
             "w": 6,
             "x": 18,
-            "y": 110
+            "y": 101
           },
           "id": 892,
           "options": {
@@ -6113,7 +6113,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 116
+            "y": 107
           },
           "id": 893,
           "options": {
@@ -6162,7 +6162,7 @@
           "title": "Review Cross-Domain Handoffs",
           "gridPos": {
             "x": 0,
-            "y": 120,
+            "y": 111,
             "w": 24,
             "h": 3
           },
@@ -6280,7 +6280,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 123,
+            "y": 114,
             "w": 24,
             "h": 10
           },
@@ -6364,7 +6364,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 133,
+            "y": 124,
             "w": 8,
             "h": 4
           },
@@ -6460,7 +6460,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 133,
+            "y": 124,
             "w": 8,
             "h": 4
           },
@@ -6550,7 +6550,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 133,
+            "y": 124,
             "w": 8,
             "h": 4
           },
@@ -6608,7 +6608,7 @@
             "h": 2,
             "w": 24,
             "x": 0,
-            "y": 137
+            "y": 128
           },
           "options": {
             "mode": "html",
@@ -6692,7 +6692,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 139,
+            "y": 130,
             "w": 24,
             "h": 4
           },
@@ -6778,7 +6778,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 143,
+            "y": 134,
             "w": 24,
             "h": 4
           },
@@ -6884,7 +6884,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 147,
+            "y": 138,
             "w": 12,
             "h": 4
           },
@@ -6989,7 +6989,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 147,
+            "y": 138,
             "w": 12,
             "h": 3
           },
@@ -7089,7 +7089,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 151,
+            "y": 142,
             "w": 14,
             "h": 3
           },
@@ -7190,7 +7190,7 @@
           },
           "gridPos": {
             "x": 14,
-            "y": 151,
+            "y": 142,
             "w": 10,
             "h": 3
           },
@@ -7290,7 +7290,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 154,
+            "y": 145,
             "w": 8,
             "h": 3
           },
@@ -7390,7 +7390,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 154,
+            "y": 145,
             "w": 8,
             "h": 3
           },
@@ -7483,7 +7483,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 154,
+            "y": 145,
             "w": 8,
             "h": 3
           },
@@ -7599,7 +7599,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 157,
+            "y": 148,
             "w": 24,
             "h": 9
           },
@@ -7798,7 +7798,7 @@
           "description": "CURRENT · Expected stage coverage for Pipeline / Run Type. Missing lag/backlog signals are listed individually. Undefined expected stages are UNKNOWN. VALID EMPTY requires a recorded complete stage catalog and every expected signal. Query failures are QUERY ERROR.",
           "gridPos": {
             "x": 0,
-            "y": 166,
+            "y": 157,
             "w": 24,
             "h": 14
           },
@@ -7929,7 +7929,7 @@
           "title": "Review Global Process Signals",
           "gridPos": {
             "x": 0,
-            "y": 180,
+            "y": 171,
             "w": 24,
             "h": 3
           },
@@ -8000,7 +8000,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 183,
+            "y": 174,
             "w": 24,
             "h": 6
           },
@@ -8091,7 +8091,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 189,
+            "y": 180,
             "w": 8,
             "h": 3
           },
@@ -8192,7 +8192,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 189,
+            "y": 180,
             "w": 8,
             "h": 3
           },
@@ -8292,7 +8292,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 189,
+            "y": 180,
             "w": 8,
             "h": 3
           },
@@ -8455,7 +8455,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 192,
+            "y": 183,
             "w": 24,
             "h": 6
           },
@@ -8562,7 +8562,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 198,
+            "y": 189,
             "w": 12,
             "h": 3
           },
@@ -8662,7 +8662,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 198,
+            "y": 189,
             "w": 12,
             "h": 3
           },
@@ -8752,7 +8752,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 201,
+            "y": 192,
             "w": 14,
             "h": 6
           },
@@ -8846,7 +8846,7 @@
           },
           "gridPos": {
             "x": 14,
-            "y": 201,
+            "y": 192,
             "w": 10,
             "h": 3
           },
@@ -8946,7 +8946,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 207,
+            "y": 198,
             "w": 10,
             "h": 3
           },
@@ -9036,7 +9036,7 @@
           },
           "gridPos": {
             "x": 10,
-            "y": 207,
+            "y": 198,
             "w": 14,
             "h": 6
           },
@@ -9130,7 +9130,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 213,
+            "y": 204,
             "w": 24,
             "h": 3
           },
@@ -9230,7 +9230,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 216,
+            "y": 207,
             "w": 24,
             "h": 3
           },
@@ -9315,7 +9315,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 219,
+            "y": 210,
             "w": 24,
             "h": 10
           },
@@ -9384,7 +9384,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 229,
+            "y": 220,
             "w": 24,
             "h": 9
           },
@@ -9474,7 +9474,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 238,
+            "y": 229,
             "w": 24,
             "h": 3
           },
@@ -9545,7 +9545,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 241,
+            "y": 232,
             "w": 24,
             "h": 7
           },
@@ -9616,7 +9616,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 248,
+            "y": 239,
             "w": 24,
             "h": 6
           },
@@ -9655,7 +9655,7 @@
           "description": "TIME RANGE · Shows selected-range stage lag in seconds for Pipeline, Run Type, and Stage. No data means no emitted lag samples or unavailable telemetry, never zero lag. Use Worst Stage Lag and current blockers for severity",
           "gridPos": {
             "x": 0,
-            "y": 254,
+            "y": 245,
             "w": 24,
             "h": 10
           },
@@ -9826,7 +9826,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 264,
+            "y": 255,
             "w": 24,
             "h": 6
           },
@@ -9884,7 +9884,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 270,
+            "y": 261,
             "w": 24,
             "h": 7
           },
@@ -9959,7 +9959,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 277,
+            "y": 268,
             "w": 24,
             "h": 6
           },
@@ -10017,7 +10017,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 283,
+            "y": 274,
             "w": 24,
             "h": 12
           },
@@ -10327,7 +10327,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 295,
+            "y": 286,
             "w": 24,
             "h": 9
           },
@@ -10449,7 +10449,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 304,
+            "y": 295,
             "w": 24,
             "h": 7
           },
@@ -10546,7 +10546,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 311,
+            "y": 302,
             "w": 24,
             "h": 7
           },
@@ -10642,7 +10642,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 318,
+            "y": 309,
             "w": 24,
             "h": 7
           },
@@ -10739,7 +10739,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 325,
+            "y": 316,
             "w": 24,
             "h": 7
           },
@@ -10839,7 +10839,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 332,
+            "y": 323,
             "w": 24,
             "h": 3
           },
@@ -10901,7 +10901,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 335,
+            "y": 326,
             "w": 24,
             "h": 6
           },
@@ -10942,7 +10942,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 58,
+        "y": 49,
         "w": 24,
         "h": 1
       },
@@ -10954,7 +10954,7 @@
           "description": "GLOBAL / TIME RANGE · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Action opens the domain page named on the row. Fleet charts for pipeline signals stay on this page.",
           "gridPos": {
             "x": 0,
-            "y": 59,
+            "y": 50,
             "w": 24,
             "h": 12
           },
@@ -11628,7 +11628,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 59,
+        "y": 50,
         "w": 24,
         "h": 1
       },
@@ -11640,7 +11640,7 @@
           "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state.",
           "gridPos": {
             "x": 0,
-            "y": 60,
+            "y": 51,
             "w": 24,
             "h": 6
           },
@@ -11982,7 +11982,7 @@
       "description": "Expand for saved domain trust reasons for the selected Run ID.",
       "gridPos": {
         "x": 0,
-        "y": 60,
+        "y": 51,
         "w": 24,
         "h": 1
       },
@@ -11993,7 +11993,7 @@
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
-            "y": 61,
+            "y": 52,
             "w": 24,
             "h": 8
           },
@@ -12253,7 +12253,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 61,
+        "y": 52,
         "w": 24,
         "h": 1
       },
@@ -12265,7 +12265,7 @@
           "description": "CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. Published at is the gateway publication clock, not the Prometheus evaluation clock. Retained publications do not expire after 15 minutes. Reason unavailable means no diagnostic cause is exposed by this metric.",
           "gridPos": {
             "x": 0,
-            "y": 62,
+            "y": 53,
             "w": 24,
             "h": 9
           },

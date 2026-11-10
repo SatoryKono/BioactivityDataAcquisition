@@ -999,6 +999,23 @@ def _shift_panel_tree(panel: dict[str, Any], *, delta: int) -> None:
 
 
 _INCIDENT_TAIL_ROW_ORDER = (8809, 8808, 32010, 32005, 9450, 9700)
+_INCIDENT_TAIL_CARD_IDS = frozenset({9460, 9452})
+
+
+def _incident_tail_cursor(panels: list[dict[str, Any]], tail_ids: set[int]) -> int:
+    """Find the end of fixed content, excluding all generated tail bands."""
+    cursor = 0
+    for panel in panels:
+        if not isinstance(panel, dict) or id(panel) in tail_ids:
+            continue
+        if panel.get("id") in _INCIDENT_TAIL_CARD_IDS:
+            continue
+        for descendant in _walk_panels([panel]):
+            geometry = _panel_geometry(descendant)
+            if geometry is not None:
+                _, y, height = geometry
+                cursor = max(cursor, y + height)
+    return cursor
 
 
 def _pack_incident_tail_rows(payload: dict[str, Any]) -> None:
@@ -1015,24 +1032,18 @@ def _pack_incident_tail_rows(payload: dict[str, Any]) -> None:
     ]
     tail_ids = {id(panel) for panel in tail}
     tail.sort(key=lambda panel: _INCIDENT_TAIL_ROW_ORDER.index(panel.get("id")))
-    cursor = 0
-    for panel in panels:
-        if id(panel) in tail_ids or not isinstance(panel, dict):
-            continue
-        for descendant in _walk_panels([panel]):
-            grid = descendant.get("gridPos")
-            if (
-                isinstance(grid, dict)
-                and isinstance(grid.get("y"), int)
-                and isinstance(grid.get("h"), int)
-            ):
-                cursor = max(cursor, grid["y"] + grid["h"])
+    cursor = _incident_tail_cursor(panels, tail_ids)
     for row in tail:
         grid = row.get("gridPos")
         if not isinstance(grid, dict) or not isinstance(grid.get("y"), int):
             continue
         _shift_panel_tree(row, delta=cursor - int(grid["y"]))
         cursor += int(grid.get("h") or 1)
+    # These two half-width cards share the band immediately after the rows.
+    # Excluding them from the initial cursor avoids retaining their old gap.
+    for panel in panels:
+        if panel.get("id") in _INCIDENT_TAIL_CARD_IDS:
+            _shift_panel_tree(panel, delta=cursor - panel["gridPos"]["y"])
 
 
 def _pack_control_plane_rows(root: list[dict[str, Any]]) -> None:

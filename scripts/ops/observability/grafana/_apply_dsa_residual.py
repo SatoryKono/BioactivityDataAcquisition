@@ -420,10 +420,11 @@ Contract: docs/03-guides/dashboards/contracts/observability-states.md (LA-13; sh
 
 
 def _ensure_observability_row(
-    root: list[dict[str, Any]], fleet: dict[str, Any]
+    root: list[dict[str, Any]],
+    fleet: dict[str, Any],
 ) -> dict[str, Any]:
     """Insert a disclosure header while preserving existing panel geometry."""
-    row = next((panel for panel in root if panel.get("id") == 8809), None)
+    row = next((p for p in root if p.get("id") == 8809), None)
     if row is not None:
         return row
     row_y = fleet["gridPos"]["y"]
@@ -442,17 +443,18 @@ def _ensure_observability_row(
 
 
 def _detach_observability_panels(
-    root: list[dict[str, Any]], row: dict[str, Any]
+    root: list[dict[str, Any]],
+    row: dict[str, Any],
 ) -> list[dict[str, Any]]:
     """Remove migrated copies from their old parents, retaining the new row."""
     for panel in walk(root):
         if panel.get("type") == "row" and panel is not row:
             panel["panels"] = [
-                child
-                for child in panel.get("panels", [])
-                if child.get("id") not in OBSERVABILITY_PANEL_IDS
+                p
+                for p in panel.get("panels", [])
+                if p.get("id") not in OBSERVABILITY_PANEL_IDS
             ]
-    return [panel for panel in root if panel.get("id") not in OBSERVABILITY_PANEL_IDS]
+    return [p for p in root if p.get("id") not in OBSERVABILITY_PANEL_IDS]
 
 
 def _build_observability_row_children(
@@ -490,14 +492,10 @@ def _build_observability_row_children(
 def apply_observability_states(data: dict[str, Any]) -> None:
     """Separate visibility evidence without changing queries or dropping panels."""
     root = data.get("panels") or []
-    fleet = next((panel for panel in root if panel.get("id") == 8808), None)
+    fleet = next((p for p in root if p.get("id") == 8808), None)
     if fleet is None:
         return
-    signals = {
-        panel["id"]: panel
-        for panel in walk(root)
-        if panel.get("id") in OBSERVABILITY_PANEL_IDS
-    }
+    signals = {p["id"]: p for p in walk(root) if p.get("id") in OBSERVABILITY_PANEL_IDS}
     row = _ensure_observability_row(root, fleet)
     # Keep the existing row during check-mode reads; never strip its children
     # before comparing the generated dashboard with its on-disk source.
