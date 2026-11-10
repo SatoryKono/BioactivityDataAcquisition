@@ -697,6 +697,22 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/test_failure_analysis.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12375_b_repeat_blocker.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12375_restart_c_no_change_report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    **dict.fromkeys(
+        (
+            "reports/audit-runs/12553-runtime-acceptance/README.md",
+            "reports/audit-runs/12553-runtime-acceptance/glob-walk-normal-junit.xml",
+            "reports/audit-runs/12553-runtime-acceptance/glob-walk-normal-stdout.txt",
+            "reports/audit-runs/12553-runtime-acceptance/negative-control-junit.xml",
+            "reports/audit-runs/12553-runtime-acceptance/negative-control-stdout.txt",
+            "reports/audit-runs/12553-runtime-acceptance/reentrant-lock-normal-junit.xml",
+        ),
+        (
+            "tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_glob_walk.py",
+            "tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock.py",
+            "tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_reentrant_lock_negative.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
     "reports/12553_runtime_acceptance_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
