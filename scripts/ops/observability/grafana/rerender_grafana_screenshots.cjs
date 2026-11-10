@@ -714,13 +714,17 @@ function _overflowCountMismatched(payload) {
 
 function summarizeRequiredPanel(panel) {
   if (!Number.isInteger(panel.id)) return null;
-  const {collectValueMappings} = require('./capture_table_pages.cjs');
+  const {
+    collectValueMappings,
+    collectFieldFormats,
+  } = require('./capture_table_pages.cjs');
   return {
     id: panel.id,
     title: panelDisplayTitle(panel),
     type: typeof panel.type === "string" ? panel.type : "unknown",
     noValue: panel.fieldConfig?.defaults?.noValue,
     valueMappings: collectValueMappings(panel.fieldConfig),
+    fieldFormats: collectFieldFormats(panel.fieldConfig),
     gridPos: summarizeFirstWindowPanel(panel).gridPos,
   };
 }

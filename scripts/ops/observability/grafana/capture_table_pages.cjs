@@ -72,6 +72,71 @@ function collectValueMappings(fieldConfig) {
   return pairs;
 }
 
+function fieldFormatFromProps(properties, fallback = {}) {
+  const props = Object.fromEntries(
+    (properties || [])
+      .filter((prop) => prop && typeof prop.id === 'string')
+      .map((prop) => [prop.id, prop.value]),
+  );
+  const unit = props.unit ?? fallback.unit;
+  if (!unit || unit === 'none') return null;
+  const decimals = props.decimals ?? fallback.decimals;
+  return {
+    unit,
+    decimals: Number.isInteger(decimals) ? decimals : null,
+  };
+}
+
+function collectFieldFormats(fieldConfig) {
+  const defaults = fieldConfig?.defaults || {};
+  const formats = [];
+  const seen = new Set();
+  const push = (fmt) => {
+    if (!fmt) return;
+    const key = `${fmt.unit}:${fmt.decimals}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    formats.push(fmt);
+  };
+  push(fieldFormatFromProps(
+    Object.entries(defaults)
+      .filter(([id]) => id === 'unit' || id === 'decimals')
+      .map(([id, value]) => ({id, value})),
+  ));
+  for (const override of fieldConfig?.overrides || []) {
+    push(fieldFormatFromProps(override.properties, {
+      unit: defaults.unit,
+      decimals: defaults.decimals,
+    }));
+  }
+  return formats;
+}
+
+function unitDisplayLabel(unit) {
+  if (!unit || unit === 'none' || unit === 'short') return null;
+  if (unit.startsWith('time:')) return null;
+  if (unit.startsWith('suffix:')) return unit.slice('suffix:'.length);
+  if (unit.startsWith('prefix:')) return null;
+  if (unit === 'percent') return '%';
+  return unit;
+}
+
+function unitDisplayCandidates(raw, fmt) {
+  const label = unitDisplayLabel(fmt.unit);
+  if (label == null || !Number.isFinite(raw)) return [];
+  const places = fmt.decimals == null ? [0, 1, 2, 3] : [fmt.decimals];
+  const out = new Set();
+  for (const decimals of places) {
+    const fixed = decimals === 0 ? String(Math.round(raw)) : raw.toFixed(decimals);
+    const trimmed = fixed.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
+    for (const body of new Set([fixed, trimmed, String(raw)])) {
+      out.add(`${body} ${label}`);
+      out.add(`${body}${label}`);
+    }
+  }
+  return [...out];
+}
+
 function matchExactOrNoValue(observed, displayed, noValue) {
   if (observed === displayed) return {status: 'VERIFIED'};
   if (observed === '' && noValue === displayed) {
@@ -107,7 +172,22 @@ function matchRegexMapping(observed, displayed, mapping) {
   };
 }
 
-function inspectMatchesCell(observed, displayed, {noValue, valueMappings}) {
+function matchUnitFormat(observed, displayed, fieldFormats) {
+  const raw = Number(String(observed).trim());
+  if (!Number.isFinite(raw)) return null;
+  const text = String(displayed).trim();
+  for (const fmt of fieldFormats || []) {
+    if (unitDisplayCandidates(raw, fmt).includes(text)) {
+      return {
+        status: 'VERIFIED_UNIT_FORMAT',
+        mapping: {raw: observed, display: displayed, type: 'unit', unit: fmt.unit},
+      };
+    }
+  }
+  return null;
+}
+
+function inspectMatchesCell(observed, displayed, {noValue, valueMappings, fieldFormats}) {
   const direct = matchExactOrNoValue(observed, displayed, noValue);
   if (direct) return direct;
   for (const mapping of valueMappings || []) {
@@ -115,7 +195,7 @@ function inspectMatchesCell(observed, displayed, {noValue, valueMappings}) {
       || matchRegexMapping(observed, displayed, mapping);
     if (matched) return matched;
   }
-  return null;
+  return matchUnitFormat(observed, displayed, fieldFormats);
 }
 
 async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,timeout,inspect}) {
@@ -161,7 +241,7 @@ async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,t
   return {tiles, inspectedValues};
 }
 
-async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pngEvidence,timeout,noValue,valueMappings,seen,inspectCounter}) {
+async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pngEvidence,timeout,noValue,valueMappings,fieldFormats,seen,inspectCounter}) {
   const results=[];
   const known = seen instanceof Set ? seen : new Set(seen || []);
   const counter = inspectCounter || {n: 0};
@@ -189,7 +269,7 @@ async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pn
       const value=dialog.locator('pre');
       await value.waitFor({state:'visible',timeout});
       const observed=await value.innerText();
-      const match=inspectMatchesCell(observed, text, {noValue, valueMappings});
+      const match=inspectMatchesCell(observed, text, {noValue, valueMappings, fieldFormats});
       if(!match)throw new Error('Inspect value differs from the captured table cell');
       counter.n += 1;
       const file=path.join(dir,`page-${index}-inspect-${counter.n}.png`);
@@ -233,6 +313,7 @@ async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeo
         dir,index,outputDir,pngEvidence,timeout,
         noValue:panel.noValue,
         valueMappings:panel.valueMappings || [],
+        fieldFormats:panel.fieldFormats || [],
         seen,inspectCounter,
       };
       // Inspect the initial viewport before any scroll restore can unmount rows.
@@ -288,5 +369,6 @@ module.exports={
   captureScrollTiles,
   mergeInspected,
   collectValueMappings,
+  collectFieldFormats,
   inspectMatchesCell,
 };

@@ -156,20 +156,22 @@ console.log(JSON.stringify(result.tablePanels));
 
 
 @pytest.mark.parametrize(
-    ("raw", "displayed", "expect"),
+    ("raw", "displayed", "expect", "mapping_type"),
     [
-        ("value", "value", "VERIFIED"),
-        ("", "value", "VERIFIED_NO_VALUE_MAPPING"),
+        ("value", "value", "VERIFIED", None),
+        ("", "value", "VERIFIED_NO_VALUE_MAPPING", "noValue"),
         (
             "Provider: run_preflight_provider_observation",
             "Provider: saved preflight observation",
             "VERIFIED_VALUE_MAPPING",
+            "value",
         ),
-        ("unexpected", "value", None),
+        ("12.5", "12.5 s", "VERIFIED_UNIT_FORMAT", "unit"),
+        ("unexpected", "value", None, None),
     ],
 )
 def test_inspector_reads_dialog_and_separates_empty_mapping(
-    tmp_path, raw, displayed, expect
+    tmp_path, raw, displayed, expect, mapping_type
 ):
     node = shutil.which("node")
     if node is None:
@@ -189,9 +191,10 @@ const page={getByRole:role=>role==='dialog'?dialog:{waitFor:async()=>{},click:as
   screenshot:async()=>Buffer.from('test')};
 const valueMappings=[{type:'value',raw:'Provider: run_preflight_provider_observation',
   display:'Provider: saved preflight observation'}];
+const fieldFormats=[{unit:'s',decimals:null}];
 captureInspectedValues(page,root,[{text:displayed,clipped:true,role:'gridcell'}],
  {dir:process.argv[2],index:1,outputDir:process.argv[2],pngEvidence:()=>({}),timeout:100,
-  noValue:'value',valueMappings})
+  noValue:'value',valueMappings,fieldFormats})
  .then(results=>console.log(JSON.stringify({results})))
  .catch(error=>console.log(JSON.stringify({error:error.message})));
 """
@@ -222,11 +225,18 @@ captureInspectedValues(page,root,[{text:displayed,clipped:true,role:'gridcell'}]
         assert value["observed"] == raw
         assert value["text"] == displayed
         assert value["status"] == expect
-        if expect == "VERIFIED_VALUE_MAPPING":
+        if mapping_type == "value":
             assert value["mapping"] == {
                 "raw": raw,
                 "display": displayed,
                 "type": "value",
+            }
+        elif mapping_type == "unit":
+            assert value["mapping"] == {
+                "raw": raw,
+                "display": displayed,
+                "type": "unit",
+                "unit": "s",
             }
 
 
