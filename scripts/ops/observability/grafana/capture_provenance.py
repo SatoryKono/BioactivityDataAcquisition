@@ -255,47 +255,58 @@ def model_errors(source: dict, evidence: object) -> list[str]:
     return errors
 
 
+def _v2_phase_errors(
+    source: dict, evidence: dict, model: object, before: object
+) -> list[str]:
+    from scripts.ops.observability.grafana._v2_model_parity import semantic_errors
+
+    if not isinstance(model, dict):
+        return ["missing v2 model"]
+    metadata, spec = model.get("metadata"), model.get("spec")
+    if not isinstance(metadata, dict) or not isinstance(spec, dict):
+        return ["invalid v2 identity/schema"]
+    errors = []
+    valid = (
+        model.get("kind") == "DashboardWithAccessInfo"
+        and model.get("apiVersion") == "dashboard.grafana.app/v2"
+        and metadata.get("name") == source.get("uid")
+        and metadata.get("resourceVersion")
+        and isinstance(spec.get("elements"), dict)
+        and isinstance(spec.get("layout"), dict)
+    )
+    if not valid:
+        errors.append("invalid v2 identity/schema")
+    for legacy_phase in ("before", "after"):
+        version = (evidence.get(legacy_phase) or {}).get("version")
+        if version is None or metadata.get("generation") != version:
+            errors.append(
+                f"v2 generation differs from {legacy_phase} provisioned model"
+            )
+    if model != before:
+        errors.append("v2 model differs from bracketing API read")
+    errors.extend(semantic_errors(source, spec))
+    return errors
+
+
 def _v2_model_errors(source: dict, evidence: dict, v2: object) -> list[str]:
-    """Bind Grafana's converted v2 spec to the same provisioned v1 generation."""
+    """Bind every converted browser model to the exact source semantics."""
     if (
         not isinstance(v2, dict)
         or not isinstance(v2.get("loaded"), list)
         or not v2["loaded"]
     ):
         return ["missing browser-loaded v2 model"]
-    errors = []
     before = v2.get("before")
-    for phase, model in [
+    phases = [
         ("before", before),
         *[("loaded", m) for m in v2["loaded"]],
         ("after", v2.get("after")),
-    ]:
-        if not isinstance(model, dict):
-            errors.append(f"missing {phase} v2 model")
-            continue
-        metadata = model.get("metadata") or {}
-        spec = model.get("spec") or {}
-        if not isinstance(metadata, dict) or not isinstance(spec, dict):
-            errors.append(f"invalid {phase} v2 identity/schema")
-            continue
-        if (
-            model.get("kind") != "DashboardWithAccessInfo"
-            or model.get("apiVersion") != "dashboard.grafana.app/v2"
-            or metadata.get("name") != source.get("uid")
-            or not metadata.get("resourceVersion")
-            or not isinstance(spec.get("elements"), dict)
-            or not isinstance(spec.get("layout"), dict)
-        ):
-            errors.append(f"invalid {phase} v2 identity/schema")
-        for legacy_phase in ("before", "after"):
-            version = (evidence.get(legacy_phase) or {}).get("version")
-            if version is None or metadata.get("generation") != version:
-                errors.append(
-                    f"{phase} v2 generation differs from {legacy_phase} provisioned model"
-                )
-        if model != before:
-            errors.append(f"{phase} v2 model differs from bracketing API read")
-    return errors
+    ]
+    return [
+        f"{phase} {error}"
+        for phase, model in phases
+        for error in _v2_phase_errors(source, evidence, model, before)
+    ]
 
 
 def attachment_errors(root: Path, evidence: object) -> list[str]:

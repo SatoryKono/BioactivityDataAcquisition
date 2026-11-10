@@ -119,12 +119,85 @@ def test_browser_migration_remains_a_source_parity_failure():
 
 
 def _v2_evidence():
-    source = {"uid": "example", "version": 7, "panels": []}
+    panel = {
+        "id": 1,
+        "type": "stat",
+        "title": "Count",
+        "gridPos": {"x": 0, "y": 0, "w": 24, "h": 5},
+        "targets": [
+            {
+                "refId": "A",
+                "expr": "up",
+                "datasource": {"type": "prometheus", "uid": "prom"},
+            }
+        ],
+    }
+    source = {"uid": "example", "version": 7, "panels": [panel]}
     dto = {
         "kind": "DashboardWithAccessInfo",
         "apiVersion": "dashboard.grafana.app/v2",
         "metadata": {"name": "example", "generation": 7, "resourceVersion": "123"},
-        "spec": {"elements": {}, "layout": {}},
+        "spec": {
+            "elements": {
+                "panel-1": {
+                    "kind": "Panel",
+                    "spec": {
+                        "id": 1,
+                        "title": "Count",
+                        "vizConfig": {
+                            "group": "stat",
+                            "spec": {
+                                "options": {},
+                                "fieldConfig": {"defaults": {}, "overrides": []},
+                            },
+                        },
+                        "data": {
+                            "kind": "QueryGroup",
+                            "spec": {
+                                "queryOptions": {},
+                                "transformations": [],
+                                "queries": [
+                                    {
+                                        "kind": "PanelQuery",
+                                        "spec": {
+                                            "refId": "A",
+                                            "hidden": False,
+                                            "query": {
+                                                "kind": "DataQuery",
+                                                "group": "prometheus",
+                                                "version": "v0",
+                                                "datasource": {"name": "prom"},
+                                                "spec": {"expr": "up"},
+                                            },
+                                        },
+                                    }
+                                ],
+                            },
+                        },
+                    },
+                }
+            },
+            "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                    "items": [
+                        {
+                            "kind": "GridLayoutItem",
+                            "spec": {
+                                "element": {
+                                    "kind": "ElementReference",
+                                    "name": "panel-1",
+                                },
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 5,
+                            },
+                        }
+                    ]
+                },
+            },
+        },
     }
     return source, {
         "before": source,
@@ -141,6 +214,31 @@ def _v2_evidence():
 def test_v2_browser_model_matches_same_provisioned_generation():
     source, evidence = _v2_evidence()
     assert model_errors(source, evidence) == []
+
+
+@pytest.mark.parametrize("mutation", ["lost_panels", "query", "layout", "field_config"])
+def test_consistently_wrong_v2_conversion_is_rejected(mutation):
+    source, evidence = _v2_evidence()
+    for dto in (
+        evidence["v2"]["before"],
+        *evidence["v2"]["loaded"],
+        evidence["v2"]["after"],
+    ):
+        spec = dto["spec"]
+        if mutation == "lost_panels":
+            spec["elements"] = {}
+            spec["layout"] = {}
+        elif mutation == "query":
+            spec["elements"]["panel-1"]["spec"]["data"]["spec"]["queries"][0]["spec"][
+                "query"
+            ]["spec"]["expr"] = "vector(0)"
+        elif mutation == "layout":
+            spec["layout"]["spec"]["items"][0]["spec"]["width"] = 1
+        else:
+            spec["elements"]["panel-1"]["spec"]["vizConfig"]["spec"]["fieldConfig"][
+                "defaults"
+            ]["unit"] = "percent"
+    assert model_errors(source, evidence)
 
 
 @pytest.mark.parametrize("phase", ["before", "loaded", "after"])

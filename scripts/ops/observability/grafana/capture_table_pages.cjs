@@ -2,6 +2,10 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
+// A single browser is shared: each action must finish before the next starts.
+const sequential = (items, action) => items.reduce(
+  (pending, item) => pending.then(() => action(item)), Promise.resolve());
+
 function tableEvidence(el) {
   const rect = node => {const r=node.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};};
   return {
@@ -23,11 +27,11 @@ function tableEvidence(el) {
 async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,timeout}) {
   const grids=root.locator('[role="grid"]');
   const tiles=[];
-  for(let g=0;g<await grids.count();g++) {
+  await sequential(Array.from({length:await grids.count()},(_,i)=>i), async g => {
     const grid=grids.nth(g);
     const size=await grid.evaluate(el=>({w:el.clientWidth,h:el.clientHeight,
       sw:el.scrollWidth,sh:el.scrollHeight,x:el.scrollLeft,y:el.scrollTop}));
-    if(size.sw<=size.w+2 && size.sh<=size.h+2)continue;
+    if(size.sw<=size.w+2 && size.sh<=size.h+2)return;
     if(size.w<=0 || size.h<=0)throw new Error('Table grid has no visible scroll viewport');
     const positions=(extent,viewport)=>{
       const result=[0],max=Math.max(0,extent-viewport);
@@ -36,7 +40,8 @@ async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,t
       return result;
     };
     try {
-      for(const y of positions(size.sh,size.h))for(const x of positions(size.sw,size.w)){
+      const coordinates=positions(size.sh,size.h).flatMap(y=>positions(size.sw,size.w).map(x=>({x,y})));
+      await sequential(coordinates, async ({x,y}) => {
         if(tiles.length>=1000)throw new Error('Table scroll capture exceeded 1000 tiles');
         await grid.evaluate((el,{x,y})=>{el.scrollLeft=x;el.scrollTop=y;},{x,y});
         await page.waitForTimeout(150);
@@ -44,28 +49,28 @@ async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,t
         const file=path.join(dir,`page-${index}-scroll-${tiles.length+1}.png`);
         const bytes=await require('./native_browser_zoom.cjs').captureElementScreenshot(page,root,{path:file,animations:'disabled',timeout});
         tiles.push({grid:g,x,y,...evidence,file:path.relative(outputDir,file),...pngEvidence(bytes)});
-      }
+      });
     } finally {
       await grid.evaluate((el,{x,y})=>{el.scrollLeft=x;el.scrollTop=y;},size);
     }
-  }
+  });
   return tiles;
 }
 
 async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pngEvidence,timeout}) {
   const results=[];
   const values=[...new Set(cells.filter(c=>c.clipped && c.role!=='columnheader').map(c=>c.text))];
-  for(const text of values){
+  await sequential(values, async text => {
     // The accessible name also contains the Inspect button's label.
     const cell=root.locator('[role="gridcell"]').filter({hasText:text}).first();
     if(!await cell.count()){
-      results.push({text,status:'CELL_NOT_MOUNTED'});continue;
+      results.push({text,status:'CELL_NOT_MOUNTED'});return;
     }
     await cell.scrollIntoViewIfNeeded({timeout});
     await cell.hover();
     const inspect=cell.getByRole('button',{name:'Inspect value',exact:true});
     if(!await inspect.count()){
-      results.push({text,status:'INSPECT_UNAVAILABLE'});continue;
+      results.push({text,status:'INSPECT_UNAVAILABLE'});return;
     }
     await inspect.click();
     try {
@@ -80,13 +85,15 @@ async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pn
     } finally {
       await page.getByRole('button',{name:'Close',exact:true}).click();
     }
-  }
+  });
   return results;
 }
 async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeout}) {
+  // PNG capture may legitimately be unlimited; UI transitions never may be.
+  const transitionTimeout = Number.isFinite(timeout) && timeout > 0 ? timeout : 30000;
   const results = [];
-  for (const panel of dashboard.tablePanels || dashboard.firstWindowPanels || []) {
-    if (panel.type !== 'table') continue;
+  await sequential(dashboard.tablePanels || dashboard.firstWindowPanels || [], async panel => {
+    if (panel.type !== 'table') return;
     const root = page.locator(`[data-viz-panel-key="panel-${panel.id}"]`).first();
     await root.scrollIntoViewIfNeeded({timeout});
     await root.waitFor({state:'visible',timeout});
@@ -94,8 +101,8 @@ async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeo
     const paginated = (await next.count()) > 0;
     const previous = root.getByRole('button', {name:'previous page', exact:true});
     const pages = [];
-    let complete = false;
-    for (let index = 1; index <= 100; index++) {
+    async function capturePage(index) {
+      if(index>100)throw new Error('Table capture incomplete: pagination exceeded 100 pages');
       const evidence = await root.evaluate(tableEvidence);
       const dir=path.join(outputDir,'panels',dashboard.uid,String(panel.id));
       await fs.promises.mkdir(dir,{recursive:true});
@@ -106,23 +113,25 @@ async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeo
       const inspectedValues=await captureInspectedValues(page,root,
         [ ...evidence.cells, ...scrollTiles.flatMap(t=>t.cells)],{dir,index,outputDir,pngEvidence,timeout});
       pages.push({page:index,...evidence,scrollTiles,inspectedValues,file:path.relative(outputDir,file),...pngEvidence(bytes)});
-      if (!paginated || await next.isDisabled()) { complete=true; break; }
+      if (!paginated || await next.isDisabled()) return;
       const before = await root.innerText();
       await next.focus();
       await page.keyboard.press('Enter');
       await page.waitForFunction(({id,before}) =>
         document.querySelector(`[data-viz-panel-key="panel-${id}"]`)?.innerText !== before,
-        {id:panel.id,before},{timeout});
+        {id:panel.id,before},{timeout:transitionTimeout});
+      await capturePage(index+1);
     }
-    for (let i=0; paginated && i<pages.length && !await previous.isDisabled(); i++) {
+    await capturePage(1);
+    async function restorePage(remaining) {
+      if(remaining<=0 || await previous.isDisabled())return;
       await previous.click(); await page.waitForTimeout(100);
+      await restorePage(remaining-1);
     }
-    results.push({panelId:panel.id,title:panel.title,paginated,status:complete?'COMPLETE':'NOT_PROVEN',
+    if(paginated)await restorePage(pages.length);
+    results.push({panelId:panel.id,title:panel.title,paginated,status:'COMPLETE',
       method:'native next-page button activated with Enter; original first page restored',pages});
-  }
-  if (results.some(result => result.status !== 'COMPLETE')) {
-    throw new Error('Table capture incomplete: pagination exceeded 100 pages');
-  }
+  });
   return results;
 }
 module.exports={captureTablePages};

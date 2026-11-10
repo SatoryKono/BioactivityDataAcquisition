@@ -2434,7 +2434,7 @@ function browserDashboardResponseKind(responseUrl, baseUrl, uid) {
   if (url.pathname === `/api/dashboards/uid/${encodeURIComponent(uid)}`) return "legacy";
   const resource = url.pathname.match(/^\/apis\/dashboard\.grafana\.app\/v1beta1\/namespaces\/[^/]+\/dashboards\/([^/]+)\/dto$/);
   if (resource && decodeURIComponent(resource[1]) === uid) return "grafana-v1beta1-dto";
-  const v2 = url.pathname.match(/^\/apis\/dashboard\.grafana\.app\/v2\/namespaces\/[^/]+\/dashboards\/([^/]+)\/dto$/);
+  const v2 = /^\/apis\/dashboard\.grafana\.app\/v2\/namespaces\/[^/]+\/dashboards\/([^/]+)\/dto$/.exec(url.pathname);
   if (v2 && decodeURIComponent(v2[1]) === uid) return "grafana-v2-dto";
   return null;
 }

@@ -7,6 +7,7 @@ import hashlib
 import json
 import math
 from collections import Counter
+from itertools import pairwise
 from pathlib import Path
 
 
@@ -156,18 +157,81 @@ def _terminal_capture_reasons(dashboard: dict, first: set[int]) -> list[str]:
     return reasons
 
 
+def _observed_scroll_rectangle(tile: dict, scroller: dict, index: int) -> tuple | None:
+    dimensions = ("clientWidth", "clientHeight", "scrollWidth", "scrollHeight")
+    candidates = tile.get("scrollers", [])[index : index + 1]
+    if not tile.get("file") or not tile.get("sha256") or not candidates:
+        return None
+    observed = candidates[0]
+    if any(observed.get(k) != scroller.get(k) for k in dimensions):
+        return None
+    x, y = observed.get("scrollLeft"), observed.get("scrollTop")
+    if not all(isinstance(v, (int, float)) and math.isfinite(v) for v in (x, y)):
+        return None
+    width, height, total_width, total_height = (scroller[k] for k in dimensions)
+    if not (
+        0 <= x <= max(0, total_width - width) + 2
+        and 0 <= y <= max(0, total_height - height) + 2
+    ):
+        return None
+    return x, y, min(x + width, total_width), min(y + height, total_height)
+
+
+def _rectangles_cover(
+    rectangles: list[tuple], total_width: float, total_height: float
+) -> bool:
+    edges = sorted(
+        {0, total_width, *(r[0] for r in rectangles), *(r[2] for r in rectangles)}
+    )
+    for left, right in pairwise(edges):
+        if right - left <= 2:
+            continue
+        intervals = sorted(
+            (y, bottom)
+            for x, y, end, bottom in rectangles
+            if x <= left + 2 and end >= right - 2
+        )
+        covered = 0
+        for top, bottom in intervals:
+            if top > covered + 2:
+                return False
+            covered = max(covered, bottom)
+        if covered < total_height - 2:
+            return False
+    return bool(rectangles)
+
+
+def _scroll_covered(page: dict, scroller: dict, index: int) -> bool:
+    """Prove two-dimensional coverage from observed offsets, not tile counts."""
+    values = [
+        scroller.get(k)
+        for k in ("clientWidth", "clientHeight", "scrollWidth", "scrollHeight")
+    ]
+    if any(
+        not isinstance(v, (int, float)) or not math.isfinite(v) or v <= 0
+        for v in values
+    ):
+        return False
+    rectangles = [
+        r
+        for tile in page.get("scrollTiles", [])
+        if (r := _observed_scroll_rectangle(tile, scroller, index)) is not None
+    ]
+    return _rectangles_cover(rectangles, values[2], values[3])
+
+
 def _table_page_reasons(dashboard: dict) -> list[str]:
     reasons = []
     for table in dashboard.get("tablePagination", []):
         if table.get("status") not in {"COMPLETE", "NOT_PAGINATED"}:
             reasons.append(f"incomplete table pagination: {table.get('panelId')}")
         for page in table.get("pages", []):
-            for scroller in page.get("scrollers", []):
+            for index, scroller in enumerate(page.get("scrollers", [])):
                 if any(
                     scroller.get(f"scroll{axis}", 0)
                     > scroller.get(f"client{axis}", 0) + 2
                     for axis in ("Width", "Height")
-                ):
+                ) and not _scroll_covered(page, scroller, index):
                     reasons.append(
                         f"table page overflow: {table.get('panelId')}/{page.get('page')}"
                     )

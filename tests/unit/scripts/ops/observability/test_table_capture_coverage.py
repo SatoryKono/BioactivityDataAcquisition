@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import copy
 import shutil
 import subprocess
 from pathlib import Path
@@ -10,6 +11,51 @@ from pathlib import Path
 import pytest
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    "positions,passes",
+    [
+        ([(0, 0), (100, 0), (0, 100), (100, 100)], True),
+        ([], False),
+        ([(0, 0), (100, 100)], False),
+        ([(0, 0), (100, 0)], False),
+    ],
+)
+def test_scroll_acceptance_requires_complete_two_dimensional_coverage(
+    positions, passes
+):
+    from scripts.ops.observability.grafana.capture_acceptance import _table_page_reasons
+
+    scroller = {
+        "clientWidth": 100,
+        "clientHeight": 100,
+        "scrollWidth": 200,
+        "scrollHeight": 200,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+    }
+    page = {
+        "page": 1,
+        "scrollers": [scroller],
+        "scrollTiles": [
+            {
+                "file": f"{x}-{y}.png",
+                "sha256": "a" * 64,
+                "scrollers": [{**scroller, "scrollLeft": x, "scrollTop": y}],
+            }
+            for x, y in positions
+        ],
+    }
+    dashboard = {
+        "tablePagination": [{"panelId": 1, "status": "COMPLETE", "pages": [page]}]
+    }
+    assert (not _table_page_reasons(dashboard)) is passes
+    if passes:
+        wrong = copy.deepcopy(dashboard)
+        for tile in wrong["tablePagination"][0]["pages"][0]["scrollTiles"]:
+            tile["scrollers"][0]["scrollTop"] = 0
+        assert _table_page_reasons(wrong)
 
 
 @pytest.mark.parametrize("stalled", [False, True])
@@ -36,12 +82,14 @@ const roots=Object.fromEntries([1,2].map(id=>[id,{
 }]));
 const page={locator:selector=>roots[Number(selector.match(/panel-(\d+)/)[1])],
   keyboard:{press:async()=>{if(!stalled)states[active]++;}},
-  waitForTimeout:async()=>{},waitForFunction:async()=>{if(stalled)throw Error('page did not advance');}};
+  waitForTimeout:async()=>{},waitForFunction:async(fn,args,options)=>{
+    if(!(options.timeout>0))throw Error('unbounded transition timeout');
+    if(stalled)throw Error('page did not advance');}};
 (async()=>{
  try {
   const results=await captureTablePages(page,{dashboard:{uid:'test',firstWindowPanels:[],
     tablePanels:[{id:1,type:'table'},{id:2,type:'table'}]},outputDir:process.argv[2],
-    pngEvidence:()=>({bytes:4}),timeout:50});
+    pngEvidence:()=>({bytes:4}),timeout:0});
   console.log(JSON.stringify({results,states}));
  }catch(error){console.log(JSON.stringify({error:error.message}));}
 })();
