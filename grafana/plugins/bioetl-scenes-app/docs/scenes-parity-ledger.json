@@ -20,9 +20,9 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "7d9d54c8452b10580cb28fd074c84bc4eea7b4b7a464379e7eff890c8423f7cb",
+    "bioetl-control-plane-v1": "1523a5303b419ecaaff7c9d770c906f13b5d666b9242af6fd13891708d187aaa",
     "bioetl-dq-v2": "febb6b61d62465dc82959b560982f4e7f736b3d479f6e2aa997ca9b55a881d1a",
-    "bioetl-incident-v1": "9eeef13143985d2303d72714bef5b99309aefe8d21eb4317d4f5c96fc1d3c0a1",
+    "bioetl-incident-v1": "57506cb6a1334ee8e7042e2f9dfabaec13879315a4add67a311a61c86b948b37",
     "bioetl-overview-v2": "cbf190d9f08c9ad623b4336e5c6a134cc6b3fc30fe89246c90ec69f60a428bfd",
     "bioetl-run-explorer-v1": "914279afc9b057434229bcbcf2fb42d8920d5f681801a3fef13977b4528bc43e"
   },

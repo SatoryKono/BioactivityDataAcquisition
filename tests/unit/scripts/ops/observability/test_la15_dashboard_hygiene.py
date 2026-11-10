@@ -32,6 +32,8 @@ def test_empty_states_name_a_reason() -> None:
         assert "не применимо" in expression
         assert "нет записей" in expression
         assert "нет данных" in expression
+    assert "selected_run_id != null" in _CHECKPOINT_EMPTY_ROWS
+    assert "$append($listed" in _CHECKPOINT_EMPTY_ROWS
     assert "no Run ID selected" in _CHECKPOINT_EMPTY_ROWS
     assert "checkpoint anchors were not recorded" in _CHECKPOINT_EMPTY_ROWS
     assert "checkpoint comparison returned no rows" in _CHECKPOINT_EMPTY_ROWS

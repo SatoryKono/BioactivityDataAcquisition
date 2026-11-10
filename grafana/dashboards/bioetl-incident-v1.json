@@ -284,7 +284,7 @@
         "label": "Read latency quantile",
         "multi": false,
         "name": "read_latency_quantile",
-        "description": "Quantile selector for Track Global Read Latency, not a duration. p95 stores histogram quantile 0.95. The chart unit is seconds; 0.95 is the quantile, not the latency.",
+        "description": "Quantile selector for Track Global Read Latency, not a duration. p95 stores histogram quantile 0.95. Values are stored in seconds; Grafana may display sub-second samples as ms. 0.95 is the quantile, not the latency.",
         "options": [
           {
             "selected": false,
@@ -9280,7 +9280,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Unit: seconds. Read latency quantile p95 = 0.95 selects the histogram quantile; it is not the latency reading. TIME RANGE · Default p95 read latency by store and operation; change Read latency to p50 or p99. Excludes failed reads (status!=\"failed\"). Filters do not apply. Values are seconds; the axis auto-scales (milliseconds display as ms). No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
+          "description": "Values are seconds (Grafana may show sub-second samples as ms). Read latency quantile p95 = 0.95 selects the histogram quantile; it is not the latency reading. TIME RANGE · Default p95 read latency by store and operation; change Read latency to p50 or p99. Excludes failed reads (status!=\"failed\"). Filters do not apply. Values are seconds; the axis auto-scales (milliseconds display as ms). No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -9307,7 +9307,6 @@
               "decimals": 3,
               "noValue": "NO OBSERVATIONS — no usable histogram increments",
               "custom": {
-                "axisLabel": "seconds",
                 "showPoints": "always"
               }
             },
@@ -9339,7 +9338,7 @@
           "targets": [
             {
               "expr": "(histogram_quantile($read_latency_quantile, (sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])) unless on (store, operation) (sum by (store, operation) (changes(bioetl_control_plane_read_duration_seconds_created{status!=\"failed\"}[$__range]) > 0))))) >= 0",
-              "legendFormat": "{{store}} / {{operation}} · seconds",
+              "legendFormat": "{{store}} / {{operation}}",
               "refId": "A",
               "datasource": {
                 "type": "prometheus",

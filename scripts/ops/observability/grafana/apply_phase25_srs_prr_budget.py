@@ -284,35 +284,36 @@ _OV_EXCL = (
     f"'{FRAME}': 'exclusions'}}]"
 )
 # Zero checkpoint rows are a successful empty frame. Grafana then draws a blank
-# table, which cannot be told apart from a broken query.
+# table, which cannot be told apart from a broken query. Keep comparison rows
+# when present and only prepend an explicit state row for MISSING anchors or
+# missing Run ID (including selected_run_id=null).
 _CHECKPOINT_EMPTY_ROWS = (
     "($listed := $type(rows) = 'array' ? rows : []; "
-    "$count($listed) > 0 ? $listed : [{"
-    "'anchor': '—', "
-    "'status': (($exists(message) and message != '') or "
-    "($exists(status) and (status = 'scope_resolve_timeout' or "
-    "status = 'evidence_build_timeout'))) ? 'нет данных' : "
-    "(($exists(selected_run_id) and selected_run_id != '' and "
-    "selected_run_id != '-' and selected_run_id != 'All') ? "
-    "(($exists(checkpoint_compare) and checkpoint_compare.status = 'MISSING') ? "
-    "'нет записей' : 'нет данных') : 'не применимо'), "
-    "'current_value_full': ($exists(message) and message != '') ? message : "
-    "(($exists(status) and (status = 'scope_resolve_timeout' or "
-    "status = 'evidence_build_timeout')) ? "
-    "'нет данных — checkpoint comparison request timed out' : "
-    "(($exists(selected_run_id) and selected_run_id != '' and "
-    "selected_run_id != '-' and selected_run_id != 'All') ? "
-    "(($exists(checkpoint_compare) and checkpoint_compare.status = 'MISSING') ? "
-    "'нет записей — checkpoint anchors were not recorded for this run' : "
-    "'нет данных — checkpoint comparison returned no rows') : "
-    "'не применимо — no Run ID selected')), "
+    "$hasRun := $exists(selected_run_id) and selected_run_id != null and "
+    "selected_run_id != '' and selected_run_id != '-' and selected_run_id != 'All'; "
+    "$timeout := $exists(status) and (status = 'scope_resolve_timeout' or "
+    "status = 'evidence_build_timeout'); "
+    "$msg := $exists(message) and message != ''; "
+    "$state := function($status, $current){("
+    "{'anchor': '—', 'status': $status, 'current_value_full': $current, "
     "'checkpoint_value_full': '—'"
-    "}])"
+    "})}; "
+    "$timeout or $msg ? "
+    "($count($listed) > 0 ? $listed : [$state('нет данных', "
+    "$msg ? message : 'нет данных — checkpoint comparison request timed out')]) : "
+    "(!$hasRun ? [$state('не применимо', 'не применимо — no Run ID selected')] : "
+    "(($exists(checkpoint_compare) and checkpoint_compare.status = 'MISSING') ? "
+    "$append($listed, [$state('нет записей', "
+    "'нет записей — checkpoint anchors were not recorded for this run')]) : "
+    "($count($listed) > 0 ? $listed : [$state('нет данных', "
+    "'нет данных — checkpoint comparison returned no rows')])))"
+    ")"
 )
 _READ_LATENCY_DESCRIPTION = (
     "Quantile selector for Track Global Read Latency, not a duration. "
-    "p95 stores histogram quantile 0.95. The chart unit is seconds; "
-    "0.95 is the quantile, not the latency."
+    "p95 stores histogram quantile 0.95. Values are stored in seconds; "
+    "Grafana may display sub-second samples as ms. 0.95 is the quantile, "
+    "not the latency."
 )
 
 
@@ -1395,7 +1396,7 @@ def _stamp_checkpoint_empty_rows(data: dict[str, Any]) -> None:
 
 
 def _stamp_read_latency_context(data: dict[str, Any]) -> None:
-    """Label p95 = 0.95 as a quantile and mark the chart unit as seconds."""
+    """Label p95 = 0.95 as a quantile; keep unit=s without fixed seconds labels."""
     templating = data.get("templating") or {}
     for variable in templating.get("list") or []:
         if not isinstance(variable, dict):
@@ -1419,20 +1420,33 @@ def _stamp_read_latency_context(data: dict[str, Any]) -> None:
         }
     panel = _by_id(data, 111)
     defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
+    defaults["unit"] = "s"
     custom = defaults.setdefault("custom", {})
     if isinstance(custom, dict):
-        custom["axisLabel"] = "seconds"
-    description = str(panel.get("description") or "")
+        # Grafana auto-scales unit "s" (e.g. 0.005 → "5 ms"); do not hard-label
+        # the axis/legend as seconds or operators misread sub-second samples.
+        custom.pop("axisLabel", None)
     prefix = (
-        "Unit: seconds. Read latency quantile p95 = 0.95 selects the histogram "
-        "quantile; it is not the latency reading. "
+        "Values are seconds (Grafana may show sub-second samples as ms). "
+        "Read latency quantile p95 = 0.95 selects the histogram quantile; "
+        "it is not the latency reading. "
     )
-    if not description.startswith("Unit: seconds."):
-        panel["description"] = prefix + description
+    description = str(panel.get("description") or "")
+    for old in (
+        "Unit: seconds. Read latency quantile p95 = 0.95 selects the histogram "
+        "quantile; it is not the latency reading. ",
+        "Values are seconds (Grafana may show sub-second samples as ms). "
+        "Read latency quantile p95 = 0.95 selects the histogram quantile; "
+        "it is not the latency reading. ",
+    ):
+        if description.startswith(old):
+            description = description[len(old) :]
+            break
+    panel["description"] = prefix + description
     for target in panel.get("targets") or []:
         legend = target.get("legendFormat")
-        if isinstance(legend, str) and "seconds" not in legend:
-            target["legendFormat"] = f"{legend} · seconds"
+        if isinstance(legend, str) and legend.endswith(" · seconds"):
+            target["legendFormat"] = legend[: -len(" · seconds")]
 
 
 def _stamp_overview_empty_reasons(data: dict[str, Any]) -> None:
