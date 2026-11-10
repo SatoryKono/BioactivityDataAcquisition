@@ -220,28 +220,30 @@ def _scroll_covered(page: dict, scroller: dict, index: int) -> bool:
     return _rectangles_cover(rectangles, values[2], values[3])
 
 
+def _incomplete_inspect(page: dict) -> bool:
+    return any(
+        item.get("status") in {"CELL_NOT_MOUNTED", "INSPECT_UNAVAILABLE"}
+        for item in page.get("inspectedValues", [])
+    )
+
+
 def _table_page_reasons(dashboard: dict) -> list[str]:
     reasons = []
     for table in dashboard.get("tablePagination", []):
+        panel_id = table.get("panelId")
         if table.get("status") not in {"COMPLETE", "NOT_PAGINATED"}:
-            reasons.append(f"incomplete table pagination: {table.get('panelId')}")
+            reasons.append(f"incomplete table pagination: {panel_id}")
         for page in table.get("pages", []):
-            if any(
-                item.get("status") in {"CELL_NOT_MOUNTED", "INSPECT_UNAVAILABLE"}
-                for item in page.get("inspectedValues", [])
-            ):
-                reasons.append(
-                    f"incomplete table inspect: {table.get('panelId')}/{page.get('page')}"
-                )
+            page_id = page.get("page")
+            if _incomplete_inspect(page):
+                reasons.append(f"incomplete table inspect: {panel_id}/{page_id}")
             for index, scroller in enumerate(page.get("scrollers", [])):
                 if any(
                     scroller.get(f"scroll{axis}", 0)
                     > scroller.get(f"client{axis}", 0) + 2
                     for axis in ("Width", "Height")
                 ) and not _scroll_covered(page, scroller, index):
-                    reasons.append(
-                        f"table page overflow: {table.get('panelId')}/{page.get('page')}"
-                    )
+                    reasons.append(f"table page overflow: {panel_id}/{page_id}")
     return reasons
 
 
