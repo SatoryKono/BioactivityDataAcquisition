@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-10T13:24:41.879760+00:00",
+  "generated_at": "2026-11-10T14:31:52.367357+00:00",
   "summary": {
     "total_scripts": 722,
     "status_counts": {
@@ -23513,7 +23513,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2475,
+          "line": 2476,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -23544,7 +23544,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2759,
+          "line": 2765,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._empty_observation_contract import ("
         },
@@ -23575,13 +23575,13 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2531,
+          "line": 2532,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2832,
+          "line": 2838,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
@@ -23624,7 +23624,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2528,
+          "line": 2529,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections"
         },
@@ -23707,7 +23707,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2581,
+          "line": 2582,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._overview_identity import ("
         }
@@ -23737,25 +23737,25 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2550,
+          "line": 2551,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2559,
+          "line": 2560,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2576,
+          "line": 2577,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2636,
+          "line": 2637,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         }
@@ -23774,13 +23774,13 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2588,
+          "line": 2589,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._replay_layout import apply_replay_layout"
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2633,
+          "line": 2634,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._replay_layout import apply_replay_layout"
         }
@@ -23805,7 +23805,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2589,
+          "line": 2590,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._replay_readiness_design import ("
         }
@@ -23826,13 +23826,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 276,
+          "line": 277,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._run_explorer_columns import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2545,
+          "line": 2546,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._run_explorer_columns import ("
         },
@@ -23881,13 +23881,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1433,
+          "line": 1434,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import STATUS_URL"
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2567,
+          "line": 2568,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
@@ -23918,7 +23918,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2769,
+          "line": 2775,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._table_wrapping import apply_table_wrapping"
         }
@@ -23962,7 +23962,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2523,
+          "line": 2524,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._visual_usability import ("
         }
@@ -23981,7 +23981,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2539,
+          "line": 2540,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._workflow_scope import apply_workflow_scope"
         },
@@ -24098,7 +24098,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2806,
+          "line": 2812,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import ("
         },
@@ -24129,7 +24129,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2813,
+          "line": 2819,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.apply_phase2_remainder import ("
         },
@@ -24191,7 +24191,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2855,
+          "line": 2861,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.apply_phase4_reflow import ("
         },
@@ -24550,7 +24550,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2467,
+          "line": 2468,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
@@ -24638,7 +24638,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 3013,
+          "line": 3019,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.generate_prometheus_only_dashboards import ("
         },
