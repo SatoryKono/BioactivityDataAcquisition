@@ -5,9 +5,9 @@ from __future__ import annotations
 from copy import deepcopy
 import json
 from pathlib import Path
-import re
 
 import pytest
+import yaml
 
 from scripts.ops.observability.grafana import render_nav_bus as nav
 from scripts.ops.observability.grafana._overview_global_alerts import (
@@ -29,15 +29,22 @@ def test_global_alerts_retain_donor_query_and_complete_list() -> None:
     panels = {p["id"]: p for p in overview["panels"]}
     donor = next(p for p in incident["panels"] if p["id"] == 2005)
     summary = panels[2005]
-    assert summary["targets"] == donor["targets"]
-    assert summary["transformations"] == donor["transformations"]
-    assert summary["fieldConfig"] == donor["fieldConfig"]
-    # $1 is a PromQL capture replacement, never a dashboard selection.
-    assert not re.search(
-        r"\$(?:\{)?(?:run_id|pipeline|provider|workflow|run_type)",
-        str(summary["targets"]),
+    metric = "bioetl_incident_global_alerts"
+    rules = yaml.safe_load(
+        (nav.ROOT / "grafana/prometheus-rules/bioetl_observability.yml").read_text(
+            encoding="utf-8"
+        )
     )
-    assert summary["gridPos"] == {"x": 0, "y": 19, "w": 24, "h": 4}
+    recorded = next(
+        rule["expr"]
+        for group in rules["groups"]
+        for rule in group["rules"]
+        if rule.get("record") == metric
+    )
+    assert "".join(recorded.split()) == "".join(donor["targets"][0]["expr"].split())
+    assert summary["targets"] == [dict(donor["targets"][0], expr=metric)]
+    assert summary["transformations"] == donor["transformations"]
+    assert summary["gridPos"] == {"x": 0, "y": 19, "w": 24, "h": 5}
     assert "repeat" not in summary
     assert panels[32005]["collapsed"] is True
     full = panels[32005]["panels"][0]
