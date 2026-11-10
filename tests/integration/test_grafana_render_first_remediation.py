@@ -1058,6 +1058,22 @@ def _override_width(panel: dict[str, object], matcher: str) -> int | None:
     return None
 
 
+def _override_min_width(panel: dict[str, object], matcher: str) -> int | None:
+    field_config = panel.get("fieldConfig")
+    if not isinstance(field_config, dict):
+        return None
+    for item in field_config.get("overrides") or []:
+        if not isinstance(item, dict):
+            continue
+        options = str((item.get("matcher") or {}).get("options") or "")
+        if matcher not in options:
+            continue
+        for prop in item.get("properties") or []:
+            if isinstance(prop, dict) and prop.get("id") == "custom.minWidth":
+                return int(prop.get("value") or 0)
+    return None
+
+
 def _override_novalue(panel: dict[str, object], matcher: str) -> str | None:
     field_config = panel.get("fieldConfig")
     if not isinstance(field_config, dict):
@@ -1090,8 +1106,11 @@ def test_run_explorer_index_is_disk_last_ten_not_time_range() -> None:
 def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     recent = _panel(explorer, 3010)
-    assert _override_width(recent, "Workflow") == 80
-    assert _override_width(recent, "Pipeline") == 210
+    # Workflow/Pipeline stay flex (minWidth floor only) so 200% width budget holds.
+    assert _override_width(recent, "Workflow") is None
+    assert _override_width(recent, "Pipeline") is None
+    assert _override_min_width(recent, "Workflow") == 80
+    assert _override_min_width(recent, "Pipeline") == 210
     assert recent["fieldConfig"]["defaults"]["custom"]["minWidth"] == 50
     assert recent["options"]["footer"]["enablePagination"] is False
     assert (_override_width(recent, "Run ID") or 0) <= 340

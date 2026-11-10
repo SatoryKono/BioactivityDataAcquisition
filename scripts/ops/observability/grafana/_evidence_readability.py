@@ -311,8 +311,13 @@ def _trust(p: dict[int, dict]) -> None:
     _override(p[9406], "checkpoint_value_short", "noValue", "UNKNOWN")
     if 9409 in p:
         _override(p[9409], "Action", _WIDTH, 190)
-    for pid in (9413, 9414, 9415):
-        _table(p[pid], {"check": 220, "status": 110})
+    for pid in (9413, 9414, 9415, 9416):
+        if pid not in p:
+            continue
+        # 9416 retention keeps the compact first-window check width from
+        # gr_db_corrections (125); sibling trust tables stay at 220.
+        check_width = 125 if pid == 9416 else 220
+        _table(p[pid], {"check": check_width, "status": 110})
         _override(p[pid], "reason", _HIDDEN, True)
         _override(p[pid], "reason_display", _HIDDEN, True)
         _override(p[pid], "detail", "displayName", "Reason")

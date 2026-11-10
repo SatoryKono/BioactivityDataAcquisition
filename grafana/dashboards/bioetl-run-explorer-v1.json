@@ -438,10 +438,6 @@
             },
             "properties": [
               {
-                "id": "custom.minWidth",
-                "value": 100
-              },
-              {
                 "id": "custom.inspect",
                 "value": true
               },
@@ -471,7 +467,7 @@
                 }
               },
               {
-                "id": "custom.width",
+                "id": "custom.minWidth",
                 "value": 80
               }
             ]
@@ -482,10 +478,6 @@
               "options": "Pipeline"
             },
             "properties": [
-              {
-                "id": "custom.minWidth",
-                "value": 80
-              },
               {
                 "id": "custom.inspect",
                 "value": true
@@ -509,7 +501,7 @@
                 }
               },
               {
-                "id": "custom.width",
+                "id": "custom.minWidth",
                 "value": 210
               }
             ]

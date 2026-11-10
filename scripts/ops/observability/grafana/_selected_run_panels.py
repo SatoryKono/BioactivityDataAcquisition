@@ -9,7 +9,7 @@ from scripts.ops.observability.grafana.dashboard_context_links import build_hand
 STATUS_URL = "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
 DESCRIPTION = (
     "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; "
-    "missing selection is SELECT RUN; request failure is Source unavailable. "
+    "missing selection is SELECT RUN; request failure is QUERY ERROR. "
     "N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. "
     "This saved verdict does not authorize replay."
 )

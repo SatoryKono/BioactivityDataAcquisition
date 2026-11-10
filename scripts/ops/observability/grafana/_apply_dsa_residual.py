@@ -396,7 +396,7 @@ def apply_provider() -> None:
 
 
 OBSERVABILITY_PANEL_IDS = (9102, 907, 894, 9491)
-OBSERVABILITY_LEGEND = """### Observability states — source and next action
+OBSERVABILITY_LEGEND = """Observability states — source and next action
 
 Incident severity and evidence quality are separate. A telemetry CRIT describes visibility.
 
@@ -470,7 +470,9 @@ def _build_observability_row_children(
         "id": 8810,
         "type": "text",
         "title": "Review Observability States",
-        "gridPos": {"x": 0, "y": row["gridPos"]["y"] + 1, "w": 24, "h": 14},
+        # Keep the legend compact so collapsed-row data density stays above the
+        # REQ-DASH-004 floor (text must not dominate the Observability Signals row).
+        "gridPos": {"x": 0, "y": row["gridPos"]["y"] + 1, "w": 24, "h": 4},
         "options": {"mode": "markdown", "content": OBSERVABILITY_LEGEND},
     }
     y = legend["gridPos"]["y"] + legend["gridPos"]["h"]
@@ -478,11 +480,17 @@ def _build_observability_row_children(
         panel = signals.get(panel_id)
         if panel is None:
             continue
+        if panel.get("id") == 894:
+            height = 3
+        elif panel.get("type") == "stat":
+            height = 4
+        else:
+            height = max(4, panel.get("gridPos", {}).get("h", 4))
         panel["gridPos"] = {
             "x": 0,
             "y": y,
             "w": 24,
-            "h": max(4, panel.get("gridPos", {}).get("h", 4)),
+            "h": height,
         }
         y += panel["gridPos"]["h"]
         children.append(panel)

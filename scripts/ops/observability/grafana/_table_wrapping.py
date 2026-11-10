@@ -68,7 +68,9 @@ def _rank_width(overrides: list[dict]) -> None:
 
 
 def _pipeline_widths(overrides: list[dict]) -> None:
-    # Underscored identifiers have no native word-break opportunities.
+    # Underscored identifiers need a readable floor, but must stay flex columns:
+    # custom.width on Workflow/Pipeline blows the first-window 200% CSS budget.
+    min_width = "custom.minWidth"
     for name, width in (("Pipeline", 210), ("Workflow", 80)):
         override = next(
             (
@@ -80,8 +82,10 @@ def _pipeline_widths(overrides: list[dict]) -> None:
         )
         if override is None:
             continue
-        override["properties"] = [p for p in override["properties"] if p["id"] != WIDTH]
-        override["properties"].append({"id": WIDTH, "value": width})
+        override["properties"] = [
+            p for p in override["properties"] if p["id"] not in {WIDTH, min_width}
+        ]
+        override["properties"].append({"id": min_width, "value": width})
 
 
 def _provider_reason(overrides: list[dict]) -> None:

@@ -2459,6 +2459,39 @@ dashboards:
         - not_applicable
         render_profiles:
         - desktop_dark
+      '8809':
+        title: Observability Signals
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: &id006
+        - full_dark
+        - full_light
+        - zoom_200
+      '8810':
+        title: Review Observability States
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id006
       '9101':
         title: Review Runtime Blockers
         role: severity_table
@@ -2677,7 +2710,7 @@ dashboards:
         - crit
         - telemetry_absent
         - backend_error
-        render_profiles: &id010
+        render_profiles: &id011
         - full_dark
         - full_light
         - zoom_200
@@ -2723,7 +2756,7 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: &id006
+        render_profiles: &id007
         - full_dark
         - full_light
         - zoom_200
@@ -2748,7 +2781,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id006
+        render_profiles: *id007
       '9991':
         title: ''
         role: guidance
@@ -2870,7 +2903,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: &id007
+        render_profiles: &id008
         - full_dark
         - full_light
         - zoom_200
@@ -2895,7 +2928,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id007
+        render_profiles: *id008
       '22011':
         title: Inspect Global Signal Measurements
         role: forensic_table
@@ -2935,7 +2968,7 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: &id008
+        render_profiles: &id009
         - full_dark
         - full_light
         - zoom_200
@@ -2953,7 +2986,7 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: *id008
+        render_profiles: *id009
   bioetl-overview-v2:
     panels:
       '99':
@@ -3083,7 +3116,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: &id009
+        render_profiles: &id010
         - full_dark
         - full_light
         - zoom_200
@@ -3114,7 +3147,7 @@ dashboards:
         - crit
         - telemetry_absent
         - backend_error
-        render_profiles: *id009
+        render_profiles: *id010
       '9482':
         title: Review Contract Exclusions
         role: indicator
@@ -3220,7 +3253,7 @@ dashboards:
         - crit
         - telemetry_absent
         - backend_error
-        render_profiles: *id010
+        render_profiles: *id011
   bioetl-run-explorer-v1:
     panels:
       '1':

@@ -123,7 +123,12 @@ def test_ranked_action_overrides_inspect_value_with_domain_link() -> None:
         for o in evidence["fieldConfig"]["overrides"]
         if o["matcher"]["options"] == "Signal"
     )
-    assert {"id": "custom.wrapText", "value": True} in signal["properties"]
+    # Canonical table wrapping keeps Signal unwrapped; full text stays via inspect.
+    assert {"id": "custom.wrapText", "value": False} in signal["properties"]
+    assert {
+        "id": "custom.cellOptions",
+        "value": {"type": "auto", "wrapText": False},
+    } in signal["properties"]
     assert {"id": "links", "value": []} in signal["properties"]
     assert {"id": "links", "value": []} in details["properties"]
     extractor = next(t for t in panel["transformations"] if t["id"] == "extractFields")
