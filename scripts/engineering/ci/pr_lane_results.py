@@ -105,7 +105,9 @@ TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
 BENCHMARK_EVIDENCE_TESTS: tuple[str, ...] = (
     "tests/unit/repo_backed/scripts/qa/test_validate_benchmark_evidence_repo.py",
 )
-GRAFANA_CONTEXT_LINKS_TEST = "tests/unit/scripts/ops/observability/test_dashboard_context_links.py"
+GRAFANA_CONTEXT_LINKS_TEST = (
+    "tests/unit/scripts/ops/observability/test_dashboard_context_links.py"
+)
 
 DOCUMENTATION_CLEANUP_INVENTORY_TESTS: tuple[str, ...] = (
     DOCUMENTATION_CLEANUP_INVENTORY_TEST,
