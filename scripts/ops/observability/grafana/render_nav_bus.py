@@ -48,6 +48,7 @@ HTTP_EVIDENCE_STATES = (
 
 # Full portfolio bus. Order is the five-dashboard numbering.
 _BUS_UIDS: tuple[str, ...] = (
+    # v2 is canonical. Isolated 100000 is legacy / «не использовать»
     "bioetl-run-explorer-v1",
     "bioetl-control-plane-v1",
     "bioetl-overview-v2",
@@ -2465,6 +2466,7 @@ def apply_to_dashboard(
         panel for panel in payload.get("panels", []) if panel.get("id") != 9450
     ]
     from scripts.ops.observability.grafana.dashboard_context_links import (
+        _rewrite_links,
         normalize_dashboard_actions,
         finalize_dashboard_links,
         retire_runtime_links,
@@ -2532,6 +2534,9 @@ def apply_to_dashboard(
     )
 
     apply_evidence_readability(payload)
+    # explain_incident stamps HTML hrefs after the early normalize_dashboard_actions
+    # pass; re-run content/url serialization so All/`.*` selection stays encoded.
+    _rewrite_links(payload)
     from scripts.ops.observability.grafana._workflow_scope import apply_workflow_scope
 
     apply_workflow_scope(payload)
@@ -2724,6 +2729,8 @@ def apply_to_dashboard(
         panel = pending.pop()
         pending.extend(panel.get("panels", []))
         description = panel.get("description", "")
+        # Migrate legacy Provider Health handoff copy; keep matching the old
+        # phrase so reintroduced donor text is rewritten on the next render.
         if "Handoff: Provider Health" in description:
             panel["description"] = description.replace(
                 "Handoff: Provider Health",
@@ -2760,6 +2767,9 @@ def apply_to_dashboard(
                 panel.setdefault("fieldConfig", {}).setdefault("defaults", {})[
                     "noValue"
                 ] = label
+    from scripts.ops.observability.grafana._table_wrapping import apply_table_wrapping
+
+    apply_table_wrapping(payload.get("panels", []))
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

@@ -64,7 +64,7 @@ workflow и условие job. `[UNIQUE-GH]` означает отсутств�
 | контур не найден | `chembl-baseline-smoke.yml:baseline-cli-runner-smoke` (.github/workflows/chembl-baseline-smoke.yml:19) | [UNIQUE-GH] | — | runs-on=ubuntu-24.04, matrix, uv, pytest | — | — | {"workflow_dispatch": null} / — |
 | контур не найден | `chembl-baseline-smoke.yml:baseline-reconciliation-smoke` (.github/workflows/chembl-baseline-smoke.yml:73) | [UNIQUE-GH] | — | runs-on=ubuntu-24.04, uv, pytest | — | — | {"workflow_dispatch": null} / — |
 | контур не найден | `chembl-baseline-smoke.yml:baseline-architecture-smoke` (.github/workflows/chembl-baseline-smoke.yml:114) | [UNIQUE-GH] | — | runs-on=ubuntu-24.04, uv, pytest | — | — | {"workflow_dispatch": null} / — |
-| контур не найден | `codeql.yml:analyze` (.github/workflows/codeql.yml:14) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {"workflow_call": null} / — |
+| контур не найден | `codeql.yml:analyze` (.github/workflows/codeql.yml:15) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {"workflow_call": null, "workflow_dispatch": null} / — |
 | контур не найден | `coderabbit.yml:cli-review` (.github/workflows/coderabbit.yml:18) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {"workflow_dispatch": null} / — |
 | контур не найден | `compiled-artifacts-block.yml:no-pyc-check` (.github/workflows/compiled-artifacts-block.yml:16) | [UNIQUE-GH] | — | runs-on=ubuntu-latest, uv | — | — | {"workflow_call": null} / — |
 | контур не найден | `consolidation-gates.yml:canonical-manifest-hashes` (.github/workflows/consolidation-gates.yml:16) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {"workflow_dispatch": null} / — |

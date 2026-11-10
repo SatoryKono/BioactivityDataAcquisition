@@ -508,7 +508,8 @@
             },
             "inspect": true,
             "wrapText": false,
-            "minWidth": 50
+            "minWidth": 50,
+            "wrapHeaderText": true
           },
           "links": [
             {
@@ -819,8 +820,8 @@
       },
       "transparent": true,
       "options": {
-        "mode": "markdown",
-        "content": "**Canonical identity:** [Open Review Run Identity on Overview](/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range})\n\nDQ no longer duplicates identity tables (F-16)."
+        "mode": "html",
+        "content": "<div style=\"font-size:16px;line-height:1.5\"><strong>Canonical identity:</strong> <a href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range}\">Open Review Run Identity on Overview</a><br>DQ no longer duplicates identity tables (F-16).</div>"
       }
     },
     {
@@ -843,10 +844,13 @@
           "custom": {
             "align": "left",
             "cellOptions": {
-              "type": "auto"
+              "type": "auto",
+              "wrapText": true
             },
             "inspect": true,
-            "minWidth": 50
+            "minWidth": 50,
+            "wrapText": true,
+            "wrapHeaderText": true
           },
           "decimals": 0,
           "unit": "none",
@@ -1461,7 +1465,8 @@
                   "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapHeaderText": true
               }
             },
             "overrides": [
@@ -1762,7 +1767,8 @@
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": false,
+                "wrapHeaderText": true
               }
             },
             "overrides": [
@@ -1996,8 +2002,8 @@
           },
           "transparent": true,
           "options": {
-            "mode": "markdown",
-            "content": "**Canonical identity:** [Open Review Run Identity on Overview](/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range})"
+            "mode": "html",
+            "content": "<div style=\"font-size:16px;line-height:1.5\"><strong>Canonical identity:</strong> <a href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range}\">Open Review Run Identity on Overview</a></div>"
           }
         }
       ]
