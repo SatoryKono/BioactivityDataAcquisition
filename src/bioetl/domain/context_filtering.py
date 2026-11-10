@@ -129,6 +129,31 @@ class InputFilterContext:
             fallback_column=None,
         )
 
+    @property
+    def is_disabled(self) -> bool:
+        """Check if the input filter is explicitly disabled."""
+        return not self.enabled
+
+    @property
+    def is_csv_mode(self) -> bool:
+        """Check if the input filter is using CSV-based filtering."""
+        return (
+            self.enabled
+            and not self.multi_filter_ids
+            and not self.filter_ids
+            and bool(self.source_path)
+        )
+
+    @property
+    def is_direct_ids_mode(self) -> bool:
+        """Check if the input filter is using direct IDs filtering."""
+        return self.enabled and not self.multi_filter_ids and bool(self.filter_ids)
+
+    @property
+    def is_multi_ids_mode(self) -> bool:
+        """Check if the input filter is using multi-field IDs filtering."""
+        return self.enabled and bool(self.multi_filter_ids)
+
     def __post_init__(self) -> None:
         """Validate filter configuration."""
         self._detach_owned_mappings()
@@ -174,6 +199,11 @@ class VacuumSettings:
 
     enabled: bool | None = None
     retention_days: int = 7
+
+    @property
+    def is_enabled_override(self) -> bool | None:
+        """Return explicit vacuum override state, if one was provided."""
+        return None if self.enabled is None else bool(self.enabled)
 
     def __post_init__(self) -> None:
         """Validate vacuum configuration."""
