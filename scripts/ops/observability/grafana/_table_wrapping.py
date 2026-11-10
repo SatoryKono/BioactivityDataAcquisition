@@ -29,6 +29,22 @@ def _wrap_header_defaults(panel: dict) -> None:
     custom["wrapHeaderText"] = True
 
 
+def _strip_value_wrap_property(prop: dict, *, keep: bool) -> None:
+    """Apply allowlist-aware value-wrap stripping to one override property."""
+    if prop["id"] == "custom.wrapText":
+        if keep:
+            return
+        prop["value"] = False
+        return
+    if prop["id"] != "custom.cellOptions":
+        return
+    value = prop.get("value")
+    if not isinstance(value, dict):
+        return
+    # Contracts assert wrapText when cellOptions is present.
+    value["wrapText"] = bool(keep and value.get("wrapText", keep))
+
+
 def _strip_stale_value_wrap(overrides: list[dict]) -> None:
     """Drop blanket value-wrap left by earlier helper revisions.
 
@@ -39,16 +55,7 @@ def _strip_stale_value_wrap(overrides: list[dict]) -> None:
         name = override.get("matcher", {}).get("options")
         keep = name in _VALUE_WRAP_FIELDS
         for prop in override.get("properties", []):
-            if prop["id"] == "custom.wrapText":
-                if keep:
-                    continue
-                prop["value"] = False
-            elif prop["id"] == "custom.cellOptions":
-                value = prop.get("value")
-                if not isinstance(value, dict):
-                    continue
-                # Contracts assert wrapText when cellOptions is present.
-                value["wrapText"] = bool(keep and value.get("wrapText", keep))
+            _strip_value_wrap_property(prop, keep=keep)
 
 
 def _rank_width(overrides: list[dict]) -> None:
