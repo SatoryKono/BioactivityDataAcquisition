@@ -1138,6 +1138,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         (REQUIRED_CHECKS_PROSE_TEST,),
     ),
+    ".devin/workflows/qodo-sync.md": (SYNC_CURSOR_RULES_TEST,),
+    "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md": (
+        SYNC_CURSOR_RULES_TEST,
+    ),
 }
 
 # Directory-level edges for generated artifacts and diagrams where an exact
