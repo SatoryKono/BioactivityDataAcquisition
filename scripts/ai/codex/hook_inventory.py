@@ -42,10 +42,18 @@ GIT_HOOKS = ("pre-commit", "pre-push", "commit-msg", "reference-transaction")
 MAX_BYTES = 1024 * 1024
 
 
-def _read_config(path: Path) -> dict[str, Any]:
-    if path.stat().st_size > MAX_BYTES:
+def _read_bytes(path: Path) -> bytes:
+    """Bound reads even when another process grows or replaces the file."""
+    with path.open("rb") as stream:
+        raw = stream.read(MAX_BYTES + 1)
+    if len(raw) > MAX_BYTES:
         raise ValueError("configuration exceeds diagnostic size limit")
-    raw = path.read_text(encoding="utf-8-sig")
+    return raw
+
+
+def _read_config(path: Path) -> dict[str, Any]:
+    """Parse an object without exposing its values in parser diagnostics."""
+    raw = _read_bytes(path).decode("utf-8-sig")
     data = tomllib.loads(raw) if path.suffix == ".toml" else json.loads(raw)
     if not isinstance(data, dict):
         raise ValueError("configuration must be an object")
@@ -53,20 +61,19 @@ def _read_config(path: Path) -> dict[str, Any]:
 
 
 def _file_evidence(path: Path) -> dict[str, Any]:
+    """Record identity without emitting configuration or command contents."""
     result: dict[str, Any] = {"path": str(path), "present": False}
     try:
         result["present"] = path.exists()
         if path.is_file():
-            if path.stat().st_size > MAX_BYTES:
-                result["status"] = "ERROR"
-            else:
-                result["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
-    except OSError:
+            result["sha256"] = hashlib.sha256(_read_bytes(path)).hexdigest()
+    except (OSError, ValueError):
         result["status"] = "ERROR"
     return result
 
 
 def _git(root: Path, *args: str) -> str:
+    """Run a bounded metadata query without optional Git locks."""
     completed = subprocess.run(
         ["git", "--no-optional-locks", "-C", str(root), *args],
         capture_output=True,
@@ -80,6 +87,44 @@ def _git(root: Path, *args: str) -> str:
         # Do not echo configuration values or arbitrary stderr to diagnostics.
         raise ValueError("Git metadata query failed")
     return completed.stdout.strip()
+
+
+def _event_sources(sources: list[tuple[Path, Any]]) -> dict[str, list[str]]:
+    """Keep every observed event's origin, including inline-only sources."""
+    events: dict[str, set[str]] = {}
+    for path, hooks in sources:
+        if isinstance(hooks, dict):
+            for event in hooks:
+                events.setdefault(event, set()).add(str(path))
+    return {event: sorted(paths) for event, paths in sorted(events.items())}
+
+
+def _opencode_candidates(root: Path) -> list[dict[str, Any]]:
+    """Fingerprint alternate project configs; never guess JSONC contents."""
+    results = []
+    for name in (
+        "opencode.jsonc",
+        ".opencode/opencode.json",
+        ".opencode/opencode.jsonc",
+    ):
+        path = root / name
+        item = _file_evidence(path)
+        if path.is_file():
+            if path.suffix == ".jsonc":
+                item.update(parse_status="UNSUPPORTED", plugins_configured=None)
+            else:
+                try:
+                    config = _read_config(path)
+                    item.update(
+                        parse_status="OBSERVED",
+                        plugins_configured=bool(
+                            config.get("plugin") or config.get("plugins")
+                        ),
+                    )
+                except (OSError, ValueError):
+                    item.update(parse_status="ERROR", plugins_configured=None)
+        results.append(item)
+    return results
 
 
 def git_inventory(root: Path) -> dict[str, Any]:
@@ -127,13 +172,17 @@ def runtime_inventory(root: Path, name: str, command: str | None) -> dict[str, A
         "hook_surface": _file_evidence(root / hook_name),
         "configured_events": [],
     }
+    if name == "opencode":
+        result["additional_configurations"] = _opencode_candidates(root)
     try:
         path = root / config_name
         config = _read_config(path) if path.is_file() else {}
         hook_path = root / hook_name
         hook_config = _read_config(hook_path) if hook_path.is_file() else {}
         hooks = hook_config.get("hooks", hook_config if name == "devin" else {})
-        result["configured_events"] = sorted(hooks) if isinstance(hooks, dict) else []
+        events = _event_sources([(path, config.get("hooks", {})), (hook_path, hooks)])
+        result["configured_events"] = sorted(events)
+        result["event_sources"] = events
         result["inline_hooks_present"] = bool(config.get("hooks"))
         result["plugins_configured"] = bool(
             config.get("plugin") or config.get("plugins")
@@ -143,6 +192,16 @@ def runtime_inventory(root: Path, name: str, command: str | None) -> dict[str, A
                 "project hooks require explicit --config-location; EAP capability must be verified"
             )
         elif name == "opencode":
+            candidates = result["additional_configurations"]
+            if any(item.get("plugins_configured") is True for item in candidates):
+                result["plugins_configured"] = True
+            if any(
+                item.get("parse_status") in {"UNSUPPORTED", "ERROR"}
+                for item in candidates
+            ):
+                result["config_status"] = "INCOMPLETE"
+                if not result["plugins_configured"]:
+                    result["plugins_configured"] = None
             result["discovery_note"] = (
                 "subordinate surface; plugin APIs must match installed major version"
             )
@@ -153,7 +212,7 @@ def runtime_inventory(root: Path, name: str, command: str | None) -> dict[str, A
     except (OSError, ValueError):
         result["config_status"] = "ERROR"
     else:
-        result["config_status"] = "OBSERVED"
+        result.setdefault("config_status", "OBSERVED")
     return result
 
 

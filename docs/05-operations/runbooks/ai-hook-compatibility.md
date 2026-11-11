@@ -39,6 +39,10 @@ launcher scripts, runs hooks, starts an agent, installs packages, or contacts
 a service. Exit code 2 means installed capability remains NOT_PROVEN, not PASS.
 Its JSON separates present files, discoverable Git hooks, configured events,
 and execution evidence. It reports paths and digests, not command/config values.
+Inline and standalone event definitions retain their source paths. Alternate
+OpenCode project configurations are fingerprinted too. JSONC is reported as
+an unsupported parse format with incomplete discovery, never as proof that
+plugins are absent. The diagnostic does not install a JSONC parser.
 
 ## Evidence captured on 2026-11-11
 
