@@ -164,12 +164,13 @@ ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
 RUNTIME_ACCEPTANCE_12553_TEST = (
     "tests/unit/scripts/engineering/qa/test_runtime_acceptance_12553.py"
 )
+GHA_DISABLED_MAP_TEST = "tests/architecture/test_gha_disabled_map_10263.py"
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".github/workflows/runtime-acceptance-12553.yml": (
         "tests/architecture/test_github_actions_runtime_policy.py",
-        "tests/architecture/test_gha_disabled_map_10263.py",
+        GHA_DISABLED_MAP_TEST,
         "tests/architecture/test_actions_artifact_storage_policy.py",
         RUNTIME_ACCEPTANCE_12553_TEST,
     ),
@@ -1067,7 +1068,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".github/workflows/main-ghcr-publish.yml": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
-        "tests/architecture/test_gha_disabled_map_10263.py",
+        GHA_DISABLED_MAP_TEST,
     ),
     ".github/workflows/main-integrity.yml": (
         DOCKER_RUNTIME_CONTRACT_TEST,
@@ -1236,7 +1237,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
     ),
     "docs/04-reference/github-actions-workflows.md": (
-        "tests/architecture/test_gha_disabled_map_10263.py",
+        GHA_DISABLED_MAP_TEST,
         REQUIRED_CHECKS_PROSE_TEST,
     ),
     "docs/05-operations/ci-workflow-map.md": (REQUIRED_CHECKS_PROSE_TEST,),
