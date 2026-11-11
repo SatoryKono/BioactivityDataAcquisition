@@ -57,17 +57,18 @@ def _reserve_alert_band(panels: list[dict[str, Any]], bottom: int) -> None:
 def embed_global_alerts(overview: dict[str, Any], incident: dict[str, Any]) -> None:
     """Copy the global summary/full-list pair after selected-run layout builders.
 
-    The caller rebuilds the local layout before this pass. Reserve y=19 for
-    the summary and translate the lower local blocks together, preserving
-    their queries, sizes and relative positions. No selected-run datasource
-    participates in the global query or its Dashboard-datasource consumer.
+    The caller rebuilds the local layout before this pass. Keep the summary
+    before the collapsed full-list row: Grafana groups following standalone
+    panels under that row. Translate lower local blocks together and put the
+    disclosure last so neither alerts nor saved-run evidence gets hidden.
+    No selected-run datasource participates in either global alert query.
     """
     donors = {panel["id"]: panel for panel in incident["panels"]}
     summary = deepcopy(donors[2005])
     full = deepcopy(donors[32005])
     panels = overview["panels"]
     panels[:] = [panel for panel in panels if panel["id"] not in {2005, 32005}]
-    summary["gridPos"] = {"x": 0, "y": 19, "w": 24, "h": 5}
+    summary["gridPos"] = {"x": 0, "y": 18, "w": 24, "h": 5}
     # This existing recording rule evaluates the Incident donor expression.
     # Reuse its samples instead of recomputing the long expression on first load.
     summary["targets"][0]["expr"] = "bioetl_incident_global_alerts"
@@ -77,15 +78,28 @@ def embed_global_alerts(overview: dict[str, Any], incident: dict[str, Any]) -> N
         "Summary shows up to two highest-priority alerts; open Incident "
         "Workspace or Browse Global Alerts for all rows."
     )
-    _reserve_alert_band(panels, bottom=24)
-    delta = 18 - full["gridPos"]["y"]
-    full["gridPos"]["y"] = 18
+    _reserve_alert_band(panels, bottom=23)
+    full_y = max(
+        23,
+        max(
+            (panel["gridPos"]["y"] + panel["gridPos"]["h"] for panel in panels),
+            default=23,
+        ),
+    )
+    delta = full_y - full["gridPos"]["y"]
+    full["gridPos"]["y"] = full_y
     for child in full["panels"]:
         child["gridPos"]["y"] += delta
+        if child["id"] == 22005:
+            # A Dashboard-datasource consumer in a collapsed Scenes row can
+            # suppress its source panel. Query the same cheap recording rule
+            # independently so collapsing the full list never hides summary.
+            child["datasource"] = deepcopy(summary["datasource"])
+            child["targets"] = deepcopy(summary["targets"])
         _apply_overview_alert_handoff(child)
     full["description"] = (
         "GLOBAL / CURRENT · Expand for all fleet alerts, independently of "
-        "the selected Run ID. The summary below shows up to two rows."
+        "the selected Run ID. The summary above shows up to two rows."
     )
     panels.extend([summary, full])
     panels.sort(key=lambda panel: (panel["gridPos"]["y"], panel["gridPos"]["x"]))

@@ -144,14 +144,14 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9002 | Review Run Domains |
 | bioetl-overview-v2.json | 9603 | Review Selected Run Status |
 | bioetl-overview-v2.json | 9300 | Review Run Identity |
-| bioetl-overview-v2.json | 32005 | Browse Global Alerts |
-| bioetl-overview-v2.json | 22005 | Monitor Global Alerts (Full) |
 | bioetl-overview-v2.json | 2005 | Monitor Global Alerts |
 | bioetl-overview-v2.json | 9480 | Review Provider Evidence |
 | bioetl-overview-v2.json | 9481 | Review Provider Check |
 | bioetl-overview-v2.json | 9460 | Inspect Selected Run Stages |
 | bioetl-overview-v2.json | 9482 | Review Contract Exclusions |
 | bioetl-overview-v2.json | 9483 | Review FK Comparison Scope |
+| bioetl-overview-v2.json | 32005 | Browse Global Alerts |
+| bioetl-overview-v2.json | 22005 | Monitor Global Alerts (Full) |
 | bioetl-run-explorer-v1.json | 1000 | Navigate Dashboards |
 | bioetl-run-explorer-v1.json | 1 | Understand Run Scope |
 | bioetl-run-explorer-v1.json | 3010 | Inspect Recent Runs (last 10) |
