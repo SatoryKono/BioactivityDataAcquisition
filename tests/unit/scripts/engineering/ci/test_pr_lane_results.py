@@ -1221,3 +1221,21 @@ def test_native_runtime_checker_uses_architecture_owners() -> None:
     )
     assert "tests/unit/scripts" not in report["selected"]
     assert "tests/unit/repo_backed/scripts" not in report["selected"]
+
+
+@pytest.mark.parametrize(
+    "path,owner",
+    [
+        ("AGENTS.md", "tests/architecture/test_codex_task_routing.py"),
+        (
+            "scripts/memory/run_workflow.sh",
+            "tests/architecture/test_ai_memory_program_contracts.py",
+        ),
+    ],
+)
+def test_root_and_memory_entrypoints_have_reviewed_owners(
+    path: str, owner: str
+) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert owner in report["selected"]
