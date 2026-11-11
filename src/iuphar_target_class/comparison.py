@@ -70,24 +70,14 @@ def compare_stage0(
     residual: list[str] = []
     legacy: list[tuple[str, str]] = []
     for key in sorted(set(grouped_m) | set(grouped_python)):
-        label = _label(key)
-        m_group = grouped_m.get(key, ())
-        python_group = grouped_python.get(key, ())
-        if len(m_group) > 1 or len(python_group) > 1:
-            residual.append(label)
-            continue
-        m_row = m_group[0] if m_group else None
-        python_row = python_group[0] if python_group else None
-        if m_row is not None and "legacy_iuphar_class" in m_row:
-            legacy.append((label, m_row["legacy_iuphar_class"]))
-        if m_row is None or python_row is None or _class(m_row) == _class(python_row):
-            continue
-        sign = python_row.get("change_sign", "")
-        explanation = python_row.get("explanation", "")
-        if sign in CHANGE_CATEGORIES and explanation:
-            changes.append((label, sign, explanation))
-        else:
-            residual.append(label)
+        _classify_key(
+            key,
+            grouped_m.get(key, ()),
+            grouped_python.get(key, ()),
+            changes,
+            residual,
+            legacy,
+        )
     return ComparisonReport(
         True,
         "строки M и Python сопоставлены по полному ключу",
@@ -97,6 +87,43 @@ def compare_stage0(
         False,
         tuple(sorted(legacy)),
     )
+
+
+def _classify_key(
+    key: tuple[tuple[str, str], ...],
+    m_group: tuple[Mapping[str, str], ...],
+    python_group: tuple[Mapping[str, str], ...],
+    changes: list[tuple[str, str, str]],
+    residual: list[str],
+    legacy: list[tuple[str, str]],
+) -> None:
+    """Record one identity key. Duplicates and unexplained gaps stay residual."""
+    label = _label(key)
+    if len(m_group) > 1 or len(python_group) > 1:
+        residual.append(label)
+        return
+    m_row = m_group[0] if m_group else None
+    python_row = python_group[0] if python_group else None
+    if m_row is not None and "legacy_iuphar_class" in m_row:
+        legacy.append((label, m_row["legacy_iuphar_class"]))
+    if m_row is None or python_row is None or _class(m_row) == _class(python_row):
+        return
+    _record_difference(label, python_row, changes, residual)
+
+
+def _record_difference(
+    label: str,
+    python_row: Mapping[str, str],
+    changes: list[tuple[str, str, str]],
+    residual: list[str],
+) -> None:
+    """Keep an explained category. Anything else is residual, not a metric."""
+    sign = python_row.get("change_sign", "")
+    explanation = python_row.get("explanation", "")
+    if sign in CHANGE_CATEGORIES and explanation:
+        changes.append((label, sign, explanation))
+        return
+    residual.append(label)
 
 
 def _group(
