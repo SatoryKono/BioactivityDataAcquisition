@@ -1551,6 +1551,7 @@ def test_ghcr_publish_waits_outside_the_main_integrity_conclusion() -> None:
     jobs = docker["jobs"]
     gate = jobs["docker-publish-gate"]
     assert "environment" not in gate
+    assert "github.event_name == 'workflow_run'" in gate["if"]
     assert gate["permissions"] == {"contents": "read"}
     for name in (
         "docker-runtime-contracts",
