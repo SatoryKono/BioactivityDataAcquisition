@@ -103,6 +103,14 @@ def _git(repo: Path, *args: str) -> str:
         if not re.fullmatch(r"[A-Za-z0-9_./:\\{}^-]+", argument):
             raise ValueError("Git argument contains unsupported characters")
         checked_args.append(argument)
+    # -C does not neutralize inherited Git directory/index/config controls.
+    # Freeze object interpretation as well as the destination and commit SHA.
+    environment = {
+        key: value
+        for key, value in os.environ.items()
+        if not key.upper().startswith("GIT_")
+    }
+    environment["GIT_NO_REPLACE_OBJECTS"] = "1"
     result = subprocess.run(
         [
             "git",
@@ -118,6 +126,7 @@ def _git(repo: Path, *args: str) -> str:
         capture_output=True,
         text=True,
         encoding="utf-8",
+        env=environment,
     )
     return result.stdout
 
@@ -204,18 +213,25 @@ def _populate_existing(destination: Path, sha: str) -> None:
         )
 
 
-def create_worktree(args: argparse.Namespace) -> Path:
-    destination = validate_destination(args.destination)
-    repo = _source_repo()
-    approved, _ = _roots()
-    _inside(
-        Path(
-            _git(
-                repo, "rev-parse", "--path-format=absolute", "--git-common-dir"
-            ).strip()
-        ),
-        approved,
-    )
+def _creation_arguments(
+    args: argparse.Namespace, destination: Path, sha: str, branch: str
+) -> list[str]:
+    """Assemble fixed Git options after destination/ref validation."""
+    command = ["worktree", "add"]
+    if args.no_checkout or args.existing_branch:
+        command.append("--no-checkout")
+    if args.detach:
+        command.append("--detach")
+    elif not args.existing_branch:
+        command.extend(["-b", branch])
+    command.extend(["--", str(destination), args.existing_branch or sha])
+    return command
+
+
+def _creation_identity(
+    args: argparse.Namespace, repo: Path, destination: Path
+) -> tuple[str, str]:
+    """Resolve an immutable commit and validate the requested branch."""
     if args.existing_branch and args.start_point != "origin/main":
         raise ValueError("--existing-branch cannot be combined with --start-point")
     ref = (
@@ -229,19 +245,27 @@ def create_worktree(args: argparse.Namespace) -> Path:
         if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]*", branch):
             raise ValueError("Use a simple branch name, never Git options")
         _git(repo, "check-ref-format", "--branch", branch)
+    return sha, branch
+
+
+def create_worktree(args: argparse.Namespace) -> Path:
+    destination = validate_destination(args.destination)
+    repo = _source_repo()
+    approved, _ = _roots()
+    _inside(
+        Path(
+            _git(
+                repo, "rev-parse", "--path-format=absolute", "--git-common-dir"
+            ).strip()
+        ),
+        approved,
+    )
+    sha, branch = _creation_identity(args, repo, destination)
     if not args.no_checkout:
         _check_env(repo, sha, args.env_example_approved)
     # Resolve again immediately before creation, after all potentially slow reads.
     validate_destination(args.destination)
-    command = ["worktree", "add"]
-    if args.no_checkout or args.existing_branch:
-        command.append("--no-checkout")
-    if args.detach:
-        command.append("--detach")
-    elif not args.existing_branch:
-        command.extend(["-b", branch])
-    command.extend(["--", str(destination), args.existing_branch or sha])
-    _git(repo, *command)
+    _git(repo, *_creation_arguments(args, destination, sha, branch))
     _created_target(destination)
     if args.existing_branch and not args.no_checkout:
         # Native add reserves the branch without checkout. Populate only the
@@ -266,14 +290,16 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         if args.install_helper:
-            if (
-                args.destination
-                or args.branch
-                or args.existing_branch
-                or args.detach
-                or args.no_checkout
-                or args.env_example_approved
-                or args.start_point != "origin/main"
+            if any(
+                (
+                    args.destination,
+                    args.branch,
+                    args.existing_branch,
+                    args.detach,
+                    args.no_checkout,
+                    args.env_example_approved,
+                    args.start_point != "origin/main",
+                )
             ):
                 raise ValueError(
                     "--install-helper cannot be combined with creation options"

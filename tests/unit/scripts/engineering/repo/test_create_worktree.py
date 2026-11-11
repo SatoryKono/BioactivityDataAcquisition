@@ -300,11 +300,12 @@ def test_git_common_metadata_escape_blocks_creation(
 def test_real_read_only_git_preflight_requires_template_consent() -> None:
     repo = Path(__file__).resolve().parents[5]
     template = repo / ".env.example"
-    before = template.stat().st_mtime_ns
+    before = template.stat().st_mtime_ns if template.exists() else None
     sha = guard._revision(repo, "HEAD")
     with pytest.raises(ValueError, match="explicit per-task user approval"):
         guard._check_env(repo, sha, False)
-    assert template.stat().st_mtime_ns == before
+    after = template.stat().st_mtime_ns if template.exists() else None
+    assert after == before
 
 
 def test_git_paths_decode_as_utf8_under_legacy_windows_locale(
@@ -352,3 +353,44 @@ def test_new_foreign_files_are_preserved_before_existing_branch_population(
     assert error.value.code == 2
     assert foreign.read_text(encoding="utf-8") == "preserve me"
     assert not any(args[0] == "read-tree" for _, args in git_calls)
+
+
+@pytest.mark.parametrize(
+    "variable",
+    [
+        "GIT_DIR",
+        "GIT_COMMON_DIR",
+        "GIT_WORK_TREE",
+        "GIT_INDEX_FILE",
+        "GIT_CONFIG_COUNT",
+        "GIT_CONFIG_PARAMETERS",
+        "GIT_CONFIG_SYSTEM",
+        "GIT_OBJECT_DIRECTORY",
+        "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+        "git_work_tree",
+    ],
+)
+def test_git_execution_cannot_inherit_repository_or_config_redirects(
+    policy: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    variable: str,
+) -> None:
+    monkeypatch.setenv(variable, "synthetic-redirect")
+    monkeypatch.setenv("GIT_NO_REPLACE_OBJECTS", "0")
+    monkeypatch.setenv("BIOETL_FIXTURE_PASSTHROUGH", "preserved")
+    environments = []
+
+    def fake_run(command, **kwargs):
+        environments.append(kwargs.get("env"))
+        return subprocess.CompletedProcess(command, 0, stdout="synthetic output\n")
+
+    monkeypatch.setattr(guard.subprocess, "run", fake_run)
+    assert guard._git(policy, "rev-parse", "--show-toplevel") == "synthetic output\n"
+    environment = environments[0]
+    assert environment is not None
+    assert {key.upper() for key in environment if key.upper().startswith("GIT_")} == {
+        "GIT_NO_REPLACE_OBJECTS"
+    }
+    assert environment["GIT_NO_REPLACE_OBJECTS"] == "1"
+    assert environment["BIOETL_FIXTURE_PASSTHROUGH"] == "preserved"
+    assert os.environ[variable] == "synthetic-redirect"
