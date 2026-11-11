@@ -7,8 +7,6 @@ ______________________________________________________________________
 ---
 name: research-workflow
 description: "Use for structured research, deep investigation, traceable evidence, and multi-stream synthesis with explicit decisions and constrained specifications. Single router: select work via --phase initialize|evidence|synthesis|decisions|specs|complete; phase bodies live in references/phases/."
-context: fork
-agent: general-purpose
 ---
 
 # Research Workflow (router)
@@ -78,7 +76,14 @@ all phases through `--phase`, the same way `py-test-bot` serves
 
 ## User Interaction
 
-Use the **AskUserQuestion tool** at key decision points:
+Run in the current agent by default; skill metadata does not launch a child.
+Multi-stream work requires delegation authority from the active runtime and the
+user's scope; it never expands permissions.
+
+At key decision points, use the active runtime's available user-input capability.
+Discover that capability rather than assuming a tool or role name. If unavailable,
+ask a plain-text question in the conversation and wait before dependent work;
+continue only independent work. Missing required input is not approval.
 
 ### Phase 1 (Initialize)
 - Brief ambiguity clarification
