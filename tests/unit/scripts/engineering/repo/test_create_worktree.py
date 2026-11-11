@@ -16,6 +16,31 @@ pytestmark = pytest.mark.unit
 SHA = "a" * 40
 
 
+@pytest.mark.parametrize(
+    "ref", ["--help", "-c", "main\n--force", "HEAD:path", "a;calc"]
+)
+def test_revision_rejects_options_and_expressions_before_git(ref, monkeypatch):
+    monkeypatch.setattr(guard, "_git", lambda *_: pytest.fail("Git must not run"))
+    with pytest.raises(ValueError, match="Invalid Git revision"):
+        guard._revision(Path("D:/github/repo"), ref)
+
+
+@pytest.mark.parametrize("argument", ["main\n--force", "$(calc)", "a;calc", "a b"])
+def test_git_argument_allowlist_blocks_before_subprocess(argument, monkeypatch):
+    monkeypatch.setattr(
+        subprocess, "run", lambda *_a, **_k: pytest.fail("Must not run")
+    )
+    with pytest.raises(ValueError, match="unsupported characters"):
+        guard._git(Path("D:/github/repo"), "rev-parse", argument)
+
+
+def test_branch_option_is_rejected_before_native_branch_check(policy, git_calls):
+    with pytest.raises(SystemExit):
+        guard.main(["safe-task", "--branch=--help", "--no-checkout"])
+    assert not any(args[0] == "check-ref-format" for _, args in git_calls)
+    assert not guard.WORKTREE_ROOT.exists()
+
+
 @pytest.fixture
 def policy(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     approved = (tmp_path / "approved").resolve()
@@ -280,6 +305,26 @@ def test_real_read_only_git_preflight_requires_template_consent() -> None:
     with pytest.raises(ValueError, match="explicit per-task user approval"):
         guard._check_env(repo, sha, False)
     assert template.stat().st_mtime_ns == before
+
+
+def test_git_paths_decode_as_utf8_under_legacy_windows_locale(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import locale
+
+    monkeypatch.setattr(locale, "getencoding", lambda: "cp1252")
+    original = subprocess.run
+
+    def checked_run(*args, **kwargs):
+        assert kwargs["encoding"] == "utf-8"
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(subprocess, "run", checked_run)
+    repo = Path(__file__).resolve().parents[5]
+    sha = guard._revision(repo, "HEAD")
+    paths = guard._git(repo, "ls-tree", "-rz", "--name-only", sha, "--")
+    assert "docs/99-archive/plans/наблюдаемость.md\0" in paths
+    guard._check_env(repo, sha, True)
 
 
 def test_new_foreign_files_are_preserved_before_existing_branch_population(

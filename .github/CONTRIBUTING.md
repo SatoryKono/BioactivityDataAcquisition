@@ -78,7 +78,9 @@ python D:/github/BioactivityDataAcquisition/.git/hooks/bioetl-create-worktree.py
 
 The flag records prior consent; it does not grant it. Real `.env` is never
 copied. Other tracked `.env*` files fail closed. The default branch is
-`codex/<task>` from an immutable `origin/main` commit. `--existing-branch` attaches
+`codex/<task>` from an immutable `origin/main` commit. Branch/start-point values
+accept simple ASCII ref names or commit SHA values, not arbitrary Git options or
+revision expressions. `--existing-branch` attaches
 without moving its ref; a concurrent ref move is reported without resetting it.
 `--no-checkout` creates metadata only and is not permission to commit a partial
 tree or later write an env file. Keep the full-tree gate before every commit.

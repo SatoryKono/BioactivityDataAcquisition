@@ -96,6 +96,13 @@ def _source_repo() -> Path:
 
 
 def _git(repo: Path, *args: str) -> str:
+    # This CLI accepts simple ref names/SHA values, never arbitrary Git options
+    # or revision expressions. Fixed options below are implementation-owned.
+    checked_args = []
+    for argument in args:
+        if not re.fullmatch(r"[A-Za-z0-9_./:\\{}^-]+", argument):
+            raise ValueError("Git argument contains unsupported characters")
+        checked_args.append(argument)
     result = subprocess.run(
         [
             "git",
@@ -105,17 +112,18 @@ def _git(repo: Path, *args: str) -> str:
             f"safe.directory={repo}",
             "-C",
             str(repo),
-            *args,
+            *checked_args,
         ],
         check=True,
         capture_output=True,
         text=True,
+        encoding="utf-8",
     )
     return result.stdout
 
 
 def _revision(repo: Path, ref: str) -> str:
-    if not ref or ref.startswith("-") or any(c.isspace() for c in ref):
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]*", ref):
         raise ValueError("Invalid Git revision")
     sha = _git(
         repo, "rev-parse", "--verify", "--end-of-options", f"{ref}^{{commit}}"
@@ -218,6 +226,8 @@ def create_worktree(args: argparse.Namespace) -> Path:
     sha = _revision(repo, ref)
     branch = args.existing_branch or args.branch or f"codex/{destination.name}"
     if not args.detach:
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]*", branch):
+            raise ValueError("Use a simple branch name, never Git options")
         _git(repo, "check-ref-format", "--branch", branch)
     if not args.no_checkout:
         _check_env(repo, sha, args.env_example_approved)
