@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-11T21:25:27.894036+00:00",
+  "generated_at": "2026-11-11T21:34:11.127185+00:00",
   "summary": {
     "total_scripts": 735,
     "status_counts": {
@@ -1182,7 +1182,7 @@
         },
         {
           "path": "tests/unit/scripts/test_mcp_readiness.py",
-          "line": 669,
+          "line": 674,
           "source_group": "tests",
           "text": "from scripts.ai.codex.mcp_http_probe import HttpProbeClient"
         }
@@ -1231,7 +1231,7 @@
         },
         {
           "path": "tests/unit/scripts/test_mcp_readiness.py",
-          "line": 652,
+          "line": 657,
           "source_group": "tests",
           "text": "from scripts.ai.codex.mcp_probe_client import client_for"
         }
@@ -3511,9 +3511,9 @@
         },
         {
           "path": "tests/unit/scripts/test_mcp_readiness.py",
-          "line": 649,
+          "line": 651,
           "source_group": "tests",
-          "text": "[\"mcp_context7_wrapper.sh\", \"mcp_ast_grep_wrapper.sh\", \"mcp_deja_wrapper.ps1\"],"
+          "text": "\"mcp_ast_grep_wrapper.sh\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3809,9 +3809,9 @@
         },
         {
           "path": "tests/unit/scripts/test_mcp_readiness.py",
-          "line": 649,
+          "line": 650,
           "source_group": "tests",
-          "text": "[\"mcp_context7_wrapper.sh\", \"mcp_ast_grep_wrapper.sh\", \"mcp_deja_wrapper.ps1\"],"
+          "text": "\"mcp_context7_wrapper.sh\","
         }
       ]
     },
@@ -3830,9 +3830,9 @@
         },
         {
           "path": "tests/unit/scripts/test_mcp_readiness.py",
-          "line": 649,
+          "line": 652,
           "source_group": "tests",
-          "text": "[\"mcp_context7_wrapper.sh\", \"mcp_ast_grep_wrapper.sh\", \"mcp_deja_wrapper.ps1\"],"
+          "text": "\"mcp_deja_wrapper.ps1\","
         }
       ],
       "owner": "@bioetl-platform",

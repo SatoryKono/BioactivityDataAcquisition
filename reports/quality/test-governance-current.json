@@ -1900,7 +1900,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "222af884d5bb0964e6bd59867623aa44dccf7b550539d101af449f834699e4a4",
+  "source_tree_sha256": "847ea9f507349bd70ed8ac09c6ffede969ac3c8b567b6f3a10701e38c997ea15",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 73,

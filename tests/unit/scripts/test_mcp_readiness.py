@@ -646,14 +646,19 @@ def test_early_policy_denial_does_not_pass_control(tmp_path, method):
 
 @pytest.mark.parametrize(
     "name",
-    ["mcp_context7_wrapper.sh", "mcp_ast_grep_wrapper.sh", "mcp_deja_wrapper.ps1"],
+    [
+        "mcp_context7_wrapper.sh",
+        "mcp_ast_grep_wrapper.sh",
+        "mcp_deja_wrapper.ps1",
+        "MCP_CONTEXT7_WRAPPER.SH",
+    ],
 )
 def test_existing_legacy_wrapper_does_not_prove_no_install_backend(tmp_path, name):
     from scripts.ai.codex.mcp_probe_client import client_for
 
     adapter = tmp_path / name
     adapter.write_text("# fallback may install a package", encoding="utf-8")
-    launcher = "powershell" if adapter.suffix == ".ps1" else "bash"
+    launcher = "powershell" if adapter.suffix.lower() == ".ps1" else "bash"
     args = (
         ["-NoProfile", "-File", str(adapter)]
         if launcher == "powershell"

@@ -136,9 +136,8 @@ def _execution_directory(entry: Mapping, workspace: Path) -> Path:
 def _require_no_install_adapter(path: Path) -> None:
     # Legacy project wrappers can fall through to npx/uvx package installation.
     # File existence and a host marker cannot prove that fallback is impossible.
-    if path.name.startswith("mcp_") and path.name.endswith(
-        ("_wrapper.sh", "_wrapper.ps1")
-    ):
+    name = path.resolve(strict=True).name.lower()
+    if name.startswith("mcp_") and name.endswith(("_wrapper.sh", "_wrapper.ps1")):
         raise ProbeError("WRAPPER_BACKEND_NO_INSTALL_NOT_VERIFIED")
 
 
