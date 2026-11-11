@@ -700,3 +700,41 @@ def test_stdio_blocked_write_obeys_shared_request_deadline(tmp_path):
         assert time.monotonic() - started < 0.4
         assert error.value.uncertain
     assert not psutil.pid_exists(pid)
+
+
+def test_stdio_cleanup_does_not_wait_for_inherited_stdout_or_kill_backend(tmp_path):
+    import time
+    import psutil
+    from scripts.ai.codex.mcp_probe_client import StdioProbeClient
+
+    child_pid_file = tmp_path / "owned-fixture-child.pid"
+    adapter = tmp_path / "inherited_stdout_adapter.py"
+    adapter.write_text(
+        "import subprocess,sys,time\nfrom pathlib import Path\n"
+        "child=subprocess.Popen([sys.executable,'-c','import time; time.sleep(60)'],"
+        "stdin=subprocess.DEVNULL,stdout=sys.stdout,stderr=subprocess.DEVNULL)\n"
+        f"Path({str(child_pid_file)!r}).write_text(str(child.pid))\n"
+        "time.sleep(60)\n",
+        encoding="utf-8",
+    )
+    child = None
+    try:
+        with StdioProbeClient(
+            {"command": sys.executable, "args": [str(adapter)]}, tmp_path, {}
+        ) as client:
+            ready = time.monotonic() + 5
+            while not child_pid_file.exists() or not child_pid_file.read_text().strip():
+                assert time.monotonic() < ready, "fixture child did not start"
+                time.sleep(0.005)
+            child = psutil.Process(int(child_pid_file.read_text()))
+            parent_pid = client._process.pid
+            started = time.monotonic()
+            with pytest.raises(ProbeError, match="TIMEOUT"):
+                client.request("tools/list", {}, 0.05)
+        assert time.monotonic() - started < 0.8
+        assert not psutil.pid_exists(parent_pid)
+        assert child.is_running(), "diagnostic must not kill the inherited backend"
+    finally:
+        if child is not None and child.is_running():
+            child.terminate()
+            child.wait(timeout=3)

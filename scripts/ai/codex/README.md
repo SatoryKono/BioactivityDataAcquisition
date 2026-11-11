@@ -303,3 +303,8 @@ Stdio requests use nonblocking pipe writes; sending and waiting for the reply
 share one monotonic request deadline. If the platform cannot support this, the
 probe remains `NOT_TESTED`. An unresponsive owned adapter is terminated on
 timeout; shared owners are never terminated or automatically restarted.
+
+The JSONL reader uses interruptible nonblocking reads and a bounded join during
+cleanup. An inherited stdout held by a backend cannot block diagnostic shutdown;
+that backend is not terminated. `--no-write` controls report output; it does not
+cancel the separately acknowledged adapter cache/log/startup effects.

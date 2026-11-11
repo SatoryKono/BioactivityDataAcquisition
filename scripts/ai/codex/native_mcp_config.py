@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 import json
+import os
 from pathlib import Path
 import queue
 import re
@@ -68,6 +69,8 @@ class NativeConfigClient:
         self.max_message_bytes = max_message_bytes
         self._messages: queue.Queue[dict[str, Any] | None] = queue.Queue(maxsize=32)
         self._failed = threading.Event()
+        self._stop_reading = threading.Event()
+        self._reader: threading.Thread | None = None
         self._process: subprocess.Popen[bytes] | None = None
 
     def __enter__(self) -> NativeConfigClient:
@@ -84,7 +87,15 @@ class NativeConfigClient:
             )
         except OSError:
             raise NativeConfigError("native config process could not start") from None
-        threading.Thread(target=self._read_messages, daemon=True).start()
+        try:
+            os.set_blocking(self._process.stdout.fileno(), False)
+        except (OSError, AttributeError):
+            NativeConfigClient.__exit__(self, None, None, None)
+            raise NativeConfigError(
+                "native config nonblocking pipe unavailable"
+            ) from None
+        self._reader = threading.Thread(target=self._read_messages, daemon=True)
+        self._reader.start()
         return self
 
     def _put(self, message: dict[str, Any] | None) -> None:
@@ -93,28 +104,58 @@ class NativeConfigClient:
         except queue.Full:
             self._failed.set()
 
-    def _read_messages(self) -> None:
+    def _read_available(self, size: int) -> bytes | None:
         process = self._process
         if process is None or process.stdout is None:
-            self._failed.set()
-            return
+            raise ValueError("native config output unavailable")
         try:
-            for _ in range(_MAX_MESSAGES):
-                line = process.stdout.readline(self.max_message_bytes + 1)
-                if not line:
-                    self._put(None)
-                    return
-                if len(line) > self.max_message_bytes:
-                    self._failed.set()
-                    return
+            return os.read(process.stdout.fileno(), size)
+        except BlockingIOError:
+            self._stop_reading.wait(0.005)
+            return None
+
+    def _lines(self):
+        pending = bytearray()
+        while not self._stop_reading.is_set():
+            chunk = self._read_available(
+                min(65536, self.max_message_bytes + 1 - len(pending))
+            )
+            if chunk is None:
+                continue
+            if not chunk:
+                if pending:
+                    yield bytes(pending)
+                return
+            pending.extend(chunk)
+            while b"\n" in pending:
+                end = pending.index(b"\n") + 1
+                yield bytes(pending[:end])
+                del pending[:end]
+            if len(pending) > self.max_message_bytes:
+                raise ValueError("native config message exceeded bounds")
+
+    def _read_messages(self) -> None:
+        try:
+            for count, line in enumerate(self._lines()):
+                if self._stop_reading.is_set():
+                    break
+                if count >= _MAX_MESSAGES or len(line) > self.max_message_bytes:
+                    raise ValueError("native config output exceeded bounds")
                 value = json.loads(line)
                 if not isinstance(value, dict):
-                    self._failed.set()
-                    return
+                    raise ValueError("native config response is not an object")
                 self._put(value)
-            self._failed.set()
         except (OSError, ValueError):
             self._failed.set()
+        finally:
+            self._put(None)
+
+    def _stop_reader(self) -> bool:
+        self._stop_reading.set()
+        if self._reader is None:
+            return True
+        self._reader.join(timeout=0.5)
+        return not self._reader.is_alive()
 
     def _send(self, value: dict[str, Any]) -> None:
         process = self._process
@@ -149,9 +190,12 @@ class NativeConfigClient:
             except queue.Empty:
                 continue
             if value is None:
-                raise NativeConfigError(
-                    "native config process closed before responding"
+                detail = (
+                    "native config response exceeded bounds or was malformed"
+                    if self._failed.is_set()
+                    else "native config process closed before responding"
                 )
+                raise NativeConfigError(detail)
             if "method" in value and "id" in value:
                 raise NativeConfigError(
                     "interactive native request refused; no approval supplied"
@@ -204,6 +248,7 @@ class NativeConfigClient:
         process = self._process
         if process is None:
             return
+        reader_stopped = self._stop_reader()
         if process.stdin is not None:
             try:
                 process.stdin.close()
@@ -220,4 +265,8 @@ class NativeConfigClient:
                 process.wait(timeout=2)
         finally:
             if process.stdout is not None:
+                # The reader uses nonblocking os.read, not BufferedReader's lock.
+                # Closing this end never waits for an inherited writer to exit.
                 process.stdout.close()
+        if not reader_stopped:
+            raise NativeConfigError("native config reader cleanup not verified")

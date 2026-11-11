@@ -501,7 +501,7 @@ def main() -> int:
     parser.add_argument(
         "--no-write",
         action="store_true",
-        help="compatibility flag; diagnostics are read-only unless --output is set",
+        help="suppress report output; adapter service effects require explicit opt-in",
     )
     parser.add_argument(
         "--output",
