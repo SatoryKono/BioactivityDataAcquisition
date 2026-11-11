@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
+from typing import Literal
 
-from .models import ClassificationResult, Evidence, RunProvenance
+from .models import ClassificationResult, Evidence, ProviderAnnotation, RunProvenance
 
 EVIDENCE_TYPE_ORDER: tuple[str, ...] = (
     "match",
@@ -47,6 +48,15 @@ class StoredRun:
     payload: bytes
 
 
+@dataclass(frozen=True, slots=True)
+class RerunRequest:
+    """Pending recomputation. No old payload is presented as a new result."""
+
+    previous_run_id: str
+    rules_version: str
+    status: Literal["pending_recomputation"] = "pending_recomputation"
+
+
 class ContractDefect(ValueError):
     """A reference or class chain does not meet the evidence contract."""
 
@@ -59,12 +69,17 @@ def build_evidence_table(
     order = {name: index for index, name in enumerate(EVIDENCE_TYPE_ORDER)}
     ranked = sorted(
         drafts,
-        key=lambda draft: (order[draft.evidence_type], draft.source_id, draft.content),
+        key=lambda draft: (
+            order[draft.evidence_type],
+            draft.input_row_id,
+            draft.source_id,
+            draft.content,
+        ),
     )
-    assigned: dict[tuple[str, str, str], Evidence] = {}
+    assigned: dict[tuple[str, str, str, str], Evidence] = {}
     records: list[Evidence] = []
     for draft in ranked:
-        key = (draft.evidence_type, draft.source_id, draft.content)
+        key = (draft.input_row_id, draft.evidence_type, draft.source_id, draft.content)
         if key in assigned:
             continue
         ordinal = len(records) + 1
@@ -110,23 +125,33 @@ def require_resolvable(table: EvidenceTable) -> None:
     _reject_duplicate_ids(table.local_evidence_ids)
 
 
-def class_chain_defects(row: ClassificationResult) -> tuple[str, ...]:
+def class_chain_defects(
+    row: ClassificationResult, *, annotation: ProviderAnnotation | None = None
+) -> tuple[str, ...]:
     """Invariant 9. A class needs every link from the matched target."""
     if not row.iuphar_class:
         return ()
     defects: list[str] = []
     if row.match_status != "matched" or not row.matched_target_id:
         defects.append("matched_target_id")
-    if not row.snapshot_id or not row.iuphar_type_raw:
+    family_evidence = (
+        annotation is not None
+        and annotation.target_id == row.matched_target_id
+        and row.iuphar_annotation_status == "partial"
+        and bool(annotation.family_ids)
+    )
+    if not row.snapshot_id or not (row.iuphar_type_raw or family_evidence):
         defects.append("raw_annotation")
     if not row.iuphar_mapping_rule_id or not row.iuphar_mapping_version:
         defects.append("mapping_rule")
     return tuple(defects)
 
 
-def require_class_chain(row: ClassificationResult) -> None:
+def require_class_chain(
+    row: ClassificationResult, *, annotation: ProviderAnnotation | None = None
+) -> None:
     """Raise when a non-empty IUPHAR class has a broken provenance chain."""
-    defects = class_chain_defects(row)
+    defects = class_chain_defects(row, annotation=annotation)
     if defects:
         message = "class chain is incomplete: " + ", ".join(defects)
         raise ContractDefect(message)
@@ -143,13 +168,12 @@ def content_equal(left: StoredRun, right: StoredRun) -> bool:
     )
 
 
-def rerun_with_new_rules(previous: StoredRun, rules_version: str) -> StoredRun:
-    """A new rules version is a new run. The previous payload stays in place."""
-    if not rules_version or rules_version == previous.rules_version:
+def rerun_with_new_rules(previous: StoredRun, rules_version: str) -> RerunRequest:
+    """Request recomputation; only recomputed results may become a StoredRun."""
+    if not rules_version.strip() or rules_version == previous.rules_version:
         message = "a new rules version requires its own run"
         raise ValueError(message)
-    provenance = replace(previous.provenance, rules_version=rules_version)
-    return StoredRun(rules_version, provenance, previous.table, previous.payload)
+    return RerunRequest(previous.table.run_id, rules_version)
 
 
 def local_only_violation(row: ClassificationResult) -> bool:
@@ -160,7 +184,12 @@ def local_only_violation(row: ClassificationResult) -> bool:
     return bool(row.iuphar_class or row.matched_target_id or row.iuphar_type_raw)
 
 
-def trace_violation(row: ClassificationResult, methods: tuple[str, ...]) -> bool:
+def trace_violation(
+    row: ClassificationResult,
+    methods: tuple[str, ...],
+    *,
+    annotation: ProviderAnnotation | None = None,
+) -> bool:
     """Invariant 2. A class needs a matched id and a non-name method."""
     if not row.iuphar_class:
         return False
@@ -170,7 +199,7 @@ def trace_violation(row: ClassificationResult, methods: tuple[str, ...]) -> bool
         or not row.matched_target_id
         or not methods
         or name_only
-        or bool(class_chain_defects(row))
+        or bool(class_chain_defects(row, annotation=annotation))
     )
 
 
@@ -193,14 +222,14 @@ def match_id_violation(row: ClassificationResult) -> bool:
 
 def _list_ids(
     ranked: list[EvidenceDraft],
-    assigned: dict[tuple[str, str, str], Evidence],
+    assigned: dict[tuple[str, str, str, str], Evidence],
     list_name: str,
 ) -> tuple[str, ...]:
     found: set[str] = set()
     for draft in ranked:
         if draft.list_name != list_name:
             continue
-        key = (draft.evidence_type, draft.source_id, draft.content)
+        key = (draft.input_row_id, draft.evidence_type, draft.source_id, draft.content)
         found.add(assigned[key].evidence_id)
     return tuple(sorted(found))
 

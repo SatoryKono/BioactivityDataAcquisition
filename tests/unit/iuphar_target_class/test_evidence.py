@@ -13,10 +13,15 @@ from iuphar_target_class.evidence import (
     build_evidence_table,
     class_chain_defects,
     content_equal,
+    require_class_chain,
     require_resolvable,
     rerun_with_new_rules,
 )
-from iuphar_target_class.models import ClassificationResult, RunProvenance
+from iuphar_target_class.models import (
+    ClassificationResult,
+    ProviderAnnotation,
+    RunProvenance,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -75,12 +80,15 @@ def test_rerun_keeps_ids_and_a_new_rules_version_is_separate() -> None:
     assert first.rules_version == "plan-v1-r8"
     assert first.payload == payload
     assert fresh.rules_version == "plan-v1-r9"
-    assert content_equal(first, fresh) is False
+    assert fresh.status == "pending_recomputation"
+    assert fresh.previous_run_id == "run-1"
+    assert not hasattr(fresh, "payload")
+    assert not hasattr(fresh, "table")
 
 
-def test_broken_class_chain_is_a_defect() -> None:
+def _classified_row() -> ClassificationResult:
     provenance = _provenance("t0")
-    row = ClassificationResult(
+    return ClassificationResult(
         input_row_id="row-1",
         snapshot_id="snap",
         input_validation_status="valid",
@@ -109,6 +117,10 @@ def test_broken_class_chain_is_a_defect() -> None:
         row_sha256="abc",
         provenance=provenance,
     )
+
+
+def test_broken_class_chain_is_a_defect() -> None:
+    row = _classified_row()
     assert "mapping_rule" in class_chain_defects(row)
     complete = replace(
         row,
@@ -117,3 +129,52 @@ def test_broken_class_chain_is_a_defect() -> None:
         iuphar_mapping_version="plan-v1-r8",
     )
     assert class_chain_defects(complete) == ()
+
+
+def test_evidence_deduplication_keeps_each_input_row() -> None:
+    first = _draft("match", "uniprot_xref", "P35372", "match")
+    second = replace(first, input_row_id="row-2")
+    forward = build_evidence_table((first, second, first), run_id="run-1")
+    reverse = build_evidence_table((second, first, second), run_id="run-1")
+    assert forward == reverse
+    assert len(forward.records) == 2
+    assert {r.input_row_id for r in forward.records} == {"row-1", "row-2"}
+    assert len(forward.match_evidence_ids) == 2
+    require_resolvable(forward)
+
+
+def test_new_rules_request_does_not_relabel_finished_payload() -> None:
+    table = build_evidence_table(_drafts(), run_id="run-1")
+    previous = StoredRun(
+        "plan-v1-r8", _provenance("t0"), table, b'{"class":"Receptor"}'
+    )
+    request = rerun_with_new_rules(previous, "plan-v1-r9")
+    assert not isinstance(request, StoredRun)
+    assert previous.provenance.rules_version == "plan-v1-r8"
+    assert previous.table.run_id == "run-1"
+
+
+@pytest.mark.parametrize("annotation_target", ["1", "wrong"])
+def test_family_mapping_chain_uses_matching_provider_annotation(
+    annotation_target: str,
+) -> None:
+    row = replace(
+        _classified_row(),
+        iuphar_annotation_status="partial",
+        iuphar_mapping_rule_id="class:Receptor",
+        iuphar_mapping_version="plan-v1-r8",
+    )
+    annotation = ProviderAnnotation(
+        annotation_target, None, ("family-1",), None, "human", None
+    )
+    defects = class_chain_defects(row, annotation=annotation)
+    assert ("raw_annotation" in defects) is (annotation_target != "1")
+    assert "raw_annotation" in class_chain_defects(row)
+    if annotation_target == "1":
+        require_class_chain(row, annotation=annotation)
+        assert "raw_annotation" in class_chain_defects(
+            row, annotation=replace(annotation, family_ids=())
+        )
+        assert "mapping_rule" in class_chain_defects(
+            replace(row, iuphar_mapping_rule_id=None), annotation=annotation
+        )
