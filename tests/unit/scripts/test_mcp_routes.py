@@ -292,3 +292,32 @@ def test_routes_mode_uses_native_capture_without_transport_probe(
     assert report["missing"] == ["memory"]
     assert report["readiness_level"] == "configuration"
     assert SECRET not in json.dumps(report)
+
+
+def test_registered_positional_profile_changes_selection_identity(
+    tmp_path: Path,
+) -> None:
+    value = capture(tmp_path)
+    entry = value.payload["config"]["mcp_servers"]["github"]
+    entry["args"] = ["-I", "/approved/deja-owner.py", "client", "bioetl-main"]
+    before = snapshot(value)["routes"]["github"]
+    entry["args"][-1] = "bioetl-other"
+    after = snapshot(value)["routes"]["github"]
+    assert before["selection"]["chain"]["profile"]["adapter_profile"] == "bioetl-main"
+    assert before["selection_fingerprint"] != after["selection_fingerprint"]
+
+
+def test_unknown_adapter_client_argument_stays_opaque() -> None:
+    projected, complete = transport_projection(
+        {
+            "command": "python",
+            "args": [
+                "/unreviewed/other-owner.py",
+                "client",
+                SECRET,
+            ],
+        }
+    )
+    assert SECRET not in json.dumps(projected)
+    assert "adapter_profile_reference" not in projected
+    assert complete is False

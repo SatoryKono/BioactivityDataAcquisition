@@ -228,6 +228,11 @@ def _authorization(entry: Mapping[str, Any]) -> tuple[dict[str, object], bool]:
 def transport_projection(entry: Mapping[str, Any]) -> tuple[dict[str, object], bool]:
     """Project non-secret selection inputs; flag intentionally omitted arguments."""
     projected, transport_complete = _transport(entry)
+    positional_profile = _positional_profile(entry)
+    if positional_profile:
+        # These registered controller CLIs define the final client argument as
+        # an opaque profile identity, not a credential or arbitrary free text.
+        projected["adapter_profile_reference"] = positional_profile
     authorization, auth_complete = _authorization(entry)
     projected.update(authorization)
     projected.update(_environment(entry))
@@ -246,6 +251,24 @@ def _origins(payload: Mapping[str, Any], name: str) -> dict[str, object]:
     }
 
 
+def _positional_profile(entry: Mapping[str, Any]) -> str | None:
+    args = entry.get("args", [])
+    if not isinstance(args, list) or len(args) < 3:
+        return None
+    profile = args[-1]
+    if (
+        args[-2] != "client"
+        or not isinstance(profile, str)
+        or not _PROFILE.fullmatch(profile)
+    ):
+        return None
+    adapters = {"deja-owner.py", "filesystem-owner.py"}
+    names = {
+        Path(arg.replace("\\", "/")).name for arg in args[:-2] if isinstance(arg, str)
+    }
+    return profile if adapters & names else None
+
+
 def _adapter_profile(entry: Mapping[str, Any]) -> str | None:
     args = entry.get("args", [])
     if not isinstance(args, list):
@@ -258,7 +281,7 @@ def _adapter_profile(entry: Mapping[str, Any]) -> str | None:
             and _PROFILE.fullmatch(following)
         ):
             return following
-    return None
+    return _positional_profile(entry)
 
 
 def _declarations(payload: Mapping[str, Any], name: str) -> list[dict[str, object]]:
