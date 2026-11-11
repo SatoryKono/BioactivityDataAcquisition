@@ -1,4 +1,6 @@
 name: SEC-01 acceptance probe
+# SEC-01 synthetic scanner input, never issued by any service.
+# api_key = "Q9w7E3r5T1y8U2i6O4p0A9s7D3f5G1h8J2k6L4z0"
 
 on:
   pull_request:
