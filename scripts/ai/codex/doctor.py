@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import queue
 import json
+import shutil
 import socket
 import time
 import threading
@@ -309,6 +310,54 @@ def run_mcp(
     return 1 if payload["failed"] else 0
 
 
+def run_routes(
+    repo_root: Path,
+    profile: str,
+    *,
+    codex_executable: Path | None,
+    output_json: bool,
+    output_path: Path | None = None,
+) -> int:
+    """Capture configuration through the native resolver without probing MCP."""
+    from scripts.ai.codex.mcp_routes import route_snapshot
+    from scripts.ai.codex.native_mcp_config import NativeConfigClient, NativeConfigError
+
+    executable = str(codex_executable) if codex_executable else shutil.which("codex")
+    if not executable:
+        print(
+            json.dumps(
+                {
+                    "status": "NOT_TESTED",
+                    "detail": "native Codex executable unavailable",
+                }
+            )
+        )
+        return 1
+    try:
+        with NativeConfigClient(
+            [executable, "app-server", "--stdio"], repo_root
+        ) as client:
+            capture = client.read()
+        payload = route_snapshot(
+            capture,
+            expected=_as_str_list(profile_plan(profile, repo_root)["selected"]),
+            project_profile=profile,
+        )
+    except (NativeConfigError, ValueError) as exc:
+        print(json.dumps({"status": "NOT_TESTED", "detail": str(exc)}))
+        return 1
+    if output_path is not None:
+        _write_mcp_payload(repo_root, output_path, payload)
+    if output_json:
+        print(json.dumps(payload, indent=2))
+    else:
+        print("Native effective MCP configuration (tool readiness NOT_TESTED)")
+        print("Expected: " + ", ".join(_as_str_list(payload["expected"])))
+        print("Effective: " + ", ".join(_as_str_list(payload["effective"])))
+        print("Missing: " + ", ".join(_as_str_list(payload["missing"])))
+    return 0
+
+
 def _governed_report_path(repo_root: Path, requested: Path) -> Path:
     """Resolve an explicit MCP report path under governed quality reports."""
 
@@ -329,9 +378,17 @@ def _governed_report_path(repo_root: Path, requested: Path) -> Path:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "mode", choices=("static", "mcp", "all", "rules"), nargs="?", default="static"
+        "mode",
+        choices=("static", "mcp", "all", "rules", "routes"),
+        nargs="?",
+        default="static",
     )
     parser.add_argument("--profile", choices=sorted(setup_mcp.MCP_PROFILES))
+    parser.add_argument(
+        "--codex-executable",
+        type=Path,
+        help="installed native Codex executable for routes mode",
+    )
     parser.add_argument("--timeout", type=float, default=1.0)
     parser.add_argument("--overall-timeout", type=float, default=10.0)
     parser.add_argument(
@@ -352,7 +409,7 @@ def main() -> int:
     if args.no_write and args.output is not None:
         parser.error("--no-write and --output are mutually exclusive")
     if args.output is not None and args.mode in {"static", "rules"}:
-        parser.error("--output is only valid for mcp or all mode")
+        parser.error("--output is only valid for mcp, all, or routes mode")
     if args.mode == "rules":
         payload = rule_loading_inventory(repo_root)
         if args.json:
@@ -362,6 +419,15 @@ def main() -> int:
                 "[NOT_PROVEN] Rule candidates inventoried; native loading/execution needs evidence."
             )
         return 2
+
+    if args.mode == "routes":
+        return run_routes(
+            repo_root,
+            profile,
+            codex_executable=args.codex_executable,
+            output_json=args.json,
+            output_path=args.output,
+        )
 
     static_status = 0
     if args.mode in {"static", "all"}:

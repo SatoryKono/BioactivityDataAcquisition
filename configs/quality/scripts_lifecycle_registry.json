@@ -61,6 +61,18 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
+    "scripts/ai/codex/mcp_routes.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the secret-minimized route projection imported by doctor; keep supporting because doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
+    },
+    "scripts/ai/codex/native_mcp_config.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the bounded native config/read transport imported by doctor; keep supporting because doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
+    },
     "scripts/ai/codex/native_runtime_contract.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the static validation library behind doctor.py and the optional setup validators; keep .codex as the only project-scoped discovery surface.",
