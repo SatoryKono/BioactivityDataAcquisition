@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from typing import Literal
 
 from .models import ClassificationResult, Evidence, ProviderAnnotation, RunProvenance
@@ -269,8 +269,23 @@ def _reject_duplicate_ids(evidence_ids: tuple[str, ...]) -> None:
 
 def _without_run_id(table: EvidenceTable) -> EvidenceTable:
     """Drop the run id. Evidence ids and payload bytes stay in the comparison."""
-    records = tuple(replace(record, run_id="") for record in table.records)
-    return replace(table, run_id="", records=records)
+    records = tuple(
+        Evidence(
+            record.evidence_id,
+            record.input_row_id,
+            record.evidence_type,
+            record.source_id,
+            record.content,
+            "",
+        )
+        for record in table.records
+    )
+    return EvidenceTable(
+        "",
+        records,
+        table.match_evidence_ids,
+        table.local_evidence_ids,
+    )
 
 
 def _without_timestamps(provenance: RunProvenance) -> tuple[str | None, ...]:
