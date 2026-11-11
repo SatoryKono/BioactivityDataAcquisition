@@ -18,6 +18,38 @@ pytestmark = pytest.mark.unit
 _VOCAB = frozenset({"alpha", "beta"})
 
 
+@pytest.mark.parametrize("local_status", ["invalid_status", "", "SUPPORTED"])
+def test_unknown_local_status_is_a_contract_error(local_status: str) -> None:
+    result = select_effective_class(
+        _row(iuphar_annotation_status="partial", local_status=local_status)
+    )
+    assert result.decision_status == "requires_review"
+    assert result.conflict_codes == ("contract_error",)
+    assert result.effective_class is None
+
+
+@pytest.mark.parametrize("foreign_side", ["both", "direct", "local"])
+def test_subclass_vocabulary_defects_are_not_resolved(foreign_side: str) -> None:
+    result = select_effective_class(
+        _row(
+            local_status="supported",
+            local_class="Receptor",
+            iuphar_subclass="foreign",
+            local_subclasses=("foreign",),
+            direct_vocabulary=frozenset()
+            if foreign_side in {"both", "direct"}
+            else frozenset({"foreign"}),
+            local_vocabulary=frozenset()
+            if foreign_side in {"both", "local"}
+            else frozenset({"foreign"}),
+        )
+    )
+    assert "contract_error" in result.conflict_codes
+    assert result.decision_status == "requires_review"
+    assert result.effective_class is None
+    assert result.effective_subclasses == ()
+
+
 def _row(**overrides: object) -> ResolutionInput:
     payload: dict[str, object] = {
         "match_status": "matched",

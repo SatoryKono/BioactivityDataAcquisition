@@ -10,6 +10,9 @@ from .policy import PLAN_SOURCE, PLAN_VERSION, compare_subclasses
 ANNOTATION_STATUSES = frozenset(
     {"available", "partial", "unmapped_type", "conflicting", "not_available"}
 )
+LOCAL_STATUSES = frozenset(
+    {"supported", "not_supported", "candidate_only", "conflicting"}
+)
 _NULL_ANNOTATION = frozenset(
     {
         "not_found",
@@ -114,7 +117,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             null,
             "supported",
             "local",
-            "local_rule",
             "requires_review",
             ("source_unavailable",),
             "literal",
@@ -130,7 +132,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             null,
             "any",
             "null",
-            "none",
             "unresolved",
             ("source_unavailable",),
             "literal",
@@ -146,7 +147,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             null,
             "any",
             "null",
-            "none",
             "requires_review",
             (),
             "match",
@@ -162,7 +162,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             null,
             "any",
             "null",
-            "none",
             "unresolved",
             ("insufficient_input",),
             "literal",
@@ -178,7 +177,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             frozenset({"available"}),
             "same_or_absent",
             "iuphar",
-            "iuphar_normalized",
             "resolved",
             (),
             "empty",
@@ -194,7 +192,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             frozenset({"available"}),
             "supported_different",
             "iuphar",
-            "iuphar_normalized",
             "requires_review",
             ("direct_local_conflict",),
             "literal",
@@ -210,7 +207,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             frozenset({"available"}),
             "conflicting",
             "iuphar",
-            "iuphar_normalized",
             "requires_review",
             ("local_conflict",),
             "literal",
@@ -226,7 +222,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             frozenset({"available"}),
             "candidate_only",
             "iuphar",
-            "iuphar_normalized",
             "resolved",
             (),
             "empty",
@@ -242,7 +237,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             frozenset({"partial"}),
             "supported_different",
             "iuphar",
-            "iuphar_normalized",
             "requires_review",
             ("partial_annotation", "direct_local_conflict"),
             "literal",
@@ -258,7 +252,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             frozenset({"partial"}),
             "conflicting",
             "iuphar",
-            "iuphar_normalized",
             "requires_review",
             ("partial_annotation", "local_conflict"),
             "literal",
@@ -274,7 +267,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             frozenset({"partial"}),
             "partial_agree",
             "iuphar",
-            "iuphar_normalized",
             "resolved",
             ("partial_annotation",),
             "literal",
@@ -290,7 +282,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             frozenset({"unmapped_type"}),
             "supported",
             "local",
-            "local_rule",
             "requires_review",
             ("unmapped_type",),
             "literal",
@@ -306,7 +297,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             frozenset({"unmapped_type"}),
             "any",
             "null",
-            "none",
             "unresolved",
             ("unmapped_type",),
             "literal",
@@ -322,7 +312,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             frozenset({"conflicting"}),
             "any",
             "null",
-            "none",
             "requires_review",
             ("direct_class_conflict",),
             "literal",
@@ -338,7 +327,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             frozenset({"not_available"}),
             "supported",
             "local",
-            "local_rule",
             "requires_review",
             ("annotation_not_available",),
             "literal",
@@ -354,7 +342,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             frozenset({"not_available"}),
             "any",
             "null",
-            "none",
             "unresolved",
             ("annotation_not_available",),
             "literal",
@@ -370,7 +357,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             null,
             "supported",
             "local",
-            "local_rule",
             "resolved",
             ("direct_not_found",),
             "literal",
@@ -386,7 +372,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             null,
             "conflicting",
             "null",
-            "none",
             "requires_review",
             ("local_conflict",),
             "literal",
@@ -402,7 +387,6 @@ def resolution_rules() -> tuple[RowRule, ...]:
             null,
             "candidate_or_absent",
             "null",
-            "none",
             "unresolved",
             (),
             "empty",
@@ -436,9 +420,6 @@ def select_effective_class(
     """Apply the complex rule, then the first matching row, then subclasses."""
     selected = resolution_rules() if rules is None else rules
     validate_resolution_policy(selected)
-    complex_result = _complex_without_direct_match(row)
-    if complex_result is not None:
-        return complex_result
     if not _admissible(row):
         return _finish(
             row,
@@ -449,6 +430,9 @@ def select_effective_class(
             False,
             "contract_error",
         )
+    complex_result = _complex_without_direct_match(row)
+    if complex_result is not None:
+        return complex_result
     for rule in selected:
         if _matches(rule, row):
             return _from_rule(row, rule)
@@ -485,7 +469,6 @@ def _rule(
     annotation: frozenset[str | None],
     relation: str,
     takes: str,
-    source: str,
     decision: str,
     codes: tuple[str, ...],
     code_mode: str,
@@ -501,7 +484,9 @@ def _rule(
         annotation=annotation,
         relation=relation,
         takes=takes,
-        source=source,
+        source={"iuphar": "iuphar_normalized", "local": "local_rule", "null": "none"}[
+            takes
+        ],
         decision=decision,
         codes=codes,
         code_mode=code_mode,
@@ -514,6 +499,8 @@ def _rule(
 
 
 def _admissible(row: ResolutionInput) -> bool:
+    if row.local_status not in LOCAL_STATUSES:
+        return False
     if row.match_status == "matched":
         return row.iuphar_annotation_status in ANNOTATION_STATUSES
     if row.match_status in _NULL_ANNOTATION:
@@ -621,6 +608,11 @@ def _finish(
         conflict = _with_subclass_conflict(row, source, subclasses, codes)
     if "subclass_conflict" in conflict:
         decision = "requires_review"
+    if "contract_error" in conflict:
+        effective_class = None
+        source = "none"
+        subclasses = ()
+        decision = "requires_review"
     candidates = row.local_candidates
     if keep_local_candidate and row.local_class and row.local_class not in candidates:
         candidates = (*candidates, row.local_class)
@@ -664,7 +656,17 @@ def _with_subclass_conflict(
     codes: tuple[str, ...],
 ) -> tuple[str, ...]:
     other = _unselected_subclasses(row, source)
-    if not selected or not other or set(selected) & set(other):
+    if not selected or not other:
+        return codes
+    direct_side, local_side = (
+        (selected, other) if source == "iuphar_normalized" else (other, selected)
+    )
+    if (
+        not set(direct_side) <= row.direct_vocabulary
+        or not set(local_side) <= row.local_vocabulary
+    ):
+        return (*codes, "contract_error")
+    if set(selected) & set(other):
         return codes
     for direct, local in _pairs(source, selected, other):
         verdict = compare_subclasses(
