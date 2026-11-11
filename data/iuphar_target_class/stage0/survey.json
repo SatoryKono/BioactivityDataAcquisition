@@ -93,8 +93,8 @@
       "relative_path": null
     }
   ],
-  "gold_standard_reviewer": "Федор Новиков",
-  "gold_standard_reviewer_source": "поручение владельца результата закрыть оставшиеся задачи; отдельный человек не назван",
+  "gold_standard_reviewer": "Cursor",
+  "gold_standard_reviewer_source": "Явное назначение владельцем результата 2026-11-11: Cursor на обе роли — исполнителя модуля и проверяющего эталонов.",
   "issued_on": "2026-11-10",
   "local_observations": [
     {
@@ -105,8 +105,8 @@
     }
   ],
   "m_code_versions": [],
-  "module_executor": "Федор Новиков",
-  "module_executor_source": "поручение владельца результата закрыть оставшиеся задачи; отдельный человек не назван",
+  "module_executor": "Cursor",
+  "module_executor_source": "Явное назначение владельцем результата 2026-11-11: Cursor на обе роли — исполнителя модуля и проверяющего эталонов.",
   "plan_revision": "8",
   "plan_version": "1",
   "provenance_claims": [

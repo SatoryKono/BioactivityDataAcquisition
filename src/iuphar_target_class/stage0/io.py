@@ -6,6 +6,7 @@ import csv
 import hashlib
 import io
 import json
+import tempfile
 from pathlib import Path
 
 from .constants import SHA256_PATTERN
@@ -46,14 +47,22 @@ def atomic_write_bytes(path: Path, payload: bytes, *, root: Path) -> None:
         message = "path escapes root"
         raise ValueError(message)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    temporary = destination.with_name(f".{destination.name}.tmp")
+    temporary: Path | None = None
     try:
-        temporary.write_bytes(payload)
+        # Exclusive creation preserves any existing sibling and prevents a
+        # predictable temporary symlink from redirecting the write.
+        with tempfile.NamedTemporaryFile(
+            dir=destination.parent,
+            prefix=f".{destination.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temporary = Path(handle.name)
+            handle.write(payload)
         temporary.replace(destination)
-    except Exception:
-        if temporary.exists():
-            temporary.unlink()
-        raise
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 def canonical_csv_bytes(columns: tuple[str, ...], rows: list[dict[str, str]]) -> bytes:

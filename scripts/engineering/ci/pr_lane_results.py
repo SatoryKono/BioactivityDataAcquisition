@@ -173,6 +173,9 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "src/iuphar_target_class/__init__.py": (
+        "tests/unit/iuphar_target_class/test_stage0_manifest.py",
+    ),
     "scripts/ai/codex/native_runtime_contract.py": (
         "tests/architecture/test_codex_native_runtime.py",
         "tests/architecture/test_codex_agent_catalog_inventory.py",
@@ -1288,6 +1291,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "src/iuphar_target_class/stage0/": (
+        "tests/unit/iuphar_target_class/test_stage0_manifest.py",
+    ),
+    "data/iuphar_target_class/stage0/": (
+        "tests/unit/iuphar_target_class/test_stage0_manifest.py",
+    ),
     **dict.fromkeys(
         (
             ".codex/agents/",

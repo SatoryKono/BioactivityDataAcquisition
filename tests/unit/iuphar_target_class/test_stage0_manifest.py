@@ -119,9 +119,9 @@ def test_committed_manifest_pins_hashes_and_blocks_ground_truth() -> None:
     assert manifest["missing_parameters"] == []
     assert manifest["roles"]["result_owner"]["name"] == "Федор Новиков"
     assert manifest["roles"]["result_owner"]["status"] == "назначен"
-    assert manifest["roles"]["module_executor"]["name"] == "Федор Новиков"
+    assert manifest["roles"]["module_executor"]["name"] == "Cursor"
     assert manifest["roles"]["module_executor"]["status"] == "назначен"
-    assert manifest["roles"]["gold_standard_reviewer"]["name"] == "Федор Новиков"
+    assert manifest["roles"]["gold_standard_reviewer"]["name"] == "Cursor"
     assert manifest["roles"]["gold_standard_reviewer"]["status"] == "назначен"
     for name, digest in manifest["artifact_sha256"].items():
         payload = (OUTPUT_DIR / name).read_bytes()
@@ -248,6 +248,33 @@ def test_atomic_write_replaces_and_removes_temp(tmp_path: Path) -> None:
     atomic_write_bytes(target, b"two\n", root=tmp_path)
     assert target.read_bytes() == b"two\n"
     assert not (tmp_path / ".manifest.json.tmp").exists()
+    assert not list(tmp_path.glob(".manifest.json.*.tmp"))
+
+
+def test_atomic_write_preserves_existing_temp_sibling(tmp_path: Path) -> None:
+    target = tmp_path / "manifest.json"
+    sibling = tmp_path / ".manifest.json.tmp"
+    sibling.write_bytes(b"original source bytes\n")
+    atomic_write_bytes(target, b"published\n", root=tmp_path)
+    assert sibling.read_bytes() == b"original source bytes\n"
+    assert target.read_bytes() == b"published\n"
+    assert set(tmp_path.iterdir()) == {target, sibling}
+
+
+def test_atomic_write_cleans_own_temp_on_replace_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    target = tmp_path / "manifest.json"
+    target.write_bytes(b"previous publication\n")
+
+    def fail_replace(_source: Path, _destination: Path) -> None:
+        raise OSError("replacement unavailable")
+
+    monkeypatch.setattr(Path, "replace", fail_replace)
+    with pytest.raises(OSError, match="replacement unavailable"):
+        atomic_write_bytes(target, b"new publication\n", root=tmp_path)
+    assert target.read_bytes() == b"previous publication\n"
+    assert set(tmp_path.iterdir()) == {target}
 
 
 def test_schema_rejects_unestablished_ground_truth(tmp_path: Path) -> None:

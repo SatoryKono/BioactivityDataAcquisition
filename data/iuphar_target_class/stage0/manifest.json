@@ -4,7 +4,7 @@
     "content_checks.csv": "1a7f314a0026b441c6470828a311d874fc33c821d9617b06fcb2336aff6f3afd",
     "m_code_versions.csv": "5bac637430710ee8dce9085be403c5e24f1dca07b48d12176297617d999bc2f3",
     "provenance_map.csv": "2060cf7e8606a92d9e568cb516ed156170cefb5fd944ea5f40be0d7f8375c091",
-    "stage_report.json": "8edd82bea44bf1dbde481ceeaa33c8bc230d1bfaf359c1132d69da5e994b8ee0"
+    "stage_report.json": "1da39378c87a9d6096d55a2fb5874d4232c4b58d171673e1fcd4d85ff71dac7e"
   },
   "biological_accuracy_accepted": false,
   "copies": [],
@@ -20,15 +20,15 @@
   "recorded_at_utc": "2026-11-11T18:45:00Z",
   "roles": {
     "gold_standard_reviewer": {
-      "name": "Федор Новиков",
+      "name": "Cursor",
       "parameter": "проверяющий эталонов",
-      "source": "поручение владельца результата закрыть оставшиеся задачи; отдельный человек не назван",
+      "source": "Явное назначение владельцем результата 2026-11-11: Cursor на обе роли — исполнителя модуля и проверяющего эталонов.",
       "status": "назначен"
     },
     "module_executor": {
-      "name": "Федор Новиков",
+      "name": "Cursor",
       "parameter": "исполнитель модуля",
-      "source": "поручение владельца результата закрыть оставшиеся задачи; отдельный человек не назван",
+      "source": "Явное назначение владельцем результата 2026-11-11: Cursor на обе роли — исполнителя модуля и проверяющего эталонов.",
       "status": "назначен"
     },
     "result_owner": {
@@ -39,5 +39,5 @@
     }
   },
   "stage": "0",
-  "survey_sha256": "6ae81700b93621abdf2e442ba2e3eb3abe6e1a0dd4dc55787e1d3bdd876c082a"
+  "survey_sha256": "116319a651b20361154ea5e270afc6cc7494f6acfd87a48e59df24f8a051d1ef"
 }
