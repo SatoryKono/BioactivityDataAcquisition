@@ -173,6 +173,18 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    **dict.fromkeys(
+        (
+            "AGENTS.md",
+            "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+        ),
+        (
+            "tests/architecture/test_runtime_agent_docs_drift.py",
+            "tests/architecture/test_junie_runtime_ci_contract.py",
+            "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
     "scripts/ai/codex/native_runtime_contract.py": (
         "tests/architecture/test_codex_native_runtime.py",
         "tests/architecture/test_codex_agent_catalog_inventory.py",
