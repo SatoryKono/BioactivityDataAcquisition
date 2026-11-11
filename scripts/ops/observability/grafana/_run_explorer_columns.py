@@ -51,13 +51,13 @@ _COLUMNS = {
     "pipeline": ("Pipeline", None, 80),
     "provider": ("Provider", 60, 50),
     # Full UUID stays in the hidden identity field and Inspect; keep the preview bounded.
-    "run_label": (_RUN_ID_LABEL, 100, 50),
-    "started_at": ("Started", 140, 50),
+    "run_label": (_RUN_ID_LABEL, 110, 50),
+    "started_at": ("Started", 170, 50),
     "duration_display": ("Duration", 70, 50),
     "status": ("Overview", 80, 80),
     "saved_evidence_status": ("Saved Evidence", None, 80),
     "data_quality_status": (_DATA_QUALITY, None, 80),
-    "replay_readiness_status": (_REPLAY_READINESS, 90, 80),
+    "replay_readiness_status": (_REPLAY_READINESS, 125, 80),
 }
 _CONTEXT = "var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}"
 _SELECT_RUN_URL = (

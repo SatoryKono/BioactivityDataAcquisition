@@ -24,7 +24,7 @@
     "bioetl-dq-v2": "1fec4c0324617f23eb98dc0c46670d9e292adeab8131d6c02523dc2e8a7963ad",
     "bioetl-incident-v1": "077ca7ecbbf2c2c393309dcfc38febe75e79534384d6a68cb2059688d4be10b3",
     "bioetl-overview-v2": "e045ec482210ab68f647a63ea5743953248929f79e6b64a34be3619062d000c0",
-    "bioetl-run-explorer-v1": "dddd11c90dff8963180833cf767ca0a0974861c3c8a012008e8f3f4761fdb89e"
+    "bioetl-run-explorer-v1": "75c7356c8af103d3c9878a370aced2411a8a61db0df0cfa5ba4b96e4dfc6eb3a"
   },
   "panels": [
     {
