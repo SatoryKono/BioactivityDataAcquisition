@@ -6,6 +6,7 @@ _WIDTH = "custom.width"
 _CUSTOM_HIDDEN = "custom.hidden"
 _NOT_PROVIDED = "Not provided"
 _NOT_VERIFIED = "Not verified"
+_SEE_RUNBOOK = "See runbook"
 _CELL_NO_WRAP = {"type": "auto", "wrapText": False}
 
 
@@ -120,7 +121,7 @@ def _configure_confidence(panel: dict, override) -> None:
 def _configure_owner_next_step(panel: dict, override) -> None:
     for field, display in (("owner", "Owner"), ("next_step", "Next step")):
         override(panel, field, "displayName", display)
-        override(panel, field, "noValue", "See runbook")
+        override(panel, field, "noValue", _SEE_RUNBOOK)
         override(panel, field, "custom.cellOptions", dict(_CELL_NO_WRAP))
         _set_field_hidden(panel, field, hidden=False, override=override)
 
@@ -175,8 +176,7 @@ def _stamp_named_alert_runbooks(expr: str) -> str:
     """Point the two critical alerts at their own runbook, owner and next step."""
     for alertname, stem in _NAMED_ALERT_RUNBOOKS:
         expr = (
-            f'label_replace({expr},"alert_runbook","{stem}",'
-            f'"alertname","{alertname}")'
+            f'label_replace({expr},"alert_runbook","{stem}","alertname","{alertname}")'
         )
     return (
         "label_replace(label_replace(label_replace("
@@ -275,9 +275,9 @@ def _explain_global_alerts(panels: dict[int, dict], override) -> None:
         override(panel, "pipeline", "links", [])
         override(panel, "alert_runbook", _CUSTOM_HIDDEN, True)
         override(panel, "owner", "displayName", "Owner")
-        override(panel, "owner", "noValue", "See runbook")
+        override(panel, "owner", "noValue", _SEE_RUNBOOK)
         override(panel, "next_step", "displayName", "Next step")
-        override(panel, "next_step", "noValue", "See runbook")
+        override(panel, "next_step", "noValue", _SEE_RUNBOOK)
         override(
             panel,
             "alertname",
