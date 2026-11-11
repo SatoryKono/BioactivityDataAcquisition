@@ -101,6 +101,7 @@ class Evidence:
     evidence_type: str
     source_id: str
     content: str
+    run_id: str = ""
 
 
 @dataclass(frozen=True, slots=True)
