@@ -234,8 +234,8 @@ registers the active BioETL MCP server set:
 | Server | Transport | Purpose |
 | --- | --- | --- |
 | `memory` | `npx @modelcontextprotocol/server-memory` | Persistent assistant memory file |
-| `filesystem` | Project wrapper via Windows interop | Read-only access through the registered Windows owner for the physical BioETL checkout |
-| `fetch` | Project wrapper via Windows interop | Public HTTP(S) through the account-local registered Windows owner |
+| `filesystem` | Project wrapper via Windows interop | Read-only access through the registered Windows owner for the physical BioETL checkout (`%LOCALAPPDATA%\pc-agent\mcp-shared\filesystem-v1\project-launcher.json`); fail-closed if the launcher/owner is missing |
+| `fetch` | Project wrapper via Windows interop | Public HTTP(S) through the account-local registered Windows owner (`%LOCALAPPDATA%\pc-agent\mcp-shared\public-fetch-v1\project-launcher.json`); fail-closed if the launcher/owner is missing |
 | `github` | Project wrapper | GitHub API access |
 | `docker` | Project wrapper | Docker MCP gateway access |
 | `context7` | Project wrapper | Documentation/context lookup |

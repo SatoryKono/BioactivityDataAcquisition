@@ -18,6 +18,42 @@ CONTRACT = ROOT / "scripts/ai/npm_runtime_contract.cjs"
 NODE = shutil.which("node")
 
 
+def _isolated_windows_owner_env(tmp_path: Path) -> dict[str, str]:
+    """Keep Windows owner lookups inside the temp fixture across WSL interop."""
+    local_appdata = str(tmp_path)
+    env = {
+        **os.environ,
+        "LOCALAPPDATA": local_appdata,
+        "BIOETL_MCP_VALIDATE_ONLY": "0",
+    }
+    if os.name != "nt" and shutil.which("wslpath") and shutil.which("powershell.exe"):
+        try:
+            converted = subprocess.run(
+                ["wslpath", "-w", local_appdata],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=8,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            converted = None
+        if (
+            converted is not None
+            and converted.returncode == 0
+            and converted.stdout.strip()
+        ):
+            local_appdata = converted.stdout.strip()
+            env["LOCALAPPDATA"] = local_appdata
+        existing = [
+            part
+            for part in env.get("WSLENV", "").split(":")
+            if part and not part.upper().startswith("LOCALAPPDATA")
+        ]
+        existing.append("LOCALAPPDATA/p")
+        env["WSLENV"] = ":".join(existing)
+    return env
+
+
 def _node(code: str, payload: dict) -> subprocess.CompletedProcess[str]:
     assert NODE, "Node is required to validate the npm runtime contract"
     return subprocess.run(
@@ -204,14 +240,11 @@ def test_powershell_filesystem_fails_closed(tmp_path: Path) -> None:
     )
     result = subprocess.run(
         [powershell, "-NoProfile", "-Command", code],
-        env={
-            **os.environ,
-            "LOCALAPPDATA": str(tmp_path),
-            "BIOETL_MCP_VALIDATE_ONLY": "0",
-        },
+        env=_isolated_windows_owner_env(tmp_path),
         text=True,
         capture_output=True,
         check=False,
+        timeout=30,
     )
     assert result.returncode != 0
     assert "Filesystem MCP requires the registered Windows owner" in result.stderr
@@ -242,11 +275,8 @@ def test_shell_filesystem_fails_closed(tmp_path: Path) -> None:
         text=True,
         capture_output=True,
         check=False,
-        env={
-            **os.environ,
-            "LOCALAPPDATA": str(tmp_path),
-            "BIOETL_MCP_VALIDATE_ONLY": "0",
-        },
+        env=_isolated_windows_owner_env(tmp_path),
+        timeout=30,
     )
     assert result.returncode != 0
     assert "Filesystem MCP requires the registered Windows owner" in result.stderr

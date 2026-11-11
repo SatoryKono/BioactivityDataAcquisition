@@ -73,6 +73,10 @@ function Invoke-OwnedMcpStdio {
         $requestRead = $clientInput.ReadAsync($requestBytes, 0, $requestBytes.Length)
         $responseRead = $adapterOutput.ReadAsync($responseBytes, 0, $responseBytes.Length)
         while ($true) {
+            $pending = New-Object 'System.Collections.Generic.List[System.Threading.Tasks.Task]'
+            $pending.Add($responseRead)
+            if ($requestRead) { $pending.Add($requestRead) }
+            [void][System.Threading.Tasks.Task]::WaitAny($pending.ToArray())
             if ($responseRead.IsCompleted) {
                 $count = $responseRead.GetAwaiter().GetResult()
                 if ($count -eq 0) { break }
@@ -91,7 +95,6 @@ function Invoke-OwnedMcpStdio {
                     $requestRead = $clientInput.ReadAsync($requestBytes, 0, $requestBytes.Length)
                 }
             }
-            Start-Sleep -Milliseconds 10
         }
         $adapter.WaitForExit()
         return $adapter.ExitCode

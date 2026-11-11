@@ -18,6 +18,8 @@ EXPECTED_NEO4J_CYPHER_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_cypher
 EXPECTED_NEO4J_MEMORY_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
 EXPECTED_MERMAID_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_mermaid_wrapper.sh"
 EXPECTED_FILESYSTEM_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_filesystem_wrapper.sh"
+EXPECTED_FILESYSTEM_WRAPPER_PS1_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_filesystem_wrapper.ps1"
+EXPECTED_FETCH_WRAPPER_PS1_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_fetch_wrapper.ps1"
 # shellcheck source=./support/load_repo_env.sh
 source "${SCRIPT_DIR}/support/load_repo_env.sh"
 
@@ -193,8 +195,20 @@ ref_out="$(codex mcp get ref 2>&1 || true)"
 
 filesystem_wrapper_source="$(<"$EXPECTED_FILESYSTEM_WRAPPER_PATH")"
 require_contains "$filesystem_wrapper_source" 'mcp_filesystem_wrapper.ps1' "filesystem uses the Windows owner launcher" || status=1
+if [[ -f "$EXPECTED_FILESYSTEM_WRAPPER_PS1_PATH" ]]; then
+  ok "filesystem Windows owner launcher exists"
+else
+  fail "filesystem Windows owner launcher missing at ${EXPECTED_FILESYSTEM_WRAPPER_PS1_PATH}"
+  status=1
+fi
 fetch_wrapper_source="$(<"$EXPECTED_FETCH_WRAPPER_PATH")"
 require_contains "$fetch_wrapper_source" 'mcp_fetch_wrapper.ps1' "fetch uses the Windows owner launcher" || status=1
+if [[ -f "$EXPECTED_FETCH_WRAPPER_PS1_PATH" ]]; then
+  ok "fetch Windows owner launcher exists"
+else
+  fail "fetch Windows owner launcher missing at ${EXPECTED_FETCH_WRAPPER_PS1_PATH}"
+  status=1
+fi
 mermaid_wrapper_source="$(<"$EXPECTED_MERMAID_WRAPPER_PATH")"
 require_contains "$mermaid_wrapper_source" 'mcp-mermaid@0.4.1' "mermaid wrapper pins mcp-mermaid@0.4.1" || status=1
 
@@ -215,13 +229,15 @@ if grep -Fq 'http://127.0.0.1:8826/mcp' <<<"$memory_out"; then
   require_contains "$mermaid_out" 'http://127.0.0.1:8818/mcp' "mermaid uses the shared singleton endpoint" || status=1
 else
   require_contains "$memory_out" "@modelcontextprotocol/server-memory@2026.1.26" "memory is pinned to @2026.1.26" || status=1
-  if grep -Fq 'filesystem-owner.py' <<<"$filesystem_out"; then
-    ok "filesystem uses the registered read-only owner"
+  if grep -Fq 'filesystem-v1/project-launcher.json' <<<"$filesystem_out" ||
+    grep -Fq 'filesystem-v1\project-launcher.json' <<<"$filesystem_out"; then
+    ok "filesystem uses the registered read-only owner launcher"
   else
     require_wrapper_path "$filesystem_out" "$EXPECTED_FILESYSTEM_WRAPPER_PATH" "filesystem is routed through the project wrapper" || status=1
   fi
-  if grep -Fq 'fetch-owner.py' <<<"$fetch_out"; then
-    ok "fetch uses the registered local owner"
+  if grep -Fq 'public-fetch-v1/project-launcher.json' <<<"$fetch_out" ||
+    grep -Fq 'public-fetch-v1\project-launcher.json' <<<"$fetch_out"; then
+    ok "fetch uses the registered local owner launcher"
   else
     require_wrapper_path "$fetch_out" "$EXPECTED_FETCH_WRAPPER_PATH" "fetch is routed through the project wrapper" || status=1
   fi
@@ -263,6 +279,7 @@ else
 fi
 
 validate_wrapper_if_possible "github" "${EXPECTED_GITHUB_WRAPPER_PATH}" "GITHUB_PERSONAL_ACCESS_TOKEN" || status=1
+validate_wrapper_if_possible "filesystem" "${EXPECTED_FILESYSTEM_WRAPPER_PATH}" || status=1
 validate_wrapper_if_possible "fetch" "${EXPECTED_FETCH_WRAPPER_PATH}" || status=1
 validate_wrapper_if_possible "brave-search" "${EXPECTED_BRAVE_WRAPPER_PATH}" "BRAVE_API_KEY" || status=1
 validate_wrapper_if_possible "prometheus" "${EXPECTED_PROMETHEUS_WRAPPER_PATH}" || status=1
