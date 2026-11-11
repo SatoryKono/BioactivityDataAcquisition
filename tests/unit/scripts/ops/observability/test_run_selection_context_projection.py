@@ -83,11 +83,18 @@ def test_query_context_is_explicit_and_clock_is_query_evaluation(
     expression = RUN_SELECTION_CONTEXT.replace(
         "${run_id:percentencode}", quote(value, safe="~()*!.'")
     )
-    script = "const fs=require('fs'); const q=JSON.parse(fs.readFileSync(0,'utf8')); require(q.module)(q.expr).evaluate(q.payload).then(x=>process.stdout.write(JSON.stringify(x))).catch(e=>{console.error(e.message);process.exit(1)});"
-    before = datetime.now(UTC)
+    script = "const fs=require('fs'); const q=JSON.parse(fs.readFileSync(0,'utf8')); const expr=require(q.module)(q.expr); expr.registerFunction('now',()=>q.now); expr.evaluate(q.payload).then(x=>process.stdout.write(JSON.stringify(x))).catch(e=>{console.error(e.message);process.exit(1)});"
+    checked_clock = datetime(2026, 11, 11, 10, tzinfo=UTC)
     result = subprocess.run(
         [node, "-e", script],
-        input=json.dumps({"module": module, "expr": expression, "payload": payload}),
+        input=json.dumps(
+            {
+                "module": module,
+                "expr": expression,
+                "payload": payload,
+                "now": checked_clock.isoformat(),
+            }
+        ),
         capture_output=True,
         text=True,
         timeout=20,
@@ -102,5 +109,5 @@ def test_query_context_is_explicit_and_clock_is_query_evaluation(
     checked_at = datetime.fromisoformat(
         row["context_checked_at"].replace("Z", "+00:00")
     )
-    assert before <= checked_at <= datetime.now(UTC)
+    assert checked_at == checked_clock
     assert "selection_context" not in payload

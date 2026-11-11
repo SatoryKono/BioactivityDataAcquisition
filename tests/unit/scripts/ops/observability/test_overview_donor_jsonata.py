@@ -46,7 +46,8 @@ def evaluate_donor(payload):
     module = os.environ.get("JSONATA_MODULE")
     if not node or not module or not Path(module).exists():
         pytest.skip("Set JSONATA_MODULE to exercise the real JSONata engine")
-    script = "const fs=require('fs'); const q=JSON.parse(fs.readFileSync(0,'utf8')); require(q.module)(q.expr).evaluate(q.payload).then(x=>process.stdout.write(JSON.stringify(x))).catch(e=>{console.error(e.message);process.exit(1)});"
+    checked_clock = datetime(2026, 11, 11, 10, tzinfo=UTC)
+    script = "const fs=require('fs'); const q=JSON.parse(fs.readFileSync(0,'utf8')); const expr=require(q.module)(q.expr); expr.registerFunction('now',()=>q.now); expr.registerFunction('millis',()=>q.millis); expr.evaluate(q.payload).then(x=>process.stdout.write(JSON.stringify(x))).catch(e=>{console.error(e.message);process.exit(1)});"
     result = subprocess.run(
         [node, "-e", script],
         input=json.dumps(
@@ -54,6 +55,8 @@ def evaluate_donor(payload):
                 "module": module,
                 "expr": _OV_DONOR.replace("${run_id:percentencode}", "-"),
                 "payload": payload,
+                "now": checked_clock.isoformat(),
+                "millis": checked_clock.timestamp() * 1000,
             }
         ),
         capture_output=True,
@@ -95,7 +98,9 @@ def test_full_overview_donor_keeps_context_with_missing_or_offset_dates(
 
 
 def test_full_donor_provider_age_uses_clock_and_offset():
-    completed = (datetime.now(UTC) - timedelta(seconds=90)).isoformat()
+    completed = (
+        datetime(2026, 11, 11, 10, tzinfo=UTC) - timedelta(seconds=90)
+    ).isoformat()
     rows = evaluate_donor(donor_payload(None, completed))
     provider = next(r for r in rows if r["_bioetl_frame"] == "provider")
     assert provider["observed_display"] == "1 min ago"
