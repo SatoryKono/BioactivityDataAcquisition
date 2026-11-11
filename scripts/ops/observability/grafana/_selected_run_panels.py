@@ -950,7 +950,9 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
 _NO_RUNS_LABEL = "НЕТ ЗАПУСКОВ"
 SELECTOR_ROWS = (
     "$exists(items) and $count(items) = 0 ? "
-    f'[{{"text":"{_NO_RUNS_LABEL}","value":"-"}}] : items'
+    f'[{{"text":"{_NO_RUNS_LABEL}","value":"-"}}] : '
+    '[$map(items, function($item) { $merge([$item, {"text": '
+    '$replace($item.text, " [STALE catalog]", "")}]) })]'
 )
 
 
@@ -959,6 +961,11 @@ def stamp_selector_columns(payload: dict[str, object]) -> None:
     for variable in payload.get("templating", {}).get("list", []):
         if variable.get("name") == "run_id":
             variable["regex"] = ""
+            variable["description"] = (
+                "Run ID from the catalog snapshot; run dates describe execution, "
+                "not catalog freshness. Catalog freshness is Not verified here. "
+                "Refresh the dashboard to request an updated list."
+            )
         query = variable.get("query")
         if not isinstance(query, dict):
             continue

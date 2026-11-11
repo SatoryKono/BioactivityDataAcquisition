@@ -55,3 +55,45 @@ def test_overview_does_not_keep_current_first_action():
         (_DASHBOARDS / "bioetl-overview-v2.json").read_text(encoding="utf-8")
     )
     assert all(panel.get("id") != 215 for panel in payload["panels"])
+
+
+def test_workflow_freshness_is_scoped_publication_age_not_saved_run_health():
+    payload = json.loads(
+        (_DASHBOARDS / "bioetl-incident-v1.json").read_text(encoding="utf-8")
+    )
+    row = next(p for p in payload["panels"] if p["id"] == 9700)
+    panel = row["panels"][0]
+    assert "${workflow_evidence_freshness}" in row["title"]
+    assert "threshold 24h" in panel["title"]
+    queries = {target["refId"]: target["expr"] for target in panel["targets"]}
+    assert "time() - " in queries["C"]
+    assert "bioetl_workflow_scope_published_seconds" in queries["C"]
+    assert "> bool 86400" in queries["E"]
+    assert "or on(workflow)" in queries["E"]
+    assert "* 0 + 2" in queries["E"]
+    assert "unless on(workflow)" in queries["E"]
+    assert "or on(workflow)" in queries["C"]
+    assert "* 0 / 0" in queries["C"]
+    assert "* 86400" in queries["D"]
+    for expr in queries.values():
+        assert "$run_id" not in expr
+        assert 'workflow=~"$workflow"' in expr
+        assert 'pipeline=~"$pipeline"' in expr
+        assert 'run_type=~"$run_type"' in expr
+    variable = next(
+        v
+        for v in payload["templating"]["list"]
+        if v["name"] == "workflow_evidence_freshness"
+    )
+    assert variable["skipUrlSync"] is True
+    assert variable["current"]["value"] == "Not verified"
+    state_query = variable["query"]["query"]
+    assert "unless on(workflow)" in state_query
+    assert '"STALE"' in state_query and '"Not verified"' in state_query
+    assert "absent(" in state_query
+    overrides = panel["fieldConfig"]["overrides"]
+    freshness = next(o for o in overrides if o["matcher"]["options"] == "Freshness")
+    props = {p["id"]: p["value"] for p in freshness["properties"]}
+    assert props["noValue"] == "Not verified"
+    assert props["mappings"][0]["options"]["1"]["text"] == "STALE"
+    assert props["mappings"][0]["options"]["2"]["text"] == "Not verified"

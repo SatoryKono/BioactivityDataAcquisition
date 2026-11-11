@@ -451,7 +451,8 @@ shipped_selector_registry:
     family: incident_workspace
     visible_selectors: *id001
     hidden_context_selectors: []
-    hidden_detail_selectors: []
+    hidden_detail_selectors:
+    - workflow_evidence_freshness
     top_bar_order:
     - workflow
     - pipeline
@@ -466,6 +467,7 @@ shipped_selector_registry:
       run_id: control_plane_filter_options_api
       provider: prometheus_provider_health_union
       read_latency_quantile: custom
+      workflow_evidence_freshness: prometheus_publication_age
   bioetl-run-explorer-v1:
     family: exact_run_explorer
     visible_selectors: &id005
@@ -510,6 +512,7 @@ hidden_handoff_contract:
   detail_only_shipped_vars:
   - selected_run_id
   - selected_pipeline
+  - workflow_evidence_freshness
   reserved_future_vars:
   - selected_manifest_id
   - selected_started_at
@@ -520,6 +523,7 @@ hidden_handoff_contract:
   - execution_fingerprint
   rules:
   - Hidden vars preserve navigation or detail-only scope and do not automatically become visible top-level selectors.
+  - workflow_evidence_freshness is a derived publication-age heading, hidden and excluded from URL sync; it is not a health or navigation selector.
   - Visible selectors MUST NOT be propagated implicitly with blanket includeVars semantics.
   - selected_run_id / selected_pipeline are detail-only A2 resolves from selector-context for
     Overview + DQ selected-run report/artifact URLs; Incident and Run Explorer dropped the

@@ -71,7 +71,7 @@ ______________________________________________________________________
 |---|---|
 | `bioetl-control-plane-v1` | `$pipeline`, `$run_id`, `$run_type`, `$workflow` |
 | `bioetl-dq-v2` | `$pipeline`, `$run_id`, `$run_type`, `$selected_pipeline`, `$selected_run_id`, `$workflow` |
-| `bioetl-incident-v1` | `$pipeline`, `$provider`, `$read_latency_quantile`, `$run_id`, `$run_type`, `$workflow` |
+| `bioetl-incident-v1` | `$pipeline`, `$provider`, `$read_latency_quantile`, `$run_id`, `$run_type`, `$workflow`, `$workflow_evidence_freshness` |
 | `bioetl-overview-v2` | `$pipeline`, `$run_id`, `$run_type`, `$selected_pipeline`, `$selected_run_id`, `$workflow` |
 | `bioetl-run-explorer-v1` | `$lookup_run_id`, `$pipeline`, `$run_id`, `$run_type`, `$workflow` |
 | `bioetl-silver-reject-explorer` (retired) | `$field`, `$payload_hash`, `$pipeline`, `$quarantine_run_id`, `$reason_code`, `$run_type` |

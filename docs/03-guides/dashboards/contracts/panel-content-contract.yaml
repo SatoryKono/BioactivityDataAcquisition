@@ -2743,7 +2743,7 @@ dashboards:
         render_profiles:
         - desktop_dark
       '9700':
-        title: Inspect Current Workflow Evidence
+        title: Inspect Current Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h
         role: row_group
         tier: 4
         scope: global
@@ -2761,7 +2761,7 @@ dashboards:
         - full_light
         - zoom_200
       '9701':
-        title: Review Current Workflow Evidence
+        title: Review Current Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h
         role: evidence_table
         tier: 3
         scope: current
