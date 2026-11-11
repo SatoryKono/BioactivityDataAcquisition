@@ -425,6 +425,39 @@ def validate_canonical_skills(repo_root: Path = REPO_ROOT) -> list[Finding]:
     return []
 
 
+def validate_skill_routes(repo_root: Path = REPO_ROOT) -> list[Finding]:
+    """Resolve explicit agent skill allowlists within their own runtime tree."""
+    findings: list[Finding] = []
+    for runtime in (".codex", ".junie", ".devin"):
+        agents = repo_root / runtime / "agents"
+        paths = [
+            *agents.glob("py-*.md"),
+            *agents.glob("py-*.toml"),
+            *agents.glob("*/AGENT.md"),
+        ]
+        for path in paths:
+            content = path.read_text(encoding="utf-8")
+            match = re.search(
+                r"Allowed skills:\s*(.*?)(?=\.\s|\n\s*\n|Allowed MCP:|$)", content, re.S
+            )
+            if match is None:
+                continue
+            names = re.findall(
+                r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*",
+                match.group(1).replace("opt-in", "").replace(" and ", " "),
+            )
+            for name in names:
+                if not (repo_root / runtime / "skills" / name / "SKILL.md").is_file():
+                    findings.append(
+                        Finding(
+                            "skill.route",
+                            f"project skill entrypoint is missing: {name}",
+                            path.relative_to(repo_root).as_posix(),
+                        )
+                    )
+    return findings
+
+
 def validate_native_runtime(repo_root: Path = REPO_ROOT) -> list[Finding]:
     """Validate every repository-native Codex discovery surface."""
 
@@ -432,6 +465,7 @@ def validate_native_runtime(repo_root: Path = REPO_ROOT) -> list[Finding]:
         *validate_project_config(repo_root),
         *validate_agents(repo_root),
         *validate_canonical_skills(repo_root),
+        *validate_skill_routes(repo_root),
         *validate_runtime_context(repo_root),
         *validate_ai_launcher_safety(repo_root),
     ]

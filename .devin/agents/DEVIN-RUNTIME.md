@@ -184,11 +184,15 @@ Use the smallest existing skill that matches the request:
 | --- | --- | --- | --- |
 | Diagnose without fixing | read-only | `py-debug-bot` (foreground) | reproduction and evidence only |
 | Implement a focused fix | write in requested scope | direct implementation; `py-config-bot` when configs change | targeted lint/tests |
-| Review the current diff | read-only | `py-audit-bot` (background) or `code-review` skill | diff inspection; no external writes |
+| Review the current diff | read-only | `py-audit-bot` (`review`; background when authorized) | diff inspection; no external writes |
 | Diagnose CI failure | read-only | `py-debug-bot` (foreground) | reproduction, root cause, remediation guidance |
 | Implement diagnosed CI remediation | write in requested scope | parent / orchestrator | failed checks plus targeted regression |
-| Prepare a PR | branch/commit/push authorized by request | `create-pr` skill | repository quality gates for touched scope |
+| Prepare a PR | branch/commit/push authorized by request | parent PR workflow; optional external `create-pr` skill when installed | repository quality gates for touched scope |
 | Audit architecture debt | read-only | `py-audit-bot` (foreground) | architecture/debt gates; budgets MUST NOT increase |
+
+`create-pr` is a user-installed capability, not a project-local skill. Discover
+it before use; if unavailable, the authorized parent follows repository PR policy
+directly. Review uses the project-local `py-audit-bot` route.
 
 Templates do not broaden user authority. Diagnosis and review stay read-only unless the user also asks for implementation. Load the selected skill and relevant sources/tests; do not load every ADR or the whole repository by default.
 
