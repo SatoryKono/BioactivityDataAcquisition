@@ -78,6 +78,12 @@ identity to repository, commit, branch, worktree, task, and source references.
 
 ## Governed Profiles
 
+Hook discovery: `python scripts/ai/codex/doctor.py hooks --no-write --json`.
+Exit 2 means installed capability is NOT_PROVEN. Discovery never runs hooks or
+runtime commands. See `docs/05-operations/runbooks/ai-hook-compatibility.md` for
+platform observations and vendor contracts; documentation alone cannot enable
+a native adapter.
+
 Junie exposes its own role vocabulary, but it routes the same six logical
 profiles governed by `.codex/agents/CODEX-RUNTIME.md`. The logical profile set
 MUST match the tracked `.codex/agents/py-*.md` and `.junie/agents/py-*.md`

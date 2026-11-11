@@ -274,6 +274,7 @@
     "bioetl_http_retries_total",
     "bioetl_http_retry_budget_exhausted_total",
     "bioetl_incident_alert_priority",
+    "bioetl_incident_global_alerts",
     "bioetl_incident_ranked_dq",
     "bioetl_incident_ranked_evidence",
     "bioetl_incident_ranked_provider",
@@ -1737,6 +1738,11 @@
     "bioetl_incident_alert_priority": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/dashboards/bioetl-incident-v1.json"
+    ],
+    "bioetl_incident_global_alerts": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
+      "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_incident_ranked_dq": [
       "docs/03-guides/dashboards/panels/bioetl-incident-v1-panels.md"
