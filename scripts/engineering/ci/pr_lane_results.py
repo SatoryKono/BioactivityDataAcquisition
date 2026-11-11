@@ -320,6 +320,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/delivery.py": (
         "tests/unit/iuphar_target_class/test_delivery.py",
     ),
+    "src/iuphar_target_class/w153.py": (
+        "tests/unit/iuphar_target_class/test_w153.py",
+    ),
     "data/iuphar_target_class/delivery/example-input.csv": (
         "tests/unit/iuphar_target_class/test_delivery.py",
     ),
