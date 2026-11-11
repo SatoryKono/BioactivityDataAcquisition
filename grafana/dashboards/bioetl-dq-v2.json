@@ -518,6 +518,10 @@
               {
                 "id": "unit",
                 "value": "time:YYYY-MM-DD HH:mm"
+              },
+              {
+                "id": "custom.width",
+                "value": 155
               }
             ]
           }

@@ -93,7 +93,8 @@ def stamp_run_selection_context(payload: dict) -> None:
                     {
                         "matcher": {"id": "byName", "options": "Context checked at"},
                         "properties": [
-                            {"id": "unit", "value": "time:YYYY-MM-DD HH:mm"}
+                            {"id": "unit", "value": "time:YYYY-MM-DD HH:mm"},
+                            {"id": "custom.width", "value": 155},
                         ],
                     }
                 ],

@@ -97,7 +97,8 @@ def embed_global_alerts(overview: dict[str, Any], incident: dict[str, Any]) -> N
         "UNKNOWN; global alerts never overwrite the saved run verdict."
     )
     scope = next(panel for panel in panels if panel["id"] == 99)
-    scope["options"]["content"] = scope["options"]["content"].replace(
-        "This page assesses that run only.",
-        "Saved evidence assesses that run only; GLOBAL alerts below assess the fleet.",
-    )
+    if scope["type"] == "text":
+        scope["options"]["content"] = scope["options"]["content"].replace(
+            "This page assesses that run only.",
+            "Saved evidence assesses that run only; GLOBAL alerts below assess the fleet.",
+        )
