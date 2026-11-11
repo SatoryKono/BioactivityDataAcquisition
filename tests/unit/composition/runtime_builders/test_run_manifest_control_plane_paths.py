@@ -91,7 +91,7 @@ def test_private_fallback_uses_uid_scoped_temp_when_home_cache_fails(
     monkeypatch.setattr(subject.Path, "home", lambda: tmp_path / "home")
     monkeypatch.setattr(subject.tempfile, "gettempdir", lambda: str(tmp_path / "tmp"))
     monkeypatch.setattr(subject.os, "getuid", lambda: 42, raising=False)
-    monkeypatch.setattr(subject, "_prepare_private_runtime_dir", prepare)
+    monkeypatch.setattr(subject, "prepare_private_runtime_dir", prepare)
 
     assert subject.private_fallback_data_root() == fallback
     assert calls == [preferred, fallback]
@@ -100,5 +100,5 @@ def test_private_fallback_uses_uid_scoped_temp_when_home_cache_fails(
 def test_prepare_private_runtime_dir_creates_private_directory(tmp_path: Path) -> None:
     target = tmp_path / "nested/private"
 
-    assert subject._prepare_private_runtime_dir(target) == target
+    assert subject.prepare_private_runtime_dir(target) == target
     assert target.is_dir()

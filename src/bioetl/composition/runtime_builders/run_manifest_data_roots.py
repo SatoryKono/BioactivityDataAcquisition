@@ -171,11 +171,11 @@ def private_fallback_data_root() -> Path:
     """Named seam for the user-private fallback data root (test monkeypatch)."""
     preferred = Path.home() / ".cache" / "bioetl-data"
     try:
-        return _prepare_private_runtime_dir(preferred)
+        return prepare_private_runtime_dir(preferred)
     except OSError:
         runtime_user = getattr(os, "getuid", lambda: "user")()
         fallback = Path(tempfile.gettempdir()) / f"bioetl-data-{runtime_user}"
-        return _prepare_private_runtime_dir(fallback)
+        return prepare_private_runtime_dir(fallback)
 
 
 def private_fallback_data_root_with_mode() -> tuple[Path, DataRootMode]:
@@ -190,7 +190,7 @@ def private_fallback_data_root_with_mode() -> tuple[Path, DataRootMode]:
     return path, "tmp"
 
 
-def _prepare_private_runtime_dir(path: Path) -> Path:
+def prepare_private_runtime_dir(path: Path) -> Path:
     """Create a private runtime directory; POSIX rejects non-owner modes."""
     path.mkdir(parents=True, exist_ok=True, mode=0o700)
     with suppress(OSError):

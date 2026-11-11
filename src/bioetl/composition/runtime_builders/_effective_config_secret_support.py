@@ -26,7 +26,7 @@ _EXECUTION_SECRET_SETTING_SURFACES: tuple[tuple[str, str], ...] = (
 )
 
 
-def _secret_is_present(value: object) -> bool:
+def secret_is_present(value: object) -> bool:
     if value is None:
         return False
     get_secret_value = getattr(value, "get_secret_value", None)
@@ -34,7 +34,7 @@ def _secret_is_present(value: object) -> bool:
     return raw_value not in (None, "")
 
 
-def _secret_value_hash(
+def secret_value_hash(
     value: object,
     value_hash: Callable[[str], str],
 ) -> str | None:
@@ -60,7 +60,7 @@ def build_secret_surface_inventory(
     secret_surfaces: dict[str, object] = {}
     for surface, attribute_name in _EXECUTION_SECRET_SETTING_SURFACES:
         value = getattr(settings, attribute_name, None)
-        present = _secret_is_present(value)
+        present = secret_is_present(value)
         if surface in _PRESENCE_ONLY_SECRET_SURFACES:
             secret_surfaces[surface] = {
                 "present": present,
@@ -68,7 +68,7 @@ def build_secret_surface_inventory(
                 "hash_policy": "presence_only",
             }
             continue
-        hashed_value = _secret_value_hash(value, value_hash) if present else None
+        hashed_value = secret_value_hash(value, value_hash) if present else None
         secret_surfaces[surface] = {
             "present": present,
             "value_hash": hashed_value,
