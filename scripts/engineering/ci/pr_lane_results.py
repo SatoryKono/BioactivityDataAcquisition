@@ -152,6 +152,9 @@ MCP_GITHUB_PROJECT_TRANSPORT_TEST = "tests/integration/test_github_project_trans
 MCP_HOST_TRANSPORT_DISPATCH_TEST = (
     "tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py"
 )
+MCP_WRAPPER_CONTRACTS_TEST = (
+    "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py"
+)
 CURSOR_SKILL_SYNC_TEST = "tests/architecture/test_cursor_skill_sync_safety.py"
 SYNC_CURSOR_RULES_TEST = "tests/unit/scripts/test_sync_cursor_rules.py"
 ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
@@ -1089,9 +1092,24 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/ai/npm_runtime_contract.cjs": (NPM_RUNTIME_TEST,),
     "scripts/ai/mcp/mcp_filesystem_wrapper.sh": (NPM_RUNTIME_TEST,),
     "scripts/ai/mcp/mcp_filesystem_wrapper.ps1": (NPM_RUNTIME_TEST,),
+    "scripts/ai/mcp/mcp_fetch_wrapper.sh": (MCP_WRAPPER_CONTRACTS_TEST,),
+    "scripts/ai/mcp/mcp_fetch_wrapper.ps1": (MCP_WRAPPER_CONTRACTS_TEST,),
+    "scripts/ai/mcp/support/run_owned_stdio.ps1": (
+        NPM_RUNTIME_TEST,
+        MCP_WRAPPER_CONTRACTS_TEST,
+    ),
+    "scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh": (
+        NPM_RUNTIME_TEST,
+        MCP_WRAPPER_CONTRACTS_TEST,
+    ),
     "scripts/ai/mcp/check.sh": (
         NPM_RUNTIME_TEST,
-        "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+        MCP_WRAPPER_CONTRACTS_TEST,
+    ),
+    "docs/03-guides/development/codex-wsl2-setup.md": (
+        NPM_RUNTIME_TEST,
+        MCP_WRAPPER_CONTRACTS_TEST,
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
     ),
     ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
     "src/memory/dedup.py": ("tests/unit/memory/test_dedup.py",),
