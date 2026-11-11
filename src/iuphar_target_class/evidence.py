@@ -189,6 +189,13 @@ def _require_row_evidence(
         ):
             message = f"row evidence does not resolve to this input row and run: {evidence_id}"
             raise ContractDefect(message)
+    if not any(
+        evidence_id in table.match_evidence_ids
+        and records[evidence_id].evidence_type == "iuphar_mapping"
+        for evidence_id in row.match_evidence_ids
+    ):
+        message = "row evidence requires IUPHAR mapping in match evidence"
+        raise ContractDefect(message)
 
 
 def content_equal(left: StoredRun, right: StoredRun) -> bool:

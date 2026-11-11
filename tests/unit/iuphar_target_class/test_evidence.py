@@ -320,3 +320,15 @@ def test_class_chain_requires_a_table_and_accepts_own_row_references() -> None:
     with pytest.raises(ContractDefect, match="evidence table"):
         require_class_chain(row)
     require_class_chain(row, table=build_evidence_table(_drafts(), run_id="run-1"))
+
+
+@pytest.mark.parametrize("evidence_type", ["local_rule", "iuphar_mapping"])
+def test_local_evidence_list_cannot_substitute_for_iuphar_mapping(
+    evidence_type: str,
+) -> None:
+    table = build_evidence_table(
+        (_draft(evidence_type, "rule-1", "Receptor", "local"),), run_id="run-1"
+    )
+    row = replace(_supported_direct_row(), match_evidence_ids=table.local_evidence_ids)
+    with pytest.raises(ContractDefect, match="IUPHAR mapping"):
+        require_class_chain(row, table=table)
