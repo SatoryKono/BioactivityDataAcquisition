@@ -58,7 +58,7 @@ def test_overview_paired_tables_have_fixed_rows_and_inspectable_reasons():
     assert summary["gridPos"]["h"] == 5
     # Domains follow the context table; the right-hand status/identity stack
     # retains its height so all five identity rows fit the first window.
-    assert domains["gridPos"]["h"] == 9
+    assert domains["gridPos"]["h"] == 8
     assert domains["gridPos"]["y"] + domains["gridPos"]["h"] <= (
         panels[9300]["gridPos"]["y"] + panels[9300]["gridPos"]["h"]
     )
