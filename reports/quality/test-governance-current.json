@@ -528,12 +528,26 @@
       "path": "tests/unit/scripts/engineering/qa/test_runtime_acceptance_12553.py",
       "rationale": "candidate tests that need later assertion strengthening or removal review",
       "test_name": "test_published_bundle_integrity"
+    },
+    {
+      "category": "helper_asserted",
+      "line": "96",
+      "path": "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py",
+      "rationale": "tests that delegate verification to check/validate/verify helper calls",
+      "test_name": "test_generated_heading_measures_age_and_missing_coverage"
+    },
+    {
+      "category": "helper_asserted",
+      "line": "132",
+      "path": "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py",
+      "rationale": "tests that delegate verification to check/validate/verify helper calls",
+      "test_name": "test_freshness_table_keeps_explicit_unknown_rows"
     }
   ],
   "assertless_category_counts": {
     "architecture_helper_guard": 0,
     "benchmark_or_performance": 0,
-    "helper_asserted": 1,
+    "helper_asserted": 3,
     "intentional_no_exception_contract": 68,
     "weak_no_value": 2
   },
@@ -847,9 +861,15 @@
       "categories": {
         "weak_no_value": 1
       }
+    },
+    "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "helper_asserted": 2
+      }
     }
   },
-  "assertless_total_candidates": 71,
+  "assertless_total_candidates": 73,
   "budget_violations": [
     {
       "actual": 2,
@@ -1585,12 +1605,26 @@
         "path": "tests/unit/scripts/engineering/qa/test_runtime_acceptance_12553.py",
         "rationale": "candidate tests that need later assertion strengthening or removal review",
         "test_name": "test_published_bundle_integrity"
+      },
+      {
+        "category": "helper_asserted",
+        "line": "96",
+        "path": "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py",
+        "rationale": "tests that delegate verification to check/validate/verify helper calls",
+        "test_name": "test_generated_heading_measures_age_and_missing_coverage"
+      },
+      {
+        "category": "helper_asserted",
+        "line": "132",
+        "path": "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py",
+        "rationale": "tests that delegate verification to check/validate/verify helper calls",
+        "test_name": "test_freshness_table_keeps_explicit_unknown_rows"
       }
     ],
     "assertless_category_counts": {
       "architecture_helper_guard": 0,
       "benchmark_or_performance": 0,
-      "helper_asserted": 1,
+      "helper_asserted": 3,
       "intentional_no_exception_contract": 68,
       "weak_no_value": 2
     },
@@ -1621,7 +1655,7 @@
       "tests/unit/infrastructure/test_checkpoint.py:189",
       "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fifteen.py:44"
     ],
-    "assertless_total_candidates": 71,
+    "assertless_total_candidates": 73,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -1818,8 +1852,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3252,
-      "test_python_file_count": 3504,
+      "test_glob_file_count": 3257,
+      "test_python_file_count": 3509,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1860,16 +1894,16 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3252,
-    "total_test_functions": 32221,
+    "total_test_files": 3257,
+    "total_test_functions": 32245,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "82a04a1582068a088a74a4e21b47cd3783d4722bc9246aa7800a9f88f1d51473",
+  "source_tree_sha256": "aaf6f9df86666b3d05a1a8aeb281516a76f8588e7446b512d62596b33ad78811",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 71,
+    "assertless_total_candidates": 73,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
@@ -1891,8 +1925,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3252,
-    "test_python_file_count": 3504,
+    "test_glob_file_count": 3257,
+    "test_python_file_count": 3509,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -1933,8 +1967,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3252,
-  "total_test_functions": 32221,
+  "total_test_files": 3257,
+  "total_test_functions": 32245,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
