@@ -20,6 +20,8 @@ WORKING_CLASSES: tuple[str, ...] = (
     "Other Protein Target",
 )
 PLAN_SOURCE = "план v1 r8 §2.1"
+PLAN_SECTION_5 = "план v1 r8 §5"
+DOCUMENTARY_STATUS = "подтверждено документально"
 PLAN_VERSION = "plan-v1-r8"
 BASE_MISSING_MARKERS: tuple[str, ...] = (
     "#n/a",
@@ -264,22 +266,22 @@ def policy_document() -> dict[str, object]:
                     "as_of": "2026-11-09",
                     "item": "api_key_required",
                     "note": "не проверенный контракт сервиса",
-                    "source": "план v1 r8 §5",
-                    "status": "подтверждено документально",
+                    "source": PLAN_SECTION_5,
+                    "status": DOCUMENTARY_STATUS,
                 },
                 {
                     "as_of": "2026-11-09",
                     "item": "header_GTP-API-Key",
                     "note": "не проверенный контракт сервиса",
-                    "source": "план v1 r8 §5",
-                    "status": "подтверждено документально",
+                    "source": PLAN_SECTION_5,
+                    "status": DOCUMENTARY_STATUS,
                 },
                 {
                     "as_of": "2026-11-09",
                     "item": "rate_about_60_per_minute",
                     "note": "ориентир документации, не измеренный лимит",
-                    "source": "план v1 r8 §5",
-                    "status": "подтверждено документально",
+                    "source": PLAN_SECTION_5,
+                    "status": DOCUMENTARY_STATUS,
                 },
             ],
             "operational_check": {

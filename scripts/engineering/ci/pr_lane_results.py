@@ -176,6 +176,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/__init__.py": (
         "tests/unit/iuphar_target_class/test_stage0_manifest.py",
     ),
+    "src/iuphar_target_class/policy.py": (
+        "tests/unit/iuphar_target_class/test_policy.py",
+    ),
+    "data/iuphar_target_class/policy/policy.json": (
+        "tests/unit/iuphar_target_class/test_policy.py",
+    ),
     "scripts/ai/codex/native_runtime_contract.py": (
         "tests/architecture/test_codex_native_runtime.py",
         "tests/architecture/test_codex_agent_catalog_inventory.py",

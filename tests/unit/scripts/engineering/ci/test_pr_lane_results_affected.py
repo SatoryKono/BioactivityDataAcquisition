@@ -104,6 +104,26 @@ def test_iuphar_source_and_data_keep_bounded_stage0_owners(tmp_path: Path) -> No
         )
 
 
+def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class"
+    owner.mkdir(parents=True)
+    (owner / "test_policy.py").write_text(
+        "def test_policy():\n    assert True\n", encoding="utf-8"
+    )
+    report = build_shadow_compare(
+        [
+            "src/iuphar_target_class/policy.py",
+            "data/iuphar_target_class/policy/policy.json",
+        ],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == ["tests/unit/iuphar_target_class/test_policy.py"]
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            ["src/iuphar_target_class/unmapped.py"], repo_root=tmp_path
+        )
+
+
 def test_shadow_compare_routes_domain_ports_stub() -> None:
     """Typed ports package stubs map like their .py siblings under tests/unit."""
     repo_root = Path(__file__).resolve().parents[5]
