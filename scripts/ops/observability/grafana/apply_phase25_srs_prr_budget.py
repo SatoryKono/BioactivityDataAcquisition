@@ -177,6 +177,25 @@ def _tag_rows(expr: str, frame: str) -> str:
     return f"$map({expr}, function($row){{$merge([$row, {{'{FRAME}': '{frame}'}}])}})"
 
 
+# Share the offset-safe parser with Incident; never compare missing dates.
+_TIMESTAMP_SECONDS = (
+    "$secs := function($t){( "
+    "$tail := $substring($t, 19); "
+    "$rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; "
+    "$zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : "
+    "($contains($rest, '+') ? '+' : '-')); "
+    "$digits := $rest != '' ? $substringBefore($rest, $zone) : ''; "
+    "$frac := $digits != '' ? $number('0.' & $digits) : 0; "
+    "$sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); "
+    "$off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : "
+    "$substringAfter($tail, '-')); "
+    "$oh := $off != '' ? $number($substring($off, 0, 2)) : 0; "
+    "$om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; "
+    "$toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 "
+    "+ $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac "
+    "- $sign * ($oh*3600 + $om*60) )}; "
+)
+
 # --- Overview multi-section JSONata (single SRS HTTP) ---------------------
 
 _OV_DOMAINS = (
@@ -207,8 +226,9 @@ _OV_IDENTITY = (
     "($v := function($x){$exists($x) and $x != '' ? $string($x) : "
     "'Not recorded in saved run evidence'}; "
     "$s := summary[0]; "
-    "$start := $s.started_at ? $toMillis($s.started_at) : null; "
-    "$end := $s.completed_at ? $toMillis($s.completed_at) : null; "
+    + _TIMESTAMP_SECONDS
+    + "$start := $s.started_at ? $secs($s.started_at) : null; "
+    "$end := $s.completed_at ? $secs($s.completed_at) : null; "
     f"$map(["
     "{'parameter':'Run ID','value':$v(run_id)},"
     "{'parameter':'Pipeline','value':$v(pipeline)},"
@@ -218,13 +238,13 @@ _OV_IDENTITY = (
     "($substring(started_at,-1) = 'Z' ? 'UTC' : $substring(started_at,-6)) : "
     "'Not recorded in saved run evidence'},"
     "{'parameter':'Total Run Duration','value':$start != null and $end != null "
-    "and $end >= $start ? ($n := $floor(($end - $start) / 1000 + 0.5); "
+    "? ($end >= $start ? ($n := $floor($end - $start + 0.5); "
     "$parts := [$floor($n / 86400), $floor(($n % 86400) / 3600), "
     "$floor(($n % 3600) / 60), $n % 60]; "
     "$units := [' d', ' h', ' min', ' s']; "
     "$n = 0 ? '0 s' : $join($map($parts, function($v, $i)"
     "{$v > 0 ? $string($v) & $units[$i]}), ' ')) : "
-    "'Not recorded in saved run evidence'}"
+    "'Not recorded in saved run evidence') : 'Not recorded in saved run evidence'}"
     f"], function($row){{$merge([$row, {{'{FRAME}':'identity'}}])}}))"
 )
 
@@ -233,32 +253,33 @@ _OV_PROVIDER = (
     "$cached := $d.reason = 'cached_bronze_no_remote_probe'; "
     "$saved := evidence_availability in ['AVAILABLE', 'legacy_no_snapshot']; "
     "$completed := summary[0].completed_at; "
-    "$age := $completed ? $floor(($millis() - $toMillis($completed)) / 1000) : null; "
-    "$seconds := $age != null and $age>=0 ? $age : 0; "
+    + _TIMESTAMP_SECONDS
+    + "$age := $completed ? $floor($millis()/1000 - $secs($completed)) : null; "
+    "$seconds := $age != null ? ($age >= 0 ? $age : 0) : 0; "
     "$parts := [$floor($seconds/86400), $floor(($seconds%86400)/3600), "
     "$floor(($seconds%3600)/60)]; "
     "$units := [' d',' h',' min']; "
     "$elapsed := $join($map($parts,function($v,$i)"
     "{$v>0 ? $string($v)&$units[$i]}),' '); "
-    "$map(provider_checks, function($p) { $merge([$p, {"
-    "'data_source': $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : "
+    "$observed := $age != null ? ($age >= 0 ? "
+    "($age < 60 ? 'Just now' : $elapsed & ' ago') : 'Not recorded') : 'Not recorded'; "
+    "$map(provider_checks, function($p) {( "
+    "$source := $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : "
     "($d.reason = 'run_preflight_provider_observation' and $p.evidence = 'PRESENT' "
-    "? 'Provider check' : 'UNKNOWN')), "
-    "'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), "
-    "'check_result_display': $cached ? '—' : "
+    "? 'Provider check' : 'UNKNOWN')); "
+    "$performed := $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'); "
+    "$result := $cached ? '—' : "
     "($p.check_result = 'QUERY ERROR' ? 'Source unavailable' : "
-    "($p.evidence = 'PRESENT' and $p.check_result "
-    "? $p.check_result : 'UNKNOWN')), "
-    "'reason': $cached ? 'Cached Bronze used; provider API was not called.' : "
+    "($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN')); "
+    "$reason := $cached ? 'Cached Bronze used; provider API was not called.' : "
     "($d.reason = 'run_preflight_provider_observation' ? "
-    "'Saved provider preflight check.' : "
-    "($d.reason_display ? $d.reason_display : "
-    "'Provider check evidence was not recorded.')), "
-    "'observed_display': $age != null and $age >= 0 ? "
-    "($age<60 ? 'Just now' : $elapsed & ' ago') : 'Not recorded', "
-    "'report_label': $saved or $cached ? 'Open report' : '—'"
-    # f-string doubles braces; trailing `)` closes the outer `(` block.
-    f", '{FRAME}': 'provider'}}]) }}))"
+    "'Saved provider preflight check.' : ($d.reason_display ? $d.reason_display : "
+    "'Provider check evidence was not recorded.')); "
+    "$label := $saved or $cached ? 'Open report' : '—'; "
+    "$merge([$p, {'data_source': $source, 'check_performed': $performed, "
+    "'check_result_display': $result, 'reason': $reason, "
+    "'observed_display': $observed, 'report_label': $label"
+    f", '{FRAME}': 'provider'}}]) )}}))"
 )
 
 _OV_STAGES = _tag_rows("stage_diagnostics", "stages")
@@ -526,22 +547,8 @@ _INC_DURATION = (
     # whole donor. A missing timestamp stays null, not 0 and not a query error.
     "($s := summary[0]; "
     "$a := $s.started_at; $b := $s.completed_at; "
-    "$secs := function($t){( "
-    "$tail := $substring($t, 19); "
-    "$rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; "
-    "$zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : "
-    "($contains($rest, '+') ? '+' : '-')); "
-    "$digits := $rest != '' ? $substringBefore($rest, $zone) : ''; "
-    "$frac := $digits != '' ? $number('0.' & $digits) : 0; "
-    "$sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); "
-    "$off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : "
-    "$substringAfter($tail, '-')); "
-    "$oh := $off != '' ? $number($substring($off, 0, 2)) : 0; "
-    "$om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; "
-    "$toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 "
-    "+ $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac "
-    "- $sign * ($oh*3600 + $om*60) )}; "
-    "$start := $a ? $secs($a) : null; "
+    + _TIMESTAMP_SECONDS
+    + "$start := $a ? $secs($a) : null; "
     "$end := $b ? $secs($b) : null; "
     # Compare only after both ends exist: this backend evaluates `>=` on null
     # and fails the whole donor (QUERY ERROR) instead of leaving the stat empty.
