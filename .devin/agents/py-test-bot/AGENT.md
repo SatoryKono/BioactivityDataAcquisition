@@ -87,7 +87,7 @@ ______________________________________________________________________
 
 - **Baseline**: перед началом рефакторинга (после формирования плана `py-plan-bot`).
 - **Final**: после завершения рефакторинга.
-- **Re-test**: после fix от `py-debug-bot`.
+- **Re-test**: после исправления уполномоченным исполнителем по результатам RCA от `py-debug-bot`.
 - **На запрос**: разработка новых тестов для нового функционала.
 
 ______________________________________________________________________
@@ -257,7 +257,7 @@ ______________________________________________________________________
 || Baseline FAIL                  | → py-debug-bot                      ||
 || Code complete (implementation) | → py-test-bot (phase=final)         ||
 || Final FAIL                     | → py-debug-bot                      ||
-|| Fix applied (py-debug-bot)     | → py-test-bot (phase=retest)        ||
+|| Fix applied (authorized implementer after py-debug-bot RCA) | → py-test-bot (phase=retest)        ||
 || All tests pass                 | → py-doc-bot + py-audit-bot (final) ||
 
 ## Env File Guardrail
