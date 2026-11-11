@@ -81,6 +81,26 @@ def test_glued_identifier_is_invalid_and_not_repaired() -> None:
     assert isolated.row_sha256
 
 
+def test_glued_uniprot_token_in_a_list_is_invalid() -> None:
+    glue = GlueFixture("uniprot", "P04637P00533", ("concatenated identifiers",))
+    glued = validate_input(
+        _row(uniprot="P04637P00533;P04637"),
+        provenance=PROVENANCE,
+        glue_fixtures=(glue,),
+    )
+    assert glued.input_validation_status == "invalid_input"
+    assert glued.uniprot_accessions == ()
+    assert glued.raw_fields["uniprot"] == "P04637P00533;P04637"
+    assert "glued identifier in uniprot" in glued.input_errors
+    clean = validate_input(
+        _row(uniprot="P04637;P00533"),
+        provenance=PROVENANCE,
+        glue_fixtures=(glue,),
+    )
+    assert clean.input_validation_status == "valid"
+    assert clean.uniprot_accessions == ("P04637", "P00533")
+
+
 def test_absent_well_formed_id_is_not_found() -> None:
     validated = validate_input(
         _row(target_id="840"),

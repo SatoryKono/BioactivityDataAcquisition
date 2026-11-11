@@ -51,11 +51,23 @@ def normalize_identifiers(
     """Return the normalized id and an error when a glue fixture matches.
 
     A glued value is not rewritten. ``920840`` stays ``920840``.
+    Multi-value fields are checked after a real ``;`` or ``|`` split, so one
+    glued token cannot hide behind a second identifier.
     """
+    subjects = _glue_subjects(value, field)
     for fixture in glue_fixtures:
-        if fixture.field == field and fixture.original == value and fixture.signs:
+        if fixture.field == field and fixture.original in subjects and fixture.signs:
             return value, f"glued identifier in {field}"
     return normalize_missing(value), None
+
+
+def _glue_subjects(value: str | None, field: str) -> tuple[str, ...]:
+    """Values compared to a glue fixture. Multi fields contribute each element."""
+    if value is None:
+        return ()
+    if field not in _MULTI_FIELDS:
+        return (value,)
+    return (value, *_split_multi(value))
 
 
 def parse_ec_numbers(raw: str | None) -> tuple[EcNumber, ...]:
