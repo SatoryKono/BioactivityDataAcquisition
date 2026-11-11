@@ -181,6 +181,22 @@ def _phase(row: dict, name: str, operation: Callable):
     return result
 
 
+def _effective_tools(entry: Mapping, names: Sequence[str]) -> list[str]:
+    """Apply native allow/deny lists without changing the backend catalogue."""
+    enabled = entry.get("enabled_tools")
+    disabled = set(entry.get("disabled_tools") or [])
+    return [
+        name
+        for name in names
+        if (enabled is None or name in enabled) and name not in disabled
+    ]
+
+
+def _require_control_enabled(entry: Mapping, control: Mapping) -> None:
+    if not _effective_tools(entry, [control["tool"]]):
+        raise ProbeError("CONTROL_TOOL_DISABLED_BY_NATIVE_POLICY")
+
+
 def _run_session(
     row: dict, entry: Mapping, control: Mapping, workspace, environment, factory
 ):
@@ -208,17 +224,22 @@ def _run_session(
                 "status": "PASS" if client.transport_seen else "NOT_TESTED"
             }
         names = _phase(row, "catalog", lambda: _catalog(client, tool_limit))
-        row["tool_count"] = len(names)
+        row["tool_count_raw"] = len(names)
+        effective_names = _effective_tools(entry, names)
+        row["tool_count"] = len(effective_names)
+        row["native_tool_filters_applied"] = True
         row["memory_write_tools_advertised"] = bool(
             {
                 "create_entities",
                 "delete_entities",
                 "add_observations",
                 "delete_observations",
+                "create_relations",
+                "delete_relations",
             }
             & set(names)
         )
-        if control["tool"] not in names:
+        if control["tool"] not in effective_names:
             raise ProbeError("CONTROL_TOOL_MISSING")
         _phase(row, "tool", lambda: _semantic_call(client, control, tool_limit))
         row["control_status"] = "PASS"
@@ -253,6 +274,7 @@ def _probe_row(name, entry, control_value, capture, *, environment, factory, req
         }
     try:
         control = _control(control_value, name)
+        _require_control_enabled(entry, control)
         _run_session(
             row,
             entry,
@@ -296,8 +318,13 @@ def _apply_probe_failure(row: dict, control_value, exc: ProbeError) -> None:
         "AUTH_HELPER_NOT_TESTED",
     }:
         row["status"] = "NOT_TESTED"
-    if exc.category == "ADAPTER_DISABLED_BY_POLICY":
+    if exc.category in {
+        "ADAPTER_DISABLED_BY_POLICY",
+        "CONTROL_TOOL_DISABLED_BY_NATIVE_POLICY",
+    }:
         row["status"] = "DISABLED"
+    if exc.category == "CONTROL_TOOL_DISABLED_BY_NATIVE_POLICY":
+        row["control_status"] = "DISABLED"
     if "tool" in row["phases"]:
         row["control_status"] = row["status"]
         if row["status"] == "DENIED_AS_EXPECTED":

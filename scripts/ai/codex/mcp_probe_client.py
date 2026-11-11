@@ -160,9 +160,14 @@ def probe_environment(
     )
     if entry.get("bearer_token_env_var"):
         references.add(entry["bearer_token_env_var"])
+    explicit = entry.get("env") or {}
     for key in references:
+        if key in explicit:
+            continue
         if key in repository_env:
             result[key] = repository_env[key]
+        elif key in os.environ:
+            result[key] = os.environ[key]
     # An explicit task restriction must survive the wrapper's dotenv loading.
     # Preserve only this non-secret policy variable, not unrelated credentials.
     if "BIOETL_AI_MEMORY_MODE" in os.environ:

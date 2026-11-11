@@ -738,3 +738,61 @@ def test_stdio_cleanup_does_not_wait_for_inherited_stdout_or_kill_backend(tmp_pa
         if child is not None and child.is_running():
             child.terminate()
             child.wait(timeout=3)
+
+
+@pytest.mark.parametrize(
+    "filters",
+    [
+        {"disabled_tools": ["read_file"]},
+        {"enabled_tools": ["other_tool"]},
+        {"enabled_tools": []},
+        {"enabled_tools": ["read_file"], "disabled_tools": ["read_file"]},
+    ],
+)
+def test_native_tool_filters_block_control_before_any_adapter_call(tmp_path, filters):
+    session = Session()
+    row = report(capture(tmp_path, **filters), session)["results"][0]
+    assert row["status"] == "DISABLED"
+    assert row["control_status"] == "DISABLED"
+    assert row["detail"] == "CONTROL_TOOL_DISABLED_BY_NATIVE_POLICY"
+    assert session.calls == []
+
+
+def test_client_tool_filter_does_not_claim_server_write_prohibition(tmp_path):
+    session = Session(
+        {"tools/list": {"tools": [{"name": "read_file"}, {"name": "create_relations"}]}}
+    )
+    row = report(capture(tmp_path, enabled_tools=["read_file"]), session)["results"][0]
+    assert row["control_status"] == "PASS"
+    assert row["tool_count_raw"] == 2 and row["tool_count"] == 1
+    assert row["memory_write_tools_advertised"] is True
+    assert row["technical_write_prohibition_status"] == "NOT_TESTED"
+
+
+@pytest.mark.parametrize(
+    "entry",
+    [
+        {"env_vars": ["DECLARED_AUTH"]},
+        {"env_http_headers": {"Authorization": "DECLARED_AUTH"}},
+        {"bearer_token_env_var": "DECLARED_AUTH"},
+    ],
+)
+def test_declared_process_variables_survive_without_dotenv(monkeypatch, entry):
+    from scripts.ai.codex.mcp_probe_client import probe_environment
+
+    monkeypatch.setenv("DECLARED_AUTH", SECRET)
+    monkeypatch.setenv("UNRELATED_SECRET", SECRET)
+    result = probe_environment(entry, {})
+    assert result["DECLARED_AUTH"] == SECRET
+    assert "UNRELATED_SECRET" not in result
+
+
+def test_explicit_route_env_is_not_replaced_by_reference_fallback(monkeypatch):
+    from scripts.ai.codex.mcp_probe_client import probe_environment
+
+    monkeypatch.setenv("DECLARED_AUTH", "process-value")
+    result = probe_environment(
+        {"env_vars": ["DECLARED_AUTH"], "env": {"DECLARED_AUTH": "route-value"}},
+        {"DECLARED_AUTH": "repository-value"},
+    )
+    assert result["DECLARED_AUTH"] == "route-value"

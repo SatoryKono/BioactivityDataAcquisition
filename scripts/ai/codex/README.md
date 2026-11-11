@@ -308,3 +308,11 @@ The JSONL reader uses interruptible nonblocking reads and a bounded join during
 cleanup. An inherited stdout held by a backend cannot block diagnostic shutdown;
 that backend is not terminated. `--no-write` controls report output; it does not
 cancel the separately acknowledged adapter cache/log/startup effects.
+
+Native `enabled_tools` and `disabled_tools` apply before adapter startup and
+control execution; deny wins. A filtered control is `DISABLED`, not a passing
+backend call. Raw and effective catalogue sizes remain separate; client filters
+cannot prove server-side prohibition of writes. Explicit route env values are
+preserved. Declared env/header/bearer references use repository dotenv values
+when available, with process-env fallback when absent; unrelated process secrets
+are not inherited. The explicit task memory restriction still takes priority.
