@@ -121,7 +121,7 @@ def _opencode_candidates(root: Path) -> list[dict[str, Any]]:
                             config.get("plugin") or config.get("plugins")
                         ),
                     )
-                except (OSError, ValueError):
+                except (OSError, ValueError, RecursionError):
                     item.update(parse_status="ERROR", plugins_configured=None)
         results.append(item)
     return results

@@ -14,6 +14,39 @@ from scripts.ai.codex import hook_inventory as inventory
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("relative", ["opencode.json", ".opencode/opencode.json"])
+def test_deep_json_preserves_complete_runtime_diagnostic(
+    tmp_path, monkeypatch, relative
+):
+    """A bounded but deeply nested config cannot abort other runtime evidence."""
+    path = tmp_path / relative
+    path.parent.mkdir(parents=True, exist_ok=True)
+    private = "private-parser-content"
+    payload = '{"nested":' + "[" * 10000 + json.dumps(private) + "]" * 10000 + "}"
+    assert len(payload.encode()) < inventory.MAX_BYTES
+    path.write_text(payload)
+    monkeypatch.setattr(inventory.shutil, "which", lambda name: None)
+    monkeypatch.setattr(
+        inventory, "git_inventory", lambda root: {"status": "NOT_PROVEN"}
+    )
+    report = inventory.collect(tmp_path)
+    assert len(report["runtimes"]) == 4
+    opencode = next(
+        item for item in report["runtimes"] if item["runtime"] == "opencode"
+    )
+    if relative == "opencode.json":
+        assert opencode["config_status"] == "ERROR"
+    else:
+        assert opencode["config_status"] == "INCOMPLETE"
+        candidate = next(
+            item
+            for item in opencode["additional_configurations"]
+            if item["path"] == str(path)
+        )
+        assert candidate["parse_status"] == "ERROR"
+    assert private not in json.dumps(report)
+
+
 def test_launcher_and_stale_metadata_do_not_establish_version(tmp_path: Path) -> None:
     """A launcher plus a package version cannot attest the selected binary."""
     launcher = tmp_path / "codex.cmd"
