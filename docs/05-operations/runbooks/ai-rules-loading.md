@@ -163,6 +163,25 @@ For native observations verify complete content, selected source paths, binary
 identity and cwd; distinguish discovery, prompt rendering, execution and refusal.
 Never turn an unavailable client, skipped probe or unknown version into PASS.
 
+### Explicit CI closeout
+
+The existing Skills Consistency manual workflow (`approve_runtime_sync=false`)
+now captures source-bound `done` receipts inside its native-runtime job. It runs
+scoped runtime tests, check-only light governance (cleanup/auto-fix, memory and
+broad architecture are explicitly excluded), full links, and source-only debt
+checks. The main PR gate still supplies its required architecture and quality
+checks. Logs and the governance JSON retain individual skipped steps as SKIP;
+the receipt qualifies the declared producer scope, not those excluded checks.
+
+The workflow captures actual exit codes, timestamps, argv and output digests,
+then uses the existing core assembler/verifier at CI trust. A failure remains a
+failed receipt; missing evidence, timeout, STOP or DEGRADED cannot admit closeout.
+The GitHub run SHA must equal the current reviewed head. Download and inspect
+`ai-runtime-proof-<run-id>-<attempt>` before claiming admission. A green stale run
+or a hand-authored receipt is insufficient. This proves scoped static validation,
+not native model obedience, process isolation, or whole-epic acceptance.
+No sync, native hook, agent, or EvidenceStore ingestion is activated by that run.
+
 ## Rollback
 
 Remove the inventory invocation or revert bootstrap changes with their mirrors.
