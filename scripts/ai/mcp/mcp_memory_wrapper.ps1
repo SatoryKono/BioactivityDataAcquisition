@@ -52,6 +52,9 @@ if (Test-Path $venvWinPython) {
 $env:PYTHONPATH = "$repoRoot\src" + $(if ($env:PYTHONPATH) { ";$env:PYTHONPATH" } else { '' })
 $scopeArgs = @()
 if (-not [string]::IsNullOrWhiteSpace($env:MEMORY_FILE_PATH)) {
+    $targetGuard = Join-Path $scriptDir 'support/check_legacy_memory_target.py'
+    & $memoryPython $targetGuard $repoRoot $env:MEMORY_FILE_PATH
+    if ($LASTEXITCODE -ne 0) { exit 78 }
     $scopeArgs += @('--target', $env:MEMORY_FILE_PATH)
 }
 $seed = if ($env:MEMORY_SEED_PATH) { $env:MEMORY_SEED_PATH } else {

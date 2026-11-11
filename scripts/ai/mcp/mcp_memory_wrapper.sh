@@ -64,6 +64,10 @@ fi
 export PYTHONPATH="${REPO_ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}"
 scope_args=()
 if [[ -n "${MEMORY_FILE_PATH:-}" ]]; then
+  if ! "${MEMORY_PYTHON}" "${SCRIPT_DIR}/support/check_legacy_memory_target.py" \
+      "${REPO_ROOT}" "${MEMORY_FILE_PATH}"; then
+    exit 78
+  fi
   scope_args+=(--target "${MEMORY_FILE_PATH}")
 fi
 export MEMORY_REPO_ROOT="${REPO_ROOT}"

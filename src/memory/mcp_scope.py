@@ -5,11 +5,13 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
+import tempfile
 from pathlib import Path
 
-from memory.storage import atomic_write_bytes
+from memory.storage import exclusive_lock
 
 
 def _confine_under_root(path: Path, *, root: Path) -> Path:
@@ -85,15 +87,30 @@ def memory_scope_path(
 def initialize_memory_file(target: Path, seed: Path) -> None:
     """Seed one scope exactly once under the shared storage lock."""
     target.parent.mkdir(parents=True, exist_ok=True)
-    if target.exists():
-        return
-    payload = seed.read_bytes()
-    parsed = json.loads(payload)
-    if not isinstance(parsed, dict):
-        raise ValueError("MCP memory seed must be a JSON object")
-    # Concurrent first users may both reach this call, but the storage primitive
-    # serializes complete writes and every contender writes the identical seed.
-    atomic_write_bytes(target, payload)
+    with exclusive_lock(target):
+        if target.exists() or target.is_symlink():
+            return
+        payload = seed.read_bytes()
+        parsed = json.loads(payload)
+        if not isinstance(parsed, dict):
+            raise ValueError("MCP memory seed must be a JSON object")
+        fd, raw_temp_path = tempfile.mkstemp(
+            dir=target.parent, prefix=f".{target.name}.", suffix=".tmp"
+        )
+        temp_path = Path(raw_temp_path)
+        try:
+            with os.fdopen(fd, "wb") as handle:
+                handle.write(payload)
+                handle.flush()
+                os.fsync(handle.fileno())
+            try:
+                # A hard link publishes the complete file only if no target
+                # already exists, including one created by a noncooperating writer.
+                os.link(temp_path, target)
+            except FileExistsError:
+                return
+        finally:
+            temp_path.unlink(missing_ok=True)
 
 
 def main(argv: list[str] | None = None) -> int:

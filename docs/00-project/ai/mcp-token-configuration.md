@@ -143,6 +143,11 @@ For the full local registration and wrapper preflight:
 bash scripts/ai/mcp/check.sh
 ```
 
+Filesystem MCP startup is temporarily blocked pending a verified safe backend.
+The check reports this block and exits nonzero; wrapper validation-only success
+does not indicate filesystem readiness. Other configured MCP routes remain
+independent of the filesystem wrapper.
+
 ## Troubleshooting
 
 | Symptom | Check |

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -45,6 +46,43 @@ def test_concurrent_seed_is_atomic_and_shared_within_scope(tmp_path: Path) -> No
     }
     assert not list(target.parent.glob("*.tmp"))
     assert not list(target.parent.glob("*.lock"))
+
+
+def test_noncooperating_writer_is_not_overwritten(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    seed = tmp_path / "seed.json"
+    seed.write_text('{"entities":[],"relations":[]}\n', encoding="utf-8")
+    target = tmp_path / "scope" / "memory.json"
+    original_link = os.link
+
+    def create_competing_file(source: Path, destination: Path) -> None:
+        destination.write_text("competing writer", encoding="utf-8")
+        original_link(source, destination)
+
+    monkeypatch.setattr("memory.mcp_scope.os.link", create_competing_file)
+    initialize_memory_file(target, seed)
+
+    assert target.read_text(encoding="utf-8") == "competing writer"
+    assert not list(target.parent.glob("*.tmp"))
+
+
+def test_unsupported_hard_link_fails_without_partial_graph(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    seed = tmp_path / "seed.json"
+    seed.write_text('{"entities":[],"relations":[]}\n', encoding="utf-8")
+    target = tmp_path / "scope" / "memory.json"
+
+    def refuse_link(*_args: object, **_kwargs: object) -> None:
+        raise OSError("hard links unavailable")
+
+    monkeypatch.setattr("memory.mcp_scope.os.link", refuse_link)
+    with pytest.raises(OSError, match="hard links unavailable"):
+        initialize_memory_file(target, seed)
+
+    assert not target.exists()
+    assert not list(target.parent.glob("*.tmp"))
 
 
 def test_existing_same_scope_memory_is_shared_not_reseeded(tmp_path: Path) -> None:

@@ -73,6 +73,7 @@ def test_mcp_memory_read_write_does_not_require_npm_cache(tmp_path: Path) -> Non
         "scripts/ai/mcp/mcp_memory_wrapper.sh",
         "scripts/ai/mcp/support/load_repo_env.sh",
         "scripts/ai/mcp/support/token_validation.sh",
+        "scripts/ai/mcp/support/check_legacy_memory_target.py",
         "scripts/ops/support/load_repo_env.sh",
         "src/memory/__init__.py",
         "src/memory/fs_confine.py",
@@ -151,6 +152,25 @@ def test_mcp_memory_default_store_is_scoped_and_untracked() -> None:
     assert 'scope_args+=(--target "${MEMORY_FILE_PATH}")' in wrapper
     assert 'if ! MEMORY_FILE_PATH="$(' in wrapper
     assert "export MEMORY_FILE_PATH\nexec" in wrapper
+
+
+@pytest.mark.parametrize("first_part", ["project-service-v1", "PROJECT-SERVICE-V1", "legacy"])
+def test_legacy_memory_target_guard_keeps_owner_namespace_reserved(
+    tmp_path: Path, first_part: str
+) -> None:
+    helper = Path("scripts/ai/mcp/support/check_legacy_memory_target.py")
+    target = tmp_path / ".cache" / "mcp-memory" / first_part / "memory.json"
+    outcome = subprocess.run(
+        [sys.executable, "-I", "-S", "-B", str(helper), str(tmp_path), str(target)],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=8,
+    )
+    assert outcome.returncode == (0 if first_part == "legacy" else 78)
+    assert not target.exists()
+    if first_part != "legacy":
+        assert "registered adapter" in outcome.stderr
 
 
 def test_mcp_memory_wrapper_is_git_executable() -> None:

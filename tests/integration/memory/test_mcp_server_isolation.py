@@ -129,7 +129,8 @@ def test_live_servers_share_scope_persist_and_write_concurrently(
                 for index, process in enumerate((first, second), start=1)
             ]
             for future in futures:
-                future.result()
+                result = future.result()
+                assert not result.get("isError"), result
         graph = json.loads(path.read_text(encoding="utf-8"))
         assert {item["name"] for item in graph["entities"]} == {
             "client-1",

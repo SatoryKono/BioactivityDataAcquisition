@@ -1,17 +1,21 @@
 #!/usr/bin/env bash
-# MCP filesystem server: pin package and scope to repo root with a host-native
-# absolute path. Avoids client-side expansion of portable "." into a foreign
-# OS path (e.g. Windows E:\... under WSL Node), which breaks path.resolve().
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
-export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
-
 # shellcheck source=./support/token_validation.sh
 source "${SCRIPT_DIR}/support/token_validation.sh"
 mcp_exit_if_validate_only "filesystem"
-mcp_prepare_npm_cache
 
-# Optional extra allowed roots after the repo root (advanced clients).
-exec npx -y "@modelcontextprotocol/server-filesystem@2026.8.31" "${REPO_ROOT}" "$@"
+if command -v cygpath >/dev/null 2>&1; then
+  wrapper="$(cygpath -aw "${SCRIPT_DIR}/mcp_filesystem_wrapper.ps1")"
+elif command -v wslpath >/dev/null 2>&1; then
+  wrapper="$(wslpath -aw "${SCRIPT_DIR}/mcp_filesystem_wrapper.ps1")"
+else
+  printf '%s\n' 'Filesystem MCP requires the registered Windows owner.' >&2
+  exit 1
+fi
+if ! command -v powershell.exe >/dev/null 2>&1; then
+  printf '%s\n' 'Filesystem MCP requires the registered Windows owner.' >&2
+  exit 1
+fi
+exec powershell.exe -NoProfile -NonInteractive -File "${wrapper}"

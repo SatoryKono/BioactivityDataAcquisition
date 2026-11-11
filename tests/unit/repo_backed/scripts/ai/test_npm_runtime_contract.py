@@ -102,15 +102,19 @@ def test_current_root_lock_satisfies_manifest_and_engines() -> None:
     assert ">=22.12.0" in rejected.stderr
 
 
-def test_filesystem_runtime_and_diagnostic_pins_match_lock() -> None:
+def test_filesystem_runtime_and_diagnostic_fail_closed() -> None:
     lock = json.loads((ROOT / "package-lock.json").read_text(encoding="utf-8"))
-    version = lock["packages"]["node_modules/@modelcontextprotocol/server-filesystem"][
-        "version"
-    ]
-    for name in ("mcp_filesystem_wrapper.sh", "mcp_filesystem_wrapper.ps1", "check.sh"):
+    dependency = "@modelcontextprotocol/server-filesystem"
+    assert dependency not in lock["packages"][""]["dependencies"]
+    assert not any(
+        path.endswith(f"node_modules/{dependency}") for path in lock["packages"]
+    )
+    for name in ("mcp_filesystem_wrapper.sh", "mcp_filesystem_wrapper.ps1"):
         source = (ROOT / "scripts/ai/mcp" / name).read_text(encoding="utf-8")
-        assert f"@modelcontextprotocol/server-filesystem@{version}" in source
-        assert "2026.1.14" not in source
+        assert "Windows owner" in source
+        assert dependency not in source
+    diagnostic = (ROOT / "scripts/ai/mcp/check.sh").read_text(encoding="utf-8")
+    assert "filesystem uses the Windows owner launcher" in diagnostic
 
 
 def test_both_setup_platforms_enforce_preinstall_contract() -> None:
@@ -181,7 +185,7 @@ def test_container_preflight_on_synthetic_installed_runtime(
         assert "Chromium version mismatch" in result.stderr
 
 
-def test_powershell_filesystem_executes_locked_pin() -> None:
+def test_powershell_filesystem_fails_closed(tmp_path: Path) -> None:
     powershell = (
         shutil.which("pwsh")
         or shutil.which("pwsh.exe")
@@ -194,25 +198,27 @@ def test_powershell_filesystem_executes_locked_pin() -> None:
     assert powershell, "PowerShell is required for the actual Windows launch contract"
     script = ROOT / "scripts/ai/mcp/mcp_filesystem_wrapper.ps1"
     code = (
-        "function global:npx { $args -join '|'; $global:LASTEXITCODE=0 }; $global:LASTEXITCODE=0; & '"
+        "function global:npx { Write-Output '__NPX_CALLED__'; $global:LASTEXITCODE=0 }; $global:LASTEXITCODE=0; & '"
         + str(script).replace("'", "''")
         + "'"
     )
     result = subprocess.run(
         [powershell, "-NoProfile", "-Command", code],
+        env={**os.environ, "LOCALAPPDATA": str(tmp_path), "BIOETL_MCP_VALIDATE_ONLY": "0"},
         text=True,
         capture_output=True,
         check=False,
     )
-    assert result.returncode == 0, result.stderr
-    assert "@modelcontextprotocol/server-filesystem@2026.8.31" in result.stdout
+    assert result.returncode != 0
+    assert "Filesystem MCP requires the registered Windows owner" in result.stderr
+    assert "__NPX_CALLED__" not in result.stdout
 
 
-def test_shell_filesystem_executes_locked_pin(tmp_path: Path) -> None:
+def test_shell_filesystem_fails_closed(tmp_path: Path) -> None:
     bash = _windows_bash() if os.name == "nt" else shutil.which("bash")
     assert bash
     npx = tmp_path / "npx"
-    npx.write_text('#!/usr/bin/env bash\nprintf "%s\\n" "$@"\n', encoding="utf-8")
+    npx.write_text('#!/usr/bin/env bash\nprintf "__NPX_CALLED__\\n"\n', encoding="utf-8")
     npx.chmod(0o755)
     fake_bin = str(tmp_path)
     if os.name == "nt":
@@ -230,10 +236,11 @@ def test_shell_filesystem_executes_locked_pin(tmp_path: Path) -> None:
         text=True,
         capture_output=True,
         check=False,
-        env={**os.environ, "NPM_CONFIG_CACHE": str(tmp_path / ".cache/npm-cache")},
+        env={**os.environ, "LOCALAPPDATA": str(tmp_path), "BIOETL_MCP_VALIDATE_ONLY": "0"},
     )
-    assert result.returncode == 0, result.stderr
-    assert "@modelcontextprotocol/server-filesystem@2026.8.31" in result.stdout
+    assert result.returncode != 0
+    assert "Filesystem MCP requires the registered Windows owner" in result.stderr
+    assert "__NPX_CALLED__" not in result.stdout
 
 
 def test_root_npm_lock_graph_clean_install_parity(tmp_path: Path) -> None:

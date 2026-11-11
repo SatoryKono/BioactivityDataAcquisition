@@ -167,6 +167,20 @@ def _release_lock(lock_path: Path, *, poll_seconds: float) -> None:
             time.sleep(poll_seconds)
 
 
+def _replace_with_reader_wait(source: Path, target: Path) -> None:
+    """Wait briefly for Windows readers while retaining the caller's writer lock."""
+    deadline = time.monotonic() + 1.0
+    while True:
+        try:
+            os.replace(source, target)  # noqa: PTH105
+            return
+        except PermissionError:
+            # Reuse the same durable temp file; do not replay the mutation.
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(0.01)
+
+
 def atomic_write_bytes(
     target: Path,
     data: bytes,
@@ -198,7 +212,7 @@ def atomic_write_bytes(
             target_resolved = target.expanduser().resolve(strict=False)
             temp_resolved = temp_path.expanduser().resolve(strict=False)
             temp_resolved.relative_to(target_resolved.parent)
-            os.replace(temp_resolved, target_resolved)  # noqa: PTH105
+            _replace_with_reader_wait(temp_resolved, target_resolved)
         finally:
             if temp_path is not None:
                 temp_path.unlink(missing_ok=True)
@@ -286,7 +300,7 @@ def append_jsonl(
             target_resolved = target.expanduser().resolve(strict=False)
             temp_resolved = temp_path.expanduser().resolve(strict=False)
             temp_resolved.relative_to(target_resolved.parent)
-            os.replace(temp_resolved, target_resolved)  # noqa: PTH105
+            _replace_with_reader_wait(temp_resolved, target_resolved)
         finally:
             if temp_path is not None:
                 temp_path.unlink(missing_ok=True)

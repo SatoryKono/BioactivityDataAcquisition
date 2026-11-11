@@ -386,7 +386,7 @@ What this script does:
 - Writes workspace MCP config for Copilot at `.vscode/mcp.json`.
 - Synchronizes `.mcp.json`, `scripts/ai/.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`, `.qodo/mcp.json`, `.zed/mcp.json`, `.codex/settings.json`, `.gemini/settings.json`, Devin project settings in `.devin/config.json`, Devin MCP servers in `.devin/mcp_config.json`, and the managed MCP block in `~/.codex/config.toml`.
 - Registers the current MCP set: `memory`, `filesystem`, `fetch`, `github`, `docker`, `context7`, `ast-grep`, `mcp-code-interpreter`, `prometheus`, `grafana`, `brave-search`, `neo4j-cypher`, `neo4j-memory`, `mermaid`, `deja`, `adr-analysis`, `mutmut`, `code-analyzer`, `github-actions`, `deepwiki`, and `ref`.
-- Runs the pinned `mcp-server-fetch==2025.4.7` through `uvx --python 3.13`; this avoids the known stdio startup hang under CPython 3.14 in WSL while keeping the tracked config portable.
+- Routes Fetch through the registered Windows owner. The project wrapper reads the account-local launcher descriptor and requires Windows interop when called from WSL.
 - Keeps Codex npm/uv runtime caches under the native Linux user cache (`~/.cache/bioetl-mcp`, or `$XDG_CACHE_HOME/bioetl-mcp`) so WSL package installs do not rely on atomic rename/cleanup operations on `WSL-mounted Windows paths`; tracked MCP manifests remain repo-relative.
 - Uses repo-local wrappers for local and Docker-backed servers so auth and machine-local settings stay out of tracked MCP config files.
 - Uses local defaults when not overridden:
