@@ -1,0 +1,218 @@
+{
+  "schema_version": 1,
+  "issue": 13046,
+  "classification": "historical bounded diagnostic evidence; not current-session readiness",
+  "deja": {
+    "applicability": "dialogue history search",
+    "profile": "bioetl-main",
+    "selected_exports": 40,
+    "export_selection_source": "existing protected profile metadata; no export/profile changes",
+    "read_control": {
+      "observed_utc": "2026-11-11 19:05:58 UTC",
+      "control": "deja recall(query=BioETL,limit=3)",
+      "scope": "current exposed tool; no fresh ordinary-session acceptance claim",
+      "expected_profile": "bioetl-main",
+      "selected_exports": 40,
+      "profile_allows_notes": false,
+      "source_header_count": 3,
+      "all_source_headers_in_selected_exports": true,
+      "tool_error": false,
+      "response_chars": 3256,
+      "backend_process_binding": "NOT_TESTED",
+      "raw_response_persisted": false
+    },
+    "diagnostic_phases": {
+      "client_start": {
+        "status": "PASS",
+        "elapsed_ms": 10
+      },
+      "initialize": {
+        "status": "PASS",
+        "elapsed_ms": 354
+      },
+      "transport": {
+        "status": "PASS"
+      },
+      "catalog": {
+        "status": "PASS",
+        "elapsed_ms": 24
+      },
+      "tool": {
+        "status": "PASS",
+        "elapsed_ms": 1006
+      }
+    },
+    "backend_identity_before": {
+      "observed_utc": "2026-11-11T19:12:02.179491+00:00",
+      "profile": "bioetl-main",
+      "checks": {
+        "registered_profile": true,
+        "registered_workspace": true,
+        "owner_alive_with_recorded_birth": true,
+        "authenticated_health_ready": true,
+        "generation_matches": true,
+        "owner_pid_matches": true,
+        "container_matches": true,
+        "profile_stamp_matches": true,
+        "notes_disabled": true,
+        "container_running": true,
+        "image_matches": true,
+        "container_network_none": true,
+        "rootfs_readonly": true,
+        "export_input_readonly": true
+      },
+      "all_checks_pass": true,
+      "runtime_instance": {
+        "pid": 26316,
+        "birth": 134388795958488556,
+        "generation": "af08c1e8dad59ccbe9e64259e9a24bdd",
+        "container": "de1283e41ca84e0a0a4d44a45dfdc9423291aae0d048489fd5e462c9c4e99f72"
+      },
+      "raw_dialogue_or_config_saved": false,
+      "service_start_or_restart": false,
+      "ordinary_fresh_session_acceptance": "NOT_TESTED"
+    },
+    "backend_identity_after": {
+      "observed_utc": "2026-11-11T19:16:22.955093+00:00",
+      "profile": "bioetl-main",
+      "checks": {
+        "registered_profile": true,
+        "registered_workspace": true,
+        "owner_alive_with_recorded_birth": true,
+        "authenticated_health_ready": true,
+        "generation_matches": true,
+        "owner_pid_matches": true,
+        "container_matches": true,
+        "profile_stamp_matches": true,
+        "notes_disabled": true,
+        "container_running": true,
+        "image_matches": true,
+        "container_network_none": true,
+        "rootfs_readonly": true,
+        "export_input_readonly": true
+      },
+      "all_checks_pass": true,
+      "runtime_instance": {
+        "pid": 26316,
+        "birth": 134388795958488556,
+        "generation": "af08c1e8dad59ccbe9e64259e9a24bdd",
+        "container": "de1283e41ca84e0a0a4d44a45dfdc9423291aae0d048489fd5e462c9c4e99f72"
+      },
+      "raw_dialogue_or_config_saved": false,
+      "service_start_or_restart": false,
+      "ordinary_fresh_session_acceptance": "NOT_TESTED",
+      "runtime_instance_unchanged_from_previous": true
+    },
+    "notes_permitted": false,
+    "technical_read_only_scope": "adapter tool filtering and read-only input/root filesystem; no real write attempted",
+    "quality_scope": "three nonempty selected-export source headers; no relevance/recall benchmark",
+    "new_ordinary_session": "NOT_TESTED",
+    "isolation_negative_test": "NOT_TESTED"
+  },
+  "source_rag": {
+    "applicability": "APPLICABLE: existing local memory.rag workflow implementation; no new dependencies/service",
+    "owner": "BioETL Team (src/memory/catalog/owner_map.yaml)",
+    "receipt": {
+      "observed_utc": "2026-11-11T20:51:51.236098+00:00",
+      "head": "985457dde09b8453c3dcfdf7eb6cb7f05c12e37a",
+      "workspace": "D:\\github\\BioactivityDataAcquisition-worktrees\\mcp-13046-retrieval",
+      "status": "PASS",
+      "scope": "bounded workflow source RAG; not MCP or ordinary-session acceptance",
+      "expected_source": "src/bioetl/composition/runtime_builders/_cached_bronze_binding.py",
+      "source_sha256": "1dd6efd1edf7cc8da8e77671525b09efc8af3856827ce7695fa55269ac543c2a",
+      "control_symbol": "bind_cached_bronze_context",
+      "validation_ok": true,
+      "source_count": 48,
+      "chunk_count": 207,
+      "source_identities_sha256": "e3bfd2f099088aea11aed9275504cdf8a79e142270a3550c08efac3b86f4cbc9",
+      "source_identities": {
+        "src/bioetl/composition/runtime_builders/_cached_bronze_binding.py": "1dd6efd1edf7cc8da8e77671525b09efc8af3856827ce7695fa55269ac543c2a",
+        "src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py": "4ca6e6fb1fcc088b441c18cba28a8c964997548330ff94322279229678fb10a3",
+        "src/bioetl/composition/runtime_builders/_runner_input_preparation.py": "33f27d8ae214567e225649c1fe92e2de97aaa9bd961d34dc75366a4460e8559b",
+        "src/bioetl/__init__.py": "778859c332502593e78ff3907282a9a52a86902b55e9bda1991b8d98f5450404",
+        "src/bioetl/__main__.py": "82afa22639df0be69a465ada086effcf1fc84a81ce19b8befd5c095bd5b85b75",
+        "src/bioetl/application/__init__.py": "4b8845ae3558b3a1857aa5017a4079748632d2db28d78043f3ab9706ce81fcd7",
+        "src/bioetl/application/composite/__init__.py": "ed552ea4eb3b839f6e32561bcf29fa3cb539a6b4af8b454ea2bd2dfb12716ad1",
+        "src/bioetl/application/composite/_coalesce_policy_support.py": "cecd21831de18c7f846d331cf976fbcb641bde213838a1f88d595256e6edceca",
+        "src/bioetl/application/composite/_coalesce_timestamp_support.py": "3f1562abdbe0a19bd1244922ca1bab8a91e8cfeea1720b43426aaa941edeb730",
+        "src/bioetl/application/composite/_lifecycle_observer_event_metrics.py": "91e2507414fee239061b2089d587e06b8607b56eccc7ae2f22d90fc92692fcf9",
+        "src/bioetl/application/composite/_lifecycle_observer_span_management.py": "f7c104eb0472c23c6bea4a5131da3729ddd9288c47342a34f188a4f61ec5ffbb",
+        "src/bioetl/application/composite/_lifecycle_observer_tracing_helpers.py": "a0108061ca6e5270ae50e78aa5a9c41054317d0bfec7d6c0af89f475787787e8",
+        "src/bioetl/application/composite/_lifecycle_observer_tracing_types.py": "8d4de3a312ab5ffd1b3b93f28827c01995a1167f39d8759d816e9207a2914bff",
+        "src/bioetl/application/composite/_preflight_field_priority.py": "e7b6c664fa1276d8e66495c761de9cbb1b6b8f7f946506deeb9ac39fcfe3fc87",
+        "src/bioetl/application/composite/_preflight_orchestration.py": "f9d31cb9b2d833a4a19ebe1fff06e695c4411435d2aedd11760713b71bfeee08",
+        "src/bioetl/application/composite/_preflight_reporting.py": "83308d53cd174e28ce45d56c367b7c111bdf0760704f89144e72b9fd99743ca3",
+        "src/bioetl/application/composite/_preflight_types.py": "38dbe8f15b653f53e70ba9850a8746c545f88b357e0c4df5eb3ef06da8e4437c",
+        "src/bioetl/application/composite/aggregator.py": "c4b7677035668cf0d395b8f98d7caa84ec5a0eb5eed4e5bbaac76480d9a725d2",
+        "src/bioetl/application/composite/checkpoint/__init__.py": "43247f722b496a27ecceb0e352ddd1faa9d4f067f45b21667f68042b86d61501",
+        "src/bioetl/application/composite/checkpoint/_anchor_context.py": "7379c99bccaebe622581c8df8205b75bf766f2207d693f0cc89170bab6122540",
+        "src/bioetl/application/composite/checkpoint/_checkpoint_replay_projection.py": "15120220dc959068a23e19f03cb6b90527e98887cacf0ac96636570da274fb2f",
+        "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py": "0810db4cf6221ccecd64377c24bdc164bd033f0d0df5081d37e03141ef1dadd8",
+        "src/bioetl/application/composite/checkpoint/_checkpoint_warnings.py": "5f66b17038b7d8f3cea09bf0faa1b898e92bf5661a74a2f6f0ad4ccacd911e29",
+        "src/bioetl/application/composite/checkpoint/_load_validation.py": "7e5a2cc765f11b060e55f37133d98cef17ce1888d191fdb321d8c0a976676d4d",
+        "src/bioetl/application/composite/checkpoint/_state_support.py": "e441da433c9a84ab7deaf5916df0aafdb6b7df4e93a315180785e5fc7afbb0f4",
+        "src/bioetl/application/composite/checkpoint/load_service.py": "50bed3bff267f5724f7e29c09a0947b060ae26259bc631ed429ea919fffa377d",
+        "src/bioetl/application/composite/checkpoint/persistence_service.py": "8a12425906ba30d30bf023ed81b2d862017984b688fabcca8761d55463b3c656",
+        "src/bioetl/application/composite/checkpoint/service.py": "aaf1d7f741cfc95c9db3cbb12c2dcdcf9d642e21c84cf34f9d8fae4538a9b4b9",
+        "src/bioetl/application/composite/checkpoint/state.py": "dda0b6518a232faac492a81325a7881c0ac1c2a4bffb1de5c293c76c6f0be7e8",
+        "src/bioetl/application/composite/checkpoint/state_parsing.py": "723306836c66df08e5f2cb688895f09eb096d19d205a6315acd92a574e5da263",
+        "src/bioetl/application/composite/checkpoint/state_serialization.py": "ea67665d0b2e7d375ccd8016c099ed01bb9bd18de422795d6763d4267ce34ade",
+        "src/bioetl/application/composite/checkpoint/transition_service.py": "5b02a1501b926ce012d6fd88e8b0f9a022b7e37e5863954eead32d9cd40badaa",
+        "src/bioetl/application/composite/coalesce_policy.py": "32a666b005de987351953f3594a1b0afa18f2a497270b039e760244a91c945df",
+        "src/bioetl/application/composite/column_orderer_group_flow.py": "cb0899c7898b1c4986b684d8ad75394af3c6b0c8f88c36a6a2802583affea9fa",
+        "src/bioetl/application/composite/column_orderer_semantic.py": "d3794f0962ce858cbf43d7489ef864401c3751eb6b87c80b2485d274554fdef7",
+        "src/bioetl/application/composite/column_priority_orderer.py": "7b0e1e23401aaa516787087a751eba3a149cd634537809bbeeddc266a3210a33",
+        "src/bioetl/application/composite/column_renamer.py": "72b35bd2731113c94f94385672d0c830d2666a01102d41970fee87fc0486c6cd",
+        "src/bioetl/application/composite/column_service.py": "296e6df2e271c1c5e10f10183b6e3329d8858b4c43a3254b5d2f385af7aafdf7",
+        "src/bioetl/application/composite/column_service_priority.py": "ef1c967406ad99dc0ee9afd238b80b8ab38c12b3f432992545d23e79524d1923",
+        "src/bioetl/application/composite/column_service_stage_delegates.py": "c738d659e2b2bdef4cfd0087fe1c074c37228e221ebf5231a08a1008eb3b98d4",
+        "src/bioetl/application/composite/column_service_support.py": "9004cd9317787504be031e71f474d1b13b5434ede37cc84b12d6b246718d1af8",
+        "src/bioetl/application/composite/conflict_resolver.py": "fde66873fba79d0b81c531f9974a15a1982b9bfc83eb03aeced362d133eeceaa",
+        "src/bioetl/application/composite/coordinator.py": "2fcc16b74c95b90f62e687382ad8b570f47bfa036f838826f9e074bc2ea66f40",
+        "src/bioetl/application/composite/coordinator_planning.py": "e336df42aee530651cc2e02d1a73fa6a3497971a3e76500f9c82fc8b349d5658",
+        "src/bioetl/application/composite/coordinator_result_mixin.py": "2338dc052c95c0cd294c2726a2375eb6f23708115184361ebd70302ab2d78d53",
+        "src/bioetl/application/composite/cross_validator.py": "cdbb090f95b80b18c8846ea4db4f85f3f4c18eebac8d18266b2655ee8e7954c4",
+        "src/bioetl/application/composite/cross_validator_helpers.py": "a6e8bf92d820060567bec5070f5d135fd8772acd367d66686a8868bc0c2d166e",
+        "src/bioetl/application/composite/deduplication.py": "186871c28e1927ffe8e4f1448f62a91798f9925e01477a000c8d224af0aae2e2"
+      },
+      "source_set_and_bytes_unchanged": true,
+      "network": "disabled in Python process",
+      "bounds": {
+        "max_sources": 48,
+        "per_source_bytes": 262144,
+        "total_source_bytes": 4194304,
+        "output_bytes": 2097152,
+        "observation_seconds": 120
+      },
+      "temporary_directory": "D:\\github\\BioETL-diagnostics\\mcp-13046-source-control-20261111",
+      "output_outside_git": true,
+      "raw_chunks_retained": false,
+      "duration_seconds": 8.895,
+      "outputs": {
+        "corpus_catalog.json": {
+          "bytes": 16971,
+          "sha256": "69804ab3f5b0b1878aa98d133d9ef98d5b170929421ecfef6f535252c02a2804"
+        },
+        "chunks.jsonl": {
+          "bytes": 475578,
+          "sha256": "b682c50d364f72649c265b35ef8def95b36f3142931d8554b3e48caf814ed700"
+        }
+      },
+      "cleanup": "verified generated pair unlinked individually; empty run directory removed"
+    },
+    "coverage": "bounded selected workflow corpus only; not the full repository",
+    "reproduction": "memory.rag.indexing.write_rag_manifests(workflow, focus_query=bind_cached_bronze_context, max_sources=48); validate_rag_manifest_files(verify_sources=True); rank_chunks(source_type=code, profile=implementation)",
+    "cleanup_on_timeout": "do not replay automatically; inspect physical run directory and remove only verified current-run files",
+    "output_size_limit_scope": "verified before acceptance; existing builder has no streaming disk quota",
+    "network_limit_scope": "socket calls disabled in the diagnostic Python process; no OS-wide network policy claim"
+  },
+  "freshness": {
+    "status": "HISTORICAL_SNAPSHOT",
+    "invalidate_on": [
+      "Deja export selection/content or profile/access change",
+      "backend owner generation change requires independent binding recheck",
+      "source corpus/content/config or HEAD change"
+    ],
+    "policy": "mark affected evidence STALE; no automatic query replay or backend restart"
+  }
+}
