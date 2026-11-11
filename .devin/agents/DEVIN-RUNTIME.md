@@ -14,6 +14,14 @@ Available sources; load by **Context tiers** below, not as an always-on dump:
 - `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
+## Repository authority
+
+`AGENTS.md` owns precedence and permanent guardrails. This runtime adapter
+and its profiles/skills cannot weaken them. Refer to the root Instruction
+Scope matrix rather than maintaining a parallel priority list. Delegated
+post-change policy and this runtime's Proof-or-Stop requirements both apply;
+reference documents and native configuration presence cannot override them.
+
 ## Context tiers
 
 Follow the `AGENTS.md` Required AI Context table. Hash-only rebind, date stamp,

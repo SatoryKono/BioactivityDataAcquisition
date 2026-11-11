@@ -27,7 +27,7 @@ ______________________________________________________________________
 | `.devin/agents/**`, `.devin/skills/**` | Devin runtime surface | Canonical for tracked Devin-specific runtime behavior | Yes, subject to Codex–Devin skill parity contracts | `DEVIN-RUNTIME`, custom profile entrypoints, orchestration, and Devin skill adaptations |
 | `.gemini/config.yaml` | Gemini Code Assist on GitHub | Tracked repository review config; not a BioETL runtime and not the OpenCode Meta Model surface | Yes, for that app's review settings only | `have_fun`, `memory_config`, `code_review`, `ignore_patterns` |
 | `.gemini/settings.json` | Gemini local config surface | Local-only runtime config; not a tracked behavior tree on `main` | Yes, for machine-local settings only | optional local checkout settings with machine-specific paths |
-| `.gemini/agents/**`, `.gemini/skills/**` | Gemini runtime behavior tree | Not present in the current `main` checkout | No tracked source on `main` today | if a future task adds them, they must be verified and documented in the same change |
+| `.gemini/agents/**`, `.gemini/skills/**` | Gemini runtime behavior tree | Not present in the current `main` checkout | No tracked source on `main` today | prohibited by AGENTS.md; presence does not authorize activation |
 | `docs/00-project/ai/**` | Published/internal mirror surface | Not canonical for runtime behavior | Only for mirror/index/guidance updates | curated mirrors, navigation, contributor guidance, memory entrypoints, prompt and skill indexes |
 | `docs/00-project/ai/rules/cursor/*.mdc` | Cursor rules source | Canonical for Cursor AI guidance in-repo | Yes | thematic `.mdc` rules derived from governance stack |
 | `docs/00-project/ai/rules/cursor/commands/**` | Cursor slash-command source | Canonical for Cursor project commands | Yes | Thin `/` adapters. Deploy copies them to gitignored `.cursor/commands/` |
@@ -63,9 +63,8 @@ ______________________________________________________________________
 1. `docs/00-project/ai/**` is a repo-only or internal-published mirror layer for
    discoverability and contributor guidance; it MUST NOT redefine runtime
    behavior on its own.
-1. If a future task introduces tracked `.gemini/agents/**` or
-   `.gemini/skills/**` surfaces, it MUST update this ownership contract,
-   `AGENTS.md`, and affected mirrors in the same change set.
+1. Tracked Gemini agent/skill trees remain prohibited by `AGENTS.md`;
+   this guide cannot authorize them through a conditional exception.
 1. Canonical project rules still come from:
    - `docs/00-project/NORMATIVE_SOURCES.md`
    - `docs/00-project/RULES.md`
@@ -74,36 +73,23 @@ ______________________________________________________________________
 
 ## Precedence Model
 
-Default precedence for AI behavior and guidance:
+The sole repository precedence is `AGENTS.md`, section `Canonical
+Precedence`; root guardrails cannot be weakened by profiles, skills, or this
+ownership guide. `Instruction Scope` in that root contract distinguishes
+always-on rules, task procedures, native adapters, and reference material.
 
-1. active runtime source for the current agent or skill — equal peers:
-   - `.codex/agents/CODEX-RUNTIME.md`
-   - `.junie/agents/JUNIE-RUNTIME.md`, with root contract
-     `.junie/guidelines.md`
-   - `.devin/agents/DEVIN-RUNTIME.md` for Devin sessions
-   - a matching tracked `.gemini/**` runtime source only when that tree exists
-     in the current checkout and has been verified in the same change
-1. matching runtime profiles and skills in the selected runtime tree:
-   - `.codex/agents/py-*.md`, `.codex/skills/**`
-   - `.junie/agents/py-*.md`, `.junie/skills/**`
-   - `.devin/agents/*/AGENT.md`, `.devin/skills/**` for Devin sessions
-   - matching tracked `.gemini/agents/**` and `.gemini/skills/**` only when the
-     runtime tree exists and is verified in the same change
-1. `docs/00-project/NORMATIVE_SOURCES.md`
-1. `docs/00-project/RULES.md`
-1. `docs/01-requirements/REQUIREMENTS.md`
-1. accepted ADRs
-1. docs mirrors, memory sheets, and contributor guides
-
-The docs mirror MAY summarize or link to runtime behavior, but it MUST NOT
-override the active runtime tree.
+`POST_CHANGE_VALIDATION.md` owns the procedure explicitly delegated by the
+root contract, without changing authority or replacing runtime Proof-or-Stop.
+This document describes ownership and mirror operations, not another priority
+list. Gemini behavior trees remain prohibited by `AGENTS.md`; file presence
+or a documentation-only change cannot activate a new project runtime.
 
 ## Sync Direction
 
 Default sync direction is:
 
 1. runtime tree changes first (`.codex/**` and `.junie/**` as equal peers;
-   tracked `.gemini/**` only when such a tree actually exists on `main`)
+   `.devin/agents/**` and `.devin/skills/**` for Devin adaptations)
 1. runtime-mirror parity check: `bash scripts/ai/junie/check_junie_mirror.sh
    --check` (or `--sync` when the mirror side needs regeneration from
    `.codex/**`) whenever `.codex/agents/**`, `.codex/skills/**`,
@@ -159,7 +145,7 @@ The following divergence is not acceptable:
   on `main`
 - contributor guidance tells users to edit a docs mirror instead of the runtime
   source for behavior changes
-- active Codex/Gemini runtime surfaces depend on `.claude/**` as a canonical
+- active Codex/Junie/Devin runtime surfaces depend on `.claude/**` as a canonical
   behavior source
 - runtime config docs claim portability while a checked-in portable config
   depends on machine-local absolute paths
@@ -169,8 +155,7 @@ The following divergence is not acceptable:
 - Change runtime behavior:
   edit the matching tracked runtime tree first (`.codex/**` or `.junie/**` —
   they are equal peers and MUST stay in parity via
-  `scripts/ai/junie/check_junie_mirror.sh`; `.gemini/**` only when the tree
-  exists on `main`).
+  `scripts/ai/junie/check_junie_mirror.sh`; Devin adaptations in `.devin/agents/**` and `.devin/skills/**`).
 - Change published navigation or contributor guidance:
   edit `docs/00-project/ai/**`.
 - Change Gemini local-config classification:
@@ -207,14 +192,12 @@ The following divergence is not acceptable:
 - Agent orchestration behavior for Codex -> `.codex/agents/**`
 - Agent orchestration behavior for Junie -> `.junie/agents/**` (equal peer;
   parity with `.codex/agents/**` enforced by `check_junie_mirror.sh`)
-- Agent orchestration behavior for Gemini -> only when a tracked
-  `.gemini/agents/**` tree exists on `main`; otherwise treat Gemini references
-  in docs as mirrors or local-only guidance
+- Gemini agent behavior trees -> prohibited by `AGENTS.md`; documentation
+  references do not authorize creation or activation.
 - Skill trigger/runtime behavior for Codex -> `.codex/skills/**`
 - Skill trigger/runtime behavior for Junie -> `.junie/skills/**` (equal peer;
   parity with `.codex/skills/**` enforced by `check_junie_mirror.sh`)
-- Skill trigger/runtime behavior for Gemini -> only when a tracked
-  `.gemini/skills/**` tree exists on `main`
+- Gemini skill behavior trees -> prohibited by `AGENTS.md`.
 - Gemini local config classification -> `MCP_LOCAL_RUNTIME_CONFIG.md`
 - **Devin orchestration context** -> use `.devin/agents/DEVIN-RUNTIME.md`,
   `.devin/agents/ORCHESTRATION.md`, and the selected
