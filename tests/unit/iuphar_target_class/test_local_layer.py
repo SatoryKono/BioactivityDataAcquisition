@@ -166,6 +166,50 @@ def test_local_result_has_no_iuphar_fields() -> None:
     assert not any(name.startswith("iuphar_") for name in names)
 
 
+@pytest.mark.parametrize("layer", ("L1", "L2"))
+def test_other_protein_prediction_does_not_supply_a_rule(layer: str) -> None:
+    result = apply_local(
+        (),
+        rules=(),
+        predictions=(
+            Prediction(layer, "Other Protein Target", True, False, "prediction"),
+        ),
+    )
+    assert result.local_status == "not_supported"
+    assert result.local_class is None
+    assert result.local_rule_ids == ()
+    assert result.local_evidence_ids == ()
+    assert "candidate_only" in result.local_candidates
+
+
+def test_other_protein_prediction_keeps_matched_keyword_rule_as_owner() -> None:
+    result = apply_local(
+        (),
+        rules=(
+            _rule("opt", "annotation", "keyword_id=KW-OPT", "Other Protein Target"),
+        ),
+        keyword_ids=("KW-OPT",),
+        predictions=(
+            Prediction("L1", "Other Protein Target", True, False, "prediction"),
+        ),
+    )
+    assert result.local_status == "supported"
+    assert result.local_class == "Other Protein Target"
+    assert result.local_rule_ids == ("opt",)
+    assert result.local_evidence_ids == ("keyword:KW-OPT",)
+
+
+def test_independent_receptor_prediction_keeps_existing_support() -> None:
+    result = apply_local(
+        (),
+        rules=(),
+        predictions=(Prediction("L1", "Receptor", True, False, "prediction"),),
+    )
+    assert result.local_status == "supported"
+    assert result.local_class == "Receptor"
+    assert result.local_rule_ids == ("prediction:L1",)
+
+
 def test_broken_rule_blocks_processing() -> None:
     broken = _rule("bad", "annotation", "keyword_id=KW-1", "Enzyme", version="")
     with pytest.raises(ValueError, match="missing version"):
