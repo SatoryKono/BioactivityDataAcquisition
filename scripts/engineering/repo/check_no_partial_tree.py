@@ -56,6 +56,10 @@ _REVISION_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_./@^{}~+-]*$")
 _SHA_RE = re.compile(r"^[0-9a-f]{40}(?:[0-9a-f]{24})?$")
 
 
+class EvidenceError(ValueError):
+    """Git or event evidence cannot qualify the protected operation."""
+
+
 def is_collapsed_tree(base_top: frozenset[str], child_top: frozenset[str]) -> bool:
     """Return whether a commit tree collapsed relative to the healthy base tree.
 
@@ -76,7 +80,7 @@ def validate_revision_token(token: str) -> str:
     """Reject git flag-injection in revision tokens from CLI/agents."""
     text = str(token).strip()
     if not text or text.startswith("-") or not _REVISION_RE.fullmatch(text):
-        raise SystemExit(f"invalid git revision: {token!r}")
+        raise EvidenceError(f"invalid git revision: {token!r}")
     return text
 
 
@@ -84,19 +88,19 @@ def validate_repo(repo: str | Path) -> Path:
     """Resolve cwd to an existing git work tree; refuse flag-like paths."""
     raw = str(repo).strip()
     if not raw or raw.startswith("-"):
-        raise SystemExit(f"invalid git repository path: {repo!r}")
+        raise EvidenceError(f"invalid git repository path: {repo!r}")
     path = Path(raw).resolve()
     if not path.is_dir():
-        raise SystemExit(f"git repository is not a directory: {path}")
+        raise EvidenceError(f"git repository is not a directory: {path}")
     git_meta = path / ".git"
     if not git_meta.exists():
-        raise SystemExit(f"not a git repository: {path}")
+        raise EvidenceError(f"not a git repository: {path}")
     return path
 
 
 def _run_git(repo: Path, verb: str, *args: str) -> str:
     if verb not in _GIT_VERBS:
-        raise SystemExit(f"unsupported git verb: {verb!r}")
+        raise EvidenceError(f"unsupported git verb: {verb!r}")
     env = os.environ.copy()
     for key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"):
         env.pop(key, None)
@@ -115,9 +119,9 @@ def _run_git(repo: Path, verb: str, *args: str) -> str:
             timeout=10,
         )
     except (OSError, subprocess.TimeoutExpired):
-        raise SystemExit("Git evidence unavailable or timed out") from None
+        raise EvidenceError("Git evidence unavailable or timed out") from None
     if result.returncode != 0:
-        raise SystemExit(f"git {verb} failed; evidence unavailable")
+        raise EvidenceError(f"git {verb} failed; evidence unavailable")
     return result.stdout
 
 
@@ -233,7 +237,7 @@ def check_index_tree(repo: str | Path, base: str) -> list[str]:
     for record in filter(None, before.split("\x00")):
         metadata, path = record.split("\t", 1)
         if metadata.split()[2] != "0":
-            raise SystemExit("unmerged index is unqualified")
+            raise EvidenceError("unmerged index is unqualified")
         roots.add(path.split("/", 1)[0])
     missing = (_top_directories(cwd, base_sha) - roots) & DIRECTORY_ANCHORS
     problems = []
@@ -273,7 +277,7 @@ def select_event_range(event_name: str, event: dict[str, Any]) -> tuple[str, str
             raise ValueError("missing immutable identities")
         return base, tip
     except (KeyError, TypeError, ValueError):
-        raise SystemExit(
+        raise EvidenceError(
             "event has no qualified base/tip; new branches require an explicit trusted base"
         ) from None
 
@@ -291,7 +295,7 @@ def resolve_revision(repo: str | Path, token: str) -> str:
     )
     sha = stdout.strip().splitlines()[-1] if stdout.strip() else ""
     if not _SHA_RE.fullmatch(sha):
-        raise SystemExit(f"git rev-parse did not return a commit SHA for {token!r}")
+        raise EvidenceError(f"git rev-parse did not return a commit SHA for {token!r}")
     return sha
 
 
@@ -299,7 +303,7 @@ def _git(repo: str | Path, *args: str) -> str:
     """Run an allowlisted git verb in a validated repository."""
     cwd = validate_repo(repo)
     if not args:
-        raise SystemExit("git verb is required")
+        raise EvidenceError("git verb is required")
     verb = args[0]
     extra = args[1:]
     return _run_git(cwd, verb, *extra)
@@ -325,7 +329,7 @@ def _shallow_boundaries(repo: Path) -> frozenset[str]:
     if state == "false":
         return frozenset()
     if state != "true":
-        raise SystemExit("history completeness is unknown")
+        raise EvidenceError("history completeness is unknown")
     try:
         path = Path(
             _run_git(
@@ -341,7 +345,7 @@ def _shallow_boundaries(repo: Path) -> frozenset[str]:
             raise ValueError("invalid shallow identities")
         return boundaries
     except (OSError, ValueError):
-        raise SystemExit("history completeness is unavailable") from None
+        raise EvidenceError("history completeness is unavailable") from None
 
 
 def find_collapsing_commits(
@@ -359,7 +363,7 @@ def find_collapsing_commits(
     shallow = _shallow_boundaries(cwd)
     common = _run_git(cwd, "merge-base", "--all", base_sha, tip_sha).strip()
     if not _SHA_RE.fullmatch(common):
-        raise SystemExit("trusted base and tip have no verified common ancestor")
+        raise EvidenceError("trusted base and tip have no verified common ancestor")
     revisions = [
         line
         for line in _run_git(
@@ -372,7 +376,7 @@ def find_collapsing_commits(
         if line
     ]
     if shallow.intersection(revisions):
-        raise SystemExit("candidate range crosses incomplete shallow history")
+        raise EvidenceError("candidate range crosses incomplete shallow history")
     base_top = _top_level_names(cwd, base_sha)
     offenders: list[str] = []
     for revision in revisions:
@@ -383,7 +387,7 @@ def find_collapsing_commits(
         ) or _missing_directory_content(cwd, common, revision):
             offenders.append(revision)
     if shallow != _shallow_boundaries(cwd):
-        raise SystemExit("history completeness changed during inspection")
+        raise EvidenceError("history completeness changed during inspection")
     return offenders
 
 
@@ -402,7 +406,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.event_json:
             args.base, args.tip = _load_event_range(args.event_name, args.event_json)
         return _run_checks(args.repo, args.base, args.tip, check_index=args.check_index)
-    except SystemExit:
+    except EvidenceError:
         print("ERROR: incomplete or invalid Git/event evidence")
         return 2
 
@@ -416,7 +420,7 @@ def _load_event_range(event_name: str, path: Path) -> tuple[str, str]:
         with resolved.open("rb") as stream:
             payload = stream.read(1024 * 1024 + 1)
     except (OSError, ValueError, RecursionError):
-        raise SystemExit("event evidence is unavailable or invalid") from None
+        raise EvidenceError("event evidence is unavailable or invalid") from None
     return parse_event_payload(event_name, payload)
 
 
@@ -427,7 +431,7 @@ def parse_event_payload(event_name: str, payload: bytes) -> tuple[str, str]:
         if not isinstance(event, dict):
             raise ValueError("invalid event")
     except (ValueError, RecursionError):
-        raise SystemExit("event evidence is unavailable or invalid") from None
+        raise EvidenceError("event evidence is unavailable or invalid") from None
     return select_event_range(event_name, event)
 
 

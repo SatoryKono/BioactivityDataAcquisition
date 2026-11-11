@@ -66,9 +66,10 @@ intentional deletions from an identical tree produced by a partial index.
 ## CI event and trust boundary
 
 The workflow uses pull_request_target with read-only repository access and a
-job-scoped status-write permission. It checks out the protected base checker,
+job-scoped status-write permission. It checks out the protected main checker,
 fetches candidate objects without checking them out, and executes no candidate
-Python, actions, dependencies or hooks. Git metadata queries disable fsmonitor
+Python, actions, dependencies or hooks. The checkout ref is the literal
+refs/heads/main, so a PR field cannot choose executable code. Git metadata queries disable fsmonitor
 and external diff/textconv execution. No agent or service is started.
 PR events are restricted to the protected main target. Push and manual runs
 load their checker from main, including when manual dispatch is requested from
