@@ -133,7 +133,7 @@ def test_run_explorer_processing_status_fits_zoom_with_inspectable_run_id() -> N
     assert fields["Overview"]["custom.width"] == 80
     assert fields["Overview"]["custom.minWidth"] == 80
     assert fields["Started"]["unit"] == "time:YYYY-MM-DD HH:mm"
-    assert fields["Run ID"]["custom.width"] == 100
+    assert fields["Run ID"]["custom.width"] == 110
     assert fields["Run ID"]["custom.inspect"] is True
     assert fields["Run ID"]["custom.wrapText"] is False
     assert fields["Run ID"]["custom.cellOptions"]["wrapText"] is False

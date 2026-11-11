@@ -1112,8 +1112,8 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     # Workflow/Pipeline stay flex (minWidth floor only) so 200% width budget holds.
     assert _override_width(recent, "Workflow") is None
     assert _override_width(recent, "Pipeline") is None
-    assert _override_min_width(recent, "Workflow") == 50
-    assert _override_min_width(recent, "Pipeline") == 70
+    assert _override_min_width(recent, "Workflow") == 80
+    assert _override_min_width(recent, "Pipeline") == 80
     assert recent["fieldConfig"]["defaults"]["custom"]["minWidth"] == 50
     assert recent["options"]["footer"]["enablePagination"] is False
     assert (_override_width(recent, "Run ID") or 0) <= 340
