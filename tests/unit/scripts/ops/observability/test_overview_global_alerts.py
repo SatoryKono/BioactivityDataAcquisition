@@ -44,13 +44,21 @@ def test_global_alerts_retain_donor_query_and_complete_list() -> None:
     assert "".join(recorded.split()) == "".join(donor["targets"][0]["expr"].split())
     assert summary["targets"] == [dict(donor["targets"][0], expr=metric)]
     assert summary["transformations"] == donor["transformations"]
-    assert summary["gridPos"] == {"x": 0, "y": 19, "w": 24, "h": 5}
+    assert summary["gridPos"] == {"x": 0, "y": 18, "w": 24, "h": 5}
     assert "repeat" not in summary
     assert panels[32005]["collapsed"] is True
+    # A collapsed row adopts following standalone panels in Grafana Scenes.
+    # Keep the disclosure last so summary and saved-run cards remain visible.
+    assert overview["panels"][-1]["id"] == 32005
+    assert panels[32005]["gridPos"]["y"] >= max(
+        p["gridPos"]["y"] + p["gridPos"]["h"]
+        for p in overview["panels"]
+        if p["id"] != 32005
+    )
     full = panels[32005]["panels"][0]
     assert full["id"] == 22005
-    assert full["targets"][0]["panelId"] == 2005
-    assert full["targets"][0]["withTransforms"] is False
+    assert full["datasource"] == summary["datasource"]
+    assert full["targets"] == summary["targets"]
     assert all(t["id"] != "limit" for t in full["transformations"])
     for panel in (summary, full):
         link = panel["links"][0]
