@@ -227,11 +227,12 @@ async def test_forbidden_is_not_retried(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_concurrent_health_and_data_share_one_bucket():
+async def test_concurrent_health_and_data_share_one_bucket(monkeypatch):
+    now = virtual_clock(monkeypatch)
     sent = []
 
     def respond(request):
-        sent.append(asyncio.get_running_loop().time())
+        sent.append(now[0])
         return httpx.Response(200)
 
     client = make_client(TokenBucketRateLimiter(50, 1))
@@ -243,6 +244,7 @@ async def test_concurrent_health_and_data_share_one_bucket():
             client.get("https://example.test/b"),
         )
     assert len(sent) == 3
+    sent.sort()
     assert all(b - a >= 0.018 for a, b in pairwise(sent))
 
 
