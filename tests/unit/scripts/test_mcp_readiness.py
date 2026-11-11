@@ -328,6 +328,32 @@ def http_mcp_fixture():
             raw = json.dumps(
                 {"jsonrpc": "2.0", "id": payload["id"], "result": result}
             ).encode()
+            if self.path in {"/slow-json", "/slow-sse", "/slow-headers"}:
+                import time
+
+                if self.path == "/slow-sse":
+                    raw = b"data: " + raw + b"\n\n"
+                try:
+                    if self.path == "/slow-headers":
+                        self.wfile.write(b"HTTP/1.0 200 OK\r\n")
+                        raw = b"Content-Type: application/json\r\n\r\n" + raw
+                    else:
+                        self.send_response(200)
+                        self.send_header(
+                            "Content-Type",
+                            "text/event-stream"
+                            if self.path == "/slow-sse"
+                            else "application/json",
+                        )
+                        self.send_header("Content-Length", str(len(raw)))
+                        self.end_headers()
+                    for byte in raw:
+                        self.wfile.write(bytes([byte]))
+                        self.wfile.flush()
+                        time.sleep(0.02)
+                except (BrokenPipeError, ConnectionResetError):
+                    pass
+                return
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Mcp-Session-Id", "fixture-session")
@@ -555,3 +581,99 @@ def test_probe_plan_rejects_symlink_escape(tmp_path):
         pytest.skip("symlink creation is unavailable on this host")
     with pytest.raises(ValueError, match="mcp-controls"):
         _read_probe_plan(tmp_path, linked.relative_to(tmp_path))
+
+
+@pytest.mark.parametrize("cwd_relative", [False, True])
+def test_stdio_respects_effective_cwd_and_relative_script(tmp_path, cwd_relative):
+    directory = tmp_path / "adapter-cwd"
+    directory.mkdir()
+    adapter = directory / "cwd_adapter.py"
+    adapter.write_text(
+        """import json,os,sys
+for line in sys.stdin:
+ r=json.loads(line)
+ if 'id' not in r: continue
+ m=r['method']
+ v={'protocolVersion':'2025-03-26','capabilities':{},'serverInfo':{'name':'fixture'}} if m=='initialize' else {'tools':[{'name':'read_file'}]} if m=='tools/list' else {'content':[{'type':'text','text':os.getcwd()}]}
+ print(json.dumps({'jsonrpc':'2.0','id':r['id'],'result':v}),flush=True)
+""",
+        encoding="utf-8",
+    )
+    value = capture(
+        tmp_path,
+        command=sys.executable,
+        args=["-u", adapter.name],
+        cwd=directory.name if cwd_relative else str(directory),
+    )
+    result = readiness_report(
+        value,
+        expected=["filesystem"],
+        required=["filesystem"],
+        profile="stable",
+        controls={"filesystem": {**CONTROL, "contains_all": [str(directory)]}},
+        environment={},
+    )
+    assert result["results"][0]["phases"]["tool"]["status"] == "PASS"
+
+
+@pytest.mark.parametrize("mode", ["off", "read-only"])
+def test_task_memory_restriction_survives_environment_filter(monkeypatch, mode):
+    from scripts.ai.codex.mcp_probe_client import probe_environment
+
+    monkeypatch.setenv("BIOETL_AI_MEMORY_MODE", mode)
+    monkeypatch.setenv("UNRELATED_SECRET", SECRET)
+    result = probe_environment(
+        {"env": {"BIOETL_AI_MEMORY_MODE": "read-write"}},
+        {"BIOETL_AI_MEMORY_MODE": "read-write"},
+    )
+    assert result["BIOETL_AI_MEMORY_MODE"] == mode
+    assert "UNRELATED_SECRET" not in result
+
+
+@pytest.mark.parametrize("method", ["initialize", "tools/list"])
+def test_early_policy_denial_does_not_pass_control(tmp_path, method):
+    session = Session({method: ProbeError("WORKSPACE_POLICY_DENIED")})
+    result = report(
+        capture(tmp_path),
+        session,
+        control={**CONTROL, "expected_policy_reason": "WORKSPACE_POLICY_DENIED"},
+    )
+    row = result["results"][0]
+    assert row["status"] == "FAIL"
+    assert row["control_status"] == "NOT_TESTED"
+    assert not any(call[0] == "tools/call" for call in session.calls)
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["mcp_context7_wrapper.sh", "mcp_ast_grep_wrapper.sh", "mcp_deja_wrapper.ps1"],
+)
+def test_existing_legacy_wrapper_does_not_prove_no_install_backend(tmp_path, name):
+    from scripts.ai.codex.mcp_probe_client import client_for
+
+    adapter = tmp_path / name
+    adapter.write_text("# fallback may install a package", encoding="utf-8")
+    launcher = "powershell" if adapter.suffix == ".ps1" else "bash"
+    args = (
+        ["-NoProfile", "-File", str(adapter)]
+        if launcher == "powershell"
+        else [str(adapter)]
+    )
+    with pytest.raises(ProbeError, match="WRAPPER_BACKEND_NO_INSTALL_NOT_VERIFIED"):
+        client_for({"command": launcher, "args": args}, tmp_path, {})
+
+
+@pytest.mark.parametrize("suffix", ["/slow-json", "/slow-sse", "/slow-headers"])
+def test_http_slow_drip_obeys_total_deadline_without_replay(http_mcp_fixture, suffix):
+    import time
+    from scripts.ai.codex.mcp_http_probe import HttpProbeClient
+
+    url, seen = http_mcp_fixture
+    started = time.monotonic()
+    with HttpProbeClient({"url": url + suffix}, None, {}) as client:
+        with pytest.raises(ProbeError) as error:
+            client.request("tools/list", {}, 0.1)
+    elapsed = time.monotonic() - started
+    assert error.value.uncertain
+    assert elapsed < 0.6, f"request exceeded its total observation budget: {elapsed}"
+    assert len(seen) == 1

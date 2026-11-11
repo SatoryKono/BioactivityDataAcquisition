@@ -55,9 +55,21 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/ai/codex/mcp_http_probe.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain bounded HTTP transport used by mcp_probe_client; doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
+    },
     "scripts/ai/codex/mcp_probe_client.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain the bounded stdio/HTTP diagnostic clients imported by doctor; keep supporting because doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
+    },
+    "scripts/ai/codex/mcp_probe_errors.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain sanitized shared MCP diagnostic outcomes; doctor owns the public CLI.",
       "owner": "@bioetl-platform",
       "review_by": "2026-12-11"
     },

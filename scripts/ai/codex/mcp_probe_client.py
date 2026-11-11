@@ -4,38 +4,19 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from pathlib import Path
-import json
 import os
-import time
-import urllib.error
-import urllib.request
 
 from scripts.ai.codex.native_mcp_config import NativeConfigClient, NativeConfigError
 
-MAX_RESPONSE_BYTES = 1024 * 1024
-
-
-class ProbeError(RuntimeError):
-    """A sanitized failure category; never retain a server error message."""
-
-    def __init__(self, category: str, *, uncertain: bool = False) -> None:
-        super().__init__(category)
-        self.category = category
-        self.uncertain = uncertain
-
-
-def rpc_result(value: dict) -> dict:
-    error = value.get("error")
-    if isinstance(error, dict):
-        data = error.get("data")
-        reason = data.get("reason") if isinstance(data, dict) else None
-        if reason == "WORKSPACE_POLICY_DENIED":
-            raise ProbeError("WORKSPACE_POLICY_DENIED")
-        raise ProbeError("RPC_ERROR")
-    result = value.get("result")
-    if not isinstance(result, dict):
-        raise ProbeError("INVALID_RESPONSE")
-    return result
+from scripts.ai.codex.mcp_probe_errors import (
+    ProbeError as ProbeError,
+    rpc_result as rpc_result,
+)
+from scripts.ai.codex.mcp_http_probe import (
+    MAX_RESPONSE_BYTES,
+    HttpProbeClient,
+    _read_http_reply as _read_http_reply,
+)
 
 
 class StdioProbeClient(NativeConfigClient):
@@ -44,7 +25,7 @@ class StdioProbeClient(NativeConfigClient):
     def __init__(self, entry: Mapping, workspace: Path, environment: Mapping[str, str]):
         super().__init__(
             [str(entry["command"]), *entry.get("args", [])],
-            workspace,
+            _execution_directory(entry, workspace),
             max_message_bytes=MAX_RESPONSE_BYTES,
             environment=environment,
         )
@@ -97,137 +78,6 @@ class StdioProbeClient(NativeConfigClient):
             raise ProbeError("TRANSPORT_ERROR", uncertain=True) from None
 
 
-class _NoRedirect(urllib.request.HTTPRedirectHandler):
-    def redirect_request(self, *_args, **_kwargs):
-        return None
-
-
-def _http_message(raw: bytes) -> dict:
-    text = raw.decode("utf-8")
-    if text.lstrip().startswith("{"):
-        value = json.loads(text)
-    else:
-        value = json.loads(
-            "\n".join(
-                line[5:].strip()
-                for line in text.splitlines()
-                if line.startswith("data:")
-            )
-        )
-    if not isinstance(value, dict):
-        raise ProbeError("INVALID_RESPONSE")
-    return value
-
-
-def _read_http_reply(response, timeout: float) -> bytes:
-    if "text/event-stream" not in response.headers.get("Content-Type", ""):
-        return response.read(MAX_RESPONSE_BYTES + 1)
-    deadline = time.monotonic() + timeout
-    event = bytearray()
-    for _ in range(1024):
-        if time.monotonic() >= deadline:
-            raise ProbeError("TIMEOUT", uncertain=True)
-        line = response.readline(MAX_RESPONSE_BYTES + 1 - len(event))
-        event.extend(line)
-        if len(event) > MAX_RESPONSE_BYTES:
-            raise ProbeError("RESPONSE_LIMIT", uncertain=True)
-        if not line or line.strip() == b"":
-            if b"data:" in event and "id" in _http_message(bytes(event)):
-                return bytes(event)
-            event.clear()
-    raise ProbeError("SSE_EVENT_LIMIT", uncertain=True)
-
-
-class HttpProbeClient:
-    """Streamable HTTP with bounded responses and no redirect/replay."""
-
-    def __init__(self, entry: Mapping, workspace: Path, environment: Mapping[str, str]):
-        del workspace
-        self.url = str(entry["url"])
-        self.headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json, text/event-stream",
-        }
-        self.headers.update(entry.get("http_headers") or {})
-        for key, reference in (entry.get("env_http_headers") or {}).items():
-            if not environment.get(reference):
-                raise ProbeError("AUTH_REFERENCE_UNAVAILABLE")
-            self.headers[key] = environment[reference]
-        reference = entry.get("bearer_token_env_var")
-        if reference:
-            if not environment.get(reference):
-                raise ProbeError("AUTH_REFERENCE_UNAVAILABLE")
-            self.headers["Authorization"] = "Bearer " + environment[reference]
-        if entry.get("http_headers_helper"):
-            raise ProbeError("AUTH_HELPER_NOT_TESTED")
-        self._opener = urllib.request.build_opener(_NoRedirect())
-        self._identifier = 0
-        self._last_timeout = 0.0
-        self.transport_seen = False
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *_):
-        # Never DELETE a shared session or restart its owner.
-        self._opener.close()
-
-    def _post(
-        self, payload: dict, timeout: float, *, notification: bool = False
-    ) -> dict:
-        request = urllib.request.Request(
-            self.url,
-            data=json.dumps(payload).encode(),
-            headers=self.headers,
-            method="POST",
-        )
-        try:
-            with self._opener.open(request, timeout=timeout) as response:
-                session = response.headers.get("Mcp-Session-Id")
-                if session:
-                    self.headers["Mcp-Session-Id"] = session
-                if notification and response.status in (200, 202, 204):
-                    return {}
-                raw = _read_http_reply(response, timeout)
-            if len(raw) > MAX_RESPONSE_BYTES:
-                raise ProbeError("RESPONSE_LIMIT", uncertain=True)
-            return _http_message(raw)
-        except urllib.error.HTTPError as exc:
-            category = "AUTH_ERROR" if exc.code in (401, 403) else "HTTP_ERROR"
-            raise ProbeError(category) from None
-        except (TimeoutError, OSError):
-            raise ProbeError("TIMEOUT_OR_CONNECTION", uncertain=True) from None
-        except (ValueError, UnicodeError):
-            raise ProbeError("INVALID_RESPONSE", uncertain=True) from None
-
-    def request(self, method: str, params: dict, timeout: float) -> dict:
-        self._identifier += 1
-        self._last_timeout = timeout
-        value = self._post(
-            {
-                "jsonrpc": "2.0",
-                "id": self._identifier,
-                "method": method,
-                "params": params,
-            },
-            timeout,
-        )
-        self.transport_seen = True
-        if value.get("id") != self._identifier:
-            raise ProbeError("RESPONSE_ID_MISMATCH", uncertain=True)
-        result = rpc_result(value)
-        if method == "initialize" and isinstance(result.get("protocolVersion"), str):
-            self.headers["MCP-Protocol-Version"] = result["protocolVersion"]
-        return result
-
-    def notify_initialized(self):
-        self._post(
-            {"jsonrpc": "2.0", "method": "notifications/initialized"},
-            self._last_timeout,
-            notification=True,
-        )
-
-
 def probe_environment(
     entry: Mapping, repository_env: Mapping[str, str]
 ) -> dict[str, str]:
@@ -260,7 +110,36 @@ def probe_environment(
     for key in references:
         if key in repository_env:
             result[key] = repository_env[key]
+    # An explicit task restriction must survive the wrapper's dotenv loading.
+    # Preserve only this non-secret policy variable, not unrelated credentials.
+    if "BIOETL_AI_MEMORY_MODE" in os.environ:
+        result["BIOETL_AI_MEMORY_MODE"] = os.environ["BIOETL_AI_MEMORY_MODE"]
     return result
+
+
+def _execution_directory(entry: Mapping, workspace: Path) -> Path:
+    """Use the effective native cwd, resolving relative values from workspace."""
+    configured = entry.get("cwd")
+    if configured is None:
+        return workspace.resolve(strict=True)
+    if not isinstance(configured, str) or not configured:
+        raise ProbeError("ADAPTER_CWD_INVALID")
+    directory = Path(configured)
+    if not directory.is_absolute():
+        directory = workspace / directory
+    directory = directory.resolve(strict=True)
+    if not directory.is_dir():
+        raise ProbeError("ADAPTER_CWD_INVALID")
+    return directory
+
+
+def _require_no_install_adapter(path: Path) -> None:
+    # Legacy project wrappers can fall through to npx/uvx package installation.
+    # File existence and a host marker cannot prove that fallback is impossible.
+    if path.name.startswith("mcp_") and path.name.endswith(
+        ("_wrapper.sh", "_wrapper.ps1")
+    ):
+        raise ProbeError("WRAPPER_BACKEND_NO_INSTALL_NOT_VERIFIED")
 
 
 def _approved_stdio_shape(entry: Mapping, workspace: Path) -> None:
@@ -275,6 +154,7 @@ def _approved_stdio_shape(entry: Mapping, workspace: Path) -> None:
     }
     if launcher not in prefixes:
         raise ProbeError("INSTALL_OR_UNREVIEWED_LAUNCHER_NOT_TESTED")
+    workspace = _execution_directory(entry, workspace)
     args = entry.get("args", [])
     if not isinstance(args, list) or not all(isinstance(arg, str) for arg in args):
         raise ProbeError("ADAPTER_ARGUMENTS_INVALID")
@@ -287,6 +167,7 @@ def _approved_stdio_shape(entry: Mapping, workspace: Path) -> None:
             path.suffix.lower() in {".py", ".js", ".mjs", ".ps1", ".sh"}
             and actual.is_file()
         ):
+            _require_no_install_adapter(actual)
             return
         raise ProbeError("ADAPTER_PREFIX_NOT_TESTED")
     raise ProbeError("EXISTING_ADAPTER_REQUIRED")

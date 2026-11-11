@@ -284,3 +284,17 @@ Probe plans must be repository-relative JSON files under
 `reports/quality/mcp-controls/`. Absolute paths, parent traversal and resolved
 symlink/junction escapes are rejected before any adapter starts. Reading a plan
 is bounded to 1 MiB; arbitrary files are not accepted as control plans.
+
+The stdio probe uses the native effective `cwd` for both relative script
+resolution and process startup. An explicit task `BIOETL_AI_MEMORY_MODE` is
+preserved over route/dotenv values without inheriting unrelated secrets.
+Legacy `mcp_*_wrapper.sh` / `.ps1` fallbacks remain `NOT_TESTED` because an
+existing wrapper file cannot prove a no-install backend; select a verified
+existing adapter route instead. Policy denial on initialize/catalog is a phase
+failure, not a successful negative tool control. `control_status` stays
+`NOT_TESTED` until the actual control is attempted.
+
+HTTP response headers, JSON and SSE bodies share the request's monotonic
+deadline. Each body read receives the remaining socket timeout; a watchdog
+interrupts only the diagnostic's owned socket at the deadline. Initialize's
+notification shares its remaining budget. No request is replayed on timeout.

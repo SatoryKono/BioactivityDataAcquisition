@@ -19,7 +19,7 @@ READ_TOOLS_BY_SERVER = {
         {"read_file", "read_text_file", "list_directory", "list_allowed_directories"}
     ),
     "ast-grep": frozenset({"find_code", "find_code_by_rule", "find_code_by_pattern"}),
-    "code-analyzer": frozenset({"count_tokens"}),
+    "code-analyzer": frozenset({"count_tokens", "count_code_tokens"}),
     "adr-analysis": frozenset({"list_roots"}),
     "github": frozenset({"get_me", "search_repositories", "get_file_contents"}),
     "context7": frozenset({"resolve-library-id", "query-docs", "get-library-docs"}),
@@ -221,6 +221,7 @@ def _run_session(
         if control["tool"] not in names:
             raise ProbeError("CONTROL_TOOL_MISSING")
         _phase(row, "tool", lambda: _semantic_call(client, control, tool_limit))
+        row["control_status"] = "PASS"
     row["detail"] = (
         "tool control passed; independent backend/access identity NOT_TESTED"
     )
@@ -236,6 +237,7 @@ def _probe_row(name, entry, control_value, capture, *, environment, factory, req
         "phases": {},
         "backend_identity_status": "NOT_TESTED",
         "technical_write_prohibition_status": "NOT_TESTED",
+        "control_status": "NOT_TESTED",
     }
     if entry is None:
         return {
@@ -266,7 +268,9 @@ def _probe_row(name, entry, control_value, capture, *, environment, factory, req
         )
         row["status"] = (
             "DENIED_AS_EXPECTED"
-            if expected and exc.category == "WORKSPACE_POLICY_DENIED"
+            if expected
+            and exc.category == "WORKSPACE_POLICY_DENIED"
+            and row["phases"].get("tool", {}).get("status") == "FAIL"
             else "FAIL"
         )
         if exc.category in {
@@ -276,6 +280,7 @@ def _probe_row(name, entry, control_value, capture, *, environment, factory, req
             "INSTALL_OR_UNREVIEWED_LAUNCHER_NOT_TESTED",
             "ADAPTER_PREFIX_NOT_TESTED",
             "EXISTING_ADAPTER_REQUIRED",
+            "WRAPPER_BACKEND_NO_INSTALL_NOT_VERIFIED",
             "ROUTE_LIMIT_NOT_RESOLVED",
             "AUTH_REFERENCE_UNAVAILABLE",
             "AUTH_HELPER_NOT_TESTED",
@@ -283,6 +288,10 @@ def _probe_row(name, entry, control_value, capture, *, environment, factory, req
             row["status"] = "NOT_TESTED"
         if exc.category == "ADAPTER_DISABLED_BY_POLICY":
             row["status"] = "DISABLED"
+        if "tool" in row["phases"]:
+            row["control_status"] = row["status"]
+            if row["status"] == "DENIED_AS_EXPECTED":
+                row["phases"]["tool"]["status"] = "DENIED_AS_EXPECTED"
         row["detail"] = exc.category
         row["uncertain_outcome"] = exc.uncertain
     except Exception:
