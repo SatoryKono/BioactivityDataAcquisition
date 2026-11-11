@@ -377,3 +377,48 @@ def test_shared_catalog_daily_flag_matches_stable_local_inventory() -> None:
         mcp_profile_contract.profile_plan("stable", ROOT)["required_local"]
     )
     assert daily == stable_local
+
+
+@pytest.mark.parametrize("runtime", [".codex", ".junie", ".devin"])
+@pytest.mark.parametrize("suffix", [".md", ".toml"])
+def test_skill_allowlists_reject_unresolved_routes(
+    tmp_path: Path, runtime: str, suffix: str
+) -> None:
+    agent = tmp_path / runtime / "agents" / ("py-test-bot" + suffix)
+    agent.parent.mkdir(parents=True)
+    skill = tmp_path / runtime / "skills/valid/SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text("valid entrypoint", encoding="utf-8")
+    agent.write_text(
+        "Allowed skills: `valid`,\n`missing-skill` opt-in.\nAllowed MCP: ast-grep.",
+        encoding="utf-8",
+    )
+    findings = native_runtime_contract.validate_skill_routes(tmp_path)
+    assert len(findings) == 1
+    assert findings[0].code == "skill.route"
+    assert "missing-skill" in findings[0].message
+    agent.write_text("Allowed skills: valid. Allowed MCP: ast-grep.", encoding="utf-8")
+    assert native_runtime_contract.validate_skill_routes(tmp_path) == []
+    agent.write_text(
+        "Allowed skills: valid/valid. Allowed MCP: ast-grep.", encoding="utf-8"
+    )
+    assert (
+        native_runtime_contract.validate_skill_routes(tmp_path)[0].code == "skill.route"
+    )
+
+
+def test_project_agent_skill_allowlists_resolve() -> None:
+    assert native_runtime_contract.validate_skill_routes(ROOT) == []
+
+
+@pytest.mark.parametrize("runtime", [".codex", ".junie", ".devin"])
+def test_research_skill_uses_portable_current_agent_workflow(runtime: str) -> None:
+    text = (ROOT / runtime / "skills/research-workflow/SKILL.md").read_text(
+        encoding="utf-8"
+    )
+    metadata = yaml.safe_load(text.split("---", 2)[1])
+    assert "context" not in metadata
+    assert "agent" not in metadata
+    assert "AskUserQuestion" not in text
+    assert "plain-text question" in text
+    assert "never expands permissions" in text

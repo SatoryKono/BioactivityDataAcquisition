@@ -49,9 +49,13 @@ profiles/skills не могут их ослаблять. Область и ус�
 параллельный нумерованный список precedence.
 
 Навигация: `.codex/agents/CODEX-RUNTIME.md`,
-`.junie/agents/JUNIE-RUNTIME.md`, `.devin/agents/DEVIN-RUNTIME.md`;
-matching runtime profiles/skills выбираются только для активного runtime. Runtime-зеркала обязательны в пределах их контрактов; справочные
-docs mirrors не определяют новое поведение.
+`.junie/agents/JUNIE-RUNTIME.md`, `.devin/agents/DEVIN-RUNTIME.md`.
+matching runtime profiles/skills выбираются только для активного runtime:
+`.codex/agents/py-*.md`, `.codex/skills/**`, `.junie/agents/py-*.md`,
+`.junie/skills/**`, `.devin/agents/*/AGENT.md`, `.devin/skills/**`.
+Runtime-зеркала обязательны в пределах их контрактов; справочные docs mirrors
+не определяют новое поведение.
+
 
 ## Что читать по теме
 
