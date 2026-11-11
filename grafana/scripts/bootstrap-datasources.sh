@@ -218,6 +218,8 @@ deleteDatasources:
   - name: Tempo
   - name: Quarantine Explorer
   - name: Pushgateway
+  - name: BioETL Isolated 100000 Ops HTTP
+    orgId: 1
   - name: BioETL Ops HTTP
     orgId: 1
 EOF

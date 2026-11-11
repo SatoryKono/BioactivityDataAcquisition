@@ -29,11 +29,10 @@ their sizes, relative placement, queries and the upper saved-run layout remain.
 Local validation covers JSON, query independence, donor parity, complete-list
 access, non-overlapping geometry and regeneration. Live v2 rendering with
 BioETLPipelineInfrastructureValidationFailed and BioETLDataFreshnessLagCritical
-is NOT_VERIFIABLE under owner decision 175. Isolated 100000 remains an operating
-legacy generation; its Overview JSON/generator is absent from this checkout.
-Updating its assets requires the actual export, followed by import and the same
-no-selection critical-alert and navigation checks. Neither generation has been
-live-validated by this change.
+is NOT_VERIFIABLE under owner decision 175. This change did not live-validate
+the canonical Overview. Isolated 100000 was removed from the active project by
+owner decision on 2026-11-11; its assets and live checks are no longer part of
+this change's remaining acceptance scope. Historical audit results are retained.
 
 ## Review Run Identity
 

@@ -1,6 +1,8 @@
 # Incident Workspace: observability states
 
-This contract applies to Incident Workspace v2 and legacy Isolated 100000.
+This contract applies to the canonical Incident Workspace v2.
+Isolated 100000 was removed from the active project by owner decision on
+2026-11-11 and is outside this contract's operational acceptance scope.
 LA-04 (#12938) uses the same cause-verification terms; LA-05 (#12939) uses
 the same missing-signal and empty-observation terms. Neither severity nor
 telemetry presence proves the cause of an incident.
@@ -59,7 +61,7 @@ cache policy remain unchanged. The same selector projection is used by Explorer,
 Data Quality and Replay Readiness in both dashboard generations.
 
 Repository validation proves generated layout and copy only. Live application
-to **Incident Workspace v2** and **Isolated 100000 Incident Workspace** must each
+to **Incident Workspace v2** must
 be recorded as `NOT_VERIFIABLE` until the deployed dashboard, expanded row and
 legend have been inspected. Confirm actual states and a measured zero against
 their source; a generated JSON or successful CI run is not live acceptance.

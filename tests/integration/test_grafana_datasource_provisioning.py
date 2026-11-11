@@ -349,6 +349,7 @@ def test_bootstrap_prunes_retired_and_non_query_datasources() -> None:
     assert "name: Tempo" in content
     assert "name: Quarantine Explorer" in content
     assert "name: Pushgateway" in content
+    assert "name: BioETL Isolated 100000 Ops HTTP" in content
     assert "BIOETL_ENABLE_TRACING_DATASOURCES" not in content
 
 

@@ -52,7 +52,7 @@ HTTP_EVIDENCE_STATES = (
 
 # Full portfolio bus. Order is the five-dashboard numbering.
 _BUS_UIDS: tuple[str, ...] = (
-    # v2 is canonical. Isolated 100000 is legacy / «не использовать»
+    # Only the five canonical dashboards belong to the active portfolio.
     "bioetl-run-explorer-v1",
     "bioetl-control-plane-v1",
     "bioetl-overview-v2",

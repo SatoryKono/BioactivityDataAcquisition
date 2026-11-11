@@ -49,7 +49,10 @@ retired dashboards must be removed explicitly after backup.
 
 ## Shipped dashboard surface (2026-07-28)
 
-**РЕШЕНИЕ**: поколение v2 — КАНОНИЧНОЕ. Isolated 100000 помечается legacy / «не использовать» во всех точках входа.
+**РЕШЕНИЕ**: поколение v2 — КАНОНИЧНОЕ. Isolated 100000 исключён из проекта
+по решению владельца 11.11.2026: его дашборды и источник Ops HTTP удалены из
+живой Grafana; восстановление backend на порту 8011 не требуется. Исторические
+экспорты и результаты аудита сохраняются отдельно.
 
 
 **Five** dashboards under `grafana/dashboards/` (portfolio cap ≤7):
@@ -2987,7 +2990,9 @@ Canonical generation is the five boards numbered 1–5. Titles and Grafana title
 | `bioetl-dq-v2` | `4. Data Quality` | `4-data-quality` |
 | `bioetl-incident-v1` | `5. Incident Workspace` | `5-incident-workspace` |
 
-Isolated 100000 stays legacy / «не использовать». It is not a provisioned JSON file and is not emitted by `scripts/ops/observability/grafana/`.
+Isolated 100000 is removed from the active project by owner decision on
+2026-11-11. It is not provisioned or generated; its live dashboards and datasource
+are retired. Canonical v2 is the only operator dashboard generation.
 
 **D-11 slug backlink check** (repository, before any slug edit):
 
@@ -2995,7 +3000,7 @@ Isolated 100000 stays legacy / «не использовать». It is not a pr
 *   No shipped dashboard JSON and no generator URL references UID `bioetl-isolated-replay-100000` or the path slug `1-trust`.
 *   Dated capture receipts under `docs/reports/dashboard-ux-checks/assets/2026-09-23-*` still contain `/d/bioetl-control-plane-v1/1-trust` and `vis23-1-trust`. Those files are historical evidence, not navigation targets, and were not rewritten.
 *   LA-10 click targets in the table above use `2. Replay Readiness` and `5. Incident Workspace`. They do not use `1-trust` or `6-incident-workspace`. Leaving the canonical slug on `2-replay-readiness` keeps those links intact.
-*   **Live remainder `NOT_VERIFIABLE`:** the working URL `/d/bioetl-isolated-replay-100000/1-trust` is an untracked Isolated board. This checkout cannot re-save that Grafana slug. An operator must confirm the live board is unused or retitle it so Grafana publishes a slug other than `1-trust`, then click the LA-10 rows above.
+*   **Retired scope:** the untracked Isolated Replay board is removed by owner decision on 2026-11-11. Its slug and backend are no longer live acceptance requirements. Historical `NOT_VERIFIABLE` evidence is preserved; this retirement does not turn it into PASS.
 
 **A-08 empty panels** (repository):
 
