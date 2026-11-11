@@ -89,6 +89,24 @@ def test_provenance_panels_share_readability_contract() -> None:
         provenance = panels[panel_id]
         content = str((provenance.get("options") or {}).get("content") or "")
 
+        if filename in {"bioetl-overview-v2.json", "bioetl-dq-v2.json"}:
+            # Saved-run provenance is a donor table, replacing static HTML.
+            assert provenance["type"] == "table", filename
+            assert provenance["title"] == "Review Run Context", filename
+            assert provenance["gridPos"]["h"] == 5, filename
+            target = provenance["targets"][0]
+            assert target["withTransforms"] is False, filename
+            assert target["panelId"] == (9002 if panel_id == 99 else 9406)
+            assert provenance["fieldConfig"]["defaults"]["custom"]["inspect"] is True
+            assert "selection_context" in json.dumps(provenance["transformations"])
+            assert any(
+                transform["id"] == "limit" and transform["options"]["limitField"] == 1
+                for transform in provenance["transformations"]
+            ), filename
+            for token in ("SELECTED RUN", "AUTO", "EXPLICIT", "UNKNOWN", "TIME RANGE"):
+                assert token in provenance["description"], filename
+            continue
+
         compact_banner = "font-size:16px" in content and (
             "padding:4px 10px" in content or "padding:0 6px" in content
         )

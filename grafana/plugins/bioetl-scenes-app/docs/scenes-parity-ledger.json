@@ -21,10 +21,10 @@
   },
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "edf170f35f3fe912617028b2f63262b184932232d405792525555645f79a8291",
-    "bioetl-dq-v2": "49a570450086fe5fab45e9bd1eab522e7c6e310c85d83901a6c91eddae318c60",
-    "bioetl-incident-v1": "077ca7ecbbf2c2c393309dcfc38febe75e79534384d6a68cb2059688d4be10b3",
-    "bioetl-overview-v2": "02df3184a77fe3c6602442bbc9ff296e370fa91de4fb21e7c0ee48d392158d28",
-    "bioetl-run-explorer-v1": "6ff7833d4415bc6c57cfe10b139c09edbc5b95bf8378a07d3e30f2c99a948acf"
+    "bioetl-dq-v2": "1fec4c0324617f23eb98dc0c46670d9e292adeab8131d6c02523dc2e8a7963ad",
+    "bioetl-incident-v1": "8403d1e6c105d4c1b720d21d101bc0502bd1deeeefac959d26a4027cdbfa8b5e",
+    "bioetl-overview-v2": "f3354a6380a2d12d39136659878ad63edd73f44a861b440fe107b18bf90804ac",
+    "bioetl-run-explorer-v1": "72fa91875ada804780191016109b531cc95ab9ee69d59669f0c2f99f52591e5e"
   },
   "panels": [
     {
@@ -2254,7 +2254,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "bioetl_incident_global_alerts"
+          "topk(2, bioetl_incident_global_alerts)"
         ],
         "target_count": 1
       }
