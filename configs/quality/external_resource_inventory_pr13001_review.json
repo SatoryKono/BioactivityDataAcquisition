@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "f5a53e31c4aab642a372ccd6bea1ce8233281c1a",
+  "source_ref": "8bf82de798b645f1737892209367665daac5804b",
+  "source_reviews": {
+    "src/bioetl/composition/runtime_builders/_run_manifest_snapshot_support.py": "Removed five pure helper wrappers and delegated snapshot/name resolution directly to existing owners. Import AST unchanged; no acquisition, resource ownership, closer, or shutdown behavior changed."
+  },
+  "line_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "reference_moves": []
+}
