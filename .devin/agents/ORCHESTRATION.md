@@ -100,6 +100,18 @@ authorized `read-write` mode. In `off`/`read-only`, skip these writes and report
 the mode and missing evidence. Review-curated may identify due or stale notes;
 review results never grant permission to mutate them.
 
+Regular ritual rule:
+
+- run `review-curated` on a recurring engineering cadence
+- run it again before release-readiness, governance, или architecture-review checkpoints
+- treat `due` notes как verification work и `stale` notes как review-or-archive candidates
+
+______________________________________________________________________
+
+
+Curated review does not authorize promotion, archival, or persistent writes;
+those still require authorized `read-write` mode.
+
 ## 2. Стандартный workflow задачи
 
 ```
