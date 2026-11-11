@@ -107,5 +107,7 @@ def test_acceptance_report_marks_only_executed_checks() -> None:
     assert by_name["test_resolution_matrix"]["status"] == "PASS"
     assert by_name["test_rerun_new_file"]["status"] == "PASS"
     assert by_name["test_name_collision_blocked"]["status"] == "PASS"
+    assert by_name["invariant_1_local_only"]["status"] == "PASS"
+    assert by_name["invariant_8_match_id"]["status"] == "PASS"
     assert by_name["w153_integration"]["status"] == "NOT_RUN"
     assert "не принимается" in str(report["statement"])
