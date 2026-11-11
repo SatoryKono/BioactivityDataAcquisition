@@ -64,6 +64,7 @@ RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
+RUNTIME_AGENT_DOCS_DRIFT_TEST = "tests/architecture/test_runtime_agent_docs_drift.py"
 REQUIRED_CHECKS_PROSE_TEST = (
     "tests/architecture/test_required_checks_prose_consistency.py"
 )
@@ -172,9 +173,22 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
     {"scripts/ai/codex/native_runtime_contract.py"}
 )
 
+IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
+
+
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
-    "src/iuphar_target_class/__init__.py": (
-        "tests/unit/iuphar_target_class/test_stage0_manifest.py",
+    "src/iuphar_target_class/__init__.py": (IUPHAR_STAGE0_TEST,),
+    **dict.fromkeys(
+        (
+            "AGENTS.md",
+            "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+        ),
+        (
+            RUNTIME_AGENT_DOCS_DRIFT_TEST,
+            "tests/architecture/test_junie_runtime_ci_contract.py",
+            "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
     ),
     "scripts/ai/codex/native_runtime_contract.py": (
         "tests/architecture/test_codex_native_runtime.py",
@@ -404,10 +418,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/architecture_acceptance_baseline.yaml": (
         "tests/architecture/test_architecture_acceptance_baseline.py",
     ),
-    "configs/quality/repo_structure_catalog.yaml": (
-        "tests/unit/scripts/repo/test_audit_root_cleanliness.py",
-        "tests/unit/scripts/repo/test_check_root_governance_docs.py",
-        "tests/unit/scripts/repo/test_audit_structure.py",
+    **dict.fromkeys(
+        (
+            "configs/quality/repo_structure_catalog.yaml",
+            "docs/00-project/governance/03-file-policy.md",
+        ),
+        (
+            "tests/unit/scripts/repo/test_audit_root_cleanliness.py",
+            "tests/unit/scripts/repo/test_check_root_governance_docs.py",
+            "tests/unit/scripts/repo/test_audit_structure.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
     ),
     "docs/plans/ci1-07-negative-merge-protection-plan.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
@@ -1048,7 +1069,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/reports/evidence/project-test-health/SUMMARY.md": (
         "tests/architecture/test_governance_freshness_protocol.py",
-        "tests/architecture/test_runtime_agent_docs_drift.py",
+        RUNTIME_AGENT_DOCS_DRIFT_TEST,
         "tests/unit/scripts/docs/test_check_drift_evidence_age.py",
     ),
     "Makefile": (
@@ -1291,12 +1312,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
-    "src/iuphar_target_class/stage0/": (
-        "tests/unit/iuphar_target_class/test_stage0_manifest.py",
-    ),
-    "data/iuphar_target_class/stage0/": (
-        "tests/unit/iuphar_target_class/test_stage0_manifest.py",
-    ),
+    "src/iuphar_target_class/stage0/": (IUPHAR_STAGE0_TEST,),
+    "data/iuphar_target_class/stage0/": (IUPHAR_STAGE0_TEST,),
     **dict.fromkeys(
         (
             ".codex/agents/",
@@ -1307,7 +1324,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         (
             "tests/architecture/test_codex_native_runtime.py",
             "tests/architecture/test_codex_agent_catalog_inventory.py",
-            "tests/architecture/test_runtime_agent_docs_drift.py",
+            RUNTIME_AGENT_DOCS_DRIFT_TEST,
             "tests/architecture/test_runtime_orchestration_surfaces.py",
             "tests/architecture/test_ai_runtime_governance_links.py",
             "tests/architecture/test_junie_runtime_ci_contract.py",
