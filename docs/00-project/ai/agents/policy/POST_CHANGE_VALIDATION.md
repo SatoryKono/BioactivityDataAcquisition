@@ -7,6 +7,13 @@
 Define the minimum validation protocol after AI-assisted changes to code,
 configs, docs, contracts, prompts, diagrams, and runtime instruction surfaces.
 
+## Delegated Authority
+
+`AGENTS.md` delegates post-change procedures to this policy. It cannot
+change repository precedence or weaken root guardrails. Runtime Proof-or-Stop
+requirements remain applicable alongside the checks below; a reference mirror
+is not an alternative source of authority.
+
 ## Canonical Sources
 
 Verify changes against the current normative stack:

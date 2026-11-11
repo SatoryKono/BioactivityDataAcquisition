@@ -211,7 +211,7 @@ def test_archive_preserves_raw_bytes_and_reads_without_extraction(
     assert capture.read_evidence("run-stdout.txt", tmp_path) == b"later run\n"
 
 
-def test_published_bundle_integrity_accepts_valid():
+def test_published_bundle_integrity_accepts():
     capture.verify(capture.BUNDLE)
 
 

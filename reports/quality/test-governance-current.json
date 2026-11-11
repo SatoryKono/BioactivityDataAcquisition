@@ -100,7 +100,7 @@
       "line": "76",
       "path": "tests/unit/application/composite/runner_pkg/test_runner_constants.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_checkpoint_non_fatal_errors_catches_instances_accepts_valid"
+      "test_name": "test_checkpoint_non_fatal_errors_catches_instances_accepts"
     },
     {
       "category": "intentional_no_exception_contract",
@@ -527,21 +527,21 @@
       "line": "214",
       "path": "tests/unit/scripts/engineering/qa/test_runtime_acceptance_12553.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_published_bundle_integrity_accepts_valid"
+      "test_name": "test_published_bundle_integrity_accepts"
     },
     {
       "category": "helper_asserted",
       "line": "96",
       "path": "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py",
       "rationale": "tests that delegate verification to check/validate/verify helper calls",
-      "test_name": "test_generated_heading_measures_age_and_missing_coverage"
+      "test_name": "test_generated_heading_measures_age_and_missing_coverage_helper_asserted"
     },
     {
       "category": "helper_asserted",
       "line": "132",
       "path": "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py",
       "rationale": "tests that delegate verification to check/validate/verify helper calls",
-      "test_name": "test_freshness_table_keeps_explicit_unknown_rows"
+      "test_name": "test_freshness_table_keeps_explicit_unknown_rows_helper_asserted"
     }
   ],
   "assertless_category_counts": {
@@ -1159,7 +1159,7 @@
         "line": "76",
         "path": "tests/unit/application/composite/runner_pkg/test_runner_constants.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_checkpoint_non_fatal_errors_catches_instances_accepts_valid"
+        "test_name": "test_checkpoint_non_fatal_errors_catches_instances_accepts"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1586,21 +1586,21 @@
         "line": "214",
         "path": "tests/unit/scripts/engineering/qa/test_runtime_acceptance_12553.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_published_bundle_integrity_accepts_valid"
+        "test_name": "test_published_bundle_integrity_accepts"
       },
       {
         "category": "helper_asserted",
         "line": "96",
         "path": "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py",
         "rationale": "tests that delegate verification to check/validate/verify helper calls",
-        "test_name": "test_generated_heading_measures_age_and_missing_coverage"
+        "test_name": "test_generated_heading_measures_age_and_missing_coverage_helper_asserted"
       },
       {
         "category": "helper_asserted",
         "line": "132",
         "path": "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py",
         "rationale": "tests that delegate verification to check/validate/verify helper calls",
-        "test_name": "test_freshness_table_keeps_explicit_unknown_rows"
+        "test_name": "test_freshness_table_keeps_explicit_unknown_rows_helper_asserted"
       }
     ],
     "assertless_category_counts": {
@@ -1829,8 +1829,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3256,
-      "test_python_file_count": 3508,
+      "test_glob_file_count": 3257,
+      "test_python_file_count": 3509,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1871,13 +1871,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3256,
-    "total_test_functions": 32234,
+    "total_test_files": 3257,
+    "total_test_functions": 32255,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "3c7af1cfde8836fad1c94394ebace47ac1f9603a35a58e8b3510404b38f5c4b5",
+  "source_tree_sha256": "dac758f303287696b0e6da5a7036af4b659c3853bef8d957de160b25084c9889",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 73,
@@ -1897,8 +1897,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3256,
-    "test_python_file_count": 3508,
+    "test_glob_file_count": 3257,
+    "test_python_file_count": 3509,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -1939,8 +1939,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3256,
-  "total_test_functions": 32234,
+  "total_test_files": 3257,
+  "total_test_functions": 32255,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

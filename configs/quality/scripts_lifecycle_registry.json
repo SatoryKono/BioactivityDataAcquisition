@@ -61,6 +61,18 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
+    "scripts/ai/codex/mcp_routes.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the secret-minimized route projection imported by doctor; keep supporting because doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
+    },
+    "scripts/ai/codex/native_mcp_config.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the bounded native config/read transport imported by doctor; keep supporting because doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
+    },
     "scripts/ai/codex/native_runtime_contract.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the static validation library behind doctor.py and the optional setup validators; keep .codex as the only project-scoped discovery surface.",
@@ -391,6 +403,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh": {
+      "decision": "shared_helper_module",
+      "next_step": "Shared sourced Windows interop function for filesystem/fetch MCP launchers; no standalone command. Keep supporting behind the public wrappers.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-09"
+    },
     "scripts/ai/mcp/support/github_project_transport.mjs": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the internal GitHub stdio transport invoked after repository policy checks by the GitHub MCP wrappers. The wrappers remain the configured entrypoints.",
@@ -414,6 +432,12 @@
       "next_step": "Retain as the internal host route launcher for the Context7 and Brave wrappers.",
       "owner": "@bioetl-platform",
       "review_by": "2027-01-31"
+    },
+    "scripts/ai/mcp/support/run_owned_stdio.ps1": {
+      "decision": "shared_helper_module",
+      "next_step": "Shared dot-sourced descriptor validation and stdio forwarding functions for filesystem/fetch MCP launchers; no standalone command. Keep supporting behind the public wrappers.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-09"
     },
     "scripts/ai/mcp/support/uv_resolver.ps1": {
       "decision": "shared_helper_module",
@@ -1891,6 +1915,12 @@
       "review_by": "2026-11-30",
       "next_step": "Standalone main/--check CLI retired in #11854 after reference audit found only two imports from render_nav_bus and no invocation. Retain the actual column/title transformations as an internal helper of the canonical render_nav_bus entrypoint; do not restore a standalone CLI."
     },
+    "scripts/ops/observability/grafana/_run_selection_context.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Internal run-selection provenance transform imported by render_nav_bus and phase25; no standalone CLI. Keep supporting behind the dashboard generators.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-09"
+    },
     "scripts/ops/observability/grafana/_selected_run_panels.py": {
       "decision": "shared_helper_module",
       "next_step": "Keep as an internal transformation invoked by render_nav_bus; no standalone command or active CLI entrypoint.",
@@ -1914,6 +1944,12 @@
       "next_step": "Keep the visual-audit transformations internal to render_nav_bus. This module has no standalone CLI or deployment entrypoint.",
       "owner": "@bioetl-observability",
       "review_by": "2026-12-14"
+    },
+    "scripts/ops/observability/grafana/_workflow_freshness.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Internal workflow publication-age projection imported by _workflow_scope; no standalone CLI. Keep supporting behind the dashboard generators.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-09"
     },
     "scripts/ops/observability/grafana/_workflow_scope.py": {
       "decision": "shared_helper_module",
