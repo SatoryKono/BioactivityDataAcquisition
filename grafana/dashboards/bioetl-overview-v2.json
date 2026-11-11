@@ -756,7 +756,7 @@
         "x": 0,
         "y": 7,
         "w": 15,
-        "h": 9
+        "h": 8
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
