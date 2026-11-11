@@ -16,6 +16,7 @@ import sys
 from typing import Any, Literal
 
 Status = Literal["PASS", "FAIL", "ERROR", "SKIP"]
+_WORKTREE_LOCATION = "worktree.location"
 WINDOWS_RESERVED = frozenset(
     ["nul", "con", "prn", "aux"]
     + [f"com{i}" for i in range(1, 10)]
@@ -108,13 +109,13 @@ def revalidate_worktree(
             )
         return Decision(
             "PASS",
-            "worktree.location",
+            _WORKTREE_LOCATION,
             "destination revalidated",
             str(current.canonical),
         )
     except ValueError:
         return Decision(
-            "FAIL", "worktree.location", "destination is no longer admissible"
+            "FAIL", _WORKTREE_LOCATION, "destination is no longer admissible"
         )
     except (OSError, RuntimeError):
         return Decision(
@@ -185,7 +186,7 @@ def _evaluate_worktree(raw: Any, allowed_root: Path | None) -> Decision:
     try:
         permit = prepare_worktree(raw, allowed_root=allowed_root)
     except ValueError:
-        return Decision("FAIL", "worktree.location", "destination is not admissible")
+        return Decision("FAIL", _WORKTREE_LOCATION, "destination is not admissible")
     except (OSError, RuntimeError):
         return Decision("ERROR", "worktree.unavailable", "path resolution failed")
     return revalidate_worktree(permit, allowed_root=allowed_root)

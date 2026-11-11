@@ -14,6 +14,7 @@ import subprocess
 from typing import Any
 
 REGISTRY = "configs/quality/agent_guard_budget_surfaces.json"
+_OBJECT_ID_PATTERN = r"[0-9a-f]{40}(?:[0-9a-f]{24})?"
 METADATA = frozenset(
     {
         "owner",
@@ -119,7 +120,11 @@ def _record_list_changes(
         return ["unsupported_or_duplicate_record_identity"]
     if not set(new_map) <= set(old_map):
         return ["new_policy_record"]
-    if kind != "exemptions" and set(new_map) != set(old_map):
+    retirable = kind == "exemptions" or path in {
+        ("pairs",),
+        ("policy", "allowlist_oversized"),
+    }
+    if not retirable and set(new_map) != set(old_map):
         return ["budget_record_removed"]
     return [
         error
@@ -153,7 +158,7 @@ def _mapping_field_changes(
     ):
         return ["policy_schema_changed"]
     if key not in new:
-        retired = kind == "exemptions" and len(path) >= 2 and path[0] == "registries"
+        retired = kind == "exemptions" and len(path) == 2 and path[0] == "registries"
         return [] if retired else ["protected_field_removed"]
     return compare_documents(previous, new[key], path=(*path, key), kind=kind)
 
@@ -187,7 +192,7 @@ def _expiry_change(old: Any, new: Any) -> list[str]:
 def _git(root: Path, *args: str) -> str:
     """Read Git metadata with a deadline and no ambient repository override."""
     env = os.environ.copy()
-    for name in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"):
+    for name in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_INDEX_FILE"):
         env.pop(name, None)
     env["GIT_NO_REPLACE_OBJECTS"] = "1"
     result = subprocess.run(
@@ -223,7 +228,7 @@ def _revision(root: Path, value: str) -> str:
     sha = _git(
         root, "rev-parse", "--verify", "--end-of-options", value + "^{commit}"
     ).strip()
-    if not re.fullmatch(r"[0-9a-f]{40}(?:[0-9a-f]{24})?", sha):
+    if not re.fullmatch(_OBJECT_ID_PATTERN, sha):
         raise ValueError("unverified revision")
     return sha
 
@@ -231,7 +236,7 @@ def _revision(root: Path, value: str) -> str:
 def _git_document(root: Path, object_spec: str) -> str:
     """Pin an immutable blob before checking size, avoiding index-swap races."""
     sha = _git(root, "rev-parse", "--verify", "--end-of-options", object_spec).strip()
-    if not re.fullmatch(r"[0-9a-f]{40}(?:[0-9a-f]{24})?", sha):
+    if not re.fullmatch(_OBJECT_ID_PATTERN, sha):
         raise ValueError("unverified policy object")
     size = int(_git(root, "cat-file", "-s", sha).strip())
     if size < 0 or size > 2 * 1024 * 1024:
@@ -245,6 +250,16 @@ def _load_document(raw: str, suffix: str) -> Any:
         raise ValueError("policy exceeds size limit")
     if suffix == ".json":
         return json.loads(raw)
+    if suffix == ".txt":
+        return {
+            "allowlist": sorted(
+                {
+                    line.strip()
+                    for line in raw.splitlines()
+                    if line.strip() and not line.lstrip().startswith("#")
+                }
+            )
+        }
     import yaml
 
     try:
@@ -303,8 +318,8 @@ def check_budget_diff(
         diff_args = [base_sha, tip_sha] if tip_sha else ["--cached", base_sha]
         changed = _changed_objects(root, diff_args)
         findings = []
-        for path, blob in changed:
-            findings.extend(_check_surface(root, path, base_sha, blob, surfaces))
+        for path, blob, mode in changed:
+            findings.extend(_check_surface(root, path, base_sha, blob, surfaces, mode))
         return {
             "status": "FAIL" if findings else "PASS",
             "base_sha": base_sha,
@@ -326,7 +341,7 @@ def check_budget_diff(
         }
 
 
-def _changed_objects(root: Path, diff_args: list[str]) -> list[tuple[str, str]]:
+def _changed_objects(root: Path, diff_args: list[str]) -> list[tuple[str, str, str]]:
     """Capture immutable candidate blob IDs from a single index read.
 
     Reading :path separately for each file could mix states from concurrent
@@ -353,16 +368,24 @@ def _changed_objects(root: Path, diff_args: list[str]) -> list[tuple[str, str]]:
         if len(tokens) != 5 or tokens[-1] not in {"A", "M", "D", "T"}:
             raise ValueError("unresolved or unsupported index state")
         blob = tokens[3]
-        if not re.fullmatch(r"[0-9a-f]{40}(?:[0-9a-f]{24})?", blob):
+        if not re.fullmatch(_OBJECT_ID_PATTERN, blob):
             raise ValueError("invalid candidate object")
-        result.append((path, blob))
+        result.append((path, blob, tokens[1]))
     return result
 
 
 def _check_surface(
-    root: Path, path: str, base: str, blob: str, surfaces: list[dict[str, str]]
+    root: Path,
+    path: str,
+    base: str,
+    blob: str,
+    surfaces: list[dict[str, str]],
+    mode: str = "100644",
 ) -> list[dict[str, str]]:
     """Classify a changed path before loading any policy values."""
+    matches = [item for item in surfaces if fnmatchcase(path, item["pattern"])]
+    if (path == REGISTRY or matches) and mode not in {"100644", "100755", "000000"}:
+        return [{"path": path, "code": "budget.non_regular_policy_object"}]
     if path == REGISTRY:
         old = _git_document(root, f"{base}:{path}")
         new = _git_document(root, blob)
@@ -371,7 +394,6 @@ def _check_surface(
             if json.loads(old) == json.loads(new)
             else [{"path": path, "code": "budget.registry_change_requires_review"}]
         )
-    matches = [item for item in surfaces if fnmatchcase(path, item["pattern"])]
     if not matches:
         return (
             [{"path": path, "code": "budget.unregistered_surface"}]

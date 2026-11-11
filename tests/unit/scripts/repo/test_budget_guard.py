@@ -303,3 +303,111 @@ def test_replace_refs_cannot_substitute_trusted_policy_objects(
     budget.write_text('{"baseline":{"count":9},"max_count":9}')
     _git(root, "add", ".")
     assert guard.check_budget_diff(root, base)["status"] == "FAIL"
+
+
+def test_alternate_index_cannot_hide_staged_growth(
+    policy_repo: tuple[Path, str, Path],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An ambient clean index must not conceal increases in the repository index."""
+    root, base, budget = policy_repo
+    alternate = root.parent / "alternate-index"
+    alternate.write_bytes((root / ".git/index").read_bytes())
+    budget.write_text('{"baseline":{"count":99},"max_count":99}')
+    _git(root, "add", ".")
+    real_before = (root / ".git/index").read_bytes()
+    alternate_before = alternate.read_bytes()
+    monkeypatch.setenv("GIT_INDEX_FILE", str(alternate))
+
+    report = guard.check_budget_diff(root, base)
+
+    assert report["status"] == "FAIL"
+    assert any(
+        item["code"] == "budget.ceiling_increased" for item in report["findings"]
+    )
+    assert (root / ".git/index").read_bytes() == real_before
+    assert alternate.read_bytes() == alternate_before
+
+
+@pytest.mark.parametrize(
+    "name,keypath",
+    [
+        ("private_import_ratchet.yaml", ("pairs",)),
+        ("vcr_cassette_size_budget.yaml", ("policy", "allowlist_oversized")),
+    ],
+)
+def test_existing_nested_exemptions_can_shrink(
+    name: str, keypath: tuple[str, ...]
+) -> None:
+    """Retire actual private-import/VCR entries without removing budget records."""
+    old = guard._load_document((ROOT / "configs/quality" / name).read_text(), ".yaml")
+    new = json.loads(json.dumps(old))
+    value = new
+    for key in keypath[:-1]:
+        value = value[key]
+    value[keypath[-1]].pop()
+    if name == "private_import_ratchet.yaml":
+        new["max_count"] -= 1
+    assert not guard.compare_documents(old, new)
+
+
+def test_retirement_does_not_remove_fields_from_retained_exemptions() -> None:
+    old = {
+        "registries": {
+            "file_size_limits": {
+                "src/example.py": {"value": 100, "expires_on": "2026-12-01"},
+            }
+        }
+    }
+    new = json.loads(json.dumps(old))
+    del new["registries"]["file_size_limits"]["src/example.py"]["expires_on"]
+    assert guard.compare_documents(old, new, kind="exemptions")
+    assert not guard.compare_documents(
+        old,
+        {"registries": {"file_size_limits": {}}},
+        kind="exemptions",
+    )
+
+
+def test_text_navigation_baseline_shrinks_without_new_exceptions() -> None:
+    raw = (ROOT / "scripts/engineering/baselines/not_in_nav_baseline.txt").read_text()
+    old = guard._load_document(raw, ".txt")
+    lines = [
+        line
+        for line in raw.splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    new = guard._load_document("# reviewed removal\n" + "\n".join(lines[1:]), ".txt")
+    assert not guard._compare_surface_documents(old, new, "budget")
+    expanded = guard._load_document(raw + "\nnew/unreviewed.md\n", ".txt")
+    assert guard._compare_surface_documents(old, expanded, "budget")
+
+
+@pytest.mark.parametrize("committed", [False, True])
+def test_policy_symlink_object_cannot_masquerade_as_empty_json(
+    policy_repo: tuple[Path, str, Path],
+    committed: bool,
+) -> None:
+    """Reject Git symlink modes even when their link text parses as a valid policy."""
+    root, _, budget = policy_repo
+    budget.write_text("{}")
+    _git(root, "add", ".")
+    _git(root, "commit", "-qm", "fixture empty policy")
+    base = _git(root, "rev-parse", "HEAD")
+    payload = root.parent / "link-payload"
+    payload.write_text("{}")
+    blob = _git(root, "hash-object", "-w", str(payload))
+    path = budget.relative_to(root).as_posix()
+    _git(root, "update-index", "--cacheinfo", f"120000,{blob},{path}")
+    tip = None
+    if committed:
+        _git(root, "commit", "-qm", "fixture symbolic policy")
+        tip = _git(root, "rev-parse", "HEAD")
+    assert guard.check_budget_diff(root, base, tip=tip)["status"] == "FAIL"
+
+
+def test_budget_record_removal_is_still_rejected() -> None:
+    assert guard.compare_documents(
+        {"budgets": [{"id": "required-cap", "max_count": 2}]},
+        {"budgets": []},
+    )
