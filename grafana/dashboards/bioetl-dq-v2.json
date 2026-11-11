@@ -477,7 +477,7 @@
         "type": "datasource",
         "uid": "-- Dashboard --"
       },
-      "description": "SELECTED RUN · AUTO shows the latest run by start time in the current scope, including unfinished runs. EXPLICIT keeps the requested Run ID. Context checked at is this Grafana query evaluation time, not run start, browser click, server cache load or catalog freshness. Refresh re-evaluates the displayed context. UNKNOWN is missing evidence; request failure is Source unavailable. This context assesses that run only, not a fleet verdict. TIME RANGE telemetry never proves this run. Empty is a coverage gap, not a pass. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
+      "description": "SELECTED RUN · AUTO shows the latest run by start time in the current scope, including unfinished runs. EXPLICIT keeps the requested Run ID. Context checked at is this Grafana query evaluation time, not run start, browser click, server cache load or catalog freshness. Refresh re-evaluates the displayed context. UNKNOWN is missing evidence; request failure is Source unavailable. This context is not a fleet verdict. TIME RANGE telemetry never proves this run. Empty is a coverage gap, not a pass. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
       "targets": [
         {
           "refId": "A",
@@ -502,7 +502,6 @@
           "custom": {
             "align": "left",
             "minWidth": 50,
-            "inspect": true,
             "cellOptions": {
               "type": "auto",
               "wrapText": true
@@ -519,6 +518,10 @@
               {
                 "id": "unit",
                 "value": "time:YYYY-MM-DD HH:mm"
+              },
+              {
+                "id": "custom.width",
+                "value": 155
               }
             ]
           }
@@ -798,10 +801,6 @@
                     }
                   }
                 ]
-              },
-              {
-                "id": "custom.width",
-                "value": 480
               }
             ]
           },
@@ -936,7 +935,7 @@
       "description": "SELECTED RUN · Canonical run identity lives on Overview panel 9300. This panel is a handoff (rev7 §2.4); Control Plane 9408 remains out of scope.",
       "gridPos": {
         "x": 0,
-        "y": 18,
+        "y": 20,
         "w": 24,
         "h": 3
       },
@@ -1549,7 +1548,7 @@
       "description": "Expand for saved stage rows (Inspect Selected Run Stages), domain verdicts (Inspect Selected Run Domains), and full identity (Inspect Selected Run Identity) of the selected Run ID.",
       "gridPos": {
         "x": 0,
-        "y": 21,
+        "y": 23,
         "w": 24,
         "h": 1
       },
@@ -1560,7 +1559,7 @@
           "title": "Inspect Selected Run Stages",
           "gridPos": {
             "x": 0,
-            "y": 22,
+            "y": 24,
             "w": 24,
             "h": 8
           },
@@ -1860,7 +1859,7 @@
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
-            "y": 30,
+            "y": 32,
             "w": 24,
             "h": 8
           },
@@ -2118,7 +2117,7 @@
           "description": "SELECTED RUN · Canonical identity is Overview 9300 (rev7 §2.4).",
           "gridPos": {
             "x": 0,
-            "y": 38,
+            "y": 40,
             "w": 24,
             "h": 8
           },

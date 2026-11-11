@@ -68,8 +68,8 @@ def _assert_status_mapping(panel: dict) -> None:
 
 def test_overview_dashboard_identity_and_primary_question() -> None:
     dashboard = _dashboard()
-    provenance = _panels_by_title()["Review Run Context"]
-    content = str(provenance.get("description", ""))
+    provenance = _panels_by_title()["Inspect Scope & Evidence"]
+    content = str(provenance.get("options", {}).get("content", ""))
     description = str(dashboard.get("description", ""))
 
     assert dashboard.get("title") == "3. Run Overview"
@@ -178,18 +178,14 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     """Epic #6570/#6573/DRM-R: Status/First Action/Inputs on first path; shell lazy."""
     panels = _panels_by_title()
     # Compact navigation gives the first screen one extra grid row.
-    assert panels["Review Run Context"].get("id") == 99
+    assert panels["Inspect Scope & Evidence"].get("id") == 99
     assert "Monitor Scope Health" not in panels
     assert "Review First Action" not in panels
     assert panels["Review Run Domains"].get("id") == 9002
-    assert panels["Review Run Context"].get("gridPos", {}).get("y") == 2
+    assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 2
     assert panels["Review Selected Run Status"].get("id") == 9603
     assert panels["Review Selected Run Status"].get("gridPos", {}).get("y") == 5
-    assert (
-        panels["Review Run Domains"]["gridPos"]["y"]
-        == panels["Review Run Context"]["gridPos"]["y"]
-        + panels["Review Run Context"]["gridPos"]["h"]
-    )
+    assert panels["Review Run Domains"].get("gridPos", {}).get("y") == 5
     assert panels["Review Run Domains"].get("gridPos", {}).get("w", 0) >= 8
     identity = panels["Review Run Identity"]
     assert identity["id"] == 9300
@@ -224,7 +220,9 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
     assert "from=" not in target["url"] and "to=" not in target["url"]
     assert "Saved evidence for this Run ID" in summary["description"]
 
-    content = str(panels["Review Run Context"].get("description", ""))
+    content = str(
+        panels["Inspect Scope & Evidence"].get("options", {}).get("content", "")
+    )
     assert "set a concrete" not in content
     assert "unknown" in content.lower()
     assert "Review All Domain Status" not in panels
@@ -245,13 +243,10 @@ def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> N
     assert target.get("withTransforms") is False
     donor = domains["targets"][0]
     assert "selected-run-status?pipeline=${pipeline}&run_id=${run_id}" in donor["url"]
-    assert donor["parser"] == "backend"
-    assert (
-        "uql" not in donor
-    )  # URI-encoded Run ID is interpolated directly into JSONata.
-    for label in ("Run ID", "Pipeline", "Run Type", "Started at", "Run duration"):
+    assert "parse-json | jsonata" in donor["uql"]
+    for label in ("Run ID", "Pipeline", "Run Type", "Started at", "Total Run Duration"):
         assert label in donor["root_selector"]
-    assert "Not recorded" in donor["root_selector"]
+    assert "Not recorded in saved run evidence" in donor["root_selector"]
     assert any(
         t.get("id") == "filterByValue"
         and "_bioetl_frame" in json.dumps(t)
@@ -363,6 +358,5 @@ def test_overview_separates_saved_run_evidence_from_global_alerts() -> None:
     for panel_id in kept:
         assert panel_id in panels
     assert "including without a selected run" in str(_dashboard().get("description"))
-    assert panels[9603]["gridPos"]["y"] == 5
-    assert panels[9002]["gridPos"]["y"] == 7
+    assert panels[9603]["gridPos"]["y"] == panels[9002]["gridPos"]["y"]
     assert panels[9603]["gridPos"]["y"] < 12

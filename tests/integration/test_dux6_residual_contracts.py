@@ -87,16 +87,6 @@ def test_provenance_panels_share_readability_contract() -> None:
         data = json.loads((DASH / filename).read_text(encoding="utf-8"))
         panels = {panel.get("id"): panel for panel in _walk(data.get("panels"))}
         provenance = panels[panel_id]
-        if filename in {"bioetl-overview-v2.json", "bioetl-dq-v2.json"}:
-            assert provenance["title"] == "Review Run Context"
-            assert provenance["type"] == "table"
-            assert provenance["gridPos"]["h"] == 5
-            assert provenance["fieldConfig"]["defaults"]["custom"]["inspect"] is True
-            assert "selection_context" in json.dumps(provenance["transformations"])
-            for token in ("AUTO", "EXPLICIT", "UNKNOWN", "SELECTED RUN", "TIME RANGE"):
-                assert token in provenance["description"], filename
-            assert "font-size:12px" not in json.dumps(provenance), filename
-            continue
         content = str((provenance.get("options") or {}).get("content") or "")
 
         compact_banner = "font-size:16px" in content and (

@@ -71,7 +71,7 @@ def embed_global_alerts(overview: dict[str, Any], incident: dict[str, Any]) -> N
     summary["gridPos"] = {"x": 0, "y": 18, "w": 24, "h": 5}
     # This existing recording rule evaluates the Incident donor expression.
     # Reuse its samples instead of recomputing the long expression on first load.
-    summary["targets"][0]["expr"] = "topk(2, bioetl_incident_global_alerts)"
+    summary["targets"][0]["expr"] = "bioetl_incident_global_alerts"
     _apply_overview_alert_handoff(summary)
     summary["description"] += (
         " Fleet alert urgency is independent of the saved run verdict. "
@@ -96,10 +96,7 @@ def embed_global_alerts(overview: dict[str, Any], incident: dict[str, Any]) -> N
             # independently so collapsing the full list never hides summary.
             child["datasource"] = deepcopy(summary["datasource"])
             child["targets"] = deepcopy(summary["targets"])
-            child["targets"][0]["expr"] = "bioetl_incident_global_alerts"
         _apply_overview_alert_handoff(child)
-        # The always-visible summary owns the Incident handoff.
-        child["links"] = []
     full["description"] = (
         "GLOBAL / CURRENT · Expand for all fleet alerts, independently of "
         "the selected Run ID. The summary above shows up to two rows."

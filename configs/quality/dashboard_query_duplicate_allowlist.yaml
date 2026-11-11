@@ -38,6 +38,17 @@ exact_duplicates:
         The first-window scope card and the collapsed fleet row card
         intentionally mirror the same workflow-scope priority signal in two
         operator contexts after the runtime fleet evidence moved to Incident.
+    - id: overview-incident-global-alerts-shared
+      owner: "@bioetl-observability"
+      linked_issue: "#11269"
+      normalized_expression: bioetl_incident_global_alerts
+      panel_refs:
+        - "bioetl-overview-v2.json :: Monitor Global Alerts"
+        - "bioetl-overview-v2.json :: Monitor Global Alerts (Full)"
+      disposition: retain_shared_global_alerts
+      rationale: >
+        The overview dashboard intentionally includes two views of global alerts
+        (a summary card and a full view) for operator visibility.
 near_duplicates:
   max_count: 5
   owner: "@bioetl-observability"

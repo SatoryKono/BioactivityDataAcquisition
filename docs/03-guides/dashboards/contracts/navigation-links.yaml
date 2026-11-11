@@ -204,13 +204,13 @@ required_discoverable_inbound_paths:
     - source_uid: bioetl-overview-v2
       source_panel_id: 9002
       source_panel_title: Review Run Domains
-      source_status_row_panel_title_matcher: ^Review Run Context$
+      source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
   L2:
     bioetl-dq-v2:
     - source_uid: bioetl-overview-v2
       source_panel_id: 9002
       source_panel_title: Review Run Domains
-      source_status_row_panel_title_matcher: ^Review Run Context$
+      source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
 required_panel_links_by_uid:
   bioetl-overview-v2:
   - panel_id: 9002

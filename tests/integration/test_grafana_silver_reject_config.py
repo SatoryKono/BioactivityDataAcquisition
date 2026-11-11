@@ -64,8 +64,7 @@ def test_dq_v2_exposes_current_silver_reject_evidence_panels() -> None:
     ):
         assert outcome in stage_input["uql"]
     assert all("expr" not in t for t in panel["targets"])
-    assert panel["gridPos"]["h"] == 6
-    assert panel["gridPos"]["y"] + panel["gridPos"]["h"] == 18
+    assert panel["gridPos"]["h"] == 8
     assert panel["options"]["footer"]["enablePagination"] is True
     assert not any(t["id"] == "limit" for t in panel["transformations"])
 

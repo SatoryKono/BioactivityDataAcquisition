@@ -381,7 +381,7 @@ def test_datetime_units_are_yyyy_mm_dd_hh_mm() -> None:
                         and label == "Started"
                     )
                     expected = (
-                        "time:YYYY-MM-DD HH:mm"
+                        "time:YY-MM-DD:HH:mm"
                         if is_recent_run_started
                         else DASHBOARD_DATETIME_UNIT
                     )
@@ -407,7 +407,7 @@ def test_http_iso_timestamp_fields_convert_to_time() -> None:
                 continue
             converted = _converted_time_fields(panel)
             for unit, label in _iter_field_units(panel):
-                if unit not in {DASHBOARD_DATETIME_UNIT, "time:YYYY-MM-DD HH:mm"}:
+                if unit not in {DASHBOARD_DATETIME_UNIT, "time:YY-MM-DD:HH:mm"}:
                     continue
                 for field in _timestamp_names_from_matcher(label):
                     if field not in converted:

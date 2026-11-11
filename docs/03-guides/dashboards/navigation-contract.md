@@ -94,7 +94,7 @@ Overview in panels `9480` and `9481`; no retired Provider Health route is requir
 
 | Target UID | Source UID | Source panel id | Source panel title | First-screen row matcher |
 | --- | --- | ---: | --- | --- |
-| `bioetl-control-plane-v1` | `bioetl-overview-v2` | `9002` | `Review Run Domains` | `^Review Run Context$` |
-| `bioetl-dq-v2` | `bioetl-overview-v2` | `9002` | `Review Run Domains` | `^Review Run Context$` |
+| `bioetl-control-plane-v1` | `bioetl-overview-v2` | `9002` | `Review Run Domains` | `^Inspect Scope & Evidence$` |
+| `bioetl-dq-v2` | `bioetl-overview-v2` | `9002` | `Review Run Domains` | `^Inspect Scope & Evidence$` |
 
 Provider action: `Open Provider Evidence` opens local Overview panel `9480` with exact identity and time; it does not forward legacy `provider` or `pipeline_context` selectors.

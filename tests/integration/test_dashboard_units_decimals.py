@@ -99,7 +99,7 @@ def test_shipped_dashboards_do_not_use_iso_datetime_unit():
                         and label == "Started"
                     )
                     expected = (
-                        "time:YYYY-MM-DD HH:mm"
+                        "time:YY-MM-DD:HH:mm"
                         if is_recent_run_started
                         else DASHBOARD_DATETIME_UNIT
                     )

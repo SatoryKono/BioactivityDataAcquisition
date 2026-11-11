@@ -73,7 +73,7 @@ def _run_promtool_case(tmp_path, expr, ages, expected):
         text=True,
         timeout=30,
     )
-    return result
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 @pytest.mark.parametrize(
@@ -107,13 +107,12 @@ def test_generated_heading_measures_age_and_missing_coverage(tmp_path, ages, exp
     expr = variable["query"]["query"].removeprefix("query_result(")[:-1]
     for name in ("workflow", "pipeline", "run_type"):
         expr = expr.replace(f"${name}", "chosen" if name == "pipeline" else ".*")
-    result = _run_promtool_case(
+    _run_promtool_case(
         tmp_path,
         f"({expr}) * 0 + 1",
         ages,
         [{"labels": f'{{freshness="{expected}"}}', "value": 1}],
     )
-    assert result.returncode == 0, result.stdout + result.stderr
 
 
 @pytest.mark.parametrize(
@@ -149,5 +148,4 @@ def test_freshness_table_keeps_explicit_unknown_rows(tmp_path, ages, expected):
         {"labels": f'{{workflow="w{index}"}}', "value": value}
         for index, value in enumerate(expected)
     ]
-    result = _run_promtool_case(tmp_path, expr, ages, samples)
-    assert result.returncode == 0, result.stdout + result.stderr
+    _run_promtool_case(tmp_path, expr, ages, samples)

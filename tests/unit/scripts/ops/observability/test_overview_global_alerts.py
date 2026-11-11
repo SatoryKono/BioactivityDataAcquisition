@@ -43,7 +43,7 @@ def test_global_alerts_retain_donor_query_and_complete_list() -> None:
         if rule.get("record") == metric
     )
     assert "".join(recorded.split()) == "".join(donor["targets"][0]["expr"].split())
-    assert summary["targets"] == [dict(donor["targets"][0], expr=f"topk(2, {metric})")]
+    assert summary["targets"] == [dict(donor["targets"][0], expr=metric)]
     assert summary["transformations"] == donor["transformations"]
     assert summary["gridPos"] == {"x": 0, "y": 18, "w": 24, "h": 5}
     assert "repeat" not in summary
@@ -59,10 +59,9 @@ def test_global_alerts_retain_donor_query_and_complete_list() -> None:
     full = panels[32005]["panels"][0]
     assert full["id"] == 22005
     assert full["datasource"] == summary["datasource"]
-    assert full["targets"] == [dict(summary["targets"][0], expr=metric)]
+    assert full["targets"] == summary["targets"]
     assert all(t["id"] != "limit" for t in full["transformations"])
-    assert full["links"] == []
-    for panel in (summary,):
+    for panel in (summary, full):
         link = panel["links"][0]
         assert "/d/bioetl-incident-v1/" in link["url"]
         assert "var-run_id=-" in link["url"]
