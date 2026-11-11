@@ -1,0 +1,5 @@
+field_id,provenance_status,source_ref,source_sha256,rule_or_process,confirmation_owner,usage_limit,accepted_as_ground_truth
+L1,не установлено,,,,,candidate_only,false
+L2,не установлено,,,,,candidate_only,false
+g2p_availability,не установлено,,,,,,false
+target_all,не установлено,,,,,legacy,false

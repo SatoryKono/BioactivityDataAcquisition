@@ -1,0 +1,48 @@
+{
+  "artifact": "stage_report",
+  "biological_accuracy_accepted": false,
+  "criteria": [
+    {
+      "id": "manifest_and_provenance_published",
+      "status": "выполнено"
+    },
+    {
+      "id": "unestablished_fields_restricted",
+      "status": "выполнено"
+    },
+    {
+      "id": "roles_assigned_by_result_owner",
+      "missing_parameters": [
+        "исполнитель модуля",
+        "проверяющий эталонов"
+      ],
+      "status": "не выполнено"
+    },
+    {
+      "id": "biological_accuracy",
+      "status": "не принимается"
+    }
+  ],
+  "development_mode": "synthetic_fixtures_only",
+  "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13008",
+  "local_observations": [
+    {
+      "ci_recheck": false,
+      "location": "D:/github; D:/Storage; D:/KimiData; C:/Users/Fedor/Documents; C:/Users/Fedor/source; C:/Users/Fedor/src; C:/Users/Fedor/Desktop; C:/Users/Fedor/ws",
+      "method": "Get-ChildItem -Recurse -Depth 4 -Directory -Filter source_sections, IUPHAR, iuphar; -File -Filter target_all*",
+      "result": "no matches"
+    }
+  ],
+  "m_code_version_status": "не установлено",
+  "recorded_at_utc": "2026-11-11T18:45:00Z",
+  "selected_source_count": 0,
+  "stage": "0",
+  "stage_status": "incomplete_missing_parameters",
+  "statement": "Без проверенных данных разработка на синтетических fixtures допустима, биологическая точность не принимается.",
+  "survey_sha256": "e66abd0673a269569fe508ad95d1544025bbe45d600cc7a90ee227a4547b28a2",
+  "table_sha256": {
+    "content_checks.csv": "1a7f314a0026b441c6470828a311d874fc33c821d9617b06fcb2336aff6f3afd",
+    "m_code_versions.csv": "5bac637430710ee8dce9085be403c5e24f1dca07b48d12176297617d999bc2f3",
+    "provenance_map.csv": "2060cf7e8606a92d9e568cb516ed156170cefb5fd944ea5f40be0d7f8375c091"
+  }
+}
