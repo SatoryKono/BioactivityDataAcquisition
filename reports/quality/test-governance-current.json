@@ -96,11 +96,11 @@
       "test_name": "test_increment_counter_without_metrics_api_is_noop"
     },
     {
-      "category": "weak_no_value",
+      "category": "intentional_no_exception_contract",
       "line": "76",
       "path": "tests/unit/application/composite/runner_pkg/test_runner_constants.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_checkpoint_non_fatal_errors_catches_instances"
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_checkpoint_non_fatal_errors_catches_instances_accepts_valid"
     },
     {
       "category": "intentional_no_exception_contract",
@@ -523,19 +523,33 @@
       "test_name": "test_consume_headers"
     },
     {
-      "category": "weak_no_value",
+      "category": "intentional_no_exception_contract",
       "line": "214",
       "path": "tests/unit/scripts/engineering/qa/test_runtime_acceptance_12553.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_published_bundle_integrity"
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_published_bundle_integrity_accepts_valid"
+    },
+    {
+      "category": "helper_asserted",
+      "line": "96",
+      "path": "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py",
+      "rationale": "tests that delegate verification to check/validate/verify helper calls",
+      "test_name": "test_generated_heading_measures_age_and_missing_coverage"
+    },
+    {
+      "category": "helper_asserted",
+      "line": "132",
+      "path": "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py",
+      "rationale": "tests that delegate verification to check/validate/verify helper calls",
+      "test_name": "test_freshness_table_keeps_explicit_unknown_rows"
     }
   ],
   "assertless_category_counts": {
     "architecture_helper_guard": 0,
     "benchmark_or_performance": 0,
-    "helper_asserted": 1,
-    "intentional_no_exception_contract": 68,
-    "weak_no_value": 2
+    "helper_asserted": 3,
+    "intentional_no_exception_contract": 70,
+    "weak_no_value": 0
   },
   "assertless_examples": [
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
@@ -580,7 +594,7 @@
     "tests/unit/application/composite/runner_pkg/test_runner_constants.py": {
       "assertless_tests": 1,
       "categories": {
-        "weak_no_value": 1
+        "intentional_no_exception_contract": 1
       }
     },
     "tests/unit/application/core/test_batch_metrics_accounting.py": {
@@ -845,25 +859,18 @@
     "tests/unit/scripts/engineering/qa/test_runtime_acceptance_12553.py": {
       "assertless_tests": 1,
       "categories": {
-        "weak_no_value": 1
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "helper_asserted": 2
       }
     }
   },
-  "assertless_total_candidates": 71,
-  "budget_violations": [
-    {
-      "actual": 2,
-      "budget": "refined_assertless_max",
-      "expected_max": 0,
-      "metric": "refined_assertless_tests"
-    },
-    {
-      "actual": 4,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "assertless_total_candidates": 73,
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1036,16 +1043,11 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 68,
-  "markerless_examples": [
-    "tests/unit/scripts/ops/observability/test_la15_dashboard_hygiene.py:26",
-    "tests/unit/scripts/ops/observability/test_la15_dashboard_hygiene.py:30",
-    "tests/unit/scripts/ops/observability/test_la15_dashboard_hygiene.py:44",
-    "tests/unit/scripts/ops/observability/test_la15_dashboard_hygiene.py:60"
-  ],
-  "markerless_test_functions": 4,
+  "intentional_no_exception_contract": 70,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
-  "refined_assertless_tests": 2,
+  "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
@@ -1153,11 +1155,11 @@
         "test_name": "test_increment_counter_without_metrics_api_is_noop"
       },
       {
-        "category": "weak_no_value",
+        "category": "intentional_no_exception_contract",
         "line": "76",
         "path": "tests/unit/application/composite/runner_pkg/test_runner_constants.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_checkpoint_non_fatal_errors_catches_instances"
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_checkpoint_non_fatal_errors_catches_instances_accepts_valid"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1580,19 +1582,33 @@
         "test_name": "test_consume_headers"
       },
       {
-        "category": "weak_no_value",
+        "category": "intentional_no_exception_contract",
         "line": "214",
         "path": "tests/unit/scripts/engineering/qa/test_runtime_acceptance_12553.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_published_bundle_integrity"
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_published_bundle_integrity_accepts_valid"
+      },
+      {
+        "category": "helper_asserted",
+        "line": "96",
+        "path": "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py",
+        "rationale": "tests that delegate verification to check/validate/verify helper calls",
+        "test_name": "test_generated_heading_measures_age_and_missing_coverage"
+      },
+      {
+        "category": "helper_asserted",
+        "line": "132",
+        "path": "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py",
+        "rationale": "tests that delegate verification to check/validate/verify helper calls",
+        "test_name": "test_freshness_table_keeps_explicit_unknown_rows"
       }
     ],
     "assertless_category_counts": {
       "architecture_helper_guard": 0,
       "benchmark_or_performance": 0,
-      "helper_asserted": 1,
-      "intentional_no_exception_contract": 68,
-      "weak_no_value": 2
+      "helper_asserted": 3,
+      "intentional_no_exception_contract": 70,
+      "weak_no_value": 0
     },
     "assertless_examples": [
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
@@ -1621,7 +1637,7 @@
       "tests/unit/infrastructure/test_checkpoint.py:189",
       "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fifteen.py:44"
     ],
-    "assertless_total_candidates": 71,
+    "assertless_total_candidates": 73,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -1794,15 +1810,10 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/scripts/ops/observability/test_la15_dashboard_hygiene.py:26",
-      "tests/unit/scripts/ops/observability/test_la15_dashboard_hygiene.py:30",
-      "tests/unit/scripts/ops/observability/test_la15_dashboard_hygiene.py:44",
-      "tests/unit/scripts/ops/observability/test_la15_dashboard_hygiene.py:60"
-    ],
-    "markerless_test_functions": 4,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
-    "refined_assertless_tests": 2,
+    "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
@@ -1818,8 +1829,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3252,
-      "test_python_file_count": 3504,
+      "test_glob_file_count": 3256,
+      "test_python_file_count": 3508,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1860,29 +1871,24 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3252,
-    "total_test_functions": 32221,
+    "total_test_files": 3256,
+    "total_test_functions": 32234,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "82a04a1582068a088a74a4e21b47cd3783d4722bc9246aa7800a9f88f1d51473",
+  "source_tree_sha256": "3c7af1cfde8836fad1c94394ebace47ac1f9603a35a58e8b3510404b38f5c4b5",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 71,
+    "assertless_total_candidates": 73,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 68,
-    "markerless_examples": [
-      "tests/unit/scripts/ops/observability/test_la15_dashboard_hygiene.py:26",
-      "tests/unit/scripts/ops/observability/test_la15_dashboard_hygiene.py:30",
-      "tests/unit/scripts/ops/observability/test_la15_dashboard_hygiene.py:44",
-      "tests/unit/scripts/ops/observability/test_la15_dashboard_hygiene.py:60"
-    ],
-    "markerless_test_functions": 4,
-    "refined_assertless_tests": 2,
+    "intentional_no_exception_contract": 70,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
+    "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
@@ -1891,8 +1897,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3252,
-    "test_python_file_count": 3504,
+    "test_glob_file_count": 3256,
+    "test_python_file_count": 3508,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -1933,8 +1939,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3252,
-  "total_test_functions": 32221,
+  "total_test_files": 3256,
+  "total_test_functions": 32234,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import pytest
 from pathlib import Path
+
+pytestmark = pytest.mark.unit
 
 from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
     _CHECKPOINT_EMPTY_ROWS,
