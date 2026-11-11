@@ -155,6 +155,18 @@ def probe_environment(
         key: value for key, value in os.environ.items() if key.upper() in infrastructure
     }
     result.update(entry.get("env") or {})
+    result.update(_declared_environment(entry, repository_env))
+    # An explicit task restriction must survive the wrapper's dotenv loading.
+    # Preserve only this non-secret policy variable, not unrelated credentials.
+    if "BIOETL_AI_MEMORY_MODE" in os.environ:
+        result["BIOETL_AI_MEMORY_MODE"] = os.environ["BIOETL_AI_MEMORY_MODE"]
+    return result
+
+
+def _declared_environment(
+    entry: Mapping, repository_env: Mapping[str, str]
+) -> dict[str, str]:
+    result = {}
     references = set(entry.get("env_vars") or []) | set(
         (entry.get("env_http_headers") or {}).values()
     )
@@ -168,10 +180,6 @@ def probe_environment(
             result[key] = repository_env[key]
         elif key in os.environ:
             result[key] = os.environ[key]
-    # An explicit task restriction must survive the wrapper's dotenv loading.
-    # Preserve only this non-secret policy variable, not unrelated credentials.
-    if "BIOETL_AI_MEMORY_MODE" in os.environ:
-        result["BIOETL_AI_MEMORY_MODE"] = os.environ["BIOETL_AI_MEMORY_MODE"]
     return result
 
 

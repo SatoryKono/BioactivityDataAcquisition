@@ -145,6 +145,16 @@ def _semantic_call(client, control: Mapping, timeout: float) -> None:
         raise ProbeError("TOOL_REPORTED_ERROR")
     if control.get("expected_policy_reason"):
         raise ProbeError("EXPECTED_POLICY_DENIAL_NOT_OBSERVED")
+    rendered = _render_tool_result(result)
+    if not rendered.strip():
+        raise ProbeError("EMPTY_TOOL_RESULT")
+    if len(rendered.encode("utf-8")) > 1024 * 1024:
+        raise ProbeError("RESPONSE_LIMIT", uncertain=True)
+    if not all(token in rendered for token in control["contains_all"]):
+        raise ProbeError("CONTROL_RESULT_MISMATCH")
+
+
+def _render_tool_result(result: Mapping) -> str:
     content = result.get("content") or []
     if not isinstance(content, list):
         raise ProbeError("INVALID_TOOL_RESULT")
@@ -156,12 +166,7 @@ def _semantic_call(client, control: Mapping, timeout: float) -> None:
     structured = result.get("structuredContent")
     if isinstance(structured, dict) and structured:
         rendered += json.dumps(structured, ensure_ascii=False)
-    if not rendered.strip():
-        raise ProbeError("EMPTY_TOOL_RESULT")
-    if len(rendered.encode("utf-8")) > 1024 * 1024:
-        raise ProbeError("RESPONSE_LIMIT", uncertain=True)
-    if not all(token in rendered for token in control["contains_all"]):
-        raise ProbeError("CONTROL_RESULT_MISMATCH")
+    return rendered
 
 
 def _phase(row: dict, name: str, operation: Callable):
@@ -179,22 +184,6 @@ def _phase(row: dict, name: str, operation: Callable):
         "elapsed_ms": round((time.monotonic() - started) * 1000),
     }
     return result
-
-
-def _effective_tools(entry: Mapping, names: Sequence[str]) -> list[str]:
-    """Apply native allow/deny lists without changing the backend catalogue."""
-    enabled = entry.get("enabled_tools")
-    disabled = set(entry.get("disabled_tools") or [])
-    return [
-        name
-        for name in names
-        if (enabled is None or name in enabled) and name not in disabled
-    ]
-
-
-def _require_control_enabled(entry: Mapping, control: Mapping) -> None:
-    if not _effective_tools(entry, [control["tool"]]):
-        raise ProbeError("CONTROL_TOOL_DISABLED_BY_NATIVE_POLICY")
 
 
 def _run_session(
@@ -248,6 +237,24 @@ def _run_session(
     )
 
 
+def _effective_tools(entry: Mapping, names: Sequence[str]) -> list[str]:
+    """Apply native allow/deny lists without changing the backend catalogue."""
+    enabled = entry.get("enabled_tools")
+    disabled = set(entry.get("disabled_tools") or [])
+    return [
+        name
+        for name in names
+        if (enabled is None or name in enabled) and name not in disabled
+    ]
+
+
+def _control_enabled(entry: Mapping, tool: str) -> bool:
+    allowed = entry.get("enabled_tools")
+    return tool not in (entry.get("disabled_tools") or []) and (
+        allowed is None or tool in allowed
+    )
+
+
 def _probe_row(name, entry, control_value, capture, *, environment, factory, required):
     row = {
         "server": name,
@@ -274,7 +281,12 @@ def _probe_row(name, entry, control_value, capture, *, environment, factory, req
         }
     try:
         control = _control(control_value, name)
-        _require_control_enabled(entry, control)
+        if not _control_enabled(entry, control["tool"]):
+            return {
+                **row,
+                "control_status": "DISABLED",
+                "detail": "CONTROL_TOOL_DISABLED_BY_CONFIG",
+            }
         _run_session(
             row,
             entry,
@@ -318,13 +330,8 @@ def _apply_probe_failure(row: dict, control_value, exc: ProbeError) -> None:
         "AUTH_HELPER_NOT_TESTED",
     }:
         row["status"] = "NOT_TESTED"
-    if exc.category in {
-        "ADAPTER_DISABLED_BY_POLICY",
-        "CONTROL_TOOL_DISABLED_BY_NATIVE_POLICY",
-    }:
+    if exc.category == "ADAPTER_DISABLED_BY_POLICY":
         row["status"] = "DISABLED"
-    if exc.category == "CONTROL_TOOL_DISABLED_BY_NATIVE_POLICY":
-        row["control_status"] = "DISABLED"
     if "tool" in row["phases"]:
         row["control_status"] = row["status"]
         if row["status"] == "DENIED_AS_EXPECTED":

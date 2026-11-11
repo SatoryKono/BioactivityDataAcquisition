@@ -309,10 +309,20 @@ cleanup. An inherited stdout held by a backend cannot block diagnostic shutdown;
 that backend is not terminated. `--no-write` controls report output; it does not
 cancel the separately acknowledged adapter cache/log/startup effects.
 
-Native `enabled_tools` and `disabled_tools` apply before adapter startup and
-control execution; deny wins. A filtered control is `DISABLED`, not a passing
-backend call. Raw and effective catalogue sizes remain separate; client filters
-cannot prove server-side prohibition of writes. Explicit route env values are
-preserved. Declared env/header/bearer references use repository dotenv values
-when available, with process-env fallback when absent; unrelated process secrets
-are not inherited. The explicit task memory restriction still takes priority.
+Readiness controls honor native `enabled_tools` and `disabled_tools` before
+starting a diagnostic session. An excluded control is reported with
+`control_status: DISABLED` and overall readiness remains `NOT_TESTED`.
+Raw and effective catalogue sizes remain separate; client filters cannot prove
+server-side prohibition of writes. Explicit route env values are preserved.
+Only explicitly declared environment references may inherit process values
+when the repository environment has no value; unrelated credentials stay excluded.
+
+HTTP name resolution, address attempts and TLS setup share the same absolute
+request deadline. A timed-out connection worker cannot send a protocol request;
+late DNS results are discarded before socket creation, and late owned sockets
+are closed by their worker. A platform resolver already running may finish in
+a daemon thread; its completion does not delay the diagnostic report.
+
+Invalid or unreadable probe plans produce a structured `NOT_TESTED` result
+before adapter startup. Credential-bearing HTTP controls are limited to
+loopback hosts; remote credential-bearing controls require HTTPS.

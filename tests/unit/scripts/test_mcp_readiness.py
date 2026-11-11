@@ -1,5 +1,7 @@
 """Protocol, semantic, isolation-reason and redaction readiness regressions."""
 
+from __future__ import annotations
+
 from copy import deepcopy
 from io import BytesIO
 import json
@@ -734,28 +736,236 @@ def test_stdio_cleanup_does_not_wait_for_inherited_stdout_or_kill_backend(tmp_pa
         assert time.monotonic() - started < 0.8
         assert not psutil.pid_exists(parent_pid)
         assert child.is_running(), "diagnostic must not kill the inherited backend"
+        assert child.status() != psutil.STATUS_ZOMBIE
     finally:
-        if child is not None and child.is_running():
-            child.terminate()
-            child.wait(timeout=3)
+        if child is not None:
+            try:
+                if child.is_running() and child.status() != psutil.STATUS_ZOMBIE:
+                    child.terminate()
+                    deadline = time.monotonic() + 3
+                    while child.is_running() and child.status() != psutil.STATUS_ZOMBIE:
+                        assert time.monotonic() < deadline, (
+                            "fixture backend did not stop"
+                        )
+                        time.sleep(0.01)
+            except psutil.NoSuchProcess:
+                pass
 
 
 @pytest.mark.parametrize(
     "filters",
     [
         {"disabled_tools": ["read_file"]},
-        {"enabled_tools": ["other_tool"]},
+        {"enabled_tools": ["list_directory"]},
         {"enabled_tools": []},
         {"enabled_tools": ["read_file"], "disabled_tools": ["read_file"]},
     ],
 )
-def test_native_tool_filters_block_control_before_any_adapter_call(tmp_path, filters):
+def test_filtered_control_never_starts_a_diagnostic_session(tmp_path, filters):
     session = Session()
     row = report(capture(tmp_path, **filters), session)["results"][0]
-    assert row["status"] == "DISABLED"
+    assert row["status"] == "NOT_TESTED"
     assert row["control_status"] == "DISABLED"
-    assert row["detail"] == "CONTROL_TOOL_DISABLED_BY_NATIVE_POLICY"
-    assert session.calls == []
+    assert row["detail"] == "CONTROL_TOOL_DISABLED_BY_CONFIG"
+    assert not session.calls
+    assert not row["ready"]
+
+
+def test_explicitly_enabled_control_retains_semantic_check(tmp_path):
+    session = Session()
+    row = report(capture(tmp_path, enabled_tools=["read_file"]), session)["results"][0]
+    assert row["control_status"] == "PASS"
+    assert sum(method == "tools/call" for method, _, _ in session.calls) == 1
+
+
+@pytest.mark.parametrize(
+    "reference",
+    [
+        {"env_vars": ["SYNTHETIC_MCP_TOKEN"]},
+        {"env_http_headers": {"X-Token": "SYNTHETIC_MCP_TOKEN"}},
+        {"bearer_token_env_var": "SYNTHETIC_MCP_TOKEN"},
+    ],
+)
+def test_declared_process_environment_is_inherited_without_unrelated_secrets(
+    monkeypatch, reference
+):
+    from scripts.ai.codex.mcp_probe_client import probe_environment
+
+    monkeypatch.setenv("SYNTHETIC_MCP_TOKEN", SECRET)
+    monkeypatch.setenv("UNRELATED_SECRET", SECRET)
+    result = probe_environment(reference, {})
+    assert result["SYNTHETIC_MCP_TOKEN"] == SECRET
+    assert "UNRELATED_SECRET" not in result
+    assert (
+        probe_environment(reference, {"SYNTHETIC_MCP_TOKEN": "repository-value"})[
+            "SYNTHETIC_MCP_TOKEN"
+        ]
+        == "repository-value"
+    )
+
+
+def test_http_slow_dns_obeys_deadline_without_late_connection(monkeypatch):
+    import socket
+    import threading
+    import time
+    from scripts.ai.codex.mcp_http_probe import HttpProbeClient
+
+    resolved = threading.Event()
+    dialed = []
+
+    def slow_resolution(*args, **kwargs):
+        time.sleep(0.4)
+        resolved.set()
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("127.0.0.1", 9))]
+
+    def forbidden_socket(*args, **kwargs):
+        dialed.append(args)
+        raise AssertionError("DNS completed after deadline; must not open a socket")
+
+    monkeypatch.setattr(socket, "getaddrinfo", slow_resolution)
+    monkeypatch.setattr(socket, "socket", forbidden_socket)
+    client = HttpProbeClient({"url": "http://synthetic.invalid/mcp"}, None, {})
+    began = time.monotonic()
+    with pytest.raises(ProbeError, match="TIMEOUT"):
+        client.request("initialize", {}, 0.05)
+    assert time.monotonic() - began < 0.25
+    assert resolved.wait(1)
+    time.sleep(0.03)
+    assert dialed == []
+
+
+def test_http_late_connection_is_closed_by_its_owner():
+    import threading
+    import time
+    from scripts.ai.codex.mcp_http_probe import _connect_before_deadline
+
+    release = threading.Event()
+    late_closed = threading.Event()
+
+    class Connection:
+        sock = None
+
+        def connect(self):
+            release.wait(1)
+            self.sock = object()
+
+        def close(self):
+            if self.sock is not None:
+                late_closed.set()
+                self.sock = None
+
+    connection = Connection()
+    try:
+        with pytest.raises(ProbeError, match="TIMEOUT"):
+            _connect_before_deadline(connection, time.monotonic() + 0.02)
+    finally:
+        release.set()
+    assert late_closed.wait(1)
+    assert connection.sock is None
+
+
+def test_http_address_attempts_share_remaining_deadline(monkeypatch):
+    import socket
+    import time
+    from scripts.ai.codex.mcp_http_probe import _open_socket
+
+    budgets, closed = [], []
+
+    class UnreachableSocket:
+        def settimeout(self, timeout):
+            self.timeout = timeout
+            budgets.append(timeout)
+
+        def connect(self, address):
+            time.sleep(min(0.04, self.timeout))
+            raise OSError("synthetic address unavailable")
+
+        def close(self):
+            closed.append(self)
+
+    monkeypatch.setattr(
+        socket,
+        "getaddrinfo",
+        lambda *args: [
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("127.0.0.1", n))
+            for n in range(1, 6)
+        ],
+    )
+    monkeypatch.setattr(socket, "socket", lambda *args: UnreachableSocket())
+    started = time.monotonic()
+    with pytest.raises((ProbeError, OSError)):
+        _open_socket(("synthetic.invalid", 80), None, started + 0.06)
+    assert time.monotonic() - started < 0.2
+    assert 1 <= len(budgets) <= 2
+    assert len(closed) == len(budgets)
+    if len(budgets) == 2:
+        assert budgets[1] < budgets[0]
+
+
+@pytest.mark.parametrize(
+    "mode", ["missing-root", "missing-file", "invalid-json", "unsafe-path"]
+)
+def test_invalid_probe_plan_returns_not_tested_without_launch(
+    tmp_path, monkeypatch, capsys, mode
+):
+    from scripts.ai.codex.doctor import run_mcp
+    import scripts.ai.codex.native_mcp_config as native
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("invalid plan must never start a native process")
+
+    monkeypatch.setattr(native, "NativeConfigClient", forbidden)
+    plan = Path("reports/quality/mcp-controls/control.json")
+    if mode != "missing-root":
+        (tmp_path / plan.parent).mkdir(parents=True)
+    if mode == "invalid-json":
+        (tmp_path / plan).write_text(SECRET, encoding="utf-8")
+    if mode == "unsafe-path":
+        plan = Path("../outside.json")
+    assert (
+        run_mcp(
+            tmp_path,
+            "stable",
+            output_json=True,
+            codex_executable=Path("synthetic-codex"),
+            probe_plan=plan,
+            start_approved_adapters=True,
+        )
+        == 1
+    )
+    output = capsys.readouterr()
+    assert json.loads(output.out) == {
+        "status": "NOT_TESTED",
+        "detail": "probe plan unavailable or invalid",
+    }
+    assert SECRET not in output.out + output.err
+
+
+@pytest.mark.parametrize(
+    "credential",
+    [
+        {"bearer_token_env_var": "SYNTHETIC_TOKEN"},
+        {"env_http_headers": {"X-Token": "SYNTHETIC_TOKEN"}},
+        {"http_headers": {"X-Token": SECRET}},
+    ],
+)
+def test_cleartext_remote_credentials_are_refused_before_connection(credential):
+    from scripts.ai.codex.mcp_http_probe import HttpProbeClient
+
+    environment = {"SYNTHETIC_TOKEN": SECRET}
+    with pytest.raises(ProbeError, match="UNSUPPORTED_HTTP_URL"):
+        HttpProbeClient(
+            {"url": "http://synthetic.invalid/mcp", **credential}, None, environment
+        )
+    for url in [
+        "http://127.0.0.1/mcp",
+        "http://localhost/mcp",
+        "http://[::1]/mcp",
+        "https://synthetic.invalid/mcp",
+    ]:
+        assert HttpProbeClient(
+            {"url": url, **credential}, None, environment
+        ).url.hostname
 
 
 def test_client_tool_filter_does_not_claim_server_write_prohibition(tmp_path):
@@ -767,24 +977,6 @@ def test_client_tool_filter_does_not_claim_server_write_prohibition(tmp_path):
     assert row["tool_count_raw"] == 2 and row["tool_count"] == 1
     assert row["memory_write_tools_advertised"] is True
     assert row["technical_write_prohibition_status"] == "NOT_TESTED"
-
-
-@pytest.mark.parametrize(
-    "entry",
-    [
-        {"env_vars": ["DECLARED_AUTH"]},
-        {"env_http_headers": {"Authorization": "DECLARED_AUTH"}},
-        {"bearer_token_env_var": "DECLARED_AUTH"},
-    ],
-)
-def test_declared_process_variables_survive_without_dotenv(monkeypatch, entry):
-    from scripts.ai.codex.mcp_probe_client import probe_environment
-
-    monkeypatch.setenv("DECLARED_AUTH", SECRET)
-    monkeypatch.setenv("UNRELATED_SECRET", SECRET)
-    result = probe_environment(entry, {})
-    assert result["DECLARED_AUTH"] == SECRET
-    assert "UNRELATED_SECRET" not in result
 
 
 def test_explicit_route_env_is_not_replaced_by_reference_fallback(monkeypatch):

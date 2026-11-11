@@ -1,5 +1,7 @@
 """Sanitized shared failures for MCP diagnostic transports."""
 
+from __future__ import annotations
+
 
 class ProbeError(RuntimeError):
     """A category and uncertainty flag, without raw server errors or secrets."""

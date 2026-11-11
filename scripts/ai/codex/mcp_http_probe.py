@@ -1,7 +1,10 @@
 """Single-attempt HTTP MCP probes with bounded reads and an absolute deadline."""
 
+from __future__ import annotations
+
 from collections.abc import Mapping
 import http.client
+import ipaddress
 import json
 import re
 import socket
@@ -19,6 +22,62 @@ def _remaining(deadline: float) -> float:
     if remaining <= 0:
         raise ProbeError("TIMEOUT", uncertain=True)
     return remaining
+
+
+def _dial_address(address, source_address, deadline: float):
+    family, kind, protocol, _, target = address
+    stream = socket.socket(family, kind, protocol)
+    try:
+        stream.settimeout(_remaining(deadline))
+        if source_address:
+            stream.bind(source_address)
+        stream.connect(target)
+        return stream
+    except BaseException:
+        stream.close()
+        raise
+
+
+def _open_socket(address, source_address, deadline: float):
+    host, port = address
+    error = OSError("connection address unavailable")
+    for item in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
+        _remaining(deadline)
+        try:
+            return _dial_address(item, source_address, deadline)
+        except OSError as exc:
+            error = exc
+    raise error
+
+
+def _connect_before_deadline(connection, deadline: float) -> None:
+    """Bound DNS, address attempts and TLS without a late protocol request."""
+    finished = threading.Event()
+    cancelled = threading.Event()
+    errors = []
+    connection._create_connection = lambda address, _timeout, source_address: (
+        _open_socket(address, source_address, deadline)
+    )
+
+    def connect():
+        try:
+            connection.connect()
+        except Exception as exc:
+            errors.append(exc)
+        finally:
+            if cancelled.is_set():
+                connection.close()
+            finished.set()
+
+    worker = threading.Thread(target=connect, daemon=True)
+    worker.start()
+    if not finished.wait(max(0.0, deadline - time.monotonic())):
+        cancelled.set()
+        connection.close()
+        raise ProbeError("TIMEOUT", uncertain=True)
+    if errors:
+        raise errors[0]
+    _remaining(deadline)
 
 
 class _SocketDeadline:
@@ -98,30 +157,54 @@ def _read_http_reply(response, timeout: float, *, guard=None) -> bytes:
             return bytes(buffer)
 
 
+def _is_loopback(host: str) -> bool:
+    if host.rstrip(".").lower() == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
+def _validate_http_transport(url, entry: Mapping) -> None:
+    if url.scheme not in {"http", "https"} or not url.hostname:
+        raise ProbeError("UNSUPPORTED_HTTP_URL")
+    if url.username or url.password or entry.get("http_headers_helper"):
+        raise ProbeError("AUTH_HELPER_NOT_TESTED")
+    credentials = any(
+        entry.get(key)
+        for key in ("bearer_token_env_var", "env_http_headers", "http_headers")
+    )
+    if url.scheme == "http" and credentials and not _is_loopback(url.hostname):
+        raise ProbeError("UNSUPPORTED_HTTP_URL")
+
+
+def _request_headers(entry: Mapping, environment: Mapping[str, str]) -> dict:
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+    }
+    headers.update(entry.get("http_headers") or {})
+    for key, reference in (entry.get("env_http_headers") or {}).items():
+        if not environment.get(reference):
+            raise ProbeError("AUTH_REFERENCE_UNAVAILABLE")
+        headers[key] = environment[reference]
+    reference = entry.get("bearer_token_env_var")
+    if reference:
+        if not environment.get(reference):
+            raise ProbeError("AUTH_REFERENCE_UNAVAILABLE")
+        headers["Authorization"] = "Bearer " + environment[reference]
+    return headers
+
+
 class HttpProbeClient:
     """Own each HTTP connection; never redirect, replay, or DELETE a session."""
 
     def __init__(self, entry: Mapping, workspace, environment: Mapping[str, str]):
         del workspace
         self.url = urlsplit(str(entry["url"]))
-        if self.url.scheme not in {"http", "https"} or not self.url.hostname:
-            raise ProbeError("UNSUPPORTED_HTTP_URL")
-        if self.url.username or self.url.password or entry.get("http_headers_helper"):
-            raise ProbeError("AUTH_HELPER_NOT_TESTED")
-        self.headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json, text/event-stream",
-        }
-        self.headers.update(entry.get("http_headers") or {})
-        for key, reference in (entry.get("env_http_headers") or {}).items():
-            if not environment.get(reference):
-                raise ProbeError("AUTH_REFERENCE_UNAVAILABLE")
-            self.headers[key] = environment[reference]
-        reference = entry.get("bearer_token_env_var")
-        if reference:
-            if not environment.get(reference):
-                raise ProbeError("AUTH_REFERENCE_UNAVAILABLE")
-            self.headers["Authorization"] = "Bearer " + environment[reference]
+        _validate_http_transport(self.url, entry)
+        self.headers = _request_headers(entry, environment)
         self._identifier = 0
         self._last_deadline = 0.0
         self.transport_seen = False
@@ -135,7 +218,7 @@ class HttpProbeClient:
     def _exchange(
         self, connection, payload: dict, deadline: float, notification: bool
     ) -> dict:
-        connection.connect()
+        _connect_before_deadline(connection, deadline)
         if connection.sock is None:
             raise ProbeError("CONNECTION_UNAVAILABLE", uncertain=True)
         with _SocketDeadline(connection.sock, deadline) as guard:

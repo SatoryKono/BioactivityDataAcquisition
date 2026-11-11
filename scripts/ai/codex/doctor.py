@@ -15,6 +15,9 @@ from pathlib import Path
 from typing import Any, cast
 import sys
 
+# Read-only discovery must not create project bytecode caches on fresh installs.
+sys.dont_write_bytecode = True
+
 _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
@@ -406,7 +409,18 @@ def run_mcp(
     if probe_plan is not None:
         if not start_approved_adapters:
             raise ValueError("--probe-plan requires --start-approved-adapters")
-        controls = _read_probe_plan(repo_root, probe_plan)
+        try:
+            controls = _read_probe_plan(repo_root, probe_plan)
+        except (OSError, ValueError):
+            print(
+                json.dumps(
+                    {
+                        "status": "NOT_TESTED",
+                        "detail": "probe plan unavailable or invalid",
+                    }
+                )
+            )
+            return 1
         print(
             "MCP diagnostic service effects: " + "; ".join(SERVICE_EFFECTS),
             file=sys.stderr,
@@ -474,7 +488,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "mode",
-        choices=("static", "mcp", "all", "routes", "transport"),
+        choices=("static", "hooks", "mcp", "all", "routes", "transport"),
         nargs="?",
         default="static",
     )
@@ -512,6 +526,14 @@ def main() -> int:
     parser.add_argument("--repo-root", type=Path, default=REPO_ROOT)
     args = parser.parse_args()
     repo_root = args.repo_root.resolve()
+    if args.mode == "hooks":
+        if args.output is not None:
+            parser.error("hooks mode is read-only; --output is not supported")
+        from scripts.ai.codex.hook_inventory import collect
+
+        print(json.dumps(collect(repo_root), indent=2))
+        # Discovery is evidence, not proof of installed runtime capability.
+        return 2
     profile = args.profile or setup_mcp.DEFAULT_LOCAL_PROFILE
     _validate_options(parser, args)
     return _dispatch(args, repo_root, profile)
