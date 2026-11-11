@@ -13,16 +13,19 @@ CHANGE_CATEGORIES: tuple[str, ...] = (
     "direct_local_separation",
     "new_or_unverified_logic",
 )
-_RESULT_FIELDS = frozenset(
+# Raw identity columns shared by the input normalization contract. Result and
+# provenance projections must not change the identity of an input row.
+_IDENTITY_FIELDS = frozenset(
     {
-        "change_sign",
-        "decision_status",
-        "effective_class",
-        "effective_source",
-        "explanation",
-        "iuphar_class",
-        "legacy_iuphar_class",
-        "match_status",
+        "input_row_id",
+        "target_id",
+        "uniprot",
+        "gene_id",
+        "gene_symbol",
+        "organism",
+        "isoform_id",
+        "isoform_suffix",
+        "target_kind",
     }
 )
 
@@ -54,10 +57,10 @@ def compare_stage0(
     python_rows: tuple[Mapping[str, str], ...],
 ) -> ComparisonReport:
     """Join on the full identity key and leave the M rows untouched."""
-    if reference.selected_source_count == 0 and not reference.m_rows:
+    if not reference.m_rows:
         return ComparisonReport(
             False,
-            "эталонный набор этапа 0 не содержит выбранного источника и строк M",
+            "эталонный набор этапа 0 не содержит строк M",
             (),
             (),
             None,
@@ -104,11 +107,22 @@ def _classify_key(
         return
     m_row = m_group[0] if m_group else None
     python_row = python_group[0] if python_group else None
-    if m_row is not None and "legacy_iuphar_class" in m_row:
-        legacy.append((label, m_row["legacy_iuphar_class"]))
-    if m_row is None or python_row is None or _class(m_row) == _class(python_row):
+    _record_legacy(label, m_row, legacy)
+    if not key or m_row is None or python_row is None:
+        residual.append(label)
+        return
+    if _class(m_row) == _class(python_row):
         return
     _record_difference(label, python_row, changes, residual)
+
+
+def _record_legacy(
+    label: str,
+    row: Mapping[str, str] | None,
+    legacy: list[tuple[str, str]],
+) -> None:
+    if row is not None and "legacy_iuphar_class" in row:
+        legacy.append((label, row["legacy_iuphar_class"]))
 
 
 def _record_difference(
@@ -133,9 +147,7 @@ def _group(
     for row in rows:
         key = tuple(
             sorted(
-                (name, value)
-                for name, value in row.items()
-                if name not in _RESULT_FIELDS
+                (name, value) for name, value in row.items() if name in _IDENTITY_FIELDS
             )
         )
         grouped.setdefault(key, []).append(row)
@@ -147,7 +159,7 @@ def _class(row: Mapping[str, str]) -> str:
 
 
 def _label(key: tuple[tuple[str, str], ...]) -> str:
-    return "|".join(f"{name}={value}" for name, value in key)
+    return "|".join(f"{name}={value}" for name, value in key) or "<missing identity>"
 
 
 def _metrics(rows: tuple[Mapping[str, str], ...]) -> dict[str, int]:
