@@ -23,8 +23,8 @@ Every wrapper skill must state:
    required pre-task. Hash-only work uses `BIOETL_AI_MEMORY_MODE=off`.
 1. Reuse already-read current sources; re-read on content change, expanded scope,
    or conflicting evidence. A source list is navigation, not a mandatory dump.
-1. Select memory mode within user authority. When pre-task is selected for strict no-file-changes work,
-   run read-only pre-task with `--skip-refresh-if-missing --skip-session-note`;
+1. Select memory mode within user authority. For selected pre-task under a strict
+   ban on file changes, use read-only with `--skip-refresh-if-missing --skip-session-note`;
    do not rebuild even temporary artifacts. Report missing retrieval as DEGRADED
    and verify claims against source; never downgrade a V3/V4 task to skip checks.
 1. Read the primary profile or workflow file named by the wrapper.

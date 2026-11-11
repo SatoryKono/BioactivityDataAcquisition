@@ -89,7 +89,7 @@ and required pre-task; hash-only work uses `BIOETL_AI_MEMORY_MODE=off`.
 Reuse already-read current sources; re-read on content change, expanded scope,
 or conflicting evidence. Use matching Devin profiles and native capabilities.
 
-When pre-task is selected for strict no-file-changes work, run read-only pre-task with
+When pre-task is selected for strict no-file-changes work, use read-only with
 `--skip-refresh-if-missing --skip-session-note`; do not rebuild even temporary
 artifacts. Missing retrieval stays DEGRADED; verify claims against source.
 

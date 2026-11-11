@@ -26,9 +26,10 @@ RULES, requirements, ADRs, and policies when the task touches those
 surfaces. This file only defines Codex routing; it does not restate project
 governance.
 
-For a role-specific task, read the matching `.codex/agents/py-*.md`, wrapper
-skill, and `docs/00-project/ai/memory/memory-py-*.md`. Load additional sources
-only when the task touches their governed surface.
+For a role-specific task, read the matching `.codex/agents/py-*.md` and wrapper
+skill. Load `docs/00-project/ai/memory/memory-py-*.md` when selected by the
+context-tier matrix or relevant to the task; its presence is not a V1 bootstrap
+requirement. Load additional sources only for their governed surface.
 
 ## Governed roles
 
@@ -68,7 +69,7 @@ root agent performs the same responsibilities directly.
    required, V3/V4 retain the full package and required pre-task, hash-only
    uses `BIOETL_AI_MEMORY_MODE=off`. Reuse already-read current sources; re-read
    on content change, expanded scope, or conflicting evidence.
-1. When pre-task is selected for strict no-file-changes work, use read-only pre-task with
+1. When pre-task is selected for strict no-file-changes work, use read-only with
    `--skip-refresh-if-missing --skip-session-note`; do not rebuild temporary
    artifacts. Report missing retrieval as DEGRADED and verify source directly.
 1. Inspect current evidence: target files, related tests, contracts, configs,
