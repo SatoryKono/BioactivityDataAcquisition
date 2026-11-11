@@ -210,6 +210,16 @@ def test_independent_receptor_prediction_keeps_existing_support() -> None:
     assert result.local_rule_ids == ("prediction:L1",)
 
 
+def test_subclass_parent_outside_the_dictionary_is_rejected() -> None:
+    with pytest.raises(ValueError, match="outside the class dictionary"):
+        apply_local(
+            (),
+            rules=(),
+            predictions=(Prediction("L1", "Enzyme", True, False, "prediction"),),
+            subclass_of={"Enzyme": "not-a-working-class"},
+        )
+
+
 def test_broken_rule_blocks_processing() -> None:
     broken = _rule("bad", "annotation", "keyword_id=KW-1", "Enzyme", version="")
     with pytest.raises(ValueError, match="missing version"):
