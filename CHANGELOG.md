@@ -28,6 +28,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- **Main Integrity publish split (#13023):** the Main Integrity conclusion no
+  longer waits on Environment `ghcr-publish`. `main-integrity.yml` calls
+  `docker.yml` with `publish: false` and ends at `docker-complete`.
+  `main-ghcr-publish.yml` publishes the already scanned image for the current
+  `main` HEAD after a successful push, still behind reviewer `@SatoryKono`.
+  A stale SHA does not open a deployment. `cancelled` and `waiting` are not
+  success. Existing waiting runs are not rewritten. Ref-wide
+  `cancel-in-progress: true` is not restored. Scanned-image retention stays
+  1 day. This is a CI contract change, not a package major version.
+
 - **PMCID canonicalizer (#12027):** public `normalize_pmc_id` is removed.
   PubMed extraction and `pmc_id` / `pmcid` join keys use
   `normalize_pmcid_reference_id`. Canonical values stay uppercase `PMC` plus
