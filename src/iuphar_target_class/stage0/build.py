@@ -86,25 +86,44 @@ def _reject_output_overlap(
     survey: Stage0Survey,
 ) -> None:
     """Refuse to publish when an artifact path is a source or the survey."""
+    protected = _protected_source_paths(root, survey_file, survey)
+    planned = {(output / name).resolve() for name in ARTIFACT_NAMES}
+    planned.update(_planned_copy_paths(root, output, survey))
+    overlap = sorted(path.as_posix() for path in planned & protected)
+    if overlap:
+        message = "output path replaces source material: " + ", ".join(overlap)
+        raise ValueError(message)
+
+
+def _protected_source_paths(
+    root: Path,
+    survey_file: Path,
+    survey: Stage0Survey,
+) -> set[Path]:
     protected = {survey_file}
     protected.update(
         (root / item.source_ref).resolve() for item in survey.m_code_versions
     )
-    for candidate in survey.candidate_files:
-        protected.add((root / candidate.relative_path).resolve())
-    for material in survey.expected_materials:
-        if material.relative_path is not None:
-            protected.add((root / material.relative_path).resolve())
-    planned = {(output / name).resolve() for name in ARTIFACT_NAMES}
+    protected.update(
+        (root / candidate.relative_path).resolve()
+        for candidate in survey.candidate_files
+    )
+    protected.update(
+        (root / material.relative_path).resolve()
+        for material in survey.expected_materials
+        if material.relative_path is not None
+    )
+    return protected
+
+
+def _planned_copy_paths(root: Path, output: Path, survey: Stage0Survey) -> set[Path]:
+    planned: set[Path] = set()
     for candidate in survey.candidate_files:
         source = (root / candidate.relative_path).resolve()
         if candidate.select_as_source and source.is_file():
             digest = sha256_file(source)
             planned.add((output / "copies" / f"{digest}.bin").resolve())
-    overlap = sorted(path.as_posix() for path in planned & protected)
-    if overlap:
-        message = "output path replaces source material: " + ", ".join(overlap)
-        raise ValueError(message)
+    return planned
 
 
 def build_artifacts(
@@ -262,6 +281,16 @@ def _inspect_path(
             selected_as_stage0_source=False,
             note=_join_notes(note, "directory; not a table"),
         )
+    return _inspect_file(path, check_id, subject, select_as_source, note)
+
+
+def _inspect_file(
+    path: Path,
+    check_id: str,
+    subject: str,
+    select_as_source: bool,
+    note: str,
+) -> FileInspection:
     payload_sha = sha256_file(path)
     byte_count = path.stat().st_size
     columns: tuple[str, ...] = ()
