@@ -317,6 +317,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/comparison.py": (
         "tests/unit/iuphar_target_class/test_comparison.py",
     ),
+    "src/iuphar_target_class/delivery.py": (
+        "tests/unit/iuphar_target_class/test_delivery.py",
+    ),
+    "data/iuphar_target_class/delivery/example-input.csv": (
+        "tests/unit/iuphar_target_class/test_delivery.py",
+    ),
     "scripts/ai/codex/native_runtime_contract.py": (
         CODEX_NATIVE_RUNTIME_TEST,
         "tests/architecture/test_codex_agent_catalog_inventory.py",
