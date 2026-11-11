@@ -63,7 +63,9 @@ class Stage0Survey:
     result_owner_name: str
     result_owner_source: str
     module_executor: str | None
+    module_executor_source: str | None
     gold_standard_reviewer: str | None
+    gold_standard_reviewer_source: str | None
     candidate_files: tuple[CandidateFile, ...]
     expected_materials: tuple[ExpectedMaterial, ...]
     provenance_claims: tuple[ProvenanceClaim, ...]

@@ -40,10 +40,12 @@ def _base_survey(**overrides: object) -> dict[str, object]:
         "candidate_files": [],
         "expected_materials": [],
         "gold_standard_reviewer": None,
+        "gold_standard_reviewer_source": None,
         "issued_on": "2026-11-10",
         "local_observations": [],
         "m_code_versions": [],
         "module_executor": None,
+        "module_executor_source": None,
         "plan_revision": "8",
         "plan_version": "1",
         "provenance_claims": [
@@ -114,19 +116,18 @@ def test_committed_manifest_pins_hashes_and_blocks_ground_truth() -> None:
     assert manifest["development_mode"] == "synthetic_fixtures_only"
     assert manifest["copies"] == []
     assert manifest["m_code_version_status"] == PROVENANCE_UNESTABLISHED
-    assert manifest["missing_parameters"] == [
-        "исполнитель модуля",
-        "проверяющий эталонов",
-    ]
+    assert manifest["missing_parameters"] == []
     assert manifest["roles"]["result_owner"]["name"] == "Федор Новиков"
     assert manifest["roles"]["result_owner"]["status"] == "назначен"
-    assert manifest["roles"]["module_executor"]["status"] == PROVENANCE_UNESTABLISHED
-    assert manifest["roles"]["gold_standard_reviewer"]["name"] is None
+    assert manifest["roles"]["module_executor"]["name"] == "Федор Новиков"
+    assert manifest["roles"]["module_executor"]["status"] == "назначен"
+    assert manifest["roles"]["gold_standard_reviewer"]["name"] == "Федор Новиков"
+    assert manifest["roles"]["gold_standard_reviewer"]["status"] == "назначен"
     for name, digest in manifest["artifact_sha256"].items():
         payload = (OUTPUT_DIR / name).read_bytes()
         assert hashlib.sha256(payload).hexdigest() == digest
     assert report["statement"].startswith("Без проверенных данных")
-    assert report["stage_status"] == "incomplete_missing_parameters"
+    assert report["stage_status"] == "recorded_without_biological_acceptance"
     assert all(item["status"] != "PASS" for item in report["criteria"])
     assert all(not line.endswith(",true") for line in provenance.splitlines()[1:])
     content = (OUTPUT_DIR / "content_checks.csv").read_text(encoding="utf-8")
@@ -313,3 +314,35 @@ def test_publish_rejects_output_outside_repo(tmp_path: Path) -> None:
     )
     with pytest.raises(ValueError, match="escapes repo"):
         publish_stage0(repo, survey_path, tmp_path / "outside")
+
+
+def test_publish_rejects_output_that_replaces_a_source(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    tables = repo / "tables"
+    tables.mkdir(parents=True)
+    source = tables / "content_checks.csv"
+    original = b"target_all\nEnzyme\n"
+    source.write_bytes(original)
+    survey_path = repo / "survey.json"
+    survey_path.write_text(
+        json.dumps(
+            _base_survey(
+                candidate_files=[
+                    {
+                        "relative_path": "tables/content_checks.csv",
+                        "select_as_source": True,
+                    },
+                ],
+            ),
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    with pytest.raises(ValueError, match="replaces source"):
+        publish_stage0(repo, survey_path, tables)
+    assert source.read_bytes() == original
+    assert not (tables / "manifest.json").exists()

@@ -67,6 +67,7 @@ def publish_stage0(repo_root: Path, survey_path: Path, output_dir: Path) -> None
         raise ValueError(message)
     survey_bytes = survey_file.read_bytes()
     survey = load_survey(survey_file, root=root)
+    _reject_output_overlap(root, survey_file, output, survey)
     artifacts = build_artifacts(
         repo_root=root,
         survey=survey,
@@ -76,6 +77,31 @@ def publish_stage0(repo_root: Path, survey_path: Path, output_dir: Path) -> None
     output.mkdir(parents=True, exist_ok=True)
     for name in ARTIFACT_NAMES:
         atomic_write_bytes(output / name, artifacts[name], root=output)
+
+
+def _reject_output_overlap(
+    root: Path,
+    survey_file: Path,
+    output: Path,
+    survey: Stage0Survey,
+) -> None:
+    """Refuse to publish when an artifact path is a source or the survey."""
+    protected = {survey_file}
+    for candidate in survey.candidate_files:
+        protected.add((root / candidate.relative_path).resolve())
+    for material in survey.expected_materials:
+        if material.relative_path is not None:
+            protected.add((root / material.relative_path).resolve())
+    planned = {(output / name).resolve() for name in ARTIFACT_NAMES}
+    for candidate in survey.candidate_files:
+        source = (root / candidate.relative_path).resolve()
+        if candidate.select_as_source and source.is_file():
+            digest = sha256_file(source)
+            planned.add((output / "copies" / f"{digest}.bin").resolve())
+    overlap = sorted(path.as_posix() for path in planned & protected)
+    if overlap:
+        message = "output path replaces source material: " + ", ".join(overlap)
+        raise ValueError(message)
 
 
 def build_artifacts(
@@ -500,10 +526,12 @@ def _manifest(
             "gold_standard_reviewer": _role(
                 "проверяющий эталонов",
                 survey.gold_standard_reviewer,
-                None,
+                survey.gold_standard_reviewer_source,
             ),
             "module_executor": _role(
-                "исполнитель модуля", survey.module_executor, None
+                "исполнитель модуля",
+                survey.module_executor,
+                survey.module_executor_source,
             ),
             "result_owner": _role(
                 "владелец результата",

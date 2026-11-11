@@ -45,10 +45,12 @@ def survey_from_object(payload: dict[str, Any]) -> Stage0Survey:
             "candidate_files",
             "expected_materials",
             "gold_standard_reviewer",
+            "gold_standard_reviewer_source",
             "issued_on",
             "local_observations",
             "m_code_versions",
             "module_executor",
+            "module_executor_source",
             "plan_revision",
             "plan_version",
             "provenance_claims",
@@ -89,9 +91,17 @@ def survey_from_object(payload: dict[str, Any]) -> Stage0Survey:
             "result_owner_source",
         ),
         module_executor=_optional_role(payload["module_executor"], "module_executor"),
+        module_executor_source=_optional_role(
+            payload["module_executor_source"],
+            "module_executor_source",
+        ),
         gold_standard_reviewer=_optional_role(
             payload["gold_standard_reviewer"],
             "gold_standard_reviewer",
+        ),
+        gold_standard_reviewer_source=_optional_role(
+            payload["gold_standard_reviewer_source"],
+            "gold_standard_reviewer_source",
         ),
         candidate_files=tuple(
             _candidate(item)
