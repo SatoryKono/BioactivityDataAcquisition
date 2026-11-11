@@ -106,7 +106,7 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 
 | ID | Title | Type |
 | --- | --- | --- |
-| 99 | Inspect Scope & Evidence | text |
+| 99 | Review Run Context | table |
 | 9604 | Review Overall Verdict | stat |
 | 9002 | Review Run Domains | table |
 | 9603 | Review Selected Run Status | table |

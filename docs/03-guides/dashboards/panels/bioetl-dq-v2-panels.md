@@ -60,7 +60,7 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 
 | ID | Title | Type |
 | --- | --- | --- |
-| 9400 | Understand Evidence Scope | text |
+| 9400 | Review Run Context | table |
 | 9406 | Review Selected Run Status | table |
 | 9402 | Inspect Run Identity | text |
 | 9403 | Inspect Processed Records | table |
