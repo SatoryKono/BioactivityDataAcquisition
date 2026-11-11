@@ -157,6 +157,63 @@ def test_placeholder_role_is_rejected() -> None:
         survey_from_object(payload)
 
 
+@pytest.mark.parametrize("role", ["module_executor", "gold_standard_reviewer"])
+@pytest.mark.parametrize("provided", ["name", "source"])
+def test_role_requires_both_name_and_assignment_source(
+    role: str, provided: str
+) -> None:
+    field = role if provided == "name" else f"{role}_source"
+    with pytest.raises(ValueError, match="assignment source"):
+        survey_from_object(_base_survey(**{field: "Cursor"}))
+
+
+@pytest.mark.parametrize("source_exists", [False, True])
+def test_m_code_version_rejects_unverified_hash(
+    tmp_path: Path, source_exists: bool
+) -> None:
+    source = tmp_path / "processing.m"
+    if source_exists:
+        source.write_bytes(b"let result = 1 in result\n")
+    payload = _base_survey(
+        m_code_versions=[
+            {
+                "version_id": "v1",
+                "source_ref": "processing.m",
+                "source_sha256": "0" * 64,
+            }
+        ]
+    )
+    with pytest.raises(ValueError, match="M-code source"):
+        _publish(tmp_path, payload, tmp_path / "out")
+    assert not (tmp_path / "out").exists()
+
+
+def test_m_code_version_requires_actual_source_bytes(tmp_path: Path) -> None:
+    source = tmp_path / "processing.m"
+    original = b"let result = 1 in result\n"
+    source.write_bytes(original)
+    digest = hashlib.sha256(original).hexdigest()
+    artifacts = _publish(
+        tmp_path,
+        _base_survey(
+            m_code_versions=[
+                {
+                    "version_id": "v1",
+                    "source_ref": "processing.m",
+                    "source_sha256": digest,
+                }
+            ]
+        ),
+        tmp_path / "out",
+    )
+    assert (
+        json.loads(artifacts["manifest.json"])["m_code_version_status"]
+        == PROVENANCE_ESTABLISHED
+    )
+    assert digest.encode() in artifacts["m_code_versions.csv"]
+    assert source.read_bytes() == original
+
+
 def test_partial_claim_is_not_ground_truth(tmp_path: Path) -> None:
     payload = _base_survey()
     claims = payload["provenance_claims"]

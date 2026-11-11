@@ -78,6 +78,12 @@ def survey_from_object(payload: dict[str, Any]) -> Stage0Survey:
     ):
         message = f"provenance_claims must list each of {REQUIRED_FIELD_IDS} once"
         raise ValueError(message)
+    for role in ("module_executor", "gold_standard_reviewer"):
+        name = _optional_role(payload[role], role)
+        source = _optional_role(payload[f"{role}_source"], f"{role}_source")
+        if (name is None) != (source is None):
+            message = f"{role} requires both a name and assignment source"
+            raise ValueError(message)
     return Stage0Survey(
         recorded_at_utc=recorded_at,
         plan_version=_required_text(payload["plan_version"], "plan_version"),
@@ -184,7 +190,7 @@ def _m_code(payload: dict[str, Any]) -> MCodeVersion:
         raise ValueError(message)
     return MCodeVersion(
         version_id=_required_text(payload["version_id"], "version_id"),
-        source_ref=_required_text(payload["source_ref"], "source_ref"),
+        source_ref=_relative_path(payload["source_ref"]),
         source_sha256=sha,
     )
 
