@@ -106,25 +106,40 @@ def _explain_ranked_suspects(panels: dict[int, dict], override) -> None:
         override(panel, "Confidence", "displayName", "Cause verification")
         override(panel, "Confidence", _WIDTH, 155)
         override(panel, "Confidence", "noValue", "Not verified")
-        override(panel, "Confidence", "custom.cellOptions", {"type": "color-text", "wrapText": False})
+        override(
+            panel,
+            "Confidence",
+            "custom.cellOptions",
+            {"type": "color-text", "wrapText": False},
+        )
         override(
             panel,
             "Confidence",
             "mappings",
-            [{"type": "value", "options": {
-                "UNVERIFIED": {"text": "Not verified"},
-                "UNVERIFIED_STALE": {"text": "Not verified", "color": "orange"}
-            }}],
+            [
+                {
+                    "type": "value",
+                    "options": {
+                        "UNVERIFIED": {"text": "Not verified"},
+                        "UNVERIFIED_STALE": {"text": "Not verified", "color": "orange"},
+                    },
+                }
+            ],
         )
         for field in ("owner", "next_step"):
             display = "Owner" if field == "owner" else "Next step"
             override(panel, field, "displayName", display)
             override(panel, field, "noValue", "See runbook")
-            override(panel, field, "custom.cellOptions", {"type": "auto", "wrapText": False})
+            override(
+                panel, field, "custom.cellOptions", {"type": "auto", "wrapText": False}
+            )
 
             # Explicitly remove custom.hidden=True and add custom.hidden=False
             overrides = panel.get("fieldConfig", {}).get("overrides", [])
-            field_override = next((o for o in overrides if o.get("matcher", {}).get("options") == field), None)
+            field_override = next(
+                (o for o in overrides if o.get("matcher", {}).get("options") == field),
+                None,
+            )
             if field_override:
                 props = field_override.get("properties", [])
                 props[:] = [p for p in props if p.get("id") != "custom.hidden"]
