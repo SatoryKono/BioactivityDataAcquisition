@@ -53,6 +53,10 @@ NPM_RUNTIME_TEST = "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.
 GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
     "tests/architecture/test_github_actions_runtime_policy.py"
 )
+CODEX_NATIVE_RUNTIME_TEST = "tests/architecture/test_codex_native_runtime.py"
+AI_RUNTIME_GOVERNANCE_LINKS_TEST = (
+    "tests/architecture/test_ai_runtime_governance_links.py"
+)
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
 TECH_DEBT_5847_5852_CLOSEOUT_TEST = (
     "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py"
@@ -174,14 +178,14 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/ai/codex/native_runtime_contract.py": (
-        "tests/architecture/test_codex_native_runtime.py",
+        CODEX_NATIVE_RUNTIME_TEST,
         "tests/architecture/test_codex_agent_catalog_inventory.py",
         "tests/architecture/test_codex_skill_agent_links.py",
         "tests/architecture/test_grok_subagent_least_privilege.py",
     ),
     "docs/00-project/NORMATIVE_SOURCES.md": (
         "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
-        "tests/architecture/test_ai_runtime_governance_links.py",
+        AI_RUNTIME_GOVERNANCE_LINKS_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     **dict.fromkeys(
@@ -193,8 +197,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         (
             "tests/unit/scripts/test_hook_inventory.py",
-            "tests/architecture/test_codex_native_runtime.py",
-            "tests/architecture/test_ai_runtime_governance_links.py",
+            CODEX_NATIVE_RUNTIME_TEST,
+            AI_RUNTIME_GOVERNANCE_LINKS_TEST,
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
     ),
@@ -1311,11 +1315,11 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
             "docs/00-project/ai/agents/agents/",
         ),
         (
-            "tests/architecture/test_codex_native_runtime.py",
+            CODEX_NATIVE_RUNTIME_TEST,
             "tests/architecture/test_codex_agent_catalog_inventory.py",
             "tests/architecture/test_runtime_agent_docs_drift.py",
             "tests/architecture/test_runtime_orchestration_surfaces.py",
-            "tests/architecture/test_ai_runtime_governance_links.py",
+            AI_RUNTIME_GOVERNANCE_LINKS_TEST,
             "tests/architecture/test_junie_runtime_ci_contract.py",
             "tests/architecture/test_devin_runtime_no_dead_script_refs.py",
             "tests/architecture/test_devin_setup_guide_codex_models.py",
