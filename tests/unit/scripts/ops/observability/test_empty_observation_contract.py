@@ -24,6 +24,7 @@ pytestmark = pytest.mark.unit
 
 @pytest.mark.parametrize("panel_id", [105, 207, 239, 256, 112, 135, 8807])
 def test_static_empty_copy_cannot_attest_available_telemetry(panel_id):
+    """Static empty copy stays unknown while retaining real numeric mappings."""
     from copy import deepcopy
 
     from scripts.ops.observability.grafana._empty_observation_contract import (
@@ -71,6 +72,7 @@ def test_static_empty_copy_cannot_attest_available_telemetry(panel_id):
 
 
 def test_failed_run_coverage_gap_cannot_be_qualified_as_no_observations():
+    """Insufficient failed-counter coverage cannot prove an empty event window."""
     from scripts.ops.observability.grafana._empty_observation_contract import (
         apply_event_empty_copy,
     )
@@ -80,6 +82,7 @@ def test_failed_run_coverage_gap_cannot_be_qualified_as_no_observations():
     assert panel == {"id": 205, "fieldConfig": {"defaults": {"noValue": "UNKNOWN"}}}
 
     def unexpected_fetch(*args, **kwargs):
+        """Reject attempts to bypass the dedicated failed-run coverage guard."""
         pytest.fail("Failed Runs must retain its own scope/sample coverage guard")
 
     assert qualify_empty(
