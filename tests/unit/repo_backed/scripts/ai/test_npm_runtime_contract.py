@@ -27,27 +27,12 @@ def _isolated_windows_owner_env(tmp_path: Path) -> dict[str, str]:
         "BIOETL_MCP_VALIDATE_ONLY": "0",
     }
     if os.name != "nt" and shutil.which("wslpath") and shutil.which("powershell.exe"):
-        try:
-            converted = subprocess.run(
-                ["wslpath", "-w", local_appdata],
-                check=False,
-                capture_output=True,
-                text=True,
-                timeout=8,
-            )
-        except (OSError, subprocess.TimeoutExpired):
-            converted = None
-        if (
-            converted is not None
-            and converted.returncode == 0
-            and converted.stdout.strip()
-        ):
-            local_appdata = converted.stdout.strip()
-            env["LOCALAPPDATA"] = local_appdata
+        # WSLENV /p performs Linux-to-Windows conversion at the process boundary.
+        # Passing an already converted Windows path would convert it twice.
         existing = [
             part
             for part in env.get("WSLENV", "").split(":")
-            if part and not part.upper().startswith("LOCALAPPDATA")
+            if part and part.split("/", 1)[0].casefold() != "localappdata"
         ]
         existing.append("LOCALAPPDATA/p")
         env["WSLENV"] = ":".join(existing)
@@ -281,6 +266,40 @@ def test_shell_filesystem_fails_closed(tmp_path: Path) -> None:
     assert result.returncode != 0
     assert "Filesystem MCP requires the registered Windows owner" in result.stderr
     assert "__NPX_CALLED__" not in result.stdout
+
+
+def test_wsl_owner_fixture_path_reaches_windows(tmp_path: Path) -> None:
+    """Verify the real interop boundary before relying on missing-owner tests."""
+    if (
+        os.name == "nt"
+        or not shutil.which("wslpath")
+        or not shutil.which("powershell.exe")
+    ):
+        pytest.skip("Requires actual WSL-to-Windows PowerShell interop")
+    expected = subprocess.run(
+        ["wslpath", "-w", str(tmp_path)],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=8,
+    ).stdout.strip()
+    result = subprocess.run(
+        [
+            "powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            "[Console]::Write($env:LOCALAPPDATA)",
+        ],
+        env=_isolated_windows_owner_env(tmp_path),
+        input="",
+        capture_output=True,
+        text=True,
+        timeout=15,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip().casefold() == expected.casefold()
 
 
 def test_root_npm_lock_graph_clean_install_parity(tmp_path: Path) -> None:
