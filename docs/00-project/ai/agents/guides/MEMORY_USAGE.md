@@ -99,24 +99,9 @@ Use different precedence depending on the type of conflict.
 
 ### AI Runtime Behavior Conflicts
 
-When agent behavior instructions disagree, use this priority (same model as
-`AGENTS.md` / `AI_RUNTIME_MIRROR_OWNERSHIP.md`):
-
-1. active runtime source for the current agent or skill — equal peers on
-   `main`:
-   - `.codex/**` (`.codex/agents/CODEX-RUNTIME.md`, profiles, skills)
-   - `.junie/**` (`.junie/agents/JUNIE-RUNTIME.md`, `.junie/guidelines.md`,
-     profiles, skills) with parity via
-     `scripts/ai/junie/check_junie_mirror.sh`
-   - `.devin/agents/**` and `.devin/skills/**` for Devin sessions
-   - a matching tracked `.gemini/**` runtime tree only when it exists in the
-     checkout and is verified in the same change
-1. `docs/00-project/NORMATIVE_SOURCES.md`
-1. `docs/00-project/RULES.md`
-1. `docs/01-requirements/REQUIREMENTS.md`
-1. accepted ADRs in `docs/02-architecture/decisions/`
-1. docs mirrors, memory sheets, and helper AI docs in `docs/00-project/ai/**`
-1. machine-readable memory artifacts such as `mcp-memory.json`
+Use only `AGENTS.md`, section `Canonical Precedence`. Memory is navigation,
+not a separate rule hierarchy, and cannot weaken root guardrails or activate
+a prohibited runtime. Load context by the root task-tier matrix.
 
 ### Implementation Fact Conflicts
 
@@ -127,8 +112,7 @@ use this priority:
 1. `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md`,
    `docs/01-requirements/REQUIREMENTS.md`, accepted ADRs
 1. active runtime maps and profiles in tracked equal-peer runtime trees
-   (`.codex/**`, `.junie/**`; `.devin/**` for Devin; tracked `.gemini/**` only
-   when present and verified)
+   (`.codex/**`, `.junie/**`; `.devin/**` for Devin)
 1. `agent-memory.md` and `memory-py-*.md`
 1. machine-readable memory artifacts such as `mcp-memory.json`
 
