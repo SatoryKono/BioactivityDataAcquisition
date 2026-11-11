@@ -1,0 +1,28 @@
+name: Main GHCR Publish
+
+# Runs from the default branch after Main Integrity completes.
+# It does not rebuild the image. A stale SHA skips before ghcr-publish.
+on:
+  workflow_run:
+    workflows: ["Main Integrity"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main'
+    uses: ./.github/workflows/docker.yml
+    with:
+      publish: true
+      cache-write: false
+      caller-sha: ${{ github.event.workflow_run.head_sha }}
+      artifact-run-id: ${{ github.event.workflow_run.id }}
+    permissions:
+      contents: read
+      actions: read
+      packages: write
+      security-events: write
+      id-token: write
+      attestations: write
