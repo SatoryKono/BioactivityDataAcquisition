@@ -3,14 +3,14 @@
 **Dashboard file:** `grafana/dashboards/bioetl-overview-v2.json`
 
 Run Overview separates two scopes. Saved evidence assesses one persisted Run ID;
-missing selection is SELECT RUN, absent evidence is UNKNOWN or INCOMPLETE, and
+an unresolved selection resolves the latest run in scope; absent evidence is UNKNOWN or INCOMPLETE, and
 failed requests remain QUERY ERROR. GLOBAL / CURRENT alerts assess the fleet
 independently of that selection. They never prove this run succeeded or change
 its saved verdict. Incident Workspace owns incident triage and fleet diagnostics.
 
 ## Monitor Global Alerts — LA-06 (#12940)
 
-Panel `2005` is an always-expanded root table at `y=19`, copied by
+Panel `2005` is an always-expanded root table at `y=21`, copied by
 `render_nav_bus` from Incident Workspace's global alert donor. It reads the
 existing `bioetl_incident_global_alerts` recording rule, which evaluates the
 same expression as the donor. Its query does not
@@ -120,3 +120,13 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 9482 | Review Contract Exclusions | canvas |
 | 9483 | Review FK Comparison Scope | table |
 <!-- END SHIPPED PANEL INVENTORY -->
+
+## Review Run Context — LA-12 (#12946)
+
+Panel `99` shows AUTO or EXPLICIT, the actual Run ID, execution state, saved
+verdict and server resolution time. AUTO includes unfinished latest runs; an
+explicit unavailable run stays bound rather than falling back to another run.
+The context reuses the same donor frame as saved evidence, so it adds no HTTP
+request and cannot describe a different snapshot. Resolved at is the cached
+server selection time, not run start or a browser click. The block stays in
+the first window; the identity table remains bounded to its existing five rows.

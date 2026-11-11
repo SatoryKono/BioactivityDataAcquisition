@@ -43,6 +43,7 @@ from bioetl.interfaces.http._selected_run_a2_resolve import (
     resolve_a2_latest_run_id,
 )
 from bioetl.interfaces.http._selected_run_artifact_probes import _artifact_probes
+from bioetl.interfaces.http._selected_run_context import with_selection_context
 from bioetl.interfaces.http._selected_run_live import (
     active_run_diagnostics,
     scope_matches,
@@ -363,18 +364,19 @@ async def handle_selected_run_status(
         if is_unresolved_run_id(run_id):
             resolved = _resolve_a2_run_id(host, pipeline=pipeline, query=query)
             if isinstance(resolved, dict):
-                return resolved
+                return with_selection_context(resolved, requested_run_id)
             run_id = resolved
             a2_resolved = True
         # A2 catalog membership already enforced filters (incl. workflow aliases);
         # do not re-reject via report.workflow_id vs Grafana workflow alias.
-        return _load_selected_with_live_fallback(
+        result = _load_selected_with_live_fallback(
             host,
             pipeline=pipeline,
             run_id=run_id,
             query=query,
             skip_scope_check=a2_resolved,
         )
+        return with_selection_context(result, requested_run_id)
 
     async def cached_load() -> dict[str, object]:
         # Propagate ForensicEndpointUnavailable / IO failures so the cache does
@@ -397,4 +399,6 @@ async def handle_selected_run_status(
         payload = unavailable_status(
             pipeline, requested_run_id, _QUERY_ERROR, "request_failed"
         )
+    if "selection_context" not in payload:
+        payload = with_selection_context(payload, requested_run_id)
     await host._send_payload_response(writer, 200, payload)

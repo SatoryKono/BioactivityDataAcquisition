@@ -63,3 +63,13 @@ to **Incident Workspace v2** and **Isolated 100000 Incident Workspace** must eac
 be recorded as `NOT_VERIFIABLE` until the deployed dashboard, expanded row and
 legend have been inspected. Confirm actual states and a measured zero against
 their source; a generated JSON or successful CI run is not live acceptance.
+
+LA-12 (#12946): Overview and Data Quality expose selection provenance before
+run evidence. AUTO means the latest run by start time in the selected scope,
+including unfinished runs. EXPLICIT means the requested Run ID stays bound;
+an unavailable explicit run is never replaced with a different latest run.
+The context includes the actual Run ID, execution state, saved verdict and
+server resolution time. This clock is not run start or browser click time;
+cache hits retain it and a refreshed selection receives a new clock. Empty
+catalogs say NO RUN; resolution failure says Context unavailable. Neither
+context provenance nor the dashboard time range proves saved-run health.

@@ -263,6 +263,9 @@ async def test_http_ignores_time_and_range(tmp_path, monkeypatch, age, chart_ran
     }
     await handle_selected_run_status(host, MagicMock(), query)
     payload = host._send_payload_response.call_args.args[2]
+    context = payload.pop("selection_context")
+    assert context[0]["context"] == "EXPLICIT · requested Run ID"
+    assert context[0]["run_id"] == "run-a"
     assert payload == read(tmp_path)
     assert payload["verdict"] == "OK"
     assert payload["replay_readiness_now"] == "INSUFFICIENT"
@@ -757,7 +760,9 @@ async def test_current_telemetry_is_not_consulted(tmp_path, monkeypatch, current
     await handle_selected_run_status(
         host, MagicMock(), {"pipeline": "chembl_activity", "run_id": "run-a"}
     )
-    assert host._send_payload_response.call_args.args[2] == read(tmp_path)
+    payload = host._send_payload_response.call_args.args[2]
+    assert payload.pop("selection_context")[0]["context"].startswith("EXPLICIT")
+    assert payload == read(tmp_path)
     host._run_manifest_port.get_by_run_id.assert_not_called()
     host._run_ledger_port.list_entries_by_run_id.assert_not_called()
 

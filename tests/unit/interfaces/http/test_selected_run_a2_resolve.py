@@ -343,6 +343,8 @@ async def test_handle_unresolved_run_id_auto_selects_latest(
     payload = host._send_payload_response.await_args.args[2]
     assert payload["run_id"] == selected
     assert payload["verdict"] == "OK"
+    assert payload["selection_context"][0]["context"] == "AUTO · latest run in scope"
+    assert payload["selection_context"][0]["run_id"] == selected
 
 
 async def test_handle_empty_catalog_emits_no_runs(
@@ -364,6 +366,7 @@ async def test_handle_empty_catalog_emits_no_runs(
     assert payload["verdict"] == "НЕТ ЗАПУСКОВ"
     assert payload["reason"] == NO_RUNS_REASON
     assert payload["presentation_summary"][0]["execution_state"] == "НЕТ ЗАПУСКОВ"
+    assert payload["selection_context"][0]["context"] == "NO RUN · empty scope"
 
 
 async def test_handle_missing_manifest_port_is_query_error() -> None:
@@ -376,6 +379,7 @@ async def test_handle_missing_manifest_port_is_query_error() -> None:
     assert payload["verdict"] == "QUERY ERROR"
     assert payload["reason"] == CATALOG_UNAVAILABLE_REASON
     assert payload["verdict"] != "НЕТ ЗАПУСКОВ"
+    assert payload["selection_context"][0]["context"] == "Context unavailable"
 
 
 async def test_handle_explicit_url_run_id_wins(
@@ -415,6 +419,7 @@ async def test_handle_explicit_url_run_id_wins(
     resolve.assert_not_called()
     payload = host._send_payload_response.await_args.args[2]
     assert payload["run_id"] == explicit
+    assert payload["selection_context"][0]["context"] == "EXPLICIT · requested Run ID"
 
 
 def test_auto_selected_report_only_fills_selected_and_a2_via(tmp_path: Path) -> None:

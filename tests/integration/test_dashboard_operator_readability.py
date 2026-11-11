@@ -560,8 +560,9 @@ def test_dq_9451_reason_uses_dq_mappings() -> None:
 def test_dq_9400_banner_names_time_range_limit() -> None:
     """#11572: the banner states that a time-range value never proves this run."""
     panels = _dq_panels_by_id()
-    content = str((panels[9400].get("options") or {}).get("content") or "")
-    assert "never proves this run" in content
+    assert panels[9400]["title"] == "Review Run Context"
+    assert panels[9400]["targets"][0]["panelId"] == 9406
+    assert "selection_context" in json.dumps(panels[9400]["transformations"])
     assert "never proves this run" in str(panels[9400].get("description") or "")
 
 
@@ -750,12 +751,12 @@ def test_dq_renderer_copy_matches_shipped() -> None:
         STATUS_DESCRIPTION,
     )
     from scripts.ops.observability.grafana.render_nav_bus import (
-        _DQ_SCOPE_HTML,
         HTTP_EVIDENCE_STATES,
     )
 
     panels = _dq_panels_by_id()
-    assert panels[9400]["options"]["content"] == _DQ_SCOPE_HTML
+    assert "AUTO shows the latest run by start time" in panels[9400]["description"]
+    assert "EXPLICIT keeps the requested Run ID" in panels[9400]["description"]
     assert str(panels[9406].get("description") or "").startswith(STATUS_DESCRIPTION)
     assert (
         panels[9403]["description"]

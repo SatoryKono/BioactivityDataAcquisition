@@ -28,7 +28,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 9413 | Review Checkpoint Validation |
 | bioetl-control-plane-v1.json | 9406 | Compare Checkpoint Anchors |
 | bioetl-dq-v2.json | 1000 | Navigate Dashboards |
-| bioetl-dq-v2.json | 9400 | Understand Evidence Scope |
+| bioetl-dq-v2.json | 9400 | Review Run Context |
 | bioetl-dq-v2.json | 9406 | Review Selected Run Status |
 | bioetl-dq-v2.json | 9402 | Inspect Run Identity |
 | bioetl-dq-v2.json | 9403 | Inspect Processed Records |
@@ -139,7 +139,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 9460 | Inspect Selected Run Stages |
 | bioetl-incident-v1.json | 9452 | Inspect Selected Run Identity |
 | bioetl-overview-v2.json | 1000 | Navigate Dashboards |
-| bioetl-overview-v2.json | 99 | Inspect Scope & Evidence |
+| bioetl-overview-v2.json | 99 | Review Run Context |
 | bioetl-overview-v2.json | 9604 | Review Overall Verdict |
 | bioetl-overview-v2.json | 9002 | Review Run Domains |
 | bioetl-overview-v2.json | 9603 | Review Selected Run Status |

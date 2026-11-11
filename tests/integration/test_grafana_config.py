@@ -1347,8 +1347,8 @@ def test_control_plane_remaining_replay_safety_text_is_not_stale() -> None:
 def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
     specs = {
         "bioetl-control-plane-v1.json": {9400: 3},
-        "bioetl-overview-v2.json": {99: 3},
-        "bioetl-dq-v2.json": {9400: 3},
+        "bioetl-overview-v2.json": {99: 5},
+        "bioetl-dq-v2.json": {9400: 5},
         "bioetl-incident-v1.json": {9400: 3, 2541: 3},
     }
     for filename, expected in specs.items():
@@ -1357,8 +1357,14 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
         for pid, height in expected.items():
             panel = panels[pid]
             assert panel["gridPos"]["h"] == height
-            assert panel["options"]["mode"] == "html"
-            assert "overflow:hidden" not in panel["options"]["content"]
+            if panel["type"] == "table":
+                assert panel["title"] == "Review Run Context"
+                assert panel["targets"][0]["withTransforms"] is False
+                assert "selection_context" in json.dumps(panel["transformations"])
+                assert panel["options"]["cellHeight"] == "sm"
+            else:
+                assert panel["options"]["mode"] == "html"
+                assert "overflow:hidden" not in panel["options"]["content"]
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     assert panels[9002]["options"]["cellHeight"] == "sm"

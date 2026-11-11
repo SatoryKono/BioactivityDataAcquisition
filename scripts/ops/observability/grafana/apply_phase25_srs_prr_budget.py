@@ -394,17 +394,30 @@ _DONOR_SCHEMA = (
 )
 
 
-def _normalized_donor(*parts: str) -> str:
+def _normalized_donor(*parts: str, selection_context: bool = False) -> str:
     """Give every donor row the same columns before Grafana builds a frame."""
+    schema = _DONOR_SCHEMA
+    if selection_context:
+        schema = schema[:-1] + ", 'context': null, 'resolved_at': null}"
+        parts = (
+            *parts,
+            "$map(selection_context, function($r){$merge([$r, {'_bioetl_frame':'selection_context'}])})",
+        )
     appended = _append_many(*parts)
     return (
-        f"($schema := {_DONOR_SCHEMA}; "
+        f"($schema := {schema}; "
         f"$map({appended}, function($row){{$merge([$schema, $row])}}))"
     )
 
 
 _OV_DONOR = _normalized_donor(
-    _OV_DOMAINS, _OV_IDENTITY, _OV_PROVIDER, _OV_STAGES, _OV_RECON, _OV_EXCL
+    _OV_DOMAINS,
+    _OV_IDENTITY,
+    _OV_PROVIDER,
+    _OV_STAGES,
+    _OV_RECON,
+    _OV_EXCL,
+    selection_context=True,
 )
 
 _MERGED_PRR = (
@@ -480,7 +493,9 @@ _DQ_STAGEINPUT = (
     + "}) }))"
 )
 
-_DQ_DONOR = _normalized_donor(_DQ_STATUS, _DQ_DOMAINS, _DQ_STAGES, _DQ_STAGEINPUT)
+_DQ_DONOR = _normalized_donor(
+    _DQ_STATUS, _DQ_DOMAINS, _DQ_STAGES, _DQ_STAGEINPUT, selection_context=True
+)
 
 # --- Incident donor -------------------------------------------------------
 
