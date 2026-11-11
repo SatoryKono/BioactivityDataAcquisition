@@ -48,7 +48,8 @@ ______________________________________________________________________
 
 ## Memory
 
-> **При старте** прочитай специализированную память:
+> Читай специализированную память, когда она выбрана матрицей Required AI Context
+> из `AGENTS.md` (полный пакет V3/V4; не безусловный bootstrap для V1):
 > `docs/00-project/ai/memory/memory-py-test-bot.md` — test structure, thresholds, VCR, failure classification, selection strategy.
 > Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
 
@@ -98,13 +99,21 @@ ______________________________________________________________________
 || ------------- | :----------: | --------------------------------------------------------------- |
 || `task_id`     |      Да      | Идентификатор задачи                                            |
 || `phase`       |      Да      | `baseline` \| `final` \| `retest` \| `new_tests`                |
-|| `plan`        |      Да      | Актуальный план (`01-plan-initial.md` или `03-plan-updated.md`) |
-|| `rf_ids`      |      Да      | Список `RF-*` для тестов                                        |
+|| `plan`        |   Условно    | Актуальный план (`01-plan-initial.md` или `03-plan-updated.md`) |
+|| `rf_ids`      |   Условно    | Список `RF-*` для тестов                                        |
 || `debug_fixes` |     Нет      | Список `DBG-*` fix-ов (при `phase=retest`)                      |
 
 ______________________________________________________________________
 
 ## Выходы
+
+Formal report bundle обязателен для V3/V4 campaigns либо при явном требовании
+пользователя или применимого contract. Для V1/V2 без такого требования достаточно
+краткого результата в ответе: scope, команды, outcomes, skips и ограничения.
+`plan` и `rf_ids` обязательны для formal campaign; для focused V1/V2 укажи
+конкретный scope вместо искусственного RF-плана. Если нужен файл отчёта вне
+`tests/**`, верни содержимое уполномоченному parent: профиль не расширяет свои
+permissions ради сохранения отчёта.
 
 || Файл                           | Фаза     | Описание                      |
 || ------------------------------ | -------- | ----------------------------- |
@@ -116,7 +125,14 @@ ______________________________________________________________________
 
 ## Обязательные правила
 
-1. **Определение scope тестов** — на основе `RF-*` из плана:
+1. **Focused-first** — начинай с наименьшего meaningful pytest node для scope,
+   независимо от `phase=baseline|final|retest|new_tests`. `phase=final` alone
+   does not require a full suite. Обоснуй выбранный риск и связи изменённого кода.
+   Broad/full suite нужен при shared behavior, cross-layer contracts, высокой
+   неопределённости влияния либо по обязательному CI / security / release gate.
+   Focused mode cannot waive mandatory gates or lower the task tier.
+
+1. **Определение scope тестов** — по изменённым поверхностям и, если есть, `RF-*`:
 
    - unit-тесты затрагиваемых модулей
    - integration-тесты (если RF затрагивает adapters / storage)
@@ -138,7 +154,7 @@ pytest tests/integration/path/ -v --tb=short
 # Architecture-тесты
 pytest tests/architecture/ -v
 
-# Полный прогон (для final)
+# Полный прогон: только по обоснованному broad scope или обязательному gate
 pytest tests/ -v --cov=src/bioetl/ --cov-report=term-missing --tb=short
 
 # Type checking
@@ -152,7 +168,11 @@ mypy src/bioetl/path/to/module.py --strict
    - новые failures (отсутствовавшие в baseline)
    - регрессии (прошедшие в baseline, но упавшие в final)
 
-1. **При FAIL** — немедленно формировать input для `py-debug-bot`.
+1. **При FAIL** — передай воспроизведение и evidence в read-only `py-debug-bot`.
+   Debug возвращает RCA и regression checks; исправления production-кода делает
+   только authorized parent / implementer. После исправления выполни retest
+   исходного падения и затронутых регрессий. Failed retest остаётся FAIL и
+   возвращается на RCA; blocked reproduction / timeout — BLOCKED, не PASS.
 
 1. **Разработка новых тестов** (`phase=new_tests`):
 
@@ -174,9 +194,18 @@ ______________________________________________________________________
 || `composition/**`                      | `tests/unit/composition/` + `tests/architecture/`                                  |
 || `interfaces/**`                       | `tests/unit/interfaces/`                                                           |
 || `configs/**`                          | `tests/integration/` (config validation)                                           |
-|| Any Python file                       | `make lint` first                                                                  |
+|| Any Python file                       | targeted lint/type checks first                                                                  |
 
 ______________________________________________________________________
+
+## Workflow Scenarios
+
+| Scenario | Required behavior |
+| --- | --- |
+| focused change | Small scope, including final: focused tests and related contracts; concise output unless formal bundle is required. |
+| broad change | Shared behavior / release: expand suites and preserve every applicable architecture, security, coverage and release gate. |
+| blocked reproduction | Preserve exact command and environment blocker; report BLOCKED, hand off evidence to read-only debug; do not claim PASS. |
+| failed retest | Keep FAIL; read-only debug supplies RCA, authorized parent / implementer fixes product code, then retest with regression evidence. |
 
 ## Failure Analysis
 
@@ -240,6 +269,10 @@ ______________________________________________________________________
 
 ## Пороги качества
 
+Сохраняй все применимые пороги и release gates. Результат focused suite не
+доказывает overall coverage: без соответствующего измерения укажи NOT_MEASURED.
+Узкий запуск не отменяет обязательную проверку overall coverage при release.
+
 || Метрика                |   Порог   | Действие при нарушении ||
 || ---------------------- | :-------: | ---------------------- ||
 || Coverage (overall)     |   ≥85%    | MUST: добавить тесты   ||
@@ -250,6 +283,10 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 ## Интеграция с другими субагентами
+
+Таблица относится к formal campaign либо явному требованию пользователя/contract.
+Для focused V1/V2 parent может выполнить эти обязанности напрямую; обязательная
+цепочка subagents и искусственный report bundle не требуются.
 
 || Событие                        | Действие                            ||
 || ------------------------------ | ----------------------------------- ||

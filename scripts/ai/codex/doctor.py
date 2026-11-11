@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import queue
 import json
+import shutil
 import socket
 import time
 import threading
@@ -13,6 +14,9 @@ import urllib.request
 from pathlib import Path
 from typing import Any, cast
 import sys
+
+# Read-only discovery must not create project bytecode caches on fresh installs.
+sys.dont_write_bytecode = True
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
@@ -304,6 +308,54 @@ def run_mcp(
     return 1 if payload["failed"] else 0
 
 
+def run_routes(
+    repo_root: Path,
+    profile: str,
+    *,
+    codex_executable: Path | None,
+    output_json: bool,
+    output_path: Path | None = None,
+) -> int:
+    """Capture configuration through the native resolver without probing MCP."""
+    from scripts.ai.codex.mcp_routes import route_snapshot
+    from scripts.ai.codex.native_mcp_config import NativeConfigClient, NativeConfigError
+
+    executable = str(codex_executable) if codex_executable else shutil.which("codex")
+    if not executable:
+        print(
+            json.dumps(
+                {
+                    "status": "NOT_TESTED",
+                    "detail": "native Codex executable unavailable",
+                }
+            )
+        )
+        return 1
+    try:
+        with NativeConfigClient(
+            [executable, "app-server", "--stdio"], repo_root
+        ) as client:
+            capture = client.read()
+        payload = route_snapshot(
+            capture,
+            expected=_as_str_list(profile_plan(profile, repo_root)["selected"]),
+            project_profile=profile,
+        )
+    except (NativeConfigError, ValueError) as exc:
+        print(json.dumps({"status": "NOT_TESTED", "detail": str(exc)}))
+        return 1
+    if output_path is not None:
+        _write_mcp_payload(repo_root, output_path, payload)
+    if output_json:
+        print(json.dumps(payload, indent=2))
+    else:
+        print("Native effective MCP configuration (tool readiness NOT_TESTED)")
+        print("Expected: " + ", ".join(_as_str_list(payload["expected"])))
+        print("Effective: " + ", ".join(_as_str_list(payload["effective"])))
+        print("Missing: " + ", ".join(_as_str_list(payload["missing"])))
+    return 0
+
+
 def _governed_report_path(repo_root: Path, requested: Path) -> Path:
     """Resolve an explicit MCP report path under governed quality reports."""
 
@@ -324,9 +376,17 @@ def _governed_report_path(repo_root: Path, requested: Path) -> Path:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "mode", choices=("static", "mcp", "all"), nargs="?", default="static"
+        "mode",
+        choices=("static", "hooks", "mcp", "all", "routes"),
+        nargs="?",
+        default="static",
     )
     parser.add_argument("--profile", choices=sorted(setup_mcp.MCP_PROFILES))
+    parser.add_argument(
+        "--codex-executable",
+        type=Path,
+        help="installed native Codex executable for routes mode",
+    )
     parser.add_argument("--timeout", type=float, default=1.0)
     parser.add_argument("--overall-timeout", type=float, default=10.0)
     parser.add_argument(
@@ -343,11 +403,28 @@ def main() -> int:
     parser.add_argument("--repo-root", type=Path, default=REPO_ROOT)
     args = parser.parse_args()
     repo_root = args.repo_root.resolve()
+    if args.mode == "hooks":
+        if args.output is not None:
+            parser.error("hooks mode is read-only; --output is not supported")
+        from scripts.ai.codex.hook_inventory import collect
+
+        print(json.dumps(collect(repo_root), indent=2))
+        # Discovery is evidence, not proof of installed runtime capability.
+        return 2
     profile = args.profile or setup_mcp.DEFAULT_LOCAL_PROFILE
     if args.no_write and args.output is not None:
         parser.error("--no-write and --output are mutually exclusive")
     if args.output is not None and args.mode == "static":
-        parser.error("--output is only valid for mcp or all mode")
+        parser.error("--output is only valid for mcp, all, or routes mode")
+
+    if args.mode == "routes":
+        return run_routes(
+            repo_root,
+            profile,
+            codex_executable=args.codex_executable,
+            output_json=args.json,
+            output_path=args.output,
+        )
 
     static_status = 0
     if args.mode in {"static", "all"}:

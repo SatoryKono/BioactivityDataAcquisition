@@ -20,9 +20,10 @@ RULES, requirements, ADRs, and policies when the task touches those
 surfaces. This file only defines Codex routing; it does not restate project
 governance.
 
-For a role-specific task, read the matching `.codex/agents/py-*.md`, wrapper
-skill, and `docs/00-project/ai/memory/memory-py-*.md`. Load additional sources
-only when the task touches their governed surface.
+For a role-specific task, read the matching `.codex/agents/py-*.md` and wrapper
+skill. Load `docs/00-project/ai/memory/memory-py-*.md` when selected by the
+context-tier matrix or relevant to the task; its presence is not a V1 bootstrap
+requirement. Load additional sources only for their governed surface.
 
 ## Governed roles
 
@@ -57,8 +58,15 @@ root agent performs the same responsibilities directly.
 ## Standard task loop
 
 1. Resolve user intent, mutation authority, scope, and risk tier.
-1. Run memory `pre-task` with runtime/agent identity only when required by
-   the root context-tier matrix (V1 read-only optional; hash-only off).
+1. Select sources and memory through the `AGENTS.md` Required AI Context table,
+   the single task-class matrix: V1 retrieval is optional, V2 pre-task is
+   required, V3/V4 retain the full package and required pre-task, hash-only
+   uses `BIOETL_AI_MEMORY_MODE=off`. Reuse already-read current sources; re-read
+   on content change, expanded scope, or conflicting evidence.
+1. When pre-task is selected for strict no-file-changes work, use read-only with
+   `--skip-refresh-if-missing --skip-session-note` and set
+   `PYTHONDONTWRITEBYTECODE=1` before starting Python (direct or wrapper invocation); do not rebuild temporary
+   artifacts. Report missing retrieval as DEGRADED and verify source directly.
 1. Inspect current evidence: target files, related tests, contracts, configs,
    docs, mirrors, and debt registries.
 1. For V3/V4, maintain an explicit plan with at most one active step.
@@ -69,8 +77,9 @@ root agent performs the same responsibilities directly.
    Markdown link or `Owner:` / `Status:` / `Class:` header changes require
    `python -m scripts.docs generate-cleanup-inventory --update` in the same
    changeset.
-1. Run memory `post-task` only in authorized read-write mode; otherwise
-   skip persistent notes. Report evidence, skips, mirror status, and debt outcome.
+1. Run memory `post-task`, create session notes, promote knowledge, or persist
+   refresh artifacts only in authorized `read-write` mode. In `off`/`read-only`,
+   skip these writes and report evidence, skips, mirror status, and debt outcome.
 
 Diagnosis and review remain read-only unless implementation was also requested.
 `py-debug-bot` never applies fixes: it returns a reproduction, root cause,

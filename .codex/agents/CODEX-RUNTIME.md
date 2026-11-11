@@ -22,16 +22,10 @@ reference documents and native configuration presence cannot override them.
 
 ## Context tiers
 
-Follow the `AGENTS.md` Required AI Context table. Hash-only rebind, date stamp,
-and remote-main skip RULES/ADR and full `pre-task` RAG
-(`BIOETL_AI_MEMORY_MODE=off`). V3/V4 keep the full package.
-
-| Task class | Read | Memory |
-| --- | --- | --- |
-| hash-only generated-artifact rebind, date stamp, remote-main | drift runbook + touched reporter | `BIOETL_AI_MEMORY_MODE=off`; skip RAG |
-| V1 docs/prompt | `AGENTS.md` guardrails + POST_CHANGE docs slice | read-only optional |
-| V2 focused code | + matching role/skill for SCOPE | `pre-task` |
-| V3/V4 | full package via `AGENTS.md` | `pre-task` required |
+The `AGENTS.md` Required AI Context table is the single task-class matrix.
+Apply its source-reuse and memory-write rules before loading a role or wrapper;
+this map does not define a second bootstrap table. V3/V4 retain the full package
+and required pre-task. Hash-only work uses `BIOETL_AI_MEMORY_MODE=off`.
 
 ## Purpose
 
@@ -68,6 +62,12 @@ omit it rather than guessing. Generated episodic records bind this actor
 identity to repository, commit, branch, worktree, task, and source references.
 
 ## Native Project Discovery
+
+Hook discovery: `python scripts/ai/codex/doctor.py hooks --no-write --json`.
+Exit 2 means installed capability is NOT_PROVEN. Discovery never runs hooks or
+runtime commands. See `docs/05-operations/runbooks/ai-hook-compatibility.md` for
+platform observations and vendor contracts; documentation alone cannot enable
+a native adapter.
 
 - `.codex/config.toml` contains portable trusted-project settings only.
 - `.codex/agents/py-*.toml` exposes the six governed profiles to native Codex
