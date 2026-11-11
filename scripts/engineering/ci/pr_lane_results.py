@@ -64,6 +64,7 @@ RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
+RUNTIME_AGENT_DOCS_DRIFT_TEST = "tests/architecture/test_runtime_agent_docs_drift.py"
 REQUIRED_CHECKS_PROSE_TEST = (
     "tests/architecture/test_required_checks_prose_consistency.py"
 )
@@ -173,12 +174,16 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
-    "AGENTS.md": (
-        "tests/architecture/test_codex_task_routing.py",
-        "tests/architecture/test_runtime_agent_docs_drift.py",
-        "tests/architecture/test_junie_runtime_ci_contract.py",
-        "tests/architecture/test_gitignore_secret_and_agents_policy.py",
-        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+    **dict.fromkeys(
+        ("AGENTS.md", "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"),
+        (
+            "tests/architecture/test_codex_task_routing.py",
+            RUNTIME_AGENT_DOCS_DRIFT_TEST,
+            "tests/architecture/test_junie_runtime_ci_contract.py",
+            "tests/architecture/test_gitignore_secret_and_agents_policy.py",
+            "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
     ),
     "scripts/memory/run_workflow.sh": (
         "tests/architecture/test_ai_memory_program_contracts.py",
@@ -1056,7 +1061,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/reports/evidence/project-test-health/SUMMARY.md": (
         "tests/architecture/test_governance_freshness_protocol.py",
-        "tests/architecture/test_runtime_agent_docs_drift.py",
+        RUNTIME_AGENT_DOCS_DRIFT_TEST,
         "tests/unit/scripts/docs/test_check_drift_evidence_age.py",
     ),
     "Makefile": (
@@ -1309,7 +1314,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         (
             "tests/architecture/test_codex_native_runtime.py",
             "tests/architecture/test_codex_agent_catalog_inventory.py",
-            "tests/architecture/test_runtime_agent_docs_drift.py",
+            RUNTIME_AGENT_DOCS_DRIFT_TEST,
             "tests/architecture/test_runtime_orchestration_surfaces.py",
             "tests/architecture/test_ai_runtime_governance_links.py",
             "tests/architecture/test_junie_runtime_ci_contract.py",

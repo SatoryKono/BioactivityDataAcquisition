@@ -17,8 +17,8 @@ Every wrapper skill must state:
 ## Standard Workflow
 
 1. Resolve scope and confirm the wrapper is the right entrypoint.
-1. Select context through the `AGENTS.md` Required AI Context table, the single
-   task-class matrix. V1 memory retrieval is optional; V2 uses the matching
+1. Apply `AGENTS.md` Instruction Scope and its Required AI Context table, the
+   single task-class matrix. V1 memory retrieval is optional; V2 uses the matching
    profile/skill and required pre-task; V3/V4 retain the full package and
    required pre-task. Hash-only work uses `BIOETL_AI_MEMORY_MODE=off`.
 1. Reuse already-read current sources; re-read on content change, expanded scope,

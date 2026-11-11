@@ -8,8 +8,13 @@ only `.codex` → `.junie` (`never_write_to_codex`).
 
 ## Canonical Precedence
 
-For AI runtime behavior and workflow conflicts, use this priority:
+Within repository instructions, use this priority for AI runtime behavior
+and workflow conflicts (higher-level platform and explicit user instructions
+still apply):
 
+1. repository-wide root contract: `AGENTS.md`, with the aligned Junie entry
+   contract `.junie/guidelines.md`; their permanent guardrails cannot be
+   weakened by a runtime, profile, skill, memory sheet, or helper document
 1. active runtime source for the current agent or skill — equal peers:
    - `.codex/agents/CODEX-RUNTIME.md`
    - `.junie/agents/JUNIE-RUNTIME.md`
@@ -25,6 +30,29 @@ For AI runtime behavior and workflow conflicts, use this priority:
    and guidance only
 
 Docs mirrors MUST NOT redefine runtime behavior on their own.
+
+A policy linked by this root contract owns only the delegated procedure; it
+does not gain independent authority to change guardrails or precedence.
+`POST_CHANGE_VALIDATION.md` owns the post-change procedure. Runtime
+`Proof-or-Stop Closeout` requirements remain mandatory when applicable.
+If sources conflict, cite both, apply this order, and record the bounded
+resolution; an unresolved safety conflict is not permission to weaken a rule.
+
+## Instruction Scope
+
+| Layer | Scope and owner | Loading condition |
+| --- | --- | --- |
+| Root guardrails | This contract: secrets, authorized operations, debt, full Git tree, mirrors, validation | Always; also preserve the active user worktree-location restriction |
+| Runtime adapter | Matching runtime map and native configuration | Active runtime only; configuration presence is not proof of loading |
+| Profile | Matching role authority, inputs, outputs, handoff | Only when performing that role; never expands user authority |
+| Skill | Task procedure and supported tool fallback | Selected by task/affected files; context tiers below still apply |
+| Delegated policy | Post-change validation and source-owned contracts | Only the trigger delegated here or by the active runtime |
+| Reference/mirror | Navigation, examples, token names and onboarding | Read as needed; cannot introduce behavior or an alternative priority |
+
+Do not create a native rules directory or setting without version-specific
+support evidence. Mandatory runtime mirrors are governed copies, not redundant
+reference material to remove. Detailed procedures may move to a skill only
+while their root trigger and resolvable entrypoint remain intact.
 
 `AGENTS.md` remains the repository-wide entry point. `.junie/guidelines.md`
 does not diverge from it; any change to Canonical Precedence, Required AI

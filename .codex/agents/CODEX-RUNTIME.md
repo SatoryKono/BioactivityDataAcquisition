@@ -12,6 +12,14 @@
 
 Load only the role- and risk-relevant sources selected by those contracts.
 
+## Repository authority
+
+`AGENTS.md` owns precedence and permanent guardrails. This runtime adapter
+and its profiles/skills cannot weaken them. Refer to the root Instruction
+Scope matrix rather than maintaining a parallel priority list. Delegated
+post-change policy and this runtime's Proof-or-Stop requirements both apply;
+reference documents and native configuration presence cannot override them.
+
 ## Context tiers
 
 The `AGENTS.md` Required AI Context table is the single task-class matrix.
