@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-11T17:11:22.319272+00:00",
+  "generated_at": "2026-11-11T17:22:24.212525+00:00",
   "summary": {
     "total_scripts": 730,
     "status_counts": {
@@ -1095,7 +1095,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/doctor.py",
-          "line": 349,
+          "line": 352,
           "source_group": "scripts",
           "text": "from scripts.ai.codex.hook_inventory import collect"
         },

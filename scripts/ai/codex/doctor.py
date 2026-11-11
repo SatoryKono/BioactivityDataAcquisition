@@ -14,6 +14,9 @@ from pathlib import Path
 from typing import Any, cast
 import sys
 
+# Read-only discovery must not create project bytecode caches on fresh installs.
+sys.dont_write_bytecode = True
+
 _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
