@@ -57,9 +57,8 @@ root agent performs the same responsibilities directly.
 ## Standard task loop
 
 1. Resolve user intent, mutation authority, scope, and risk tier.
-1. Run the canonical memory `pre-task` workflow with runtime/agent identity
-   unless SCOPE is a generated-artifact rebind, date stamp, or remote-main
-   hash-only change (`BIOETL_AI_MEMORY_MODE=off`).
+1. Run memory `pre-task` with runtime/agent identity only when required by
+   the root context-tier matrix (V1 read-only optional; hash-only off).
 1. Inspect current evidence: target files, related tests, contracts, configs,
    docs, mirrors, and debt registries.
 1. For V3/V4, maintain an explicit plan with at most one active step.
@@ -70,8 +69,8 @@ root agent performs the same responsibilities directly.
    Markdown link or `Owner:` / `Status:` / `Class:` header changes require
    `python -m scripts.docs generate-cleanup-inventory --update` in the same
    changeset.
-1. Run the memory `post-task` workflow and report evidence, skips, mirror
-   status, and debt outcome.
+1. Run memory `post-task` only in authorized read-write mode; otherwise
+   skip persistent notes. Report evidence, skips, mirror status, and debt outcome.
 
 Diagnosis and review remain read-only unless implementation was also requested.
 `py-debug-bot` never applies fixes: it returns a reproduction, root cause,

@@ -17,13 +17,12 @@ Every wrapper skill must state:
 ## Standard Workflow
 
 1. Resolve scope and confirm the wrapper is the right entrypoint.
-1. Read `AGENTS.md`, `docs/00-project/NORMATIVE_SOURCES.md`,
-   `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`, and
-   `docs/00-project/ai/memory/agent-memory.md`.
-1. Run `python -m memory.tooling.workflow pre-task ...`. Skip this step for
-   hash-only work (generated-artifact rebind, date stamp, remote-main refresh):
-   use `BIOETL_AI_MEMORY_MODE=off` per `AGENTS.md` instead of the full
-   pre-task RAG.
+1. Apply `AGENTS.md` Instruction Scope and Required AI Context; read only
+   the normative/memory package selected by that task tier.
+1. Run `python -m memory.tooling.workflow pre-task ...` when the root tier
+   requires it. V1 memory is read-only optional; hash-only work uses
+   `BIOETL_AI_MEMORY_MODE=off`. This wrapper cannot broaden those obligations.
+   Strict read-only tasks must not refresh repository files implicitly.
 1. Read the primary profile or workflow file named by the wrapper.
 1. Use repo search to find related tests, docs, configs, contracts, mirrors,
    evidence, and validation gates.
