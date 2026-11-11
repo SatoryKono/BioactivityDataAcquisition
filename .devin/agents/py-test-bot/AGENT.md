@@ -48,7 +48,8 @@ ______________________________________________________________________
 
 ## Memory
 
-> **При старте** прочитай специализированную память:
+> Читай специализированную память, когда она выбрана матрицей Required AI Context
+> из `AGENTS.md` (полный пакет V3/V4; не безусловный bootstrap для V1):
 > `docs/00-project/ai/memory/memory-py-test-bot.md` — test structure, thresholds, VCR, failure classification, selection strategy.
 > Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
 
