@@ -22,6 +22,64 @@ from scripts.ops.observability.grafana._empty_observation_contract import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("panel_id", [105, 207, 239, 256, 112, 135, 8807])
+def test_static_empty_copy_cannot_attest_available_telemetry(panel_id):
+    from copy import deepcopy
+
+    from scripts.ops.observability.grafana._empty_observation_contract import (
+        apply_event_empty_copy,
+    )
+
+    panel = {
+        "id": panel_id,
+        "description": "Selected scope and time window.",
+        "targets": [{"expr": "increase(bioetl_errors_total[5m])"}],
+        "fieldConfig": {
+            "defaults": {
+                "noValue": "NO OBSERVATIONS",
+                "mappings": [{"type": "value", "options": {"0": {"text": "0"}}}],
+            }
+        },
+    }
+    original = deepcopy(panel)
+    payload = [{"id": 8808, "panels": [panel]}]
+    apply_event_empty_copy(payload)
+    assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert "producer availability" in panel["description"]
+    assert "Only an actual sample" in panel["description"]
+    assert panel["targets"] == original["targets"]
+    assert (
+        panel["fieldConfig"]["defaults"]["mappings"]
+        == original["fieldConfig"]["defaults"]["mappings"]
+    )
+    once = deepcopy(payload)
+    apply_event_empty_copy(payload)
+    assert payload == once
+
+
+def test_failed_run_coverage_gap_cannot_be_qualified_as_no_observations():
+    from scripts.ops.observability.grafana._empty_observation_contract import (
+        apply_event_empty_copy,
+    )
+
+    panel = {"id": 205, "fieldConfig": {"defaults": {"noValue": "UNKNOWN"}}}
+    apply_event_empty_copy([panel])
+    assert panel == {"id": 205, "fieldConfig": {"defaults": {"noValue": "UNKNOWN"}}}
+
+    def unexpected_fetch(*args, **kwargs):
+        pytest.fail("Failed Runs must retain its own scope/sample coverage guard")
+
+    assert qualify_empty(
+        dashboard_uid="bioetl-incident-v1",
+        panel_id=205,
+        expr="increase(bioetl_pipeline_runs_total[6h])",
+        base_url="http://unused",
+        fetch=unexpected_fetch,
+        substitute=lambda value: value,
+        timeout=1,
+    ) == (False, [])
+
+
 @pytest.mark.parametrize(
     "gap", [None, "missing-rule", "bad-rule", "outage", "late-start", "query-error"]
 )

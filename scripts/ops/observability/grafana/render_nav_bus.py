@@ -2774,6 +2774,7 @@ def apply_to_dashboard(
     _remove_dead_organize_renames(payload)
     if current_uid == "bioetl-incident-v1":
         from scripts.ops.observability.grafana._empty_observation_contract import (
+            apply_event_empty_copy,
             empty_state_label,
         )
 
@@ -2783,6 +2784,7 @@ def apply_to_dashboard(
                 panel.setdefault("fieldConfig", {}).setdefault("defaults", {})[
                     "noValue"
                 ] = label
+        apply_event_empty_copy(payload.get("panels", []))
     from scripts.ops.observability.grafana._table_wrapping import apply_table_wrapping
 
     apply_table_wrapping(payload.get("panels", []))

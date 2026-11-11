@@ -4588,7 +4588,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Duration quantiles require observed histogram increments within the rate interval. An empty chart is UNKNOWN, not zero duration or a failed run. NaN quantiles are omitted; isolated valid observations are shown as points. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
+          "description": "TIME RANGE · Duration quantiles require observed histogram increments within the rate interval. An empty chart is UNKNOWN, not zero duration or a failed run. NaN quantiles are omitted; isolated valid observations are shown as points. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4622,7 +4622,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "NO OBSERVATIONS — no usable histogram increments"
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -4684,7 +4684,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Duration quantiles require observed histogram increments within the rate interval. An empty chart is UNKNOWN, not zero duration or a failed run. NaN quantiles are omitted; isolated valid observations are shown as points. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
+          "description": "TIME RANGE · Duration quantiles require observed histogram increments within the rate interval. An empty chart is UNKNOWN, not zero duration or a failed run. NaN quantiles are omitted; isolated valid observations are shown as points. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4718,7 +4718,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "NO OBSERVATIONS — no usable histogram increments"
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -5559,7 +5559,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Lists selected-range error samples grouped by Stage and error code for Pipeline and Run Type. An empty table means no matching samples, not guaranteed Pipeline Health. Check Metrics Coverage before treating it as valid empty evidence TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Lists selected-range error samples grouped by Stage and error code for Pipeline and Run Type. An empty table means no matching samples, not guaranteed Pipeline Health. Check Metrics Coverage before treating it as valid empty evidence TELEMETRY MISSING is not a zero and not VALID EMPTY. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -5624,7 +5624,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero). Check Monitor Metrics Coverage.",
+              "noValue": "UNKNOWN",
               "links": [
                 {
                   "title": "Check Monitor Metrics Coverage",
@@ -7223,7 +7223,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts missing upstream lineage references during the selected range. Any non-zero value makes replay evidence incomplete. Run Type does not affect this panel. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically.",
+          "description": "TIME RANGE · Counts missing upstream lineage references during the selected range. Any non-zero value makes replay evidence incomplete. Run Type does not affect this panel. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -7267,7 +7267,7 @@
               },
               "unit": "short",
               "decimals": 0,
-              "noValue": "NO OBSERVATIONS",
+              "noValue": "UNKNOWN",
               "displayName": "Track Missing Lineage"
             },
             "overrides": []
@@ -7324,7 +7324,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts failed lineage-fragment writes during the selected range. Run Type does not affect this panel. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically. Missing counter evidence is UNKNOWN; measured zero means no observed events.",
+          "description": "TIME RANGE · Counts failed lineage-fragment writes during the selected range. Run Type does not affect this panel. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically. Missing counter evidence is UNKNOWN; measured zero means no observed events. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -7367,7 +7367,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "NO OBSERVATIONS",
+              "noValue": "UNKNOWN",
               "displayName": "Track Lineage Failures"
             },
             "overrides": []
@@ -8225,7 +8225,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts incompatible checkpoint decisions during the selected range. Any non-zero value blocks resume. Run Type does not affect this panel. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically. Missing counter evidence is UNKNOWN; measured zero means no observed events.",
+          "description": "TIME RANGE · Counts incompatible checkpoint decisions during the selected range. Any non-zero value blocks resume. Run Type does not affect this panel. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically. Missing counter evidence is UNKNOWN; measured zero means no observed events. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -8269,7 +8269,7 @@
               },
               "unit": "short",
               "decimals": 0,
-              "noValue": "NO OBSERVATIONS",
+              "noValue": "UNKNOWN",
               "displayName": "Track Incompatibilities"
             },
             "overrides": []
@@ -8426,7 +8426,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows missing lineage references recorded during the selected range, grouped by layer and reference type. No rows can mean either no gaps or missing lineage telemetry; check fragment activity. Run Type does not affect this panel. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Shows missing lineage references recorded during the selected range, grouped by layer and reference type. No rows can mean either no gaps or missing lineage telemetry; check fragment activity. Run Type does not affect this panel. TELEMETRY MISSING is not a zero and not VALID EMPTY. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -8474,7 +8474,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "No missing-lineage reference samples in range. Empty means no sampled lineage-missing events or absent telemetry, not proof of full lineage closure.",
+              "noValue": "UNKNOWN",
               "custom": {
                 "inspect": true,
                 "minWidth": 50,
@@ -8596,7 +8596,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts replay-drift events during the selected range. Any non-zero value requires stopping replay and inspecting the drift type. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically. Missing counter evidence is UNKNOWN; measured zero means no observed events.",
+          "description": "TIME RANGE · Counts replay-drift events during the selected range. Any non-zero value requires stopping replay and inspecting the drift type. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically. Missing counter evidence is UNKNOWN; measured zero means no observed events. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -8639,7 +8639,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "NO OBSERVATIONS",
+              "noValue": "UNKNOWN",
               "displayName": "Track Replay Drift"
             },
             "overrides": []
@@ -8796,7 +8796,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows global graceful-shutdown starts grouped by reason over the selected range. Pipeline and Run Type filters do not affect this panel. An empty chart can mean no starts or unavailable telemetry; compare with completions without treating it as an alert verdict TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Shows global graceful-shutdown starts grouped by reason over the selected range. Pipeline and Run Type filters do not affect this panel. An empty chart can mean no starts or unavailable telemetry; compare with completions without treating it as an alert verdict TELEMETRY MISSING is not a zero and not VALID EMPTY. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -8830,7 +8830,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -9080,7 +9080,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows global graceful-shutdown completions grouped by reason over the selected range. Pipeline and Run Type filters do not affect this panel. An empty chart can mean no completions or unavailable telemetry; compare with starts for incomplete shutdown context TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Shows global graceful-shutdown completions grouped by reason over the selected range. Pipeline and Run Type filters do not affect this panel. An empty chart can mean no completions or unavailable telemetry; compare with starts for incomplete shutdown context TELEMETRY MISSING is not a zero and not VALID EMPTY. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -9114,7 +9114,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -9264,7 +9264,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts failed checkpoint administration operations across all pipelines during the selected range. Pipeline and Run Type filters do not affect this panel. Zero means no failures were recorded in the selected range; it does not prove telemetry completeness. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically. Missing counter evidence is UNKNOWN; measured zero means no observed events.",
+          "description": "TIME RANGE · Counts failed checkpoint administration operations across all pipelines during the selected range. Pipeline and Run Type filters do not affect this panel. Zero means no failures were recorded in the selected range; it does not prove telemetry completeness. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically. Missing counter evidence is UNKNOWN; measured zero means no observed events. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -9307,7 +9307,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "NO OBSERVATIONS",
+              "noValue": "UNKNOWN",
               "displayName": "Track Global Admin Failures"
             },
             "overrides": []
@@ -9607,7 +9607,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows audit-write outcomes across all pipelines. Dashboard filters do not apply. This is supporting evidence, not the replay verdict. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Shows audit-write outcomes across all pipelines. Dashboard filters do not apply. This is supporting evidence, not the replay verdict. TELEMETRY MISSING is not a zero and not VALID EMPTY. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -9622,7 +9622,7 @@
               ],
               "mappings": [],
               "unit": "short",
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -9665,7 +9665,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows replay-drift events grouped by capability, drift type, and status. No data means either no events occurred or drift telemetry is unavailable. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Shows replay-drift events grouped by capability, drift type, and status. No data means either no events occurred or drift telemetry is unavailable. TELEMETRY MISSING is not a zero and not VALID EMPTY. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -9679,7 +9679,7 @@
                 }
               ],
               "mappings": [],
-              "noValue": "No replay drift samples",
+              "noValue": "UNKNOWN",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -9888,7 +9888,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Checkpoint compatibility decisions by outcome. An absent series is TELEMETRY MISSING and remains UNKNOWN. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Checkpoint compatibility decisions by outcome. An absent series is TELEMETRY MISSING and remains UNKNOWN. Run Type does not affect this panel. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -9903,7 +9903,7 @@
               ],
               "mappings": [],
               "unit": "short",
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -9946,7 +9946,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows audit-query outcomes across all pipelines. Dashboard filters do not apply. This is supporting evidence, not the replay verdict. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Shows audit-query outcomes across all pipelines. Dashboard filters do not apply. This is supporting evidence, not the replay verdict. TELEMETRY MISSING is not a zero and not VALID EMPTY. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -9961,7 +9961,7 @@
               ],
               "mappings": [],
               "unit": "short",
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -10004,7 +10004,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows replay lag over time by replay capability and status. No data means replay-lag telemetry is unavailable. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Shows replay lag over time by replay capability and status. No data means replay-lag telemetry is unavailable. TELEMETRY MISSING is not a zero and not VALID EMPTY. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -10036,7 +10036,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -10079,7 +10079,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · TIME RANGE · Shows ledger appends over time by event type and status. This is historical evidence. Run Type does not affect this panel. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "CURRENT · TIME RANGE · Shows ledger appends over time by event type and status. This is historical evidence. Run Type does not affect this panel. TELEMETRY MISSING is not a zero and not VALID EMPTY. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -10094,7 +10094,7 @@
               ],
               "mappings": [],
               "unit": "short",
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -10491,7 +10491,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows p50, p95, and p99 checkpoint-save latency for the selected range. No data means no latency samples were recorded, not zero latency. Run Type does not affect this panel. TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
+          "description": "TIME RANGE · Shows p50, p95, and p99 checkpoint-save latency for the selected range. No data means no latency samples were recorded, not zero latency. Run Type does not affect this panel. TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -10523,7 +10523,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "NO OBSERVATIONS — no usable histogram increments",
+              "noValue": "UNKNOWN",
               "custom": {
                 "showPoints": "always"
               }
@@ -10588,7 +10588,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows p50, p95, and p99 audit-write latency across all pipelines during the selected range. No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
+          "description": "TIME RANGE · Shows p50, p95, and p99 audit-write latency across all pipelines during the selected range. No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -10620,7 +10620,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "No GLOBAL audit write latency samples in range. Empty means no audit writes were timed or audit telemetry is absent, not zero latency.",
+              "noValue": "UNKNOWN",
               "custom": {
                 "showPoints": "always"
               }
@@ -10684,7 +10684,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows p50, p95, and p99 administration latency across all pipelines during the selected range. Filters do not affect this panel. No data is expected when no administration operations occurred in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
+          "description": "TIME RANGE · Shows p50, p95, and p99 administration latency across all pipelines during the selected range. Filters do not affect this panel. No data is expected when no administration operations occurred in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -10716,7 +10716,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "No GLOBAL checkpoint operator latency samples in range. This is optional admin/operator telemetry, not pipeline success evidence.",
+              "noValue": "UNKNOWN",
               "custom": {
                 "showPoints": "always"
               }
@@ -10781,7 +10781,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows p50, p95, and p99 audit-query latency across all pipelines during the selected range. No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
+          "description": "TIME RANGE · Shows p50, p95, and p99 audit-query latency across all pipelines during the selected range. No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -10813,7 +10813,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "No GLOBAL audit query latency samples in range. Empty means no audit queries were timed or audit telemetry is absent, not zero latency.",
+              "noValue": "UNKNOWN",
               "custom": {
                 "showPoints": "always"
               }
@@ -10963,7 +10963,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows lineage-fragment writes by layer and status during the selected range. Run Type does not affect this panel. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Shows lineage-fragment writes by layer and status during the selected range. Run Type does not affect this panel. TELEMETRY MISSING is not a zero and not VALID EMPTY. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -10978,7 +10978,7 @@
               ],
               "mappings": [],
               "unit": "short",
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },

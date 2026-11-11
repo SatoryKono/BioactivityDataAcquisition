@@ -39,6 +39,35 @@ _EVENT_PANELS = frozenset(
         8805,
     }
 )
+
+_EMPTY_EVENT_GUIDANCE = (
+    " Empty result: UNKNOWN until producer availability, observed scope and "
+    "event-family coverage are verified. Check Monitor Metrics Coverage, the "
+    "selector and time window. NO OBSERVATIONS requires those witnesses; "
+    "TELEMETRY MISSING requires a confirmed coverage gap. Only an actual "
+    "sample can establish a measured zero."
+)
+
+
+def apply_event_empty_copy(panels: list[dict[str, Any]]) -> None:
+    """Keep static rendering neutral; only qualify_empty can verify emptiness.
+
+    Grafana's noValue also applies to missing cells in populated frames. It
+    cannot distinguish an unavailable family from a valid empty event query.
+    Do not change targets, numeric samples or the failed-run coverage guard.
+    """
+    for panel in panels:
+        apply_event_empty_copy(panel.get("panels", []))
+        if panel.get("id") not in _EVENT_PANELS | {112, 135, 8807}:
+            continue
+        panel.setdefault("fieldConfig", {}).setdefault("defaults", {})["noValue"] = (
+            "UNKNOWN"
+        )
+        description = panel.get("description", "")
+        if _EMPTY_EVENT_GUIDANCE not in description:
+            panel["description"] = description + _EMPTY_EVENT_GUIDANCE
+
+
 _SIGNAL_WITNESSES = {
     4: 'bioetl_dq_current_status{pipeline=~"$pipeline"}',
     259: "bioetl_provider_current_status",
