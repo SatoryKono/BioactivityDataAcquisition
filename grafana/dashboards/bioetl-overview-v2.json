@@ -477,7 +477,7 @@
         "type": "datasource",
         "uid": "-- Dashboard --"
       },
-      "description": "SELECTED RUN · AUTO shows the latest run by start time in the current scope, including unfinished runs. EXPLICIT keeps the requested Run ID. Context checked at is this Grafana query evaluation time, not run start, browser click, server cache load or catalog freshness. Refresh re-evaluates the displayed context. UNKNOWN is missing evidence; request failure is Source unavailable. This context is not a fleet verdict. TIME RANGE telemetry never proves this run. Empty is a coverage gap, not a pass. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
+      "description": "SELECTED RUN · AUTO shows the latest run by start time in the current scope, including unfinished runs. EXPLICIT keeps the requested Run ID. Context checked at is this Grafana query evaluation time, not run start, browser click, server cache load or catalog freshness. Refresh re-evaluates the displayed context. UNKNOWN is missing evidence; request failure is Source unavailable. This context assesses that run only, not a fleet verdict. TIME RANGE telemetry never proves this run. Empty is a coverage gap, not a pass. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
       "targets": [
         {
           "refId": "A",
@@ -502,6 +502,7 @@
           "custom": {
             "align": "left",
             "minWidth": 50,
+            "inspect": true,
             "cellOptions": {
               "type": "auto",
               "wrapText": true
@@ -518,58 +519,6 @@
               {
                 "id": "unit",
                 "value": "time:YYYY-MM-DD HH:mm"
-              },
-              {
-                "id": "custom.width",
-                "value": 155
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Context"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 110
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Run ID"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 150
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Execution"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 90
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Verdict"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 65
               }
             ]
           }
@@ -735,11 +684,11 @@
                 },
                 "UNKNOWN": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#9CA3AF"
                 },
                 "N/A": {
                   "text": "N/A",
-                  "color": "gray"
+                  "color": "#9CA3AF"
                 },
                 "QUERY ERROR": {
                   "text": "Source unavailable",
@@ -747,11 +696,11 @@
                 },
                 "SELECT RUN": {
                   "text": "SELECT RUN",
-                  "color": "gray"
+                  "color": "#9CA3AF"
                 },
                 "НЕТ ЗАПУСКОВ": {
                   "text": "НЕТ ЗАПУСКОВ",
-                  "color": "gray"
+                  "color": "#9CA3AF"
                 }
               }
             },
@@ -761,7 +710,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "text"
                 }
               }
             }
@@ -773,7 +722,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "gray",
+                "color": "#9CA3AF",
                 "value": null
               }
             ]
@@ -807,7 +756,7 @@
         "x": 0,
         "y": 7,
         "w": 15,
-        "h": 8
+        "h": 9
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -965,6 +914,22 @@
                 ]
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason details"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              }
+            ]
           }
         ]
       },
@@ -975,7 +940,7 @@
           "source": "url",
           "parser": "backend",
           "format": "table",
-          "root_selector": "($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null, 'context': null, 'context_checked_at': null}; $map($append($append($append($append($append($append(($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'НЕТ ЗАПУСКОВ']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'execution_state': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : (($s.verdict = 'OK' or $s.verdict = 'SELECT RUN' or $s.verdict = 'НЕТ ЗАПУСКОВ') ? ($r ? $r : $s.reason) : $s.reason), '_bioetl_frame': 'domains'}]) })), ($v := function($x){$exists($x) and $x != '' ? $string($x) : 'Not recorded in saved run evidence'}; $s := summary[0]; $secs := function($t){( $tail := $substring($t, 19); $rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; $zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : ($contains($rest, '+') ? '+' : '-')); $digits := $rest != '' ? $substringBefore($rest, $zone) : ''; $frac := $digits != '' ? $number('0.' & $digits) : 0; $sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); $off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : $substringAfter($tail, '-')); $oh := $off != '' ? $number($substring($off, 0, 2)) : 0; $om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; $toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 + $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac - $sign * ($oh*3600 + $om*60) )}; $start := $s.started_at ? $secs($s.started_at) : null; $end := $s.completed_at ? $secs($s.completed_at) : null; $map([{'parameter':'Run ID','value':$v(run_id)},{'parameter':'Pipeline','value':$v(pipeline)},{'parameter':'Run Type','value':$v(run_type)},{'parameter':'Started at','value':started_at ? $substring(started_at,0,10) & ' ' & $substring(started_at,11,5) & ' ' & ($substring(started_at,-1) = 'Z' ? 'UTC' : $substring(started_at,-6)) : 'Not recorded in saved run evidence'},{'parameter':'Total Run Duration','value':$start != null and $end != null ? ($end >= $start ? ($n := $floor($end - $start + 0.5); $parts := [$floor($n / 86400), $floor(($n % 86400) / 3600), $floor(($n % 3600) / 60), $n % 60]; $units := [' d', ' h', ' min', ' s']; $n = 0 ? '0 s' : $join($map($parts, function($v, $i){$v > 0 ? $string($v) & $units[$i]}), ' ')) : 'Not recorded in saved run evidence') : 'Not recorded in saved run evidence'}], function($row){$merge([$row, {'_bioetl_frame':'identity'}])}))), ($d := presentation_domains[domain = 'Provider'][0]; $cached := $d.reason = 'cached_bronze_no_remote_probe'; $saved := evidence_availability in ['AVAILABLE', 'legacy_no_snapshot']; $completed := summary[0].completed_at; $secs := function($t){( $tail := $substring($t, 19); $rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; $zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : ($contains($rest, '+') ? '+' : '-')); $digits := $rest != '' ? $substringBefore($rest, $zone) : ''; $frac := $digits != '' ? $number('0.' & $digits) : 0; $sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); $off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : $substringAfter($tail, '-')); $oh := $off != '' ? $number($substring($off, 0, 2)) : 0; $om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; $toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 + $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac - $sign * ($oh*3600 + $om*60) )}; $age := $completed ? $floor($millis()/1000 - $secs($completed)) : null; $seconds := $age != null ? ($age >= 0 ? $age : 0) : 0; $parts := [$floor($seconds/86400), $floor(($seconds%86400)/3600), $floor(($seconds%3600)/60)]; $units := [' d',' h',' min']; $elapsed := $join($map($parts,function($v,$i){$v>0 ? $string($v)&$units[$i]}),' '); $observed := $age != null ? ($age >= 0 ? ($age < 60 ? 'Just now' : $elapsed & ' ago') : 'Not recorded') : 'Not recorded'; $map(provider_checks, function($p) {( $source := $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : ($d.reason = 'run_preflight_provider_observation' and $p.evidence = 'PRESENT' ? 'Provider check' : 'UNKNOWN')); $performed := $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'); $result := $cached ? '—' : ($p.check_result = 'QUERY ERROR' ? 'Source unavailable' : ($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN')); $reason := $cached ? 'Cached Bronze used; provider API was not called.' : ($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check.' : ($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.')); $label := $saved or $cached ? 'Open report' : '—'; $merge([$p, {'data_source': $source, 'check_performed': $performed, 'check_result_display': $result, 'reason': $reason, 'observed_display': $observed, 'report_label': $label, '_bioetl_frame': 'provider'}]) )}))), $map(stage_diagnostics, function($row){$merge([$row, {'_bioetl_frame': 'stages'}])})), ($recon := $type(reconciliation_display) = 'array' ? reconciliation_display : []; $count($recon) > 0 ? $map($recon, function($row){$merge([$row, ($row.result = 'UNKNOWN' and $row.meaning = 'no_runs_in_scope') ? {'result': 'нет записей', 'meaning': 'нет записей — no runs in scope'} : {}, {'_bioetl_frame': 'reconciliation'}])}) : [{'step_id': '—', 'mode': 'нет данных', 'scope': '—', 'pins': '—', 'limit': '—', 'result': verdict = 'SELECT RUN' ? 'не применимо' : (verdict = 'НЕТ ЗАПУСКОВ' ? 'нет записей' : 'нет данных'), 'meaning': verdict = 'SELECT RUN' ? 'не применимо — no Run ID selected' : (verdict = 'НЕТ ЗАПУСКОВ' ? 'нет записей — no runs in scope' : 'нет данных — FK comparison rows were not returned'), '_bioetl_frame': 'reconciliation'}])), [{'status': (verdict='SELECT RUN' or verdict='НЕТ ЗАПУСКОВ') ? verdict : ($exists(contract_exclusions_status) and contract_exclusions_status != '' ? contract_exclusions_status : 'нет данных'), 'detail': contract_exclusions_rate != null ? 'excluded ' & $string($round(contract_exclusions_rate*100,2)) & '%' : (verdict='SELECT RUN' ? 'не применимо — Choose a run' : (verdict='НЕТ ЗАПУСКОВ' ? 'нет записей — No runs in scope' : 'нет данных — excluded UNKNOWN')), '_bioetl_frame': 'exclusions'}]), ($requested := \"${run_id:percentencode}\"; $auto := $requested in ['', '-', 'All', '$__all', '%24__all', '__all', '*', '%2A']; $hasRun := $type(run_id) = 'string' and run_id != '' and run_id != '-'; [{'_bioetl_frame':'selection_context', 'context': $auto ? ($hasRun ? 'AUTO · latest run in scope' : (reason = 'no_runs_in_scope' ? 'NO RUN · empty scope' : 'Context unavailable')) : 'EXPLICIT · requested Run ID', 'run_id': $type(run_id) = 'string' ? run_id : $requested, 'execution_state': $type(execution_state) = 'string' and execution_state != '' ? execution_state : 'UNKNOWN', 'verdict': $type(verdict) = 'string' and verdict != '' ? verdict : 'UNKNOWN', 'context_checked_at': $now()}])), function($row){$merge([$schema, $row])}))",
+          "root_selector": "($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null, 'context': null, 'context_checked_at': null}; $map($append($append($append($append($append($append($map(($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'НЕТ ЗАПУСКОВ']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'execution_state': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : (($s.verdict = 'OK' or $s.verdict = 'SELECT RUN' or $s.verdict = 'НЕТ ЗАПУСКОВ') ? ($r ? $r : $s.reason) : $s.reason), '_bioetl_frame': 'domains'}]) })), function($row){$merge([$row, {'domain_reason_brief': $type($row.reason_display) = 'string' and $length($row.reason_display) > 32 ? $substring($row.reason_display, 0, 31) & '…' : $row.reason_display, 'run_reason_brief': $type($row.run_reason) = 'string' and $length($row.run_reason) > 20 ? $substring($row.run_reason, 0, 19) & '…' : $row.run_reason}])}), ($v := function($x){$exists($x) and $x != '' ? $string($x) : 'Not recorded'}; $s := summary[0]; $secs := function($t){( $tail := $substring($t, 19); $rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; $zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : ($contains($rest, '+') ? '+' : '-')); $digits := $rest != '' ? $substringBefore($rest, $zone) : ''; $frac := $digits != '' ? $number('0.' & $digits) : 0; $sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); $off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : $substringAfter($tail, '-')); $oh := $off != '' ? $number($substring($off, 0, 2)) : 0; $om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; $toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 + $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac - $sign * ($oh*3600 + $om*60) )}; $start := $s.started_at ? $secs($s.started_at) : null; $end := $s.completed_at ? $secs($s.completed_at) : null; $map([{'parameter':'Run ID','value':$v(run_id)},{'parameter':'Pipeline','value':$v(pipeline)},{'parameter':'Run Type','value':$v(run_type)},{'parameter':'Started at','value':started_at ? $substring(started_at,0,10) & ' ' & $substring(started_at,11,5) & ' ' & ($substring(started_at,-1) = 'Z' ? 'UTC' : $substring(started_at,-6)) : 'Not recorded'},{'parameter':'Run duration','value':$start != null and $end != null ? ($end >= $start ? ($n := $floor($end - $start + 0.5); $parts := [$floor($n / 86400), $floor(($n % 86400) / 3600), $floor(($n % 3600) / 60), $n % 60]; $units := [' d', ' h', ' min', ' s']; $n = 0 ? '0 s' : $join($map($parts, function($v, $i){$v > 0 ? $string($v) & $units[$i]}), ' ')) : 'Not recorded') : 'Not recorded'}], function($row){$merge([$row, {'_bioetl_frame':'identity'}])}))), ($d := presentation_domains[domain = 'Provider'][0]; $cached := $d.reason = 'cached_bronze_no_remote_probe'; $saved := evidence_availability in ['AVAILABLE', 'legacy_no_snapshot']; $completed := summary[0].completed_at; $secs := function($t){( $tail := $substring($t, 19); $rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; $zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : ($contains($rest, '+') ? '+' : '-')); $digits := $rest != '' ? $substringBefore($rest, $zone) : ''; $frac := $digits != '' ? $number('0.' & $digits) : 0; $sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); $off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : $substringAfter($tail, '-')); $oh := $off != '' ? $number($substring($off, 0, 2)) : 0; $om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; $toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 + $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac - $sign * ($oh*3600 + $om*60) )}; $age := $completed ? $floor($millis()/1000 - $secs($completed)) : null; $seconds := $age != null ? ($age >= 0 ? $age : 0) : 0; $parts := [$floor($seconds/86400), $floor(($seconds%86400)/3600), $floor(($seconds%3600)/60)]; $units := [' d',' h',' min']; $elapsed := $join($map($parts,function($v,$i){$v>0 ? $string($v)&$units[$i]}),' '); $observed := $age != null ? ($age >= 0 ? ($age < 60 ? 'Just now' : $elapsed & ' ago') : 'Not recorded') : 'Not recorded'; $map(provider_checks, function($p) {( $source := $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : ($d.reason = 'run_preflight_provider_observation' and $p.evidence = 'PRESENT' ? 'Provider check' : 'UNKNOWN')); $performed := $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'); $result := $cached ? '—' : ($p.check_result = 'QUERY ERROR' ? 'Source unavailable' : ($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN')); $reason := $cached ? 'Cached Bronze used; provider API was not called.' : ($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check.' : ($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.')); $label := $saved or $cached ? 'Open report' : '—'; $merge([$p, {'data_source': $source, 'check_performed': $performed, 'check_result_display': $result, 'reason': $reason, 'observed_display': $observed, 'report_label': $label, '_bioetl_frame': 'provider'}]) )}))), $map(stage_diagnostics, function($row){$merge([$row, {'_bioetl_frame': 'stages'}])})), ($recon := $type(reconciliation_display) = 'array' ? reconciliation_display : []; $count($recon) > 0 ? $map($recon, function($row){$merge([$row, ($row.result = 'UNKNOWN' and $row.meaning = 'no_runs_in_scope') ? {'result': 'нет записей', 'meaning': 'нет записей — no runs in scope'} : {}, {'_bioetl_frame': 'reconciliation'}])}) : [{'step_id': '—', 'mode': 'нет данных', 'scope': '—', 'pins': '—', 'limit': '—', 'result': verdict = 'SELECT RUN' ? 'не применимо' : (verdict = 'НЕТ ЗАПУСКОВ' ? 'нет записей' : 'нет данных'), 'meaning': verdict = 'SELECT RUN' ? 'не применимо — no Run ID selected' : (verdict = 'НЕТ ЗАПУСКОВ' ? 'нет записей — no runs in scope' : 'нет данных — FK comparison rows were not returned'), '_bioetl_frame': 'reconciliation'}])), [{'status': (verdict='SELECT RUN' or verdict='НЕТ ЗАПУСКОВ') ? verdict : ($exists(contract_exclusions_status) and contract_exclusions_status != '' ? contract_exclusions_status : 'нет данных'), 'detail': contract_exclusions_rate != null ? 'excluded ' & $string($round(contract_exclusions_rate*100,2)) & '%' : (verdict='SELECT RUN' ? 'не применимо — Choose a run' : (verdict='НЕТ ЗАПУСКОВ' ? 'нет записей — No runs in scope' : 'нет данных — excluded UNKNOWN')), '_bioetl_frame': 'exclusions'}]), ($requested := \"${run_id:percentencode}\"; $auto := $requested in ['', '-', 'All', '$__all', '%24__all', '__all', '*', '%2A']; $hasRun := $type(run_id) = 'string' and run_id != '' and run_id != '-'; [{'_bioetl_frame':'selection_context', 'context': $auto ? ($hasRun ? 'AUTO · latest run in scope' : (reason = 'no_runs_in_scope' ? 'NO RUN · empty scope' : 'Context unavailable')) : 'EXPLICIT · requested Run ID', 'run_id': $type(run_id) = 'string' ? run_id : $requested, 'execution_state': $type(execution_state) = 'string' and execution_state != '' ? execution_state : 'UNKNOWN', 'verdict': $type(verdict) = 'string' and verdict != '' ? verdict : 'UNKNOWN', 'context_checked_at': $now()}])), function($row){$merge([$schema, $row])}))",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
             "method": "GET",
@@ -1027,7 +992,8 @@
               "names": [
                 "domain",
                 "status_display",
-                "reason_display"
+                "reason_display",
+                "domain_reason_brief"
               ]
             }
           }
@@ -1038,17 +1004,19 @@
             "indexByName": {
               "domain": 0,
               "status_display": 1,
-              "reason_display": 2
+              "reason_display": 3,
+              "domain_reason_brief": 2
             },
             "renameByName": {
               "domain": "Domain",
               "status_display": "Status",
-              "reason_display": "Reason"
+              "reason_display": "Reason details",
+              "domain_reason_brief": "Reason"
             }
           }
         }
       ],
-      "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is Source unavailable. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
+      "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is Source unavailable. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Reason is a shortened preview; Inspect Data retains complete Reason details.",
       "links": [
         {
           "title": "Open Control Plane",
@@ -1085,7 +1053,7 @@
         "type": "datasource",
         "uid": "-- Dashboard --"
       },
-      "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is Source unavailable. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
+      "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is Source unavailable. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report. Reason is a shortened preview; Inspect Data retains complete Reason details.",
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
@@ -1154,7 +1122,7 @@
                       },
                       "НЕТ ЗАПУСКОВ": {
                         "text": "НЕТ ЗАПУСКОВ",
-                        "color": "gray"
+                        "color": "#9CA3AF"
                       }
                     }
                   }
@@ -1217,7 +1185,7 @@
                       },
                       "UNKNOWN": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#9CA3AF"
                       },
                       "UNFINISHED": {
                         "text": "UNFINISHED",
@@ -1225,7 +1193,7 @@
                       },
                       "НЕТ ЗАПУСКОВ": {
                         "text": "НЕТ ЗАПУСКОВ",
-                        "color": "gray"
+                        "color": "#9CA3AF"
                       }
                     }
                   }
@@ -1356,7 +1324,7 @@
                       },
                       "НЕТ ЗАПУСКОВ": {
                         "text": "НЕТ ЗАПУСКОВ",
-                        "color": "gray"
+                        "color": "#9CA3AF"
                       }
                     }
                   }
@@ -1377,6 +1345,22 @@
               {
                 "id": "custom.width",
                 "value": 60
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason details"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
               }
             ]
           }
@@ -1428,7 +1412,8 @@
                 "execution_state",
                 "run_verdict",
                 "saved_trust",
-                "run_reason"
+                "run_reason",
+                "run_reason_brief"
               ]
             }
           }
@@ -1445,14 +1430,16 @@
             "indexByName": {
               "run_verdict": 1,
               "saved_trust": 2,
-              "run_reason": 3,
-              "execution_state": 0
+              "run_reason": 4,
+              "execution_state": 0,
+              "run_reason_brief": 3
             },
             "renameByName": {
               "run_verdict": "Overall verdict",
-              "run_reason": "Reason",
+              "run_reason": "Reason details",
               "saved_trust": "Trust",
-              "execution_state": "Processing"
+              "execution_state": "Processing",
+              "run_reason_brief": "Reason"
             },
             "excludeByName": {
               "__name__": true,
@@ -1509,7 +1496,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 125
+                "value": 100
               }
             ]
           }
@@ -1602,7 +1589,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_incident_global_alerts",
+          "expr": "topk(2, bioetl_incident_global_alerts)",
           "format": "table",
           "instant": true,
           "refId": "A",
@@ -1634,7 +1621,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "gray",
+                "color": "#9CA3AF",
                 "value": null
               },
               {
@@ -2193,23 +2180,23 @@
                 },
                 "UNKNOWN": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#9CA3AF"
                 },
                 "N/A": {
                   "text": "N/A",
-                  "color": "gray"
+                  "color": "#9CA3AF"
                 },
                 "—": {
                   "text": "—",
-                  "color": "gray"
+                  "color": "#9CA3AF"
                 },
                 "SELECT RUN": {
                   "text": "SELECT RUN",
-                  "color": "gray"
+                  "color": "#9CA3AF"
                 },
                 "НЕТ ЗАПУСКОВ": {
                   "text": "НЕТ ЗАПУСКОВ",
-                  "color": "gray"
+                  "color": "#9CA3AF"
                 },
                 "INCOMPLETE": {
                   "text": "INCOMPLETE",
@@ -2227,7 +2214,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "text"
                 }
               }
             }
@@ -2239,7 +2226,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "gray",
+                "color": "#9CA3AF",
                 "value": null
               }
             ]
@@ -2903,27 +2890,27 @@
               "options": {
                 "UNKNOWN": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#9CA3AF"
                 },
                 "SELECT RUN": {
                   "text": "SELECT RUN",
-                  "color": "gray"
+                  "color": "#9CA3AF"
                 },
                 "НЕТ ЗАПУСКОВ": {
                   "text": "НЕТ ЗАПУСКОВ",
-                  "color": "gray"
+                  "color": "#9CA3AF"
                 },
                 "нет данных": {
                   "text": "нет данных",
-                  "color": "gray"
+                  "color": "#9CA3AF"
                 },
                 "нет записей": {
                   "text": "нет записей",
-                  "color": "gray"
+                  "color": "#9CA3AF"
                 },
                 "не применимо": {
                   "text": "не применимо",
-                  "color": "gray"
+                  "color": "#9CA3AF"
                 }
               }
             }
@@ -3140,7 +3127,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "gray",
+                    "color": "#9CA3AF",
                     "value": null
                   },
                   {
@@ -3415,14 +3402,7 @@
               }
             }
           ],
-          "links": [
-            {
-              "title": "Open Incident Workspace (all global alerts)",
-              "url": "/d/bioetl-incident-v1/5-incident-workspace?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&viewPanel=22005&${__url_time_range}",
-              "includeVars": false,
-              "targetBlank": false
-            }
-          ]
+          "links": []
         }
       ],
       "description": "GLOBAL / CURRENT · Expand for all fleet alerts, independently of the selected Run ID. The summary above shows up to two rows."

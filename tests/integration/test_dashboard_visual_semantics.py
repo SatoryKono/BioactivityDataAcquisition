@@ -35,9 +35,9 @@ def test_dq_canvas_uses_saved_exclusions_frame_without_inventing_rates() -> None
     assert target["withTransforms"] is False
     query = by_id[9002]["targets"][0]
     assert "run_id=${run_id}" in query["url"]
-    assert "contract_exclusions_status" in query["uql"]
-    assert "contract_exclusions_rate != null" in query["uql"]
-    assert "excluded UNKNOWN" in query["uql"]
+    assert "contract_exclusions_status" in query["root_selector"]
+    assert "contract_exclusions_rate != null" in query["root_selector"]
+    assert "excluded UNKNOWN" in query["root_selector"]
     frame = quality["transformations"][0]
     assert frame["id"] == "filterByValue"
     assert frame["options"]["type"] == "include"
@@ -66,8 +66,8 @@ def test_status_panels_have_correct_value_mapping():
         "2": "WARN",
         "3": "CRIT",
     }
-    assert options["0"]["color"] == "green"
-    assert options["3"]["color"] == "red"
+    assert options["0"]["color"] == "#14532d"
+    assert options["3"]["color"] == "#9f1239"
     assert options["1"]["color"] != "green"
     assert defaults["noValue"] == "UNKNOWN"
 

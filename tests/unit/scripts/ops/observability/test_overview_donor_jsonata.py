@@ -70,9 +70,9 @@ def evaluate_donor(payload):
 @pytest.mark.parametrize(
     ("start", "end", "duration"),
     [
-        (None, None, "Not recorded in saved run evidence"),
-        ("2026-11-11T10:00:00+00:00", None, "Not recorded in saved run evidence"),
-        (None, "2026-11-11T10:00:00Z", "Not recorded in saved run evidence"),
+        (None, None, "Not recorded"),
+        ("2026-11-11T10:00:00+00:00", None, "Not recorded"),
+        (None, "2026-11-11T10:00:00Z", "Not recorded"),
         ("2026-11-11T10:00:00Z", "2026-11-11T10:03:10Z", "3 min 10 s"),
         ("2026-11-11T10:00:00+00:00", "2026-11-11T10:03:10+00:00", "3 min 10 s"),
         ("2026-11-11T13:00:00.123+03:00", "2026-11-11T10:03:10.623Z", "3 min 11 s"),
@@ -80,7 +80,7 @@ def evaluate_donor(payload):
         (
             "2026-11-11T10:03:00Z",
             "2026-11-11T10:00:00Z",
-            "Not recorded in saved run evidence",
+            "Not recorded",
         ),
     ],
 )
@@ -91,7 +91,7 @@ def test_full_overview_donor_keeps_context_with_missing_or_offset_dates(
     identity = {
         r["parameter"]: r["value"] for r in rows if r["_bioetl_frame"] == "identity"
     }
-    assert identity["Total Run Duration"] == duration
+    assert identity["Run duration"] == duration
     context = next(r for r in rows if r["_bioetl_frame"] == "selection_context")
     assert context["context"] == "AUTO · latest run in scope"
     assert context["execution_state"] == ("UNFINISHED" if end is None else "SUCCESS")
@@ -119,3 +119,16 @@ def test_full_donor_empty_catalog_keeps_explained_context():
     rows = evaluate_donor(payload)
     context = next(r for r in rows if r["_bioetl_frame"] == "selection_context")
     assert context["context"] == "NO RUN · empty scope"
+
+
+def test_long_reason_preview_preserves_the_complete_saved_explanation():
+    payload = donor_payload(None, None)
+    explanation = "Mismatch between saved and current identity. " * 8
+    payload["presentation_domains"][0].update(reason_display=explanation)
+    rows = evaluate_donor(payload)
+    domain = next(row for row in rows if row["_bioetl_frame"] == "domains")
+    assert explanation in domain["run_reason"]
+    assert domain["reason_display"] == explanation
+    assert domain["domain_reason_brief"] == explanation[:31] + "…"
+    assert domain["run_reason_brief"] == domain["run_reason"][:19] + "…"
+    assert len(domain["run_reason_brief"]) == 20

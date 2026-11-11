@@ -575,3 +575,47 @@ def apply_visual_usability(payload: dict) -> None:
                 panel["gridPos"]["h"] += shift
             if panel["id"] != 1000:
                 panel["gridPos"]["y"] -= shift
+
+
+def apply_accessible_status_colors(payload: dict) -> None:
+    """Preserve state hues while meeting text contrast on the shipped dark theme."""
+    if payload.get("uid") not in {"bioetl-incident-v1", "bioetl-overview-v2"}:
+        return
+    for panel in walk(payload["panels"]):
+        background = panel.get("options", {}).get("colorMode") in {
+            "background",
+            "backgroundSolid",
+        }
+        palette = (
+            {
+                "gray": "#475569",
+                "#555555": "#475569",
+                "green": "#14532d",
+                "orange": "#9a3412",
+                "red": "#9f1239",
+            }
+            if background
+            else {"gray": "#9CA3AF", "#555555": "#9CA3AF"}
+        )
+
+        def adjust(value, palette: dict[str, str] = palette):
+            if isinstance(value, dict):
+                # Empty-observation builders use neutral theme text for null.
+                # Keep that fixed point rather than alternating text and gray.
+                if (
+                    value.get("type") == "special"
+                    and value.get("options", {}).get("match") == "null"
+                ):
+                    result = value["options"].get("result", {})
+                    if result.get("text") == "UNKNOWN":
+                        result["color"] = "text"
+                for key, child in value.items():
+                    if key == "color" and isinstance(child, str) and child in palette:
+                        value[key] = palette[child]
+                    else:
+                        adjust(child)
+            elif isinstance(value, list):
+                for child in value:
+                    adjust(child)
+
+        adjust(panel.get("fieldConfig", {}))
