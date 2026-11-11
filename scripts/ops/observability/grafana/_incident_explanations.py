@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 _WIDTH = "custom.width"
+_CUSTOM_HIDDEN = "custom.hidden"
 _NOT_PROVIDED = "Not provided"
+_NOT_VERIFIED = "Not verified"
+_CELL_NO_WRAP = {"type": "auto", "wrapText": False}
 
 
 def _alert_provider_rows() -> str:
@@ -73,66 +76,121 @@ def explain_incident(panels: dict[int, dict], override) -> None:
     _measurements(panels)
 
 
+def _set_field_hidden(panel: dict, field: str, *, hidden: bool, override) -> None:
+    """Replace any existing custom.hidden property for ``field``."""
+    overrides = panel.get("fieldConfig", {}).get("overrides", [])
+    field_override = next(
+        (o for o in overrides if o.get("matcher", {}).get("options") == field),
+        None,
+    )
+    if field_override is None:
+        override(panel, field, _CUSTOM_HIDDEN, hidden)
+        return
+    props = field_override.get("properties", [])
+    props[:] = [p for p in props if p.get("id") != _CUSTOM_HIDDEN]
+    props.append({"id": _CUSTOM_HIDDEN, "value": hidden})
+
+
+def _configure_confidence(panel: dict, override) -> None:
+    override(panel, "Confidence", "displayName", "Cause verification")
+    override(panel, "Confidence", _WIDTH, 155)
+    override(panel, "Confidence", "noValue", _NOT_VERIFIED)
+    override(
+        panel,
+        "Confidence",
+        "custom.cellOptions",
+        {"type": "color-text", "wrapText": False},
+    )
+    override(
+        panel,
+        "Confidence",
+        "mappings",
+        [
+            {
+                "type": "value",
+                "options": {
+                    "UNVERIFIED": {"text": _NOT_VERIFIED},
+                    "UNVERIFIED_STALE": {"text": _NOT_VERIFIED, "color": "orange"},
+                },
+            }
+        ],
+    )
+
+
+def _configure_owner_next_step(panel: dict, override) -> None:
+    for field, display in (("owner", "Owner"), ("next_step", "Next step")):
+        override(panel, field, "displayName", display)
+        override(panel, field, "noValue", "See runbook")
+        override(panel, field, "custom.cellOptions", dict(_CELL_NO_WRAP))
+        _set_field_hidden(panel, field, hidden=False, override=override)
+
+
+def _configure_ranked_action(panel: dict, override) -> None:
+    override(
+        panel,
+        "Action",
+        "links",
+        [
+            {
+                "title": "Open domain diagnostics",
+                "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}"
+                "?var-workflow=$__all&var-pipeline=${__data.fields.route_pipeline:percentencode}"
+                "&var-run_type=$__all&var-run_id=-&${__data.fields.action_scope}&from=${__from}&to=${__to}",
+                "targetBlank": False,
+                "includeVars": False,
+            }
+        ],
+    )
+    override(panel, "Signal", "links", [])
+    panel["links"] = [
+        link
+        for link in panel.get("links", [])
+        if link.get("title", "").startswith("Show all")
+    ]
+    panel["fieldConfig"]["defaults"]["links"] = []
+
+
+def _ranked_suspect_description(*, summary: bool) -> str:
+    text = (
+        "GLOBAL / TIME RANGE · All pipelines; independent of selected Pipeline, Provider and Run ID. "
+        "Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. "
+        "Recording sample time is not event time. Missing telemetry remains UNKNOWN. "
+        "Action opens the domain page named on the row. "
+        "Fleet charts for pipeline signals stay on this page."
+    )
+    if summary:
+        return (
+            text + " Summary shows up to two rows; open all rows for complete evidence."
+        )
+    return text
+
+
+def _stamp_ranked_suspect_expr(panel: dict, *, summary: bool) -> None:
+    if not summary:
+        panel["targets"][0].pop("expr", None)
+        return
+    panel["targets"][0]["expr"] = (
+        "label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,"
+        '"object","$1","object","(.*) / $"),'
+        '"route_pipeline",".*","pipeline","unknown"),'
+        '"owner","See runbook","owner","^$"),'
+        '"next_step","See runbook","next_step","^$")'
+    )
+
+
 def _explain_ranked_suspects(panels: dict[int, dict], override) -> None:
     for pid in (2010, 22010):
         panel = panels[pid]
+        summary = pid == 2010
         panel["title"] = (
-            "Inspect Ranked Suspects"
-            if pid == 2010
-            else "Inspect Global Suspects (Full)"
+            "Inspect Ranked Suspects" if summary else "Inspect Global Suspects (Full)"
         )
-        if pid == 2010:
-            panel["targets"][0]["expr"] = (
-                "label_replace(label_replace(bioetl_incident_ranked_evidence,"
-                '"object","$1","object","(.*) / $"),'
-                '"route_pipeline",".*","pipeline","unknown")'
-            )
-        else:
-            panel["targets"][0].pop("expr", None)
-        panel["description"] = (
-            "GLOBAL / TIME RANGE · All pipelines; independent of selected Pipeline, Provider and Run ID. "
-            "Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. "
-            "Recording sample time is not event time. Missing telemetry remains UNKNOWN. "
-            "Action opens the domain page named on the row. "
-            "Fleet charts for pipeline signals stay on this page."
-            + (
-                " Summary shows up to two rows; open all rows for complete evidence."
-                if pid == 2010
-                else ""
-            )
-        )
-        override(panel, "Confidence", "displayName", "Cause verification")
-        override(panel, "Confidence", _WIDTH, 155)
-        override(panel, "Confidence", "noValue", "Not verified")
-        override(
-            panel,
-            "Confidence",
-            "mappings",
-            [{"type": "value", "options": {"UNVERIFIED": {"text": "Not verified"}}}],
-        )
-        override(
-            panel,
-            "Action",
-            "links",
-            [
-                {
-                    "title": "Open domain diagnostics",
-                    "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}"
-                    "?var-workflow=$__all&var-pipeline=${__data.fields.route_pipeline:percentencode}"
-                    "&var-run_type=$__all&var-run_id=-&${__data.fields.action_scope}&from=${__from}&to=${__to}",
-                    "targetBlank": False,
-                    "includeVars": False,
-                }
-            ],
-        )
-        override(panel, "Signal", "links", [])
-        panel["links"] = [
-            link
-            for link in panel.get("links", [])
-            if link.get("title", "").startswith("Show all")
-        ]
-        panel["fieldConfig"]["defaults"]["links"] = []
-        if pid == 2010:
+        _stamp_ranked_suspect_expr(panel, summary=summary)
+        panel["description"] = _ranked_suspect_description(summary=summary)
+        _configure_confidence(panel, override)
+        _configure_owner_next_step(panel, override)
+        _configure_ranked_action(panel, override)
+        if summary:
             panel["links"] = [
                 {
                     "title": "Show all rows and total (summary: up to 2)",
@@ -184,11 +242,11 @@ def _explain_global_alerts(panels: dict[int, dict], override) -> None:
             "mappings",
             [{"type": "value", "options": {"chembl": {"text": "ChEMBL"}}}],
         )
-        override(panel, "pipeline_context", "custom.hidden", True)
+        override(panel, "pipeline_context", _CUSTOM_HIDDEN, True)
         override(panel, "pipeline", "displayName", "Pipeline")
         override(panel, "pipeline", "noValue", _NOT_PROVIDED)
         override(panel, "pipeline", "links", [])
-        override(panel, "alert_runbook", "custom.hidden", True)
+        override(panel, "alert_runbook", _CUSTOM_HIDDEN, True)
         override(
             panel,
             "alertname",
@@ -235,7 +293,7 @@ def _measurements(panels: dict[int, dict]) -> None:
             "unit": unit,
             "observation_time": _NOT_PROVIDED,
             "publication_time": _NOT_PROVIDED,
-            "freshness": "Not verified: observed/published timestamps not provided",
+            "freshness": f"{_NOT_VERIFIED}: observed/published timestamps not provided",
         }.items():
             expr = f'label_replace({expr},"{label}","{value}","","")'
         targets.append(
