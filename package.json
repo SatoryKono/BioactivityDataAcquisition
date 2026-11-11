@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@modelcontextprotocol/server-filesystem": "^2026.8.31",
     "neo4j-driver": "^6.3.0",
     "rxjs": "^7.8.2"
   },
