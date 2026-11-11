@@ -56,8 +56,11 @@ jobs:
     with:
       cache-write: true
       caller-sha: ${{ github.sha }}
+      # Conclusion ends at docker-complete. GHCR publish is main-ghcr-publish.yml.
+      publish: false
     permissions:
       contents: read
+      actions: read
       packages: write
       security-events: write
       id-token: write

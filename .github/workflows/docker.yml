@@ -16,24 +16,37 @@ on:
         type: string
         required: false
         default: ""
+      publish:
+        description: "Request GHCR publish when caller-sha is still main HEAD"
+        type: boolean
+        required: false
+        default: false
+      artifact-run-id:
+        description: "Run id that uploaded the scanned image; empty uses this run"
+        type: string
+        required: false
+        default: ""
     outputs:
       image-digest:
         description: "Published GHCR image digest"
         value: ${{ jobs.docker-push.outputs.digest }}
-  # Direct push is off. main-integrity.yml is the only main invocation and
-  # runs this workflow after integrity. Pull requests use pr-required.yml
-  # docker-lane. Manual runs validate the lane only; publishing stays behind
-  # main plus workflow_call and the ghcr-publish environment.
+  # Direct push is off. main-integrity.yml calls this workflow with
+  # publish false, so its conclusion ends at docker-complete.
+  # main-ghcr-publish.yml calls it after a successful main push with
+  # publish true and the integrity run id. Pull requests use pr-required.yml
+  # docker-lane. Manual runs validate the lane only.
   workflow_dispatch:
 concurrency:
-  # A direct main push is not a trigger. workflow_call from main-integrity
-  # stays ref-scoped with the caller. The push clause remains so a protected
-  # publish approval cannot cancel a newer main SHA if push is restored.
-  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.run_id || github.ref }}
-  cancel-in-progress: "${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}"
+  # Publish-only workflow_run calls must not cancel another integrity
+  # run's publication before the current-HEAD gate can reject a stale SHA.
+  # Keep main pushes isolated too if that direct trigger is restored.
+  group: ${{ github.workflow }}-${{ (github.event_name == 'workflow_run' || (github.event_name == 'push' && github.ref == 'refs/heads/main')) && github.run_id || github.ref }}
+  cancel-in-progress: "${{ github.event_name != 'workflow_run' && (github.event_name != 'push' || github.ref != 'refs/heads/main') }}"
 
 jobs:
   docker-runtime-contracts:
+    # Publish-only calls reuse the scanned artifact and must not rebuild.
+    if: inputs.artifact-run-id == ''
     # Static + repo-backed unit contracts for optional Docker lane (RF-008).
     # Host-disruptive recovery/fault-injection/soak remain opt-in/manual.
     runs-on: ubuntu-latest
@@ -66,6 +79,7 @@ jobs:
             tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py
 
   docker-lint:
+    if: inputs.artifact-run-id == ''
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -89,6 +103,7 @@ jobs:
           config: .hadolint.yaml
 
   docker-compose-validate:
+    if: inputs.artifact-run-id == ''
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -115,6 +130,7 @@ jobs:
         run: docker compose -f docker-compose.monitoring.yml config > /dev/null
 
   docker-build:
+    if: inputs.artifact-run-id == ''
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -406,7 +422,7 @@ jobs:
       - docker-lint
       - docker-compose-validate
       - docker-build
-    if: always()
+    if: always() && inputs.artifact-run-id == ''
     permissions:
       contents: read
     steps:
@@ -432,15 +448,43 @@ jobs:
           done
           test "${failures}" -eq 0
 
+  docker-publish-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: inputs.publish == true && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_call' || github.event_name == 'workflow_run')
+    permissions:
+      contents: read
+    outputs:
+      current: ${{ steps.head.outputs.current }}
+    steps:
+      - name: Compare caller SHA to main HEAD
+        id: head
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          SOURCE_SHA: ${{ inputs.caller-sha || github.sha }}
+        run: |
+          set -euo pipefail
+          current_sha="$(gh api "/repos/${REPOSITORY}/branches/main" --jq '.commit.sha')"
+          echo "source_sha=${SOURCE_SHA}"
+          echo "current_main_sha=${current_sha}"
+          if [ "${current_sha}" != "${SOURCE_SHA}" ]; then
+            echo "::notice::Not requesting ghcr-publish: ${SOURCE_SHA} is no longer main HEAD (${current_sha})."
+            echo "current=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "current=true" >> "$GITHUB_OUTPUT"
+
   docker-push:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs:
       - docker-build
       - docker-complete
+      - docker-publish-gate
     outputs:
       digest: ${{ steps.publish.outputs.digest }}
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_call')
+    if: always() && inputs.publish == true && needs.docker-publish-gate.result == 'success' && needs.docker-publish-gate.outputs.current == 'true' && (inputs.artifact-run-id != '' || needs.docker-complete.result == 'success')
     environment: ghcr-publish
     env:
       TESTED_SHA: ${{ inputs.caller-sha || github.sha }}
@@ -449,6 +493,7 @@ jobs:
       cancel-in-progress: false
     permissions:
       contents: read
+      actions: read
       packages: write
       id-token: write
       attestations: write
@@ -472,12 +517,21 @@ jobs:
           fi
           echo "stale=false" >> "$GITHUB_OUTPUT"
 
-      - name: Download exact scanned image
-        if: steps.head-guard.outputs.stale != 'true'
+      - name: Download exact scanned image from this run
+        if: steps.head-guard.outputs.stale != 'true' && inputs.artifact-run-id == ''
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: bioetl-scanned-image-${{ inputs.caller-sha || github.sha }}
           path: scanned-image
+
+      - name: Download exact scanned image from the integrity run
+        if: steps.head-guard.outputs.stale != 'true' && inputs.artifact-run-id != ''
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: bioetl-scanned-image-${{ inputs.caller-sha || github.sha }}
+          path: scanned-image
+          run-id: ${{ inputs.artifact-run-id }}
+          github-token: ${{ github.token }}
 
       - name: Load exact scanned image
         if: steps.head-guard.outputs.stale != 'true'
