@@ -43,12 +43,20 @@ def test_reserved_characters_are_replaced_in_every_part() -> None:
 def test_rerun_new_file(tmp_path: Path) -> None:
     source = _copy_example(tmp_path)
     first = run_batch(
-        source, snapshot_id="snap", rules_version="plan-v1-r8", run_id="run-1"
+        source,
+        root=tmp_path,
+        snapshot_id="snap",
+        rules_version="plan-v1-r8",
+        run_id="run-1",
     )
     written = tmp_path / first.normalized_name
     before = written.read_bytes()
     second = run_batch(
-        source, snapshot_id="snap", rules_version="plan-v1-r8", run_id="run-2"
+        source,
+        root=tmp_path,
+        snapshot_id="snap",
+        rules_version="plan-v1-r8",
+        run_id="run-2",
     )
     assert first.written is True
     assert second.written is True
@@ -61,12 +69,20 @@ def test_rerun_new_file(tmp_path: Path) -> None:
 def test_name_collision_blocked(tmp_path: Path) -> None:
     source = _copy_example(tmp_path)
     first = run_batch(
-        source, snapshot_id="snap", rules_version="plan-v1-r8", run_id="run-1"
+        source,
+        root=tmp_path,
+        snapshot_id="snap",
+        rules_version="plan-v1-r8",
+        run_id="run-1",
     )
     written = tmp_path / first.normalized_name
     before = written.read_bytes()
     second = run_batch(
-        source, snapshot_id="snap", rules_version="plan-v1-r8", run_id="run-1"
+        source,
+        root=tmp_path,
+        snapshot_id="snap",
+        rules_version="plan-v1-r8",
+        run_id="run-1",
     )
     assert second.written is False
     assert second.diagnostic == "name_collision"
@@ -92,6 +108,8 @@ def test_batch_cli_writes_beside_the_example(tmp_path: Path) -> None:
     source = _copy_example(tmp_path, "in:put.csv")
     code = main(
         [
+            "--root",
+            str(tmp_path),
             "--source",
             str(source),
             "--snapshot",
@@ -110,3 +128,19 @@ def test_batch_cli_writes_beside_the_example(tmp_path: Path) -> None:
     assert document["mapping_version"] is None
     assert document["biological_accuracy_accepted"] is False
     assert document["rules_version"] == "plan-v1-r8"
+
+
+def test_path_outside_root_is_rejected(tmp_path: Path) -> None:
+    root = tmp_path / "root"
+    root.mkdir()
+    outside = tmp_path / "outside.csv"
+    outside.write_bytes(_EXAMPLE.read_bytes())
+    with pytest.raises(ValueError, match="path escapes root"):
+        run_batch(
+            outside,
+            root=root,
+            snapshot_id="snap",
+            rules_version="plan-v1-r8",
+            run_id="run-1",
+        )
+    assert list(root.iterdir()) == []

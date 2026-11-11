@@ -87,11 +87,13 @@ def contract_document() -> dict[str, object]:
 def run_batch(
     source: Path,
     *,
+    root: Path,
     snapshot_id: str,
     rules_version: str,
     run_id: str,
 ) -> DeliveryResult:
-    """Read one CSV and write the result in the same directory."""
+    """Read one CSV inside ``root`` and write the result beside that file."""
+    source = _path_inside_root(source, root)
     raw_name, safe_name = result_names(
         source.name,
         snapshot_id=snapshot_id,
@@ -104,7 +106,7 @@ def run_batch(
         return DeliveryResult(
             raw_name, safe_name, str(directory), False, "name_collision", None
         )
-    rows = _read_rows(source)
+    rows = _read_rows(source, root=root)
     payload = _csv_bytes(tuple(output_row(row) for row in rows))
     atomic_write_bytes(destination, payload, root=directory)
     manifest_name = f"{destination.stem}.manifest.json"
@@ -128,6 +130,7 @@ def run_batch(
 def main(argv: Sequence[str] | None = None) -> int:
     """CLI wrapper. It uses the same writer as ``run_batch``."""
     parser = argparse.ArgumentParser(prog="iuphar-target-class")
+    parser.add_argument("--root", required=True, type=Path)
     parser.add_argument("--source", required=True, type=Path)
     parser.add_argument("--snapshot", required=True)
     parser.add_argument("--rules", required=True)
@@ -135,6 +138,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(list(argv) if argv is not None else None)
     result = run_batch(
         args.source,
+        root=args.root,
         snapshot_id=args.snapshot,
         rules_version=args.rules,
         run_id=args.run_id,
@@ -150,9 +154,25 @@ if __name__ == "__main__":
     raise SystemExit(main())
 
 
-def _read_rows(source: Path) -> tuple[dict[str, str], ...]:
-    with source.open(encoding="utf-8", newline="") as handle:
+def _read_rows(source: Path, *, root: Path) -> tuple[dict[str, str], ...]:
+    """Read a CSV only after its resolved path stays inside ``root``."""
+    resolved = _path_inside_root(source, root)
+    with resolved.open(encoding="utf-8", newline="") as handle:
         return tuple(dict(row) for row in csv.DictReader(handle))
+
+
+def _path_inside_root(path: Path, root: Path) -> Path:
+    """Resolve ``path`` and reject it when it leaves ``root``.
+
+    The check matches stage-0 publication: ``resolve`` then
+    ``is_relative_to``, before any byte is read.
+    """
+    root_resolved = root.resolve()
+    resolved = path.resolve()
+    if not resolved.is_relative_to(root_resolved):
+        message = "path escapes root"
+        raise ValueError(message)
+    return resolved
 
 
 def _csv_bytes(rows: tuple[Mapping[str, str], ...]) -> bytes:
