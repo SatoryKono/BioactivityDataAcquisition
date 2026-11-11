@@ -167,6 +167,11 @@ RUNTIME_ACCEPTANCE_12553_TEST = (
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "docs/00-project/NORMATIVE_SOURCES.md": (
+        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+        "tests/architecture/test_ai_runtime_governance_links.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     ".github/workflows/runtime-acceptance-12553.yml": (
         "tests/architecture/test_github_actions_runtime_policy.py",
         "tests/architecture/test_gha_disabled_map_10263.py",
@@ -1272,6 +1277,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "docs/reports/dashboard-ux-checks/": (
+        "tests/integration/test_dashboard_ux_report_freshness.py",
+        "tests/integration/test_dashboard_operator_readability.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "reports/audit-runs/12553-runtime-acceptance/": (
         RUNTIME_ACCEPTANCE_12553_TEST,
         "tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_glob_walk.py",

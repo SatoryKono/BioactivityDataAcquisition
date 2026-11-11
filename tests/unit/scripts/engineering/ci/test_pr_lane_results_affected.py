@@ -53,6 +53,38 @@ def test_unmapped_path_still_has_no_pytest_target(
     assert "tests gate has no affected pytest target" in capsys.readouterr().err
 
 
+def test_normative_index_selects_precedence_guards_and_rejects_unknown_peer() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["docs/00-project/NORMATIVE_SOURCES.md"], repo_root=repo_root
+    )
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == {
+        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+        "tests/architecture/test_ai_runtime_governance_links.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+    }
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(["docs/00-project/UNKNOWN.md"], repo_root=repo_root)
+
+
+def test_dashboard_ux_report_family_keeps_bounded_freshness_guards() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["docs/reports/dashboard-ux-checks/2099-01-01.md"], repo_root=repo_root
+    )
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == {
+        "tests/integration/test_dashboard_ux_report_freshness.py",
+        "tests/integration/test_dashboard_operator_readability.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+    }
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            ["docs/reports/UNKNOWN/2099-01-01.md"], repo_root=repo_root
+        )
+
+
 def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
     """Select source-layer tests and existing test paths, excluding missing paths."""
     unit_domain = tmp_path / "tests" / "unit" / "domain"
