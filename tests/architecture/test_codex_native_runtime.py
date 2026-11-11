@@ -399,6 +399,12 @@ def test_skill_allowlists_reject_unresolved_routes(
     assert "missing-skill" in findings[0].message
     agent.write_text("Allowed skills: valid. Allowed MCP: ast-grep.", encoding="utf-8")
     assert native_runtime_contract.validate_skill_routes(tmp_path) == []
+    agent.write_text(
+        "Allowed skills: valid/valid. Allowed MCP: ast-grep.", encoding="utf-8"
+    )
+    assert (
+        native_runtime_contract.validate_skill_routes(tmp_path)[0].code == "skill.route"
+    )
 
 
 def test_project_agent_skill_allowlists_resolve() -> None:

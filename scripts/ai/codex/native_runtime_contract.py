@@ -442,12 +442,16 @@ def validate_skill_routes(repo_root: Path = REPO_ROOT) -> list[Finding]:
             )
             if match is None:
                 continue
-            names = re.findall(
-                r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*",
-                match.group(1).replace("opt-in", "").replace(" and ", " "),
-            )
-            for name in names:
-                if not (repo_root / runtime / "skills" / name / "SKILL.md").is_file():
+            entries = re.split(r"[,;]|\band\b", match.group(1))
+            for entry in entries:
+                name = entry.strip().removesuffix("opt-in").strip().strip("`.")
+                valid_name = re.fullmatch(r"[a-z][a-z0-9_-]*", name)
+                if (
+                    not valid_name
+                    or not (
+                        repo_root / runtime / "skills" / name / "SKILL.md"
+                    ).is_file()
+                ):
                     findings.append(
                         Finding(
                             "skill.route",
