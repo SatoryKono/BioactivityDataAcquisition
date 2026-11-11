@@ -399,9 +399,9 @@
     },
     "scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh": {
       "decision": "shared_helper_module",
-      "next_step": "Sourced Windows interoperability function library for MCP wrapper entrypoints; has no standalone invocation contract.",
+      "next_step": "Shared sourced Windows interop function for filesystem/fetch MCP launchers; no standalone command. Keep supporting behind the public wrappers.",
       "owner": "@bioetl-platform",
-      "review_by": "2027-02-11"
+      "review_by": "2027-02-09"
     },
     "scripts/ai/mcp/support/github_project_transport.mjs": {
       "decision": "shared_helper_module",
@@ -429,9 +429,9 @@
     },
     "scripts/ai/mcp/support/run_owned_stdio.ps1": {
       "decision": "shared_helper_module",
-      "next_step": "Dot-sourced functions consumed by owned MCP PowerShell entrypoints; retain shared helper classification without changing execution permissions.",
+      "next_step": "Shared dot-sourced descriptor validation and stdio forwarding functions for filesystem/fetch MCP launchers; no standalone command. Keep supporting behind the public wrappers.",
       "owner": "@bioetl-platform",
-      "review_by": "2027-02-11"
+      "review_by": "2027-02-09"
     },
     "scripts/ai/mcp/support/uv_resolver.ps1": {
       "decision": "shared_helper_module",
@@ -860,10 +860,10 @@
       "review_by": "2026-12-01"
     },
     "scripts/engineering/ci/pr_lane_results.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Keep as the internal result-mapping implementation behind the canonical scripts.engineering.ci pr-lane-results command; do not expose a second workflow CLI surface.",
+      "review_by": "2026-12-31",
       "owner": "@bioetl-platform",
-      "review_by": "2026-12-31"
+      "decision": "shared_helper_module",
+      "next_step": "Keep as the internal result-mapping implementation behind the canonical scripts.engineering.ci pr-lane-results command; do not expose a second workflow CLI surface."
     },
     "scripts/engineering/ci/presubmit_gate.py": {
       "decision": "shared_helper_module",
@@ -1035,21 +1035,21 @@
     },
     "scripts/engineering/diagnostics/legacy/coderabbit_20260925/build_relevance_report.py": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this finalizes the dated CodeRabbit evidence into Markdown and JSON. Keep historical/manual; no Make or workflow callers found.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-12-07"
+      "review_by": "2026-12-07",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this finalizes the dated CodeRabbit evidence into Markdown and JSON. Keep historical/manual; no Make or workflow callers found."
     },
     "scripts/engineering/diagnostics/legacy/coderabbit_20260925/normalize_findings.py": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this parses the dated audit leaves and writes normalized findings and leaf status. Keep historical/manual; no Make or workflow callers found.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-12-07"
+      "review_by": "2026-12-07",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this parses the dated audit leaves and writes normalized findings and leaf status. Keep historical/manual; no Make or workflow callers found."
     },
     "scripts/engineering/diagnostics/legacy/coderabbit_20260925/triage_findings.py": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this triages the dated finding set against source snippets and writes the campaign JSON. Keep historical/manual; no Make or workflow callers found.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-12-07"
+      "review_by": "2026-12-07",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this triages the dated finding set against source snippets and writes the campaign JSON. Keep historical/manual; no Make or workflow callers found."
     },
     "scripts/engineering/finances/github_billing_pipeline.py": {
       "decision": "shared_helper_module",
@@ -1071,39 +1071,39 @@
     },
     "scripts/engineering/performance/capture_delta_merge.py": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain as a manual evidence-capture helper for sequential Delta merges from an isolated clean source checkout; preserve raw timing output and source identity alongside each result.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
+      "review_by": "2026-11-30",
+      "next_step": "Retain as a manual evidence-capture helper for sequential Delta merges from an isolated clean source checkout; preserve raw timing output and source identity alongside each result."
     },
     "scripts/engineering/performance/check_hash.py": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain as a manual hash-equivalence helper for the eager versus lazy Silver read measurements; do not promote it to a product entrypoint.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
+      "review_by": "2026-11-30",
+      "next_step": "Retain as a manual hash-equivalence helper for the eager versus lazy Silver read measurements; do not promote it to a product entrypoint."
     },
     "scripts/engineering/performance/generate_report.py": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain as a manual report builder for the eager versus lazy Silver read measurements; do not promote it to a product entrypoint.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
+      "review_by": "2026-11-30",
+      "next_step": "Retain as a manual report builder for the eager versus lazy Silver read measurements; do not promote it to a product entrypoint."
     },
     "scripts/engineering/performance/measure_merge_eager.py": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain as a manual eager-versus-lazy Silver read probe; keep it supporting so the active script cap stays flat.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
+      "review_by": "2026-11-30",
+      "next_step": "Retain as a manual eager-versus-lazy Silver read probe; keep it supporting so the active script cap stays flat."
     },
     "scripts/engineering/performance/measure_merger_input.py": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain as a bounded Linux operator probe of the eager Silver input path. Keep it supporting so the active script cap stays flat; do not promote it to a product entrypoint.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
+      "review_by": "2026-11-30",
+      "next_step": "Retain as a bounded Linux operator probe of the eager Silver input path. Keep it supporting so the active script cap stays flat; do not promote it to a product entrypoint."
     },
     "scripts/engineering/performance/run_measurements.sh": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain as the manual driver for eager versus lazy Silver read measurements; do not promote it to a product entrypoint.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the manual driver for eager versus lazy Silver read measurements; do not promote it to a product entrypoint."
     },
     "scripts/engineering/qa/_gen_cyclic_workflows.py": {
       "decision": "legacy_manual_utility",
@@ -1113,9 +1113,9 @@
     },
     "scripts/engineering/qa/_refresh_issue5376_live_metrics.py": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this writes the issue-specific closeout JSON from the coverage inventory. Keep historical/manual; no Make, workflow or QA router callers found.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-12-07"
+      "review_by": "2026-12-07",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point. 2026-11-07 review: this writes the issue-specific closeout JSON from the coverage inventory. Keep historical/manual; no Make, workflow or QA router callers found."
     },
     "scripts/engineering/qa/_tracked_glob.py": {
       "decision": "shared_helper_module",
@@ -1485,9 +1485,9 @@
     },
     "scripts/engineering/qa/requalify_external_resource_inventory.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the source-review implementation behind python -m scripts.engineering.qa requalify-external-resource-inventory; owning tests exercise the dispatcher. Preserve the original catalog checker and NOT_RUN runtime claims. Direct module invocation remains compatible, not a separate public script surface.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the source-review implementation behind python -m scripts.engineering.qa requalify-external-resource-inventory; owning tests exercise the dispatcher. Preserve the original catalog checker and NOT_RUN runtime claims. Direct module invocation remains compatible, not a separate public script surface."
     },
     "scripts/engineering/qa/run_architecture_audit_read_only.py": {
       "decision": "shared_helper_module",
@@ -1905,15 +1905,15 @@
     },
     "scripts/ops/observability/grafana/_run_explorer_columns.py": {
       "decision": "shared_helper_module",
-      "next_step": "Standalone main/--check CLI retired in #11854 after reference audit found only two imports from render_nav_bus and no invocation. Retain the actual column/title transformations as an internal helper of the canonical render_nav_bus entrypoint; do not restore a standalone CLI.",
       "owner": "@bioetl-observability",
-      "review_by": "2026-11-30"
+      "review_by": "2026-11-30",
+      "next_step": "Standalone main/--check CLI retired in #11854 after reference audit found only two imports from render_nav_bus and no invocation. Retain the actual column/title transformations as an internal helper of the canonical render_nav_bus entrypoint; do not restore a standalone CLI."
     },
     "scripts/ops/observability/grafana/_run_selection_context.py": {
       "decision": "shared_helper_module",
-      "next_step": "Imported run-selection projection helper consumed by Grafana generation and rendering entrypoints; not a standalone command.",
+      "next_step": "Internal run-selection provenance transform imported by render_nav_bus and phase25; no standalone CLI. Keep supporting behind the dashboard generators.",
       "owner": "@bioetl-platform",
-      "review_by": "2027-02-11"
+      "review_by": "2027-02-09"
     },
     "scripts/ops/observability/grafana/_selected_run_panels.py": {
       "decision": "shared_helper_module",
@@ -1941,9 +1941,9 @@
     },
     "scripts/ops/observability/grafana/_workflow_freshness.py": {
       "decision": "shared_helper_module",
-      "next_step": "Imported workflow-freshness projection helper used by _workflow_scope.py; not a standalone command.",
+      "next_step": "Internal workflow publication-age projection imported by _workflow_scope; no standalone CLI. Keep supporting behind the dashboard generators.",
       "owner": "@bioetl-platform",
-      "review_by": "2027-02-11"
+      "review_by": "2027-02-09"
     },
     "scripts/ops/observability/grafana/_workflow_scope.py": {
       "decision": "shared_helper_module",
@@ -1965,27 +1965,27 @@
     },
     "scripts/ops/observability/grafana/apply_phase25_srs_prr_budget.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain the dashboard transform helpers imported by render_nav_bus and lint_dashboard_phase2; route the legacy apply command through python -m scripts.ops apply-grafana-phase25-srs-prr-budget. Direct module invocation remains compatible.",
       "owner": "@bioetl-platform",
-      "review_by": "2027-01-31"
+      "review_by": "2027-01-31",
+      "next_step": "Retain the dashboard transform helpers imported by render_nav_bus and lint_dashboard_phase2; route the legacy apply command through python -m scripts.ops apply-grafana-phase25-srs-prr-budget. Direct module invocation remains compatible."
     },
     "scripts/ops/observability/grafana/apply_phase2_remainder.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain the dashboard transform helpers imported by render_nav_bus; route the legacy apply command through python -m scripts.ops apply-grafana-phase2-remainder. Direct module invocation remains compatible.",
       "owner": "@bioetl-platform",
-      "review_by": "2027-01-31"
+      "review_by": "2027-01-31",
+      "next_step": "Retain the dashboard transform helpers imported by render_nav_bus; route the legacy apply command through python -m scripts.ops apply-grafana-phase2-remainder. Direct module invocation remains compatible."
     },
     "scripts/ops/observability/grafana/apply_phase4_dead_vars.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain the tested Phase 4.1 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-dead-vars; keep direct module invocation as a compatibility surface.",
       "owner": "@bioetl-platform",
-      "review_by": "2027-01-31"
+      "review_by": "2027-01-31",
+      "next_step": "Retain the tested Phase 4.1 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-dead-vars; keep direct module invocation as a compatibility surface."
     },
     "scripts/ops/observability/grafana/apply_phase4_reflow.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain the tested Phase 4.2–4.3 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-reflow; keep direct module invocation as a compatibility surface.",
       "owner": "@bioetl-platform",
-      "review_by": "2027-01-31"
+      "review_by": "2027-01-31",
+      "next_step": "Retain the tested Phase 4.2\u20134.3 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-reflow; keep direct module invocation as a compatibility surface."
     },
     "scripts/ops/observability/grafana/capture_acceptance.py": {
       "decision": "shared_helper_module",
@@ -2049,9 +2049,9 @@
     },
     "scripts/ops/observability/grafana/lint_dashboard_phase2.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain the Phase 2 linter implementation behind python -m scripts.ops lint-grafana-phase2; its repo-backed tests and canonical dispatcher exercise the supported command.",
       "owner": "@bioetl-platform",
-      "review_by": "2027-01-31"
+      "review_by": "2027-01-31",
+      "next_step": "Retain the Phase 2 linter implementation behind python -m scripts.ops lint-grafana-phase2; its repo-backed tests and canonical dispatcher exercise the supported command."
     },
     "scripts/ops/observability/grafana/qa_context.py": {
       "decision": "shared_helper_module",
@@ -2079,9 +2079,9 @@
     },
     "scripts/ops/observability/grafana/refresh_router_delivery.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the release verification/writer backend behind python -m scripts.ops refresh-router-delivery; owning tests exercise read-only check and atomic update through this dispatcher. Preserve full rootfs/config/layer parity and immutable registry identity. Direct module invocation remains compatible.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the release verification/writer backend behind python -m scripts.ops refresh-router-delivery; owning tests exercise read-only check and atomic update through this dispatcher. Preserve full rootfs/config/layer parity and immutable registry identity. Direct module invocation remains compatible."
     },
     "scripts/ops/observability/grafana/regression_acceptance.py": {
       "decision": "shared_helper_module",
@@ -2103,15 +2103,15 @@
     },
     "scripts/ops/observability/grafana/router_managed_image.py": {
       "decision": "shared_helper_module",
-      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks. 2026-11-07 review: retain behind the scripts.ops router. The host verification workflow imports it and the managed-image tests cover immutable image and complete rootfs comparisons.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-12-07"
+      "review_by": "2026-12-07",
+      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks. 2026-11-07 review: retain behind the scripts.ops router. The host verification workflow imports it and the managed-image tests cover immutable image and complete rootfs comparisons."
     },
     "scripts/ops/observability/grafana/router_rootfs.py": {
       "decision": "shared_helper_module",
-      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks. 2026-11-07 review: retain behind the scripts.ops router. The Router bridge workflow runs the rootfs tests, which cover trusted extraction and filesystem comparisons.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-12-07"
+      "review_by": "2026-12-07",
+      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks. 2026-11-07 review: retain behind the scripts.ops router. The Router bridge workflow runs the rootfs tests, which cover trusted extraction and filesystem comparisons."
     },
     "scripts/ops/observability/grafana/run_grafana_render_matrix.py": {
       "decision": "shared_helper_module",
@@ -2151,9 +2151,9 @@
     },
     "scripts/ops/observability/grafana/trusted_docker.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the shared Docker identity library imported by both rootfs and managed-image verifiers; it has no standalone command. Preserve fixed protected Linux paths and the registered signed Windows installation check.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the shared Docker identity library imported by both rootfs and managed-image verifiers; it has no standalone command. Preserve fixed protected Linux paths and the registered signed Windows installation check."
     },
     "scripts/ops/observability/promote_router_host_release.py": {
       "decision": "shared_helper_module",
@@ -2175,9 +2175,9 @@
     },
     "scripts/ops/observability/seed_dc6_pipeline_run_report.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain the local-only DC-6 fixture writer behind python -m scripts.ops seed-dc6-pipeline-run-report; keep acceptance data out of committed run reports.",
       "owner": "@bioetl-platform",
-      "review_by": "2027-01-31"
+      "review_by": "2027-01-31",
+      "next_step": "Retain the local-only DC-6 fixture writer behind python -m scripts.ops seed-dc6-pipeline-run-report; keep acceptance data out of committed run reports."
     },
     "scripts/ops/observability/trust_validation_fixture_materialization.py": {
       "decision": "shared_helper_module",
