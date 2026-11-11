@@ -247,6 +247,38 @@ def test_module_cli_runs_in_a_separate_process(tmp_path: Path) -> None:
     assert (tmp_path / result.stdout.strip()).is_file()
 
 
+def test_manifest_failure_rolls_back_csv_and_allows_retry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from iuphar_target_class import delivery
+
+    source = _copy_example(tmp_path)
+    create = delivery._create_new
+
+    def fail_manifest(path: Path, payload: bytes, *, root: Path) -> bool:
+        if path.name.endswith(".manifest.json"):
+            raise OSError("disk full")
+        return create(path, payload, root=root)
+
+    with monkeypatch.context() as context:
+        context.setattr(delivery, "_create_new", fail_manifest)
+        with pytest.raises(OSError, match="disk full"):
+            run_batch(
+                source,
+                root=tmp_path,
+                snapshot_id="snap",
+                rules_version="v1",
+                run_id="retry",
+            )
+    assert set(tmp_path.iterdir()) == {source}
+    result = run_batch(
+        source, root=tmp_path, snapshot_id="snap", rules_version="v1", run_id="retry"
+    )
+    assert result.written
+    assert result.manifest_name is not None
+    assert (tmp_path / result.manifest_name).is_file()
+
+
 def test_csv_output_preserves_special_characters(tmp_path: Path) -> None:
     source = tmp_path / "quoted.csv"
     legacy = 'A, B "quoted"\nnext line'

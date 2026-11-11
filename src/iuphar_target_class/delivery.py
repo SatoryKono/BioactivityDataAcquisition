@@ -128,7 +128,12 @@ def run_batch(
         return DeliveryResult(
             raw_name, safe_name, str(directory), False, "name_collision", None
         )
-    if not _create_new(manifest_path, manifest, root=root):
+    try:
+        manifest_created = _create_new(manifest_path, manifest, root=root)
+    except OSError:
+        _path_inside_root(destination, root).unlink(missing_ok=True)
+        raise
+    if not manifest_created:
         _path_inside_root(destination, root).unlink(missing_ok=True)
         return DeliveryResult(
             raw_name, safe_name, str(directory), False, "name_collision", None
