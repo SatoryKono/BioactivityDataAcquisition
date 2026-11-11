@@ -9,8 +9,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: main-${{ github.ref }}
-  cancel-in-progress: true
+  # CI-MAP-8 / #12583: tip must reach terminal. A shared ref-wide group discards
+  # the queued tip when a newer push arrives even with cancel-in-progress: false
+  # (docs/00-project/governance/05-github-policy.md). Scope by SHA on every run;
+  # keep cancel-in-progress disabled for main so an in-flight tip is not aborted.
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   integrity:
