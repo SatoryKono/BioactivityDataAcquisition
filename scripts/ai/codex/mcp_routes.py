@@ -72,7 +72,7 @@ _SAFE_WORDS = frozenset(
         "code-analyzer",
     }
 )
-_VARIABLE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\Z")
+_VARIABLE = re.compile(r"[A-Za-z_]\w*\Z", re.ASCII)
 _PROFILE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,95}\Z")
 _SECRET_FLAG = re.compile(r"token|password|secret|api[-_]?key|authorization", re.I)
 _BINARY_NAMES = frozenset(

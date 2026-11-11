@@ -140,20 +140,27 @@ class NativeConfigClient:
                 raise NativeConfigError(
                     "native config process closed before responding"
                 )
-            if "method" in value and "id" in value:
-                raise NativeConfigError(
-                    "interactive native request refused; no approval supplied"
-                )
-            if value.get("id") == identifier:
-                if "error" in value:
-                    raise NativeConfigError("native config request was rejected")
-                result = value.get("result")
-                if not isinstance(result, dict):
-                    raise NativeConfigError("native config result is not an object")
+            result = self._result_for(value, identifier)
+            if result is not None:
                 return result
         raise NativeConfigError(
             "native config observation timeout; no restart or replay"
         )
+
+    @staticmethod
+    def _result_for(value: dict[str, Any], identifier: int) -> dict[str, Any] | None:
+        if "method" in value and "id" in value:
+            raise NativeConfigError(
+                "interactive native request refused; no approval supplied"
+            )
+        if value.get("id") != identifier:
+            return None
+        if "error" in value:
+            raise NativeConfigError("native config request was rejected")
+        result = value.get("result")
+        if not isinstance(result, dict):
+            raise NativeConfigError("native config result is not an object")
+        return result
 
     def read(self) -> ConfigCapture:
         """Read effective config and origins with the same native resolver as Codex."""
