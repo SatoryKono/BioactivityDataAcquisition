@@ -1125,3 +1125,35 @@ def test_shadow_compare_cli_writes_canonical_json(tmp_path: Path) -> None:
         "selected_count",
     ]
     assert not output.with_suffix(".json.tmp").exists()
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        ".codex/agents/py-test-bot.toml",
+        ".junie/agents/py-test-bot.md",
+        ".devin/agents/py-test-bot/AGENT.md",
+        "docs/00-project/ai/agents/agents/py-test-bot.md",
+    ],
+)
+def test_shadow_compare_routes_runtime_profiles_to_governing_tests(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert "tests/architecture/test_codex_native_runtime.py" in report["selected"]
+    assert "tests/architecture/test_runtime_agent_docs_drift.py" in report["selected"]
+    assert not report["covers_full_suite"]
+
+
+def test_shadow_compare_routes_normative_index_without_accepting_other_docs() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["docs/00-project/NORMATIVE_SOURCES.md"], repo_root=root
+    )
+    assert (
+        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py"
+        in report["selected"]
+    )
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            ["docs/00-project/unmapped-runtime-note.md"], repo_root=root
+        )

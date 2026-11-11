@@ -167,6 +167,10 @@ RUNTIME_ACCEPTANCE_12553_TEST = (
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "docs/00-project/NORMATIVE_SOURCES.md": (
+        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     ".github/workflows/runtime-acceptance-12553.yml": (
         "tests/architecture/test_github_actions_runtime_policy.py",
         "tests/architecture/test_gha_disabled_map_10263.py",
@@ -1272,6 +1276,24 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    **dict.fromkeys(
+        (
+            ".codex/agents/",
+            ".junie/agents/",
+            ".devin/agents/",
+            "docs/00-project/ai/agents/agents/",
+        ),
+        (
+            "tests/architecture/test_codex_native_runtime.py",
+            "tests/architecture/test_codex_agent_catalog_inventory.py",
+            "tests/architecture/test_runtime_agent_docs_drift.py",
+            "tests/architecture/test_runtime_orchestration_surfaces.py",
+            "tests/architecture/test_ai_runtime_governance_links.py",
+            "tests/architecture/test_junie_runtime_ci_contract.py",
+            "tests/architecture/test_devin_runtime_no_dead_script_refs.py",
+            "tests/architecture/test_devin_setup_guide_codex_models.py",
+        ),
+    ),
     "reports/audit-runs/12553-runtime-acceptance/": (
         RUNTIME_ACCEPTANCE_12553_TEST,
         "tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_glob_walk.py",
