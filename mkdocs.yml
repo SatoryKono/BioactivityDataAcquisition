@@ -566,6 +566,7 @@ nav:
           - "CLAUDE": 00-project/ai/agents/guides/CLAUDE.md
           - "CODEX": 00-project/ai/agents/guides/CODEX.md
           - "Codex Task Routing and Validation": 00-project/ai/agents/guides/CODEX_TASK_ROUTING.md
+          - "AI Rule Loading Evidence": 05-operations/runbooks/ai-rules-loading.md
           - "GEMINI": 00-project/ai/agents/guides/GEMINI.md
           - "Test Lane Mental Model": 00-project/ai/agents/guides/TEST_LANE_MENTAL_MODEL.md
           - "Basedpyright Project Diagnostics": 00-project/ai/agents/guides/BASEDPRIGHT_PROJECT_DIAGNOSTICS.md

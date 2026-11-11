@@ -1,8 +1,10 @@
 # BioETL AI Runtime Entry Point — JetBrains Junie
 
-This file is the JetBrains Junie root operating contract for the BioETL
-repository. It is the Junie-native equivalent of `AGENTS.md` and MUST stay in
-lock-step with it. `.junie/**` and `.codex/**` are **equal-peer** tracked AI
+This file is the governed JetBrains Junie root contract mirror for BioETL and
+MUST stay in lock-step with `AGENTS.md`. It is also a legacy native discovery
+candidate; do not assume both files enter a session. Current vendor discovery
+prefers `.junie/AGENTS.md`, then root `AGENTS.md`, then legacy guidelines.
+The installed Junie version and effective IDE/CLI setting need qualification. `.junie/**` and `.codex/**` are **equal-peer** tracked AI
 runtime trees. Behavior edits belong in both trees. Automatic sync writes
 only `.codex` → `.junie` (`never_write_to_codex`).
 
@@ -58,6 +60,20 @@ while their root trigger and resolvable entrypoint remain intact.
 does not diverge from it; any change to Canonical Precedence, Required AI
 Context, Environment Configuration, Post-Change Validation, or Guardrails
 MUST be applied to both files.
+
+## Runtime Bootstrap
+
+Before task actions, read the matching active runtime map named in Canonical
+Precedence. Read only the current runtime, then select profiles and skills by
+task. This is required instruction-driven reading, not a claim that a client
+natively injects the Markdown map. A profile reference is not proof of native
+agent registration; a skill catalog is not proof its body entered a prompt.
+
+The selected map is the bootstrap for the context-tier table below. If client
+identity or loading cannot be established, report NOT_PROVEN and retain the
+root guardrails. Do not substitute a foreign runtime or enable an unqualified
+adapter. See `docs/05-operations/runbooks/ai-rules-loading.md` for separate
+presence, configuration, discovery, prompt-rendering and execution evidence.
 
 ## Required AI Context
 

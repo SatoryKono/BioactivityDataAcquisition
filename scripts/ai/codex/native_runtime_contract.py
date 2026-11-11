@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import ast
 import dataclasses
+import hashlib
+import json
 import re
 import tomllib
 from pathlib import Path
@@ -25,11 +27,131 @@ READ_ONLY_AGENTS = {
     "py-debug-bot",
     "py-plan-bot",
 }
+ROOT_CONTRACT_FILE = "AGENTS.md"
+RULE_NATIVE_CANDIDATE = "native_candidate"
+RULE_CONFIGURATION = "configuration"
+RULE_INSTRUCTION_DRIVEN = "instruction_driven"
+RULE_SELECTED_PROFILE = "selected_profile"
+RULE_SELECTED_SKILL = "selected_skill"
+RULE_NOT_PROVEN = "NOT_PROVEN"
+RULE_SOURCE_PATTERNS = {
+    "codex": (
+        (RULE_NATIVE_CANDIDATE, "AGENTS.override.md"),
+        (RULE_NATIVE_CANDIDATE, ROOT_CONTRACT_FILE),
+        (RULE_CONFIGURATION, ".codex/config.toml"),
+        (RULE_INSTRUCTION_DRIVEN, ".codex/agents/CODEX-RUNTIME.md"),
+        (RULE_SELECTED_PROFILE, ".codex/agents/py-*.toml"),
+        (RULE_SELECTED_PROFILE, ".codex/agents/py-*.md"),
+        (RULE_SELECTED_SKILL, ".codex/skills/*/SKILL.md"),
+    ),
+    "junie": (
+        (RULE_NATIVE_CANDIDATE, ".junie/AGENTS.md"),
+        (RULE_NATIVE_CANDIDATE, ROOT_CONTRACT_FILE),
+        ("legacy_candidate", ".junie/guidelines.md"),
+        (RULE_CONFIGURATION, ".junie/config.json"),
+        (RULE_INSTRUCTION_DRIVEN, ".junie/agents/JUNIE-RUNTIME.md"),
+        (RULE_SELECTED_PROFILE, ".junie/agents/py-*.md"),
+        (RULE_SELECTED_SKILL, ".junie/skills/*/SKILL.md"),
+    ),
+    "devin": (
+        (RULE_NATIVE_CANDIDATE, ROOT_CONTRACT_FILE),
+        (RULE_CONFIGURATION, ".devin/config.json"),
+        (RULE_INSTRUCTION_DRIVEN, ".devin/agents/DEVIN-RUNTIME.md"),
+        (RULE_SELECTED_PROFILE, ".devin/agents/*/AGENT.md"),
+        (RULE_SELECTED_SKILL, ".devin/skills/*/SKILL.md"),
+    ),
+    "opencode": (
+        ("subordinate_candidate", ROOT_CONTRACT_FILE),
+        (RULE_CONFIGURATION, "opencode.json"),
+        (RULE_SELECTED_PROFILE, ".opencode/agent/*.md"),
+    ),
+}
+RULE_SOURCE_MAX_BYTES = 1024 * 1024
+
+
+def _rule_configuration(path: Path, raw: bytes) -> dict[str, object]:
+    """Expose only a declared import flag, never credentials or parser details."""
+    text = raw.decode("utf-8-sig")
+    data = tomllib.loads(text) if path.suffix == ".toml" else json.loads(text)
+    if not isinstance(data, dict):
+        raise ValueError("configuration must be an object")
+    if not path.as_posix().endswith(".devin/config.json"):
+        return {}
+    declared = data.get("read_config_from", {}).get("agents_standard")
+    return {
+        "declared_agents_standard": declared if isinstance(declared, bool) else None
+    }
+
+
+def _rule_source(root: Path, path: Path, connection: str) -> dict[str, object]:
+    """Fingerprint only declared repository sources, never raw contents/errors."""
+    item: dict[str, object] = {
+        "path": path.relative_to(root).as_posix(),
+        "connection": connection,
+        "presence": "MISSING",
+        "loading": RULE_NOT_PROVEN,
+        "execution": RULE_NOT_PROVEN,
+    }
+    try:
+        if not path.exists():
+            return item
+        resolved = path.resolve()
+        if not resolved.is_relative_to(
+            root.resolve()
+        ) or resolved.name.casefold().startswith(".env"):
+            raise ValueError("protected or external source")
+        with resolved.open("rb") as stream:
+            raw = stream.read(RULE_SOURCE_MAX_BYTES + 1)
+        if len(raw) > RULE_SOURCE_MAX_BYTES:
+            raise ValueError("oversized source")
+        item.update(
+            presence="PRESENT", sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)
+        )
+        if connection == RULE_CONFIGURATION:
+            item.update(_rule_configuration(path, raw))
+    except (OSError, ValueError, TypeError, AttributeError):
+        item.update(presence="ERROR", reason="source unavailable or invalid")
+    return item
+
+
+def rule_loading_inventory(repo_root: Path) -> dict[str, object]:
+    """Observe candidate sources only; never infer native loading or execute tools."""
+    records = []
+    for runtime, patterns in RULE_SOURCE_PATTERNS.items():
+        sources = []
+        for connection, pattern in patterns:
+            paths = (
+                sorted(repo_root.glob(pattern))
+                if "*" in pattern
+                else [repo_root / pattern]
+            )
+            sources.extend(_rule_source(repo_root, path, connection) for path in paths)
+        records.append(
+            {
+                "runtime": runtime,
+                "status": RULE_NOT_PROVEN,
+                "version": None,
+                "native_configuration": RULE_NOT_PROVEN,
+                "model_execution": RULE_NOT_PROVEN,
+                "scope": "subordinate" if runtime == "opencode" else "repository",
+                "enabled_by_diagnostic": False,
+                "sources": sources,
+            }
+        )
+    return {
+        "schema_version": 1,
+        "status": RULE_NOT_PROVEN,
+        "scope": "declared repository candidates; global layers and client state not inspected",
+        "runtime_process_started": False,
+        "runtimes": records,
+    }
+
+
 BOOTSTRAP_BASELINE_BYTES = 465_721
 BOOTSTRAP_BASELINE_LINES = 8_324
 BOOTSTRAP_MAX_BYTES = BOOTSTRAP_BASELINE_BYTES * 70 // 100
 BOOTSTRAP_CORPUS_PATHS = (
-    "AGENTS.md",
+    ROOT_CONTRACT_FILE,
     ".codex/agents/CODEX-RUNTIME.md",
     ".codex/agents/ORCHESTRATION.md",
     *tuple(f".codex/agents/{name}.md" for name in AGENT_NAMES),
@@ -362,7 +484,7 @@ def _agent_instruction_findings(
     instructions: str,
 ) -> list[Finding]:
     required_refs = (
-        "AGENTS.md",
+        ROOT_CONTRACT_FILE,
         f".codex/agents/{agent_name}.md",
         f".codex/skills/{agent_name}/SKILL.md",
         f"docs/00-project/ai/memory/memory-{agent_name}.md",

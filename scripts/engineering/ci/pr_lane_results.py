@@ -65,6 +65,7 @@ BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
 RUNTIME_AGENT_DOCS_DRIFT_TEST = "tests/architecture/test_runtime_agent_docs_drift.py"
+CODEX_NATIVE_RUNTIME_TEST = "tests/architecture/test_codex_native_runtime.py"
 REQUIRED_CHECKS_PROSE_TEST = (
     "tests/architecture/test_required_checks_prose_consistency.py"
 )
@@ -178,16 +179,18 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         (
             "AGENTS.md",
             "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+            "docs/05-operations/runbooks/ai-rules-loading.md",
         ),
         (
             RUNTIME_AGENT_DOCS_DRIFT_TEST,
+            CODEX_NATIVE_RUNTIME_TEST,
             "tests/architecture/test_junie_runtime_ci_contract.py",
             "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
     ),
     "scripts/ai/codex/native_runtime_contract.py": (
-        "tests/architecture/test_codex_native_runtime.py",
+        CODEX_NATIVE_RUNTIME_TEST,
         "tests/architecture/test_codex_agent_catalog_inventory.py",
         "tests/architecture/test_codex_skill_agent_links.py",
         "tests/architecture/test_grok_subagent_least_privilege.py",
@@ -1309,7 +1312,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
             "docs/00-project/ai/agents/agents/",
         ),
         (
-            "tests/architecture/test_codex_native_runtime.py",
+            CODEX_NATIVE_RUNTIME_TEST,
             "tests/architecture/test_codex_agent_catalog_inventory.py",
             RUNTIME_AGENT_DOCS_DRIFT_TEST,
             "tests/architecture/test_runtime_orchestration_surfaces.py",

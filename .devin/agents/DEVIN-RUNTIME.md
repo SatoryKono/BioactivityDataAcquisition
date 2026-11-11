@@ -41,9 +41,15 @@ Map logical BioETL `py-*` profiles onto the Devin CLI runtime roles using custom
 
 ## Canonical Launch
 
-Run Devin from the repository root so project discovery loads `AGENTS.md`,
-`.devin/config.json`, `.devin/mcp_config.json`, `.devin/agents/**`, and
-`.devin/skills/**`:
+Run Devin from the repository root. These are declared sources, not proof
+that every file is loaded at startup: `AGENTS.md`, `.devin/config.json`,
+`.devin/mcp_config.json`, `.devin/agents/**`, and `.devin/skills/**`.
+Verify resolver/discovery separately with `devin rules list`,
+`devin rules show AGENTS` and `devin skills list --json`. These commands do
+not prove model execution or child-process permission enforcement.
+`make devin-check` is not a no-write loader probe: its prerequisite writes a
+local MCP overlay. Follow `docs/05-operations/runbooks/ai-rules-loading.md`.
+For the established launch workflow:
 
 ```bash
 make devin-check

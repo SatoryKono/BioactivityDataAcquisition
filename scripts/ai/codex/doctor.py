@@ -24,7 +24,12 @@ from mcp_profile_contract import (
     profile_plan,
     validate_profile_matrix,
 )  # pyright: ignore[reportImplicitRelativeImport]
-from native_runtime_contract import Finding, REPO_ROOT, validate_native_runtime  # pyright: ignore[reportImplicitRelativeImport]
+from native_runtime_contract import (  # pyright: ignore[reportImplicitRelativeImport]
+    Finding,
+    REPO_ROOT,
+    rule_loading_inventory,
+    validate_native_runtime,
+)
 
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
@@ -324,7 +329,7 @@ def _governed_report_path(repo_root: Path, requested: Path) -> Path:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "mode", choices=("static", "mcp", "all"), nargs="?", default="static"
+        "mode", choices=("static", "mcp", "all", "rules"), nargs="?", default="static"
     )
     parser.add_argument("--profile", choices=sorted(setup_mcp.MCP_PROFILES))
     parser.add_argument("--timeout", type=float, default=1.0)
@@ -346,8 +351,17 @@ def main() -> int:
     profile = args.profile or setup_mcp.DEFAULT_LOCAL_PROFILE
     if args.no_write and args.output is not None:
         parser.error("--no-write and --output are mutually exclusive")
-    if args.output is not None and args.mode == "static":
+    if args.output is not None and args.mode in {"static", "rules"}:
         parser.error("--output is only valid for mcp or all mode")
+    if args.mode == "rules":
+        payload = rule_loading_inventory(repo_root)
+        if args.json:
+            print(json.dumps(payload, indent=2))
+        else:
+            print(
+                "[NOT_PROVEN] Rule candidates inventoried; native loading/execution needs evidence."
+            )
+        return 2
 
     static_status = 0
     if args.mode in {"static", "all"}:

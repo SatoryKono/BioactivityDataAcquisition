@@ -70,11 +70,17 @@ identity to repository, commit, branch, worktree, task, and source references.
 ## Native Project Discovery
 
 - `.codex/config.toml` contains portable trusted-project settings only.
-- `.codex/agents/py-*.toml` exposes the six governed profiles to native Codex
-  custom-agent discovery. Each thin descriptor routes to its matching Markdown
-  profile, skill, and memory sheet; the parent model is inherited.
-- `.codex/skills/**` is the sole project-local skill discovery and behavioral
-  source.
+- `.codex/agents/py-*.toml` declares six governed descriptors. Each routes to
+  its matching Markdown profile, skill and memory sheet; the parent model is
+  inherited. Native registration must be qualified for the selected client.
+- `.codex/skills/**` is the canonical project-local skill behavioral source.
+  Native discovery is version-scoped; a metadata listing is not body injection.
+- `AGENTS.md` Runtime Bootstrap requires reading this map before task actions;
+  the map itself is not an automatically injected AGENTS entrypoint.
+- Separate loader evidence is described in
+  `docs/05-operations/runbooks/ai-rules-loading.md`; static doctor validates
+  declared contracts only. `doctor.py rules --no-write --json` deliberately
+  always returns exit 2 / NOT_PROVEN; native observations are separate evidence.
 - Validate these surfaces with `scripts/ai/codex/doctor.py static --no-write`.
   On Windows use
   `.\.venv-win\Scripts\python.exe scripts/ai/codex/doctor.py static --no-write`.
