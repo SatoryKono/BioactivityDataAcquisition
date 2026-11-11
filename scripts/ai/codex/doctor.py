@@ -378,6 +378,18 @@ def _governed_report_path(repo_root: Path, requested: Path) -> Path:
     return resolved
 
 
+def _print_rule_inventory(repo_root: Path, *, output_json: bool) -> int:
+    """Report declared candidates without claiming native loading or execution."""
+    payload = rule_loading_inventory(repo_root)
+    if output_json:
+        print(json.dumps(payload, indent=2))
+    else:
+        print(
+            "[NOT_PROVEN] Rule candidates inventoried; native loading/execution needs evidence."
+        )
+    return 2
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -422,14 +434,7 @@ def main() -> int:
     if args.output is not None and args.mode in {"static", "rules"}:
         parser.error("--output is only valid for mcp, all, or routes mode")
     if args.mode == "rules":
-        payload = rule_loading_inventory(repo_root)
-        if args.json:
-            print(json.dumps(payload, indent=2))
-        else:
-            print(
-                "[NOT_PROVEN] Rule candidates inventoried; native loading/execution needs evidence."
-            )
-        return 2
+        return _print_rule_inventory(repo_root, output_json=args.json)
 
     if args.mode == "routes":
         return run_routes(
