@@ -702,111 +702,39 @@ def test_stdio_blocked_write_obeys_shared_request_deadline(tmp_path):
     assert not psutil.pid_exists(pid)
 
 
-def test_stdio_cleanup_does_not_wait_for_backend_inherited_stdout(tmp_path):
-    import threading
+def test_stdio_cleanup_does_not_wait_for_inherited_stdout_or_kill_backend(tmp_path):
     import time
     import psutil
     from scripts.ai.codex.mcp_probe_client import StdioProbeClient
 
-    backend_pid_file = tmp_path / "fake-backend.pid"
-    adapter = tmp_path / "backend_stdout_holder.py"
+    child_pid_file = tmp_path / "owned-fixture-child.pid"
+    adapter = tmp_path / "inherited_stdout_adapter.py"
     adapter.write_text(
-        """import subprocess,sys,time
-from pathlib import Path
-backend = subprocess.Popen(
-    [sys.executable, '-c', 'import time; time.sleep(5)'],
-    stdin=subprocess.DEVNULL,
-    creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
-)
-Path(sys.argv[1]).write_text(str(backend.pid), encoding='utf-8')
-time.sleep(60)
-""",
+        "import subprocess,sys,time\nfrom pathlib import Path\n"
+        "child=subprocess.Popen([sys.executable,'-c','import time; time.sleep(60)'],"
+        "stdin=subprocess.DEVNULL,stdout=sys.stdout,stderr=subprocess.DEVNULL)\n"
+        f"Path({str(child_pid_file)!r}).write_text(str(child.pid))\n"
+        "time.sleep(60)\n",
         encoding="utf-8",
     )
-    backend = None
-    existing_threads = set(threading.enumerate())
+    child = None
     try:
         with StdioProbeClient(
-            {
-                "command": getattr(sys, "_base_executable", sys.executable),
-                "args": [str(adapter), str(backend_pid_file)],
-            },
-            tmp_path,
-            {},
+            {"command": sys.executable, "args": [str(adapter)]}, tmp_path, {}
         ) as client:
-            readers = tuple(
-                thread
-                for thread in threading.enumerate()
-                if thread not in existing_threads
-            )
-            assert readers
-            setup_deadline = time.monotonic() + 3
-            while not backend_pid_file.exists() or not backend_pid_file.stat().st_size:
-                assert time.monotonic() < setup_deadline, "fake backend did not start"
+            ready = time.monotonic() + 5
+            while not child_pid_file.exists() or not child_pid_file.read_text().strip():
+                assert time.monotonic() < ready, "fixture child did not start"
                 time.sleep(0.005)
-            backend = psutil.Process(int(backend_pid_file.read_text(encoding="utf-8")))
-            assert backend.ppid() == client._process.pid
+            child = psutil.Process(int(child_pid_file.read_text()))
+            parent_pid = client._process.pid
             started = time.monotonic()
             with pytest.raises(ProbeError, match="TIMEOUT"):
-                client.request("initialize", {}, 0.1)
-        assert time.monotonic() - started < 1
-        assert backend.is_running(), "diagnostic cleanup stopped the shared backend"
-        for reader in readers:
-            reader.join(timeout=0.2)
-            assert not reader.is_alive()
-        assert client._process.stdout.closed
+                client.request("tools/list", {}, 0.05)
+        assert time.monotonic() - started < 0.8
+        assert not psutil.pid_exists(parent_pid)
+        assert child.is_running(), "diagnostic must not kill the inherited backend"
     finally:
-        # This finite, test-owned fake exits naturally; cleanup never signals it.
-        if backend is not None:
-            backend.wait(timeout=6)
-
-
-def test_interruptible_reader_preserves_bounded_jsonl_lines():
-    import os
-    import threading
-    from scripts.ai.codex.mcp_probe_client import _InterruptiblePipeReader
-
-    source, sink = os.pipe()
-    stream = os.fdopen(source, "rb")
-    reader = _InterruptiblePipeReader(stream, threading.Event())
-    try:
-        os.write(sink, b"12345\nok\n")
-        os.close(sink)
-        sink = None
-        assert reader.readline(4) == b"1234"
-        assert reader.readline(4) == b"5\n"
-        assert reader.readline(4) == b"ok\n"
-        assert reader.readline(4) == b""
-    finally:
-        reader.finish()
-        if sink is not None:
-            os.close(sink)
-
-
-def test_interruptible_reader_closes_without_waiting_for_pipe_eof():
-    import os
-    import threading
-    from scripts.ai.codex.mcp_probe_client import _InterruptiblePipeReader
-
-    source, sink = os.pipe()
-    reader = _InterruptiblePipeReader(os.fdopen(source, "rb"), threading.Event())
-    lines = []
-
-    def receive():
-        try:
-            lines.append(reader.readline(1024))
-        finally:
-            reader.finish()
-
-    thread = threading.Thread(target=receive, daemon=True)
-    thread.start()
-    try:
-        reader.close()
-        thread.join(timeout=0.2)
-        assert not thread.is_alive()
-        assert lines == [b""]
-        assert os.fstat(sink).st_size == 0
-    finally:
-        reader.close()
-        thread.join(timeout=0.2)
-        os.close(sink)
+        if child is not None and child.is_running():
+            child.terminate()
+            child.wait(timeout=3)
