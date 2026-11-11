@@ -30,7 +30,7 @@
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 41 |
 | docs_reports_generated_or_route_owned | 7 |
-| docs_reports_retention_sensitive_evidence | 28 |
+| docs_reports_retention_sensitive_evidence | 29 |
 | generated_skill_reference_mirror | 19 |
 | generated_test_run_evidence | 6 |
 | guide | 2 |
@@ -51,7 +51,7 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 764 |
+| Active | 765 |
 | Archived | 1554 |
 | Canonical | 77 |
 | Generated | 1066 |
@@ -61,7 +61,7 @@
 
 | Surface | Count |
 | --- | --- |
-| active | 764 |
+| active | 765 |
 | archive | 1554 |
 | canonical | 77 |
 | generated | 1066 |
@@ -73,7 +73,7 @@
 | --- | --- |
 | archive-after-migration | 423 |
 | generate-automatically | 1066 |
-| keep | 2688 |
+| keep | 2689 |
 
 ## Cleanup Candidates
 
