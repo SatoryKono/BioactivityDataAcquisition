@@ -414,21 +414,49 @@ def test_partial_mapped_targets_fail_lane(
 def test_mcp_check_source_routes_both_mandatory_contract_suites(tmp_path: Path) -> None:
     from scripts.engineering.ci.pr_lane_results import (
         affected_pytest_targets,
+        MCP_WRAPPER_CONTRACTS_TEST,
         NPM_RUNTIME_TEST,
     )
 
-    mcp_target = "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py"
-    for name in (NPM_RUNTIME_TEST, mcp_target):
+    for name in (NPM_RUNTIME_TEST, MCP_WRAPPER_CONTRACTS_TEST):
         path = tmp_path / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.touch()
     assert affected_pytest_targets(["scripts/ai/mcp/check.sh"], repo_root=tmp_path) == [
         NPM_RUNTIME_TEST,
-        mcp_target,
+        MCP_WRAPPER_CONTRACTS_TEST,
     ]
-    (tmp_path / mcp_target).unlink()
+    (tmp_path / MCP_WRAPPER_CONTRACTS_TEST).unlink()
     with pytest.raises(ValueError, match="Missing mandatory mapped test targets"):
         affected_pytest_targets(["scripts/ai/mcp/check.sh"], repo_root=tmp_path)
+
+
+def test_shadow_compare_routes_managed_filesystem_fetch_owners() -> None:
+    """Fetch/owned-stdio wrappers and WSL setup guide keep explicit owners."""
+    from scripts.engineering.ci.pr_lane_results import (
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+        MCP_WRAPPER_CONTRACTS_TEST,
+        NPM_RUNTIME_TEST,
+        build_shadow_compare,
+    )
+
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            "docs/03-guides/development/codex-wsl2-setup.md",
+            "scripts/ai/mcp/mcp_fetch_wrapper.ps1",
+            "scripts/ai/mcp/mcp_fetch_wrapper.sh",
+            "scripts/ai/mcp/support/run_owned_stdio.ps1",
+        ],
+        repo_root=repo_root,
+    )
+    assert report["selected"] == [
+        NPM_RUNTIME_TEST,
+        MCP_WRAPPER_CONTRACTS_TEST,
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+    ]
+    assert report["covers_full_suite"] is False
+    assert report["activation"] == "not_applied"
 
 
 def test_complete_suite_removes_nested_duplicates_after_required_validation(

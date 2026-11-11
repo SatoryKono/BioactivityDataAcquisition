@@ -204,7 +204,11 @@ def test_powershell_filesystem_fails_closed(tmp_path: Path) -> None:
     )
     result = subprocess.run(
         [powershell, "-NoProfile", "-Command", code],
-        env={**os.environ, "LOCALAPPDATA": str(tmp_path), "BIOETL_MCP_VALIDATE_ONLY": "0"},
+        env={
+            **os.environ,
+            "LOCALAPPDATA": str(tmp_path),
+            "BIOETL_MCP_VALIDATE_ONLY": "0",
+        },
         text=True,
         capture_output=True,
         check=False,
@@ -218,7 +222,9 @@ def test_shell_filesystem_fails_closed(tmp_path: Path) -> None:
     bash = _windows_bash() if os.name == "nt" else shutil.which("bash")
     assert bash
     npx = tmp_path / "npx"
-    npx.write_text('#!/usr/bin/env bash\nprintf "__NPX_CALLED__\\n"\n', encoding="utf-8")
+    npx.write_text(
+        '#!/usr/bin/env bash\nprintf "__NPX_CALLED__\\n"\n', encoding="utf-8"
+    )
     npx.chmod(0o755)
     fake_bin = str(tmp_path)
     if os.name == "nt":
@@ -236,7 +242,11 @@ def test_shell_filesystem_fails_closed(tmp_path: Path) -> None:
         text=True,
         capture_output=True,
         check=False,
-        env={**os.environ, "LOCALAPPDATA": str(tmp_path), "BIOETL_MCP_VALIDATE_ONLY": "0"},
+        env={
+            **os.environ,
+            "LOCALAPPDATA": str(tmp_path),
+            "BIOETL_MCP_VALIDATE_ONLY": "0",
+        },
     )
     assert result.returncode != 0
     assert "Filesystem MCP requires the registered Windows owner" in result.stderr

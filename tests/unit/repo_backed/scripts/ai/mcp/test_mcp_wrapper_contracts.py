@@ -1167,7 +1167,9 @@ def test_bash_fetch_wrapper_supports_validation_without_owner() -> None:
 def test_powershell_fetch_wrapper_refuses_missing_owner(tmp_path: Path) -> None:
     result = _run_powershell_file(
         FETCH_PS1,
-        env=_clean_env(LOCALAPPDATA=_powershell_path(tmp_path), BIOETL_MCP_VALIDATE_ONLY=None),
+        env=_clean_env(
+            LOCALAPPDATA=_powershell_path(tmp_path), BIOETL_MCP_VALIDATE_ONLY=None
+        ),
     )
     assert result.returncode == 1
     assert result.stdout == ""
@@ -1179,7 +1181,7 @@ def test_fetch_wrappers_exclude_standalone_package_launch() -> None:
     powershell_source = FETCH_PS1.read_text(encoding="utf-8")
     assert "mcp_fetch_wrapper.ps1" in bash_source
     assert "project-launcher.json" in powershell_source
-    assert 'Invoke-OwnedMcpStdio' in powershell_source
+    assert "Invoke-OwnedMcpStdio" in powershell_source
     assert '-I -S -B "' in powershell_source
     for source in (bash_source, powershell_source):
         assert "mcp-server-fetch==" not in source
