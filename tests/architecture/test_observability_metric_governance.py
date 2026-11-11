@@ -266,7 +266,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     assert (
         report["typed_target_counts"]
         == {
-            "promql": 106,  # Incident Workspace fleet panels + Overview Monitor Global Alerts (LA-06).
+            "promql": 109,  # LA-06 fleet/alerts + LA-07 workflow freshness age/threshold/flag targets.
             "http": 14,
             "loki": 0,
             "tempo": 0,

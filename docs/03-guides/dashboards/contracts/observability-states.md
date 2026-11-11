@@ -15,6 +15,7 @@ telemetry presence proves the cause of an incident.
 | NO OBSERVATIONS | No matching events in the stated scope/window, with producer availability, observed scope and declared event families verified. | Evidence-gated lazy-event query; status gauges do not qualify merely because they are absent. | Confirm scope/window and witnesses; if witnesses are missing, investigate missing telemetry (LA-05). |
 | TELEMETRY MISSING | Expected measurement or evidence is absent; product health is unresolved. | Missing required series, scrape or recording-rule coverage; telemetry coverage panels. | Check producer emission, scrape targets, rule evaluation and selector/query alignment (LA-05). |
 | Not verified | The cause or freshness assertion has not been verified, even if severity is CRIT. | Raw UNVERIFIED cause verification, or unavailable observation/publication timestamps. | Follow domain evidence to verify cause and timestamps; never infer verification from a firing rule (LA-04). |
+| STALE | Measured evidence age exceeds its displayed freshness threshold; this is a visibility warning, not product failure. | Current Workflow Evidence: publication age > 24h (86400s). | Refresh the evidence source; inspect publication time independently of run execution dates. |
 | Blank / No data | A rendering outcome without a semantic verdict; never automatically OK or zero. | Empty result/frame, missing field, query error, unavailable source or no selected context. | Inspect query/frame, scope and source health. Classify as NO OBSERVATIONS only with its witnesses; otherwise UNKNOWN or TELEMETRY MISSING. |
 
 Numeric encodings are source-specific: use the panel's labelled value mapping,
@@ -40,6 +41,22 @@ before Fleet (8808), holds panels 9102, 907, 894 and 9491 and an on-screen legen
 Scope, window and source remain those of each panel; moving panels changes no
 query or health threshold. Current/global evidence does not attest a selected
 historical Run ID. Scope headings must preserve that distinction.
+
+LA-07 (#12941): Current Workflow Evidence shows publication age and its 24h
+display threshold. The heading reports STALE if any known scoped publication
+exceeds that threshold; otherwise missing/invalid publication timestamps or
+missing scope produce Not verified. Within threshold means only a measured age
+at or below the threshold, never an OK health verdict. Row-level freshness stays
+Not verified when its timestamp is absent. Retained evidence and workflow health
+rules do not expire at this display threshold. Refresh the dashboard to evaluate
+age again; query failures remain errors, never fresh evidence.
+
+Run ID selectors omit the ambiguous legacy [STALE catalog] suffix. They make
+no freshness assertion: their on-screen description says catalog freshness is
+Not verified here and distinguishes run execution dates from catalog age.
+Refresh the dashboard to request an updated list. Catalog API metadata and its
+cache policy remain unchanged. The same selector projection is used by Explorer,
+Data Quality and Replay Readiness in both dashboard generations.
 
 Repository validation proves generated layout and copy only. Live application
 to **Incident Workspace v2** and **Isolated 100000 Incident Workspace** must each

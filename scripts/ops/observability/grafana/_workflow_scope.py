@@ -612,3 +612,8 @@ def apply_workflow_scope(payload: dict) -> None:
         return
     source = next(p for p in panels if p.get("type") == "table")
     _evidence_row(payload, source)
+    from scripts.ops.observability.grafana._workflow_freshness import (
+        apply_workflow_freshness,
+    )
+
+    apply_workflow_freshness(payload, payload["panels"][-1], _SCOPE)

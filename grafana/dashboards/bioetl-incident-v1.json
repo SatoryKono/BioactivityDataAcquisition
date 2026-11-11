@@ -87,7 +87,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -144,7 +144,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -189,7 +189,7 @@
           "uid": "bioetl-ops-http"
         },
         "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
-        "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
+        "description": "Run ID from the catalog snapshot; run dates describe execution, not catalog freshness. Catalog freshness is Not verified here. Refresh the dashboard to request an updated list.",
         "hide": 0,
         "includeAll": false,
         "label": "Run ID",
@@ -208,7 +208,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -305,6 +305,31 @@
         "query": "p50 quantile : 0.50, p95 quantile : 0.95, p99 quantile : 0.99",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "name": "workflow_evidence_freshness",
+        "type": "query",
+        "hide": 2,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "query_result(label_replace((max((time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})))) > 86400), \"freshness\", \"STALE\", \"\", \"\") or on() label_replace((count((group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) unless on(workflow) (bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()))) > 0 or absent(group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))), \"freshness\", \"Not verified\", \"\", \"\") or on() label_replace((max((time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})))) <= 86400), \"freshness\", \"Within threshold\", \"\", \"\"))",
+        "query": {
+          "query": "query_result(label_replace((max((time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})))) > 86400), \"freshness\", \"STALE\", \"\", \"\") or on() label_replace((count((group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) unless on(workflow) (bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()))) > 0 or absent(group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))), \"freshness\", \"Not verified\", \"\", \"\") or on() label_replace((max((time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})))) <= 86400), \"freshness\", \"Within threshold\", \"\", \"\"))",
+          "refId": "StandardVariableQuery"
+        },
+        "regex": "/freshness=\"([^\"]+)\"/",
+        "refresh": 2,
+        "skipUrlSync": true,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {
+          "text": "Not verified",
+          "value": "Not verified"
+        },
+        "description": "Hidden publication-age heading for scoped workflow evidence (Within threshold / STALE >24h / Not verified). Not a health or navigation selector; excluded from URL sync."
       }
     ]
   },
@@ -12365,7 +12390,7 @@
     {
       "id": 9700,
       "type": "row",
-      "title": "Inspect Current Workflow Evidence",
+      "title": "Inspect Current Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h",
       "collapsed": true,
       "gridPos": {
         "x": 0,
@@ -12377,8 +12402,8 @@
         {
           "id": 9701,
           "type": "table",
-          "title": "Review Current Workflow Evidence",
-          "description": "CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. Published at is the gateway publication clock, not the Prometheus evaluation clock. Retained publications do not expire after 15 minutes. Reason unavailable means no diagnostic cause is exposed by this metric.",
+          "title": "Review Current Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h",
+          "description": "CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. Published at is the gateway publication clock, not the Prometheus evaluation clock. Retained publications do not expire after 15 minutes. Reason unavailable means no diagnostic cause is exposed by this metric. Publication age is measured at query evaluation. Display threshold: 24h (86400 seconds); STALE means age > threshold, not workflow failure. Within threshold does not prove health. Missing/invalid publication time is Not verified. The heading uses the oldest scoped publication; any known stale row takes precedence over missing coverage. Retention and health status are unchanged. Refresh the dashboard to re-evaluate.",
           "gridPos": {
             "x": 0,
             "y": 53,
@@ -12404,7 +12429,37 @@
               "refId": "B",
               "instant": true,
               "format": "table",
-              "expr": "bioetl_workflow_scope_published_seconds * on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 1000",
+              "expr": "((((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) * 1000) or on(workflow) ((group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) unless on(workflow) (bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time())) * 0 / 0))",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
+            },
+            {
+              "refId": "C",
+              "instant": true,
+              "format": "table",
+              "expr": "((time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))) or on(workflow) ((group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) unless on(workflow) (bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time())) * 0 / 0))",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
+            },
+            {
+              "refId": "D",
+              "instant": true,
+              "format": "table",
+              "expr": "group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 86400",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
+            },
+            {
+              "refId": "E",
+              "instant": true,
+              "format": "table",
+              "expr": "(((time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))) > bool 86400) or on(workflow) (((group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) unless on(workflow) (bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()))) * 0 + 2))",
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
@@ -12429,7 +12484,10 @@
                     "run_type",
                     "Value #A",
                     "Value #B",
-                    "reason"
+                    "reason",
+                    "Value #C",
+                    "Value #D",
+                    "Value #E"
                   ]
                 }
               }
@@ -12443,7 +12501,10 @@
                   "run_type": "Run Type",
                   "Value #A": "Status",
                   "Value #B": "Published at",
-                  "reason": "Reason"
+                  "reason": "Reason",
+                  "Value #C": "Publication age",
+                  "Value #D": "Freshness threshold",
+                  "Value #E": "Freshness"
                 }
               }
             }
@@ -12503,6 +12564,93 @@
                   {
                     "id": "unit",
                     "value": "time:YYYY-MM-DD HH:mm"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Publication age"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "s"
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "Not verified"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Freshness threshold"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "s"
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "Not verified"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Freshness"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": "Not verified"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "0": {
+                            "text": "Within threshold"
+                          },
+                          "1": {
+                            "text": "STALE",
+                            "color": "orange"
+                          },
+                          "2": {
+                            "text": "Not verified"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Published at"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "Not verified"
                   }
                 ]
               }

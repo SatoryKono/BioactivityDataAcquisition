@@ -137,6 +137,7 @@ dashboards:
       - run_id
       - read_latency_quantile
       - provider
+      - workflow_evidence_freshness
   - uid: bioetl-run-explorer-v1
     title: Run Explorer
     owner: "@bioetl-observability"
