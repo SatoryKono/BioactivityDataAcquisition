@@ -18,6 +18,12 @@ from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
 
 def _preferred_python() -> str:
+    owned_python = os.environ.get("BIOETL_HOOK_PROJECT_PYTHON")
+    if owned_python is not None:
+        explicit = Path(owned_python)
+        if not explicit.is_absolute() or not explicit.is_file():
+            raise ValueError("installed hook project interpreter is unavailable")
+        return str(explicit)
     if os.name == "nt":
         win_python = REPO_ROOT / ".venv-win" / "Scripts" / "python.exe"
         if win_python.exists():
@@ -44,7 +50,11 @@ def main() -> int:
         )
         return 2
 
-    target_python = _preferred_python()
+    try:
+        target_python = _preferred_python()
+    except ValueError:
+        sys.stderr.write("BioETL hook ERROR: installed project interpreter unavailable.\n")
+        return 2
     command = [target_python, *sys.argv[1:]]
     completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
         ensure_safe_cli_argv(command), cwd=REPO_ROOT, check=False

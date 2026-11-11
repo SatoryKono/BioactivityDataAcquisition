@@ -8,6 +8,7 @@ Usage:
 Commands:
     guard-operation    Check a structured operation without executing it
     guard-budgets      Compare protected policy limits to trusted Git objects
+    hooks              Install, inspect or roll back owned Git hooks explicitly
     check-inventory    Check scripts inventory drift
     github-settings-review  Collect read-only GitHub governance evidence
     sync-inventory     Refresh scripts inventory manifest
@@ -118,6 +119,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     cmd, rest = args[0], args[1:]
+
+    if cmd == "hooks":
+        from scripts.engineering.repo.hook_installation import main as hooks_main
+
+        return hooks_main(rest)
 
     if cmd == "guard-operation":
         from scripts.engineering.repo.operation_guards import main as guard_main

@@ -2009,7 +2009,7 @@
       "decision": "shared_helper_module",
       "owner": "@bioetl-platform",
       "review_by": "2027-01-31",
-      "next_step": "Retain the tested Phase 4.2\u20134.3 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-reflow; keep direct module invocation as a compatibility surface."
+      "next_step": "Retain the tested Phase 4.2–4.3 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-reflow; keep direct module invocation as a compatibility surface."
     },
     "scripts/ops/observability/grafana/capture_acceptance.py": {
       "decision": "shared_helper_module",
@@ -2400,6 +2400,36 @@
       "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/engineering/repo/hook_installation.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
+    },
+    "scripts/engineering/repo/hook_runtime.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
+    },
+    "scripts/engineering/repo/offline_precommit.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
+    },
+    "scripts/engineering/repo/process_deadline.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
+    },
+    "scripts/engineering/repo/process_supervisor.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
     }
   },
   "schema_version": "1.0"
