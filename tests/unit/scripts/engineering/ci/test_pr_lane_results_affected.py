@@ -446,6 +446,7 @@ def test_shadow_compare_routes_managed_filesystem_fetch_owners() -> None:
             "docs/03-guides/development/codex-wsl2-setup.md",
             "scripts/ai/mcp/mcp_fetch_wrapper.ps1",
             "scripts/ai/mcp/mcp_fetch_wrapper.sh",
+            "scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh",
             "scripts/ai/mcp/support/run_owned_stdio.ps1",
         ],
         repo_root=repo_root,

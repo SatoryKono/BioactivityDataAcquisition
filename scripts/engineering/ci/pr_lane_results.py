@@ -1098,6 +1098,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         NPM_RUNTIME_TEST,
         MCP_WRAPPER_CONTRACTS_TEST,
     ),
+    "scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh": (
+        NPM_RUNTIME_TEST,
+        MCP_WRAPPER_CONTRACTS_TEST,
+    ),
     "scripts/ai/mcp/check.sh": (
         NPM_RUNTIME_TEST,
         MCP_WRAPPER_CONTRACTS_TEST,

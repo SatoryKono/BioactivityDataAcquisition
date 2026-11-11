@@ -1,3 +1,55 @@
+function Get-OwnedMcpLauncher {
+    param(
+        [Parameter(Mandatory)][string]$LauncherRelativePath,
+        [Parameter(Mandatory)][string]$Policy,
+        [Parameter(Mandatory)][string]$OwnerPathPattern,
+        [string]$ProfilePattern = ""
+    )
+    if ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT) {
+        throw "Windows profile unavailable"
+    }
+    $localProfile = $env:LOCALAPPDATA
+    if (-not $localProfile) {
+        $localProfile = [Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)
+    }
+    $path = Join-Path $localProfile $LauncherRelativePath
+    $descriptor = Get-Item -LiteralPath $path
+    if ($descriptor.PSIsContainer -or $descriptor.Length -gt 4096 -or
+        ($descriptor.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        throw "Invalid launcher descriptor"
+    }
+    $launcher = Get-Content -LiteralPath $path -Raw | ConvertFrom-Json
+    if ($launcher.policy -ne $Policy -or
+        $launcher.python -notmatch '^[A-Za-z]:[\\/].*[\\/]python\.exe$' -or
+        $launcher.owner -notmatch $OwnerPathPattern -or
+        -not (Test-Path -LiteralPath $launcher.python -PathType Leaf) -or
+        -not (Test-Path -LiteralPath $launcher.owner -PathType Leaf) -or
+        ($ProfilePattern -and $launcher.profile -notmatch $ProfilePattern)) {
+        throw "Invalid launcher fields"
+    }
+    return $launcher
+}
+
+function Resolve-OwnedMcpLauncherOrExit {
+    param(
+        [Parameter(Mandatory)][string]$LauncherRelativePath,
+        [Parameter(Mandatory)][string]$Policy,
+        [Parameter(Mandatory)][string]$OwnerPathPattern,
+        [Parameter(Mandatory)][string]$MissingOwnerMessage,
+        [string]$ProfilePattern = ""
+    )
+    try {
+        return Get-OwnedMcpLauncher `
+            -LauncherRelativePath $LauncherRelativePath `
+            -Policy $Policy `
+            -OwnerPathPattern $OwnerPathPattern `
+            -ProfilePattern $ProfilePattern
+    } catch {
+        [Console]::Error.WriteLine($MissingOwnerMessage)
+        exit 1
+    }
+}
+
 function Invoke-OwnedMcpStdio {
     param([Parameter(Mandatory)][string]$Python, [Parameter(Mandatory)][string]$Arguments)
     # Forward raw MCP frames without PowerShell's text pipeline.

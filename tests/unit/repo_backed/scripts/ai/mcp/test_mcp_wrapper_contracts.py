@@ -1179,9 +1179,15 @@ def test_powershell_fetch_wrapper_refuses_missing_owner(tmp_path: Path) -> None:
 def test_fetch_wrappers_exclude_standalone_package_launch() -> None:
     bash_source = FETCH_SH.read_text(encoding="utf-8")
     powershell_source = FETCH_PS1.read_text(encoding="utf-8")
+    owned_stdio = (MCP_DIR / "support" / "run_owned_stdio.ps1").read_text(
+        encoding="utf-8"
+    )
     assert "mcp_fetch_wrapper.ps1" in bash_source
+    assert "exec_windows_ps1_wrapper.sh" in bash_source
     assert "project-launcher.json" in powershell_source
+    assert "Resolve-OwnedMcpLauncherOrExit" in powershell_source
     assert "Invoke-OwnedMcpStdio" in powershell_source
+    assert "Get-OwnedMcpLauncher" in owned_stdio
     assert '-I -S -B "' in powershell_source
     for source in (bash_source, powershell_source):
         assert "mcp-server-fetch==" not in source
