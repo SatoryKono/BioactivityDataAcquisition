@@ -118,7 +118,10 @@ jobs:
           capture tests test_health tests python -m pytest \
             tests/architecture/test_codex_native_runtime.py \
             tests/architecture/test_runtime_agent_docs_drift.py \
-            tests/architecture/test_junie_runtime_ci_contract.py -q --no-cov \
+            tests/architecture/test_junie_runtime_ci_contract.py \
+            tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py \
+            tests/unit/scripts/test_hook_inventory.py tests/unit/scripts/test_mcp_routes.py \
+            -q --no-cov \
             --junitxml="$run_dir/tests.xml"
           capture governance pretest_guardrails governance bash scripts/engineering/dev/pretest_guardrails.sh \
             --mode check --scope light --skip-cleanup --skip-memory --skip-architecture \
