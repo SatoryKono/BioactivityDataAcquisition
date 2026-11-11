@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from contextlib import suppress
 from pathlib import Path
 import os
 import json
+import threading
 import time
+from typing import IO, cast
 
 from scripts.ai.codex.native_mcp_config import NativeConfigClient, NativeConfigError
 
@@ -19,6 +22,55 @@ from scripts.ai.codex.mcp_http_probe import (
     HttpProbeClient,
     _read_http_reply as _read_http_reply,
 )
+
+
+class _InterruptiblePipeReader:
+    """Keep JSONL framing without a blocking BufferedReader lock on shutdown."""
+
+    def __init__(self, stream: IO[bytes], stop: threading.Event):
+        self._stream = stream
+        self._stop = stop
+        self._buffer = bytearray()
+        self._descriptor = stream.fileno()
+        os.set_blocking(self._descriptor, False)
+
+    def __getattr__(self, name):
+        return getattr(self._stream, name)
+
+    def _buffered_line(self, limit: int) -> bytes | None:
+        end = self._buffer.find(b"\n") + 1
+        if end or len(self._buffer) >= limit:
+            count = min(end or limit, limit)
+            line = bytes(self._buffer[:count])
+            del self._buffer[:count]
+            return line
+        return None
+
+    def readline(self, limit: int) -> bytes:
+        while not self._stop.is_set():
+            line = self._buffered_line(limit)
+            if line is not None:
+                return line
+            try:
+                chunk = os.read(self._descriptor, min(65536, limit - len(self._buffer)))
+            except BlockingIOError:
+                self._stop.wait(0.005)
+                continue
+            if not chunk:
+                line = bytes(self._buffer)
+                self._buffer.clear()
+                return line
+            self._buffer.extend(chunk)
+        return b""
+
+    def close(self) -> None:
+        # NativeConfigClient closes this wrapper from the caller thread. The
+        # reader alone closes the underlying descriptor after it stops using it.
+        self._stop.set()
+
+    def finish(self) -> None:
+        self._buffer.clear()
+        self._stream.close()
 
 
 class StdioProbeClient(NativeConfigClient):
@@ -41,26 +93,60 @@ class StdioProbeClient(NativeConfigClient):
         self.transport_seen = False
         self._deadline = 0.0
         self._timed_out = False
+        self._reader_stop = threading.Event()
+        self._reader_setup_lock = threading.Lock()
+        self._reader_thread: threading.Thread | None = None
+
+    def _read_messages(self) -> None:
+        with self._reader_setup_lock:
+            self._reader_thread = threading.current_thread()
+            if self._reader_stop.is_set():
+                return
+            process = self._process
+            if process is None or process.stdout is None:
+                self._failed.set()
+                return
+            try:
+                reader = _InterruptiblePipeReader(process.stdout, self._reader_stop)
+            except (OSError, ValueError):
+                self._failed.set()
+                return
+            process.stdout = cast(IO[bytes], reader)
+        try:
+            # Retain the native JSON/object, message-count, line-size and queue
+            # checks; only the source of bounded lines changes.
+            super()._read_messages()
+        finally:
+            with suppress(OSError, ValueError):
+                reader.finish()
 
     def __enter__(self):
         super().__enter__()
         try:
             os.set_blocking(self._process.stdin.fileno(), False)
         except (OSError, AttributeError):
-            super().__exit__(None, None, None)
+            self.__exit__(None, None, None)
             raise ProbeError("NONBLOCKING_STDIO_NOT_SUPPORTED") from None
         return self
 
     def __exit__(self, *args):
         # Do not spend the normal grace period on an unresponsive adapter.
         # Only this Popen process is terminated, never a shared owner.
-        if (
-            self._timed_out
-            and self._process is not None
-            and self._process.poll() is None
-        ):
-            self._process.terminate()
-        super().__exit__(*args)
+        with self._reader_setup_lock:
+            self._reader_stop.set()
+        try:
+            if (
+                self._timed_out
+                and self._process is not None
+                and self._process.poll() is None
+            ):
+                with suppress(OSError):
+                    self._process.terminate()
+            super().__exit__(*args)
+        finally:
+            reader = self._reader_thread
+            if reader is not None and reader is not threading.current_thread():
+                reader.join(timeout=0.2)
 
     def _remaining(self) -> float:
         remaining = self._deadline - time.monotonic()

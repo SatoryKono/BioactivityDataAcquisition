@@ -302,4 +302,6 @@ notification shares its remaining budget. No request is replayed on timeout.
 Stdio requests use nonblocking pipe writes; sending and waiting for the reply
 share one monotonic request deadline. If the platform cannot support this, the
 probe remains `NOT_TESTED`. An unresponsive owned adapter is terminated on
-timeout; shared owners are never terminated or automatically restarted.
+timeout; shared owners are never terminated or automatically restarted. The bounded
+stdout reader stops without waiting for EOF from a backend that inherited
+the adapter pipe; the existing JSON, message-size and queue limits remain in force.
