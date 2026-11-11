@@ -53,7 +53,7 @@ run_subagent(
 | py-debug-bot | — (read-only; implementation stays with orchestrator) | всё |
 | py-config-bot | `configs/` | `src/bioetl/`, `docs/` |
 | py-doc-bot | `docs/`, docstrings | `configs/`, `tests/` |
-| py-test-bot | — (exec only; `AGENT.md` denies write/edit) | `src/bioetl/`, `configs/`, `tests/` |
+| py-test-bot | `tests/**` within native permissions | `src/bioetl/`, `configs/`, `docs/`; product fixes belong to authorized parent |
 
 ### Определения субагентов
 
@@ -114,6 +114,16 @@ Curated review does not authorize promotion, archival, or persistent writes;
 those still require authorized `read-write` mode.
 
 ## 2. Стандартный workflow задачи
+
+Схема ниже описывает formal V3/V4 campaign или явно запрошенный полный цикл.
+V1/V2 не требуют этой цепочки или formal report bundle без требования пользователя
+или применимого contract. `py-test-bot` использует focused-first для baseline,
+final и retest; phase=final сама по себе не запускает full suite. Broad/full scope
+выбирается по shared behavior, cross-layer impact и обязательным CI / security /
+release gates; снижать tier или обходить gates через focused mode запрещено.
+Debug остаётся read-only: test evidence → RCA → authorized parent / implementer
+fix → retest. При blocked reproduction нет PASS; при failed retest сохраняется
+FAIL и цикл возвращается к RCA.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -259,9 +269,13 @@ ______________________________________________________________________
 reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md
 ```
 
-Правило: любой агент/субагент формирует итоговый отчёт только по этому пути (LLM = вызывающая модель, agent = профиль/skill, `phase` — опциональный суффикс для baseline/final/targeted, если это закреплено в contract конкретного `py-*` профиля). Дополнительные артефакты (телеметрия, метрики, промежуточные планы) сохраняйте рядом в той же директории, но итоговый отчёт должен соответствовать шаблону `reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md`.
+Для formal V3/V4 campaign либо явного требования пользователя/contract итоговый файловый отчёт формируется по этому пути (LLM = вызывающая модель, agent = профиль/skill, `phase` — опциональный суффикс для baseline/final/targeted, если это закреплено в contract конкретного `py-*` профиля). Дополнительные артефакты (телеметрия, метрики, промежуточные планы) сохраняйте рядом в той же директории, но итоговый отчёт должен соответствовать шаблону `reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md`.
 
-Требования к каждому файлу (минимум):
+Для focused V1/V2 без обязательного bundle достаточно краткого результата в
+ответе. Файловые отчёты вне permissions профиля сохраняет уполномоченный parent;
+само требование отчёта не расширяет native write permissions.
+
+Требования к каждому обязательному файлу (минимум):
 
 - Дата/время создания (UTC), LLM, agent
 - Scope (файлы/модули)
@@ -339,7 +353,7 @@ ______________________________________________________________________
 ## 7. Гарантии и инварианты
 
 1. **Traceability**: каждое изменение в коде привязано к `RF-*`, каждый fix — к `DBG-*`, каждый doc update — к `DOC-*`, каждый config change — к `CFG-*`.
-1. **Baseline/Final symmetry**: для каждого baseline-артефакта существует final-артефакт.
+1. **Baseline/Final symmetry**: в обязательном formal bundle для каждого baseline-артефакта существует final-артефакт; phase не определяет ширину suite.
 1. **No blind changes**: код не меняется без предварительного плана (`RF-*`).
 1. **No untested changes**: каждый `RF-*` проверяется через `py-test-bot`.
 1. **Architecture gate**: финальный аудит (`py-audit-bot`) является обязательным gate перед завершением задачи.
