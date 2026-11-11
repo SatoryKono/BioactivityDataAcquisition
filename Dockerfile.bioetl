@@ -19,10 +19,10 @@ RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
     && apk add --no-cache \
         bash=5.3-r12 \
         ca-certificates-bundle=20260909-r3 \
-        glibc-2.44-locale-posix=2.44-r8 \
-        glibc-2.44=2.44-r8 \
-        ld-linux-2.44=2.44-r8 \
-        libcrypt1-2.44=2.44-r8 \
+        glibc-2.44-locale-posix=2.44-r16 \
+        glibc-2.44=2.44-r16 \
+        ld-linux-2.44=2.44-r16 \
+        libcrypt1-2.44=2.44-r16 \
         py3-pip-wheel=26.2.2-r2 \
         python-3.13=3.13.18_git20261030-r0 \
         uv=0.11.26-r0 \
@@ -67,10 +67,10 @@ USER 0
 RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
     && apk add --no-cache \
         ca-certificates-bundle=20260909-r3 \
-        glibc-2.44-locale-posix=2.44-r8 \
-        glibc-2.44=2.44-r8 \
-        ld-linux-2.44=2.44-r8 \
-        libcrypt1-2.44=2.44-r8 \
+        glibc-2.44-locale-posix=2.44-r16 \
+        glibc-2.44=2.44-r16 \
+        ld-linux-2.44=2.44-r16 \
+        libcrypt1-2.44=2.44-r16 \
         py3-pip-wheel=26.2.2-r2 \
         python-3.13=3.13.18_git20261030-r0 \
         tzdata=2026c-r0 \
