@@ -74,15 +74,23 @@ def test_runtime_ownership_keeps_devin_source_above_foreign_profiles() -> None:
     ownership = Path(
         "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md"
     ).read_text(encoding="utf-8")
-    precedence = ownership.split("## Precedence Model", 1)[1].split(
+    delegation = ownership.split("## Precedence Model", 1)[1].split(
         "## Sync Direction", 1
     )[0]
+    assert "sole repository precedence is `AGENTS.md`" in delegation
+    assert "1. active runtime" not in delegation
 
+    root = Path("AGENTS.md").read_text(encoding="utf-8")
+    precedence = root.split("## Canonical Precedence", 1)[1].split(
+        "## Instruction Scope", 1
+    )[0]
+
+    root_contract = precedence.index("repository-wide root contract")
     devin_runtime = precedence.index(".devin/agents/DEVIN-RUNTIME.md")
-    matching_profiles = precedence.index("matching runtime profiles and skills")
+    matching_profiles = precedence.index("runtime profiles and skills")
     devin_profile = precedence.index(".devin/agents/*/AGENT.md")
 
-    assert devin_runtime < matching_profiles < devin_profile
+    assert root_contract < devin_runtime < matching_profiles < devin_profile
 
 
 def test_no_tracked_devin_atomic_temp_config_duplicates() -> None:
