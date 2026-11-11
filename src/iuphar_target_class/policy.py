@@ -38,9 +38,9 @@ EC_CATEGORIES: tuple[tuple[int, str], ...] = (
 )
 UNSET = "не утверждено"
 NOT_RUN = "NOT_RUN"
-ROLE_COINCIDENCE = (
-    "владелец результата, исполнитель модуля и проверяющий эталонов — "
-    "одно лицо, Федор Новиков"
+ROLE_ASSIGNMENT = (
+    "владелец результата — Федор Новиков; исполнитель модуля и "
+    "проверяющий эталонов — Cursor, назначение владельца 2026-11-11"
 )
 
 
@@ -304,17 +304,17 @@ def policy_document() -> dict[str, object]:
         },
         "gold_cases": {
             "cases": [],
-            "checker": "Федор Новиков",
+            "checker": "Cursor",
             "reason": "закреплённый источник IUPHAR в этапе 0 отсутствует",
             "status": "не подтверждены",
         },
         "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13009",
         "l1_l2_independence": {
             "biological_sample_review": False,
-            "checker": "Федор Новиков",
+            "checker": "Cursor",
             "checked_against": "этап 0: provenance L1/L2 не установлено",
             "result": "производным независимым подтверждением не считается",
-            "role_coincidence": ROLE_COINCIDENCE,
+            "role_assignment": ROLE_ASSIGNMENT,
             "usage": "candidate_only",
         },
         "local_rules": [_rule_payload(rule) for rule in local_rules()],
@@ -340,7 +340,7 @@ def policy_document() -> dict[str, object]:
         },
         "plan": {"issued_on": "2026-11-10", "revision": "8", "version": "1"},
         "result_key": ["input_row_id", "snapshot_id"],
-        "role_coincidence": ROLE_COINCIDENCE,
+        "role_assignment": ROLE_ASSIGNMENT,
         "stage": "1",
         "stage_status": "recorded_without_biological_acceptance",
         "subclass_comparison": {

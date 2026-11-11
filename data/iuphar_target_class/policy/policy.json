@@ -96,7 +96,7 @@
   },
   "gold_cases": {
     "cases": [],
-    "checker": "Федор Новиков",
+    "checker": "Cursor",
     "reason": "закреплённый источник IUPHAR в этапе 0 отсутствует",
     "status": "не подтверждены"
   },
@@ -104,9 +104,9 @@
   "l1_l2_independence": {
     "biological_sample_review": false,
     "checked_against": "этап 0: provenance L1/L2 не установлено",
-    "checker": "Федор Новиков",
+    "checker": "Cursor",
     "result": "производным независимым подтверждением не считается",
-    "role_coincidence": "владелец результата, исполнитель модуля и проверяющий эталонов — одно лицо, Федор Новиков",
+    "role_assignment": "владелец результата — Федор Новиков; исполнитель модуля и проверяющий эталонов — Cursor, назначение владельца 2026-11-11",
     "usage": "candidate_only"
   },
   "local_rules": [
@@ -238,7 +238,7 @@
     "input_row_id",
     "snapshot_id"
   ],
-  "role_coincidence": "владелец результата, исполнитель модуля и проверяющий эталонов — одно лицо, Федор Новиков",
+  "role_assignment": "владелец результата — Федор Новиков; исполнитель модуля и проверяющий эталонов — Cursor, назначение владельца 2026-11-11",
   "stage": "1",
   "stage_status": "recorded_without_biological_acceptance",
   "subclass_comparison": {
