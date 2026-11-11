@@ -437,12 +437,11 @@ def validate_skill_routes(repo_root: Path = REPO_ROOT) -> list[Finding]:
         ]
         for path in paths:
             content = path.read_text(encoding="utf-8")
-            match = re.search(
-                r"Allowed skills:\s*(.*?)(?=\.\s|\n\s*\n|Allowed MCP:|$)", content, re.S
-            )
-            if match is None:
+            allowlist = content.partition("Allowed skills:")[2]
+            if not allowlist:
                 continue
-            entries = re.split(r"[,;]|\band\b", match.group(1))
+            allowlist = re.split(r"\.\s|\n\s*\n|Allowed MCP:", allowlist, maxsplit=1)[0]
+            entries = re.split(r"[,;]|\band\b", allowlist)
             for entry in entries:
                 name = entry.strip().removesuffix("opt-in").strip().strip("`.")
                 valid_name = re.fullmatch(r"[a-z][a-z0-9_-]*", name)
