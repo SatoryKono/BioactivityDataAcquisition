@@ -180,6 +180,13 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/__init__.py": (IUPHAR_STAGE0_TEST,),
     **dict.fromkeys(
         (
+            "src/iuphar_target_class/policy.py",
+            "data/iuphar_target_class/policy/policy.json",
+        ),
+        ("tests/unit/iuphar_target_class/test_policy.py",),
+    ),
+    **dict.fromkeys(
+        (
             "AGENTS.md",
             "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
         ),
