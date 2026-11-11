@@ -3,6 +3,11 @@
 from __future__ import annotations
 
 from pathlib import Path
+import csv
+import subprocess
+import sys
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 
 import pytest
 
@@ -105,7 +110,7 @@ def test_local_class_is_not_copied_into_iuphar_class() -> None:
 
 
 def test_batch_cli_writes_beside_the_example(tmp_path: Path) -> None:
-    source = _copy_example(tmp_path, "in:put.csv")
+    source = _copy_example(tmp_path, "in put.csv")
     code = main(
         [
             "--root",
@@ -144,3 +149,84 @@ def test_path_outside_root_is_rejected(tmp_path: Path) -> None:
             run_id="run-1",
         )
     assert list(root.iterdir()) == []
+
+
+def test_module_cli_runs_in_a_separate_process(tmp_path: Path) -> None:
+    source = _copy_example(tmp_path)
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "iuphar_target_class.delivery",
+            "--root",
+            str(tmp_path),
+            "--source",
+            str(source),
+            "--snapshot",
+            "snap",
+            "--rules",
+            "plan-v1-r8",
+            "--run-id",
+            "cli",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert (tmp_path / result.stdout.strip()).is_file()
+
+
+def test_csv_output_preserves_special_characters(tmp_path: Path) -> None:
+    source = tmp_path / "quoted.csv"
+    legacy = 'A, B "quoted"\nnext line'
+    with source.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=["input_row_id", "old_iuphar_class"])
+        writer.writeheader()
+        writer.writerow({"input_row_id": "row-1", "old_iuphar_class": legacy})
+    result = run_batch(
+        source, root=tmp_path, snapshot_id="snap", rules_version="v1", run_id="quoted"
+    )
+    with (tmp_path / result.normalized_name).open(
+        encoding="utf-8", newline=""
+    ) as handle:
+        rows = list(csv.DictReader(handle))
+    assert len(rows) == 1
+    assert rows[0]["legacy_iuphar_class"] == legacy
+    assert None not in rows[0]
+
+
+def test_concurrent_normalized_name_collision_preserves_one_winner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from iuphar_target_class import delivery
+
+    source = _copy_example(tmp_path)
+    barrier = Barrier(2)
+    serialize = delivery._csv_bytes
+
+    def synchronized_rows(rows: tuple[dict[str, str], ...]) -> bytes:
+        payload = serialize(rows)
+        barrier.wait(timeout=10)
+        return payload
+
+    monkeypatch.setattr(delivery, "_csv_bytes", synchronized_rows)
+
+    def publish(run_id: str):
+        return run_batch(
+            source, root=tmp_path, snapshot_id="snap", rules_version="v1", run_id=run_id
+        )
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        results = list(executor.map(publish, ("run:1", "run?1")))
+    assert sum(result.written for result in results) == 1
+    assert sorted(result.diagnostic or "written" for result in results) == [
+        "name_collision",
+        "written",
+    ]
+    assert results[0].normalized_name == results[1].normalized_name
+    assert (
+        (tmp_path / results[0].normalized_name)
+        .read_bytes()
+        .startswith(b"input_row_id,")
+    )

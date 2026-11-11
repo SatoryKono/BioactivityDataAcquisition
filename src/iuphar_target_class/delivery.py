@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import argparse
 import csv
+import os
 import sys
+import tempfile
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
 from .policy import PLAN_VERSION
-from .stage0.io import atomic_write_bytes, canonical_json_bytes
+from .stage0.io import canonical_csv_bytes, canonical_json_bytes
 
 _FORBIDDEN = set('\\/:*?"<>|')
 _COLUMNS = (
@@ -102,14 +104,13 @@ def run_batch(
     )
     directory = source.parent
     destination = directory / safe_name
-    if destination.exists():
+    manifest_name = f"{destination.stem}.manifest.json"
+    if destination.exists() or (directory / manifest_name).exists():
         return DeliveryResult(
             raw_name, safe_name, str(directory), False, "name_collision", None
         )
     rows = _read_rows(source, root=root)
     payload = _csv_bytes(tuple(output_row(row) for row in rows))
-    atomic_write_bytes(destination, payload, root=directory)
-    manifest_name = f"{destination.stem}.manifest.json"
     manifest = canonical_json_bytes(
         {
             "directory": str(directory),
@@ -121,7 +122,13 @@ def run_batch(
             "source_name": raw_name,
         }
     )
-    atomic_write_bytes(directory / manifest_name, manifest, root=directory)
+    try:
+        _atomic_write_new(destination, payload, root=directory)
+        _atomic_write_new(directory / manifest_name, manifest, root=directory)
+    except FileExistsError:
+        return DeliveryResult(
+            raw_name, safe_name, str(directory), False, "name_collision", None
+        )
     return DeliveryResult(
         raw_name, safe_name, str(directory), True, None, manifest_name
     )
@@ -150,10 +157,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "__main__":
-    raise SystemExit(main())
-
-
 def _read_rows(source: Path, *, root: Path) -> tuple[dict[str, str], ...]:
     """Read a CSV only after its resolved path stays inside ``root``."""
     resolved = _path_inside_root(source, root)
@@ -176,7 +179,27 @@ def _path_inside_root(path: Path, root: Path) -> Path:
 
 
 def _csv_bytes(rows: tuple[Mapping[str, str], ...]) -> bytes:
-    lines = [",".join(_COLUMNS)]
-    for row in rows:
-        lines.append(",".join(row[column] for column in _COLUMNS))
-    return ("\n".join(lines) + "\n").encode("utf-8")
+    return canonical_csv_bytes(_COLUMNS, [dict(row) for row in rows])
+
+
+def _atomic_write_new(path: Path, payload: bytes, *, root: Path) -> None:
+    """Publish complete bytes using a link that cannot replace an occupied name."""
+    destination = _path_inside_root(path, root)
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            dir=destination.parent,
+            prefix=f".{destination.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temporary = Path(handle.name)
+            handle.write(payload)
+        os.link(temporary, destination)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
