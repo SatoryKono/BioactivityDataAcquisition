@@ -297,7 +297,9 @@ def test_artifact_recorder_ignores_bronze_snapshot_payloads_that_are_not_lists()
 
 
 @pytest.mark.unit
-def test_attach_candidate_artifact_recorder_reports_missing_without_attach_method() -> None:
+def test_attach_candidate_artifact_recorder_reports_missing_without_attach_method() -> (
+    None
+):
     assert (
         _attach_candidate_artifact_recorder(
             object(),
