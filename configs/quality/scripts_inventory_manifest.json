@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-11T19:07:48.475421+00:00",
+  "generated_at": "2026-11-11T19:10:38.612882+00:00",
   "summary": {
     "total_scripts": 730,
     "status_counts": {
@@ -24538,7 +24538,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_la15_dashboard_hygiene.py",
-          "line": 7,
+          "line": 9,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import ("
         },
