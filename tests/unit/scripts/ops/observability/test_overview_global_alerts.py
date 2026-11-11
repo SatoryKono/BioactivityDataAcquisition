@@ -24,6 +24,7 @@ def _load(name: str) -> dict:
 
 
 def test_global_alerts_retain_donor_query_and_complete_list() -> None:
+    """Keep the summary visible and the independent full list untruncated."""
     overview = _load("overview-v2")
     incident = _load("incident-v1")
     panels = {p["id"]: p for p in overview["panels"]}
