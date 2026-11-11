@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -104,10 +105,48 @@ def test_acceptance_report_marks_only_executed_checks() -> None:
     for name, reason in NOT_RUN_REASONS.items():
         assert by_name[name]["status"] == "NOT_RUN"
         assert by_name[name]["reason"] == reason
-    assert by_name["test_resolution_matrix"]["status"] == "PASS"
-    assert by_name["test_rerun_new_file"]["status"] == "PASS"
-    assert by_name["test_name_collision_blocked"]["status"] == "PASS"
-    assert by_name["invariant_1_local_only"]["status"] == "PASS"
-    assert by_name["invariant_8_match_id"]["status"] == "PASS"
+    for name in (
+        *(node_id.rsplit("::", 1)[-1] for node_id in _NODE_IDS),
+        "invariant_1_local_only",
+        "invariant_4_candidates_kept",
+        "invariant_8_match_id",
+        "invariant_5_rerun",
+        "stage5_empty_reference",
+    ):
+        assert by_name[name]["status"] == "PASS", name
     assert by_name["w153_integration"]["status"] == "NOT_RUN"
     assert "не принимается" in str(report["statement"])
+
+
+@pytest.mark.parametrize(
+    "failed_check",
+    (
+        "invariant_4_candidates_kept",
+        "invariant_5_rerun",
+        "stage5_empty_reference",
+    ),
+)
+def test_acceptance_rejects_failed_computed_invariant(
+    monkeypatch: pytest.MonkeyPatch, failed_check: str
+) -> None:
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(args[0], 0),
+    )
+    module = sys.modules[__name__]
+    if failed_check == "invariant_4_candidates_kept":
+        row = replace(_row(), candidate_target_ids=("1", "2"))
+        monkeypatch.setattr(module, "_row", lambda: row)
+    elif failed_check == "invariant_5_rerun":
+        monkeypatch.setattr(module, "content_equal", lambda left, right: False)
+    else:
+        empty = compare_stage0(Stage0Reference("stage0", 0, ()), ())
+        monkeypatch.setattr(
+            module,
+            "compare_stage0",
+            lambda reference, python_rows: replace(empty, metrics={}),
+        )
+    with pytest.raises(AssertionError) as failure:
+        test_acceptance_report_marks_only_executed_checks()
+    assert failed_check in str(failure.value)
