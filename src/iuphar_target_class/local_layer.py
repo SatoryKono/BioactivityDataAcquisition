@@ -140,7 +140,7 @@ def infer_from_annotations(
 def collect_prediction_candidates(
     predictions: tuple[Prediction, ...],
 ) -> tuple[tuple[_Support, ...], tuple[str, ...], tuple[Diagnostic, ...]]:
-    """Unknown or IUPHAR-derived predictions stay candidates."""
+    """Predictions cannot supply the explicit rule for Other Protein Target."""
     support: list[_Support] = []
     candidates: list[str] = []
     diagnostics: list[Diagnostic] = []
@@ -162,6 +162,18 @@ def collect_prediction_candidates(
                     "dependent_prediction",
                     "warning",
                     f"{prediction.layer} is derived from the IUPHAR result",
+                    evidence_id=prediction.evidence_id,
+                )
+            )
+            continue
+        if prediction.predicted_class == "Other Protein Target":
+            candidates.append("candidate_only")
+            diagnostics.append(
+                Diagnostic(
+                    "prediction_requires_explicit_rule",
+                    "info",
+                    "Other Protein Target prediction stays candidate-only; "
+                    "a matching explicit local rule must supply support",
                     evidence_id=prediction.evidence_id,
                 )
             )
