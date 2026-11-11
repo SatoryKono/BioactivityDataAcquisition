@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source_reviews": {
+    "src/bioetl/composition/runtime_builders/_effective_config_secret_support.py": "Reviewed helper renaming (secret_is_present/secret_value_hash) with no resource acquisition, ownership, or cleanup changes.",
+    "src/bioetl/composition/runtime_builders/run_manifest_data_roots.py": "Reviewed helper renaming (prepare_private_runtime_dir) and callers; import_module acquisition site and I/O ownership unchanged."
+  },
+  "line_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "reference_moves": [],
+  "catalog_ref": "f5a4f10c0c6d5d391d683f7ee9bb5c8b2f77e322",
+  "source_ref": "f5a4f10c0c6d5d391d683f7ee9bb5c8b2f77e322"
+}
