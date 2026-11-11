@@ -180,13 +180,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/__init__.py": (IUPHAR_STAGE0_TEST,),
     **dict.fromkeys(
         (
-            "src/iuphar_target_class/policy.py",
-            "data/iuphar_target_class/policy/policy.json",
-        ),
-        ("tests/unit/iuphar_target_class/test_policy.py",),
-    ),
-    **dict.fromkeys(
-        (
             "AGENTS.md",
             "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
         ),
@@ -196,6 +189,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
+    ),
+    "src/iuphar_target_class/policy.py": (
+        "tests/unit/iuphar_target_class/test_policy.py",
+    ),
+    "data/iuphar_target_class/policy/policy.json": (
+        "tests/unit/iuphar_target_class/test_policy.py",
     ),
     "scripts/ai/codex/native_runtime_contract.py": (
         "tests/architecture/test_codex_native_runtime.py",

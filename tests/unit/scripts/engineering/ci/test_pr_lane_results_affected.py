@@ -104,7 +104,7 @@ def test_iuphar_source_and_data_keep_bounded_stage0_owners(tmp_path: Path) -> No
         )
 
 
-def test_iuphar_policy_and_data_keep_bounded_owners(tmp_path: Path) -> None:
+def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
     owner = tmp_path / "tests/unit/iuphar_target_class/test_policy.py"
     owner.parent.mkdir(parents=True)
     owner.write_text("def test_policy():\n    assert True\n", encoding="utf-8")
@@ -117,10 +117,12 @@ def test_iuphar_policy_and_data_keep_bounded_owners(tmp_path: Path) -> None:
     )
     assert report["selected"] == ["tests/unit/iuphar_target_class/test_policy.py"]
     assert report["covers_full_suite"] is False
-    with pytest.raises(ValueError, match="unmapped paths"):
-        build_shadow_compare(
-            ["data/iuphar_target_class/policy/unowned.json"], repo_root=tmp_path
-        )
+    for unowned in (
+        "src/iuphar_target_class/unmapped.py",
+        "data/iuphar_target_class/policy/unowned.json",
+    ):
+        with pytest.raises(ValueError, match="unmapped paths"):
+            build_shadow_compare([unowned], repo_root=tmp_path)
 
 
 def test_file_policy_doc_keeps_structure_catalog_owners() -> None:

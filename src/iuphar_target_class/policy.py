@@ -20,6 +20,8 @@ WORKING_CLASSES: tuple[str, ...] = (
     "Other Protein Target",
 )
 PLAN_SOURCE = "план v1 r8 §2.1"
+PLAN_SECTION_5 = "план v1 r8 §5"
+DOCUMENTARY_STATUS = "подтверждено документально"
 PLAN_VERSION = "plan-v1-r8"
 BASE_MISSING_MARKERS: tuple[str, ...] = (
     "#n/a",
@@ -38,8 +40,6 @@ EC_CATEGORIES: tuple[tuple[int, str], ...] = (
 )
 UNSET = "не утверждено"
 NOT_RUN = "NOT_RUN"
-_DOCUMENTARY_SOURCE = "план v1 r8 §5"
-_DOCUMENTARY_STATUS = "подтверждено документально"
 ROLE_ASSIGNMENT = (
     "владелец результата — Федор Новиков; исполнитель модуля и "
     "проверяющий эталонов — Cursor, назначение владельца 2026-11-11"
@@ -266,22 +266,22 @@ def policy_document() -> dict[str, object]:
                     "as_of": "2026-11-09",
                     "item": "api_key_required",
                     "note": "не проверенный контракт сервиса",
-                    "source": _DOCUMENTARY_SOURCE,
-                    "status": _DOCUMENTARY_STATUS,
+                    "source": PLAN_SECTION_5,
+                    "status": DOCUMENTARY_STATUS,
                 },
                 {
                     "as_of": "2026-11-09",
                     "item": "header_GTP-API-Key",
                     "note": "не проверенный контракт сервиса",
-                    "source": _DOCUMENTARY_SOURCE,
-                    "status": _DOCUMENTARY_STATUS,
+                    "source": PLAN_SECTION_5,
+                    "status": DOCUMENTARY_STATUS,
                 },
                 {
                     "as_of": "2026-11-09",
                     "item": "rate_about_60_per_minute",
                     "note": "ориентир документации, не измеренный лимит",
-                    "source": _DOCUMENTARY_SOURCE,
-                    "status": _DOCUMENTARY_STATUS,
+                    "source": PLAN_SECTION_5,
+                    "status": DOCUMENTARY_STATUS,
                 },
             ],
             "operational_check": {
