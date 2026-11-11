@@ -77,7 +77,7 @@ def test_runtime_hook_docs_have_bounded_routes_without_accepting_unknown_docs() 
         "tests/architecture/test_devin_runtime_no_dead_script_refs.py",
     }
     with pytest.raises(ValueError, match="unmapped paths"):
-        build_shadow_compare([*paths, ".codex/agents/UNKNOWN.md"], repo_root=repo_root)
+        build_shadow_compare([*paths, "docs/05-operations/runbooks/unknown-hook-note.md"], repo_root=repo_root)
 
 
 def test_normative_index_selects_precedence_guards_and_rejects_unknown_peer() -> None:
