@@ -53,8 +53,6 @@ def test_unmapped_path_still_has_no_pytest_target(
     assert "tests gate has no affected pytest target" in capsys.readouterr().err
 
 
-
-
 def test_dashboard_ux_report_family_keeps_bounded_freshness_guards() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
@@ -70,8 +68,6 @@ def test_dashboard_ux_report_family_keeps_bounded_freshness_guards() -> None:
         build_shadow_compare(
             ["docs/reports/UNKNOWN/2099-01-01.md"], repo_root=repo_root
         )
-
-
 
 
 def test_runtime_hook_docs_have_bounded_routes_without_accepting_unknown_docs() -> None:

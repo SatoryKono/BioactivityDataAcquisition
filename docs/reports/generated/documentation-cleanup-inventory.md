@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4180 |
-| Tracked doc-like files | 4180 |
+| Doc-like files | 4181 |
+| Tracked doc-like files | 4181 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4180 |
+| tracked | 4181 |
 
 ## Lifecycle Counts
 
