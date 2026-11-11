@@ -1,5 +1,7 @@
 """Evaluate generated freshness queries at boundaries with the Prometheus engine."""
 
+from __future__ import annotations
+
 import json
 import os
 from pathlib import Path

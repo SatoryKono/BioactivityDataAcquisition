@@ -1,5 +1,7 @@
 """Exercise the shipped Infinity selector expression using the JSONata engine."""
 
+from __future__ import annotations
+
 import json
 import os
 import shutil
