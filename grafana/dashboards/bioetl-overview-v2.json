@@ -604,7 +604,7 @@
         "x": 15,
         "y": 2,
         "w": 9,
-        "h": 5
+        "h": 3
       },
       "datasource": {
         "type": "datasource",
@@ -1026,7 +1026,7 @@
       "title": "Review Selected Run Status",
       "gridPos": {
         "x": 15,
-        "y": 7,
+        "y": 5,
         "w": 9,
         "h": 5
       },
@@ -1426,9 +1426,9 @@
       "title": "Review Run Identity",
       "gridPos": {
         "x": 15,
-        "y": 12,
+        "y": 10,
         "w": 9,
-        "h": 6
+        "h": 8
       },
       "description": "SELECTED RUN · Pipeline and full Run ID identify the saved run. Run Type and Started at (with saved UTC offset) characterize its execution. SELECT RUN means no selected run context. Missing saved values are Not recorded; request failures remain QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
       "datasource": {
@@ -1541,7 +1541,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 20,
+        "y": 18,
         "w": 24,
         "h": 1
       },
@@ -1553,7 +1553,7 @@
           "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state.",
           "gridPos": {
             "x": 0,
-            "y": 21,
+            "y": 19,
             "w": 24,
             "h": 6
           },
@@ -1888,7 +1888,7 @@
       "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state. Fleet alert urgency is independent of the saved run verdict. Summary shows up to two highest-priority alerts; open Incident Workspace or Browse Global Alerts for all rows.",
       "gridPos": {
         "x": 0,
-        "y": 21,
+        "y": 19,
         "w": 24,
         "h": 5
       },
@@ -2217,7 +2217,7 @@
       "title": "Review Provider Evidence",
       "gridPos": {
         "x": 0,
-        "y": 26,
+        "y": 24,
         "w": 15,
         "h": 5
       },
@@ -2420,7 +2420,7 @@
       "title": "Review Provider Check",
       "gridPos": {
         "x": 15,
-        "y": 26,
+        "y": 24,
         "w": 9,
         "h": 5
       },
@@ -2598,7 +2598,7 @@
       "title": "Inspect Selected Run Stages",
       "gridPos": {
         "x": 0,
-        "y": 31,
+        "y": 29,
         "w": 15,
         "h": 6
       },
@@ -3065,7 +3065,7 @@
       "title": "Review Contract Exclusions",
       "gridPos": {
         "x": 15,
-        "y": 31,
+        "y": 29,
         "w": 9,
         "h": 6
       },
@@ -3271,7 +3271,7 @@
       "description": "SELECTED RUN · Persisted FK comparison in the exact parent workflow. selected-snapshot means absence only inside the pinned reference, not absence from the complete provider. Expiry can affect all selected rows while execution succeeds; remaining rows and scope stay explicit. Missing evidence is UNKNOWN and failed requests remain QUERY ERROR. Saved Evidence and Replay Readiness retain their independent checks. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. An empty comparison is not a blank table: не применимо means no Run ID is selected, нет записей means no runs are in scope, нет данных means FK comparison rows were not returned.",
       "gridPos": {
         "x": 0,
-        "y": 37,
+        "y": 35,
         "w": 24,
         "h": 12
       },

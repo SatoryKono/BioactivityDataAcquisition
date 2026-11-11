@@ -10,7 +10,7 @@ its saved verdict. Incident Workspace owns incident triage and fleet diagnostics
 
 ## Monitor Global Alerts — LA-06 (#12940)
 
-Panel `2005` is an always-expanded root table at `y=21`, copied by
+Panel `2005` is an always-expanded root table at `y=19`, copied by
 `render_nav_bus` from Incident Workspace's global alert donor. It reads the
 existing `bioetl_incident_global_alerts` recording rule, which evaluates the
 same expression as the donor. Its query does not

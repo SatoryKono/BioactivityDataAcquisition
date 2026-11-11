@@ -18,15 +18,21 @@ def stamp_run_selection_context(payload: dict) -> None:
     grid = dict(panel["gridPos"])
     old_bottom = grid["y"] + grid["h"]
     delta = 5 - grid["h"]
-    for other in payload["panels"]:
-        if other["gridPos"]["y"] >= old_bottom:
-            other["gridPos"]["y"] += delta
-            _shift_children(other, delta)
-        elif other is not panel and other["gridPos"]["y"] == grid["y"]:
-            other["gridPos"]["h"] = 5
+    if payload["uid"] == "bioetl-dq-v2":
+        for other in payload["panels"]:
+            if other["gridPos"]["y"] >= old_bottom:
+                other["gridPos"]["y"] += delta
+                _shift_children(other, delta)
+        # Accounting already paginates. Keep its row budget and all values;
+        # the first page adapts to the space left by the context block.
+        next(p for p in payload["panels"] if p["id"] == 9403)["gridPos"]["h"] = 6
+    else:
+        # Only the domains under the left-hand banner need to move. Preserve
+        # the right-hand status/identity stack so all five identity rows fit.
+        next(p for p in payload["panels"] if p["id"] == 9002)["gridPos"]["y"] = (
+            grid["y"] + 5
+        )
     grid["h"] = 5
-    compact_id = 9300 if payload["uid"] == "bioetl-overview-v2" else 9403
-    next(p for p in payload["panels"] if p["id"] == compact_id)["gridPos"]["h"] = 6
     panel.clear()
     panel.update(
         {
