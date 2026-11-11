@@ -10,7 +10,7 @@ its saved verdict. Incident Workspace owns incident triage and fleet diagnostics
 
 ## Monitor Global Alerts — LA-06 (#12940)
 
-Panel `2005` is an always-expanded root table at `y=19`, copied by
+Panel `2005` is an always-expanded root table at `y=18`, copied by
 `render_nav_bus` from Incident Workspace's global alert donor. It reads the
 existing `bioetl_incident_global_alerts` recording rule, which evaluates the
 same expression as the donor. Its query does not
@@ -20,20 +20,23 @@ fleet alerts remain visible even when no saved run can be assessed. The
 `Open Incident Workspace (all global alerts)` action resets the destination to
 all workflows/pipelines/run types and Run ID `-`, retaining the time range.
 
-Collapsed row `32005` holds full table `22005`. It reads raw frames from local
-panel `2005` through the Dashboard datasource with `withTransforms=false` and
-has no row limit. Expanding it makes every alert available without changing the
-selected-run context. Provider and stage blocks move together six rows down;
+Collapsed row `32005` is last, after the saved-run panels, and holds full table
+`22005`. Both alert tables independently read `bioetl_incident_global_alerts`;
+the full table has no row limit. A Dashboard-datasource consumer inside a
+collapsed Grafana Scenes row can hide its source summary, so this pair does not
+share a panel query runner. Expanding the full list makes every alert available
+without changing the selected-run context. Provider and stage blocks move together five rows down;
 their sizes, relative placement, queries and the upper saved-run layout remain.
 
 Local validation covers JSON, query independence, donor parity, complete-list
 access, non-overlapping geometry and regeneration. Live v2 rendering with
 BioETLPipelineInfrastructureValidationFailed and BioETLDataFreshnessLagCritical
-is NOT_VERIFIABLE under owner decision 175. Isolated 100000 remains an operating
-legacy generation; its Overview JSON/generator is absent from this checkout.
-Updating its assets requires the actual export, followed by import and the same
-no-selection critical-alert and navigation checks. Neither generation has been
-live-validated by this change.
+was recorded as NOT_VERIFIABLE under owner decision 175 for the original LA-06
+delivery. Isolated 100000 was then an operating legacy generation without an
+Overview JSON/generator in this checkout; neither generation had been
+live-validated by that delivery. The owner subsequently confirmed retirement of
+Isolated. Current v2 acceptance must inspect the complete page with the full-list
+row collapsed and no selected Run ID, in addition to individual panel renders.
 
 ## Review Run Identity
 
@@ -111,12 +114,12 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 9002 | Review Run Domains | table |
 | 9603 | Review Selected Run Status | table |
 | 9300 | Review Run Identity | table |
-| 32005 | Browse Global Alerts | row |
-| 22005 | Monitor Global Alerts (Full) | table |
 | 2005 | Monitor Global Alerts | table |
 | 9480 | Review Provider Evidence | table |
 | 9481 | Review Provider Check | stat |
 | 9460 | Inspect Selected Run Stages | table |
 | 9482 | Review Contract Exclusions | canvas |
 | 9483 | Review FK Comparison Scope | table |
+| 32005 | Browse Global Alerts | row |
+| 22005 | Monitor Global Alerts (Full) | table |
 <!-- END SHIPPED PANEL INVENTORY -->

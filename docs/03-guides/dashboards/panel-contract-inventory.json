@@ -16,7 +16,7 @@
   "target_counts": {
     "http": 14,
     "loki": 0,
-    "promql": 109,
+    "promql": 110,
     "tempo": 0,
     "unknown": 0
   },
@@ -3756,6 +3756,39 @@
       "ref_id": "A",
       "runbook_urls": [],
       "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-overview-v2",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": true,
+      "empty_state": "coverage_gap",
+      "formula": "bioetl_incident_global_alerts",
+      "kind": "promql",
+      "panel_id": 22005,
+      "panel_title": "Monitor Global Alerts (Full)",
+      "query": "bioetl_incident_global_alerts",
+      "query_tokens": [
+        "bioetl_incident_global_alerts"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "gray",
+          "value": null
+        },
+        {
+          "color": "#9a3412",
+          "value": 1
+        },
+        {
+          "color": "#9f1239",
+          "value": 2
+        }
+      ],
       "unit": "none"
     },
     {
