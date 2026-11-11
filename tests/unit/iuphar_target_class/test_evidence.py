@@ -213,7 +213,11 @@ def test_family_mapping_chain_uses_matching_provider_annotation(
     assert ("raw_annotation" in defects) is (annotation_target != "1")
     assert "raw_annotation" in class_chain_defects(row)
     if annotation_target == "1":
-        require_class_chain(row, annotation=annotation)
+        require_class_chain(
+            row,
+            annotation=annotation,
+            table=build_evidence_table(_drafts(), run_id="run-1"),
+        )
         assert "raw_annotation" in class_chain_defects(
             row, annotation=replace(annotation, family_ids=())
         )
@@ -269,3 +273,50 @@ def test_class_chain_requires_mapping_evidence() -> None:
         iuphar_mapping_version="plan-v1-r8",
     )
     assert "mapping_evidence" in class_chain_defects(row)
+
+
+def _supported_direct_row() -> ClassificationResult:
+    return replace(
+        _classified_row(),
+        iuphar_type_raw="gpcr",
+        iuphar_mapping_rule_id="class:Receptor",
+        iuphar_mapping_version="plan-v1-r8",
+        match_evidence_ids=build_evidence_table(
+            _drafts(), run_id="run-1"
+        ).match_evidence_ids,
+    )
+
+
+def test_duplicate_record_ids_are_rejected_before_reference_resolution() -> None:
+    table = build_evidence_table(_drafts(), run_id="run-1")
+    duplicate = replace(table.records[0], content="contradictory content")
+    with pytest.raises(ContractDefect, match="duplicate.*record"):
+        require_resolvable(replace(table, records=(*table.records, duplicate)))
+
+
+def test_type_chain_rejects_annotation_for_another_target() -> None:
+    annotation = ProviderAnnotation("other-target", "gpcr", (), None, "human", None)
+    assert "raw_annotation" in class_chain_defects(
+        _supported_direct_row(), annotation=annotation
+    )
+
+
+@pytest.mark.parametrize("references", ["other-row", "missing"])
+def test_class_chain_rejects_foreign_or_missing_row_references(references: str) -> None:
+    drafts = tuple(replace(draft, input_row_id="row-2") for draft in _drafts())
+    table = build_evidence_table(drafts, run_id="run-1")
+    row = replace(
+        _supported_direct_row(),
+        match_evidence_ids=table.match_evidence_ids
+        if references == "other-row"
+        else ("missing",),
+    )
+    with pytest.raises(ContractDefect, match="row evidence"):
+        require_class_chain(row, table=table)
+
+
+def test_class_chain_requires_a_table_and_accepts_own_row_references() -> None:
+    row = _supported_direct_row()
+    with pytest.raises(ContractDefect, match="evidence table"):
+        require_class_chain(row)
+    require_class_chain(row, table=build_evidence_table(_drafts(), run_id="run-1"))

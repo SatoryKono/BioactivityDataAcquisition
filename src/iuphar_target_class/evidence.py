@@ -117,6 +117,10 @@ def unresolved_references(table: EvidenceTable) -> tuple[str, ...]:
 
 def require_resolvable(table: EvidenceTable) -> None:
     """Raise when a list id has no child record in the same run."""
+    record_ids = tuple(record.evidence_id for record in table.records)
+    if len(record_ids) != len(set(record_ids)):
+        message = "duplicate evidence record id"
+        raise ContractDefect(message)
     missing = unresolved_references(table)
     if missing:
         message = "unresolvable evidence reference: " + ", ".join(missing)
@@ -128,7 +132,7 @@ def require_resolvable(table: EvidenceTable) -> None:
 def class_chain_defects(
     row: ClassificationResult, *, annotation: ProviderAnnotation | None = None
 ) -> tuple[str, ...]:
-    """Invariant 9. A class needs every link from the matched target."""
+    """Check structural links; require_class_chain also verifies child records."""
     if not row.iuphar_class:
         return ()
     defects: list[str] = []
@@ -140,7 +144,11 @@ def class_chain_defects(
         and row.iuphar_annotation_status == "partial"
         and bool(annotation.family_ids)
     )
-    if not row.snapshot_id or not (row.iuphar_type_raw or family_evidence):
+    if (
+        not row.snapshot_id
+        or (annotation is not None and annotation.target_id != row.matched_target_id)
+        or not (row.iuphar_type_raw or family_evidence)
+    ):
         defects.append("raw_annotation")
     if not row.iuphar_mapping_rule_id or not row.iuphar_mapping_version:
         defects.append("mapping_rule")
@@ -150,13 +158,37 @@ def class_chain_defects(
 
 
 def require_class_chain(
-    row: ClassificationResult, *, annotation: ProviderAnnotation | None = None
+    row: ClassificationResult,
+    *,
+    annotation: ProviderAnnotation | None = None,
+    table: EvidenceTable | None = None,
 ) -> None:
     """Raise when a non-empty IUPHAR class has a broken provenance chain."""
     defects = class_chain_defects(row, annotation=annotation)
     if defects:
         message = "class chain is incomplete: " + ", ".join(defects)
         raise ContractDefect(message)
+    if row.iuphar_class:
+        _require_row_evidence(row, table)
+
+
+def _require_row_evidence(
+    row: ClassificationResult, table: EvidenceTable | None
+) -> None:
+    if table is None:
+        message = "class chain requires an evidence table"
+        raise ContractDefect(message)
+    require_resolvable(table)
+    records = {record.evidence_id: record for record in table.records}
+    for evidence_id in (*row.match_evidence_ids, *row.local_evidence_ids):
+        record = records.get(evidence_id)
+        if (
+            record is None
+            or record.input_row_id != row.input_row_id
+            or record.run_id != table.run_id
+        ):
+            message = f"row evidence does not resolve to this input row and run: {evidence_id}"
+            raise ContractDefect(message)
 
 
 def content_equal(left: StoredRun, right: StoredRun) -> bool:
