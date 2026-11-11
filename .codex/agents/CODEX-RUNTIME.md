@@ -61,6 +61,12 @@ identity to repository, commit, branch, worktree, task, and source references.
 
 ## Native Project Discovery
 
+Hook discovery: `python scripts/ai/codex/doctor.py hooks --no-write --json`.
+Exit 2 means installed capability is NOT_PROVEN. Discovery never runs hooks or
+runtime commands. See `docs/05-operations/runbooks/ai-hook-compatibility.md` for
+platform observations and vendor contracts; documentation alone cannot enable
+a native adapter.
+
 - `.codex/config.toml` contains portable trusted-project settings only.
 - `.codex/agents/py-*.toml` exposes the six governed profiles to native Codex
   custom-agent discovery. Each thin descriptor routes to its matching Markdown

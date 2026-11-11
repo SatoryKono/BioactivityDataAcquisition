@@ -324,7 +324,7 @@ def _governed_report_path(repo_root: Path, requested: Path) -> Path:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "mode", choices=("static", "mcp", "all"), nargs="?", default="static"
+        "mode", choices=("static", "hooks", "mcp", "all"), nargs="?", default="static"
     )
     parser.add_argument("--profile", choices=sorted(setup_mcp.MCP_PROFILES))
     parser.add_argument("--timeout", type=float, default=1.0)
@@ -343,6 +343,14 @@ def main() -> int:
     parser.add_argument("--repo-root", type=Path, default=REPO_ROOT)
     args = parser.parse_args()
     repo_root = args.repo_root.resolve()
+    if args.mode == "hooks":
+        if args.output is not None:
+            parser.error("hooks mode is read-only; --output is not supported")
+        from scripts.ai.codex.hook_inventory import collect
+
+        print(json.dumps(collect(repo_root), indent=2))
+        # Discovery is evidence, not proof of installed runtime capability.
+        return 2
     profile = args.profile or setup_mcp.DEFAULT_LOCAL_PROFILE
     if args.no_write and args.output is not None:
         parser.error("--no-write and --output are mutually exclusive")

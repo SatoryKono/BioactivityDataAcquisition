@@ -1,0 +1,179 @@
+"""Read-only hook discovery; never execute runtime commands or hook contents.
+
+Only local Git metadata queries are executed. Vendor documentation describes
+capabilities, not proof that a particular installed build implements them.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tomllib
+from typing import Any
+
+RUNTIMES = {
+    "codex": (
+        ".codex/config.toml",
+        ".codex/hooks.json",
+        "https://developers.openai.com/codex/hooks",
+    ),
+    "junie": (
+        ".junie/config.json",
+        ".junie/config.json",
+        "https://junie.jetbrains.com/docs/junie-cli-hooks.html",
+    ),
+    "devin": (
+        ".devin/config.json",
+        ".devin/hooks.v1.json",
+        "https://docs.devin.ai/cli/extensibility/hooks/overview",
+    ),
+    "opencode": (
+        "opencode.json",
+        ".opencode/plugins",
+        "https://opencode.ai/docs/plugins/",
+    ),
+}
+GIT_HOOKS = ("pre-commit", "pre-push", "commit-msg", "reference-transaction")
+MAX_BYTES = 1024 * 1024
+
+
+def _read_config(path: Path) -> dict[str, Any]:
+    if path.stat().st_size > MAX_BYTES:
+        raise ValueError("configuration exceeds diagnostic size limit")
+    raw = path.read_text(encoding="utf-8-sig")
+    data = tomllib.loads(raw) if path.suffix == ".toml" else json.loads(raw)
+    if not isinstance(data, dict):
+        raise ValueError("configuration must be an object")
+    return data
+
+
+def _file_evidence(path: Path) -> dict[str, Any]:
+    result: dict[str, Any] = {"path": str(path), "present": False}
+    try:
+        result["present"] = path.exists()
+        if path.is_file():
+            if path.stat().st_size > MAX_BYTES:
+                result["status"] = "ERROR"
+            else:
+                result["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+    except OSError:
+        result["status"] = "ERROR"
+    return result
+
+
+def _git(root: Path, *args: str) -> str:
+    completed = subprocess.run(
+        ["git", "--no-optional-locks", "-C", str(root), *args],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=3,
+        check=False,
+    )
+    if completed.returncode:
+        # Do not echo configuration values or arbitrary stderr to diagnostics.
+        raise ValueError("Git metadata query failed")
+    return completed.stdout.strip()
+
+
+def git_inventory(root: Path) -> dict[str, Any]:
+    """Resolve effective hooks directory with Git, including linked worktrees."""
+    try:
+        raw = _git(root, "rev-parse", "--path-format=absolute", "--git-path", "hooks")
+        hooks = Path(raw)
+        if not hooks.is_absolute():
+            hooks = root / hooks
+        records = []
+        for name in GIT_HOOKS:
+            path = hooks / name
+            item = _file_evidence(path)
+            candidate = path.is_file() and os.access(path, os.X_OK)
+            item.update(name=name, discoverable=candidate, execution="NOT_PROVEN")
+            records.append(item)
+        return {
+            "status": "OBSERVED",
+            "directory": str(hooks.resolve()),
+            "hooks": records,
+        }
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return {
+            "status": "ERROR",
+            "reason": "effective Git hooks directory unavailable",
+        }
+
+
+def runtime_inventory(root: Path, name: str, command: str | None) -> dict[str, Any]:
+    """Report command resolution without interpreting or running launchers."""
+    config_name, hook_name, documentation = RUNTIMES[name]
+    result: dict[str, Any] = {
+        "runtime": name,
+        "command": command,
+        "resolved_command": str(Path(command).resolve()) if command else None,
+        "version": None,
+        "version_status": "NOT_PROVEN" if command else "MISSING",
+        "version_method": "requires binary-bound vendor metadata or explicit version evidence",
+        "capability_status": "NOT_PROVEN",
+        "enabled_by_diagnostic": False,
+        "documentation": documentation,
+        "execution": "NOT_PROVEN",
+        "scope": "current OS/process PATH only; does not inspect another WSL distribution",
+        "config": _file_evidence(root / config_name),
+        "hook_surface": _file_evidence(root / hook_name),
+        "configured_events": [],
+    }
+    try:
+        path = root / config_name
+        config = _read_config(path) if path.is_file() else {}
+        hook_path = root / hook_name
+        hook_config = _read_config(hook_path) if hook_path.is_file() else {}
+        hooks = hook_config.get("hooks", hook_config if name == "devin" else {})
+        result["configured_events"] = sorted(hooks) if isinstance(hooks, dict) else []
+        result["inline_hooks_present"] = bool(config.get("hooks"))
+        result["plugins_configured"] = bool(
+            config.get("plugin") or config.get("plugins")
+        )
+        if name == "junie":
+            result["discovery_note"] = (
+                "project hooks require explicit --config-location; EAP capability must be verified"
+            )
+        elif name == "opencode":
+            result["discovery_note"] = (
+                "subordinate surface; plugin APIs must match installed major version"
+            )
+        else:
+            result["discovery_note"] = (
+                "trust, managed policy, user/session/plugin layers require separate verification"
+            )
+    except (OSError, ValueError):
+        result["config_status"] = "ERROR"
+    else:
+        result["config_status"] = "OBSERVED"
+    return result
+
+
+def collect(root: Path) -> dict[str, Any]:
+    """Collect local evidence; unknown installed capabilities never become PASS."""
+    runtimes = [runtime_inventory(root, name, shutil.which(name)) for name in RUNTIMES]
+    return {
+        "schema_version": 1,
+        "status": "NOT_PROVEN",
+        "platform": sys.platform,
+        "python": sys.executable,
+        "python_version": sys.version.split()[0],
+        "repo_root": str(root.resolve()),
+        "git": git_inventory(root),
+        "runtimes": runtimes,
+        "layers": {
+            "git_configuration": _file_evidence(root / ".pre-commit-config.yaml"),
+            "command_wrapper": _file_evidence(
+                root / "scripts/engineering/dev/pretest_guardrails.sh"
+            ),
+            "ci": _file_evidence(root / ".github/workflows/skills-consistency.yml"),
+        },
+    }
