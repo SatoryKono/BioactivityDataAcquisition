@@ -202,3 +202,66 @@ def test_matched_id_invariant() -> None:
         match_evidence_ids=(),
     )
     assert enforce_match_invariant(broken).match_status == "contract_error"
+
+
+@pytest.mark.parametrize("field", ["name", "synonyms"])
+def test_name_channels_respect_query_species(field: str) -> None:
+    catalog = (
+        _target("1", gene="GENE", species="human", name="shared", synonym="shared"),
+        _target("2", gene="GENE", species="mouse", name="shared", synonym="shared"),
+    )
+    query = _query(
+        gene_symbol="GENE",
+        organism="human",
+        **{field: "shared" if field == "name" else ("shared",)},
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "matched"
+    assert result.matched_target_id == "1"
+    assert result.candidate_target_ids == ("1",)
+
+
+def test_species_filter_cannot_hide_exact_identifier_conflict() -> None:
+    catalog = (
+        _target("1", uniprot="P11111", species="human"),
+        _target("2", uniprot="P22222", species="mouse"),
+    )
+    result = resolve_match(
+        _query(target_id="1", uniprot_ids=("P22222",), organism="human"),
+        catalog,
+        snapshot_complete=True,
+    )
+    assert result.match_status == "identity_conflict"
+    assert result.matched_target_id is None
+    assert result.candidate_target_ids == ("1", "2")
+
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        _query(target_id="missing", uniprot_ids=("P11111",)),
+        _query(target_id="1", uniprot_ids=("missing",)),
+        _query(uniprot_ids=("P11111", "missing")),
+    ],
+)
+def test_every_supplied_identifier_must_support_a_match(query: MatchQuery) -> None:
+    result = resolve_match(
+        query, (_target("1", uniprot="P11111"),), snapshot_complete=True
+    )
+    assert result.match_status == "ambiguous"
+    assert result.matched_target_id is None
+
+
+def test_gene_without_species_cannot_hide_an_existing_identity_conflict() -> None:
+    catalog = (
+        _target("1", uniprot="P11111", species="human"),
+        _target("2", uniprot="P22222", species="human"),
+    )
+    result = resolve_match(
+        _query(target_id="1", uniprot_ids=("P22222",), gene_symbol="GENE"),
+        catalog,
+        snapshot_complete=True,
+    )
+    assert result.match_status == "identity_conflict"
+    assert result.matched_target_id is None
+    assert result.candidate_target_ids == ("1", "2")

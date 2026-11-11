@@ -112,6 +112,8 @@ def collect_candidates(
     wanted_names = {query.name} if query.name is not None else set()
     wanted_synonyms = set(query.synonyms)
     for target in catalog:
+        if query.organism is not None and target.species != query.organism:
+            continue
         if set(target.names) & wanted_names:
             found.append(Candidate(target.target_id, EXACT_NAME))
         if set(target.synonyms) & wanted_synonyms:
@@ -167,17 +169,20 @@ def _decide(
     gene_blocked = query.organism is None and (
         query.gene_symbol is not None or query.gene_id is not None
     )
-    exact_channels: list[tuple[str, tuple[str, ...]]] = []
-    if query.target_id is not None:
-        exact_channels.append((EXPLICIT, explicit))
-    if query.uniprot_ids:
-        exact_channels.append((UNIPROT, uniprot))
-    if query.gene_id is not None and not gene_blocked:
-        exact_channels.append((GENE_ID, gene_id))
-    if query.gene_symbol is not None and not gene_blocked:
-        exact_channels.append((GENE_SYMBOL, gene_symbol))
+    exact_channels = _exact_channels(query, catalog, candidates)
+    conflict_channels = _exact_channels(query, catalog, candidates, unfiltered=True)
     everyone = _union(explicit, uniprot, gene_id, gene_symbol, named)
-
+    nonempty = [(method, ids) for method, ids in conflict_channels if ids]
+    if len(nonempty) >= 2 and not set.intersection(*(set(ids) for _, ids in nonempty)):
+        conflict_ids = _union(*(ids for _, ids in nonempty))
+        methods = {method for method, _ in nonempty}
+        return _result(
+            "identity_conflict",
+            None,
+            conflict_ids,
+            tuple(method for method in METHOD_ORDER if method in methods),
+            ("identity_conflict",),
+        )
     if uniprot_species_gap or (gene_blocked and not _single_agreement(exact_channels)):
         return _result(
             "insufficient_input",
@@ -187,16 +192,6 @@ def _decide(
             ("insufficient_input",),
         )
 
-    nonempty = [(method, ids) for method, ids in exact_channels if ids]
-    if len(nonempty) >= 2 and not set.intersection(*(set(ids) for _, ids in nonempty)):
-        conflict_ids = _union(*(ids for _, ids in nonempty))
-        return _result(
-            "identity_conflict",
-            None,
-            conflict_ids,
-            _methods(candidates, set(conflict_ids)),
-            ("identity_conflict",),
-        )
     agreed = _single_agreement(exact_channels)
     if agreed is not None and set(everyone) == {agreed}:
         return _result(
@@ -281,10 +276,42 @@ def _methods(
     return tuple(method for method in METHOD_ORDER if method in found)
 
 
+def _exact_channels(
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+    candidates: tuple[Candidate, ...],
+    *,
+    unfiltered: bool = False,
+) -> list[tuple[str, tuple[str, ...]]]:
+    channels: list[tuple[str, tuple[str, ...]]] = []
+    if query.target_id is not None:
+        channels.append((EXPLICIT, _ids_of(candidates, EXPLICIT)))
+    for identifier in query.uniprot_ids:
+        hits = _ids(
+            target.target_id
+            for target in catalog
+            if identifier in target.uniprot_ids
+            and (
+                unfiltered or query.organism is None or target.species == query.organism
+            )
+        )
+        channels.append((UNIPROT, hits))
+    if query.organism is not None:
+        channels.extend(
+            (method, _ids_of(candidates, method))
+            for method, supplied in (
+                (GENE_ID, query.gene_id),
+                (GENE_SYMBOL, query.gene_symbol),
+            )
+            if supplied is not None
+        )
+    return channels
+
+
 def _single_agreement(
     channels: list[tuple[str, tuple[str, ...]]],
 ) -> str | None:
-    nonempty = [set(ids) for _, ids in channels if ids]
+    nonempty = [set(ids) for _, ids in channels]
     if not nonempty:
         return None
     shared = set.intersection(*nonempty)
