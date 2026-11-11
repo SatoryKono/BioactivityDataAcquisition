@@ -228,6 +228,21 @@ def test_iuphar_snapshot_has_a_bounded_owner(tmp_path: Path) -> None:
     assert report["covers_full_suite"] is False
 
 
+def test_iuphar_comparison_has_a_bounded_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class"
+    owner.mkdir(parents=True)
+    (owner / "test_comparison.py").write_text(
+        "def test_contract():\n    assert True\n",
+        encoding="utf-8",
+    )
+    report = build_shadow_compare(
+        ["src/iuphar_target_class/comparison.py"],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == ["tests/unit/iuphar_target_class/test_comparison.py"]
+    assert report["covers_full_suite"] is False
+
+
 def test_iuphar_evidence_has_a_bounded_owner(tmp_path: Path) -> None:
     owner = tmp_path / "tests/unit/iuphar_target_class"
     owner.mkdir(parents=True)

@@ -274,6 +274,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/evidence.py": (
         "tests/unit/iuphar_target_class/test_evidence.py",
     ),
+    "src/iuphar_target_class/comparison.py": (
+        "tests/unit/iuphar_target_class/test_comparison.py",
+    ),
     "scripts/ai/codex/native_runtime_contract.py": (
         CODEX_NATIVE_RUNTIME_TEST,
         "tests/architecture/test_codex_agent_catalog_inventory.py",
