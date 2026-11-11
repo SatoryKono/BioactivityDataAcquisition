@@ -179,16 +179,19 @@ IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/__init__.py": (IUPHAR_STAGE0_TEST,),
     **dict.fromkeys(
+        ("AGENTS.md", "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"),
         (
-            "AGENTS.md",
-            "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-        ),
-        (
+            "tests/architecture/test_codex_task_routing.py",
             RUNTIME_AGENT_DOCS_DRIFT_TEST,
             "tests/architecture/test_junie_runtime_ci_contract.py",
+            "tests/architecture/test_gitignore_secret_and_agents_policy.py",
             "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
+    ),
+    "scripts/memory/run_workflow.sh": (
+        "tests/architecture/test_ai_memory_program_contracts.py",
+        "tests/integration/memory/test_workflow_tooling.py",
     ),
     "scripts/ai/codex/native_runtime_contract.py": (
         "tests/architecture/test_codex_native_runtime.py",

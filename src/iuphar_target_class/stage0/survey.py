@@ -68,22 +68,8 @@ def survey_from_object(payload: dict[str, Any]) -> Stage0Survey:
     if _DATE.fullmatch(issued_on) is None:
         message = "issued_on must be YYYY-MM-DD"
         raise ValueError(message)
-    claims = tuple(
-        _claim(item)
-        for item in _object_list(payload["provenance_claims"], "provenance_claims")
-    )
-    claim_ids = [claim.field_id for claim in claims]
-    if sorted(claim_ids) != sorted(REQUIRED_FIELD_IDS) or len(claim_ids) != len(
-        set(claim_ids)
-    ):
-        message = f"provenance_claims must list each of {REQUIRED_FIELD_IDS} once"
-        raise ValueError(message)
-    for role in ("module_executor", "gold_standard_reviewer"):
-        name = _optional_role(payload[role], role)
-        source = _optional_role(payload[f"{role}_source"], f"{role}_source")
-        if (name is None) != (source is None):
-            message = f"{role} requires both a name and assignment source"
-            raise ValueError(message)
+    claims = _validated_claims(payload)
+    _validate_role_assignments(payload)
     return Stage0Survey(
         recorded_at_utc=recorded_at,
         plan_version=_required_text(payload["plan_version"], "plan_version"),
@@ -131,6 +117,29 @@ def survey_from_object(payload: dict[str, Any]) -> Stage0Survey:
             )
         ),
     )
+
+
+def _validated_claims(payload: dict[str, Any]) -> tuple[ProvenanceClaim, ...]:
+    claims = tuple(
+        _claim(item)
+        for item in _object_list(payload["provenance_claims"], "provenance_claims")
+    )
+    claim_ids = [claim.field_id for claim in claims]
+    if sorted(claim_ids) != sorted(REQUIRED_FIELD_IDS) or len(claim_ids) != len(
+        set(claim_ids)
+    ):
+        message = f"provenance_claims must list each of {REQUIRED_FIELD_IDS} once"
+        raise ValueError(message)
+    return claims
+
+
+def _validate_role_assignments(payload: dict[str, Any]) -> None:
+    for role in ("module_executor", "gold_standard_reviewer"):
+        name = _optional_role(payload[role], role)
+        source = _optional_role(payload[f"{role}_source"], f"{role}_source")
+        if (name is None) != (source is None):
+            message = f"{role} requires both a name and assignment source"
+            raise ValueError(message)
 
 
 def _claim(payload: dict[str, Any]) -> ProvenanceClaim:

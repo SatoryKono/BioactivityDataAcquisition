@@ -51,3 +51,10 @@ def test_memory_workflow_helper_prefers_windows_venv() -> None:
     win = script.index(".venv-win/Scripts/python.exe")
     posix = script.index(".venv/bin/python")
     assert win < posix
+
+
+def test_memory_workflow_wrapper_disables_bytecode_before_first_import() -> None:
+    script = Path("scripts/memory/run_workflow.sh").read_text(encoding="utf-8")
+    assert script.index("export PYTHONDONTWRITEBYTECODE=1") < script.index(
+        'if ! "${PYTHON_BIN}" -c'
+    )
