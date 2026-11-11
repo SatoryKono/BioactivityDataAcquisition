@@ -49,13 +49,15 @@ def test_overview_paired_tables_have_fixed_rows_and_inspectable_reasons():
     )
     panels = {p["id"]: p for p in _panels(dashboard["panels"])}
     summary, domains = panels[9603], panels[9002]
-    assert summary["gridPos"]["y"] == domains["gridPos"]["y"]
+    context = panels[99]["gridPos"]
+    assert domains["gridPos"]["y"] == context["y"] + context["h"]
+    assert summary["gridPos"]["y"] < domains["gridPos"]["y"]
     assert domains["gridPos"]["x"] == 0
     assert summary["gridPos"]["x"] == 15
     assert summary["gridPos"]["w"] == 9
     assert summary["gridPos"]["h"] == 5
-    # Phase 4.3 keeps the domain table at eight rows; the identity table sits
-    # below the paired summary and may extend farther down the same window.
+    # Domains follow the context table; the right-hand status/identity stack
+    # retains its height so all five identity rows fit the first window.
     assert domains["gridPos"]["h"] == 8
     assert domains["gridPos"]["y"] + domains["gridPos"]["h"] <= (
         panels[9300]["gridPos"]["y"] + panels[9300]["gridPos"]["h"]
@@ -151,7 +153,7 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
             if t["id"] == "filterFieldsByName"
         )
         if panel is summary and uid == "bioetl-overview-v2":
-            assert {"run_execution", "saved_trust", "run_reason"}.issubset(fields)
+            assert {"execution_state", "saved_trust", "run_reason"}.issubset(fields)
         elif panel is not summary and uid == "bioetl-overview-v2":
             assert "status_display" in fields
         else:
