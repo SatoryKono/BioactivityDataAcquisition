@@ -111,9 +111,12 @@ def collect_candidates(
         )
     wanted_names = {query.name} if query.name is not None else set()
     wanted_synonyms = set(query.synonyms)
-    for target in catalog:
-        if query.organism is not None and target.species != query.organism:
-            continue
+    name_targets = (
+        catalog
+        if query.organism is None
+        else tuple(target for target in catalog if target.species == query.organism)
+    )
+    for target in name_targets:
         if set(target.names) & wanted_names:
             found.append(Candidate(target.target_id, EXACT_NAME))
         if set(target.synonyms) & wanted_synonyms:
