@@ -45,6 +45,8 @@ VIEW_PANEL_TRUST_SIBLING = "viewPanel=9414"
 _SELECT_RUN = "SELECT RUN"
 _NO_RUNS = "НЕТ ЗАПУСКОВ"
 _NO_RECORDS = "нет записей"
+_COL_REASON_DETAILS = "Reason details"
+_CUSTOM_HIDDEN = "custom.hidden"
 
 OV_IDENTITY = (
     "/d/bioetl-overview-v2/3-run-overview"
@@ -939,7 +941,8 @@ def _replace_with_handoff(
     )
 
 
-def apply_overview(data: dict[str, Any]) -> None:
+def _configure_overview_donor(data: dict[str, Any]) -> None:
+    """Keep complete donor evidence behind its bounded visible preview."""
     donor = _by_id(data, 9002)
     donor["datasource"] = dict(OPS)
     donor["targets"] = [_infinity_uql(_OV_DONOR, parser="backend")]
@@ -973,7 +976,7 @@ def apply_overview(data: dict[str, Any]) -> None:
                 "renameByName": {
                     "domain": "Domain",
                     "status_display": "Status",
-                    "reason_display": "Reason details",
+                    "reason_display": _COL_REASON_DETAILS,
                     "domain_reason_brief": "Reason",
                 },
             },
@@ -987,13 +990,13 @@ def apply_overview(data: dict[str, Any]) -> None:
             )
     overrides = donor["fieldConfig"]["overrides"]
     overrides[:] = [
-        o for o in overrides if o["matcher"].get("options") != "Reason details"
+        o for o in overrides if o["matcher"].get("options") != _COL_REASON_DETAILS
     ]
     overrides.append(
         {
-            "matcher": {"id": "byName", "options": "Reason details"},
+            "matcher": {"id": "byName", "options": _COL_REASON_DETAILS},
             "properties": [
-                {"id": "custom.hidden", "value": True},
+                {"id": _CUSTOM_HIDDEN, "value": True},
                 {"id": "custom.inspect", "value": True},
             ],
         }
@@ -1004,22 +1007,10 @@ def apply_overview(data: dict[str, Any]) -> None:
     if note not in donor["description"]:
         donor["description"] += note
 
-    for pid, frame in (
-        (9603, "domains"),
-        (9604, "domains"),
-        (9300, "identity"),
-        (9480, "provider"),
-        (9481, "provider"),
-        (9482, "exclusions"),
-        (9483, "reconciliation"),
-    ):
-        panel = _by_id(data, pid)
-        panel["datasource"] = dict(DASH_DS)
-        panel["targets"] = [_dash_target(9002)]
-        _prepend_frame_filter(panel, frame)
 
+def _configure_overview_summary(summary: dict[str, Any]) -> None:
+    """Project canonical execution and retain full reasons for Inspect Data."""
     # Use the canonical execution column shared with the context block.
-    summary = _by_id(data, 9603)
     _ensure_field_projection(
         summary,
         (
@@ -1041,17 +1032,17 @@ def apply_overview(data: dict[str, Any]) -> None:
         if transform["id"] == "organize":
             transform["options"]["indexByName"].update(run_reason_brief=3, run_reason=4)
             transform["options"]["renameByName"].update(
-                run_reason_brief="Reason", run_reason="Reason details"
+                run_reason_brief="Reason", run_reason=_COL_REASON_DETAILS
             )
     overrides = summary["fieldConfig"]["overrides"]
     overrides[:] = [
-        o for o in overrides if o["matcher"].get("options") != "Reason details"
+        o for o in overrides if o["matcher"].get("options") != _COL_REASON_DETAILS
     ]
     overrides.append(
         {
-            "matcher": {"id": "byName", "options": "Reason details"},
+            "matcher": {"id": "byName", "options": _COL_REASON_DETAILS},
             "properties": [
-                {"id": "custom.hidden", "value": True},
+                {"id": _CUSTOM_HIDDEN, "value": True},
                 {"id": "custom.inspect", "value": True},
             ],
         }
@@ -1061,6 +1052,26 @@ def apply_overview(data: dict[str, Any]) -> None:
     )
     if note not in summary["description"]:
         summary["description"] += note
+
+
+def apply_overview(data: dict[str, Any]) -> None:
+    _configure_overview_donor(data)
+
+    for pid, frame in (
+        (9603, "domains"),
+        (9604, "domains"),
+        (9300, "identity"),
+        (9480, "provider"),
+        (9481, "provider"),
+        (9482, "exclusions"),
+        (9483, "reconciliation"),
+    ):
+        panel = _by_id(data, pid)
+        panel["datasource"] = dict(DASH_DS)
+        panel["targets"] = [_dash_target(9002)]
+        _prepend_frame_filter(panel, frame)
+
+    _configure_overview_summary(_by_id(data, 9603))
 
     # Row filter alone is not enough: project back to the prior column set.
     _ensure_field_projection(_by_id(data, 9300), _IDENTITY_FIELDS)
@@ -1468,11 +1479,11 @@ def _unhide_reasons_count(override: dict[str, Any]) -> None:
         p for p in override.get("properties") or [] if p.get("id") != "custom.hideFrom"
     ]
     for prop in props:
-        if prop.get("id") == "custom.hidden":
+        if prop.get("id") == _CUSTOM_HIDDEN:
             prop["value"] = False
             break
     else:
-        props.append({"id": "custom.hidden", "value": False})
+        props.append({"id": _CUSTOM_HIDDEN, "value": False})
     override["properties"] = props
 
 
