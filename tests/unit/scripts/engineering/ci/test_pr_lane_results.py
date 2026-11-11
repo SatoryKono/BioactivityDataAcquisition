@@ -1146,7 +1146,11 @@ def test_shadow_compare_routes_runtime_profiles_to_governing_tests(path: str) ->
 
 @pytest.mark.parametrize(
     "path",
-    ["AGENTS.md", "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"],
+    [
+        "AGENTS.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+        "docs/05-operations/runbooks/ai-rules-loading.md",
+    ],
 )
 def test_shadow_compare_routes_root_and_delegated_validation_policy(path: str) -> None:
     """Root/policy edits select governing tests without waiving unknown policies."""
