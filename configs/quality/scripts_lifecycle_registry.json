@@ -2406,6 +2406,12 @@
       "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/ai/codex/hook_inventory.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Internal read-only discovery library imported by doctor.py; retain as shared helper, not a standalone runtime or CLI entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-11"
     }
   },
   "schema_version": "1.0"
