@@ -344,8 +344,9 @@ def test_unmerged_index_is_not_a_proposed_complete_tree(repo: Path) -> None:
 
 
 def test_event_cli_errors_do_not_echo_payload(
-    repo: Path, capsys: pytest.CaptureFixture[str]
+    repo: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    monkeypatch.chdir(repo)
     path = repo / "invalid-event.json"
     path.write_text("private-payload-not-for-logs")
     assert (
@@ -362,3 +363,42 @@ def test_event_cli_errors_do_not_echo_payload(
 def test_sparse_index_setting_is_reported_before_directory_collapse(repo: Path) -> None:
     _git(repo, "config", "index.sparse", "true")
     assert "sparse index is enabled" in module.check_checkout_state(repo)
+
+
+@pytest.mark.parametrize("relative", [False, True])
+def test_event_reader_refuses_outside_and_prefix_sibling_paths(
+    tmp_path, monkeypatch, relative
+):
+    """A sibling sharing the directory prefix is outside the invocation boundary."""
+    inside = tmp_path / "checkout"
+    outside = tmp_path / "checkout-private"
+    inside.mkdir()
+    outside.mkdir()
+    event = outside / "event.json"
+    event.write_text('{"before":"' + "1" * 40 + '","after":"' + "2" * 40 + '"}')
+    monkeypatch.chdir(inside)
+    candidate = Path("../checkout-private/event.json") if relative else event
+    with pytest.raises(SystemExit, match="unavailable or invalid"):
+        module._load_event_range("push", candidate)
+
+
+def test_event_reader_resolves_symlink_before_boundary_check(tmp_path, monkeypatch):
+    inside = tmp_path / "checkout"
+    inside.mkdir()
+    outside = tmp_path / "private.json"
+    outside.write_text("{}")
+    link = inside / "event.json"
+    try:
+        link.symlink_to(outside)
+    except OSError:
+        pytest.skip("host does not allow fixture symlinks")
+    monkeypatch.chdir(inside)
+    with pytest.raises(SystemExit, match="unavailable or invalid"):
+        module._load_event_range("push", link)
+
+
+def test_event_reader_accepts_in_directory_metadata(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    path = tmp_path / "event.json"
+    path.write_text('{"before":"' + "1" * 40 + '","after":"' + "2" * 40 + '"}')
+    assert module._load_event_range("push", path) == ("1" * 40, "2" * 40)

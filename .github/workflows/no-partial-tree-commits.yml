@@ -53,9 +53,10 @@ jobs:
           spec = importlib.util.spec_from_file_location("trusted_tree_guard", path)
           guard = importlib.util.module_from_spec(spec)
           spec.loader.exec_module(guard)
-          base, tip = guard._load_event_range(
-              os.environ["GITHUB_EVENT_NAME"], Path(os.environ["GITHUB_EVENT_PATH"])
-          )
+          # Only the GitHub host supplies this path; CLI paths have a cwd boundary.
+          with open(os.environ["GITHUB_EVENT_PATH"], "rb") as event_file:
+              payload = event_file.read(1024 * 1024 + 1)
+          base, tip = guard.parse_event_payload(os.environ["GITHUB_EVENT_NAME"], payload)
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
               output.write(f"base={base}\ntip={tip}\n")
           PY

@@ -408,14 +408,25 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _load_event_range(event_name: str, path: Path) -> tuple[str, str]:
-    """Read bounded event metadata without echoing payload or parser errors."""
+    """Read caller-supplied metadata only inside the current working directory."""
     try:
-        with path.open("rb") as stream:
+        resolved = path.resolve()
+        if not resolved.is_relative_to(Path.cwd().resolve()):
+            raise ValueError("event path escaped invocation directory")
+        with resolved.open("rb") as stream:
             payload = stream.read(1024 * 1024 + 1)
+    except (OSError, ValueError, RecursionError):
+        raise SystemExit("event evidence is unavailable or invalid") from None
+    return parse_event_payload(event_name, payload)
+
+
+def parse_event_payload(event_name: str, payload: bytes) -> tuple[str, str]:
+    """Parse bounded bytes; GitHub's host-owned event reader shares this API."""
+    try:
         event = json.loads(payload) if len(payload) <= 1024 * 1024 else None
         if not isinstance(event, dict):
             raise ValueError("invalid event")
-    except (OSError, ValueError, RecursionError):
+    except (ValueError, RecursionError):
         raise SystemExit("event evidence is unavailable or invalid") from None
     return select_event_range(event_name, event)
 

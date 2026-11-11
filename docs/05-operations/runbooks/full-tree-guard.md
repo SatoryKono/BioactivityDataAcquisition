@@ -80,6 +80,9 @@ explicit trusted base through manual dispatch. Manual dispatch requires base
 and tip inputs and never borrows fields from another event type. The CLI
 supports the same selection through --event-name and --event-json with a
 bounded event read. Unknown event shapes fail closed without dumping payloads.
+CLI event files must resolve inside the invocation directory, including after
+symlink resolution. The workflow reads GitHub's host-provided event path separately
+and passes bounded bytes to the same parser; it does not widen the CLI boundary.
 
 Because pull_request_target jobs attach to the base SHA, the workflow publishes
 bioetl/no-partial-tree on the validated candidate SHA. Only a successful guard
