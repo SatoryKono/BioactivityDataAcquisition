@@ -170,7 +170,7 @@ def install_helper() -> Path:
     content = (
         '"""Managed BioETL worktree entrypoint; source: scripts/engineering/repo/create_worktree.py."""\n'
         "from pathlib import Path\nimport runpy\n"
-        'runpy.run_path(str(Path(__file__).resolve().parents[2] / "scripts/engineering/repo/create_worktree.py"), run_name="__main__")\n'
+        'raise SystemExit(runpy.run_path(str(Path(__file__).resolve().parents[2] / "scripts/engineering/repo/create_worktree.py"))["main"]())\n'
     )
     if os.path.lexists(target):
         if target.is_symlink() or target.read_text(encoding="utf-8") != content:
@@ -300,7 +300,3 @@ def main(argv: list[str] | None = None) -> int:
         parser.error(str(error))
     print(result)
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

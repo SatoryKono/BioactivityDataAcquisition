@@ -60,7 +60,7 @@ Hosted CI checkouts are remote workflow inputs, not workstation worktrees.
 From a clean primary checkout, install the governed entrypoint once:
 
 ```powershell
-python scripts/engineering/repo/create_worktree.py --install-helper
+python -B -m scripts.engineering.repo worktree --install-helper
 python D:/github/BioactivityDataAcquisition/.git/hooks/bioetl-create-worktree.py issue-123 --validate-only
 ```
 

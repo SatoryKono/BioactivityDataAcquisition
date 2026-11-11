@@ -16,6 +16,14 @@ pytestmark = pytest.mark.unit
 SHA = "a" * 40
 
 
+def test_router_refuses_creation_without_mandatory_helper(monkeypatch):
+    from scripts.engineering.repo import __main__ as router
+
+    monkeypatch.setattr(guard, "main", lambda *_: pytest.fail("Must not create"))
+    with pytest.raises(SystemExit, match="installed bioetl-create-worktree.py"):
+        router.main(["worktree", "safe-task", "--no-checkout"])
+
+
 @pytest.mark.parametrize(
     "ref", ["--help", "-c", "main\n--force", "HEAD:path", "a;calc"]
 )
@@ -99,7 +107,10 @@ def policy(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     (repo / ".git").mkdir(parents=True)
     implementation = repo / "scripts/engineering/repo/create_worktree.py"
     implementation.parent.mkdir(parents=True)
-    implementation.write_text("print('tracked implementation')\n", encoding="utf-8")
+    implementation.write_text(
+        "def main():\n    print('tracked implementation')\n    return 0\n",
+        encoding="utf-8",
+    )
     monkeypatch.setattr(guard, "APPROVED_ROOT", approved)
     monkeypatch.setattr(
         guard, "WORKTREE_ROOT", approved / "BioactivityDataAcquisition-worktrees"
@@ -317,7 +328,15 @@ def test_native_validate_only_creates_no_tree() -> None:
     task = "guard-preflight-" + uuid.uuid4().hex
     target = Path("D:/github/BioactivityDataAcquisition-worktrees") / task
     result = subprocess.run(
-        [sys.executable, "-B", guard.__file__, task, "--validate-only"],
+        [
+            sys.executable,
+            "-B",
+            "-m",
+            "scripts.engineering.repo",
+            "worktree",
+            task,
+            "--validate-only",
+        ],
         check=True,
         capture_output=True,
         text=True,
@@ -331,7 +350,15 @@ def test_native_validate_only_creates_no_tree() -> None:
 )
 def test_non_windows_cli_fails_closed() -> None:
     result = subprocess.run(
-        [sys.executable, "-B", guard.__file__, "safe-task", "--validate-only"],
+        [
+            sys.executable,
+            "-B",
+            "-m",
+            "scripts.engineering.repo",
+            "worktree",
+            "safe-task",
+            "--validate-only",
+        ],
         capture_output=True,
         text=True,
     )
