@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from bioetl.interfaces.http._selected_run_context import with_selection_context
+from bioetl.interfaces.http.selected_run_status import with_selection_context
 from bioetl.interfaces.http._selected_run_status_cache import SelectedRunStatusCache
 
 pytestmark = pytest.mark.unit

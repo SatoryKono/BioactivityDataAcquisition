@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Mapping
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import cast
 
@@ -43,7 +44,6 @@ from bioetl.interfaces.http._selected_run_a2_resolve import (
     resolve_a2_latest_run_id,
 )
 from bioetl.interfaces.http._selected_run_artifact_probes import _artifact_probes
-from bioetl.interfaces.http._selected_run_context import with_selection_context
 from bioetl.interfaces.http._selected_run_live import (
     active_run_diagnostics,
     scope_matches,
@@ -73,6 +73,33 @@ _QUERY_ERROR = "QUERY ERROR"
 _CONTROL_PLANE = "Control Plane"
 
 _NO_RUNS = NO_RUNS_STATUS
+
+
+def with_selection_context(
+    payload: dict[str, object], requested_run_id: str
+) -> dict[str, object]:
+    """Stamp the physical resolution once, before caching its result.
+
+    This clock is server context resolution, not run start or browser click time.
+    Cache hits retain it; changing an explicit Run ID uses a different cache key.
+    """
+    run_id = str(payload.get("run_id") or "-")
+    automatic = is_unresolved_run_id(requested_run_id)
+    mode = "AUTO · latest run in scope" if automatic else "EXPLICIT · requested Run ID"
+    if automatic and is_unresolved_run_id(run_id):
+        mode = (
+            "NO RUN · empty scope"
+            if payload.get("reason") == "no_runs_in_scope"
+            else "Context unavailable"
+        )
+    context = {
+        "context": mode,
+        "run_id": run_id,
+        "execution_state": payload.get("execution_state") or "UNKNOWN",
+        "verdict": payload.get("verdict") or "UNKNOWN",
+        "resolved_at": datetime.now(UTC).isoformat(),
+    }
+    return {**payload, "selection_context": [context]}
 
 
 def _present_status(
