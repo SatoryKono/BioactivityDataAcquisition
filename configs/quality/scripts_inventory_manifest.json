@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-11T22:30:22.038809+00:00",
+  "generated_at": "2026-11-11T22:39:19.707505+00:00",
   "summary": {
     "total_scripts": 735,
     "status_counts": {
@@ -1172,7 +1172,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/ai/codex/mcp_probe_client.py",
@@ -1185,6 +1185,24 @@
           "line": 674,
           "source_group": "tests",
           "text": "from scripts.ai.codex.mcp_http_probe import HttpProbeClient"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 799,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_http_probe import HttpProbeClient"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 828,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_http_probe import _connect_before_deadline"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 858,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_http_probe import _open_socket"
         }
       ],
       "owner": "@bioetl-platform",

@@ -21,6 +21,62 @@ def _remaining(deadline: float) -> float:
     return remaining
 
 
+def _dial_address(address, source_address, deadline: float):
+    family, kind, protocol, _, target = address
+    stream = socket.socket(family, kind, protocol)
+    try:
+        stream.settimeout(_remaining(deadline))
+        if source_address:
+            stream.bind(source_address)
+        stream.connect(target)
+        return stream
+    except BaseException:
+        stream.close()
+        raise
+
+
+def _open_socket(address, source_address, deadline: float):
+    host, port = address
+    error = OSError("connection address unavailable")
+    for item in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
+        _remaining(deadline)
+        try:
+            return _dial_address(item, source_address, deadline)
+        except OSError as exc:
+            error = exc
+    raise error
+
+
+def _connect_before_deadline(connection, deadline: float) -> None:
+    """Bound DNS, address attempts and TLS without a late protocol request."""
+    finished = threading.Event()
+    cancelled = threading.Event()
+    errors = []
+    connection._create_connection = lambda address, _timeout, source_address: (
+        _open_socket(address, source_address, deadline)
+    )
+
+    def connect():
+        try:
+            connection.connect()
+        except Exception as exc:
+            errors.append(exc)
+        finally:
+            if cancelled.is_set():
+                connection.close()
+            finished.set()
+
+    worker = threading.Thread(target=connect, daemon=True)
+    worker.start()
+    if not finished.wait(max(0.0, deadline - time.monotonic())):
+        cancelled.set()
+        connection.close()
+        raise ProbeError("TIMEOUT", uncertain=True)
+    if errors:
+        raise errors[0]
+    _remaining(deadline)
+
+
 class _SocketDeadline:
     """Interrupt only this request's owned socket, including a partial line."""
 
@@ -135,7 +191,7 @@ class HttpProbeClient:
     def _exchange(
         self, connection, payload: dict, deadline: float, notification: bool
     ) -> dict:
-        connection.connect()
+        _connect_before_deadline(connection, deadline)
         if connection.sock is None:
             raise ProbeError("CONNECTION_UNAVAILABLE", uncertain=True)
         with _SocketDeadline(connection.sock, deadline) as guard:

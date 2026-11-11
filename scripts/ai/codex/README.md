@@ -314,3 +314,9 @@ starting a diagnostic session. An excluded control is reported with
 `control_status: DISABLED` and overall readiness remains `NOT_TESTED`.
 Only explicitly declared environment references may inherit process values
 when the repository environment has no value; unrelated credentials stay excluded.
+
+HTTP name resolution, address attempts and TLS setup share the same absolute
+request deadline. A timed-out connection worker cannot send a protocol request;
+late DNS results are discarded before socket creation, and late owned sockets
+are closed by their worker. A platform resolver already running may finish in
+a daemon thread; its completion does not delay the diagnostic report.

@@ -790,3 +790,101 @@ def test_declared_process_environment_is_inherited_without_unrelated_secrets(
         ]
         == "repository-value"
     )
+
+
+def test_http_slow_dns_obeys_deadline_without_late_connection(monkeypatch):
+    import socket
+    import threading
+    import time
+    from scripts.ai.codex.mcp_http_probe import HttpProbeClient
+
+    resolved = threading.Event()
+    dialed = []
+
+    def slow_resolution(*args, **kwargs):
+        time.sleep(0.4)
+        resolved.set()
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("127.0.0.1", 9))]
+
+    def forbidden_socket(*args, **kwargs):
+        dialed.append(args)
+        raise AssertionError("DNS completed after deadline; must not open a socket")
+
+    monkeypatch.setattr(socket, "getaddrinfo", slow_resolution)
+    monkeypatch.setattr(socket, "socket", forbidden_socket)
+    client = HttpProbeClient({"url": "http://synthetic.invalid/mcp"}, None, {})
+    began = time.monotonic()
+    with pytest.raises(ProbeError, match="TIMEOUT"):
+        client.request("initialize", {}, 0.05)
+    assert time.monotonic() - began < 0.25
+    assert resolved.wait(1)
+    time.sleep(0.03)
+    assert dialed == []
+
+
+def test_http_late_connection_is_closed_by_its_owner():
+    import threading
+    import time
+    from scripts.ai.codex.mcp_http_probe import _connect_before_deadline
+
+    release = threading.Event()
+    late_closed = threading.Event()
+
+    class Connection:
+        sock = None
+
+        def connect(self):
+            release.wait(1)
+            self.sock = object()
+
+        def close(self):
+            if self.sock is not None:
+                late_closed.set()
+                self.sock = None
+
+    connection = Connection()
+    try:
+        with pytest.raises(ProbeError, match="TIMEOUT"):
+            _connect_before_deadline(connection, time.monotonic() + 0.02)
+    finally:
+        release.set()
+    assert late_closed.wait(1)
+    assert connection.sock is None
+
+
+def test_http_address_attempts_share_remaining_deadline(monkeypatch):
+    import socket
+    import time
+    from scripts.ai.codex.mcp_http_probe import _open_socket
+
+    budgets, closed = [], []
+
+    class UnreachableSocket:
+        def settimeout(self, timeout):
+            self.timeout = timeout
+            budgets.append(timeout)
+
+        def connect(self, address):
+            time.sleep(min(0.04, self.timeout))
+            raise OSError("synthetic address unavailable")
+
+        def close(self):
+            closed.append(self)
+
+    monkeypatch.setattr(
+        socket,
+        "getaddrinfo",
+        lambda *args: [
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("127.0.0.1", n))
+            for n in range(1, 6)
+        ],
+    )
+    monkeypatch.setattr(socket, "socket", lambda *args: UnreachableSocket())
+    started = time.monotonic()
+    with pytest.raises((ProbeError, OSError)):
+        _open_socket(("synthetic.invalid", 80), None, started + 0.06)
+    assert time.monotonic() - started < 0.2
+    assert 1 <= len(budgets) <= 2
+    assert len(closed) == len(budgets)
+    if len(budgets) == 2:
+        assert budgets[1] < budgets[0]
