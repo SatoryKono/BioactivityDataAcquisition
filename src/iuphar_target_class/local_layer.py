@@ -200,6 +200,7 @@ def apply_local(
     subclass_of: Mapping[str, str] | None = None,
 ) -> LocalInference:
     """Combine local evidence. Conflicting supported classes stay unresolved."""
+    _reject_unknown_subclass_parents(subclass_of or {})
     validate_local_config(rules)
     ec = infer_from_ec(numbers, rules, organism=organism)
     keywords, text_candidates, text_diagnostics = infer_from_annotations(
@@ -259,6 +260,14 @@ def _assemble(
         local_candidates=tuple(sorted(set(candidates) | set(extra))),
         diagnostics=diagnostics,
     )
+
+
+def _reject_unknown_subclass_parents(subclass_of: Mapping[str, str]) -> None:
+    """A hierarchy parent must be a working class. Evidence is not consulted."""
+    for parent in subclass_of.values():
+        if parent not in WORKING_CLASSES:
+            message = f"subclass parent {parent} is outside the class dictionary"
+            raise ValueError(message)
 
 
 def _resolved_class(
