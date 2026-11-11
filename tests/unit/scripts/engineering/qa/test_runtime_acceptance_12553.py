@@ -211,8 +211,14 @@ def test_archive_preserves_raw_bytes_and_reads_without_extraction(
     assert capture.read_evidence("run-stdout.txt", tmp_path) == b"later run\n"
 
 
-def test_published_bundle_integrity():
+def test_published_bundle_integrity(capsys):
     capture.verify(capture.BUNDLE)
+    manifest = json.loads(
+        capture.read_evidence(capture.ARTIFACT_MANIFEST, capture.BUNDLE)
+    )
+    assert capsys.readouterr().out == (
+        f"verified {len(manifest)} evidence files and 207 resource identities\n"
+    )
 
 
 def test_observer_retains_the_real_handle_for_closure_inspection(tmp_path, monkeypatch):
