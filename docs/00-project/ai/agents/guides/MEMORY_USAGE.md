@@ -38,9 +38,11 @@ sources; re-read on content change, expanded scope, or conflicting evidence.
    full deterministic corpus rebuild.
    RAG retrieval requires a valid catalog/chunk pair whose source contents,
    eligible source set, and source identity still match the checkout.
-   Strict no-file-changes work requires read-only mode and both
-   `--skip-refresh-if-missing --skip-session-note`: default read-only can still
-   rebuild in a temporary directory, so mode alone is insufficient. Do not
+   Strict no-file-changes work requires read-only mode, both flags
+   `--skip-refresh-if-missing --skip-session-note`, and
+   `PYTHONDONTWRITEBYTECODE=1` set before Python starts, directly or via a wrapper.
+   Default read-only can still rebuild in a temporary directory; mode alone
+   is insufficient. Do not
    restore missing artifacts; report DEGRADED and verify source directly.
 1. Read retrieved context in the order `catalog -> graph -> rag -> source`.
 1. Cross-check important claims with repo search, active docs, configs, tests,

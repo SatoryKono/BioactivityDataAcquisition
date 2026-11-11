@@ -64,7 +64,8 @@ root agent performs the same responsibilities directly.
    uses `BIOETL_AI_MEMORY_MODE=off`. Reuse already-read current sources; re-read
    on content change, expanded scope, or conflicting evidence.
 1. When pre-task is selected for strict no-file-changes work, use read-only with
-   `--skip-refresh-if-missing --skip-session-note`; do not rebuild temporary
+   `--skip-refresh-if-missing --skip-session-note` and set
+   `PYTHONDONTWRITEBYTECODE=1` before starting Python (direct or wrapper invocation); do not rebuild temporary
    artifacts. Report missing retrieval as DEGRADED and verify source directly.
 1. Inspect current evidence: target files, related tests, contracts, configs,
    docs, mirrors, and debt registries.

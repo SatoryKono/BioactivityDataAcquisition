@@ -45,7 +45,8 @@ It ignores a caller-provided refresh output root in this mode, creates no
 session note, and does not mutate repository-owned memory surfaces.
 
 For a strict no-file-changes task, also pass
-`--skip-refresh-if-missing --skip-session-note` in read-only mode. This forbids
+`--skip-refresh-if-missing --skip-session-note` and set
+`PYTHONDONTWRITEBYTECODE=1` before starting Python (direct or wrapper invocation) in read-only mode. This forbids
 both temporary rebuilds and session notes. Missing artifacts remain DEGRADED;
 inspect canonical sources instead of silently restoring memory files. The
 `AGENTS.md` Required AI Context table selects whether pre-task is required;

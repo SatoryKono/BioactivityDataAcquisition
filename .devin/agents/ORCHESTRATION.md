@@ -90,7 +90,8 @@ Reuse already-read current sources; re-read on content change, expanded scope,
 or conflicting evidence. Use matching Devin profiles and native capabilities.
 
 When pre-task is selected for strict no-file-changes work, use read-only with
-`--skip-refresh-if-missing --skip-session-note`; do not rebuild even temporary
+`--skip-refresh-if-missing --skip-session-note` and set
+`PYTHONDONTWRITEBYTECODE=1` before starting Python (direct or wrapper invocation); do not rebuild even temporary
 artifacts. Missing retrieval stays DEGRADED; verify claims against source.
 
 When pre-task is selected, declare runtime/agent provenance and use retrieval

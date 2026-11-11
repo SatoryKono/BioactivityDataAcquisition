@@ -52,10 +52,10 @@ re-read when the source changes, scope expands, or evidence conflicts.
 Select memory mode within user authority. `post-task`, session notes, promotion,
 and persistent refresh require authorized `read-write` mode. When selected
 pre-task must preserve a strict ban on file changes, use `read-only` with
-`--skip-refresh-if-missing --skip-session-note`; this also forbids temporary
-rebuilds. Missing retrieval artifacts stay DEGRADED and claims are verified
-against source. Hash-only work
-uses `off`; if the user forbids retrieval itself, record that constraint and the
+`--skip-refresh-if-missing --skip-session-note` and set
+`PYTHONDONTWRITEBYTECODE=1` before starting Python, directly or through a wrapper.
+The two flags forbid temporary rebuilds. Missing retrieval artifacts stay DEGRADED and claims are verified
+against source. Hash-only work uses `off`; if the user forbids retrieval itself, record that constraint and the
 required pre-task as disabled, rather than claiming successful retrieval.
 V2 and V3/V4 still require their matrix-selected pre-task and applicable checks;
 a missing artifact or denied write capability does not lower the task tier.

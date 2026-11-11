@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -828,3 +829,24 @@ def test_strict_no_file_changes_pre_task_never_refreshes_or_writes_notes(
         assert payload["retrieval"]["missing_artifacts"]
     else:
         assert payload["retrieval"]["kind"] == "disabled"
+
+
+@pytest.mark.parametrize("disable_bytecode", [False, True])
+def test_fresh_memory_import_bytecode_requires_process_level_guard(
+    tmp_path: Path, disable_bytecode: bool
+) -> None:
+    """Package-level dont_write_bytecode is too late for its own first import."""
+    package = tmp_path / "memory"
+    package.mkdir()
+    source = Path("src/memory/__init__.py").read_text(encoding="utf-8")
+    (package / "__init__.py").write_text(source, encoding="utf-8")
+    env = os.environ.copy()
+    env.pop("PYTHONDONTWRITEBYTECODE", None)
+    env.pop("PYTHONPYCACHEPREFIX", None)
+    env["PYTHONPATH"] = str(tmp_path)
+    if disable_bytecode:
+        env["PYTHONDONTWRITEBYTECODE"] = "1"
+    subprocess.run(
+        [sys.executable, "-c", "import memory"], cwd=tmp_path, env=env, check=True
+    )
+    assert bool(list(package.rglob("*.pyc"))) is not disable_bytecode
