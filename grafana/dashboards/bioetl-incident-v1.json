@@ -590,7 +590,7 @@
           "instant": true,
           "range": false,
           "format": "table",
-          "expr": "label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\")",
+          "expr": "label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\")",
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
@@ -846,13 +846,6 @@
                 "value": false
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              },
-              {
                 "id": "displayName",
                 "value": "Cause verification"
               },
@@ -865,6 +858,13 @@
                 "value": "Not verified"
               },
               {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "wrapText": false
+                }
+              },
+              {
                 "id": "mappings",
                 "value": [
                   {
@@ -872,6 +872,10 @@
                     "options": {
                       "UNVERIFIED": {
                         "text": "Not verified"
+                      },
+                      "UNVERIFIED_STALE": {
+                        "text": "Not verified",
+                        "color": "orange"
                       }
                     }
                   }
@@ -1166,6 +1170,60 @@
               {
                 "id": "custom.width",
                 "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "owner"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Owner"
+              },
+              {
+                "id": "noValue",
+                "value": "See runbook"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "next_step"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Next step"
+              },
+              {
+                "id": "noValue",
+                "value": "See runbook"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
               }
             ]
           },
@@ -11216,13 +11274,6 @@
                     "value": false
                   },
                   {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  },
-                  {
                     "id": "displayName",
                     "value": "Cause verification"
                   },
@@ -11235,6 +11286,13 @@
                     "value": "Not verified"
                   },
                   {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
+                  },
+                  {
                     "id": "mappings",
                     "value": [
                       {
@@ -11242,6 +11300,10 @@
                         "options": {
                           "UNVERIFIED": {
                             "text": "Not verified"
+                          },
+                          "UNVERIFIED_STALE": {
+                            "text": "Not verified",
+                            "color": "orange"
                           }
                         }
                       }
@@ -11596,6 +11658,60 @@
                       "type": "auto",
                       "wrapText": true
                     }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "owner"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Owner"
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "See runbook"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "next_step"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Next step"
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "See runbook"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": false
                   }
                 ]
               }

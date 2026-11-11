@@ -22,7 +22,7 @@
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "e156b942d21f9008efe4fd07b44f1c4a92f32cc60c7cc6ab8480441e1a3e41c5",
     "bioetl-dq-v2": "febb6b61d62465dc82959b560982f4e7f736b3d479f6e2aa997ca9b55a881d1a",
-    "bioetl-incident-v1": "5828e923dbb9a3ea13bd3cf5328ff8a983829b4069b61c39089a00997c79eb1e",
+    "bioetl-incident-v1": "d2709f46f31a0970027bb4719b89213133eb6541520a044dcc44be7568ad41db",
     "bioetl-overview-v2": "72e85be382a0a006b7da8abe7965d06b65a4cfec0cb51b900c4d7e81a302ef83",
     "bioetl-run-explorer-v1": "94b964452f158d6c9eb6a714e884c38e550f5f2e877ad24c1fd9eac690305c63"
   },
@@ -453,7 +453,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\")"
+          "label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\")"
         ],
         "target_count": 1
       }

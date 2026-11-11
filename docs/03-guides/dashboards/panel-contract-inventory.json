@@ -2873,11 +2873,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\")",
+      "formula": "label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\")",
       "kind": "promql",
       "panel_id": 2010,
       "panel_title": "Inspect Ranked Suspects",
-      "query": "label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\")",
+      "query": "label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\")",
       "query_tokens": [
         "bioetl_incident_ranked_evidence"
       ],
