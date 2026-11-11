@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-11T18:39:34.954258+00:00",
+  "generated_at": "2026-11-11T19:08:23.807279+00:00",
   "summary": {
-    "total_scripts": 731,
+    "total_scripts": 733,
     "status_counts": {
       "active": 338,
-      "supporting": 391,
+      "supporting": 393,
       "temporary_diagnostic": 2
     },
     "reference_group_coverage": {
@@ -14,7 +14,7 @@
       "ci": 76,
       "docs": 291,
       "other": 22,
-      "scripts": 626,
+      "scripts": 628,
       "skills": 13,
       "tests": 544
     }
@@ -308,7 +308,7 @@
       "agent_usage": [
         "CODEX-RUNTIME"
       ],
-      "reference_count": 24,
+      "reference_count": 26,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -1168,6 +1168,18 @@
       ]
     },
     {
+      "path": "scripts/ai/codex/mcp_probe_client.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-11",
+      "next_step": "Retain the bounded stdio/HTTP diagnostic clients imported by doctor; keep supporting because doctor owns the public CLI."
+    },
+    {
       "path": "scripts/ai/codex/mcp_profile_contract.py",
       "type": "py",
       "status": "supporting",
@@ -1199,6 +1211,25 @@
       "next_step": "Retain as the profile-matrix helper behind doctor.py and ensure-mcp.sh; keep contributor-facing diagnostics routed through the canonical doctor or launcher command."
     },
     {
+      "path": "scripts/ai/codex/mcp_readiness.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/codex/doctor.py",
+          "line": 368,
+          "source_group": "scripts",
+          "text": "from scripts.ai.codex.mcp_readiness import readiness_report, SERVICE_EFFECTS"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-11",
+      "next_step": "Retain the effective-route protocol/control readiness model imported by doctor; keep supporting because doctor owns the public CLI."
+    },
+    {
       "path": "scripts/ai/codex/mcp_routes.py",
       "type": "py",
       "status": "supporting",
@@ -1228,11 +1259,17 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/ai/codex/doctor.py",
           "line": 318,
+          "source_group": "scripts",
+          "text": "from scripts.ai.codex.native_mcp_config import NativeConfigClient, NativeConfigError"
+        },
+        {
+          "path": "scripts/ai/codex/doctor.py",
+          "line": 367,
           "source_group": "scripts",
           "text": "from scripts.ai.codex.native_mcp_config import NativeConfigClient, NativeConfigError"
         },
@@ -2875,13 +2912,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/governance/script-testing-standards.md",
           "line": 259,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/_check_env_keys.py` - Environment validation"
+        },
+        {
+          "path": "scripts/ai/codex/doctor.py",
+          "line": 369,
+          "source_group": "scripts",
+          "text": "from scripts.ai.mcp._check_env_keys import load_dotenv"
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_check_env_keys.py",

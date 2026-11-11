@@ -53,6 +53,7 @@ class NativeConfigClient:
         *,
         timeout: float = 30.0,
         max_message_bytes: int = _MAX_MESSAGE_BYTES,
+        environment: Mapping[str, str] | None = None,
     ) -> None:
         if (
             not command
@@ -61,6 +62,7 @@ class NativeConfigClient:
         ):
             raise ValueError("invalid native config diagnostic bounds")
         self.command = tuple(command)
+        self._environment = dict(environment) if environment is not None else None
         self.workspace = workspace.resolve(strict=True)
         self.timeout = timeout
         self.max_message_bytes = max_message_bytes
@@ -78,6 +80,7 @@ class NativeConfigClient:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL,
                 creationflags=flags,
+                env=self._environment,
             )
         except OSError:
             raise NativeConfigError("native config process could not start") from None

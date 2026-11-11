@@ -271,7 +271,7 @@ def _print_mcp_payload(
     )
 
 
-def run_mcp(
+def run_transport(
     repo_root: Path,
     profile: str,
     *,
@@ -353,6 +353,86 @@ def run_routes(
     return 0
 
 
+def run_mcp(
+    repo_root: Path,
+    profile: str,
+    *,
+    output_json: bool,
+    codex_executable: Path | None = None,
+    output_path: Path | None = None,
+    probe_plan: Path | None = None,
+    start_approved_adapters: bool = False,
+) -> int:
+    """Inspect native routes; only an explicit control plan enables MCP calls."""
+    from scripts.ai.codex.native_mcp_config import NativeConfigClient, NativeConfigError
+    from scripts.ai.codex.mcp_readiness import readiness_report, SERVICE_EFFECTS
+    from scripts.ai.mcp._check_env_keys import load_dotenv
+
+    executable = str(codex_executable) if codex_executable else shutil.which("codex")
+    if not executable:
+        print(
+            json.dumps(
+                {
+                    "status": "NOT_TESTED",
+                    "detail": "native Codex executable unavailable",
+                }
+            )
+        )
+        return 1
+    if output_path is not None:
+        _governed_report_path(repo_root, output_path)
+    controls = {}
+    if probe_plan is not None:
+        if not start_approved_adapters:
+            raise ValueError("--probe-plan requires --start-approved-adapters")
+        raw = probe_plan.read_bytes()
+        if len(raw) > 1024 * 1024:
+            raise ValueError("probe plan exceeds size limit")
+        controls = json.loads(raw)
+        if not isinstance(controls, dict):
+            raise ValueError("probe plan must be a server/control object")
+        print(
+            "MCP diagnostic service effects: " + "; ".join(SERVICE_EFFECTS),
+            file=sys.stderr,
+        )
+
+    def capture():
+        with NativeConfigClient(
+            [executable, "app-server", "--stdio"], repo_root
+        ) as client:
+            return client.read()
+
+    try:
+        plan = profile_plan(profile, repo_root)
+        payload = readiness_report(
+            capture(),
+            expected=_as_str_list(plan["selected"]),
+            required=_as_str_list(plan["required"]),
+            profile=profile,
+            controls=controls,
+            environment=load_dotenv(repo_root / ".env"),
+            after=capture,
+        )
+    except (NativeConfigError, ValueError):
+        print(
+            json.dumps(
+                {
+                    "status": "NOT_TESTED",
+                    "detail": "native configuration unavailable or invalid; raw data omitted",
+                }
+            )
+        )
+        return 1
+    if output_path is not None:
+        _write_mcp_payload(repo_root, output_path, payload)
+    if output_json:
+        print(json.dumps(payload, indent=2))
+    else:
+        for row in payload["results"]:
+            print(f"[{row['status']}] {row['server']}: {row['detail']}")
+    return 0 if payload["ready"] else 1
+
+
 def _governed_report_path(repo_root: Path, requested: Path) -> Path:
     """Resolve an explicit MCP report path under governed quality reports."""
 
@@ -373,13 +453,26 @@ def _governed_report_path(repo_root: Path, requested: Path) -> Path:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "mode", choices=("static", "mcp", "all", "routes"), nargs="?", default="static"
+        "mode",
+        choices=("static", "mcp", "all", "routes", "transport"),
+        nargs="?",
+        default="static",
     )
     parser.add_argument("--profile", choices=sorted(setup_mcp.MCP_PROFILES))
     parser.add_argument(
         "--codex-executable",
         type=Path,
         help="installed native Codex executable for routes mode",
+    )
+    parser.add_argument(
+        "--probe-plan",
+        type=Path,
+        help="explicit read-control JSON; no raw responses are saved",
+    )
+    parser.add_argument(
+        "--start-approved-adapters",
+        action="store_true",
+        help="acknowledge declared service effects for the explicit control plan",
     )
     parser.add_argument("--timeout", type=float, default=1.0)
     parser.add_argument("--overall-timeout", type=float, default=10.0)
@@ -403,6 +496,18 @@ def main() -> int:
     if args.output is not None and args.mode == "static":
         parser.error("--output is only valid for mcp, all, or routes mode")
 
+    if args.probe_plan and not args.start_approved_adapters:
+        parser.error("--probe-plan requires --start-approved-adapters")
+    if args.mode == "transport":
+        return run_transport(
+            repo_root,
+            profile,
+            timeout=max(0.1, args.timeout),
+            overall_timeout=max(0.1, args.overall_timeout),
+            output_json=args.json,
+            output_path=args.output,
+        )
+
     if args.mode == "routes":
         return run_routes(
             repo_root,
@@ -420,10 +525,11 @@ def main() -> int:
         live_status = run_mcp(
             repo_root,
             profile,
-            timeout=max(0.1, args.timeout),
-            overall_timeout=max(0.1, args.overall_timeout),
             output_json=args.json,
             output_path=args.output,
+            codex_executable=args.codex_executable,
+            probe_plan=args.probe_plan,
+            start_approved_adapters=args.start_approved_adapters,
         )
     return 1 if static_status or live_status else 0
 

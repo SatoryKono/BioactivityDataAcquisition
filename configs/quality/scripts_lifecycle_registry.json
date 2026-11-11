@@ -55,11 +55,23 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/ai/codex/mcp_probe_client.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain the bounded stdio/HTTP diagnostic clients imported by doctor; keep supporting because doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
+    },
     "scripts/ai/codex/mcp_profile_contract.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the profile-matrix helper behind doctor.py and ensure-mcp.sh; keep contributor-facing diagnostics routed through the canonical doctor or launcher command.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
+    },
+    "scripts/ai/codex/mcp_readiness.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain the effective-route protocol/control readiness model imported by doctor; keep supporting because doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
     },
     "scripts/ai/codex/mcp_routes.py": {
       "decision": "shared_helper_module",

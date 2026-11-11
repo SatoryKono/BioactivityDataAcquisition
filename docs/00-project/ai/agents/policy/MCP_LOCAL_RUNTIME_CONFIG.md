@@ -416,3 +416,74 @@ or isolated Codex home does not replace ordinary-session acceptance. Full memory
 graphs, raw native configuration, headers, credentials, and native revision
 tokens must not be copied into diagnostic logs. Persist only the projected
 report through an explicit `--output reports/quality/<name>.json` path.
+
+## Protocol and control-call doctor
+
+`doctor.py mcp` now uses the native effective-route capture. Without an explicit
+control plan it starts no MCP adapters and reports `NOT_TESTED`. The former
+fixed localhost catalog/socket diagnostic remains available as
+`doctor.py transport`; its OK/FAIL/WARN transport results do not attest MCP
+readiness. The legacy `--timeout` and `--overall-timeout` options belong to that
+transport diagnostic. Native route resolution still has its own observation
+limit; it must not be confused with backend initialization limits.
+
+To opt into the already approved adapters, provide both `--probe-plan` and
+`--start-approved-adapters`. A plan is a JSON object keyed by effective server
+name. Each control declares a tool, arguments, and nonempty `contains_all`
+expectations evaluated locally against actual result content. For example:
+
+```json
+{
+  "filesystem": {
+    "tool": "read_file",
+    "arguments": {"path": "README.md"},
+    "contains_all": ["BioETL"]
+  }
+}
+```
+
+Select arguments and expected sources for the actual route before executing;
+this example is a schema illustration, not a claim that a server accepts a
+relative file path. External controls must check library/document identity and
+origin rather than freeze volatile result IDs. List-roots and token-count
+controls cover only those functions, not ADR analysis or other analyzer tools.
+Do not place secrets or full graph/dialogue contents into a control plan.
+
+The diagnostic announces ordinary network, cache/log and approved-backend
+startup effects before invoking a control. It installs nothing, registers no
+workspace, does not enable missing routes, and never restarts a shared owner.
+Only declared reading tools are eligible. Unbounded `read_graph`, memory writes
+and Deja `remember` are deliberately ineligible; prefer a bounded reading query.
+Explicit root `.env` references are read locally, never copied or changed.
+
+The report distinguishes client startup, actual transport response, MCP
+initialize, bounded/paginated tools/list, and semantic tool control. The native
+route's startup timeout covers startup plus initialize; its tool timeout covers
+catalog enumeration and separately the control call. Each phase reports elapsed
+time and the limit source. If a native timeout/default cannot be established,
+the control remains `NOT_TESTED`; no universal backend timeout is invented.
+Responses and process stderr stay private and bounded. Neither response content,
+raw server exception text nor credential hashes are persisted by the report.
+
+Statuses are `PASS` for a verified phase, `FAIL` for a confirmed failed check,
+`DISABLED` for native intentional disable, `NOT_TESTED` for missing evidence,
+`DENIED_AS_EXPECTED` only for the exact structured reason
+`WORKSPACE_POLICY_DENIED`, and `STALE` when the final native capture differs or
+cannot be obtained. HTTP 401/403, a dead process, or a generic exception cannot
+qualify as expected workspace isolation. An uncertain request outcome is an
+additional flag and never triggers an automatic retry, replay, or restart.
+
+Semantic control success does not prove local owner/process identity. Until the
+independent backend/access binding is verified, backend identity and overall
+readiness remain `NOT_TESTED` and the command exits nonzero. Obligatory disabled,
+missing or untested routes are not silently waived. Diagnostic tools/list may
+advertise memory writes even when all diagnostic calls are reads; the report
+records this distinction without executing a write or claiming technical
+read-only enforcement.
+
+A final native config capture detects affected-route drift, including private
+credential rotation in memory. It does not automatically replay old controls.
+Instance recovery must be verified separately without treating a new PID or
+generation as a policy change. This direct diagnostic is not a new ordinary
+user session and cannot close ordinary-session acceptance. If the actual user
+session cannot invoke a tool, retain `NOT_TESTED` for that acceptance item.
