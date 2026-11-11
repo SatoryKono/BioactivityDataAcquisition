@@ -41,6 +41,56 @@ def test_branch_option_is_rejected_before_native_branch_check(policy, git_calls)
     assert not guard.WORKTREE_ROOT.exists()
 
 
+@pytest.mark.parametrize("status", ["FAIL", "ERROR", "SKIP"])
+def test_shared_guard_non_pass_blocks_git_creation(
+    policy, git_calls, monkeypatch, status
+):
+    from types import SimpleNamespace
+
+    original = guard.runpy.run_path
+
+    def refused(path):
+        namespace = original(path)
+        namespace["revalidate_worktree"] = lambda *_a, **_k: SimpleNamespace(
+            status=status, code="worktree.race"
+        )
+        return namespace
+
+    monkeypatch.setattr(guard.runpy, "run_path", refused)
+    with pytest.raises(SystemExit):
+        guard.main(["safe-task", "--no-checkout"])
+    assert not any(args[:2] == ("worktree", "add") for _, args in git_calls)
+    assert not guard.WORKTREE_ROOT.exists()
+
+
+def test_shared_guard_revalidates_immediately_before_add(
+    policy, git_calls, monkeypatch
+):
+    events = []
+    original_load = guard.runpy.run_path
+    original_git = guard._git
+
+    def loaded(path):
+        namespace = original_load(path)
+        original_check = namespace["revalidate_worktree"]
+
+        def checked(*args, **kwargs):
+            events.append("revalidate")
+            return original_check(*args, **kwargs)
+
+        namespace["revalidate_worktree"] = checked
+        return namespace
+
+    def tracked_git(repo, *args):
+        events.append(args[:2])
+        return original_git(repo, *args)
+
+    monkeypatch.setattr(guard.runpy, "run_path", loaded)
+    monkeypatch.setattr(guard, "_git", tracked_git)
+    guard.main(["safe-task", "--no-checkout"])
+    assert events[-2:] == ["revalidate", ("worktree", "add")]
+
+
 @pytest.fixture
 def policy(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     approved = (tmp_path / "approved").resolve()
@@ -51,7 +101,9 @@ def policy(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     implementation.parent.mkdir(parents=True)
     implementation.write_text("print('tracked implementation')\n", encoding="utf-8")
     monkeypatch.setattr(guard, "APPROVED_ROOT", approved)
-    monkeypatch.setattr(guard, "WORKTREE_ROOT", approved / "worktrees")
+    monkeypatch.setattr(
+        guard, "WORKTREE_ROOT", approved / "BioactivityDataAcquisition-worktrees"
+    )
     monkeypatch.setattr(guard, "_require_windows", lambda: None)
     monkeypatch.setattr(guard, "_source_repo", lambda: repo)
     return repo

@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import runpy
 import subprocess
 import sys
 from pathlib import Path, PurePosixPath
@@ -207,6 +208,12 @@ def _populate_existing(destination: Path, sha: str) -> None:
 
 def create_worktree(args: argparse.Namespace) -> Path:
     destination = validate_destination(args.destination)
+    # Execute the tracked stdlib guard without importing project packages or
+    # writing bytecode. Keep its ancestor identities in process until creation.
+    path_guard = runpy.run_path(str(Path(__file__).with_name("operation_guards.py")))
+    permit = path_guard["prepare_worktree"](
+        str(destination), allowed_root=APPROVED_ROOT
+    )
     repo = _source_repo()
     approved, _ = _roots()
     _inside(
@@ -242,6 +249,9 @@ def create_worktree(args: argparse.Namespace) -> Path:
     elif not args.existing_branch:
         command.extend(["-b", branch])
     command.extend(["--", str(destination), args.existing_branch or sha])
+    decision = path_guard["revalidate_worktree"](permit, allowed_root=APPROVED_ROOT)
+    if decision.status != "PASS":
+        raise ValueError("Shared worktree guard refused creation: " + decision.code)
     _git(repo, *command)
     _created_target(destination)
     if args.existing_branch and not args.no_checkout:
