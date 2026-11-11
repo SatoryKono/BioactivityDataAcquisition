@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Mapping
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import cast
 
@@ -73,33 +72,6 @@ _QUERY_ERROR = "QUERY ERROR"
 _CONTROL_PLANE = "Control Plane"
 
 _NO_RUNS = NO_RUNS_STATUS
-
-
-def with_selection_context(
-    payload: dict[str, object], requested_run_id: str
-) -> dict[str, object]:
-    """Stamp the physical resolution once, before caching its result.
-
-    This clock is server context resolution, not run start or browser click time.
-    Cache hits retain it; changing an explicit Run ID uses a different cache key.
-    """
-    run_id = str(payload.get("run_id") or "-")
-    automatic = is_unresolved_run_id(requested_run_id)
-    mode = "AUTO · latest run in scope" if automatic else "EXPLICIT · requested Run ID"
-    if automatic and is_unresolved_run_id(run_id):
-        mode = (
-            "NO RUN · empty scope"
-            if payload.get("reason") == "no_runs_in_scope"
-            else "Context unavailable"
-        )
-    context = {
-        "context": mode,
-        "run_id": run_id,
-        "execution_state": payload.get("execution_state") or "UNKNOWN",
-        "verdict": payload.get("verdict") or "UNKNOWN",
-        "resolved_at": datetime.now(UTC).isoformat(),
-    }
-    return {**payload, "selection_context": [context]}
 
 
 def _present_status(
@@ -391,19 +363,18 @@ async def handle_selected_run_status(
         if is_unresolved_run_id(run_id):
             resolved = _resolve_a2_run_id(host, pipeline=pipeline, query=query)
             if isinstance(resolved, dict):
-                return with_selection_context(resolved, requested_run_id)
+                return resolved
             run_id = resolved
             a2_resolved = True
         # A2 catalog membership already enforced filters (incl. workflow aliases);
         # do not re-reject via report.workflow_id vs Grafana workflow alias.
-        result = _load_selected_with_live_fallback(
+        return _load_selected_with_live_fallback(
             host,
             pipeline=pipeline,
             run_id=run_id,
             query=query,
             skip_scope_check=a2_resolved,
         )
-        return with_selection_context(result, requested_run_id)
 
     async def cached_load() -> dict[str, object]:
         # Propagate ForensicEndpointUnavailable / IO failures so the cache does
@@ -426,6 +397,4 @@ async def handle_selected_run_status(
         payload = unavailable_status(
             pipeline, requested_run_id, _QUERY_ERROR, "request_failed"
         )
-    if "selection_context" not in payload:
-        payload = with_selection_context(payload, requested_run_id)
     await host._send_payload_response(writer, 200, payload)

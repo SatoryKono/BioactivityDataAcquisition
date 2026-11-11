@@ -2,6 +2,21 @@
 
 from __future__ import annotations
 
+RUN_SELECTION_CONTEXT = (
+    '($requested := "${run_id:percentencode}"; '
+    "$auto := $requested in ['', '-', 'All', '$__all', '%24__all', '__all', '*', '%2A']; "
+    "$hasRun := $type(run_id) = 'string' and run_id != '' and run_id != '-'; "
+    "[{'_bioetl_frame':'selection_context', "
+    "'context': $auto ? ($hasRun ? 'AUTO · latest run in scope' : "
+    "(reason = 'no_runs_in_scope' ? 'NO RUN · empty scope' : 'Context unavailable')) "
+    ": 'EXPLICIT · requested Run ID', "
+    "'run_id': $type(run_id) = 'string' ? run_id : $requested, "
+    "'execution_state': $type(execution_state) = 'string' and execution_state != '' "
+    "? execution_state : 'UNKNOWN', "
+    "'verdict': $type(verdict) = 'string' and verdict != '' ? verdict : 'UNKNOWN', "
+    "'context_checked_at': $now()}])"
+)
+
 
 def _shift_children(panel: dict, delta: int) -> None:
     for child in panel.get("panels", []):
@@ -44,9 +59,9 @@ def stamp_run_selection_context(payload: dict) -> None:
             "description": (
                 "SELECTED RUN · AUTO shows the latest run by start time in the current "
                 "scope, including unfinished runs. EXPLICIT keeps the requested Run ID. "
-                "Resolved at is the server selection resolution time, retained on cache "
-                "hits, not run start or browser click time. Refresh re-evaluates AUTO "
-                "after the cache refresh. UNKNOWN is missing evidence; request failure "
+                "Context checked at is this Grafana query evaluation time, not run "
+                "start, browser click, server cache load or catalog freshness. Refresh "
+                "re-evaluates the displayed context. UNKNOWN is missing evidence; request failure "
                 "is Source unavailable. This context is not a fleet verdict. "
                 "TIME RANGE telemetry never proves this run. Empty is a coverage gap, "
                 "not a pass. Backend failure indicates an unavailable source and must "
@@ -76,7 +91,7 @@ def stamp_run_selection_context(payload: dict) -> None:
                 },
                 "overrides": [
                     {
-                        "matcher": {"id": "byName", "options": "Resolved at"},
+                        "matcher": {"id": "byName", "options": "Context checked at"},
                         "properties": [
                             {"id": "unit", "value": "time:YYYY-MM-DD HH:mm"}
                         ],
@@ -110,7 +125,7 @@ def stamp_run_selection_context(payload: dict) -> None:
                                 "run_id",
                                 "execution_state",
                                 "verdict",
-                                "resolved_at",
+                                "context_checked_at",
                             ]
                         }
                     },
@@ -119,7 +134,10 @@ def stamp_run_selection_context(payload: dict) -> None:
                     "id": "convertFieldType",
                     "options": {
                         "conversions": [
-                            {"targetField": "resolved_at", "destinationType": "time"}
+                            {
+                                "targetField": "context_checked_at",
+                                "destinationType": "time",
+                            }
                         ]
                     },
                 },
@@ -131,14 +149,14 @@ def stamp_run_selection_context(payload: dict) -> None:
                             "run_id": 1,
                             "execution_state": 2,
                             "verdict": 3,
-                            "resolved_at": 4,
+                            "context_checked_at": 4,
                         },
                         "renameByName": {
                             "context": "Context",
                             "run_id": "Run ID",
                             "execution_state": "Execution",
                             "verdict": "Verdict",
-                            "resolved_at": "Resolved at",
+                            "context_checked_at": "Context checked at",
                         },
                     },
                 },

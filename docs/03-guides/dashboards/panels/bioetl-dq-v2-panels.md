@@ -24,10 +24,11 @@ current telemetry.
 - **Type:** Table
 - **Panel ID:** `9400`
 - Shows AUTO (latest run in scope, including unfinished runs) or EXPLICIT
-  (requested Run ID), actual Run ID, execution, verdict and Resolved at.
+  (requested Run ID), actual Run ID, execution, verdict and Context checked at.
 - Uses the same donor frame as Review Selected Run Status, without an extra
-  HTTP request. The resolution clock survives cache hits and is neither run
-  start nor browser click time. TIME RANGE telemetry never proves this run.
+  HTTP request. The clock records the Grafana query evaluation, not run start,
+  browser click, server cache load or catalog freshness. TIME RANGE telemetry
+  never proves this run.
 
 ### Review Selected Run Status
 - **Type:** Table

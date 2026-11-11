@@ -124,9 +124,9 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 ## Review Run Context — LA-12 (#12946)
 
 Panel `99` shows AUTO or EXPLICIT, the actual Run ID, execution state, saved
-verdict and server resolution time. AUTO includes unfinished latest runs; an
+verdict and Context checked at (Grafana query evaluation time). AUTO includes unfinished latest runs; an
 explicit unavailable run stays bound rather than falling back to another run.
 The context reuses the same donor frame as saved evidence, so it adds no HTTP
-request and cannot describe a different snapshot. Resolved at is the cached
-server selection time, not run start or a browser click. The block stays in
+request and cannot describe a different snapshot. The clock is not run start,
+a browser click, server cache load or catalog freshness. The block stays in
 the first window; the identity table remains bounded to its existing five rows.

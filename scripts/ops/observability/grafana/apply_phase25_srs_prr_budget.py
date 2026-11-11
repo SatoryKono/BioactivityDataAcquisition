@@ -4,10 +4,10 @@
 Rewrites the five provisioned dashboard JSON files in place:
 
 - Overview donor 9002 becomes a multi-section selected-run-status payload
-  (presentation enrichment stays in Infinity UQL; Grafana transforms cannot
+  (presentation enrichment stays in Infinity JSONata; Grafana transforms cannot
   express that JSONata). Consumers use ``-- Dashboard --`` and filter
   ``_bioetl_frame``.
-- DQ and Incident donors use the backend parser. UQL leaves the HTTP body in
+- Overview, DQ and Incident donors use the backend parser. UQL leaves the HTTP body in
   ``meta.custom.data`` with zero fields, so Dashboard datasource children
   (stages, domains, duration) see an empty frame. Control Plane keeps UQL.
 - Identity / stages copies become markdown handoffs per §2.4.
@@ -23,6 +23,9 @@ import re
 from pathlib import Path
 from typing import Any
 
+from scripts.ops.observability.grafana._run_selection_context import (
+    RUN_SELECTION_CONTEXT,
+)
 from scripts.ops.observability.grafana.render_nav_bus import write_dashboard_source
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -398,11 +401,8 @@ def _normalized_donor(*parts: str, selection_context: bool = False) -> str:
     """Give every donor row the same columns before Grafana builds a frame."""
     schema = _DONOR_SCHEMA
     if selection_context:
-        schema = schema[:-1] + ", 'context': null, 'resolved_at': null}"
-        parts = (
-            *parts,
-            "$map(selection_context, function($r){$merge([$r, {'_bioetl_frame':'selection_context'}])})",
-        )
+        schema = schema[:-1] + ", 'context': null, 'context_checked_at': null}"
+        parts = (*parts, RUN_SELECTION_CONTEXT)
     appended = _append_many(*parts)
     return (
         f"($schema := {schema}; "
@@ -922,7 +922,8 @@ def _replace_with_handoff(
 def apply_overview(data: dict[str, Any]) -> None:
     donor = _by_id(data, 9002)
     donor["datasource"] = dict(OPS)
-    donor["targets"] = [_infinity_uql(_OV_DONOR)]
+    donor["targets"] = [_infinity_uql(_OV_DONOR, parser="backend")]
+    donor["targets"][0].pop("uql", None)
     # Keep presentation columns available pre-transform for 9603/9604; donor
     # visual still filters to Domain/Status/Reason after the frame filter.
     donor["transformations"] = [
@@ -1095,6 +1096,7 @@ def apply_dq(data: dict[str, Any]) -> None:
     donor = _by_id(data, 9406)
     donor["datasource"] = dict(OPS)
     donor["targets"] = [_infinity_uql(_DQ_DONOR, parser="backend")]
+    donor["targets"][0].pop("uql", None)
     donor["transformations"] = _status_donor_transforms()
     _align_status_donor_overrides(donor)
 

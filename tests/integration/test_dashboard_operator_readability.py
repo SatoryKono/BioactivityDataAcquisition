@@ -76,7 +76,8 @@ def test_overview_stages_and_quality_are_outside_saved_evidence() -> None:
     )
     donor = panels[9002]["targets"][0]
     assert "contract_exclusions_status" in donor["root_selector"]
-    assert "contract_exclusions_status" in donor["uql"]
+    assert donor["parser"] == "backend"
+    assert "uql" not in donor
     # A1 SELECT RUN and A2 empty catalog must not collapse into UNKNOWN.
     # Missing exclusion evidence stays the explicit «нет данных» state.
     select_guard = (
@@ -85,7 +86,6 @@ def test_overview_stages_and_quality_are_outside_saved_evidence() -> None:
         "? contract_exclusions_status : 'нет данных')"
     )
     assert select_guard in donor["root_selector"]
-    assert select_guard in donor["uql"]
     assert "не применимо — Choose a run" in donor["root_selector"]
     assert "нет записей — No runs in scope" in donor["root_selector"]
     value_maps = [
@@ -612,16 +612,14 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
     donor_target = donor["targets"][0]
     # Backend materializes the frame. UQL leaves zero fields for panel 9460.
     assert donor_target["parser"] == "backend"
-    assert donor_target["root_selector"] == donor_target["uql"].removeprefix(
-        'parse-json | jsonata "'
-    ).removesuffix('"')
+    assert "uql" not in donor_target
     assert (
         "$exists(stage_diagnostics) ? stage_diagnostics : []"
         in donor_target["root_selector"]
     )
     assert "QUERY ERROR" not in donor_target["root_selector"]
-    assert "removals[outcome=" in donor_target["uql"]
-    assert "$s.tracking = 'full' ? 0" in donor_target["uql"]
+    assert "removals[outcome=" in donor_target["root_selector"]
+    assert "$s.tracking = 'full' ? 0" in donor_target["root_selector"]
     incident_donor = next(
         item for item in get_dashboard_panels(incident) if item.get("id") == 2101
     )

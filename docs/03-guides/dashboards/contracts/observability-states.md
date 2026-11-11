@@ -69,7 +69,8 @@ run evidence. AUTO means the latest run by start time in the selected scope,
 including unfinished runs. EXPLICIT means the requested Run ID stays bound;
 an unavailable explicit run is never replaced with a different latest run.
 The context includes the actual Run ID, execution state, saved verdict and
-server resolution time. This clock is not run start or browser click time;
-cache hits retain it and a refreshed selection receives a new clock. Empty
+Context checked at (Grafana query evaluation time). This clock is not run start,
+browser click, server cache load or catalog freshness. A refreshed query
+re-evaluates the displayed context. Empty
 catalogs say NO RUN; resolution failure says Context unavailable. Neither
 context provenance nor the dashboard time range proves saved-run health.

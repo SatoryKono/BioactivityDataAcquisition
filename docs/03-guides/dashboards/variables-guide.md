@@ -86,6 +86,7 @@ Overview and Data Quality show Review Run Context on the first screen. With an
 unresolved Run ID, AUTO displays the latest run by start time within the current
 filters, even if that run is unfinished. Selecting a Run ID changes the context
 to EXPLICIT and keeps that exact request. Execution and Verdict remain distinct.
-Resolved at records server context resolution, not the run start or the browser
-click. It stays unchanged on a cache hit; AUTO can change after cache refresh.
+Context checked at records the Grafana query evaluation, not the run start,
+browser click or server cache load. It makes no catalog freshness assertion;
+AUTO displays the latest run returned for the current scope.
 An empty scope and a failed resolution never claim that a latest run is shown.

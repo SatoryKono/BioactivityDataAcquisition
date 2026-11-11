@@ -568,7 +568,8 @@ def _assert_overview_identity_panel(dashboard: dict) -> None:
     donor_target = donor["targets"][0]
     assert donor_target["url"].startswith("/ops/observability/selected-run-status?")
     assert "run_id=${run_id}" in donor_target["url"]
-    assert "parse-json | jsonata" in donor_target["uql"]
+    assert donor_target["parser"] == "backend"
+    assert "uql" not in donor_target
     assert "Run ID" in donor_target["root_selector"]
     assert "Not recorded in saved run evidence" in donor_target["root_selector"]
 
