@@ -37,7 +37,16 @@ def test_static_empty_copy_cannot_attest_available_telemetry(panel_id):
         "fieldConfig": {
             "defaults": {
                 "noValue": "NO OBSERVATIONS",
-                "mappings": [{"type": "value", "options": {"0": {"text": "0"}}}],
+                "mappings": [
+                    {"type": "value", "options": {"0": {"text": "0"}}},
+                    {
+                        "type": "special",
+                        "options": {
+                            "match": "null",
+                            "result": {"text": "NO OBSERVATIONS", "color": "gray"},
+                        },
+                    },
+                ],
             }
         },
     }
@@ -49,9 +58,13 @@ def test_static_empty_copy_cannot_attest_available_telemetry(panel_id):
     assert "Only an actual sample" in panel["description"]
     assert panel["targets"] == original["targets"]
     assert (
-        panel["fieldConfig"]["defaults"]["mappings"]
-        == original["fieldConfig"]["defaults"]["mappings"]
+        panel["fieldConfig"]["defaults"]["mappings"][0]
+        == original["fieldConfig"]["defaults"]["mappings"][0]
     )
+    assert panel["fieldConfig"]["defaults"]["mappings"][1]["options"]["result"] == {
+        "text": "UNKNOWN",
+        "color": "gray",
+    }
     once = deepcopy(payload)
     apply_event_empty_copy(payload)
     assert payload == once

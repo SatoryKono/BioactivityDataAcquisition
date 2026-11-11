@@ -60,9 +60,16 @@ def apply_event_empty_copy(panels: list[dict[str, Any]]) -> None:
         apply_event_empty_copy(panel.get("panels", []))
         if panel.get("id") not in _EVENT_PANELS | {112, 135, 8807}:
             continue
-        panel.setdefault("fieldConfig", {}).setdefault("defaults", {})["noValue"] = (
-            "UNKNOWN"
-        )
+        defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
+        defaults["noValue"] = "UNKNOWN"
+        for mapping in defaults.get("mappings", []):
+            options = mapping.get("options", {})
+            if (
+                mapping.get("type") == "special"
+                and options.get("match") in {"null", "nan", "null+nan"}
+                and options.get("result", {}).get("text") == "NO OBSERVATIONS"
+            ):
+                options["result"]["text"] = "UNKNOWN"
         description = panel.get("description", "")
         if _EMPTY_EVENT_GUIDANCE not in description:
             panel["description"] = description + _EMPTY_EVENT_GUIDANCE

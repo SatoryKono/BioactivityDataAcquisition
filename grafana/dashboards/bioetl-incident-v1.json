@@ -7242,7 +7242,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "NO OBSERVATIONS",
+                      "text": "UNKNOWN",
                       "color": "gray"
                     }
                   }
@@ -7343,7 +7343,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "NO OBSERVATIONS",
+                      "text": "UNKNOWN",
                       "color": "gray"
                     }
                   }
@@ -8244,7 +8244,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "NO OBSERVATIONS",
+                      "text": "UNKNOWN",
                       "color": "gray"
                     }
                   }
@@ -8615,7 +8615,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "NO OBSERVATIONS",
+                      "text": "UNKNOWN",
                       "color": "gray"
                     }
                   }
@@ -9283,7 +9283,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "NO OBSERVATIONS",
+                      "text": "UNKNOWN",
                       "color": "gray"
                     }
                   }
