@@ -1381,11 +1381,13 @@ def test_main_docker_validation_only_decouples_main_push_from_publish_approval()
     cancel_in_progress = str(concurrency["cancel-in-progress"])
 
     assert group == (
-        "${{ github.workflow }}-${{ github.event_name == 'push' && "
-        "github.ref == 'refs/heads/main' && github.run_id || github.ref }}"
+        "${{ github.workflow }}-${{ (github.event_name == 'workflow_run' || "
+        "(github.event_name == 'push' && github.ref == 'refs/heads/main')) "
+        "&& github.run_id || github.ref }}"
     )
     assert cancel_in_progress == (
-        "${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}"
+        "${{ github.event_name != 'workflow_run' && "
+        "(github.event_name != 'push' || github.ref != 'refs/heads/main') }}"
     )
 
     publish = workflow["jobs"]["docker-push"]

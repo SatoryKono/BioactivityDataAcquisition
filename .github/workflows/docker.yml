@@ -37,11 +37,11 @@ on:
   # docker-lane. Manual runs validate the lane only.
   workflow_dispatch:
 concurrency:
-  # A direct main push is not a trigger. workflow_call stays ref-scoped
-  # with the caller. The push clause remains so a protected publish
-  # approval cannot cancel a newer main SHA if push is restored.
-  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.run_id || github.ref }}
-  cancel-in-progress: "${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}"
+  # Publish-only workflow_run calls must not cancel another integrity
+  # run's publication before the current-HEAD gate can reject a stale SHA.
+  # Keep main pushes isolated too if that direct trigger is restored.
+  group: ${{ github.workflow }}-${{ (github.event_name == 'workflow_run' || (github.event_name == 'push' && github.ref == 'refs/heads/main')) && github.run_id || github.ref }}
+  cancel-in-progress: "${{ github.event_name != 'workflow_run' && (github.event_name != 'push' || github.ref != 'refs/heads/main') }}"
 
 jobs:
   docker-runtime-contracts:
