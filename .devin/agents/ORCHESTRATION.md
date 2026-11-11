@@ -83,25 +83,23 @@ Operational defaults:
 
 ## 1.2 Memory-Enabled Task Loop
 
-Перед стандартным subagent workflow оркестратор и role-specific profiles должны использовать canonical memory loop из `src/memory/DAILY_WORKFLOW.md`.
+The `AGENTS.md` Required AI Context table is the single task-class matrix.
+V1 retrieval is optional; V2 pre-task is required; V3/V4 retain the full package
+and required pre-task; hash-only work uses `BIOETL_AI_MEMORY_MODE=off`.
+Reuse already-read current sources; re-read on content change, expanded scope,
+or conflicting evidence. Use matching Devin profiles and native capabilities.
 
-Минимальный порядок:
+When pre-task is selected for strict no-file-changes work, use read-only with
+`--skip-refresh-if-missing --skip-session-note` and set
+`PYTHONDONTWRITEBYTECODE=1` before starting Python (direct or wrapper invocation); do not rebuild even temporary
+artifacts. Missing retrieval stays DEGRADED; verify claims against source.
 
-1. `pre-task` only when required by AGENTS.md context tiers (V1 read-only optional; hash-only off).
-1. retrieval order: `catalog -> graph -> rag -> source`
-1. baseline/profile-specific work
-1. `post-task` and session notes only in authorized read-write mode; skip otherwise.
-1. promotion только для durable knowledge
-
-Это не заменяет runtime source или `.devin/agents/*.md`, а стандартизует:
-
-- pre-task retrieval
-- session-note creation
-- post-task summary
-- refresh rebuild-only memory artifacts
-- optional promotion into curated memory
-- periodic curated review via `python -m memory.tooling.workflow review-curated`
-- archive of superseded curated notes вместо silent stale accumulation
+When pre-task is selected, declare runtime/agent provenance and use retrieval
+order `catalog -> graph -> rag -> source`. Run `post-task`, create session notes,
+persist refresh artifacts, promote knowledge, or archive curated notes only in
+authorized `read-write` mode. In `off`/`read-only`, skip these writes and report
+the mode and missing evidence. Review-curated may identify due or stale notes;
+review results never grant permission to mutate them.
 
 Regular ritual rule:
 
@@ -110,6 +108,10 @@ Regular ritual rule:
 - treat `due` notes как verification work и `stale` notes как review-or-archive candidates
 
 ______________________________________________________________________
+
+
+Curated review does not authorize promotion, archival, or persistent writes;
+those still require authorized `read-write` mode.
 
 ## 2. Стандартный workflow задачи
 

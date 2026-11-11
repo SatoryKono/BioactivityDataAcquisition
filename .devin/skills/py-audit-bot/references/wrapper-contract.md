@@ -9,7 +9,7 @@ Every wrapper skill must state:
 
 - trigger scope: when the wrapper is the right entrypoint
 - canonical profile or workflow file
-- required memory loop
+- task-tier-selected memory loop
 - expected output artifact or final report shape
 - validation command family
 - fallback behavior when the profile, tool, or environment is unavailable
@@ -17,12 +17,17 @@ Every wrapper skill must state:
 ## Standard Workflow
 
 1. Resolve scope and confirm the wrapper is the right entrypoint.
-1. Apply `AGENTS.md` Instruction Scope and Required AI Context; read only
-   the normative/memory package selected by that task tier.
-1. Run `python -m memory.tooling.workflow pre-task ...` when the root tier
-   requires it. V1 memory is read-only optional; hash-only work uses
-   `BIOETL_AI_MEMORY_MODE=off`. This wrapper cannot broaden those obligations.
-   Strict read-only tasks must not refresh repository files implicitly.
+1. Apply `AGENTS.md` Instruction Scope and its Required AI Context table, the
+   single task-class matrix. V1 memory retrieval is optional; V2 uses the matching
+   profile/skill and required pre-task; V3/V4 retain the full package and
+   required pre-task. Hash-only work uses `BIOETL_AI_MEMORY_MODE=off`.
+1. Reuse already-read current sources; re-read on content change, expanded scope,
+   or conflicting evidence. A source list is navigation, not a mandatory dump.
+1. Select memory mode within user authority. For selected pre-task under a strict
+   ban on file changes, use read-only with `--skip-refresh-if-missing --skip-session-note` and set
+   `PYTHONDONTWRITEBYTECODE=1` before starting Python (direct or wrapper invocation);
+   do not rebuild even temporary artifacts. Report missing retrieval as DEGRADED
+   and verify claims against source; never downgrade a V3/V4 task to skip checks.
 1. Read the primary profile or workflow file named by the wrapper.
 1. Use repo search to find related tests, docs, configs, contracts, mirrors,
    evidence, and validation gates.
