@@ -70,7 +70,10 @@ workflow for a V1/V2 task.
 
 ## Least-privilege (SUBAGENT-20260910)
 
-Allowed skills: `py-config-bot`, `bioetl-post-change`; `new-pipeline` opt-in.
+Allowed skills: `py-config-bot`; `new-pipeline` opt-in.
+
+Post-change policy: `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` (mandatory when applicable).
+
 Allowed MCP: `ast-grep`, `code-analyzer`.
 Forbidden MCP includes `github`. Do not call undeclared MCP.
 Do not run `gh`, `hub`, or `api.github.com`. Local `git` status/diff/log is
