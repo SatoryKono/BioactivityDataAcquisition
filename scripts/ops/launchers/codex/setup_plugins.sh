@@ -480,7 +480,10 @@ install_precommit() {
         return 0
     fi
 
-    log_info "Ensuring pre-commit is installed..."
+    log_info "Explicitly bootstrapping qualified pre-commit 4.7.0..."
+    if ! run_python -c 'import importlib.metadata,sys; sys.exit(importlib.metadata.version("pre-commit") != "4.7.0")' >/dev/null 2>&1; then
+        run_python -m pip install --only-binary=:all: "pre-commit==4.7.0"
+    fi
     local cache_root="$REPO_ROOT/.cache"
     local precommit_home="$cache_root/pre-commit"
     local precommit_home_runtime="$precommit_home"
@@ -554,7 +557,10 @@ New-Item -ItemType Directory -Force -Path \$env:GOCACHE | Out-Null
 New-Item -ItemType Directory -Force -Path \$env:GOPATH | Out-Null
 New-Item -ItemType Directory -Force -Path \$env:UV_CACHE_DIR | Out-Null
 Set-Location '$repo_root_win'
-& '$python_bin_win' -m pre_commit install --hook-type pre-commit --hook-type pre-push --hook-type commit-msg
+& '$python_bin_win' -m pre_commit install-hooks
+if (\$LASTEXITCODE -ne 0) { exit \$LASTEXITCODE }
+& '$python_bin_win' -m scripts.engineering.repo hooks install --python '$python_bin_win'
+exit \$LASTEXITCODE
 " >/dev/null
             log_ok "pre-commit hooks installed"
             return 0
@@ -563,28 +569,13 @@ Set-Location '$repo_root_win'
         log_warn "Windows pre-commit bootstrap fallback could not convert required paths; using direct invocation."
     fi
 
-    if [[ "$USE_UV" == true ]]; then
-        if ! UV_NO_BUILD=1 uv run --frozen --no-build python -m pre_commit --version >/dev/null 2>&1; then
-            # Pin + binary-only install (shell:S8541).
-            UV_NO_BUILD=1 uv run --frozen --no-build python -m pip install --only-binary=:all: "pre-commit==4.0.1"
-        fi
-        if git rev-parse --git-dir >/dev/null 2>&1; then
-            UV_NO_BUILD=1 uv run --frozen --no-build python -m pre_commit install --hook-type pre-commit --hook-type pre-push --hook-type commit-msg
-            log_ok "pre-commit hooks installed"
-        else
-            log_warn "Not a git repository, skipping pre-commit install"
-        fi
-    else
-        if ! "$PYTHON_BIN" -m pre_commit --version >/dev/null 2>&1; then
-            "$PYTHON_BIN" -m pip install --only-binary=:all: "pre-commit==4.0.1"
-        fi
-        if git rev-parse --git-dir >/dev/null 2>&1; then
-            "$PYTHON_BIN" -m pre_commit install --hook-type pre-commit --hook-type pre-push --hook-type commit-msg
-            log_ok "pre-commit hooks installed"
-        else
-            log_warn "Not a git repository, skipping pre-commit install"
-        fi
-    fi
+    # Bootstrap may access the network only during this explicit setup command.
+    # Git callbacks use the separate qualified cached-only adapter.
+    run_python -m pre_commit install-hooks
+    local project_python
+    project_python="$(run_python -c 'import sys; print(sys.executable)')"
+    run_python -m scripts.engineering.repo hooks install --python "$project_python"
+    log_ok "Owned Git hooks installed; use hooks doctor to inspect effective routing"
     return 0
 }
 

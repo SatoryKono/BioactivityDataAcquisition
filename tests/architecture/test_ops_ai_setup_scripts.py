@@ -139,7 +139,13 @@ def test_setup_plugins_supports_hook_only_install_and_commit_msg_hook() -> None:
     )
 
     assert "--hooks-only" in content
-    assert "--hook-type commit-msg" in content
+    assert "-m scripts.engineering.repo hooks install --python" in content
+    assert "-m pre_commit install-hooks" in content
+    assert "pre-commit==4.7.0" in content
+    assert "pre_commit install --hook-type" not in content
+    from scripts.engineering.repo.hook_installation import HOOKS
+
+    assert set(HOOKS) == {"pre-commit", "pre-push", "commit-msg"}
 
 
 def test_make_precommit_install_reuses_setup_plugins_helper() -> None:
