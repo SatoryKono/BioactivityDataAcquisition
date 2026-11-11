@@ -38,6 +38,8 @@ EC_CATEGORIES: tuple[tuple[int, str], ...] = (
 )
 UNSET = "не утверждено"
 NOT_RUN = "NOT_RUN"
+_DOCUMENTARY_SOURCE = "план v1 r8 §5"
+_DOCUMENTARY_STATUS = "подтверждено документально"
 ROLE_ASSIGNMENT = (
     "владелец результата — Федор Новиков; исполнитель модуля и "
     "проверяющий эталонов — Cursor, назначение владельца 2026-11-11"
@@ -240,12 +242,12 @@ def compare_subclasses(
     A subclass outside its own vocabulary is a contract defect. A subclass
     with no link to the other layer is incompatible.
     """
+    if direct_subclass is not None and direct_subclass not in direct_vocabulary:
+        return "contract_defect"
+    if local_subclass is not None and local_subclass not in local_vocabulary:
+        return "contract_defect"
     if direct_subclass is None or local_subclass is None:
         return "empty"
-    if direct_subclass not in direct_vocabulary:
-        return "contract_defect"
-    if local_subclass not in local_vocabulary:
-        return "contract_defect"
     pair = (direct_subclass, local_subclass)
     if direct_subclass == local_subclass or pair in same_pairs:
         return "same"
@@ -264,22 +266,22 @@ def policy_document() -> dict[str, object]:
                     "as_of": "2026-11-09",
                     "item": "api_key_required",
                     "note": "не проверенный контракт сервиса",
-                    "source": "план v1 r8 §5",
-                    "status": "подтверждено документально",
+                    "source": _DOCUMENTARY_SOURCE,
+                    "status": _DOCUMENTARY_STATUS,
                 },
                 {
                     "as_of": "2026-11-09",
                     "item": "header_GTP-API-Key",
                     "note": "не проверенный контракт сервиса",
-                    "source": "план v1 r8 §5",
-                    "status": "подтверждено документально",
+                    "source": _DOCUMENTARY_SOURCE,
+                    "status": _DOCUMENTARY_STATUS,
                 },
                 {
                     "as_of": "2026-11-09",
                     "item": "rate_about_60_per_minute",
                     "note": "ориентир документации, не измеренный лимит",
-                    "source": "план v1 r8 §5",
-                    "status": "подтверждено документально",
+                    "source": _DOCUMENTARY_SOURCE,
+                    "status": _DOCUMENTARY_STATUS,
                 },
             ],
             "operational_check": {
