@@ -33,6 +33,12 @@ def test_context_uses_uri_encoded_variable_in_backend_only(uid, donor_id):
     assert (
         "uql" not in target
     )  # JSON literal interpolation must not enter a quoted UQL program.
+    if uid == "bioetl-overview-v2":
+        status = next(p for p in dashboard["panels"] if p["id"] == 9603)
+        projection = next(
+            t for t in status["transformations"] if t["id"] == "filterFieldsByName"
+        )
+        assert "execution_state" in projection["options"]["include"]["names"]
 
 
 @pytest.mark.parametrize(

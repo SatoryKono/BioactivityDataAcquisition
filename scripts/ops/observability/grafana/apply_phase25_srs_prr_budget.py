@@ -191,6 +191,7 @@ _OV_DOMAINS = (
     "'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? "
     "'Cached Bronze used; provider API was not called.' : $d.reason_display, "
     "'run_execution': $s.execution_state, "
+    "'execution_state': $s.execution_state, "
     "'run_verdict': $s.verdict, "
     "'saved_trust': $t, "
     "'run_reason': $count($issues) > 0 ? $join($map($issues, function($d) { "
@@ -965,6 +966,18 @@ def apply_overview(data: dict[str, Any]) -> None:
         panel["datasource"] = dict(DASH_DS)
         panel["targets"] = [_dash_target(9002)]
         _prepend_frame_filter(panel, frame)
+
+    # Use the canonical execution column shared with the context block.
+    summary = _by_id(data, 9603)
+    _ensure_field_projection(
+        summary, ("execution_state", "run_verdict", "saved_trust", "run_reason")
+    )
+    for transform in summary["transformations"]:
+        if transform["id"] == "organize":
+            for key in ("indexByName", "renameByName"):
+                values = transform["options"][key]
+                if "run_execution" in values:
+                    values["execution_state"] = values.pop("run_execution")
 
     # Row filter alone is not enough: project back to the prior column set.
     _ensure_field_projection(_by_id(data, 9300), _IDENTITY_FIELDS)
