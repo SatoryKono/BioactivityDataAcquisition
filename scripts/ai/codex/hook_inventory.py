@@ -127,6 +127,17 @@ def _opencode_candidates(root: Path) -> list[dict[str, Any]]:
     return results
 
 
+def _merge_opencode_evidence(result: dict[str, Any]) -> None:
+    """Avoid an absence claim when an alternate config cannot be parsed."""
+    candidates = result["additional_configurations"]
+    if any(item.get("plugins_configured") is True for item in candidates):
+        result["plugins_configured"] = True
+    if any(item.get("parse_status") in {"UNSUPPORTED", "ERROR"} for item in candidates):
+        result["config_status"] = "INCOMPLETE"
+        if not result["plugins_configured"]:
+            result["plugins_configured"] = None
+
+
 def git_inventory(root: Path) -> dict[str, Any]:
     """Resolve effective hooks directory with Git, including linked worktrees."""
     try:
@@ -192,16 +203,7 @@ def runtime_inventory(root: Path, name: str, command: str | None) -> dict[str, A
                 "project hooks require explicit --config-location; EAP capability must be verified"
             )
         elif name == "opencode":
-            candidates = result["additional_configurations"]
-            if any(item.get("plugins_configured") is True for item in candidates):
-                result["plugins_configured"] = True
-            if any(
-                item.get("parse_status") in {"UNSUPPORTED", "ERROR"}
-                for item in candidates
-            ):
-                result["config_status"] = "INCOMPLETE"
-                if not result["plugins_configured"]:
-                    result["plugins_configured"] = None
+            _merge_opencode_evidence(result)
             result["discovery_note"] = (
                 "subordinate surface; plugin APIs must match installed major version"
             )
