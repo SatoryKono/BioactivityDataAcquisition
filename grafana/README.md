@@ -2696,12 +2696,13 @@ Machine mapping: `docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`.
 
 | Dashboard | UID | Primary surface | Purpose |
 | --- | --- | --- | --- |
-| 1. Trust | `bioetl-control-plane-v1` | Prometheus + BioETL Ops HTTP | Replay/resume trust, manifest/ledger/checkpoint |
-| 2. Overview | `bioetl-overview-v2` | Prometheus + BioETL Ops HTTP | L0 answer, L1 cards, collapsed Alert/SLO triage |
-| 3. Data Quality | `bioetl-dq-v2` | Prometheus + BioETL Ops HTTP | DQ current/range, quarantine aggregates |
-| 4. Incident Workspace | `bioetl-incident-v1` | Prometheus | Multi-domain suspects + ALERTS support |
-| Prometheus Stats | `rpfmFFz7z` | Prometheus | Instance-only (untracked). Superseded by Prometheus 2.0 Stats. |
-| Run Explorer | `bioetl-run-explorer-v1` | BioETL Ops HTTP | Exact-run identity (never Prom `run_id` labels) |
+| 1. Run Explorer | `bioetl-run-explorer-v1` | BioETL Ops HTTP | Exact-run identity (never Prom `run_id` labels) |
+| 2. Replay Readiness | `bioetl-control-plane-v1` | Prometheus + BioETL Ops HTTP | Replay/resume trust, manifest/ledger/checkpoint |
+| 3. Run Overview | `bioetl-overview-v2` | Prometheus + BioETL Ops HTTP | L0 answer, L1 cards, collapsed Alert/SLO triage |
+| 4. Data Quality | `bioetl-dq-v2` | Prometheus + BioETL Ops HTTP | DQ current/range, quarantine aggregates |
+| 5. Incident Workspace | `bioetl-incident-v1` | Prometheus | Multi-domain suspects + ALERTS support |
+
+Prometheus Stats (`rpfmFFz7z`) is instance-only and is outside this numbered set. Disposition: Appendix "Prometheus Stats Dashboard (UID: rpfmFFz7z) - No Data Incident (LA-08)".
 
 `Inspect Recent Runs` (`3010`) is a filesystem index, not Prometheus.
 `/health/ready` green does not prove the table should fill. Empty
