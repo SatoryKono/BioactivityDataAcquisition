@@ -308,3 +308,9 @@ The JSONL reader uses interruptible nonblocking reads and a bounded join during
 cleanup. An inherited stdout held by a backend cannot block diagnostic shutdown;
 that backend is not terminated. `--no-write` controls report output; it does not
 cancel the separately acknowledged adapter cache/log/startup effects.
+
+Readiness controls honor native `enabled_tools` and `disabled_tools` before
+starting a diagnostic session. An excluded control is reported with
+`control_status: DISABLED` and overall readiness remains `NOT_TESTED`.
+Only explicitly declared environment references may inherit process values
+when the repository environment has no value; unrelated credentials stay excluded.

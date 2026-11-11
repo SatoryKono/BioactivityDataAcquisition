@@ -738,3 +738,55 @@ def test_stdio_cleanup_does_not_wait_for_inherited_stdout_or_kill_backend(tmp_pa
         if child is not None and child.is_running():
             child.terminate()
             child.wait(timeout=3)
+
+
+@pytest.mark.parametrize(
+    "filters",
+    [
+        {"disabled_tools": ["read_file"]},
+        {"enabled_tools": ["list_directory"]},
+        {"enabled_tools": []},
+        {"enabled_tools": ["read_file"], "disabled_tools": ["read_file"]},
+    ],
+)
+def test_filtered_control_never_starts_a_diagnostic_session(tmp_path, filters):
+    session = Session()
+    row = report(capture(tmp_path, **filters), session)["results"][0]
+    assert row["status"] == "NOT_TESTED"
+    assert row["control_status"] == "DISABLED"
+    assert row["detail"] == "CONTROL_TOOL_DISABLED_BY_CONFIG"
+    assert not session.calls
+    assert not row["ready"]
+
+
+def test_explicitly_enabled_control_retains_semantic_check(tmp_path):
+    session = Session()
+    row = report(capture(tmp_path, enabled_tools=["read_file"]), session)["results"][0]
+    assert row["control_status"] == "PASS"
+    assert sum(method == "tools/call" for method, _, _ in session.calls) == 1
+
+
+@pytest.mark.parametrize(
+    "reference",
+    [
+        {"env_vars": ["SYNTHETIC_MCP_TOKEN"]},
+        {"env_http_headers": {"X-Token": "SYNTHETIC_MCP_TOKEN"}},
+        {"bearer_token_env_var": "SYNTHETIC_MCP_TOKEN"},
+    ],
+)
+def test_declared_process_environment_is_inherited_without_unrelated_secrets(
+    monkeypatch, reference
+):
+    from scripts.ai.codex.mcp_probe_client import probe_environment
+
+    monkeypatch.setenv("SYNTHETIC_MCP_TOKEN", SECRET)
+    monkeypatch.setenv("UNRELATED_SECRET", SECRET)
+    result = probe_environment(reference, {})
+    assert result["SYNTHETIC_MCP_TOKEN"] == SECRET
+    assert "UNRELATED_SECRET" not in result
+    assert (
+        probe_environment(reference, {"SYNTHETIC_MCP_TOKEN": "repository-value"})[
+            "SYNTHETIC_MCP_TOKEN"
+        ]
+        == "repository-value"
+    )

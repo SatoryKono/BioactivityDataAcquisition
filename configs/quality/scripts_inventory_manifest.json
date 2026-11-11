@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-11T22:19:37.924734+00:00",
+  "generated_at": "2026-11-11T22:30:22.038809+00:00",
   "summary": {
     "total_scripts": 735,
     "status_counts": {
@@ -1197,7 +1197,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
         {
           "path": "scripts/ai/codex/mcp_readiness.py",
@@ -5355,7 +5355,7 @@
         },
         {
           "path": "tests/architecture/test_runtime_orchestration_surfaces.py",
-          "line": 110,
+          "line": 111,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ai\" / \"mcp\" / \"support\" / \"mcp_docker_prune.ps1\""
         },
@@ -5400,7 +5400,7 @@
         },
         {
           "path": "tests/architecture/test_runtime_orchestration_surfaces.py",
-          "line": 107,
+          "line": 108,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ai\" / \"mcp\" / \"support\" / \"mcp_docker_prune.sh\""
         },

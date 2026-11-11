@@ -145,6 +145,16 @@ def _semantic_call(client, control: Mapping, timeout: float) -> None:
         raise ProbeError("TOOL_REPORTED_ERROR")
     if control.get("expected_policy_reason"):
         raise ProbeError("EXPECTED_POLICY_DENIAL_NOT_OBSERVED")
+    rendered = _render_tool_result(result)
+    if not rendered.strip():
+        raise ProbeError("EMPTY_TOOL_RESULT")
+    if len(rendered.encode("utf-8")) > 1024 * 1024:
+        raise ProbeError("RESPONSE_LIMIT", uncertain=True)
+    if not all(token in rendered for token in control["contains_all"]):
+        raise ProbeError("CONTROL_RESULT_MISMATCH")
+
+
+def _render_tool_result(result: Mapping) -> str:
     content = result.get("content") or []
     if not isinstance(content, list):
         raise ProbeError("INVALID_TOOL_RESULT")
@@ -156,12 +166,7 @@ def _semantic_call(client, control: Mapping, timeout: float) -> None:
     structured = result.get("structuredContent")
     if isinstance(structured, dict) and structured:
         rendered += json.dumps(structured, ensure_ascii=False)
-    if not rendered.strip():
-        raise ProbeError("EMPTY_TOOL_RESULT")
-    if len(rendered.encode("utf-8")) > 1024 * 1024:
-        raise ProbeError("RESPONSE_LIMIT", uncertain=True)
-    if not all(token in rendered for token in control["contains_all"]):
-        raise ProbeError("CONTROL_RESULT_MISMATCH")
+    return rendered
 
 
 def _phase(row: dict, name: str, operation: Callable):
@@ -227,6 +232,13 @@ def _run_session(
     )
 
 
+def _control_enabled(entry: Mapping, tool: str) -> bool:
+    allowed = entry.get("enabled_tools")
+    return tool not in (entry.get("disabled_tools") or []) and (
+        allowed is None or tool in allowed
+    )
+
+
 def _probe_row(name, entry, control_value, capture, *, environment, factory, required):
     row = {
         "server": name,
@@ -253,6 +265,12 @@ def _probe_row(name, entry, control_value, capture, *, environment, factory, req
         }
     try:
         control = _control(control_value, name)
+        if not _control_enabled(entry, control["tool"]):
+            return {
+                **row,
+                "control_status": "DISABLED",
+                "detail": "CONTROL_TOOL_DISABLED_BY_CONFIG",
+            }
         _run_session(
             row,
             entry,
