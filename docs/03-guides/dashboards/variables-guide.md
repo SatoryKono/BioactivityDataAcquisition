@@ -79,3 +79,14 @@ ______________________________________________________________________
 | `bioetl-alerts-slo` (retired) | `$pipeline`, `$run_type`, `$workflow` |
 
 Runtime and Provider Health are retired. Their legacy URLs redirect to Run Overview; saved Provider Evidence uses the selected Run ID and panel 9480.
+
+### Automatic and explicit Run ID context (LA-12)
+
+Overview and Data Quality show Review Run Context on the first screen. With an
+unresolved Run ID, AUTO displays the latest run by start time within the current
+filters, even if that run is unfinished. Selecting a Run ID changes the context
+to EXPLICIT and keeps that exact request. Execution and Verdict remain distinct.
+Context checked at records the Grafana query evaluation, not the run start,
+browser click or server cache load. It makes no catalog freshness assertion;
+AUTO displays the latest run returned for the current scope.
+An empty scope and a failed resolution never claim that a latest run is shown.

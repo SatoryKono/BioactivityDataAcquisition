@@ -349,19 +349,23 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '9400':
-        title: ''
-        role: guidance
-        tier: 4
+        title: Review Run Context
+        role: identity_table
+        tier: 3
         scope: selected_run
         scope_class: selected_run
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
+        evidence_source: ops_http
+        empty_state_class: coverage_gap
         state_model:
-        - N/A
+        - UNKNOWN
+        - ERROR
         required_copy:
-        - operator_guidance
+        - evidence_scope
+        - no_data
         fixture_cases:
-        - not_applicable
+        - populated
+        - telemetry_absent
+        - backend_error
         render_profiles: *id001
       '9402':
         title: Inspect Run Identity
@@ -2990,19 +2994,23 @@ dashboards:
   bioetl-overview-v2:
     panels:
       '99':
-        title: ''
-        role: guidance
-        tier: 4
+        title: Review Run Context
+        role: identity_table
+        tier: 3
         scope: selected_run
         scope_class: selected_run
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
+        evidence_source: ops_http
+        empty_state_class: coverage_gap
         state_model:
-        - N/A
+        - UNKNOWN
+        - ERROR
         required_copy:
-        - operator_guidance
+        - evidence_scope
+        - no_data
         fixture_cases:
-        - not_applicable
+        - populated
+        - telemetry_absent
+        - backend_error
         render_profiles: *id001
       '1000':
         title: ''

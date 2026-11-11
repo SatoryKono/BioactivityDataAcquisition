@@ -3,7 +3,7 @@
 **Dashboard file:** `grafana/dashboards/bioetl-overview-v2.json`
 
 Run Overview separates two scopes. Saved evidence assesses one persisted Run ID;
-missing selection is SELECT RUN, absent evidence is UNKNOWN or INCOMPLETE, and
+an unresolved selection resolves the latest run in scope; absent evidence is UNKNOWN or INCOMPLETE, and
 failed requests remain QUERY ERROR. GLOBAL / CURRENT alerts assess the fleet
 independently of that selection. They never prove this run succeeded or change
 its saved verdict. Incident Workspace owns incident triage and fleet diagnostics.
@@ -109,7 +109,7 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 
 | ID | Title | Type |
 | --- | --- | --- |
-| 99 | Inspect Scope & Evidence | text |
+| 99 | Review Run Context | table |
 | 9604 | Review Overall Verdict | stat |
 | 9002 | Review Run Domains | table |
 | 9603 | Review Selected Run Status | table |
@@ -123,3 +123,13 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 32005 | Browse Global Alerts | row |
 | 22005 | Monitor Global Alerts (Full) | table |
 <!-- END SHIPPED PANEL INVENTORY -->
+
+## Review Run Context — LA-12 (#12946)
+
+Panel `99` shows AUTO or EXPLICIT, the actual Run ID, execution state, saved
+verdict and Context checked at (Grafana query evaluation time). AUTO includes unfinished latest runs; an
+explicit unavailable run stays bound rather than falling back to another run.
+The context reuses the same donor frame as saved evidence, so it adds no HTTP
+request and cannot describe a different snapshot. The clock is not run start,
+a browser click, server cache load or catalog freshness. The block stays in
+the first window; the identity table remains bounded to its existing five rows.

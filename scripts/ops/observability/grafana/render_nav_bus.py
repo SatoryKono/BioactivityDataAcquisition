@@ -2769,6 +2769,10 @@ def apply_to_dashboard(
     # Phase 2.5 donor–consumer budget must run after identity/layout rebuilds so
     # re-running this generator does not wipe SRS/PRR donors or markdown handoffs.
     _apply_phase25_srs_prr_budget(payload, current_uid=current_uid)
+    from scripts.ops.observability.grafana._run_selection_context import (
+        stamp_run_selection_context,
+    )
+
     _migrate_grafana_schema42(payload)
     _neutralize_mapped_status_thresholds(payload)
     _remove_dead_organize_renames(payload)
@@ -2810,6 +2814,7 @@ def apply_to_dashboard(
             (DASH_DIR / "bioetl-incident-v1.json").read_text(encoding="utf-8")
         )
         embed_global_alerts(payload, incident)
+    stamp_run_selection_context(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

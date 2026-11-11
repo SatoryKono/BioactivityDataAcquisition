@@ -282,10 +282,9 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
     assert 9401 not in panels
     assert {9400, 9406, 9402, 9403}.issubset(panels)
     assert "SELECTED RUN" in panels[9400]["description"]
-    assert (
-        "CURRENT pipeline status and TIME RANGE scores are not on this page"
-        in panels[9400]["options"]["content"]
-    )
+    assert panels[9400]["type"] == "table"
+    assert panels[9400]["title"] == "Review Run Context"
+    assert "TIME RANGE telemetry never proves this run" in panels[9400]["description"]
     identity = panels[9402]
     assert identity["type"] == "text"
     assert "Open Review Run Identity on Overview" in identity["options"]["content"]
@@ -1112,9 +1111,9 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     identity, processed = panels[9402], panels[9403]
     assert identity["gridPos"]["w"] == processed["gridPos"]["w"] == 24
-    assert identity["gridPos"]["y"] == 18
-    assert processed["gridPos"]["y"] == 10
-    assert processed["gridPos"]["h"] == 8
+    assert identity["gridPos"]["y"] == 20
+    assert processed["gridPos"]["y"] == 12
+    assert processed["gridPos"]["h"] == 6
     assert processed["options"]["footer"]["enablePagination"] is True
     assert processed["options"]["cellHeight"] == "sm"
     assert not any(t["id"] == "limit" for t in processed["transformations"])
