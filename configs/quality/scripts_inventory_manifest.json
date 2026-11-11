@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-11T18:59:46.809599+00:00",
+  "generated_at": "2026-11-11T19:03:15.066616+00:00",
   "summary": {
     "total_scripts": 730,
     "status_counts": {
@@ -3808,7 +3808,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 483,
+          "line": 492,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\","
         }
@@ -3857,7 +3857,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 484,
+          "line": 493,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\","
         }
@@ -4793,7 +4793,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 485,
+          "line": 494,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\","
         }
@@ -5212,7 +5212,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 486,
+          "line": 495,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\","
         }
