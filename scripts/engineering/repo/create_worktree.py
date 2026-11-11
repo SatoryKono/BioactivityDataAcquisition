@@ -18,6 +18,7 @@ from pathlib import Path, PurePosixPath
 APPROVED_ROOT = Path("D:/github")
 WORKTREE_ROOT = APPROVED_ROOT / "BioactivityDataAcquisition-worktrees"
 HELPER_NAME = "bioetl-create-worktree.py"
+DEFAULT_START_POINT = "origin/main"
 _TASK = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,99}")
 _RESERVED = {
     "CON",
@@ -216,7 +217,7 @@ def create_worktree(args: argparse.Namespace) -> Path:
         ),
         approved,
     )
-    if args.existing_branch and args.start_point != "origin/main":
+    if args.existing_branch and args.start_point != DEFAULT_START_POINT:
         raise ValueError("--existing-branch cannot be combined with --start-point")
     ref = (
         f"refs/heads/{args.existing_branch}"
@@ -260,7 +261,7 @@ def main(argv: list[str] | None = None) -> int:
     branch.add_argument("--branch")
     branch.add_argument("--existing-branch")
     branch.add_argument("--detach", action="store_true")
-    parser.add_argument("--start-point", default="origin/main")
+    parser.add_argument("--start-point", default=DEFAULT_START_POINT)
     parser.add_argument("--no-checkout", action="store_true")
     parser.add_argument("--env-example-approved", action="store_true")
     args = parser.parse_args(argv)
@@ -273,7 +274,7 @@ def main(argv: list[str] | None = None) -> int:
                 or args.detach
                 or args.no_checkout
                 or args.env_example_approved
-                or args.start_point != "origin/main"
+                or args.start_point != DEFAULT_START_POINT
             ):
                 raise ValueError(
                     "--install-helper cannot be combined with creation options"
