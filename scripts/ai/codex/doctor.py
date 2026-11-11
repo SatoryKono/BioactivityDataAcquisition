@@ -406,7 +406,18 @@ def run_mcp(
     if probe_plan is not None:
         if not start_approved_adapters:
             raise ValueError("--probe-plan requires --start-approved-adapters")
-        controls = _read_probe_plan(repo_root, probe_plan)
+        try:
+            controls = _read_probe_plan(repo_root, probe_plan)
+        except (OSError, ValueError):
+            print(
+                json.dumps(
+                    {
+                        "status": "NOT_TESTED",
+                        "detail": "probe plan unavailable or invalid",
+                    }
+                )
+            )
+            return 1
         print(
             "MCP diagnostic service effects: " + "; ".join(SERVICE_EFFECTS),
             file=sys.stderr,

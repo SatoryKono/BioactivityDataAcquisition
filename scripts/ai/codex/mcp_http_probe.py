@@ -1,7 +1,10 @@
 """Single-attempt HTTP MCP probes with bounded reads and an absolute deadline."""
 
+from __future__ import annotations
+
 from collections.abc import Mapping
 import http.client
+import ipaddress
 import json
 import re
 import socket
@@ -154,30 +157,54 @@ def _read_http_reply(response, timeout: float, *, guard=None) -> bytes:
             return bytes(buffer)
 
 
+def _is_loopback(host: str) -> bool:
+    if host.rstrip(".").lower() == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
+def _validate_http_transport(url, entry: Mapping) -> None:
+    if url.scheme not in {"http", "https"} or not url.hostname:
+        raise ProbeError("UNSUPPORTED_HTTP_URL")
+    if url.username or url.password or entry.get("http_headers_helper"):
+        raise ProbeError("AUTH_HELPER_NOT_TESTED")
+    credentials = any(
+        entry.get(key)
+        for key in ("bearer_token_env_var", "env_http_headers", "http_headers")
+    )
+    if url.scheme == "http" and credentials and not _is_loopback(url.hostname):
+        raise ProbeError("UNSUPPORTED_HTTP_URL")
+
+
+def _request_headers(entry: Mapping, environment: Mapping[str, str]) -> dict:
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+    }
+    headers.update(entry.get("http_headers") or {})
+    for key, reference in (entry.get("env_http_headers") or {}).items():
+        if not environment.get(reference):
+            raise ProbeError("AUTH_REFERENCE_UNAVAILABLE")
+        headers[key] = environment[reference]
+    reference = entry.get("bearer_token_env_var")
+    if reference:
+        if not environment.get(reference):
+            raise ProbeError("AUTH_REFERENCE_UNAVAILABLE")
+        headers["Authorization"] = "Bearer " + environment[reference]
+    return headers
+
+
 class HttpProbeClient:
     """Own each HTTP connection; never redirect, replay, or DELETE a session."""
 
     def __init__(self, entry: Mapping, workspace, environment: Mapping[str, str]):
         del workspace
         self.url = urlsplit(str(entry["url"]))
-        if self.url.scheme not in {"http", "https"} or not self.url.hostname:
-            raise ProbeError("UNSUPPORTED_HTTP_URL")
-        if self.url.username or self.url.password or entry.get("http_headers_helper"):
-            raise ProbeError("AUTH_HELPER_NOT_TESTED")
-        self.headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json, text/event-stream",
-        }
-        self.headers.update(entry.get("http_headers") or {})
-        for key, reference in (entry.get("env_http_headers") or {}).items():
-            if not environment.get(reference):
-                raise ProbeError("AUTH_REFERENCE_UNAVAILABLE")
-            self.headers[key] = environment[reference]
-        reference = entry.get("bearer_token_env_var")
-        if reference:
-            if not environment.get(reference):
-                raise ProbeError("AUTH_REFERENCE_UNAVAILABLE")
-            self.headers["Authorization"] = "Bearer " + environment[reference]
+        _validate_http_transport(self.url, entry)
+        self.headers = _request_headers(entry, environment)
         self._identifier = 0
         self._last_deadline = 0.0
         self.transport_seen = False

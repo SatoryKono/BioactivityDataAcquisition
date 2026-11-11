@@ -536,3 +536,7 @@ request deadline. A timed-out connection worker cannot send a protocol request;
 late DNS results are discarded before socket creation, and late owned sockets
 are closed by their worker. A platform resolver already running may finish in
 a daemon thread; its completion does not delay the diagnostic report.
+
+Invalid or unreadable probe plans produce a structured `NOT_TESTED` result
+before adapter startup. Credential-bearing HTTP controls are limited to
+loopback hosts; remote credential-bearing controls require HTTPS.

@@ -1,5 +1,7 @@
 """Protocol, semantic, isolation-reason and redaction readiness regressions."""
 
+from __future__ import annotations
+
 from copy import deepcopy
 from io import BytesIO
 import json
@@ -734,10 +736,20 @@ def test_stdio_cleanup_does_not_wait_for_inherited_stdout_or_kill_backend(tmp_pa
         assert time.monotonic() - started < 0.8
         assert not psutil.pid_exists(parent_pid)
         assert child.is_running(), "diagnostic must not kill the inherited backend"
+        assert child.status() != psutil.STATUS_ZOMBIE
     finally:
-        if child is not None and child.is_running():
-            child.terminate()
-            child.wait(timeout=3)
+        if child is not None:
+            try:
+                if child.is_running() and child.status() != psutil.STATUS_ZOMBIE:
+                    child.terminate()
+                    deadline = time.monotonic() + 3
+                    while child.is_running() and child.status() != psutil.STATUS_ZOMBIE:
+                        assert time.monotonic() < deadline, (
+                            "fixture backend did not stop"
+                        )
+                        time.sleep(0.01)
+            except psutil.NoSuchProcess:
+                pass
 
 
 @pytest.mark.parametrize(
@@ -888,3 +900,69 @@ def test_http_address_attempts_share_remaining_deadline(monkeypatch):
     assert len(closed) == len(budgets)
     if len(budgets) == 2:
         assert budgets[1] < budgets[0]
+
+
+@pytest.mark.parametrize(
+    "mode", ["missing-root", "missing-file", "invalid-json", "unsafe-path"]
+)
+def test_invalid_probe_plan_returns_not_tested_without_launch(
+    tmp_path, monkeypatch, capsys, mode
+):
+    from scripts.ai.codex.doctor import run_mcp
+    import scripts.ai.codex.native_mcp_config as native
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("invalid plan must never start a native process")
+
+    monkeypatch.setattr(native, "NativeConfigClient", forbidden)
+    plan = Path("reports/quality/mcp-controls/control.json")
+    if mode != "missing-root":
+        (tmp_path / plan.parent).mkdir(parents=True)
+    if mode == "invalid-json":
+        (tmp_path / plan).write_text(SECRET, encoding="utf-8")
+    if mode == "unsafe-path":
+        plan = Path("../outside.json")
+    assert (
+        run_mcp(
+            tmp_path,
+            "stable",
+            output_json=True,
+            codex_executable=Path("synthetic-codex"),
+            probe_plan=plan,
+            start_approved_adapters=True,
+        )
+        == 1
+    )
+    output = capsys.readouterr()
+    assert json.loads(output.out) == {
+        "status": "NOT_TESTED",
+        "detail": "probe plan unavailable or invalid",
+    }
+    assert SECRET not in output.out + output.err
+
+
+@pytest.mark.parametrize(
+    "credential",
+    [
+        {"bearer_token_env_var": "SYNTHETIC_TOKEN"},
+        {"env_http_headers": {"X-Token": "SYNTHETIC_TOKEN"}},
+        {"http_headers": {"X-Token": SECRET}},
+    ],
+)
+def test_cleartext_remote_credentials_are_refused_before_connection(credential):
+    from scripts.ai.codex.mcp_http_probe import HttpProbeClient
+
+    environment = {"SYNTHETIC_TOKEN": SECRET}
+    with pytest.raises(ProbeError, match="UNSUPPORTED_HTTP_URL"):
+        HttpProbeClient(
+            {"url": "http://synthetic.invalid/mcp", **credential}, None, environment
+        )
+    for url in [
+        "http://127.0.0.1/mcp",
+        "http://localhost/mcp",
+        "http://[::1]/mcp",
+        "https://synthetic.invalid/mcp",
+    ]:
+        assert HttpProbeClient(
+            {"url": url, **credential}, None, environment
+        ).url.hostname
