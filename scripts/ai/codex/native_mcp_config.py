@@ -123,6 +123,15 @@ class NativeConfigClient:
         except (BrokenPipeError, OSError):
             raise NativeConfigError("native config connection closed") from None
 
+    @staticmethod
+    def _result(value: dict[str, Any]) -> dict[str, Any]:
+        if "error" in value:
+            raise NativeConfigError("native config request was rejected")
+        result = value.get("result")
+        if not isinstance(result, dict):
+            raise NativeConfigError("native config result is not an object")
+        return result
+
     def _response(self, identifier: int) -> dict[str, Any]:
         deadline = time.monotonic() + self.timeout
         while time.monotonic() < deadline:
@@ -145,12 +154,7 @@ class NativeConfigClient:
                     "interactive native request refused; no approval supplied"
                 )
             if value.get("id") == identifier:
-                if "error" in value:
-                    raise NativeConfigError("native config request was rejected")
-                result = value.get("result")
-                if not isinstance(result, dict):
-                    raise NativeConfigError("native config result is not an object")
-                return result
+                return self._result(value)
         raise NativeConfigError(
             "native config observation timeout; no restart or replay"
         )
