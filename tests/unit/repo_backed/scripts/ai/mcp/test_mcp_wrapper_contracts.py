@@ -117,6 +117,7 @@ POWERSHELL_WRAPPER_ENV_NAMES = (
     "PATH",
     "PATHEXT",
     "USERPROFILE",
+    "LOCALAPPDATA",
     "UV_CACHE_DIR",
     "UV_TOOL_DIR",
     "DENO_DIR",
@@ -672,6 +673,7 @@ def _windows_wrapper_env(
         PATH=path_value,
         PATHEXT=pathext,
         USERPROFILE=windows_dir,
+        LOCALAPPDATA=windows_dir,
         UV_CACHE_DIR=f"{windows_dir}{join}uv-cache",
         UV_TOOL_DIR=f"{windows_dir}{join}uv-tools",
         DENO_DIR=f"{windows_dir}{join}deno-cache",
@@ -1156,87 +1158,42 @@ Invoke-BioetlUvxWithScopedBypass `
 
 
 @BASH_MARK
-def test_bash_fetch_wrapper_executes_resolved_uvx(tmp_path: Path) -> None:
-    fake_bin = tmp_path / "bin"
-    fake_bin.mkdir()
-    fake_uvx = fake_bin / "uvx"
-    capture_file = tmp_path / "fetch-args.txt"
-    _write_bash_launcher(fake_uvx)
-    env = _clean_env(
-        PATH=f"{fake_bin}:/usr/bin:/bin",
-        UV_CACHE_DIR=str(tmp_path / "uv-cache"),
-        UV_TOOL_DIR=str(tmp_path / "uv-tools"),
-        BIOETL_TEST_CAPTURE=str(capture_file),
-        BIOETL_TEST_EXIT_CODE="17",
-    )
-
+def test_bash_fetch_wrapper_supports_validation_without_owner() -> None:
+    env = _clean_env(BIOETL_MCP_VALIDATE_ONLY="1")
     result = _run_bash(f"bash {shlex.quote(_bash_lf_script(FETCH_SH))}", env=env)
-
-    assert result.returncode == 17
-    assert result.stdout == ""
-    captured = _read_capture_file(capture_file).splitlines()
-    # WSL may report the launcher path in /mnt/<drive>/... form.
-    assert captured[0] in {
-        f"executable={fake_uvx}",
-        f"executable={_bash_path(fake_uvx)}",
-        f"executable={fake_uvx.as_posix()}",
-    }
-    assert captured[1:7] == [
-        "arg=--python",
-        "arg=3.13",
-        "arg=--with",
-        "arg=mcp<2",
-        "arg=--from",
-        "arg=mcp-server-fetch==2025.4.7",
-    ]
-    assert "arg=mcp-server-fetch" in captured
+    assert result.returncode == 0, result.stderr
+    assert "[OK] fetch MCP wrapper validation completed" in result.stdout
 
 
 @POWERSHELL_MARK
-def test_powershell_fetch_wrapper_executes_resolved_uvx(
-    windows_fixture_dir: Path,
-) -> None:
-    fake_uvx = windows_fixture_dir / "uvx.ps1"
-    capture_file = windows_fixture_dir / "fetch-args.txt"
-    _write_windows_launcher(fake_uvx)
-    env = _windows_wrapper_env(
-        windows_fixture_dir,
-        capture_file,
+def test_powershell_fetch_wrapper_refuses_missing_owner(tmp_path: Path) -> None:
+    result = _run_powershell_file(
+        FETCH_PS1,
+        env=_clean_env(
+            LOCALAPPDATA=_powershell_path(tmp_path), BIOETL_MCP_VALIDATE_ONLY=None
+        ),
     )
-
-    result = _run_powershell_file(FETCH_PS1, env=env)
-
-    assert result.returncode == 0, result.stderr
+    assert result.returncode == 1
     assert result.stdout == ""
-    captured = _read_capture_file(capture_file).splitlines()
-    assert "arg=--python" in captured
-    assert "arg=3.13" in captured
-    assert "arg=--with" in captured
-    assert "arg=mcp<2" in captured
-    assert "arg=--from" in captured
-    assert "arg=mcp-server-fetch==2025.4.7" in captured
-    assert "arg=mcp-server-fetch" in captured
+    assert "requires the registered Windows owner" in result.stderr
 
 
-def test_fetch_source_assertions_accept_and_reject_contract_fixtures() -> None:
-    check_source = CHECK_SH.read_text(encoding="utf-8")
-    patterns = re.findall(
-        r'require_contains "\$fetch_wrapper_source" \'([^\']+)\'',
-        check_source,
+def test_fetch_wrappers_exclude_standalone_package_launch() -> None:
+    bash_source = FETCH_SH.read_text(encoding="utf-8")
+    powershell_source = FETCH_PS1.read_text(encoding="utf-8")
+    owned_stdio = (MCP_DIR / "support" / "run_owned_stdio.ps1").read_text(
+        encoding="utf-8"
     )
-    assert patterns == [
-        "mcp-server-fetch==2025.4.7",
-        "mcp<2",
-        "bioetl_resolve_uvx_bin",
-        "--python 3.13",
-    ]
-
-    passing = " ".join(patterns)
-    assert all(pattern in passing for pattern in patterns)
-    for omitted in patterns:
-        failing = " ".join(pattern for pattern in patterns if pattern != omitted)
-        assert not all(pattern in failing for pattern in patterns)
-    assert "uvx --python 3.13" not in patterns
+    assert "mcp_fetch_wrapper.ps1" in bash_source
+    assert "exec_windows_ps1_wrapper.sh" in bash_source
+    assert "project-launcher.json" in powershell_source
+    assert "Resolve-OwnedMcpLauncherOrExit" in powershell_source
+    assert "Invoke-OwnedMcpStdio" in powershell_source
+    assert "Get-OwnedMcpLauncher" in owned_stdio
+    assert '-I -S -B "' in powershell_source
+    for source in (bash_source, powershell_source):
+        assert "mcp-server-fetch==" not in source
+        assert "uvx" not in source
 
 
 @POWERSHELL_MARK
