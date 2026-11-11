@@ -87,6 +87,9 @@ def _reject_output_overlap(
 ) -> None:
     """Refuse to publish when an artifact path is a source or the survey."""
     protected = {survey_file}
+    protected.update(
+        (root / item.source_ref).resolve() for item in survey.m_code_versions
+    )
     for candidate in survey.candidate_files:
         protected.add((root / candidate.relative_path).resolve())
     for material in survey.expected_materials:
@@ -112,6 +115,7 @@ def build_artifacts(
     output_dir: Path,
 ) -> dict[str, bytes]:
     """Return canonical artifact bytes without writing them."""
+    _verify_m_code_sources(repo_root, survey)
     inspections = inspect_survey(repo_root, survey)
     copies = copy_selected_sources(
         repo_root=repo_root,
@@ -357,6 +361,18 @@ def _claim_established(
         return False
     copied = copies_by_source.get(claim.source_ref)
     return copied is not None and copied.sha256 == claim.source_sha256
+
+
+def _verify_m_code_sources(repo_root: Path, survey: Stage0Survey) -> None:
+    root = repo_root.resolve()
+    for item in survey.m_code_versions:
+        source = (root / item.source_ref).resolve()
+        if not source.is_relative_to(root) or not source.is_file():
+            message = f"M-code source is unavailable inside root: {item.source_ref}"
+            raise ValueError(message)
+        if sha256_file(source) != item.source_sha256:
+            message = f"M-code source SHA-256 mismatch: {item.source_ref}"
+            raise ValueError(message)
 
 
 def _m_code_csv(survey: Stage0Survey) -> bytes:

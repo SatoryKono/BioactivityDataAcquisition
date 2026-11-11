@@ -104,6 +104,24 @@ def test_iuphar_source_and_data_keep_bounded_stage0_owners(tmp_path: Path) -> No
         )
 
 
+def test_file_policy_doc_keeps_structure_catalog_owners() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["docs/00-project/governance/03-file-policy.md"], repo_root=root
+    )
+    assert set(report["selected"]) == {
+        "tests/unit/scripts/repo/test_audit_root_cleanliness.py",
+        "tests/unit/scripts/repo/test_check_root_governance_docs.py",
+        "tests/unit/scripts/repo/test_audit_structure.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+    }
+    assert report["covers_full_suite"] is False
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            ["docs/00-project/governance/unowned-file-policy.md"], repo_root=root
+        )
+
+
 def test_shadow_compare_routes_domain_ports_stub() -> None:
     """Typed ports package stubs map like their .py siblings under tests/unit."""
     repo_root = Path(__file__).resolve().parents[5]
