@@ -59,7 +59,7 @@ def test_global_alerts_retain_donor_query_and_complete_list() -> None:
     full = panels[32005]["panels"][0]
     assert full["id"] == 22005
     assert full["datasource"] == summary["datasource"]
-    assert full["targets"] == [dict(summary["targets"][0], expr=metric)]
+    assert full["targets"] == [dict(donor["targets"][0], expr=metric)]
     assert all(t["id"] != "limit" for t in full["transformations"])
     assert full["links"] == []
     for panel in (summary,):

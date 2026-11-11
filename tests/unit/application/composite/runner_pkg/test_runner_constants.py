@@ -79,6 +79,7 @@ def test_checkpoint_non_fatal_errors_catches_instances() -> None:
     CheckpointConflictError requires (pipeline, message) — other built-in
     exceptions accept a single string argument.
     """
+    assert CHECKPOINT_NON_FATAL_ERRORS
     for exc_type in CHECKPOINT_NON_FATAL_ERRORS:
         if exc_type is CheckpointConflictError:
             instance: BaseException = exc_type("test_pipeline", "conflict")
