@@ -167,6 +167,25 @@ RUNTIME_ACCEPTANCE_12553_TEST = (
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "docs/00-project/NORMATIVE_SOURCES.md": (
+        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+        "tests/architecture/test_ai_runtime_governance_links.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    **dict.fromkeys(
+        (
+            ".codex/agents/CODEX-RUNTIME.md",
+            ".junie/agents/JUNIE-RUNTIME.md",
+            ".devin/agents/DEVIN-RUNTIME.md",
+            "docs/05-operations/runbooks/ai-hook-compatibility.md",
+        ),
+        (
+            "tests/unit/scripts/test_hook_inventory.py",
+            "tests/architecture/test_codex_native_runtime.py",
+            "tests/architecture/test_ai_runtime_governance_links.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
     ".github/workflows/runtime-acceptance-12553.yml": (
         "tests/architecture/test_github_actions_runtime_policy.py",
         "tests/architecture/test_gha_disabled_map_10263.py",
