@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Literal
 
 from .models import ClassificationResult, Evidence, ProviderAnnotation, RunProvenance
@@ -144,6 +144,8 @@ def class_chain_defects(
         defects.append("raw_annotation")
     if not row.iuphar_mapping_rule_id or not row.iuphar_mapping_version:
         defects.append("mapping_rule")
+    if not row.match_evidence_ids:
+        defects.append("mapping_evidence")
     return tuple(defects)
 
 
@@ -162,7 +164,7 @@ def content_equal(left: StoredRun, right: StoredRun) -> bool:
     return (
         left.rules_version == right.rules_version
         and left.payload == right.payload
-        and left.table == right.table
+        and _without_run_id(left.table) == _without_run_id(right.table)
         and _without_timestamps(left.provenance)
         == _without_timestamps(right.provenance)
     )
@@ -205,6 +207,10 @@ def trace_violation(
 
 def unsupported_class(row: ClassificationResult) -> bool:
     """Invariant 3. A class without a rule and an evidence id stays empty."""
+    if row.iuphar_class and (
+        not row.iuphar_mapping_rule_id or not row.match_evidence_ids
+    ):
+        return True
     if row.local_class and (not row.local_rule_ids or not row.local_evidence_ids):
         return True
     if row.effective_class and row.effective_source == "local_rule":
@@ -259,6 +265,14 @@ def _reject_duplicate_ids(evidence_ids: tuple[str, ...]) -> None:
     if tuple(sorted(evidence_ids)) != evidence_ids:
         message = "evidence ids are not in canonical order"
         raise ContractDefect(message)
+
+
+def _without_run_id(table: EvidenceTable) -> EvidenceTable:
+    return replace(
+        table,
+        run_id="",
+        records=tuple(replace(record, run_id="") for record in table.records),
+    )
 
 
 def _without_timestamps(provenance: RunProvenance) -> tuple[str | None, ...]:

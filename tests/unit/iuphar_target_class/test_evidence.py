@@ -16,6 +16,7 @@ from iuphar_target_class.evidence import (
     require_class_chain,
     require_resolvable,
     rerun_with_new_rules,
+    unsupported_class,
 )
 from iuphar_target_class.models import (
     ClassificationResult,
@@ -127,6 +128,7 @@ def test_broken_class_chain_is_a_defect() -> None:
         iuphar_type_raw="gpcr",
         iuphar_mapping_rule_id="type:gpcr",
         iuphar_mapping_version="plan-v1-r8",
+        match_evidence_ids=("row-1/iuphar_mapping/family:1/0002",),
     )
     assert class_chain_defects(complete) == ()
 
@@ -163,6 +165,7 @@ def test_family_mapping_chain_uses_matching_provider_annotation(
         iuphar_annotation_status="partial",
         iuphar_mapping_rule_id="class:Receptor",
         iuphar_mapping_version="plan-v1-r8",
+        match_evidence_ids=("row-1/iuphar_mapping/family:1/0002",),
     )
     annotation = ProviderAnnotation(
         annotation_target, None, ("family-1",), None, "human", None
@@ -178,3 +181,52 @@ def test_family_mapping_chain_uses_matching_provider_annotation(
         assert "mapping_rule" in class_chain_defects(
             replace(row, iuphar_mapping_rule_id=None), annotation=annotation
         )
+
+
+def test_content_equality_ignores_execution_ids_but_not_evidence_content() -> None:
+    first = StoredRun(
+        "plan-v1-r8",
+        _provenance("t0"),
+        build_evidence_table(_drafts(), run_id="run-1"),
+        b"same",
+    )
+    second = StoredRun(
+        "plan-v1-r8",
+        _provenance("t1"),
+        build_evidence_table(_drafts(), run_id="run-2"),
+        b"same",
+    )
+    assert content_equal(first, second)
+    changed = replace(second.table.records[0], content="different")
+    assert not content_equal(
+        first,
+        replace(
+            second,
+            table=replace(second.table, records=(changed, *second.table.records[1:])),
+        ),
+    )
+
+
+@pytest.mark.parametrize("missing", ["evidence", "rule"])
+def test_direct_class_requires_support_even_when_effective_class_is_empty(
+    missing: str,
+) -> None:
+    row = replace(
+        _classified_row(),
+        effective_class=None,
+        effective_source="none",
+        iuphar_mapping_rule_id=None if missing == "rule" else "class:Receptor",
+        iuphar_mapping_version="plan-v1-r8",
+        match_evidence_ids=() if missing == "evidence" else ("mapping-1",),
+    )
+    assert unsupported_class(row)
+
+
+def test_class_chain_requires_mapping_evidence() -> None:
+    row = replace(
+        _classified_row(),
+        iuphar_type_raw="gpcr",
+        iuphar_mapping_rule_id="class:Receptor",
+        iuphar_mapping_version="plan-v1-r8",
+    )
+    assert "mapping_evidence" in class_chain_defects(row)
