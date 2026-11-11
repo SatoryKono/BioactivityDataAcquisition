@@ -87,10 +87,10 @@ Operational defaults:
 
 Минимальный порядок:
 
-1. `python -m memory.tooling.workflow pre-task --task-id <id> --title "<task>"`
+1. `pre-task` only when required by AGENTS.md context tiers (V1 read-only optional; hash-only off).
 1. retrieval order: `catalog -> graph -> rag -> source`
 1. baseline/profile-specific work
-1. `python -m memory.tooling.workflow post-task --task-id <id> --title "<task>" --summary "<result>"`
+1. `post-task` and session notes only in authorized read-write mode; skip otherwise.
 1. promotion только для durable knowledge
 
 Это не заменяет runtime source или `.devin/agents/*.md`, а стандартизует:
