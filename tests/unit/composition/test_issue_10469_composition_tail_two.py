@@ -165,15 +165,24 @@ def test_record_processor_policy_normalizes_non_iterable_and_version_fallbacks()
 
 def test_secret_hash_returns_none_for_missing_and_empty_secret() -> None:
     value_hash = Mock(return_value="hash")
-
-    assert secret_support._secret_value_hash(None, value_hash) is None
-    assert (
-        secret_support._secret_value_hash(
-            SimpleNamespace(get_secret_value=lambda: ""),
-            value_hash,
-        )
-        is None
+    settings = SimpleNamespace(
+        pii_salt_current=None,
+        pii_salt_next=SimpleNamespace(get_secret_value=lambda: ""),
+        pubmed_api_key=None,
+        uniprot_api_key=SimpleNamespace(get_secret_value=lambda: ""),
+        openalex_api_key=None,
+        semanticscholar_api_key=None,
     )
+
+    inventory = secret_support.build_secret_surface_inventory(
+        settings=settings,
+        value_hash=value_hash,
+    )
+    surfaces = inventory["secret_surfaces"]
+    assert surfaces["settings.pii_salt_current"]["present"] is False
+    assert surfaces["settings.pii_salt_next"]["present"] is False
+    assert surfaces["settings.pubmed_api_key"]["value_hash"] is None
+    assert surfaces["settings.uniprot_api_key"]["value_hash"] is None
     value_hash.assert_not_called()
 
 

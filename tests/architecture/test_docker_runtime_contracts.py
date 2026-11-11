@@ -1074,10 +1074,10 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         encoding="utf-8"
     )
     assert "uv=0.11.26-r0" in dockerfile
-    assert dockerfile.count("glibc-2.44=2.44-r8") == 2
-    assert dockerfile.count("glibc-2.44-locale-posix=2.44-r8") == 2
-    assert dockerfile.count("ld-linux-2.44=2.44-r8") == 2
-    assert dockerfile.count("libcrypt1-2.44=2.44-r8") == 2
+    assert dockerfile.count("glibc-2.44=2.44-r16") == 2
+    assert dockerfile.count("glibc-2.44-locale-posix=2.44-r16") == 2
+    assert dockerfile.count("ld-linux-2.44=2.44-r16") == 2
+    assert dockerfile.count("libcrypt1-2.44=2.44-r16") == 2
     assert dockerfile.count("py3-pip-wheel=26.2.2-r2") == 2
     assert (
         dockerfile.count(

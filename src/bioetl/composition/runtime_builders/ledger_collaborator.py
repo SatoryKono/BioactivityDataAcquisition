@@ -38,32 +38,26 @@ class ArtifactRecorderAttachmentResult:
     failed_count: int
 
 
-def _empty_attachment_result() -> ArtifactRecorderAttachmentResult:
-    return ArtifactRecorderAttachmentResult(
-        candidate_count=0,
-        attached_count=0,
-        missing_attach_method_count=0,
-        failed_count=0,
-    )
-
-
-def _attach_artifact_recorder(
-    target: object,
-    service: RunLedgerService,
-) -> bool:
+def _attach_candidate_artifact_recorder(
+    candidate: object,
+    run_ledger_service: RunLedgerService,
+) -> str:
     """Attach an artifact-recorder callback to one metadata writer when supported."""
-    attach = getattr(target, "attach_artifact_recorder", None)
+    attach = getattr(candidate, "attach_artifact_recorder", None)
     if not callable(attach):
-        return False
-    attach(
-        lambda layer, artifact_path, details=None: _record_artifact(
-            service,
-            layer=layer,
-            artifact_path=artifact_path,
-            details=details,
+        return "missing"
+    try:
+        attach(
+            lambda layer, artifact_path, details=None: _record_artifact(
+                run_ledger_service,
+                layer=layer,
+                artifact_path=artifact_path,
+                details=details,
+            )
         )
-    )
-    return True
+    except (AttributeError, RuntimeError, TypeError, ValueError):
+        return "failed"
+    return "attached"
 
 
 from bioetl.composition.runtime_builders._ledger_metadata_candidates import (
@@ -74,23 +68,6 @@ from bioetl.composition.runtime_builders._ledger_metadata_candidates import (
 from bioetl.infrastructure.control_plane.file_contract_evidence_recorder import (
     FileContractEvidenceRecorder,
 )
-
-
-def _attach_candidate_artifact_recorder(
-    candidate: object,
-    run_ledger_service: RunLedgerService,
-) -> str:
-    attach = getattr(candidate, "attach_artifact_recorder", None)
-    if not callable(attach):
-        return "missing"
-    try:
-        return (
-            "attached"
-            if _attach_artifact_recorder(candidate, run_ledger_service)
-            else "missing"
-        )
-    except (AttributeError, RuntimeError, TypeError, ValueError):
-        return "failed"
 
 
 def _attach_contract_evidence_recorder(
@@ -133,7 +110,12 @@ def attach_control_plane_collaborators(
 
     services = getattr(runner, "services", None)
     if services is None:
-        return _empty_attachment_result()
+        return ArtifactRecorderAttachmentResult(
+            candidate_count=0,
+            attached_count=0,
+            missing_attach_method_count=0,
+            failed_count=0,
+        )
 
     unique_candidates = _iter_unique_candidates(
         _collect_metadata_writer_candidates(services)

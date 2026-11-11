@@ -38,7 +38,7 @@ import pytest
 
 from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.composition.runtime_builders.ledger_collaborator import (
-    _attach_artifact_recorder,
+    _attach_candidate_artifact_recorder,
     _collect_metadata_writer_candidates,
     attach_control_plane_collaborators,
 )
@@ -297,13 +297,15 @@ def test_artifact_recorder_ignores_bronze_snapshot_payloads_that_are_not_lists()
 
 
 @pytest.mark.unit
-def test_attach_artifact_recorder_returns_false_without_attach_method() -> None:
+def test_attach_candidate_artifact_recorder_reports_missing_without_attach_method() -> (
+    None
+):
     assert (
-        _attach_artifact_recorder(
+        _attach_candidate_artifact_recorder(
             object(),
             _FakeRunLedgerService(),  # type: ignore[arg-type]
         )
-        is False
+        == "missing"
     )
 
 
