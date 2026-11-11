@@ -1402,9 +1402,8 @@ def test_main_docker_validation_only_decouples_main_push_from_publish_approval()
     assert "Skipping GHCR publish" in guard["run"]
     assert 'echo "stale=true" >> "$GITHUB_OUTPUT"' in guard["run"]
     for step in publish["steps"][1:]:
-        assert step.get("if") == "steps.head-guard.outputs.stale != 'true'", step.get(
-            "name"
-        )
+        condition = str(step.get("if", ""))
+        assert "steps.head-guard.outputs.stale != 'true'" in condition, step.get("name")
 
 
 _TRUSTED_CACHE_TO = (
@@ -1438,6 +1437,10 @@ def test_docker_workflow_call_checks_out_caller_sha_and_limits_cache_write() -> 
     assert inputs["cache-write"]["default"] is False
     assert inputs["caller-sha"]["type"] == "string"
     assert inputs["caller-sha"]["default"] == ""
+    assert inputs["publish"]["type"] == "boolean"
+    assert inputs["publish"]["default"] is False
+    assert inputs["artifact-run-id"]["type"] == "string"
+    assert inputs["artifact-run-id"]["default"] == ""
     assert (
         trigger["workflow_call"]["outputs"]["image-digest"]["value"]
         == "${{ jobs.docker-push.outputs.digest }}"
@@ -1466,6 +1469,7 @@ def test_docker_workflow_call_checks_out_caller_sha_and_limits_cache_write() -> 
     assert caller["if"] == "github.ref == 'refs/heads/main'"
     assert caller["with"]["cache-write"] is True
     assert caller["with"]["caller-sha"] == "${{ github.sha }}"
+    assert caller["with"]["publish"] is False
 
 
 def test_docker_push_uses_environment_and_does_not_publish_latest_on_main() -> None:
@@ -1501,6 +1505,77 @@ def test_docker_push_requires_all_validation_jobs() -> None:
     for dependency in _workflow_needs(complete):
         assert f"needs.{dependency}.result" in rendered
     assert 'test "${failures}" -eq 0' in complete["steps"][0]["run"]
+
+
+def test_ghcr_publish_waits_outside_the_main_integrity_conclusion() -> None:
+    integrity = _load_yaml(ROOT / ".github/workflows/main-integrity.yml")
+    assert integrity["concurrency"]["group"] == (
+        "${{ github.workflow }}-${{ github.sha }}"
+    )
+    assert integrity["concurrency"]["cancel-in-progress"] == (
+        "${{ github.ref != 'refs/heads/main' }}"
+    )
+    caller = integrity["jobs"]["docker"]
+    assert caller["with"]["publish"] is False
+    assert "artifact-run-id" not in caller["with"]
+    assert caller["permissions"]["actions"] == "read"
+
+    workflow = _load_yaml(ROOT / ".github/workflows/main-ghcr-publish.yml")
+    trigger = workflow.get("on", workflow.get(True))
+    assert isinstance(trigger, dict)
+    assert set(trigger) == {"workflow_run"}
+    assert trigger["workflow_run"]["workflows"] == ["Main Integrity"]
+    assert trigger["workflow_run"]["types"] == ["completed"]
+    job = workflow["jobs"]["publish"]
+    assert job["if"] == (
+        "github.event.workflow_run.conclusion == 'success' && "
+        "github.event.workflow_run.event == 'push' && "
+        "github.event.workflow_run.head_branch == 'main'"
+    )
+    assert job["with"] == {
+        "publish": True,
+        "cache-write": False,
+        "caller-sha": "${{ github.event.workflow_run.head_sha }}",
+        "artifact-run-id": "${{ github.event.workflow_run.id }}",
+    }
+    assert job["permissions"] == {
+        "contents": "read",
+        "actions": "read",
+        "packages": "write",
+        "security-events": "write",
+        "id-token": "write",
+        "attestations": "write",
+    }
+
+    docker = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    jobs = docker["jobs"]
+    gate = jobs["docker-publish-gate"]
+    assert "environment" not in gate
+    assert gate["permissions"] == {"contents": "read"}
+    for name in (
+        "docker-runtime-contracts",
+        "docker-lint",
+        "docker-compose-validate",
+        "docker-build",
+    ):
+        assert jobs[name]["if"] == "inputs.artifact-run-id == ''"
+    assert jobs["docker-complete"]["if"] == ("always() && inputs.artifact-run-id == ''")
+    push = jobs["docker-push"]
+    assert "docker-publish-gate" in _workflow_needs(push)
+    assert push["permissions"]["actions"] == "read"
+    downloads = [
+        step
+        for step in push["steps"]
+        if str(step.get("uses", "")).startswith("actions/download-artifact@")
+    ]
+    assert len(downloads) == 2
+    same_run = next(
+        step for step in downloads if "run-id" not in (step.get("with") or {})
+    )
+    cross_run = next(step for step in downloads if "run-id" in (step.get("with") or {}))
+    assert "inputs.artifact-run-id == ''" in same_run["if"]
+    assert cross_run["with"]["run-id"] == "${{ inputs.artifact-run-id }}"
+    assert "inputs.artifact-run-id != ''" in cross_run["if"]
 
 
 def test_docker_built_image_uses_one_canonical_trivy_scan_and_blocks_all_medium_plus() -> (
@@ -1747,8 +1822,8 @@ def test_docker_security_gate_covers_dependency_build_inputs() -> None:
     assert "pull_request" not in trigger
     assert "push" not in trigger
     # Dependency/build inputs trigger the docker gate through the shared
-    # required-checks catalog. main-integrity.yml is the only main caller,
-    # so a direct push cannot publish ahead of the integrity job.
+    # required-checks catalog. docker.yml has no push trigger, and
+    # main-integrity.yml calls it with publish false.
     catalog = _load_yaml(ROOT / "configs/quality/github_required_checks.yaml")
     docker_gate = next(gate for gate in catalog["gates"] if gate.get("id") == "docker")
     paths = set(docker_gate["paths"]["include"])

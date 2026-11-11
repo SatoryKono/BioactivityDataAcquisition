@@ -1064,6 +1064,15 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         RUN_REPORT_CONTRACTS_TEST,
     ),
     ".github/workflows/docker.yml": (DOCKER_RUNTIME_CONTRACT_TEST,),
+    ".github/workflows/main-ghcr-publish.yml": (
+        DOCKER_RUNTIME_CONTRACT_TEST,
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+        "tests/architecture/test_gha_disabled_map_10263.py",
+    ),
+    ".github/workflows/main-integrity.yml": (
+        DOCKER_RUNTIME_CONTRACT_TEST,
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
     "reports/quality/architecture-debt-remote-main-baseline.md": (
         "tests/unit/scripts/qa/test_report_architecture_debt_remote_main_baseline.py",
     ),
