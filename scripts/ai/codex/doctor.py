@@ -353,6 +353,27 @@ def run_routes(
     return 0
 
 
+def _read_probe_plan(repo_root: Path, requested: Path) -> dict:
+    """Read a bounded JSON plan inside the dedicated repository control area."""
+    if requested.is_absolute() or ".." in requested.parts:
+        raise ValueError("probe plan must be repository-relative without traversal")
+    physical_root = repo_root.resolve(strict=True)
+    control_root = (physical_root / "reports/quality/mcp-controls").resolve(strict=True)
+    if not control_root.is_relative_to(physical_root):
+        raise ValueError("probe control area must remain inside the workspace")
+    candidate = (physical_root / requested).resolve(strict=True)
+    if not candidate.is_relative_to(control_root) or candidate.suffix != ".json":
+        raise ValueError("probe plan must resolve under reports/quality/mcp-controls")
+    with candidate.open("rb") as stream:
+        raw = stream.read(1024 * 1024 + 1)
+    if len(raw) > 1024 * 1024:
+        raise ValueError("probe plan exceeds size limit")
+    controls = json.loads(raw)
+    if not isinstance(controls, dict):
+        raise ValueError("probe plan must be a server/control object")
+    return controls
+
+
 def run_mcp(
     repo_root: Path,
     profile: str,
@@ -385,12 +406,7 @@ def run_mcp(
     if probe_plan is not None:
         if not start_approved_adapters:
             raise ValueError("--probe-plan requires --start-approved-adapters")
-        raw = probe_plan.read_bytes()
-        if len(raw) > 1024 * 1024:
-            raise ValueError("probe plan exceeds size limit")
-        controls = json.loads(raw)
-        if not isinstance(controls, dict):
-            raise ValueError("probe plan must be a server/control object")
+        controls = _read_probe_plan(repo_root, probe_plan)
         print(
             "MCP diagnostic service effects: " + "; ".join(SERVICE_EFFECTS),
             file=sys.stderr,
@@ -425,12 +441,16 @@ def run_mcp(
         return 1
     if output_path is not None:
         _write_mcp_payload(repo_root, output_path, payload)
+    _print_readiness(payload, output_json)
+    return 0 if payload["ready"] else 1
+
+
+def _print_readiness(payload: dict, output_json: bool) -> None:
     if output_json:
         print(json.dumps(payload, indent=2))
-    else:
-        for row in payload["results"]:
-            print(f"[{row['status']}] {row['server']}: {row['detail']}")
-    return 0 if payload["ready"] else 1
+        return
+    for row in payload["results"]:
+        print(f"[{row['status']}] {row['server']}: {row['detail']}")
 
 
 def _governed_report_path(repo_root: Path, requested: Path) -> Path:
@@ -467,7 +487,7 @@ def main() -> int:
     parser.add_argument(
         "--probe-plan",
         type=Path,
-        help="explicit read-control JSON; no raw responses are saved",
+        help="repository-relative JSON under reports/quality/mcp-controls",
     )
     parser.add_argument(
         "--start-approved-adapters",
@@ -493,6 +513,13 @@ def main() -> int:
     args = parser.parse_args()
     repo_root = args.repo_root.resolve()
     profile = args.profile or setup_mcp.DEFAULT_LOCAL_PROFILE
+    _validate_options(parser, args)
+    return _dispatch(args, repo_root, profile)
+
+
+def _validate_options(
+    parser: argparse.ArgumentParser, args: argparse.Namespace
+) -> None:
     if args.no_write and args.output is not None:
         parser.error("--no-write and --output are mutually exclusive")
     if args.output is not None and args.mode == "static":
@@ -506,6 +533,9 @@ def main() -> int:
         )
     if args.probe_plan and not args.start_approved_adapters:
         parser.error("--probe-plan requires --start-approved-adapters")
+
+
+def _dispatch(args: argparse.Namespace, repo_root: Path, profile: str) -> int:
     if args.mode == "transport":
         return run_transport(
             repo_root,

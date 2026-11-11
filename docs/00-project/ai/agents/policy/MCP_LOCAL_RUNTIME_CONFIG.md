@@ -495,3 +495,8 @@ Installer/container launchers and unreviewed interpreter prefixes remain
 supported interpreter prefix and never invokes npx/uv/pip installation paths.
 An unsupported valid protocol version is a client capability gap, reported
 `NOT_TESTED`, rather than evidence that the server is broken.
+
+Probe plans must be repository-relative JSON files under
+`reports/quality/mcp-controls/`. Absolute paths, parent traversal and resolved
+symlink/junction escapes are rejected before any adapter starts. Reading a plan
+is bounded to 1 MiB; arbitrary files are not accepted as control plans.

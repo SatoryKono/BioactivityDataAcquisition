@@ -3,6 +3,7 @@
 from copy import deepcopy
 from io import BytesIO
 import json
+from pathlib import Path
 import sys
 
 import pytest
@@ -518,3 +519,39 @@ def test_exit_78_means_disabled_only_for_the_project_memory_wrapper(
     with pytest.raises(ProbeError) as error:
         client.request("initialize", {}, 90)
     assert error.value.category == category
+
+
+def test_probe_plan_is_bounded_and_confined(tmp_path):
+    from scripts.ai.codex.doctor import _read_probe_plan
+
+    control_root = tmp_path / "reports/quality/mcp-controls"
+    control_root.mkdir(parents=True)
+    plan = control_root / "control.json"
+    plan.write_text('{"filesystem": {}}', encoding="utf-8")
+    assert _read_probe_plan(tmp_path, plan.relative_to(tmp_path)) == {"filesystem": {}}
+    for requested in (
+        plan,
+        Path("../control.json"),
+        Path("reports/quality/outside.json"),
+    ):
+        with pytest.raises((ValueError, FileNotFoundError)):
+            _read_probe_plan(tmp_path, requested)
+    plan.write_bytes(b" " * (1024 * 1024 + 1))
+    with pytest.raises(ValueError, match="size limit"):
+        _read_probe_plan(tmp_path, plan.relative_to(tmp_path))
+
+
+def test_probe_plan_rejects_symlink_escape(tmp_path):
+    from scripts.ai.codex.doctor import _read_probe_plan
+
+    control_root = tmp_path / "reports/quality/mcp-controls"
+    control_root.mkdir(parents=True)
+    outside = tmp_path / "outside.json"
+    outside.write_text("{}", encoding="utf-8")
+    linked = control_root / "control.json"
+    try:
+        linked.symlink_to(outside)
+    except OSError:
+        pytest.skip("symlink creation is unavailable on this host")
+    with pytest.raises(ValueError, match="mcp-controls"):
+        _read_probe_plan(tmp_path, linked.relative_to(tmp_path))

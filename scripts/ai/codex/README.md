@@ -279,3 +279,8 @@ same change.
 - `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md`
 - `docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
+Probe plans must be repository-relative JSON files under
+`reports/quality/mcp-controls/`. Absolute paths, parent traversal and resolved
+symlink/junction escapes are rejected before any adapter starts. Reading a plan
+is bounded to 1 MiB; arbitrary files are not accepted as control plans.
