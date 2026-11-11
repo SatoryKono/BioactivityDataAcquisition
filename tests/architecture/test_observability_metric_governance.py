@@ -263,16 +263,13 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     assert all(
         str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
     )
-    assert (
-        report["typed_target_counts"]
-        == {
-            "promql": 109,  # LA-06 fleet/alerts + LA-07 workflow freshness age/threshold/flag targets.
-            "http": 14,
-            "loki": 0,
-            "tempo": 0,
-            "unknown": 0,
-        }
-    )
+    assert report["typed_target_counts"] == {
+        "promql": 110,  # LA-06 summary/full-list reads + LA-07 freshness targets.
+        "http": 14,
+        "loki": 0,
+        "tempo": 0,
+        "unknown": 0,
+    }
     assert all(target["datasource_type"] for target in report["typed_targets"])
     assert all(
         target["datasource_type"] == "yesoreyeram-infinity-datasource"
