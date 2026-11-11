@@ -165,3 +165,16 @@ def stamp_run_selection_context(payload: dict) -> None:
             "links": [],
         }
     )
+    if payload["uid"] == "bioetl-overview-v2":
+        for name, width in (
+            ("Context", 110),
+            ("Run ID", 150),
+            ("Execution", 90),
+            ("Verdict", 65),
+        ):
+            panel["fieldConfig"]["overrides"].append(
+                {
+                    "matcher": {"id": "byName", "options": name},
+                    "properties": [{"id": "custom.width", "value": width}],
+                }
+            )
