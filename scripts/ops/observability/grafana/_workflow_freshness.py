@@ -44,6 +44,12 @@ def apply_workflow_freshness(payload: dict, row: dict, scope: str) -> None:
             "includeAll": False,
             "options": [],
             "current": {"text": NOT_VERIFIED, "value": NOT_VERIFIED},
+            "description": (
+                "Hidden publication-age heading for scoped workflow evidence "
+                f"(Within threshold / STALE >{FRESH_SECONDS // 3600}h / "
+                f"{NOT_VERIFIED}). Not a health or navigation selector; "
+                "excluded from URL sync."
+            ),
         }
     )
     row["title"] += TITLE_SUFFIX

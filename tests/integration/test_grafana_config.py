@@ -107,6 +107,7 @@ EXPECTED_VARS_BY_DASHBOARD = {
         "run_type",
         "run_id",
         "provider",
+        "workflow_evidence_freshness",
     },
     "bioetl-run-explorer-v1.json": {
         "lookup_run_id",

@@ -328,7 +328,8 @@
         "current": {
           "text": "Not verified",
           "value": "Not verified"
-        }
+        },
+        "description": "Hidden publication-age heading for scoped workflow evidence (Within threshold / STALE >24h / Not verified). Not a health or navigation selector; excluded from URL sync."
       }
     ]
   },
