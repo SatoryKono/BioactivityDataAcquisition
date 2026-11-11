@@ -58,7 +58,7 @@ def test_overview_paired_tables_have_fixed_rows_and_inspectable_reasons():
     assert summary["gridPos"]["h"] == 5
     # Domains follow the context table; the right-hand status/identity stack
     # retains its height so all five identity rows fit the first window.
-    assert domains["gridPos"]["h"] == 8
+    assert domains["gridPos"]["h"] == 9
     assert domains["gridPos"]["y"] + domains["gridPos"]["h"] <= (
         panels[9300]["gridPos"]["y"] + panels[9300]["gridPos"]["h"]
     )
@@ -223,7 +223,7 @@ def test_run_cell_inspection_and_links_use_full_identity():
     assert links[1]["url"] == "${__data.fields.report_url:raw}"
     assert rules["Run ID"]["custom.inspect"] is True
     assert rules["Run ID"]["custom.wrapText"] is False
-    assert rules["Run ID"]["custom.width"] == 110
+    assert rules["Run ID"]["custom.width"] == 100
     assert all("tooltip" not in link for link in links)
     assert rules["Run ID"]["custom.tooltip.field"] == "run_id"
     for field in ("Overview", "Saved Evidence", "Data Quality", "Replay Readiness"):

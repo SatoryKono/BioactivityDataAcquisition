@@ -84,10 +84,9 @@ def test_checkpoint_non_fatal_errors_catches_instances() -> None:
             instance: BaseException = exc_type("test_pipeline", "conflict")
         else:
             instance = exc_type("boom")
-        try:
+        with pytest.raises(CHECKPOINT_NON_FATAL_ERRORS) as caught:
             raise instance
-        except CHECKPOINT_NON_FATAL_ERRORS:
-            pass  # expected
+        assert caught.value is instance
 
 
 # ---------------------------------------------------------------------------
