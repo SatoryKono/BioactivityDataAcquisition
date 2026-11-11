@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-11T18:17:01.958178+00:00",
+  "generated_at": "2026-11-11T18:39:34.954258+00:00",
   "summary": {
     "total_scripts": 731,
     "status_counts": {
@@ -16,7 +16,7 @@
       "other": 22,
       "scripts": 626,
       "skills": 13,
-      "tests": 542
+      "tests": 544
     }
   },
   "scripts": [
@@ -308,7 +308,7 @@
       "agent_usage": [
         "CODEX-RUNTIME"
       ],
-      "reference_count": 23,
+      "reference_count": 24,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -1203,13 +1203,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/codex/doctor.py",
           "line": 317,
           "source_group": "scripts",
           "text": "from scripts.ai.codex.mcp_routes import route_snapshot"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_routes.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_routes import ("
         }
       ],
       "owner": "@bioetl-platform",
@@ -1222,13 +1228,31 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/ai/codex/doctor.py",
           "line": 318,
           "source_group": "scripts",
           "text": "from scripts.ai.codex.native_mcp_config import NativeConfigClient, NativeConfigError"
+        },
+        {
+          "path": "scripts/ai/codex/mcp_routes.py",
+          "line": 17,
+          "source_group": "scripts",
+          "text": "from scripts.ai.codex.native_mcp_config import ConfigCapture"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_routes.py",
+          "line": 21,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.native_mcp_config import ("
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_routes.py",
+          "line": 257,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex import native_mcp_config"
         }
       ],
       "owner": "@bioetl-platform",
@@ -23799,7 +23823,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 2994,
+          "line": 2995,
           "source_group": "other",
           "text": "*   Active handoffs already use `/d/bioetl-control-plane-v1/2-replay-readiness`. Generators: `render_nav_bus.py`, `_replay_readiness_design.py`, `_latest_complete_run_panel.py`, `_gr_db_corrections.py"
         },
@@ -23928,7 +23952,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 2994,
+          "line": 2995,
           "source_group": "other",
           "text": "*   Active handoffs already use `/d/bioetl-control-plane-v1/2-replay-readiness`. Generators: `render_nav_bus.py`, `_replay_readiness_design.py`, `_latest_complete_run_panel.py`, `_gr_db_corrections.py"
         },
@@ -23992,7 +24016,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 2994,
+          "line": 2995,
           "source_group": "other",
           "text": "*   Active handoffs already use `/d/bioetl-control-plane-v1/2-replay-readiness`. Generators: `render_nav_bus.py`, `_replay_readiness_design.py`, `_latest_complete_run_panel.py`, `_gr_db_corrections.py"
         },
@@ -24146,7 +24170,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 2994,
+          "line": 2995,
           "source_group": "other",
           "text": "*   Active handoffs already use `/d/bioetl-control-plane-v1/2-replay-readiness`. Generators: `render_nav_bus.py`, `_replay_readiness_design.py`, `_latest_complete_run_panel.py`, `_gr_db_corrections.py"
         },
@@ -24179,7 +24203,7 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 2994,
+          "line": 2995,
           "source_group": "other",
           "text": "*   Active handoffs already use `/d/bioetl-control-plane-v1/2-replay-readiness`. Generators: `render_nav_bus.py`, `_replay_readiness_design.py`, `_latest_complete_run_panel.py`, `_gr_db_corrections.py"
         },
@@ -24542,7 +24566,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 2994,
+          "line": 2995,
           "source_group": "other",
           "text": "*   Active handoffs already use `/d/bioetl-control-plane-v1/2-replay-readiness`. Generators: `render_nav_bus.py`, `_replay_readiness_design.py`, `_latest_complete_run_panel.py`, `_gr_db_corrections.py"
         },
@@ -26820,7 +26844,7 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 2710,
+          "line": 2711,
           "source_group": "other",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`."
         }
