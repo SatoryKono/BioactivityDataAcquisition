@@ -484,39 +484,32 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
         (
             "bioetl-incident-v1.json",
             "Track Replay Drift by Type",
-            "No data means no replay drift events were observed in range or replay drift telemetry is absent",
-            "No replay drift samples",
+            "UNKNOWN until producer availability",
+            "UNKNOWN",
         ),
         (
             "bioetl-incident-v1.json",
             "Track Global Checkpoint Admin Latency",
-            "Expected Empty classification: No data is valid when no checkpoint "
-            "operator/admin duration samples were emitted",
-            "No GLOBAL checkpoint operator latency samples in range. This is optional "
-            "admin/operator telemetry, not pipeline success evidence.",
+            "UNKNOWN until producer availability",
+            "UNKNOWN",
         ),
         (
             "bioetl-incident-v1.json",
             "Review Missing Lineage by Layer",
-            "Use as lineage risk triage only; it does not prove complete artifact "
-            "identity graph or exact artifact refs.",
-            "No missing-lineage reference samples in range. Empty means no sampled "
-            "lineage-missing events or absent telemetry, not proof of full lineage "
-            "closure.",
+            "UNKNOWN until producer availability",
+            "UNKNOWN",
         ),
         (
             "bioetl-incident-v1.json",
             "Track Global Audit Write Latency",
-            "No data means no latency samples, not zero latency.",
-            "No GLOBAL audit write latency samples in range. Empty means no audit "
-            "writes were timed or audit telemetry is absent, not zero latency.",
+            "UNKNOWN until producer availability",
+            "UNKNOWN",
         ),
         (
             "bioetl-incident-v1.json",
             "Track Global Audit Query Latency",
-            "No data means no latency samples, not zero latency.",
-            "No GLOBAL audit query latency samples in range. Empty means no audit "
-            "queries were timed or audit telemetry is absent, not zero latency.",
+            "UNKNOWN until producer availability",
+            "UNKNOWN",
         ),
     ],
 )
@@ -526,7 +519,7 @@ def test_review_panels_explain_empty_state_explicitly(
     description_snippet: str,
     expected_no_value: str,
 ) -> None:
-    """Panels with ambiguous empty-state semantics should explain no-data behavior explicitly."""
+    """Unverified event empty states stay UNKNOWN until witnesses qualify emptiness."""
     dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
     panel = next(
         (
@@ -539,6 +532,7 @@ def test_review_panels_explain_empty_state_explicitly(
     assert panel is not None, f"Panel '{panel_title}' not found in {dashboard_name}"
     description = panel.get("description", "")
     assert description
+    assert description_snippet in description
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("noValue") == expected_no_value
 
