@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-11T18:20:15.195654+00:00",
+  "generated_at": "2026-11-11T18:31:37.954268+00:00",
   "summary": {
     "total_scripts": 730,
     "status_counts": {
@@ -23794,7 +23794,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 2994,
+          "line": 2995,
           "source_group": "other",
           "text": "*   Active handoffs already use `/d/bioetl-control-plane-v1/2-replay-readiness`. Generators: `render_nav_bus.py`, `_replay_readiness_design.py`, `_latest_complete_run_panel.py`, `_gr_db_corrections.py"
         },
@@ -23923,7 +23923,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 2994,
+          "line": 2995,
           "source_group": "other",
           "text": "*   Active handoffs already use `/d/bioetl-control-plane-v1/2-replay-readiness`. Generators: `render_nav_bus.py`, `_replay_readiness_design.py`, `_latest_complete_run_panel.py`, `_gr_db_corrections.py"
         },
@@ -23987,7 +23987,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 2994,
+          "line": 2995,
           "source_group": "other",
           "text": "*   Active handoffs already use `/d/bioetl-control-plane-v1/2-replay-readiness`. Generators: `render_nav_bus.py`, `_replay_readiness_design.py`, `_latest_complete_run_panel.py`, `_gr_db_corrections.py"
         },
@@ -24141,7 +24141,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 2994,
+          "line": 2995,
           "source_group": "other",
           "text": "*   Active handoffs already use `/d/bioetl-control-plane-v1/2-replay-readiness`. Generators: `render_nav_bus.py`, `_replay_readiness_design.py`, `_latest_complete_run_panel.py`, `_gr_db_corrections.py"
         },
@@ -24174,7 +24174,7 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 2994,
+          "line": 2995,
           "source_group": "other",
           "text": "*   Active handoffs already use `/d/bioetl-control-plane-v1/2-replay-readiness`. Generators: `render_nav_bus.py`, `_replay_readiness_design.py`, `_latest_complete_run_panel.py`, `_gr_db_corrections.py"
         },
@@ -24545,7 +24545,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 2994,
+          "line": 2995,
           "source_group": "other",
           "text": "*   Active handoffs already use `/d/bioetl-control-plane-v1/2-replay-readiness`. Generators: `render_nav_bus.py`, `_replay_readiness_design.py`, `_latest_complete_run_panel.py`, `_gr_db_corrections.py"
         },
@@ -26823,7 +26823,7 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 2710,
+          "line": 2711,
           "source_group": "other",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`."
         }
