@@ -50,7 +50,9 @@ def test_incident_workflow_band_uses_workflow_metrics() -> None:
     assert dashboard["uid"] == "bioetl-incident-v1"
     panels = _iter_panels(list(dashboard.get("panels") or []))
     titles = {str(panel.get("title") or "") for panel in panels}
-    assert "Review Current Workflow Evidence" in titles
+    assert any(
+        title.startswith("Review Current Workflow Evidence · ") for title in titles
+    )
     assert "Track Failed Workflow Runs" in titles
     assert "Track Failed Workflow Steps" in titles
 
