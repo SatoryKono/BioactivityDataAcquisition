@@ -165,14 +165,41 @@ def _ranked_suspect_description(*, summary: bool) -> str:
     return text
 
 
+_NAMED_ALERT_RUNBOOKS = (
+    ("BioETLPipelineInfrastructureValidationFailed", "pipeline-failure-critical"),
+    ("BioETLDataFreshnessLagCritical", "pipeline-failure-dq"),
+)
+
+
+def _stamp_named_alert_runbooks(expr: str) -> str:
+    """Point the two critical alerts at their own runbook, owner and next step."""
+    for alertname, stem in _NAMED_ALERT_RUNBOOKS:
+        expr = (
+            f'label_replace({expr},"alert_runbook","{stem}",'
+            f'"alertname","{alertname}")'
+        )
+    return (
+        "label_replace(label_replace(label_replace("
+        f'{expr},"owner","BioETL Team","alertname",'
+        '"BioETLPipelineInfrastructureValidationFailed|BioETLDataFreshnessLagCritical"),'
+        '"next_step","Open pipeline-failure-critical.md","alertname",'
+        '"BioETLPipelineInfrastructureValidationFailed"),'
+        '"next_step","Open pipeline-failure-dq.md","alertname",'
+        '"BioETLDataFreshnessLagCritical")'
+    )
+
+
 def _stamp_ranked_suspect_expr(panel: dict, *, summary: bool) -> None:
     if not summary:
         panel["targets"][0].pop("expr", None)
         return
     panel["targets"][0]["expr"] = (
-        "label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,"
+        "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace("
+        "bioetl_incident_ranked_evidence,"
         '"object","$1","object","(.*) / $"),'
         '"route_pipeline",".*","pipeline","unknown"),'
+        '"owner","BioETL Team","reason","infrastructure_failed"),'
+        '"next_step","Open pipeline-failure-critical.md","reason","infrastructure_failed"),'
         '"owner","See runbook","owner","^$"),'
         '"next_step","See runbook","next_step","^$")'
     )
@@ -220,7 +247,7 @@ def _explain_global_alerts(panels: dict[int, dict], override) -> None:
                 f'"{_NOT_PROVIDED}","provider","^$")'
             )
             expr = panel["targets"][0]["expr"]
-            panel["targets"][0]["expr"] = (
+            panel["targets"][0]["expr"] = _stamp_named_alert_runbooks(
                 f'label_replace(label_replace({expr},"alert_runbook",'
                 '"incident-response","",""),"alert_runbook","docker-stability",'
                 '"alertname","BioETLDockerRuntimeProbeMissing")'
@@ -247,6 +274,10 @@ def _explain_global_alerts(panels: dict[int, dict], override) -> None:
         override(panel, "pipeline", "noValue", _NOT_PROVIDED)
         override(panel, "pipeline", "links", [])
         override(panel, "alert_runbook", _CUSTOM_HIDDEN, True)
+        override(panel, "owner", "displayName", "Owner")
+        override(panel, "owner", "noValue", "See runbook")
+        override(panel, "next_step", "displayName", "Next step")
+        override(panel, "next_step", "noValue", "See runbook")
         override(
             panel,
             "alertname",
