@@ -1144,6 +1144,23 @@ def test_shadow_compare_routes_runtime_profiles_to_governing_tests(path: str) ->
     assert not report["covers_full_suite"]
 
 
+@pytest.mark.parametrize(
+    "path",
+    ["AGENTS.md", "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"],
+)
+def test_shadow_compare_routes_root_and_delegated_validation_policy(path: str) -> None:
+    """Root/policy edits select governing tests without waiving unknown policies."""
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert "tests/architecture/test_runtime_agent_docs_drift.py" in report["selected"]
+    assert "tests/architecture/test_junie_runtime_ci_contract.py" in report["selected"]
+    assert not report["covers_full_suite"]
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            ["docs/00-project/ai/agents/policy/UNMAPPED.md"], repo_root=root
+        )
+
+
 def test_shadow_compare_routes_normative_index_without_accepting_other_docs() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(

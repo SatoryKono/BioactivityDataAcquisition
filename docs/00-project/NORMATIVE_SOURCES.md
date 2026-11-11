@@ -24,6 +24,7 @@ BioETL не использует один монолитный файл «все
 
 | Слой | Файл | Назначение |
 | ---- | ---- | ---------- |
+| Requirements | [REQUIREMENTS.md](../01-requirements/REQUIREMENTS.md) | Проверяемые требования проекта |
 | Constitution | [RULES.md](RULES.md) | Архитектура, Medallion, DQ, composite, API/retry, determinism, observability, testing, naming, governance (RFC 2119) |
 | Decisions | [decisions/](../02-architecture/decisions/) | Accepted ADR — точечные архитектурные решения |
 
@@ -38,20 +39,23 @@ BioETL не использует один монолитный файл «все
 
 ## Precedence для AI runtime
 
-Канонический порядок разрешения конфликтов для AI runtime живет в
-[AGENTS.md](../../AGENTS.md), секция `Canonical Precedence`. Этот индекс не
-ведет параллельный нумерованный список precedence. Важно: active runtime
-sources — equal peers `.codex/agents/CODEX-RUNTIME.md`,
-`.junie/agents/JUNIE-RUNTIME.md` и `.devin/agents/DEVIN-RUNTIME.md`
-(для Devin sessions; root-контракты — `AGENTS.md` и `.junie/guidelines.md`) —
-вместе с matching runtime profiles/skills выбранного runtime
-(`.codex/agents/py-*.md`, `.codex/skills/**`, `.junie/agents/py-*.md`,
-`.junie/skills/**`, `.devin/agents/*/AGENT.md`, `.devin/skills/**`)
-стоят выше этого normative index; parity между
-`.codex/**` и `.junie/**` поддерживается
-`scripts/ai/junie/check_junie_mirror.sh`. Docs mirrors в
-`docs/00-project/ai/**` остаются navigation/guidance surfaces и не
-переопределяют runtime behavior самостоятельно.
+Канонический порядок разрешения конфликтов живёт только в
+[AGENTS.md](../../AGENTS.md), секция `Canonical Precedence`. Корневые
+защитные ограничения обязательны для Codex, Junie и Devin; matching runtime
+profiles/skills не могут их ослаблять. Область и условия подключения заданы
+там же в `Instruction Scope` и `Required AI Context`.
+
+Этот индекс выбирает нормативные источники по теме и не ведёт
+параллельный нумерованный список precedence.
+
+Навигация: `.codex/agents/CODEX-RUNTIME.md`,
+`.junie/agents/JUNIE-RUNTIME.md`, `.devin/agents/DEVIN-RUNTIME.md`.
+matching runtime profiles/skills выбираются только для активного runtime:
+`.codex/agents/py-*.md`, `.codex/skills/**`, `.junie/agents/py-*.md`,
+`.junie/skills/**`, `.devin/agents/*/AGENT.md`, `.devin/skills/**`.
+Runtime-зеркала обязательны в пределах их контрактов; справочные docs mirrors
+не определяют новое поведение.
+
 
 ## Что читать по теме
 
