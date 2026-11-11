@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import os
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
@@ -332,3 +333,85 @@ def test_concurrent_normalized_name_collision_preserves_one_winner(
         .read_bytes()
         .startswith(b"input_row_id,")
     )
+
+
+def _names(source_name: str, run_id: str) -> tuple[str, str]:
+    _, safe = result_names(
+        source_name,
+        snapshot_id="snap",
+        rules_version="v1",
+        run_id=run_id,
+    )
+    return safe, f"{safe}.manifest.json"
+
+
+def _dangling_entry(tmp_path: Path, name: str, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Pretend ``name`` is a dangling symlink whose resolve() follows elsewhere."""
+    target = tmp_path / "unrelated.csv"
+    real_resolve = Path.resolve
+    real_lstat = Path.lstat
+    real_link = os.link
+
+    def resolve(self: Path, *args: object, **kwargs: object) -> Path:
+        if self.name == name:
+            return target
+        return real_resolve(self, *args, **kwargs)
+
+    def lstat(self: Path) -> os.stat_result:
+        if self.name == name:
+            return os.stat_result((0o120777, 0, 0, 1, 0, 0, 0, 0, 0, 0))
+        return real_lstat(self)
+
+    def link(src: object, dst: object, *args: object, **kwargs: object) -> None:
+        if Path(str(dst)).name == name:
+            raise FileExistsError(name)
+        real_link(src, dst, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "resolve", resolve)
+    monkeypatch.setattr(Path, "lstat", lstat)
+    monkeypatch.setattr(os, "link", link)
+    return target
+
+
+def test_dangling_result_symlink_is_a_collision(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = _copy_example(tmp_path)
+    safe, _manifest = _names(source.name, "link")
+    target = _dangling_entry(tmp_path, safe, monkeypatch)
+    result = run_batch(
+        source, root=tmp_path, snapshot_id="snap", rules_version="v1", run_id="link"
+    )
+    assert result.written is False
+    assert result.diagnostic == "name_collision"
+    assert not target.exists()
+    assert not (tmp_path / safe).exists()
+
+
+def test_dangling_manifest_symlink_is_a_collision(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = _copy_example(tmp_path)
+    safe, manifest = _names(source.name, "link")
+    target = _dangling_entry(tmp_path, manifest, monkeypatch)
+    result = run_batch(
+        source, root=tmp_path, snapshot_id="snap", rules_version="v1", run_id="link"
+    )
+    assert result.written is False
+    assert result.diagnostic == "name_collision"
+    assert not target.exists()
+    assert not (tmp_path / safe).exists()
+    assert not (tmp_path / manifest).exists()
+
+
+def test_long_result_name_publishes_with_a_short_temp_prefix(tmp_path: Path) -> None:
+    source = _copy_example(tmp_path, f"{'a' * 210}.csv")
+    result = run_batch(
+        source, root=tmp_path, snapshot_id="s", rules_version="v", run_id="r"
+    )
+    assert result.written is True
+    assert result.manifest_name is not None
+    assert len(result.normalized_name) == 233
+    assert len(result.manifest_name) == 247
+    assert (tmp_path / result.normalized_name).is_file()
+    assert (tmp_path / result.manifest_name).is_file()

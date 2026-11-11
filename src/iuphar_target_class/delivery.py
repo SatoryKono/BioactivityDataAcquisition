@@ -16,6 +16,7 @@ from .policy import PLAN_VERSION
 from .stage0.io import canonical_json_bytes
 
 _FORBIDDEN = set('\\/:*?"<>|')
+_TEMP_PREFIX = ".iuphar-"
 _COLUMNS = (
     "input_row_id",
     "legacy_iuphar_class",
@@ -107,7 +108,7 @@ def run_batch(
     destination = directory / safe_name
     manifest_name = f"{safe_name}.manifest.json"
     manifest_path = directory / manifest_name
-    if destination.exists() or manifest_path.exists():
+    if _directory_entry(destination) or _directory_entry(manifest_path):
         return DeliveryResult(
             raw_name, safe_name, str(directory), False, "name_collision", None
         )
@@ -124,6 +125,7 @@ def run_batch(
             "source_name": raw_name,
         }
     )
+    published = _publish_name(destination, root)
     if not _create_new(destination, payload, root=root):
         return DeliveryResult(
             raw_name, safe_name, str(directory), False, "name_collision", None
@@ -131,10 +133,10 @@ def run_batch(
     try:
         manifest_created = _create_new(manifest_path, manifest, root=root)
     except OSError:
-        _path_inside_root(destination, root).unlink(missing_ok=True)
+        published.unlink(missing_ok=True)
         raise
     if not manifest_created:
-        _path_inside_root(destination, root).unlink(missing_ok=True)
+        published.unlink(missing_ok=True)
         return DeliveryResult(
             raw_name, safe_name, str(directory), False, "name_collision", None
         )
@@ -197,21 +199,46 @@ def _csv_bytes(rows: tuple[Mapping[str, str], ...]) -> bytes:
     return buffer.getvalue().encode("utf-8")
 
 
+def _directory_entry(path: Path) -> bool:
+    """True for any directory entry, including a dangling symlink."""
+    try:
+        path.lstat()
+    except FileNotFoundError:
+        return False
+    return True
+
+
+def _publish_name(path: Path, root: Path) -> Path:
+    """Return the final name inside ``root`` without following that name.
+
+    The parent is resolved for the containment check. The last component stays
+    as given, so publication cannot replace the target of a symlink.
+    """
+    root_resolved = root.resolve()
+    parent = path.parent.resolve()
+    if path.name in {"", ".", ".."} or not parent.is_relative_to(root_resolved):
+        message = "path escapes root"
+        raise ValueError(message)
+    return parent / path.name
+
+
 def _create_new(path: Path, payload: bytes, *, root: Path) -> bool:
-    """Create ``path`` only when it is absent. An existing file is left untouched."""
-    resolved = _path_inside_root(path, root)
+    """Create ``path`` only when that name is absent. An existing entry is kept."""
+    destination = _publish_name(path, root)
+    if _directory_entry(destination):
+        return False
     temporary: Path | None = None
     try:
         with tempfile.NamedTemporaryFile(
-            dir=resolved.parent,
-            prefix=f".{resolved.name}.",
+            dir=destination.parent,
+            prefix=_TEMP_PREFIX,
             suffix=".tmp",
             delete=False,
         ) as handle:
             temporary = Path(handle.name)
             handle.write(payload)
         try:
-            os.link(temporary, resolved)
+            os.link(temporary, destination)
         except FileExistsError:
             return False
     finally:
