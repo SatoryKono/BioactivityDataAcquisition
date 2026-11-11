@@ -468,7 +468,7 @@
               },
               {
                 "id": "custom.minWidth",
-                "value": 80
+                "value": 50
               }
             ]
           },
@@ -502,7 +502,7 @@
               },
               {
                 "id": "custom.minWidth",
-                "value": 210
+                "value": 70
               }
             ]
           },
@@ -522,7 +522,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 85
+                "value": 60
               },
               {
                 "id": "links",
@@ -561,7 +561,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 110
+                "value": 100
               },
               {
                 "id": "links",
@@ -620,11 +620,11 @@
               },
               {
                 "id": "custom.width",
-                "value": 170
+                "value": 140
               },
               {
                 "id": "unit",
-                "value": "time:YY-MM-DD:HH:mm"
+                "value": "time:YYYY-MM-DD HH:mm"
               }
             ]
           },
@@ -785,7 +785,7 @@
             "properties": [
               {
                 "id": "custom.minWidth",
-                "value": 90
+                "value": 80
               },
               {
                 "id": "custom.inspect",
@@ -906,7 +906,7 @@
             "properties": [
               {
                 "id": "custom.minWidth",
-                "value": 90
+                "value": 80
               },
               {
                 "id": "custom.inspect",
@@ -1027,7 +1027,7 @@
             "properties": [
               {
                 "id": "custom.minWidth",
-                "value": 90
+                "value": 80
               },
               {
                 "id": "custom.inspect",
@@ -1035,7 +1035,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 125
+                "value": 90
               },
               {
                 "id": "links",

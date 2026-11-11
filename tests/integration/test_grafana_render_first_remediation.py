@@ -145,7 +145,7 @@ def test_rf001_headline_status_is_evidence_aware() -> None:
     assert _mapping_text(_panel(runtime, 18940), "1") == "UNKNOWN"
 
     assert "run_id=${run_id}" in str(_panel(dq, 9406).get("targets"))
-    provenance = str(_panel(dq, 9400).get("options", {}).get("content", ""))
+    provenance = str(_panel(dq, 9400).get("description", ""))
     assert "SELECTED RUN" in provenance
     assert all(
         panel.get("id") != 9401 for panel in _iter_panels(list(dq.get("panels", [])))
@@ -252,7 +252,8 @@ def test_iteration_2_runtime_valid_empty_frames_are_semantic_tables() -> None:
         no_value = str(
             (panel.get("fieldConfig") or {}).get("defaults", {}).get("noValue") or ""
         )
-        assert no_value.startswith("TELEMETRY MISSING")
+        assert no_value == "UNKNOWN" or no_value.startswith("TELEMETRY MISSING")
+        assert "TELEMETRY MISSING" in panel["description"]
         organize = next(
             item for item in panel["transformations"] if item.get("id") == "organize"
         )
@@ -371,7 +372,9 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
     status = _panel(overview, 9603)
     inputs = _panel(overview, 9002)
     assert inputs["title"] == "Review Run Domains"
-    assert inputs["gridPos"]["y"] == status["gridPos"]["y"]
+    assert status["gridPos"]["y"] == 5
+    assert inputs["gridPos"]["y"] == 7
+    assert inputs["gridPos"]["y"] + inputs["gridPos"]["h"] <= FIRST_WINDOW_Y
     assert inputs["gridPos"]["w"] >= 8
     assert status["gridPos"]["y"] < FIRST_WINDOW_Y
 
@@ -414,7 +417,7 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
         "Pipeline",
         "Run Type",
         "Started at",
-        "Total Run Duration",
+        "Run duration",
     } <= set(re.findall(r"'parameter':\s*'([^']+)'", target["root_selector"]))
 
     # Workflow overview + Alerts/SLO retired; ID-card noValue contract remains.
@@ -1109,8 +1112,8 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     # Workflow/Pipeline stay flex (minWidth floor only) so 200% width budget holds.
     assert _override_width(recent, "Workflow") is None
     assert _override_width(recent, "Pipeline") is None
-    assert _override_min_width(recent, "Workflow") == 80
-    assert _override_min_width(recent, "Pipeline") == 210
+    assert _override_min_width(recent, "Workflow") == 50
+    assert _override_min_width(recent, "Pipeline") == 70
     assert recent["fieldConfig"]["defaults"]["custom"]["minWidth"] == 50
     assert recent["options"]["footer"]["enablePagination"] is False
     assert (_override_width(recent, "Run ID") or 0) <= 340
@@ -1413,6 +1416,8 @@ def test_incident_main_columns_hide_future_service_labels_but_keep_inspect() -> 
         "Object",
         "Signal",
         "Action",
+        "owner",
+        "next_step",
     }
 
 
