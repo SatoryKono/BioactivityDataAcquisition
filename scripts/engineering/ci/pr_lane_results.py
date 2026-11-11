@@ -167,6 +167,12 @@ RUNTIME_ACCEPTANCE_12553_TEST = (
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "scripts/ai/codex/native_runtime_contract.py": (
+        "tests/architecture/test_codex_native_runtime.py",
+        "tests/architecture/test_codex_agent_catalog_inventory.py",
+        "tests/architecture/test_codex_skill_agent_links.py",
+        "tests/architecture/test_grok_subagent_least_privilege.py",
+    ),
     "docs/00-project/NORMATIVE_SOURCES.md": (
         "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
@@ -1853,6 +1859,9 @@ def _script_targets(path: str, root: Path) -> list[str]:
     }
     if selected:
         return [test.relative_to(root).as_posix() for test in selected]
+    reviewed = AFFECTED_TESTS_BY_PATH.get(path)
+    if reviewed:
+        return list(reviewed)
     return [
         test_root.relative_to(root).as_posix()
         for test_root in test_roots
