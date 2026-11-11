@@ -22,6 +22,8 @@ else
   PYTHON_BIN="$(command -v python)"
 fi
 
+# Suppress first-import bytecode too, before either Python invocation.
+export PYTHONDONTWRITEBYTECODE=1
 export PYTHONPATH="${REPO_ROOT}/src:${REPO_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 
 if ! "${PYTHON_BIN}" -c "import memory.tooling.workflow" >/dev/null 2>&1; then
