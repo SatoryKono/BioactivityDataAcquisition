@@ -1483,6 +1483,18 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-10-15"
     },
+    "scripts/engineering/qa/runtime_acceptance_12553.py": {
+      "decision": "legacy_manual_utility",
+      "next_step": "Retain as the issue-12553 runtime-acceptance capture CLI behind the dedicated workflow; keep it supporting so active_script_count_max does not grow, and retire with the 12553 acceptance bundle once the closeout lands.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-14"
+    },
+    "scripts/engineering/qa/runtime_acceptance_12553_coverage.py": {
+      "decision": "legacy_manual_utility",
+      "next_step": "Retain as the issue-12553 coverage companion for the runtime-acceptance capture CLI; keep it supporting so active_script_count_max does not grow, and retire with the 12553 acceptance bundle once the closeout lands.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-14"
+    },
     "scripts/engineering/qa/snapshot_sonarcloud_open.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain as a bounded live SonarCloud OPEN-issue snapshot exporter; keep it supporting and do not treat it as a new active QA entrypoint.",
@@ -1831,17 +1843,17 @@
       "owner": "@bioetl-observability",
       "review_by": "2026-12-14"
     },
-    "scripts/ops/observability/grafana/_evidence_readability.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the internal readability pass imported by render_nav_bus.py; it has no standalone command and must stay behind the canonical dashboard generator.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
     "scripts/ops/observability/grafana/_empty_observation_contract.py": {
       "decision": "shared_helper_module",
       "next_step": "Keep empty-state witness contracts internal to the live auditor and dashboard generator. This module has no standalone CLI or deployment entrypoint.",
       "owner": "@bioetl-observability",
       "review_by": "2026-12-14"
+    },
+    "scripts/ops/observability/grafana/_evidence_readability.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal readability pass imported by render_nav_bus.py; it has no standalone command and must stay behind the canonical dashboard generator.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-09-30"
     },
     "scripts/ops/observability/grafana/_incident_explanations.py": {
       "decision": "shared_helper_module",
@@ -1854,6 +1866,12 @@
       "next_step": "Keep as the internal discovery-panel transformation imported by render_nav_bus and its tests; this module has no CLI entrypoint.",
       "owner": "@bioetl-observability",
       "review_by": "2026-11-30"
+    },
+    "scripts/ops/observability/grafana/_overview_global_alerts.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Keep overview global-alert donor transforms internal to render_nav_bus. This module has no standalone CLI or deployment entrypoint; keep it supporting so active_script_count_max does not grow.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-12-14"
     },
     "scripts/ops/observability/grafana/_provider_evidence_columns.py": {
       "decision": "shared_helper_module",
