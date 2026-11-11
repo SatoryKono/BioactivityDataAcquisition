@@ -145,7 +145,7 @@ The following divergence is not acceptable:
   on `main`
 - contributor guidance tells users to edit a docs mirror instead of the runtime
   source for behavior changes
-- active Codex/Gemini runtime surfaces depend on `.claude/**` as a canonical
+- active Codex/Junie/Devin runtime surfaces depend on `.claude/**` as a canonical
   behavior source
 - runtime config docs claim portability while a checked-in portable config
   depends on machine-local absolute paths
@@ -192,14 +192,12 @@ The following divergence is not acceptable:
 - Agent orchestration behavior for Codex -> `.codex/agents/**`
 - Agent orchestration behavior for Junie -> `.junie/agents/**` (equal peer;
   parity with `.codex/agents/**` enforced by `check_junie_mirror.sh`)
-- Agent orchestration behavior for Gemini -> only when a tracked
-  `.gemini/agents/**` tree exists on `main`; otherwise treat Gemini references
-  in docs as mirrors or local-only guidance
+- Gemini agent behavior trees -> prohibited by `AGENTS.md`; documentation
+  references do not authorize creation or activation.
 - Skill trigger/runtime behavior for Codex -> `.codex/skills/**`
 - Skill trigger/runtime behavior for Junie -> `.junie/skills/**` (equal peer;
   parity with `.codex/skills/**` enforced by `check_junie_mirror.sh`)
-- Skill trigger/runtime behavior for Gemini -> only when a tracked
-  `.gemini/skills/**` tree exists on `main`
+- Gemini skill behavior trees -> prohibited by `AGENTS.md`.
 - Gemini local config classification -> `MCP_LOCAL_RUNTIME_CONFIG.md`
 - **Devin orchestration context** -> use `.devin/agents/DEVIN-RUNTIME.md`,
   `.devin/agents/ORCHESTRATION.md`, and the selected
