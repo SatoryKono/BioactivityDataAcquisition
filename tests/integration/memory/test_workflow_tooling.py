@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -792,3 +793,60 @@ def test_review_curated_workflow_returns_ritual_summary(monkeypatch) -> None:
     assert payload["summary"]["review_candidates"] == 2
     assert "regular engineering cadence" in payload["cadence"]
     assert "archive" in payload["next_action"]
+
+
+@pytest.mark.parametrize("mode", ["read-only", "off"])
+def test_strict_no_file_changes_pre_task_never_refreshes_or_writes_notes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mode: str
+) -> None:
+    """The documented strict flags must block even temporary recovery."""
+    monkeypatch.setenv("BIOETL_AI_MEMORY_MODE", mode)
+
+    def forbidden(*args: object, **kwargs: object) -> None:
+        pytest.fail("Strict no-file-changes pre-task attempted a filesystem write")
+
+    monkeypatch.setattr(workflow, "refresh_all", forbidden)
+    monkeypatch.setattr(workflow, "_write_note", forbidden)
+    monkeypatch.setattr(workflow.tempfile, "mkdtemp", forbidden)
+    before = sorted(tmp_path.rglob("*"))
+    payload = workflow.pre_task_workflow(
+        task_id="strict-no-writes",
+        title="sources",
+        query="sources",
+        source_refs=[],
+        chunks_path=tmp_path / "missing-rag" / "chunks.jsonl",
+        events_dir=tmp_path / "missing-timeline",
+        session_note_path=tmp_path / "session.md",
+        run_refresh_if_missing=False,
+        create_session_note=False,
+    )
+    assert sorted(tmp_path.rglob("*")) == before
+    assert payload["session_note"] is None
+    assert payload["refresh_output_root"] is None
+    assert payload["refresh_report"] is None
+    if mode == "read-only":
+        assert payload["retrieval"]["degraded"] is True
+        assert payload["retrieval"]["missing_artifacts"]
+    else:
+        assert payload["retrieval"]["kind"] == "disabled"
+
+
+@pytest.mark.parametrize("disable_bytecode", [False, True])
+def test_fresh_memory_import_bytecode_requires_process_level_guard(
+    tmp_path: Path, disable_bytecode: bool
+) -> None:
+    """Package-level dont_write_bytecode is too late for its own first import."""
+    package = tmp_path / "memory"
+    package.mkdir()
+    source = Path("src/memory/__init__.py").read_text(encoding="utf-8")
+    (package / "__init__.py").write_text(source, encoding="utf-8")
+    env = os.environ.copy()
+    env.pop("PYTHONDONTWRITEBYTECODE", None)
+    env.pop("PYTHONPYCACHEPREFIX", None)
+    env["PYTHONPATH"] = str(tmp_path)
+    if disable_bytecode:
+        env["PYTHONDONTWRITEBYTECODE"] = "1"
+    subprocess.run(
+        [sys.executable, "-c", "import memory"], cwd=tmp_path, env=env, check=True
+    )
+    assert bool(list(package.rglob("*.pyc"))) is not disable_bytecode
