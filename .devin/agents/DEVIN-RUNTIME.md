@@ -35,6 +35,12 @@ Map logical BioETL `py-*` profiles onto the Devin CLI runtime roles using custom
 
 ## Canonical Launch
 
+Hook discovery: `python scripts/ai/codex/doctor.py hooks --no-write --json`.
+Exit 2 means installed capability is NOT_PROVEN. Discovery never runs hooks or
+runtime commands. See `docs/05-operations/runbooks/ai-hook-compatibility.md` for
+platform observations and vendor contracts; documentation alone cannot enable
+a native adapter.
+
 Run Devin from the repository root. These are declared sources, not proof
 that every file is loaded at startup: `AGENTS.md`, `.devin/config.json`,
 `.devin/mcp_config.json`, `.devin/agents/**`, and `.devin/skills/**`.

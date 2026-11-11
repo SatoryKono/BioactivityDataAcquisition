@@ -15,6 +15,9 @@ from pathlib import Path
 from typing import Any, cast
 import sys
 
+# Read-only discovery must not create project bytecode caches on fresh installs.
+sys.dont_write_bytecode = True
+
 _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
@@ -379,7 +382,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "mode",
-        choices=("static", "mcp", "all", "rules", "routes"),
+        choices=("static", "hooks", "mcp", "all", "rules", "routes"),
         nargs="?",
         default="static",
     )
@@ -405,6 +408,14 @@ def main() -> int:
     parser.add_argument("--repo-root", type=Path, default=REPO_ROOT)
     args = parser.parse_args()
     repo_root = args.repo_root.resolve()
+    if args.mode == "hooks":
+        if args.output is not None:
+            parser.error("hooks mode is read-only; --output is not supported")
+        from scripts.ai.codex.hook_inventory import collect
+
+        print(json.dumps(collect(repo_root), indent=2))
+        # Discovery is evidence, not proof of installed runtime capability.
+        return 2
     profile = args.profile or setup_mcp.DEFAULT_LOCAL_PROFILE
     if args.no_write and args.output is not None:
         parser.error("--no-write and --output are mutually exclusive")

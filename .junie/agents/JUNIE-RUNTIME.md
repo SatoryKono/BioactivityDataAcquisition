@@ -78,6 +78,12 @@ identity to repository, commit, branch, worktree, task, and source references.
 
 ## Governed Profiles
 
+Hook discovery: `python scripts/ai/codex/doctor.py hooks --no-write --json`.
+Exit 2 means installed capability is NOT_PROVEN. Discovery never runs hooks or
+runtime commands. See `docs/05-operations/runbooks/ai-hook-compatibility.md` for
+platform observations and vendor contracts; documentation alone cannot enable
+a native adapter.
+
 The table is a logical responsibility map, not a native registration receipt.
 The byte-parity profile Markdown files do not declare vendor YAML metadata;
 native custom-agent registration is NOT_PROVEN for the installed build. Until
