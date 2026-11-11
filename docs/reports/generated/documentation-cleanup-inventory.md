@@ -28,7 +28,7 @@
 | active_quality_baseline | 125 |
 | closeout_evidence | 168 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 39 |
+| docs_reports_curated_or_historical_report | 40 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 28 |
 | generated_skill_reference_mirror | 19 |
@@ -55,7 +55,7 @@
 | Archived | 1554 |
 | Canonical | 77 |
 | Generated | 1066 |
-| Working | 714 |
+| Working | 715 |
 
 ## Surface Families
 
@@ -65,13 +65,13 @@
 | archive | 1554 |
 | canonical | 77 |
 | generated | 1066 |
-| working | 714 |
+| working | 715 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 421 |
+| archive-after-migration | 422 |
 | generate-automatically | 1066 |
 | keep | 2689 |
 
@@ -99,6 +99,7 @@
 | `docs/reports/audit/phase-profile-41570319793.json` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/phase-profile-41570319793.md` | Working | 1 | archive-after-migration |
 | `docs/reports/ci/main-integrity-m1-m2-report.md` | Working | 0 | archive-after-migration |
+| `docs/reports/ci/main-integrity-m2-window-final.md` | Working | 0 | archive-after-migration |
 | `docs/reports/ci/stage0_closure.json` | Working | 0 | archive-after-migration |
 | `docs/reports/ci/stage0_closure_report.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
@@ -158,7 +159,6 @@
 | `reports/audit-runs/12107-r07/adapter-owner-map.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/adapter-owner-map.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/behavior-followups.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/12107-r07/behavior-obligation-matrix.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -268,6 +268,7 @@
 | `docs/reports/audit/phase-profile-41570319793.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/audit/phase-profile-41570319793.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/ci/main-integrity-m1-m2-report.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/ci/main-integrity-m2-window-final.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/ci/stage0_closure.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/ci/stage0_closure_report.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
@@ -299,7 +300,6 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/post-main-tests.txt` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/runtime-receipt.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 
 ## Generated Route Registry
 
