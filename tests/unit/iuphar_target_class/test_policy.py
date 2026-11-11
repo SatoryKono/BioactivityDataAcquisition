@@ -133,6 +133,32 @@ def test_subclass_outside_vocabulary_is_a_contract_defect() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    ("direct_subclass", "local_subclass", "expected"),
+    [
+        ("unknown", None, "contract_defect"),
+        (None, "unknown", "contract_defect"),
+        ("alpha", None, "empty"),
+        (None, "beta", "empty"),
+        (None, None, "empty"),
+    ],
+)
+def test_missing_peer_does_not_hide_an_invalid_subclass(
+    direct_subclass: str | None, local_subclass: str | None, expected: str
+) -> None:
+    assert (
+        compare_subclasses(
+            direct_subclass=direct_subclass,
+            local_subclass=local_subclass,
+            direct_vocabulary=frozenset({"alpha"}),
+            local_vocabulary=frozenset({"beta"}),
+            same_pairs=frozenset(),
+            class_subclass_pairs=frozenset(),
+        )
+        == expected
+    )
+
+
 def test_committed_policy_matches_rebuild() -> None:
     assert POLICY_PATH.read_bytes() == canonical_json_bytes(policy_document())
 
