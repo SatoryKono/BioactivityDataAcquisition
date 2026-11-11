@@ -8,10 +8,19 @@ from dataclasses import dataclass
 from .models import Diagnostic, MatchResult
 
 EXPLICIT = "explicit_target_id"
-UNIPROT = "uniprot"
-GENE = "gene"
+UNIPROT = "uniprot_xref"
+GENE_ID = "gene_id"
+GENE_SYMBOL = "gene_symbol"
 EXACT_NAME = "exact_name"
 EXACT_SYNONYM = "exact_synonym"
+METHOD_ORDER = (
+    EXPLICIT,
+    UNIPROT,
+    GENE_ID,
+    GENE_SYMBOL,
+    EXACT_NAME,
+    EXACT_SYNONYM,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -40,6 +49,92 @@ class MatchQuery:
     synonyms: tuple[str, ...]
 
 
+@dataclass(frozen=True, slots=True)
+class CrossReference:
+    """One provider cross-reference. Selection uses the database id, not position."""
+
+    database: str
+    identifier: str
+
+
+@dataclass(frozen=True, slots=True)
+class Candidate:
+    """One channel hit. The list order does not choose the status."""
+
+    target_id: str
+    match_method: str
+
+
+def select_uniprot_accessions(
+    references: tuple[CrossReference, ...],
+) -> tuple[str, ...]:
+    """Keep UniProt accessions wherever they sit in the provider list."""
+    return tuple(
+        item.identifier for item in references if item.database.casefold() == "uniprot"
+    )
+
+
+def collect_candidates(
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+) -> tuple[Candidate, ...]:
+    """Ask every channel. The first hit does not stop the search."""
+    found: list[Candidate] = []
+    if query.target_id is not None:
+        found.extend(
+            Candidate(target.target_id, EXPLICIT)
+            for target in catalog
+            if target.target_id == query.target_id
+        )
+    if query.uniprot_ids:
+        wanted = set(query.uniprot_ids)
+        found.extend(
+            Candidate(target.target_id, UNIPROT)
+            for target in catalog
+            if set(target.uniprot_ids) & wanted
+            and (query.organism is None or target.species == query.organism)
+        )
+    if query.organism is not None:
+        found.extend(
+            Candidate(target.target_id, GENE_ID)
+            for target in catalog
+            if query.gene_id is not None
+            and target.gene_id == query.gene_id
+            and target.species == query.organism
+        )
+        found.extend(
+            Candidate(target.target_id, GENE_SYMBOL)
+            for target in catalog
+            if query.gene_symbol is not None
+            and target.gene_symbol == query.gene_symbol
+            and target.species == query.organism
+        )
+    wanted_names = {query.name} if query.name is not None else set()
+    wanted_synonyms = set(query.synonyms)
+    for target in catalog:
+        if set(target.names) & wanted_names:
+            found.append(Candidate(target.target_id, EXACT_NAME))
+        if set(target.synonyms) & wanted_synonyms:
+            found.append(Candidate(target.target_id, EXACT_SYNONYM))
+    return tuple(
+        sorted(
+            found,
+            key=lambda item: (item.target_id, METHOD_ORDER.index(item.match_method)),
+        )
+    )
+
+
+def validate_identity(
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+    candidates: tuple[Candidate, ...],
+    *,
+    snapshot_complete: bool,
+) -> MatchResult:
+    """Turn the full candidate list into one match status."""
+    return _decide(query, catalog, candidates, snapshot_complete=snapshot_complete)
+
+
 def resolve_match(
     query: MatchQuery,
     catalog: tuple[CatalogTarget, ...],
@@ -47,57 +142,81 @@ def resolve_match(
     snapshot_complete: bool,
 ) -> MatchResult:
     """Search every channel, then choose one status. Catalog order is ignored."""
-    explicit = _ids(
-        target.target_id
-        for target in catalog
-        if query.target_id is not None and target.target_id == query.target_id
+    return validate_identity(
+        query,
+        catalog,
+        collect_candidates(query, catalog),
+        snapshot_complete=snapshot_complete,
     )
-    uniprot, uniprot_species_gap = _uniprot_ids(query, catalog)
-    gene, gene_blocked = _gene_ids(query, catalog)
-    named = _name_ids(query, catalog)
 
+
+def _decide(
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+    candidates: tuple[Candidate, ...],
+    *,
+    snapshot_complete: bool,
+) -> MatchResult:
+    """Choose one status from every channel. Catalog order is ignored."""
+    explicit = _ids_of(candidates, EXPLICIT)
+    uniprot = _ids_of(candidates, UNIPROT)
+    gene_id = _ids_of(candidates, GENE_ID)
+    gene_symbol = _ids_of(candidates, GENE_SYMBOL)
+    named = _ids_of(candidates, EXACT_NAME, EXACT_SYNONYM)
+    _, uniprot_species_gap = _uniprot_ids(query, catalog)
+    gene_blocked = query.organism is None and (
+        query.gene_symbol is not None or query.gene_id is not None
+    )
     exact_channels: list[tuple[str, tuple[str, ...]]] = []
     if query.target_id is not None:
         exact_channels.append((EXPLICIT, explicit))
     if query.uniprot_ids:
         exact_channels.append((UNIPROT, uniprot))
-    if (query.gene_symbol or query.gene_id) and not gene_blocked:
-        exact_channels.append((GENE, gene))
+    if query.gene_id is not None and not gene_blocked:
+        exact_channels.append((GENE_ID, gene_id))
+    if query.gene_symbol is not None and not gene_blocked:
+        exact_channels.append((GENE_SYMBOL, gene_symbol))
+    everyone = _union(explicit, uniprot, gene_id, gene_symbol, named)
 
     if uniprot_species_gap or (gene_blocked and not _single_agreement(exact_channels)):
         return _result(
             "insufficient_input",
             None,
-            _union(explicit, uniprot, gene, named),
-            None,
+            everyone,
+            _methods(candidates, set(everyone)),
             ("insufficient_input",),
         )
 
     nonempty = [(method, ids) for method, ids in exact_channels if ids]
     if len(nonempty) >= 2 and not set.intersection(*(set(ids) for _, ids in nonempty)):
+        conflict_ids = _union(*(ids for _, ids in nonempty))
         return _result(
             "identity_conflict",
             None,
-            _union(*(ids for _, ids in nonempty)),
-            None,
+            conflict_ids,
+            _methods(candidates, set(conflict_ids)),
             ("identity_conflict",),
         )
     agreed = _single_agreement(exact_channels)
-    if agreed is not None:
-        method = next(method for method, ids in nonempty if agreed in ids)
-        return _result("matched", agreed, (agreed,), method, ())
-
-    if named:
-        method = _name_method(query, catalog, named)
-        return _result("ambiguous", None, named, method, ("exact_name_or_synonym",))
-
-    if any(ids for _, ids in exact_channels):
-        found = _union(*(ids for _, ids in exact_channels))
-        return _result("ambiguous", None, found, nonempty[0][0], ("ambiguous_match",))
-
+    if agreed is not None and set(everyone) == {agreed}:
+        return _result(
+            "matched",
+            agreed,
+            (agreed,),
+            _methods(candidates, {agreed}),
+            (),
+        )
+    if everyone:
+        return _result(
+            "ambiguous",
+            None,
+            everyone,
+            _methods(candidates, set(everyone)),
+            ("ambiguous_match",),
+        )
     if not snapshot_complete:
-        return _result("source_unavailable", None, (), None, ("source_unavailable",))
-    return _result("not_found", None, (), None, ())
+        return _result("source_unavailable", None, (), (), ("source_unavailable",))
+    return _result("not_found", None, (), (), ())
 
 
 def enforce_match_invariant(result: MatchResult) -> MatchResult:
@@ -113,7 +232,7 @@ def enforce_match_invariant(result: MatchResult) -> MatchResult:
             match_status="contract_error",
             matched_target_id=None,
             candidate_target_ids=result.candidate_target_ids,
-            match_method=None,
+            match_method=(),
             match_evidence_ids=result.match_evidence_ids,
             diagnostics=(
                 Diagnostic(
@@ -142,46 +261,24 @@ def _uniprot_ids(
     return _ids(target.target_id for target in hits), False
 
 
-def _gene_ids(
-    query: MatchQuery,
-    catalog: tuple[CatalogTarget, ...],
-) -> tuple[tuple[str, ...], bool]:
-    if query.gene_symbol is None and query.gene_id is None:
-        return (), False
-    if query.organism is None:
-        return (), True
-    hits = [
-        target.target_id
-        for target in catalog
-        if target.species == query.organism
-        and (
-            (query.gene_symbol is not None and target.gene_symbol == query.gene_symbol)
-            or (query.gene_id is not None and target.gene_id == query.gene_id)
-        )
-    ]
-    return _ids(hits), False
-
-
-def _name_ids(query: MatchQuery, catalog: tuple[CatalogTarget, ...]) -> tuple[str, ...]:
-    wanted_names = {query.name} if query.name is not None else set()
-    wanted_synonyms = set(query.synonyms)
+def _ids_of(candidates: tuple[Candidate, ...], *methods: str) -> tuple[str, ...]:
+    selected = set(methods)
     return _ids(
-        target.target_id
-        for target in catalog
-        if set(target.names) & wanted_names or set(target.synonyms) & wanted_synonyms
+        candidate.target_id
+        for candidate in candidates
+        if candidate.match_method in selected
     )
 
 
-def _name_method(
-    query: MatchQuery,
-    catalog: tuple[CatalogTarget, ...],
-    named: tuple[str, ...],
-) -> str:
-    by_id = {target.target_id: target for target in catalog}
-    wanted = {query.name} if query.name is not None else set()
-    if any(set(by_id[target_id].names) & wanted for target_id in named):
-        return EXACT_NAME
-    return EXACT_SYNONYM
+def _methods(
+    candidates: tuple[Candidate, ...], target_ids: set[str]
+) -> tuple[str, ...]:
+    found = {
+        candidate.match_method
+        for candidate in candidates
+        if candidate.target_id in target_ids
+    }
+    return tuple(method for method in METHOD_ORDER if method in found)
 
 
 def _single_agreement(
@@ -208,7 +305,7 @@ def _result(
     status: str,
     matched: str | None,
     candidates: tuple[str, ...],
-    method: str | None,
+    method: tuple[str, ...],
     codes: tuple[str, ...],
 ) -> MatchResult:
     diagnostics = tuple(Diagnostic(code, "warning", code) for code in codes)
