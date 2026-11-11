@@ -166,7 +166,19 @@ RUNTIME_ACCEPTANCE_12553_TEST = (
 )
 
 
+# Opt-in only: these modules have reviewed non-unit owners because their native
+# discovery uses dynamic imports. Other scripts retain the conservative fallback.
+EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
+    {"scripts/ai/codex/native_runtime_contract.py"}
+)
+
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "scripts/ai/codex/native_runtime_contract.py": (
+        "tests/architecture/test_codex_native_runtime.py",
+        "tests/architecture/test_codex_agent_catalog_inventory.py",
+        "tests/architecture/test_codex_skill_agent_links.py",
+        "tests/architecture/test_grok_subagent_least_privilege.py",
+    ),
     "docs/00-project/NORMATIVE_SOURCES.md": (
         "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
         "tests/architecture/test_ai_runtime_governance_links.py",
@@ -1291,6 +1303,24 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    **dict.fromkeys(
+        (
+            ".codex/agents/",
+            ".junie/agents/",
+            ".devin/agents/",
+            "docs/00-project/ai/agents/agents/",
+        ),
+        (
+            "tests/architecture/test_codex_native_runtime.py",
+            "tests/architecture/test_codex_agent_catalog_inventory.py",
+            "tests/architecture/test_runtime_agent_docs_drift.py",
+            "tests/architecture/test_runtime_orchestration_surfaces.py",
+            "tests/architecture/test_ai_runtime_governance_links.py",
+            "tests/architecture/test_junie_runtime_ci_contract.py",
+            "tests/architecture/test_devin_runtime_no_dead_script_refs.py",
+            "tests/architecture/test_devin_setup_guide_codex_models.py",
+        ),
+    ),
     "reports/audit-runs/12553-runtime-acceptance/": (
         RUNTIME_ACCEPTANCE_12553_TEST,
         "tests/unit/infrastructure/observability/metric_inventory/test_lifecycle_glob_walk.py",
@@ -1850,6 +1880,13 @@ def _script_targets(path: str, root: Path) -> list[str]:
     }
     if selected:
         return [test.relative_to(root).as_posix() for test in selected]
+    reviewed = (
+        AFFECTED_TESTS_BY_PATH.get(path)
+        if path in EXPLICIT_SCRIPT_FALLBACK_PATHS
+        else ()
+    )
+    if reviewed:
+        return list(reviewed)
     return [
         test_root.relative_to(root).as_posix()
         for test_root in test_roots

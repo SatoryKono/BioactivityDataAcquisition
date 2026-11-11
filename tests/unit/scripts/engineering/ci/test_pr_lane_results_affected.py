@@ -69,6 +69,12 @@ def test_runtime_hook_docs_have_bounded_routes_without_accepting_unknown_docs() 
         "tests/architecture/test_codex_native_runtime.py",
         "tests/architecture/test_ai_runtime_governance_links.py",
         "tests/architecture/test_documentation_cleanup_inventory.py",
+        "tests/architecture/test_runtime_agent_docs_drift.py",
+        "tests/architecture/test_devin_setup_guide_codex_models.py",
+        "tests/architecture/test_codex_agent_catalog_inventory.py",
+        "tests/architecture/test_runtime_orchestration_surfaces.py",
+        "tests/architecture/test_junie_runtime_ci_contract.py",
+        "tests/architecture/test_devin_runtime_no_dead_script_refs.py",
     }
     with pytest.raises(ValueError, match="unmapped paths"):
         build_shadow_compare([*paths, ".codex/agents/UNKNOWN.md"], repo_root=repo_root)
