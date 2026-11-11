@@ -111,6 +111,16 @@ def _run_check_all(rest: list[str]) -> int:
     return 0
 
 
+def _run_worktree(rest: list[str]) -> int:
+    from scripts.engineering.repo.create_worktree import main as worktree_main
+
+    if not {"--install-helper", "--validate-only"}.intersection(rest):
+        raise SystemExit(
+            "Creation requires the installed bioetl-create-worktree.py helper"
+        )
+    return worktree_main(rest)
+
+
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
 
@@ -121,13 +131,7 @@ def main(argv: list[str] | None = None) -> int:
     cmd, rest = args[0], args[1:]
 
     if cmd == "worktree":
-        from scripts.engineering.repo.create_worktree import main as worktree_main
-
-        if not {"--install-helper", "--validate-only"}.intersection(rest):
-            raise SystemExit(
-                "Creation requires the installed bioetl-create-worktree.py helper"
-            )
-        return worktree_main(rest)
+        return _run_worktree(rest)
 
     if cmd == "guard-operation":
         from scripts.engineering.repo.operation_guards import main as guard_main

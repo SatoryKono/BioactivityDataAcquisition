@@ -206,6 +206,20 @@ def _populate_existing(destination: Path, sha: str) -> None:
         )
 
 
+def _creation_command(
+    args: argparse.Namespace, destination: Path, sha: str, branch: str
+) -> list[str]:
+    command = ["worktree", "add"]
+    if args.no_checkout or args.existing_branch:
+        command.append("--no-checkout")
+    if args.detach:
+        command.append("--detach")
+    elif not args.existing_branch:
+        command.extend(["-b", branch])
+    command.extend(["--", str(destination), args.existing_branch or sha])
+    return command
+
+
 def create_worktree(args: argparse.Namespace) -> Path:
     destination = validate_destination(args.destination)
     # Execute the tracked stdlib guard without importing project packages or
@@ -241,14 +255,7 @@ def create_worktree(args: argparse.Namespace) -> Path:
         _check_env(repo, sha, args.env_example_approved)
     # Resolve again immediately before creation, after all potentially slow reads.
     validate_destination(args.destination)
-    command = ["worktree", "add"]
-    if args.no_checkout or args.existing_branch:
-        command.append("--no-checkout")
-    if args.detach:
-        command.append("--detach")
-    elif not args.existing_branch:
-        command.extend(["-b", branch])
-    command.extend(["--", str(destination), args.existing_branch or sha])
+    command = _creation_command(args, destination, sha, branch)
     decision = path_guard["revalidate_worktree"](permit, allowed_root=APPROVED_ROOT)
     if decision.status != "PASS":
         raise ValueError("Shared worktree guard refused creation: " + decision.code)
