@@ -118,9 +118,11 @@ def _argument(value: str, previous: str) -> tuple[str, bool]:
         return value, True
     if value in _SAFE_WORDS:
         return value, True
+    if value in {"--profile", "--root", "--workspace"}:
+        return value, True
     if value.startswith("-"):
-        flag, separator, _ = value.partition("=")
-        return (flag + "=[omitted]", False) if separator else (flag, True)
+        # Attached -c/-e code and unknown option names may contain secrets too.
+        return "[opaque option]", False
     if _path_argument(value) and (
         previous in {"--root", "--workspace"}
         or Path(value).suffix.lower()
