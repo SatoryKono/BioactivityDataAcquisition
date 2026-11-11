@@ -963,6 +963,20 @@
                     "targetBlank": true
                   }
                 ]
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "QUERY ERROR": {
+                        "text": "Source unavailable",
+                        "color": "red"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           }

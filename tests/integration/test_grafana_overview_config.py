@@ -229,6 +229,28 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
     assert "Review First Action" not in panels
 
 
+def test_review_run_domains_status_maps_query_error() -> None:
+    """A failed domain request must not render as a raw QUERY ERROR verdict."""
+    panel = _panels_by_title()["Review Run Domains"]
+    status_maps = [
+        item["value"]
+        for override in panel["fieldConfig"]["overrides"]
+        if override.get("matcher") == {"id": "byName", "options": "Status"}
+        for item in override.get("properties", [])
+        if item.get("id") == "mappings"
+    ]
+    assert status_maps
+    options = next(
+        mapping["options"]
+        for mapping in status_maps[0]
+        if mapping.get("type") == "value"
+    )
+    assert options["QUERY ERROR"] == {
+        "text": "Source unavailable",
+        "color": "red",
+    }
+
+
 def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> None:
     identity = _panels_by_title()["Review Run Identity"]
     domains = _panels_by_title()["Review Run Domains"]
