@@ -228,7 +228,7 @@ ______________________________________________________________________
 ||  **py-plan-bot**  |        —         |  scope RF-*   | config RF-*  |      —       |         —         |       scope       |
 ||  **py-test-bot**  |        —         |       —        |       —       | FAIL report  |         —         |         —         |
 || **py-config-bot** |        —         |  config tests  |       —       |      —       | DQ migration docs |         —         |
-|| **py-debug-bot**  |   plan update    | retest trigger |  fix config   |      —       |     fix → doc     |  fix → re-audit   |
+|| **py-debug-bot**  |   RCA → plan update | regression guidance | config remediation guidance | — | doc impact guidance | RCA evidence |
 ||  **py-doc-bot**   |        —         |       —        |       —       |      —       |         —         | terminology check |
 
 ### Ключевые потоки данных
@@ -291,7 +291,7 @@ ______________________________________________________________________
 || ---------- | :-------------------------: | :-------------------------------------: |
 || `refactor` |        orchestrator         |   py-config-bot (если config impact)    |
 || `feature`  |        orchestrator         |    py-config-bot (если новый entity)    |
-|| `bugfix`   | orchestrator / py-debug-bot | py-config-bot (если config-related bug) |
+|| `bugfix`   | orchestrator (implementation) | py-debug-bot (RCA only); py-config-bot (если config-related bug) |
 || `config`   |        py-config-bot        |                    —                    |
 || `doc`      |         py-doc-bot          |                    —                    |
 
@@ -299,7 +299,7 @@ ______________________________________________________________________
 
 || Ситуация                                 | Действие                                           |
 || ---------------------------------------- | -------------------------------------------------- |
-|| py-debug-bot: 5 итераций без fix         | → `Requires Manual Review`, уведомить пользователя |
+|| 5 итераций по проблеме без подтверждённой причины или исправления уполномоченным исполнителем         | → `Requires Manual Review`, уведомить пользователя |
 || py-audit-bot final: новый MUST           | → Блокер, возврат к py-debug-bot/py-plan-bot       |
 || py-test-bot: coverage < 85%              | → MUST: разработка тестов (phase=new_tests)        |
 || py-plan-bot: цикл зависимостей RF-*      | → Пересмотр декомпозиции задачи                    |
