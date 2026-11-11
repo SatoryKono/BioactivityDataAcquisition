@@ -265,6 +265,9 @@ regexes = [
     '''^(?:\n)?[ \t]*"src/bioetl/composition/registry_api\.py"[ \t]*:[ \t]*"6b0f8014dddfe7256ac4a1eb8ee8f6d3bcc2bd38",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/_config_access_loaders\.py"[ \t]*:[ \t]*"fa89cef06f9426b971aa365a5b794282ba125dbb",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/_effective_config_secret_support\.py"[ \t]*:[ \t]*"87369b2ef9c23af8f67ace60c433999bdd6d084b",?[ \t]*\r?$''',
+    # #13003 resource-free rebind: renamed then consolidated helper blob OIDs (not credentials).
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/_effective_config_secret_support\.py"[ \t]*:[ \t]*"916e778c57cd561a98c16148dd07c92cc7e131e5",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/_effective_config_secret_support\.py"[ \t]*:[ \t]*"9bd36ef76172f40ac9ddeccea0a4c9ae33154040",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/config_access\.py"[ \t]*:[ \t]*"5b9af80fcf8f9ca538a25bffd7622ee1a7d620ff",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/domain/exceptions/internal_auth\.py"[ \t]*:[ \t]*"d259de469bf4fcb2e980bee28dfaf47f6b0f3386",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/domain/exceptions/internal_auth\.py"[ \t]*:[ \t]*"c9b834e8629743df02df5bfc1cfe58276ad04d34",?[ \t]*\r?$''',
@@ -278,6 +281,15 @@ regexes = [
     '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/config/workflow_config_api\.py"[ \t]*:[ \t]*"5baa38f4a2e00144ea95f1fd2d51411fd248a92d",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/interfaces/cli/commands/domains/maintenance/service_access\.py"[ \t]*:[ \t]*"bc3d9d727fb2888a90d260cdbc1b29f0f376e139",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/interfaces/cli/commands/domains/quarantine/runtime_access\.py"[ \t]*:[ \t]*"4e3f2ee99746c5a323bc7f78401910eda6cdedd9",?[ \t]*\r?$''',
+]
+
+[[rules.allowlists]]
+description = "Reviewed #13003 inventory content_sha256 for resource-free secret_support rebind (not a credential)"
+condition = "AND"
+paths = ['''^configs/quality/external_resource_inventory\.json$''']
+regexTarget = "line"
+regexes = [
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/_effective_config_secret_support\.py"[ \t]*:[ \t]*"c8ab813f9dd12ced391901474e87a81ac9fe088dd7276fd7e139961615311fd1",?[ \t]*\r?$''',
 ]
 
 [[rules.allowlists]]
@@ -353,6 +365,7 @@ regexes = [
     '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/_config_access_loaders\.py": "ca76981450d2733dd9f00eb5171941e3662494ad5cf19834ad7933de7b3b4cd3",?[ \t\r\n]*$''',
     '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/_effective_config_secret_support\.py": "00d2c6315dc65285b71e382863ad616717e2e1a6b22455717f5617f8d086453b",?[ \t\r\n]*$''',
     '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/config_access\.py": "e594d4f50bcbb469051b56ce98f63689fbf313d7fedbeeb2baa5e34a87cef4aa",?[ \t\r\n]*$''',
+
     '''^(?:\n)?[ \t]*"src/bioetl/domain/exceptions/internal_auth\.py": "372ee1f65a11ef48ff3a4753ca769fc5be00867586c5687783551d9fb8537410",?[ \t\r\n]*$''',
     '''^(?:\n)?[ \t]*"src/bioetl/domain/normalization/join_keys\.py": "a935e92a84a60cc37549a2d594f842b2acfc88974e398ae6df47086d4bcdd0ec",?[ \t\r\n]*$''',
     '''^(?:\n)?[ \t]*"src/bioetl/domain/normalization/open_access\.py": "c6d24b9effb865505bc6d864f6e3bfe36c86b18c00468e21c3e11cf3bedac43e",?[ \t\r\n]*$''',
