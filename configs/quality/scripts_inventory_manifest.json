@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-11T19:14:03.340112+00:00",
+  "generated_at": "2026-11-11T20:04:39.177224+00:00",
   "summary": {
     "total_scripts": 730,
     "status_counts": {
@@ -12500,7 +12500,7 @@
         },
         {
           "path": "scripts/ai/codex/hook_inventory.py",
-          "line": 236,
+          "line": 260,
           "source_group": "scripts",
           "text": "root / \"scripts/engineering/dev/pretest_guardrails.sh\""
         },

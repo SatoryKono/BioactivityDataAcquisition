@@ -133,7 +133,8 @@ def _merge_opencode_evidence(result: dict[str, Any]) -> None:
     if any(item.get("plugins_configured") is True for item in candidates):
         result["plugins_configured"] = True
     if any(item.get("parse_status") in {"UNSUPPORTED", "ERROR"} for item in candidates):
-        result["config_status"] = "INCOMPLETE"
+        if result.get("config_status") != "ERROR":
+            result["config_status"] = "INCOMPLETE"
         if not result["plugins_configured"]:
             result["plugins_configured"] = None
 
@@ -185,37 +186,60 @@ def runtime_inventory(root: Path, name: str, command: str | None) -> dict[str, A
     }
     if name == "opencode":
         result["additional_configurations"] = _opencode_candidates(root)
-    try:
-        path = root / config_name
-        config = _read_config(path) if path.is_file() else {}
-        hook_path = root / hook_name
-        hook_config = _read_config(hook_path) if hook_path.is_file() else {}
-        hooks = hook_config.get("hooks", hook_config if name == "devin" else {})
-        events = _event_sources([(path, config.get("hooks", {})), (hook_path, hooks)])
-        result["configured_events"] = sorted(events)
-        result["event_sources"] = events
-        result["inline_hooks_present"] = bool(config.get("hooks"))
-        result["plugins_configured"] = bool(
-            config.get("plugin") or config.get("plugins")
-        )
-        if name == "junie":
-            result["discovery_note"] = (
-                "project hooks require explicit --config-location; EAP capability must be verified"
-            )
-        elif name == "opencode":
-            _merge_opencode_evidence(result)
-            result["discovery_note"] = (
-                "subordinate surface; plugin APIs must match installed major version"
-            )
-        else:
-            result["discovery_note"] = (
-                "trust, managed policy, user/session/plugin layers require separate verification"
-            )
-    except (OSError, ValueError):
-        result["config_status"] = "ERROR"
-    else:
-        result.setdefault("config_status", "OBSERVED")
+    _populate_configuration(root, name, result)
+
     return result
+
+
+def _configuration_source(path: Path) -> tuple[dict[str, Any], str]:
+    """One unreadable source must not suppress an independent valid source."""
+    try:
+        if not path.exists():
+            return {}, "MISSING"
+        return _read_config(path), "OBSERVED"
+    except (OSError, ValueError, RecursionError):
+        return {}, "ERROR"
+
+
+def _populate_configuration(root: Path, name: str, result: dict[str, Any]) -> None:
+    """Retain partial facts and per-source parse states without absence claims."""
+    config_name, hook_name, _ = RUNTIMES[name]
+    path, hook_path = root / config_name, root / hook_name
+    config, config_status = _configuration_source(path)
+    if hook_path == path:
+        hook_config, hook_status = config, config_status
+    elif name == "opencode":
+        hook_config, hook_status = {}, "NOT_APPLICABLE"
+    else:
+        hook_config, hook_status = _configuration_source(hook_path)
+    result["source_parse_status"] = {
+        str(path): config_status,
+        str(hook_path): hook_status,
+    }
+    result["config_status"] = (
+        "ERROR" if "ERROR" in {config_status, hook_status} else "OBSERVED"
+    )
+    hooks = hook_config.get("hooks", hook_config if name == "devin" else {})
+    events = _event_sources([(path, config.get("hooks", {})), (hook_path, hooks)])
+    result["configured_events"] = sorted(events)
+    result["event_sources"] = events
+    result["inline_hooks_present"] = (
+        None if config_status == "ERROR" else bool(config.get("hooks"))
+    )
+    result["plugins_configured"] = (
+        None
+        if config_status == "ERROR"
+        else bool(config.get("plugin") or config.get("plugins"))
+    )
+    if name == "opencode":
+        _merge_opencode_evidence(result)
+    result["discovery_note"] = {
+        "junie": "project hooks require explicit --config-location; EAP capability must be verified",
+        "opencode": "subordinate surface; plugin APIs must match installed major version",
+    }.get(
+        name,
+        "trust, managed policy, user/session/plugin layers require separate verification",
+    )
 
 
 def collect(root: Path) -> dict[str, Any]:

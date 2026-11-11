@@ -163,3 +163,27 @@ def test_read_limit_applies_to_stream_not_prior_stat(
     with pytest.raises(ValueError, match="size limit"):
         inventory._read_bytes(tmp_path / "growing.json")
     assert sizes == [inventory.MAX_BYTES + 1]
+
+
+@pytest.mark.parametrize("broken", ["config.json", "hooks.v1.json"])
+def test_independent_devin_sources_survive_other_source_failure(
+    tmp_path: Path, broken: str
+) -> None:
+    """A malformed source cannot hide events from the other valid file."""
+    folder = tmp_path / ".devin"
+    folder.mkdir()
+    inline, standalone = folder / "config.json", folder / "hooks.v1.json"
+    inline.write_text('{"hooks":{"Stop":[]}}')
+    standalone.write_text('{"PreToolUse":[]}')
+    (folder / broken).write_text("invalid-private-parser-input")
+    result = inventory.runtime_inventory(tmp_path, "devin", None)
+    event, valid = (
+        ("PreToolUse", standalone) if broken == "config.json" else ("Stop", inline)
+    )
+    assert result["configured_events"] == [event]
+    assert result["event_sources"] == {event: [str(valid)]}
+    assert result["source_parse_status"][str(folder / broken)] == "ERROR"
+    assert result["source_parse_status"][str(valid)] == "OBSERVED"
+    assert result["config_status"] == "ERROR"
+    assert result["execution"] == "NOT_PROVEN"
+    assert "invalid-private-parser-input" not in json.dumps(result)
