@@ -16,7 +16,7 @@
   "target_counts": {
     "http": 14,
     "loki": 0,
-    "promql": 106,
+    "promql": 109,
     "tempo": 0,
     "unknown": 0
   },
@@ -3460,7 +3460,7 @@
       "formula": "label_replace(max by(workflow)(bioetl_workflow_scope_input_status{input=\"workflow\",workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"reason\",\"Reason unavailable\",\"\",\"\")",
       "kind": "promql",
       "panel_id": 9701,
-      "panel_title": "Review Current Workflow Evidence",
+      "panel_title": "Review Current Workflow Evidence \u00b7 ${workflow_evidence_freshness} \u00b7 threshold 24h",
       "query": "label_replace(max by(workflow)(bioetl_workflow_scope_input_status{input=\"workflow\",workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"reason\",\"Reason unavailable\",\"\",\"\")",
       "query_tokens": [
         "bioetl_workflow_scope_input_status"
@@ -3477,16 +3477,78 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "bioetl_workflow_scope_published_seconds * on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 1000",
+      "formula": "((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) * 1000",
       "kind": "promql",
       "panel_id": 9701,
-      "panel_title": "Review Current Workflow Evidence",
-      "query": "bioetl_workflow_scope_published_seconds * on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 1000",
+      "panel_title": "Review Current Workflow Evidence \u00b7 ${workflow_evidence_freshness} \u00b7 threshold 24h",
+      "query": "((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) * 1000",
       "query_tokens": [
         "bioetl_workflow_scope_published_seconds",
         "bioetl_workflow_scope_universe"
       ],
       "ref_id": "B",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "coverage_gap",
+      "formula": "(time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})))",
+      "kind": "promql",
+      "panel_id": 9701,
+      "panel_title": "Review Current Workflow Evidence \u00b7 ${workflow_evidence_freshness} \u00b7 threshold 24h",
+      "query": "(time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})))",
+      "query_tokens": [
+        "bioetl_workflow_scope_published_seconds",
+        "bioetl_workflow_scope_universe"
+      ],
+      "ref_id": "C",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "coverage_gap",
+      "formula": "group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 86400",
+      "kind": "promql",
+      "panel_id": 9701,
+      "panel_title": "Review Current Workflow Evidence \u00b7 ${workflow_evidence_freshness} \u00b7 threshold 24h",
+      "query": "group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 86400",
+      "query_tokens": [
+        "bioetl_workflow_scope_universe"
+      ],
+      "ref_id": "D",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "coverage_gap",
+      "formula": "(time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))) > bool 86400",
+      "kind": "promql",
+      "panel_id": 9701,
+      "panel_title": "Review Current Workflow Evidence \u00b7 ${workflow_evidence_freshness} \u00b7 threshold 24h",
+      "query": "(time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))) > bool 86400",
+      "query_tokens": [
+        "bioetl_workflow_scope_published_seconds",
+        "bioetl_workflow_scope_universe"
+      ],
+      "ref_id": "E",
       "runbook_urls": [],
       "thresholds": [],
       "unit": "none"

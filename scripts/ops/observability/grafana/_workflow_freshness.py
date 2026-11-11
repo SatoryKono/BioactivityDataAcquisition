@@ -5,6 +5,7 @@ from __future__ import annotations
 FRESH_SECONDS = 86400
 VARIABLE = "workflow_evidence_freshness"
 TITLE_SUFFIX = " · ${workflow_evidence_freshness} · threshold 24h"
+NOT_VERIFIED = "Not verified"
 
 
 def apply_workflow_freshness(payload: dict, row: dict, scope: str) -> None:
@@ -21,7 +22,7 @@ def apply_workflow_freshness(payload: dict, row: dict, scope: str) -> None:
     # assertion. Known stale rows remain visible even with incomplete coverage.
     state = (
         f'label_replace({stale}, "freshness", "STALE", "", "")'
-        f' or on() label_replace({unknown}, "freshness", "Not verified", "", "")'
+        f' or on() label_replace({unknown}, "freshness", "{NOT_VERIFIED}", "", "")'
         f" or on() label_replace((max({age}) <= {FRESH_SECONDS}), "
         '"freshness", "Within threshold", "", "")'
     )
@@ -42,7 +43,7 @@ def apply_workflow_freshness(payload: dict, row: dict, scope: str) -> None:
             "multi": False,
             "includeAll": False,
             "options": [],
-            "current": {"text": "Not verified", "value": "Not verified"},
+            "current": {"text": NOT_VERIFIED, "value": NOT_VERIFIED},
         }
     )
     row["title"] += TITLE_SUFFIX
@@ -52,7 +53,7 @@ def apply_workflow_freshness(payload: dict, row: dict, scope: str) -> None:
         " Publication age is measured at query evaluation. Display threshold: 24h "
         "(86400 seconds); STALE means age > threshold, not workflow failure. "
         "Within threshold does not prove health. Missing/invalid publication time "
-        "is Not verified. The heading uses the oldest scoped publication; any "
+        f"is {NOT_VERIFIED}. The heading uses the oldest scoped publication; any "
         "known stale row takes precedence over missing coverage. Retention and "
         "health status are unchanged. Refresh the dashboard to re-evaluate."
     )
@@ -79,7 +80,7 @@ def apply_workflow_freshness(payload: dict, row: dict, scope: str) -> None:
                 "matcher": {"id": "byName", "options": name},
                 "properties": [
                     {"id": "unit", "value": "s"},
-                    {"id": "noValue", "value": "Not verified"},
+                    {"id": "noValue", "value": NOT_VERIFIED},
                 ],
             }
         )
@@ -87,7 +88,7 @@ def apply_workflow_freshness(payload: dict, row: dict, scope: str) -> None:
         {
             "matcher": {"id": "byName", "options": "Freshness"},
             "properties": [
-                {"id": "noValue", "value": "Not verified"},
+                {"id": "noValue", "value": NOT_VERIFIED},
                 {"id": "custom.cellOptions", "value": {"type": "color-text"}},
                 {
                     "id": "mappings",
@@ -109,7 +110,7 @@ def apply_workflow_freshness(payload: dict, row: dict, scope: str) -> None:
             "matcher": {"id": "byName", "options": "Published at"},
             "properties": [
                 {"id": "unit", "value": "time:YYYY-MM-DD HH:mm"},
-                {"id": "noValue", "value": "Not verified"},
+                {"id": "noValue", "value": NOT_VERIFIED},
             ],
         }
     )
