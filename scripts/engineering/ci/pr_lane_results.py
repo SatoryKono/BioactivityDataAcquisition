@@ -179,6 +179,9 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "configs/quality/agent_guard_budget_surfaces.json": (
+        "tests/unit/scripts/repo/test_budget_guard.py",
+    ),
     **dict.fromkeys(
         ("AGENTS.md", "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"),
         (
