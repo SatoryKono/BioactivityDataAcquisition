@@ -63,9 +63,14 @@ root agent performs the same responsibilities directly.
 ## Standard task loop
 
 1. Resolve user intent, mutation authority, scope, and risk tier.
-1. Run the canonical memory `pre-task` workflow with runtime/agent identity
-   unless SCOPE is a generated-artifact rebind, date stamp, or remote-main
-   hash-only change (`BIOETL_AI_MEMORY_MODE=off`).
+1. Select sources and memory through the `AGENTS.md` Required AI Context table,
+   the single task-class matrix: V1 retrieval is optional, V2 pre-task is
+   required, V3/V4 retain the full package and required pre-task, hash-only
+   uses `BIOETL_AI_MEMORY_MODE=off`. Reuse already-read current sources; re-read
+   on content change, expanded scope, or conflicting evidence.
+1. When pre-task is selected for strict no-file-changes work, use read-only pre-task with
+   `--skip-refresh-if-missing --skip-session-note`; do not rebuild temporary
+   artifacts. Report missing retrieval as DEGRADED and verify source directly.
 1. Inspect current evidence: target files, related tests, contracts, configs,
    docs, mirrors, and debt registries.
 1. For V3/V4, maintain an explicit plan with at most one active step.
@@ -76,8 +81,9 @@ root agent performs the same responsibilities directly.
    Markdown link or `Owner:` / `Status:` / `Class:` header changes require
    `python -m scripts.docs generate-cleanup-inventory --update` in the same
    changeset.
-1. Run the memory `post-task` workflow and report evidence, skips, mirror
-   status, and debt outcome.
+1. Run memory `post-task`, create session notes, promote knowledge, or persist
+   refresh artifacts only in authorized `read-write` mode. In `off`/`read-only`,
+   skip these writes and report evidence, skips, mirror status, and debt outcome.
 
 Diagnosis and review remain read-only unless implementation was also requested.
 `py-debug-bot` never applies fixes: it returns a reproduction, root cause,

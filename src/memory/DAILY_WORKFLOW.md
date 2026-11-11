@@ -44,6 +44,13 @@ projections, `pre-task` may build them under an isolated temporary directory.
 It ignores a caller-provided refresh output root in this mode, creates no
 session note, and does not mutate repository-owned memory surfaces.
 
+For a strict no-file-changes task, also pass
+`--skip-refresh-if-missing --skip-session-note` in read-only mode. This forbids
+both temporary rebuilds and session notes. Missing artifacts remain DEGRADED;
+inspect canonical sources instead of silently restoring memory files. The
+`AGENTS.md` Required AI Context table selects whether pre-task is required;
+V1 retrieval is optional and V3/V4 retain the full package and pre-task.
+
 ## Pre-Task
 
 Run the standard pre-task workflow from the repository root. Prefer the project

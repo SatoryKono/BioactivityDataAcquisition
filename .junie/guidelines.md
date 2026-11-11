@@ -44,6 +44,22 @@ dumping RULES/ADR on every edit.
 | V2 focused code | + matching role/skill for SCOPE | `pre-task` |
 | V3/V4 | full package: `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`, `docs/00-project/ai/memory/agent-memory.md`, role `memory-py-*.md`, `src/memory/DAILY_WORKFLOW.md` | `pre-task` required |
 
+The Required AI Context table above is the single task-class matrix; profiles,
+wrappers, and orchestration MUST NOT independently require a larger bootstrap.
+Reuse an already-read source while its content and task scope remain current;
+re-read when the source changes, scope expands, or evidence conflicts.
+
+Select memory mode within user authority. `post-task`, session notes, promotion,
+and persistent refresh require authorized `read-write` mode. When selected
+pre-task must preserve a strict ban on file changes, use `read-only` with
+`--skip-refresh-if-missing --skip-session-note`; this also forbids temporary
+rebuilds. Missing retrieval artifacts stay DEGRADED and claims are verified
+against source. Hash-only work
+uses `off`; if the user forbids retrieval itself, record that constraint and the
+required pre-task as disabled, rather than claiming successful retrieval.
+V2 and V3/V4 still require their matrix-selected pre-task and applicable checks;
+a missing artifact or denied write capability does not lower the task tier.
+
 Hash-only work does **not** require reading `docs/00-project/RULES.md` or the
 ADR tree. V3/V4 keep that package. Select RULES/ADR slices through
 `docs/00-project/NORMATIVE_SOURCES.md` when the task actually touches those

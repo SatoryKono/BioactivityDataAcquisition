@@ -7,7 +7,12 @@
 Define how AI agents should use BioETL memory surfaces without treating memory
 as a replacement for runtime truth.
 
-## Mandatory Read Order
+## Task-selected Read Order
+
+Use the `AGENTS.md` Required AI Context table as the single task-class matrix.
+The list below is the V3/V4 memory package, not an unconditional V1 bootstrap.
+V1 retrieval is optional; V2 pre-task remains required. Reuse already-read current
+sources; re-read on content change, expanded scope, or conflicting evidence.
 
 1. `docs/00-project/ai/memory/agent-memory.md`
 1. matching `docs/00-project/ai/memory/memory-py-*.md` file when a role-specific
@@ -23,7 +28,7 @@ as a replacement for runtime truth.
    `BIOETL_AI_AGENT`; set `BIOETL_AI_MODEL` only when a stable model identifier
    is known. Do not allow durable task records to fall back to an unidentified
    runtime.
-1. Run memory workflow pre-task before substantial work, using `--profile`
+1. Run memory workflow pre-task when selected by the task-class matrix, using `--profile`
    when a task-specific ranking profile applies. Prefer the project venv and
    `PYTHONPATH=src` (or `bash scripts/memory/run_workflow.sh pre-task ...`) so
    `import memory` works outside a fully synced editable install:
@@ -33,6 +38,10 @@ as a replacement for runtime truth.
    full deterministic corpus rebuild.
    RAG retrieval requires a valid catalog/chunk pair whose source contents,
    eligible source set, and source identity still match the checkout.
+   Strict no-file-changes work requires read-only mode and both
+   `--skip-refresh-if-missing --skip-session-note`: default read-only can still
+   rebuild in a temporary directory, so mode alone is insufficient. Do not
+   restore missing artifacts; report DEGRADED and verify source directly.
 1. Read retrieved context in the order `catalog -> graph -> rag -> source`.
 1. Cross-check important claims with repo search, active docs, configs, tests,
    and accepted ADRs.
