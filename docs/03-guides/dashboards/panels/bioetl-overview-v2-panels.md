@@ -114,12 +114,12 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 9002 | Review Run Domains | table |
 | 9603 | Review Selected Run Status | table |
 | 9300 | Review Run Identity | table |
-| 32005 | Browse Global Alerts | row |
-| 22005 | Monitor Global Alerts (Full) | table |
 | 2005 | Monitor Global Alerts | table |
 | 9480 | Review Provider Evidence | table |
 | 9481 | Review Provider Check | stat |
 | 9460 | Inspect Selected Run Stages | table |
 | 9482 | Review Contract Exclusions | canvas |
 | 9483 | Review FK Comparison Scope | table |
+| 32005 | Browse Global Alerts | row |
+| 22005 | Monitor Global Alerts (Full) | table |
 <!-- END SHIPPED PANEL INVENTORY -->
