@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import pytest
+import yaml
 
 from pathlib import Path
 
@@ -115,3 +116,64 @@ def test_mcp_docker_prune_ps1_supports_dry_run() -> None:
     assert "dry-run: would docker rm -f" in ps1
     assert "docker rm -f" in sh
     assert "-not $apply" in ps1
+
+
+@pytest.mark.parametrize(
+    "scenario,required",
+    [
+        ("focused change", "phase=final` alone does not require a full suite"),
+        (
+            "broad change",
+            "Focused mode cannot waive mandatory gates or lower the task tier",
+        ),
+        ("blocked reproduction", "BLOCKED, не PASS"),
+        ("failed retest", "authorized parent / implementer"),
+    ],
+)
+def test_devin_test_profile_preserves_risk_based_scenarios(
+    scenario: str, required: str
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    profile = " ".join(
+        (root / ".devin/agents/py-test-bot/AGENT.md")
+        .read_text(encoding="utf-8")
+        .split()
+    )
+    assert scenario in profile
+    assert required in profile
+    assert "Полный прогон (для final)" not in profile
+    assert "Formal report bundle" in profile and "V1/V2" in profile
+    orchestration = (root / ".devin/agents/ORCHESTRATION.md").read_text(
+        encoding="utf-8"
+    )
+    assert "focused-first" in orchestration
+    assert "py-test-bot | — (exec only" not in orchestration
+
+
+def test_devin_test_native_model_and_permissions_remain_bounded() -> None:
+    root = Path(__file__).resolve().parents[2]
+    text = (root / ".devin/agents/py-test-bot/AGENT.md").read_text(encoding="utf-8")
+    metadata = yaml.safe_load(text.split("---", 2)[1])
+    assert metadata["model"] == "swe-1.6"
+    assert metadata["allowed-tools"] == [
+        "read",
+        "grep",
+        "glob",
+        "exec",
+        "write",
+        "edit",
+    ]
+    assert metadata["permissions"]["allow"] == [
+        "Read(**)",
+        "Write(tests/**)",
+        "Exec(pytest)",
+        "Exec(python)",
+        "Exec(make)",
+    ]
+    assert metadata["permissions"]["deny"] == [
+        "Write(src/**)",
+        "Write(configs/**)",
+        "Write(docs/**)",
+        "Exec(gh)",
+        "Exec(hub)",
+    ]
