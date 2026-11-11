@@ -34,13 +34,22 @@ def canonical_json_bytes(payload: object) -> bytes:
     return (text + "\n").encode("utf-8")
 
 
-def atomic_write_bytes(path: Path, payload: bytes) -> None:
-    """Write ``payload`` via a sibling temp file, then ``Path.replace``."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(f".{path.name}.tmp")
+def atomic_write_bytes(path: Path, payload: bytes, *, root: Path) -> None:
+    """Write ``payload`` via a sibling temp file, then ``Path.replace``.
+
+    ``path`` must resolve inside ``root``. The check rejects traversal before
+    any byte is written.
+    """
+    root_resolved = root.resolve()
+    destination = path.resolve()
+    if not destination.is_relative_to(root_resolved):
+        message = "path escapes root"
+        raise ValueError(message)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_name(f".{destination.name}.tmp")
     try:
         temporary.write_bytes(payload)
-        temporary.replace(path)
+        temporary.replace(destination)
     except Exception:
         if temporary.exists():
             temporary.unlink()

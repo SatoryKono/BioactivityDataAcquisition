@@ -11,15 +11,21 @@ from .constants import (
     ARTIFACT_NAMES,
     CONTENT_ABSENT,
     CONTENT_CHECK_COLUMNS,
+    CONTENT_CHECKS_CSV,
     CONTENT_INSPECTED_NOT_SELECTED,
     CONTENT_SELECTED,
+    CRITERION_SATISFIED,
     M_CODE_COLUMNS,
+    M_CODE_VERSIONS_CSV,
+    MANIFEST_JSON,
     MISSING_ROLE_PARAMETERS,
     PROVENANCE_COLUMNS,
     PROVENANCE_ESTABLISHED,
+    PROVENANCE_MAP_CSV,
     PROVENANCE_UNESTABLISHED,
     ROLE_STATUS_ASSIGNED,
     ROLE_STATUS_UNESTABLISHED,
+    STAGE_REPORT_JSON,
     USAGE_LIMIT_WHEN_UNESTABLISHED,
     WATCHED_COLUMNS,
 )
@@ -50,17 +56,26 @@ _BIOLOGICAL_STATEMENT = (
 
 def publish_stage0(repo_root: Path, survey_path: Path, output_dir: Path) -> None:
     """Inspect the survey, write stage-0 artifacts, and leave originals unchanged."""
-    survey_bytes = survey_path.read_bytes()
-    survey = load_survey(survey_path)
+    root = repo_root.resolve()
+    survey_file = survey_path.resolve()
+    output = output_dir.resolve()
+    if not survey_file.is_relative_to(root):
+        message = "survey path escapes repo"
+        raise ValueError(message)
+    if not output.is_relative_to(root):
+        message = "output path escapes repo"
+        raise ValueError(message)
+    survey_bytes = survey_file.read_bytes()
+    survey = load_survey(survey_file, root=root)
     artifacts = build_artifacts(
-        repo_root=repo_root.resolve(),
+        repo_root=root,
         survey=survey,
         survey_sha256=sha256_bytes(survey_bytes),
-        output_dir=output_dir.resolve(),
+        output_dir=output,
     )
-    output_dir.mkdir(parents=True, exist_ok=True)
+    output.mkdir(parents=True, exist_ok=True)
     for name in ARTIFACT_NAMES:
-        atomic_write_bytes(output_dir / name, artifacts[name])
+        atomic_write_bytes(output / name, artifacts[name], root=output)
 
 
 def build_artifacts(
@@ -100,11 +115,11 @@ def build_artifacts(
         report_sha256=sha256_bytes(report_bytes),
     )
     return {
-        "content_checks.csv": content_csv,
-        "m_code_versions.csv": m_code_csv,
-        "manifest.json": canonical_json_bytes(manifest),
-        "provenance_map.csv": provenance_csv,
-        "stage_report.json": report_bytes,
+        CONTENT_CHECKS_CSV: content_csv,
+        M_CODE_VERSIONS_CSV: m_code_csv,
+        MANIFEST_JSON: canonical_json_bytes(manifest),
+        PROVENANCE_MAP_CSV: provenance_csv,
+        STAGE_REPORT_JSON: report_bytes,
     }
 
 
@@ -164,7 +179,7 @@ def copy_selected_sources(
         source = _within_repo(repo_root, candidate.relative_path)
         before = source.read_bytes()
         copy_path = output_dir / "copies" / f"{inspection.sha256}.bin"
-        atomic_write_bytes(copy_path, before)
+        atomic_write_bytes(copy_path, before, root=output_dir)
         after = source.read_bytes()
         if after != before or sha256_file(copy_path) != inspection.sha256:
             message = f"copy diverged from original: {candidate.relative_path}"
@@ -266,7 +281,7 @@ def _absent(check_id: str, subject: str, note: str) -> FileInspection:
 
 
 def _read_csv_table(path: Path) -> tuple[int, tuple[str, ...]]:
-    with path.open("r", encoding="utf-8", newline="") as handle:
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
         reader = csv.reader(handle)
         header_row = next(reader, None)
         if header_row is None:
@@ -390,16 +405,16 @@ def _stage_report(
         "criteria": [
             {
                 "id": "manifest_and_provenance_published",
-                "status": "выполнено",
+                "status": CRITERION_SATISFIED,
             },
             {
                 "id": "unestablished_fields_restricted",
-                "status": "выполнено",
+                "status": CRITERION_SATISFIED,
             },
             {
                 "id": "roles_assigned_by_result_owner",
                 "missing_parameters": list(missing),
-                "status": "не выполнено" if missing else "выполнено",
+                "status": "не выполнено" if missing else CRITERION_SATISFIED,
             },
             {
                 "id": "biological_accuracy",
@@ -431,9 +446,9 @@ def _stage_report(
         "statement": _BIOLOGICAL_STATEMENT,
         "survey_sha256": survey_sha256,
         "table_sha256": {
-            "content_checks.csv": content_sha256,
-            "m_code_versions.csv": m_code_sha256,
-            "provenance_map.csv": provenance_sha256,
+            CONTENT_CHECKS_CSV: content_sha256,
+            M_CODE_VERSIONS_CSV: m_code_sha256,
+            PROVENANCE_MAP_CSV: provenance_sha256,
         },
     }
 
@@ -452,10 +467,10 @@ def _manifest(
     return {
         "artifact": "stage0_manifest",
         "artifact_sha256": {
-            "content_checks.csv": content_sha256,
-            "m_code_versions.csv": m_code_sha256,
-            "provenance_map.csv": provenance_sha256,
-            "stage_report.json": report_sha256,
+            CONTENT_CHECKS_CSV: content_sha256,
+            M_CODE_VERSIONS_CSV: m_code_sha256,
+            PROVENANCE_MAP_CSV: provenance_sha256,
+            STAGE_REPORT_JSON: report_sha256,
         },
         "biological_accuracy_accepted": False,
         "copies": [

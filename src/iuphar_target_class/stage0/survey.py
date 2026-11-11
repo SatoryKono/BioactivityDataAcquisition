@@ -23,9 +23,14 @@ _RECORDED_AT = re.compile(RECORDED_AT_PATTERN)
 _PLACEHOLDER = "[...]"
 
 
-def load_survey(path: Path) -> Stage0Survey:
-    """Load a survey object from JSON."""
-    payload = json.loads(path.read_text(encoding="utf-8"))
+def load_survey(path: Path, *, root: Path) -> Stage0Survey:
+    """Load a survey object from JSON inside ``root``."""
+    root_resolved = root.resolve()
+    source = path.resolve()
+    if not source.is_relative_to(root_resolved):
+        message = "survey path escapes root"
+        raise ValueError(message)
+    payload = json.loads(source.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         message = "survey must be a JSON object"
         raise TypeError(message)

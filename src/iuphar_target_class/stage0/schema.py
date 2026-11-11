@@ -15,6 +15,7 @@ from .constants import (
     PROVENANCE_ESTABLISHED,
     PROVENANCE_UNESTABLISHED,
     REQUIRED_FIELD_IDS,
+    SHA256_PATTERN,
     USAGE_CANDIDATE_ONLY,
     USAGE_LEGACY,
     USAGE_LIMIT_WHEN_UNESTABLISHED,
@@ -37,7 +38,7 @@ class ProvenanceMapSchema(pa.DataFrameModel):
     source_ref: Series[str] | None = pa.Field(nullable=True)
     source_sha256: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^[a-f0-9]{64}$",
+        str_matches=SHA256_PATTERN,
     )
     rule_or_process: Series[str] | None = pa.Field(nullable=True)
     confirmation_owner: Series[str] | None = pa.Field(nullable=True)
@@ -88,7 +89,7 @@ class MCodeVersionSchema(pa.DataFrameModel):
 
     version_id: Series[str] = pa.Field(nullable=False)
     source_ref: Series[str] = pa.Field(nullable=False)
-    source_sha256: Series[str] = pa.Field(nullable=False, str_matches=r"^[a-f0-9]{64}$")
+    source_sha256: Series[str] = pa.Field(nullable=False, str_matches=SHA256_PATTERN)
 
     class Config:
         """Strict column set. Empty frames are valid."""
@@ -108,7 +109,7 @@ class ContentCheckSchema(pa.DataFrameModel):
     )
     row_count: Series[pd.Int64Dtype] | None = pa.Field(nullable=True, ge=0)
     byte_count: Series[pd.Int64Dtype] | None = pa.Field(nullable=True, ge=0)
-    sha256: Series[str] | None = pa.Field(nullable=True, str_matches=r"^[a-f0-9]{64}$")
+    sha256: Series[str] | None = pa.Field(nullable=True, str_matches=SHA256_PATTERN)
     column_count: Series[pd.Int64Dtype] | None = pa.Field(nullable=True, ge=0)
     watched_fields: Series[str] = pa.Field(nullable=False)
     selected_as_stage0_source: Series[bool] = pa.Field()

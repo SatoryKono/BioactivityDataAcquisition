@@ -24,6 +24,7 @@ REQUIRED_FIELD_IDS: tuple[str, ...] = (
 
 ROLE_STATUS_ASSIGNED = "назначен"
 ROLE_STATUS_UNESTABLISHED = "не установлено"
+CRITERION_SATISFIED = "выполнено"
 
 MISSING_ROLE_PARAMETERS: tuple[str, ...] = (
     "исполнитель модуля",
@@ -77,10 +78,16 @@ CONTENT_CHECK_COLUMNS: tuple[str, ...] = (
     "note",
 )
 
+CONTENT_CHECKS_CSV = "content_checks.csv"
+M_CODE_VERSIONS_CSV = "m_code_versions.csv"
+MANIFEST_JSON = "manifest.json"
+PROVENANCE_MAP_CSV = "provenance_map.csv"
+STAGE_REPORT_JSON = "stage_report.json"
+
 ARTIFACT_NAMES: tuple[str, ...] = (
-    "content_checks.csv",
-    "m_code_versions.csv",
-    "manifest.json",
-    "provenance_map.csv",
-    "stage_report.json",
+    CONTENT_CHECKS_CSV,
+    M_CODE_VERSIONS_CSV,
+    MANIFEST_JSON,
+    PROVENANCE_MAP_CSV,
+    STAGE_REPORT_JSON,
 )

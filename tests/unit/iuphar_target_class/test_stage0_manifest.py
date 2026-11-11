@@ -243,8 +243,8 @@ def test_republish_is_byte_identical(tmp_path: Path) -> None:
 
 def test_atomic_write_replaces_and_removes_temp(tmp_path: Path) -> None:
     target = tmp_path / "manifest.json"
-    atomic_write_bytes(target, b"one\n")
-    atomic_write_bytes(target, b"two\n")
+    atomic_write_bytes(target, b"one\n", root=tmp_path)
+    atomic_write_bytes(target, b"two\n", root=tmp_path)
     assert target.read_bytes() == b"two\n"
     assert not (tmp_path / ".manifest.json.tmp").exists()
 
@@ -282,3 +282,34 @@ def test_publish_stage0_writes_the_committed_names(tmp_path: Path) -> None:
     publish_stage0(tmp_path, survey_path, output)
     for name in ARTIFACTS:
         assert (output / name).is_file()
+
+
+def test_utf8_bom_does_not_hide_watched_header(tmp_path: Path) -> None:
+    source = tmp_path / "tables" / "target_all.csv"
+    source.parent.mkdir(parents=True)
+    source.write_bytes("target_all\nEnzyme\n".encode("utf-8-sig"))
+    raw = source.read_bytes()
+    assert raw.startswith(b"\xef\xbb\xbf")
+    payload = _base_survey(
+        candidate_files=[
+            {"relative_path": "tables/target_all.csv", "select_as_source": False},
+        ],
+    )
+    artifacts = _publish(tmp_path, payload, tmp_path / "out")
+    text = artifacts["content_checks.csv"].decode("utf-8")
+    row = next(line for line in text.splitlines() if "tables/target_all.csv" in line)
+    assert ",target_all," in row
+    assert hashlib.sha256(raw).hexdigest() in row
+
+
+def test_publish_rejects_output_outside_repo(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    survey_path = repo / "survey.json"
+    survey_path.write_text(
+        json.dumps(_base_survey(), ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    with pytest.raises(ValueError, match="escapes repo"):
+        publish_stage0(repo, survey_path, tmp_path / "outside")
