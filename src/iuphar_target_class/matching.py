@@ -196,7 +196,11 @@ def _decide(
         )
 
     agreed = _single_agreement(exact_channels)
-    if agreed is not None and set(everyone) == {agreed}:
+    if (
+        agreed is not None
+        and set(everyone) == {agreed}
+        and _matches_requested_species(query, catalog, agreed)
+    ):
         return _result(
             "matched",
             agreed,
@@ -277,6 +281,15 @@ def _methods(
         if candidate.target_id in target_ids
     }
     return tuple(method for method in METHOD_ORDER if method in found)
+
+
+def _matches_requested_species(
+    query: MatchQuery, catalog: tuple[CatalogTarget, ...], target_id: str
+) -> bool:
+    return query.organism is None or any(
+        target.target_id == target_id and target.species == query.organism
+        for target in catalog
+    )
 
 
 def _exact_channels(

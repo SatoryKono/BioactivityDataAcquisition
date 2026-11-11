@@ -265,3 +265,27 @@ def test_gene_without_species_cannot_hide_an_existing_identity_conflict() -> Non
     assert result.match_status == "identity_conflict"
     assert result.matched_target_id is None
     assert result.candidate_target_ids == ("1", "2")
+
+
+@pytest.mark.parametrize("species", ["human", None])
+def test_explicit_id_cannot_confirm_a_target_outside_the_requested_species(
+    species: str | None,
+) -> None:
+    result = resolve_match(
+        _query(target_id="1", organism="mouse"),
+        (_target("1", species=species),),
+        snapshot_complete=True,
+    )
+    assert result.match_status != "matched"
+    assert result.matched_target_id is None
+    assert result.diagnostics
+
+
+def test_explicit_id_with_compatible_species_is_still_matched() -> None:
+    result = resolve_match(
+        _query(target_id="1", organism="human"),
+        (_target("1", species="human"),),
+        snapshot_complete=True,
+    )
+    assert result.match_status == "matched"
+    assert result.matched_target_id == "1"
