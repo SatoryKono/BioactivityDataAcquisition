@@ -12429,7 +12429,7 @@
               "refId": "B",
               "instant": true,
               "format": "table",
-              "expr": "((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) * 1000",
+              "expr": "((((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) * 1000) or on(workflow) ((group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) unless on(workflow) (bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time())) * 0 / 0))",
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
@@ -12439,7 +12439,7 @@
               "refId": "C",
               "instant": true,
               "format": "table",
-              "expr": "(time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})))",
+              "expr": "((time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))) or on(workflow) ((group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) unless on(workflow) (bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time())) * 0 / 0))",
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
@@ -12459,7 +12459,7 @@
               "refId": "E",
               "instant": true,
               "format": "table",
-              "expr": "(time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))) > bool 86400",
+              "expr": "(((time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))) > bool 86400) or on(workflow) (((group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) unless on(workflow) (bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()))) * 0 + 2))",
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
@@ -12628,6 +12628,9 @@
                           "1": {
                             "text": "STALE",
                             "color": "orange"
+                          },
+                          "2": {
+                            "text": "Not verified"
                           }
                         }
                       }

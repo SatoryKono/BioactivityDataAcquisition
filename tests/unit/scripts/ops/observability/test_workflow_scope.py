@@ -68,7 +68,12 @@ def test_workflow_freshness_is_scoped_publication_age_not_saved_run_health():
     queries = {target["refId"]: target["expr"] for target in panel["targets"]}
     assert "time() - " in queries["C"]
     assert "bioetl_workflow_scope_published_seconds" in queries["C"]
-    assert queries["E"].endswith("> bool 86400")
+    assert "> bool 86400" in queries["E"]
+    assert "or on(workflow)" in queries["E"]
+    assert "* 0 + 2" in queries["E"]
+    assert "unless on(workflow)" in queries["E"]
+    assert "or on(workflow)" in queries["C"]
+    assert "* 0 / 0" in queries["C"]
     assert "* 86400" in queries["D"]
     for expr in queries.values():
         assert "$run_id" not in expr
@@ -91,3 +96,4 @@ def test_workflow_freshness_is_scoped_publication_age_not_saved_run_health():
     props = {p["id"]: p["value"] for p in freshness["properties"]}
     assert props["noValue"] == "Not verified"
     assert props["mappings"][0]["options"]["1"]["text"] == "STALE"
+    assert props["mappings"][0]["options"]["2"]["text"] == "Not verified"

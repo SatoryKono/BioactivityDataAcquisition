@@ -27,6 +27,17 @@ def apply_workflow_freshness(payload: dict, row: dict, scope: str) -> None:
         '"freshness", "Within threshold", "", "")'
     )
     query = f"query_result({state})"
+    # Table frames: joinByField/filter/rename keep only fields that queries emit.
+    # When every scoped workflow lacks a valid publish time, age is empty and the
+    # Freshness column disappears — noValue cannot invent a missing field. Cover
+    # universe gaps explicitly. Sentinel 2 => Not verified; never emit 0 for
+    # unknown (0 maps to Within threshold).
+    unknown_nan = f"({missing} * 0 / 0)"
+    published_cells = f"(({scoped} * 1000) or on(workflow) {unknown_nan})"
+    age_cells = f"({age} or on(workflow) {unknown_nan})"
+    freshness_cells = (
+        f"(({age} > bool {FRESH_SECONDS}) or on(workflow) (({missing}) * 0 + 2))"
+    )
     variables = payload.setdefault("templating", {}).setdefault("list", [])
     variables[:] = [v for v in variables if v.get("name") != VARIABLE]
     variables.append(
@@ -63,11 +74,11 @@ def apply_workflow_freshness(payload: dict, row: dict, scope: str) -> None:
         "known stale row takes precedence over missing coverage. Retention and "
         "health status are unchanged. Refresh the dashboard to re-evaluate."
     )
-    panel["targets"][1]["expr"] = f"{scoped} * 1000"
+    panel["targets"][1]["expr"] = published_cells
     for ref, expr in (
-        ("C", age),
+        ("C", age_cells),
         ("D", f"{universe} * {FRESH_SECONDS}"),
-        ("E", f"{age} > bool {FRESH_SECONDS}"),
+        ("E", freshness_cells),
     ):
         panel["targets"].append(
             {"refId": ref, "instant": True, "format": "table", "expr": expr}
@@ -104,6 +115,7 @@ def apply_workflow_freshness(payload: dict, row: dict, scope: str) -> None:
                             "options": {
                                 "0": {"text": "Within threshold"},
                                 "1": {"text": "STALE", "color": "orange"},
+                                "2": {"text": NOT_VERIFIED},
                             },
                         }
                     ],

@@ -22,7 +22,7 @@
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "edf170f35f3fe912617028b2f63262b184932232d405792525555645f79a8291",
     "bioetl-dq-v2": "81fffd1ef0647aa094c0eb7d4d960694a43eb5dda5ebd158f5e99714f86913e2",
-    "bioetl-incident-v1": "2137297fab8d3fc49f457cd77eda34aa2df1be150d0b724c32e56608137dc051",
+    "bioetl-incident-v1": "0ee742fd24a9982d4d8b4196725cb20366089cbbd658d33b1259f9d2c7fd30c1",
     "bioetl-overview-v2": "9b2c48c7fa210b54e6d125efec2b46e689e1c6554137cfd898054d31a19366f2",
     "bioetl-run-explorer-v1": "6ff7833d4415bc6c57cfe10b139c09edbc5b95bf8378a07d3e30f2c99a948acf"
   },
@@ -2094,10 +2094,10 @@
         "datasource_uid": "prometheus",
         "expressions": [
           "label_replace(max by(workflow)(bioetl_workflow_scope_input_status{input=\"workflow\",workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"reason\",\"Reason unavailable\",\"\",\"\")",
-          "((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) * 1000",
-          "(time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})))",
+          "((((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) * 1000) or on(workflow) ((group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) unless on(workflow) (bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time())) * 0 / 0))",
+          "((time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))) or on(workflow) ((group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) unless on(workflow) (bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time())) * 0 / 0))",
           "group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 86400",
-          "(time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))) > bool 86400"
+          "(((time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))) > bool 86400) or on(workflow) (((group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) unless on(workflow) (bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()))) * 0 + 2))"
         ],
         "target_count": 5
       }
