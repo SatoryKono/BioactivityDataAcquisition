@@ -45,6 +45,8 @@ VIEW_PANEL_TRUST_SIBLING = "viewPanel=9414"
 _SELECT_RUN = "SELECT RUN"
 _NO_RUNS = "НЕТ ЗАПУСКОВ"
 _NO_RECORDS = "нет записей"
+_REASON_DETAILS = "Reason details"
+_CUSTOM_HIDDEN = "custom.hidden"
 
 OV_IDENTITY = (
     "/d/bioetl-overview-v2/3-run-overview"
@@ -936,6 +938,49 @@ def _replace_with_handoff(
     )
 
 
+def _configure_overview_summary(summary: dict[str, Any]) -> None:
+    """Keep the bounded reason preview and complete inspectable explanation."""
+    _ensure_field_projection(
+        summary,
+        (
+            "execution_state",
+            "run_verdict",
+            "saved_trust",
+            "run_reason",
+            "run_reason_brief",
+        ),
+    )
+    for transform in summary["transformations"]:
+        if transform["id"] == "organize":
+            for key in ("indexByName", "renameByName"):
+                values = transform["options"][key]
+                if "run_execution" in values:
+                    values["execution_state"] = values.pop("run_execution")
+
+            transform["options"]["indexByName"].update(run_reason_brief=3, run_reason=4)
+            transform["options"]["renameByName"].update(
+                run_reason_brief="Reason", run_reason=_REASON_DETAILS
+            )
+    overrides = summary["fieldConfig"]["overrides"]
+    overrides[:] = [
+        o for o in overrides if o["matcher"].get("options") != _REASON_DETAILS
+    ]
+    overrides.append(
+        {
+            "matcher": {"id": "byName", "options": _REASON_DETAILS},
+            "properties": [
+                {"id": _CUSTOM_HIDDEN, "value": True},
+                {"id": "custom.inspect", "value": True},
+            ],
+        }
+    )
+    note = (
+        " Reason is a shortened preview; Inspect Data retains complete Reason details."
+    )
+    if note not in summary["description"]:
+        summary["description"] += note
+
+
 def apply_overview(data: dict[str, Any]) -> None:
     donor = _by_id(data, 9002)
     donor["datasource"] = dict(OPS)
@@ -983,49 +1028,7 @@ def apply_overview(data: dict[str, Any]) -> None:
         panel["targets"] = [_dash_target(9002)]
         _prepend_frame_filter(panel, frame)
 
-    # Use the canonical execution column shared with the context block.
-    summary = _by_id(data, 9603)
-    _ensure_field_projection(
-        summary,
-        (
-            "execution_state",
-            "run_verdict",
-            "saved_trust",
-            "run_reason",
-            "run_reason_brief",
-        ),
-    )
-    for transform in summary["transformations"]:
-        if transform["id"] == "organize":
-            for key in ("indexByName", "renameByName"):
-                values = transform["options"][key]
-                if "run_execution" in values:
-                    values["execution_state"] = values.pop("run_execution")
-
-    for transform in summary["transformations"]:
-        if transform["id"] == "organize":
-            transform["options"]["indexByName"].update(run_reason_brief=3, run_reason=4)
-            transform["options"]["renameByName"].update(
-                run_reason_brief="Reason", run_reason="Reason details"
-            )
-    overrides = summary["fieldConfig"]["overrides"]
-    overrides[:] = [
-        o for o in overrides if o["matcher"].get("options") != "Reason details"
-    ]
-    overrides.append(
-        {
-            "matcher": {"id": "byName", "options": "Reason details"},
-            "properties": [
-                {"id": "custom.hidden", "value": True},
-                {"id": "custom.inspect", "value": True},
-            ],
-        }
-    )
-    note = (
-        " Reason is a shortened preview; Inspect Data retains complete Reason details."
-    )
-    if note not in summary["description"]:
-        summary["description"] += note
+    _configure_overview_summary(_by_id(data, 9603))
 
     # Row filter alone is not enough: project back to the prior column set.
     _ensure_field_projection(_by_id(data, 9300), _IDENTITY_FIELDS)
@@ -1433,11 +1436,11 @@ def _unhide_reasons_count(override: dict[str, Any]) -> None:
         p for p in override.get("properties") or [] if p.get("id") != "custom.hideFrom"
     ]
     for prop in props:
-        if prop.get("id") == "custom.hidden":
+        if prop.get("id") == _CUSTOM_HIDDEN:
             prop["value"] = False
             break
     else:
-        props.append({"id": "custom.hidden", "value": False})
+        props.append({"id": _CUSTOM_HIDDEN, "value": False})
     override["properties"] = props
 
 
