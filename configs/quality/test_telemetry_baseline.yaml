@@ -2,13 +2,13 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-11-11T17:55:14.816408+00:00'
+refreshed_at_utc: '2026-11-11T18:55:51.323960+00:00'
 refresh_status: captured
 source_commit: facb0b5673c7cec55b6f4efb230f531618e9b56e
 source_run_id: '42263682929'
 source_event: workflow_dispatch
 source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/42263682929
-source_tree_sha256: fda9b9d202243c2ffee7a7646f50b563cba879871fb9df5932f13961432f6223
+source_tree_sha256: d784a449c6ab83c658b1e78510452bb5c8cbd55a1f9ff320bcad9a941d641a37
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
