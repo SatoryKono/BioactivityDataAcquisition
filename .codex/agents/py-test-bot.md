@@ -71,8 +71,10 @@ keep credentials and recorded sensitive data out of tests and reports.
 
 ## Least-privilege (SUBAGENT-20260910)
 
-Allowed skills: `py-test-bot`, `vcr-record`, `verify-architecture`,
-`bioetl-post-change`.
+Allowed skills: `py-test-bot`, `vcr-record`, `verify-architecture`.
+
+Post-change policy: `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` (mandatory when applicable).
+
 Allowed MCP: `ast-grep`; `mutmut` opt-in.
 Forbidden MCP includes `github`. Do not call undeclared MCP.
 Do not run `gh`, `hub`, or `api.github.com`. Local `git` status/diff/log is

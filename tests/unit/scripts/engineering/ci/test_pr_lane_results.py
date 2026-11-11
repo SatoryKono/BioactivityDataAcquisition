@@ -1125,3 +1125,78 @@ def test_shadow_compare_cli_writes_canonical_json(tmp_path: Path) -> None:
         "selected_count",
     ]
     assert not output.with_suffix(".json.tmp").exists()
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        ".codex/agents/py-test-bot.toml",
+        ".junie/agents/py-test-bot.md",
+        ".devin/agents/py-test-bot/AGENT.md",
+        "docs/00-project/ai/agents/agents/py-test-bot.md",
+    ],
+)
+def test_shadow_compare_routes_runtime_profiles_to_governing_tests(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert "tests/architecture/test_codex_native_runtime.py" in report["selected"]
+    assert "tests/architecture/test_runtime_agent_docs_drift.py" in report["selected"]
+    assert not report["covers_full_suite"]
+
+
+def test_shadow_compare_routes_normative_index_without_accepting_other_docs() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["docs/00-project/NORMATIVE_SOURCES.md"], repo_root=root
+    )
+    assert (
+        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py"
+        in report["selected"]
+    )
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            ["docs/00-project/unmapped-runtime-note.md"], repo_root=root
+        )
+
+
+def test_script_fallback_honors_reviewed_owner_and_keeps_unknown_scope_broad(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from scripts.engineering.ci import pr_lane_results as lane
+
+    unit = tmp_path / "tests/unit/scripts"
+    unit.mkdir(parents=True)
+    owner = "tests/architecture/test_owner.py"
+    file = tmp_path / owner
+    file.parent.mkdir(parents=True)
+    file.write_text("def test_owner(): pass", encoding="utf-8")
+    path = "scripts/tools/owned.py"
+    monkeypatch.setitem(lane.AFFECTED_TESTS_BY_PATH, path, (owner,))
+    monkeypatch.setattr(lane, "EXPLICIT_SCRIPT_FALLBACK_PATHS", frozenset({path}))
+    assert lane.affected_pytest_targets([path], repo_root=tmp_path) == [owner]
+    existing = "scripts/tools/existing.py"
+    monkeypatch.setitem(lane.AFFECTED_TESTS_BY_PATH, existing, (owner,))
+    assert lane.affected_pytest_targets([existing], repo_root=tmp_path) == [
+        owner,
+        "tests/unit/scripts",
+    ]
+    assert lane.affected_pytest_targets(
+        ["scripts/tools/unknown.py"], repo_root=tmp_path
+    ) == ["tests/unit/scripts"]
+    file.unlink()
+    with pytest.raises(ValueError, match="Missing mandatory mapped test targets"):
+        lane.affected_pytest_targets([path], repo_root=tmp_path)
+
+
+def test_native_runtime_checker_uses_architecture_owners() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["scripts/ai/codex/native_runtime_contract.py"], repo_root=root
+    )
+    assert "tests/architecture/test_codex_native_runtime.py" in report["selected"]
+    assert (
+        "tests/architecture/test_grok_subagent_least_privilege.py" in report["selected"]
+    )
+    assert "tests/unit/scripts" not in report["selected"]
+    assert "tests/unit/repo_backed/scripts" not in report["selected"]

@@ -43,8 +43,8 @@ BioETL не использует один монолитный файл «все
 ведет параллельный нумерованный список precedence. Важно: active runtime
 sources — equal peers `.codex/agents/CODEX-RUNTIME.md`,
 `.junie/agents/JUNIE-RUNTIME.md` и `.devin/agents/DEVIN-RUNTIME.md`
-(для Devin sessions; root-контракты — `AGENTS.md` и `.junie/guidelines.md`).
-Matching runtime profiles/skills выбранного runtime
+(для Devin sessions; root-контракты — `AGENTS.md` и `.junie/guidelines.md`) —
+вместе с matching runtime profiles/skills выбранного runtime
 (`.codex/agents/py-*.md`, `.codex/skills/**`, `.junie/agents/py-*.md`,
 `.junie/skills/**`, `.devin/agents/*/AGENT.md`, `.devin/skills/**`)
 стоят выше этого normative index; parity между
