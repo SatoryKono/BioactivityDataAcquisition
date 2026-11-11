@@ -89,11 +89,11 @@ def test_guard_flags_partial_tree_commit_in_range(repo: Path) -> None:
 
 
 def test_rejects_flag_injection_in_revision_tokens(repo: Path) -> None:
-    with pytest.raises(SystemExit, match="invalid git revision"):
+    with pytest.raises(module.EvidenceError, match="invalid git revision"):
         module.find_collapsing_commits("--upload-pack=evil", "HEAD", repo=repo)
-    with pytest.raises(SystemExit, match="invalid git revision"):
+    with pytest.raises(module.EvidenceError, match="invalid git revision"):
         module.find_collapsing_commits("HEAD", "-c", repo=repo)
-    with pytest.raises(SystemExit, match="invalid git repository path"):
+    with pytest.raises(module.EvidenceError, match="invalid git repository path"):
         module.validate_repo("-C")
 
 
@@ -173,7 +173,7 @@ def test_sparse_configuration_and_skip_worktree_are_separate_from_tree(
 
 
 def test_shallow_and_missing_base_never_pass(repo: Path) -> None:
-    with pytest.raises(SystemExit):
+    with pytest.raises(module.EvidenceError):
         module.find_collapsing_commits("missing-trusted-base", "HEAD", repo=repo)
     base = _git(repo, "rev-parse", "HEAD").strip()
     (repo / "src/new.txt").write_text("new")
@@ -181,7 +181,7 @@ def test_shallow_and_missing_base_never_pass(repo: Path) -> None:
     _git(repo, "commit", "-qm", "candidate")
     tip = _git(repo, "rev-parse", "HEAD").strip()
     (repo / ".git/shallow").write_text(tip + "\n")
-    with pytest.raises(SystemExit):
+    with pytest.raises(module.EvidenceError):
         module.find_collapsing_commits(base, tip, repo=repo)
 
 
@@ -207,7 +207,7 @@ def test_git_timeout_is_explicit_and_does_not_echo_exception(
 
     monkeypatch.setattr(module.subprocess, "run", timeout)
     with pytest.raises(
-        SystemExit, match="Git evidence unavailable or timed out"
+        module.EvidenceError, match="Git evidence unavailable or timed out"
     ) as caught:
         module.resolve_revision(repo, "HEAD")
     assert "private-value" not in str(caught.value)
@@ -250,7 +250,7 @@ def test_push_and_manual_have_separate_range_contracts() -> None:
 def test_unqualified_event_identity_is_never_a_default_pass(
     event_name: str, event: dict
 ) -> None:
-    with pytest.raises(SystemExit):
+    with pytest.raises(module.EvidenceError):
         module.select_event_range(event_name, event)
 
 
@@ -303,10 +303,7 @@ def test_guard_workflow_runs_trusted_base_code_and_publishes_candidate_status() 
     checkout = next(
         s for s in steps if s.get("uses", "").startswith("actions/checkout@")
     )
-    assert (
-        checkout["with"]["ref"]
-        == "${{ github.event.pull_request.base.sha || 'refs/heads/main' }}"
-    )
+    assert checkout["with"]["ref"] == "refs/heads/main"
     assert checkout["with"]["persist-credentials"] is False
     assert checkout["with"]["fetch-depth"] == 0
     assert len([s for s in steps if "uses" in s]) == 1
@@ -339,7 +336,7 @@ def test_unmerged_index_is_not_a_proposed_complete_tree(repo: Path) -> None:
     _git(repo, "commit", "-qm", "other")
     with pytest.raises(subprocess.CalledProcessError):
         _git(repo, "merge", "side")
-    with pytest.raises(SystemExit, match="unmerged index"):
+    with pytest.raises(module.EvidenceError, match="unmerged index"):
         module.check_index_tree(repo, healthy)
 
 
@@ -378,7 +375,7 @@ def test_event_reader_refuses_outside_and_prefix_sibling_paths(
     event.write_text('{"before":"' + "1" * 40 + '","after":"' + "2" * 40 + '"}')
     monkeypatch.chdir(inside)
     candidate = Path("../checkout-private/event.json") if relative else event
-    with pytest.raises(SystemExit, match="unavailable or invalid"):
+    with pytest.raises(module.EvidenceError, match="unavailable or invalid"):
         module._load_event_range("push", candidate)
 
 
@@ -393,7 +390,7 @@ def test_event_reader_resolves_symlink_before_boundary_check(tmp_path, monkeypat
     except OSError:
         pytest.skip("host does not allow fixture symlinks")
     monkeypatch.chdir(inside)
-    with pytest.raises(SystemExit, match="unavailable or invalid"):
+    with pytest.raises(module.EvidenceError, match="unavailable or invalid"):
         module._load_event_range("push", link)
 
 
