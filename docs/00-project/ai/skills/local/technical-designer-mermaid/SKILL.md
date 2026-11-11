@@ -129,7 +129,12 @@ Otherwise use generic Mermaid mode.
 
 8. Respect repository delivery rules.
 
-- If source `.mmd/.mermaid` changed, ensure rendered `svg/png` outputs are updated in commit.
+- Canonical `.mmd` / `.mermaid` sources stay tracked. When sources change, regenerate
+  and commit the corresponding sibling `svg/*.svg` baselines for source-vs-render drift.
+- PNG previews are local render outputs or targeted CI artifacts, not tracked baselines.
+  Do not add bulk PNG files to Git. Follow the
+  `docs/02-architecture/diagrams/governance/render-retention.md`
+  (ADR-040 / DOC-GOV-02); retain applicable lint, syntax, and source-vs-render checks.
 - Resolve or explicitly justify orphan nodes (`GRAPH-001`) using `%% keep-orphan: ...` only when intentional.
 - Edge-referenced flowchart IDs must have a labeled declaration (`GRAPH-003`); use `%% keep-undeclared: ...` only with a reason.
 
