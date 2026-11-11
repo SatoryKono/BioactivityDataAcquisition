@@ -682,3 +682,21 @@ def test_http_slow_drip_obeys_total_deadline_without_replay(http_mcp_fixture, su
     assert error.value.uncertain
     assert elapsed < 0.6, f"request exceeded its total observation budget: {elapsed}"
     assert len(seen) == 1
+
+
+def test_stdio_blocked_write_obeys_shared_request_deadline(tmp_path):
+    import time
+    import psutil
+    from scripts.ai.codex.mcp_probe_client import StdioProbeClient
+
+    adapter = tmp_path / "never_reads.py"
+    adapter.write_text("import time; time.sleep(60)", encoding="utf-8")
+    entry = {"command": sys.executable, "args": [str(adapter)]}
+    with StdioProbeClient(entry, tmp_path, {}) as client:
+        pid = client._process.pid
+        started = time.monotonic()
+        with pytest.raises(ProbeError, match="TIMEOUT") as error:
+            client.request("tools/call", {"data": "x" * 100_000}, 0.05)
+        assert time.monotonic() - started < 0.4
+        assert error.value.uncertain
+    assert not psutil.pid_exists(pid)

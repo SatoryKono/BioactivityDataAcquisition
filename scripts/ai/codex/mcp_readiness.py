@@ -262,43 +262,48 @@ def _probe_row(name, entry, control_value, capture, *, environment, factory, req
             factory,
         )
     except ProbeError as exc:
-        expected = (
-            isinstance(control_value, dict)
-            and control_value.get("expected_policy_reason") == "WORKSPACE_POLICY_DENIED"
-        )
-        row["status"] = (
-            "DENIED_AS_EXPECTED"
-            if expected
-            and exc.category == "WORKSPACE_POLICY_DENIED"
-            and row["phases"].get("tool", {}).get("status") == "FAIL"
-            else "FAIL"
-        )
-        if exc.category in {
-            "CONTROL_NOT_DECLARED",
-            "READ_CONTROL_NOT_APPROVED",
-            "PROTOCOL_VERSION_NOT_SUPPORTED",
-            "INSTALL_OR_UNREVIEWED_LAUNCHER_NOT_TESTED",
-            "ADAPTER_PREFIX_NOT_TESTED",
-            "EXISTING_ADAPTER_REQUIRED",
-            "WRAPPER_BACKEND_NO_INSTALL_NOT_VERIFIED",
-            "ROUTE_LIMIT_NOT_RESOLVED",
-            "AUTH_REFERENCE_UNAVAILABLE",
-            "AUTH_HELPER_NOT_TESTED",
-        }:
-            row["status"] = "NOT_TESTED"
-        if exc.category == "ADAPTER_DISABLED_BY_POLICY":
-            row["status"] = "DISABLED"
-        if "tool" in row["phases"]:
-            row["control_status"] = row["status"]
-            if row["status"] == "DENIED_AS_EXPECTED":
-                row["phases"]["tool"]["status"] = "DENIED_AS_EXPECTED"
-        row["detail"] = exc.category
-        row["uncertain_outcome"] = exc.uncertain
+        _apply_probe_failure(row, control_value, exc)
     except Exception:
         row["status"] = "FAIL"
         row["detail"] = "diagnostic failed; raw exception and payload omitted"
         row["uncertain_outcome"] = True
     return row
+
+
+def _apply_probe_failure(row: dict, control_value, exc: ProbeError) -> None:
+    expected = (
+        isinstance(control_value, dict)
+        and control_value.get("expected_policy_reason") == "WORKSPACE_POLICY_DENIED"
+    )
+    row["status"] = (
+        "DENIED_AS_EXPECTED"
+        if expected
+        and exc.category == "WORKSPACE_POLICY_DENIED"
+        and row["phases"].get("tool", {}).get("status") == "FAIL"
+        else "FAIL"
+    )
+    if exc.category in {
+        "CONTROL_NOT_DECLARED",
+        "READ_CONTROL_NOT_APPROVED",
+        "PROTOCOL_VERSION_NOT_SUPPORTED",
+        "INSTALL_OR_UNREVIEWED_LAUNCHER_NOT_TESTED",
+        "ADAPTER_PREFIX_NOT_TESTED",
+        "EXISTING_ADAPTER_REQUIRED",
+        "NONBLOCKING_STDIO_NOT_SUPPORTED",
+        "WRAPPER_BACKEND_NO_INSTALL_NOT_VERIFIED",
+        "ROUTE_LIMIT_NOT_RESOLVED",
+        "AUTH_REFERENCE_UNAVAILABLE",
+        "AUTH_HELPER_NOT_TESTED",
+    }:
+        row["status"] = "NOT_TESTED"
+    if exc.category == "ADAPTER_DISABLED_BY_POLICY":
+        row["status"] = "DISABLED"
+    if "tool" in row["phases"]:
+        row["control_status"] = row["status"]
+        if row["status"] == "DENIED_AS_EXPECTED":
+            row["phases"]["tool"]["status"] = "DENIED_AS_EXPECTED"
+    row["detail"] = exc.category
+    row["uncertain_outcome"] = exc.uncertain
 
 
 def _aggregate_status(rows: Sequence[Mapping]) -> str:

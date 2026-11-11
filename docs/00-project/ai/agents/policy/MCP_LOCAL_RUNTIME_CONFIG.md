@@ -514,3 +514,8 @@ HTTP response headers, JSON and SSE bodies share the request's monotonic
 deadline. Each body read receives the remaining socket timeout; a watchdog
 interrupts only the diagnostic's owned socket at the deadline. Initialize's
 notification shares its remaining budget. No request is replayed on timeout.
+
+Stdio requests use nonblocking pipe writes; sending and waiting for the reply
+share one monotonic request deadline. If the platform cannot support this, the
+probe remains `NOT_TESTED`. An unresponsive owned adapter is terminated on
+timeout; shared owners are never terminated or automatically restarted.

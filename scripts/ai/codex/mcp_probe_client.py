@@ -5,6 +5,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 from pathlib import Path
 import os
+import json
+import time
 
 from scripts.ai.codex.native_mcp_config import NativeConfigClient, NativeConfigError
 
@@ -37,6 +39,55 @@ class StdioProbeClient(NativeConfigClient):
         )
         self._identifier = 0
         self.transport_seen = False
+        self._deadline = 0.0
+        self._timed_out = False
+
+    def __enter__(self):
+        super().__enter__()
+        try:
+            os.set_blocking(self._process.stdin.fileno(), False)
+        except (OSError, AttributeError):
+            super().__exit__(None, None, None)
+            raise ProbeError("NONBLOCKING_STDIO_NOT_SUPPORTED") from None
+        return self
+
+    def __exit__(self, *args):
+        # Do not spend the normal grace period on an unresponsive adapter.
+        # Only this Popen process is terminated, never a shared owner.
+        if (
+            self._timed_out
+            and self._process is not None
+            and self._process.poll() is None
+        ):
+            self._process.terminate()
+        super().__exit__(*args)
+
+    def _remaining(self) -> float:
+        remaining = self._deadline - time.monotonic()
+        if remaining <= 0:
+            self._timed_out = True
+            raise ProbeError("TIMEOUT", uncertain=True)
+        return remaining
+
+    def _send(self, value: dict) -> None:
+        if self._process is None or self._process.stdin is None:
+            raise NativeConfigError("native MCP request process unavailable")
+        encoded = json.dumps(value).encode() + b"\n"
+        if len(encoded) > MAX_RESPONSE_BYTES:
+            raise ProbeError("REQUEST_LIMIT")
+        remaining = memoryview(encoded)
+        while remaining:
+            budget = self._remaining()
+            try:
+                written = os.write(self._process.stdin.fileno(), remaining)
+            except BlockingIOError:
+                time.sleep(min(0.005, budget))
+                continue
+            except OSError:
+                raise NativeConfigError("native MCP request send failed") from None
+            if written <= 0:
+                raise NativeConfigError("native MCP request send failed")
+            remaining = remaining[written:]
 
     def _result(self, value: dict) -> dict:
         self.transport_seen = True
@@ -44,7 +95,7 @@ class StdioProbeClient(NativeConfigClient):
 
     def request(self, method: str, params: dict, timeout: float) -> dict:
         self._identifier += 1
-        self.timeout = timeout
+        self._deadline = time.monotonic() + timeout
         try:
             self._send(
                 {
@@ -54,6 +105,7 @@ class StdioProbeClient(NativeConfigClient):
                     "params": params,
                 }
             )
+            self.timeout = self._remaining()
             return self._response(self._identifier)
         except NativeConfigError as exc:
             if (
@@ -67,6 +119,7 @@ class StdioProbeClient(NativeConfigClient):
             category = (
                 "TIMEOUT" if "observation timeout" in str(exc) else "TRANSPORT_ERROR"
             )
+            self._timed_out = category == "TIMEOUT"
             raise ProbeError(category, uncertain=True) from None
 
     def notify_initialized(self) -> None:
