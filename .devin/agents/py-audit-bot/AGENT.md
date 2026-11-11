@@ -47,7 +47,8 @@ ______________________________________________________________________
 
 ## Memory
 
-> **При старте** прочитай специализированную память:
+> Читай специализированную память, когда она выбрана матрицей Required AI Context
+> из `AGENTS.md` (полный пакет V3/V4; не безусловный bootstrap для V1):
 > `docs/00-project/ai/memory/memory-py-audit-bot.md` — navigation sheet only
 > (owners of import matrix, scoring, and thresholds live in RULES / quality
 > configs / architecture tests; do not invent them from memory).
