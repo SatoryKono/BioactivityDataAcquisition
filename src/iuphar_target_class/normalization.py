@@ -208,7 +208,7 @@ def isolated_invalid_result(row: ValidatedInput) -> ClassificationResult:
 
 def require_approved_normalization(provenance: RunProvenance) -> None:
     """Refuse an accepted run while the marker version is unapproved."""
-    if provenance.normalization_version is None:
+    if not (provenance.normalization_version or "").strip():
         message = "missing_markers version не утверждена"
         raise ValueError(message)
 
@@ -250,9 +250,12 @@ def _invalid(
 
 def _parse_ec_token(token: str) -> EcNumber:
     parts = token.split(".")
-    if not 1 <= len(parts) <= 4 or not parts[0].isdigit():
+    if not 1 <= len(parts) <= 4 or not _ascii_digits(parts[0]):
         return _bad_ec(token)
-    top = int(parts[0])
+    try:
+        top = int(parts[0])
+    except ValueError:
+        return _bad_ec(token)
     if top not in _EC_NAMES:
         return _bad_ec(token)
     seen_dash = False
@@ -263,7 +266,7 @@ def _parse_ec_token(token: str) -> EcNumber:
         if part == "-":
             seen_dash = True
             continue
-        if seen_dash or not part.isdigit():
+        if seen_dash or not _ascii_digits(part):
             return _bad_ec(token)
         depth += 1
         prefix.append(part)
@@ -278,6 +281,10 @@ def _parse_ec_token(token: str) -> EcNumber:
     )
 
 
+def _ascii_digits(value: str) -> bool:
+    return value.isascii() and value.isdigit()
+
+
 def _bad_ec(token: str) -> EcNumber:
     return EcNumber(
         raw=token,
@@ -290,7 +297,11 @@ def _bad_ec(token: str) -> EcNumber:
 
 
 def _split_multi(value: str) -> tuple[str, ...]:
-    return tuple(part.strip() for part in re.split(r"[;|]", value) if part.strip())
+    return tuple(
+        part.strip()
+        for part in re.split(r"[;|]", value)
+        if normalize_missing(part) is not None
+    )
 
 
 def _split_stored(value: str | None) -> tuple[str, ...]:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+from dataclasses import replace
 
 from iuphar_target_class.models import GlueFixture, RawTargetRow, RunProvenance
 from iuphar_target_class.normalization import (
@@ -136,3 +137,47 @@ def test_invalid_ec_is_kept_as_a_diagnostic() -> None:
 def test_unapproved_marker_version_blocks_an_accepted_run() -> None:
     with pytest.raises(ValueError, match="missing_markers version"):
         require_approved_normalization(PROVENANCE)
+
+
+@pytest.mark.parametrize("version", ["", " ", "\t\n"])
+def test_blank_marker_version_blocks_an_accepted_run(version: str) -> None:
+    with pytest.raises(ValueError, match="missing_markers version"):
+        require_approved_normalization(
+            replace(PROVENANCE, normalization_version=version)
+        )
+
+
+def test_approved_marker_version_allows_the_run() -> None:
+    approved = replace(PROVENANCE, normalization_version="markers-v1")
+    assert require_approved_normalization(approved) is None
+
+
+@pytest.mark.parametrize("token", ["².1.1.1", "٣.1.1.1", "3.².1.1", "9" * 5000])
+def test_malformed_ec_does_not_interrupt_following_rows(token: str) -> None:
+    rows = (_row(ec=token), _row(ec="3.1.1.1"))
+    invalid, valid = validate_batch(rows, provenance=PROVENANCE)
+    assert invalid.ec_numbers[0].valid is False
+    assert invalid.ec_numbers[0].raw == token
+    assert invalid.diagnostics[0].code == "invalid_ec"
+    assert valid.ec_numbers[0].valid is True
+
+
+def test_missing_tokens_are_filtered_after_splitting() -> None:
+    result = validate_input(
+        _row(
+            uniprot="P04637;N/A|#n/a",
+            ec="3.1.1.1;N/A",
+            synonyms="name|n/a",
+            keywords="N/A;enzyme",
+        ),
+        provenance=PROVENANCE,
+        catalog=frozenset({"N/A"}),
+    )
+    assert result.uniprot_accessions == ("P04637",)
+    assert result.synonyms == ("name",)
+    assert result.keywords == ("enzyme",)
+    assert result.catalog_status == "not_found"
+    assert len(result.ec_numbers) == 1
+    assert result.ec_numbers[0].valid is True
+    assert result.diagnostics == ()
+    assert result.raw_fields["uniprot"] == "P04637;N/A|#n/a"
