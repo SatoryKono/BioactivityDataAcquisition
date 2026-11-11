@@ -1173,7 +1173,14 @@ def test_script_fallback_honors_reviewed_owner_and_keeps_unknown_scope_broad(
     file.write_text("def test_owner(): pass", encoding="utf-8")
     path = "scripts/tools/owned.py"
     monkeypatch.setitem(lane.AFFECTED_TESTS_BY_PATH, path, (owner,))
+    monkeypatch.setattr(lane, "EXPLICIT_SCRIPT_FALLBACK_PATHS", frozenset({path}))
     assert lane.affected_pytest_targets([path], repo_root=tmp_path) == [owner]
+    existing = "scripts/tools/existing.py"
+    monkeypatch.setitem(lane.AFFECTED_TESTS_BY_PATH, existing, (owner,))
+    assert lane.affected_pytest_targets([existing], repo_root=tmp_path) == [
+        owner,
+        "tests/unit/scripts",
+    ]
     assert lane.affected_pytest_targets(
         ["scripts/tools/unknown.py"], repo_root=tmp_path
     ) == ["tests/unit/scripts"]

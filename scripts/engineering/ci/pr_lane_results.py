@@ -166,6 +166,12 @@ RUNTIME_ACCEPTANCE_12553_TEST = (
 )
 
 
+# Opt-in only: these modules have reviewed non-unit owners because their native
+# discovery uses dynamic imports. Other scripts retain the conservative fallback.
+EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
+    {"scripts/ai/codex/native_runtime_contract.py"}
+)
+
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/ai/codex/native_runtime_contract.py": (
         "tests/architecture/test_codex_native_runtime.py",
@@ -1859,7 +1865,11 @@ def _script_targets(path: str, root: Path) -> list[str]:
     }
     if selected:
         return [test.relative_to(root).as_posix() for test in selected]
-    reviewed = AFFECTED_TESTS_BY_PATH.get(path)
+    reviewed = (
+        AFFECTED_TESTS_BY_PATH.get(path)
+        if path in EXPLICIT_SCRIPT_FALLBACK_PATHS
+        else ()
+    )
     if reviewed:
         return list(reviewed)
     return [
