@@ -1628,7 +1628,7 @@
       ],
       "duplication_clusters": 0,
       "files": 49,
-      "total_loc": 6481,
+      "total_loc": 6489,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.288,
       "max_internal_fan_in": 2,
@@ -3308,7 +3308,7 @@
       "files": 55,
       "total_loc": 6735,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.336,
+      "helper_function_ratio": 0.323,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.runtime_builders.runner_inputs",
       "bounded_growth_budgets": {
