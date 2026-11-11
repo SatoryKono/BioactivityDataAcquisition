@@ -166,9 +166,9 @@ def test_record_processor_policy_normalizes_non_iterable_and_version_fallbacks()
 def test_secret_hash_returns_none_for_missing_and_empty_secret() -> None:
     value_hash = Mock(return_value="hash")
 
-    assert secret_support._secret_value_hash(None, value_hash) is None
+    assert secret_support.secret_value_hash(None, value_hash) is None
     assert (
-        secret_support._secret_value_hash(
+        secret_support.secret_value_hash(
             SimpleNamespace(get_secret_value=lambda: ""),
             value_hash,
         )

@@ -709,7 +709,7 @@ def test_run_manifest_data_root_helpers_cover_explicit_and_fallback_modes(
 
     monkeypatch.setattr(
         data_roots,
-        "_prepare_private_runtime_dir",
+        "prepare_private_runtime_dir",
         lambda path: (
             (_ for _ in ()).throw(OSError("no-cache"))
             if ".cache" in str(path)
@@ -753,7 +753,7 @@ def test_run_manifest_data_root_helpers_cover_planned_artifacts_and_private_root
     prepared: list[Path] = []
     monkeypatch.setattr(
         data_roots,
-        "_prepare_private_runtime_dir",
+        "prepare_private_runtime_dir",
         lambda path: prepared.append(path) or path,
     )
     result = data_roots.private_fallback_data_root()
@@ -788,7 +788,7 @@ def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     original_private_fallback = data_roots.private_fallback_data_root
-    original_prepare_private_runtime_dir = data_roots._prepare_private_runtime_dir
+    original_prepare_private_runtime_dir = data_roots.prepare_private_runtime_dir
     assert data_roots.resolve_data_root(SimpleNamespace(data_dir="/explicit")) == Path(
         "/explicit"
     )
@@ -821,7 +821,7 @@ def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
     prepared: list[Path] = []
     monkeypatch.setattr(
         data_roots,
-        "_prepare_private_runtime_dir",
+        "prepare_private_runtime_dir",
         lambda path: prepared.append(path) or path,
     )
     resolved = data_roots.private_fallback_data_root()
@@ -830,7 +830,7 @@ def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
 
     monkeypatch.setattr(
         data_roots,
-        "_prepare_private_runtime_dir",
+        "prepare_private_runtime_dir",
         lambda path: (
             (_ for _ in ()).throw(OSError("fallback"))
             if ".cache" in str(path)
@@ -843,7 +843,7 @@ def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
     chmod_calls: list[tuple[Path, int]] = []
     monkeypatch.setattr(
         data_roots,
-        "_prepare_private_runtime_dir",
+        "prepare_private_runtime_dir",
         original_prepare_private_runtime_dir,
     )
     monkeypatch.setattr(
@@ -863,7 +863,7 @@ def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
         lambda self: type("S", (), {"st_uid": 0, "st_mode": 0o700})(),
     )
     monkeypatch.setattr(data_roots.os, "getuid", lambda: 0, raising=False)
-    prepared_path = data_roots._prepare_private_runtime_dir(Path("/tmp/private-cache"))
+    prepared_path = data_roots.prepare_private_runtime_dir(Path("/tmp/private-cache"))
     assert prepared_path == Path("/tmp/private-cache")
     assert chmod_calls == [(Path("/tmp/private-cache"), 0o700)]
 
