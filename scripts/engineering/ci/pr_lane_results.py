@@ -175,7 +175,14 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     **dict.fromkeys(
-        ("AGENTS.md", "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"),
+        (
+            "AGENTS.md",
+            "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+            "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
+            "docs/00-project/ai/prompts/library/session/bootstrap.md",
+            "docs/03-guides/development/pycharm-setup.md",
+            "docs/03-guides/github-workflow-diagrams.md",
+        ),
         (
             "tests/architecture/test_codex_task_routing.py",
             RUNTIME_AGENT_DOCS_DRIFT_TEST,

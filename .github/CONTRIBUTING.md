@@ -5,6 +5,7 @@
 ```bash
 # 1. Clone and install
 # Clone the canonical repository or your fork, then verify origin:
+cd D:/github
 git clone <repo-url>
 cd BioactivityDataAcquisition
 git remote -v
@@ -47,6 +48,48 @@ For the full local GitHub workflow, including worktrees, sync/rebase, PR creatio
 
 - [docs/03-guides/github-local-workflow.md](../docs/03-guides/github-local-workflow.md)
 - [GitHub branch naming and lifecycle policy](../docs/00-project/governance/05-github-policy.md#1-branch-strategy)
+
+### Governed local worktrees
+
+Local BioETL Git trees belong only inside `D:\github`, including older,
+review and recovery checkouts. New worktrees are one task child of
+`D:\github\BioactivityDataAcquisition-worktrees`. Do not use `.worktrees`,
+`.codex/worktrees`, `%TEMP%`, cloud folders or another drive for these trees.
+Hosted CI checkouts are remote workflow inputs, not workstation worktrees.
+
+From a clean primary checkout, install the governed entrypoint once:
+
+```powershell
+python scripts/engineering/repo/create_worktree.py --install-helper
+python D:/github/BioactivityDataAcquisition/.git/hooks/bioetl-create-worktree.py issue-123 --validate-only
+```
+
+Use Windows Python (from WSL, invoke Windows Python); Git and Python are the only
+helper dependencies. `--validate-only` checks physical paths without Git calls,
+files, or a new tree. Slugs use letters, digits, `.`, `_`, `-`; device names,
+traversal, existing destinations and redirected roots are rejected.
+
+After **explicit per-task user approval for creating only the tracked root
+`.env.example`**, creation may use:
+
+```powershell
+python D:/github/BioactivityDataAcquisition/.git/hooks/bioetl-create-worktree.py issue-123 --env-example-approved
+```
+
+The flag records prior consent; it does not grant it. Real `.env` is never
+copied. Other tracked `.env*` files fail closed. The default branch is
+`codex/<task>` from an immutable `origin/main` commit. `--existing-branch` attaches
+without moving its ref; a concurrent ref move is reported without resetting it.
+`--no-checkout` creates metadata only and is not permission to commit a partial
+tree or later write an env file. Keep the full-tree gate before every commit.
+
+Installation refuses an existing different local helper and never overwrites it.
+Preserve that helper, compare it with the tracked implementation, and review its
+migration explicitly; do not reset a dirty primary checkout to install it.
+The implementation belongs in the primary checkout for a durable installation.
+Direct `git worktree add` is forbidden even for metadata-only creation. Inspect
+failed destinations before recovery; the helper never deletes them or foreign
+work. Removing a worktree containing `.env*` needs its own explicit approval.
 
 ### Governance Metrics Note
 

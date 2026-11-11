@@ -224,7 +224,7 @@ graph TD
 graph LR
     A[Main worktree] --> B{Сложная задача?}
     B -->|Нет| C[Обычная feature branch]
-    B -->|Да| D[git worktree add]
+    B -->|Да| D[Governed worktree helper]
     D --> E[Isolated worktree]
     E --> F[Разработка]
     F --> G[Commit + push]
