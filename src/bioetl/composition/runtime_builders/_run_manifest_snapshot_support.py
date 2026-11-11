@@ -40,15 +40,18 @@ def build_launch_context_snapshot(
     replay_support_reason: str | None = None,
 ) -> dict[str, object]:
     """Build a snapshot of the launch context."""
-    snapshot = _build_base_snapshot(ctx, run_type_value, execution_context_value)
-    exact_replay_support_boundary = _determine_replay_support_boundary()
+    snapshot = build_runtime_launch_field_snapshot(
+        ctx,
+        run_type_value=run_type_value,
+        execution_context_value=execution_context_value,
+    )
     snapshot.update(
         {
             "configured_required_persistence_profile": (
                 configured_required_persistence_profile or required_persistence_profile
             ),
             "required_persistence_profile": required_persistence_profile,
-            "exact_replay_support_boundary": exact_replay_support_boundary,
+            "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
         }
     )
     if required_persistence_profile_opt_down:
@@ -69,24 +72,6 @@ def build_launch_context_snapshot(
     )
     _add_optional_fields(snapshot, ctx)
     return snapshot
-
-
-def _build_base_snapshot(
-    ctx: PipelineRunContext,
-    run_type_value: str,
-    execution_context_value: str,
-) -> dict[str, object]:
-    """Build the base snapshot."""
-    return build_runtime_launch_field_snapshot(
-        ctx,
-        run_type_value=run_type_value,
-        execution_context_value=execution_context_value,
-    )
-
-
-def _determine_replay_support_boundary() -> str:
-    """Determine the replay support boundary."""
-    return "snapshot_backed_source_runs_only"
 
 
 def _add_reproducibility_profile_fields(
@@ -131,29 +116,12 @@ def resolve_provider_entity(
     yaml_config: object,
 ) -> tuple[str, str]:
     """Resolve provider and entity from pipeline name and config."""
-    fallback_provider, fallback_entity = _determine_fallbacks(pipeline_name)
-    provider = _resolve_provider(yaml_config, fallback_provider)
-    entity = _resolve_entity(yaml_config, fallback_entity)
-    return provider, entity
-
-
-def _determine_fallbacks(pipeline_name: str) -> tuple[str, str]:
-    """Determine fallback provider and entity from pipeline name."""
-
-    return pipeline_name_fallbacks(pipeline_name)
-
-
-def _resolve_provider(yaml_config: object, fallback: str) -> str:
-    """Resolve provider from config or use fallback."""
-    return resolve_name_component(
-        getattr(yaml_config, "provider", None),
-        fallback=fallback,
-    )
-
-
-def _resolve_entity(yaml_config: object, fallback: str) -> str:
-    """Resolve entity from config or use fallback."""
-    return resolve_name_component(
-        getattr(yaml_config, "entity_type", None),
-        fallback=fallback,
+    fallback_provider, fallback_entity = pipeline_name_fallbacks(pipeline_name)
+    return (
+        resolve_name_component(
+            getattr(yaml_config, "provider", None), fallback=fallback_provider
+        ),
+        resolve_name_component(
+            getattr(yaml_config, "entity_type", None), fallback=fallback_entity
+        ),
     )

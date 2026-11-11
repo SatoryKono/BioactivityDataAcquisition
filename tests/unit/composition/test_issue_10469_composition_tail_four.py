@@ -25,7 +25,7 @@ from bioetl.composition.runtime_builders._run_manifest_replay_support import (
     _resolve_replay_id,
 )
 from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
-    _determine_fallbacks,
+    resolve_provider_entity,
 )
 from bioetl.composition.runtime_builders.runner_control_plane_assembly import (
     _log_effective_required_persistence_profile,
@@ -90,8 +90,32 @@ def test_replay_parentage_prefers_context_value() -> None:
     assert _resolve_replay_id(context, "replay_of_run_id", {}) == "parent-run"
 
 
-def test_single_component_pipeline_name_is_both_provider_and_entity() -> None:
-    assert _determine_fallbacks("chembl") == ("chembl", "chembl")
+@pytest.mark.parametrize(
+    ("pipeline_name", "config", "expected"),
+    [
+        ("chembl", SimpleNamespace(), ("chembl", "chembl")),
+        ("chembl_activity", SimpleNamespace(), ("chembl", "activity")),
+        (
+            "chembl_activity",
+            SimpleNamespace(provider="  ", entity_type=None),
+            ("chembl", "activity"),
+        ),
+        (
+            "chembl_activity",
+            SimpleNamespace(provider="pubchem", entity_type="compound"),
+            ("pubchem", "compound"),
+        ),
+    ],
+)
+def test_provider_entity_uses_configured_names_or_pipeline_fallbacks(
+    pipeline_name: str,
+    config: SimpleNamespace,
+    expected: tuple[str, str],
+) -> None:
+    assert (
+        resolve_provider_entity(pipeline_name=pipeline_name, yaml_config=config)
+        == expected
+    )
 
 
 def test_control_plane_profile_logging_is_optional() -> None:
