@@ -332,3 +332,22 @@ def test_local_evidence_list_cannot_substitute_for_iuphar_mapping(
     row = replace(_supported_direct_row(), match_evidence_ids=table.local_evidence_ids)
     with pytest.raises(ContractDefect, match="IUPHAR mapping"):
         require_class_chain(row, table=table)
+
+
+def test_class_chain_rejects_local_evidence_used_as_mapping_confirmation() -> None:
+    table = build_evidence_table(
+        (
+            _draft("local_rule", "ec:3", "Hydrolases", "match"),
+            _draft("iuphar_mapping", "family:1", "Receptor", "match"),
+        ),
+        run_id="run-1",
+    )
+    local_id = next(
+        record.evidence_id
+        for record in table.records
+        if record.evidence_type == "local_rule"
+    )
+    assert local_id in table.match_evidence_ids
+    row = replace(_supported_direct_row(), match_evidence_ids=table.match_evidence_ids)
+    with pytest.raises(ContractDefect, match="wrong type"):
+        require_class_chain(row, table=table)

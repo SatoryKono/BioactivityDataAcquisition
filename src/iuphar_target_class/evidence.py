@@ -13,6 +13,11 @@ EVIDENCE_TYPE_ORDER: tuple[str, ...] = (
     "iuphar_mapping",
     "local_rule",
 )
+_LOCAL_EVIDENCE_TYPE = "local_rule"
+_MAPPING_EVIDENCE_TYPE = "iuphar_mapping"
+_DIRECT_EVIDENCE_TYPES = frozenset(
+    name for name in EVIDENCE_TYPE_ORDER if name != _LOCAL_EVIDENCE_TYPE
+)
 _NAME_ONLY = frozenset({"exact_name", "exact_synonym"})
 _SEPARATOR = "/"
 
@@ -181,21 +186,45 @@ def _require_row_evidence(
     require_resolvable(table)
     records = {record.evidence_id: record for record in table.records}
     for evidence_id in (*row.match_evidence_ids, *row.local_evidence_ids):
-        record = records.get(evidence_id)
-        if (
-            record is None
-            or record.input_row_id != row.input_row_id
-            or record.run_id != table.run_id
-        ):
-            message = f"row evidence does not resolve to this input row and run: {evidence_id}"
-            raise ContractDefect(message)
+        _require_owned_record(row, table, records, evidence_id)
+    _require_direct_evidence_types(row, table, records)
+
+
+def _require_owned_record(
+    row: ClassificationResult,
+    table: EvidenceTable,
+    records: dict[str, Evidence],
+    evidence_id: str,
+) -> None:
+    record = records.get(evidence_id)
+    if (
+        record is None
+        or record.input_row_id != row.input_row_id
+        or record.run_id != table.run_id
+    ):
+        message = (
+            f"row evidence does not resolve to this input row and run: {evidence_id}"
+        )
+        raise ContractDefect(message)
+
+
+def _require_direct_evidence_types(
+    row: ClassificationResult,
+    table: EvidenceTable,
+    records: dict[str, Evidence],
+) -> None:
+    """Direct-layer ids must be direct types, including one match-list mapping."""
     if not any(
         evidence_id in table.match_evidence_ids
-        and records[evidence_id].evidence_type == "iuphar_mapping"
+        and records[evidence_id].evidence_type == _MAPPING_EVIDENCE_TYPE
         for evidence_id in row.match_evidence_ids
     ):
         message = "row evidence requires IUPHAR mapping in match evidence"
         raise ContractDefect(message)
+    for evidence_id in row.match_evidence_ids:
+        if records[evidence_id].evidence_type not in _DIRECT_EVIDENCE_TYPES:
+            message = f"direct evidence has the wrong type: {evidence_id}"
+            raise ContractDefect(message)
 
 
 def content_equal(left: StoredRun, right: StoredRun) -> bool:
