@@ -14,7 +14,7 @@
       }
     ]
   },
-  "description": "SELECTED RUN. Run ID is always selected. The first screen shows saved status, domain verdicts and full identity for that run. Provider evidence and stage accounting follow below the fold. CURRENT fleet panels, First Action, and TIME RANGE history are not on Overview. run_id is HTTP context only and is never a Prometheus label.",
+  "description": "SELECTED RUN · Saved status, domain verdicts and identity assess only the selected Run ID. GLOBAL / CURRENT · Fleet alerts are independent of Run ID, Pipeline, Provider and Workflow, including without a selected run. Open Incident Workspace for triage. Missing saved evidence remains UNKNOWN; global alerts never overwrite the saved run verdict.",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -472,7 +472,7 @@
       },
       "id": 99,
       "options": {
-        "content": "<div style=\"max-width:96ch;white-space:normal;padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">${pipeline:text} | ${run_id}<br>This page assesses that run only. Run identity and domain assessments are on this screen. UNKNOWN means saved evidence is missing.</div>",
+        "content": "<div style=\"max-width:96ch;white-space:normal;padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">${pipeline:text} | ${run_id}<br>Saved evidence assesses that run only; GLOBAL alerts below assess the fleet. Run identity and domain assessments are on this screen. UNKNOWN means saved evidence is missing.</div>",
         "mode": "html",
         "bioetlDisplayTitle": "Inspect Scope & Evidence"
       },
@@ -1421,12 +1421,689 @@
       ]
     },
     {
+      "id": 32005,
+      "type": "row",
+      "title": "Browse Global Alerts",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "id": 22005,
+          "type": "table",
+          "title": "Monitor Global Alerts (Full)",
+          "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state.",
+          "gridPos": {
+            "x": 0,
+            "y": 19,
+            "w": 24,
+            "h": 6
+          },
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "targets": [
+            {
+              "panelId": 2005,
+              "refId": "A",
+              "withTransforms": false,
+              "datasource": {
+                "type": "datasource",
+                "uid": "-- Dashboard --"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "NO MATCHING SIGNALS",
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false,
+                "wrapHeaderText": true
+              },
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "text"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gray",
+                    "value": null
+                  },
+                  {
+                    "color": "#9a3412",
+                    "value": 1
+                  },
+                  {
+                    "color": "#9f1239",
+                    "value": 2
+                  }
+                ]
+              },
+              "links": [],
+              "unit": "none"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value)$"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "right"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 120
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Active Alerts"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "alertname"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Alert"
+                  },
+                  {
+                    "id": "links",
+                    "value": []
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "alertstate"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "firing": {
+                            "text": "FIRING",
+                            "color": "#ff7383"
+                          },
+                          "pending": {
+                            "text": "PENDING",
+                            "color": "#ffb357"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 100
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "State"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "instance"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": "NOT PROVIDED"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 145
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "job"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": "NOT PROVIDED"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 185
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "severity"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 90
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Severity"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "provider"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": "Not provided"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 190
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Provider"
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "chembl": {
+                            "text": "ChEMBL"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Pipeline"
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "Not provided"
+                  },
+                  {
+                    "id": "links",
+                    "value": []
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "alert_runbook"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "pipeline_context"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false,
+              "enablePagination": true,
+              "countRows": true
+            },
+            "cellHeight": "sm"
+          },
+          "transformations": [
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "field": "Value",
+                    "desc": true
+                  }
+                ]
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "severity": 0,
+                  "alertname": 1,
+                  "pipeline": 2,
+                  "provider": 3,
+                  "alertstate": 4
+                }
+              }
+            }
+          ],
+          "links": [
+            {
+              "title": "Open Incident Workspace (all global alerts)",
+              "url": "/d/bioetl-incident-v1/5-incident-workspace?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&viewPanel=22005&${__url_time_range}",
+              "includeVars": false,
+              "targetBlank": false
+            }
+          ]
+        }
+      ],
+      "description": "GLOBAL / CURRENT · Expand for all fleet alerts, independently of the selected Run ID. The summary below shows up to two rows."
+    },
+    {
+      "id": 2005,
+      "type": "table",
+      "title": "Monitor Global Alerts",
+      "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state. Fleet alert urgency is independent of the saved run verdict. Summary shows up to two highest-priority alerts; open Incident Workspace or Browse Global Alerts for all rows.",
+      "gridPos": {
+        "x": 0,
+        "y": 19,
+        "w": 24,
+        "h": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "bioetl_incident_global_alerts",
+          "format": "table",
+          "instant": true,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "NO MATCHING SIGNALS",
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "inspect": true,
+            "minWidth": 50,
+            "wrapText": false,
+            "wrapHeaderText": true
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "gray",
+                "value": null
+              },
+              {
+                "color": "#9a3412",
+                "value": 1
+              },
+              {
+                "color": "#9f1239",
+                "value": 2
+              }
+            ]
+          },
+          "links": [],
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(Value|#Value|Value \\(.*\\)|value)$"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              },
+              {
+                "id": "custom.width",
+                "value": 120
+              },
+              {
+                "id": "displayName",
+                "value": "Active Alerts"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "alertname"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Alert"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "links",
+                "value": []
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "alertstate"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "firing": {
+                        "text": "FIRING",
+                        "color": "#ff7383"
+                      },
+                      "pending": {
+                        "text": "PENDING",
+                        "color": "#ffb357"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "State"
+              },
+              {
+                "id": "custom.width",
+                "value": 75
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "instance"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "NOT PROVIDED"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "job"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "NOT PROVIDED"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 75
+              },
+              {
+                "id": "displayName",
+                "value": "Severity"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "provider"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "Not provided"
+              },
+              {
+                "id": "custom.width",
+                "value": 190
+              },
+              {
+                "id": "displayName",
+                "value": "Provider"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "chembl": {
+                        "text": "ChEMBL"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pipeline"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Pipeline"
+              },
+              {
+                "id": "noValue",
+                "value": "Not provided"
+              },
+              {
+                "id": "links",
+                "value": []
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "alert_runbook"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pipeline_context"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false,
+          "enablePagination": false
+        },
+        "cellHeight": "sm"
+      },
+      "transformations": [
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "field": "Value",
+                "desc": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 2
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "severity": 0,
+              "alertname": 1,
+              "pipeline": 2,
+              "provider": 3,
+              "alertstate": 4
+            }
+          }
+        }
+      ],
+      "links": [
+        {
+          "title": "Open Incident Workspace (all global alerts)",
+          "url": "/d/bioetl-incident-v1/5-incident-workspace?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&viewPanel=22005&${__url_time_range}",
+          "includeVars": false,
+          "targetBlank": false
+        }
+      ]
+    },
+    {
       "id": 9480,
       "type": "table",
       "title": "Review Provider Evidence",
       "gridPos": {
         "x": 0,
-        "y": 18,
+        "y": 24,
         "w": 15,
         "h": 5
       },
@@ -1629,7 +2306,7 @@
       "title": "Review Provider Check",
       "gridPos": {
         "x": 15,
-        "y": 18,
+        "y": 24,
         "w": 9,
         "h": 5
       },
@@ -1807,7 +2484,7 @@
       "title": "Inspect Selected Run Stages",
       "gridPos": {
         "x": 0,
-        "y": 23,
+        "y": 29,
         "w": 15,
         "h": 6
       },
@@ -2274,7 +2951,7 @@
       "title": "Review Contract Exclusions",
       "gridPos": {
         "x": 15,
-        "y": 23,
+        "y": 29,
         "w": 9,
         "h": 6
       },
@@ -2480,7 +3157,7 @@
       "description": "SELECTED RUN · Persisted FK comparison in the exact parent workflow. selected-snapshot means absence only inside the pinned reference, not absence from the complete provider. Expiry can affect all selected rows while execution succeeds; remaining rows and scope stay explicit. Missing evidence is UNKNOWN and failed requests remain QUERY ERROR. Saved Evidence and Replay Readiness retain their independent checks. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. An empty comparison is not a blank table: не применимо means no Run ID is selected, нет записей means no runs are in scope, нет данных means FK comparison rows were not returned.",
       "gridPos": {
         "x": 0,
-        "y": 29,
+        "y": 35,
         "w": 24,
         "h": 12
       },

@@ -70,7 +70,7 @@ def test_dashboard_rows_match_flat_and_forensic_surfaces() -> None:
         "bioetl-control-plane-v1.json": 2,
         "bioetl-dq-v2.json": 1,
         "bioetl-incident-v1.json": 9,
-        "bioetl-overview-v2.json": 0,
+        "bioetl-overview-v2.json": 1,
         "bioetl-run-explorer-v1.json": 0,
     }
     observed = {}
@@ -82,43 +82,42 @@ def test_dashboard_rows_match_flat_and_forensic_surfaces() -> None:
             if panel.get("type") == "row"
         ]
         observed[dashboard_path.name] = len(rows)
-        if expected_rows[dashboard_path.name] == 0:
-            flat_panels = get_dashboard_panels(dashboard)
-            if dashboard_path.stem == "bioetl-run-explorer-v1":
-                assert [panel["id"] for panel in flat_panels] == [1000, 1, 3010]
-            else:
-                assert len(flat_panels) == 11
-            if dashboard_path.stem == "bioetl-overview-v2":
-                comparison = next(
-                    panel
-                    for panel in get_dashboard_panels(dashboard)
-                    if panel["id"] == 9483
-                )
-                assert comparison["type"] == "table"
-                by_id = {
-                    panel["id"]: panel for panel in get_dashboard_panels(dashboard)
-                }
-                target = comparison["targets"][0]
-                assert target["panelId"] == 9002
-                source = resolve_dashboard_target(by_id, target)
-                assert "reconciliation_display" in source["root_selector"]
-                assert "run_id=${run_id}" in source["url"]
-                assert comparison["transformations"][0] == {
-                    "id": "filterByValue",
-                    "options": {
-                        "type": "include",
-                        "match": "all",
-                        "filters": [
-                            {
-                                "fieldName": "_bioetl_frame",
-                                "config": {
-                                    "id": "equal",
-                                    "options": {"value": "reconciliation"},
-                                },
-                            }
-                        ],
-                    },
-                }
+        if dashboard_path.stem == "bioetl-run-explorer-v1":
+            assert [panel["id"] for panel in get_dashboard_panels(dashboard)] == [
+                1000,
+                1,
+                3010,
+            ]
+        if dashboard_path.stem == "bioetl-overview-v2":
+            assert [row["id"] for row in rows] == [32005]
+            comparison = next(
+                panel
+                for panel in get_dashboard_panels(dashboard)
+                if panel["id"] == 9483
+            )
+            assert comparison["type"] == "table"
+            by_id = {panel["id"]: panel for panel in get_dashboard_panels(dashboard)}
+            target = comparison["targets"][0]
+            assert target["panelId"] == 9002
+            source = resolve_dashboard_target(by_id, target)
+            assert "reconciliation_display" in source["root_selector"]
+            assert "run_id=${run_id}" in source["url"]
+            assert comparison["transformations"][0] == {
+                "id": "filterByValue",
+                "options": {
+                    "type": "include",
+                    "match": "all",
+                    "filters": [
+                        {
+                            "fieldName": "_bioetl_frame",
+                            "config": {
+                                "id": "equal",
+                                "options": {"value": "reconciliation"},
+                            },
+                        }
+                    ],
+                },
+            }
     assert observed == expected_rows
 
 
@@ -137,10 +136,7 @@ def test_row_groups_materialize_expanded_for_test_stage() -> None:
         materialized = materialize_expanded(shipped)
         root_panels = materialized["panels"]
         rows = [panel for panel in root_panels if panel.get("type") == "row"]
-        if dashboard_path.name in {
-            "bioetl-run-explorer-v1.json",
-            "bioetl-overview-v2.json",
-        }:
+        if dashboard_path.stem == "bioetl-run-explorer-v1":
             assert rows == []
             assert len(get_dashboard_panels(materialized)) == shipped_total
             continue

@@ -115,6 +115,8 @@ services:
       - GF_LOG_LEVEL=info
       - GF_SERVER_ROOT_URL=http://localhost:3000
       - GF_SERVER_SERVE_FROM_SUB_PATH=false
+      # Use the same Prometheus alert queue as the direct Incident entry point.
+      - GF_USERS_HOME_PAGE=/d/bioetl-incident-v1
       # Operator-facing clock on all shipped dashboards: YYYY-MM-DD HH:mm
       # (Grafana uses mm for minutes). Applies to time picker, axis ticks,
       # and default Time fields. Panel units use the same custom format.

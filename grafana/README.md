@@ -819,6 +819,14 @@ ______________________________________________________________________
 - Image: `mirror.gcr.io/grafana/grafana:12.2.5` (digest pinned in `docker-compose.monitoring.yml`)
 - Container: `bioetl-grafana`
 - Порт: `3000:3000`
+- Главная страница инстанса открывает `5. Incident Workspace` по UID
+  `bioetl-incident-v1`. При входе через Home и напрямую оператор видит
+  одну очередь Monitor Global Alerts с текущим срезом Prometheus.
+  Стандартная карточка Grafana показывала активные уведомления встроенного
+  Alertmanager с фильтрами видимости. Она могла быть пустой при FIRING в
+  Prometheus. В профиле `prometheus_only` Home ведёт к тому же уведомлению
+  о недоступности полного дашборда. Настройки Home Dashboard пользователя,
+  команды или организации имеют приоритет над страницей инстанса.
 - Volumes:
   - `grafana-data` → `/var/lib/grafana` (persistent данные Grafana)
   - `./grafana/provisioning/datasources-core` → bootstrap-источник обязательных datasource

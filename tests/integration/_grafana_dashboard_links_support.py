@@ -855,6 +855,21 @@ def _assert_cross_dashboard_link_policy(
                 "${__data.fields.route_pipeline:percentencode}",
                 "${__data.fields.pipeline:percentencode}",
             }
+        elif (
+            link.get("title")
+            == _PRESERVED_IDENTITY_HANDOFF["overview_global_alert_reset"]["title"]
+        ):
+            reset = _PRESERVED_IDENTITY_HANDOFF["overview_global_alert_reset"]
+            assert (current_uid, target_uid) == (
+                reset["source_uid"],
+                reset["target_uid"],
+            )
+            assert _extract_link_var_values(url) == reset["required_values"]
+            assert f"&viewPanel={reset['view_panel']}&" in url
+            assert link.get("includeVars") is False
+            _assert_required_time_tokens(
+                url, tokens=_DASHBOARD_TIME_HANDOFF_TOKENS, context="global alert reset"
+            )
         elif current_uid == "bioetl-run-explorer-v1" and "${__data.fields." in url:
             values = _extract_link_var_values(url)
             assert values["run_id"] == "${__data.fields.run_id:percentencode}"
