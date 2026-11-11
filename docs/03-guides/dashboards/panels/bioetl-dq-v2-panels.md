@@ -4,7 +4,7 @@
 
 ## Overview
 
-Dashboard `5. Data Quality` assesses the selected Run ID from saved HTTP evidence. Run ID is always set on this page. Prometheus CURRENT status and TIME RANGE scores are not panels on this dashboard. Shipped dashboard JSON is the source of truth.
+Dashboard `4. Data Quality` assesses the selected Run ID from saved HTTP evidence. Run ID is always set on this page. Prometheus CURRENT status and TIME RANGE scores are not panels on this dashboard. Shipped dashboard JSON is the source of truth.
 
 The page answer is `SELECTED RUN`. A TIME RANGE value is not shown here and never proves this run.
 
@@ -20,10 +20,15 @@ by stage ID. Excluded means contract exclusions. A recorded zero stays zero;
 a stage without tracked removals stays UNKNOWN. These columns do not use
 current telemetry.
 
-### Understand Evidence Scope
-- **Type:** Text
-- **Purpose:** State that this page is the selected Run ID assessment.
-- **Data sources:** Operator copy.
+### Review Run Context
+- **Type:** Table
+- **Panel ID:** `9400`
+- Shows AUTO (latest run in scope, including unfinished runs) or EXPLICIT
+  (requested Run ID), actual Run ID, execution, verdict and Context checked at.
+- Uses the same donor frame as Review Selected Run Status, without an extra
+  HTTP request. The clock records the Grafana query evaluation, not run start,
+  browser click, server cache load or catalog freshness. TIME RANGE telemetry
+  never proves this run.
 
 ### Review Selected Run Status
 - **Type:** Table
@@ -56,7 +61,7 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 
 | ID | Title | Type |
 | --- | --- | --- |
-| 9400 | Understand Evidence Scope | text |
+| 9400 | Review Run Context | table |
 | 9406 | Review Selected Run Status | table |
 | 9402 | Inspect Run Identity | text |
 | 9403 | Inspect Processed Records | table |
