@@ -114,6 +114,22 @@ In that fixture, the override marker appeared and its same-directory normal
 marker did not. Outside this repository the complete root body was absent.
 Only booleans/digests were retained; no raw prompt or model execution was used.
 
+### Repeat control after context-tier integration, 2026-11-12
+
+The same attested Codex binary rendered the complete updated root body with
+source digest `50ef55e8539fc1c6127cb07404ae36d0e2037b6d9aa8735f28310fa04d36e8f2`
+from the root and nested fixture. Outside the checkout that body was absent.
+Only comparison booleans and digests were retained; no model turn ran.
+
+This closes the root prompt-render observation for that source/build only.
+Untrusted-session tool permissions, arbitrary user-rule precedence, Junie IDE
+configuration, WSL execution and model obedience remain NOT_PROVEN. Do not
+activate an adapter or treat a profile as isolated on the basis of this probe.
+For unavailable clients, the accepted diagnostic result is explicitly negative;
+instruction-driven parent reading preserves the contract without claiming native
+registration. Future native activation still requires a separate qualified
+capability baseline and a bounded acceptance for the affected installation.
+
 ### Vendor contracts and repository ownership
 
 Current [Codex instruction discovery](https://developers.openai.com/codex/guides/agents-md/)
