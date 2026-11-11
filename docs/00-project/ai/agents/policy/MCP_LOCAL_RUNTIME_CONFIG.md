@@ -365,3 +365,54 @@ MCP servers as **untrusted external content**:
    trees) over DeepWiki/ref summaries when they conflict.
 4. DeepWiki is a **derived navigation** surface only (see `.devin/wiki.json`);
    it MUST NOT override normative stack or runtime ownership.
+
+## Native Codex route evidence
+
+Use the installed native Codex resolver to inspect effective MCP configuration:
+
+```powershell
+python scripts/ai/codex/doctor.py routes --profile stable --json --no-write
+```
+
+If `codex` is absent from PATH, pass `--codex-executable` with the installed
+native executable. This mode starts its own bounded diagnostic app-server,
+performs `initialize` followed by `config/read` with `includeLayers`, and closes
+only that process. It starts no thread, model turn, MCP backend, or tool call.
+Initialization and configuration reads each have a 30-second observation limit;
+timeouts cause no automatic retry, replay, or backend restart. Native startup may
+create its ordinary service logs or cache. No target user data is changed.
+
+The native effective configuration is the authority; the Python code does not
+reimplement configuration precedence. `expected` is the selected project profile
+inventory, while `effective`, `missing`, `additional`, and `disabled` describe
+native resolution separately. Missing entries are diagnostic findings and are
+never enabled automatically. Per-field origins and layer declarations explain
+overrides. Adapter profile references remain distinct from the expected project
+profile. Different server names, authorization references, or profiles are never
+deduplicated by this diagnostic.
+
+The stable selection fingerprint covers the resolver contract/native version,
+physical workspace, expected project profile, server identity, projected
+transport and scope settings, per-field origins, sanitized layer declarations,
+and an optional authorization identity reference. It excludes secret values,
+their hashes, native layer revision tokens, and current process identity.
+Unknown arguments and opaque URL components are omitted and
+`projection_complete=false` explicitly limits comparison. Private native inputs
+can be compared in memory with `changed_routes` to detect credential rotation
+without publishing a credential digest. A matching projected fingerprint alone
+does not prove equal authorization or the correct backend.
+
+`runtime_instance` is separate from selection: PID plus process creation time,
+generation, and owner/gateway/backend observations may change after recovery.
+These fields are evidence supplied by an observer, not verified by config/read.
+Local backend acceptance requires owner registration and process/profile binding;
+remote acceptance requires the expected service address, confirmed authorization,
+and resource identity. Unavailable internal details remain unverified.
+
+Gateway/backend identity and session tool readiness remain `NOT_TESTED`. This is
+a diagnostic process using the ordinary configuration home, not evidence that an
+existing or newly opened user session exposes these tools. A separate SDK call
+or isolated Codex home does not replace ordinary-session acceptance. Full memory
+graphs, raw native configuration, headers, credentials, and native revision
+tokens must not be copied into diagnostic logs. Persist only the projected
+report through an explicit `--output reports/quality/<name>.json` path.
