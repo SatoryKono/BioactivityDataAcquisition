@@ -474,8 +474,10 @@ def main() -> int:
         action="store_true",
         help="acknowledge declared service effects for the explicit control plan",
     )
-    parser.add_argument("--timeout", type=float, default=1.0)
-    parser.add_argument("--overall-timeout", type=float, default=10.0)
+    parser.add_argument("--timeout", type=float, help="legacy transport mode only")
+    parser.add_argument(
+        "--overall-timeout", type=float, help="legacy transport mode only"
+    )
     parser.add_argument(
         "--no-write",
         action="store_true",
@@ -496,14 +498,22 @@ def main() -> int:
     if args.output is not None and args.mode == "static":
         parser.error("--output is only valid for mcp, all, or routes mode")
 
+    if args.mode != "transport" and (
+        args.timeout is not None or args.overall_timeout is not None
+    ):
+        parser.error(
+            "--timeout/--overall-timeout belong to transport mode; MCP controls use native route limits"
+        )
     if args.probe_plan and not args.start_approved_adapters:
         parser.error("--probe-plan requires --start-approved-adapters")
     if args.mode == "transport":
         return run_transport(
             repo_root,
             profile,
-            timeout=max(0.1, args.timeout),
-            overall_timeout=max(0.1, args.overall_timeout),
+            timeout=max(0.1, args.timeout if args.timeout is not None else 1.0),
+            overall_timeout=max(
+                0.1, args.overall_timeout if args.overall_timeout is not None else 10.0
+            ),
             output_json=args.json,
             output_path=args.output,
         )

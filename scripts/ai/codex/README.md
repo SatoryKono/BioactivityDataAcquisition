@@ -93,10 +93,9 @@ bash scripts/ai/codex/run-codex.sh setup
 # After setup, the managed PATH command uses the same launcher
 codex
 
-# MCP: static configuration versus bounded live readiness
+# MCP: static configuration and effective-route diagnostics
 bash scripts/ai/codex/run-codex.sh mcp-static
-bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \
-  --timeout 1 --overall-timeout 10 --no-write
+bash scripts/ai/codex/run-codex.sh mcp-check --profile stable --no-write
 bash scripts/ai/codex/run-codex.sh mcp-setup
 
 # Diagnostics and performance evidence
@@ -195,12 +194,23 @@ readiness use a selected profile:
 | `graph` | `stable` plus Neo4j Cypher/Memory required |
 | `full` | complete explicitly selected inventory required |
 
-`mcp-check` prints `FAIL` for unavailable required servers, `WARN` for optional
-servers, and `SKIP` for remote/auth-managed endpoints. Every network probe has
-a per-server and overall timeout. It never starts Docker Compose or the
-monitoring stack and is read-only by default. Persist evidence only by passing
-an explicit `.json` path under `reports/quality`, for example
-`--output reports/quality/codex-mcp-health.json`. Static CI uses:
+The profile table is expected project inventory, not proof of a particular
+session's effective tools. `mcp-check` delegates resolution to native Codex and
+lists effective, missing, extra and disabled routes. Without a control plan it
+reports `NOT_TESTED` and exits nonzero; it starts no MCP backend. Add both
+`--probe-plan <controls.json>` and `--start-approved-adapters` to execute declared
+reading controls under the resolved per-route limits. PASS phases, FAIL,
+DISABLED, NOT_TESTED, DENIED_AS_EXPECTED and STALE remain distinct. Independent
+backend/access identity and ordinary-session acceptance are separate checks.
+
+The former socket-only diagnostic is `python scripts/ai/codex/doctor.py transport
+--profile stable --timeout 1 --overall-timeout 10 --no-write`; it cannot attest
+MCP readiness. Do not enable missing servers merely to turn a diagnostic green.
+Neither mode starts Docker Compose or the monitoring stack. Persist a projected
+report only via an explicit `.json` path under `reports/quality`, for example
+`--output reports/quality/codex-mcp-health.json`. No raw graph/dialogue response
+is persisted. The latency baseline measures `mcp-static` configuration ensure,
+not unexecuted live controls. Static CI uses:
 
 ```bash
 python3 scripts/ai/codex/mcp_profile_contract.py --check
@@ -220,8 +230,7 @@ python3 scripts/ai/codex/setup_mcp.py \
 bash scripts/ai/codex/run-codex.sh mcp-setup
 # Restart MCP clients that were already running.
 bash scripts/ai/codex/run-codex.sh mcp-static
-bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \
-  --timeout 1 --overall-timeout 10 --no-write
+bash scripts/ai/codex/run-codex.sh mcp-check --profile stable --no-write
 ```
 
 The shared-plane start is bounded by `CODEX_MCP_SHARED_START_TIMEOUT` inside

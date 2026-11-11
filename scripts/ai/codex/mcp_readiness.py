@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping, Sequence
 import json
 import math
+import datetime
 import time
 
 from scripts.ai.codex.mcp_probe_client import ProbeError, client_for, probe_environment
@@ -13,38 +14,20 @@ from scripts.ai.codex.native_mcp_config import ConfigCapture
 
 SUPPORTED_PROTOCOLS = frozenset({"2024-11-05", "2025-03-26"})
 
-READ_TOOLS = frozenset(
-    {
-        "read_file",
-        "read_text_file",
-        "list_directory",
-        "list_allowed_directories",
-        "find_code",
-        "find_code_by_rule",
-        "find_code_by_pattern",
-        "search",
-        "search_code",
-        "count_tokens",
-        "analyze_code",
-        "list_roots",
-        "get_me",
-        "search_repositories",
-        "get_file_contents",
-        "resolve-library-id",
-        "query-docs",
-        "get-library-docs",
-        "ref_search_documentation",
-        "ref_read_url",
-        "fetch",
-        "search_nodes",
-        "open_nodes",
-        "recall",
-        "recall_context",
-        "blame",
-        "how",
-        "fix",
-    }
-)
+READ_TOOLS_BY_SERVER = {
+    "filesystem": frozenset(
+        {"read_file", "read_text_file", "list_directory", "list_allowed_directories"}
+    ),
+    "ast-grep": frozenset({"find_code", "find_code_by_rule", "find_code_by_pattern"}),
+    "code-analyzer": frozenset({"count_tokens"}),
+    "adr-analysis": frozenset({"list_roots"}),
+    "github": frozenset({"get_me", "search_repositories", "get_file_contents"}),
+    "context7": frozenset({"resolve-library-id", "query-docs", "get-library-docs"}),
+    "ref": frozenset({"ref_search_documentation", "ref_read_url"}),
+    "fetch": frozenset({"fetch"}),
+    "memory": frozenset({"search_nodes", "open_nodes"}),
+    "deja": frozenset({"recall", "recall_context", "blame", "how", "fix"}),
+}
 SERVICE_EFFECTS = [
     "network requests",
     "ordinary adapter/backend cache and logs",
@@ -62,11 +45,13 @@ def _limit(entry: Mapping, key: str) -> float:
     return float(value)
 
 
-def _control(value: object) -> dict:
+def _control(value: object, server: str) -> dict:
     if not isinstance(value, dict):
         raise ProbeError("CONTROL_NOT_DECLARED")
     tool = value.get("tool")
-    if tool not in READ_TOOLS or not isinstance(value.get("arguments"), dict):
+    if tool not in READ_TOOLS_BY_SERVER.get(server, ()) or not isinstance(
+        value.get("arguments"), dict
+    ):
         raise ProbeError("READ_CONTROL_NOT_APPROVED")
     expected = value.get("contains_all")
     denial = value.get("expected_policy_reason")
@@ -91,9 +76,14 @@ def _initialize(client, timeout: float) -> None:
         },
         timeout,
     )
-    if result.get("protocolVersion") not in SUPPORTED_PROTOCOLS or not isinstance(
-        result.get("capabilities"), dict
-    ):
+    version = result.get("protocolVersion")
+    if version not in SUPPORTED_PROTOCOLS:
+        try:
+            datetime.date.fromisoformat(version)
+        except (ValueError, TypeError):
+            raise ProbeError("INITIALIZE_CONTRACT") from None
+        raise ProbeError("PROTOCOL_VERSION_NOT_SUPPORTED")
+    if not isinstance(result.get("capabilities"), dict):
         raise ProbeError("INITIALIZE_CONTRACT")
     info = result.get("serverInfo")
     if (
@@ -245,6 +235,7 @@ def _probe_row(name, entry, control_value, capture, *, environment, factory, req
         "uncertain_outcome": False,
         "phases": {},
         "backend_identity_status": "NOT_TESTED",
+        "technical_write_prohibition_status": "NOT_TESTED",
     }
     if entry is None:
         return {
@@ -259,7 +250,7 @@ def _probe_row(name, entry, control_value, capture, *, environment, factory, req
             "detail": "disabled by native effective configuration",
         }
     try:
-        control = _control(control_value)
+        control = _control(control_value, name)
         _run_session(
             row,
             entry,
@@ -280,6 +271,8 @@ def _probe_row(name, entry, control_value, capture, *, environment, factory, req
         )
         if exc.category in {
             "CONTROL_NOT_DECLARED",
+            "READ_CONTROL_NOT_APPROVED",
+            "PROTOCOL_VERSION_NOT_SUPPORTED",
             "INSTALL_OR_UNREVIEWED_LAUNCHER_NOT_TESTED",
             "ADAPTER_PREFIX_NOT_TESTED",
             "EXISTING_ADAPTER_REQUIRED",
@@ -288,6 +281,8 @@ def _probe_row(name, entry, control_value, capture, *, environment, factory, req
             "AUTH_HELPER_NOT_TESTED",
         }:
             row["status"] = "NOT_TESTED"
+        if exc.category == "ADAPTER_DISABLED_BY_POLICY":
+            row["status"] = "DISABLED"
         row["detail"] = exc.category
         row["uncertain_outcome"] = exc.uncertain
     except Exception:
@@ -295,6 +290,14 @@ def _probe_row(name, entry, control_value, capture, *, environment, factory, req
         row["detail"] = "diagnostic failed; raw exception and payload omitted"
         row["uncertain_outcome"] = True
     return row
+
+
+def _aggregate_status(rows: Sequence[Mapping]) -> str:
+    mandatory = [row for row in rows if row["required"]]
+    for status in ("STALE", "FAIL", "DISABLED"):
+        if any(row["status"] == status for row in mandatory):
+            return status
+    return "NOT_TESTED"
 
 
 def readiness_report(
@@ -340,9 +343,7 @@ def readiness_report(
         readiness_level="tool_and_identity",
         results=rows,
         ready=False,
-        status="FAIL"
-        if any(r["required"] and r["status"] == "FAIL" for r in rows)
-        else "NOT_TESTED",
+        status=_aggregate_status(rows),
         service_effects=SERVICE_EFFECTS,
         ordinary_user_session="NOT_TESTED",
     )

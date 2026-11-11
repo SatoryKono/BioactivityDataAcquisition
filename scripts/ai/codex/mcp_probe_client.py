@@ -48,6 +48,12 @@ class StdioProbeClient(NativeConfigClient):
             max_message_bytes=MAX_RESPONSE_BYTES,
             environment=environment,
         )
+        self._memory_policy_wrapper = any(
+            Path(arg.replace("\\", "/")).name
+            in {"mcp_memory_wrapper.ps1", "mcp_memory_wrapper.sh"}
+            for arg in entry.get("args", [])
+            if isinstance(arg, str)
+        )
         self._identifier = 0
         self.transport_seen = False
 
@@ -69,6 +75,12 @@ class StdioProbeClient(NativeConfigClient):
             )
             return self._response(self._identifier)
         except NativeConfigError as exc:
+            if (
+                self._memory_policy_wrapper
+                and self._process is not None
+                and self._process.poll() == 78
+            ):
+                raise ProbeError("ADAPTER_DISABLED_BY_POLICY") from None
             # NativeConfigError is already sanitized. Do not propagate arbitrary
             # transport/server exceptions or stderr into the report.
             category = (

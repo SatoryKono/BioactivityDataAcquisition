@@ -28,7 +28,7 @@ def capture(tmp_path, **updates):
     }
     entry.update(updates)
     return ConfigCapture(
-        tmp_path, {"config": {"mcp_servers": {"fixture": entry}}, "origins": {}}
+        tmp_path, {"config": {"mcp_servers": {"filesystem": entry}}, "origins": {}}
     )
 
 
@@ -58,7 +58,7 @@ class Session:
             "initialize": {
                 "protocolVersion": "2025-03-26",
                 "capabilities": {},
-                "serverInfo": {"name": "fixture"},
+                "serverInfo": {"name": "filesystem"},
             },
             "tools/list": {"tools": [{"name": "read_file"}]},
             "tools/call": {"content": [{"type": "text", "text": SECRET}]},
@@ -77,10 +77,10 @@ class Session:
 def report(value, session, *, control=CONTROL, after=None):
     return readiness_report(
         value,
-        expected=["fixture"],
-        required=["fixture"],
+        expected=["filesystem"],
+        required=["filesystem"],
         profile="stable",
-        controls={"fixture": control} if control is not None else {},
+        controls={"filesystem": control} if control is not None else {},
         environment={},
         after=after,
         factory=lambda *args: session,
@@ -163,12 +163,12 @@ def test_missing_limit_or_control_never_starts_an_adapter(tmp_path):
 
     for value, controls in (
         (capture(tmp_path), {}),
-        (capture(tmp_path, tool_timeout_sec=None), {"fixture": CONTROL}),
+        (capture(tmp_path, tool_timeout_sec=None), {"filesystem": CONTROL}),
     ):
         result = readiness_report(
             value,
-            expected=["fixture"],
-            required=["fixture"],
+            expected=["filesystem"],
+            required=["filesystem"],
             profile="stable",
             controls=controls,
             environment={},
@@ -181,14 +181,14 @@ def test_disabled_and_absent_routes_are_explicit(tmp_path):
     value = capture(tmp_path, enabled=False)
     result = readiness_report(
         value,
-        expected=["fixture", "missing"],
-        required=["fixture", "missing"],
+        expected=["filesystem", "missing"],
+        required=["filesystem", "missing"],
         profile="stable",
         controls={},
         environment={},
     )
     assert {row["server"]: row["status"] for row in result["results"]} == {
-        "fixture": "DISABLED",
+        "filesystem": "DISABLED",
         "missing": "FAIL",
     }
     assert result["status"] == "FAIL"
@@ -218,15 +218,17 @@ def test_paginated_catalog_is_read_before_control_call(tmp_path):
 def test_private_rotation_and_final_capture_failure_invalidate_results(tmp_path):
     before = capture(tmp_path, env={"TOKEN": SECRET})
     after = ConfigCapture(tmp_path, deepcopy(before.payload))
-    after.payload["config"]["mcp_servers"]["fixture"]["env"]["TOKEN"] = "rotated"
+    after.payload["config"]["mcp_servers"]["filesystem"]["env"]["TOKEN"] = "rotated"
     value = report(before, Session(), after=lambda: after)
     assert value["results"][0]["status"] == "STALE"
+    assert value["status"] == "STALE"
 
     def unavailable():
         raise RuntimeError(SECRET)
 
     value = report(before, Session(), after=unavailable)
     assert value["results"][0]["status"] == "STALE"
+    assert value["status"] == "STALE"
     assert SECRET not in json.dumps(value)
 
 
@@ -252,10 +254,10 @@ for line in sys.stdin:
     value = capture(tmp_path, command=sys.executable, args=["-u", str(adapter)])
     result = readiness_report(
         value,
-        expected=["fixture"],
-        required=["fixture"],
+        expected=["filesystem"],
+        required=["filesystem"],
         profile="stable",
-        controls={"fixture": CONTROL},
+        controls={"filesystem": CONTROL},
         environment={},
     )
     assert result["results"][0]["phases"]["tool"]["status"] == "PASS"
@@ -317,7 +319,7 @@ def http_mcp_fixture():
                 "initialize": {
                     "protocolVersion": "2025-03-26",
                     "capabilities": {},
-                    "serverInfo": {"name": "fixture"},
+                    "serverInfo": {"name": "filesystem"},
                 },
                 "tools/list": {"tools": [{"name": "read_file"}]},
                 "tools/call": {"content": [{"type": "text", "text": SECRET}]},
@@ -352,7 +354,7 @@ def test_http_exchange_keeps_session_auth_and_payloads_private(
         {
             "config": {
                 "mcp_servers": {
-                    "fixture": {
+                    "filesystem": {
                         "url": url,
                         "startup_timeout_sec": 5,
                         "tool_timeout_sec": 5,
@@ -365,10 +367,10 @@ def test_http_exchange_keeps_session_auth_and_payloads_private(
     )
     result = readiness_report(
         value,
-        expected=["fixture"],
-        required=["fixture"],
+        expected=["filesystem"],
+        required=["filesystem"],
         profile="stable",
-        controls={"fixture": CONTROL},
+        controls={"filesystem": CONTROL},
         environment={"FIXTURE_TOKEN": SECRET},
     )
     assert result["results"][0]["phases"]["tool"]["status"] == "PASS"
@@ -390,7 +392,7 @@ def test_http_never_follows_redirect_or_calls_auth_failure_policy_success(
         {
             "config": {
                 "mcp_servers": {
-                    "fixture": {
+                    "filesystem": {
                         "url": url + suffix,
                         "startup_timeout_sec": 5,
                         "tool_timeout_sec": 5,
@@ -402,11 +404,14 @@ def test_http_never_follows_redirect_or_calls_auth_failure_policy_success(
     )
     result = readiness_report(
         value,
-        expected=["fixture"],
-        required=["fixture"],
+        expected=["filesystem"],
+        required=["filesystem"],
         profile="stable",
         controls={
-            "fixture": {**CONTROL, "expected_policy_reason": "WORKSPACE_POLICY_DENIED"}
+            "filesystem": {
+                **CONTROL,
+                "expected_policy_reason": "WORKSPACE_POLICY_DENIED",
+            }
         },
         environment={},
     )
@@ -447,3 +452,69 @@ def test_supported_older_protocol_is_negotiated_without_false_failure(tmp_path):
     row = report(capture(tmp_path), session)["results"][0]
     assert row["phases"]["initialize"]["status"] == "PASS"
     assert row["phases"]["tool"]["status"] == "PASS"
+
+
+def test_unknown_valid_protocol_is_client_not_tested_not_server_failure(tmp_path):
+    session = Session(
+        {
+            "initialize": {
+                "protocolVersion": "2099-01-01",
+                "capabilities": {},
+                "serverInfo": {"name": "future-fixture"},
+            }
+        }
+    )
+    result = report(capture(tmp_path), session)
+    assert result["status"] == "NOT_TESTED"
+    assert result["results"][0]["detail"] == "PROTOCOL_VERSION_NOT_SUPPORTED"
+    assert not any(method == "tools/call" for method, _, _ in session.calls)
+
+
+def test_deja_fix_is_not_an_approved_filesystem_operation(tmp_path):
+    session = Session()
+    result = report(capture(tmp_path), session, control={**CONTROL, "tool": "fix"})
+    assert result["results"][0]["status"] == "NOT_TESTED"
+    assert result["results"][0]["detail"] == "READ_CONTROL_NOT_APPROVED"
+    assert session.calls == []
+
+
+def test_legacy_timeout_flags_are_rejected_before_any_mcp_call(monkeypatch, capsys):
+    from scripts.ai.codex import doctor
+
+    monkeypatch.setattr(sys, "argv", ["doctor.py", "mcp", "--timeout", "1"])
+    monkeypatch.setattr(
+        doctor, "run_mcp", lambda *args, **kwargs: pytest.fail("unexpected MCP call")
+    )
+    with pytest.raises(SystemExit) as error:
+        doctor.main()
+    assert error.value.code == 2
+    assert "native route limits" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    "script,category",
+    [
+        ("mcp_memory_wrapper.ps1", "ADAPTER_DISABLED_BY_POLICY"),
+        ("unrelated.py", "TRANSPORT_ERROR"),
+    ],
+)
+def test_exit_78_means_disabled_only_for_the_project_memory_wrapper(
+    tmp_path, monkeypatch, script, category
+):
+    from types import SimpleNamespace
+    from scripts.ai.codex.mcp_probe_client import StdioProbeClient
+    from scripts.ai.codex.native_mcp_config import NativeConfigError
+
+    client = StdioProbeClient(
+        {"command": sys.executable, "args": [str(tmp_path / script)]}, tmp_path, {}
+    )
+    client._process = SimpleNamespace(poll=lambda: 78)
+    monkeypatch.setattr(client, "_send", lambda *args: None)
+
+    def closed(*args):
+        raise NativeConfigError("native config process closed before responding")
+
+    monkeypatch.setattr(client, "_response", closed)
+    with pytest.raises(ProbeError) as error:
+        client.request("initialize", {}, 90)
+    assert error.value.category == category

@@ -144,11 +144,11 @@ When profile flags are omitted, `--check-local` reads the persisted
 bounded `missing`, `extra`, `transport_drift`, and `server_drift` names, and
 ignores custom non-BioETL Gemini servers.
 
-The bounded local live probe is explicit and never starts Docker Compose or a
-monitoring stack:
+The legacy bounded transport probe never starts Docker Compose or a monitoring
+stack and does not establish MCP protocol/tool readiness:
 
 ```bash
-bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \
+python scripts/ai/codex/doctor.py transport --profile stable \
   --timeout 1 --overall-timeout 10 --no-write
 ```
 
@@ -197,7 +197,7 @@ bash scripts/ai/codex/run-codex.sh mcp-setup
 bash scripts/ai/codex/run-codex.sh mcp-static
 python3 scripts/ai/codex/setup_mcp.py --check
 python3 scripts/ai/codex/setup_mcp.py --check-local
-bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \
+python scripts/ai/codex/doctor.py transport --profile stable \
   --timeout 1 --overall-timeout 10 --no-write
 codex mcp list
 ```
@@ -487,3 +487,11 @@ Instance recovery must be verified separately without treating a new PID or
 generation as a policy change. This direct diagnostic is not a new ordinary
 user session and cannot close ordinary-session acceptance. If the actual user
 session cannot invoke a tool, retain `NOT_TESTED` for that acceptance item.
+
+The launcher latency baseline now measures static MCP configuration ensure.
+It does not label missing semantic controls as successful live readiness.
+Installer/container launchers and unreviewed interpreter prefixes remain
+`NOT_TESTED`; the direct diagnostic accepts an existing script adapter with a
+supported interpreter prefix and never invokes npx/uv/pip installation paths.
+An unsupported valid protocol version is a client capability gap, reported
+`NOT_TESTED`, rather than evidence that the server is broken.
