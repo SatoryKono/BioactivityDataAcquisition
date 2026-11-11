@@ -1,0 +1,13 @@
+name: SEC-01 acceptance probe
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/issue-12932-probe.yml
+
+permissions:
+  contents: read
+
+jobs:
+  security:
+    uses: ./.github/workflows/security.yml
