@@ -54,7 +54,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -110,7 +110,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -167,7 +167,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -212,7 +212,7 @@
           "uid": "bioetl-ops-http"
         },
         "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
-        "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
+        "description": "Run ID from the catalog snapshot; run dates describe execution, not catalog freshness. Catalog freshness is Not verified here. Refresh the dashboard to request an updated list.",
         "hide": 0,
         "includeAll": false,
         "label": "Selected Run",
@@ -231,7 +231,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
             "type": "json",
             "source": "url",
             "url_options": {

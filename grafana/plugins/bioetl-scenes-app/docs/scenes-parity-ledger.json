@@ -20,11 +20,11 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "e156b942d21f9008efe4fd07b44f1c4a92f32cc60c7cc6ab8480441e1a3e41c5",
-    "bioetl-dq-v2": "febb6b61d62465dc82959b560982f4e7f736b3d479f6e2aa997ca9b55a881d1a",
-    "bioetl-incident-v1": "d2709f46f31a0970027bb4719b89213133eb6541520a044dcc44be7568ad41db",
-    "bioetl-overview-v2": "72e85be382a0a006b7da8abe7965d06b65a4cfec0cb51b900c4d7e81a302ef83",
-    "bioetl-run-explorer-v1": "94b964452f158d6c9eb6a714e884c38e550f5f2e877ad24c1fd9eac690305c63"
+    "bioetl-control-plane-v1": "edf170f35f3fe912617028b2f63262b184932232d405792525555645f79a8291",
+    "bioetl-dq-v2": "81fffd1ef0647aa094c0eb7d4d960694a43eb5dda5ebd158f5e99714f86913e2",
+    "bioetl-incident-v1": "0ee742fd24a9982d4d8b4196725cb20366089cbbd658d33b1259f9d2c7fd30c1",
+    "bioetl-overview-v2": "9b2c48c7fa210b54e6d125efec2b46e689e1c6554137cfd898054d31a19366f2",
+    "bioetl-run-explorer-v1": "6ff7833d4415bc6c57cfe10b139c09edbc5b95bf8378a07d3e30f2c99a948acf"
   },
   "panels": [
     {
@@ -2087,16 +2087,19 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-incident-v1",
       "panel_id": 9701,
-      "panel_title": "Review Current Workflow Evidence",
+      "panel_title": "Review Current Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h",
       "route": "incident-console",
       "source": {
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
           "label_replace(max by(workflow)(bioetl_workflow_scope_input_status{input=\"workflow\",workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"reason\",\"Reason unavailable\",\"\",\"\")",
-          "bioetl_workflow_scope_published_seconds * on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 1000"
+          "((((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) * 1000) or on(workflow) ((group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) unless on(workflow) (bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time())) * 0 / 0))",
+          "((time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))) or on(workflow) ((group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) unless on(workflow) (bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time())) * 0 / 0))",
+          "group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 86400",
+          "(((time() - ((bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()) and on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))) > bool 86400) or on(workflow) (((group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) unless on(workflow) (bioetl_workflow_scope_published_seconds > 0 and bioetl_workflow_scope_published_seconds <= time()))) * 0 + 2))"
         ],
-        "target_count": 2
+        "target_count": 5
       }
     },
     {

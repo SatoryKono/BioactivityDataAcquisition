@@ -59,8 +59,14 @@ them does not reread manifests, ledger entries, or report identities. Concurrent
 requests for the same query share one refresh. Scope, timezone and selection
 policy are isolated by the cache key.
 
-An eligible older snapshot is marked `[STALE catalog]` in option labels; values
-remain unchanged. This mark concerns the option catalog, not the run verdict.
+An eligible older snapshot is marked `[STALE catalog]` in the filter-options
+payload; values remain unchanged. This mark is the options-snapshot age, not
+the run verdict and not the freshness of the runs in the list. Shipped Run ID
+selectors remove that suffix before display. They do not assert catalog
+freshness: the Run ID description states that run dates are execution times,
+catalog freshness is Not verified on the selector, and refreshing the dashboard
+requests an updated list.
+
 The JSON `catalog` object exposes snapshot identity, age, refresh state and the
 last refresh error. Adding `status_only=1` to the same query inspects this state
 without starting work. A cold or expired catalog still returns typed 503/504;

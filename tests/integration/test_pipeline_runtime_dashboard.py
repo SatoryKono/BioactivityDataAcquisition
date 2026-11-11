@@ -97,6 +97,7 @@ def test_pipeline_runtime_has_required_variables() -> None:
         "run_id",
         "provider",
         "read_latency_quantile",
+        "workflow_evidence_freshness",
     }
 
 
@@ -562,7 +563,10 @@ def test_runtime_row_sequence_is_fixed_detect_localize_escalate() -> None:
         (32010, "Browse Global Suspects"),
         (32005, "Browse Global Alerts"),
         (9450, "Inspect Saved Run Evidence"),
-        (9700, "Inspect Current Workflow Evidence"),
+        (
+            9700,
+            "Inspect Current Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h",
+        ),
     ], f"Incident row order/title drifted: {row_pairs}"
 
 

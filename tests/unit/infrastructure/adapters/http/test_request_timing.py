@@ -227,14 +227,35 @@ async def test_forbidden_is_not_retried(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_concurrent_health_and_data_share_one_bucket():
+async def test_concurrent_health_and_data_share_one_bucket(monkeypatch):
+    real_sleep = asyncio.sleep
+    now = virtual_clock(monkeypatch)
+    advance_clock = asyncio.sleep
+    sleepers = 0
+    peak_sleepers = 0
+
+    async def cooperative_sleep(delay):
+        nonlocal sleepers, peak_sleepers
+        sleepers += 1
+        peak_sleepers = max(peak_sleepers, sleepers)
+        try:
+            await real_sleep(0)
+            # Tiny floating-point deficits must still advance the virtual clock.
+            await advance_clock(max(delay, 1e-9))
+        finally:
+            sleepers -= 1
+
+    monkeypatch.setattr(asyncio, "sleep", cooperative_sleep)
     sent = []
 
     def respond(request):
-        sent.append(asyncio.get_running_loop().time())
+        sent.append(now[0])
         return httpx.Response(200)
 
-    client = make_client(TokenBucketRateLimiter(50, 1))
+    limiter = TokenBucketRateLimiter(50, 1)
+    # All three requests must contend, including health, not just the data pair.
+    await limiter.acquire()
+    client = make_client(limiter)
     async with httpx.AsyncClient(transport=httpx.MockTransport(respond)) as transport:
         client._client = transport
         await asyncio.gather(
@@ -242,7 +263,9 @@ async def test_concurrent_health_and_data_share_one_bucket():
             client.get("https://example.test/a"),
             client.get("https://example.test/b"),
         )
+    assert peak_sleepers == 3, "health/data must all wait concurrently"
     assert len(sent) == 3
+    sent.sort()
     assert all(b - a >= 0.018 for a, b in pairwise(sent))
 
 
