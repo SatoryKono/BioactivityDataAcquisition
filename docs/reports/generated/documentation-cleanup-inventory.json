@@ -117808,7 +117808,7 @@
       "active_quality_baseline": 125,
       "closeout_evidence": 168,
       "docs_reports_curated_entrypoint": 2,
-      "docs_reports_curated_or_historical_report": 40,
+      "docs_reports_curated_or_historical_report": 41,
       "docs_reports_generated_or_route_owned": 7,
       "docs_reports_retention_sensitive_evidence": 28,
       "generated_skill_reference_mirror": 19,
@@ -117821,7 +117821,7 @@
       "working_report": 381
     },
     "by_recommended_action": {
-      "archive-after-migration": 422,
+      "archive-after-migration": 423,
       "generate-automatically": 1066,
       "keep": 2688
     },
@@ -117848,7 +117848,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 758,
+      "reports": 759,
       "security": 2
     },
     "by_status": {
@@ -117856,19 +117856,19 @@
       "Archived": 1554,
       "Canonical": 77,
       "Generated": 1066,
-      "Working": 715
+      "Working": 716
     },
     "by_surface_family": {
       "active": 764,
       "archive": 1554,
       "canonical": 77,
       "generated": 1066,
-      "working": 715
+      "working": 716
     },
     "by_tracking_state": {
-      "tracked": 4176
+      "tracked": 4177
     },
-    "docs_reports_local_count": 77,
+    "docs_reports_local_count": 78,
     "duplicate_group_count": 80,
     "generated_route_count": 76,
     "generated_without_route_count": 214,
@@ -117879,8 +117879,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4176,
+    "total_doc_like": 4177,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4176
+    "total_doc_like_tracked": 4177
   }
 }
