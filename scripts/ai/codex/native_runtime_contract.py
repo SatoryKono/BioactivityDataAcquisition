@@ -28,6 +28,7 @@ READ_ONLY_AGENTS = {
     "py-plan-bot",
 }
 ROOT_CONTRACT_FILE = "AGENTS.md"
+CODEX_RUNTIME_FILE = ".codex/agents/CODEX-RUNTIME.md"
 RULE_NATIVE_CANDIDATE = "native_candidate"
 RULE_CONFIGURATION = "configuration"
 RULE_INSTRUCTION_DRIVEN = "instruction_driven"
@@ -39,7 +40,7 @@ RULE_SOURCE_PATTERNS = {
         (RULE_NATIVE_CANDIDATE, "AGENTS.override.md"),
         (RULE_NATIVE_CANDIDATE, ROOT_CONTRACT_FILE),
         (RULE_CONFIGURATION, ".codex/config.toml"),
-        (RULE_INSTRUCTION_DRIVEN, ".codex/agents/CODEX-RUNTIME.md"),
+        (RULE_INSTRUCTION_DRIVEN, CODEX_RUNTIME_FILE),
         (RULE_SELECTED_PROFILE, ".codex/agents/py-*.toml"),
         (RULE_SELECTED_PROFILE, ".codex/agents/py-*.md"),
         (RULE_SELECTED_SKILL, ".codex/skills/*/SKILL.md"),
@@ -152,7 +153,7 @@ BOOTSTRAP_BASELINE_LINES = 8_324
 BOOTSTRAP_MAX_BYTES = BOOTSTRAP_BASELINE_BYTES * 70 // 100
 BOOTSTRAP_CORPUS_PATHS = (
     ROOT_CONTRACT_FILE,
-    ".codex/agents/CODEX-RUNTIME.md",
+    CODEX_RUNTIME_FILE,
     ".codex/agents/ORCHESTRATION.md",
     *tuple(f".codex/agents/{name}.md" for name in AGENT_NAMES),
     *tuple(f".codex/skills/{name}/SKILL.md" for name in AGENT_NAMES),
@@ -166,7 +167,7 @@ BOOTSTRAP_CORPUS_PATHS = (
     "src/memory/DAILY_WORKFLOW.md",
 )
 ACTIVE_RUNTIME_TEXT_PATHS = (
-    ".codex/agents/CODEX-RUNTIME.md",
+    CODEX_RUNTIME_FILE,
     ".codex/agents/ORCHESTRATION.md",
     ".codex/agents/README.md",
     *tuple(f".codex/agents/{name}.md" for name in AGENT_NAMES),
