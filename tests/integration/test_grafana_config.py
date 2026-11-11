@@ -1370,7 +1370,7 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     assert panels[9002]["options"]["cellHeight"] == "sm"
     # Phase 4.3 / rev7 §4.3: h in 7–8 with limitField=6.
-    assert panels[9002]["gridPos"]["h"] == 9
+    assert panels[9002]["gridPos"]["h"] == 8
     assert panels[9300]["gridPos"]["y"] + panels[9300]["gridPos"]["h"] <= 18
     assert 215 not in panels
     explorer = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
