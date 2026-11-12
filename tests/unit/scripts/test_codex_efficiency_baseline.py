@@ -146,7 +146,16 @@ def test_offline_rejects_nonimmutable_refs_before_git(monkeypatch, tmp_path, ref
 
 @pytest.mark.parametrize(
     "path",
-    [".env", ".env.example", ".ENV/receipt.json", ".env:stream", ".env /receipt.json"],
+    [
+        ".env",
+        ".env.example",
+        ".ENV/receipt.json",
+        ".env:stream",
+        ".env /receipt.json",
+        ".envrc",
+        ".ENV-private.md",
+        ".environment/receipt.json",
+    ],
 )
 def test_report_output_guard_creates_no_environment_files(tmp_path, path):
     with pytest.raises(ValueError, match="environment"):
@@ -283,3 +292,9 @@ def test_committed_static_comparison_binds_generator_and_marks_live_metrics_miss
     assert report["policy"]["raw_contents_retained"] is False
     assert set(report["runtime_metrics"].values()) == {"NOT_MEASURED"}
     assert report["baseline"]["commit"] != report["after"]["commit"]
+
+
+@pytest.mark.parametrize("part", [".envrc", ".ENV-private.md", ".environment"])
+def test_instruction_scope_excludes_all_environment_prefixed_paths(part):
+    path = f".codex/skills/{part}/source.md"
+    assert efficiency_baseline._instruction_group(path) is None

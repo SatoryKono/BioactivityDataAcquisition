@@ -69,7 +69,7 @@ def _local_git(root: Path, *args: str, data: bytes | None = None) -> bytes:
 
 def _env_part(part: str) -> bool:
     normalized = part.split(":", 1)[0].rstrip(" .").casefold()
-    return normalized == ".env" or normalized.startswith(".env.")
+    return normalized.startswith(".env")
 
 
 def _instruction_group(path: str) -> str | None:

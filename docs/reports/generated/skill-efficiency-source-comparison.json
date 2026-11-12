@@ -493,7 +493,7 @@
       "path": "src/memory/DAILY_WORKFLOW.md"
     }
   ],
-  "generator_sha256_lf": "db2ef6658df9256f25e46ba73a3c7124d178dc14356562c2c937785f695a30e2",
+  "generator_sha256_lf": "adbd2138bef26945fce072070e8ea20d5aeb655b4c956a74f13fbb6f8a2b5fe7",
   "policy": {
     "agents_or_probes_started": false,
     "interpretation": "selected source metadata; not loaded context, tokens, usage frequency or savings",
