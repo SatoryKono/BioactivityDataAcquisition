@@ -156,6 +156,8 @@ def _run_supervised(
 ) -> ProcessResult:
     """A dedicated subreaper cannot adopt another caller thread's processes."""
     _require_posix()
+    from scripts.engineering.repo import process_supervisor
+
     payload = json.dumps(
         {
             "argv": list(argv),
@@ -168,7 +170,7 @@ def _run_supervised(
         return _result(start, None, "invalid_command")
     entry = (
         "import sys;sys.path.insert(0,sys.argv[1]);"
-        "from process_supervisor import main;"
+        f"from {process_supervisor.__name__} import main;"
         "raise SystemExit(main(int(sys.argv[2]),int(sys.argv[3])))"
     )
     with (
@@ -184,7 +186,7 @@ def _run_supervised(
                 "-B",
                 "-c",
                 entry,
-                str(Path(__file__).resolve().parent),
+                str(Path(__file__).resolve().parents[3]),
                 str(config.fileno()),
                 str(result.fileno()),
             ],
