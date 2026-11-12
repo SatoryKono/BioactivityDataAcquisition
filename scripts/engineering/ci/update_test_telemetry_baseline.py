@@ -1002,6 +1002,8 @@ def _validate_ci_capture_inputs(source_commit: str, coverage_xml: Path) -> str:
         raise ValueError(
             "CI capture requires a source commit and original coverage XML"
         )
+    if re.fullmatch(r"[0-9a-fA-F]{40}", source_commit) is None:
+        raise ValueError("CI capture requires a full 40-character commit SHA")
     inputs = (
         "src",
         "tests",
