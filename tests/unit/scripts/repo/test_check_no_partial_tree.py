@@ -128,6 +128,10 @@ def test_branch_before_a_new_main_anchor_is_not_retroactively_partial(
     _git(repo, "commit", "-qm", "add runtime on main")
     trusted = _git(repo, "rev-parse", "HEAD").strip()
     _git(repo, "checkout", "feature-before-anchor")
+    before = (repo / ".git/index").read_bytes()
+    assert module.check_index_tree(repo, trusted) == []
+    assert (repo / ".git/index").read_bytes() == before
+    assert module.find_collapsing_commits(trusted, "HEAD", repo=repo) == []
     _git(repo, "merge", "--no-edit", trusted)
     assert module.find_collapsing_commits(trusted, "HEAD", repo=repo) == []
     _git(repo, "rm", "-qr", ".devin")
@@ -325,6 +329,24 @@ def test_root_file_cannot_impersonate_a_directory_anchor(repo: Path) -> None:
     assert module.find_collapsing_commits(healthy, bad, repo=repo) == [bad]
 
 
+@pytest.mark.parametrize("filename", ["new.py", "keep.txt"])
+def test_intent_to_add_cannot_preserve_a_future_commit_anchor(
+    repo: Path, filename: str
+) -> None:
+    trusted = _git(repo, "rev-parse", "HEAD").strip()
+    _git(repo, "rm", "-qr", "src")
+    (repo / "src").mkdir()
+    (repo / "src" / filename).write_text("")
+    _git(repo, "add", "-N", "src")
+    before = (repo / ".git/index").read_bytes()
+    with pytest.raises(module.EvidenceError, match="intent-to-add"):
+        module.check_index_tree(repo, trusted)
+    assert (repo / ".git/index").read_bytes() == before
+    assert module.main(["--repo", str(repo), "--base", trusted, "--check-index"]) == 2
+    _git(repo, "add", "src")
+    assert module.check_index_tree(repo, trusted) == []
+
+
 def test_index_replacement_during_inspection_is_error(
     repo: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -377,11 +399,25 @@ def test_guard_workflow_runs_trusted_base_code_and_publishes_candidate_status() 
     assert "job.status == 'success'" in status["env"]["RESULT_STATE"]
 
 
-def test_ci_bootstrap_checks_out_main_without_candidate_files(repo: Path) -> None:
+@pytest.mark.parametrize("tip_form", ["sha", "branch", "tracking", "missing"])
+def test_ci_bootstrap_checks_out_main_without_candidate_files(
+    repo: Path, tip_form: str
+) -> None:
     """Execute the workflow bootstrap against a synthetic local origin, no network."""
     import shlex
+    import os
+    import subprocess
+    import sys
     import yaml
 
+    root = Path(__file__).resolve().parents[4]
+    guard = repo / "scripts/engineering/repo/check_no_partial_tree.py"
+    guard.parent.mkdir(parents=True)
+    guard.write_bytes(
+        (root / "scripts/engineering/repo/check_no_partial_tree.py").read_bytes()
+    )
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-qm", "trusted checker fixture")
     trusted = _git(repo, "rev-parse", "HEAD").strip()
     if _git(repo, "branch", "--show-current").strip() != "main":
         _git(repo, "branch", "main", trusted)
@@ -390,12 +426,11 @@ def test_ci_bootstrap_checks_out_main_without_candidate_files(repo: Path) -> Non
     _git(repo, "add", ".")
     _git(repo, "commit", "-qm", "candidate must remain data")
     candidate = _git(repo, "rev-parse", "HEAD").strip()
-    root = Path(__file__).resolve().parents[4]
     workflow = yaml.safe_load(
         (root / ".github/workflows/no-partial-tree-commits.yml").read_text()
     )
     script = workflow["jobs"]["no-partial-tree"]["steps"][0]["run"]
-    checkout = repo.parent / "ci-trusted-checkout"
+    checkout = repo.with_name(repo.name + "-ci")
     checkout.mkdir()
     for line in script.splitlines():
         argv = shlex.split(line)
@@ -410,7 +445,38 @@ def test_ci_bootstrap_checks_out_main_without_candidate_files(repo: Path) -> Non
         ]
         _git(checkout, *argv[1:])
     assert _git(checkout, "rev-parse", "HEAD").strip() == trusted
-    _git(checkout, "fetch", "--no-tags", "origin", candidate)
+    fetch_step = next(
+        row
+        for row in workflow["jobs"]["no-partial-tree"]["steps"]
+        if row.get("id") == "objects"
+    )
+    program = fetch_step["run"].split("<<'PY'\n", 1)[1].rsplit("\nPY", 1)[0]
+    tip = {
+        "sha": candidate,
+        "branch": "untrusted-candidate",
+        "tracking": "origin/untrusted-candidate",
+        "missing": "branch-that-does-not-exist",
+    }[tip_form]
+    output = checkout / "outputs.txt"
+    result = subprocess.run(
+        [sys.executable, "-I", "-B", "-c", program],
+        cwd=checkout,
+        env=dict(os.environ, BASE_REF=trusted, TIP_REF=tip, GITHUB_OUTPUT=str(output)),
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if tip_form == "missing":
+        assert result.returncode != 0
+        assert not output.exists()
+        assert _git(checkout, "rev-parse", "HEAD").strip() == trusted
+        assert not (checkout / "src/untrusted.py").exists()
+        return
+    assert result.returncode == 0, result.stderr
+    assert dict(line.split("=", 1) for line in output.read_text().splitlines()) == {
+        "base": trusted,
+        "tip": candidate,
+    }
     assert _git(checkout, "rev-parse", "HEAD").strip() == trusted
     assert not (checkout / "src/untrusted.py").exists()
 

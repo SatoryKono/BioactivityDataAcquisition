@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T00:07:13.821970+00:00",
+  "generated_at": "2026-11-12T00:34:08.550147+00:00",
   "summary": {
     "total_scripts": 734,
     "status_counts": {
@@ -21508,7 +21508,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 13,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -21536,7 +21536,13 @@
         },
         {
           "path": ".github/workflows/no-partial-tree-commits.yml",
-          "line": 76,
+          "line": 77,
+          "source_group": "ci",
+          "text": "\"trusted_tree_guard\", Path(\"scripts/engineering/repo/check_no_partial_tree.py\")"
+        },
+        {
+          "path": ".github/workflows/no-partial-tree-commits.yml",
+          "line": 110,
           "source_group": "ci",
           "text": "python3 -B scripts/engineering/repo/check_no_partial_tree.py \\"
         },
@@ -21551,12 +21557,6 @@
           "line": 38,
           "source_group": "docs",
           "text": "python -B scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD"
-        },
-        {
-          "path": "scripts/engineering/ci/presubmit_gate.py",
-          "line": 27,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.repo.check_no_partial_tree import resolve_revision"
         }
       ]
     },

@@ -44,6 +44,10 @@ sparse-directory index entries and skip-worktree entries are inspected
 independently. An index replacement during inspection is a refusal, including
 when another agent performs it. No lock is retained across Git's eventual
 commit; malicious races after validation require a stronger host boundary.
+Index anchors use the verified common ancestor of HEAD and the trusted base, so
+a branch predating a new main anchor remains valid before synchronization.
+Intent-to-add entries are refused using Git's visible/invisible index diff modes;
+an empty file staged normally remains valid. Missing Git support is ERROR.
 
 Every commit in base..tip is inspected, including intermediate commits and
 merge ancestry. The directory-anchor comparison uses each commit's verified
@@ -85,6 +89,10 @@ explicit trusted base through manual dispatch. Manual dispatch requires base
 and tip inputs and never borrows fields from another event type. The CLI
 supports the same selection through --event-name and --event-json with a
 bounded event read. Unknown event shapes fail closed without dumping payloads.
+Each event resolves base/tip to immutable identities before checking. Missing
+objects are fetched from the fixed origin without checkout, including manual
+branch names, origin-prefixed names and explicit SHAs. Already available local
+revisions can be used directly; a requested SHA must match the resolved object.
 CLI event files must resolve inside the invocation directory, including after
 symlink resolution. The workflow reads GitHub's host-provided event path separately
 and passes bounded bytes to the same parser; it does not widen the CLI boundary.

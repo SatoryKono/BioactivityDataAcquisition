@@ -63,15 +63,49 @@ jobs:
           PY
 
       - name: Fetch candidate objects without checkout
-        if: github.event_name == 'pull_request_target'
+        id: objects
         env:
-          TIP_SHA: ${{ steps.range.outputs.tip }}
-        run: timeout 90 git fetch --no-tags origin "$TIP_SHA"
+          BASE_REF: ${{ steps.range.outputs.base }}
+          TIP_REF: ${{ steps.range.outputs.tip }}
+        run: |
+          python3 -I -B - <<'PY'
+          import importlib.util
+          import os
+          import subprocess
+          from pathlib import Path
+          spec = importlib.util.spec_from_file_location(
+              "trusted_tree_guard", Path("scripts/engineering/repo/check_no_partial_tree.py")
+          )
+          guard = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(guard)
+          def resolve_or_fetch(ref):
+              ref = guard.validate_revision_token(ref)
+              try:
+                  resolved = guard.resolve_revision(Path.cwd(), ref)
+              except guard.EvidenceError:
+                  remote_ref = ref.removeprefix("origin/")
+                  subprocess.run(
+                      ["git", "-c", "core.hooksPath=/dev/null", "-c", "core.fsmonitor=false",
+                       "fetch", "--no-tags", "origin", remote_ref],
+                      check=True, capture_output=True, timeout=90,
+                  )
+                  resolved = guard.resolve_revision(Path.cwd(), "FETCH_HEAD")
+              if guard._SHA_RE.fullmatch(ref) and resolved != ref:
+                  raise guard.EvidenceError("Fetched identity differs from requested SHA")
+              return resolved
+          try:
+              base = resolve_or_fetch(os.environ["BASE_REF"])
+              tip = resolve_or_fetch(os.environ["TIP_REF"])
+          except (guard.EvidenceError, OSError, subprocess.SubprocessError):
+              raise SystemExit("Candidate objects are unavailable; no qualified result") from None
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"base={base}\ntip={tip}\n")
+          PY
 
       - name: Reject sparse state and incomplete history
         env:
-          BASE_SHA: ${{ steps.range.outputs.base }}
-          TIP_SHA: ${{ steps.range.outputs.tip }}
+          BASE_SHA: ${{ steps.objects.outputs.base }}
+          TIP_SHA: ${{ steps.objects.outputs.tip }}
         run: |
           python3 -B scripts/engineering/repo/check_no_partial_tree.py \
             --base "$BASE_SHA" --tip "$TIP_SHA"
