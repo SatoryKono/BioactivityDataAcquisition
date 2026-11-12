@@ -147,8 +147,8 @@ trend evidence only.
 
 ## Refresh Procedure
 
-1. Preferred path: download `reports/coverage/coverage.xml` and `reports/test-telemetry/slowest-tests.json` from a main-branch CI run.
-2. Fallback path: use resilient CI diagnostics artifacts (`junit_parallel.xml`, `junit_serial.xml`, and the coverage `TOTAL` line from `parallel.log`) when the direct coverage artifact expired.
-3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline --source-commit <sha> --source-run-id <run-id> ...` with either direct artifacts or fallback diagnostics inputs.
+1. Download original `reports/coverage/coverage.xml` and `reports/test-telemetry/slowest-tests.json` from the same qualified CI run. Verify its exact head, all 17 shards, module nonregression and both hard coverage gates; report the overall workflow separately.
+2. If XML expired or measured inputs changed, obtain a new complete measurement. Use a fresh Nightly or a verified `--local-manifest`; logs and supplied percentages cannot replace the original XML.
+3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline --coverage-xml <original-xml> --source-commit <full-40-character-sha> --source-run-id <run-id> ...` with matching same-run duration inputs. The CLI rejects percentage overrides and input drift, and retains the XML measurement time instead of stamping the current time.
 4. A legacy JSON timed-row count requires raw `--junit` inputs for the complete recorded source inventory; the updater rejects a partial or legacy-only refresh before writing outputs.
 5. Commit the updated baseline and branch-consumable telemetry summary layer together.
