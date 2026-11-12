@@ -111,13 +111,8 @@ def validate_input(
             tuple(errors),
             row_hash,
         )
-    diagnostics: list[Diagnostic] = []
     ec_numbers = parse_ec_numbers(row.fields.get("ec"))
-    for number in ec_numbers:
-        if not number.valid and number.diagnostic is not None:
-            diagnostics.append(
-                Diagnostic("invalid_ec", "warning", number.diagnostic),
-            )
+    diagnostics = _ec_diagnostics(ec_numbers)
     taxon, taxon_diagnostic = _taxon(
         normalized.get("organism"),
         snapshot_taxon,
@@ -158,6 +153,17 @@ def validate_input(
         row_sha256=row_hash,
         provenance=provenance,
     )
+
+
+def _ec_diagnostics(ec_numbers: tuple[EcNumber, ...]) -> list[Diagnostic]:
+    """Keep malformed-token warnings in their original input order."""
+    diagnostics: list[Diagnostic] = []
+    for number in ec_numbers:
+        if not number.valid and number.diagnostic is not None:
+            diagnostics.append(
+                Diagnostic("invalid_ec", "warning", number.diagnostic),
+            )
+    return diagnostics
 
 
 def validate_batch(

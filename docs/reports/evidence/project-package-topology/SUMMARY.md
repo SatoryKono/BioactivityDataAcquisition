@@ -445,7 +445,7 @@ it is not a new coverage measurement or a complete topology re-audit.
 - Accepted coverage inventory: `2612` modules
 - Accepted inventory: `2522` fully covered
 - Accepted inventory: `88` partially covered
-- Test inventory: `assertless_total_candidates=73`
+- Test inventory: `assertless_total_candidates=71`
 
 Derived by scripts/engineering/qa/report_topology_source_binding.py from
 the verified source tree and accepted inventory. This is a source-only projection, not a

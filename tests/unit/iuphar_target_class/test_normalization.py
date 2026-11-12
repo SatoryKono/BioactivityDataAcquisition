@@ -154,6 +154,26 @@ def test_invalid_ec_is_kept_as_a_diagnostic() -> None:
     assert validated.ec_raw == "not-an-ec"
 
 
+def test_ec_warnings_precede_taxon_warning_and_preserve_source_values() -> None:
+    row = _row(ec="bad-first;3.1.1.1|bad-second", organism="mouse")
+    original = dict(row.fields)
+    validated = validate_input(row, provenance=PROVENANCE, snapshot_taxon="human")
+    assert tuple(item.code for item in validated.diagnostics) == (
+        "invalid_ec",
+        "invalid_ec",
+        "taxon_source_conflict",
+    )
+    assert tuple(item.message for item in validated.diagnostics[:2]) == (
+        "invalid EC token: bad-first",
+        "invalid EC token: bad-second",
+    )
+    assert all(item.level == "warning" for item in validated.diagnostics)
+    assert validated.taxon == "human"
+    assert validated.ec_raw == original["ec"]
+    assert validated.raw_fields == original
+    assert row.fields == original
+
+
 def test_unapproved_marker_version_blocks_an_accepted_run() -> None:
     with pytest.raises(ValueError, match="missing_markers version"):
         require_approved_normalization(PROVENANCE)
