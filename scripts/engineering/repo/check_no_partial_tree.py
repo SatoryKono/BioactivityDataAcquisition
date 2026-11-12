@@ -354,9 +354,9 @@ def find_collapsing_commits(
 ) -> list[str]:
     """Return collapsing commits in base..tip, oldest first.
 
-    Root commits (no parents) are skipped: they cannot collapse anything.
-    Every other commit is compared against the base tree so inherited
-    collapses inside the range are still reported.
+    Each commit uses its own common ancestor with the trusted base. Later
+    anchor additions on main cannot retroactively invalidate an older branch.
+    Unrelated roots cannot qualify for shared history.
     """
     cwd = validate_repo(repo)
     base_sha = resolve_revision(cwd, base)
@@ -378,14 +378,18 @@ def find_collapsing_commits(
     ]
     if shallow.intersection(revisions):
         raise EvidenceError("candidate range crosses incomplete shallow history")
-    base_top = _top_level_names(cwd, base_sha)
     offenders: list[str] = []
     for revision in revisions:
         if not _parent_shas(cwd, revision):
-            continue
+            raise EvidenceError("unrelated root cannot qualify for shared history")
+        historical_base = _run_git(
+            cwd, "merge-base", "--all", base_sha, revision
+        ).strip()
+        if not _SHA_RE.fullmatch(historical_base):
+            raise EvidenceError("candidate commit has no unambiguous trusted ancestor")
         if is_collapsed_tree(
-            base_top, _top_level_names(cwd, revision)
-        ) or _missing_directory_content(cwd, common, revision):
+            _top_level_names(cwd, historical_base), _top_level_names(cwd, revision)
+        ) or _missing_directory_content(cwd, historical_base, revision):
             offenders.append(revision)
     if shallow != _shallow_boundaries(cwd):
         raise EvidenceError("history completeness changed during inspection")

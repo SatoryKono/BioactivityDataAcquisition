@@ -36,12 +36,12 @@ jobs:
       statuses: write
     steps:
       - name: Checkout trusted checker
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: SatoryKono/BioactivityDataAcquisition
-          ref: refs/heads/main
-          persist-credentials: false
-          fetch-depth: 0
+        # Public, fixed origin/ref: no PR checkout, credentials or third-party action.
+        run: |
+          git -c init.templateDir= -c core.hooksPath=/dev/null init .
+          git remote add origin https://github.com/SatoryKono/BioactivityDataAcquisition.git
+          timeout 180 git -c core.fsmonitor=false fetch --no-tags origin refs/heads/main
+          git -c core.hooksPath=/dev/null -c core.fsmonitor=false checkout --detach FETCH_HEAD
 
       - name: Resolve event-owned identities
         id: range
