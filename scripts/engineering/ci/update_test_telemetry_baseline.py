@@ -24,6 +24,7 @@ CANONICAL_COVERAGE_XML = "reports/coverage/coverage.xml"
 CANONICAL_SLOWEST_TESTS_JSON = "reports/test-telemetry/slowest-tests.json"
 DEFAULT_COVERAGE_THRESHOLD = 85.0
 TELEMETRY_FRESHNESS_MAX_AGE_DAYS = 45
+TESTS_WORKFLOW_PATH = ".github/workflows/tests.yml"
 UNKNOWN_LABEL = "<unknown>"
 SUPPORTED_SOURCE_EVENTS = (
     "pull_request",
@@ -50,7 +51,7 @@ def compute_test_telemetry_source_tree_sha256(repo_root: Path = REPO_ROOT) -> st
         for path in (
             "pyproject.toml",
             "configs/quality/test_matrix.yaml",
-            ".github/workflows/tests.yml",
+            TESTS_WORKFLOW_PATH,
             "scripts/engineering/ci/junit_duration_summary.py",
             "scripts/engineering/dev/pytest_junit_subtests.py",
         )
@@ -472,7 +473,7 @@ def build_baseline_payload(
     return {
         "version": 1,
         "policy_scope": "test_telemetry_baseline",
-        "workflow_path": ".github/workflows/tests.yml",
+        "workflow_path": TESTS_WORKFLOW_PATH,
         "source_branch": source_branch,
         "refreshed_at_utc": datetime.now(UTC).isoformat(),
         "refresh_status": status,
@@ -1012,7 +1013,7 @@ def _validate_ci_capture_inputs(source_commit: str, coverage_xml: Path) -> str:
         "scripts/engineering/qa",
         "pyproject.toml",
         "configs/quality/test_matrix.yaml",
-        ".github/workflows/tests.yml",
+        TESTS_WORKFLOW_PATH,
     )
     changed = subprocess.run(
         ["git", "diff", "--quiet", source_commit, "--", *inputs],
