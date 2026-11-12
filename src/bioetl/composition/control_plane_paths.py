@@ -6,20 +6,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.application.observability.control_plane_evidence import (
-    ControlPlaneEvidenceService,
-)
-from bioetl.application.services.run_reports.paths import resolve_report_root
-from bioetl.domain.control_plane.run_ledger import RunLedgerEntry
-from bioetl.domain.types import RunID
-from bioetl.infrastructure.control_plane.file_archive_store import FileArchiveStore
-from bioetl.infrastructure.control_plane.file_artifact_lifecycle_store import (
-    FileControlPlaneArtifactLifecycleStore,
-)
 
 from bioetl.application.services.run_reports.source_identity import (
     RUNTIME_SOURCE_ID_ENV,
     resolve_runtime_source_identity,
+)
+from bioetl.composition.bootstrap.runtime.run_status_capture import (
+    bind_selected_evidence_validation,
 )
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     load_repository_source_environment,
@@ -28,7 +21,6 @@ from bioetl.composition.runtime_builders.run_manifest_data_roots import (
     resolve_data_root,
 )
 from bioetl.domain.control_plane import RunManifest
-from bioetl.domain.ports import RawRunManifestInspectionPort
 from bioetl.domain.control_plane.run_evidence_location import (
     DEFAULT_EVIDENCE_ROOT_ALIAS,
     canonicalize_relative_data_root,
@@ -38,6 +30,7 @@ from bioetl.infrastructure.control_plane.evidence_location_path_safety import (
 )
 from bioetl.infrastructure.control_plane.file_evidence_read_context import (
     FileEvidenceReadContext,
+    _SelectedRootLedgerPort as _SelectedRootLedgerPort,
     validate_control_tree,
 )
 from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
@@ -114,59 +107,6 @@ def control_plane_root(settings: Settings, leaf: str) -> Path:
 
 
 @dataclass(frozen=True, slots=True)
-class _SelectedRootLedgerPort:
-    """Read-only ledger port that contains files under the selected data_root.
-
-    Validation uses the same run-id chain as Processed Records, after each
-    concrete JSONL / predecessor pointer is checked against the selected root.
-    """
-
-    context: FileEvidenceReadContext
-
-    def append(self, entry: RunLedgerEntry) -> None:
-        raise NotImplementedError("selected validation ledger is read-only")
-
-    def list_entries(self, manifest_id: str) -> list[RunLedgerEntry]:
-        self._assert_manifest_chain(manifest_id)
-        entries = self.context.ledger_port.list_entries(manifest_id)
-        if not entries:
-            return []
-        return list(self.context.get_ledger_entries_by_run_id(entries[0].run_id))
-
-    def list_entries_by_run_id(self, run_id: RunID) -> list[RunLedgerEntry]:
-        return list(self.context.get_ledger_entries_by_run_id(run_id))
-
-    def list_entries_after(
-        self,
-        manifest_id: str,
-        after_entry_id: str | None,
-    ) -> list[RunLedgerEntry]:
-        self._assert_manifest_chain(manifest_id)
-        return self.context.ledger_port.list_entries_after(manifest_id, after_entry_id)
-
-    def _assert_manifest_chain(self, manifest_id: str) -> None:
-        base = self.context.data_root / "output" / "control" / "run_ledger"
-        record_id = manifest_id
-        seen: set[str] = set()
-        while record_id and record_id not in seen:
-            seen.add(record_id)
-            assert_path_within_trusted_base(
-                base / f"{record_id}.jsonl",
-                trusted_base=self.context.data_root,
-                field_name="ledger record path",
-            )
-            pointer = base / "_predecessors" / f"{record_id}.txt"
-            assert_path_within_trusted_base(
-                pointer,
-                trusted_base=self.context.data_root,
-                field_name="ledger predecessor",
-            )
-            record_id = (
-                pointer.read_text(encoding="utf-8").strip() if pointer.exists() else ""
-            )
-
-
-@dataclass(frozen=True, slots=True)
 class FileEvidenceReadContextFactory:
     """Open file-backed read ports under a trusted alias base (RF-003)."""
 
@@ -217,39 +157,12 @@ class FileEvidenceReadContextFactory:
             ),
             replay_object_verifier=verifier,
         )
-        if self.archive_root is not None:
-            report_root = resolve_report_root(root=self.report_root)
-            archive_verifier: FileArchiveStore | None = FileArchiveStore(
-                safe_root, self.archive_root, report_root
-            )
-        else:
-            archive_verifier = None
-        if isinstance(context.manifest_port, RawRunManifestInspectionPort):
-            manifest_inspector: RawRunManifestInspectionPort | None = (
-                context.manifest_port
-            )
-        else:
-            manifest_inspector = None
-        validation_service = ControlPlaneEvidenceService(
-            ledger_port=_SelectedRootLedgerPort(context),
-            lineage_store=context.lineage_port,
-            manifest_inspector=manifest_inspector,
-            lifecycle_planner=FileControlPlaneArtifactLifecycleStore(
-                base_path=output_root, metrics=self.metrics
-            ),
-            archive_verifier=archive_verifier,
+        return bind_selected_evidence_validation(
+            context,
+            archive_root=self.archive_root,
+            report_root=self.report_root,
+            metrics=self.metrics,
         )
-        bound: FileEvidenceReadContext = FileEvidenceReadContext(
-            data_root=context.data_root,
-            trusted_alias_base=context.trusted_alias_base,
-            manifest_port=context.manifest_port,
-            ledger_port=context.ledger_port,
-            workflow_manifest_port=context.workflow_manifest_port,
-            lineage_port=context.lineage_port,
-            replay_object_verifier=context.replay_object_verifier,
-            validation_service=validation_service,
-        )
-        return bound
 
 
 @dataclass(frozen=True, slots=True)

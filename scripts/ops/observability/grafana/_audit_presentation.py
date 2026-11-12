@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
+
 from typing import Any
 
 _LABEL_TRANSLATIONS = {
@@ -163,3 +165,21 @@ def stamp_audit_presentation(dashboard: dict[str, Any]) -> None:
     for panel in dashboard.get("panels", []):
         stamp_audit_presentation(panel)
         _stamp_panel_presentation(dashboard, panel)
+
+
+def project_adaptive_dashboard(source: dict) -> dict:
+    """Preserve queries and identity; adapt the catalog and prioritize the verdict."""
+    result = deepcopy(source)
+    if result.get("uid") == "bioetl-run-explorer-v1":
+        enable_adaptive_catalog(result)
+    if result.get("uid") == "bioetl-overview-v2":
+        # Keep the main answer first when Grafana stacks columns at 200%.
+        # Give the status stack one additional column so docked-menu desktop
+        # widths retain complete status words. Scope and queries are unchanged.
+        panels = {panel["id"]: panel for panel in result["panels"]}
+        for panel_id in (9604, 9603, 9300):
+            panels[panel_id]["gridPos"]["x"] = 0
+            panels[panel_id]["gridPos"]["w"] = 10
+        for panel_id in (99, 9002):
+            panels[panel_id]["gridPos"].update(x=10, w=14)
+    return result

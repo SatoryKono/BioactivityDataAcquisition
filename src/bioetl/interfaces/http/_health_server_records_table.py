@@ -30,6 +30,24 @@ from bioetl.interfaces.http.run_report_ops import load_pipeline_run_report_paylo
 __all__ = ["handle_processed_records_table"]
 
 
+def _validate_selected_manifest(
+    manifest: object, *, pipeline: str, run_id: RunID, run_type: str | None
+) -> None:
+    """Reject missing evidence and mismatched selected identity before ledger reads."""
+    if manifest is None:
+        raise ForensicEndpointUnavailable(reason="manifest_missing", status_code=404)
+    requested_types = _selector_tokens(run_type)
+    if (
+        not isinstance(manifest, RunManifest)
+        or str(manifest.run_id) != str(run_id)
+        or manifest.pipeline_name != pipeline
+        or (requested_types and manifest.run_type.value not in requested_types)
+    ):
+        raise ForensicEndpointUnavailable(
+            reason="selector_context_mismatch", status_code=409
+        )
+
+
 def _selected_ledger_entries(
     host: _HealthObservabilityRoutingHost,
     *,
@@ -54,18 +72,9 @@ def _selected_ledger_entries(
     }:
         raise ForensicEndpointUnavailable(reason=resolved.code.value, status_code=409)
     manifest = resolved.context.get_manifest_by_run_id(run_id)
-    if manifest is None:
-        raise ForensicEndpointUnavailable(reason="manifest_missing", status_code=404)
-    requested_types = _selector_tokens(run_type)
-    if (
-        not isinstance(manifest, RunManifest)
-        or str(manifest.run_id) != str(run_id)
-        or manifest.pipeline_name != pipeline
-        or (requested_types and manifest.run_type.value not in requested_types)
-    ):
-        raise ForensicEndpointUnavailable(
-            reason="selector_context_mismatch", status_code=409
-        )
+    _validate_selected_manifest(
+        manifest, pipeline=pipeline, run_id=run_id, run_type=run_type
+    )
     entries = resolved.context.get_ledger_entries_by_run_id(run_id)
     if any(str(entry.run_id) != str(run_id) for entry in entries):
         raise ForensicEndpointUnavailable(

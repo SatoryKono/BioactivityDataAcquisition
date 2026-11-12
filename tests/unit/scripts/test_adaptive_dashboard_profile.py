@@ -6,7 +6,9 @@ from copy import deepcopy
 
 import pytest
 
-from scripts.ops.observability.grafana.generate_adaptive_dashboards import project
+from scripts.ops.observability.grafana._audit_presentation import (
+    project_adaptive_dashboard as project,
+)
 
 pytestmark = pytest.mark.unit
 

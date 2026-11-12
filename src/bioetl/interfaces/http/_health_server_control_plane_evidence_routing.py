@@ -374,34 +374,7 @@ async def _service_payload(
     scope, service = bound_scope, bound_service
     evidence_scope = to_evidence_scope(scope)
     try:
-        if endpoint == "trust-summary":
-            return await asyncio.to_thread(
-                service.trust_summary, scope=evidence_scope, now=current_utc_time()
-            )
-        if endpoint == "retention-compliance":
-            started = perf_counter()
-            payload = await asyncio.to_thread(
-                service.retention_compliance,
-                scope=evidence_scope,
-                now=current_utc_time(),
-            )
-            payload["forensic_elapsed_seconds"] = round(perf_counter() - started, 4)
-            payload["forensic_deadline_seconds"] = FORENSIC_ENDPOINT_TIMEOUT_SECONDS
-            return payload
-        if endpoint == "manifest-validation":
-            return await asyncio.to_thread(
-                service.manifest_validation,
-                scope=evidence_scope,
-            )
-        if endpoint == "lineage-validation":
-            return await asyncio.to_thread(
-                service.lineage_validation,
-                scope=evidence_scope,
-            )
-        return await asyncio.to_thread(
-            service.failure_reasons,
-            scope=evidence_scope,
-        )
+        return await _dispatch_bound_evidence(service, scope, endpoint=endpoint)
     except SOURCE_READ_ERRORS:
         return source_error_payload(
             endpoint=endpoint,
@@ -409,6 +382,41 @@ async def _service_payload(
             reason=source_reason,
             check=source_check,
         )
+
+
+async def _dispatch_bound_evidence(
+    service: ControlPlaneEvidenceService, scope: _IdentityScope, *, endpoint: str
+) -> dict[str, object]:
+    """Dispatch a validated selection through the existing shared executor."""
+    evidence_scope = to_evidence_scope(scope)
+    if endpoint == "trust-summary":
+        return await asyncio.to_thread(
+            service.trust_summary, scope=evidence_scope, now=current_utc_time()
+        )
+    if endpoint == "retention-compliance":
+        started = perf_counter()
+        payload = await asyncio.to_thread(
+            service.retention_compliance,
+            scope=evidence_scope,
+            now=current_utc_time(),
+        )
+        payload["forensic_elapsed_seconds"] = round(perf_counter() - started, 4)
+        payload["forensic_deadline_seconds"] = FORENSIC_ENDPOINT_TIMEOUT_SECONDS
+        return payload
+    if endpoint == "manifest-validation":
+        return await asyncio.to_thread(
+            service.manifest_validation,
+            scope=evidence_scope,
+        )
+    if endpoint == "lineage-validation":
+        return await asyncio.to_thread(
+            service.lineage_validation,
+            scope=evidence_scope,
+        )
+    return await asyncio.to_thread(
+        service.failure_reasons,
+        scope=evidence_scope,
+    )
 
 
 def _same_run_id(left: object, right: object) -> bool:
@@ -436,6 +444,23 @@ def _selected_validation_pipeline(
     return (
         scope.resolved_manifest.pipeline_name if scope.resolved_manifest else requested
     )
+
+
+def _validate_bound_manifest(
+    manifest: object, *, scope: _IdentityScope, pipeline: str
+) -> RunManifest:
+    """Require a manifest matching the selected run, pipeline and run types."""
+    if (
+        not isinstance(manifest, RunManifest)
+        or not _same_run_id(manifest.run_id, scope.selected_run_id)
+        or manifest.pipeline_name != pipeline
+        or (
+            scope.selected_run_types
+            and manifest.run_type.value not in scope.selected_run_types
+        )
+    ):
+        raise ValueError("Selected validation manifest identity does not match")
+    return manifest
 
 
 def _bind_selected_validation(
@@ -468,16 +493,7 @@ def _bind_selected_validation(
         raise ValueError("Selected validation evidence location is unavailable")
     context = resolved.context
     manifest = context.get_manifest_by_run_id(scope.selected_run_id)
-    if (
-        not isinstance(manifest, RunManifest)
-        or not _same_run_id(manifest.run_id, scope.selected_run_id)
-        or manifest.pipeline_name != pipeline
-        or (
-            scope.selected_run_types
-            and manifest.run_type.value not in scope.selected_run_types
-        )
-    ):
-        raise ValueError("Selected validation manifest identity does not match")
+    manifest = _validate_bound_manifest(manifest, scope=scope, pipeline=pipeline)
     getter = getattr(context, "get_validation_service", None)
     bound = getter() if callable(getter) else None
     if not isinstance(bound, ControlPlaneEvidenceService):

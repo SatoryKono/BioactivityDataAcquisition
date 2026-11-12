@@ -7,12 +7,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2027-02-10"
     },
-    "scripts/ops/observability/grafana/generate_adaptive_dashboards.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the projection implementation behind render_nav_bus --adaptive-profile; it has no separate CLI. Preserve the existing active-script budget.",
-      "owner": "@bioetl-platform",
-      "review_by": "2027-02-10"
-    },
     "scripts/ops/observability/grafana/repair_legacy_prometheus_dashboard.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the pure transformation for the existing exported legacy Prometheus dashboard; no I/O, provisioning or standalone command surface.",
@@ -2051,7 +2045,7 @@
       "decision": "shared_helper_module",
       "owner": "@bioetl-platform",
       "review_by": "2027-01-31",
-      "next_step": "Retain the tested Phase 4.2\u20134.3 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-reflow; keep direct module invocation as a compatibility surface."
+      "next_step": "Retain the tested Phase 4.2–4.3 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-reflow; keep direct module invocation as a compatibility surface."
     },
     "scripts/ops/observability/grafana/capture_acceptance.py": {
       "decision": "shared_helper_module",
