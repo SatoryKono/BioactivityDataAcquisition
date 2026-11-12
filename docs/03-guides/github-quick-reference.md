@@ -133,14 +133,19 @@ gh release create v6.2.0 --title "v6.2.0" --notes-file CHANGELOG.md
 
 ## Worktrees (для сложных задач)
 
+Bootstrap and path/consent rules:
+[Governed local worktrees](../../.github/CONTRIBUTING.md#governed-local-worktrees).
+
 ```bash
 # Создать isolated worktree
-git worktree add .worktrees/feat-name -b feat/name origin/main
-cd .worktrees/feat-name
+# Only after per-task approval for creating the tracked .env.example:
+python D:/github/BioactivityDataAcquisition/.git/hooks/bioetl-create-worktree.py feat-name --env-example-approved
+cd D:/github/BioactivityDataAcquisition-worktrees/feat-name
 
 # После завершения
-cd ../..
-git worktree remove .worktrees/feat-name
+# Only for a clean unused tree, with separate approval to delete any .env*:
+cd D:/github/BioactivityDataAcquisition
+git worktree remove D:/github/BioactivityDataAcquisition-worktrees/feat-name
 ```
 
 ## Dependabot PRs

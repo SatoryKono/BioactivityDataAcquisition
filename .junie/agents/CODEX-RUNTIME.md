@@ -1,3 +1,6 @@
+> Compatibility reference only; Junie uses JUNIE-RUNTIME.md, not this file
+> as an automatically loaded runtime entrypoint.
+
 # CODEX-RUNTIME.md — Navigation Pointer (Junie Tree)
 
 > **Not a runtime SSOT.** This path is a navigation stub only.
