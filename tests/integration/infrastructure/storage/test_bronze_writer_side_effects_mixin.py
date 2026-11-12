@@ -82,11 +82,16 @@ class TestBronzeWriterSideEffectsMixin:
 
     @pytest.mark.asyncio
     async def test_log_bronze_audit_skips_when_audit_is_none(
-        self, tmp_path: Path
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """Should silently skip audit when audit port is None."""
+        """Disabled audit must skip entry construction and logging."""
         host = _Host(tmp_path)
         host._audit = None
+        entry_factory = MagicMock()
+        monkeypatch.setattr(
+            "bioetl.infrastructure.storage.bronze.side_effects_mixin.build_bronze_audit_entry",
+            entry_factory,
+        )
         ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
         await host._log_bronze_audit(
             run_id=RunID("run-2"),
@@ -100,7 +105,8 @@ class TestBronzeWriterSideEffectsMixin:
             provider="chembl",
             entity="activity",
         )
-        # No exception raised, no audit call
+        assert entry_factory.mock_calls == []
+        assert host.logger.mock_calls == []
 
     @pytest.mark.asyncio
     async def test_build_bronze_write_result_includes_checksum(

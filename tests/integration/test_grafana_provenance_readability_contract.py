@@ -86,6 +86,19 @@ def test_provenance_panel_readability_contract(
 ) -> None:
     dashboard = json.loads((DASHBOARDS / filename).read_text(encoding="utf-8"))
     panel = next(item for item in dashboard["panels"] if item.get("id") == panel_id)
+    if filename in {"bioetl-overview-v2.json", "bioetl-dq-v2.json"}:
+        # LA-12 replaces static copy with evidence from the shared saved-run frame.
+        assert panel["title"] == "Review Run Context"
+        assert panel["type"] == "table"
+        assert panel["gridPos"]["h"] == 5
+        assert panel["targets"][0]["withTransforms"] is False
+        assert panel["targets"][0]["panelId"] == (9002 if panel_id == 99 else 9406)
+        assert panel["fieldConfig"]["defaults"]["custom"]["inspect"] is True
+        assert "selection_context" in json.dumps(panel["transformations"])
+        for token in ("SELECTED RUN", "AUTO", "EXPLICIT", "UNKNOWN", "TIME RANGE"):
+            assert token in panel["description"]
+        assert "font-size:12px" not in json.dumps(panel)
+        return
     content = str(panel["options"]["content"])
 
     assert panel_base_title(panel) == title
