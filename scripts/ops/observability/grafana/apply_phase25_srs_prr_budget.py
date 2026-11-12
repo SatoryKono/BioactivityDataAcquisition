@@ -45,6 +45,8 @@ VIEW_PANEL_TRUST_SIBLING = "viewPanel=9414"
 _SELECT_RUN = "SELECT RUN"
 _NO_RUNS = "НЕТ ЗАПУСКОВ"
 _NO_RECORDS = "нет записей"
+_REASON_DETAILS = "Reason details"
+_CUSTOM_HIDDEN = "custom.hidden"
 
 OV_IDENTITY = (
     "/d/bioetl-overview-v2/3-run-overview"
@@ -222,9 +224,18 @@ _OV_DOMAINS = (
     f", '{FRAME}': 'domains'}}]) }}))"
 )
 
+
+# Keep the full explanation for Inspect; the verdict card has a bounded preview.
+_OV_DOMAINS = (
+    "$map(" + _OV_DOMAINS + ", function($row){$merge([$row, {"
+    "'run_reason_brief': $type($row.run_reason) = 'string' and "
+    "$length($row.run_reason) > 20 ? $substring($row.run_reason, 0, 19) & '…' "
+    ": $row.run_reason}])})"
+)
+
 _OV_IDENTITY = (
     "($v := function($x){$exists($x) and $x != '' ? $string($x) : "
-    "'Not recorded in saved run evidence'}; "
+    "'Not recorded'}; "
     "$s := summary[0]; "
     + _TIMESTAMP_SECONDS
     + "$start := $s.started_at ? $secs($s.started_at) : null; "
@@ -236,15 +247,15 @@ _OV_IDENTITY = (
     "{'parameter':'Started at','value':started_at ? "
     "$substring(started_at,0,10) & ' ' & $substring(started_at,11,5) & ' ' & "
     "($substring(started_at,-1) = 'Z' ? 'UTC' : $substring(started_at,-6)) : "
-    "'Not recorded in saved run evidence'},"
-    "{'parameter':'Total Run Duration','value':$start != null and $end != null "
+    "'Not recorded'},"
+    "{'parameter':'Run duration','value':$start != null and $end != null "
     "? ($end >= $start ? ($n := $floor($end - $start + 0.5); "
     "$parts := [$floor($n / 86400), $floor(($n % 86400) / 3600), "
     "$floor(($n % 3600) / 60), $n % 60]; "
     "$units := [' d', ' h', ' min', ' s']; "
     "$n = 0 ? '0 s' : $join($map($parts, function($v, $i)"
     "{$v > 0 ? $string($v) & $units[$i]}), ' ')) : "
-    "'Not recorded in saved run evidence') : 'Not recorded in saved run evidence'}"
+    "'Not recorded') : 'Not recorded'}"
     f"], function($row){{$merge([$row, {{'{FRAME}':'identity'}}])}}))"
 )
 
@@ -927,6 +938,49 @@ def _replace_with_handoff(
     )
 
 
+def _configure_overview_summary(summary: dict[str, Any]) -> None:
+    """Keep the bounded reason preview and complete inspectable explanation."""
+    _ensure_field_projection(
+        summary,
+        (
+            "execution_state",
+            "run_verdict",
+            "saved_trust",
+            "run_reason",
+            "run_reason_brief",
+        ),
+    )
+    for transform in summary["transformations"]:
+        if transform["id"] == "organize":
+            for key in ("indexByName", "renameByName"):
+                values = transform["options"][key]
+                if "run_execution" in values:
+                    values["execution_state"] = values.pop("run_execution")
+
+            transform["options"]["indexByName"].update(run_reason_brief=3, run_reason=4)
+            transform["options"]["renameByName"].update(
+                run_reason_brief="Reason", run_reason=_REASON_DETAILS
+            )
+    overrides = summary["fieldConfig"]["overrides"]
+    overrides[:] = [
+        o for o in overrides if o["matcher"].get("options") != _REASON_DETAILS
+    ]
+    overrides.append(
+        {
+            "matcher": {"id": "byName", "options": _REASON_DETAILS},
+            "properties": [
+                {"id": _CUSTOM_HIDDEN, "value": True},
+                {"id": "custom.inspect", "value": True},
+            ],
+        }
+    )
+    note = (
+        " Reason is a shortened preview; Inspect Data retains complete Reason details."
+    )
+    if note not in summary["description"]:
+        summary["description"] += note
+
+
 def apply_overview(data: dict[str, Any]) -> None:
     donor = _by_id(data, 9002)
     donor["datasource"] = dict(OPS)
@@ -974,17 +1028,7 @@ def apply_overview(data: dict[str, Any]) -> None:
         panel["targets"] = [_dash_target(9002)]
         _prepend_frame_filter(panel, frame)
 
-    # Use the canonical execution column shared with the context block.
-    summary = _by_id(data, 9603)
-    _ensure_field_projection(
-        summary, ("execution_state", "run_verdict", "saved_trust", "run_reason")
-    )
-    for transform in summary["transformations"]:
-        if transform["id"] == "organize":
-            for key in ("indexByName", "renameByName"):
-                values = transform["options"][key]
-                if "run_execution" in values:
-                    values["execution_state"] = values.pop("run_execution")
+    _configure_overview_summary(_by_id(data, 9603))
 
     # Row filter alone is not enough: project back to the prior column set.
     _ensure_field_projection(_by_id(data, 9300), _IDENTITY_FIELDS)
@@ -1119,6 +1163,14 @@ def apply_dq(data: dict[str, Any]) -> None:
     donor["targets"][0].pop("uql", None)
     donor["transformations"] = _status_donor_transforms()
     _align_status_donor_overrides(donor)
+    # The single-row first-window verdict must fit at 200% browser zoom.
+    # Give the wrapping explanation most of the width; status fields remain
+    # short, while Inspect retains every source value.
+    for override in donor["fieldConfig"]["overrides"]:
+        if override["matcher"] == {"id": "byName", "options": "Reason"}:
+            override["properties"] = [
+                prop for prop in override["properties"] if prop["id"] != "custom.width"
+            ] + [{"id": "custom.width", "value": 480}]
 
     stages = _by_id(data, 9460)
     stages["datasource"] = dict(DASH_DS)
@@ -1384,11 +1436,11 @@ def _unhide_reasons_count(override: dict[str, Any]) -> None:
         p for p in override.get("properties") or [] if p.get("id") != "custom.hideFrom"
     ]
     for prop in props:
-        if prop.get("id") == "custom.hidden":
+        if prop.get("id") == _CUSTOM_HIDDEN:
             prop["value"] = False
             break
     else:
-        props.append({"id": "custom.hidden", "value": False})
+        props.append({"id": _CUSTOM_HIDDEN, "value": False})
     override["properties"] = props
 
 
