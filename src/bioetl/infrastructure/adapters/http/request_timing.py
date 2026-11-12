@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+import zlib
 from typing import Any, Protocol, TypedDict, cast
 
 import httpx
@@ -73,7 +74,66 @@ async def _dispatch_http_request(
         if is_stream:
             request = client.build_request(method, url, **typed_kwargs)  # type: ignore[misc]  # technical-reason: httpx unpacked kwargs dynamic signature
             return await client.send(request, stream=True, follow_redirects=False)
-        return await client.request(method, url, follow_redirects=False, **typed_kwargs)
+        request = client.build_request(method, url, **typed_kwargs)  # type: ignore[misc]  # technical-reason: HTTPX dynamic request kwargs
+        request.headers["Accept-Encoding"] = "gzip, deflate"
+        response = await client.send(request, stream=True, follow_redirects=False)
+        try:
+            return await _read_bounded_response(response)
+        finally:
+            await response.aclose()
+
+
+_MAX_RESPONSE_WIRE_BYTES = 16 * 1024 * 1024
+_MAX_RESPONSE_DECODED_BYTES = 64 * 1024 * 1024
+
+
+class ResponseBudgetExceeded(ValueError):
+    """Response exceeds the non-retryable transport memory budget."""
+
+
+async def _read_bounded_response(response: httpx.Response) -> httpx.Response:
+    """Bound raw reads and decompressor output before materializing JSON input."""
+    if response.is_stream_consumed:
+        if len(response.content) > _MAX_RESPONSE_DECODED_BYTES:
+            raise ResponseBudgetExceeded("Decoded HTTP response budget exceeded")
+        return response
+    encoding = response.headers.get("Content-Encoding", "identity").lower().strip()
+    if encoding not in {"identity", "gzip", "deflate"}:
+        raise ValueError("Unsupported HTTP response content encoding")
+    decoder = (
+        None
+        if encoding == "identity"
+        else zlib.decompressobj(
+            16 + zlib.MAX_WBITS if encoding == "gzip" else zlib.MAX_WBITS
+        )
+    )
+    body = bytearray()
+    wire_bytes = 0
+    async for raw in response.aiter_raw():
+        wire_bytes += len(raw)
+        if wire_bytes > _MAX_RESPONSE_WIRE_BYTES:
+            raise ResponseBudgetExceeded("Wire HTTP response budget exceeded")
+        remaining = _MAX_RESPONSE_DECODED_BYTES - len(body)
+        decoded = raw if decoder is None else decoder.decompress(raw, remaining + 1)
+        if len(decoded) > remaining:
+            raise ResponseBudgetExceeded("Decoded HTTP response budget exceeded")
+        body.extend(decoded)
+        if decoder is not None and decoder.unused_data:
+            raise ValueError("Trailing or concatenated compressed HTTP response")
+    if decoder is not None and not decoder.eof:
+        raise ValueError("Truncated compressed HTTP response")
+    headers = response.headers.copy()
+    headers.pop("content-encoding", None)
+    headers["Content-Length"] = str(len(body))
+    response.extensions["bioetl_wire_response_bytes"] = wire_bytes
+    return httpx.Response(
+        response.status_code,
+        headers=headers,
+        content=bytes(body),
+        request=response.request,
+        extensions=response.extensions,
+        history=response.history,
+    )
 
 
 def _apply_provider_cooldown(host: RequestTimingHost, response: httpx.Response) -> None:
