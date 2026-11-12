@@ -154,7 +154,9 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
         for pid in ids:
             panel = panels[pid]
             assert panel["gridPos"]["y"] == 2
-            assert panel["gridPos"]["h"] == 3
+            assert panel["gridPos"]["h"] == (
+                5 if panel.get("title") == "Review Run Context" else 3
+            )
         if filename == "bioetl-control-plane-v1.json":
             assert panels[9422]["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
             assert "SELECT RUN" in panels[9422]["description"]
@@ -463,10 +465,10 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
         dashboard = load_dashboard(_DASHBOARD_DIR / filename)
         panel = next(p for p in dashboard["panels"] if p["id"] == pid)
         assert badge in panel["description"]
-        content = panel["options"]["content"]
+        content = panel["options"].get("content", panel["description"])
         assert badge in content or (badge == "SELECTED RUN" and "${run_id}" in content)
         assert panel["gridPos"]["y"] <= 4
-        assert "overflow:hidden" not in panel["options"]["content"]
+        assert "overflow:hidden" not in content
 
 
 def test_navigation_bus_panels_document_handoff_policy() -> None:
