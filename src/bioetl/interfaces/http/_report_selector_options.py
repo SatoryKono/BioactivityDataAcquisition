@@ -132,22 +132,65 @@ def _unresolved_run_option_index(
     if dimension != "run_id" or response_shape != "options":
         return None
     for index, item in enumerate(items):
-        if (
-            isinstance(item, dict)
-            and item.get("value") == entry.run_id
-            and " · unknown · " in str(item.get("text", ""))
-        ):
-            return index
+        if not isinstance(item, dict):
+            continue
+        if item.get("value") != entry.run_id:
+            continue
+        if " · unknown · " not in str(item.get("text", "")):
+            continue
+        return index
     return None
 
 
-def _option_seen_value(option: object, *, dimension: str, entry: ReportIndexEntry) -> object:
+def _option_seen_value(
+    option: object, *, dimension: str, entry: ReportIndexEntry
+) -> object:
     """Stable catalog key for one appended or replaced selector option."""
     if dimension == "run_id":
         return entry.run_id
     if isinstance(option, dict):
         return option.get("value")
     return option
+
+
+def _merge_report_option(
+    *,
+    items: list[object],
+    seen: set[object],
+    entry: ReportIndexEntry,
+    dimension: str,
+    response_shape: str,
+    scopes: dict[str, tuple[str, ...]],
+    root: Path,
+    timezone: str,
+) -> None:
+    """Append or replace one identity-checked report option in ``items``."""
+    # A manifest without a terminal ledger event may already advertise this
+    # run as unknown. An identity-checked report can resolve that label;
+    # preserve known ledger statuses and retain exactly one option per ID.
+    unresolved = _unresolved_run_option_index(
+        items,
+        entry=entry,
+        dimension=dimension,
+        response_shape=response_shape,
+    )
+    candidate_seen = seen - {entry.run_id} if unresolved is not None else seen
+    option = _maybe_report_option(
+        entry=entry,
+        dimension=dimension,
+        response_shape=response_shape,
+        scopes=scopes,
+        root=root,
+        timezone=timezone,
+        seen=candidate_seen,
+    )
+    if option is None:
+        return
+    if unresolved is not None:
+        items[unresolved] = option
+    else:
+        items.append(option)
+    seen.add(_option_seen_value(option, dimension=dimension, entry=entry))
 
 
 def supplement_report_options(
@@ -169,33 +212,18 @@ def supplement_report_options(
     raw_items = payload.get("items", [])
     items = list(raw_items) if isinstance(raw_items, list) else []
     seen = {item.get("value") if isinstance(item, dict) else item for item in items}
-    for entry in sorted(entries, key=lambda item: item.started_at or "", reverse=True):
-        # A manifest without a terminal ledger event may already advertise this
-        # run as unknown. An identity-checked report can resolve that label;
-        # preserve known ledger statuses and retain exactly one option per ID.
-        unresolved = _unresolved_run_option_index(
-            items,
-            entry=entry,
-            dimension=dimension,
-            response_shape=response_shape,
-        )
-        candidate_seen = seen - {entry.run_id} if unresolved is not None else seen
-        option = _maybe_report_option(
+    ordered = sorted(entries, key=lambda item: item.started_at or "", reverse=True)
+    for entry in ordered:
+        _merge_report_option(
+            items=items,
+            seen=seen,
             entry=entry,
             dimension=dimension,
             response_shape=response_shape,
             scopes=scopes,
             root=root,
             timezone=timezone,
-            seen=candidate_seen,
         )
-        if option is None:
-            continue
-        if unresolved is not None:
-            items[unresolved] = option
-        else:
-            items.append(option)
-        seen.add(_option_seen_value(option, dimension=dimension, entry=entry))
     return {**payload, "items": items}
 
 

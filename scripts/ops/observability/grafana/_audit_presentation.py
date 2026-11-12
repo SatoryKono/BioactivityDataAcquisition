@@ -10,6 +10,7 @@ _LABEL_TRANSLATIONS = {
     "нет записей": "NO RECORDS",
     "не применимо": "N/A",
 }
+_TRANSLATABLE_KEYS = frozenset({"text", "title", "description", "noValue"})
 
 
 def enable_adaptive_catalog(dashboard: dict[str, Any]) -> None:
@@ -28,21 +29,40 @@ def enable_adaptive_catalog(dashboard: dict[str, Any]) -> None:
     )
 
 
+def _translate_label_text(item: str) -> str:
+    """Apply the English label map to one presentation string."""
+    for source, target in _LABEL_TRANSLATIONS.items():
+        item = item.replace(source, target)
+    return item
+
+
+def _translate_mapping(value: dict[str, Any]) -> None:
+    """Translate string labels in one mapping node, then descend."""
+    for key, item in value.items():
+        if key in _TRANSLATABLE_KEYS and isinstance(item, str):
+            value[key] = _translate_label_text(item)
+            continue
+        _translate_audit_labels(item)
+
+
 def _translate_audit_labels(value: Any) -> None:
     """Replace legacy Russian presentation tokens with English labels."""
     if isinstance(value, dict):
-        for key, item in value.items():
-            if key in {"text", "title", "description", "noValue"} and isinstance(
-                item, str
-            ):
-                for source, target in _LABEL_TRANSLATIONS.items():
-                    item = item.replace(source, target)
-                value[key] = item
-            else:
-                _translate_audit_labels(item)
-    elif isinstance(value, list):
+        _translate_mapping(value)
+        return
+    if isinstance(value, list):
         for item in value:
             _translate_audit_labels(item)
+
+
+def _set_wrap(properties: list[dict[str, Any]], *, enabled: bool) -> None:
+    """Toggle wrapText / cellOptions.wrapText on one override property list."""
+    for prop in properties:
+        prop_id = prop.get("id")
+        if prop_id == "custom.wrapText":
+            prop["value"] = enabled
+        elif prop_id == "custom.cellOptions":
+            prop["value"]["wrapText"] = enabled
 
 
 def _stamp_run_explorer_wrap(panel: dict[str, Any]) -> None:
@@ -54,22 +74,15 @@ def _stamp_run_explorer_wrap(panel: dict[str, Any]) -> None:
         wrapHeaderText=True,
         cellOptions={"type": "auto", "wrapText": True},
     )
-    for override in panel["fieldConfig"].get("overrides", []):
-        for prop in override.get("properties", []):
-            if prop.get("id") == "custom.wrapText":
-                prop["value"] = True
-            if prop.get("id") == "custom.cellOptions":
-                prop["value"]["wrapText"] = True
+    overrides = panel["fieldConfig"].get("overrides", [])
+    for override in overrides:
+        _set_wrap(override.get("properties", []), enabled=True)
     run_id = next(
         item
-        for item in panel["fieldConfig"]["overrides"]
+        for item in overrides
         if item.get("matcher", {}).get("options") == "Run ID"
     )
-    for prop in run_id["properties"]:
-        if prop["id"] == "custom.wrapText":
-            prop["value"] = False
-        if prop["id"] == "custom.cellOptions":
-            prop["value"]["wrapText"] = False
+    _set_wrap(run_id["properties"], enabled=False)
 
 
 def _stamp_overview_widths(panel: dict[str, Any]) -> None:
@@ -86,30 +99,34 @@ def _stamp_overview_widths(panel: dict[str, Any]) -> None:
             props.append({"id": "custom.width", "value": width})
 
 
+def _ensure_cached_bronze_reason_mapping(prop: dict[str, Any]) -> None:
+    """Insert or merge the cached-Bronze reason value mapping."""
+    mapping = {
+        "type": "value",
+        "options": {
+            "cached_bronze_no_remote_probe": {
+                "text": "Cached Bronze used; provider API was not called."
+            }
+        },
+    }
+    value_map = next(
+        (item for item in prop["value"] if item.get("type") == "value"),
+        None,
+    )
+    if value_map is not None:
+        value_map["options"].update(mapping["options"])
+        return
+    prop["value"].insert(0, mapping)
+
+
 def _stamp_overview_reason_mapping(panel: dict[str, Any]) -> None:
     """Expose the cached-Bronze reason as readable English copy."""
     for override in panel.get("fieldConfig", {}).get("overrides", []):
         if override.get("matcher", {}).get("options") != "Reason":
             continue
         for prop in override.get("properties", []):
-            if prop.get("id") != "mappings":
-                continue
-            mapping = {
-                "type": "value",
-                "options": {
-                    "cached_bronze_no_remote_probe": {
-                        "text": "Cached Bronze used; provider API was not called."
-                    }
-                },
-            }
-            value_map = next(
-                (item for item in prop["value"] if item.get("type") == "value"),
-                None,
-            )
-            if value_map is not None:
-                value_map["options"].update(mapping["options"])
-            else:
-                prop["value"].insert(0, mapping)
+            if prop.get("id") == "mappings":
+                _ensure_cached_bronze_reason_mapping(prop)
 
 
 def _stamp_panel_presentation(dashboard: dict[str, Any], panel: dict[str, Any]) -> None:
@@ -123,9 +140,11 @@ def _stamp_panel_presentation(dashboard: dict[str, Any], panel: dict[str, Any]) 
         return
     if panel_id == 9604:
         panel.setdefault("options", {})["text"] = {"valueSize": 24}
-    elif panel_id == 9603:
+        return
+    if panel_id == 9603:
         _stamp_overview_widths(panel)
-    elif panel_id == 9002:
+        return
+    if panel_id == 9002:
         _stamp_overview_reason_mapping(panel)
 
 

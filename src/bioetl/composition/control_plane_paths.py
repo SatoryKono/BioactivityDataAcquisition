@@ -217,29 +217,29 @@ class FileEvidenceReadContextFactory:
             ),
             replay_object_verifier=verifier,
         )
-        report_root = (
-            resolve_report_root(root=self.report_root)
-            if self.archive_root is not None
-            else self.report_root
-        )
+        if self.archive_root is not None:
+            report_root = resolve_report_root(root=self.report_root)
+            archive_verifier: FileArchiveStore | None = FileArchiveStore(
+                safe_root, self.archive_root, report_root
+            )
+        else:
+            archive_verifier = None
+        if isinstance(context.manifest_port, RawRunManifestInspectionPort):
+            manifest_inspector: RawRunManifestInspectionPort | None = (
+                context.manifest_port
+            )
+        else:
+            manifest_inspector = None
         validation_service = ControlPlaneEvidenceService(
             ledger_port=_SelectedRootLedgerPort(context),
             lineage_store=context.lineage_port,
-            manifest_inspector=(
-                context.manifest_port
-                if isinstance(context.manifest_port, RawRunManifestInspectionPort)
-                else None
-            ),
+            manifest_inspector=manifest_inspector,
             lifecycle_planner=FileControlPlaneArtifactLifecycleStore(
                 base_path=output_root, metrics=self.metrics
             ),
-            archive_verifier=(
-                FileArchiveStore(safe_root, self.archive_root, report_root)
-                if self.archive_root is not None
-                else None
-            ),
+            archive_verifier=archive_verifier,
         )
-        return FileEvidenceReadContext(
+        bound: FileEvidenceReadContext = FileEvidenceReadContext(
             data_root=context.data_root,
             trusted_alias_base=context.trusted_alias_base,
             manifest_port=context.manifest_port,
@@ -249,6 +249,7 @@ class FileEvidenceReadContextFactory:
             replay_object_verifier=context.replay_object_verifier,
             validation_service=validation_service,
         )
+        return bound
 
 
 @dataclass(frozen=True, slots=True)
