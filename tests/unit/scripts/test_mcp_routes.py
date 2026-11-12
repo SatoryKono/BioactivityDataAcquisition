@@ -321,3 +321,59 @@ def test_unknown_adapter_client_argument_stays_opaque() -> None:
     assert SECRET not in json.dumps(projected)
     assert "adapter_profile_reference" not in projected
     assert complete is False
+
+
+@pytest.mark.parametrize(
+    "adapter,options,profile",
+    [
+        ("deja-owner.py", [], "bioetl-main"),
+        ("filesystem-owner.py", ["--production"], "a" * 64),
+    ],
+)
+def test_registered_positional_profile_is_a_complete_transport(
+    tmp_path: Path,
+    adapter: str,
+    options: list[str],
+    profile: str,
+) -> None:
+    args = ["-I", "-S", "-B", str(tmp_path / adapter), *options, "client", profile]
+    projected, complete = transport_projection({"command": "python", "args": args})
+    assert projected["adapter_profile_reference"] == profile
+    assert projected["args"] == args
+    assert complete is True
+
+
+def test_registered_profile_does_not_hide_other_omitted_arguments(
+    tmp_path: Path,
+) -> None:
+    projected, complete = transport_projection(
+        {
+            "command": "python",
+            "args": [
+                str(tmp_path / "deja-owner.py"),
+                "--token",
+                SECRET,
+                "client",
+                "bioetl-main",
+            ],
+        }
+    )
+    assert projected["adapter_profile_reference"] == "bioetl-main"
+    assert SECRET not in json.dumps(projected)
+    assert complete is False
+
+
+def test_invalid_positional_profile_remains_opaque(tmp_path: Path) -> None:
+    projected, complete = transport_projection(
+        {
+            "command": "python",
+            "args": [
+                str(tmp_path / "deja-owner.py"),
+                "client",
+                "invalid/profile",
+            ],
+        }
+    )
+    assert "adapter_profile_reference" not in projected
+    assert "invalid/profile" not in json.dumps(projected)
+    assert complete is False
