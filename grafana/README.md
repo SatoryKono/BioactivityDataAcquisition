@@ -2949,7 +2949,7 @@ availability, and historical manifests must not be rewritten for a green UI.
 ## Appendix: Live Instance Incident Reports
 
 ### Prometheus Stats Dashboard (UID: rpfmFFz7z) - No Data Incident (LA-08)
-*   **Status:** Instance-only. The UID stays outside the five canonical dashboards and is not a file under `grafana/dashboards/`.
+*   **Status:** `NOT_VERIFIABLE` in repository. Instance-only: the UID stays outside the five canonical dashboards and is not a file under `grafana/dashboards/`.
 *   **Diagnosis:** The stock Grafana sample queries Prometheus 1.x local-storage metrics. On the live Prometheus those four series are absent. `POST /api/dashboards/db` for this UID returns `Cannot save provisioned dashboard`, so the sample cannot be edited through the API. Do not add `rpfmFFz7z` to `grafana/provisioning/dashboards/bioetl.yaml`; that provider list is the five canonical boards.
 *   **Live check (2026-11-11, `http://127.0.0.1:9090/api/v1/query`):**
 
