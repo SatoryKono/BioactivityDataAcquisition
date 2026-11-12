@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
-import uuid
 from pathlib import Path
 
 import pytest
@@ -261,8 +260,8 @@ def test_installer_preserves_unmanaged_helper(policy: Path) -> None:
     os.name != "nt" or not Path("D:/github").is_dir(),
     reason="Requires approved native Windows workspace",
 )
-def test_native_validate_only_creates_no_tree() -> None:
-    task = "guard-preflight-" + uuid.uuid4().hex
+def test_native_validate_only_creates_no_tree(tmp_path: Path) -> None:
+    task = "guard-preflight-" + tmp_path.name
     target = Path("D:/github/BioactivityDataAcquisition-worktrees") / task
     result = subprocess.run(
         [sys.executable, "-B", guard.__file__, task, "--validate-only"],
