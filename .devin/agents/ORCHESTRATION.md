@@ -53,7 +53,7 @@ run_subagent(
 | py-debug-bot | — (read-only; implementation stays with orchestrator) | всё |
 | py-config-bot | `configs/` | `src/bioetl/`, `docs/` |
 | py-doc-bot | `docs/`, docstrings | `configs/`, `tests/` |
-| py-test-bot | — (exec only; `AGENT.md` denies write/edit) | `src/bioetl/`, `configs/`, `tests/` |
+| py-test-bot | `tests/**` through authorized parent until native qualification | `src/bioetl/`, `configs/`, `docs/`; product fixes belong to authorized parent |
 
 ### Определения субагентов
 
@@ -83,25 +83,23 @@ Operational defaults:
 
 ## 1.2 Memory-Enabled Task Loop
 
-Перед стандартным subagent workflow оркестратор и role-specific profiles должны использовать canonical memory loop из `src/memory/DAILY_WORKFLOW.md`.
+The `AGENTS.md` Required AI Context table is the single task-class matrix.
+V1 retrieval is optional; V2 pre-task is required; V3/V4 retain the full package
+and required pre-task; hash-only work uses `BIOETL_AI_MEMORY_MODE=off`.
+Reuse already-read current sources; re-read on content change, expanded scope,
+or conflicting evidence. Use matching Devin profiles and native capabilities.
 
-Минимальный порядок:
+When pre-task is selected for strict no-file-changes work, use read-only with
+`--skip-refresh-if-missing --skip-session-note` and set
+`PYTHONDONTWRITEBYTECODE=1` before starting Python (direct or wrapper invocation); do not rebuild even temporary
+artifacts. Missing retrieval stays DEGRADED; verify claims against source.
 
-1. `pre-task` only when required by AGENTS.md context tiers (V1 read-only optional; hash-only off).
-1. retrieval order: `catalog -> graph -> rag -> source`
-1. baseline/profile-specific work
-1. `post-task` and session notes only in authorized read-write mode; skip otherwise.
-1. promotion только для durable knowledge
-
-Это не заменяет runtime source или `.devin/agents/*.md`, а стандартизует:
-
-- pre-task retrieval
-- session-note creation
-- post-task summary
-- refresh rebuild-only memory artifacts
-- optional promotion into curated memory
-- periodic curated review via `python -m memory.tooling.workflow review-curated`
-- archive of superseded curated notes вместо silent stale accumulation
+When pre-task is selected, declare runtime/agent provenance and use retrieval
+order `catalog -> graph -> rag -> source`. Run `post-task`, create session notes,
+persist refresh artifacts, promote knowledge, or archive curated notes only in
+authorized `read-write` mode. In `off`/`read-only`, skip these writes and report
+the mode and missing evidence. Review-curated may identify due or stale notes;
+review results never grant permission to mutate them.
 
 Regular ritual rule:
 
@@ -111,7 +109,21 @@ Regular ritual rule:
 
 ______________________________________________________________________
 
+
+Curated review does not authorize promotion, archival, or persistent writes;
+those still require authorized `read-write` mode.
+
 ## 2. Стандартный workflow задачи
+
+Схема ниже описывает formal V3/V4 campaign или явно запрошенный полный цикл.
+V1/V2 не требуют этой цепочки или formal report bundle без требования пользователя
+или применимого contract. `py-test-bot` использует focused-first для baseline,
+final и retest; phase=final сама по себе не запускает full suite. Broad/full scope
+выбирается по shared behavior, cross-layer impact и обязательным CI / security /
+release gates; снижать tier или обходить gates через focused mode запрещено.
+Debug остаётся read-only: test evidence → RCA → authorized parent / implementer
+fix → retest. При blocked reproduction нет PASS; при failed retest сохраняется
+FAIL и цикл возвращается к RCA.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -257,9 +269,13 @@ ______________________________________________________________________
 reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md
 ```
 
-Правило: любой агент/субагент формирует итоговый отчёт только по этому пути (LLM = вызывающая модель, agent = профиль/skill, `phase` — опциональный суффикс для baseline/final/targeted, если это закреплено в contract конкретного `py-*` профиля). Дополнительные артефакты (телеметрия, метрики, промежуточные планы) сохраняйте рядом в той же директории, но итоговый отчёт должен соответствовать шаблону `reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md`.
+Для formal V3/V4 campaign либо явного требования пользователя/contract итоговый файловый отчёт формируется по этому пути (LLM = вызывающая модель, agent = профиль/skill, `phase` — опциональный суффикс для baseline/final/targeted, если это закреплено в contract конкретного `py-*` профиля). Дополнительные артефакты (телеметрия, метрики, промежуточные планы) сохраняйте рядом в той же директории, но итоговый отчёт должен соответствовать шаблону `reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md`.
 
-Требования к каждому файлу (минимум):
+Для focused V1/V2 без обязательного bundle достаточно краткого результата в
+ответе. Файловые отчёты вне permissions профиля сохраняет уполномоченный parent;
+само требование отчёта не расширяет native write permissions.
+
+Требования к каждому обязательному файлу (минимум):
 
 - Дата/время создания (UTC), LLM, agent
 - Scope (файлы/модули)
@@ -337,7 +353,7 @@ ______________________________________________________________________
 ## 7. Гарантии и инварианты
 
 1. **Traceability**: каждое изменение в коде привязано к `RF-*`, каждый fix — к `DBG-*`, каждый doc update — к `DOC-*`, каждый config change — к `CFG-*`.
-1. **Baseline/Final symmetry**: для каждого baseline-артефакта существует final-артефакт.
+1. **Baseline/Final symmetry**: в обязательном formal bundle для каждого baseline-артефакта существует final-артефакт; phase не определяет ширину suite.
 1. **No blind changes**: код не меняется без предварительного плана (`RF-*`).
 1. **No untested changes**: каждый `RF-*` проверяется через `py-test-bot`.
 1. **Architecture gate**: финальный аудит (`py-audit-bot`) является обязательным gate перед завершением задачи.
@@ -418,3 +434,11 @@ ______________________________________________________________________
 - Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
 - Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
 - Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.
+
+## Native qualification gate
+
+Apply DEVIN-RUNTIME.md Permission boundary and qualification before every
+invocation or parallel/foreground/background example above. Restricted native
+delegation is blocked; these workflows describe logical duties handled by the
+authorized parent. Legacy frontmatter permissions are unqualified declarations,
+not proof of isolation; no foreground or built-in fallback expands authority.

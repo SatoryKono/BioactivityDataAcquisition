@@ -22,8 +22,8 @@
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "edf170f35f3fe912617028b2f63262b184932232d405792525555645f79a8291",
     "bioetl-dq-v2": "49a570450086fe5fab45e9bd1eab522e7c6e310c85d83901a6c91eddae318c60",
-    "bioetl-incident-v1": "2314fff7db0c5434efdf576dd436eeb30667903559faa67472fe48c2cd4bd786",
-    "bioetl-overview-v2": "02df3184a77fe3c6602442bbc9ff296e370fa91de4fb21e7c0ee48d392158d28",
+    "bioetl-incident-v1": "88aba9787b9a5dfed2cd6d041be0b7da8b22c02967b4a39b6fb19180d6d8ef66",
+    "bioetl-overview-v2": "513fa8d604dcde45326b77bd309597b3dbefc7aff78c5ec77e1c3439ea27f317",
     "bioetl-run-explorer-v1": "6ff7833d4415bc6c57cfe10b139c09edbc5b95bf8378a07d3e30f2c99a948acf"
   },
   "panels": [
@@ -453,7 +453,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\")"
+          "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"BioETL Team\",\"reason\",\"infrastructure_failed\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"reason\",\"infrastructure_failed\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\")"
         ],
         "target_count": 1
       }
@@ -472,7 +472,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "label_replace(label_replace(label_replace(label_replace((label_replace(label_join((bioetl_incident_alert_priority{provider!=\"\"} or ((bioetl_incident_alert_priority{provider=\"\"} unless bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"}) * on(pipeline) group_left(provider) (group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0) and on(pipeline) (count by(pipeline)(group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0)) == 1))) or ((bioetl_incident_alert_priority{provider=\"\"} unless bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"}) unless on(pipeline) (group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0) and on(pipeline) (count by(pipeline)(group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0)) == 1))) or label_replace(bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"},\"provider\",\"N/A — Infrastructure\",\"\",\"\")),\"pipeline_context\",\";\",\"alertname\",\"pipeline\"),\"pipeline\",\"N/A — Docker infrastructure\",\"pipeline_context\",\"BioETLDockerRuntimeProbeMissing;\")),\"pipeline\",\"Not provided\",\"pipeline\",\"^$\"),\"provider\",\"Not provided\",\"provider\",\"^$\"),\"alert_runbook\",\"incident-response\",\"\",\"\"),\"alert_runbook\",\"docker-stability\",\"alertname\",\"BioETLDockerRuntimeProbeMissing\")"
+          "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace((label_replace(label_join((bioetl_incident_alert_priority{provider!=\"\"} or ((bioetl_incident_alert_priority{provider=\"\"} unless bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"}) * on(pipeline) group_left(provider) (group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0) and on(pipeline) (count by(pipeline)(group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0)) == 1))) or ((bioetl_incident_alert_priority{provider=\"\"} unless bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"}) unless on(pipeline) (group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0) and on(pipeline) (count by(pipeline)(group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0)) == 1))) or label_replace(bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"},\"provider\",\"N/A — Infrastructure\",\"\",\"\")),\"pipeline_context\",\";\",\"alertname\",\"pipeline\"),\"pipeline\",\"N/A — Docker infrastructure\",\"pipeline_context\",\"BioETLDockerRuntimeProbeMissing;\")),\"pipeline\",\"Not provided\",\"pipeline\",\"^$\"),\"provider\",\"Not provided\",\"provider\",\"^$\"),\"alert_runbook\",\"incident-response\",\"\",\"\"),\"alert_runbook\",\"docker-stability\",\"alertname\",\"BioETLDockerRuntimeProbeMissing\"),\"alert_runbook\",\"pipeline-failure-critical\",\"alertname\",\"BioETLPipelineInfrastructureValidationFailed\"),\"alert_runbook\",\"pipeline-failure-dq\",\"alertname\",\"BioETLDataFreshnessLagCritical\"),\"owner\",\"BioETL Team\",\"alertname\",\"BioETLPipelineInfrastructureValidationFailed|BioETLDataFreshnessLagCritical\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"alertname\",\"BioETLPipelineInfrastructureValidationFailed\"),\"next_step\",\"Open pipeline-failure-dq.md\",\"alertname\",\"BioETLDataFreshnessLagCritical\")"
         ],
         "target_count": 1
       }
@@ -2254,7 +2254,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "bioetl_incident_global_alerts"
+          "topk(2, bioetl_incident_global_alerts)"
         ],
         "target_count": 1
       }

@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4177 |
-| Tracked doc-like files | 4177 |
+| Doc-like files | 4185 |
+| Tracked doc-like files | 4185 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4177 |
+| tracked | 4185 |
 
 ## Lifecycle Counts
 
@@ -28,8 +28,8 @@
 | active_quality_baseline | 125 |
 | closeout_evidence | 168 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 40 |
-| docs_reports_generated_or_route_owned | 7 |
+| docs_reports_curated_or_historical_report | 41 |
+| docs_reports_generated_or_route_owned | 8 |
 | docs_reports_retention_sensitive_evidence | 29 |
 | generated_skill_reference_mirror | 19 |
 | generated_test_run_evidence | 6 |
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 381 |
+| working_report | 382 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -51,29 +51,29 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 765 |
+| Active | 770 |
 | Archived | 1554 |
 | Canonical | 77 |
-| Generated | 1066 |
-| Working | 715 |
+| Generated | 1067 |
+| Working | 717 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 765 |
+| active | 770 |
 | archive | 1554 |
 | canonical | 77 |
-| generated | 1066 |
-| working | 715 |
+| generated | 1067 |
+| working | 717 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 422 |
-| generate-automatically | 1066 |
-| keep | 2689 |
+| archive-after-migration | 424 |
+| generate-automatically | 1067 |
+| keep | 2694 |
 
 ## Cleanup Candidates
 
@@ -132,6 +132,7 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/runtime-receipt.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | Working | 0 | archive-after-migration |
+| `docs/reports/mcp-readiness/2026-11-11-retrieval.md` | Working | 0 | archive-after-migration |
 | `reports/12361_named_blocker.md` | Working | 0 | archive-after-migration |
 | `reports/12371-restart-c/handoff_report.md` | Working | 0 | archive-after-migration |
 | `reports/12375_b_repeat_blocker.md` | Working | 0 | archive-after-migration |
@@ -158,7 +159,6 @@
 | `reports/audit-runs/12107-r07/acceptance-review.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/adapter-owner-map.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/adapter-owner-map.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/12107-r07/behavior-followups.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

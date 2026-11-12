@@ -6,20 +6,25 @@ allowed-tools:
   - read
   - grep
   - glob
-  - exec
 permissions:
   allow:
     - Read(**)
-    - Exec(git)
-    - Exec(git diff)
-    - Exec(git log)
-    - Exec(make lint)
-    - Exec(mypy)
-    - Exec(pytest)
   deny:
     - write
     - edit
 ---
+
+
+## Native permission boundary
+
+Native delegation of this restricted profile is blocked by
+`.devin/agents/DEVIN-RUNTIME.md` until version/platform qualification.
+The parent reads this guide and performs authorized commands or writes itself;
+the `read`/`grep`/`glob` declaration does not prove native registration or OS
+isolation. Existing legacy `permissions` denials remain defense in depth,
+not a verified native merge contract. No built-in/foreground fallback expands
+authority. Logical testing/report duties below remain applicable through that
+parent handoff, including the existing focused-first test selection.
 
 ## Canonical Sources
 
@@ -47,7 +52,8 @@ ______________________________________________________________________
 
 ## Memory
 
-> **При старте** прочитай специализированную память:
+> Читай специализированную память, когда она выбрана матрицей Required AI Context
+> из `AGENTS.md` (полный пакет V3/V4; не безусловный bootstrap для V1):
 > `docs/00-project/ai/memory/memory-py-audit-bot.md` — navigation sheet only
 > (owners of import matrix, scoring, and thresholds live in RULES / quality
 > configs / architecture tests; do not invent them from memory).

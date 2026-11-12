@@ -145,6 +145,25 @@ def _load_saved_assessment(
         )
 
 
+def _assessment_artifact_probes(
+    report: Mapping[str, object],
+    assessment: Mapping[str, object],
+    directory: Path,
+) -> tuple[list[Mapping[str, object]], bool]:
+    """Attach completeness evidence to the saved report's artifact probes."""
+    probes, inventory_present = _artifact_probes(report, directory)
+    if assessment.get("evidence_completeness") != "COMPLETE":
+        probes.append(
+            {
+                "code": "report_evidence_completeness",
+                "result": "unknown",
+                "reason": "report_evidence_incomplete",
+                "evidence_ref": "#/selected_run_snapshot/assessment",
+            }
+        )
+    return probes, inventory_present
+
+
 def load_selected_run_status(
     *,
     pipeline: str,
@@ -196,16 +215,9 @@ def load_selected_run_status(
         run_id,
         heartbeat_now=_NOT_EVALUATED,
     )
-    probes, inventory_present = _artifact_probes(report, path.parent)
-    if assessment.get("evidence_completeness") != "COMPLETE":
-        probes.append(
-            {
-                "code": "report_evidence_completeness",
-                "result": "unknown",
-                "reason": "report_evidence_incomplete",
-                "evidence_ref": "#/selected_run_snapshot/assessment",
-            }
-        )
+    probes, inventory_present = _assessment_artifact_probes(
+        report, assessment, path.parent
+    )
     manifest, replay_probe = project_assay_replay(
         path.parent,
         run_id,

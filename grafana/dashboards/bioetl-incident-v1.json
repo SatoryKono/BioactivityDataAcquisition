@@ -615,7 +615,7 @@
           "instant": true,
           "range": false,
           "format": "table",
-          "expr": "label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\")",
+          "expr": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"BioETL Team\",\"reason\",\"infrastructure_failed\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"reason\",\"infrastructure_failed\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\")",
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
@@ -1334,7 +1334,7 @@
       },
       "targets": [
         {
-          "expr": "label_replace(label_replace(label_replace(label_replace((label_replace(label_join((bioetl_incident_alert_priority{provider!=\"\"} or ((bioetl_incident_alert_priority{provider=\"\"} unless bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"}) * on(pipeline) group_left(provider) (group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0) and on(pipeline) (count by(pipeline)(group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0)) == 1))) or ((bioetl_incident_alert_priority{provider=\"\"} unless bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"}) unless on(pipeline) (group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0) and on(pipeline) (count by(pipeline)(group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0)) == 1))) or label_replace(bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"},\"provider\",\"N/A — Infrastructure\",\"\",\"\")),\"pipeline_context\",\";\",\"alertname\",\"pipeline\"),\"pipeline\",\"N/A — Docker infrastructure\",\"pipeline_context\",\"BioETLDockerRuntimeProbeMissing;\")),\"pipeline\",\"Not provided\",\"pipeline\",\"^$\"),\"provider\",\"Not provided\",\"provider\",\"^$\"),\"alert_runbook\",\"incident-response\",\"\",\"\"),\"alert_runbook\",\"docker-stability\",\"alertname\",\"BioETLDockerRuntimeProbeMissing\")",
+          "expr": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace((label_replace(label_join((bioetl_incident_alert_priority{provider!=\"\"} or ((bioetl_incident_alert_priority{provider=\"\"} unless bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"}) * on(pipeline) group_left(provider) (group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0) and on(pipeline) (count by(pipeline)(group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0)) == 1))) or ((bioetl_incident_alert_priority{provider=\"\"} unless bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"}) unless on(pipeline) (group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0) and on(pipeline) (count by(pipeline)(group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0)) == 1))) or label_replace(bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"},\"provider\",\"N/A — Infrastructure\",\"\",\"\")),\"pipeline_context\",\";\",\"alertname\",\"pipeline\"),\"pipeline\",\"N/A — Docker infrastructure\",\"pipeline_context\",\"BioETLDockerRuntimeProbeMissing;\")),\"pipeline\",\"Not provided\",\"pipeline\",\"^$\"),\"provider\",\"Not provided\",\"provider\",\"^$\"),\"alert_runbook\",\"incident-response\",\"\",\"\"),\"alert_runbook\",\"docker-stability\",\"alertname\",\"BioETLDockerRuntimeProbeMissing\"),\"alert_runbook\",\"pipeline-failure-critical\",\"alertname\",\"BioETLPipelineInfrastructureValidationFailed\"),\"alert_runbook\",\"pipeline-failure-dq\",\"alertname\",\"BioETLDataFreshnessLagCritical\"),\"owner\",\"BioETL Team\",\"alertname\",\"BioETLPipelineInfrastructureValidationFailed|BioETLDataFreshnessLagCritical\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"alertname\",\"BioETLPipelineInfrastructureValidationFailed\"),\"next_step\",\"Open pipeline-failure-dq.md\",\"alertname\",\"BioETLDataFreshnessLagCritical\")",
           "format": "table",
           "instant": true,
           "refId": "A",
@@ -1601,6 +1601,38 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "owner"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Owner"
+              },
+              {
+                "id": "noValue",
+                "value": "See runbook"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "next_step"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Next step"
+              },
+              {
+                "id": "noValue",
+                "value": "See runbook"
               }
             ]
           }
@@ -12065,6 +12097,38 @@
                   {
                     "id": "custom.hidden",
                     "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "owner"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Owner"
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "See runbook"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "next_step"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Next step"
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "See runbook"
                   }
                 ]
               }

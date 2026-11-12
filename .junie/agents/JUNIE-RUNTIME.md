@@ -29,16 +29,10 @@ reference documents and native configuration presence cannot override them.
 
 ## Context tiers
 
-Follow the `AGENTS.md` Required AI Context table. Hash-only rebind, date stamp,
-and remote-main skip RULES/ADR and full `pre-task` RAG
-(`BIOETL_AI_MEMORY_MODE=off`). V3/V4 keep the full package.
-
-| Task class | Read | Memory |
-| --- | --- | --- |
-| hash-only generated-artifact rebind, date stamp, remote-main | drift runbook + touched reporter | `BIOETL_AI_MEMORY_MODE=off`; skip RAG |
-| V1 docs/prompt | `AGENTS.md` / `.junie/guidelines.md` guardrails + POST_CHANGE docs slice | read-only optional |
-| V2 focused code | + matching role/skill for SCOPE | `pre-task` |
-| V3/V4 | full package via `AGENTS.md` | `pre-task` required |
+The `AGENTS.md` Required AI Context table is the single task-class matrix.
+Apply its source-reuse and memory-write rules before loading a role or wrapper;
+this map does not define a second bootstrap table. V3/V4 retain the full package
+and required pre-task. Hash-only work uses `BIOETL_AI_MEMORY_MODE=off`.
 
 ## Purpose
 
@@ -84,19 +78,30 @@ identity to repository, commit, branch, worktree, task, and source references.
 
 ## Governed Profiles
 
-Junie exposes its own role vocabulary, but it routes the same six logical
-profiles governed by `.codex/agents/CODEX-RUNTIME.md`. The logical profile set
+Hook discovery: `python scripts/ai/codex/doctor.py hooks --no-write --json`.
+Exit 2 means installed capability is NOT_PROVEN. Discovery never runs hooks or
+runtime commands. See `docs/05-operations/runbooks/ai-hook-compatibility.md` for
+platform observations and vendor contracts; documentation alone cannot enable
+a native adapter.
+
+The table is a logical responsibility map, not a native registration receipt.
+The byte-parity profile Markdown files do not declare vendor YAML metadata;
+native custom-agent registration is NOT_PROVEN for the installed build. Until
+qualified, the parent reads a selected guide and performs its responsibilities
+directly without claiming a native agent was loaded. Keep the governed mirrors.
+See `docs/05-operations/runbooks/ai-rules-loading.md` for version-bound evidence.
+The logical profile set
 MUST match the tracked `.codex/agents/py-*.md` and `.junie/agents/py-*.md`
 inventories.
 
-| Logical profile | Junie role | Default authority |
+| Logical profile | Parent responsibility (not a native role name) | Default authority |
 | --- | --- | --- |
-| `py-audit-bot` | default | read-only |
-| `py-config-bot` | worker | workspace write |
-| `py-debug-bot` | worker | read-only |
-| `py-doc-bot` | worker | workspace write |
-| `py-plan-bot` | default | read-only |
-| `py-test-bot` | default or worker | workspace write |
+| `py-audit-bot` | audit | read-only |
+| `py-config-bot` | config remediation | workspace write |
+| `py-debug-bot` | diagnosis | read-only |
+| `py-doc-bot` | documentation | workspace write |
+| `py-plan-bot` | planning | read-only |
+| `py-test-bot` | tests | workspace write |
 
 ## Common Task Routing
 
