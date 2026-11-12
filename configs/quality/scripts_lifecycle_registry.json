@@ -1777,6 +1777,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/repo/create_worktree.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Keep as the stdlib implementation behind the existing scripts.engineering.repo worktree bootstrap and mandatory installed bioetl-create-worktree.py helper. No standalone script entrypoint; preserve active_script_count_max and all env/path/full-tree guardrails.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
+    },
     "scripts/engineering/repo/github_settings_review.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the read-only GitHub governance review implementation behind `python -m scripts.engineering.repo github-settings-review`; keep workflow and runbook invocation routed through the package entrypoint.",
