@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "636533e7ef28a6b71a6f266b6253001ca77bf2a6",
+  "source_ref": "636533e7ef28a6b71a6f266b6253001ca77bf2a6",
+  "source_reviews": {
+    "src/bioetl/interfaces/http/health_server.py": "Reviewed optional quarantine token construction setting; existing server/task acquisition and cleanup scopes unchanged. No new external resource.",
+    "src/bioetl/interfaces/http/health_server_http_mixin.py": "Reviewed unique Authorization parsing and constant-time token check before dispatch. Existing socket/reader/writer ownership and close paths unchanged; no new external acquisition."
+  },
+  "line_updates": {
+    "src/bioetl/interfaces/http/health_server.py": {
+      "270": 272,
+      "266": 268,
+      "265": 267
+    }
+  }
+}
