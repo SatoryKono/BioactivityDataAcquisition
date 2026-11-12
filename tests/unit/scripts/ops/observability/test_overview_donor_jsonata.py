@@ -132,3 +132,38 @@ def test_long_reason_preview_preserves_the_complete_saved_explanation():
     assert domain["domain_reason_brief"] == explanation[:31] + "…"
     assert domain["run_reason_brief"] == domain["run_reason"][:19] + "…"
     assert len(domain["run_reason_brief"]) == 20
+
+
+@pytest.mark.parametrize(
+    ("domain_name", "reason", "display"),
+    [
+        (
+            "Workflow",
+            "workflow_parent_not_finalized",
+            "Parent workflow completion has not been recorded",
+        ),
+        (
+            "Provider",
+            "run_preflight_provider_observation",
+            "Provider: saved preflight observation",
+        ),
+    ],
+)
+def test_run_reason_alias_is_applied_before_bounded_preview(
+    domain_name, reason, display
+):
+    payload = donor_payload(None, None)
+    payload["presentation_domains"] = [
+        {
+            "domain": domain_name,
+            "verdict": "INCOMPLETE",
+            "reason": reason,
+            "reason_display": reason,
+        }
+    ]
+    rows = evaluate_donor(payload)
+    domain = next(row for row in rows if row["_bioetl_frame"] == "domains")
+    assert domain["run_reason_brief"] == display[:19] + "…"
+    assert len(domain["run_reason_brief"]) == 20
+    assert domain["run_reason"] == domain_name + ": " + reason
+    assert domain["reason_display"] == reason

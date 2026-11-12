@@ -390,5 +390,6 @@ def test_dq_decoder_rejects_invalid_record_policy() -> None:
     from bioetl.domain.composite.config_composite_section_decoders import (
         build_dq_config,
     )
+
     with pytest.raises(ValueError, match="invalid_record_policy"):
         build_dq_config({"invalid_record_policy": "silently_accept"})
