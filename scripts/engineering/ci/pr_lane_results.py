@@ -373,6 +373,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
     ),
+    "docs/05-operations/01-monitoring-guide.md": (
+        "tests/integration/test_grafana_dashboard_links.py",
+        "tests/unit/scripts/ops/observability/test_check_published_observability_endpoints.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     **dict.fromkeys(
         (
             "reports/review/grafana-full-tables-20261110/audit.json",
