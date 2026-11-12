@@ -477,7 +477,7 @@
         "type": "datasource",
         "uid": "-- Dashboard --"
       },
-      "description": "SELECTED RUN · AUTO shows the latest run by start time in the current scope, including unfinished runs. EXPLICIT keeps the requested Run ID. Context checked at is this Grafana query evaluation time, not run start, browser click, server cache load or catalog freshness. Refresh re-evaluates the displayed context. UNKNOWN is missing evidence; request failure is Source unavailable. This context assesses that run only, not a fleet verdict. TIME RANGE telemetry never proves this run. Empty is a coverage gap, not a pass. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
+      "description": "SELECTED RUN · AUTO shows the latest run by start time in the current scope, including unfinished runs. EXPLICIT keeps the requested Run ID and shows evidence for that run only. Context checked at is this Grafana query evaluation time, not run start, browser click, server cache load or catalog freshness. Refresh re-evaluates the displayed context. UNKNOWN is missing evidence; request failure is Source unavailable. This context assesses that run only, not a fleet verdict. TIME RANGE telemetry never proves this run. Empty is a coverage gap, not a pass. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
       "targets": [
         {
           "refId": "A",
@@ -910,6 +910,20 @@
                     "title": "Open saved run report",
                     "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
                     "targetBlank": true
+                  }
+                ]
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "QUERY ERROR": {
+                        "text": "Source unavailable",
+                        "color": "red"
+                      }
+                    }
                   }
                 ]
               }
