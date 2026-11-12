@@ -57,7 +57,7 @@ Commands:
   exec           Auto-execute mode
   check          Check environment
   setup          Setup components
-  mcp-check      Run bounded profile-aware MCP readiness checks
+  mcp-check      Inspect effective routes and explicitly selected MCP controls
   mcp-static     Check MCP configuration without live services
   mcp-setup      Force-refresh MCP configuration
   login          Login with API key
