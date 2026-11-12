@@ -300,6 +300,26 @@ jobs:
         if: always() && !cancelled()
         with:
           sarif_file: "reports/security/trivy-results.sarif"
+          # Existing main configurations scan this same complete image.
+          # Explicit categories keep comparisons stable across reusable callers.
+          category: ".github/workflows/docker.yml:docker-build"
+          wait-for-processing: true
+
+      - name: Upload Trivy results for main-integrity comparison
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        if: always() && !cancelled()
+        with:
+          sarif_file: "reports/security/trivy-results.sarif"
+          category: ".github/workflows/main-integrity.yml:docker-build"
+          wait-for-processing: true
+
+      - name: Upload Trivy results for PR coordinator comparison
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        if: always() && !cancelled()
+        with:
+          sarif_file: "reports/security/trivy-results.sarif"
+          category: ".github/workflows/pr-required.yml:docker-build"
+          wait-for-processing: true
 
       - name: Generate SBOM for the scanned local image
         uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3

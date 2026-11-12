@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T17:52:56.319604+00:00",
+  "generated_at": "2026-11-12T19:10:04.973628+00:00",
   "summary": {
     "total_scripts": 746,
     "status_counts": {
@@ -4102,7 +4102,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 703,
+          "line": 725,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\","
         }
@@ -4151,7 +4151,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 704,
+          "line": 726,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\","
         }
@@ -5099,7 +5099,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 705,
+          "line": 727,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\","
         }
@@ -5518,7 +5518,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 706,
+          "line": 728,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\","
         }
@@ -16184,13 +16184,13 @@
         },
         {
           "path": ".github/workflows/docker.yml",
-          "line": 343,
+          "line": 363,
           "source_group": "ci",
           "text": "python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \\"
         },
         {
           "path": ".github/workflows/docker.yml",
-          "line": 395,
+          "line": 415,
           "source_group": "ci",
           "text": "python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \\"
         },
@@ -19482,7 +19482,7 @@
           "path": "docs/05-engineering/test-telemetry-baseline.md",
           "line": 124,
           "source_group": "docs",
-          "text": "| 3 | `17.645` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-u"
+          "text": "| 3 | `15.383` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-u"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
@@ -22593,7 +22593,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1413,
+          "line": 1435,
           "source_group": "tests",
           "text": "\"scripts/engineering/repo/process_supervisor.py\","
         }
@@ -24640,7 +24640,7 @@
         },
         {
           "path": "tests/integration/test_grafana_evidence_readability.py",
-          "line": 244,
+          "line": 257,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import _stage_colors"
         }
