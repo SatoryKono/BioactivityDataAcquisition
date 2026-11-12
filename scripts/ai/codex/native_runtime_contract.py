@@ -657,9 +657,28 @@ def _declared_string_list(text: str, key: str, indent: int) -> list[str]:
     positions = [index for index, line in enumerate(lines) if pattern.match(line)]
     if len(positions) != 1 or lines[positions[0]] != marker:
         raise ValueError("missing/duplicate declared list")
+    return _permission_list_values(lines[positions[0] + 1 :], indent)
+
+
+def _permission_scalar(raw: str) -> str:
+    """Accept plain or unescaped quoted values, without Python escape rules."""
+    value = raw.strip()
+    if value.startswith(("'", '"')):
+        if len(value) < 2 or value[-1] != value[0]:
+            raise ValueError("unsupported quoted list scalar")
+        value = value[1:-1]
+        if any(char in value for char in ("\\", "'", '"')):
+            raise ValueError("unsupported quoted list escape")
+    if not re.fullmatch(r"[A-Za-z]\w*(?:\([^\r\n()]+\))?", value, re.ASCII):
+        raise ValueError("unsupported list scalar")
+    return value
+
+
+def _permission_list_values(lines: list[str], indent: int) -> list[str]:
+    """Reject folded continuations; all list items share an indentation."""
     result = []
     item_indent: int | None = None
-    for line in lines[positions[0] + 1 :]:
+    for line in lines:
         if not line.strip() or line.lstrip().startswith("#"):
             continue
         match = re.fullmatch(r"( *)- (.+)", line)
@@ -673,19 +692,7 @@ def _declared_string_list(text: str, key: str, indent: int) -> list[str]:
         ):
             raise ValueError("unsupported list indentation")
         item_indent = current_indent
-        value = match[2].strip()
-        if value.startswith(("'", '"')):
-            # Only the unescaped quoted subset is governed here. Python string
-            # escapes differ from YAML (notably single quotes); never decode
-            # these permission declarations with ast.literal_eval.
-            if len(value) < 2 or value[-1] != value[0]:
-                raise ValueError("unsupported quoted list scalar")
-            value = value[1:-1]
-            if any(char in value for char in ("\\", "'", '"')):
-                raise ValueError("unsupported quoted list escape")
-        if not re.fullmatch(r"[A-Za-z]\w*(?:\([^\r\n()]+\))?", value, re.ASCII):
-            raise ValueError("unsupported list scalar")
-        result.append(value)
+        result.append(_permission_scalar(match[2]))
     if not result:
         raise ValueError("empty declared list")
     return result
