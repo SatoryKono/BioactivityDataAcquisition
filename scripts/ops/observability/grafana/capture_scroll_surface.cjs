@@ -113,19 +113,28 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
   if(!Number.isFinite(visibleHeight) || visibleHeight<=0)throw new Error('Sticky chrome covers scroll surface');
   // Keep toolbar shadows inside the overlap rather than copying them over content.
   const overlap=Math.min(64,Math.floor(visibleHeight/4));
+  // Rounded client/scroll heights can overstate the reachable scrollTop. Browsers
+  // may clamp to a fractional maximum below scrollHeight - clientHeight.
+  const maxScrollTop=Math.max(0,surface.scrollHeight-surface.clientHeight);
   let target=0;
   for (;;) {
     let actual=await page.evaluate(y=>{
       const el=document.querySelector('[data-bioetl-capture-scroll]');el.scrollTop=y;return el.scrollTop;
     },target);
-    if(actual<=previous)throw new Error(`Dashboard scroll capture stalled at ${actual}; surface=${JSON.stringify(surface)}`);
+    if(actual<=previous){
+      // No further progress after a successful tile means the browser already
+      // clamped to the real end; compositionSlices still enforces full coverage.
+      if(tiles.length>0 && target>=previous)break;
+      throw new Error(`Dashboard scroll capture stalled at ${actual}; surface=${JSON.stringify(surface)}`);
+    }
     previous=actual;
     await page.waitForTimeout(750);
     const tile = await captureStableTile(page, {tileDir,index:tiles.length,timeout,measure,verify,pngEvidence});
     actual = tile.scrollTop;
     tiles.push({...tile,file:path.relative(path.dirname(filePath),tile.file)});
     if(actual+surface.clientHeight>=surface.scrollHeight)break;
-    const next=Math.min(actual+visibleHeight-overlap,surface.scrollHeight-surface.clientHeight);
+    if(actual>=maxScrollTop-1e-3)break;
+    const next=Math.min(actual+visibleHeight-overlap,maxScrollTop);
     if(next<=actual)throw new Error('Dashboard scroll capture made no progress');
     target=next;
   }

@@ -174,3 +174,57 @@ captureScrollSurface(page,{
         capture_output=True,
         text=True,
     )
+
+
+def test_capture_accepts_fractional_browser_scroll_clamp(tmp_path):
+    """Rounded client/scroll heights may overstate the reachable scrollTop."""
+    script = r"""
+const fs = require('node:fs');
+const path = require('node:path');
+const modulePath = process.argv[1], directory = process.argv[2];
+// Integer DOM metrics imply maxScrollTop=1200, but the browser clamps to 1199.6.
+const surface = {top:232,stickyBottom:232,clientHeight:600,scrollHeight:1800,scale:1};
+const native = require(path.join(path.dirname(modulePath),'native_browser_zoom.cjs'));
+native.capturePageScreenshot = async (_page,options)=>{
+  const bytes=Buffer.from('synthetic viewport');
+  fs.writeFileSync(options.path,bytes);
+  return bytes;
+};
+const {captureScrollSurface} = require(modulePath);
+const maxActual = 1199.6;
+let scrollTop=0;
+const page = {
+  evaluate: async (fn,arg)=>{
+    const code=fn.toString();
+    if(code.includes('const candidates')) return surface;
+    if(code.includes('el.scrollTop=y')) {
+      scrollTop=Math.min(arg,maxActual);
+      return scrollTop;
+    }
+    if(code.includes('delete el.dataset')) {scrollTop=0;return;}
+    if(code.includes('getBoundingClientRect')) return [];
+    return scrollTop;
+  },
+  waitForTimeout: async ()=>{},
+  context: ()=>({newPage: async ()=>({
+    evaluate: async ()=>Buffer.from('synthetic composite').toString('base64'),
+    close: async ()=>{},
+  })}),
+};
+captureScrollSurface(page,{
+  filePath:path.join(directory,'dashboard.png'), timeout:1000,
+  pngEvidence:()=>({width:584,height:916}), measure:async()=>({}),
+}).then(result=>{
+  const positions=result.tiles.map(tile=>tile.scrollTop);
+  if(JSON.stringify(positions)!==JSON.stringify([0,536,1072,1199.6]))
+    throw new Error(`Unexpected scroll positions: ${positions}`);
+  if(result.composition.canvasHeight!==2032)
+    throw new Error(`Incorrect composite height: ${result.composition.canvasHeight}`);
+}).catch(error=>{console.error(error);process.exitCode=1;});
+"""
+    subprocess.run(
+        ["node", "-e", script, str(COMPOSITOR), str(tmp_path)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
