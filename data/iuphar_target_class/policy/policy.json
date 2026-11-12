@@ -1,0 +1,260 @@
+{
+  "api_contract": {
+    "documentary": [
+      {
+        "as_of": "2026-11-09",
+        "item": "api_key_required",
+        "note": "не проверенный контракт сервиса",
+        "source": "план v1 r8 §5",
+        "status": "подтверждено документально"
+      },
+      {
+        "as_of": "2026-11-09",
+        "item": "header_GTP-API-Key",
+        "note": "не проверенный контракт сервиса",
+        "source": "план v1 r8 §5",
+        "status": "подтверждено документально"
+      },
+      {
+        "as_of": "2026-11-09",
+        "item": "rate_about_60_per_minute",
+        "note": "ориентир документации, не измеренный лимит",
+        "source": "план v1 r8 §5",
+        "status": "подтверждено документально"
+      }
+    ],
+    "operational_check": {
+      "blocks_stages_0_to_3": false,
+      "reason": "эксплуатационная проверка относится к этапу 4",
+      "status": "NOT_RUN"
+    },
+    "saved_responses": {
+      "families": "NOT_RUN",
+      "gene_protein_cross_reference": "NOT_RUN",
+      "reason": "сохранённые ответы в репозитории отсутствуют",
+      "targets": "NOT_RUN"
+    }
+  },
+  "biological_accuracy_accepted": false,
+  "class_dictionary": [
+    {
+      "family": "dictionary",
+      "input_conditions": "утверждённое отображение type или family ID выбранного выпуска даёт Receptor",
+      "justification_source": "план v1 r8 §2.1",
+      "limits": "проектная группировка, не схема API; без утверждённого отображения класс не присваивается",
+      "marks_direct_layer": false,
+      "output": "Receptor",
+      "rule_id": "class:Receptor",
+      "version": "plan-v1-r8"
+    },
+    {
+      "family": "dictionary",
+      "input_conditions": "утверждённое отображение type или family ID выбранного выпуска даёт Ion Channel",
+      "justification_source": "план v1 r8 §2.1",
+      "limits": "проектная группировка, не схема API; без утверждённого отображения класс не присваивается",
+      "marks_direct_layer": false,
+      "output": "Ion Channel",
+      "rule_id": "class:Ion Channel",
+      "version": "plan-v1-r8"
+    },
+    {
+      "family": "dictionary",
+      "input_conditions": "утверждённое отображение type или family ID выбранного выпуска даёт Enzyme",
+      "justification_source": "план v1 r8 §2.1",
+      "limits": "проектная группировка, не схема API; без утверждённого отображения класс не присваивается",
+      "marks_direct_layer": false,
+      "output": "Enzyme",
+      "rule_id": "class:Enzyme",
+      "version": "plan-v1-r8"
+    },
+    {
+      "family": "dictionary",
+      "input_conditions": "утверждённое отображение type или family ID выбранного выпуска даёт Transporter",
+      "justification_source": "план v1 r8 §2.1",
+      "limits": "проектная группировка, не схема API; без утверждённого отображения класс не присваивается",
+      "marks_direct_layer": false,
+      "output": "Transporter",
+      "rule_id": "class:Transporter",
+      "version": "plan-v1-r8"
+    },
+    {
+      "family": "dictionary",
+      "input_conditions": "утверждённое отображение type или family ID выбранного выпуска даёт Other Protein Target",
+      "justification_source": "план v1 r8 §2.1",
+      "limits": "проектная группировка, не схема API; без утверждённого отображения класс не присваивается",
+      "marks_direct_layer": false,
+      "output": "Other Protein Target",
+      "rule_id": "class:Other Protein Target",
+      "version": "plan-v1-r8"
+    }
+  ],
+  "direct_mappings": {
+    "families": [],
+    "reason": "выпуск снимка не выбран: охват и набор видов не утверждены",
+    "release": null,
+    "types": []
+  },
+  "gold_cases": {
+    "cases": [],
+    "checker": "Cursor",
+    "reason": "закреплённый источник IUPHAR в этапе 0 отсутствует",
+    "status": "не подтверждены"
+  },
+  "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13009",
+  "l1_l2_independence": {
+    "biological_sample_review": false,
+    "checked_against": "этап 0: provenance L1/L2 не установлено",
+    "checker": "Cursor",
+    "result": "производным независимым подтверждением не считается",
+    "role_assignment": "владелец результата — Федор Новиков; исполнитель модуля и проверяющий эталонов — Cursor, назначение владельца 2026-11-11",
+    "usage": "candidate_only"
+  },
+  "local_rules": [
+    {
+      "family": "ec",
+      "input_conditions": "EC с подтверждённой категорией 1",
+      "justification_source": "план v1 r8 шаг D, справочник IUBMB",
+      "limits": "категория EC, не класс IUPHAR; EC 7 не становится Transporter; слой local",
+      "marks_direct_layer": false,
+      "output": "Oxidoreductases",
+      "rule_id": "ec:1",
+      "version": "plan-v1-r8"
+    },
+    {
+      "family": "ec",
+      "input_conditions": "EC с подтверждённой категорией 2",
+      "justification_source": "план v1 r8 шаг D, справочник IUBMB",
+      "limits": "категория EC, не класс IUPHAR; EC 7 не становится Transporter; слой local",
+      "marks_direct_layer": false,
+      "output": "Transferases",
+      "rule_id": "ec:2",
+      "version": "plan-v1-r8"
+    },
+    {
+      "family": "ec",
+      "input_conditions": "EC с подтверждённой категорией 3",
+      "justification_source": "план v1 r8 шаг D, справочник IUBMB",
+      "limits": "категория EC, не класс IUPHAR; EC 7 не становится Transporter; слой local",
+      "marks_direct_layer": false,
+      "output": "Hydrolases",
+      "rule_id": "ec:3",
+      "version": "plan-v1-r8"
+    },
+    {
+      "family": "ec",
+      "input_conditions": "EC с подтверждённой категорией 4",
+      "justification_source": "план v1 r8 шаг D, справочник IUBMB",
+      "limits": "категория EC, не класс IUPHAR; EC 7 не становится Transporter; слой local",
+      "marks_direct_layer": false,
+      "output": "Lyases",
+      "rule_id": "ec:4",
+      "version": "plan-v1-r8"
+    },
+    {
+      "family": "ec",
+      "input_conditions": "EC с подтверждённой категорией 5",
+      "justification_source": "план v1 r8 шаг D, справочник IUBMB",
+      "limits": "категория EC, не класс IUPHAR; EC 7 не становится Transporter; слой local",
+      "marks_direct_layer": false,
+      "output": "Isomerases",
+      "rule_id": "ec:5",
+      "version": "plan-v1-r8"
+    },
+    {
+      "family": "ec",
+      "input_conditions": "EC с подтверждённой категорией 6",
+      "justification_source": "план v1 r8 шаг D, справочник IUBMB",
+      "limits": "категория EC, не класс IUPHAR; EC 7 не становится Transporter; слой local",
+      "marks_direct_layer": false,
+      "output": "Ligases",
+      "rule_id": "ec:6",
+      "version": "plan-v1-r8"
+    },
+    {
+      "family": "ec",
+      "input_conditions": "EC с подтверждённой категорией 7",
+      "justification_source": "план v1 r8 шаг D, справочник IUBMB",
+      "limits": "категория EC, не класс IUPHAR; EC 7 не становится Transporter; слой local",
+      "marks_direct_layer": false,
+      "output": "Translocases",
+      "rule_id": "ec:7",
+      "version": "plan-v1-r8"
+    },
+    {
+      "family": "l1_l2",
+      "input_conditions": "predicted L1/L2 при неизвестном происхождении",
+      "justification_source": "план v1 r8 шаг D; этап 0: происхождение не установлено",
+      "limits": "не независимое подтверждение и не direct-слой",
+      "marks_direct_layer": false,
+      "output": "candidate_only",
+      "rule_id": "predicted-l1-l2",
+      "version": "plan-v1-r8"
+    },
+    {
+      "family": "free_text",
+      "input_conditions": "свободный текст, подстроки kinase/channel/zinc finger",
+      "justification_source": "план v1 r8 шаг D",
+      "limits": "класс автоматически не определяется",
+      "marks_direct_layer": false,
+      "output": "кандидат ручного разбора",
+      "rule_id": "free-text",
+      "version": "plan-v1-r8"
+    }
+  ],
+  "parameters": {
+    "graph_limits": {
+      "keys": [
+        "max_depth",
+        "max_visited_nodes"
+      ],
+      "max_depth": null,
+      "max_visited_nodes": null,
+      "status": "не утверждено"
+    },
+    "isoform_policy": null,
+    "isoform_policy_status": "не утверждено",
+    "missing_markers_base": [
+      "#n/a",
+      "N/A",
+      "n/a",
+      ""
+    ],
+    "missing_markers_null": true,
+    "missing_markers_version": null,
+    "missing_markers_version_status": "не утверждено",
+    "missing_markers_whitespace_only": true,
+    "snapshot_coverage": null,
+    "snapshot_coverage_status": "не утверждено",
+    "snapshot_species": null,
+    "volume_test_seconds": null,
+    "volume_test_time_status": "не утверждено"
+  },
+  "plan": {
+    "issued_on": "2026-11-10",
+    "revision": "8",
+    "version": "1"
+  },
+  "result_key": [
+    "input_row_id",
+    "snapshot_id"
+  ],
+  "role_assignment": "владелец результата — Федор Новиков; исполнитель модуля и проверяющий эталонов — Cursor, назначение владельца 2026-11-11",
+  "stage": "1",
+  "stage_status": "recorded_without_biological_acceptance",
+  "subclass_comparison": {
+    "class_subclass_pairs": [],
+    "direct_vocabulary": [],
+    "local_vocabulary": [],
+    "rule": "совпадение; класс–подкласс; иначе несовместимость; подкласс вне словаря своего слоя — дефект контракта; подкласс без отображения в другой слой — несовместим",
+    "same_pairs": [],
+    "status": "не утверждено"
+  },
+  "unknown_type_status": "unmapped_type",
+  "working_classes": [
+    "Receptor",
+    "Ion Channel",
+    "Enzyme",
+    "Transporter",
+    "Other Protein Target"
+  ]
+}
