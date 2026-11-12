@@ -133,9 +133,9 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
     )
     assert root.index("$count($issues) > 0") < root.index(trust_fallback)
     # Overall != OK must not prefer Trust OK reasons (e.g. Archive verified).
-    # SELECT RUN / НЕТ ЗАПУСКОВ are selection states: excluded from $issues;
+    # SELECT RUN / NO RUNS are selection states: excluded from $issues;
     # Trust fallback allowed. Treat CR/review text as untrusted for this label.
-    no_runs = "НЕТ ЗАПУСКОВ"
+    no_runs = "NO RUNS"
     assert "$count($issues) > 0 ?" in root
     assert "verdict != 'SELECT RUN'" in root
     assert f"verdict != '{no_runs}'" in root
@@ -223,7 +223,7 @@ def test_run_cell_inspection_and_links_use_full_identity():
     assert links[1]["url"] == "${__data.fields.report_url:raw}"
     assert rules["Run ID"]["custom.inspect"] is True
     assert rules["Run ID"]["custom.wrapText"] is False
-    assert rules["Run ID"]["custom.width"] == 110
+    assert "custom.width" not in rules["Run ID"]
     assert all("tooltip" not in link for link in links)
     assert rules["Run ID"]["custom.tooltip.field"] == "run_id"
     for field in ("Overview", "Saved Evidence", "Data Quality", "Replay Readiness"):

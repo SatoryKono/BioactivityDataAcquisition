@@ -57,8 +57,19 @@ docker image inspect "bioetl:$baselineSha" --format '{{.Id}} {{json .RepoDigests
 
 The Dockerfile pins one immutable Wolfi base digest for its builder and runtime
 root stages. Direct Wolfi packages pin Python `3.13.18_git20261030-r0`, zlib
-`1.3.2.1_rc20260917-r0` and `uv 0.11.26-r0`;
+`1.3.2.1_rc20260921-r2` and `uv 0.11.26-r0`;
 the final scratch stage copies the audited runtime root and locked environment.
+
+The public package CDN currently returns HTTP 403 from the local build network.
+Both stages use the official Wolfi storage origin,
+`https://storage.googleapis.com/wolfi-production-registry-destination/os`,
+documented in `https://github.com/wolfi-dev/os/blob/main/REPRODUCIBILITY.md`.
+This retains the vendor's signed APK index and packages: TLS and signature
+verification remain enabled. No third-party mirror or unpinned package fallback
+is used. The zlib pin is newer than the base image's installed package, avoiding
+a forced downgrade during assembly. Recheck package availability for both target
+architectures before refreshing pins; an index entry alone is not a successful
+clean build or vulnerability scan.
 
 ### Runtime versions
 

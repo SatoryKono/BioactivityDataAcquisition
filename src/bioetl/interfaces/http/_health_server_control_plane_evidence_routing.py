@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Coroutine
+from dataclasses import replace
 from time import perf_counter
 from typing import Protocol
 
@@ -14,6 +15,10 @@ from bioetl.application.observability.control_plane_evidence.service_support imp
     source_error_payload,
 )
 from bioetl.application.runtime_clock import current_utc_time
+from bioetl.application.services.evidence_location.resolver import (
+    EvidenceLocationResolver,
+)
+from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.ports import CheckpointPort, RunReportStorePort, WorkflowManifestPort
 from bioetl.interfaces.http._control_plane_latest_complete import (
     LATEST_COMPLETE_SCAN_LIMIT,
@@ -353,6 +358,18 @@ async def _service_payload(
                 reason=source_reason,
                 check=source_check,
             )
+    try:
+        bound_scope, bound_service = await asyncio.to_thread(
+            _bind_selected_validation, host, scope, service
+        )
+    except SOURCE_READ_ERRORS:
+        return source_error_payload(
+            endpoint=endpoint,
+            scope=to_evidence_scope(scope),
+            reason=source_reason,
+            check=source_check,
+        )
+    scope, service = bound_scope, bound_service
     evidence_scope = to_evidence_scope(scope)
     try:
         if endpoint == "trust-summary":
@@ -390,6 +407,53 @@ async def _service_payload(
             reason=source_reason,
             check=source_check,
         )
+
+
+def _bind_selected_validation(
+    host: _EvidenceRoutingHost,
+    scope: _IdentityScope,
+    service: ControlPlaneEvidenceService,
+) -> tuple[_IdentityScope, ControlPlaneEvidenceService]:
+    """Keep validation, lifecycle and ledger ports on the selected locator root."""
+    resolver = getattr(host, "_evidence_location_resolver", None)
+    if (
+        not isinstance(resolver, EvidenceLocationResolver)
+        or scope.selected_run_id is None
+    ):
+        return scope, service
+    pipeline = (
+        scope.resolved_manifest.pipeline_name
+        if scope.resolved_manifest
+        else scope.requested_pipeline
+    )
+    resolved = resolver.resolve(
+        kind="pipeline",
+        owner=pipeline,
+        run_id=scope.selected_run_id,
+        expected_runtime_source_id=getattr(host, "_runtime_source_id", None),
+    )
+    if resolved.context is None or resolved.code.value in {
+        "identity_conflict",
+        "location_invalid",
+    }:
+        raise ValueError("Selected validation evidence location is unavailable")
+    context = resolved.context
+    manifest = context.get_manifest_by_run_id(scope.selected_run_id)
+    if (
+        not isinstance(manifest, RunManifest)
+        or str(manifest.run_id) != scope.selected_run_id
+        or manifest.pipeline_name != pipeline
+        or (
+            scope.selected_run_types
+            and manifest.run_type.value not in scope.selected_run_types
+        )
+    ):
+        raise ValueError("Selected validation manifest identity does not match")
+    getter = getattr(context, "get_validation_service", None)
+    bound = getter() if callable(getter) else None
+    if not isinstance(bound, ControlPlaneEvidenceService):
+        raise ValueError("Selected validation ports are unavailable")
+    return replace(scope, resolved_manifest=manifest), bound
 
 
 def _require_service(host: _EvidenceRoutingHost) -> ControlPlaneEvidenceService:

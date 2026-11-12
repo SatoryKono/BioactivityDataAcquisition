@@ -89,10 +89,18 @@ def write_dashboard_source(path: Path, serialized: str, *, root: Path) -> None:
     }
     if target.parent not in allowed or target.suffix != ".json":
         raise ValueError("Dashboard generator output must stay in a canonical profile")
-    if not isinstance(json.loads(serialized), dict):
+    payload = json.loads(serialized)
+    if not isinstance(payload, dict):
         raise ValueError("Dashboard generator output must be a JSON object")
+    from scripts.ops.observability.grafana._audit_presentation import (
+        stamp_audit_presentation,
+    )
+
+    stamp_audit_presentation(payload)
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(serialized, encoding="utf-8")
+    target.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
 
 
 def _validate_action_route_uids() -> None:
@@ -235,7 +243,7 @@ _RECOVERY_ACTION_HTML = (
 )
 _RUN_EXPLORER_UID = "bioetl-run-explorer-v1"
 CHIP_BASE = (
-    "box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;"
+    "box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0;"
     "border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere"
 )
 # Theme-safe chips: slate link surface works on dark and light Grafana themes.
@@ -2815,6 +2823,11 @@ def apply_to_dashboard(
         )
         embed_global_alerts(payload, incident)
     stamp_run_selection_context(payload)
+    from scripts.ops.observability.grafana._audit_presentation import (
+        stamp_audit_presentation,
+    )
+
+    stamp_audit_presentation(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:
@@ -3042,7 +3055,18 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Apply the state, evidence-table and navigation follow-up before rendering; combine with --check to verify without writing",
     )
+    parser.add_argument(
+        "--adaptive-profile",
+        action="store_true",
+        help="Generate or check the explicit adaptive profile from current native dashboards",
+    )
     args = parser.parse_args(argv)
+    if args.adaptive_profile:
+        from scripts.ops.observability.grafana.generate_adaptive_dashboards import (
+            generate,
+        )
+
+        return generate(check=args.check)
     ok = True
     # Render the global-alert donor before its Overview consumer.
     for item in sorted(BUS, key=lambda item: item["uid"] != "bioetl-incident-v1"):

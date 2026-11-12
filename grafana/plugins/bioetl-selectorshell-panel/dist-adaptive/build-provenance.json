@@ -4,8 +4,8 @@
   "inputs_sha256_lf": {
     "grafana/plugins/bioetl-selectorshell-panel/src/adaptive-module.ts": "0d6659fb29cb2037da9068d0792306e98dcd5b382dd7be8769c371c22e8c12a8",
     "grafana/plugins/bioetl-selectorshell-panel/src/adaptive-types.ts": "5396a3d53268da8f4cb1d67abe3b38ffde51597ceabe822f5cffcce72b89e80f",
-    "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.test.tsx": "0233b41b6670111af78b46727e495e879109139bfb62c00351f9f74cfd736f1c",
-    "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.tsx": "9829fdff693ff14a9005abd5897586557f9be67acee7f07e331aa922a2bfca18",
+    "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.test.tsx": "3bd058de76cd753e1eed7c5d3819a2ed217529378e55c71c661ce97427162168",
+    "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.tsx": "2ed14639f93195acee71ff22469ba673714b8638100c12605264e7d2319884b1",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.test.tsx": "124229d28dced94a525ef31452e0252716a71cb6293a2431b38d1266716fd0d1",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.tsx": "9f8962b1bbe000247a588fa2c1b6cb91e0ab22f96b03beb1e9dcb2ec939a5222",
     "grafana/plugins/bioetl-selectorshell-panel/src/img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
@@ -36,7 +36,7 @@
     "grafana/plugins/bioetl-selectorshell-panel/package.json": "60731bed06b59d6928d9c02b3525e18a1ee4d65b7d5ca787e3cf231f81ade5ed",
     "grafana/plugins/bioetl-selectorshell-panel/package-lock.json": "9e593ec8e791b5721b36f601c7d4726f3903bee088842748942c64c87c65c183",
     "grafana/plugins/bioetl-selectorshell-panel/webpack.config.ts": "4db8eb4dfc7042637cdcd201dafb0152be2d30b52fa97d497b1aabd98e552411",
-    "grafana/plugins/bioetl-selectorshell-panel/webpack.adaptive.config.ts": "f05818f29389430e39a6389cdcb1ca1b0df457c6f802a466c0ccb97f343e7840",
+    "grafana/plugins/bioetl-selectorshell-panel/webpack.adaptive.config.ts": "7fdb1ecd810f52abee7ce1ebed710e968d1bbab157c27281394af7bffd9b32b5",
     "grafana/plugins/bioetl-selectorshell-panel/adaptive-build-provenance.ts": "a23c0b752a3aba0e1e25b267bf0078a176013f5f9aff9cc330ffe37166764af2",
     "grafana/tooling/router-v7-bridge/webpack-public-path.cjs": "e938b87e3750165c9cb90b666ddfe0ad15a22a3a9db8c846ca3b3b20c6a0feb0"
   },
@@ -45,8 +45,8 @@
     "LICENSE": "c5accbbd8546e94c34aed24afe689a617627d18eed5a6c48277e48db57c23851",
     "README.md": "21cbe16d6e1b1efb90b085f59b265d5bef9e5f55ac39a80639645245a860a672",
     "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
-    "module.js": "f70a63558e0e433dc98b10403b0971cbcfbd889ebe4c879a3beeac1a56c2c311",
-    "module.js.map": "302c0bcb9fd50e6cda02efc73b7adfcedbfa19daeefc84b6ef13ddc56d7035f1",
-    "plugin.json": "09085cba5ed4f10ec6df95655ab1b5524b6dc908b1201fce19c5ee9bc6aa055e"
+    "module.js": "7ee04c55a56a609c4e98917e5feb8646eff2a1032e0177b4869dbc61bc6d2b57",
+    "module.js.map": "6adb1a1382b28a7f5ea45ff686e9a66f032fe5c1b4f784ce38cfe66acd5cb3ee",
+    "plugin.json": "5bcaf0f39044eff9a5539b1be34af6fd03dde3ac9ea39926bd19320537ed2a4c"
   }
 }

@@ -8,6 +8,7 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Protocol, runtime_checkable
 
+from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_evidence_location import (
     EvidenceLocationKind,
     EvidenceLocationLookupCode,
@@ -47,6 +48,12 @@ class EvidenceReadContext(Protocol):
 
     def get_manifest_by_run_id(self, run_id: object) -> object | None:
         """Load a manifest by run id from the bound root, or ``None``."""
+        ...
+
+    def get_ledger_entries_by_run_id(
+        self, run_id: object
+    ) -> tuple[RunLedgerEntry, ...]:
+        """Read exact-run accounting from this root, without a global fallback."""
         ...
 
     def get_workflow_manifest_by_run_id(self, run_id: object) -> object | None:

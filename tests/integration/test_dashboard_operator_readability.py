@@ -79,21 +79,21 @@ def test_overview_stages_and_quality_are_outside_saved_evidence() -> None:
     assert donor["parser"] == "backend"
     assert "uql" not in donor
     # A1 SELECT RUN and A2 empty catalog must not collapse into UNKNOWN.
-    # Missing exclusion evidence stays the explicit «нет данных» state.
+    # Missing exclusion evidence stays the explicit «NO DATA» state.
     select_guard = (
-        "(verdict='SELECT RUN' or verdict='НЕТ ЗАПУСКОВ') ? verdict : "
+        "(verdict='SELECT RUN' or verdict='NO RUNS') ? verdict : "
         "($exists(contract_exclusions_status) and contract_exclusions_status != '' "
-        "? contract_exclusions_status : 'нет данных')"
+        "? contract_exclusions_status : 'NO DATA')"
     )
     assert select_guard in donor["root_selector"]
-    assert "не применимо — Choose a run" in donor["root_selector"]
-    assert "нет записей — No runs in scope" in donor["root_selector"]
+    assert "N/A — Choose a run" in donor["root_selector"]
+    assert "NO RECORDS — No runs in scope" in donor["root_selector"]
     value_maps = [
         item.get("options") or {}
         for item in quality["fieldConfig"]["defaults"]["mappings"]
         if item.get("type") == "value"
     ]
-    assert any("SELECT RUN" in opts and "НЕТ ЗАПУСКОВ" in opts for opts in value_maps)
+    assert any("SELECT RUN" in opts and "NO RUNS" in opts for opts in value_maps)
 
 
 DESIGN_SYSTEM = Path("docs/03-guides/dashboards/design-system.md")

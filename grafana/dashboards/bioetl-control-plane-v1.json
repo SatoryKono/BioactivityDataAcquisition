@@ -93,7 +93,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -150,7 +150,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -214,7 +214,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -282,7 +282,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/1-run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">1. Run Explorer</a><span class=\"bioetl-nav-current\" aria-current=\"page\" data-current=\"page\" title=\"2. Replay Readiness (Replay Readiness)\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none;display:inline-block\">2. Replay Readiness</span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Run Overview (Run Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">3. Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Preserves selected scope and time range.\" href=\"/d/bioetl-dq-v2/4-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/5-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">5. Incident Workspace</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/1-run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">1. Run Explorer</a><span class=\"bioetl-nav-current\" aria-current=\"page\" data-current=\"page\" title=\"2. Replay Readiness (Replay Readiness)\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none;display:inline-block\">2. Replay Readiness</span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Run Overview (Run Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">3. Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Preserves selected scope and time range.\" href=\"/d/bioetl-dq-v2/4-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/5-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">5. Incident Workspace</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared five-dashboard bus, numbered 1-5 (19.5% each): 1. Run Explorer / 2. Replay Readiness / 3. Run Overview / 4. Data Quality / 5. Incident Workspace. Slugs are the Grafana title slugs. Current workspace is a non-interactive <span class=\"bioetl-nav-current\"> (aria-current=page, underlined) so active state is not color-only and is not a link. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -454,8 +454,8 @@
                   "text": "INCOMPLETE",
                   "color": "#555555"
                 },
-                "НЕТ ЗАПУСКОВ": {
-                  "text": "НЕТ ЗАПУСКОВ",
+                "NO RUNS": {
+                  "text": "NO RUNS",
                   "color": "gray"
                 }
               }
@@ -1085,7 +1085,11 @@
                         "color": "#A3A3A3"
                       },
                       "НЕТ ЗАПУСКОВ": {
-                        "text": "НЕТ ЗАПУСКОВ",
+                        "text": "NO RUNS",
+                        "color": "gray"
+                      },
+                      "NO RUNS": {
+                        "text": "NO RUNS",
                         "color": "gray"
                       }
                     }
@@ -1158,7 +1162,11 @@
                         "color": "#A3A3A3"
                       },
                       "НЕТ ЗАПУСКОВ": {
-                        "text": "НЕТ ЗАПУСКОВ",
+                        "text": "NO RUNS",
+                        "color": "gray"
+                      },
+                      "NO RUNS": {
+                        "text": "NO RUNS",
                         "color": "gray"
                       }
                     }
@@ -3070,7 +3078,7 @@
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
           },
-          "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable. A blank grid is not used: не применимо means no Run ID is selected, нет записей means this run recorded no checkpoint anchors, нет данных means the comparison payload is missing or the request timed out.",
+          "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable. A blank grid is not used: N/A means no Run ID is selected, NO RECORDS means this run recorded no checkpoint anchors, NO DATA means the comparison payload is missing or the request timed out. A blank grid is not used: N/A means no Run ID is selected, NO RECORDS means this run recorded no checkpoint anchors, NO DATA means the comparison payload is missing or the request timed out.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3693,7 +3701,7 @@
               "format": "table",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "($listed := $type(rows) = 'array' ? rows : []; $hasRun := $exists(selected_run_id) and selected_run_id != null and selected_run_id != '' and selected_run_id != '-' and selected_run_id != 'All'; $timeout := $exists(status) and (status = 'scope_resolve_timeout' or status = 'evidence_build_timeout'); $msg := $exists(message) and message != ''; $state := function($status, $current){({'anchor': '—', 'status': $status, 'current_value_full': $current, 'checkpoint_value_full': '—'})}; $timeout or $msg ? ($count($listed) > 0 ? $listed : [$state('нет данных', $msg ? message : 'нет данных — checkpoint comparison request timed out')]) : ($not($hasRun) ? [$state('не применимо', 'не применимо — no Run ID selected')] : (($exists(checkpoint_compare) and checkpoint_compare.status = 'MISSING') ? $append($listed, [$state('нет записей', 'нет записей — checkpoint anchors were not recorded for this run')]) : ($count($listed) > 0 ? $listed : [$state('нет данных', 'нет данных — checkpoint comparison returned no rows')]))))",
+              "root_selector": "($listed := $type(rows) = 'array' ? rows : []; $hasRun := $exists(selected_run_id) and selected_run_id != null and selected_run_id != '' and selected_run_id != '-' and selected_run_id != 'All'; $timeout := $exists(status) and (status = 'scope_resolve_timeout' or status = 'evidence_build_timeout'); $msg := $exists(message) and message != ''; $state := function($status, $current){({'anchor': '—', 'status': $status, 'current_value_full': $current, 'checkpoint_value_full': '—'})}; $timeout or $msg ? ($count($listed) > 0 ? $listed : [$state('NO DATA', $msg ? message : 'NO DATA — checkpoint comparison request timed out')]) : ($not($hasRun) ? [$state('N/A', 'N/A — no Run ID selected')] : (($exists(checkpoint_compare) and checkpoint_compare.status = 'MISSING') ? $append($listed, [$state('NO RECORDS', 'NO RECORDS — checkpoint anchors were not recorded for this run')]) : ($count($listed) > 0 ? $listed : [$state('NO DATA', 'NO DATA — checkpoint comparison returned no rows')]))))",
               "source": "url",
               "type": "json",
               "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=checkpoint_compare",

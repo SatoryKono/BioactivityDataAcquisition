@@ -1,0 +1,3768 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Answers whether the selected Run ID can be exact-replayed from saved evidence. The first screen shows exact replay readiness, the saved Trust verdict, and retention. Collapsed rows hold checkpoint validation, manifest validation, identity, run details, discovery, and saved domain reasons.",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 1,
+  "id": null,
+  "iteration": 2,
+  "links": [],
+  "refresh": "60s",
+  "schemaVersion": 42,
+  "style": "dark",
+  "tags": [
+    "bioetl",
+    "control-plane",
+    "replay-safety",
+    "dashboard",
+    "traceability",
+    "observability",
+    "control-plane-explorer",
+    "dashboard-2.0"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_workflow_universe, workflow)",
+        "description": "Shared operator context: workflow evidence selector. This selector does not imply exact current-status intersection unless the dashboard explicitly documents that semantics.",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Workflow",
+        "multi": false,
+        "name": "workflow",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_universe, workflow)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
+        "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}&allow_stale=1",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Pipeline",
+        "multi": false,
+        "name": "pipeline",
+        "options": [],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}&allow_stale=1",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false,
+        "description": "Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Default selection is All pipelines until the operator narrows to a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series."
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
+        "definition": "/ops/control-plane/filter-options?dimension=run_type&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&allow_stale=1",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Run Type",
+        "multi": false,
+        "name": "run_type",
+        "options": [],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=run_type&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&allow_stale=1",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false,
+        "description": "Browse scope from the local control-plane catalog. Default All includes every run type. Explicit URL selections take precedence."
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "-",
+          "value": "-"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
+        "description": "Run ID from the catalog snapshot; run dates describe execution, not catalog freshness. Catalog freshness is Not verified here. Refresh the dashboard to request an updated list.",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Run ID",
+        "multi": false,
+        "name": "run_id",
+        "options": [
+          {
+            "selected": true,
+            "text": "-",
+            "value": "-"
+          }
+        ],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "browser",
+  "title": "2. Replay Readiness",
+  "uid": "bioetl-control-plane-v1",
+  "version": 2,
+  "panels": [
+    {
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 2
+      },
+      "id": 1000,
+      "options": {
+        "mode": "html",
+        "bioetlDisplayTitle": "Navigate Dashboards",
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/1-run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">1. Run Explorer</a><span class=\"bioetl-nav-current\" aria-current=\"page\" data-current=\"page\" title=\"2. Replay Readiness (Replay Readiness)\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none;display:inline-block\">2. Replay Readiness</span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Run Overview (Run Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">3. Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Preserves selected scope and time range.\" href=\"/d/bioetl-dq-v2/4-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/5-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">5. Incident Workspace</a></div>"
+      },
+      "title": "",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared five-dashboard bus, numbered 1-5 (19.5% each): 1. Run Explorer / 2. Replay Readiness / 3. Run Overview / 4. Data Quality / 5. Incident Workspace. Slugs are the Grafana title slugs. Current workspace is a non-interactive <span class=\"bioetl-nav-current\"> (aria-current=page, underlined) so active state is not color-only and is not a link. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
+      "type": "text",
+      "links": [
+        {
+          "title": "1. Run Explorer",
+          "url": "/d/bioetl-run-explorer-v1/1-run-explorer?var-workflow=.*&var-pipeline=.*&var-run_type=.*&var-run_id=-&var-lookup_run_id=&${__url_time_range}",
+          "tooltip": "1. Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "3. Run Overview",
+          "url": "/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "3. Run Overview (Run Overview). Preserves selected scope and time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "4. Data Quality",
+          "url": "/d/bioetl-dq-v2/4-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "4. Data Quality (Data Quality). Preserves selected scope and time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "5. Incident Workspace",
+          "url": "/d/bioetl-incident-v1/5-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": 9400,
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 0,
+        "y": 2,
+        "w": 15,
+        "h": 3
+      },
+      "description": "SELECTED RUN · Read exact replay readiness first, then the saved Trust verdict, then retention. Blockers for that readiness are in Review Exact Replay Checks. Those three answers use the selected Run ID. They do not use current Prometheus telemetry.",
+      "options": {
+        "mode": "html",
+        "bioetlDisplayTitle": "Inspect Scope & Evidence",
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">${pipeline:text} | <code style=\"font:inherit;background:none;border:0;padding:0\">${run_id}</code><br>Blockers: <em>Review Exact Replay Checks</em>.</div>"
+      },
+      "links": [
+        {
+          "title": "Open Replay Safety Diagnostics",
+          "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9423&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open Selected-Run Trust",
+          "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9418&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open Lineage Validation",
+          "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9415&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open Retention Compliance",
+          "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9416&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        }
+      ]
+    },
+    {
+      "id": 9422,
+      "type": "stat",
+      "title": "Review Exact Replay Readiness",
+      "gridPos": {
+        "x": 15,
+        "y": 2,
+        "w": 9,
+        "h": 3
+      },
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "description": "SELECTED RUN · Saved exact-replay assessment, not CURRENT health. OK/WARN/CRIT palette: READY=OK, INSUFFICIENT=WARN, BLOCKED=CRIT. UNSUPPORTED/UNKNOWN/INCOMPLETE are gray. SELECT RUN means no Run ID is selected; Source unavailable means backend unavailable or request failure. UNKNOWN means no assessed value, never READY. Open replay checks for basis. Occurrence-only versus semantic drift still requires exact-run evidence; current write-risk telemetry is not proof for this run. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
+      "options": {
+        "reduceOptions": {
+          "values": true,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^verdict$/"
+        },
+        "orientation": "horizontal",
+        "textMode": "value",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "text": {
+          "valueSize": 22,
+          "titleSize": 12
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "noValue": "UNKNOWN",
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "READY": {
+                  "text": "READY",
+                  "color": "green"
+                },
+                "BLOCKED": {
+                  "text": "BLOCKED",
+                  "color": "red"
+                },
+                "INSUFFICIENT": {
+                  "text": "INSUFFICIENT",
+                  "color": "orange"
+                },
+                "UNSUPPORTED": {
+                  "text": "UNSUPPORTED",
+                  "color": "#555555"
+                },
+                "SELECT RUN": {
+                  "text": "SELECT RUN",
+                  "color": "#555555"
+                },
+                "QUERY ERROR": {
+                  "text": "Source unavailable",
+                  "color": "red"
+                },
+                "UNKNOWN": {
+                  "text": "UNKNOWN",
+                  "color": "#555555"
+                },
+                "INCOMPLETE": {
+                  "text": "INCOMPLETE",
+                  "color": "#555555"
+                },
+                "NO RUNS": {
+                  "text": "NO RUNS",
+                  "color": "gray"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "#555555"
+                }
+              }
+            }
+          ],
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#555555",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "panelId": 9418,
+          "refId": "A",
+          "withTransforms": false,
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "all",
+            "filters": [
+              {
+                "fieldName": "_bioetl_frame",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "replay_readiness"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "verdict"
+              ]
+            }
+          }
+        }
+      ],
+      "links": [
+        {
+          "title": "View replay checks",
+          "includeVars": false,
+          "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9423&${__url_time_range}",
+          "targetBlank": false
+        }
+      ]
+    },
+    {
+      "id": 9423,
+      "type": "table",
+      "title": "Review Exact Replay Checks",
+      "description": "SELECTED RUN · One row per readiness check for this Run ID. Fail blocks replay. Unknown is not a pass. Valid-empty check output stays VALID EMPTY. Request failure is QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "targets": [
+        {
+          "panelId": 9418,
+          "refId": "A",
+          "withTransforms": false,
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          }
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 24,
+        "h": 13
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "enablePagination": true
+        }
+      },
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "all",
+            "filters": [
+              {
+                "fieldName": "_bioetl_frame",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "replay_checks"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "code",
+                "result",
+                "reason",
+                "evidence_ref"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "code": 0,
+              "result": 1,
+              "reason": 2,
+              "evidence_ref": 3
+            },
+            "renameByName": {
+              "code": "Check",
+              "result": "Result",
+              "reason": "Reason",
+              "evidence_ref": "Evidence reference"
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "SELECT RUN if no Run ID is selected. Source unavailable if the request failed.",
+          "custom": {
+            "align": "left",
+            "inspect": true,
+            "wrapText": true,
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": true
+            },
+            "minWidth": 50,
+            "wrapHeaderText": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Check"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "manifest_not_recorded": {
+                        "text": "manifest for this run was not recorded"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
+      "description": "SELECTED RUN · All identity anchors, missing first. Presence is not verification. VALID EMPTY means the successful response contains no anchors. Exact Replay Checks determines readiness. Inspect a value to copy it in full. No rows is not a pass; missing evidence is UNKNOWN and failed requests are QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "UNKNOWN",
+          "custom": {
+            "inspect": true,
+            "wrapText": false,
+            "minWidth": 50,
+            "wrapHeaderText": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Parameter"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 230
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Priority"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 75
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Present"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Result"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 310
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 24,
+        "h": 10
+      },
+      "id": 9408,
+      "options": {
+        "footer": {
+          "show": false,
+          "enablePagination": true,
+          "countRows": true
+        },
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "uql",
+          "refId": "A",
+          "root_selector": "",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=anchors",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "uql": "parse-json | jsonata \"rows^(present ? 1 : 0, priority, name)\"",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          }
+        }
+      ],
+      "title": "Review Replay Evidence",
+      "type": "table",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "label",
+                "priority",
+                "present",
+                "status",
+                "value_full",
+                "why"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "label": 0,
+              "priority": 1,
+              "present": 2,
+              "status": 3,
+              "value_full": 4,
+              "why": 5
+            },
+            "renameByName": {
+              "label": "Parameter",
+              "priority": "Priority",
+              "present": "Present",
+              "status": "Result",
+              "value_full": "Value",
+              "why": "Purpose"
+            }
+          }
+        }
+      ],
+      "links": [
+        {
+          "title": "Full identity report",
+          "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/control-plane/identity-evidence?pipeline=${pipeline:percentencode}&run_type=${run_type:percentencode}&run_id=${run_id:percentencode}&view=copy_values",
+          "targetBlank": true
+        },
+        {
+          "title": "Find complete runs",
+          "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/control-plane/latest-complete-run?pipeline=${pipeline:percentencode}&run_type=${run_type:percentencode}&run_id=${run_id:percentencode}&workflow=${workflow:percentencode}&error_as_row=1",
+          "targetBlank": true
+        },
+        {
+          "title": "Check BioETL Ops HTTP health",
+          "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
+          "targetBlank": true
+        }
+      ]
+    },
+    {
+      "id": 9418,
+      "type": "table",
+      "title": "Review Selected-Run Trust",
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 24,
+        "h": 5
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
+      "description": "SELECTED RUN · processing_status is the saved ETL outcome. trust_status is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "inspect": true,
+            "minWidth": 50,
+            "wrapText": false,
+            "wrapHeaderText": true
+          },
+          "unit": "none",
+          "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
+          "links": [
+            {
+              "title": "Open Run Explorer",
+              "url": "/d/bioetl-run-explorer-v1/1-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "includeVars": false,
+              "targetBlank": false
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "scope_kind"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "evidence_freshness"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Freshness"
+              },
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": true,
+                  "tooltip": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "evidence_observed_at"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:YYYY-MM-DD HH:mm"
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "processing_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Processing result"
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trust_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Saved trust verdict"
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reasons_text"
+            },
+            "properties": [
+              {
+                "id": "custom.inspect",
+                "value": true
+              },
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "noValue",
+                "value": "—"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reasons_count"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Reason count"
+              },
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Processing result"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "success": {
+                        "text": "success",
+                        "color": "green"
+                      },
+                      "failed": {
+                        "text": "failed",
+                        "color": "red"
+                      },
+                      "shutdown": {
+                        "text": "shutdown",
+                        "color": "orange"
+                      },
+                      "unknown": {
+                        "text": "unknown",
+                        "color": "#A3A3A3"
+                      },
+                      "UNKNOWN": {
+                        "text": "UNKNOWN",
+                        "color": "#A3A3A3"
+                      },
+                      "SELECT RUN": {
+                        "text": "SELECT RUN",
+                        "color": "#A3A3A3"
+                      },
+                      "UNFINISHED": {
+                        "text": "UNFINISHED",
+                        "color": "#A3A3A3"
+                      },
+                      "НЕТ ЗАПУСКОВ": {
+                        "text": "NO RUNS",
+                        "color": "gray"
+                      },
+                      "NO RUNS": {
+                        "text": "NO RUNS",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Saved trust verdict"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "OK": {
+                        "text": "OK",
+                        "color": "green"
+                      },
+                      "WARN": {
+                        "text": "WARN",
+                        "color": "orange"
+                      },
+                      "WARNING": {
+                        "text": "WARN",
+                        "color": "orange"
+                      },
+                      "ERROR": {
+                        "text": "ERROR",
+                        "color": "red"
+                      },
+                      "CRIT": {
+                        "text": "ERROR",
+                        "color": "red"
+                      },
+                      "QUERY ERROR": {
+                        "text": "QUERY ERROR",
+                        "color": "red"
+                      },
+                      "INCOMPLETE": {
+                        "text": "INCOMPLETE",
+                        "color": "#A3A3A3"
+                      },
+                      "UNKNOWN": {
+                        "text": "UNKNOWN",
+                        "color": "#A3A3A3"
+                      },
+                      "N/A": {
+                        "text": "N/A",
+                        "color": "#A3A3A3"
+                      },
+                      "SELECT RUN": {
+                        "text": "SELECT RUN",
+                        "color": "#A3A3A3"
+                      },
+                      "НЕТ ЗАПУСКОВ": {
+                        "text": "NO RUNS",
+                        "color": "gray"
+                      },
+                      "NO RUNS": {
+                        "text": "NO RUNS",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Assessed at"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason count"
+            },
+            "properties": [
+              {
+                "id": "custom.inspect",
+                "value": true
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              },
+              {
+                "id": "noValue",
+                "value": "—"
+              },
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": "no"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 70
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trust_reasons_action"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": ""
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View trust reasons",
+                    "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
+                    "includeVars": false,
+                    "targetBlank": false
+                  }
+                ]
+              },
+              {
+                "id": "displayName",
+                "value": "Action"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trust_action_note"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Action"
+              },
+              {
+                "id": "links",
+                "value": []
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "footer": {
+          "show": false,
+          "enablePagination": false
+        },
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "uql",
+          "format": "table",
+          "root_selector": "($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append([presentation_trust.($base := $sift($, function($v,$k){$k != 'trust_reasons_action'}); $merge([$base, reasons_count > 0 ? {'trust_reasons_action':'View trust reasons'} : {'trust_action_note': reasons_count = 0 ? 'No trust issues' : 'Not assessed'}, {'_bioetl_frame': 'trust'}]))], $map(replay_readiness, function($row){$merge([$row, {'_bioetl_frame': 'replay_readiness'}])})), $map(replay_checks^(result='fail' ? 0 : result='unknown' ? 1 : result='pass' ? 2 : 3), function($row){$merge([$row, {'_bioetl_frame': 'replay_checks'}])})), function($row){$merge([$schema, $row])}))",
+          "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "uql": "parse-json | jsonata \"($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append([presentation_trust.($base := $sift($, function($v,$k){$k != 'trust_reasons_action'}); $merge([$base, reasons_count > 0 ? {'trust_reasons_action':'View trust reasons'} : {'trust_action_note': reasons_count = 0 ? 'No trust issues' : 'Not assessed'}, {'_bioetl_frame': 'trust'}]))], $map(replay_readiness, function($row){$merge([$row, {'_bioetl_frame': 'replay_readiness'}])})), $map(replay_checks^(result='fail' ? 0 : result='unknown' ? 1 : result='pass' ? 2 : 3), function($row){$merge([$row, {'_bioetl_frame': 'replay_checks'}])})), function($row){$merge([$schema, $row])}))\"",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "all",
+            "filters": [
+              {
+                "fieldName": "_bioetl_frame",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "trust"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "targetField": "evidence_observed_at",
+                "destinationType": "time"
+              }
+            ]
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "processing_status",
+                "trust_status",
+                "reasons_display",
+                "reasons_text",
+                "evidence_observed_at",
+                "reasons_count",
+                "evidence_freshness",
+                "trust_reasons_action",
+                "trust_action_note"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "processing_status": 0,
+              "trust_status": 1,
+              "reasons_display": 2,
+              "reasons_count": 3,
+              "trust_reasons_action": 4,
+              "trust_action_note": 5,
+              "evidence_observed_at": 6,
+              "evidence_freshness": 7
+            },
+            "renameByName": {
+              "processing_status": "Processing result",
+              "trust_status": "Saved trust verdict",
+              "evidence_observed_at": "Assessed at",
+              "reasons_count": "Reason count"
+            },
+            "excludeByName": {
+              "reasons_display": true
+            }
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 1
+          }
+        }
+      ],
+      "links": [
+        {
+          "title": "Inspect all trust reasons",
+          "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9418&${__url_time_range}",
+          "includeVars": false,
+          "targetBlank": false
+        }
+      ]
+    },
+    {
+      "id": 9430,
+      "type": "row",
+      "title": "Inspect Manifest / Lineage / Retention",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 33,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
+          "description": "SELECTED RUN · Manifest parse, structure, schema version, and contract compatibility for this Run ID. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false,
+                "wrapHeaderText": true
+              },
+              "unit": "none",
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "ERROR": {
+                            "text": "ERROR",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 110
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": true
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "text"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "text"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "text"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "text"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
+                            "color": "text"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "text"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "text"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "text"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "text"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
+                            "color": "text"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "ERROR": {
+                            "text": "ERROR",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "check"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 220
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Check"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason_display"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "detail"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": false
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 34,
+            "w": 24,
+            "h": 9
+          },
+          "id": 9414,
+          "options": {
+            "footer": {
+              "show": false,
+              "enablePagination": false
+            },
+            "showHeader": true,
+            "cellHeight": "sm"
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "rows",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/control-plane/manifest-validation?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
+              }
+            }
+          ],
+          "title": "Review Manifest Validation",
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
+          "description": "SELECTED RUN · Lineage closure, identity consistency, cycle freedom, and persistence profile for this Run ID. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false,
+                "wrapHeaderText": true
+              },
+              "unit": "none",
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "ERROR": {
+                            "text": "ERROR",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 110
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "check"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 220
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Check"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 270
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": true
+                    }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "text"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "text"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "text"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "text"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
+                            "color": "text"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "detail"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": false
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "text"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "text"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "text"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "text"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
+                            "color": "text"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "ERROR": {
+                            "text": "ERROR",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason_display"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 43,
+            "w": 24,
+            "h": 9
+          },
+          "id": 9415,
+          "options": {
+            "footer": {
+              "show": false,
+              "enablePagination": false
+            },
+            "showHeader": true,
+            "cellHeight": "sm"
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "rows",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/control-plane/lineage-validation?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
+              }
+            }
+          ],
+          "title": "Review Lineage Validation",
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
+          "description": "SELECTED RUN · Five retention rows for this Run ID: policy, evidence floor, required evidence, snapshot evidence, and archive. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK. Archive N/A means a referenced policy does not require archiving; it is not proof of an archive. Archive verified means local copies and restore evidence passed current hash and identity checks. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false,
+                "wrapHeaderText": true
+              },
+              "unit": "none",
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed. HTTP 504 is a query error, not an empty result.",
+              "links": []
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "check"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "retention_policy": {
+                            "text": "Policy"
+                          },
+                          "evidence_floor": {
+                            "text": "Evidence floor"
+                          },
+                          "required_evidence": {
+                            "text": "Evidence"
+                          },
+                          "snapshot_evidence": {
+                            "text": "Snapshots"
+                          },
+                          "archive": {
+                            "text": "Archive"
+                          },
+                          "scope_resolution": {
+                            "text": "Scope"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 125
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Check"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "OK": {
+                            "text": "OK",
+                            "color": "green"
+                          },
+                          "WARN": {
+                            "text": "WARN",
+                            "color": "orange"
+                          },
+                          "WARNING": {
+                            "text": "WARN",
+                            "color": "orange"
+                          },
+                          "ERROR": {
+                            "text": "ERROR",
+                            "color": "red"
+                          },
+                          "INCOMPLETE": {
+                            "text": "INCOMPLETE",
+                            "color": "text"
+                          },
+                          "UNKNOWN": {
+                            "text": "UNKNOWN",
+                            "color": "text"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 110
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
+                },
+                "properties": [
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "retention_policy_satisfied": {
+                            "text": "Retained by policy"
+                          },
+                          "reproducibility_evidence_within_retention": {
+                            "text": "Within retention"
+                          },
+                          "required_evidence_surfaces_present": {
+                            "text": "Evidence present"
+                          },
+                          "snapshot_lifecycle_evidence_incomplete": {
+                            "text": "Snapshot incomplete"
+                          },
+                          "archive_evidence_not_recorded": {
+                            "text": "Archive missing"
+                          },
+                          "archive_not_applicable": {
+                            "text": "N/A: policy"
+                          },
+                          "archive_restore_verified": {
+                            "text": "Archive verified"
+                          },
+                          "reproducibility_evidence_floor_satisfied": {
+                            "text": "Evidence floor met"
+                          },
+                          "snapshot_evidence_not_required": {
+                            "text": "Not required"
+                          },
+                          "lineage_closure_gap": {
+                            "text": "Lineage closure gap"
+                          },
+                          "archive_identity_mismatch": {
+                            "text": "Identity mismatch"
+                          },
+                          "archive_checksum_mismatch": {
+                            "text": "Checksum mismatch"
+                          },
+                          "archive_inventory_mismatch": {
+                            "text": "Files mismatch"
+                          },
+                          "archive_source_mismatch": {
+                            "text": "Source changed"
+                          },
+                          "archive_evidence_invalid": {
+                            "text": "Archive invalid"
+                          },
+                          "archive_index_invalid": {
+                            "text": "Index invalid"
+                          },
+                          "snapshot_lifecycle_evidence_present": {
+                            "text": "Snapshots present"
+                          },
+                          "selected_run_id_not_found": {
+                            "text": "Run not found"
+                          },
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "text"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "text"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "text"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "text"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
+                            "color": "text"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "detail"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "endpoint"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "retryable"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "observed_at"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "headline"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "ok_count"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "unknown_count"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "warning_count"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "error_count"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "check_count"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "from_ms"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "to_ms"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "retention_policy_satisfied": {
+                            "text": "Retained by policy"
+                          },
+                          "reproducibility_evidence_within_retention": {
+                            "text": "Within retention"
+                          },
+                          "required_evidence_surfaces_present": {
+                            "text": "Evidence present"
+                          },
+                          "snapshot_lifecycle_evidence_incomplete": {
+                            "text": "Snapshot incomplete"
+                          },
+                          "archive_evidence_not_recorded": {
+                            "text": "Archive missing"
+                          },
+                          "archive_not_applicable": {
+                            "text": "N/A: policy"
+                          },
+                          "archive_restore_verified": {
+                            "text": "Archive verified"
+                          },
+                          "reproducibility_evidence_floor_satisfied": {
+                            "text": "Evidence floor met"
+                          },
+                          "snapshot_evidence_not_required": {
+                            "text": "Not required"
+                          },
+                          "lineage_closure_gap": {
+                            "text": "Lineage closure gap"
+                          },
+                          "archive_identity_mismatch": {
+                            "text": "Identity mismatch"
+                          },
+                          "archive_checksum_mismatch": {
+                            "text": "Checksum mismatch"
+                          },
+                          "archive_inventory_mismatch": {
+                            "text": "Files mismatch"
+                          },
+                          "archive_source_mismatch": {
+                            "text": "Source changed"
+                          },
+                          "archive_evidence_invalid": {
+                            "text": "Archive invalid"
+                          },
+                          "archive_index_invalid": {
+                            "text": "Index invalid"
+                          },
+                          "snapshot_lifecycle_evidence_present": {
+                            "text": "Snapshots present"
+                          },
+                          "selected_run_id_not_found": {
+                            "text": "Run not found"
+                          },
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "text"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "text"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "text"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "text"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
+                            "color": "text"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "OK": {
+                            "text": "OK",
+                            "color": "green"
+                          },
+                          "WARN": {
+                            "text": "WARN",
+                            "color": "orange"
+                          },
+                          "WARNING": {
+                            "text": "WARN",
+                            "color": "orange"
+                          },
+                          "ERROR": {
+                            "text": "ERROR",
+                            "color": "red"
+                          },
+                          "INCOMPLETE": {
+                            "text": "INCOMPLETE",
+                            "color": "text"
+                          },
+                          "UNKNOWN": {
+                            "text": "UNKNOWN",
+                            "color": "text"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Check"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason_display"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 52,
+            "w": 24,
+            "h": 9
+          },
+          "id": 9416,
+          "options": {
+            "footer": {
+              "show": false
+            },
+            "showHeader": true,
+            "cellHeight": "sm",
+            "sortBy": [
+              {
+                "displayName": "Status",
+                "desc": true
+              }
+            ]
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "rows",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "columns": [
+                {
+                  "selector": "check",
+                  "text": "check",
+                  "type": "string"
+                },
+                {
+                  "selector": "status",
+                  "text": "status",
+                  "type": "string"
+                },
+                {
+                  "selector": "reason",
+                  "text": "reason",
+                  "type": "string"
+                },
+                {
+                  "selector": "detail",
+                  "text": "detail",
+                  "type": "string"
+                },
+                {
+                  "selector": "endpoint",
+                  "text": "endpoint",
+                  "type": "string"
+                },
+                {
+                  "selector": "retryable",
+                  "text": "retryable",
+                  "type": "string"
+                },
+                {
+                  "selector": "observed_at",
+                  "text": "observed_at",
+                  "type": "string"
+                }
+              ],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
+              }
+            }
+          ],
+          "title": "Review Retention Compliance",
+          "type": "table",
+          "transformations": [
+            {
+              "id": "filterByRefId",
+              "options": {
+                "include": "A"
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "field": "status",
+                    "desc": true
+                  }
+                ]
+              }
+            },
+            {
+              "id": "limit",
+              "options": {
+                "limitField": 5
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "detail": true,
+                  "endpoint": true,
+                  "retryable": true,
+                  "observed_at": true,
+                  "Time": true
+                },
+                "indexByName": {
+                  "check": 0,
+                  "status": 1,
+                  "reason": 2
+                },
+                "renameByName": {}
+              }
+            }
+          ],
+          "links": []
+        }
+      ]
+    },
+    {
+      "id": 9431,
+      "type": "row",
+      "title": "Inspect Resume / Checkpoint",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 34,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
+          "description": "SELECTED RUN · Checkpoint parse, schema, checksum, and required identity anchors for this Run ID. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false,
+                "wrapHeaderText": true
+              },
+              "unit": "none",
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "ERROR": {
+                            "text": "ERROR",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 110
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": true
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "text"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "text"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "text"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "text"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
+                            "color": "text"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "text"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "text"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "text"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "text"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
+                            "color": "text"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "ERROR": {
+                            "text": "ERROR",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "check"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 220
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Check"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason_display"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "detail"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": false
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 35,
+            "w": 24,
+            "h": 9
+          },
+          "id": 9413,
+          "options": {
+            "footer": {
+              "show": false,
+              "enablePagination": false
+            },
+            "showHeader": true,
+            "cellHeight": "sm"
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "rows",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/control-plane/checkpoint-validation?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
+              }
+            }
+          ],
+          "title": "Review Checkpoint Validation",
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
+          "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable. A blank grid is not used: N/A means no Run ID is selected, NO RECORDS means this run recorded no checkpoint anchors, NO DATA means the comparison payload is missing or the request timed out. A blank grid is not used: N/A means no Run ID is selected, NO RECORDS means this run recorded no checkpoint anchors, NO DATA means the comparison payload is missing or the request timed out.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false,
+                "wrapHeaderText": true
+              },
+              "unit": "none",
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
+              "links": []
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Time"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "copy"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "copy_mode"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "copy_value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_target"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source_type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source_quality"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "format"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "why"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "rendering"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "missing_severity"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "identity_gap"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "present"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "priority"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "value_full"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "current_value_full"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "checkpoint_value_full"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "anchor"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Parameter"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 140
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "current_value_full"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Current"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "checkpoint_value_full"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Checkpoint"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "UNKNOWN"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Result"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 90
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "ERROR": {
+                            "text": "ERROR",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Current"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Parameter"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 160
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "text"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "text"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "text"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "text"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
+                            "color": "text"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "text"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "text"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "text"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "text"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "text"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
+                            "color": "text"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "ERROR": {
+                            "text": "ERROR",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 115
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Result"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 125
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "checkpoint_value_short"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": "UNKNOWN"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 44,
+            "w": 24,
+            "h": 9
+          },
+          "id": 9406,
+          "options": {
+            "footer": {
+              "show": false,
+              "enablePagination": true,
+              "countRows": true
+            },
+            "showHeader": true,
+            "cellHeight": "sm"
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "($listed := $type(rows) = 'array' ? rows : []; $hasRun := $exists(selected_run_id) and selected_run_id != null and selected_run_id != '' and selected_run_id != '-' and selected_run_id != 'All'; $timeout := $exists(status) and (status = 'scope_resolve_timeout' or status = 'evidence_build_timeout'); $msg := $exists(message) and message != ''; $state := function($status, $current){({'anchor': '—', 'status': $status, 'current_value_full': $current, 'checkpoint_value_full': '—'})}; $timeout or $msg ? ($count($listed) > 0 ? $listed : [$state('NO DATA', $msg ? message : 'NO DATA — checkpoint comparison request timed out')]) : ($not($hasRun) ? [$state('N/A', 'N/A — no Run ID selected')] : (($exists(checkpoint_compare) and checkpoint_compare.status = 'MISSING') ? $append($listed, [$state('NO RECORDS', 'NO RECORDS — checkpoint anchors were not recorded for this run')]) : ($count($listed) > 0 ? $listed : [$state('NO DATA', 'NO DATA — checkpoint comparison returned no rows')]))))",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=checkpoint_compare",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
+              }
+            }
+          ],
+          "title": "Compare Checkpoint Anchors",
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "copy": true,
+                  "copy_mode": true,
+                  "copy_value": true,
+                  "drilldown": true,
+                  "drilldown_type": true,
+                  "drilldown_target": true,
+                  "source": true,
+                  "source_type": true,
+                  "source_quality": true,
+                  "format": true,
+                  "why": true,
+                  "rendering": true,
+                  "missing_severity": true,
+                  "identity_gap": true,
+                  "present": true,
+                  "priority": true,
+                  "name": true,
+                  "value_full": true,
+                  "ui_status": true,
+                  "current_value_short": true,
+                  "checkpoint_value_short": true
+                },
+                "indexByName": {
+                  "anchor": 0,
+                  "status": 3,
+                  "current_value_full": 1,
+                  "checkpoint_value_full": 2
+                },
+                "renameByName": {
+                  "anchor": "Parameter",
+                  "status": "Result",
+                  "current_value_full": "Current",
+                  "checkpoint_value_full": "Checkpoint"
+                }
+              }
+            }
+          ],
+          "links": []
+        }
+      ]
+    }
+  ]
+}

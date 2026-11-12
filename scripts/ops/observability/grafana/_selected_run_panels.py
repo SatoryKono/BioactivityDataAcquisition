@@ -947,7 +947,7 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
 
 # A2 empty-catalog client fallback (rev7 §3.2): same label as API finalize when
 # filter-options returns items=[]. Keep SELECT RUN only as A1 regression maps.
-_NO_RUNS_LABEL = "НЕТ ЗАПУСКОВ"
+_NO_RUNS_LABEL = "NO RUNS"
 SELECTOR_ROWS = (
     "$exists(items) and $count(items) = 0 ? "
     f'[{{"text":"{_NO_RUNS_LABEL}","value":"-"}}] : '

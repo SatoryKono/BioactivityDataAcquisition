@@ -512,7 +512,7 @@ def test_empty_run_option_labels_do_not_invent_a_run() -> None:
     # Pre-supplement keeps SELECT RUN so report-only UUIDs are not dual-labeled.
     assert payload == {"items": [{"text": "SELECT RUN", "value": "-"}]}
     assert selector_context.finalize_run_id_empty_catalog_label(payload) == {
-        "items": [{"text": "НЕТ ЗАПУСКОВ", "value": "-"}]
+        "items": [{"text": "NO RUNS", "value": "-"}]
     }
 
 
@@ -529,7 +529,7 @@ def test_finalize_keeps_select_run_when_report_only_uuid_present() -> None:
     finalized = selector_context.finalize_run_id_empty_catalog_label(merged)
     texts = [item["text"] for item in finalized["items"]]
     values = [item["value"] for item in finalized["items"]]
-    assert "НЕТ ЗАПУСКОВ" not in texts
+    assert "NO RUNS" not in texts
     assert texts[0] == "SELECT RUN"
     assert values == ["-", "run-x"]
 

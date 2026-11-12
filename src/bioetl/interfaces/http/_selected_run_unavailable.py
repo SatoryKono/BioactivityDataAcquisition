@@ -164,7 +164,7 @@ def _gap_presentation(
             {
                 **trust,
                 "processing_status": _NO_RUNS,
-                "reasons_display": "Нет запусков в выбранном скоупе",
+                "reasons_display": "No runs in the selected scope",
             },
         )
     return dict(summary), dict(trust)

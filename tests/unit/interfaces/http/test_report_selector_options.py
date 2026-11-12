@@ -11,6 +11,40 @@ from bioetl.interfaces.http._report_selector_options import supplement_report_op
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("status", ["success", "failed", "unknown"])
+def test_verified_report_resolves_unknown_existing_run_label(tmp_path, status):
+    _report(tmp_path, status=status)
+    payload = supplement_report_options(
+        {
+            "items": [
+                {
+                    "text": "2026-09-15 · chembl_assay · unknown · run-a",
+                    "value": "run-a",
+                }
+            ]
+        },
+        dimension="run_id",
+        response_shape="options",
+        scopes={},
+        root=tmp_path,
+    )
+    assert len(payload["items"]) == 1
+    assert f" · {status} · " in payload["items"][0]["text"]
+
+
+def test_verified_report_does_not_override_known_ledger_status(tmp_path):
+    _report(tmp_path, status="success")
+    original = {"text": "2026-09-15 · chembl_assay · failed · run-a", "value": "run-a"}
+    payload = supplement_report_options(
+        {"items": [original]},
+        dimension="run_id",
+        response_shape="options",
+        scopes={},
+        root=tmp_path,
+    )
+    assert payload["items"] == [original]
+
+
 @pytest.mark.parametrize(
     "zone,started,label",
     [

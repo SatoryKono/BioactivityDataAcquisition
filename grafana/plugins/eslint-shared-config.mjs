@@ -18,6 +18,7 @@ export const sharedPluginIgnores = [
   '**/lib-cov',
   '**/coverage',
   '**/dist/',
+  '**/dist-adaptive/',
   '**/artifacts/',
   '**/work/',
   '**/ci/',

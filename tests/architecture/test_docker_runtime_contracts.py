@@ -1087,7 +1087,17 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         == 2
     )
     assert dockerfile.count("python-3.13=3.13.18_git20261030-r0") == 2
-    assert dockerfile.count("zlib=1.3.2.1_rc20260917-r0") == 2
+    assert dockerfile.count("zlib=1.3.2.1_rc20260921-r2") == 2
+    # The vendor's documented GCS origin bypasses a failing CDN, retaining APK
+    # signatures, TLS validation and exact package pins in both build stages.
+    assert (
+        dockerfile.count(
+            "https://storage.googleapis.com/wolfi-production-registry-destination/os"
+        )
+        == 2
+    )
+    assert "--allow-untrusted" not in dockerfile
+    assert "--no-check-certificate" not in dockerfile
     assert "python-3.14" not in dockerfile
     assert "FROM scratch" in dockerfile
     assert "COPY --from=runtime-root /etc /etc" in dockerfile

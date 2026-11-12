@@ -132,9 +132,6 @@ def stamp_run_selection_context(payload: dict) -> None:
                         "include": {
                             "names": [
                                 "context",
-                                "run_id",
-                                "execution_state",
-                                "verdict",
                                 "context_checked_at",
                             ]
                         }
@@ -156,16 +153,10 @@ def stamp_run_selection_context(payload: dict) -> None:
                     "options": {
                         "indexByName": {
                             "context": 0,
-                            "run_id": 1,
-                            "execution_state": 2,
-                            "verdict": 3,
-                            "context_checked_at": 4,
+                            "context_checked_at": 1,
                         },
                         "renameByName": {
                             "context": "Context",
-                            "run_id": "Run ID",
-                            "execution_state": "Execution",
-                            "verdict": "Verdict",
                             "context_checked_at": "Context checked at",
                         },
                     },

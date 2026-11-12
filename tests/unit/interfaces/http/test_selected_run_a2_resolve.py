@@ -1,4 +1,4 @@
-"""Phase 3a §3.2 — A2 latest auto-select and empty-catalog «НЕТ ЗАПУСКОВ»."""
+"""Phase 3a §3.2 — A2 latest auto-select and empty-catalog «NO RUNS»."""
 
 from __future__ import annotations
 
@@ -361,9 +361,9 @@ async def test_handle_empty_catalog_emits_no_runs(
         host, MagicMock(), {"pipeline": "chembl_assay", "run_id": "-"}
     )
     payload = host._send_payload_response.await_args.args[2]
-    assert payload["verdict"] == "НЕТ ЗАПУСКОВ"
+    assert payload["verdict"] == "NO RUNS"
     assert payload["reason"] == NO_RUNS_REASON
-    assert payload["presentation_summary"][0]["execution_state"] == "НЕТ ЗАПУСКОВ"
+    assert payload["presentation_summary"][0]["execution_state"] == "NO RUNS"
 
 
 async def test_handle_missing_manifest_port_is_query_error() -> None:
@@ -375,7 +375,7 @@ async def test_handle_missing_manifest_port_is_query_error() -> None:
     payload = host._send_payload_response.await_args.args[2]
     assert payload["verdict"] == "QUERY ERROR"
     assert payload["reason"] == CATALOG_UNAVAILABLE_REASON
-    assert payload["verdict"] != "НЕТ ЗАПУСКОВ"
+    assert payload["verdict"] != "NO RUNS"
 
 
 async def test_handle_explicit_url_run_id_wins(

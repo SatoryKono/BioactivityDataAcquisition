@@ -167,10 +167,19 @@ def _build_evidence_location_resolver(
     report_root: Path,
 ) -> EvidenceLocationResolver:
     """Read locators from the report catalog and open the recorded data root."""
+    settings = get_settings()
     return EvidenceLocationResolver(
         locations=FileEvidenceLocationStore(report_root=report_root),
         aliases=default_evidence_root_alias_registry(dashboard_data_root=data_root),
-        opener=FileEvidenceReadContextFactory(metrics=metrics),
+        opener=FileEvidenceReadContextFactory(
+            metrics=metrics,
+            archive_root=resolve_control_plane_archive_root(
+                Path(settings.archive_root)
+                if settings.archive_root is not None
+                else None
+            ),
+            report_root=report_root,
+        ),
     )
 
 

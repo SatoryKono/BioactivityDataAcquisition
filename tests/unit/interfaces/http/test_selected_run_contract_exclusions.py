@@ -193,18 +193,14 @@ def test_attach_and_saved_status_expose_fields(tmp_path) -> None:
 
 def test_unavailable_payload_has_null_contract_fields() -> None:
     # Pipeline with DQ config: limits present, rate null without funnel.
-    known = unavailable_status(
-        "chembl_activity", "-", "НЕТ ЗАПУСКОВ", "no_runs_in_scope"
-    )
+    known = unavailable_status("chembl_activity", "-", "NO RUNS", "no_runs_in_scope")
     assert known["contract_exclusions_status"] == "UNKNOWN"
     assert known["contract_exclusions_rate"] is None
     assert known["contract_exclusions_soft_limit"] == pytest.approx(0.05)
     assert known["contract_exclusions_hard_limit"] == pytest.approx(0.5)
     assert known["records_in"] is None
     # Pipeline without DQ config: all nulls.
-    unknown = unavailable_status(
-        "no_such_pipeline", "-", "НЕТ ЗАПУСКОВ", "no_runs_in_scope"
-    )
+    unknown = unavailable_status("no_such_pipeline", "-", "NO RUNS", "no_runs_in_scope")
     assert unknown["contract_exclusions_soft_limit"] is None
     assert unknown["contract_exclusions_hard_limit"] is None
     assert unknown["records_in"] is None

@@ -448,8 +448,8 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
                     "options": {
                         "UNKNOWN": {"text": "UNKNOWN", "color": "gray"},
                         "SELECT RUN": {"text": "SELECT RUN", "color": "gray"},
-                        "НЕТ ЗАПУСКОВ": {
-                            "text": "НЕТ ЗАПУСКОВ",
+                        "NO RUNS": {
+                            "text": "NO RUNS",
                             "color": "gray",
                         },
                     },

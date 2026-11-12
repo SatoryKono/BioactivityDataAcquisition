@@ -2,9 +2,17 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import TYPE_CHECKING
+
+from bioetl.application.observability.control_plane_evidence import (
+    ControlPlaneEvidenceService,
+)
+from bioetl.infrastructure.control_plane.file_archive_store import FileArchiveStore
+from bioetl.infrastructure.control_plane.file_artifact_lifecycle_store import (
+    FileControlPlaneArtifactLifecycleStore,
+)
 
 from bioetl.application.services.run_reports.source_identity import (
     RUNTIME_SOURCE_ID_ENV,
@@ -17,6 +25,7 @@ from bioetl.composition.runtime_builders.run_manifest_data_roots import (
     resolve_data_root,
 )
 from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.ports import RawRunManifestInspectionPort
 from bioetl.domain.control_plane.run_evidence_location import (
     DEFAULT_EVIDENCE_ROOT_ALIAS,
     canonicalize_relative_data_root,
@@ -106,6 +115,8 @@ class FileEvidenceReadContextFactory:
     """Open file-backed read ports under a trusted alias base (RF-003)."""
 
     metrics: MetricsPort | None = None
+    archive_root: Path | None = None
+    report_root: Path | None = None
 
     def open(
         self,
@@ -128,7 +139,7 @@ class FileEvidenceReadContextFactory:
             bronze_root=safe_root / "output" / "bronze",
             trusted_base=alias_base,
         )
-        return FileEvidenceReadContext(
+        context = FileEvidenceReadContext(
             data_root=safe_root,
             trusted_alias_base=alias_base,
             manifest_port=FileRunManifestStore(
@@ -149,6 +160,26 @@ class FileEvidenceReadContextFactory:
                 metrics=self.metrics,
             ),
             replay_object_verifier=verifier,
+        )
+        return replace(
+            context,
+            validation_service=ControlPlaneEvidenceService(
+                ledger_port=context.ledger_port,
+                lineage_store=context.lineage_port,
+                manifest_inspector=(
+                    context.manifest_port
+                    if isinstance(context.manifest_port, RawRunManifestInspectionPort)
+                    else None
+                ),
+                lifecycle_planner=FileControlPlaneArtifactLifecycleStore(
+                    base_path=output_root, metrics=self.metrics
+                ),
+                archive_verifier=(
+                    FileArchiveStore(safe_root, self.archive_root, self.report_root)
+                    if self.archive_root is not None
+                    else None
+                ),
+            ),
         )
 
 
