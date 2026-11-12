@@ -1516,4 +1516,9 @@ def test_live_status_card_and_neutral_text_meet_normal_text_contrast():
         _contrast_ratio("#f7f8fa", state["color"]) >= 4.5 for state in mapping.values()
     )
     zero = _panel(incident, 230)["fieldConfig"]["defaults"]["thresholds"]["steps"][0]
-    assert _contrast_ratio(zero["color"], "#181b1f") >= 4.5
+    assert zero["color"] == "text"
+    # Grafana 13.2.3 resolves the visualization token to colors.text.primary:
+    # https://github.com/grafana/grafana/blob/v13.2.3/packages/grafana-data/src/themes/createVisualizationColors.ts
+    # Stock foregrounds from createColors.ts; retain the 4.5:1 floor in BOTH themes.
+    for foreground, background in (("#ccccdc", "#181b1f"), ("#24292e", "#ffffff")):
+        assert _contrast_ratio(foreground, background) >= 4.5
