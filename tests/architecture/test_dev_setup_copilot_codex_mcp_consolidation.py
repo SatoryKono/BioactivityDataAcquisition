@@ -677,3 +677,40 @@ def test_static_doctor_checks_devin_permission_declarations() -> None:
     )
 
     assert validate_devin_permission_contract(repo_root()) == []
+
+
+@pytest.mark.parametrize("target", ["tools", "legacy_allow"])
+def test_devin_list_comments_cannot_hide_permission_expansion(
+    tmp_path: Path, target: str
+) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-test-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8")
+    if target == "tools":
+        text, count = re.subn(
+            r"(allowed-tools:\n(?: *- .+\n)+)",
+            r"\1# comment inside list\n- exec\n",
+            text,
+            count=1,
+        )
+        assert count == 1
+    else:
+        text = text.replace(
+            "  - Read(**)\n",
+            "  - Read(**)\n  # comment inside list\n  - Exec(python)\n",
+            1,
+        )
+    path.write_text(text, encoding="utf-8")
+    assert any(
+        f.code == "devin.profile" for f in validate_devin_permission_contract(tmp_path)
+    )
+
+
+def test_devin_readonly_list_comments_remain_supported(tmp_path: Path) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-test-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8").replace(
+        "- glob\n", "- glob\n# a valid list comment\n", 1
+    )
+    path.write_text(text, encoding="utf-8")
+    assert validate_devin_permission_contract(tmp_path) == []

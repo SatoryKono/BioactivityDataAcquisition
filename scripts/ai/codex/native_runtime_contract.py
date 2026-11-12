@@ -653,7 +653,7 @@ def _declared_string_list(text: str, key: str, indent: int) -> list[str]:
         raise ValueError("missing/duplicate declared list")
     result = []
     for line in lines[positions[0] + 1 :]:
-        if not line.strip():
+        if not line.strip() or line.lstrip().startswith("#"):
             continue
         match = re.fullmatch(r" *- (.+)", line)
         if match is None:
