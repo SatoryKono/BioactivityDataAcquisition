@@ -92,7 +92,7 @@ Commands:
   device-login   Login with device auth
   check          Check environment setup
   setup          Setup missing components
-  mcp-check      Run bounded profile-aware MCP readiness checks
+  mcp-check      Inspect effective routes and explicitly selected MCP controls
   mcp-static     Check Codex MCP configuration without live services
   mcp-setup      Force-refresh Codex MCP configuration
   baseline       Measure bounded launcher and MCP overhead

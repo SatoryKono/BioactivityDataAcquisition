@@ -55,17 +55,35 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
-    "scripts/ai/codex/hook_inventory.py": {
+    "scripts/ai/codex/mcp_http_probe.py": {
       "decision": "shared_helper_module",
-      "next_step": "Internal read-only discovery library imported by doctor.py; retain as shared helper, not a standalone runtime or CLI entrypoint.",
+      "next_step": "Retain bounded HTTP transport used by mcp_probe_client; doctor owns the public CLI.",
       "owner": "@bioetl-platform",
-      "review_by": "2027-02-11"
+      "review_by": "2026-12-11"
+    },
+    "scripts/ai/codex/mcp_probe_client.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain the bounded stdio/HTTP diagnostic clients imported by doctor; keep supporting because doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
+    },
+    "scripts/ai/codex/mcp_probe_errors.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain sanitized shared MCP diagnostic outcomes; doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
     },
     "scripts/ai/codex/mcp_profile_contract.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the profile-matrix helper behind doctor.py and ensure-mcp.sh; keep contributor-facing diagnostics routed through the canonical doctor or launcher command.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
+    },
+    "scripts/ai/codex/mcp_readiness.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain the effective-route protocol/control readiness model imported by doctor; keep supporting because doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
     },
     "scripts/ai/codex/mcp_routes.py": {
       "decision": "shared_helper_module",
@@ -1759,6 +1777,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/repo/create_worktree.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Keep as the stdlib implementation behind the existing scripts.engineering.repo worktree bootstrap and mandatory installed bioetl-create-worktree.py helper. No standalone script entrypoint; preserve active_script_count_max and all env/path/full-tree guardrails.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
+    },
     "scripts/engineering/repo/github_settings_review.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the read-only GitHub governance review implementation behind `python -m scripts.engineering.repo github-settings-review`; keep workflow and runbook invocation routed through the package entrypoint.",
@@ -2009,7 +2033,7 @@
       "decision": "shared_helper_module",
       "owner": "@bioetl-platform",
       "review_by": "2027-01-31",
-      "next_step": "Retain the tested Phase 4.2\u20134.3 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-reflow; keep direct module invocation as a compatibility surface."
+      "next_step": "Retain the tested Phase 4.2–4.3 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-reflow; keep direct module invocation as a compatibility surface."
     },
     "scripts/ops/observability/grafana/capture_acceptance.py": {
       "decision": "shared_helper_module",
@@ -2400,6 +2424,12 @@
       "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/ai/codex/hook_inventory.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Internal read-only discovery library imported by doctor.py; retain as shared helper, not a standalone runtime or CLI entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-11"
     }
   },
   "schema_version": "1.0"
