@@ -912,8 +912,8 @@ function rowTitlePattern(title) {
     throw new Error('Row title must contain literal text');
   }
   const pattern = parts.map(part => variable(part)
-    ? '[\\s\\S]*?'
-    : part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('');
+    ? String.raw`[\s\S]*?`
+    : part.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)).join('');
   return new RegExp(`^(?:Expand row )?${pattern}$`);
 }
 

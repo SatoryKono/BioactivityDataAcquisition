@@ -410,7 +410,7 @@ def test_f05_canvas_halves_do_not_overlap() -> None:
 
 
 def test_f30_domains_panel_heights_are_compact() -> None:
-    """F-30 / §4.3: domains tables use h in 7–8 at limitField 6."""
+    """Six-row tables retain the reviewed height and explicit row cap."""
     cases = (
         ("grafana/dashboards/bioetl-overview-v2.json", 9002),
         ("grafana/dashboards/bioetl-dq-v2.json", 9451),
@@ -421,7 +421,13 @@ def test_f30_domains_panel_heights_are_compact() -> None:
             json.loads(Path(path).read_text(encoding="utf-8")), panel_id
         )
         height = int(panel["gridPos"]["h"])
-        assert 7 <= height <= 8, f"{path}:{panel_id} h={height}"
+        assert height == 8, f"{path}:{panel_id} h={height}"
+        limits = [
+            t["options"]["limitField"]
+            for t in panel["transformations"]
+            if t["id"] == "limit"
+        ]
+        assert limits == [6]
 
 
 def test_seed_dc6_pipeline_run_report_writes_matching_identity(

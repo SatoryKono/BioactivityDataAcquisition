@@ -577,6 +577,31 @@ def apply_visual_usability(payload: dict) -> None:
                 panel["gridPos"]["y"] -= shift
 
 
+def _preserve_unknown_null_color(value: dict) -> None:
+    """Keep missing-observation text neutral across repeated renders."""
+    if (
+        value.get("type") == "special"
+        and value.get("options", {}).get("match") == "null"
+    ):
+        result = value["options"].get("result", {})
+        if result.get("text") == "UNKNOWN":
+            result["color"] = "text"
+
+
+def _adjust_status_colors(value, palette: dict[str, str]) -> None:
+    """Apply the panel palette recursively without changing missing evidence."""
+    if isinstance(value, dict):
+        _preserve_unknown_null_color(value)
+        for key, child in value.items():
+            if key == "color" and isinstance(child, str) and child in palette:
+                value[key] = palette[child]
+            else:
+                _adjust_status_colors(child, palette)
+    elif isinstance(value, list):
+        for child in value:
+            _adjust_status_colors(child, palette)
+
+
 def apply_accessible_status_colors(payload: dict) -> None:
     """Preserve state hues while meeting text contrast on the shipped dark theme."""
     if payload.get("uid") not in {"bioetl-incident-v1", "bioetl-overview-v2"}:
@@ -598,24 +623,4 @@ def apply_accessible_status_colors(payload: dict) -> None:
             else {"gray": "#9CA3AF", "#555555": "#9CA3AF"}
         )
 
-        def adjust(value, palette: dict[str, str] = palette):
-            if isinstance(value, dict):
-                # Empty-observation builders use neutral theme text for null.
-                # Keep that fixed point rather than alternating text and gray.
-                if (
-                    value.get("type") == "special"
-                    and value.get("options", {}).get("match") == "null"
-                ):
-                    result = value["options"].get("result", {})
-                    if result.get("text") == "UNKNOWN":
-                        result["color"] = "text"
-                for key, child in value.items():
-                    if key == "color" and isinstance(child, str) and child in palette:
-                        value[key] = palette[child]
-                    else:
-                        adjust(child)
-            elif isinstance(value, list):
-                for child in value:
-                    adjust(child)
-
-        adjust(panel.get("fieldConfig", {}))
+        _adjust_status_colors(panel.get("fieldConfig", {}), palette)

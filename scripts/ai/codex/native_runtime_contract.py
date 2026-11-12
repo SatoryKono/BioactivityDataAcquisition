@@ -425,6 +425,42 @@ def validate_canonical_skills(repo_root: Path = REPO_ROOT) -> list[Finding]:
     return []
 
 
+def validate_skill_routes(repo_root: Path = REPO_ROOT) -> list[Finding]:
+    """Resolve explicit agent skill allowlists within their own runtime tree."""
+    findings: list[Finding] = []
+    for runtime in (".codex", ".junie", ".devin"):
+        agents = repo_root / runtime / "agents"
+        paths = [
+            *agents.glob("py-*.md"),
+            *agents.glob("py-*.toml"),
+            *agents.glob("*/AGENT.md"),
+        ]
+        for path in paths:
+            content = path.read_text(encoding="utf-8")
+            allowlist = content.partition("Allowed skills:")[2]
+            if not allowlist:
+                continue
+            allowlist = re.split(r"\.\s|\n\s*\n|Allowed MCP:", allowlist, maxsplit=1)[0]
+            entries = re.split(r"[,;]|\band\b", allowlist)
+            for entry in entries:
+                name = entry.strip().removesuffix("opt-in").strip().strip("`.")
+                valid_name = re.fullmatch(r"[a-z][a-z0-9_-]*", name)
+                if (
+                    not valid_name
+                    or not (
+                        repo_root / runtime / "skills" / name / "SKILL.md"
+                    ).is_file()
+                ):
+                    findings.append(
+                        Finding(
+                            "skill.route",
+                            f"project skill entrypoint is missing: {name}",
+                            path.relative_to(repo_root).as_posix(),
+                        )
+                    )
+    return findings
+
+
 def validate_native_runtime(repo_root: Path = REPO_ROOT) -> list[Finding]:
     """Validate every repository-native Codex discovery surface."""
 
@@ -432,6 +468,7 @@ def validate_native_runtime(repo_root: Path = REPO_ROOT) -> list[Finding]:
         *validate_project_config(repo_root),
         *validate_agents(repo_root),
         *validate_canonical_skills(repo_root),
+        *validate_skill_routes(repo_root),
         *validate_runtime_context(repo_root),
         *validate_ai_launcher_safety(repo_root),
     ]

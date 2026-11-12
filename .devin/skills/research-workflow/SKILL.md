@@ -1,8 +1,6 @@
 ---
 name: research-workflow
 description: "Use when conducting structured research projects that require traceable evidence, explicit decisions, and constrained specifications. Covers the full workflow from initialization through evidence collection, synthesis, decision-making, and spec generation."
-context: fork
-agent: general-purpose
 ---
 
 # Research Workflow
@@ -405,7 +403,14 @@ Check every architecture section:
 
 ## User Interaction
 
-Use the **AskUserQuestion tool** at key decision points:
+Run in the current agent by default; skill metadata does not launch a child.
+Multi-stream work requires delegation authority from the active runtime and the
+user's scope; it never expands permissions.
+
+At key decision points, use the active runtime's available user-input capability.
+Discover that capability rather than assuming a tool or role name. If unavailable,
+ask a plain-text question in the conversation and wait before dependent work;
+continue only independent work. Missing required input is not approval.
 
 ### Phase 1 (Initialize)
 - Brief ambiguity clarification

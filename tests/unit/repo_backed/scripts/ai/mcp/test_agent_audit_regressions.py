@@ -18,6 +18,17 @@ ROOT = Path(__file__).resolve().parents[6]
 pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 
+def _native_bash() -> str:
+    if os.name == "nt":
+        from scripts.engineering.qa.run_local_coverage_verify import _windows_bash
+
+        return _windows_bash()
+    executable = shutil.which("bash")
+    if not executable:
+        pytest.skip("Native Bash unavailable")
+    return executable
+
+
 def load_module(name: str, path: Path):
     spec = importlib.util.spec_from_file_location(name, path)
     assert spec and spec.loader
@@ -84,9 +95,7 @@ def test_metrics_legacy_naive_timestamp_still_reports_unused_server(
 
 
 def test_neo4j_diagnostic_accepts_combined_auth_without_backend(tmp_path: Path) -> None:
-    bash = shutil.which("bash")
-    if not bash:
-        pytest.skip("Bash unavailable")
+    bash = _native_bash()
     binaries = tmp_path / "bin"
     binaries.mkdir()
     for name, body in {
@@ -106,7 +115,7 @@ def test_neo4j_diagnostic_accepts_combined_auth_without_backend(tmp_path: Path) 
         NEO4J_AUTH="fixture-user/fixture-password",
     )
     result = subprocess.run(
-        [bash, str(ROOT / "scripts/ai/mcp/check_neo4j_memory.sh")],
+        [bash, (ROOT / "scripts/ai/mcp/check_neo4j_memory.sh").as_posix()],
         env=env,
         cwd=ROOT,
         capture_output=True,
@@ -324,13 +333,36 @@ def test_github_powershell_child_env_is_isolated(tmp_path: Path) -> None:
         NEO4J_AUTH="malformed-fixture",
         BIOETL_GITHUB_MCP_ACCESS="read-only",
     )
+    # The fixture exercises the native binary boundary, independently of an
+    # operator's optional managed-route file. Mock only that host discovery;
+    # do not modify production routing or credential policy.
+    env.pop("PC_AGENT_GITHUB_PROJECT_ROUTES", None)
+    env.pop("BIOETL_GITHUB_MCP_SHA256", None)
+    env.pop("BIOETL_MCP_VALIDATE_ONLY", None)
+    env["BIOETL_TEST_WRAPPER_PATH"] = str(
+        ROOT / "scripts/ai/mcp/github-mcp-wrapper.ps1"
+    )
+    launch = tmp_path / "launch-fixture.ps1"
+    launch.write_text(
+        r"""function global:Test-Path {
+    [CmdletBinding()]
+    param([Parameter(Position=0)][string]$Path, [string]$LiteralPath, [string]$PathType)
+    $candidate = if ($PSBoundParameters.ContainsKey('LiteralPath')) { $LiteralPath } else { $Path }
+    if ($candidate -match '[/\\]\.config[/\\]pc-agent[/\\]github-project-route\.json$') { return $false }
+    Microsoft.PowerShell.Management\Test-Path @PSBoundParameters
+}
+& $env:BIOETL_TEST_WRAPPER_PATH
+exit $LASTEXITCODE
+""",
+        encoding="utf-8",
+    )
     completed = subprocess.run(
         [
             pwsh,
             "-NoProfile",
             "-NonInteractive",
             "-File",
-            str(ROOT / "scripts/ai/mcp/github-mcp-wrapper.ps1"),
+            str(launch),
         ],
         cwd=tmp_path,
         env=env,
@@ -448,6 +480,19 @@ def test_github_bash_isolates_env_and_checks_identity(
     env.pop("BIOETL_MCP_VALIDATE_ONLY", None)
     if digest:
         env["BIOETL_GITHUB_MCP_SHA256"] = digest
+    # Exercise native launch with a local fixture, independent of the host's
+    # managed GitHub route. Exit 78 is the transport's documented no-route
+    # result; the fixture never contacts an owner or a remote service.
+    env.pop("PC_AGENT_GITHUB_PROJECT_ROUTES", None)
+    fixture_bin = tmp_path / "bin"
+    fixture_bin.mkdir()
+    node = fixture_bin / "node"
+    node.write_text(
+        '#!/bin/sh\ncase "${1##*/}" in github_project_transport.mjs) exit 78;; *) exit 99;; esac\n',
+        encoding="utf-8",
+    )
+    node.chmod(0o755)
+    env["PATH"] = str(fixture_bin) + os.pathsep + env.get("PATH", "")
     completed = subprocess.run(
         [executable, str(ROOT / "scripts/ai/mcp/github-mcp-wrapper.sh")],
         cwd=tmp_path,

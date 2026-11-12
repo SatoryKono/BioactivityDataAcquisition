@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4177 |
-| Tracked doc-like files | 4177 |
+| Doc-like files | 4178 |
+| Tracked doc-like files | 4178 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4177 |
+| tracked | 4178 |
 
 ## Lifecycle Counts
 
@@ -28,7 +28,7 @@
 | active_quality_baseline | 125 |
 | closeout_evidence | 168 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 40 |
+| docs_reports_curated_or_historical_report | 41 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 29 |
 | generated_skill_reference_mirror | 19 |
@@ -55,7 +55,7 @@
 | Archived | 1554 |
 | Canonical | 77 |
 | Generated | 1066 |
-| Working | 715 |
+| Working | 716 |
 
 ## Surface Families
 
@@ -65,13 +65,13 @@
 | archive | 1554 |
 | canonical | 77 |
 | generated | 1066 |
-| working | 715 |
+| working | 716 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 422 |
+| archive-after-migration | 423 |
 | generate-automatically | 1066 |
 | keep | 2689 |
 
@@ -123,6 +123,7 @@
 | `docs/reports/dashboard-ux-checks/2026-10-06.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-11-07.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-11-09.md` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-11-11.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-event-age.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-final-tests.txt` | Working | 0 | archive-after-migration |
@@ -158,7 +159,6 @@
 | `reports/audit-runs/12107-r07/acceptance-review.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/adapter-owner-map.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/adapter-owner-map.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/12107-r07/behavior-followups.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -292,6 +292,7 @@
 | `docs/reports/dashboard-ux-checks/2026-10-06.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-11-07.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-11-09.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-11-11.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-event-age.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-final-tests.txt` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
@@ -299,7 +300,6 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/post-main-runtime-receipt.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/post-main-tests.txt` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/runtime-receipt.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 
 ## Generated Route Registry
 

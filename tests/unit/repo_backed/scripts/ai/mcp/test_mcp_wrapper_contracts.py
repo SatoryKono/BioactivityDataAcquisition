@@ -137,6 +137,16 @@ POWERSHELL_WRAPPER_ENV_NAMES = (
 )
 
 
+@pytest.fixture(autouse=True)
+def _isolate_wrapper_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep shell route discovery away from the real user's managed profile."""
+    fixture_home = tmp_path / "wrapper-home"
+    fixture_home.mkdir()
+    monkeypatch.setenv("HOME", str(fixture_home))
+    monkeypatch.delenv("PC_AGENT_MCP_ROUTES_FILE", raising=False)
+    monkeypatch.delenv("PC_AGENT_MCP_ROUTES_SHA256", raising=False)
+
+
 def _clean_env(**updates: str | None) -> dict[str, str]:
     """Return an environment without inherited credentials or proxy settings."""
     sensitive_fragments = ("TOKEN", "API_KEY", "PASSWORD", "SECRET")

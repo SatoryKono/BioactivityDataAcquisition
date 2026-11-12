@@ -393,7 +393,7 @@
     },
     "scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh": {
       "decision": "shared_helper_module",
-      "next_step": "Sourced function library for mcp_fetch_wrapper.sh and mcp_filesystem_wrapper.sh; keep standalone invocation on the public wrappers.",
+      "next_step": "Shared sourced Windows interop function for filesystem/fetch MCP launchers; no standalone command. Keep supporting behind the public wrappers.",
       "owner": "@bioetl-platform",
       "review_by": "2026-12-11"
     },
@@ -423,7 +423,7 @@
     },
     "scripts/ai/mcp/support/run_owned_stdio.ps1": {
       "decision": "shared_helper_module",
-      "next_step": "Dot-sourced function library for the fetch/filesystem PowerShell wrappers; keep standalone invocation on the public wrappers.",
+      "next_step": "Shared dot-sourced descriptor validation and stdio forwarding functions for filesystem/fetch MCP launchers; no standalone command. Keep supporting behind the public wrappers.",
       "owner": "@bioetl-platform",
       "review_by": "2026-12-11"
     },
@@ -1905,7 +1905,7 @@
     },
     "scripts/ops/observability/grafana/_run_selection_context.py": {
       "decision": "shared_helper_module",
-      "next_step": "Imported projection helper used by render_nav_bus.py; keep generation through render_nav_bus and do not expose a separate CLI.",
+      "next_step": "Internal run-selection provenance transform imported by render_nav_bus and phase25; no standalone CLI. Keep supporting behind the dashboard generators.",
       "owner": "@bioetl-platform",
       "review_by": "2026-12-11"
     },
@@ -1935,7 +1935,7 @@
     },
     "scripts/ops/observability/grafana/_workflow_freshness.py": {
       "decision": "shared_helper_module",
-      "next_step": "Imported workflow freshness projection helper for dashboard generators; retain as a shared module rather than a standalone entrypoint.",
+      "next_step": "Internal workflow publication-age projection imported by _workflow_scope; no standalone CLI. Keep supporting behind the dashboard generators.",
       "owner": "@bioetl-platform",
       "review_by": "2026-12-11"
     },

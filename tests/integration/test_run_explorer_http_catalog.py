@@ -265,13 +265,19 @@ def test_run_explorer_flex_columns_omit_custom_width() -> None:
             widths[field] = int(props["custom.width"])
         if "custom.minWidth" in props:
             min_widths[field] = int(props["custom.minWidth"])
-    for field in ("Workflow", "Pipeline", "Saved Evidence", "Data Quality"):
+    for field, minimum in {
+        "Workflow": 50,
+        "Pipeline": 70,
+        "Saved Evidence": 80,
+        "Data Quality": 80,
+    }.items():
         assert field not in widths
-        assert min_widths[field] >= 80
-    assert widths["Replay Readiness"] == 125
-    assert widths["Run ID"] == 110
+        assert min_widths[field] == minimum
+    assert panel["fieldConfig"]["defaults"]["custom"]["inspect"] is True
+    assert widths["Replay Readiness"] == 90
+    assert widths["Run ID"] == 80
     assert min_widths["Run ID"] == 50
-    assert widths["Started"] == 170
+    assert widths["Started"] == 140
     assert widths["Overview"] == min_widths["Overview"] == 80
     visible_width = sum(width for field, width in widths.items() if field not in hidden)
     budget = (1366 // 2) * panel["gridPos"]["w"] // 24 - 40

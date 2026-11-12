@@ -393,6 +393,17 @@ time.sleep(10)
 """
     monkeypatch.setattr(subject, "_PLAIN_DELTA_WRITE_SUBPROCESS_CODE", script)
 
+    from bioetl.infrastructure.storage.silver import support
+
+    spawned_pids = []
+    real_spawn = support.run_protected_subprocess_popen
+
+    def capture_spawn(*args, **kwargs):
+        process = real_spawn(*args, **kwargs)
+        spawned_pids.append(process.pid)
+        return process
+
+    monkeypatch.setattr(support, "run_protected_subprocess_popen", capture_spawn)
     start_time = time.monotonic()
     with pytest.raises(TimeoutError):
         _run_plain_delta_write_subprocess(
@@ -405,8 +416,8 @@ time.sleep(10)
         )
     elapsed = time.monotonic() - start_time
     assert elapsed < 1.0
-    pid = int(pid_path.read_text(encoding="utf-8"))
-    assert not psutil.pid_exists(pid)
+    assert len(spawned_pids) == 1
+    assert not psutil.pid_exists(spawned_pids[0])
 
 
 def test_run_plain_delta_write_subprocess_cancel_reaps_child(
