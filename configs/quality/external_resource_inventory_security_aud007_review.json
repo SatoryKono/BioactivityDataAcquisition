@@ -1,38 +1,13 @@
 {
   "schema_version": 1,
-  "catalog_ref": "951c7c4c055ae3e2798b7e1260920003f1a42ae1",
-  "source_ref": "1d5db1f59f905614403e4465de6114b75ebcbab9",
+  "catalog_ref": "9c8564a7dee9441565e4f54bae53d700a6fe4963",
+  "source_ref": "f5f10a674f598dfe711f9fa6d2b1a9449d69fd39",
   "source_reviews": {
-    "src/bioetl/infrastructure/export/csv_exporter_table_ops.py": "Reviewed in-memory export-copy string neutralization and Arrow schema handling only; no external acquisition or mutation of input tables.",
-    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": "Reviewed CSV writes of safe table copies; original temporary file creation, publication and cleanup owner/lifetimes unchanged.",
-    "src/bioetl/infrastructure/export/debug_export_ops.py": "Reviewed debug CSV values/header neutralization and explicit XLSX string cell types; existing file context and Workbook.save acquisition remain unchanged.",
-    "src/bioetl/infrastructure/export/export_writer_adapter.py": "Reviewed safe CSV copy, provenance policy and explicit pandas ExcelWriter context before saving text cells. Same XLSX output operation, now explicit context close on normal/error paths; no runtime qualification inferred."
-  },
-  "expression_updates": {
-    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": {
-      "pv.write_csv(data, temp_path, write_options=write_options)": "pv.write_csv(spreadsheet_safe_table(data), temp_path, write_options=write_options)"
-    },
-    "src/bioetl/infrastructure/export/export_writer_adapter.py": {
-      "pyarrow_csv.write_csv(flattened, output_path, write_options=write_options)": "pyarrow_csv.write_csv(spreadsheet_safe_table(flattened), output_path, write_options=write_options)",
-      "dataframe.to_excel(output_path, index=False, engine='openpyxl')": "dataframe.to_excel(writer, index=False)"
-    }
-  },
-  "segment_updates": {
-    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": {
-      "pv.write_csv(data, temp_path, write_options=write_options)": "pv.write_csv("
-    },
-    "src/bioetl/infrastructure/export/export_writer_adapter.py": {
-      "pyarrow_csv.write_csv(flattened, output_path, write_options=write_options)": "pyarrow_csv.write_csv(",
-      "dataframe.to_excel(output_path, index=False, engine=\"openpyxl\")": "dataframe.to_excel(writer, index=False)"
-    }
+    "src/bioetl/infrastructure/export/export_writer_adapter.py": "Reviewed XLSX error path: create an in-memory placeholder worksheet to preserve primary write errors, and enforce text cell types in finally before ExcelWriter saves on any exit. Existing workbook/file acquisition and context-close owner unchanged; no new external acquisition or runtime qualification."
   },
   "line_updates": {
-    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": {
-      "144": 150,
-      "140": 146
-    },
     "src/bioetl/infrastructure/export/export_writer_adapter.py": {
-      "37": 38
+      "38": 38
     }
   }
 }
