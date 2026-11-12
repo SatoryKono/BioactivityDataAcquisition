@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
 
-pytestmark = pytest.mark.unit
+import pytest
 
 from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
     _CHECKPOINT_EMPTY_ROWS,
@@ -18,6 +17,8 @@ from scripts.ops.observability.grafana.dashboard_context_links import (
     PATH_BY_UID,
     grafana_dashboard_slug,
 )
+
+pytestmark = pytest.mark.unit
 
 _ROOT = Path(__file__).resolve().parents[5]
 _ACTIVE_SURFACES = (

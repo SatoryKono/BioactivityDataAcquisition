@@ -1,8 +1,10 @@
 # BioETL AI Runtime Entry Point — JetBrains Junie
 
-This file is the JetBrains Junie root operating contract for the BioETL
-repository. It is the Junie-native equivalent of `AGENTS.md` and MUST stay in
-lock-step with it. `.junie/**` and `.codex/**` are **equal-peer** tracked AI
+This file is the governed JetBrains Junie root contract mirror for BioETL and
+MUST stay in lock-step with `AGENTS.md`. It is also a legacy native discovery
+candidate; do not assume both files enter a session. Current vendor discovery
+prefers `.junie/AGENTS.md`, then root `AGENTS.md`, then legacy guidelines.
+The installed Junie version and effective IDE/CLI setting need qualification. `.junie/**` and `.codex/**` are **equal-peer** tracked AI
 runtime trees. Behavior edits belong in both trees. Automatic sync writes
 only `.codex` → `.junie` (`never_write_to_codex`).
 
@@ -59,6 +61,20 @@ does not diverge from it; any change to Canonical Precedence, Required AI
 Context, Environment Configuration, Post-Change Validation, or Guardrails
 MUST be applied to both files.
 
+## Runtime Bootstrap
+
+Before task actions, read the matching active runtime map named in Canonical
+Precedence. Read only the current runtime, then select profiles and skills by
+task. This is required instruction-driven reading, not a claim that a client
+natively injects the Markdown map. A profile reference is not proof of native
+agent registration; a skill catalog is not proof its body entered a prompt.
+
+The selected map is the bootstrap for the context-tier table below. If client
+identity or loading cannot be established, report NOT_PROVEN and retain the
+root guardrails. Do not substitute a foreign runtime or enable an unqualified
+adapter. See `docs/05-operations/runbooks/ai-rules-loading.md` for separate
+presence, configuration, discovery, prompt-rendering and execution evidence.
+
 ## Required AI Context
 
 Guardrails in this file (env, tech-debt budgets, root scratch, post-change,
@@ -71,6 +87,22 @@ dumping RULES/ADR on every edit.
 | V1 docs/prompt | this file's guardrails + `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` docs slice | read-only optional |
 | V2 focused code | + matching role/skill for SCOPE | `pre-task` |
 | V3/V4 | full package: `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`, `docs/00-project/ai/memory/agent-memory.md`, role `memory-py-*.md`, `src/memory/DAILY_WORKFLOW.md` | `pre-task` required |
+
+The Required AI Context table above is the single task-class matrix; profiles,
+wrappers, and orchestration MUST NOT independently require a larger bootstrap.
+Reuse an already-read source while its content and task scope remain current;
+re-read when the source changes, scope expands, or evidence conflicts.
+
+Select memory mode within user authority. `post-task`, session notes, promotion,
+and persistent refresh require authorized `read-write` mode. When selected
+pre-task must preserve a strict ban on file changes, use `read-only` with
+`--skip-refresh-if-missing --skip-session-note` and set
+`PYTHONDONTWRITEBYTECODE=1` before starting Python, directly or through a wrapper.
+The two flags forbid temporary rebuilds. Missing retrieval artifacts stay DEGRADED and claims are verified
+against source. Hash-only work uses `off`; if the user forbids retrieval itself, record that constraint and the
+required pre-task as disabled, rather than claiming successful retrieval.
+V2 and V3/V4 still require their matrix-selected pre-task and applicable checks;
+a missing artifact or denied write capability does not lower the task tier.
 
 Hash-only work does **not** require reading `docs/00-project/RULES.md` or the
 ADR tree. V3/V4 keep that package. Select RULES/ADR slices through
@@ -188,6 +220,23 @@ Minimum expectation:
   the full top-level tree. Report-only snapshots go to PR artifacts or orphan
   branches never merged into `main`. Gate:
   `python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`.
+
+## Local Git Tree Placement
+
+All local BioETL checkouts, linked/detached worktrees, temporary, review and
+recovery trees MUST stay physically inside `D:\github`. New worktrees go only
+to `D:\github\BioactivityDataAcquisition-worktrees\<task>`. Resolve existing
+ancestors, symlinks and junctions before creation or relocation; never redirect
+the approved root. This also applies to older checkouts.
+
+Create through `python D:/github/BioactivityDataAcquisition/.git/hooks/bioetl-create-worktree.py <task>`.
+Direct `git worktree add`, including `--no-checkout`, is forbidden. Do not use
+an automatic worktree mode whose path cannot be directed into the approved root.
+The tracked implementation is `scripts/engineering/repo/create_worktree.py`;
+bootstrap and migration instructions are in
+[Governed local worktrees](../.github/CONTRIBUTING.md#governed-local-worktrees).
+Template checkout still requires per-task `.env.example` approval; this rule
+does not relax the env guardrail or the full-tree commit gate.
 
 ## Dashboard Skill Routing
 
