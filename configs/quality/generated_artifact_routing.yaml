@@ -423,6 +423,7 @@ routes:
     outputs:
       - reports/quality/test-governance-current.json
       - reports/quality/test-fixture-asset-duplication.json
+      - reports/quality/test-basename-collision-inventory.json
     notes: Test-governance tracked artifacts include fixture-asset visibility inventory.
 
   - id: flaky-test-burndown-review-quality-baseline

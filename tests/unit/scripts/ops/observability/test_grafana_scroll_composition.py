@@ -84,10 +84,12 @@ captureScrollSurface(page,{
             str(scale),
             str(client_height),
         ],
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
+        timeout=20,
     )
+    assert result.returncode == 0, result.stderr
     proof = json.loads(result.stdout)
     if client_height > 684:
         assert proof == {"clipped": True}
@@ -120,10 +122,12 @@ console.log(JSON.stringify({height:plan.canvasHeight,covered,tiles:plan.slices.l
 """
     result = subprocess.run(
         ["node", "-e", script, str(COMPOSITOR), str(scale)],
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
+        timeout=20,
     )
+    assert result.returncode == 0, result.stderr
     proof = json.loads(result.stdout)
     assert proof == {
         "height": int(1538 * scale + 0.5),
@@ -154,10 +158,12 @@ console.log(JSON.stringify({tiles:plan.slices.length,lastHeight:last.height,cove
 """
     result = subprocess.run(
         ["node", "-e", script, str(COMPOSITOR)],
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
+        timeout=20,
     )
+    assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout) == {
         "tiles": 4,
         "lastHeight": 0,
@@ -189,10 +195,12 @@ console.log(JSON.stringify({height:plan.canvasHeight,rows:rows.length,first:rows
 """
     result = subprocess.run(
         ["node", "-e", script, str(COMPOSITOR), str(scale), json.dumps(offsets)],
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
+        timeout=20,
     )
+    assert result.returncode == 0, result.stderr
     height = (916 + offsets[-1]) * scale
     assert json.loads(result.stdout) == {
         "height": height,
@@ -216,10 +224,12 @@ throw new Error('Incomplete capture was accepted');
 """
     result = subprocess.run(
         ["node", "-e", script, str(COMPOSITOR)],
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
+        timeout=20,
     )
+    assert result.returncode == 0, result.stderr
     proof = json.loads(result.stdout)
     assert proof["rejected"] is True
     assert "incomplete document" in proof["reason"]
@@ -245,10 +255,12 @@ console.log(JSON.stringify({height:plan.canvasHeight,rows:rows.length,first:rows
 """
     result = subprocess.run(
         ["node", "-e", script, str(COMPOSITOR), str(scale)],
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
+        timeout=20,
     )
+    assert result.returncode == 0, result.stderr
     height = 2032 * scale
     assert json.loads(result.stdout) == {
         "height": height,
@@ -316,10 +328,12 @@ captureScrollSurface(page,{
             str(remainder),
             str(scale),
         ],
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
+        timeout=20,
     )
+    assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout) == {
         "positions": [0, 620, 620 + remainder],
         "height": (1536 + remainder) * scale,
