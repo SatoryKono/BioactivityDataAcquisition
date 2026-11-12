@@ -34,13 +34,6 @@
   "assertless_candidates": [
     {
       "category": "intentional_no_exception_contract",
-      "line": "84",
-      "path": "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_log_bronze_audit_skips_when_audit_is_none"
-    },
-    {
-      "category": "intentional_no_exception_contract",
       "line": "586",
       "path": "tests/integration/infrastructure/storage/test_delta_reader.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -87,13 +80,6 @@
       "path": "tests/unit/application/test_issue_10518_application_svc2.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_checkpoint_record_metrics_noop_without_sink"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "986",
-      "path": "tests/unit/application/test_issue_10518_application_tail1a.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_increment_counter_without_metrics_api_is_noop"
     },
     {
       "category": "intentional_no_exception_contract",
@@ -534,11 +520,10 @@
     "architecture_helper_guard": 0,
     "benchmark_or_performance": 0,
     "helper_asserted": 3,
-    "intentional_no_exception_contract": 68,
+    "intentional_no_exception_contract": 66,
     "weak_no_value": 0
   },
   "assertless_examples": [
-    "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
     "tests/unit/application/test_issue_10518_app_leftovers_branches.py:100",
     "tests/unit/application/test_issue_10518_application_coreobs_b.py:43",
@@ -546,7 +531,6 @@
     "tests/unit/application/test_issue_10518_application_pipelines_a.py:753",
     "tests/unit/application/test_issue_10518_application_svc2.py:807",
     "tests/unit/application/test_issue_10518_application_svc2.py:1552",
-    "tests/unit/application/test_issue_10518_application_tail1a.py:986",
     "tests/unit/application/core/test_batch_metrics_accounting.py:48",
     "tests/unit/application/core/test_batch_tracing.py:137",
     "tests/unit/application/observability/test_pipeline_metrics.py:297",
@@ -562,15 +546,11 @@
     "tests/unit/infrastructure/test_checkpoint.py:135",
     "tests/unit/infrastructure/test_checkpoint.py:189",
     "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fifteen.py:44",
-    "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py:221"
+    "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py:221",
+    "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py:507",
+    "tests/unit/infrastructure/test_storage_factory.py:820"
   ],
   "assertless_families": {
-    "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py": {
-      "assertless_tests": 1,
-      "categories": {
-        "intentional_no_exception_contract": 1
-      }
-    },
     "tests/integration/infrastructure/storage/test_delta_reader.py": {
       "assertless_tests": 1,
       "categories": {
@@ -623,12 +603,6 @@
       "assertless_tests": 2,
       "categories": {
         "helper_asserted": 1,
-        "intentional_no_exception_contract": 1
-      }
-    },
-    "tests/unit/application/test_issue_10518_application_tail1a.py": {
-      "assertless_tests": 1,
-      "categories": {
         "intentional_no_exception_contract": 1
       }
     },
@@ -843,7 +817,7 @@
       }
     }
   },
-  "assertless_total_candidates": 71,
+  "assertless_total_candidates": 69,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1017,7 +991,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 68,
+  "intentional_no_exception_contract": 66,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
@@ -1067,13 +1041,6 @@
     "assertless_candidates": [
       {
         "category": "intentional_no_exception_contract",
-        "line": "84",
-        "path": "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_log_bronze_audit_skips_when_audit_is_none"
-      },
-      {
-        "category": "intentional_no_exception_contract",
         "line": "586",
         "path": "tests/integration/infrastructure/storage/test_delta_reader.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -1120,13 +1087,6 @@
         "path": "tests/unit/application/test_issue_10518_application_svc2.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_checkpoint_record_metrics_noop_without_sink"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "986",
-        "path": "tests/unit/application/test_issue_10518_application_tail1a.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_increment_counter_without_metrics_api_is_noop"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1567,11 +1527,10 @@
       "architecture_helper_guard": 0,
       "benchmark_or_performance": 0,
       "helper_asserted": 3,
-      "intentional_no_exception_contract": 68,
+      "intentional_no_exception_contract": 66,
       "weak_no_value": 0
     },
     "assertless_examples": [
-      "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
       "tests/unit/application/test_issue_10518_app_leftovers_branches.py:100",
       "tests/unit/application/test_issue_10518_application_coreobs_b.py:43",
@@ -1579,7 +1538,6 @@
       "tests/unit/application/test_issue_10518_application_pipelines_a.py:753",
       "tests/unit/application/test_issue_10518_application_svc2.py:807",
       "tests/unit/application/test_issue_10518_application_svc2.py:1552",
-      "tests/unit/application/test_issue_10518_application_tail1a.py:986",
       "tests/unit/application/core/test_batch_metrics_accounting.py:48",
       "tests/unit/application/core/test_batch_tracing.py:137",
       "tests/unit/application/observability/test_pipeline_metrics.py:297",
@@ -1595,9 +1553,11 @@
       "tests/unit/infrastructure/test_checkpoint.py:135",
       "tests/unit/infrastructure/test_checkpoint.py:189",
       "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fifteen.py:44",
-      "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py:221"
+      "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py:221",
+      "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py:507",
+      "tests/unit/infrastructure/test_storage_factory.py:820"
     ],
-    "assertless_total_candidates": 71,
+    "assertless_total_candidates": 69,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -1837,15 +1797,15 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "7e02e25dedbd311dce73fb7a8a2ecf5424366728af9b138edacae42d03107070",
+  "source_tree_sha256": "45238503df033886397563c5040f872d8d2dc67e4147cb36d900534f0eb15205",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 71,
+    "assertless_total_candidates": 69,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 68,
+    "intentional_no_exception_contract": 66,
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
