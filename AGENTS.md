@@ -211,6 +211,23 @@ Minimum expectation:
   branches never merged into `main`. Gate:
   `python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`.
 
+## Local Git Tree Placement
+
+All local BioETL checkouts, linked/detached worktrees, temporary, review and
+recovery trees MUST stay physically inside `D:\github`. New worktrees go only
+to `D:\github\BioactivityDataAcquisition-worktrees\<task>`. Resolve existing
+ancestors, symlinks and junctions before creation or relocation; never redirect
+the approved root. This also applies to older checkouts.
+
+Create through `python D:/github/BioactivityDataAcquisition/.git/hooks/bioetl-create-worktree.py <task>`.
+Direct `git worktree add`, including `--no-checkout`, is forbidden. Do not use
+an automatic worktree mode whose path cannot be directed into the approved root.
+The tracked implementation is `scripts/engineering/repo/create_worktree.py`;
+bootstrap and migration instructions are in
+[Governed local worktrees](.github/CONTRIBUTING.md#governed-local-worktrees).
+Template checkout still requires per-task `.env.example` approval; this rule
+does not relax the env guardrail or the full-tree commit gate.
+
 ## Dashboard Skill Routing
 
 - Monitoring/Grafana is **optional** (ADR-010). Do **not** start

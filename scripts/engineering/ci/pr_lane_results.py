@@ -187,6 +187,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         (
             "AGENTS.md",
             "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+            "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
+            "docs/00-project/ai/prompts/library/session/bootstrap.md",
+            "docs/03-guides/development/pycharm-setup.md",
+            "docs/03-guides/github-workflow-diagrams.md",
             "docs/05-operations/runbooks/ai-rules-loading.md",
         ),
         (
