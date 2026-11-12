@@ -353,6 +353,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/ops/observability/grafana/dashboard_context_links.py": (
         GRAFANA_CONTEXT_LINKS_TEST,
     ),
+    "scripts/ops/observability/grafana/capture_scroll_surface.cjs": (
+        "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py",
+        "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
+        "tests/unit/scripts/ops/observability/test_grafana_immutable_capture.py",
+    ),
     **dict.fromkeys(
         ("docs/05-operations/runbooks/observability-checklist.md", "grafana/README.md"),
         (
