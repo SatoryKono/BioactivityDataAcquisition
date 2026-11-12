@@ -23,6 +23,28 @@ from scripts.engineering.qa import report_contract_coverage_matrix as matrix
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("provider", ["chembl", "composite"])
+def test_target_contract_evidence_excludes_unrelated_package_substrings(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, provider: str
+) -> None:
+    monkeypatch.setattr(matrix, "PROJECT_ROOT", tmp_path)
+    unrelated = [
+        "tests/unit/iuphar_target_class/test_matching.py",
+        "tests/unit/iuphar_target_class/test_normalization.py",
+        "tests/unit/targeting/test_policy.py",
+    ]
+    relevant = [
+        f"tests/contract/test_{provider}_target.py",
+        "tests/unit/domain/test_target.py",
+        "tests/unit/domain/test_target_validation.py",
+        "tests/unit/domain/target/test_policy.py",
+    ]
+    paths = unrelated + relevant
+    assert matrix._contract_test_paths(
+        provider, "target", [(path, path.lower()) for path in paths]
+    ) == sorted(relevant)
+
+
 def test_ci_publishing_does_not_count_as_publication_entity_evidence(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -37,6 +59,14 @@ def test_ci_publishing_does_not_count_as_publication_entity_evidence(
         "chembl", "publication", [(path, path.lower()) for path in paths]
     )
     assert actual == sorted(paths[2:])
+
+
+def test_activity_keeps_existing_bioactivity_directory_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(matrix, "PROJECT_ROOT", tmp_path)
+    path = "tests/unit/domain/entities/bioactivity/test_converters.py"
+    assert matrix._contract_test_paths("chembl", "activity", [(path, path)]) == [path]
 
 
 def test_existing_snapshot_date_reads_committed_value(tmp_path: Path) -> None:

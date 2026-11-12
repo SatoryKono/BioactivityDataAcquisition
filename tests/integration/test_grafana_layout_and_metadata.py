@@ -201,6 +201,11 @@ def test_incident_observability_row_and_legend_are_separate_from_fleet() -> None
     fleet = next(p for p in root if p["id"] == 8808)
     assert root.index(row) + 1 == root.index(fleet)
     assert row["title"] == "Observability Signals"
+    assert row["collapsed"] is True
+    assert (
+        "Collapsed header states: OK, WARN, CRIT/FIRING, UNKNOWN" in row["description"]
+    )
+    assert "A blank cell is not a measured zero." in row["description"]
     assert row["gridPos"]["y"] + 1 == fleet["gridPos"]["y"]
     assert {p["id"] for p in row["panels"]} == {8810, 9102, 907, 894, 9491}
     _assert_panels_stay_in_grid_without_overlap(row["panels"], context="Observability")

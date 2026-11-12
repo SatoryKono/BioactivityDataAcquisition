@@ -65,3 +65,73 @@ def test_path_rejects_non_absolute_candidate(tmp_path: Path) -> None:
     base.mkdir()
     with pytest.raises(EvidenceLocationInvalidError, match="absolute"):
         assert_path_within_trusted_base(Path("relative/root"), trusted_base=base)
+
+
+def test_relative_trusted_base_is_rejected_before_io(tmp_path):
+    with pytest.raises(
+        EvidenceLocationInvalidError, match="trusted evidence base must be absolute"
+    ):
+        assert_path_within_trusted_base(tmp_path / "run", trusted_base=Path("relative"))
+
+
+@pytest.mark.parametrize("failure_at", ["base", "outside_target", "inside_target"])
+def test_resolution_errors_remain_bounded_domain_errors(
+    monkeypatch, tmp_path, failure_at
+):
+    base = tmp_path / "trusted"
+    base.mkdir()
+    target = tmp_path / "outside" if failure_at == "outside_target" else base / "run"
+    failing = base if failure_at == "base" else target
+    resolve = Path.resolve
+
+    def resolve_with_failure(path, *args, **kwargs):
+        if path == failing:
+            raise OSError("fixture denied resolution")
+        return resolve(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "resolve", resolve_with_failure)
+    with pytest.raises(EvidenceLocationInvalidError, match="resolv") as caught:
+        assert_path_within_trusted_base(target, trusted_base=base)
+    assert isinstance(caught.value.__cause__, OSError)
+
+
+@pytest.mark.parametrize("link", [False, True])
+def test_component_metadata_failure_or_link_is_rejected_without_walk(
+    monkeypatch, tmp_path, link
+):
+    import stat
+    from types import SimpleNamespace
+
+    base = tmp_path / "trusted"
+    base.mkdir()
+    blocked = base / "blocked"
+    lstat = Path.lstat
+
+    def read_metadata(path, *args, **kwargs):
+        if path == blocked:
+            if link:
+                return SimpleNamespace(st_mode=stat.S_IFLNK)
+            raise OSError("fixture unreadable component")
+        return lstat(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "lstat", read_metadata)
+    with pytest.raises(EvidenceLocationInvalidError, match="symlink|containment"):
+        assert_path_within_trusted_base(blocked / "run", trusted_base=base)
+
+
+def test_unreadable_locator_path_is_not_treated_as_absent(monkeypatch, tmp_path):
+    from bioetl.infrastructure.control_plane import (
+        evidence_location_path_safety as subject,
+    )
+
+    target = tmp_path / "locator"
+    lstat = Path.lstat
+
+    def read_metadata(path, *args, **kwargs):
+        if path == target:
+            raise OSError("fixture denied metadata")
+        return lstat(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "lstat", read_metadata)
+    with pytest.raises(EvidenceLocationInvalidError, match="not readable"):
+        subject.reject_symlink_or_junction(target)
