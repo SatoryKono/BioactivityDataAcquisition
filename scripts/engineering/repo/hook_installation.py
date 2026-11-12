@@ -29,6 +29,7 @@ MODULES = (
     "offline_precommit",
     "hook_runtime",
     "hook_installation",
+    "hook_receipts",
 )
 STATE = ".bioetl-hooks-state.json"
 MANIFEST = "manifest.json"
