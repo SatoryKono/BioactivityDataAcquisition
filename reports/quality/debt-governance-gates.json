@@ -52,7 +52,7 @@
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
       "source_artifact": "reports/quality/module-coverage-inventory.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": {
@@ -437,19 +437,15 @@
     },
     {
       "current": {
-        "artifacts": [
-          "architecture_quality_scorecard",
-          "hotspot_family_baseline",
-          "module_coverage_inventory"
-        ],
-        "count": 3
+        "artifacts": [],
+        "count": 0
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: architecture_quality_scorecard, hotspot_family_baseline, module_coverage_inventory",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: none",
       "source_artifact": "reports/quality/*.json",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -476,11 +472,11 @@
   "schema_version": 1,
   "stale_artifacts": {
     "adr_enforcement_matrix": false,
-    "architecture_quality_scorecard": true,
+    "architecture_quality_scorecard": false,
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
-    "hotspot_family_baseline": true,
-    "module_coverage_inventory": true,
+    "hotspot_family_baseline": false,
+    "module_coverage_inventory": false,
     "remote_main_baseline": false
   },
   "status_counts": {
