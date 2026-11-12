@@ -2430,6 +2430,36 @@
       "next_step": "Internal read-only discovery library imported by doctor.py; retain as shared helper, not a standalone runtime or CLI entrypoint.",
       "owner": "@bioetl-platform",
       "review_by": "2027-02-11"
+    },
+    "scripts/engineering/repo/hook_installation.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
+    },
+    "scripts/engineering/repo/hook_runtime.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
+    },
+    "scripts/engineering/repo/offline_precommit.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
+    },
+    "scripts/engineering/repo/process_deadline.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
+    },
+    "scripts/engineering/repo/process_supervisor.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
     }
   },
   "schema_version": "1.0"
