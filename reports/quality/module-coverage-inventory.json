@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "d2e62cad5a90bb0459f4cd9efa8335b03fdc72e85021f8c820e6efa841618afe",
+  "coverage_xml_sha256": "dfd73458855b64918a56fc1a86451119e14edd7f839a659a8606fb5849e00619",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
@@ -52250,7 +52250,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "14c09721406e065002b466b0f5f9b81a6e846b1a68ed8fd705d01861d8573e0c",
+  "source_tree_sha256": "c86d1b29516048ee6a7cc39d072b6799889ccb0a68b1e9dfe862b5801b6dbb16",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

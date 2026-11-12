@@ -308,6 +308,9 @@ def test_github_powershell_child_env_is_isolated(tmp_path: Path) -> None:
         "import os,sys,json;print(json.dumps({'unrelated':'OPENAI_API_KEY' in os.environ,'github':'GITHUB_PERSONAL_ACCESS_TOKEN' in os.environ,'args':sys.argv[1:]}))",
         encoding="utf-8",
     )
+    # This test exercises the synthetic native child, never a user profile.
+    routes = tmp_path / "github-routes.json"
+    routes.write_text(json.dumps({"version": 1, "workspaces": []}), encoding="utf-8")
     env = {
         key: value
         for key, value in os.environ.items()
@@ -318,6 +321,7 @@ def test_github_powershell_child_env_is_isolated(tmp_path: Path) -> None:
     }
     env.update(
         BIOETL_REPO_ENV_LOADED="1",
+        PC_AGENT_GITHUB_PROJECT_ROUTES=str(routes),
         BIOETL_GITHUB_MCP_SERVER=sys.executable,
         GITHUB_PERSONAL_ACCESS_TOKEN="ghp_synthetic_fixture_only_123456789",
         OPENAI_API_KEY="synthetic-unrelated",

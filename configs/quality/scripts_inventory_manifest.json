@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T05:19:15.250886+00:00",
+  "generated_at": "2026-11-12T06:32:28.786451+00:00",
   "summary": {
     "total_scripts": 744,
     "status_counts": {
@@ -3240,7 +3240,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1267,
+          "line": 1268,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3383,7 +3383,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 333,
+          "line": 337,
           "source_group": "tests",
           "text": "str(ROOT / \"scripts/ai/mcp/github-mcp-wrapper.ps1\"),"
         }
@@ -4084,7 +4084,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1258,
+          "line": 1259,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4139,7 +4139,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1257,
+          "line": 1258,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4184,13 +4184,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1256,
+          "line": 1257,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 388,
+          "line": 392,
           "source_group": "tests",
           "text": "str(ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\"),"
         },
@@ -4239,13 +4239,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1255,
+          "line": 1256,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_agent_audit_regressions.py",
-          "line": 401,
+          "line": 405,
           "source_group": "tests",
           "text": "command = [executable, str(ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.sh\")]"
         },
@@ -5087,7 +5087,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1263,
+          "line": 1264,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\": ("
         },
@@ -5506,7 +5506,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1259,
+          "line": 1260,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\": ("
         },
@@ -11419,7 +11419,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1143,
+          "line": 1144,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -11462,7 +11462,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1285,
+          "line": 1286,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -21759,7 +21759,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1383,
+          "line": 1384,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -25400,7 +25400,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1571,
+          "line": 1572,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
