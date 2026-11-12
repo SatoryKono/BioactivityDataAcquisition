@@ -173,6 +173,9 @@ uses command prefixes for `Exec(...)`, file-tool scopes for `Write(...)`, and
 restrictive profile `allowed-tools`. Skill `allowed-tools` has a different
 auto-approval role; do not transfer that meaning to profiles. Legacy profile
 `permissions` metadata is retained without claiming its interpretation.
+The static checker accepts the governed block-list spelling and rejects
+duplicate/ambiguous frontmatter keys; it does not emulate arbitrary YAML or
+replace native permission qualification.
 
 Project `.devin/config.json` keeps protected reads in `ask` only and denies
 root/nested `.env*` file-tool writes. The root permits reading but this adapter

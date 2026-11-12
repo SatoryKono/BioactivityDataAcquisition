@@ -592,6 +592,8 @@ DEVIN_RESTRICTED_PROFILES = frozenset(
 )
 DEVIN_READ_TOOLS = frozenset({"read", "grep", "glob"})
 DEVIN_PROFILE_CODE = "devin.profile"
+DEVIN_TOOLS_KEY = "allowed-tools"
+DEVIN_PERMISSIONS_KEY = "permissions"
 DEVIN_DELEGATION_BLOCK = "Native delegation of restricted profiles is blocked until"
 
 
@@ -648,8 +650,9 @@ def _declared_string_list(text: str, key: str, indent: int) -> list[str]:
     """Accept the governed block-list spelling only, not arbitrary vendor YAML."""
     lines = text.splitlines()
     marker = " " * indent + key + ":"
-    positions = [index for index, line in enumerate(lines) if line == marker]
-    if len(positions) != 1:
+    pattern = re.compile(r"^" + " " * indent + re.escape(key) + r"[ \t]*:")
+    positions = [index for index, line in enumerate(lines) if pattern.match(line)]
+    if len(positions) != 1 or lines[positions[0]] != marker:
         raise ValueError("missing/duplicate declared list")
     result = []
     for line in lines[positions[0] + 1 :]:
@@ -667,19 +670,39 @@ def _declared_string_list(text: str, key: str, indent: int) -> list[str]:
     return result
 
 
+def _devin_header(text: str) -> str:
+    """Reject ambiguous keys; only line delimiters terminate frontmatter."""
+    lines = text.splitlines()
+    if not lines or lines[0] != "---":
+        raise ValueError("missing metadata")
+    try:
+        end = lines.index("---", 1)
+    except ValueError as exc:
+        raise ValueError("missing metadata terminator") from exc
+    header = "\n".join(lines[1:end]) + "\n"
+    keys = [key.strip() for key in re.findall(r"(?m)^([^\s:#][^:\n]*):", header)]
+    known = {
+        "name",
+        "description",
+        "model",
+        "max-nesting",
+        DEVIN_TOOLS_KEY,
+        DEVIN_PERMISSIONS_KEY,
+    }
+    if len(set(keys)) != len(keys) or set(keys) - known:
+        raise ValueError("duplicate or unsupported metadata key")
+    return header
+
+
 def _devin_tool_metadata(path: Path) -> dict[str, Any]:
     """Read our bounded declaration subset; this is not a native YAML evaluator."""
-    text = path.read_text(encoding="utf-8")
-    parts = text.split("---", 2)
-    if not text.startswith("---\n") or len(parts) != 3:
-        raise ValueError("missing metadata")
-    header = parts[1]
+    header = _devin_header(path.read_text(encoding="utf-8"))
     blocks = re.findall(r"(?m)^permissions:\n((?: +[^\n]*\n|\n)*)", header)
     if len(blocks) != 1:
         raise ValueError("missing/duplicate permission metadata")
     return {
-        "allowed-tools": _declared_string_list(header, "allowed-tools", 0),
-        "permissions": {
+        DEVIN_TOOLS_KEY: _declared_string_list(header, DEVIN_TOOLS_KEY, 0),
+        DEVIN_PERMISSIONS_KEY: {
             key: _declared_string_list(blocks[0], key, 2) for key in ("allow", "deny")
         },
     }
@@ -693,7 +716,7 @@ def _devin_profile_findings(repo_root: Path, name: str) -> list[Finding]:
         return [Finding(DEVIN_PROFILE_CODE, "invalid profile tool contract", str(path))]
     findings = []
     if name in DEVIN_RESTRICTED_PROFILES:
-        if set(metadata["allowed-tools"]) != DEVIN_READ_TOOLS:
+        if set(metadata[DEVIN_TOOLS_KEY]) != DEVIN_READ_TOOLS:
             findings.append(
                 Finding(
                     DEVIN_PROFILE_CODE,
@@ -710,7 +733,7 @@ def _devin_legacy_denial_findings(
 ) -> list[Finding]:
     """Preserve declared denials without treating legacy metadata as enforcement."""
     try:
-        legacy = metadata["permissions"]
+        legacy = metadata[DEVIN_PERMISSIONS_KEY]
         allow, deny = legacy["allow"], legacy["deny"]
         if not isinstance(allow, list) or not isinstance(deny, list):
             raise ValueError("invalid legacy lists")

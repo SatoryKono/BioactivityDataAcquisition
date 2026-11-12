@@ -714,3 +714,39 @@ def test_devin_readonly_list_comments_remain_supported(tmp_path: Path) -> None:
     )
     path.write_text(text, encoding="utf-8")
     assert validate_devin_permission_contract(tmp_path) == []
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "commented_duplicate",
+        "flow_duplicate",
+        "quoted_duplicate",
+        "permission_duplicate",
+        "legacy_allow_duplicate",
+        "tools_alias",
+        "embedded_separator",
+    ],
+)
+def test_devin_ambiguous_metadata_cannot_override_restricted_tools(
+    tmp_path: Path, mutation: str
+) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-test-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8")
+    additions = {
+        "commented_duplicate": "allowed-tools: # overridden\n- exec\n",
+        "flow_duplicate": "allowed-tools: [exec]\n",
+        "quoted_duplicate": '"allowed-tools": [exec]\n',
+        "permission_duplicate": "permissions: # overridden\n  allow:\n  - Exec(python)\n",
+        "legacy_allow_duplicate": "  allow: # overridden\n  - Exec(python)\n",
+        "tools_alias": "tools: [exec]\n",
+        "embedded_separator": "description: inline---separator\nallowed-tools: [exec]\n",
+    }
+    closing = text.index("\n---", 3)
+    path.write_text(
+        text[:closing] + "\n" + additions[mutation] + text[closing:], encoding="utf-8"
+    )
+    assert any(
+        f.code == "devin.profile" for f in validate_devin_permission_contract(tmp_path)
+    )
