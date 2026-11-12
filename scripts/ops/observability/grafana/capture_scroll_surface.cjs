@@ -46,17 +46,26 @@ function compositionSlices(surface, tiles) {
   const canvasHeight = Math.round((surface.top + surface.scrollHeight) * surface.scale);
   let covered = 0;
   const slices = tiles.map((tile, index) => {
-    const offset = Math.round(tile.scrollTop * surface.scale);
-    const sourceY = index === 0 ? 0 : covered - offset;
-    const minimum = index === 0 ? 0 : Math.ceil(surface.stickyBottom * surface.scale);
-    if (sourceY < minimum || sourceY >= tile.height) {
-      throw new Error('Scroll tiles cannot cover the document without sticky chrome or a gap');
-    }
     // A scroll container can end above the screenshot's lower edge. Never
     // retain the footer/background below it as if it were dashboard content.
     const sourceBottom = Math.min(tile.height, Math.round((surface.top + surface.clientHeight) * surface.scale));
-    const height = Math.min(sourceBottom - sourceY, canvasHeight - covered);
-    if (height <= 0) throw new Error('Scroll tile adds no document pixels');
+    // Quantize absolute document boundaries, then derive the source rectangle
+    // from its bottom edge. Independently rounding the scroll offset can lose
+    // a physical pixel at fractional browser zoom (for example 125%).
+    const destinationBottom = Math.min(canvasHeight,
+      Math.round((surface.top + tile.scrollTop + surface.clientHeight) * surface.scale));
+    const height = destinationBottom - covered;
+    // A final tile at the fractional maxScrollTop can add no new rows once the
+    // previous tile already covered canvasHeight. Keep it in the tile list /
+    // manifest, but do not treat it as a composition error.
+    if (height < 0 || (height === 0 && covered !== canvasHeight)) {
+      throw new Error('Scroll tile adds no document pixels');
+    }
+    const sourceY = sourceBottom - height;
+    const minimum = index === 0 ? 0 : Math.ceil(surface.stickyBottom * surface.scale);
+    if (height > 0 && (sourceY < minimum || sourceY >= sourceBottom)) {
+      throw new Error('Scroll tiles cannot cover the document without sticky chrome or a gap');
+    }
     const slice = {sourceY, destinationY: covered, height};
     covered += height;
     return slice;
@@ -89,6 +98,10 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
       el = document.scrollingElement;
     }
     el.dataset.bioetlCaptureScroll='true';
+    // CSSOM clientHeight is integral, while the reachable scrollTop can be
+    // fractional. Measure the actual range before resetting to the first tile.
+    el.scrollTop=el.scrollHeight;
+    const maxScrollTop=el.scrollTop;
     el.scrollTop=0;
     const r=el.getBoundingClientRect();
     const stickyBottom = [...el.querySelectorAll('*')].reduce((bottom,node)=>{
@@ -96,8 +109,10 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
       return ['sticky','fixed'].includes(style.position) && box.top>=0 && box.top<innerHeight/2 && box.width>innerWidth/2
         ? Math.max(bottom,Math.min(box.bottom,innerHeight/2)) : bottom;
     },Math.max(0,r.top));
-    return {top:Math.max(0,r.top),stickyBottom,clientHeight:Math.min(el.clientHeight,innerHeight-Math.max(0,r.top)),
-      scrollHeight:el.scrollHeight,elementClientHeight:el.clientHeight,layoutViewport:{width:innerWidth,height:innerHeight},scale:devicePixelRatio};
+    return {top:Math.max(0,r.top),stickyBottom,
+      clientHeight:Math.min(el.scrollHeight-maxScrollTop,innerHeight-Math.max(0,r.top)),
+      scrollHeight:el.scrollHeight,maxScrollTop,elementClientHeight:el.clientHeight,
+      layoutViewport:{width:innerWidth,height:innerHeight},scale:devicePixelRatio};
   });
   if (!Number.isFinite(surface.clientHeight) || surface.clientHeight<=0) throw new Error('No measurable dashboard scroll surface');
   const tileDir=filePath.replace(/\.png$/,'-tiles');
@@ -121,7 +136,8 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
     actual = tile.scrollTop;
     tiles.push({...tile,file:path.relative(path.dirname(filePath),tile.file)});
     if(actual+surface.clientHeight>=surface.scrollHeight)break;
-    const next=Math.min(actual+visibleHeight-overlap,surface.scrollHeight-surface.clientHeight);
+    const next=Math.min(actual+visibleHeight-overlap,
+      surface.maxScrollTop ?? surface.scrollHeight-surface.clientHeight);
     if(next<=actual)throw new Error('Dashboard scroll capture made no progress');
     target=next;
   }
@@ -136,6 +152,7 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
       for(let i=0;i<images.length;i++){
         const img=new Image();img.src='data:image/png;base64,'+images[i];await img.decode();
         const {sourceY,destinationY,height}=composition.slices[i];
+        if(height===0)continue;
         context.drawImage(img,0,sourceY,img.width,height,0,destinationY,img.width,height);
       }
       return canvas.toDataURL('image/png').split(',')[1];
