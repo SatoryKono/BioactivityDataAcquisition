@@ -303,21 +303,35 @@ def _without_fenced_examples(text: str) -> str:
     output = []
     fence: str | None = None
     for line in text.splitlines():
-        marker = re.fullmatch(r" {0,3}(`{3,}|~{3,})(.*)", line)
+        marker = re.match(r" {0,3}(`{3,}|~{3,})", line)
         if fence is None:
             if marker:
                 fence = marker[1]
             else:
                 output.append(line)
-        elif marker and not marker[2].strip():
+        elif marker and not line[marker.end() :].strip():
             if marker[1][0] == fence[0] and len(marker[1]) >= len(fence):
                 fence = None
     return "\n".join(output)
 
 
+def _without_html_comments(text: str) -> str:
+    """Remove closed/unclosed comments with a forward-only literal scan."""
+    output = []
+    cursor = 0
+    while (start := text.find("<!--", cursor)) != -1:
+        output.append(text[cursor:start])
+        end = text.find("-->", start + 4)
+        if end == -1:
+            return "".join(output)
+        cursor = end + 3
+    output.append(text[cursor:])
+    return "".join(output)
+
+
 def guardrail_section(text: str, heading: str, level: int = 2) -> str | None:
     """Require one authoritative section; examples/comments cannot satisfy it."""
-    text = re.sub(r"<!--.*?(?:-->|\Z)", "", text, flags=re.DOTALL)
+    text = _without_html_comments(text)
     text = _without_fenced_examples(text)
     text = re.sub(r"(?m)^ {0,3}>[^\n]*(?:\n|$)", "", text)
     headers = list(re.finditer(r"(?m)^(#{1,6})[ \t](.*)$", text))
