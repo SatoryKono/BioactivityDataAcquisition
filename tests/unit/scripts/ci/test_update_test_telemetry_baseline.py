@@ -80,7 +80,9 @@ def test_ci_capture_keeps_original_measurement_date(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     xml = tmp_path / "coverage.xml"
-    xml.write_text('<coverage timestamp="1793987375208"/>', encoding="utf-8")
+    xml.write_text(
+        '<coverage timestamp="1793987375208" line-rate="0.9"/>', encoding="utf-8"
+    )
     monkeypatch.setattr(
         subprocess,
         "run",
@@ -89,6 +91,24 @@ def test_ci_capture_keeps_original_measurement_date(
     assert updater._validate_ci_capture_inputs("b" * 40, xml) == (
         "2026-11-06T17:49:35.208000+00:00"
     )
+
+
+@pytest.mark.parametrize("rate", [None, "nan", "inf", "-0.1", "1.1", "invalid"])
+def test_ci_capture_rejects_xml_without_a_valid_measured_coverage_rate(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, rate: str | None
+) -> None:
+    xml = tmp_path / "coverage.xml"
+    attributes = {"timestamp": "1793987375208"}
+    if rate is not None:
+        attributes["line-rate"] = rate
+    ET.ElementTree(ET.Element("coverage", attributes)).write(xml)
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *_a, **_k: subprocess.CompletedProcess([], 0, stdout=""),
+    )
+    with pytest.raises(ValueError):
+        updater._validate_ci_capture_inputs("a" * 40, xml)
 
 
 def test_ci_capture_rejects_percentage_without_original_artifact(
