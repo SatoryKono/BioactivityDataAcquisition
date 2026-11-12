@@ -182,10 +182,14 @@ GHA_DISABLED_MAP_TEST = "tests/architecture/test_gha_disabled_map_10263.py"
 # Opt-in only: these modules have reviewed non-unit owners because their native
 # discovery uses dynamic imports. Other scripts retain the conservative fallback.
 EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
-    {"scripts/ai/codex/native_runtime_contract.py"}
+    {
+        "scripts/ai/codex/native_runtime_contract.py",
+        "scripts/engineering/repo/process_supervisor.py",
+    }
 )
 
 NO_PARTIAL_TREE_TEST = "tests/unit/scripts/repo/test_check_no_partial_tree.py"
+HOOK_INSTALLATION_TEST = "tests/unit/scripts/test_hook_installation.py"
 IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
 DASHBOARD_UX_REPORT_FRESHNESS_TEST = (
     "tests/integration/test_dashboard_ux_report_freshness.py"
@@ -193,6 +197,27 @@ DASHBOARD_UX_REPORT_FRESHNESS_TEST = (
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "scripts/engineering/repo/process_supervisor.py": (
+        "tests/unit/scripts/repo/test_process_deadline.py",
+        HOOK_INSTALLATION_TEST,
+        "tests/unit/scripts/test_offline_precommit.py",
+    ),
+    "README.md": (
+        "tests/architecture/test_documentation_sync.py",
+        "tests/architecture/test_docs_root_surface_governance_alignment.py",
+        HOOK_INSTALLATION_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "docs/05-operations/runbooks/owned-git-hooks.md": (
+        HOOK_INSTALLATION_TEST,
+        "tests/unit/scripts/test_offline_precommit.py",
+        "tests/unit/scripts/repo/test_process_deadline.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "scripts/ops/launchers/codex/setup_plugins.sh": (
+        "tests/architecture/test_ops_ai_setup_scripts.py",
+        HOOK_INSTALLATION_TEST,
+    ),
     ".devin/config.json": (
         CODEX_NATIVE_RUNTIME_TEST,
         "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
@@ -2415,6 +2440,8 @@ def _collect_nodeids(
         sys.executable,
         "-m",
         "pytest",
+        "--rootdir",
+        str(repo_root.resolve()),
         "--collect-only",
         "-q",
         "-p",
