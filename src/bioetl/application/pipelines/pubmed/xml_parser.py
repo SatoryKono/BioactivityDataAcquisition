@@ -6,10 +6,11 @@ Provides reusable low-level functions for extracting data from XML elements.
 from __future__ import annotations
 
 import typing
+from typing import TYPE_CHECKING
 
 __all__ = ["get_int", "get_text"]
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
 
     class XmlElementProtocol(typing.Protocol):
         text: str | None
