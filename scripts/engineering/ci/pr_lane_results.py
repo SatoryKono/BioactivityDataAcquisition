@@ -81,9 +81,6 @@ REQUIRED_CHECKS_PROSE_TEST = (
     "tests/architecture/test_required_checks_prose_consistency.py"
 )
 DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
-DASHBOARD_OPERATOR_READABILITY_TEST = (
-    "tests/integration/test_dashboard_operator_readability.py"
-)
 DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST = (
     "tests/integration/test_dashboard_first_window_noscroll.py"
 )
@@ -200,9 +197,6 @@ NO_PARTIAL_TREE_TEST = "tests/unit/scripts/repo/test_check_no_partial_tree.py"
 HOOK_INSTALLATION_TEST = "tests/unit/scripts/test_hook_installation.py"
 SCOPED_CHECKS_TEST = "tests/unit/scripts/repo/test_scoped_checks.py"
 IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
-DASHBOARD_UX_REPORT_FRESHNESS_TEST = (
-    "tests/integration/test_dashboard_ux_report_freshness.py"
-)
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
@@ -340,6 +334,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "src/iuphar_target_class/delivery.py": (
         "tests/unit/iuphar_target_class/test_delivery.py",
+    ),
+    "src/iuphar_target_class/w153.py": ("tests/unit/iuphar_target_class/test_w153.py",),
+    "src/iuphar_target_class/acceptance.py": (
+        "tests/unit/iuphar_target_class/test_acceptance.py",
     ),
     "data/iuphar_target_class/delivery/example-input.csv": (
         "tests/unit/iuphar_target_class/test_delivery.py",
