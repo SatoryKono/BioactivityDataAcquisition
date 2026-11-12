@@ -50,6 +50,44 @@ def test_subclass_vocabulary_defects_are_not_resolved(foreign_side: str) -> None
     assert result.effective_subclasses == ()
 
 
+@pytest.mark.parametrize("side", ["direct", "local", "partial"])
+@pytest.mark.parametrize("known", [False, True])
+def test_one_sided_subclass_requires_its_own_vocabulary(side: str, known: bool) -> None:
+    vocabulary = frozenset({"alpha"}) if known else frozenset()
+    if side == "local":
+        row = _row(
+            iuphar_annotation_status="unmapped_type",
+            iuphar_class=None,
+            local_status="supported",
+            local_class="Enzyme",
+            local_subclasses=("alpha",),
+            local_vocabulary=vocabulary,
+        )
+    else:
+        row = _row(
+            iuphar_annotation_status="partial" if side == "partial" else "available",
+            iuphar_subclass="alpha" if side == "direct" else None,
+            confirmed_subclasses=("alpha",) if side == "partial" else (),
+            direct_vocabulary=vocabulary,
+        )
+    result = select_effective_class(row)
+    assert ("contract_error" in result.conflict_codes) is not known
+    if known:
+        assert result.effective_class == ("Enzyme" if side == "local" else "Receptor")
+        assert result.effective_source == (
+            "local_rule" if side == "local" else "iuphar_normalized"
+        )
+        assert result.effective_subclasses == ("alpha",)
+    else:
+        assert result.decision_status == "requires_review"
+        assert result.effective_class is None
+        assert result.effective_source == "none"
+        assert result.effective_subclasses == ()
+    assert result.iuphar_subclass == row.iuphar_subclass
+    assert result.local_subclasses == row.local_subclasses
+    assert result.evidence_ids == row.evidence_ids
+
+
 def _row(**overrides: object) -> ResolutionInput:
     payload: dict[str, object] = {
         "match_status": "matched",
@@ -223,6 +261,7 @@ _CASES = (
             iuphar_annotation_status="partial",
             partial_basis="type",
             confirmed_subclasses=("type-sub",),
+            direct_vocabulary=frozenset({"type-sub"}),
             local_status="not_supported",
         ),
         "Receptor",
@@ -238,6 +277,7 @@ _CASES = (
             iuphar_annotation_status="partial",
             partial_basis="family_mapping",
             confirmed_subclasses=("family-sub",),
+            direct_vocabulary=frozenset({"family-sub"}),
             local_status="supported",
             local_class="Receptor",
         ),
@@ -254,6 +294,7 @@ _CASES = (
             iuphar_annotation_status="partial",
             partial_basis="type",
             confirmed_subclasses=("type-sub",),
+            direct_vocabulary=frozenset({"type-sub"}),
             local_status="supported",
             local_class="Enzyme",
         ),
@@ -270,6 +311,7 @@ _CASES = (
             iuphar_annotation_status="partial",
             partial_basis="family_mapping",
             confirmed_subclasses=("family-sub",),
+            direct_vocabulary=frozenset({"family-sub"}),
             local_status="supported",
             local_class="Enzyme",
         ),
@@ -286,6 +328,7 @@ _CASES = (
             iuphar_annotation_status="partial",
             partial_basis="type",
             confirmed_subclasses=("type-sub",),
+            direct_vocabulary=frozenset({"type-sub"}),
             local_status="conflicting",
         ),
         "Receptor",
@@ -301,6 +344,7 @@ _CASES = (
             iuphar_annotation_status="partial",
             partial_basis="family_mapping",
             confirmed_subclasses=("family-sub",),
+            direct_vocabulary=frozenset({"family-sub"}),
             local_status="conflicting",
         ),
         "Receptor",
@@ -388,6 +432,7 @@ _CASES = (
             local_status="supported",
             local_class="Enzyme",
             local_subclasses=("beta",),
+            local_vocabulary=_VOCAB,
         ),
         "Enzyme",
         "local_rule",

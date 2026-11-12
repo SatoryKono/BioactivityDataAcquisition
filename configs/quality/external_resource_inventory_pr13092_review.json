@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "ee0c9f67d59bfd9a4d5d3486a67315e9e17fd647",
+  "source_ref": "5c7885829a1323949edd7756f60d58c99faf5e11",
+  "source_reviews": {
+    "src/bioetl/infrastructure/system/subprocess_boundary.py": "Extracted completed-output size validation; both Popen acquisition sites, process ownership, communicate/timeout cleanup and returned outputs remain unchanged. Existing source bindings only move by inserted helper lines; no runtime qualification.",
+    "src/bioetl/interfaces/http/processed_records_table.py": "Extracted pure ledger count projection into _ledger_metric_values; no resource acquisitions added or removed. Empty ledger UNKNOWN contract, report accounting and display deduplication semantics retained.",
+    "src/bioetl/interfaces/http/selected_run_status.py": "Extracted assessment completeness probe assembly into a pure helper. Artifact reads, asyncio.to_thread acquisition, saved evidence UNKNOWN handling and closer ownership remain in their original scopes; no new runtime evidence."
+  }
+}

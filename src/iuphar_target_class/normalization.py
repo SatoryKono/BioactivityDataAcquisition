@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import replace
 
 from .models import (
     ClassificationResult,
@@ -18,7 +19,7 @@ from .stage0.io import canonical_json_bytes, sha256_bytes
 
 _NAMED_MARKERS = frozenset(marker for marker in BASE_MISSING_MARKERS if marker)
 _EC_NAMES = dict(EC_CATEGORIES)
-_MULTI_FIELDS = frozenset({"uniprot", "synonyms", "ec", "keywords"})
+_MULTI_FIELDS = ("uniprot", "synonyms", "ec", "keywords")
 _SCALAR_FIELDS = (
     "target_id",
     "gene_symbol",
@@ -66,7 +67,7 @@ def _glue_subjects(value: str | None, field: str) -> tuple[str, ...]:
     if value is None:
         return ()
     if field not in _MULTI_FIELDS:
-        return (value,)
+        return (value.strip(),)
     return (value, *_split_multi(value))
 
 
@@ -87,6 +88,7 @@ def validate_input(
     snapshot_taxon: str | None = None,
 ) -> ValidatedInput:
     """Validate one row. An invalid row does not compute derived fields."""
+    row = replace(row, fields=dict(row.fields))
     errors: list[str] = []
     if not row.input_row_id:
         errors.append("input_row_id is empty")
@@ -111,13 +113,8 @@ def validate_input(
             tuple(errors),
             row_hash,
         )
-    diagnostics: list[Diagnostic] = []
     ec_numbers = parse_ec_numbers(row.fields.get("ec"))
-    for number in ec_numbers:
-        if not number.valid and number.diagnostic is not None:
-            diagnostics.append(
-                Diagnostic("invalid_ec", "warning", number.diagnostic),
-            )
+    diagnostics = _ec_diagnostics(ec_numbers)
     taxon, taxon_diagnostic = _taxon(
         normalized.get("organism"),
         snapshot_taxon,
@@ -158,6 +155,17 @@ def validate_input(
         row_sha256=row_hash,
         provenance=provenance,
     )
+
+
+def _ec_diagnostics(ec_numbers: tuple[EcNumber, ...]) -> list[Diagnostic]:
+    """Keep malformed-token warnings in their original input order."""
+    diagnostics: list[Diagnostic] = []
+    for number in ec_numbers:
+        if not number.valid and number.diagnostic is not None:
+            diagnostics.append(
+                Diagnostic("invalid_ec", "warning", number.diagnostic),
+            )
+    return diagnostics
 
 
 def validate_batch(

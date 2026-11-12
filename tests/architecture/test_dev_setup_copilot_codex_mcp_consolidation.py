@@ -18,6 +18,7 @@ import json
 import runpy
 import os
 import re
+import yaml
 from pathlib import Path
 
 from tests.helpers import repo_root, run_repo_python
@@ -328,7 +329,12 @@ def test_tracked_mcp_projections_reject_workstation_paths() -> None:
         "read_config_from",
         "hooks",
     }
-    assert devin_settings["permissions"]["ask"] == ["Read(**/.env*)"]
+    assert devin_settings["permissions"]["ask"] == [
+        "Read(.env*)",
+        "Read(**/.env*)",
+        "exec",
+        "Write(**)",
+    ]
     assert "Write(**/.env*)" in devin_settings["permissions"]["deny"]
     assert devin_settings["read_config_from"]["agents_standard"] is True
 
@@ -456,3 +462,410 @@ def test_unapproved_remote_mcp_url_rejected() -> None:
 
     assert "not in approved allowlist" in str(exc_info.value)
     assert "https://unapproved.example.com/mcp" in str(exc_info.value)
+
+
+from scripts.ai.codex.native_runtime_contract import (
+    AGENT_NAMES,
+    DEVIN_DELEGATION_BLOCK,
+    DEVIN_READ_TOOLS,
+    DEVIN_RESTRICTED_PROFILES,
+    validate_devin_permission_contract,
+)
+
+
+def _devin_fixture_tree(root: Path) -> Path:
+    config = root / ".devin/config.json"
+    config.parent.mkdir()
+    config.write_text(
+        json.dumps(
+            {
+                "permissions": {
+                    "allow": ["Read(src/**)"],
+                    "ask": ["Read(.env*)", "Read(**/.env*)", "exec", "Write(**)"],
+                    "deny": ["Write(.env*)", "Write(**/.env*)"],
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    runtime = root / ".devin/agents/DEVIN-RUNTIME.md"
+    runtime.parent.mkdir()
+    runtime.write_text(DEVIN_DELEGATION_BLOCK + " qualified.", encoding="utf-8")
+    for name in AGENT_NAMES:
+        path = root / f".devin/agents/{name}/AGENT.md"
+        path.parent.mkdir()
+        tools = sorted(DEVIN_READ_TOOLS)
+        if name not in DEVIN_RESTRICTED_PROFILES:
+            tools += ["edit", "write", "exec"]
+        denials = (
+            ["write", "edit"]
+            if name != "py-test-bot"
+            else [
+                "Write(src/**)",
+                "Write(configs/**)",
+                "Write(docs/**)",
+                "Exec(gh)",
+                "Exec(hub)",
+            ]
+        )
+        metadata = {
+            "name": name,
+            "model": "retained-model",
+            "allowed-tools": tools,
+            "permissions": {"allow": ["Read(**)"], "deny": denials},
+        }
+        path.write_text(
+            "---\n" + yaml.safe_dump(metadata) + "---\nGuide", encoding="utf-8"
+        )
+    return config
+
+
+def test_accepts_restricted_tools_and_writable_role_variants(tmp_path: Path) -> None:
+    _devin_fixture_tree(tmp_path)
+    assert validate_devin_permission_contract(tmp_path) == []
+
+
+@pytest.mark.parametrize("rule", ["exec", "Write(**)"])
+def test_rejects_parent_ask_blocked_by_same_level_deny(
+    tmp_path: Path, rule: str
+) -> None:
+    config = _devin_fixture_tree(tmp_path)
+    data = json.loads(config.read_text(encoding="utf-8"))
+    assert rule in data["permissions"]["ask"]
+    data["permissions"]["deny"].append(rule)
+    config.write_text(json.dumps(data), encoding="utf-8")
+    assert any(
+        f.code == "devin.parent" for f in validate_devin_permission_contract(tmp_path)
+    )
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["overlap", "env_root", "env_nested", "parent_exec", "auto_python", "auto_write"],
+)
+def test_rejects_parent_permission_weakening(tmp_path: Path, mutation: str) -> None:
+    config = _devin_fixture_tree(tmp_path)
+    data = json.loads(config.read_text(encoding="utf-8"))
+    p = data["permissions"]
+    if mutation == "overlap":
+        p["allow"].append("Read(**/.env*)")
+    elif mutation == "env_root":
+        p["deny"].remove("Write(.env*)")
+    elif mutation == "env_nested":
+        p["deny"].remove("Write(**/.env*)")
+    elif mutation == "parent_exec":
+        p["ask"].remove("exec")
+    elif mutation == "auto_python":
+        p["allow"].append("Exec(python)")
+    else:
+        p["allow"].append("Write(src/**)")
+    config.write_text(json.dumps(data), encoding="utf-8")
+    assert validate_devin_permission_contract(tmp_path)
+
+
+@pytest.mark.parametrize("name", sorted(DEVIN_RESTRICTED_PROFILES))
+@pytest.mark.parametrize("tool", ["exec", "write", "edit"])
+def test_rejects_restricted_child_tool_expansion(
+    tmp_path: Path, name: str, tool: str
+) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / f".devin/agents/{name}/AGENT.md"
+    text = path.read_text(encoding="utf-8")
+    data = yaml.safe_load(text.split("---", 2)[1])
+    data["allowed-tools"].append(tool)
+    path.write_text("---\n" + yaml.safe_dump(data) + "---\nGuide", encoding="utf-8")
+    assert any(
+        f.code == "devin.profile" for f in validate_devin_permission_contract(tmp_path)
+    )
+
+
+def test_rejects_removed_qualification_gate(tmp_path: Path) -> None:
+    _devin_fixture_tree(tmp_path)
+    (tmp_path / ".devin/agents/DEVIN-RUNTIME.md").write_text(
+        "Unqualified launch allowed", encoding="utf-8"
+    )
+    assert any(
+        f.code == "devin.delegation"
+        for f in validate_devin_permission_contract(tmp_path)
+    )
+
+
+@pytest.mark.parametrize(
+    "mutation", ["removed_denial", "legacy_exec", "removed_metadata"]
+)
+def test_preserves_legacy_denials_without_claiming_their_enforcement(
+    tmp_path, mutation
+):
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-test-bot/AGENT.md"
+    metadata = yaml.safe_load(path.read_text(encoding="utf-8").split("---", 2)[1])
+    if mutation == "removed_denial":
+        metadata["permissions"]["deny"].remove("Exec(gh)")
+    elif mutation == "legacy_exec":
+        metadata["permissions"]["allow"].append("Exec(python)")
+    else:
+        metadata.pop("permissions")
+    path.write_text("---\n" + yaml.safe_dump(metadata) + "---\nGuide", encoding="utf-8")
+    assert any(
+        f.code == "devin.profile" for f in validate_devin_permission_contract(tmp_path)
+    )
+
+
+@pytest.mark.parametrize("operation", ["create", "write", "delete", "rename", "move"])
+@pytest.mark.parametrize("name", [".env", ".env.example", "nested/.env.local"])
+def test_devin_policy_reuses_core_env_denial(operation: str, name: str) -> None:
+    """Exercise structured guards without creating any protected fixture file."""
+    from scripts.engineering.repo.operation_guards import evaluate_request
+
+    request = {"operation": operation, "path": name}
+    if operation in {"rename", "move"}:
+        request["destination"] = "ordinary.txt"
+    result = evaluate_request(request)
+    assert result.status == "FAIL"
+    assert result.code == "env.protected"
+
+
+def test_devin_policy_read_and_ordinary_write_are_distinct() -> None:
+    from scripts.engineering.repo.operation_guards import evaluate_request
+
+    assert evaluate_request({"operation": "read", "path": ".env"}).status == "PASS"
+    assert (
+        evaluate_request({"operation": "write", "path": "tests/ordinary.txt"}).status
+        == "PASS"
+    )
+
+
+@pytest.mark.parametrize("producer", ["python", "child", "git", "make"])
+def test_unisolated_exec_can_write_outside_tests(tmp_path: Path, producer: str) -> None:
+    """Counterexample only; this does not execute a Devin agent or prove sandboxing."""
+    import shutil
+    import subprocess
+    import sys
+
+    target = tmp_path / "outside-tests.txt"
+    statement = (
+        "from pathlib import Path; Path('outside-tests.txt').write_text('synthetic')"
+    )
+    if producer == "python":
+        argv = [sys.executable, "-c", statement]
+    elif producer == "child":
+        argv = [
+            sys.executable,
+            "-c",
+            "import subprocess,sys; subprocess.run([sys.executable,'-c',"
+            + repr(statement)
+            + "],check=True)",
+        ]
+    elif producer == "git":
+        binary = shutil.which("git")
+        if not binary:
+            pytest.skip("git unavailable; child-process boundary remains NOT_PROVEN")
+        (tmp_path / "before.txt").write_text("before\n", encoding="utf-8")
+        (tmp_path / "after.txt").write_text("after\n", encoding="utf-8")
+        argv = [
+            binary,
+            "diff",
+            "--no-index",
+            "--output=outside-tests.txt",
+            "before.txt",
+            "after.txt",
+        ]
+    else:
+        binary = shutil.which("make")
+        if not binary:
+            pytest.skip("make unavailable; native make boundary remains NOT_PROVEN")
+        (tmp_path / "Makefile").write_text(
+            "all:\n\t@echo synthetic > outside-tests.txt\n", encoding="utf-8"
+        )
+        argv = [binary, "-f", "Makefile"]
+    result = subprocess.run(
+        argv, cwd=tmp_path, capture_output=True, timeout=15, check=False
+    )
+    assert result.returncode == (1 if producer == "git" else 0)
+    assert target.is_file()
+
+
+def test_static_doctor_checks_devin_permission_declarations() -> None:
+    from scripts.ai.codex.native_runtime_contract import (
+        validate_devin_permission_contract,
+    )
+
+    assert validate_devin_permission_contract(repo_root()) == []
+
+
+@pytest.mark.parametrize("target", ["tools", "legacy_allow"])
+def test_devin_list_comments_cannot_hide_permission_expansion(
+    tmp_path: Path, target: str
+) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-test-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8")
+    if target == "tools":
+        text, count = re.subn(
+            r"(allowed-tools:\n(?: *- .+\n)+)",
+            r"\1# comment inside list\n- exec\n",
+            text,
+            count=1,
+        )
+        assert count == 1
+    else:
+        text = text.replace(
+            "  - Read(**)\n",
+            "  - Read(**)\n  # comment inside list\n  - Exec(python)\n",
+            1,
+        )
+    path.write_text(text, encoding="utf-8")
+    assert any(
+        f.code == "devin.profile" for f in validate_devin_permission_contract(tmp_path)
+    )
+
+
+@pytest.mark.parametrize("location", ["tools", "permissions"])
+def test_devin_readonly_list_comments_remain_supported(
+    tmp_path: Path, location: str
+) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-test-bot/AGENT.md"
+    marker = "- glob\n" if location == "tools" else "  - Read(**)\n"
+    text = path.read_text(encoding="utf-8").replace(
+        marker, marker + "# a valid list comment\n", 1
+    )
+    path.write_text(text, encoding="utf-8")
+    assert validate_devin_permission_contract(tmp_path) == []
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "commented_duplicate",
+        "flow_duplicate",
+        "quoted_duplicate",
+        "permission_duplicate",
+        "legacy_allow_duplicate",
+        "tools_alias",
+        "embedded_separator",
+        "quoted_nested_allow",
+        "quoted_nested_deny",
+    ],
+)
+def test_devin_ambiguous_metadata_cannot_override_restricted_tools(
+    tmp_path: Path, mutation: str
+) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-test-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8")
+    additions = {
+        "commented_duplicate": "allowed-tools: # overridden\n- exec\n",
+        "flow_duplicate": "allowed-tools: [exec]\n",
+        "quoted_duplicate": '"allowed-tools": [exec]\n',
+        "permission_duplicate": "permissions: # overridden\n  allow:\n  - Exec(python)\n",
+        "legacy_allow_duplicate": "  allow: # overridden\n  - Exec(python)\n",
+        "tools_alias": "tools: [exec]\n",
+        "embedded_separator": "description: inline---separator\nallowed-tools: [exec]\n",
+        "quoted_nested_allow": '  "allow": [Exec(python)]\n',
+        "quoted_nested_deny": "  'deny': [Exec(unrelated)]\n",
+    }
+    closing = text.index("\n---", 3)
+    path.write_text(
+        text[:closing] + "\n" + additions[mutation] + text[closing:], encoding="utf-8"
+    )
+    assert any(
+        f.code == "devin.profile" for f in validate_devin_permission_contract(tmp_path)
+    )
+
+
+@pytest.mark.parametrize(
+    "key", ['"allow"', "'allow'", '"deny"', "'deny'", "unsupported"]
+)
+def test_devin_nested_permission_keys_reject_quoted_overrides(
+    tmp_path: Path, key: str
+) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-test-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8")
+    closing = text.index("\n---", 3)
+    changed = text[:closing] + "\n  " + key + ": [Exec(unrelated)]\n" + text[closing:]
+    parsed = yaml.safe_load(changed.split("---", 2)[1])
+    assert parsed["permissions"][key.strip("\"'")] == ["Exec(unrelated)"]
+    path.write_text(changed, encoding="utf-8")
+    assert any(
+        f.code == "devin.profile" for f in validate_devin_permission_contract(tmp_path)
+    )
+
+
+def test_devin_declared_windows_read_scope_is_supported(tmp_path: Path) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-test-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8").replace(
+        "Read(**)", "Read(D:/github/docs/**)", 1
+    )
+    path.write_text(text, encoding="utf-8")
+    assert validate_devin_permission_contract(tmp_path) == []
+
+
+@pytest.mark.parametrize("key", ["allow", "deny"])
+def test_devin_complex_permission_keys_are_not_accepted(
+    tmp_path: Path, key: str
+) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-test-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8")
+    closing = text.index("\n---", 3)
+    changed = (
+        text[:closing] + "\n  ? " + key + "\n  : [Exec(unrelated)]\n" + text[closing:]
+    )
+    assert yaml.safe_load(changed.split("---", 2)[1])["permissions"][key] == [
+        "Exec(unrelated)"
+    ]
+    path.write_text(changed, encoding="utf-8")
+    assert any(
+        f.code == "devin.profile" for f in validate_devin_permission_contract(tmp_path)
+    )
+
+
+@pytest.mark.parametrize("scalar", [r"'wri\x74e'", r'"wri\x74e"', r"'wri\u0074e'"])
+def test_devin_escaped_permission_scalars_fail_closed(
+    tmp_path: Path, scalar: str
+) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-audit-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8")
+    assert "  - write\n" in text
+    changed = text.replace("  - write\n", f"  - {scalar}\n", 1)
+    yaml.safe_load(changed.split("---", 2)[1])
+    path.write_text(changed, encoding="utf-8")
+    assert any(
+        f.code == "devin.profile" for f in validate_devin_permission_contract(tmp_path)
+    )
+
+
+@pytest.mark.parametrize("scalar", ["'write'", '"write"'])
+def test_devin_unescaped_quoted_permission_scalars_remain_supported(
+    tmp_path: Path, scalar: str
+) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-audit-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8")
+    changed = text.replace("  - write\n", f"  - {scalar}\n", 1)
+    assert (
+        yaml.safe_load(changed.split("---", 2)[1])["permissions"]["deny"][0] == "write"
+    )
+    path.write_text(changed, encoding="utf-8")
+    assert validate_devin_permission_contract(tmp_path) == []
+
+
+@pytest.mark.parametrize("extra_indent", [1, 2, 4])
+def test_devin_folded_list_continuations_cannot_hide_lost_denials(
+    tmp_path: Path, extra_indent: int
+) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-audit-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8")
+    assert "  - edit\n" in text
+    changed = text.replace("  - edit\n", " " * extra_indent + "  - edit\n", 1)
+    parsed = yaml.safe_load(changed.split("---", 2)[1])
+    assert "write" not in parsed["permissions"]["deny"]
+    path.write_text(changed, encoding="utf-8")
+    assert any(
+        f.code == "devin.profile" for f in validate_devin_permission_contract(tmp_path)
+    )

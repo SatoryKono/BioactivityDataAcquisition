@@ -4,8 +4,14 @@ from __future__ import annotations
 
 import pytest
 from dataclasses import replace
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
 
 from iuphar_target_class.models import GlueFixture, RawTargetRow, RunProvenance
+from iuphar_target_class import normalization as normalization_module
 from iuphar_target_class.normalization import (
     isolated_invalid_result,
     normalize_missing,
@@ -14,6 +20,7 @@ from iuphar_target_class.normalization import (
     validate_batch,
     validate_input,
 )
+from iuphar_target_class.stage0.io import canonical_json_bytes, sha256_bytes
 
 pytestmark = pytest.mark.unit
 
@@ -79,6 +86,86 @@ def test_glued_identifier_is_invalid_and_not_repaired() -> None:
     assert isolated.effective_class is None
     assert isolated.provenance.snapshot_id == "snapshot-unset"
     assert isolated.row_sha256
+
+
+@pytest.mark.parametrize("invalid", [False, True])
+@pytest.mark.parametrize("field_name", ["raw_fields", "normalized_fields"])
+def test_validated_fields_are_immutable_independent_hash_bound_snapshots(
+    invalid: bool, field_name: str
+) -> None:
+    row = _row(target_id="920840")
+    expected_raw = dict(row.fields)
+    fixtures = (
+        (GlueFixture("target_id", "920840", ("proven glue",)),) if invalid else ()
+    )
+    result = validate_input(row, provenance=PROVENANCE, glue_fixtures=fixtures)
+    row.fields["target_id"] = "different source after validation"
+    with pytest.raises(TypeError):
+        getattr(result, field_name)["target_id"] = "mutated result"
+    assert result.raw_fields == expected_raw
+    assert result.row_sha256 == sha256_bytes(canonical_json_bytes(expected_raw))
+    assert result.target_id == (None if invalid else "920840")
+    assert result.input_validation_status == ("invalid_input" if invalid else "valid")
+
+
+def test_scalar_glue_comparison_ignores_padding_without_repairing_raw_text() -> None:
+    original = " \t920840\t "
+    result = validate_input(
+        _row(target_id=original),
+        provenance=PROVENANCE,
+        glue_fixtures=(GlueFixture("target_id", "920840", ("proven glue",)),),
+    )
+    assert result.input_validation_status == "invalid_input"
+    assert result.input_errors == ("glued identifier in target_id",)
+    assert result.raw_fields["target_id"] == original
+    assert result.target_id is None
+
+
+def test_normalized_identity_and_hash_use_one_input_snapshot(monkeypatch) -> None:
+    row = _row(target_id="840")
+    expected = dict(row.fields)
+    original = normalize_missing
+
+    def change_source_after_snapshot(value):
+        row.fields["target_id"] = "920840"
+        return original(value)
+
+    monkeypatch.setattr(
+        normalization_module, "normalize_missing", change_source_after_snapshot
+    )
+    result = validate_input(row, provenance=PROVENANCE)
+    assert result.raw_fields == expected
+    assert result.target_id == "840"
+    assert result.row_sha256 == sha256_bytes(canonical_json_bytes(expected))
+
+
+def test_multi_field_error_order_is_stable_across_hash_seeds() -> None:
+    script = """
+import json
+from iuphar_target_class.models import GlueFixture, RawTargetRow, RunProvenance
+from iuphar_target_class.normalization import validate_input
+names = ("uniprot", "synonyms", "ec", "keywords")
+row = RawTargetRow("one", dict.fromkeys(names, "glued"), target_kind="protein")
+fixtures = tuple(GlueFixture(name, "glued", ("proven glue",)) for name in names)
+p = RunProvenance("snapshot", None, None, None, "retrieved", "started")
+print(json.dumps(validate_input(row, provenance=p, glue_fixtures=fixtures).input_errors))
+"""
+    expected = [
+        f"glued identifier in {name}"
+        for name in ("uniprot", "synonyms", "ec", "keywords")
+    ]
+    for seed in ("0", "1", "2", "3"):
+        env = dict(os.environ, PYTHONHASHSEED=seed)
+        env["PYTHONPATH"] = str(Path(__file__).resolve().parents[3] / "src")
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            env=env,
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=20,
+        )
+        assert json.loads(result.stdout) == expected
 
 
 def test_glued_uniprot_token_in_a_list_is_invalid() -> None:
@@ -152,6 +239,26 @@ def test_invalid_ec_is_kept_as_a_diagnostic() -> None:
     assert validated.ec_numbers[0].valid is False
     assert validated.diagnostics[0].code == "invalid_ec"
     assert validated.ec_raw == "not-an-ec"
+
+
+def test_ec_warnings_precede_taxon_warning_and_preserve_source_values() -> None:
+    row = _row(ec="bad-first;3.1.1.1|bad-second", organism="mouse")
+    original = dict(row.fields)
+    validated = validate_input(row, provenance=PROVENANCE, snapshot_taxon="human")
+    assert tuple(item.code for item in validated.diagnostics) == (
+        "invalid_ec",
+        "invalid_ec",
+        "taxon_source_conflict",
+    )
+    assert tuple(item.message for item in validated.diagnostics[:2]) == (
+        "invalid EC token: bad-first",
+        "invalid EC token: bad-second",
+    )
+    assert all(item.level == "warning" for item in validated.diagnostics)
+    assert validated.taxon == "human"
+    assert validated.ec_raw == original["ec"]
+    assert validated.raw_fields == original
+    assert row.fields == original
 
 
 def test_unapproved_marker_version_blocks_an_accepted_run() -> None:

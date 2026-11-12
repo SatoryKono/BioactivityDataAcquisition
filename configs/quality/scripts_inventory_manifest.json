@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T03:45:53.607291+00:00",
+  "generated_at": "2026-11-12T06:46:22.364267+00:00",
   "summary": {
-    "total_scripts": 739,
+    "total_scripts": 744,
     "status_counts": {
       "active": 334,
-      "supporting": 403,
+      "supporting": 408,
       "temporary_diagnostic": 2
     },
     "reference_group_coverage": {
@@ -14,9 +14,9 @@
       "ci": 76,
       "docs": 294,
       "other": 22,
-      "scripts": 635,
+      "scripts": 639,
       "skills": 13,
-      "tests": 552
+      "tests": 558
     }
   },
   "scripts": [
@@ -429,7 +429,7 @@
         },
         {
           "path": "scripts/ai/codex/efficiency_baseline.py",
-          "line": 234,
+          "line": 236,
           "source_group": "scripts",
           "text": "headless = root / \"scripts\" / \"ai\" / \"codex\" / \"headless.sh\""
         },
@@ -705,7 +705,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 401,
+          "line": 426,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/ensure-mcp.sh\","
         }
@@ -1494,7 +1494,7 @@
       "agent_usage": [
         "README"
       ],
-      "reference_count": 8,
+      "reference_count": 10,
       "references": [
         {
           "path": ".codex/agents/README.md",
@@ -1510,13 +1510,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 179,
+          "line": 187,
           "source_group": "scripts",
-          "text": "{\"scripts/ai/codex/native_runtime_contract.py\"}"
+          "text": "\"scripts/ai/codex/native_runtime_contract.py\","
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 277,
+          "line": 302,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/native_runtime_contract.py\": ("
         },
@@ -1533,16 +1533,16 @@
           "text": "assert \"native_runtime_contract.py\" in text"
         },
         {
-          "path": "tests/architecture/test_grok_subagent_least_privilege.py",
-          "line": 11,
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 467,
           "source_group": "tests",
-          "text": "from scripts.ai.codex import native_runtime_contract"
+          "text": "from scripts.ai.codex.native_runtime_contract import ("
         },
         {
-          "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 1216,
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 689,
           "source_group": "tests",
-          "text": "[\"scripts/ai/codex/native_runtime_contract.py\"], repo_root=root"
+          "text": "from scripts.ai.codex.native_runtime_contract import ("
         }
       ],
       "owner": "@bioetl-platform",
@@ -2106,7 +2106,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 443,
+          "line": 468,
           "source_group": "scripts",
           "text": "\"scripts/ai/cursor/setup_skills.sh\","
         },
@@ -2951,7 +2951,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 14,
       "references": [
         {
           "path": "AGENTS.md",
@@ -2988,6 +2988,18 @@
           "line": 43,
           "source_group": "scripts",
           "text": "exec \"$PYTHON_BIN\" \"$SCRIPT_DIR/check_junie_mirror.py\" \"$MODE\""
+        },
+        {
+          "path": "scripts/ai/junie/junie-mirror-contract.json",
+          "line": 177,
+          "source_group": "scripts",
+          "text": "\"`scripts/ai/junie/check_junie_mirror.py --check`\","
+        },
+        {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 188,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/junie/check_junie_mirror.py\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3016,7 +3028,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 209,
+          "line": 212,
           "source_group": "ci",
           "text": "run: bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -3228,7 +3240,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1253,
+          "line": 1279,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3347,13 +3359,13 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 427,
+          "line": 452,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\","
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 404,
+          "line": 410,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         },
@@ -3410,19 +3422,19 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 428,
+          "line": 453,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\","
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 299,
+          "line": 300,
           "source_group": "tests",
           "text": "\"github\": \"github-mcp-wrapper.sh\","
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 401,
+          "line": 407,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         },
@@ -3486,7 +3498,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 403,
+          "line": 428,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\","
         },
@@ -3511,7 +3523,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 450,
+          "line": 475,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.ps1\","
         },
@@ -3560,13 +3572,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 471,
+          "line": 496,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\","
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 298,
+          "line": 299,
           "source_group": "tests",
           "text": "\"ast-grep\": \"mcp_ast_grep_wrapper.sh\","
         },
@@ -3597,7 +3609,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 451,
+          "line": 476,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\","
         },
@@ -3658,13 +3670,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 452,
+          "line": 477,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\","
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 297,
+          "line": 298,
           "source_group": "tests",
           "text": "\"brave-search\": \"mcp_brave_search_wrapper.sh\","
         },
@@ -3740,7 +3752,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 404,
+          "line": 429,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\","
         }
@@ -3803,7 +3815,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 453,
+          "line": 478,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.ps1\","
         },
@@ -3852,13 +3864,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 472,
+          "line": 497,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\","
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 296,
+          "line": 297,
           "source_group": "tests",
           "text": "\"context7\": \"mcp_context7_wrapper.sh\","
         },
@@ -3928,7 +3940,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 405,
+          "line": 430,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\","
         }
@@ -4072,7 +4084,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1244,
+          "line": 1270,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4090,7 +4102,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 645,
+          "line": 602,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\","
         }
@@ -4127,7 +4139,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1243,
+          "line": 1269,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4139,7 +4151,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 646,
+          "line": 603,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\","
         }
@@ -4172,7 +4184,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1242,
+          "line": 1268,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -4227,7 +4239,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1241,
+          "line": 1267,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -4303,7 +4315,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 406,
+          "line": 431,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\","
         },
@@ -4422,7 +4434,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 409,
+          "line": 434,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.ps1\","
         },
@@ -4434,7 +4446,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 205,
+          "line": 206,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
         },
@@ -4473,7 +4485,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 410,
+          "line": 435,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\","
         },
@@ -4485,7 +4497,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 205,
+          "line": 206,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
         },
@@ -4643,7 +4655,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 411,
+          "line": 436,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\","
         },
@@ -4686,7 +4698,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 412,
+          "line": 437,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\","
         },
@@ -4719,7 +4731,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 413,
+          "line": 438,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\","
         },
@@ -5075,7 +5087,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1249,
+          "line": 1275,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\": ("
         },
@@ -5087,7 +5099,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 647,
+          "line": 604,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\","
         }
@@ -5124,7 +5136,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 429,
+          "line": 454,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/github_project_transport.mjs\","
         },
@@ -5161,7 +5173,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 454,
+          "line": 479,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/host_transport.mjs\","
         },
@@ -5210,7 +5222,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 455,
+          "line": 480,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/invoke_host_transport.ps1\","
         },
@@ -5271,7 +5283,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 456,
+          "line": 481,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/invoke_host_transport.sh\","
         },
@@ -5494,7 +5506,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1245,
+          "line": 1271,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\": ("
         },
@@ -5506,7 +5518,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 648,
+          "line": 605,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\","
         }
@@ -5755,7 +5767,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 408,
+          "line": 433,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/test_env_loading.sh\","
         },
@@ -6371,13 +6383,13 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 158,
+          "line": 161,
           "source_group": "ci",
           "text": "python -m scripts.ai.sync.runtime_skills"
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 182,
+          "line": 185,
           "source_group": "ci",
           "text": "python -m scripts.ai.sync.runtime_skills"
         },
@@ -6636,7 +6648,7 @@
         },
         {
           "path": "scripts/ai/codex/native_runtime_contract.py",
-          "line": 184,
+          "line": 187,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/launch.ps1\","
         },
@@ -6687,7 +6699,7 @@
         },
         {
           "path": "scripts/ai/codex/native_runtime_contract.py",
-          "line": 183,
+          "line": 186,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/launch.sh\","
         },
@@ -7005,25 +7017,25 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 236,
+          "line": 238,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams lint"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 244,
+          "line": 246,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams lint"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 251,
+          "line": 253,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams fix-orphans --check"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 259,
+          "line": 261,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams fix-orphans --check"
         }
@@ -8945,7 +8957,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 219,
+      "reference_count": 220,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -9199,13 +9211,13 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 129,
+          "line": 132,
           "source_group": "ci",
           "text": "capture docs docs_runtime_checks docs_runtime python -m scripts.docs check-links"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 295,
+          "line": 297,
           "source_group": "ci",
           "text": "- id: docs-check-links"
         },
@@ -9892,19 +9904,19 @@
       "references": [
         {
           "path": "docs/filters/inventory-baseline.csv",
-          "line": 169,
+          "line": 173,
           "source_group": "docs",
           "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1074,Source-profile extraction policy,extraction_"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
-          "line": 2191,
+          "line": 2235,
           "source_group": "docs",
           "text": "\"path\": \"scripts/docs/matrix/generate_pipeline_normalization_matrix.py\","
         },
         {
           "path": "docs/filters/inventory-baseline.md",
-          "line": 119,
+          "line": 123,
           "source_group": "docs",
           "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1074 | Source-profile extraction policy |"
         },
@@ -11407,7 +11419,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1129,
+          "line": 1155,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -11450,7 +11462,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1271,
+          "line": 1297,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -12368,7 +12380,7 @@
         },
         {
           "path": "scripts/ai/codex/efficiency_baseline.py",
-          "line": 326,
+          "line": 328,
           "source_group": "scripts",
           "text": "\"python\": platform.python_version(),"
         },
@@ -12776,7 +12788,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 126,
+          "line": 129,
           "source_group": "ci",
           "text": "capture governance pretest_guardrails governance bash scripts/engineering/dev/pretest_guardrails.sh \\"
         },
@@ -13080,53 +13092,53 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 37,
+      "reference_count": 42,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
-          "line": 95,
+          "line": 97,
           "source_group": "ci",
           "text": "python3 scripts/engineering/dev/run_project_python.py -m pytest"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 104,
+          "line": 106,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m pip_audit --cache-dir .cache/pip-audit --skip-editable --strict"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 112,
+          "line": 114,
           "source_group": "ci",
           "text": "entry: python3 scripts/engineering/dev/run_project_python.py -m mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory scripts/engineering/quality"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 119,
+          "line": 121,
           "source_group": "ci",
           "text": "entry: python3 scripts/engineering/dev/run_project_python.py -m bandit -c pyproject.toml -r src/bioetl"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 127,
+          "line": 129,
           "source_group": "ci",
           "text": "python3 scripts/engineering/dev/run_project_python.py -m pytest"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 147,
+          "line": 149,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m pytest"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 157,
+          "line": 159,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 193,
+          "line": 195,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m"
         }
@@ -13372,7 +13384,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 50,
+          "line": 56,
           "source_group": "scripts",
           "text": "from scripts.engineering.dev.run_tests import TESTS_ROOT as PYTEST_ALL_ROOT"
         },
@@ -13812,7 +13824,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 742,
+          "line": 767,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -15084,7 +15096,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1388,
+          "line": 1391,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
@@ -15680,19 +15692,19 @@
       "references": [
         {
           "path": "docs/filters/inventory-baseline.csv",
-          "line": 170,
+          "line": 174,
           "source_group": "docs",
           "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/engineering/qa/config_surface_governance.py,2,8,Source-profile extraction policy,extraction_params are pr"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
-          "line": 2202,
+          "line": 2246,
           "source_group": "docs",
           "text": "\"path\": \"scripts/engineering/qa/config_surface_governance.py\","
         },
         {
           "path": "docs/filters/inventory-baseline.md",
-          "line": 120,
+          "line": 124,
           "source_group": "docs",
           "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/engineering/qa/config_surface_governance.py` | 2 | 8 | Source-profile extraction policy |"
         },
@@ -16491,7 +16503,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 344,
+          "line": 346,
           "source_group": "ci",
           "text": "scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -19456,13 +19468,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 310,
+          "line": 335,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/runtime_acceptance_12553.py\","
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 312,
+          "line": 337,
           "source_group": "scripts",
           "text": "\"tests/helpers/runtime_acceptance_12553.py\","
         },
@@ -19511,7 +19523,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 311,
+          "line": 336,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/runtime_acceptance_12553_coverage.py\","
         },
@@ -19784,13 +19796,13 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 325,
+          "line": 327,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m scripts.engineering.qa.vcr"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 334,
+          "line": 336,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m scripts.engineering.qa.vcr"
         }
@@ -19858,7 +19870,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 326,
+          "line": 328,
           "source_group": "ci",
           "text": "check-placement"
         },
@@ -19909,7 +19921,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 335,
+          "line": 337,
           "source_group": "ci",
           "text": "check-naming"
         },
@@ -21378,7 +21390,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 96,
+      "reference_count": 102,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -21616,7 +21628,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 94,
+          "line": 95,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.branch_cleanup import main as branch_cleanup_main"
         }
@@ -21631,17 +21643,23 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 142,
+          "line": 163,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.budget_guard import main as budgets_main"
         },
         {
+          "path": "scripts/engineering/repo/hook_runtime.py",
+          "line": 99,
+          "source_group": "scripts",
+          "text": "str(modules / \"budget_guard.py\"),"
+        },
+        {
           "path": "tests/unit/scripts/repo/test_budget_guard.py",
-          "line": 13,
+          "line": 15,
           "source_group": "tests",
           "text": "from scripts.engineering.repo import budget_guard as guard"
         }
@@ -21678,7 +21696,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 58,
+          "line": 59,
           "source_group": "scripts",
           "text": "\"check-cleanup-governance\": \"check_cleanup_governance.py\","
         },
@@ -21741,7 +21759,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1369,
+          "line": 1395,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -21752,7 +21770,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 17,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -21813,7 +21831,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 59,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"check-reports-quality-ttl\": \"check_reports_quality_ttl.py\","
         },
@@ -21846,7 +21864,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 60,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"check-root-governance-docs\": \"check_root_governance_docs.py\","
         },
@@ -21873,7 +21891,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 61,
+          "line": 62,
           "source_group": "scripts",
           "text": "\"check-root-review-registry\": \"check_root_hygiene_review_registry.py\","
         },
@@ -21900,7 +21918,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 290,
+          "line": 292,
           "source_group": "ci",
           "text": "check-catalog --catalog scripts/engineering/repo/catalog.yaml"
         },
@@ -21930,13 +21948,13 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 16,
+          "line": 17,
           "source_group": "scripts",
           "text": "check-catalog      Validate catalog governance policy"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 54,
+          "line": 55,
           "source_group": "scripts",
           "text": "\"check-catalog\": \"check_scripts_catalog.py\","
         }
@@ -21957,7 +21975,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 277,
+          "line": 279,
           "source_group": "ci",
           "text": "check-inventory --check"
         },
@@ -22014,7 +22032,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 55,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"check-versions\": \"check_version_consistency.py\","
         },
@@ -22065,7 +22083,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 66,
+          "line": 67,
           "source_group": "scripts",
           "text": "\"cleanup-branch-candidates\": \"cleanup_branch_candidates.sh\","
         },
@@ -22128,7 +22146,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 62,
+          "line": 63,
           "source_group": "scripts",
           "text": "\"cleanup-root-local-clutter\": \"cleanup_root_local_clutter.py\","
         },
@@ -22149,7 +22167,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "AGENTS.md",
@@ -22158,8 +22176,14 @@
           "text": "The tracked implementation is `scripts/engineering/repo/create_worktree.py`;"
         },
         {
+          "path": "scripts/ai/junie/junie-mirror-contract.json",
+          "line": 380,
+          "source_group": "scripts",
+          "text": "\"`scripts/engineering/repo/create_worktree.py`\","
+        },
+        {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 115,
+          "line": 116,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.create_worktree import main as worktree_main"
         },
@@ -22202,7 +22226,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 53,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"sync-wrapper-caller-matrix\": \"generate_scripts_wrapper_caller_matrix.py\","
         },
@@ -22253,7 +22277,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 51,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"github-settings-review\": \"github_settings_review.py\","
         },
@@ -22276,15 +22300,96 @@
       "next_step": "Retain as the read-only GitHub governance review implementation behind `python -m scripts.engineering.repo github-settings-review`; keep workflow and runbook invocation routed through the package entrypoint."
     },
     {
+      "path": "scripts/engineering/repo/hook_installation.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/__main__.py",
+          "line": 151,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.repo.hook_installation import main as hooks_main"
+        },
+        {
+          "path": "scripts/engineering/repo/hook_runtime.py",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.repo import hook_installation as installation"
+        },
+        {
+          "path": "tests/architecture/test_ops_ai_setup_scripts.py",
+          "line": 146,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo.hook_installation import HOOKS"
+        },
+        {
+          "path": "tests/unit/scripts/test_hook_installation.py",
+          "line": 15,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo import hook_installation as installer"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-12",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation."
+    },
+    {
+      "path": "scripts/engineering/repo/hook_runtime.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/scripts/test_hook_installation.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo import hook_runtime"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-12",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation."
+    },
+    {
+      "path": "scripts/engineering/repo/offline_precommit.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/hook_runtime.py",
+          "line": 180,
+          "source_group": "scripts",
+          "text": "framework = Path(__file__).with_name(\"offline_precommit.py\")"
+        },
+        {
+          "path": "tests/unit/scripts/test_offline_precommit.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo import offline_precommit as adapter"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-12",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation."
+    },
+    {
       "path": "scripts/engineering/repo/operation_guards.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 137,
+          "line": 158,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.operation_guards import main as guard_main"
         },
@@ -22293,6 +22398,24 @@
           "line": 255,
           "source_group": "scripts",
           "text": "path_guard = runpy.run_path(str(Path(__file__).with_name(\"operation_guards.py\")))"
+        },
+        {
+          "path": "scripts/engineering/repo/hook_runtime.py",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.repo.operation_guards import is_env_target"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 618,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo.operation_guards import evaluate_request"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 629,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo.operation_guards import evaluate_request"
         },
         {
           "path": "tests/unit/scripts/repo/test_operation_guards.py",
@@ -22333,7 +22456,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 63,
+          "line": 64,
           "source_group": "scripts",
           "text": "\"preflight-cleanup\": \"preflight_cleanup.sh\","
         },
@@ -22344,6 +22467,74 @@
           "text": "SCRIPT = ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"preflight_cleanup.sh\""
         }
       ]
+    },
+    {
+      "path": "scripts/engineering/repo/process_deadline.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/hook_runtime.py",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.repo.process_deadline import ProcessResult, run_owned"
+        },
+        {
+          "path": "tests/unit/scripts/repo/test_process_deadline.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo import process_deadline as runner"
+        },
+        {
+          "path": "tests/unit/scripts/test_offline_precommit.py",
+          "line": 207,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo.process_deadline import run_owned"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-12",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation."
+    },
+    {
+      "path": "scripts/engineering/repo/process_supervisor.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 189,
+          "source_group": "scripts",
+          "text": "\"scripts/engineering/repo/process_supervisor.py\","
+        },
+        {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 201,
+          "source_group": "scripts",
+          "text": "\"scripts/engineering/repo/process_supervisor.py\": ("
+        },
+        {
+          "path": "scripts/engineering/repo/process_deadline.py",
+          "line": 159,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.repo import process_supervisor"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
+          "line": 1274,
+          "source_group": "tests",
+          "text": "\"scripts/engineering/repo/process_supervisor.py\","
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-12",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation."
     },
     {
       "path": "scripts/engineering/repo/split_testing_roadmap_issue.py",
@@ -22360,7 +22551,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 64,
+          "line": 65,
           "source_group": "scripts",
           "text": "\"split-testing-roadmap\": \"split_testing_roadmap_issue.py\","
         },
@@ -22387,7 +22578,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 65,
+          "line": 66,
           "source_group": "scripts",
           "text": "\"sync-docs-issues\": \"sync_docs_issues.py\","
         }
@@ -22617,7 +22808,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 252,
+          "line": 292,
           "source_group": "scripts",
           "text": "\"scripts/memory/run_workflow.sh\": ("
         },
@@ -23689,7 +23880,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 24,
       "references": [
         {
           "path": "Makefile",
@@ -23710,6 +23901,18 @@
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
         },
         {
+          "path": "docs/05-operations/runbooks/owned-git-hooks.md",
+          "line": 44,
+          "source_group": "docs",
+          "text": "The existing `setup_plugins.sh --hooks-only` entrypoint explicitly bootstraps"
+        },
+        {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 218,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/launchers/codex/setup_plugins.sh\": ("
+        },
+        {
           "path": "scripts/engineering/dev/README.md",
           "line": 132,
           "source_group": "scripts",
@@ -23726,18 +23929,6 @@
           "line": 629,
           "source_group": "scripts",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only"
-        },
-        {
-          "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 633,
-          "source_group": "scripts",
-          "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
-        },
-        {
-          "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 107,
-          "source_group": "scripts",
-          "text": "Candidate(\"scripts/ops/launchers/codex/setup_plugins.sh\", BOOTSTRAP_HELPER_ROLE),"
         }
       ]
     },
@@ -24493,7 +24684,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_overview_identity.py",
-          "line": 410,
+          "line": 411,
           "source_group": "scripts",
           "text": "from ._overview_quality import exclusion_quality_expression"
         }
@@ -24683,7 +24874,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/apply_phase25_srs_prr_budget.py",
-          "line": 1563,
+          "line": 1615,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
@@ -25091,7 +25282,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 337,
+          "line": 362,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\": ("
         },
@@ -25209,7 +25400,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1556,
+          "line": 1588,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -25377,7 +25568,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 340,
+          "line": 365,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/dashboard_context_links.py\": ("
         },
@@ -27321,7 +27512,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 465,
+          "line": 490,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/mcp/apply-shared-to-devin.py\","
         },
@@ -27333,13 +27524,13 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 352,
+          "line": 358,
           "source_group": "tests",
           "text": "root / \"scripts/ops/runtime/mcp/apply-shared-to-devin.py\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 363,
+          "line": 369,
           "source_group": "tests",
           "text": "materializer_path = root / \"scripts/ops/runtime/mcp/apply-shared-to-devin.py\""
         }
@@ -28187,7 +28378,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 224,
+          "line": 227,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_ai_skills_layout.sh"
         },
@@ -28230,7 +28421,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 221,
+          "line": 224,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_skills_mirror.sh --check"
         },
