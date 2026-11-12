@@ -41,6 +41,10 @@ explicitly with the chosen project interpreter: `python -m pre_commit install-ho
 That command may download dependencies; it belongs outside commit/push.
 
 Run `python -m scripts.engineering.repo hooks install --python <absolute-project-python>`.
+The existing `setup_plugins.sh --hooks-only` entrypoint explicitly bootstraps
+pre-commit 4.7.0/cache and delegates to this installer. Native Windows uses the
+same router directly, as shown in README. Missing config or failed bootstrap is
+an error; it is never reported as completed setup.
 The default source is `origin/main`, resolved once to a commit. Use the Windows
 project interpreter on Windows and a separately provisioned Linux interpreter in
 WSL. This command copies tracked helper blobs into an immutable, hashed bundle
@@ -80,6 +84,13 @@ operation. Commit-msg retains the existing framework stage and protocol; it does
 not repeat tree/budget checks. No automatic generator, staging or debt ratchet is
 added. An authorized env-file change needs a separate reviewed host procedure;
 there is no caller-supplied self-approval flag.
+
+The debt guard checks both the default index and any Git-supplied commit index,
+using immutable blob identities from each raw diff. Neither index can hide growth
+in the other. Non-regular Git modes are refused. Retiring entries is permitted only
+in exemption lists explicitly declared by the trusted registry; retained expiry
+and limit fields cannot disappear. Navigation text baselines use producer-owned
+set semantics, with additions refused. Concurrent later index changes still need CI.
 
 The offline framework adapter is qualified only for pre-commit 4.7.0 and the tested
 private API signatures. Unknown versions fail before configured framework callbacks. Missing repository

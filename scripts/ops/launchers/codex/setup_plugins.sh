@@ -476,8 +476,8 @@ install_precommit() {
     fi
 
     if [[ ! -f ".pre-commit-config.yaml" ]]; then
-        log_warn ".pre-commit-config.yaml not found, skipping hook installation"
-        return 0
+        log_warn "Required .pre-commit-config.yaml is missing; hook setup cannot qualify"
+        return 2
     fi
 
     log_info "Explicitly bootstrapping qualified pre-commit 4.7.0..."
