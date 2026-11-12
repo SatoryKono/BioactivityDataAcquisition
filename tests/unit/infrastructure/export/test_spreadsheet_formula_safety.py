@@ -78,3 +78,22 @@ def test_debug_csv_and_xlsx_do_not_create_formulas(tmp_path):
     assert book.active["A2"].data_type == "s"
     assert book.active["B2"].value == -2
     book.close()
+
+
+def test_dev_environment_installs_xlsx_security_dependency():
+    import tomllib
+    import yaml
+
+    root = Path(__file__).resolve().parents[4]
+    workflow = yaml.safe_load((root / ".github/workflows/pr-required.yml").read_text())
+    setup = next(
+        step
+        for step in workflow["jobs"]["class-lane"]["steps"]
+        if step.get("id") == "setup-python"
+    )
+    assert "dev" in setup["with"]["uv-extras"].split()
+    project = tomllib.loads((root / "pyproject.toml").read_text())
+    assert any(
+        item.startswith("openpyxl")
+        for item in project["project"]["optional-dependencies"]["dev"]
+    )
