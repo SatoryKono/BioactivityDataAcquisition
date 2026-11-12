@@ -1,5 +1,7 @@
 """Verify that exported scroll captures preserve every document row."""
 
+from __future__ import annotations
+
 import json
 from pathlib import Path
 import subprocess
@@ -127,6 +129,39 @@ console.log(JSON.stringify({height:plan.canvasHeight,covered,tiles:plan.slices.l
         "height": int(1538 * scale + 0.5),
         "covered": int(1538 * scale + 0.5),
         "tiles": 2,
+    }
+
+
+def test_composition_keeps_zero_height_final_tile_at_fractional_scroll_limit():
+    """Last maxScrollTop tile may add no rows once the canvas is already covered."""
+    script = r"""
+const {compositionSlices} = require(process.argv[1]);
+const surface={top:232,stickyBottom:232,clientHeight:683.875,scrollHeight:1924,scale:1,
+  maxScrollTop:1240.125};
+const offsets=[0,619.875,1239.75,1240.125];
+const plan=compositionSlices(surface,offsets.map(scrollTop=>({scrollTop,height:916})));
+const last=plan.slices.at(-1);
+if(plan.slices.length!==offsets.length) throw new Error('Final tile dropped from composition');
+if(last.height!==0) throw new Error(`Expected zero-height final slice, got ${last.height}`);
+if(plan.canvasHeight!==2156) throw new Error('Incorrect canvas height');
+let covered=0;
+plan.slices.forEach(slice=>{
+  if(slice.destinationY!==covered) throw new Error('Gap or overwritten pixels');
+  covered+=slice.height;
+});
+if(covered!==plan.canvasHeight) throw new Error('Incomplete coverage after zero-height tile');
+console.log(JSON.stringify({tiles:plan.slices.length,lastHeight:last.height,covered}));
+"""
+    result = subprocess.run(
+        ["node", "-e", script, str(COMPOSITOR)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert json.loads(result.stdout) == {
+        "tiles": 4,
+        "lastHeight": 0,
+        "covered": 2156,
     }
 
 

@@ -55,10 +55,15 @@ function compositionSlices(surface, tiles) {
     const destinationBottom = Math.min(canvasHeight,
       Math.round((surface.top + tile.scrollTop + surface.clientHeight) * surface.scale));
     const height = destinationBottom - covered;
-    if (height <= 0) throw new Error('Scroll tile adds no document pixels');
+    // A final tile at the fractional maxScrollTop can add no new rows once the
+    // previous tile already covered canvasHeight. Keep it in the tile list /
+    // manifest, but do not treat it as a composition error.
+    if (height < 0 || (height === 0 && covered !== canvasHeight)) {
+      throw new Error('Scroll tile adds no document pixels');
+    }
     const sourceY = sourceBottom - height;
     const minimum = index === 0 ? 0 : Math.ceil(surface.stickyBottom * surface.scale);
-    if (sourceY < minimum || sourceY >= sourceBottom) {
+    if (height > 0 && (sourceY < minimum || sourceY >= sourceBottom)) {
       throw new Error('Scroll tiles cannot cover the document without sticky chrome or a gap');
     }
     const slice = {sourceY, destinationY: covered, height};
@@ -147,6 +152,7 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
       for(let i=0;i<images.length;i++){
         const img=new Image();img.src='data:image/png;base64,'+images[i];await img.decode();
         const {sourceY,destinationY,height}=composition.slices[i];
+        if(height===0)continue;
         context.drawImage(img,0,sourceY,img.width,height,0,destinationY,img.width,height);
       }
       return canvas.toDataURL('image/png').split(',')[1];
