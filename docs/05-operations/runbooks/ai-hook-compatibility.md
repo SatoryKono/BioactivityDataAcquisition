@@ -87,6 +87,61 @@ vendor evidence. Missing dependencies, unknown versions and skipped execution
 are not success. Runtime adapters are separate from Git hooks, command wrappers
 and CI; none of those layers proves another layer ran.
 
+## Shared command-wrapper guards
+
+These are internal structured operations, not vendor lifecycle event names.
+Run with `python -B -m scripts.engineering.repo guard-operation`, passing one
+JSON object on stdin with `operation`, `path`, and (for move/rename) `destination`.
+Supported operations are read, write, create, delete, move, rename and
+worktree_create. Unknown operations, malformed input and self-granted approval
+fields return ERROR. Exit codes are PASS=0, FAIL=1, ERROR=2, SKIP=3; callers
+must block mutations for every result other than PASS. The guard never executes
+the requested operation and accepts at most 64 KiB of input.
+
+Environment mutations, including `.env.example`, are denied automatically.
+Per-task user authorization must be established by the host outside the request;
+there is no approval flag in the payload. Reads remain permitted. Lexical and
+resolved path components are checked without printing values or raw errors.
+Existing-directory mutations require host review because their descendants may
+include environment files. The guard does not recursively scan an unbounded
+tree. This does not sandbox arbitrary commands or their child processes.
+
+Worktree admission fixes the root to `D:/github` on Windows and `/mnt/d/github`
+in WSL. A task must resolve directly below BioactivityDataAcquisition-worktrees.
+The in-process permit records ancestor identities and must be revalidated
+immediately before the existing approved creation helper runs. Junction escapes
+and replaced ancestors are rejected; unrelated sibling work is permitted.
+The final check cannot eliminate a hostile filesystem race after validation.
+Creation still requires the approved helper; this core creates no checkout.
+The tracked deployment/bootstrap work remains owned by
+[worktree guardrail issue #13032](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13032).
+Its host adapter must call `prepare_worktree`, retain the permit in process,
+then call `revalidate_worktree` immediately before the approved creation helper.
+This change neither replaces nor installs machine-local worktree hooks.
+
+Use `python -B -m scripts.engineering.repo guard-budgets --base origin/main`
+to compare staged Git objects against a trusted base, or supply `--tip SHA`
+for committed evidence. The registry comes from the base, so staged files cannot
+exclude themselves. Initial deployment requires the registry to exist in the
+trusted base; absence returns ERROR. Git calls have a five-second timeout and
+policy blobs are bounded to 2 MiB. Missing Git/YAML dependencies, malformed
+schemas and unknown budget candidates fail closed without changing files.
+
+Ceilings and exemption counts may decrease; floors may increase. New exemption
+records, extended expiry dates, unknown structural policy changes and registry
+changes require review and fail this automatic check. Telemetry observations
+are separate from protected coverage/freshness limits. Textual architecture
+criteria remain owned by architecture tests. This heuristic registry is not a
+complete semantic proof of every policy: independent CI must use a trusted
+baseline, check registry coverage and retain existing specialized budget and
+architecture checks. Local hooks can be bypassed and cannot enforce remote
+merge policy. No adapter or hook is installed by these commands.
+
+Callers must apply their own bounded invocation timeout (recommended ten seconds
+for operations and sixty seconds for budget comparison) and treat timeout,
+missing interpreter and invalid output as ERROR. Removing a new invocation rolls
+back integration; retain the existing guards and the unchanged debt limits.
+
 ## Verification
 
 Check that the JSON identifies the current platform, effective Git directory,

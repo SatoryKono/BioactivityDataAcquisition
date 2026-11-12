@@ -185,7 +185,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 6,
+      "inbound_links": 7,
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
@@ -50086,6 +50086,34 @@
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "docs/05-operations/runbooks/ai-hook-compatibility.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "05-operations",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": "published",
+      "declared_status": "active",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 1,
+      "owner": "BioETL Team",
+      "path": "docs/05-operations/runbooks/ai-rules-loading.md",
       "recommended_action": "keep",
       "root_doc_kind": null,
       "section": "05-operations",
@@ -117935,7 +117963,7 @@
     "by_recommended_action": {
       "archive-after-migration": 425,
       "generate-automatically": 1066,
-      "keep": 2690
+      "keep": 2691
     },
     "by_section": {
       ".github": 6,
@@ -117946,7 +117974,7 @@
       "03-guides": 128,
       "04-reference": 334,
       "05-engineering": 3,
-      "05-operations": 93,
+      "05-operations": 94,
       "99-archive": 1554,
       "AGENTS.md": 1,
       "CHANGELOG.md": 1,
@@ -117964,21 +117992,21 @@
       "security": 2
     },
     "by_status": {
-      "Active": 766,
+      "Active": 767,
       "Archived": 1554,
       "Canonical": 77,
       "Generated": 1066,
       "Working": 718
     },
     "by_surface_family": {
-      "active": 766,
+      "active": 767,
       "archive": 1554,
       "canonical": 77,
       "generated": 1066,
       "working": 718
     },
     "by_tracking_state": {
-      "tracked": 4181
+      "tracked": 4182
     },
     "docs_reports_local_count": 80,
     "duplicate_group_count": 80,
@@ -117991,8 +118019,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4181,
+    "total_doc_like": 4182,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4181
+    "total_doc_like_tracked": 4182
   }
 }

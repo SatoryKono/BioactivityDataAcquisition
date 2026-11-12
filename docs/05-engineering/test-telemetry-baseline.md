@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-11-11'
+  Last verified: '2026-11-12'
 
 ______________________________________________________________________
 
@@ -32,9 +32,9 @@ trend evidence only.
 - Source run id: `42263682929`
 - Source event: `workflow_dispatch`
 - Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/42263682929`
-- Source tree sha256: `566651834635bfad5183156868cad9a2c8b60ad544c77f2e0ce8ea0e6332db70`
+- Source tree sha256: `da0a27975ae3d2d2b3a684f3da91c6e2aad64bd2495d2494664fbfb34028044a`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-11-11T23:10:50.481771+00:00`
+- Refreshed at (UTC): `2026-11-12T00:34:26.555253+00:00`
 
 ## Branch-accurate provenance (#5729)
 

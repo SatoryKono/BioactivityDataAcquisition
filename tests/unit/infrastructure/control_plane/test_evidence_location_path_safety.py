@@ -65,3 +65,27 @@ def test_path_rejects_non_absolute_candidate(tmp_path: Path) -> None:
     base.mkdir()
     with pytest.raises(EvidenceLocationInvalidError, match="absolute"):
         assert_path_within_trusted_base(Path("relative/root"), trusted_base=base)
+
+
+@pytest.mark.parametrize(
+    "raw,expected",
+    [
+        (r"\\?\C:\data\run", r"C:\data\run"),
+        (r"\\?\UNC\host\share\run", r"\\host\share\run"),
+        (r"C:\data\run", r"C:\data\run"),
+    ],
+)
+def test_extended_windows_paths_normalize_before_containment(
+    raw, expected, monkeypatch
+):
+    from pathlib import PureWindowsPath
+    from types import SimpleNamespace
+    from bioetl.infrastructure.control_plane import (
+        evidence_location_path_safety as subject,
+    )
+
+    monkeypatch.setattr(subject, "os", SimpleNamespace(name="nt"))
+    monkeypatch.setattr(subject, "Path", PureWindowsPath)
+    assert subject._normalize_resolved_path(PureWindowsPath(raw)) == PureWindowsPath(
+        expected
+    )
