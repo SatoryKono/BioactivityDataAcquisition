@@ -53,6 +53,32 @@ def test_unmapped_path_still_has_no_pytest_target(
     assert "tests gate has no affected pytest target" in capsys.readouterr().err
 
 
+def test_grafana_capture_scroll_surface_shares_capture_cluster_route() -> None:
+    """Scroll-surface capture keeps the capture cluster plus composition regression."""
+    repo_root = Path(__file__).resolve().parents[5]
+    path = "scripts/ops/observability/grafana/capture_scroll_surface.cjs"
+    sibling = "scripts/ops/observability/grafana/capture_table_pages.cjs"
+    report = build_shadow_compare([path], repo_root=repo_root)
+    sibling_report = build_shadow_compare([sibling], repo_root=repo_root)
+    capture_cluster = {
+        "tests/unit/scripts/ops/observability/test_grafana_browser_model_observer.py",
+        "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
+        "tests/unit/scripts/ops/observability/test_grafana_immutable_capture.py",
+        "tests/unit/scripts/ops/observability/test_table_capture_coverage.py",
+        "tests/integration/test_dashboard_first_window_noscroll.py",
+    }
+    expected = {
+        *capture_cluster,
+        "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py",
+    }
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == expected
+    assert set(sibling_report["selected"]) == capture_cluster
+    assert set(report["selected"]) == set(sibling_report["selected"]) | {
+        "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py",
+    }
+
+
 def test_dashboard_ux_report_family_keeps_bounded_freshness_guards() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
@@ -228,6 +254,81 @@ def test_iuphar_models_and_normalization_have_bounded_owners(tmp_path: Path) -> 
             ["src/iuphar_target_class/unmapped.py"],
             repo_root=tmp_path,
         )
+
+
+def test_iuphar_snapshot_has_a_bounded_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class"
+    owner.mkdir(parents=True)
+    (owner / "test_snapshot.py").write_text(
+        "def test_contract():\n    assert True\n",
+        encoding="utf-8",
+    )
+    report = build_shadow_compare(
+        ["src/iuphar_target_class/snapshot.py"],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == ["tests/unit/iuphar_target_class/test_snapshot.py"]
+    assert report["covers_full_suite"] is False
+
+
+def test_iuphar_comparison_has_a_bounded_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class"
+    owner.mkdir(parents=True)
+    (owner / "test_comparison.py").write_text(
+        "def test_contract():\n    assert True\n",
+        encoding="utf-8",
+    )
+    report = build_shadow_compare(
+        ["src/iuphar_target_class/comparison.py"],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == ["tests/unit/iuphar_target_class/test_comparison.py"]
+    assert report["covers_full_suite"] is False
+
+
+def test_iuphar_evidence_has_a_bounded_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class"
+    owner.mkdir(parents=True)
+    (owner / "test_evidence.py").write_text(
+        "def test_contract():\n    assert True\n",
+        encoding="utf-8",
+    )
+    report = build_shadow_compare(
+        ["src/iuphar_target_class/evidence.py"],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == ["tests/unit/iuphar_target_class/test_evidence.py"]
+    assert report["covers_full_suite"] is False
+
+
+def test_iuphar_resolution_has_a_bounded_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class"
+    owner.mkdir(parents=True)
+    (owner / "test_resolution.py").write_text(
+        "def test_contract():\n    assert True\n",
+        encoding="utf-8",
+    )
+    report = build_shadow_compare(
+        ["src/iuphar_target_class/resolution.py"],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == ["tests/unit/iuphar_target_class/test_resolution.py"]
+    assert report["covers_full_suite"] is False
+
+
+def test_iuphar_local_layer_has_a_bounded_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class"
+    owner.mkdir(parents=True)
+    (owner / "test_local_layer.py").write_text(
+        "def test_contract():\n    assert True\n",
+        encoding="utf-8",
+    )
+    report = build_shadow_compare(
+        ["src/iuphar_target_class/local_layer.py"],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == ["tests/unit/iuphar_target_class/test_local_layer.py"]
+    assert report["covers_full_suite"] is False
 
 
 def test_shadow_compare_routes_domain_ports_stub() -> None:
