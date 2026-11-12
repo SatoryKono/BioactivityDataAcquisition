@@ -227,6 +227,14 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
 
 **Рекомендация:** Для операторов необходимо обеспечить постоянный, контролируемый путь доступа к Grafana (постоянный адрес или выделенный доступ) взамен эфемерного туннеля. Настройка на живом хосте выполняется вне репозитория.
 
+**Канонический путь, когда туннеля нет.** Если процесс `cloudflared` не запущен и контейнера туннеля нет, сравнивать не с чем: прямой ответ опубликованного порта и есть путь оператора. Это `http://127.0.0.1:3000/api/health` для Grafana и `http://127.0.0.1:9090/-/healthy` для Prometheus. Их фиксирует:
+
+```bash
+python -m scripts.ops check-observability-ports --json
+```
+
+Для живого published port диагноз Grafana — `healthy`. Сообщение Cloudflare «Your request was blocked» к этому прямому запросу не относится. Не запускайте туннель только ради сравнения.
+
 ### Published-port smoke baseline
 
 Когда dashboards и container health выглядят корректно, но host-side доступ к
