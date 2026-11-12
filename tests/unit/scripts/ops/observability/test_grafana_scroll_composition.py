@@ -11,6 +11,34 @@ REPO_ROOT = Path(__file__).resolve().parents[5]
 COMPOSITOR = REPO_ROOT / "scripts/ops/observability/grafana/capture_scroll_surface.cjs"
 
 
+@pytest.mark.parametrize("scale", [1.25, 1.5, 1.75])
+def test_fractional_zoom_preserves_complete_bounded_document(scale):
+    script = r"""
+const {compositionSlices} = require(process.argv[1]);
+const scale=Number(process.argv[2]);
+const surface={top:232,stickyBottom:232,clientHeight:685,scrollHeight:1306,scale};
+const tiles=[0,621].map(scrollTop=>({scrollTop,height:Math.round(917*scale)}));
+const plan=compositionSlices(surface,tiles);
+const expectedHeight=Math.round(1538*scale);
+if(plan.canvasHeight!==expectedHeight) throw new Error('Incorrect document height');
+let covered=0;
+plan.slices.forEach((slice,i)=>{
+  if(slice.destinationY!==covered) throw new Error('Gap or overwritten pixels');
+  if(slice.sourceY<0 || slice.sourceY+slice.height>Math.round(917*scale))
+    throw new Error('Source rectangle exceeds scroll container');
+  if(i>0 && slice.sourceY<Math.ceil(232*scale)) throw new Error('Sticky chrome included');
+  covered+=slice.height;
+});
+if(covered!==expectedHeight) throw new Error('Missing physical document pixels');
+"""
+    subprocess.run(
+        ["node", "-e", script, str(COMPOSITOR), str(scale)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
 @pytest.mark.parametrize("scale", [1, 2])
 @pytest.mark.parametrize("offsets", [[0, 218], [0, 620, 1240, 1418]])
 def test_composition_preserves_document_rows_without_toolbar_shadow(scale, offsets):

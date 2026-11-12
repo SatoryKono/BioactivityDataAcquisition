@@ -46,17 +46,21 @@ function compositionSlices(surface, tiles) {
   const canvasHeight = Math.round((surface.top + surface.scrollHeight) * surface.scale);
   let covered = 0;
   const slices = tiles.map((tile, index) => {
-    const offset = Math.round(tile.scrollTop * surface.scale);
-    const sourceY = index === 0 ? 0 : covered - offset;
-    const minimum = index === 0 ? 0 : Math.ceil(surface.stickyBottom * surface.scale);
-    if (sourceY < minimum || sourceY >= tile.height) {
-      throw new Error('Scroll tiles cannot cover the document without sticky chrome or a gap');
-    }
     // A scroll container can end above the screenshot's lower edge. Never
     // retain the footer/background below it as if it were dashboard content.
     const sourceBottom = Math.min(tile.height, Math.round((surface.top + surface.clientHeight) * surface.scale));
-    const height = Math.min(sourceBottom - sourceY, canvasHeight - covered);
+    // Quantize absolute document boundaries, then derive the source rectangle
+    // from its bottom edge. Independently rounding the scroll offset can lose
+    // a physical pixel at fractional browser zoom (for example 125%).
+    const destinationBottom = Math.min(canvasHeight,
+      Math.round((surface.top + tile.scrollTop + surface.clientHeight) * surface.scale));
+    const height = destinationBottom - covered;
     if (height <= 0) throw new Error('Scroll tile adds no document pixels');
+    const sourceY = sourceBottom - height;
+    const minimum = index === 0 ? 0 : Math.ceil(surface.stickyBottom * surface.scale);
+    if (sourceY < minimum || sourceY >= sourceBottom) {
+      throw new Error('Scroll tiles cannot cover the document without sticky chrome or a gap');
+    }
     const slice = {sourceY, destinationY: covered, height};
     covered += height;
     return slice;
