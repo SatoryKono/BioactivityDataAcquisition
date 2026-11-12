@@ -12,10 +12,10 @@
     "conflict": 0
   },
   "surface_totals": {
-    "surfaces_total": 98,
+    "surfaces_total": 102,
     "by_category": {
-      "consumer_alias": 21,
-      "observability": 10,
+      "consumer_alias": 23,
+      "observability": 12,
       "runtime_gate": 11,
       "silver_config": 10,
       "source_profile": 46
@@ -31,14 +31,14 @@
       "_silver_filters.evaluate": 1,
       "_silver_filters.should_include": 1,
       "apply_silver_filter": 6,
-      "bioetl_silver_filter_reject_total_mismatch_15m": 2,
-      "bioetl_silver_filter_rejections_total": 8,
+      "bioetl_silver_filter_reject_total_mismatch_15m": 3,
+      "bioetl_silver_filter_rejections_total": 9,
       "extraction_params": 8,
       "filters.extraction_params": 22,
       "filters.source_profile": 6,
       "should_write_silver": 1,
       "silver_filter_compatibility_mode": 2,
-      "silver_filter_rejects": 6,
+      "silver_filter_rejects": 8,
       "source_profile": 10,
       "validate_no_semantic_silver_filter_payload": 4
     }
@@ -1519,7 +1519,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "occurrence_count": 2,
-      "first_line": 509,
+      "first_line": 511,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1563,7 +1563,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/05-operations/01-monitoring-guide.md",
       "occurrence_count": 1,
-      "first_line": 267,
+      "first_line": 278,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1660,9 +1660,31 @@
       "category": "consumer_alias",
       "surface": "silver_filter_rejects_summary_alias",
       "symbol": "silver_filter_rejects",
+      "path": "docs/05-operations/runbooks/pipeline-failure-dq.md",
+      "occurrence_count": 2,
+      "first_line": 52,
+      "role": "Operator summary alias for Silver rejects",
+      "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "silver_filter_rejects_summary_alias",
+      "symbol": "silver_filter_rejects",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
-      "occurrence_count": 4,
-      "first_line": 949,
+      "occurrence_count": 2,
+      "first_line": 950,
+      "role": "Operator summary alias for Silver rejects",
+      "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "silver_filter_rejects_summary_alias",
+      "symbol": "silver_filter_rejects",
+      "path": "grafana/prometheus-rules/tests/bioetl_observability.test.yml",
+      "occurrence_count": 9,
+      "first_line": 2859,
       "role": "Operator summary alias for Silver rejects",
       "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
       "notes": ""
@@ -1750,7 +1772,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/README.md",
       "occurrence_count": 6,
-      "first_line": 948,
+      "first_line": 959,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1760,8 +1782,19 @@
       "surface": "silver_filter_metric",
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
-      "occurrence_count": 3,
-      "first_line": 894,
+      "occurrence_count": 7,
+      "first_line": 888,
+      "role": "Silver filter rejection metric",
+      "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
+      "notes": ""
+    },
+    {
+      "category": "observability",
+      "surface": "silver_filter_metric",
+      "symbol": "bioetl_silver_filter_rejections_total",
+      "path": "grafana/prometheus-rules/tests/bioetl_observability.test.yml",
+      "occurrence_count": 12,
+      "first_line": 2731,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1816,7 +1849,7 @@
       "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
       "path": "grafana/README.md",
       "occurrence_count": 2,
-      "first_line": 1361,
+      "first_line": 1372,
       "role": "Silver reject accounting reconciliation",
       "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
       "notes": ""
@@ -1827,7 +1860,18 @@
       "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 2,
-      "first_line": 1062,
+      "first_line": 1081,
+      "role": "Silver reject accounting reconciliation",
+      "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
+      "notes": ""
+    },
+    {
+      "category": "observability",
+      "surface": "silver_filter_reconciliation_rule",
+      "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
+      "path": "grafana/prometheus-rules/tests/bioetl_observability.test.yml",
+      "occurrence_count": 15,
+      "first_line": 2736,
       "role": "Silver reject accounting reconciliation",
       "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
       "notes": ""

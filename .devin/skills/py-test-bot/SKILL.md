@@ -28,6 +28,11 @@ report; do not create a separate routing skill.
 
 ## Workflow
 
+While restricted native delegation is unqualified, the authorized parent follows
+this skill and performs scoped commands/test writes. Follow the permission
+boundary in `../../agents/DEVIN-RUNTIME.md`; do not enable a native child or
+broader fallback just to run tests.
+
 1. Follow the shared wrapper contract.
 1. Read and apply `../../agents/py-test-bot/AGENT.md`.
 1. Locate related tests before choosing scope.

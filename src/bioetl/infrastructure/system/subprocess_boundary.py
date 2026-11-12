@@ -119,6 +119,27 @@ def _cleanup_process(
         _terminate_process_tree(proc)
 
 
+def _validate_command_output(
+    stdout: str | bytes | None,
+    stderr: str | bytes | None,
+    *,
+    capture_output: bool,
+    encoding: str | None,
+    errors: str | None,
+) -> None:
+    """Enforce byte limits after a completed command without changing output."""
+    output_encoding = encoding or locale.getpreferredencoding(False)
+    if capture_output and (
+        _output_size(stdout, encoding=output_encoding, errors=errors)
+        > _MAX_OUTPUT_BYTES
+        or _output_size(stderr, encoding=output_encoding, errors=errors)
+        > _MAX_OUTPUT_BYTES
+    ):
+        raise subprocess.SubprocessError(
+            f"Command output exceeds {_MAX_OUTPUT_BYTES} bytes"
+        )
+
+
 def run_protected_command(
     command: Sequence[str],
     *,
@@ -163,16 +184,9 @@ def run_protected_command(
         _cleanup_process(proc)
         raise
 
-    output_encoding = encoding or locale.getpreferredencoding(False)
-    if capture_output and (
-        _output_size(stdout, encoding=output_encoding, errors=errors)
-        > _MAX_OUTPUT_BYTES
-        or _output_size(stderr, encoding=output_encoding, errors=errors)
-        > _MAX_OUTPUT_BYTES
-    ):
-        raise subprocess.SubprocessError(
-            f"Command output exceeds {_MAX_OUTPUT_BYTES} bytes"
-        )
+    _validate_command_output(
+        stdout, stderr, capture_output=capture_output, encoding=encoding, errors=errors
+    )
 
     retcode = proc.poll()
     if check and retcode:

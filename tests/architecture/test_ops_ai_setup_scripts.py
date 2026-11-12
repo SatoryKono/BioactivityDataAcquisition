@@ -139,7 +139,31 @@ def test_setup_plugins_supports_hook_only_install_and_commit_msg_hook() -> None:
     )
 
     assert "--hooks-only" in content
-    assert "--hook-type commit-msg" in content
+    assert "-m scripts.engineering.repo hooks install --python" in content
+    assert "-m pre_commit install-hooks" in content
+    assert "pre-commit==4.7.0" in content
+    assert "pre_commit install --hook-type" not in content
+    from scripts.engineering.repo.hook_installation import HOOKS
+
+    assert set(HOOKS) == {"pre-commit", "pre-push", "commit-msg"}
+
+
+@_BASH_DRY_RUN_UNSUPPORTED_ON_WINDOWS
+def test_missing_hook_config_stops_setup_before_bootstrap(tmp_path: Path) -> None:
+    """Exercise only the setup function, with dependency installation stubbed out."""
+    content = (repo_root() / "scripts/ops/launchers/codex/setup_plugins.sh").read_text()
+    start = content.index("install_precommit() {")
+    end = content.index('\nif [[ "$HOOKS_ONLY" == true ]]; then', start)
+    script = (
+        "set -euo pipefail\nPYTEST_ONLY=false\n"
+        "log_warn() { return 0; }\nlog_info() { return 0; }\n"
+        "run_python() { return 91; }\n" + content[start:end] + "\ninstall_precommit\n"
+    )
+    result = subprocess.run(
+        ["bash", "-c", script], cwd=tmp_path, capture_output=True, text=True, timeout=10
+    )
+    assert result.returncode == 2
+    assert not (tmp_path / ".cache").exists()
 
 
 def test_make_precommit_install_reuses_setup_plugins_helper() -> None:

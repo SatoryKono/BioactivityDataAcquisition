@@ -2,6 +2,8 @@
   "schema_version": 1,
   "owner": "@bioetl-architecture",
   "surfaces": [
+    {"pattern": "configs/quality/private_import_ratchet.yaml", "kind": "budget", "exemption_paths": [["pairs"]]},
+    {"pattern": "configs/quality/vcr_cassette_size_budget.yaml", "kind": "budget", "exemption_paths": [["policy", "allowlist_oversized"]]},
     {"pattern": "configs/quality/test_telemetry_baseline.yaml", "kind": "telemetry"},
     {"pattern": "configs/quality/architecture_acceptance_baseline.yaml", "kind": "contract"},
     {"pattern": "configs/quality/*budget*.json", "kind": "budget"},
@@ -13,7 +15,7 @@
     {"pattern": "configs/quality/*baseline*.yaml", "kind": "budget"},
     {"pattern": "configs/quality/*baseline*.json", "kind": "budget"},
     {"pattern": "scripts/engineering/baselines/*.json", "kind": "budget"},
-    {"pattern": "scripts/engineering/baselines/not_in_nav_baseline.txt", "kind": "budget"},
+    {"pattern": "scripts/engineering/baselines/not_in_nav_baseline.txt", "kind": "line_exemptions"},
     {"pattern": "scripts/engineering/repo/catalog.yaml", "kind": "budget"},
     {"pattern": "tests/performance/*budget*.json", "kind": "budget"}
   ]

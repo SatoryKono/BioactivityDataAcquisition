@@ -98,6 +98,8 @@ def embed_global_alerts(overview: dict[str, Any], incident: dict[str, Any]) -> N
             child["targets"] = deepcopy(summary["targets"])
             child["targets"][0]["expr"] = "bioetl_incident_global_alerts"
         _apply_overview_alert_handoff(child)
+        # The always-visible summary owns the Incident handoff.
+        child["links"] = []
     full["description"] = (
         "GLOBAL / CURRENT · Expand for all fleet alerts, independently of "
         "the selected Run ID. The summary above shows up to two rows."
