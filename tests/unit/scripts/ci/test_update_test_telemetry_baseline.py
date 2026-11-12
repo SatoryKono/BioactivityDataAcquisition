@@ -60,7 +60,7 @@ def test_ci_capture_rejects_unmeasured_inputs(
     )
     monkeypatch.setattr(subprocess, "run", lambda *_a, **_k: next(results))
     with pytest.raises(ValueError, match="new complete measurement"):
-        updater._validate_ci_capture_inputs("historical", xml)
+        updater._validate_ci_capture_inputs("a" * 40, xml)
 
 
 def test_ci_capture_keeps_original_measurement_date(
@@ -73,16 +73,73 @@ def test_ci_capture_keeps_original_measurement_date(
         "run",
         lambda *_a, **_k: subprocess.CompletedProcess([], 0, stdout=""),
     )
-    assert updater._validate_ci_capture_inputs("same-inputs", xml) == (
+    assert updater._validate_ci_capture_inputs("b" * 40, xml) == (
         "2026-11-06T17:49:35.208000+00:00"
     )
+
+
+@pytest.mark.parametrize("token", ["HEAD;rm", "HEAD|id", "HEAD&id", "HEAD$IFS"])
+def test_ci_capture_rejects_shell_metacharacters_in_source_commit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, token: str
+) -> None:
+    xml = tmp_path / "coverage.xml"
+    xml.write_text('<coverage timestamp="1793987375208"/>', encoding="utf-8")
+    def fail(*_args: object, **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        raise AssertionError("subprocess")
+
+    monkeypatch.setattr(subprocess, "run", fail)
+    with pytest.raises(ValueError, match="full 40-character commit SHA"):
+        updater._validate_ci_capture_inputs(token, xml)
+
+
+def test_ci_capture_keeps_literal_git_argv(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    xml = tmp_path / "coverage.xml"
+    xml.write_text('<coverage timestamp="1793987375208"/>', encoding="utf-8")
+    calls: list[list[str]] = []
+
+    def run(argv: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        calls.append(list(argv))
+        return subprocess.CompletedProcess(argv, 0, stdout="")
+
+    monkeypatch.setattr(subprocess, "run", run)
+    commit = "a" * 40
+    updater._validate_ci_capture_inputs(commit, xml)
+    assert calls[0][:5] == ["git", "diff", "--quiet", commit, "--"]
+    assert calls[1][:5] == [
+        "git",
+        "ls-files",
+        "--others",
+        "--exclude-standard",
+        "--",
+    ]
+    assert commit not in calls[1]
 
 
 def test_ci_capture_rejects_percentage_without_original_artifact(
     tmp_path: Path,
 ) -> None:
     with pytest.raises(ValueError, match="original coverage XML"):
-        updater._validate_ci_capture_inputs("historical", tmp_path / "absent.xml")
+        updater._validate_ci_capture_inputs("a" * 40, tmp_path / "absent.xml")
+
+
+@pytest.mark.parametrize(
+    "source_commit",
+    ["--output=unexpected", "HEAD", "a" * 39, "g" * 40, "a" * 40 + "\n"],
+)
+def test_ci_capture_rejects_noncanonical_commit_before_git(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, source_commit: str
+) -> None:
+    xml = tmp_path / "coverage.xml"
+    xml.write_text('<coverage timestamp="1793987375208"/>', encoding="utf-8")
+
+    def unexpected_git(*_args: object, **_kwargs: object) -> None:
+        pytest.fail("Invalid source commit must be rejected before executing Git")
+
+    monkeypatch.setattr(subprocess, "run", unexpected_git)
+    with pytest.raises(ValueError, match="full 40-character commit SHA"):
+        updater._validate_ci_capture_inputs(source_commit, xml)
 
 
 def test_read_coverage_percent_returns_percentage(tmp_path: Path) -> None:
