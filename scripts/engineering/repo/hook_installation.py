@@ -175,8 +175,17 @@ def verify_bundle(bundle: Path) -> None:
             raise ValueError("bundle changed")
 
 
-def _bundle(repo: Path, common: Path, source: str) -> tuple[Path, str]:
+def _source_sha(repo: Path, source: str) -> str:
     sha = _git(repo, "rev-parse", "--verify", "--end-of-options", source + "^{commit}")
+    if len(sha) not in {40, 64} or any(
+        character not in "0123456789abcdef" for character in sha
+    ):
+        raise ValueError("invalid source identity")
+    return sha
+
+
+def _bundle(repo: Path, common: Path, source: str) -> tuple[Path, str]:
+    sha = _source_sha(repo, source)
     files: dict[str, bytes] = {}
     for module in MODULES:
         path = f"scripts/engineering/repo/{module}.py"
@@ -244,6 +253,7 @@ def install(
         raise ValueError("explicit absolute project interpreter required")
     hooks.mkdir(parents=True, exist_ok=True)
     with _lock(hooks):
+        requested_sha = _source_sha(repo, source)
         if (hooks / STATE).is_symlink():
             raise ValueError("symlink state requires host review")
         if (hooks / STATE).exists():
@@ -252,8 +262,23 @@ def install(
                 raise ValueError(
                     "existing owned installation changed; refuse overwrite"
                 )
+            installed_python = os.path.normcase(os.path.abspath(result["interpreter"]))
+            requested_python = os.path.normcase(os.path.abspath(interpreter))
+            if (
+                result["source_sha"] != requested_sha
+                or installed_python != requested_python
+            ):
+                return {
+                    "status": "ERROR",
+                    "reason": "explicit_upgrade_required",
+                    "installed_source_sha": result["source_sha"],
+                    "requested_source_sha": requested_sha,
+                    "next_step": "Inspect hooks doctor, then explicitly rollback and reinstall.",
+                }
             return result
-        bundle, sha = _bundle(repo, common, source)
+        bundle, sha = _bundle(repo, common, requested_sha)
+        if sha != requested_sha:
+            raise ValueError("source identity changed during bundle creation")
         state: dict[str, Any] = {
             "version": 1,
             "bundle": str(bundle),

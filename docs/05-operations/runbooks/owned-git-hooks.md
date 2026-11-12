@@ -73,6 +73,10 @@ is backed up but replaced by one framework invocation; the framework's existing
 legacy callback protocol remains intact. Other hooks, including reference-
 transaction, remain untouched. Reinstallation of a valid deployment is idempotent;
 an upgrade requires explicit rollback then installation from the new main SHA.
+Reinstall qualifies as idempotent only when the requested source SHA and project
+interpreter match the existing deployment. A changed request returns ERROR with
+an explicit upgrade instruction; it cannot silently report the old deployment
+as the requested update. Source identity is pinned before copying helper blobs.
 
 ## Runtime behavior
 

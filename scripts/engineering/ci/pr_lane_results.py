@@ -179,9 +179,36 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
     {"scripts/ai/codex/native_runtime_contract.py"}
 )
 
+NO_PARTIAL_TREE_TEST = "tests/unit/scripts/repo/test_check_no_partial_tree.py"
+
+
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "scripts/engineering/repo/check_no_partial_tree.py": (
+        NO_PARTIAL_TREE_TEST,
+        "tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py",
+    ),
+    "docs/05-operations/runbooks/full-tree-guard.md": (NO_PARTIAL_TREE_TEST,),
+    ".github/workflows/no-partial-tree-commits.yml": (
+        NO_PARTIAL_TREE_TEST,
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
     "configs/quality/agent_guard_budget_surfaces.json": (
         "tests/unit/scripts/repo/test_budget_guard.py",
+    ),
+    **dict.fromkeys(
+        (
+            "scripts/ai/codex/README.md",
+            "scripts/ai/codex/run-codex.ps1",
+            "scripts/ai/codex/run-codex.sh",
+        ),
+        (
+            CODEX_NATIVE_RUNTIME_TEST,
+            "tests/architecture/test_codex_launcher_bootstrap.py",
+            "tests/unit/scripts/test_mcp_routes.py",
+            "tests/unit/scripts/test_mcp_readiness.py",
+            "tests/unit/scripts/ops/test_codex_exec_env_filter.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
     ),
     **dict.fromkeys(
         (

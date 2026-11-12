@@ -566,3 +566,87 @@ def test_event_reader_accepts_in_directory_metadata(tmp_path, monkeypatch):
     path = tmp_path / "event.json"
     path.write_text('{"before":"' + "1" * 40 + '","after":"' + "2" * 40 + '"}')
     assert module._load_event_range("push", path) == ("1" * 40, "2" * 40)
+
+
+def test_alternate_index_cannot_hide_real_skip_worktree_flags(
+    repo: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Qualify the actual repository index, ignoring an ambient clean alternate."""
+    alternate = repo / "alternate-index"
+    alternate.write_bytes((repo / ".git/index").read_bytes())
+    _git(repo, "update-index", "--skip-worktree", "src/keep.txt")
+    real_before = (repo / ".git/index").read_bytes()
+    monkeypatch.setenv("GIT_INDEX_FILE", str(alternate))
+
+    assert "skip-worktree entries exist in index" in module.check_checkout_state(repo)
+    assert (repo / ".git/index").read_bytes() == real_before
+
+
+def test_unrelated_system_exit_is_not_converted_to_evidence_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Preserve a caller's requested termination instead of masking it as bad Git."""
+
+    def stop(*args: object, **kwargs: object) -> int:
+        raise SystemExit(130)
+
+    monkeypatch.setattr(module, "_run_checks", stop)
+    with pytest.raises(SystemExit) as caught:
+        module.main([])
+    assert caught.value.code == 130
+
+
+def test_ambient_config_cannot_hide_real_sparse_checkout(
+    repo: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A command-scoped override must not replace the repository's sparse setting."""
+    _git(repo, "config", "core.sparseCheckout", "true")
+    monkeypatch.setenv("GIT_CONFIG_COUNT", "1")
+    monkeypatch.setenv("GIT_CONFIG_KEY_0", "core.sparseCheckout")
+    monkeypatch.setenv("GIT_CONFIG_VALUE_0", "false")
+    assert "sparse checkout is enabled" in module.check_checkout_state(repo)
+
+
+def test_supplied_commit_index_cannot_hide_missing_directory(repo, monkeypatch):
+    trusted = _git(repo, "rev-parse", "HEAD").strip()
+    _git(repo, "rm", "-qr", "src")
+    supplied = repo / "commit-index"
+    supplied.write_bytes((repo / ".git/index").read_bytes())
+    _git(repo, "read-tree", "HEAD")
+    default_before = (repo / ".git/index").read_bytes()
+    supplied_before = supplied.read_bytes()
+    monkeypatch.setenv("GIT_INDEX_FILE", str(supplied))
+    assert module.check_index_tree(repo, trusted) == [
+        "proposed index loses directory anchors"
+    ]
+    assert (repo / ".git/index").read_bytes() == default_before
+    assert supplied.read_bytes() == supplied_before
+
+
+def test_supplied_index_skip_flags_are_checked_as_well_as_default(repo, monkeypatch):
+    _git(repo, "update-index", "--skip-worktree", "src/keep.txt")
+    supplied = repo / "commit-index"
+    supplied.write_bytes((repo / ".git/index").read_bytes())
+    _git(repo, "update-index", "--no-skip-worktree", "src/keep.txt")
+    monkeypatch.setenv("GIT_INDEX_FILE", str(supplied))
+    assert "skip-worktree entries exist in index" in module.check_checkout_state(repo)
+
+
+def test_full_supplied_commit_index_remains_valid_and_readonly(repo, monkeypatch):
+    trusted = _git(repo, "rev-parse", "HEAD").strip()
+    supplied = repo / "commit-index"
+    supplied.write_bytes((repo / ".git/index").read_bytes())
+    before = supplied.read_bytes()
+    monkeypatch.setenv("GIT_INDEX_FILE", str(supplied))
+    assert module.check_checkout_state(repo) == []
+    assert module.check_index_tree(repo, trusted) == []
+    assert supplied.read_bytes() == before
+    assert (repo / ".git/index").read_bytes() == before
+
+
+def test_empty_supplied_index_is_unqualified(repo, monkeypatch):
+    monkeypatch.setenv("GIT_INDEX_FILE", "")
+    with pytest.raises(module.EvidenceError, match="empty supplied index"):
+        module.check_index_tree(repo, "HEAD")

@@ -30,6 +30,7 @@ def fixture_installation(tmp_path, monkeypatch):
     monkeypatch.setattr(
         installer, "_bundle", lambda repo, common, source: (bundle, "a" * 40)
     )
+    monkeypatch.setattr(installer, "_source_sha", lambda repo, source: "a" * 40)
     return tmp_path, hooks, bundle
 
 
@@ -49,6 +50,56 @@ def test_preserves_foreign_hooks_and_untouched_reference_callback(fixture_instal
     assert (hooks / "pre-commit").read_bytes() == original
     assert not (hooks / "pre-push").exists()
     assert (hooks / "reference-transaction").read_bytes() == reference
+
+
+def test_matching_installation_is_idempotent(fixture_installation):
+    repo, hooks, _ = fixture_installation
+    first = installer.install(repo, Path(sys.executable))
+    before = {
+        path.name: path.read_bytes() for path in hooks.iterdir() if path.is_file()
+    }
+    assert installer.install(repo, Path(sys.executable)) == first
+    assert {
+        path.name: path.read_bytes() for path in hooks.iterdir() if path.is_file()
+    } == before
+
+
+def test_new_source_requires_explicit_upgrade(fixture_installation, monkeypatch):
+    repo, hooks, _ = fixture_installation
+    installer.install(repo, Path(sys.executable))
+    before = (hooks / "pre-commit").read_bytes()
+    monkeypatch.setattr(installer, "_source_sha", lambda repo, source: "b" * 40)
+    result = installer.install(repo, Path(sys.executable))
+    assert result["status"] == "ERROR"
+    assert result["reason"] == "explicit_upgrade_required"
+    assert installer._state(hooks)["source_sha"] == "a" * 40
+    assert (hooks / "pre-commit").read_bytes() == before
+
+
+def test_new_interpreter_requires_explicit_upgrade(fixture_installation):
+    repo, hooks, _ = fixture_installation
+    installer.install(repo, Path(sys.executable))
+    before = (hooks / "pre-commit").read_bytes()
+    proposed = repo / "different-python"
+    proposed.write_text("fixture file; never executed")
+    result = installer.install(repo, proposed)
+    assert result["status"] == "ERROR"
+    assert result["reason"] == "explicit_upgrade_required"
+    assert installer._state(hooks)["python"] == sys.executable
+    assert (hooks / "pre-commit").read_bytes() == before
+
+
+def test_bundle_source_mismatch_cannot_activate_callbacks(
+    fixture_installation, monkeypatch
+):
+    repo, hooks, bundle = fixture_installation
+    monkeypatch.setattr(
+        installer, "_bundle", lambda repo, common, source: (bundle, "b" * 40)
+    )
+    with pytest.raises(ValueError, match="source identity changed"):
+        installer.install(repo, Path(sys.executable))
+    assert not (hooks / installer.STATE).exists()
+    assert not any((hooks / name).exists() for name in installer.HOOKS)
 
 
 def test_existing_framework_hook_does_not_double_run(fixture_installation):
