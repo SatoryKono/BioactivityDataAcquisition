@@ -500,13 +500,20 @@
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_consume_headers"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "401",
+      "path": "tests/unit/iuphar_target_class/test_evidence.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_local_class_accepts_its_own_evidence_without_an_iuphar_mapping"
     }
   ],
   "assertless_category_counts": {
     "architecture_helper_guard": 0,
     "benchmark_or_performance": 0,
     "helper_asserted": 1,
-    "intentional_no_exception_contract": 66,
+    "intentional_no_exception_contract": 67,
     "weak_no_value": 0
   },
   "assertless_examples": [
@@ -795,9 +802,15 @@
       "categories": {
         "intentional_no_exception_contract": 1
       }
+    },
+    "tests/unit/iuphar_target_class/test_evidence.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
     }
   },
-  "assertless_total_candidates": 67,
+  "assertless_total_candidates": 68,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -971,7 +984,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 66,
+  "intentional_no_exception_contract": 67,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
@@ -1487,13 +1500,20 @@
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_consume_headers"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "401",
+        "path": "tests/unit/iuphar_target_class/test_evidence.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_local_class_accepts_its_own_evidence_without_an_iuphar_mapping"
       }
     ],
     "assertless_category_counts": {
       "architecture_helper_guard": 0,
       "benchmark_or_performance": 0,
       "helper_asserted": 1,
-      "intentional_no_exception_contract": 66,
+      "intentional_no_exception_contract": 67,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -1523,7 +1543,7 @@
       "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py:507",
       "tests/unit/infrastructure/test_storage_factory.py:820"
     ],
-    "assertless_total_candidates": 67,
+    "assertless_total_candidates": 68,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -1758,20 +1778,20 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3313,
-    "total_test_functions": 32938,
+    "total_test_functions": 32954,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "7d8bab89344fb297edbdeb668b04518ef2a2c0fbef2ddd380148d0a9f789d734",
+  "source_tree_sha256": "50ff3db502da26d4ca4e5712701e6a5d84d1a534bf82bb055f926e2bd0328b4c",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 67,
+    "assertless_total_candidates": 68,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 66,
+    "intentional_no_exception_contract": 67,
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
@@ -1826,7 +1846,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3313,
-  "total_test_functions": 32938,
+  "total_test_functions": 32954,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

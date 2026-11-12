@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2610`
-- Internal import edges (raw): `8544`
+- Scanned modules: `2611`
+- Internal import edges (raw): `8547`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `330`
@@ -23,10 +23,10 @@ flowchart LR
     interfaces[interfaces]
     application -->|1677 OK| application
     application -->|1149 OK| domain
-    composition -->|243 OK| application
+    composition -->|244 OK| application
     composition -->|660 OK| composition
     composition -->|328 OK| domain
-    composition -->|315 OK| infrastructure
+    composition -->|317 OK| infrastructure
     domain -->|1316 OK| domain
     infrastructure -->|806 OK| domain
     infrastructure -->|1305 OK| infrastructure
@@ -42,10 +42,10 @@ flowchart LR
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |    1677 | allowed |
 | `application`    | `domain`         |    1149 | allowed |
-| `composition`    | `application`    |     243 | allowed |
+| `composition`    | `application`    |     244 | allowed |
 | `composition`    | `composition`    |     660 | allowed |
 | `composition`    | `domain`         |     328 | allowed |
-| `composition`    | `infrastructure` |     315 | allowed |
+| `composition`    | `infrastructure` |     317 | allowed |
 | `domain`         | `domain`         |    1316 | allowed |
 | `infrastructure` | `domain`         |     806 | allowed |
 | `infrastructure` | `infrastructure` |    1305 | allowed |
@@ -81,8 +81,8 @@ flowchart LR
 | `application.core`             | `domain.ports`                 |      32 |
 | `interfaces.http`              | `domain.control_plane`         |      32 |
 | `infrastructure.storage`       | `domain.medallion`             |      31 |
+| `composition.bootstrap`        | `infrastructure.control_plane` |      29 |
 | `composition.bootstrap`        | `infrastructure.storage`       |      29 |
-| `composition.bootstrap`        | `infrastructure.control_plane` |      27 |
 | `composition.factories`        | `infrastructure.adapters`      |      27 |
 | `composition.factories`        | `infrastructure.config`        |      26 |
 | `infrastructure.adapters`      | `domain.ports`                 |      26 |

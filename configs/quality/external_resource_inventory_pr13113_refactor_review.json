@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "d8f69df4837f15b41b8fb782d01abdd4a9fcbe6b",
+  "source_ref": "487d54e8e928801d5956eeca09c612d4bcddb31d",
+  "source_reviews": {
+    "src/bioetl/application/services/control_plane/manifest/diagnostics/selected_run_replay_readiness.py": "Grouped English/Russian empty aliases; same accepted values and lifetime.",
+    "src/bioetl/composition/control_plane_paths.py": "Delegates validation composition to the isolated bootstrap assembly owner; factory and private ledger-port reexport retain semantics and selected-root path containment.",
+    "src/bioetl/infrastructure/control_plane/file_evidence_read_context.py": "Relocated read-only selected ledger port unchanged. Every predecessor path remains contained before context-managed read, and cycles terminate.",
+    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_routing.py": "Extracted identity guard and reconciliation helper. Reconciliation and binding share the same source-error boundary while preserving the reconciled scope on binder failures. Executor calls remain awaited and borrowed; no worker termination claim.",
+    "src/bioetl/interfaces/http/_health_server_records_table.py": "Extracted manifest identity check preserving missing404 and mismatched409 before selected ledger access.",
+    "src/bioetl/composition/bootstrap/assembly/evidence_context.py": "Reviewed isolated composition for selected-root validation: same ledger/lineage/manifest ports, lifecycle planner and optional archive verifier; read-only bindings with no new retained resource or executor."
+  },
+  "reference_moves": [],
+  "exclusion_moves": [
+    {
+      "from": {
+        "file": "src/bioetl/interfaces/http/_health_server_control_plane_evidence_routing.py",
+        "line": 351
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_health_server_control_plane_evidence_routing.py",
+        "scope": "_reconcile_validation_scope",
+        "call": "asyncio.to_thread",
+        "expression": "asyncio.to_thread(reconcile_manifest_validation_scope, scope, report_store=getattr(host, '_run_report_store', None))",
+        "reason": "Submission to the already inventoried asyncio.default-executor; the request does not own or shut down the shared executor."
+      }
+    },
+    {
+      "from": {
+        "file": "src/bioetl/composition/control_plane_paths.py",
+        "line": 165
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/control_plane/file_evidence_read_context.py",
+        "scope": "_SelectedRootLedgerPort._assert_manifest_chain",
+        "call": "pointer.read_text",
+        "reason": "Synchronous Path.read_text uses its own context-managed file handle and closes it before returning or propagating an error; selected-root containment is checked before this index/predecessor read. It does not create a retained resource owner."
+      }
+    }
+  ],
+  "line_updates": {
+    "src/bioetl/application/services/control_plane/manifest/diagnostics/selected_run_replay_readiness.py": {},
+    "src/bioetl/composition/control_plane_paths.py": {},
+    "src/bioetl/infrastructure/control_plane/file_evidence_read_context.py": {
+      "101": 101,
+      "117": 117,
+      "187": 187
+    },
+    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_routing.py": {
+      "142": 142,
+      "145": 145,
+      "148": 148,
+      "179": 179,
+      "254": 254,
+      "256": 256,
+      "257": 257,
+      "260": 260,
+      "262": 262,
+      "283": 283,
+      "316": 316,
+      "364": 351,
+      "377": 364,
+      "378": 365,
+      "381": 368,
+      "383": 370,
+      "391": 378,
+      "392": 379,
+      "396": 383,
+      "397": 384,
+      "401": 388
+    },
+    "src/bioetl/interfaces/http/_health_server_records_table.py": {
+      "146": 155
+    }
+  }
+}
