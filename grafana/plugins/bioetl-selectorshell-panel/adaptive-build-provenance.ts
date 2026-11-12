@@ -19,7 +19,7 @@ export class AdaptiveBuildProvenance {
     const inputPaths = [
       ...files(path.join(pluginRoot, 'src')),
       ...files(path.join(pluginRoot, '.config')),
-      ...['package.json', 'package-lock.json', 'webpack.config.ts', 'webpack.adaptive.config.ts', 'adaptive-build-provenance.ts'].map((name) => path.join(pluginRoot, name)),
+      ...['package.json', 'package-lock.json', 'tsconfig.json', 'eslint.config.mjs', 'webpack.config.ts', 'webpack.adaptive.config.ts', 'adaptive-build-provenance.ts', 'README.md', 'LICENSE', 'CHANGELOG.md'].map((name) => path.join(pluginRoot, name)),
       path.join(pluginRoot, '../../tooling/router-v7-bridge/webpack-public-path.cjs'),
     ];
     const snapshot = () => Object.fromEntries(inputPaths.map((name) => [
