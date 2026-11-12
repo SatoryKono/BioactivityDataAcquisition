@@ -658,9 +658,19 @@ def _with_subclass_conflict(
         return (*codes, "contract_error")
     if not selected or not other:
         return codes
-    if set(selected) & set(other):
+    compatible = _compatible_subclass_pairs(row, _pairs(source, selected, other))
+    if {direct for direct, _ in compatible} == set(direct_side) and {
+        local for _, local in compatible
+    } == set(local_side):
         return codes
-    for direct, local in _pairs(source, selected, other):
+    return (*codes, "subclass_conflict")
+
+
+def _compatible_subclass_pairs(
+    row: ResolutionInput, pairs: tuple[tuple[str, str], ...]
+) -> set[tuple[str, str]]:
+    compatible: set[tuple[str, str]] = set()
+    for direct, local in pairs:
         verdict = compare_subclasses(
             direct_subclass=direct,
             local_subclass=local,
@@ -670,8 +680,8 @@ def _with_subclass_conflict(
             class_subclass_pairs=row.class_subclass_pairs,
         )
         if verdict in {"same", "class_subclass"}:
-            return codes
-    return (*codes, "subclass_conflict")
+            compatible.add((direct, local))
+    return compatible
 
 
 def _unselected_subclasses(row: ResolutionInput, source: str) -> tuple[str, ...]:

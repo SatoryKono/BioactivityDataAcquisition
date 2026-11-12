@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import pytest
 
 from iuphar_target_class.matching import (
@@ -15,6 +17,46 @@ from iuphar_target_class.matching import (
 from iuphar_target_class.models import MatchResult
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize("gene_field", ["gene_symbol", "gene_id"])
+@pytest.mark.parametrize("anchor", ["target_id", "uniprot"])
+@pytest.mark.parametrize("same_target", [False, True])
+@pytest.mark.parametrize("snapshot_complete", [False, True])
+def test_unverified_gene_requires_species_despite_exact_anchor(
+    gene_field: str,
+    anchor: str,
+    same_target: bool,
+    snapshot_complete: bool,
+) -> None:
+    catalog = (
+        replace(
+            _target("1", uniprot="P11111", gene="GENE_1", species="human"),
+            gene_id="101",
+        ),
+        replace(
+            _target("2", uniprot="P22222", gene="GENE_2", species="human"),
+            gene_id="202",
+        ),
+    )
+    target = catalog[0] if same_target else catalog[1]
+    query = replace(
+        _query(
+            target_id="1" if anchor == "target_id" else None,
+            uniprot_ids=("P11111",) if anchor == "uniprot" else (),
+        ),
+        **{gene_field: getattr(target, gene_field)},
+    )
+    result = resolve_match(query, catalog, snapshot_complete=snapshot_complete)
+    assert result.match_status == "insufficient_input"
+    assert result.matched_target_id is None
+    assert result.candidate_target_ids == ("1",)
+    assert tuple(item.code for item in result.diagnostics) == ("insufficient_input",)
+    checked = resolve_match(
+        replace(query, organism="human"), catalog, snapshot_complete=snapshot_complete
+    )
+    assert checked.match_status == ("matched" if same_target else "identity_conflict")
+    assert checked.matched_target_id == ("1" if same_target else None)
 
 
 def _target(

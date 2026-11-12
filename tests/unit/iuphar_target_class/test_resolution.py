@@ -18,6 +18,64 @@ pytestmark = pytest.mark.unit
 _VOCAB = frozenset({"alpha", "beta"})
 
 
+@pytest.mark.parametrize("reverse", [False, True])
+@pytest.mark.parametrize(
+    ("direct", "local", "same_pairs", "class_pairs", "conflict"),
+    [
+        (("alpha",), ("alpha", "beta"), (), (), True),
+        (("alpha", "beta"), ("alpha",), (), (), True),
+        (("alpha", "beta"), ("gamma",), (("alpha", "gamma"),), (), True),
+        (("alpha",), ("gamma", "delta"), (("alpha", "gamma"),), (), True),
+        (
+            ("alpha", "beta"),
+            ("gamma", "delta"),
+            (("alpha", "gamma"), ("beta", "delta")),
+            (),
+            False,
+        ),
+        (
+            ("alpha",),
+            ("gamma", "delta"),
+            (),
+            (("alpha", "gamma"), ("alpha", "delta")),
+            False,
+        ),
+        (("alpha", "beta"), ("beta", "alpha"), (), (), False),
+    ],
+)
+def test_every_confirmed_subclass_needs_a_compatible_counterpart(
+    direct: tuple[str, ...],
+    local: tuple[str, ...],
+    same_pairs: tuple[tuple[str, str], ...],
+    class_pairs: tuple[tuple[str, str], ...],
+    conflict: bool,
+    reverse: bool,
+) -> None:
+    direct_values = tuple(reversed(direct)) if reverse else direct
+    local_values = tuple(reversed(local)) if reverse else local
+    partial = len(direct_values) > 1
+    row = _row(
+        iuphar_annotation_status="partial" if partial else "available",
+        iuphar_subclass=None if partial else direct_values[0],
+        confirmed_subclasses=direct_values if partial else (),
+        partial_basis="type" if partial else None,
+        local_status="supported",
+        local_class="Receptor",
+        local_subclasses=local_values,
+        direct_vocabulary=frozenset(direct_values),
+        local_vocabulary=frozenset(local_values),
+        same_pairs=frozenset(same_pairs),
+        class_subclass_pairs=frozenset(class_pairs),
+    )
+    result = select_effective_class(row)
+    assert ("subclass_conflict" in result.conflict_codes) is conflict
+    assert result.decision_status == ("requires_review" if conflict else "resolved")
+    assert result.effective_class == "Receptor"
+    assert result.effective_subclasses == direct_values
+    assert result.local_subclasses == local_values
+    assert result.evidence_ids == row.evidence_ids
+
+
 @pytest.mark.parametrize("local_status", ["invalid_status", "", "SUPPORTED"])
 def test_unknown_local_status_is_a_contract_error(local_status: str) -> None:
     result = select_effective_class(
