@@ -101,8 +101,8 @@
     "python -m scripts.engineering.qa report-debt-governance-gates --check"
   ],
   "local_tracking_ref": "origin/main",
-  "local_tracking_ref_matches_remote": false,
-  "local_tracking_ref_sha": "3cc8a32cc24045c5a4a8530e8316305742dcc62d",
+  "local_tracking_ref_matches_remote": true,
+  "local_tracking_ref_sha": "1e0211b2e7472550f64e13c59dd27d1dbd1f45ae",
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
   "remote_main_sha": "1e0211b2e7472550f64e13c59dd27d1dbd1f45ae",
