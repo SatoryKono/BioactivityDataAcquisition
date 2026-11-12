@@ -74,6 +74,12 @@ REQUIRED_CHECKS_PROSE_TEST = (
     "tests/architecture/test_required_checks_prose_consistency.py"
 )
 DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
+DASHBOARD_OPERATOR_READABILITY_TEST = (
+    "tests/integration/test_dashboard_operator_readability.py"
+)
+DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST = (
+    "tests/integration/test_dashboard_first_window_noscroll.py"
+)
 GRAFANA_METRIC_SEMANTICS_TEST = (
     "tests/integration/test_grafana_dashboard_metric_semantics.py"
 )
@@ -345,7 +351,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
             "tests/unit/scripts/ops/observability/test_grafana_immutable_capture.py",
             "tests/unit/scripts/ops/observability/test_table_capture_coverage.py",
-            "tests/integration/test_dashboard_first_window_noscroll.py",
+            DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST,
         ),
     ),
     "reports/observability/live-fixes-r6/LF1-17/report.md": (
@@ -777,8 +783,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/reports/dashboard-ux-checks/2026-11-11.md": (
         DASHBOARD_UX_REPORT_FRESHNESS_TEST,
-        "tests/integration/test_dashboard_operator_readability.py",
-        "tests/integration/test_dashboard_first_window_noscroll.py",
+        DASHBOARD_OPERATOR_READABILITY_TEST,
+        DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "docs/reports/audit/N1_SHADOW_STATUS.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
@@ -1019,7 +1025,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/observability/live-fixes-r6/LF1-16/report.md",
         ),
         (
-            "tests/integration/test_dashboard_operator_readability.py",
+            DASHBOARD_OPERATOR_READABILITY_TEST,
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
     ),
@@ -1177,7 +1183,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docker-compose.monitoring.yml": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         "tests/integration/test_grafana_datasource_provisioning.py",
-        "tests/integration/test_dashboard_operator_readability.py",
+        DASHBOARD_OPERATOR_READABILITY_TEST,
     ),
     "docs/05-operations/runbooks/docker-security-baseline.md": (
         DOCKER_RUNTIME_CONTRACT_TEST,

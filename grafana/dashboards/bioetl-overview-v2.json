@@ -2894,23 +2894,23 @@
                 },
                 "SELECT RUN": {
                   "text": "SELECT RUN",
-                  "color": "gray"
+                  "color": "text"
                 },
                 "НЕТ ЗАПУСКОВ": {
                   "text": "НЕТ ЗАПУСКОВ",
-                  "color": "gray"
+                  "color": "text"
                 },
                 "нет данных": {
                   "text": "нет данных",
-                  "color": "gray"
+                  "color": "text"
                 },
                 "нет записей": {
                   "text": "нет записей",
-                  "color": "gray"
+                  "color": "text"
                 },
                 "не применимо": {
                   "text": "не применимо",
-                  "color": "gray"
+                  "color": "text"
                 }
               }
             }
