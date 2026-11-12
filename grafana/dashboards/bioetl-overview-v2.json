@@ -1872,6 +1872,38 @@
                 "value": true
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "owner"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Owner"
+              },
+              {
+                "id": "noValue",
+                "value": "See runbook"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "next_step"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Next step"
+              },
+              {
+                "id": "noValue",
+                "value": "See runbook"
+              }
+            ]
           }
         ]
       },
@@ -3384,6 +3416,38 @@
                   {
                     "id": "custom.hidden",
                     "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "owner"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Owner"
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "See runbook"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "next_step"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Next step"
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "See runbook"
                   }
                 ]
               }
