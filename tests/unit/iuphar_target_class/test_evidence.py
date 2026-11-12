@@ -145,6 +145,45 @@ def test_evidence_deduplication_keeps_each_input_row() -> None:
     require_resolvable(forward)
 
 
+def test_content_equal_ignores_a_different_run_id() -> None:
+    payload = b'{"rows":1}\n'
+    left = StoredRun(
+        "plan-v1-r8",
+        _provenance("t0"),
+        build_evidence_table(_drafts(), run_id="run-1"),
+        payload,
+    )
+    right = StoredRun(
+        "plan-v1-r8",
+        _provenance("t1"),
+        build_evidence_table(_drafts(), run_id="run-2"),
+        payload,
+    )
+    assert left.table.run_id != right.table.run_id
+    assert content_equal(left, right)
+    changed = replace(right, payload=b'{"rows":2}\n')
+    assert not content_equal(left, changed)
+
+
+def test_unsupported_iuphar_class_without_effective_class() -> None:
+    row = replace(
+        _classified_row(),
+        effective_class=None,
+        effective_source=None,
+        iuphar_mapping_rule_id=None,
+        match_evidence_ids=(),
+    )
+    assert row.iuphar_class
+    assert row.effective_class is None
+    assert unsupported_class(row)
+    supported = replace(
+        row,
+        iuphar_mapping_rule_id="type:gpcr",
+        match_evidence_ids=("row-1/match/uniprot_xref/0001",),
+    )
+    assert not unsupported_class(supported)
+
+
 def test_new_rules_request_does_not_relabel_finished_payload() -> None:
     table = build_evidence_table(_drafts(), run_id="run-1")
     previous = StoredRun(

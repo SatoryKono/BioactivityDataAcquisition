@@ -160,7 +160,7 @@ def require_class_chain(
 
 
 def content_equal(left: StoredRun, right: StoredRun) -> bool:
-    """Invariant 5. Timestamps may differ; evidence bytes may not."""
+    """Invariant 5. Timestamps and run ids may differ; evidence bytes may not."""
     return (
         left.rules_version == right.rules_version
         and left.payload == right.payload
@@ -207,11 +207,11 @@ def trace_violation(
 
 def unsupported_class(row: ClassificationResult) -> bool:
     """Invariant 3. A class without a rule and an evidence id stays empty."""
+    if row.local_class and (not row.local_rule_ids or not row.local_evidence_ids):
+        return True
     if row.iuphar_class and (
         not row.iuphar_mapping_rule_id or not row.match_evidence_ids
     ):
-        return True
-    if row.local_class and (not row.local_rule_ids or not row.local_evidence_ids):
         return True
     if row.effective_class and row.effective_source == "local_rule":
         return not row.local_rule_ids or not row.local_evidence_ids
@@ -268,11 +268,9 @@ def _reject_duplicate_ids(evidence_ids: tuple[str, ...]) -> None:
 
 
 def _without_run_id(table: EvidenceTable) -> EvidenceTable:
-    return replace(
-        table,
-        run_id="",
-        records=tuple(replace(record, run_id="") for record in table.records),
-    )
+    """Drop the run id. Evidence ids and payload bytes stay in the comparison."""
+    records = tuple(replace(record, run_id="") for record in table.records)
+    return replace(table, run_id="", records=records)
 
 
 def _without_timestamps(provenance: RunProvenance) -> tuple[str | None, ...]:
