@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T04:37:17.669964+00:00",
+  "generated_at": "2026-11-12T06:03:57.576129+00:00",
   "summary": {
     "total_scripts": 744,
     "status_counts": {
@@ -24312,7 +24312,7 @@
         },
         {
           "path": "scripts/ops/observability/validate_live_observability.py",
-          "line": 206,
+          "line": 204,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.check_prometheus_rules_health import ("
         },
@@ -26725,7 +26725,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_validate_live_observability.py",
-          "line": 21,
+          "line": 22,
           "source_group": "tests",
           "text": "from scripts.ops.observability import validate_live_observability as vlo"
         }
