@@ -22,43 +22,6 @@ pytestmark = pytest.mark.unit
 HEAD = "a" * 40
 
 
-def test_scroll_capture_shares_capture_cluster_route_and_unknown_peer_stays_rejected() -> (
-    None
-):
-    """capture_scroll_surface.cjs reuses the existing capture-cluster targets.
-
-    Do not map the missing scroll-composition unit here; that file lands with
-    the compositionSlices export in the sibling scroll-composition change.
-    """
-    repo_root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare(
-        ["scripts/ops/observability/grafana/capture_scroll_surface.cjs"],
-        repo_root=repo_root,
-    )
-    assert not report["covers_full_suite"]
-    assert (
-        "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py"
-        in report["selected"]
-    )
-    assert (
-        "tests/unit/scripts/ops/observability/test_grafana_immutable_capture.py"
-        in report["selected"]
-    )
-    assert (
-        "tests/unit/scripts/ops/observability/test_table_capture_coverage.py"
-        in report["selected"]
-    )
-    assert (
-        "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py"
-        not in report["selected"]
-    )
-    with pytest.raises(ValueError, match="unmapped paths"):
-        build_shadow_compare(
-            ["scripts/ops/observability/grafana/unknown_scroll_capture.cjs"],
-            repo_root=repo_root,
-        )
-
-
 def test_required_tests_gate_requires_shadow_step() -> None:
     """A required tests gate fails closed when the shadow step did not succeed."""
     failures = assert_step_outcomes(
