@@ -53,7 +53,7 @@ run_subagent(
 | py-debug-bot | — (read-only; implementation stays with orchestrator) | всё |
 | py-config-bot | `configs/` | `src/bioetl/`, `docs/` |
 | py-doc-bot | `docs/`, docstrings | `configs/`, `tests/` |
-| py-test-bot | `tests/**` within native permissions | `src/bioetl/`, `configs/`, `docs/`; product fixes belong to authorized parent |
+| py-test-bot | `tests/**` through authorized parent until native qualification | `src/bioetl/`, `configs/`, `docs/`; product fixes belong to authorized parent |
 
 ### Определения субагентов
 
@@ -434,3 +434,11 @@ ______________________________________________________________________
 - Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
 - Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
 - Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.
+
+## Native qualification gate
+
+Apply DEVIN-RUNTIME.md Permission boundary and qualification before every
+invocation or parallel/foreground/background example above. Restricted native
+delegation is blocked; these workflows describe logical duties handled by the
+authorized parent. Legacy frontmatter permissions are unqualified declarations,
+not proof of isolation; no foreground or built-in fallback expands authority.
