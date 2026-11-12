@@ -10,6 +10,7 @@ Commands:
     guard-operation    Check a structured operation without executing it
     guard-budgets      Compare protected policy limits to trusted Git objects
     checks             Plan or run state-bound local post-change checks
+    closeout           Verify local source-bound evidence without CI admission
     hooks              Install, inspect or roll back owned Git hooks explicitly
     check-inventory    Check scripts inventory drift
     github-settings-review  Collect read-only GitHub governance evidence
@@ -152,6 +153,12 @@ def main(argv: list[str] | None = None) -> int:
         from scripts.engineering.repo.scoped_checks import main as checks_main
 
         return checks_main(rest)
+    if cmd == "closeout":
+        # Resolve the core from this checkout, not another editable installation.
+        sys.path.insert(0, str(_DIR.parents[2] / "src"))
+        from scripts.engineering.repo.closeout_runtime import main as closeout_main
+
+        return closeout_main(rest)
     if cmd == "hooks":
         from scripts.engineering.repo.hook_installation import main as hooks_main
 

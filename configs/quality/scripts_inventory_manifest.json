@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T19:43:49.891541+00:00",
+  "generated_at": "2026-11-12T22:01:39.243630+00:00",
   "summary": {
-    "total_scripts": 746,
+    "total_scripts": 749,
     "status_counts": {
       "active": 334,
-      "supporting": 410,
+      "supporting": 413,
       "temporary_diagnostic": 2
     },
     "reference_group_coverage": {
       "agents": 12,
       "build": 18,
       "ci": 76,
-      "docs": 295,
+      "docs": 298,
       "other": 22,
-      "scripts": 642,
+      "scripts": 644,
       "skills": 13,
-      "tests": 561
+      "tests": 563
     }
   },
   "scripts": [
@@ -21402,7 +21402,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 104,
+      "reference_count": 105,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -21640,7 +21640,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 96,
+          "line": 97,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.branch_cleanup import main as branch_cleanup_main"
         }
@@ -21659,7 +21659,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 168,
+          "line": 175,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.budget_guard import main as budgets_main"
         },
@@ -21720,7 +21720,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 60,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"check-cleanup-governance\": \"check_cleanup_governance.py\","
         },
@@ -21794,7 +21794,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 24,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -21855,7 +21855,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 61,
+          "line": 62,
           "source_group": "scripts",
           "text": "\"check-reports-quality-ttl\": \"check_reports_quality_ttl.py\","
         },
@@ -21888,7 +21888,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 62,
+          "line": 63,
           "source_group": "scripts",
           "text": "\"check-root-governance-docs\": \"check_root_governance_docs.py\","
         },
@@ -21915,7 +21915,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 63,
+          "line": 64,
           "source_group": "scripts",
           "text": "\"check-root-review-registry\": \"check_root_hygiene_review_registry.py\","
         },
@@ -21972,13 +21972,13 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 18,
+          "line": 19,
           "source_group": "scripts",
           "text": "check-catalog      Validate catalog governance policy"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 56,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"check-catalog\": \"check_scripts_catalog.py\","
         }
@@ -22056,7 +22056,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 57,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"check-versions\": \"check_version_consistency.py\","
         },
@@ -22107,7 +22107,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 68,
+          "line": 69,
           "source_group": "scripts",
           "text": "\"cleanup-branch-candidates\": \"cleanup_branch_candidates.sh\","
         },
@@ -22170,7 +22170,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 64,
+          "line": 65,
           "source_group": "scripts",
           "text": "\"cleanup-root-local-clutter\": \"cleanup_root_local_clutter.py\","
         },
@@ -22185,6 +22185,93 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as a bounded reviewed-maintenance cleanup utility for exact root-local clutter candidates from the hygiene registry; keep it non-active unless root cleanup becomes a broader governed operator workflow with a dedicated active surface budget."
+    },
+    {
+      "path": "scripts/engineering/repo/closeout_runtime.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "docs/05-operations/runbooks/ai-closeout-wrapper.md",
+          "line": 38,
+          "source_group": "docs",
+          "text": "[`closeout_runtime.py`](../../../scripts/engineering/repo/closeout_runtime.py),"
+        },
+        {
+          "path": "scripts/engineering/repo/__main__.py",
+          "line": 159,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.repo.closeout_runtime import main as closeout_main"
+        },
+        {
+          "path": "tests/unit/scripts/repo/test_closeout_runtime.py",
+          "line": 15,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo import closeout_runtime as runtime"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-13",
+      "next_step": "Retain behind the existing scripts.engineering.repo closeout facade; qualify only explicit local observations, never native lifecycle registration or authenticated CI transport."
+    },
+    {
+      "path": "scripts/engineering/repo/closeout_state.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "docs/05-operations/runbooks/ai-closeout-wrapper.md",
+          "line": 40,
+          "source_group": "docs",
+          "text": "[`closeout_state.py`](../../../scripts/engineering/repo/closeout_state.py)."
+        },
+        {
+          "path": "scripts/engineering/repo/closeout_runtime.py",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.repo import closeout_state as state"
+        },
+        {
+          "path": "scripts/engineering/repo/closeout_worker.py",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.repo import closeout_state as state"
+        },
+        {
+          "path": "tests/unit/scripts/repo/test_closeout_runtime.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo import closeout_state as state"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-13",
+      "next_step": "Retain as the source-bound metadata helper for explicit closeout commands; preserve immutable event records and the local trust ceiling."
+    },
+    {
+      "path": "scripts/engineering/repo/closeout_worker.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/05-operations/runbooks/ai-closeout-wrapper.md",
+          "line": 39,
+          "source_group": "docs",
+          "text": "[`closeout_worker.py`](../../../scripts/engineering/repo/closeout_worker.py) and"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-13",
+      "next_step": "Retain as a fixed owned-process worker behind scripts.engineering.repo closeout, without standalone CLI or native event activation; never launch producers or ingestion."
     },
     {
       "path": "scripts/engineering/repo/create_worktree.py",
@@ -22207,7 +22294,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 117,
+          "line": 118,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.create_worktree import main as worktree_main"
         },
@@ -22250,7 +22337,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 55,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"sync-wrapper-caller-matrix\": \"generate_scripts_wrapper_caller_matrix.py\","
         },
@@ -22301,7 +22388,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 53,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"github-settings-review\": \"github_settings_review.py\","
         },
@@ -22332,7 +22419,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 156,
+          "line": 163,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.hook_installation import main as hooks_main"
         },
@@ -22365,8 +22452,26 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 6,
       "references": [
+        {
+          "path": "scripts/engineering/repo/closeout_runtime.py",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.repo import hook_receipts"
+        },
+        {
+          "path": "scripts/engineering/repo/closeout_state.py",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.repo import hook_receipts"
+        },
+        {
+          "path": "scripts/engineering/repo/closeout_worker.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.repo import hook_receipts"
+        },
         {
           "path": "scripts/engineering/repo/hook_runtime.py",
           "line": 15,
@@ -22456,7 +22561,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 163,
+          "line": 170,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.operation_guards import main as guard_main"
         },
@@ -22523,7 +22628,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 65,
+          "line": 66,
           "source_group": "scripts",
           "text": "\"preflight-cleanup\": \"preflight_cleanup.sh\","
         },
@@ -22540,8 +22645,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
+        {
+          "path": "scripts/engineering/repo/closeout_runtime.py",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.repo.process_deadline import run_owned"
+        },
         {
           "path": "scripts/engineering/repo/hook_runtime.py",
           "line": 17,
@@ -22553,6 +22664,12 @@
           "line": 29,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.process_deadline import run_owned"
+        },
+        {
+          "path": "tests/unit/scripts/repo/test_closeout_runtime.py",
+          "line": 17,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo.process_deadline import ProcessResult"
         },
         {
           "path": "tests/unit/scripts/repo/test_process_deadline.py",
@@ -22624,7 +22741,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 152,
+          "line": 153,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.scoped_checks import main as checks_main"
         },
@@ -22667,7 +22784,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 66,
+          "line": 67,
           "source_group": "scripts",
           "text": "\"split-testing-roadmap\": \"split_testing_roadmap_issue.py\","
         },
@@ -22694,7 +22811,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 67,
+          "line": 68,
           "source_group": "scripts",
           "text": "\"sync-docs-issues\": \"sync_docs_issues.py\","
         }

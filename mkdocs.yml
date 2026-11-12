@@ -542,6 +542,7 @@ nav:
           - "Quarterly GitHub Settings Review": 05-operations/runbooks/github-settings-quarterly-review.md
           - "GitHub Copilot Coding Agent": 05-operations/runbooks/github-copilot-coding-agent.md
           - "AI Hook Compatibility": 05-operations/runbooks/ai-hook-compatibility.md
+          - "Explicit AI Closeout": 05-operations/runbooks/ai-closeout-wrapper.md
           - "Owned Git Hooks": 05-operations/runbooks/owned-git-hooks.md
           - "Scoped Post-change Checks": 05-operations/runbooks/scoped-post-change-checks.md
           - "Full-tree Guard": 05-operations/runbooks/full-tree-guard.md
