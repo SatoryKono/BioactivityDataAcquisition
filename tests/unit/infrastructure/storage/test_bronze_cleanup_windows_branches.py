@@ -1865,3 +1865,13 @@ def test_flat_journal_directory_is_reserved_maintenance(tmp_path: Path) -> None:
     for path, reason in skips:
         mixin._record_cleanup_discovery_skip(stats, path, reason)
     assert stats["directories_skipped"] == 0
+
+
+def test_cleanup_candidate_refuses_noncontained_root_before_stat(tmp_path, monkeypatch):
+    from unittest.mock import Mock
+
+    monkeypatch.setattr(support, "destructive_cleanup_supported", lambda root: False)
+    monkeypatch.setattr(support, "is_fully_resolved", lambda *args: False)
+    path = Mock()
+    assert support.candidate_is_safe(path, tmp_path, tmp_path, Mock()) is False
+    path.lstat.assert_not_called()

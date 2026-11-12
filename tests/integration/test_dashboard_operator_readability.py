@@ -813,16 +813,23 @@ def test_run_explorer_workflow_passport_is_conditional_in_one_column() -> None:
     assert len(displayed) == 10
     assert "Open" not in displayed
 
-    workflow_override = next(
-        item
+    overrides = {
+        item["matcher"]["options"]: {
+            prop["id"]: prop["value"] for prop in item["properties"]
+        }
         for item in panel["fieldConfig"]["overrides"]
-        if item["matcher"] == {"id": "byName", "options": "Workflow"}
-    )
-    properties = {item["id"]: item["value"] for item in workflow_override["properties"]}
+    }
+    properties = overrides["Workflow"]
     assert properties["custom.cellOptions"]["type"] == "auto"
     assert properties["custom.inspect"] is True
-    assert len(properties["links"]) == 1
-    assert "workflow_passport_path" in properties["links"][0]["url"]
+    assert properties["custom.hidden"] is True
+    assert properties["links"] == []
+    workflow_passport = next(
+        link
+        for link in overrides["Run ID"]["links"]
+        if link["title"] == "Workflow passport"
+    )
+    assert "workflow_passport_path" in workflow_passport["url"]
 
 
 def test_run_explorer_pipeline_passport_uses_a_fixed_allowed_origin() -> None:

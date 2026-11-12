@@ -330,3 +330,22 @@ def test_bound_resolver_supplies_omitted_runtime_source_id() -> None:
     assert bound is not None
     bound.resolve(kind="pipeline", owner="chembl_activity", run_id="run-a")
     assert locations.lookup.call_args.kwargs["expected_runtime_source_id"] == "src-1"
+
+
+@pytest.mark.parametrize("error", [OSError, TypeError, ValueError])
+def test_resolver_failure_returns_error_without_report_root_fallback(error):
+    from unittest.mock import Mock
+    from bioetl.interfaces.http._selected_run_unavailable import (
+        resolve_selected_run,
+        _ContextManifestPort,
+    )
+
+    resolver = Mock()
+    resolver.resolve.side_effect = error("locator unavailable")
+    payload, context = resolve_selected_run(
+        resolver, pipeline="test_pipeline", run_id="requested"
+    )
+    assert context is None
+    assert "ERROR" in str(payload)
+    port = _ContextManifestPort(lambda run_id: None, None)
+    assert port.verify_replay_objects(object()) is None

@@ -119,7 +119,7 @@ def test_incident_metrics_evidence_uses_standard_threshold_steps() -> None:
     assert defaults["thresholds"] == {
         "mode": "absolute",
         "steps": [
-            {"color": "#555555", "value": None},
+            {"color": "text", "value": None},
             {"color": "orange", "value": 1},
             {"color": "red", "value": 2},
         ],
