@@ -231,3 +231,34 @@ The following divergence is not acceptable:
 - Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
 - Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
 - Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.
+
+
+## Bounded guardrail semantic checks
+
+`scripts/ai/junie/junie-mirror-contract.json` owns the explicit
+`guardrail_obligations` used by the existing Junie checker and connected CI gate.
+It checks unique sections and complete required clauses for root/Junie entry
+contracts, all three runtime maps, precedence indexes, memory, and delegated
+validation. This includes env mutations/read policy, active user worktree scope,
+debt/full-tree restrictions, root hygiene/local-only behavior, runtime identity,
+context/memory triggers, authority, validation,
+Proof-or-Stop and subordinate disabled OpenCode. The tracked worktree placement/helper contract is checked textually; actual
+helper containment and bootstrap are tested by the owning worktree tests.
+
+The checker folds prose case/whitespace and Markdown emphasis, preserving code
+literal case/globs. Commented, fenced or quoted examples cannot satisfy an obligation.
+Missing/duplicate sections, required IDs/clauses and alternate numbered runtime
+precedence fail. Legitimate native sections, implementation-fact precedence,
+and sanctioned Devin wording remain distinct from byte/content mirror scope.
+Change clauses only together with an authorized source contract and mutation
+tests; this is not a general natural-language contradiction detector.
+
+`--check` neither syncs files nor runs agents/services. A semantic failure in a
+root/runtime-only source requires a reviewed owner edit; one-way sync cannot
+repair that authority decision. Existing Codex–Junie content checks and
+Codex–Devin variant/reference checks remain required. CI wiring stays in the
+existing parity job; no parallel gate or native rules format is introduced.
+Output separates content parity, bounded semantics and native loading/execution
+(NOT_PROVEN by this check). Expected effect is detection of the enumerated
+mutations; verify it with the negative fixtures. No measured context savings or
+agent reliability improvement is claimed.

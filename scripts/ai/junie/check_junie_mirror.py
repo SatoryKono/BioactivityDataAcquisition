@@ -245,6 +245,184 @@ def check_runtime_semantics(contract: JsonObject, issues: list[str]) -> None:
             )
 
 
+REQUIRED_GUARDRAIL_IDS = frozenset(
+    {
+        "runtime-debt",
+        "delegated-policy",
+        "worktree-user-scope",
+        "root-context",
+        "root-env",
+        "root-authority",
+        "root-worktree",
+        "opencode-root-authority",
+        "runtime-proof-devin",
+        "root-env-reading",
+        "runtime-authority",
+        "normative-precedence",
+        "root-validation",
+        "ownership-precedence",
+        "memory-runtime-precedence",
+        "opencode-subordinate",
+        "root-debt-tree",
+        "runtime-proof-codex-junie",
+        "devin-native-qualification",
+        "root-runtime-identity",
+        "runtime-context",
+        "runtime-bootstrap",
+        "root-local-safety",
+        "opencode-junie-delegation",
+        "runtime-env",
+    }
+)
+
+
+OBLIGATION_HEADING = "heading"
+OBLIGATION_PATHS = "paths"
+OBLIGATION_REQUIRED = "required"
+OBLIGATION_LEVEL = "level"
+OBLIGATION_FORBID_NUMBERED_LIST = "forbid_numbered_list"
+
+
+def normalize_clause(text: str) -> str:
+    """Fold prose whitespace/case while preserving case and globs in code."""
+    literals: list[str] = []
+
+    def protect(match: re.Match[str]) -> str:
+        literals.append(match.group(1))
+        return f"CODELITERAL{len(literals) - 1}END"
+
+    text = re.sub(r"(?<!`)`([^`]+)`(?!`)", protect, text)
+    text = text.replace("**", "").casefold()
+    for index, literal in enumerate(literals):
+        text = text.replace(f"codeliteral{index}end", literal)
+    return " ".join(text.split())
+
+
+def _without_fenced_examples(text: str) -> str:
+    """Omit fenced examples, including unclosed and indented fences."""
+    output = []
+    fence: str | None = None
+    for line in text.splitlines():
+        marker = re.fullmatch(r" {0,3}(`{3,}|~{3,})(.*)", line)
+        if fence is None:
+            if marker:
+                fence = marker[1]
+            else:
+                output.append(line)
+        elif marker and not marker[2].strip():
+            if marker[1][0] == fence[0] and len(marker[1]) >= len(fence):
+                fence = None
+    return "\n".join(output)
+
+
+def guardrail_section(text: str, heading: str, level: int = 2) -> str | None:
+    """Require one authoritative section; examples/comments cannot satisfy it."""
+    text = re.sub(r"<!--.*?(?:-->|\Z)", "", text, flags=re.DOTALL)
+    text = _without_fenced_examples(text)
+    text = re.sub(r"(?m)^ {0,3}>[^\n]*(?:\n|$)", "", text)
+    headers = list(re.finditer(r"(?m)^(#{1,6})[ \t](.*)$", text))
+    matches = [m for m in headers if len(m[1]) == level and m[2].strip() == heading]
+    if len(matches) != 1:
+        return None
+    start = matches[0]
+    end = next(
+        (
+            m.start()
+            for m in headers
+            if m.start() > start.start() and len(m[1]) <= level
+        ),
+        len(text),
+    )
+    return text[start.end() : end]
+
+
+def _valid_obligation(item: Any) -> bool:
+    if not isinstance(item, dict) or set(item) - {
+        "id",
+        OBLIGATION_HEADING,
+        OBLIGATION_PATHS,
+        OBLIGATION_REQUIRED,
+        OBLIGATION_LEVEL,
+        OBLIGATION_FORBID_NUMBERED_LIST,
+    }:
+        return False
+    if not all(
+        isinstance(item.get(key), str) and item[key].strip()
+        for key in ("id", OBLIGATION_HEADING)
+    ):
+        return False
+    if type(item.get(OBLIGATION_LEVEL, 2)) is not int or item.get(
+        OBLIGATION_LEVEL, 2
+    ) not in (2, 3):
+        return False
+    if type(item.get(OBLIGATION_FORBID_NUMBERED_LIST, False)) is not bool:
+        return False
+    return all(
+        isinstance(item.get(key), list)
+        and item[key]
+        and all(isinstance(value, str) and value.strip() for value in item[key])
+        for key in (OBLIGATION_PATHS, OBLIGATION_REQUIRED)
+    )
+
+
+def _source_obligation(root: Path, path: str, item: JsonObject) -> list[str]:
+    identifier = item["id"]
+    try:
+        resolved = (root / path).resolve()
+        if not resolved.is_relative_to(root.resolve()) or any(
+            part.casefold().startswith(".env") for part in resolved.parts
+        ):
+            return [f"{identifier}: protected/external source"]
+        if resolved.stat().st_size > 1024 * 1024:
+            return [f"{identifier}: oversized source in {path}"]
+        text = resolved.read_text(encoding="utf-8")
+    except (OSError, ValueError, RuntimeError):
+        return [f"{identifier}: missing/unreadable {path}"]
+    section = guardrail_section(
+        text, item[OBLIGATION_HEADING], item.get(OBLIGATION_LEVEL, 2)
+    )
+    if section is None:
+        return [f"{identifier}: missing/duplicate section in {path}"]
+    normalized = normalize_clause(section)
+    issues = []
+    if any(
+        normalize_clause(clause) not in normalized
+        for clause in item[OBLIGATION_REQUIRED]
+    ):
+        issues.append(f"{identifier}: required clause missing in {path}")
+    if item.get(OBLIGATION_FORBID_NUMBERED_LIST) and re.search(
+        r"(?m)^\s*\d+[.)]\s", section
+    ):
+        issues.append(f"{identifier}: parallel precedence in {path}")
+    return issues
+
+
+def check_obligations(root: Path, obligations: Any) -> list[str]:
+    """Bounded textual contracts, not general NLP or native execution proof."""
+    if not isinstance(obligations, list) or not obligations:
+        return ["missing guardrail obligations"]
+    if not all(_valid_obligation(item) for item in obligations):
+        return ["invalid guardrail obligation schema"]
+    identifiers = [item["id"] for item in obligations]
+    if len(set(identifiers)) != len(identifiers):
+        return ["duplicate guardrail obligation IDs"]
+    if not REQUIRED_GUARDRAIL_IDS.issubset(identifiers):
+        return ["missing required guardrail obligation IDs"]
+    return [
+        issue
+        for item in obligations
+        for path in item[OBLIGATION_PATHS]
+        for issue in _source_obligation(root, path, item)
+    ]
+
+
+def check_guardrail_semantics(contract: JsonObject, issues: list[str]) -> None:
+    issues.extend(
+        f"[guardrail_semantics] {issue}"
+        for issue in check_obligations(REPO_ROOT, contract.get("guardrail_obligations"))
+    )
+
+
 def do_check(contract: JsonObject) -> int:
     issues: list[str] = []
     check_agents(contract, issues)
@@ -254,19 +432,22 @@ def do_check(contract: JsonObject) -> int:
     check_skill_contents(contract, issues)
     check_runtime_only_files(contract, issues)
     check_runtime_semantics(contract, issues)
+    check_guardrail_semantics(contract, issues)
     if issues:
         print("Junie mirror parity FAILED:", file=sys.stderr)
         for line in issues:
             print(f"  - {line}", file=sys.stderr)
         print(
             f"\nTotal drift entries: {len(issues)}.\n"
-            "Run `bash scripts/ai/junie/check_junie_mirror.sh --sync` to sync .codex -> .junie.",
+            "Use --sync for mirror drift; semantic drift requires a reviewed owner edit.",
             file=sys.stderr,
         )
         return 1
     print(
         "Junie mirror parity OK: .codex/** == .junie/** (per junie-mirror-contract.json)."
     )
+    print("Guardrail semantic contract OK (bounded clauses; not general NLP).")
+    print("Native loading/execution: NOT_PROVEN by this check (not assessed).")
     return 0
 
 
