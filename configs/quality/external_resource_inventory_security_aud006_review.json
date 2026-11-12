@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "catalog_ref": "636533e7ef28a6b71a6f266b6253001ca77bf2a6",
-  "source_ref": "636533e7ef28a6b71a6f266b6253001ca77bf2a6",
+  "source_ref": "54e8c8faf7470d72f20ad0a7de7c7c8f7d87763b",
   "source_reviews": {
     "src/bioetl/interfaces/http/health_server.py": "Reviewed optional quarantine token construction setting; existing server/task acquisition and cleanup scopes unchanged. No new external resource.",
-    "src/bioetl/interfaces/http/health_server_http_mixin.py": "Reviewed unique Authorization parsing and constant-time token check before dispatch. Existing socket/reader/writer ownership and close paths unchanged; no new external acquisition."
+    "src/bioetl/interfaces/http/health_server_http_mixin.py": "Reviewed unique Authorization parsing and RFC 9110 scheme normalization / RFC 6750 SP separator. Credential bytes remain case-sensitive and constant-time compared; duplicate headers fail closed. Existing socket/reader/writer ownership and close paths unchanged; no new external acquisition."
   },
   "line_updates": {
     "src/bioetl/interfaces/http/health_server.py": {
