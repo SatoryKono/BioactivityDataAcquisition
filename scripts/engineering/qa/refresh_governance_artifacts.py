@@ -839,6 +839,8 @@ def _run_telemetry(*, check_only: bool, telemetry: argparse.Namespace) -> int:
             getattr(telemetry, key, None) not in (None, "")
             for key in (
                 "coverage_percent",
+                "coverage_xml",
+                "slowest_json",
                 "source_commit",
                 "source_run_id",
                 "source_run_url",
@@ -856,10 +858,14 @@ def _run_telemetry(*, check_only: bool, telemetry: argparse.Namespace) -> int:
                 str(local_manifest),
             ]
         )
+    if getattr(telemetry, "coverage_percent", None) is not None:
+        raise SystemExit(
+            "CI telemetry percentage overrides are forbidden; use original XML"
+        )
     missing = [
         name
         for name, value in (
-            ("--coverage-percent", telemetry.coverage_percent),
+            ("--coverage-xml", getattr(telemetry, "coverage_xml", None)),
             ("--source-commit", telemetry.source_commit),
             ("--source-run-id", telemetry.source_run_id),
             ("--source-run-url", telemetry.source_run_url),
@@ -878,8 +884,8 @@ def _run_telemetry(*, check_only: bool, telemetry: argparse.Namespace) -> int:
         sys.executable,
         "-m",
         "scripts.engineering.ci.update_test_telemetry_baseline",
-        "--coverage-percent",
-        str(telemetry.coverage_percent),
+        "--coverage-xml",
+        str(telemetry.coverage_xml),
         "--source-branch",
         str(telemetry.source_branch),
         "--source-commit",
@@ -891,6 +897,8 @@ def _run_telemetry(*, check_only: bool, telemetry: argparse.Namespace) -> int:
         "--source-run-url",
         str(telemetry.source_run_url),
     ]
+    if getattr(telemetry, "slowest_json", None):
+        command.extend(["--slowest-json", str(telemetry.slowest_json)])
     command.extend(f"--junit={path}" for path in junit_paths)
     return _run(command)
 
@@ -955,7 +963,14 @@ def run_ci_drift_families(argv: list[str]) -> int:
         default="chembl_activity",
         help="Pipeline name for --dataflow (default: chembl_activity).",
     )
-    parser.add_argument("--coverage-percent", type=float, default=None)
+    parser.add_argument(
+        "--coverage-percent",
+        type=float,
+        default=None,
+        help="Rejected for CI captures; supply --coverage-xml instead.",
+    )
+    parser.add_argument("--coverage-xml", type=Path, default=None)
+    parser.add_argument("--slowest-json", type=Path, default=None)
     parser.add_argument(
         "--junit",
         action="append",
@@ -968,7 +983,7 @@ def run_ci_drift_families(argv: list[str]) -> int:
     parser.add_argument("--source-run-id", default="")
     parser.add_argument(
         "--source-event",
-        choices=("push", "pull_request"),
+        choices=("push", "pull_request", "workflow_dispatch", "schedule"),
         default="push",
     )
     parser.add_argument("--source-run-url", default="")
