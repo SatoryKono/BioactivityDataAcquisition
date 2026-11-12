@@ -660,7 +660,9 @@ def _declared_string_list(text: str, key: str, indent: int) -> list[str]:
             continue
         match = re.fullmatch(r" *- (.+)", line)
         if match is None:
-            break
+            if len(line) - len(line.lstrip()) <= indent:
+                break
+            raise ValueError("unsupported list continuation")
         value = _frontmatter_value(match[1])
         if not re.fullmatch(r"[A-Za-z]\w*(?:\([^\r\n()]+\))?", value, re.ASCII):
             raise ValueError("unsupported list scalar")
@@ -668,6 +670,24 @@ def _declared_string_list(text: str, key: str, indent: int) -> list[str]:
     if not result:
         raise ValueError("empty declared list")
     return result
+
+
+def _validate_devin_mapping_keys(text: str, indent: int, known: set[str]) -> None:
+    """Reject quoted, complex, duplicate and unsupported mapping declarations."""
+    keys = []
+    prefix = " " * indent
+    for line in text.splitlines():
+        if not line.startswith(prefix):
+            continue
+        raw = line[indent:]
+        if not raw or raw.startswith((" ", "#", "- ")):
+            continue
+        key, separator, _ = raw.partition(":")
+        if not separator:
+            raise ValueError("unsupported metadata line")
+        keys.append(key.strip())
+    if len(set(keys)) != len(keys) or set(keys) - known:
+        raise ValueError("duplicate or unsupported metadata key")
 
 
 def _devin_header(text: str) -> str:
@@ -680,7 +700,6 @@ def _devin_header(text: str) -> str:
     except ValueError as exc:
         raise ValueError("missing metadata terminator") from exc
     header = "\n".join(lines[1:end]) + "\n"
-    keys = [key.strip() for key in re.findall(r"(?m)^([^\s:#][^:\n]*):", header)]
     known = {
         "name",
         "description",
@@ -689,17 +708,17 @@ def _devin_header(text: str) -> str:
         DEVIN_TOOLS_KEY,
         DEVIN_PERMISSIONS_KEY,
     }
-    if len(set(keys)) != len(keys) or set(keys) - known:
-        raise ValueError("duplicate or unsupported metadata key")
+    _validate_devin_mapping_keys(header, 0, known)
     return header
 
 
 def _devin_tool_metadata(path: Path) -> dict[str, Any]:
     """Read our bounded declaration subset; this is not a native YAML evaluator."""
     header = _devin_header(path.read_text(encoding="utf-8"))
-    blocks = re.findall(r"(?m)^permissions:\n((?: +[^\n]*\n|\n)*)", header)
+    blocks = re.findall(r"(?m)^permissions:\n((?: +[^\n]*\n|#[^\n]*\n|\n)*)", header)
     if len(blocks) != 1:
         raise ValueError("missing/duplicate permission metadata")
+    _validate_devin_mapping_keys(blocks[0], 2, {"allow", "deny"})
     return {
         DEVIN_TOOLS_KEY: _declared_string_list(header, DEVIN_TOOLS_KEY, 0),
         DEVIN_PERMISSIONS_KEY: {

@@ -706,11 +706,15 @@ def test_devin_list_comments_cannot_hide_permission_expansion(
     )
 
 
-def test_devin_readonly_list_comments_remain_supported(tmp_path: Path) -> None:
+@pytest.mark.parametrize("location", ["tools", "permissions"])
+def test_devin_readonly_list_comments_remain_supported(
+    tmp_path: Path, location: str
+) -> None:
     _devin_fixture_tree(tmp_path)
     path = tmp_path / ".devin/agents/py-test-bot/AGENT.md"
+    marker = "- glob\n" if location == "tools" else "  - Read(**)\n"
     text = path.read_text(encoding="utf-8").replace(
-        "- glob\n", "- glob\n# a valid list comment\n", 1
+        marker, marker + "# a valid list comment\n", 1
     )
     path.write_text(text, encoding="utf-8")
     assert validate_devin_permission_contract(tmp_path) == []
@@ -747,6 +751,55 @@ def test_devin_ambiguous_metadata_cannot_override_restricted_tools(
     path.write_text(
         text[:closing] + "\n" + additions[mutation] + text[closing:], encoding="utf-8"
     )
+    assert any(
+        f.code == "devin.profile" for f in validate_devin_permission_contract(tmp_path)
+    )
+
+
+@pytest.mark.parametrize(
+    "key", ['"allow"', "'allow'", '"deny"', "'deny'", "unsupported"]
+)
+def test_devin_nested_permission_keys_reject_quoted_overrides(
+    tmp_path: Path, key: str
+) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-test-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8")
+    closing = text.index("\n---", 3)
+    changed = text[:closing] + "\n  " + key + ": [Exec(unrelated)]\n" + text[closing:]
+    parsed = yaml.safe_load(changed.split("---", 2)[1])
+    assert parsed["permissions"][key.strip("\"'")] == ["Exec(unrelated)"]
+    path.write_text(changed, encoding="utf-8")
+    assert any(
+        f.code == "devin.profile" for f in validate_devin_permission_contract(tmp_path)
+    )
+
+
+def test_devin_declared_windows_read_scope_is_supported(tmp_path: Path) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-test-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8").replace(
+        "Read(**)", "Read(D:/github/docs/**)", 1
+    )
+    path.write_text(text, encoding="utf-8")
+    assert validate_devin_permission_contract(tmp_path) == []
+
+
+@pytest.mark.parametrize("key", ["allow", "deny"])
+def test_devin_complex_permission_keys_are_not_accepted(
+    tmp_path: Path, key: str
+) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-test-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8")
+    closing = text.index("\n---", 3)
+    changed = (
+        text[:closing] + "\n  ? " + key + "\n  : [Exec(unrelated)]\n" + text[closing:]
+    )
+    assert yaml.safe_load(changed.split("---", 2)[1])["permissions"][key] == [
+        "Exec(unrelated)"
+    ]
+    path.write_text(changed, encoding="utf-8")
     assert any(
         f.code == "devin.profile" for f in validate_devin_permission_contract(tmp_path)
     )
