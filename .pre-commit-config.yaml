@@ -73,7 +73,7 @@ repos:
       - id: mdformat
         stages: [manual]
         additional_dependencies:
-          - mdformat-gfm==0.4.1
+          - mdformat-gfm==1.0.0
           - mdformat-black==0.1.1
         exclude: >
           (?x)(^|.*/)(
