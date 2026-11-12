@@ -206,3 +206,21 @@ it('reports an incomplete required summary rather than rendering partial success
   expect(screen.queryByRole('table')).not.toBeInTheDocument();
   expect(screen.queryByRole('link')).not.toBeInTheDocument();
 });
+
+it('shows complete object values instead of an object placeholder', () => {
+  const panelProps = props();
+  panelProps.data.series[0].fields.find((field) => field.name === 'Pipeline')!.values[0] = { name: 'pipeline-a', stages: ['bronze', 'silver'] };
+  render(<AdaptiveTable {...panelProps} />);
+  expect(screen.getByText('{"name":"pipeline-a","stages":["bronze","silver"]}')).toBeInTheDocument();
+  expect(screen.queryByText('[object Object]')).not.toBeInTheDocument();
+});
+
+it('keeps a nonserializable value unknown without crashing the remaining record', () => {
+  const panelProps = props();
+  const cyclic: Record<string, unknown> = {};
+  cyclic.self = cyclic;
+  panelProps.data.series[0].fields.find((field) => field.name === 'Pipeline')!.values[0] = cyclic;
+  render(<AdaptiveTable {...panelProps} />);
+  expect(screen.getByText('UNKNOWN')).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: ids[0].slice(0, 8) })).toHaveAttribute('href', `/d/run?var-run_id=${ids[0]}`);
+});

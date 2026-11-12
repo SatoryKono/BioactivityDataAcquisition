@@ -16,8 +16,9 @@ in `dist`.
 `adaptive-build-provenance.ts` records SHA-256 hashes of every build input after
 normalizing CRLF to LF, checks that inputs did not change during compilation,
 and records hashes of the emitted files in `dist-adaptive/build-provenance.json`.
-Keep that receipt with the bundle. Rebuilding from the recovered inputs was
-verified to reproduce all seven existing output files byte for byte.
+Keep that receipt with the bundle. The initial recovery reproduced all seven
+original output files byte for byte. Subsequent source fixes require a fresh
+build and receipt; retain the previous receipt as the historical reference.
 
 Unit tests cover the adaptive table and the existing selector shell. These
 checks establish build reproducibility and component contracts; browser render
