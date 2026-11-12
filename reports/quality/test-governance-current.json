@@ -500,14 +500,42 @@
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_consume_headers"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "18",
+      "path": "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_composition_preserves_document_rows_without_toolbar_shadow"
+    },
+    {
+      "category": "weak_no_value",
+      "line": "45",
+      "path": "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py",
+      "rationale": "candidate tests that need later assertion strengthening or removal review",
+      "test_name": "test_incomplete_capture_is_rejected"
+    },
+    {
+      "category": "weak_no_value",
+      "line": "66",
+      "path": "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py",
+      "rationale": "candidate tests that need later assertion strengthening or removal review",
+      "test_name": "test_composition_excludes_pixels_below_scroll_container"
+    },
+    {
+      "category": "weak_no_value",
+      "line": "92",
+      "path": "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py",
+      "rationale": "candidate tests that need later assertion strengthening or removal review",
+      "test_name": "test_capture_scrolls_to_last_document_pixel"
     }
   ],
   "assertless_category_counts": {
     "architecture_helper_guard": 0,
     "benchmark_or_performance": 0,
     "helper_asserted": 1,
-    "intentional_no_exception_contract": 66,
-    "weak_no_value": 0
+    "intentional_no_exception_contract": 67,
+    "weak_no_value": 3
   },
   "assertless_examples": [
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
@@ -795,10 +823,30 @@
       "categories": {
         "intentional_no_exception_contract": 1
       }
+    },
+    "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py": {
+      "assertless_tests": 4,
+      "categories": {
+        "intentional_no_exception_contract": 1,
+        "weak_no_value": 3
+      }
     }
   },
-  "assertless_total_candidates": 67,
-  "budget_violations": [],
+  "assertless_total_candidates": 71,
+  "budget_violations": [
+    {
+      "actual": 3,
+      "budget": "refined_assertless_max",
+      "expected_max": 0,
+      "metric": "refined_assertless_tests"
+    },
+    {
+      "actual": 1,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -971,11 +1019,13 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 66,
-  "markerless_examples": [],
-  "markerless_test_functions": 0,
+  "intentional_no_exception_contract": 67,
+  "markerless_examples": [
+    "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py:45"
+  ],
+  "markerless_test_functions": 1,
   "parse_errors": [],
-  "refined_assertless_tests": 0,
+  "refined_assertless_tests": 3,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
@@ -1487,14 +1537,42 @@
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_consume_headers"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "18",
+        "path": "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_composition_preserves_document_rows_without_toolbar_shadow"
+      },
+      {
+        "category": "weak_no_value",
+        "line": "45",
+        "path": "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py",
+        "rationale": "candidate tests that need later assertion strengthening or removal review",
+        "test_name": "test_incomplete_capture_is_rejected"
+      },
+      {
+        "category": "weak_no_value",
+        "line": "66",
+        "path": "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py",
+        "rationale": "candidate tests that need later assertion strengthening or removal review",
+        "test_name": "test_composition_excludes_pixels_below_scroll_container"
+      },
+      {
+        "category": "weak_no_value",
+        "line": "92",
+        "path": "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py",
+        "rationale": "candidate tests that need later assertion strengthening or removal review",
+        "test_name": "test_capture_scrolls_to_last_document_pixel"
       }
     ],
     "assertless_category_counts": {
       "architecture_helper_guard": 0,
       "benchmark_or_performance": 0,
       "helper_asserted": 1,
-      "intentional_no_exception_contract": 66,
-      "weak_no_value": 0
+      "intentional_no_exception_contract": 67,
+      "weak_no_value": 3
     },
     "assertless_examples": [
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
@@ -1523,7 +1601,7 @@
       "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py:507",
       "tests/unit/infrastructure/test_storage_factory.py:820"
     ],
-    "assertless_total_candidates": 67,
+    "assertless_total_candidates": 71,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -1696,10 +1774,12 @@
         ".yml"
       ]
     },
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py:45"
+    ],
+    "markerless_test_functions": 1,
     "parse_errors": [],
-    "refined_assertless_tests": 0,
+    "refined_assertless_tests": 3,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
@@ -1715,8 +1795,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3271,
-      "test_python_file_count": 3523,
+      "test_glob_file_count": 3278,
+      "test_python_file_count": 3530,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1757,24 +1837,26 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3271,
-    "total_test_functions": 32630,
+    "total_test_files": 3278,
+    "total_test_functions": 32719,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "71d21cc1bd0ecd1f1801ffd8317b196afba903ba69a5888e4cb940eac877c23d",
+  "source_tree_sha256": "4474d2b78c9ac94222dae5b5388190c437669725fa108bab1db62933ee8982ec",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 67,
+    "assertless_total_candidates": 71,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 66,
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
-    "refined_assertless_tests": 0,
+    "intentional_no_exception_contract": 67,
+    "markerless_examples": [
+      "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py:45"
+    ],
+    "markerless_test_functions": 1,
+    "refined_assertless_tests": 3,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
@@ -1783,8 +1865,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3271,
-    "test_python_file_count": 3523,
+    "test_glob_file_count": 3278,
+    "test_python_file_count": 3530,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -1825,8 +1907,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3271,
-  "total_test_functions": 32630,
+  "total_test_files": 3278,
+  "total_test_functions": 32719,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
