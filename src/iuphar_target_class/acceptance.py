@@ -29,6 +29,9 @@ def build_acceptance_report(executed: Mapping[str, str]) -> dict[str, object]:
     names = set(executed) | set(NOT_RUN_REASONS)
     checks: list[dict[str, str]] = []
     for name in sorted(names):
+        if executed.get(name) == "FAIL":
+            checks.append({"name": name, "reason": "", "status": "FAIL"})
+            continue
         if name in NOT_RUN_REASONS:
             checks.append(
                 {"name": name, "reason": NOT_RUN_REASONS[name], "status": "NOT_RUN"}

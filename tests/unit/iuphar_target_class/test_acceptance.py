@@ -5,8 +5,11 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
+from collections.abc import Mapping, Sequence
 from dataclasses import replace
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import pytest
 
@@ -34,9 +37,9 @@ def test_acceptance_rejects_candidates_changed_by_resolution(
     monkeypatch: pytest.MonkeyPatch, remaining: tuple[str, ...]
 ) -> None:
     monkeypatch.setattr(
-        subprocess,
-        "run",
-        lambda *args, **kwargs: subprocess.CompletedProcess(args[0], 0),
+        sys.modules[__name__],
+        "_run_requested_checks",
+        lambda: {node.rsplit("::", 1)[-1]: "PASS" for node in _NODE_IDS},
     )
     resolve = select_effective_class
     seen: list[tuple[str, ...]] = []
@@ -60,6 +63,131 @@ _NODE_IDS = (
     "tests/unit/iuphar_target_class/test_delivery.py::test_name_collision_blocked",
     "tests/unit/iuphar_target_class/test_w153.py::test_w153_join_receives_computed_rows",
 )
+
+
+def _case_status(case: ET.Element) -> str:
+    if case.find("failure") is not None or case.find("error") is not None:
+        return "FAIL"
+    return "NOT_RUN" if case.find("skipped") is not None else "PASS"
+
+
+def _requested_status(outcomes: Sequence[str]) -> str:
+    if "FAIL" in outcomes:
+        return "FAIL"
+    return (
+        "PASS"
+        if outcomes and all(status == "PASS" for status in outcomes)
+        else "NOT_RUN"
+    )
+
+
+def _run_requested_checks() -> dict[str, str]:
+    root = Path(__file__).resolve().parents[3]
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(root / "src")
+    with TemporaryDirectory(prefix="iuphar-acceptance-") as directory:
+        receipt = Path(directory) / "junit.xml"
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "pytest",
+                *_NODE_IDS,
+                "-q",
+                "--tb=line",
+                "-k",
+                "",
+                "-m",
+                "",
+                f"--junitxml={receipt}",
+            ],
+            cwd=root,
+            check=False,
+            env=env,
+            timeout=120,
+        )
+        assert completed.returncode == 0, "child pytest failed"
+        cases: dict[tuple[str, str], list[str]] = {}
+        for case in ET.parse(receipt).getroot().iter("testcase"):
+            key = (case.get("classname", ""), case.get("name", "").split("[", 1)[0])
+            cases.setdefault(key, []).append(_case_status(case))
+    executed: dict[str, str] = {}
+    for node in _NODE_IDS:
+        path, name = node.split("::", 1)
+        outcomes = cases.get((path.removesuffix(".py").replace("/", "."), name), [])
+        executed[name] = _requested_status(outcomes)
+    return executed
+
+
+@pytest.mark.parametrize("name", sorted(NOT_RUN_REASONS))
+@pytest.mark.parametrize("result", [None, "PASS", "FAIL"])
+def test_blocked_checks_preserve_observed_failures(
+    name: str, result: str | None
+) -> None:
+    report = build_acceptance_report({} if result is None else {name: result})
+    checks = report["checks"]
+    assert isinstance(checks, list)
+    check = next(item for item in checks if item["name"] == name)
+    assert check["status"] == ("FAIL" if result == "FAIL" else "NOT_RUN")
+    if result != "FAIL":
+        assert check["reason"] == NOT_RUN_REASONS[name]
+    assert report["biological_accuracy_accepted"] is False
+
+
+def _trace_child_results(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> tuple[set[str], dict[str, str]]:
+    run = subprocess.run
+    build = build_acceptance_report
+    observed: set[str] = set()
+    reported: dict[str, str] = {}
+
+    def observe(command: list[str], **kwargs: object) -> subprocess.CompletedProcess:
+        options = [arg for arg in command if arg.startswith("--junitxml=")]
+        receipt = (
+            Path(options[-1].partition("=")[2])
+            if options
+            else tmp_path / "observed.xml"
+        )
+        actual = command if options else [*command, f"--junitxml={receipt}"]
+        completed = run(actual, **kwargs)
+        assert receipt.is_file()
+        observed.update(
+            case.attrib["name"].split("[", 1)[0]
+            for case in ET.parse(receipt).getroot().iter("testcase")
+            if case.find("skipped") is None
+        )
+        return completed
+
+    def capture(executed: Mapping[str, str]) -> dict[str, object]:
+        reported.update(executed)
+        return build(executed)
+
+    monkeypatch.setattr(subprocess, "run", observe)
+    monkeypatch.setattr(sys.modules[__name__], "build_acceptance_report", capture)
+    return observed, reported
+
+
+def test_filtered_child_cannot_publish_unexecuted_passes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("PYTEST_ADDOPTS", "-k snapshot_immutability")
+    observed, reported = _trace_child_results(tmp_path, monkeypatch)
+    test_acceptance_report_marks_only_executed_checks()
+    requested = {node.rsplit("::", 1)[-1] for node in _NODE_IDS}
+    passed = {name for name in requested if reported[name] == "PASS"}
+    assert passed <= observed
+
+
+def test_deselected_child_is_not_reported_as_pass(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("PYTEST_ADDOPTS", f"--deselect={_NODE_IDS[0]}")
+    observed, reported = _trace_child_results(tmp_path, monkeypatch)
+    with pytest.raises(AssertionError, match="test_resolution_matrix"):
+        test_acceptance_report_marks_only_executed_checks()
+    assert "test_resolution_matrix" not in observed
+    assert reported["test_resolution_matrix"] != "PASS"
 
 
 def _row() -> ClassificationResult:
@@ -95,17 +223,7 @@ def _row() -> ClassificationResult:
 
 
 def test_acceptance_report_marks_only_executed_checks() -> None:
-    root = Path(__file__).resolve().parents[3]
-    env = os.environ.copy()
-    env["PYTHONPATH"] = str(root / "src")
-    completed = subprocess.run(
-        [sys.executable, "-m", "pytest", *_NODE_IDS, "-q", "--tb=line"],
-        cwd=root,
-        check=False,
-        env=env,
-    )
-    batch = "PASS" if completed.returncode == 0 else "FAIL"
-    executed = {node_id.rsplit("::", 1)[-1]: batch for node_id in _NODE_IDS}
+    executed = _run_requested_checks()
     row = _row()
     table = EvidenceTable("run-1", (), (), ())
     later = RunProvenance("snap", None, "plan-v1-r8", None, "other", "other")
@@ -169,9 +287,9 @@ def test_acceptance_rejects_failed_computed_invariant(
     monkeypatch: pytest.MonkeyPatch, failed_check: str
 ) -> None:
     monkeypatch.setattr(
-        subprocess,
-        "run",
-        lambda *args, **kwargs: subprocess.CompletedProcess(args[0], 0),
+        sys.modules[__name__],
+        "_run_requested_checks",
+        lambda: {node.rsplit("::", 1)[-1]: "PASS" for node in _NODE_IDS},
     )
     module = sys.modules[__name__]
     if failed_check == "invariant_4_candidates_kept":
