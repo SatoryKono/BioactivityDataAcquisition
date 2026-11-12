@@ -106,8 +106,8 @@ Existing-directory mutations require host review because their descendants may
 include environment files. The guard does not recursively scan an unbounded
 tree. This does not sandbox arbitrary commands or their child processes.
 
-Worktree admission fixes the root to `D:/github` on Windows and `/mnt/d/github`
-in WSL. A task must resolve directly below BioactivityDataAcquisition-worktrees.
+Worktree admission fixes the physical root to `D:/github` on Windows and
+its corresponding D-drive mount in WSL. A task must resolve directly below BioactivityDataAcquisition-worktrees.
 The in-process permit records ancestor identities and must be revalidated
 immediately before the existing approved creation helper runs. Junction escapes
 and replaced ancestors are rejected; unrelated sibling work is permitted.
