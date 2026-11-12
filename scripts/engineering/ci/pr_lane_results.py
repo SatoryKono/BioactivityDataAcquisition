@@ -734,6 +734,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/integration/test_dashboard_ux_report_freshness.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
+    "docs/reports/dashboard-ux-checks/2026-11-11.md": (
+        "tests/integration/test_dashboard_ux_report_freshness.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "docs/reports/audit/N1_SHADOW_STATUS.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
     "src/bioetl/infrastructure/adapters/decorators/README.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
@@ -806,6 +810,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12929_class_lane_review.json",
             "configs/quality/external_resource_inventory_pr12929_domain_accounting_review.json",
             "configs/quality/external_resource_inventory_pr12929_valueerror_review.json",
+            "configs/quality/external_resource_inventory_pr13061_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,

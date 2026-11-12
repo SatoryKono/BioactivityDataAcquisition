@@ -384,3 +384,17 @@ def test_composite_config_parsing_covers_optional_and_error_branches() -> None:
         require_str_tuple(["a", ""], "vals")
     assert optional_str_tuple(None, "vals") is None
     assert optional_str_tuple(["a"], "vals") == ("a",)
+
+
+@pytest.mark.parametrize("factory", ["decoder", "config"])
+def test_dq_invalid_record_policy_is_rejected_at_both_construction_boundaries(factory):
+    from bioetl.domain.composite.config_composite_section_decoders import (
+        build_dq_config,
+    )
+    from bioetl.domain.composite.config_dq import CompositeDQConfig
+
+    with pytest.raises(ValueError, match="invalid_record_policy"):
+        if factory == "decoder":
+            build_dq_config({"invalid_record_policy": "silently_accept"})
+        else:
+            CompositeDQConfig(invalid_record_policy="silently_accept")

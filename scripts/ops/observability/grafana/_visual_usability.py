@@ -6,6 +6,7 @@ from copy import deepcopy
 
 from scripts.ops.observability.grafana._dashboard_state_followup import override, walk
 
+_NO_OBSERVATIONS = "NO OBSERVATIONS"
 _WIDTH = "custom.width"
 _CELL = "custom.cellOptions"
 
@@ -55,13 +56,13 @@ def _replace_rate_intervals(p: dict[int, dict]) -> None:
 
 
 def _stamp_counter_no_observations(panel: dict) -> None:
-    panel["fieldConfig"]["defaults"]["noValue"] = "NO OBSERVATIONS"
+    panel["fieldConfig"]["defaults"]["noValue"] = _NO_OBSERVATIONS
     for mapping in panel["fieldConfig"]["defaults"].get("mappings", []):
         if (
             mapping.get("type") == "special"
             and mapping["options"].get("match") == "null"
         ):
-            mapping["options"]["result"]["text"] = "NO OBSERVATIONS"
+            mapping["options"]["result"]["text"] = _NO_OBSERVATIONS
     note = (
         " No observations means this outcome has no samples in the selected window; "
         "it does not prove zero failures. A measured zero is displayed numerically."
@@ -584,7 +585,7 @@ def _preserve_unknown_null_color(value: dict) -> None:
         and value.get("options", {}).get("match") == "null"
     ):
         result = value["options"].get("result", {})
-        if result.get("text") in {"UNKNOWN", "NO OBSERVATIONS"}:
+        if result.get("text") in {"UNKNOWN", _NO_OBSERVATIONS}:
             result["color"] = "text"
 
 

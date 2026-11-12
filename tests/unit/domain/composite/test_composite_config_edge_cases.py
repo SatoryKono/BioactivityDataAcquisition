@@ -325,17 +325,3 @@ def test_validation_helpers_raise_on_invalid_values() -> None:
         _validate_optional_threshold(1.2, "soft_fail_threshold")
     with pytest.raises(ValueError, match="soft_fail_threshold must be less than"):
         _validate_threshold_order(0.5, 0.5)
-
-
-@pytest.mark.parametrize("factory", ["decoder", "config"])
-def test_dq_invalid_record_policy_is_rejected_at_both_construction_boundaries(factory):
-    from bioetl.domain.composite.config_composite_section_decoders import (
-        build_dq_config,
-    )
-    from bioetl.domain.composite.config_dq import CompositeDQConfig
-
-    with pytest.raises(ValueError, match="invalid_record_policy"):
-        if factory == "decoder":
-            build_dq_config({"invalid_record_policy": "silently_accept"})
-        else:
-            CompositeDQConfig(invalid_record_policy="silently_accept")
