@@ -157,9 +157,7 @@ def test_missing_hook_config_stops_setup_before_bootstrap(tmp_path: Path) -> Non
     script = (
         "set -euo pipefail\nPYTEST_ONLY=false\n"
         "log_warn() { return 0; }\nlog_info() { return 0; }\n"
-        "run_python() { return 91; }\n"
-        + content[start:end]
-        + "\ninstall_precommit\n"
+        "run_python() { return 91; }\n" + content[start:end] + "\ninstall_precommit\n"
     )
     result = subprocess.run(
         ["bash", "-c", script], cwd=tmp_path, capture_output=True, text=True, timeout=10

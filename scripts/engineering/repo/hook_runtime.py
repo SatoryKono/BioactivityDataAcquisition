@@ -142,7 +142,11 @@ def run(kind: str, hooks: Path, args: list[str], payload: bytes = b"") -> int:
             )
         )
         # Local system hooks use this interpreter explicitly; no silent system fallback.
-        env = dict(os.environ, BIOETL_HOOK_PROJECT_PYTHON=sys.executable)
+        env = dict(
+            os.environ,
+            BIOETL_HOOK_PROJECT_PYTHON=sys.executable,
+            PRE_COMMIT_HOME=state["pre_commit_home"],
+        )
         for phase, command in commands:
             remaining = DEADLINES[kind] - (time.monotonic() - start)
             if remaining <= 0:

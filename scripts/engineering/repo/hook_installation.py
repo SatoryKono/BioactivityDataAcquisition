@@ -149,6 +149,7 @@ def inspect_installation(repo: Path) -> dict[str, Any]:
             "effective_hooks_path": str(hooks),
             "bundle": str(bundle),
             "interpreter": state["python"],
+            "pre_commit_home": str(_cache_directory(Path(state["pre_commit_home"]))),
             "route": "protected_guards -> preserved_foreign -> cached_pre_commit",
             "execution_status": "NOT_TESTED",
         }
@@ -244,11 +245,33 @@ def _launcher(bundle: Path, interpreter: Path, name: str, hooks: Path) -> bytes:
     ).encode()
 
 
+def _cache_directory(explicit: Path | None = None) -> Path:
+    """Pin pre-commit 4.7.0's cache selection without constructing its Store."""
+    if explicit is None:
+        raw = os.environ.get("PRE_COMMIT_HOME")
+        cache = (
+            Path(raw)
+            if raw
+            else Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache")
+            / "pre-commit"
+        )
+    else:
+        cache = explicit
+    if not cache.is_absolute():
+        raise ValueError("absolute pre-commit cache required")
+    return cache.resolve()
+
+
 def install(
-    repo: Path, interpreter: Path, source: str = "origin/main"
+    repo: Path,
+    interpreter: Path,
+    source: str = "origin/main",
+    *,
+    pre_commit_home: Path | None = None,
 ) -> dict[str, Any]:
     """One locked transaction; foreign callbacks remain byte-for-byte recoverable."""
     common, hooks = locations(repo)
+    requested_cache = _cache_directory(pre_commit_home)
     if not interpreter.is_absolute() or not interpreter.is_file():
         raise ValueError("explicit absolute project interpreter required")
     hooks.mkdir(parents=True, exist_ok=True)
@@ -267,6 +290,7 @@ def install(
             if (
                 result["source_sha"] != requested_sha
                 or installed_python != requested_python
+                or result["pre_commit_home"] != str(requested_cache)
             ):
                 return {
                     "status": "ERROR",
@@ -283,6 +307,7 @@ def install(
             "version": 1,
             "bundle": str(bundle),
             "python": str(interpreter),
+            "pre_commit_home": str(requested_cache),
             "source_sha": sha,
             "hooks": {},
             "manifest_sha256": _hash(_read(bundle / "manifest.json")),
@@ -371,6 +396,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("--python", type=Path)
     parser.add_argument("--source", default="origin/main")
+    parser.add_argument("--pre-commit-home", type=Path)
     args = parser.parse_args(argv)
     try:
         if args.action == "doctor":
@@ -381,7 +407,12 @@ def main(argv: list[str] | None = None) -> int:
         else:
             if args.python is None:
                 raise ValueError("explicit interpreter required")
-            result = install(args.repo, args.python, args.source)
+            result = install(
+                args.repo,
+                args.python,
+                args.source,
+                pre_commit_home=args.pre_commit_home,
+            )
     except (
         OSError,
         ValueError,

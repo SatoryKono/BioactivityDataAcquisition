@@ -312,7 +312,9 @@ def test_real_owned_hooks_protocol_and_foreign_callback_once(
         )
     )
     monkeypatch.setattr(installer, "_bundle", lambda *args: (bundle, sha))
-    report = installer.install(repo, Path(sys.executable))
+    report = installer.install(repo, Path(sys.executable), pre_commit_home=cache)
+    env.pop("PRE_COMMIT_HOME", None)
+    env["PRE_COMMIT_HOME"] = str(repo / "ambient-unprepared-cache")
     assert report["status"] == "PASS"
     assert report["effective_hooks_path"] == str(hooks)
     assert report["execution_status"] == "NOT_TESTED"
@@ -365,3 +367,49 @@ def test_real_owned_hooks_protocol_and_foreign_callback_once(
     assert dispatched.returncode == 0, dispatched.stderr.decode(errors="replace")
     assert (repo / "foreign-runs.txt").read_text() == "xx"
     assert (repo / "framework-runs.txt").read_text() == "xxxxx"
+
+
+def test_cache_selection_is_pinned_and_requires_explicit_upgrade(
+    fixture_installation, monkeypatch
+):
+    repo, hooks, _ = fixture_installation
+    cache = repo / "prepared cache"
+    monkeypatch.setenv("PRE_COMMIT_HOME", str(cache))
+    result = installer.install(repo, Path(sys.executable))
+    assert result["pre_commit_home"] == str(cache.resolve())
+    monkeypatch.delenv("PRE_COMMIT_HOME")
+    assert installer.inspect_installation(repo)["pre_commit_home"] == str(
+        cache.resolve()
+    )
+    assert (
+        installer.install(repo, Path(sys.executable), pre_commit_home=cache)["status"]
+        == "PASS"
+    )
+    assert (
+        installer.install(repo, Path(sys.executable), pre_commit_home=repo / "other")[
+            "reason"
+        ]
+        == "explicit_upgrade_required"
+    )
+    assert installer._state(hooks)["pre_commit_home"] == str(cache.resolve())
+
+
+def test_relative_cache_is_refused_before_hook_writes(fixture_installation):
+    repo, hooks, _ = fixture_installation
+    with pytest.raises(ValueError, match="absolute pre-commit cache"):
+        installer.install(
+            repo, Path(sys.executable), pre_commit_home=Path("relative-cache")
+        )
+    assert not (hooks / installer.STATE).exists()
+
+
+@pytest.mark.parametrize("explicit_env", [False, True])
+def test_cache_default_matches_qualified_framework(tmp_path, monkeypatch, explicit_env):
+    from pre_commit.store import Store
+
+    monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "xdg"))
+    if explicit_env:
+        monkeypatch.setenv("PRE_COMMIT_HOME", str(tmp_path / "explicit"))
+    else:
+        monkeypatch.delenv("PRE_COMMIT_HOME", raising=False)
+    assert str(installer._cache_directory()) == Store.get_default_directory()

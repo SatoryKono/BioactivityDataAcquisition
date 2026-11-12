@@ -49,7 +49,13 @@ The default source is `origin/main`, resolved once to a commit. Use the Windows
 project interpreter on Windows and a separately provisioned Linux interpreter in
 WSL. This command copies tracked helper blobs into an immutable, hashed bundle
 under the common Git metadata directory; it creates no Git checkout or worktree.
-It does not install dependencies or execute existing callbacks.
+It does not install dependencies or execute existing callbacks. The installer
+captures the bootstrap PRE_COMMIT_HOME (or the qualified framework default) as
+an absolute path in installation state. Git callbacks use that pinned path even
+from a parent terminal with a missing or different PRE_COMMIT_HOME. An explicit
+`--pre-commit-home <absolute-cache>` selects the same prepared cache; changing
+that request requires the same reviewed rollback/reinstall as an interpreter
+change. Doctor reports the pinned path, not cache health or execution success.
 
 `python -m scripts.engineering.repo hooks doctor` checks effective hook discovery,
 owned file hashes, bundle hashes and interpreter presence. PASS means installation
@@ -74,7 +80,7 @@ legacy callback protocol remains intact. Other hooks, including reference-
 transaction, remain untouched. Reinstallation of a valid deployment is idempotent;
 an upgrade requires explicit rollback then installation from the new main SHA.
 Reinstall qualifies as idempotent only when the requested source SHA and project
-interpreter match the existing deployment. A changed request returns ERROR with
+interpreter and pinned pre-commit cache match the existing deployment. A changed request returns ERROR with
 an explicit upgrade instruction; it cannot silently report the old deployment
 as the requested update. Source identity is pinned before copying helper blobs.
 

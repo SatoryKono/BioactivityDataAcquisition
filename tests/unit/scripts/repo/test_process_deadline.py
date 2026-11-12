@@ -22,7 +22,9 @@ def test_inherited_stalled_protocol_pipe_cannot_block_watchdog(tmp_path):
         with os.fdopen(read_fd, "rb") as stream:
             result = runner.run_owned(
                 [sys.executable, "-c", "import sys; sys.stdin.buffer.read(1)"],
-                cwd=tmp_path, state_dir=tmp_path, timeout=0.5,
+                cwd=tmp_path,
+                state_dir=tmp_path,
+                timeout=0.5,
                 input_stream=stream,
             )
         assert result.status == "ERROR"
