@@ -726,6 +726,8 @@ def test_devin_readonly_list_comments_remain_supported(tmp_path: Path) -> None:
         "legacy_allow_duplicate",
         "tools_alias",
         "embedded_separator",
+        "quoted_nested_allow",
+        "quoted_nested_deny",
     ],
 )
 def test_devin_ambiguous_metadata_cannot_override_restricted_tools(
@@ -742,6 +744,8 @@ def test_devin_ambiguous_metadata_cannot_override_restricted_tools(
         "legacy_allow_duplicate": "  allow: # overridden\n  - Exec(python)\n",
         "tools_alias": "tools: [exec]\n",
         "embedded_separator": "description: inline---separator\nallowed-tools: [exec]\n",
+        "quoted_nested_allow": '  "allow": [Exec(python)]\n',
+        "quoted_nested_deny": "  'deny': [Exec(unrelated)]\n",
     }
     closing = text.index("\n---", 3)
     path.write_text(
