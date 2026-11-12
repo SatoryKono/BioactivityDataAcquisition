@@ -188,6 +188,11 @@ IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "docs/05-operations/runbooks/scoped-post-change-checks.md": (
+        "tests/unit/scripts/repo/test_scoped_checks.py",
+        "tests/unit/scripts/repo/test_hook_receipts.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "scripts/engineering/repo/process_supervisor.py": (
         "tests/unit/scripts/repo/test_process_deadline.py",
         HOOK_INSTALLATION_TEST,

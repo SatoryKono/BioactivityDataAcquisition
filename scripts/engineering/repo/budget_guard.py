@@ -559,3 +559,7 @@ def main(argv: list[str] | None = None) -> int:
     result = check_budget_diff(args.repo_root.resolve(), args.base, tip=args.tip)
     print(json.dumps(result))
     return {"PASS": 0, "FAIL": 1, "ERROR": 2}[result["status"]]
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -12,6 +12,7 @@ import time
 from typing import Any
 
 from scripts.engineering.repo import hook_installation as installation
+from scripts.engineering.repo import hook_receipts
 from scripts.engineering.repo.operation_guards import is_env_target
 from scripts.engineering.repo.process_deadline import ProcessResult, run_owned
 
@@ -63,6 +64,29 @@ def _push_tips(payload: bytes) -> list[str]:
     return tips
 
 
+def _has_env_change(repo: Path, diff: list[str], *, staged: bool) -> bool:
+    from scripts.engineering.repo.check_no_partial_tree import _index_views
+
+    views = _index_views(repo) if staged else [None]
+    for view in views:
+        paths = hook_receipts._git(
+            repo,
+            "diff",
+            "--no-ext-diff",
+            "--no-textconv",
+            "--name-only",
+            "--no-renames",
+            "-z",
+            *diff,
+            index_file=view,
+        )
+        if any(
+            is_env_target(path.decode("utf-8")) for path in paths.split(b"\0") if path
+        ):
+            return True
+    return False
+
+
 def _guard_commands(
     repo: Path, kind: str, payload: bytes
 ) -> list[tuple[str, list[str]]]:
@@ -74,17 +98,7 @@ def _guard_commands(
         return commands
     for tip in tips:
         diff = ["--cached"] if kind == "pre-commit" else [TRUSTED_BASE, tip]
-        paths = installation._git(
-            repo,
-            "diff",
-            "--no-ext-diff",
-            "--no-textconv",
-            "--name-only",
-            "--no-renames",
-            "-z",
-            *diff,
-        )
-        if any(is_env_target(path) for path in paths.split("\0") if path):
+        if _has_env_change(repo, diff, staged=kind == "pre-commit"):
             raise ProtectedOperation("env changes require explicit host authorization")
         full_tree = [
             str(modules / "check_no_partial_tree.py"),
@@ -173,6 +187,7 @@ def run(kind: str, hooks: Path, args: list[str], payload: bytes = b"") -> int:
         state = installation._state(hooks)
         if installation.inspect_installation(repo)["status"] != "PASS":
             raise ValueError("installation changed")
+        before = hook_receipts.protected_state(repo, TRUSTED_BASE)
         commands = _guard_commands(repo, kind, payload)
         foreign = _foreign_command(state["hooks"][kind], hooks, args)
         if foreign is not None:
@@ -190,7 +205,10 @@ def run(kind: str, hooks: Path, args: list[str], payload: bytes = b"") -> int:
             BIOETL_HOOK_PROJECT_PYTHON=sys.executable,
             PRE_COMMIT_HOME=state["pre_commit_home"],
         )
-        return _execute_commands(commands, repo, hooks, kind, payload, env, start)
+        result = _execute_commands(commands, repo, hooks, kind, payload, env, start)
+        if result:
+            return result
+        return _validate_final_state(repo, hooks, kind, payload, env, start, before)
     except ProtectedOperation:
         return 21
     except (
@@ -205,6 +223,31 @@ def run(kind: str, hooks: Path, args: list[str], payload: bytes = b"") -> int:
             "BioETL hook ERROR: protected operation or installation evidence unavailable.\n"
         )
         return 2
+
+
+def _validate_final_state(
+    repo: Path,
+    hooks: Path,
+    kind: str,
+    payload: bytes,
+    env: dict[str, str],
+    start: float,
+    before: dict[str, str],
+) -> int:
+    """Callbacks cannot stage a new proposed tree after the protected checks."""
+    after = hook_receipts.protected_state(repo, TRUSTED_BASE)
+    if after["dotenv_sha256"] != before["dotenv_sha256"]:
+        return 21
+    if any(after[key] != before[key] for key in ("head_sha", "base_sha")):
+        return 2
+    if after["index_sha256"] == before["index_sha256"]:
+        return 0
+    # No callbacks repeat. Commit-msg can otherwise be the last staging bypass.
+    commands = _guard_commands(repo, "pre-commit", payload)
+    result = _execute_commands(commands, repo, hooks, kind, payload, env, start)
+    if result:
+        return result
+    return 0 if hook_receipts.protected_state(repo, TRUSTED_BASE) == after else 2
 
 
 def _report_result(result: ProcessResult) -> int:

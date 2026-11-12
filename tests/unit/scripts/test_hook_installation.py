@@ -184,9 +184,7 @@ def test_push_deletion_and_multiple_tips():
 
 
 def test_env_index_change_blocks_before_any_callback(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        installer, "_git", lambda *args, **kwargs: "directory/.env.local\0"
-    )
+    monkeypatch.setattr(hook_runtime, "_has_env_change", lambda *args, **kwargs: True)
     with pytest.raises(ValueError, match="env changes"):
         hook_runtime._guard_commands(tmp_path, "pre-commit", b"")
 
@@ -195,9 +193,10 @@ def test_commit_message_does_not_run_tree_and_budget_checks(tmp_path):
     assert hook_runtime._guard_commands(tmp_path, "commit-msg", b"") == []
 
 
+@pytest.mark.parametrize("attack", [None, "pre-commit", "commit-msg"])
 @pytest.mark.parametrize("linked", [False, True])
 def test_real_owned_hooks_protocol_and_foreign_callback_once(
-    tmp_path, monkeypatch, linked
+    tmp_path, monkeypatch, linked, attack
 ):
     """Only private fixture callbacks execute; deployment bundle is not a checkout."""
     shell = hook_runtime.git_shell()
@@ -262,6 +261,9 @@ def test_real_owned_hooks_protocol_and_foreign_callback_once(
         ]
     }
     (repo / ".pre-commit-config.yaml").write_text(json.dumps(config))
+    (repo / "configs/owned_budget.json").write_text(
+        json.dumps({"budgets": {"max_files": 5}})
+    )
     (repo / "fixture.txt").write_text("initial")
     git("add", ".")
     git("commit", "-m", "fixture")
@@ -280,10 +282,16 @@ def test_real_owned_hooks_protocol_and_foreign_callback_once(
         common, hooks = installer.locations(repo)
         assert hooks == common / "custom-hooks"
     hooks.mkdir(exist_ok=True)
-    (hooks / "pre-commit").write_text(
-        f"#!{Path(sys.executable).as_posix()}\nopen('foreign-runs.txt', 'a').write('x')\n"
-    )
-    (hooks / "pre-commit").chmod(0o755)
+    callback = f"#!{Path(sys.executable).as_posix()}\nopen('foreign-runs.txt', 'a').write('x')\n"
+    if attack:
+        callback += (
+            "import json, subprocess\n"
+            "open('configs/owned_budget.json','w').write(json.dumps({'budgets':{'max_files':6}}))\n"
+            "subprocess.run(['git','add','configs/owned_budget.json'],check=True)\n"
+        )
+    callback_kind = attack or "pre-commit"
+    (hooks / callback_kind).write_text(callback)
+    (hooks / callback_kind).chmod(0o755)
     cache = repo / "cache"
     cache.mkdir()
     with closing(sqlite3.connect(cache / "db.db")) as connection, connection:
@@ -318,6 +326,35 @@ def test_real_owned_hooks_protocol_and_foreign_callback_once(
     assert report["status"] == "PASS"
     assert report["effective_hooks_path"] == str(hooks)
     assert report["execution_status"] == "NOT_TESTED"
+    if attack:
+        (repo / "fixture.txt").write_text("changed")
+        git("add", "fixture.txt")
+        attempted = subprocess.run(
+            [
+                "git",
+                "-c",
+                "user.name=Fixture",
+                "-c",
+                "user.email=fixture@example.invalid",
+                "commit",
+                "-m",
+                "must reject callback budget increase",
+            ],
+            cwd=repo,
+            env=env,
+            capture_output=True,
+            timeout=90,
+        )
+        assert attempted.returncode != 0
+        assert git("rev-parse", "HEAD") == sha
+        assert (
+            json.loads(git("show", ":configs/owned_budget.json"))["budgets"][
+                "max_files"
+            ]
+            == 6
+        )
+        assert (repo / "foreign-runs.txt").read_text() == "x"
+        return
     (repo / "fixture.txt").write_text("staged change")
     git("add", "fixture.txt")
     message = repo / "message.txt"
