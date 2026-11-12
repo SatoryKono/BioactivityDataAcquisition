@@ -167,3 +167,22 @@ def test_run_reason_alias_is_applied_before_bounded_preview(
     assert len(domain["run_reason_brief"]) == 20
     assert domain["run_reason"] == domain_name + ": " + reason
     assert domain["reason_display"] == reason
+
+
+def test_domain_provider_reason_alias_precedes_bounded_preview():
+    payload = donor_payload(None, None)
+    reason = "run_preflight_provider_observation"
+    payload["presentation_domains"] = [
+        {
+            "domain": "Provider",
+            "verdict": "WARN",
+            "reason": reason,
+            "reason_display": reason,
+        }
+    ]
+    rows = evaluate_donor(payload)
+    domain = next(row for row in rows if row["_bioetl_frame"] == "domains")
+    assert domain["domain_reason_brief"] == "Provider preflight check"
+    assert domain["verdict"] == "WARN"
+    assert domain["reason_display"] == reason
+    assert domain["run_reason"] == "Provider: " + reason
