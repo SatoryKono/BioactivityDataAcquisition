@@ -84,6 +84,7 @@ def test_ci_capture_rejects_shell_metacharacters_in_source_commit(
 ) -> None:
     xml = tmp_path / "coverage.xml"
     xml.write_text('<coverage timestamp="1793987375208"/>', encoding="utf-8")
+
     def fail(*_args: object, **_kwargs: object) -> subprocess.CompletedProcess[str]:
         raise AssertionError("subprocess")
 
