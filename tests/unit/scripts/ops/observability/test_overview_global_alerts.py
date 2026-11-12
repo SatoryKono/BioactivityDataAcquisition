@@ -61,7 +61,8 @@ def test_global_alerts_retain_donor_query_and_complete_list() -> None:
     assert full["datasource"] == summary["datasource"]
     assert full["targets"] == [dict(donor["targets"][0], expr=metric)]
     assert all(t["id"] != "limit" for t in full["transformations"])
-    for panel in (summary, full):
+    assert full["links"] == []
+    for panel in (summary,):
         link = panel["links"][0]
         assert "/d/bioetl-incident-v1/" in link["url"]
         assert "var-run_id=-" in link["url"]

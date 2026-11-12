@@ -519,25 +519,17 @@ def _matches(rule: RowRule, row: ResolutionInput) -> bool:
 def _relation(relation: str, row: ResolutionInput) -> bool:
     local = row.local_status
     different = local == "supported" and row.local_class != row.iuphar_class
-    if relation == "any":
-        return True
-    if relation == "supported":
-        return local == "supported"
-    if relation == "same_or_absent":
-        return local == "not_supported" or (
-            local == "supported" and row.local_class == row.iuphar_class
-        )
-    if relation == "supported_different":
-        return different
-    if relation == "conflicting":
-        return local == "conflicting"
-    if relation == "candidate_only":
-        return local == "candidate_only"
-    if relation == "candidate_or_absent":
-        return local in {"candidate_only", "not_supported"}
-    if relation == "partial_agree":
-        return not (different or local == "conflicting")
-    return False
+    return {
+        "any": True,
+        "supported": local == "supported",
+        "same_or_absent": local == "not_supported"
+        or (local == "supported" and row.local_class == row.iuphar_class),
+        "supported_different": different,
+        "conflicting": local == "conflicting",
+        "candidate_only": local == "candidate_only",
+        "candidate_or_absent": local in {"candidate_only", "not_supported"},
+        "partial_agree": not (different or local == "conflicting"),
+    }.get(relation, False)
 
 
 def _from_rule(row: ResolutionInput, rule: RowRule) -> Resolution:
@@ -656,8 +648,6 @@ def _with_subclass_conflict(
     codes: tuple[str, ...],
 ) -> tuple[str, ...]:
     other = _unselected_subclasses(row, source)
-    if not selected or not other:
-        return codes
     direct_side, local_side = (
         (selected, other) if source == "iuphar_normalized" else (other, selected)
     )
@@ -666,6 +656,8 @@ def _with_subclass_conflict(
         or not set(local_side) <= row.local_vocabulary
     ):
         return (*codes, "contract_error")
+    if not selected or not other:
+        return codes
     if set(selected) & set(other):
         return codes
     for direct, local in _pairs(source, selected, other):

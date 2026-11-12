@@ -69,7 +69,7 @@ def _local_git(root: Path, *args: str, data: bytes | None = None) -> bytes:
 
 def _env_part(part: str) -> bool:
     normalized = part.split(":", 1)[0].rstrip(" .").casefold()
-    return normalized == ".env" or normalized.startswith(".env.")
+    return normalized.startswith(".env")
 
 
 def _instruction_group(path: str) -> str | None:
@@ -212,8 +212,10 @@ def compare_instructions(root: Path, before: str, after: str) -> dict[str, Any]:
 
 
 def _check_output_target(path: Path) -> None:
-    for candidate in (path.absolute(), path.resolve()):
-        if any(_env_part(part) for part in candidate.parts):
+    for resolve_path in (path.absolute, path.resolve):
+        candidate = resolve_path()
+        parts = str(candidate).replace("\\", "/").split("/")
+        if any(_env_part(part) for part in parts):
             raise ValueError("Reports cannot target environment files or directories")
 
 

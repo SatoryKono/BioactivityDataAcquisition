@@ -97,3 +97,81 @@ c08883508249e87d297f3b306e7a4d032e36de02:reports/evidence/12461/uniprot_headers.
 # PR #12677 / Class lane 41461881864: contract test asserted the same reviewed OID
 # as a contiguous literal (generic-api-key). Chunked in a follow-up commit; keep FP.
 e77300b92366a8aaac2a68a2408a87d5557542bf:tests/architecture/test_secret_shape_and_operator_guide_contracts.py:generic-api-key:85
+
+# Reviewed non-credentials from Nightly 43150303250 (Gitleaks 8.24.3).
+# Six source-path/Git-blob references; two lookup UUIDs equal manifest_id.
+# Synthetic negative control: issue #12932, closed/unmerged PR #12999;
+# the owner confirmed that its artificial marker was never issued by a service.
+# Exact historical fingerprints only: new commit/path/rule/line still fails.
+05b8ec2da8599c76b8864d9e0aa85585a481b9ab:configs/quality/external_resource_inventory.json:generic-api-key:2570
+232a44d95783bdd95777150afe308aa8e0fe2bfc:configs/quality/external_resource_inventory.json:generic-api-key:2570
+77fd489fdab4b05c9729eed5978a32dd19ae483f:.github/workflows/issue-12932-probe.yml:generic-api-key:3
+b86dc54fdf655057596f33eeb882f42e985aa0a2:configs/quality/external_resource_inventory.json:generic-api-key:3737
+ea4060830a2ceaa850d3b641d31a8613e79ced27:reports/observability/live-fixes-r6/LF1-11/manifest-show.txt:generic-api-key:1005
+ea4060830a2ceaa850d3b641d31a8613e79ced27:reports/observability/live-fixes-r6/LF1-11/manifest-show.txt:generic-api-key:2098
+edb6ca2854b2b6a41dc1ac23d9f1f18f1eeaa61e:configs/quality/external_resource_inventory.json:generic-api-key:3681
+fe3308006e3265859d849a5e61fbf4a9dd1f7c83:configs/quality/external_resource_inventory.json:generic-api-key:2571
+fe3308006e3265859d849a5e61fbf4a9dd1f7c83:configs/quality/external_resource_inventory.json:generic-api-key:3681
+
+# Exact replay-snapshot source IDs: 58 Git blobs and 2 source-file SHA-256 values.
+# Verified against catalog source_commit:path; no path/rule/commit-wide exemptions.
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:10777
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:1840
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:1849
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:1864
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:1865
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:1870
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:1897
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:1937
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:2052
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:2534
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:2714
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:2717
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:2732
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:2810
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:2811
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:2813
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:2843
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:2847
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:2852
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:2878
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:3143
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:3227
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:3229
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:3593
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:3806
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:3825
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:3836
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:3842
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:4267
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v2/configs/quality/external_resource_inventory.json:generic-api-key:4273
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:10777
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:1840
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:1849
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:1864
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:1865
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:1870
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:1897
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:1937
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:2052
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:2534
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:2714
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:2717
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:2732
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:2810
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:2811
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:2813
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:2843
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:2847
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:2852
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:2878
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:3143
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:3227
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:3229
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:3593
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:3806
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:3825
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:3836
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:3842
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:4267
+978c25c0573a485ae07c115a76cf090a6de6b024:data/workflow-reconciliation/replay-readiness-20261111/chembl_activity-v3/configs/quality/external_resource_inventory.json:generic-api-key:4273
