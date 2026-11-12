@@ -91,3 +91,15 @@ def test_replace_refs_cannot_change_measured_git_objects(git_case) -> None:
     assert proof._git(root, "show", original + ":tracked.py").splitlines() == [
         b"VALUE = 1"
     ]
+
+
+def test_index_only_change_invalidates_the_canonical_diff_identity(git_case) -> None:
+    root, _marker, _command, git = git_case
+    original = (root / "tracked.py").read_bytes()
+    before = proof._task_diff_state(root, proof.load_policy(), [], timeout=10)
+    (root / "tracked.py").write_text("VALUE = 3\n", encoding="utf-8")
+    git("add", "tracked.py")
+    (root / "tracked.py").write_bytes(original)
+    after = proof._task_diff_state(root, proof.load_policy(), [], timeout=10)
+    assert after[0] != before[0]
+    assert after[1] is True

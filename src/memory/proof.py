@@ -299,12 +299,25 @@ def _task_diff_state(
         "--",
         timeout=timeout,
     )
+    staged_diff = _git(
+        repo_root,
+        "diff",
+        "--cached",
+        "--binary",
+        "--no-ext-diff",
+        "--no-textconv",
+        "HEAD",
+        "--",
+        timeout=timeout,
+    )
     digest = hashlib.sha256()
     digest.update(tracked_diff)
+    digest.update(b"\0default-index\0")
+    digest.update(staged_diff)
     digest.update(b"\0untracked\0")
     digest.update(_hash_paths(repo_root, untracked_paths).encode("ascii"))
     digest.update(canonical_digest(policy).encode("ascii"))
-    return digest.hexdigest(), bool(tracked_diff)
+    return digest.hexdigest(), bool(tracked_diff or staged_diff)
 
 
 def _repo_id(repo_root: Path) -> str:
