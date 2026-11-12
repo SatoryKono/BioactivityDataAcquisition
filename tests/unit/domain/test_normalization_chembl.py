@@ -151,3 +151,15 @@ class TestNormalizeOrganismName:
     ) -> None:
         """Historical VCR lexical variants should collapse to canonical display."""
         assert normalize_chembl_organism_name(raw_value) == expected
+
+
+def test_unknown_activity_unit_has_no_fabricated_qudt_identity():
+    from bioetl.domain.normalization._chembl_units import resolve_qudt_unit_identifier
+
+    assert resolve_qudt_unit_identifier("not-a-known-unit") is None
+
+
+def test_empty_unit_token_is_not_a_qudt_unit():
+    from bioetl.domain.normalization._chembl_units import resolve_qudt_unit_identifier
+
+    assert resolve_qudt_unit_identifier("   ") is None

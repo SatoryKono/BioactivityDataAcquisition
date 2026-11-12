@@ -109,3 +109,13 @@ def test_unmeasured_snapshot_cannot_certify_selected_version(snapshots, measured
 )
 def test_historical_totals_require_measured_integer_counters(snapshot, expected):
     assert totals._historical_snapshot_delta({"source_snapshot": snapshot}) == expected
+
+
+def test_optional_workflow_observations_are_copied_without_inventing_values():
+    from bioetl.domain.run_reports.workflow_totals import optional_mapping_copy
+
+    assert optional_mapping_copy(None) is None
+    source = {"measured": 0, "not_measured": None}
+    copied = optional_mapping_copy(source)
+    assert copied == source
+    assert copied is not source

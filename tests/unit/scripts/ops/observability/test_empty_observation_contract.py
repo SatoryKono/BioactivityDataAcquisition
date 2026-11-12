@@ -54,7 +54,11 @@ def test_static_empty_copy_cannot_attest_available_telemetry(panel_id):
     original = deepcopy(panel)
     payload = [{"id": 8808, "panels": [panel]}]
     apply_event_empty_copy(payload)
-    assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert panel["fieldConfig"]["defaults"]["noValue"] == (
+        "UNKNOWN — terminal histogram samples unavailable"
+        if panel_id == 239
+        else "UNKNOWN"
+    )
     assert "producer availability" in panel["description"]
     assert "Only an actual sample" in panel["description"]
     assert panel["targets"] == original["targets"]
