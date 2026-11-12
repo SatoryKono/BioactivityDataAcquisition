@@ -97,7 +97,11 @@ def run_batch(
     rules_version: str,
     run_id: str,
 ) -> DeliveryResult:
-    """Read one CSV inside ``root`` and write the result beside that file."""
+    """Read one CSV inside ``root`` and write the result beside that file.
+
+    Overlong portable CSV names return ``name_too_long`` without publication;
+    valid names retain the published template.
+    """
     source = _path_inside_root(source, root)
     _, safe_name = result_names(
         source.name,
@@ -106,6 +110,10 @@ def run_batch(
         run_id=run_id,
     )
     directory = source.parent
+    if len(safe_name.encode("utf-8")) > 255:
+        return DeliveryResult(
+            source.name, safe_name, str(directory), False, "name_too_long", None
+        )
     destination = directory / safe_name
     manifest_name = f"{safe_name}.manifest.json"
     if len(manifest_name.encode("utf-8")) > 255:
@@ -187,7 +195,12 @@ def _read_rows(source: Path, *, root: Path) -> tuple[dict[str, str], ...]:
         reader = csv.DictReader(handle)
         if not reader.fieldnames or "input_row_id" not in reader.fieldnames:
             raise ValueError("CSV requires an input_row_id header")
-        return tuple(dict(row) for row in reader)
+        if reader.fieldnames.count("input_row_id") != 1:
+            raise ValueError("CSV requires exactly one input_row_id header")
+        rows = tuple(dict(row) for row in reader)
+        if any(not (row.get("input_row_id") or "").strip() for row in rows):
+            raise ValueError("CSV input_row_id must not be empty")
+        return rows
 
 
 def _path_inside_root(path: Path, root: Path) -> Path:
