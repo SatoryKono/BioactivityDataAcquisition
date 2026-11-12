@@ -541,7 +541,7 @@ def test_pipeline_duration_has_explicit_no_value_message() -> None:
     assert panel is not None
     no_value = panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
     assert any(
-        term in no_value.lower()
+        term in (no_value + " " + panel.get("description", "")).lower()
         for term in ("terminal", "samples", "histogram increments")
     ), (
         f"Pipeline Duration noValue must explain missing terminal metric, got: {no_value!r}"

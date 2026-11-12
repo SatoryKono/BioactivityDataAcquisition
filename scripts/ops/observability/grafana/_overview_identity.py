@@ -103,10 +103,11 @@ def apply_overview_identity(payload: dict) -> None:
         "overrides": [
             {
                 "matcher": {"id": "byName", "options": "Parameter"},
-                "properties": [{"id": CUSTOM_WIDTH, "value": 125}],
+                "properties": [{"id": CUSTOM_WIDTH, "value": 100}],
             }
         ],
     }
+
     # The fixed five-parameter projection retains every identity value.
     identity["transformations"] = [
         {"id": "limit", "options": {"limitField": 5}},
