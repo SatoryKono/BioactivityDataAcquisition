@@ -1,15 +1,20 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
   "description": "Parity contract between .codex/** (source runtime) and .junie/** (mirror runtime). Enforced by scripts/ai/junie/check_junie_mirror.sh. Both trees are equal-peer canonical runtime sources; --sync copies from .codex/** into .junie/** only, never the reverse.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "source_runtime": ".codex",
   "mirror_runtime": ".junie",
   "parity_scope": {
     "agents": {
       "source_glob": ".codex/agents/py-*.md",
       "mirror_glob": ".junie/agents/py-*.md",
-      "required_match": ["filename", "sha256"],
-      "exclude_filenames": ["py-code-bot.md"]
+      "required_match": [
+        "filename",
+        "sha256"
+      ],
+      "exclude_filenames": [
+        "py-code-bot.md"
+      ]
     },
     "shared_agent_docs": {
       "source_files": [
@@ -20,24 +25,37 @@
         ".junie/agents/README.md",
         ".junie/agents/ORCHESTRATION.md"
       ],
-      "required_match": ["sha256"]
+      "required_match": [
+        "sha256"
+      ]
     },
     "skills_catalog": {
       "source_file": ".codex/skills/SKILLS-CATALOG.md",
       "mirror_file": ".junie/skills/SKILLS-CATALOG.md",
-      "required_match": ["sha256"]
+      "required_match": [
+        "sha256"
+      ]
     },
     "skills": {
       "source_glob": ".codex/skills/*/",
       "mirror_glob": ".junie/skills/*/",
-      "required_match": ["directory_name"],
-      "exclude_directory_names": ["py-code-bot"]
+      "required_match": [
+        "directory_name"
+      ],
+      "exclude_directory_names": [
+        "py-code-bot"
+      ]
     },
     "skill_contents": {
       "source_glob": ".codex/skills/**/*",
       "mirror_glob": ".junie/skills/**/*",
-      "required_match": ["relative_path", "sha256"],
-      "exclude_relative_path_prefixes": ["py-code-bot/"]
+      "required_match": [
+        "relative_path",
+        "sha256"
+      ],
+      "exclude_relative_path_prefixes": [
+        "py-code-bot/"
+      ]
     }
   },
   "runtime_only_files": {
@@ -51,7 +69,11 @@
       ".codex/agents/py-plan-bot.toml",
       ".codex/agents/py-test-bot.toml"
     ],
-    "junie_only": [".junie/agents/JUNIE-RUNTIME.md", ".junie/guidelines.md", ".junie/agents/CODEX-RUNTIME.md"]
+    "junie_only": [
+      ".junie/agents/JUNIE-RUNTIME.md",
+      ".junie/guidelines.md",
+      ".junie/agents/CODEX-RUNTIME.md"
+    ]
   },
   "runtime_semantics": {
     "junie_runtime_map": ".junie/agents/JUNIE-RUNTIME.md",
@@ -72,5 +94,335 @@
     "direction": "codex_to_junie",
     "never_write_to_codex": true,
     "preserve_runtime_only_files": true
-  }
+  },
+  "guardrail_obligations": [
+    {
+      "id": "root-env",
+      "paths": [
+        "AGENTS.md",
+        ".junie/guidelines.md"
+      ],
+      "heading": "Env File Guardrail",
+      "required": [
+        "MUST NOT create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval",
+        "(`.env`, `.env.*`)"
+      ]
+    },
+    {
+      "id": "root-authority",
+      "paths": [
+        "AGENTS.md",
+        ".junie/guidelines.md"
+      ],
+      "heading": "Canonical Precedence",
+      "required": [
+        "their permanent guardrails cannot be weakened by a runtime, profile, skill, memory sheet, or helper document",
+        "`POST_CHANGE_VALIDATION.md` owns the post-change procedure",
+        "`Proof-or-Stop Closeout` requirements remain mandatory when applicable"
+      ]
+    },
+    {
+      "id": "worktree-user-scope",
+      "paths": [
+        "AGENTS.md",
+        ".junie/guidelines.md"
+      ],
+      "heading": "Instruction Scope",
+      "required": [
+        "Always; also preserve the active user worktree-location restriction",
+        "Only when performing that role; never expands user authority",
+        "configuration presence is not proof of loading"
+      ]
+    },
+    {
+      "id": "root-debt-tree",
+      "paths": [
+        "AGENTS.md",
+        ".junie/guidelines.md"
+      ],
+      "heading": "Guardrails",
+      "required": [
+        "УВЕЛИЧИВАТЬ бюджеты тех. долга ЗАПРЕЩЕНО",
+        "never commit from a partial checkout, sparse index, or reports-only worktree",
+        "`python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`",
+        "технический долг может только уменьшаться или оставаться неизменным, увеличение бюджетов запрещено",
+        "every commit must carry the full top-level tree"
+      ]
+    },
+    {
+      "id": "root-context",
+      "paths": [
+        "AGENTS.md",
+        ".junie/guidelines.md"
+      ],
+      "heading": "Required AI Context",
+      "required": [
+        "| V3/V4 | full package:",
+        "`pre-task` required",
+        "Hash-only work does not require reading `docs/00-project/RULES.md` or the ADR tree",
+        "`post-task`, session notes, promotion, and persistent refresh require authorized `read-write` mode",
+        "V2 and V3/V4 still require their matrix-selected pre-task and applicable checks"
+      ]
+    },
+    {
+      "id": "root-validation",
+      "paths": [
+        "AGENTS.md",
+        ".junie/guidelines.md"
+      ],
+      "heading": "Post-Change Validation",
+      "required": [
+        "For any write-capable task, follow `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`",
+        "after changes under `.codex/agents/**`",
+        "`scripts/ai/junie/check_junie_mirror.py --check`",
+        "Divergences MUST be resolved before submit",
+        "After changes under `src/bioetl/**/*.py`, refresh",
+        "After markdown/docs changes that add, remove, or retarget local links",
+        "`python -m scripts.docs generate-cleanup-inventory --update`",
+        "`bash scripts/ai/junie/check_junie_mirror.sh --check`",
+        "report-module-coverage --allow-missing-coverage-xml",
+        "`.codex/skills/**`, `.junie/agents/**`, or `.junie/skills/**`, run",
+        "that change `Owner:` / `Status:` / `Class:` headers"
+      ]
+    },
+    {
+      "id": "opencode-subordinate",
+      "paths": [
+        "AGENTS.md",
+        ".junie/guidelines.md"
+      ],
+      "heading": "OpenCode GitHub Repo Agent (Phase 1, subordinate surface)",
+      "required": [
+        "Write paths (`/oc`, `agent-fix`) stay disabled",
+        "subordinate to the canonical precedence above"
+      ]
+    },
+    {
+      "id": "runtime-authority",
+      "paths": [
+        ".codex/agents/CODEX-RUNTIME.md",
+        ".junie/agents/JUNIE-RUNTIME.md",
+        ".devin/agents/DEVIN-RUNTIME.md"
+      ],
+      "heading": "Repository authority",
+      "required": [
+        "`AGENTS.md` owns precedence and permanent guardrails",
+        "profiles/skills cannot weaken them"
+      ]
+    },
+    {
+      "id": "runtime-context",
+      "paths": [
+        ".codex/agents/CODEX-RUNTIME.md",
+        ".junie/agents/JUNIE-RUNTIME.md",
+        ".devin/agents/DEVIN-RUNTIME.md"
+      ],
+      "heading": "Context tiers",
+      "required": [
+        "Required AI Context table is the single task-class matrix",
+        "V3/V4 retain the full package and required pre-task"
+      ]
+    },
+    {
+      "id": "runtime-env",
+      "paths": [
+        ".codex/agents/CODEX-RUNTIME.md",
+        ".junie/agents/JUNIE-RUNTIME.md",
+        ".devin/agents/DEVIN-RUNTIME.md"
+      ],
+      "heading": "Env File Guardrail",
+      "required": [
+        "MUST NOT create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval"
+      ]
+    },
+    {
+      "id": "runtime-proof-codex-junie",
+      "paths": [
+        ".codex/agents/CODEX-RUNTIME.md",
+        ".junie/agents/JUNIE-RUNTIME.md"
+      ],
+      "heading": "Proof-or-Stop Closeout",
+      "required": [
+        "`ADMIT` is the only outcome that can qualify a lifecycle transition at the policy-required trust tier",
+        "`DEGRADED` and `STOP` must be reported with reasons and follow-up",
+        "unavailable evidence is never pass"
+      ]
+    },
+    {
+      "id": "runtime-proof-devin",
+      "paths": [
+        ".devin/agents/DEVIN-RUNTIME.md"
+      ],
+      "heading": "Proof-or-Stop Closeout",
+      "required": [
+        "Only `ADMIT` at the policy-required trust tier can qualify"
+      ]
+    },
+    {
+      "id": "ownership-precedence",
+      "paths": [
+        "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md"
+      ],
+      "heading": "Precedence Model",
+      "required": [
+        "The sole repository precedence is `AGENTS.md`",
+        "root guardrails cannot be weakened"
+      ],
+      "forbid_numbered_list": true
+    },
+    {
+      "id": "delegated-policy",
+      "paths": [
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"
+      ],
+      "heading": "Delegated Authority",
+      "required": [
+        "`AGENTS.md` delegates post-change procedures to this policy",
+        "It cannot change repository precedence or weaken root guardrails"
+      ],
+      "forbid_numbered_list": true
+    },
+    {
+      "id": "root-env-reading",
+      "paths": [
+        "AGENTS.md"
+      ],
+      "heading": "Env File Guardrail",
+      "required": [
+        "Reading `.env` files is permitted"
+      ]
+    },
+    {
+      "id": "opencode-root-authority",
+      "paths": [
+        "AGENTS.md"
+      ],
+      "heading": "OpenCode GitHub Repo Agent (Phase 1, subordinate surface)",
+      "required": [
+        "it MUST NOT redefine runtime behavior"
+      ]
+    },
+    {
+      "id": "opencode-junie-delegation",
+      "paths": [
+        ".junie/guidelines.md"
+      ],
+      "heading": "OpenCode GitHub Repo Agent (Phase 1, subordinate surface)",
+      "required": [
+        "Full contract: `AGENTS.md` § OpenCode GitHub Repo Agent"
+      ]
+    },
+    {
+      "id": "normative-precedence",
+      "paths": [
+        "docs/00-project/NORMATIVE_SOURCES.md"
+      ],
+      "heading": "Precedence для AI runtime",
+      "required": [
+        "порядок разрешения конфликтов живёт только в",
+        "AGENTS.md",
+        "profiles/skills не могут их ослаблять"
+      ],
+      "forbid_numbered_list": true
+    },
+    {
+      "id": "memory-runtime-precedence",
+      "paths": [
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md"
+      ],
+      "heading": "AI Runtime Behavior Conflicts",
+      "level": 3,
+      "required": [
+        "Use only `AGENTS.md`, section `Canonical Precedence`",
+        "cannot weaken root guardrails or activate a prohibited runtime"
+      ],
+      "forbid_numbered_list": true
+    },
+    {
+      "id": "runtime-bootstrap",
+      "paths": [
+        "AGENTS.md",
+        ".junie/guidelines.md"
+      ],
+      "heading": "Runtime Bootstrap",
+      "required": [
+        "Before task actions, read the matching active runtime map named in Canonical Precedence",
+        "required instruction-driven reading, not a claim that a client natively injects the Markdown map"
+      ]
+    },
+    {
+      "id": "runtime-debt",
+      "paths": [
+        ".codex/agents/CODEX-RUNTIME.md",
+        ".junie/agents/JUNIE-RUNTIME.md",
+        ".devin/agents/DEVIN-RUNTIME.md"
+      ],
+      "heading": "Technical Debt Guardrail",
+      "required": [
+        "ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.",
+        "scorecard budgets, exemption limits, hotspot thresholds, hotspot family caps, and equivalent budget surfaces"
+      ]
+    },
+    {
+      "id": "root-worktree",
+      "paths": [
+        "AGENTS.md",
+        ".junie/guidelines.md"
+      ],
+      "heading": "Local Git Tree Placement",
+      "required": [
+        "recovery trees MUST stay physically inside `D:\\github`",
+        "New worktrees go only to `D:\\github\\BioactivityDataAcquisition-worktrees\\<task>`",
+        "ancestors, symlinks and junctions before creation or relocation",
+        "This also applies to older checkouts",
+        "`python D:/github/BioactivityDataAcquisition/.git/hooks/bioetl-create-worktree.py <task>`",
+        "Direct `git worktree add`, including `--no-checkout`, is forbidden",
+        "`scripts/engineering/repo/create_worktree.py`",
+        "Template checkout still requires per-task `.env.example` approval",
+        "does not relax the env guardrail or the full-tree commit gate"
+      ]
+    },
+    {
+      "id": "devin-native-qualification",
+      "paths": [
+        ".devin/agents/DEVIN-RUNTIME.md"
+      ],
+      "heading": "Permission boundary and qualification",
+      "required": [
+        "Native delegation of restricted profiles is blocked until the selected binary/version/platform demonstrates registration and effective tool limits",
+        "Do not substitute `subagent_general`, resume in foreground, or grant broader permissions as an automatic fallback",
+        "Missing qualification is NOT_PROVEN, never sandbox PASS",
+        "An approval for a command is not per-task approval to mutate `.env`"
+      ]
+    },
+    {
+      "id": "root-local-safety",
+      "paths": [
+        "AGENTS.md",
+        ".junie/guidelines.md"
+      ],
+      "heading": "Guardrails",
+      "required": [
+        "do not create root-level `_tmp_*.py`, `/_cr_*.py`, `/_publish_*.py`, ad-hoc `test_*.py`, or Windows device-name files",
+        "Tracked root must stay ≡ `.github/root-allowlist.txt`",
+        "do not introduce Docker, Redis, or external orchestration requirements unless the task explicitly requires them"
+      ]
+    },
+    {
+      "id": "root-runtime-identity",
+      "paths": [
+        "AGENTS.md",
+        ".junie/guidelines.md"
+      ],
+      "heading": "Guardrails",
+      "required": [
+        "`.codex/**` is the canonical Codex runtime source",
+        "`.devin/agents/**` and `.devin/skills/**` are the canonical tracked Devin runtime sources",
+        "it MUST NOT be silently replaced by a Codex-only profile",
+        "Gemini is not a project runtime.",
+        "`.claude/**` is not an active runtime source for Codex/Junie behavior",
+        "`docs/00-project/ai/memory/mcp-memory.json` and `docs/00-project/ai/memory/gemini-memory.json` are machine-readable memory artifacts, not human source of truth"
+      ]
+    }
+  ]
 }

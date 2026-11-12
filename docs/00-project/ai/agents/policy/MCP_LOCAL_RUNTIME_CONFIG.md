@@ -144,11 +144,11 @@ When profile flags are omitted, `--check-local` reads the persisted
 bounded `missing`, `extra`, `transport_drift`, and `server_drift` names, and
 ignores custom non-BioETL Gemini servers.
 
-The bounded local live probe is explicit and never starts Docker Compose or a
-monitoring stack:
+The legacy bounded transport probe never starts Docker Compose or a monitoring
+stack and does not establish MCP protocol/tool readiness:
 
 ```bash
-bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \
+python scripts/ai/codex/doctor.py transport --profile stable \
   --timeout 1 --overall-timeout 10 --no-write
 ```
 
@@ -197,7 +197,7 @@ bash scripts/ai/codex/run-codex.sh mcp-setup
 bash scripts/ai/codex/run-codex.sh mcp-static
 python3 scripts/ai/codex/setup_mcp.py --check
 python3 scripts/ai/codex/setup_mcp.py --check-local
-bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \
+python scripts/ai/codex/doctor.py transport --profile stable \
   --timeout 1 --overall-timeout 10 --no-write
 codex mcp list
 ```
@@ -365,3 +365,180 @@ MCP servers as **untrusted external content**:
    trees) over DeepWiki/ref summaries when they conflict.
 4. DeepWiki is a **derived navigation** surface only (see `.devin/wiki.json`);
    it MUST NOT override normative stack or runtime ownership.
+
+## Native Codex route evidence
+
+Use the installed native Codex resolver to inspect effective MCP configuration:
+
+```powershell
+python scripts/ai/codex/doctor.py routes --profile stable --json --no-write
+```
+
+If `codex` is absent from PATH, pass `--codex-executable` with the installed
+native executable. This mode starts its own bounded diagnostic app-server,
+performs `initialize` followed by `config/read` with `includeLayers`, and closes
+only that process. It starts no thread, model turn, MCP backend, or tool call.
+Initialization and configuration reads each have a 30-second observation limit;
+timeouts cause no automatic retry, replay, or backend restart. Native startup may
+create its ordinary service logs or cache. No target user data is changed.
+
+The native effective configuration is the authority; the Python code does not
+reimplement configuration precedence. `expected` is the selected project profile
+inventory, while `effective`, `missing`, `additional`, and `disabled` describe
+native resolution separately. Missing entries are diagnostic findings and are
+never enabled automatically. Per-field origins and layer declarations explain
+overrides. Adapter profile references remain distinct from the expected project
+profile. Different server names, authorization references, or profiles are never
+deduplicated by this diagnostic.
+
+The stable selection fingerprint covers the resolver contract/native version,
+physical workspace, expected project profile, server identity, projected
+transport and scope settings, per-field origins, sanitized layer declarations,
+and an optional authorization identity reference. It excludes secret values,
+their hashes, native layer revision tokens, and current process identity.
+Unknown arguments and opaque URL components are omitted and
+`projection_complete=false` explicitly limits comparison. Private native inputs
+can be compared in memory with `changed_routes` to detect credential rotation
+without publishing a credential digest. A matching projected fingerprint alone
+does not prove equal authorization or the correct backend.
+
+`runtime_instance` is separate from selection: PID plus process creation time,
+generation, and owner/gateway/backend observations may change after recovery.
+These fields are evidence supplied by an observer, not verified by config/read.
+Local backend acceptance requires owner registration and process/profile binding;
+remote acceptance requires the expected service address, confirmed authorization,
+and resource identity. Unavailable internal details remain unverified.
+
+Gateway/backend identity and session tool readiness remain `NOT_TESTED`. This is
+a diagnostic process using the ordinary configuration home, not evidence that an
+existing or newly opened user session exposes these tools. A separate SDK call
+or isolated Codex home does not replace ordinary-session acceptance. Full memory
+graphs, raw native configuration, headers, credentials, and native revision
+tokens must not be copied into diagnostic logs. Persist only the projected
+report through an explicit `--output reports/quality/<name>.json` path.
+
+## Protocol and control-call doctor
+
+`doctor.py mcp` now uses the native effective-route capture. Without an explicit
+control plan it starts no MCP adapters and reports `NOT_TESTED`. The former
+fixed localhost catalog/socket diagnostic remains available as
+`doctor.py transport`; its OK/FAIL/WARN transport results do not attest MCP
+readiness. The legacy `--timeout` and `--overall-timeout` options belong to that
+transport diagnostic. Native route resolution still has its own observation
+limit; it must not be confused with backend initialization limits.
+
+To opt into the already approved adapters, provide both `--probe-plan` and
+`--start-approved-adapters`. A plan is a JSON object keyed by effective server
+name. Each control declares a tool, arguments, and nonempty `contains_all`
+expectations evaluated locally against actual result content. For example:
+
+```json
+{
+  "filesystem": {
+    "tool": "read_file",
+    "arguments": {"path": "README.md"},
+    "contains_all": ["BioETL"]
+  }
+}
+```
+
+Select arguments and expected sources for the actual route before executing;
+this example is a schema illustration, not a claim that a server accepts a
+relative file path. External controls must check library/document identity and
+origin rather than freeze volatile result IDs. List-roots and token-count
+controls cover only those functions, not ADR analysis or other analyzer tools.
+Do not place secrets or full graph/dialogue contents into a control plan.
+
+The diagnostic announces ordinary network, cache/log and approved-backend
+startup effects before invoking a control. It installs nothing, registers no
+workspace, does not enable missing routes, and never restarts a shared owner.
+Only declared reading tools are eligible. Unbounded `read_graph`, memory writes
+and Deja `remember` are deliberately ineligible; prefer a bounded reading query.
+Explicit root `.env` references are read locally, never copied or changed.
+
+The report distinguishes client startup, actual transport response, MCP
+initialize, bounded/paginated tools/list, and semantic tool control. The native
+route's startup timeout covers startup plus initialize; its tool timeout covers
+catalog enumeration and separately the control call. Each phase reports elapsed
+time and the limit source. If a native timeout/default cannot be established,
+the control remains `NOT_TESTED`; no universal backend timeout is invented.
+Responses and process stderr stay private and bounded. Neither response content,
+raw server exception text nor credential hashes are persisted by the report.
+
+Statuses are `PASS` for a verified phase, `FAIL` for a confirmed failed check,
+`DISABLED` for native intentional disable, `NOT_TESTED` for missing evidence,
+`DENIED_AS_EXPECTED` only for the exact structured reason
+`WORKSPACE_POLICY_DENIED`, and `STALE` when the final native capture differs or
+cannot be obtained. HTTP 401/403, a dead process, or a generic exception cannot
+qualify as expected workspace isolation. An uncertain request outcome is an
+additional flag and never triggers an automatic retry, replay, or restart.
+
+Semantic control success does not prove local owner/process identity. Until the
+independent backend/access binding is verified, backend identity and overall
+readiness remain `NOT_TESTED` and the command exits nonzero. Obligatory disabled,
+missing or untested routes are not silently waived. Diagnostic tools/list may
+advertise memory writes even when all diagnostic calls are reads; the report
+records this distinction without executing a write or claiming technical
+read-only enforcement.
+
+A final native config capture detects affected-route drift, including private
+credential rotation in memory. It does not automatically replay old controls.
+Instance recovery must be verified separately without treating a new PID or
+generation as a policy change. This direct diagnostic is not a new ordinary
+user session and cannot close ordinary-session acceptance. If the actual user
+session cannot invoke a tool, retain `NOT_TESTED` for that acceptance item.
+
+The launcher latency baseline now measures static MCP configuration ensure.
+It does not label missing semantic controls as successful live readiness.
+Installer/container launchers and unreviewed interpreter prefixes remain
+`NOT_TESTED`; the direct diagnostic accepts an existing script adapter with a
+supported interpreter prefix and never invokes npx/uv/pip installation paths.
+An unsupported valid protocol version is a client capability gap, reported
+`NOT_TESTED`, rather than evidence that the server is broken.
+
+Probe plans must be repository-relative JSON files under
+`reports/quality/mcp-controls/`. Absolute paths, parent traversal and resolved
+symlink/junction escapes are rejected before any adapter starts. Reading a plan
+is bounded to 1 MiB; arbitrary files are not accepted as control plans.
+
+The stdio probe uses the native effective `cwd` for both relative script
+resolution and process startup. An explicit task `BIOETL_AI_MEMORY_MODE` is
+preserved over route/dotenv values without inheriting unrelated secrets.
+Legacy `mcp_*_wrapper.sh` / `.ps1` fallbacks remain `NOT_TESTED` because an
+existing wrapper file cannot prove a no-install backend; select a verified
+existing adapter route instead. Policy denial on initialize/catalog is a phase
+failure, not a successful negative tool control. `control_status` stays
+`NOT_TESTED` until the actual control is attempted.
+
+HTTP response headers, JSON and SSE bodies share the request's monotonic
+deadline. Each body read receives the remaining socket timeout; a watchdog
+interrupts only the diagnostic's owned socket at the deadline. Initialize's
+notification shares its remaining budget. No request is replayed on timeout.
+
+Stdio requests use nonblocking pipe writes; sending and waiting for the reply
+share one monotonic request deadline. If the platform cannot support this, the
+probe remains `NOT_TESTED`. An unresponsive owned adapter is terminated on
+timeout; shared owners are never terminated or automatically restarted.
+
+The JSONL reader uses interruptible nonblocking reads and a bounded join during
+cleanup. An inherited stdout held by a backend cannot block diagnostic shutdown;
+that backend is not terminated. `--no-write` controls report output; it does not
+cancel the separately acknowledged adapter cache/log/startup effects.
+
+Readiness controls honor native `enabled_tools` and `disabled_tools` before
+starting a diagnostic session. An excluded control is reported with
+`control_status: DISABLED` and overall readiness remains `NOT_TESTED`.
+Raw and effective catalogue sizes remain separate; client filters cannot prove
+server-side prohibition of writes. Explicit route env values are preserved.
+Only explicitly declared environment references may inherit process values
+when the repository environment has no value; unrelated credentials stay excluded.
+
+HTTP name resolution, address attempts and TLS setup share the same absolute
+request deadline. A timed-out connection worker cannot send a protocol request;
+late DNS results are discarded before socket creation, and late owned sockets
+are closed by their worker. A platform resolver already running may finish in
+a daemon thread; its completion does not delay the diagnostic report.
+
+Invalid or unreadable probe plans produce a structured `NOT_TESTED` result
+before adapter startup. Credential-bearing HTTP controls are limited to
+loopback hosts; remote credential-bearing controls require HTTPS.

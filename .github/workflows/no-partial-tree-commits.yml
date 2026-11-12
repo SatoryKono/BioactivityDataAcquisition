@@ -1,50 +1,125 @@
-# #11709: partial-tree commits (for example reports-only bot snapshots built
-# on an empty index) break three-point diffs for every PR based on them.
-# This gate fails closed on any collapsing commit in the pushed range.
-# History is never rewritten; only new collapsing commits are refused.
+# #11709 / #13037: inspect candidate objects with code from the protected base.
+# Candidate Python, actions, dependencies and hooks are never executed.
 name: No partial-tree commits
 
 on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+  push:
+    branches: [main]
   workflow_dispatch:
+    inputs:
+      base:
+        description: Explicit trusted base revision (required; no empty fallback)
+        required: true
+        type: string
+      tip:
+        description: Candidate revision
+        required: true
+        default: HEAD
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   no-partial-tree:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      statuses: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-
-      - name: Setup Python + uv
-        uses: ./.github/actions/setup-python-uv
-        with:
-          python-version: "3.12"
-
-      - name: Reject partial-tree commits
-        env:
-          BASE_REF: ${{ github.base_ref }}
-          BEFORE_SHA: ${{ github.event.before }}
-          HEAD_SHA: ${{ github.sha }}
+      - name: Checkout trusted checker
+        # Public, fixed origin/ref: no PR checkout, credentials or third-party action.
         run: |
-          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
-            BASE="origin/${BASE_REF}"
-            TIP="${HEAD_SHA}"
-          else
-            BASE="${BEFORE_SHA}"
-            if [ "${BASE}" = "0000000000000000000000000000000000000000" ]; then
-              BASE="$(git rev-list --max-parents=0 HEAD | head -1)"
-            fi
-            TIP="${HEAD_SHA}"
-          fi
-          uv run --frozen --no-build python scripts/engineering/repo/check_no_partial_tree.py \
-            --base "${BASE}" --tip "${TIP}"
+          git -c init.templateDir= -c core.hooksPath=/dev/null init .
+          git remote add origin https://github.com/SatoryKono/BioactivityDataAcquisition.git
+          timeout 180 git -c core.fsmonitor=false fetch --no-tags origin refs/heads/main
+          git -c core.hooksPath=/dev/null -c core.fsmonitor=false checkout --detach FETCH_HEAD
+
+      - name: Resolve event-owned identities
+        id: range
+        run: |
+          python3 - <<'PY'
+          import importlib.util
+          import os
+          from pathlib import Path
+          path = Path("scripts/engineering/repo/check_no_partial_tree.py")
+          spec = importlib.util.spec_from_file_location("trusted_tree_guard", path)
+          guard = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(guard)
+          # Only the GitHub host supplies this path; CLI paths have a cwd boundary.
+          with open(os.environ["GITHUB_EVENT_PATH"], "rb") as event_file:
+              payload = event_file.read(1024 * 1024 + 1)
+          base, tip = guard.parse_event_payload(os.environ["GITHUB_EVENT_NAME"], payload)
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"base={base}\ntip={tip}\n")
+          PY
+
+      - name: Fetch candidate objects without checkout
+        id: objects
+        env:
+          BASE_REF: ${{ steps.range.outputs.base }}
+          TIP_REF: ${{ steps.range.outputs.tip }}
+        run: |
+          python3 -I -B - <<'PY'
+          import importlib.util
+          import os
+          import subprocess
+          from pathlib import Path
+          spec = importlib.util.spec_from_file_location(
+              "trusted_tree_guard", Path("scripts/engineering/repo/check_no_partial_tree.py")
+          )
+          guard = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(guard)
+          def resolve_or_fetch(ref):
+              ref = guard.validate_revision_token(ref)
+              try:
+                  resolved = guard.resolve_revision(Path.cwd(), ref)
+              except guard.EvidenceError:
+                  remote_ref = ref.removeprefix("origin/")
+                  subprocess.run(
+                      ["git", "-c", "core.hooksPath=/dev/null", "-c", "core.fsmonitor=false",
+                       "fetch", "--no-tags", "origin", remote_ref],
+                      check=True, capture_output=True, timeout=90,
+                  )
+                  resolved = guard.resolve_revision(Path.cwd(), "FETCH_HEAD")
+              if guard._SHA_RE.fullmatch(ref) and resolved != ref:
+                  raise guard.EvidenceError("Fetched identity differs from requested SHA")
+              return resolved
+          try:
+              base = resolve_or_fetch(os.environ["BASE_REF"])
+              tip = resolve_or_fetch(os.environ["TIP_REF"])
+          except (guard.EvidenceError, OSError, subprocess.SubprocessError):
+              raise SystemExit("Candidate objects are unavailable; no qualified result") from None
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"base={base}\ntip={tip}\n")
+          PY
+
+      - name: Reject sparse state and incomplete history
+        env:
+          BASE_SHA: ${{ steps.objects.outputs.base }}
+          TIP_SHA: ${{ steps.objects.outputs.tip }}
+        run: |
+          python3 -B scripts/engineering/repo/check_no_partial_tree.py \
+            --base "$BASE_SHA" --tip "$TIP_SHA"
+
+      # pull_request_target runs on the base SHA. Publish a separate, scoped
+      # status on the validated candidate SHA for the required-check rule.
+      - name: Publish candidate status
+        if: always() && github.event_name == 'pull_request_target' && steps.range.outputs.tip != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TIP_SHA: ${{ steps.range.outputs.tip }}
+          RESULT_STATE: ${{ job.status == 'success' && 'success' || 'failure' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/statuses/$TIP_SHA" \
+            -f "state=$RESULT_STATE" -f 'context=bioetl/no-partial-tree' \
+            -f "target_url=$RUN_URL" -f 'description=Trusted-base full-tree guard'

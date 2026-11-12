@@ -23,6 +23,36 @@ from types import ModuleType
 pytestmark = pytest.mark.architecture
 
 
+def test_local_worktree_guard_is_owned_by_both_root_entrypoints() -> None:
+    """Workstation placement, env consent and full-tree gates stay coupled."""
+    for path in (Path("AGENTS.md"), Path(".junie/guidelines.md")):
+        content = path.read_text(encoding="utf-8")
+        section = content.split("## Local Git Tree Placement", 1)[1].split("\n## ", 1)[
+            0
+        ]
+        for anchor in (
+            "D:\\github\\BioactivityDataAcquisition-worktrees\\<task>",
+            "symlinks and junctions",
+            "older checkouts",
+            "scripts/engineering/repo/create_worktree.py",
+            "bioetl-create-worktree.py",
+            "Direct `git worktree add`, including `--no-checkout`, is forbidden",
+            "per-task `.env.example` approval",
+            "full-tree commit gate",
+        ):
+            assert anchor in section
+    for path in (
+        Path("docs/03-guides/github-local-workflow.md"),
+        Path("docs/03-guides/github-quick-reference.md"),
+    ):
+        content = path.read_text(encoding="utf-8")
+        assert "git worktree add .worktrees/" not in content
+        assert (
+            "D:/github/BioactivityDataAcquisition/.git/hooks/bioetl-create-worktree.py"
+            in content
+        )
+
+
 def _load_doc_drift_module() -> ModuleType:
     return importlib.import_module("scripts.docs.checks.check_drift")
 
@@ -74,15 +104,23 @@ def test_runtime_ownership_keeps_devin_source_above_foreign_profiles() -> None:
     ownership = Path(
         "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md"
     ).read_text(encoding="utf-8")
-    precedence = ownership.split("## Precedence Model", 1)[1].split(
+    delegation = ownership.split("## Precedence Model", 1)[1].split(
         "## Sync Direction", 1
     )[0]
+    assert "sole repository precedence is `AGENTS.md`" in delegation
+    assert "1. active runtime" not in delegation
 
+    root = Path("AGENTS.md").read_text(encoding="utf-8")
+    precedence = root.split("## Canonical Precedence", 1)[1].split(
+        "## Instruction Scope", 1
+    )[0]
+
+    root_contract = precedence.index("repository-wide root contract")
     devin_runtime = precedence.index(".devin/agents/DEVIN-RUNTIME.md")
-    matching_profiles = precedence.index("matching runtime profiles and skills")
+    matching_profiles = precedence.index("runtime profiles and skills")
     devin_profile = precedence.index(".devin/agents/*/AGENT.md")
 
-    assert devin_runtime < matching_profiles < devin_profile
+    assert root_contract < devin_runtime < matching_profiles < devin_profile
 
 
 def test_no_tracked_devin_atomic_temp_config_duplicates() -> None:
@@ -104,3 +142,22 @@ def test_active_runtime_maps_require_explicit_memory_actor_provenance() -> None:
         assert "BIOETL_AI_RUNTIME=" in content
         assert "BIOETL_AI_AGENT=" in content
         assert "BIOETL_AI_MODEL=" in content
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
+        "docs/00-project/ai/prompts/library/session/bootstrap.md",
+        "docs/03-guides/development/pycharm-setup.md",
+        "docs/03-guides/github-workflow-diagrams.md",
+    ],
+)
+def test_active_worktree_examples_delegate_creation_to_governed_helper(
+    path: str,
+) -> None:
+    text = " ".join(Path(path).read_text(encoding="utf-8").split())
+    assert "git worktree add .worktrees/" not in text
+    assert "Prefer `git worktree add`" not in text
+    assert "`git worktree add` only when" not in text
+    assert "governed helper" in text or "governed worktree helper" in text.lower()

@@ -159,9 +159,15 @@ For non-trivial work, prefer an isolated worktree instead of stacking changes in
 
 ```bash
 git fetch --prune origin
-git worktree add .worktrees/feat-short-description -b feat/short-description origin/main
-cd .worktrees/feat-short-description
+# First install the helper and obtain per-task .env.example approval as below.
+python D:/github/BioactivityDataAcquisition/.git/hooks/bioetl-create-worktree.py feat-short-description --env-example-approved
+cd D:/github/BioactivityDataAcquisition-worktrees/feat-short-description
 ```
+
+Placement, bootstrap, env consent and safe migration: see
+[Governed local worktrees](../../.github/CONTRIBUTING.md#governed-local-worktrees).
+The flag above is valid only after actual user approval. Reuse a suitable
+existing tree; direct Git creation and automatic paths outside `D:\github` are forbidden.
 
 Use worktrees by default when:
 
