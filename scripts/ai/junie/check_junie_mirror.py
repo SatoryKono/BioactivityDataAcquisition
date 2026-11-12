@@ -329,11 +329,26 @@ def _without_html_comments(text: str) -> str:
     return "".join(output)
 
 
+def _without_quoted_examples(text: str) -> str:
+    """Reject quoted paragraphs and lazy continuations through a blank line."""
+    output = []
+    quoted = False
+    for line in text.splitlines():
+        if re.match(r" {0,3}>", line):
+            quoted = True
+            continue
+        if not line.strip():
+            quoted = False
+        if not quoted:
+            output.append(line)
+    return "\n".join(output)
+
+
 def guardrail_section(text: str, heading: str, level: int = 2) -> str | None:
     """Require one authoritative section; examples/comments cannot satisfy it."""
     text = _without_html_comments(text)
     text = _without_fenced_examples(text)
-    text = re.sub(r"(?m)^ {0,3}>[^\n]*(?:\n|$)", "", text)
+    text = _without_quoted_examples(text)
     # Governed clauses use top-level prose/list continuations (0–3 spaces).
     # Deeper indentation is not accepted as authority, including tab stops.
     text = "\n".join(

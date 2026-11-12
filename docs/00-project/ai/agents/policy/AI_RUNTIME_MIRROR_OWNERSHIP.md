@@ -250,6 +250,8 @@ literal case/globs. Commented, fenced or quoted examples cannot satisfy an oblig
 Protected clauses use top-level prose/list continuations with 0–3 leading
 spaces. Deeper indentation, including tab stops, cannot establish authority;
 this bounded format check does not interpret arbitrary nested Markdown lists.
+Quoted paragraphs also exclude lazy continuation lines through the next blank
+line; separate authoritative prose from quote examples with a blank line.
 Missing/duplicate sections, required IDs/clauses and alternate numbered runtime
 precedence fail. Legitimate native sections, implementation-fact precedence,
 and sanctioned Devin wording remain distinct from byte/content mirror scope.

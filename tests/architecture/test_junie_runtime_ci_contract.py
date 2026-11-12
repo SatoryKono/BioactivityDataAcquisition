@@ -609,3 +609,34 @@ def test_supported_prose_indentation_keeps_guardrail_authority(
     )
     path.write_text(text.replace(section, prose, 1), encoding="utf-8")
     assert check_obligations(tmp_path, OBLIGATIONS) == []
+
+
+@pytest.mark.parametrize("indent", [0, 3])
+def test_lazy_quote_continuations_cannot_satisfy_guardrail(
+    tmp_path: Path, indent: int
+) -> None:
+    _guardrail_fixture_tree(tmp_path)
+    path = tmp_path / "AGENTS.md"
+    text = path.read_text(encoding="utf-8")
+    section = guardrail_section(text, "Env File Guardrail")
+    assert section is not None
+    item = next(item for item in OBLIGATIONS if item["id"] == "root-env")
+    example = (
+        "\n" + " " * indent + "> Example only:\n" + " ".join(item["required"]) + "\n"
+    )
+    path.write_text(text.replace(section, example, 1), encoding="utf-8")
+    assert any(
+        "root-env" in issue for issue in check_obligations(tmp_path, OBLIGATIONS)
+    )
+
+
+def test_blank_line_restores_prose_authority_after_quote(tmp_path: Path) -> None:
+    _guardrail_fixture_tree(tmp_path)
+    path = tmp_path / "AGENTS.md"
+    text = path.read_text(encoding="utf-8")
+    section = guardrail_section(text, "Env File Guardrail")
+    assert section is not None
+    path.write_text(
+        text.replace(section, "\n> Example only\n\n" + section, 1), encoding="utf-8"
+    )
+    assert check_obligations(tmp_path, OBLIGATIONS) == []
