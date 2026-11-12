@@ -44,7 +44,8 @@ def test_empty_state_distribution_panels_do_not_invent_observations(
     ]
     assert expressions
     assert all("vector(0)" not in expr for expr in expressions)
-    assert "TELEMETRY MISSING" in panel["fieldConfig"]["defaults"]["noValue"]
+    assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert "TELEMETRY MISSING" in panel["description"]
 
 
 def test_unfinished_run_never_inherits_the_success_color() -> None:

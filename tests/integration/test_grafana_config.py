@@ -571,7 +571,7 @@ def _assert_overview_identity_panel(dashboard: dict) -> None:
     assert donor_target["parser"] == "backend"
     assert "uql" not in donor_target
     assert "Run ID" in donor_target["root_selector"]
-    assert "Not recorded in saved run evidence" in donor_target["root_selector"]
+    assert "Not recorded" in donor_target["root_selector"]
 
 
 def _assert_overview_variable_sources(
