@@ -11,6 +11,7 @@ from __future__ import annotations
 import time
 import typing
 import xml.etree as etree
+from typing import TYPE_CHECKING
 
 from defusedxml import ElementTree as SafeET
 from defusedxml.common import DefusedXmlException
@@ -22,7 +23,7 @@ __all__ = ["PubMedXmlProcessor"]
 
 _MAX_XML_BYTES = 31457280
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
 
     class XmlElementProtocol(typing.Protocol):
         text: str | None
