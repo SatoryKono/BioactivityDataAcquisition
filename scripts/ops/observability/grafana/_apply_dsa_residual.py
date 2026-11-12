@@ -525,7 +525,9 @@ def apply_observability_states(data: dict[str, Any]) -> None:
         collapsed=True,
         description=(
             "Visibility evidence, separate from product incidents. Expand for the state legend, "
-            "coverage and telemetry limits. Missing evidence is never a measured zero."
+            "coverage and telemetry limits. Missing evidence is never a measured zero. "
+            "Collapsed header states: OK, WARN, CRIT/FIRING, UNKNOWN, NO OBSERVATIONS, "
+            "TELEMETRY MISSING, Not verified. A blank cell is not a measured zero."
         ),
     )
     row["panels"] = _build_observability_row_children(row, signals)
