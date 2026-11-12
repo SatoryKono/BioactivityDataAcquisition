@@ -24,7 +24,7 @@ transport uses `github/codeql-action/upload-sarif`.
 
 ## Purpose
 
-This page is the canonical published inventory of the **59** live GitHub Actions
+This page is the canonical published inventory of the **60** live GitHub Actions
 workflow files tracked under `.github/workflows/` on the default branch.
 The count is derived from those tracked `*.yml` files; it is not a separately
 maintained target and it is **not** equal to the GitHub Actions API
@@ -34,7 +34,7 @@ Live GET `2026-09-17`: API `total_count` is **79**.
 
 | Bucket | Count | Meaning |
 | --- | --- | --- |
-| Tracked `.github/workflows/*.yml` | 59 | Canonical inventory on `main`; this page |
+| Tracked `.github/workflows/*.yml` | 60 | Canonical inventory on `main`; this page |
 | GitHub-hosted `dynamic/**` | 10 | Dependabot, CodeQL default, agent reviewers; not PR gates |
 | GitHub-only orphan temp/codex IDs | 16 | Files left `main`; `disabled_manually` after #10265 |
 | GitHub-only residual deleted files | 3 | Former tracked workflows; `disabled_manually`; not gates |
@@ -86,7 +86,8 @@ new spend/safety decision.
 | `duplication-complexity.yml` | `Duplication and Complexity Checks` | `workflow_call` | `active` | `active` | Duplication, constructor-args, and complexity gates |
 | `e2e-matrix-health.yml` | `E2E Matrix Health` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Blocking and nightly E2E matrix smoke lanes |
 | `import-linter.yml` | `Lint and Architecture Gates` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Ruff/import-linter/architecture fast gates |
-| `main-integrity.yml` | `Main Integrity` | `push`, `workflow_dispatch` | `active` | `active` | Post-merge smoke, root hygiene, and Docker image gate |
+| `main-ghcr-publish.yml` | `Main GHCR Publish` | `workflow_run` | `active` | `active` | After a successful Main Integrity push on main, publish the scanned image for current HEAD through `ghcr-publish` |
+| `main-integrity.yml` | `Main Integrity` | `push`, `workflow_dispatch` | `active` | `active` | Post-merge smoke, root hygiene, and Docker validation through `docker-complete` |
 | `no-partial-tree-commits.yml` | `No partial-tree commits` | `workflow_dispatch` | `active` | `active` | Rejects partial-tree commits that would collapse history for downstream PRs (#11709) |
 | `opencode-pr-review.yml` | `opencode-pr-review` | `workflow_dispatch` | `active` | `active` | Dispatch-only stub (#11012); remote OpenCode installer removed until a digest pin exists |
 | `opencode-triage.yml` | `opencode-triage` | `workflow_dispatch` | `active` | `active` | Dispatch-only stub (#11012); remote OpenCode installer removed until a digest pin exists |
@@ -140,7 +141,7 @@ new spend/safety decision.
 | File | Workflow name | Triggers | GitHub live state | Decision | Primary purpose |
 | --- | --- | --- | --- | --- | --- |
 | `dashboard-render-host.yml` | `Dashboard render release evidence (host-only)` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Dashboard rendering and release evidence generation on self-hosted runner |
-| `docker.yml` | `Docker Build & Compose Validation` | `workflow_call`, `workflow_dispatch` | `active` | `active` | `main-integrity.yml` owns the main invocation after integrity; pull requests use the coordinator `docker-lane` |
+| `docker.yml` | `Docker Build & Compose Validation` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Validation plus optional no-rebuild GHCR promotion when `publish` is true. `main-integrity.yml` calls with `publish: false`. `main-ghcr-publish.yml` publishes the scanned artifact. Pull requests use `docker-lane` |
 | `labeler.yml` | `Labeler` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Applies repository labels to PRs |
 | `release.yml` | `Release` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Publish stays outside Actions (#11182) |
 

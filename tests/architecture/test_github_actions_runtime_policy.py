@@ -1336,9 +1336,11 @@ def test_build_provenance_binds_release_files_and_published_ghcr_digest() -> Non
     assert 'echo "digest=${digest}" >> "$GITHUB_OUTPUT"' in push_step["run"]
     assert publish["steps"].index(push_step) < publish["steps"].index(image_attest)
     assert publish["environment"] == "ghcr-publish"
-    assert (
-        publish["if"]
-        == "github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_call')"
+    assert publish["if"] == (
+        "always() && inputs.publish == true && "
+        "needs.docker-publish-gate.result == 'success' && "
+        "needs.docker-publish-gate.outputs.current == 'true' && "
+        "(inputs.artifact-run-id != '' || needs.docker-complete.result == 'success')"
     )
     assert release["permissions"] == docker["permissions"] == {"contents": "read"}
     caller = _load_yaml(ROOT / ".github/workflows/main-integrity.yml")["jobs"]["docker"]
