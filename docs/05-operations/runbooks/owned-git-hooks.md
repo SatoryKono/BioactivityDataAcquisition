@@ -91,7 +91,12 @@ foreign/framework callbacks on commit. Push validates each non-deletion local ti
 against `origin/main`, then runs existing configured push checks. Missing base,
 unsupported policy format, dependency failure or incomplete evidence blocks the
 operation. Commit-msg retains the existing framework stage and protocol; it does
-not repeat tree/budget checks. No automatic generator, staging or debt ratchet is
+not repeat tree/budget checks when the index remains unchanged. The callback
+bookend binds both indexes, HEAD, trusted base and root dotenv bytes. A changed
+index triggers fresh protected checks after callbacks, including commit-msg; a
+second change during those checks blocks. HEAD/base/env drift blocks directly.
+The budget file entrypoint now explicitly invokes its main function; actual Git
+dispatch regression tests cover callback-staged budget increases. No automatic generator, staging or debt ratchet is
 added. Existing configured formatters retain their normal mutation/failure behavior;
 that is separate from the read-only protected guards. An authorized env-file change
 needs a separate reviewed host procedure;
@@ -162,13 +167,16 @@ on WSL. These observations supplement, rather than replace, the earlier suites.
 
 ## Limits and additional controls
 
-Local bypasses, arbitrary shell writes, same-user bundle replacement, later index
-changes and `SKIP`/framework configuration changes require host controls or CI.
+Local bypasses, arbitrary shell writes, same-user bundle replacement, index
+changes after callback return and `SKIP`/framework configuration changes require host controls or CI.
 Commit-time env checks occur after a filesystem write and cannot prevent that
 write. Tip comparison alone does not prove absence of historical secrets: retain
 secret scanning. Tree anchors do not validate every individual deletion: retain
 architecture, policy and required generated-artifact checks. A successful callback
 is not a full runtime Proof-or-Stop acceptance receipt.
+
+Local scope selection and receipt limits are described in
+[Scoped post-change checks](scoped-post-change-checks.md).
 
 ## Rollback
 
