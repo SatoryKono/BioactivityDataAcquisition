@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import replace
 
 from .models import (
     ClassificationResult,
@@ -18,7 +19,7 @@ from .stage0.io import canonical_json_bytes, sha256_bytes
 
 _NAMED_MARKERS = frozenset(marker for marker in BASE_MISSING_MARKERS if marker)
 _EC_NAMES = dict(EC_CATEGORIES)
-_MULTI_FIELDS = frozenset({"uniprot", "synonyms", "ec", "keywords"})
+_MULTI_FIELDS = ("uniprot", "synonyms", "ec", "keywords")
 _SCALAR_FIELDS = (
     "target_id",
     "gene_symbol",
@@ -66,7 +67,7 @@ def _glue_subjects(value: str | None, field: str) -> tuple[str, ...]:
     if value is None:
         return ()
     if field not in _MULTI_FIELDS:
-        return (value,)
+        return (value.strip(),)
     return (value, *_split_multi(value))
 
 
@@ -87,6 +88,7 @@ def validate_input(
     snapshot_taxon: str | None = None,
 ) -> ValidatedInput:
     """Validate one row. An invalid row does not compute derived fields."""
+    row = replace(row, fields=dict(row.fields))
     errors: list[str] = []
     if not row.input_row_id:
         errors.append("input_row_id is empty")
