@@ -115,27 +115,10 @@ def build_processed_records_table_payload_from_prometheus(
     )
 
 
-def build_processed_records_table_payload_from_ledger(
-    *,
+def _ledger_metric_values(
     ledger_entries: tuple[RunLedgerEntry, ...],
-    pipeline: str,
-    run_type: str | None,
-    report: Mapping[str, object] | None = None,
-) -> dict[str, object]:
-    """Build exact-run accounting rows from RunLedger source-of-truth entries."""
-    if not ledger_entries:
-        # No ledger entries for the selected UUID → all rows render as UNKNOWN
-        # (DASH-STATE-001).  Use the v2 contract to signal this distinct
-        # semantic: v1 is reserved for populated-entries responses so existing
-        # clients that pattern-match on the contract string are not surprised.
-        payload = build_processed_records_table_payload(
-            metric_values={spec.metric: None for spec in PROCESSED_RECORDS_ROW_SPECS},
-            pipeline=pipeline,
-            run_type=run_type,
-        )
-        payload["contract"] = PROCESSED_RECORDS_TABLE_CONTRACT_V2
-        return payload
-
+) -> tuple[dict[str, float | int | None], int | None]:
+    """Collect ledger counts and the display-only Silver deduplication hint."""
     metric_values: dict[str, float | int | None] = {
         spec.metric: None for spec in PROCESSED_RECORDS_ROW_SPECS
     }
@@ -197,6 +180,31 @@ def build_processed_records_table_payload_from_ledger(
             ),
         }
     )
+    return metric_values, silver_deduplicated_display
+
+
+def build_processed_records_table_payload_from_ledger(
+    *,
+    ledger_entries: tuple[RunLedgerEntry, ...],
+    pipeline: str,
+    run_type: str | None,
+    report: Mapping[str, object] | None = None,
+) -> dict[str, object]:
+    """Build exact-run accounting rows from RunLedger source-of-truth entries."""
+    if not ledger_entries:
+        # No ledger entries for the selected UUID → all rows render as UNKNOWN
+        # (DASH-STATE-001).  Use the v2 contract to signal this distinct
+        # semantic: v1 is reserved for populated-entries responses so existing
+        # clients that pattern-match on the contract string are not surprised.
+        payload = build_processed_records_table_payload(
+            metric_values={spec.metric: None for spec in PROCESSED_RECORDS_ROW_SPECS},
+            pipeline=pipeline,
+            run_type=run_type,
+        )
+        payload["contract"] = PROCESSED_RECORDS_TABLE_CONTRACT_V2
+        return payload
+
+    metric_values, silver_deduplicated_display = _ledger_metric_values(ledger_entries)
     fill_report_accounting(
         metric_values,
         report=report,
