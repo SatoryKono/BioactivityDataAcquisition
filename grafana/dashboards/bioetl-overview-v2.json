@@ -684,11 +684,11 @@
                 },
                 "UNKNOWN": {
                   "text": "UNKNOWN",
-                  "color": "#9CA3AF"
+                  "color": "text"
                 },
                 "N/A": {
                   "text": "N/A",
-                  "color": "#9CA3AF"
+                  "color": "text"
                 },
                 "QUERY ERROR": {
                   "text": "Source unavailable",
@@ -696,11 +696,11 @@
                 },
                 "SELECT RUN": {
                   "text": "SELECT RUN",
-                  "color": "#9CA3AF"
+                  "color": "text"
                 },
                 "НЕТ ЗАПУСКОВ": {
                   "text": "НЕТ ЗАПУСКОВ",
-                  "color": "#9CA3AF"
+                  "color": "text"
                 }
               }
             },
@@ -722,7 +722,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "#9CA3AF",
+                "color": "text",
                 "value": null
               }
             ]
@@ -1122,7 +1122,7 @@
                       },
                       "НЕТ ЗАПУСКОВ": {
                         "text": "НЕТ ЗАПУСКОВ",
-                        "color": "#9CA3AF"
+                        "color": "text"
                       }
                     }
                   }
@@ -1185,7 +1185,7 @@
                       },
                       "UNKNOWN": {
                         "text": "UNKNOWN",
-                        "color": "#9CA3AF"
+                        "color": "text"
                       },
                       "UNFINISHED": {
                         "text": "UNFINISHED",
@@ -1193,7 +1193,7 @@
                       },
                       "НЕТ ЗАПУСКОВ": {
                         "text": "НЕТ ЗАПУСКОВ",
-                        "color": "#9CA3AF"
+                        "color": "text"
                       }
                     }
                   }
@@ -1324,7 +1324,7 @@
                       },
                       "НЕТ ЗАПУСКОВ": {
                         "text": "НЕТ ЗАПУСКОВ",
-                        "color": "#9CA3AF"
+                        "color": "text"
                       }
                     }
                   }
@@ -1621,7 +1621,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "#9CA3AF",
+                "color": "text",
                 "value": null
               },
               {
@@ -2180,23 +2180,23 @@
                 },
                 "UNKNOWN": {
                   "text": "UNKNOWN",
-                  "color": "#9CA3AF"
+                  "color": "text"
                 },
                 "N/A": {
                   "text": "N/A",
-                  "color": "#9CA3AF"
+                  "color": "text"
                 },
                 "—": {
                   "text": "—",
-                  "color": "#9CA3AF"
+                  "color": "text"
                 },
                 "SELECT RUN": {
                   "text": "SELECT RUN",
-                  "color": "#9CA3AF"
+                  "color": "text"
                 },
                 "НЕТ ЗАПУСКОВ": {
                   "text": "НЕТ ЗАПУСКОВ",
-                  "color": "#9CA3AF"
+                  "color": "text"
                 },
                 "INCOMPLETE": {
                   "text": "INCOMPLETE",
@@ -2226,7 +2226,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "#9CA3AF",
+                "color": "text",
                 "value": null
               }
             ]
@@ -2890,27 +2890,27 @@
               "options": {
                 "UNKNOWN": {
                   "text": "UNKNOWN",
-                  "color": "#9CA3AF"
+                  "color": "text"
                 },
                 "SELECT RUN": {
                   "text": "SELECT RUN",
-                  "color": "#9CA3AF"
+                  "color": "text"
                 },
                 "НЕТ ЗАПУСКОВ": {
                   "text": "НЕТ ЗАПУСКОВ",
-                  "color": "#9CA3AF"
+                  "color": "text"
                 },
                 "нет данных": {
                   "text": "нет данных",
-                  "color": "#9CA3AF"
+                  "color": "text"
                 },
                 "нет записей": {
                   "text": "нет записей",
-                  "color": "#9CA3AF"
+                  "color": "text"
                 },
                 "не применимо": {
                   "text": "не применимо",
-                  "color": "#9CA3AF"
+                  "color": "text"
                 }
               }
             }
@@ -3127,7 +3127,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#9CA3AF",
+                    "color": "text",
                     "value": null
                   },
                   {

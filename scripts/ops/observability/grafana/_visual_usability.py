@@ -620,7 +620,7 @@ def apply_accessible_status_colors(payload: dict) -> None:
                 "red": "#9f1239",
             }
             if background
-            else {"gray": "#9CA3AF", "#555555": "#9CA3AF"}
+            else {"gray": "text", "#555555": "text", "#9CA3AF": "text"}
         )
 
         _adjust_status_colors(panel.get("fieldConfig", {}), palette)
