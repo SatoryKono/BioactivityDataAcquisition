@@ -143,7 +143,10 @@ def test_run_explorer_processing_status_fits_zoom_with_inspectable_run_id() -> N
     assert all("tooltip" not in link for link in fields["Run ID"]["links"])
     assert fields["Run ID"]["custom.tooltip.field"] == "run_id"
     visible_width = sum(
-        properties.get("custom.width", 0)
+        max(
+            int(properties.get("custom.width", 0) or 0),
+            int(properties.get("custom.minWidth", 0) or 0),
+        )
         for properties in fields.values()
         if properties.get("custom.hidden") is not True
     )
