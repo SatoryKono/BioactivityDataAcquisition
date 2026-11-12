@@ -205,7 +205,8 @@ Machine-readable каталог для structure hygiene хранится в
 - допустимую D-серию `docs/D-*.md` как `repo-only sync notes` с каноническими
   successor pages;
 - разрешённый живой состав `docs/plans/**` и правило `max_active_backlog = 1`;
-- допустимые sidecar roots под `src/`: `src/bioetl`, `src/memory`;
+- допустимые sidecar roots под `src/`: `src/bioetl`, `src/memory`,
+  `src/iuphar_target_class` (автономный stage-0; интеграция в BioETL не входит);
 - approved docs-resident code zones under `docs/00-project/ai/agents/**`;
 - tolerated local-only hidden root trees such as `.agent-work/`,
   `.agentbridge/`, `.cache/`, `.coverage-sharded/`, `.scannerwork/`,
