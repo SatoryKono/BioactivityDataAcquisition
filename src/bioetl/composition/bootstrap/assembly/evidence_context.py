@@ -1,7 +1,6 @@
 """Assemble validation ports for one explicitly selected evidence root."""
 
 from __future__ import annotations
-from dataclasses import replace
 from pathlib import Path
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
@@ -47,4 +46,13 @@ def bind_selected_evidence_validation(
         ),
         archive_verifier=archive_verifier,
     )
-    return replace(context, validation_service=validation_service)
+    return FileEvidenceReadContext(
+        data_root=context.data_root,
+        trusted_alias_base=context.trusted_alias_base,
+        manifest_port=context.manifest_port,
+        ledger_port=context.ledger_port,
+        workflow_manifest_port=context.workflow_manifest_port,
+        lineage_port=context.lineage_port,
+        replay_object_verifier=context.replay_object_verifier,
+        validation_service=validation_service,
+    )

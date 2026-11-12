@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from copy import deepcopy
-
 from typing import Any
+
+_WRAP_TEXT = "custom.wrapText"
+_CELL_OPTIONS = "custom.cellOptions"
 
 _LABEL_TRANSLATIONS = {
     "НЕТ ЗАПУСКОВ": "NO RUNS",
@@ -64,15 +66,15 @@ def _set_wrap(properties: list[dict[str, Any]], *, enabled: bool) -> None:
         prop_id = prop.get("id")
         if isinstance(prop_id, str):
             seen.add(prop_id)
-        if prop_id == "custom.wrapText":
+        if prop_id == _WRAP_TEXT:
             prop["value"] = enabled
-        elif prop_id == "custom.cellOptions":
+        elif prop_id == _CELL_OPTIONS:
             prop["value"]["wrapText"] = enabled
-    if "custom.wrapText" not in seen:
-        properties.append({"id": "custom.wrapText", "value": enabled})
-    if "custom.cellOptions" not in seen:
+    if _WRAP_TEXT not in seen:
+        properties.append({"id": _WRAP_TEXT, "value": enabled})
+    if _CELL_OPTIONS not in seen:
         properties.append(
-            {"id": "custom.cellOptions", "value": {"type": "auto", "wrapText": enabled}}
+            {"id": _CELL_OPTIONS, "value": {"type": "auto", "wrapText": enabled}}
         )
 
 

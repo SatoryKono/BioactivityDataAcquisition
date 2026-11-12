@@ -36,6 +36,7 @@ from scripts.ops.observability.grafana.dashboard_context_links import (
     build_handoff_url,
 )
 
+_NATIVE_DASHBOARD_PATH = "grafana/dashboards"
 ROOT = Path(__file__).resolve().parents[4]
 if __package__ in {None, ""}:
     root_str = str(ROOT)
@@ -91,7 +92,7 @@ def generate_adaptive_profile(*, check: bool = False) -> int:
 
     outputs: dict[Path, str] = {}
     hashes = {}
-    for path in sorted((ROOT / "grafana/dashboards").glob("*.json")):
+    for path in sorted((ROOT / _NATIVE_DASHBOARD_PATH).glob("*.json")):
         raw = path.read_text(encoding="utf-8")
         hashes[path.name] = hashlib.sha256(raw.encode()).hexdigest()
         outputs[ROOT / "grafana/dashboards-adaptive" / path.name] = (
@@ -118,7 +119,7 @@ def generate_adaptive_profile(*, check: bool = False) -> int:
             {
                 "profile": "adaptive-table-v1",
                 "selection": "explicit_local_only",
-                "native_fallback": "grafana/dashboards",
+                "native_fallback": _NATIVE_DASHBOARD_PATH,
                 "canonical_sha256": hashes,
                 "plugin_version": json.loads((bundle / "plugin.json").read_text())[
                     "info"
@@ -154,7 +155,7 @@ def write_dashboard_source(path: Path, serialized: str, *, root: Path) -> None:
     """Persist generated JSON only within either canonical dashboard profile."""
     target = path.resolve()
     allowed = {
-        (root / "grafana/dashboards").resolve(),
+        (root / _NATIVE_DASHBOARD_PATH).resolve(),
         (root / "grafana/dashboards-prometheus-only").resolve(),
     }
     if target.parent not in allowed or target.suffix != ".json":
