@@ -35,9 +35,9 @@ def test_dq_canvas_uses_saved_exclusions_frame_without_inventing_rates() -> None
     assert target["withTransforms"] is False
     query = by_id[9002]["targets"][0]
     assert "run_id=${run_id}" in query["url"]
-    assert "contract_exclusions_status" in query["uql"]
-    assert "contract_exclusions_rate != null" in query["uql"]
-    assert "excluded UNKNOWN" in query["uql"]
+    assert "contract_exclusions_status" in query["root_selector"]
+    assert "contract_exclusions_rate != null" in query["root_selector"]
+    assert "excluded UNKNOWN" in query["root_selector"]
     frame = quality["transformations"][0]
     assert frame["id"] == "filterByValue"
     assert frame["options"]["type"] == "include"
