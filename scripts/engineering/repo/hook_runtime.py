@@ -238,7 +238,9 @@ def _validate_final_state(
     after = hook_receipts.protected_state(repo, TRUSTED_BASE)
     if after["dotenv_sha256"] != before["dotenv_sha256"]:
         return 21
-    if any(after[key] != before[key] for key in ("head_sha", "base_sha")):
+    if any(
+        after[key] != before[key] for key in ("head_sha", "base_sha", "history_sha256")
+    ):
         return 2
     if after["index_sha256"] == before["index_sha256"]:
         return 0

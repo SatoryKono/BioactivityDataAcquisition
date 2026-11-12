@@ -72,7 +72,7 @@ state; it does not grant runtime admission or CI acceptance.
 
 ## State and failure handling
 
-Identity includes HEAD, trusted base, both the default and supplied Git indexes,
+Identity includes HEAD, trusted base, shallow-history boundaries, both the default and supplied Git indexes,
 worktree/Git identity, committed branch input bytes as well as changed source bytes (including ignored policy candidates
 under trusted policy prefixes) and root dotenv hashes. Hidden index
 entries, sparse checkout configuration, intent-to-add, symlink escapes and incomplete
@@ -82,8 +82,10 @@ environment value or child output is stored. Local hashes detect staleness; a us
 who can forge local files is outside this trust boundary.
 
 Each Git measurement has a 10-second timeout; inputs and receipts are bounded.
-Validation allocates 120 seconds to child execution, with individual static checks
-limited to 30 seconds and dashboard tests to 90. Measurement bookends add bounded
+Validation allocates 120 seconds to child execution, with the full-history guard
+limited to 90 seconds, other static checks to 30 and dashboard tests to 90. The
+history allowance covers large valid branch histories within the same total deadline.
+Measurement bookends add bounded
 Git calls. The owned process runner cleans descendants; missing cleanup evidence
 is ERROR. The same private runner supports Windows and qualified Linux/WSL.
 The Windows pretest wrapper now returns an error when Bash is unavailable.
