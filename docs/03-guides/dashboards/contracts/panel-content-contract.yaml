@@ -355,10 +355,12 @@ dashboards:
         scope: selected_run
         scope_class: selected_run
         evidence_source: ops_http
-        empty_state_class: coverage_gap
+        empty_state_class: select_run
         state_model:
+        - VALID_EMPTY
         - UNKNOWN
         - ERROR
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -367,6 +369,12 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id001
+        required_columns:
+        - Context
+        - Run ID
+        - Execution
+        - Verdict
+        - Context checked at
       '9402':
         title: Inspect Run Identity
         role: guidance
@@ -3000,10 +3008,12 @@ dashboards:
         scope: selected_run
         scope_class: selected_run
         evidence_source: ops_http
-        empty_state_class: coverage_gap
+        empty_state_class: select_run
         state_model:
+        - VALID_EMPTY
         - UNKNOWN
         - ERROR
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -3012,6 +3022,12 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id001
+        required_columns:
+        - Context
+        - Run ID
+        - Execution
+        - Verdict
+        - Context checked at
       '1000':
         title: ''
         role: navigation
@@ -3293,8 +3309,8 @@ dashboards:
         tier: 3
         scope: global
         scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
+        evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - VALID_EMPTY
         - UNKNOWN

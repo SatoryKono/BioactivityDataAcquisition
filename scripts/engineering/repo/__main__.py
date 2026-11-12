@@ -9,6 +9,7 @@ Commands:
     worktree           Bootstrap the governed worktree helper; creation uses it
     guard-operation    Check a structured operation without executing it
     guard-budgets      Compare protected policy limits to trusted Git objects
+    hooks              Install, inspect or roll back owned Git hooks explicitly
     check-inventory    Check scripts inventory drift
     github-settings-review  Collect read-only GitHub governance evidence
     sync-inventory     Refresh scripts inventory manifest
@@ -121,6 +122,22 @@ def _run_worktree(rest: list[str]) -> int:
     return worktree_main(rest)
 
 
+def _inventory_args(rest: list[str]) -> list[str]:
+    parser = argparse.ArgumentParser(description="Sync or validate scripts inventory.")
+    parser.add_argument(
+        "--manifest", default="configs/quality/scripts_inventory_manifest.json"
+    )
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--write", action="store_true")
+    mode.add_argument("--check", action="store_true")
+    options = parser.parse_args(rest)
+    return [
+        "--check" if options.check else "--update",
+        "--manifest",
+        options.manifest,
+    ]
+
+
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
 
@@ -130,6 +147,10 @@ def main(argv: list[str] | None = None) -> int:
 
     cmd, rest = args[0], args[1:]
 
+    if cmd == "hooks":
+        from scripts.engineering.repo.hook_installation import main as hooks_main
+
+        return hooks_main(rest)
     if cmd == "worktree":
         return _run_worktree(rest)
 
@@ -144,21 +165,7 @@ def main(argv: list[str] | None = None) -> int:
         return budgets_main(rest)
 
     if cmd == "sync-inventory":
-        parser = argparse.ArgumentParser(
-            description="Sync or validate scripts inventory."
-        )
-        parser.add_argument(
-            "--manifest", default="configs/quality/scripts_inventory_manifest.json"
-        )
-        mode = parser.add_mutually_exclusive_group()
-        mode.add_argument("--write", action="store_true")
-        mode.add_argument("--check", action="store_true")
-        options = parser.parse_args(rest)
-        rest = [
-            "--check" if options.check else "--update",
-            "--manifest",
-            options.manifest,
-        ]
+        rest = _inventory_args(rest)
 
     if cmd in {"all", "check-all"}:
         return _run_check_all(rest)
