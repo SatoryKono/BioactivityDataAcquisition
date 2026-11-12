@@ -41,16 +41,7 @@ def test_collect_baseline_is_bounded_and_secret_free(
     assert all(kwargs["timeout"] == 5 for _, kwargs in calls)
     assert all(kwargs["stdout"] is subprocess.DEVNULL for _, kwargs in calls)
     assert all(kwargs["stderr"] is subprocess.DEVNULL for _, kwargs in calls)
-    expected_mcp_suffix = [
-        "mcp-check",
-        "--profile",
-        "stable",
-        "--timeout",
-        "1",
-        "--overall-timeout",
-        "10",
-        "--no-write",
-    ]
+    expected_mcp_suffix = ["mcp-static"]
     assert all(
         argv[-len(expected_mcp_suffix) :] == expected_mcp_suffix
         for argv, _ in calls[-3:]
