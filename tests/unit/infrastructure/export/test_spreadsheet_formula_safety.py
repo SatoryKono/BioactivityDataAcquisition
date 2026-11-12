@@ -97,3 +97,27 @@ def test_dev_environment_installs_xlsx_security_dependency():
         item.startswith("openpyxl")
         for item in project["project"]["optional-dependencies"]["dev"]
     )
+
+
+def test_failed_xlsx_write_preserves_error_and_keeps_partial_cells_inert(
+    tmp_path, monkeypatch
+):
+    import pandas as pd
+    from openpyxl import load_workbook
+
+    def fail_after_write(self, writer, **kwargs):
+        writer.book.active["A1"] = "=1+1"
+        raise ValueError("synthetic write failure")
+
+    monkeypatch.setattr(pd.DataFrame, "to_excel", fail_after_write)
+    with pytest.raises(ValueError, match="synthetic write failure"):
+        ExportWriterAdapter().write_export(
+            table=pa.table({"title": ["=1+1"]}),
+            table_name="audit",
+            layer="silver",
+            fmt="xlsx",
+            output_dir=str(tmp_path),
+        )
+    book = load_workbook(tmp_path / "silver_audit.xlsx", data_only=False)
+    assert book.active["A1"].data_type == "s"
+    book.close()

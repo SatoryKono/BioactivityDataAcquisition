@@ -119,12 +119,17 @@ def _write_xlsx_file(
         import pandas as pd
 
         with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
-            dataframe.to_excel(writer, index=False)
-            for sheet in writer.book.worksheets:
-                for row in sheet.iter_rows():
-                    for cell in row:
-                        if isinstance(cell.value, str):
-                            cell.data_type = "s"
+            if not writer.book.worksheets:
+                writer.book.create_sheet("Sheet1")
+            try:
+                dataframe.to_excel(writer, index=False)
+            finally:
+                # ExcelWriter saves on exceptional exit too: sanitize partial output.
+                for sheet in writer.book.worksheets:
+                    for row in sheet.iter_rows():
+                        for cell in row:
+                            if isinstance(cell.value, str):
+                                cell.data_type = "s"
     except ImportError as exc:
         raise ImportError(
             "openpyxl is required for XLSX export. Install with: pip install openpyxl"
