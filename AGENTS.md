@@ -51,6 +51,20 @@ support evidence. Mandatory runtime mirrors are governed copies, not redundant
 reference material to remove. Detailed procedures may move to a skill only
 while their root trigger and resolvable entrypoint remain intact.
 
+## Runtime Bootstrap
+
+Before task actions, read the matching active runtime map named in Canonical
+Precedence. Read only the current runtime, then select profiles and skills by
+task. This is required instruction-driven reading, not a claim that a client
+natively injects the Markdown map. A profile reference is not proof of native
+agent registration; a skill catalog is not proof its body entered a prompt.
+
+The selected map is the bootstrap for the context-tier table below. If client
+identity or loading cannot be established, report NOT_PROVEN and retain the
+root guardrails. Do not substitute a foreign runtime or enable an unqualified
+adapter. See `docs/05-operations/runbooks/ai-rules-loading.md` for separate
+presence, configuration, discovery, prompt-rendering and execution evidence.
+
 ## Required AI Context
 
 Guardrails in this file (env, tech-debt budgets, root scratch, post-change,
@@ -196,6 +210,23 @@ Minimum expectation:
   the full top-level tree. Report-only snapshots go to PR artifacts or orphan
   branches never merged into `main`. Gate:
   `python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`.
+
+## Local Git Tree Placement
+
+All local BioETL checkouts, linked/detached worktrees, temporary, review and
+recovery trees MUST stay physically inside `D:\github`. New worktrees go only
+to `D:\github\BioactivityDataAcquisition-worktrees\<task>`. Resolve existing
+ancestors, symlinks and junctions before creation or relocation; never redirect
+the approved root. This also applies to older checkouts.
+
+Create through `python D:/github/BioactivityDataAcquisition/.git/hooks/bioetl-create-worktree.py <task>`.
+Direct `git worktree add`, including `--no-checkout`, is forbidden. Do not use
+an automatic worktree mode whose path cannot be directed into the approved root.
+The tracked implementation is `scripts/engineering/repo/create_worktree.py`;
+bootstrap and migration instructions are in
+[Governed local worktrees](.github/CONTRIBUTING.md#governed-local-worktrees).
+Template checkout still requires per-task `.env.example` approval; this rule
+does not relax the env guardrail or the full-tree commit gate.
 
 ## Dashboard Skill Routing
 
