@@ -16,6 +16,7 @@ import subprocess
 from typing import Any, NotRequired, TypedDict, cast
 
 REGISTRY = "configs/quality/agent_guard_budget_surfaces.json"
+POLICY_SIZE_ERROR = "policy exceeds size limit"
 OBJECT_ID_PATTERN = r"[0-9a-f]{40}(?:[0-9a-f]{24})?"
 REGULAR_POLICY_MODES = frozenset({"000000", "100644", "100755"})
 
@@ -270,14 +271,14 @@ def _git_document(root: Path, object_spec: str) -> str:
         raise ValueError("unverified policy object")
     size = int(_git(root, "cat-file", "-s", sha).strip())
     if size < 0 or size > 2 * 1024 * 1024:
-        raise ValueError("policy exceeds size limit")
+        raise ValueError(POLICY_SIZE_ERROR)
     return _git(root, "cat-file", "blob", sha)
 
 
 def _load_document(raw: str, suffix: str) -> Any:
     """Safe-load structured policy without executing YAML constructors."""
     if len(raw.encode("utf-8")) > 2 * 1024 * 1024:
-        raise ValueError("policy exceeds size limit")
+        raise ValueError(POLICY_SIZE_ERROR)
     if suffix == ".json":
         return json.loads(raw)
     if suffix == ".txt":
@@ -457,7 +458,7 @@ def _worktree_surface(
     with target.open("rb") as stream:
         content = stream.read(2 * 1024 * 1024 + 1)
     if len(content) > 2 * 1024 * 1024:
-        raise ValueError("policy exceeds size limit")
+        raise ValueError(POLICY_SIZE_ERROR)
     old = _git_document(root, f"{base}:{path}")
     new = content.decode("utf-8")
     if path == REGISTRY:

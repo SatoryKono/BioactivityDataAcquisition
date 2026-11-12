@@ -408,6 +408,27 @@ def _execute_plan(
     return rows
 
 
+def _cache_state(
+    root: Path,
+    reuse: Path | None,
+    state: dict[str, Any],
+    static: list[Check],
+) -> tuple[bool, bool]:
+    if reuse is None:
+        return False, False
+    verdict = receipts.validate_receipt(
+        root,
+        reuse,
+        state,
+        [check.id for check in static],
+        for_reuse=True,
+    )
+    cached = verdict["status"] == "PASS"
+    return cached, not cached and verdict.get(
+        "reason"
+    ) == "receipt_unavailable_or_invalid"
+
+
 def validate(
     root: Path,
     *,
@@ -431,18 +452,13 @@ def validate(
         }
     checks = plan["checks"]
     static = [c for c in checks if c.cacheable]
-    cached = False
-    if reuse is not None:
-        verdict = receipts.validate_receipt(
-            root, reuse, state, [c.id for c in static], for_reuse=True
-        )
-        cached = verdict["status"] == "PASS"
-        if not cached and verdict["reason"] == "receipt_unavailable_or_invalid":
-            return {
-                "status": "ERROR",
-                "reason": "invalid_cache_receipt",
-                "runtime_admission": False,
-            }
+    cached, invalid_cache = _cache_state(root, reuse, state, static)
+    if invalid_cache:
+        return {
+            "status": "ERROR",
+            "reason": "invalid_cache_receipt",
+            "runtime_admission": False,
+        }
     directory = receipts.receipt_directory(root)
     directory.mkdir(exist_ok=True)
     core = _core_checks(root, plan["base_sha"])
