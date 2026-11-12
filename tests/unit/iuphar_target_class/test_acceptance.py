@@ -20,8 +20,36 @@ from iuphar_target_class.evidence import (
     match_id_violation,
 )
 from iuphar_target_class.models import ClassificationResult, RunProvenance
+from iuphar_target_class.resolution import (
+    Resolution,
+    ResolutionInput,
+    select_effective_class,
+)
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize("remaining", [(), ("2",), ("1", "2")])
+def test_acceptance_rejects_candidates_changed_by_resolution(
+    monkeypatch: pytest.MonkeyPatch, remaining: tuple[str, ...]
+) -> None:
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(args[0], 0),
+    )
+    resolve = select_effective_class
+    seen: list[tuple[str, ...]] = []
+
+    def corrupt(row: ResolutionInput) -> Resolution:
+        seen.append(row.candidate_target_ids)
+        return replace(resolve(row), candidate_target_ids=remaining)
+
+    monkeypatch.setattr(sys.modules[__name__], "select_effective_class", corrupt)
+    with pytest.raises(AssertionError, match="invariant_4_candidates_kept"):
+        test_acceptance_report_marks_only_executed_checks()
+    assert seen == [("2", "1")]
+
 
 _NODE_IDS = (
     "tests/unit/iuphar_target_class/test_resolution.py::test_resolution_matrix",
@@ -84,8 +112,19 @@ def test_acceptance_report_marks_only_executed_checks() -> None:
     executed["invariant_1_local_only"] = (
         "PASS" if not local_only_violation(row) else "FAIL"
     )
+    candidate_input = ResolutionInput(
+        match_status=row.match_status,
+        iuphar_annotation_status=row.iuphar_annotation_status,
+        local_status=row.local_status,
+        iuphar_class=row.iuphar_class,
+        local_class=row.local_class,
+        candidate_target_ids=row.candidate_target_ids,
+    )
+    resolved = select_effective_class(candidate_input)
     executed["invariant_4_candidates_kept"] = (
-        "PASS" if row.candidate_target_ids == ("2", "1") else "FAIL"
+        "PASS"
+        if resolved.candidate_target_ids == candidate_input.candidate_target_ids
+        else "FAIL"
     )
     executed["invariant_8_match_id"] = "PASS" if not match_id_violation(row) else "FAIL"
     same = content_equal(
@@ -136,8 +175,12 @@ def test_acceptance_rejects_failed_computed_invariant(
     )
     module = sys.modules[__name__]
     if failed_check == "invariant_4_candidates_kept":
-        row = replace(_row(), candidate_target_ids=("1", "2"))
-        monkeypatch.setattr(module, "_row", lambda: row)
+        resolve = select_effective_class
+        monkeypatch.setattr(
+            module,
+            "select_effective_class",
+            lambda row: replace(resolve(row), candidate_target_ids=()),
+        )
     elif failed_check == "invariant_5_rerun":
         monkeypatch.setattr(module, "content_equal", lambda left, right: False)
     else:
