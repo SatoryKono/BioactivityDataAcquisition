@@ -107,3 +107,49 @@ def test_cleanup_preserves_unconfirmed_descendant_streams_and_retries_wait(
     process.stdin.close.assert_called_once_with()
     assert process.stdout.close.called is tree_terminated
     assert process.stderr.close.called is tree_terminated
+
+
+@pytest.mark.parametrize(
+    "platform,expected_options",
+    [
+        ("posix", {"start_new_session": True}),
+        ("nt", {"creationflags": 512}),
+        ("other", {}),
+    ],
+)
+def test_command_uses_platform_isolation_flags_without_starting_a_process(
+    monkeypatch, platform, expected_options
+):
+    process = Mock(args=["fixture-python"])
+    process.communicate.return_value = (b"fixture-out", b"")
+    process.poll.return_value = 0
+    start = Mock(return_value=process)
+    monkeypatch.setattr(subject, "os", SimpleNamespace(name=platform))
+    monkeypatch.setattr(
+        subject.subprocess, "CREATE_NEW_PROCESS_GROUP", 512, raising=False
+    )
+    monkeypatch.setattr(subject.subprocess, "Popen", start)
+
+    result = subject.run_protected_command(["fixture-python"], timeout=0.25)
+
+    assert (result.returncode, result.stdout, result.stderr) == (0, b"fixture-out", b"")
+    options = start.call_args.kwargs
+    assert {
+        key: options[key]
+        for key in ("creationflags", "start_new_session")
+        if key in options
+    } == expected_options
+    assert options["shell"] is False
+    process.communicate.assert_called_once_with(timeout=0.25)
+
+
+@pytest.mark.parametrize("kill_fails", [False, True])
+def test_unknown_platform_kills_only_direct_child_and_retains_unconfirmed_tree(
+    monkeypatch, kill_fails
+):
+    process = Mock(pid=123)
+    if kill_fails:
+        process.kill.side_effect = OSError("fixture kill failure")
+    monkeypatch.setattr(subject, "os", SimpleNamespace(name="other"))
+    assert subject._terminate_process_tree(process) is False
+    process.kill.assert_called_once_with()
