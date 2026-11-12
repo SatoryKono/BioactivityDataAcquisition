@@ -93,10 +93,9 @@ bash scripts/ai/codex/run-codex.sh setup
 # After setup, the managed PATH command uses the same launcher
 codex
 
-# MCP: static configuration versus bounded live readiness
+# MCP: static configuration and effective-route diagnostics
 bash scripts/ai/codex/run-codex.sh mcp-static
-bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \
-  --timeout 1 --overall-timeout 10 --no-write
+bash scripts/ai/codex/run-codex.sh mcp-check --profile stable --no-write
 bash scripts/ai/codex/run-codex.sh mcp-setup
 
 # Diagnostics and performance evidence
@@ -195,12 +194,23 @@ readiness use a selected profile:
 | `graph` | `stable` plus Neo4j Cypher/Memory required |
 | `full` | complete explicitly selected inventory required |
 
-`mcp-check` prints `FAIL` for unavailable required servers, `WARN` for optional
-servers, and `SKIP` for remote/auth-managed endpoints. Every network probe has
-a per-server and overall timeout. It never starts Docker Compose or the
-monitoring stack and is read-only by default. Persist evidence only by passing
-an explicit `.json` path under `reports/quality`, for example
-`--output reports/quality/codex-mcp-health.json`. Static CI uses:
+The profile table is expected project inventory, not proof of a particular
+session's effective tools. `mcp-check` delegates resolution to native Codex and
+lists effective, missing, extra and disabled routes. Without a control plan it
+reports `NOT_TESTED` and exits nonzero; it starts no MCP backend. Add both
+`--probe-plan <controls.json>` and `--start-approved-adapters` to execute declared
+reading controls under the resolved per-route limits. PASS phases, FAIL,
+DISABLED, NOT_TESTED, DENIED_AS_EXPECTED and STALE remain distinct. Independent
+backend/access identity and ordinary-session acceptance are separate checks.
+
+The former socket-only diagnostic is `python scripts/ai/codex/doctor.py transport
+--profile stable --timeout 1 --overall-timeout 10 --no-write`; it cannot attest
+MCP readiness. Do not enable missing servers merely to turn a diagnostic green.
+Neither mode starts Docker Compose or the monitoring stack. Persist a projected
+report only via an explicit `.json` path under `reports/quality`, for example
+`--output reports/quality/codex-mcp-health.json`. No raw graph/dialogue response
+is persisted. The latency baseline measures `mcp-static` configuration ensure,
+not unexecuted live controls. Static CI uses:
 
 ```bash
 python3 scripts/ai/codex/mcp_profile_contract.py --check
@@ -220,8 +230,7 @@ python3 scripts/ai/codex/setup_mcp.py \
 bash scripts/ai/codex/run-codex.sh mcp-setup
 # Restart MCP clients that were already running.
 bash scripts/ai/codex/run-codex.sh mcp-static
-bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \
-  --timeout 1 --overall-timeout 10 --no-write
+bash scripts/ai/codex/run-codex.sh mcp-check --profile stable --no-write
 ```
 
 The shared-plane start is bounded by `CODEX_MCP_SHARED_START_TIMEOUT` inside
@@ -270,3 +279,50 @@ same change.
 - `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md`
 - `docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
+Probe plans must be repository-relative JSON files under
+`reports/quality/mcp-controls/`. Absolute paths, parent traversal and resolved
+symlink/junction escapes are rejected before any adapter starts. Reading a plan
+is bounded to 1 MiB; arbitrary files are not accepted as control plans.
+
+The stdio probe uses the native effective `cwd` for both relative script
+resolution and process startup. An explicit task `BIOETL_AI_MEMORY_MODE` is
+preserved over route/dotenv values without inheriting unrelated secrets.
+Legacy `mcp_*_wrapper.sh` / `.ps1` fallbacks remain `NOT_TESTED` because an
+existing wrapper file cannot prove a no-install backend; select a verified
+existing adapter route instead. Policy denial on initialize/catalog is a phase
+failure, not a successful negative tool control. `control_status` stays
+`NOT_TESTED` until the actual control is attempted.
+
+HTTP response headers, JSON and SSE bodies share the request's monotonic
+deadline. Each body read receives the remaining socket timeout; a watchdog
+interrupts only the diagnostic's owned socket at the deadline. Initialize's
+notification shares its remaining budget. No request is replayed on timeout.
+
+Stdio requests use nonblocking pipe writes; sending and waiting for the reply
+share one monotonic request deadline. If the platform cannot support this, the
+probe remains `NOT_TESTED`. An unresponsive owned adapter is terminated on
+timeout; shared owners are never terminated or automatically restarted.
+
+The JSONL reader uses interruptible nonblocking reads and a bounded join during
+cleanup. An inherited stdout held by a backend cannot block diagnostic shutdown;
+that backend is not terminated. `--no-write` controls report output; it does not
+cancel the separately acknowledged adapter cache/log/startup effects.
+
+Readiness controls honor native `enabled_tools` and `disabled_tools` before
+starting a diagnostic session. An excluded control is reported with
+`control_status: DISABLED` and overall readiness remains `NOT_TESTED`.
+Raw and effective catalogue sizes remain separate; client filters cannot prove
+server-side prohibition of writes. Explicit route env values are preserved.
+Only explicitly declared environment references may inherit process values
+when the repository environment has no value; unrelated credentials stay excluded.
+
+HTTP name resolution, address attempts and TLS setup share the same absolute
+request deadline. A timed-out connection worker cannot send a protocol request;
+late DNS results are discarded before socket creation, and late owned sockets
+are closed by their worker. A platform resolver already running may finish in
+a daemon thread; its completion does not delay the diagnostic report.
+
+Invalid or unreadable probe plans produce a structured `NOT_TESTED` result
+before adapter startup. Credential-bearing HTTP controls are limited to
+loopback hosts; remote credential-bearing controls require HTTPS.

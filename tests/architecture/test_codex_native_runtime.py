@@ -222,7 +222,7 @@ def test_mcp_doctor_warns_for_shared_optional_failure_and_fails_required(
         }
 
     monkeypatch.setattr(doctor, "_probe", fake_probe)
-    shared_status = doctor.run_mcp(
+    shared_status = doctor.run_transport(
         ROOT,
         "shared",
         timeout=0.1,
@@ -230,7 +230,7 @@ def test_mcp_doctor_warns_for_shared_optional_failure_and_fails_required(
         output_json=False,
     )
     shared_output = capsys.readouterr().out
-    core_status = doctor.run_mcp(
+    core_status = doctor.run_transport(
         ROOT,
         "core",
         timeout=0.1,
@@ -238,7 +238,7 @@ def test_mcp_doctor_warns_for_shared_optional_failure_and_fails_required(
         output_json=False,
     )
     core_output = capsys.readouterr().out
-    graph_status = doctor.run_mcp(
+    graph_status = doctor.run_transport(
         ROOT,
         "graph",
         timeout=0.1,
@@ -316,7 +316,7 @@ def test_mcp_doctor_writes_only_to_explicit_quality_report(
     )
 
     assert (
-        doctor.run_mcp(
+        doctor.run_transport(
             tmp_path,
             "stable",
             timeout=0.1,
@@ -328,7 +328,7 @@ def test_mcp_doctor_writes_only_to_explicit_quality_report(
     assert not (tmp_path / "logs").exists()
     output = Path("reports/quality/codex-mcp-health.json")
     assert (
-        doctor.run_mcp(
+        doctor.run_transport(
             tmp_path,
             "stable",
             timeout=0.1,
