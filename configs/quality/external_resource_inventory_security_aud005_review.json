@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "951c7c4c055ae3e2798b7e1260920003f1a42ae1",
+  "source_ref": "4079afb283633bb34bbb00be67c51ffac831d4fb",
+  "source_reviews": {
+    "src/bioetl/infrastructure/quarantine/filtered_reads.py": "Reviewed bounded Delta dataset scanner; original DeltaTable acquisitions and owner/cleanup references remain at same scopes. No new acquisition in independent census; lifetime is bounded by existing read operation.",
+    "src/bioetl/interfaces/http/_health_server_quarantine_routing.py": "Reviewed routing through existing forensic limiter/deadline helper; no new worker/client allocation or cleanup owner."
+  }
+}
