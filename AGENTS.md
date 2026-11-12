@@ -51,6 +51,20 @@ support evidence. Mandatory runtime mirrors are governed copies, not redundant
 reference material to remove. Detailed procedures may move to a skill only
 while their root trigger and resolvable entrypoint remain intact.
 
+## Runtime Bootstrap
+
+Before task actions, read the matching active runtime map named in Canonical
+Precedence. Read only the current runtime, then select profiles and skills by
+task. This is required instruction-driven reading, not a claim that a client
+natively injects the Markdown map. A profile reference is not proof of native
+agent registration; a skill catalog is not proof its body entered a prompt.
+
+The selected map is the bootstrap for the context-tier table below. If client
+identity or loading cannot be established, report NOT_PROVEN and retain the
+root guardrails. Do not substitute a foreign runtime or enable an unqualified
+adapter. See `docs/05-operations/runbooks/ai-rules-loading.md` for separate
+presence, configuration, discovery, prompt-rendering and execution evidence.
+
 ## Required AI Context
 
 Guardrails in this file (env, tech-debt budgets, root scratch, post-change,

@@ -69,6 +69,7 @@ BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
 RUNTIME_AGENT_DOCS_DRIFT_TEST = "tests/architecture/test_runtime_agent_docs_drift.py"
+CODEX_NATIVE_RUNTIME_TEST = "tests/architecture/test_codex_native_runtime.py"
 REQUIRED_CHECKS_PROSE_TEST = (
     "tests/architecture/test_required_checks_prose_consistency.py"
 )
@@ -190,10 +191,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "docs/00-project/ai/prompts/library/session/bootstrap.md",
             "docs/03-guides/development/pycharm-setup.md",
             "docs/03-guides/github-workflow-diagrams.md",
+            "docs/05-operations/runbooks/ai-rules-loading.md",
         ),
         (
             "tests/architecture/test_codex_task_routing.py",
             RUNTIME_AGENT_DOCS_DRIFT_TEST,
+            CODEX_NATIVE_RUNTIME_TEST,
             "tests/architecture/test_junie_runtime_ci_contract.py",
             "tests/architecture/test_gitignore_secret_and_agents_policy.py",
             "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",

@@ -2,20 +2,20 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-11-11T23:13:24.947289+00:00'
+refreshed_at_utc: '2026-11-11T23:42:13.215839+00:00'
 refresh_status: captured
 source_commit: facb0b5673c7cec55b6f4efb230f531618e9b56e
 source_run_id: '42263682929'
 source_event: workflow_dispatch
 source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/42263682929
-source_tree_sha256: 20cbeef79dba3ee3c2c04f2b247869433ef48f6e6e01f46f741201811fc94e55
+source_tree_sha256: 49d4726cb7aacfa0c465a97df780b7484f64d120fb0654965db051a765c1b1a0
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
   coverage_xml: reports/coverage/coverage.xml
   coverage_log: null
-  coverage_percent_fallback: null
+  coverage_percent_fallback: 99.5
   slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:
