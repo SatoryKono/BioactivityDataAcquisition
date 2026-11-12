@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-14'
+  Last verified: '2026-11-11'
 
 ______________________________________________________________________
 
@@ -24,6 +24,7 @@ BioETL не использует один монолитный файл «все
 
 | Слой | Файл | Назначение |
 | ---- | ---- | ---------- |
+| Requirements | [REQUIREMENTS.md](../01-requirements/REQUIREMENTS.md) | Проверяемые требования проекта |
 | Constitution | [RULES.md](RULES.md) | Архитектура, Medallion, DQ, composite, API/retry, determinism, observability, testing, naming, governance (RFC 2119) |
 | Decisions | [decisions/](../02-architecture/decisions/) | Accepted ADR — точечные архитектурные решения |
 
@@ -38,18 +39,23 @@ BioETL не использует один монолитный файл «все
 
 ## Precedence для AI runtime
 
-Канонический порядок разрешения конфликтов для AI runtime живет в
-[AGENTS.md](../../AGENTS.md), секция `Canonical Precedence`. Этот индекс не
-ведет параллельный нумерованный список precedence. Важно: active runtime
-sources — equal peers `.codex/agents/CODEX-RUNTIME.md` и
-`.junie/agents/JUNIE-RUNTIME.md` (с root-контрактами `AGENTS.md` и
-`.junie/guidelines.md`) — вместе с matching runtime profiles/skills
-(`.codex/agents/py-*.md`, `.codex/skills/**`, `.junie/agents/py-*.md`,
-`.junie/skills/**`) стоят выше этого normative index; parity между
-`.codex/**` и `.junie/**` поддерживается
-`scripts/ai/junie/check_junie_mirror.sh`. Docs mirrors в
-`docs/00-project/ai/**` остаются navigation/guidance surfaces и не
-переопределяют runtime behavior самостоятельно.
+Канонический порядок разрешения конфликтов живёт только в
+[AGENTS.md](../../AGENTS.md), секция `Canonical Precedence`. Корневые
+защитные ограничения обязательны для Codex, Junie и Devin; matching runtime
+profiles/skills не могут их ослаблять. Область и условия подключения заданы
+там же в `Instruction Scope` и `Required AI Context`.
+
+Этот индекс выбирает нормативные источники по теме и не ведёт
+параллельный нумерованный список precedence.
+
+Навигация: `.codex/agents/CODEX-RUNTIME.md`,
+`.junie/agents/JUNIE-RUNTIME.md`, `.devin/agents/DEVIN-RUNTIME.md`.
+matching runtime profiles/skills выбираются только для активного runtime:
+`.codex/agents/py-*.md`, `.codex/skills/**`, `.junie/agents/py-*.md`,
+`.junie/skills/**`, `.devin/agents/*/AGENT.md`, `.devin/skills/**`.
+Runtime-зеркала обязательны в пределах их контрактов; справочные docs mirrors
+не определяют новое поведение.
+
 
 ## Что читать по теме
 
@@ -90,7 +96,7 @@ sources — equal peers `.codex/agents/CODEX-RUNTIME.md` и
 | `docs/05-engineering/**` | docs | stub | archive only; no new SSOT |
 | `docs/plans/**` | planning | non-normative | one active backlog; archive rest |
 | `docs/reports/**` | quality/docs | non-normative thin | bulk → `reports/docs-evidence/` |
-| `docs/00-project/ai/**` | AI runtime mirrors | mirror | drift vs `.codex/**` and `.junie/**`; no behavior SSOT |
+| `docs/00-project/ai/**` | AI runtime mirrors | mirror | drift vs matching Codex, Junie, and Devin runtime sources; no behavior SSOT |
 | `docs/99-archive/**` | docs | archive | retain for history |
 | `docs/02-architecture/diagrams/**/*.mmd` | diagram governance | source | ADR-040 lint |
 | Diagram `**/png/**` | diagram governance | render artifact | CI/local only (DOC-GOV-02) |
@@ -102,9 +108,10 @@ New docs PRs SHOULD declare owner + type + retirement criterion (see
 
 ## Related AI surfaces
 
-- [AGENTS.md](../../AGENTS.md) — root AI runtime contract (Codex/Junie equal peers)
+- [AGENTS.md](../../AGENTS.md) — root AI runtime contract (Codex/Junie/Devin equal peers)
 - `../../.junie/guidelines.md` — JetBrains Junie root contract (equal peer to `AGENTS.md`)
 - `../../.codex/agents/CODEX-RUNTIME.md` and `../../.junie/agents/JUNIE-RUNTIME.md` — active runtime maps
+- `../../.devin/agents/DEVIN-RUNTIME.md` — Devin runtime map; profiles: `../../.devin/agents/*/AGENT.md`, skills: `../../.devin/skills/**`
 - `../../scripts/ai/junie/check_junie_mirror.sh` — `.codex/**` ↔ `.junie/**` parity check
 - [MEMORY_USAGE.md](ai/agents/guides/MEMORY_USAGE.md) — memory workflow
 - [POST_CHANGE_VALIDATION.md](ai/agents/policy/POST_CHANGE_VALIDATION.md) — post-change protocol

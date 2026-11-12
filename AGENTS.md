@@ -5,8 +5,13 @@ repository.
 
 ## Canonical Precedence
 
-For AI runtime behavior and workflow conflicts, use this priority:
+Within repository instructions, use this priority for AI runtime behavior
+and workflow conflicts (higher-level platform and explicit user instructions
+still apply):
 
+1. repository-wide root contract: `AGENTS.md`, with the aligned Junie entry
+   contract `.junie/guidelines.md`; their permanent guardrails cannot be
+   weakened by a runtime, profile, skill, memory sheet, or helper document
 1. active runtime source for the current agent or skill — equal peers:
    - `.codex/agents/CODEX-RUNTIME.md`
    - `.junie/agents/JUNIE-RUNTIME.md`
@@ -23,6 +28,43 @@ For AI runtime behavior and workflow conflicts, use this priority:
 
 Docs mirrors MUST NOT redefine runtime behavior on their own.
 
+A policy linked by this root contract owns only the delegated procedure; it
+does not gain independent authority to change guardrails or precedence.
+`POST_CHANGE_VALIDATION.md` owns the post-change procedure. Runtime
+`Proof-or-Stop Closeout` requirements remain mandatory when applicable.
+If sources conflict, cite both, apply this order, and record the bounded
+resolution; an unresolved safety conflict is not permission to weaken a rule.
+
+## Instruction Scope
+
+| Layer | Scope and owner | Loading condition |
+| --- | --- | --- |
+| Root guardrails | This contract: secrets, authorized operations, debt, full Git tree, mirrors, validation | Always; also preserve the active user worktree-location restriction |
+| Runtime adapter | Matching runtime map and native configuration | Active runtime only; configuration presence is not proof of loading |
+| Profile | Matching role authority, inputs, outputs, handoff | Only when performing that role; never expands user authority |
+| Skill | Task procedure and supported tool fallback | Selected by task/affected files; context tiers below still apply |
+| Delegated policy | Post-change validation and source-owned contracts | Only the trigger delegated here or by the active runtime |
+| Reference/mirror | Navigation, examples, token names and onboarding | Read as needed; cannot introduce behavior or an alternative priority |
+
+Do not create a native rules directory or setting without version-specific
+support evidence. Mandatory runtime mirrors are governed copies, not redundant
+reference material to remove. Detailed procedures may move to a skill only
+while their root trigger and resolvable entrypoint remain intact.
+
+## Runtime Bootstrap
+
+Before task actions, read the matching active runtime map named in Canonical
+Precedence. Read only the current runtime, then select profiles and skills by
+task. This is required instruction-driven reading, not a claim that a client
+natively injects the Markdown map. A profile reference is not proof of native
+agent registration; a skill catalog is not proof its body entered a prompt.
+
+The selected map is the bootstrap for the context-tier table below. If client
+identity or loading cannot be established, report NOT_PROVEN and retain the
+root guardrails. Do not substitute a foreign runtime or enable an unqualified
+adapter. See `docs/05-operations/runbooks/ai-rules-loading.md` for separate
+presence, configuration, discovery, prompt-rendering and execution evidence.
+
 ## Required AI Context
 
 Guardrails in this file (env, tech-debt budgets, root scratch, post-change,
@@ -35,6 +77,22 @@ dumping RULES/ADR on every edit.
 | V1 docs/prompt | this file's guardrails + `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` docs slice | read-only optional |
 | V2 focused code | + matching role/skill for SCOPE | `pre-task` |
 | V3/V4 | full package: `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`, `docs/00-project/ai/memory/agent-memory.md`, role `memory-py-*.md`, `src/memory/DAILY_WORKFLOW.md` | `pre-task` required |
+
+The Required AI Context table above is the single task-class matrix; profiles,
+wrappers, and orchestration MUST NOT independently require a larger bootstrap.
+Reuse an already-read source while its content and task scope remain current;
+re-read when the source changes, scope expands, or evidence conflicts.
+
+Select memory mode within user authority. `post-task`, session notes, promotion,
+and persistent refresh require authorized `read-write` mode. When selected
+pre-task must preserve a strict ban on file changes, use `read-only` with
+`--skip-refresh-if-missing --skip-session-note` and set
+`PYTHONDONTWRITEBYTECODE=1` before starting Python, directly or through a wrapper.
+The two flags forbid temporary rebuilds. Missing retrieval artifacts stay DEGRADED and claims are verified
+against source. Hash-only work uses `off`; if the user forbids retrieval itself, record that constraint and the
+required pre-task as disabled, rather than claiming successful retrieval.
+V2 and V3/V4 still require their matrix-selected pre-task and applicable checks;
+a missing artifact or denied write capability does not lower the task tier.
 
 Hash-only work does **not** require reading `docs/00-project/RULES.md` or the
 ADR tree. V3/V4 keep that package. Select RULES/ADR slices through
@@ -152,6 +210,23 @@ Minimum expectation:
   the full top-level tree. Report-only snapshots go to PR artifacts or orphan
   branches never merged into `main`. Gate:
   `python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`.
+
+## Local Git Tree Placement
+
+All local BioETL checkouts, linked/detached worktrees, temporary, review and
+recovery trees MUST stay physically inside `D:\github`. New worktrees go only
+to `D:\github\BioactivityDataAcquisition-worktrees\<task>`. Resolve existing
+ancestors, symlinks and junctions before creation or relocation; never redirect
+the approved root. This also applies to older checkouts.
+
+Create through `python D:/github/BioactivityDataAcquisition/.git/hooks/bioetl-create-worktree.py <task>`.
+Direct `git worktree add`, including `--no-checkout`, is forbidden. Do not use
+an automatic worktree mode whose path cannot be directed into the approved root.
+The tracked implementation is `scripts/engineering/repo/create_worktree.py`;
+bootstrap and migration instructions are in
+[Governed local worktrees](.github/CONTRIBUTING.md#governed-local-worktrees).
+Template checkout still requires per-task `.env.example` approval; this rule
+does not relax the env guardrail or the full-tree commit gate.
 
 ## Dashboard Skill Routing
 

@@ -50,7 +50,7 @@ Consolidated agent registry for published docs navigation.
 
 `docs/00-project/ai/agents/agents/**` is a published/internal mirror surface. It must not define runtime behavior independently from tracked runtime trees such as `.devin/agents/**`. Edit the active runtime profile first, then refresh this mirror when behavior or contributor guidance changes.
 
-## BioETL Core (6 active Devin runtime agents)
+## BioETL Core (6 governed Devin profiles; native registration is unqualified)
 
 Active set **MUST** match `.devin/agents/ORCHESTRATION.md` and the tracked `*/AGENT.md` profiles under `.devin/agents/`.
 
@@ -100,10 +100,13 @@ The following `sp-*` profiles live only under `docs/00-project/ai/agents/agents/
 
 See [ORCHESTRATION.md](./ORCHESTRATION.md) for the published mirror of the standard workflow, then confirm runtime-specific behavior in the active runtime registry when exact execution semantics matter.
 
-Detailed profile mirrors remain repo-only under `docs/00-project/ai/agents/agents/`. When exact runtime behavior matters, prefer `.devin/agents/*.md` or the active runtime registry over the published catalog.
+Detailed profile mirrors remain repo-only under `docs/00-project/ai/agents/agents/`. When exact runtime behavior matters, prefer `.devin/agents/*/AGENT.md` or the active runtime registry over the published catalog.
 
 ## Env File Guardrail
 
 - Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
 - Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
 - Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.
+Restricted native delegation follows the qualification block in DEVIN-RUNTIME.md.
+The parent uses the matching guide until effective tool limits are qualified;
+this catalog does not activate a profile or expand permissions.

@@ -986,10 +986,16 @@ def test_increment_counter_uses_canonical_api() -> None:
 def test_increment_counter_without_metrics_api_is_noop() -> None:
     from bioetl.application.services.ops.error_handler import ErrorHandlerService
 
-    handler = ErrorHandlerService(
-        logger=MagicMock(), metrics=SimpleNamespace(), service_name="test"
-    )
-    handler._increment_counter("errors_total", 1)
+    metrics = SimpleNamespace(unrelated="preserve")
+    before = vars(metrics).copy()
+    labels = {"service": "caller"}
+    logger = MagicMock()
+    handler = ErrorHandlerService(logger=logger, metrics=metrics, service_name="test")
+    handler._increment_counter("errors_total", 1, labels=labels)
+
+    assert vars(metrics) == before
+    assert labels == {"service": "caller"}
+    assert logger.mock_calls == []
 
 
 def test_legacy_increment_kwargs_signature_failure_inspect(

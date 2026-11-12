@@ -53,6 +53,51 @@ def test_unmapped_path_still_has_no_pytest_target(
     assert "tests gate has no affected pytest target" in capsys.readouterr().err
 
 
+def test_runtime_hook_docs_have_bounded_routes_without_accepting_unknown_docs() -> None:
+    """Runtime discovery docs select their real guards; unknown peers stay rejected."""
+    repo_root = Path(__file__).resolve().parents[5]
+    paths = [
+        ".codex/agents/CODEX-RUNTIME.md",
+        ".junie/agents/JUNIE-RUNTIME.md",
+        ".devin/agents/DEVIN-RUNTIME.md",
+        "docs/05-operations/runbooks/ai-hook-compatibility.md",
+    ]
+    report = build_shadow_compare(paths, repo_root=repo_root)
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == {
+        "tests/unit/scripts/test_hook_inventory.py",
+        "tests/architecture/test_codex_native_runtime.py",
+        "tests/architecture/test_ai_runtime_governance_links.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+        "tests/architecture/test_runtime_agent_docs_drift.py",
+        "tests/architecture/test_devin_setup_guide_codex_models.py",
+        "tests/architecture/test_codex_agent_catalog_inventory.py",
+        "tests/architecture/test_runtime_orchestration_surfaces.py",
+        "tests/architecture/test_junie_runtime_ci_contract.py",
+        "tests/architecture/test_devin_runtime_no_dead_script_refs.py",
+    }
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            [*paths, "docs/05-operations/runbooks/unknown-hook-note.md"],
+            repo_root=repo_root,
+        )
+
+
+def test_normative_index_selects_precedence_guards_and_rejects_unknown_peer() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["docs/00-project/NORMATIVE_SOURCES.md"], repo_root=repo_root
+    )
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == {
+        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+        "tests/architecture/test_ai_runtime_governance_links.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+    }
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(["docs/00-project/UNKNOWN.md"], repo_root=repo_root)
+
+
 def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
     """Select source-layer tests and existing test paths, excluding missing paths."""
     unit_domain = tmp_path / "tests" / "unit" / "domain"
@@ -73,6 +118,74 @@ def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
 
     # The selected parent suite already executes test_sample.py exactly once.
     assert targets == ["tests/unit/domain"]
+
+
+def test_iuphar_source_and_data_keep_bounded_stage0_owners(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class"
+    owner.mkdir(parents=True)
+    (owner / "test_stage0_manifest.py").write_text(
+        "def test_contract():\n    assert True\n", encoding="utf-8"
+    )
+    report = build_shadow_compare(
+        [
+            "src/iuphar_target_class/__init__.py",
+            "src/iuphar_target_class/stage0/build.py",
+            "data/iuphar_target_class/stage0/survey.json",
+            "data/iuphar_target_class/stage0/content_checks.csv",
+        ],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == [
+        "tests/unit/iuphar_target_class/test_stage0_manifest.py"
+    ]
+    assert report["covers_full_suite"] is False
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(["data/unowned_package/survey.json"], repo_root=tmp_path)
+    missing_owner = tmp_path / "missing-owner"
+    missing_owner.mkdir()
+    with pytest.raises(ValueError, match="Missing mandatory mapped test targets"):
+        build_shadow_compare(
+            ["src/iuphar_target_class/stage0/build.py"], repo_root=missing_owner
+        )
+
+
+def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class/test_policy.py"
+    owner.parent.mkdir(parents=True)
+    owner.write_text("def test_policy():\n    assert True\n", encoding="utf-8")
+    report = build_shadow_compare(
+        [
+            "src/iuphar_target_class/policy.py",
+            "data/iuphar_target_class/policy/policy.json",
+        ],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == ["tests/unit/iuphar_target_class/test_policy.py"]
+    assert report["covers_full_suite"] is False
+    for unowned in (
+        "src/iuphar_target_class/unmapped.py",
+        "data/iuphar_target_class/policy/unowned.json",
+    ):
+        with pytest.raises(ValueError, match="unmapped paths"):
+            build_shadow_compare([unowned], repo_root=tmp_path)
+
+
+def test_file_policy_doc_keeps_structure_catalog_owners() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["docs/00-project/governance/03-file-policy.md"], repo_root=root
+    )
+    assert set(report["selected"]) == {
+        "tests/unit/scripts/repo/test_audit_root_cleanliness.py",
+        "tests/unit/scripts/repo/test_check_root_governance_docs.py",
+        "tests/unit/scripts/repo/test_audit_structure.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+    }
+    assert report["covers_full_suite"] is False
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            ["docs/00-project/governance/unowned-file-policy.md"], repo_root=root
+        )
 
 
 def test_shadow_compare_routes_domain_ports_stub() -> None:
@@ -1037,3 +1150,95 @@ def test_resource_inventory_files_select_integrity_controls(changed_file: str) -
     assert catalog_test in report["selected"]
     assert (root / catalog_test).is_file()
     assert report["activation"] == "not_applied"
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "scripts/ai/codex/README.md",
+        "scripts/ai/codex/run-codex.ps1",
+        "scripts/ai/codex/run-codex.sh",
+    ],
+)
+def test_codex_launchers_and_guide_have_bounded_impact_routes(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    result = build_shadow_compare([path], repo_root=root)
+    assert result["covers_full_suite"] is False
+    assert {
+        "tests/architecture/test_codex_native_runtime.py",
+        "tests/architecture/test_codex_launcher_bootstrap.py",
+        "tests/unit/scripts/test_mcp_routes.py",
+        "tests/unit/scripts/test_mcp_readiness.py",
+    }.issubset(result["selected"])
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            [path, "scripts/ai/codex/unknown-launcher.ps1"], repo_root=root
+        )
+
+
+@pytest.mark.parametrize(
+    "changed_file",
+    [
+        "scripts/ai/codex/README.md",
+        "scripts/ai/codex/run-codex.ps1",
+        "scripts/ai/codex/run-codex.sh",
+    ],
+)
+def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -> None:
+    """Launcher and CLI guidance changes select their real behavioral contracts."""
+    repo_root = Path(__file__).resolve().parents[5]
+    expected = {
+        "tests/architecture/test_codex_native_runtime.py",
+        "tests/architecture/test_codex_launcher_bootstrap.py",
+        "tests/unit/scripts/ops/test_codex_exec_env_filter.py",
+    }
+    selected = affected_pytest_targets([changed_file], repo_root=repo_root)
+    assert expected.issubset(selected)
+    report = build_shadow_compare([changed_file], repo_root=repo_root)
+    assert report["activation"] == "not_applied"
+
+
+@pytest.mark.parametrize(
+    ("path", "owner"),
+    [
+        ("README.md", "tests/unit/scripts/test_hook_installation.py"),
+        (
+            "docs/05-operations/runbooks/owned-git-hooks.md",
+            "tests/unit/scripts/test_offline_precommit.py",
+        ),
+        (
+            "scripts/ops/launchers/codex/setup_plugins.sh",
+            "tests/architecture/test_ops_ai_setup_scripts.py",
+        ),
+    ],
+)
+def test_owned_hook_deployment_surfaces_have_impact_owners(
+    path: str, owner: str
+) -> None:
+    root = Path(__file__).resolve().parents[5]
+    result = build_shadow_compare([path], repo_root=root)
+    assert owner in result["selected"]
+    assert result["activation"] == "not_applied"
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            [path, "scripts/ops/launchers/codex/unknown-setup.sh"], repo_root=root
+        )
+
+
+def test_owned_hook_python_inputs_keep_real_bounded_test_owners():
+    root = Path(__file__).resolve().parents[5]
+    selected = affected_pytest_targets(
+        [
+            "scripts/engineering/repo/process_supervisor.py",
+            "scripts/engineering/dev/run_project_python.py",
+        ],
+        repo_root=root,
+    )
+    assert {
+        "tests/unit/scripts/repo/test_process_deadline.py",
+        "tests/unit/scripts/test_hook_installation.py",
+        "tests/unit/scripts/test_offline_precommit.py",
+        "tests/unit/scripts/test_run_project_python.py",
+    }.issubset(selected)
+    assert "tests/unit/scripts" not in selected
+    assert "tests/unit/repo_backed/scripts" not in selected

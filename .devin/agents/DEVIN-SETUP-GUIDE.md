@@ -122,7 +122,7 @@ This provides an interactive menu to help choose the appropriate profile for you
 
 ## Custom Subagent Profiles
 
-BioETL provides 9 custom subagent profiles in `.devin/agents/`:
+BioETL provides 6 custom subagent profiles in `.devin/agents/`. The table below also lists modes of those profiles; repeated names are not additional agents:
 
 | Profile | Model | Role | Execution Mode |
 |---------|-------|------|----------------|
@@ -131,7 +131,7 @@ BioETL provides 9 custom subagent profiles in `.devin/agents/`:
 | `py-plan-bot` | parent | Task planning, RF-* decomposition | Foreground |
 | `py-test-bot` | swe-1.6 | Tests (baseline/final/retest), coverage | Foreground/background |
 | `py-config-bot` | swe-1.6 | YAML configs (pipeline/DQ/filter/composite) | Foreground |
-| `py-debug-bot` | parent | RCA, bug fixes, regression debugging | Foreground |
+| `py-debug-bot` | parent | RCA, remediation guidance, regression debugging (read-only) | Foreground |
 | `py-doc-bot` | swe-1.6 | Docs, ADR, CHANGELOG, Mermaid diagrams | Foreground |
 | `py-test-bot` | parent | Hierarchical testing (L1→L2→L3) | Background |
 | `py-audit-bot` | parent | Hierarchical code review (S1–S8) | Background |
@@ -243,7 +243,7 @@ If you're familiar with Codex runtime, here are the key changes:
 1. **Invocation**: Replace `spawn_agent()` with `run_subagent()`
 2. **Profiles**: Use custom profile names instead of agent types
 3. **Models**: `parent` model inherits from parent agent, `swe-1.6` for cost-effective tasks
-4. **Permissions**: Configure in AGENT.md frontmatter instead of role-based
+4. **Permissions**: Follow the qualification block in DEVIN-RUNTIME.md; frontmatter alone is not enforcement
 5. **Execution**: Explicitly specify foreground/background mode
 
 ## Technical Debt Guardrail
@@ -264,24 +264,25 @@ Devin CLI `v3000.3+` splits project settings from MCP servers:
   daily servers available and marks optional servers disabled without changing
   the tracked inventory.
 
-`.devin/config.local.json` is **not** a supported project-settings override:
-only `.devin/config.json` (tracked) and the generated `.devin/mcp_config.local.json`
-overlay are materialized (see `tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py`).
-If a machine-local `config.local.json` exists, it MUST preserve the same `.env`
-guardrail as the tracked `config.json` — keep `ask`/`deny` on `Read`/`Write(**/.env*)`
-so a local override never silently weakens the repository env-file protection.
+`.devin/config.local.json` is a vendor-supported, machine-local settings layer;
+the repository materializer does not create it. It is separate from the generated
+MCP overlay. Current vendor precedence is organization > session > project-local
+> project > user. Effective layers/profile composition remain version-bound
+qualification, not a claim inferred from file presence. Keep protected reads in
+`ask` and file-tool writes in `deny`; never silently weaken root protection.
 
-Secrets are never committed. Token-bearing HTTP headers use Devin's
-`${env:VAR}` expansion and must be supplied through the environment or Devin
-Secrets. The repository `.env` guardrail remains in force: Devin asks before
-reading or writing any `.env*` file.
+Secrets are not committed. Token headers use `${env:VAR}`. Root permits reading
+`.env`, while this adapter retains a read prompt; protected file-tool writes are
+denied, not approved by that read prompt. Any protected mutation needs separate
+per-task user approval. Shell execution has a distinct boundary: follow the
+Permission boundary and qualification section of DEVIN-RUNTIME.md.
 
 ## Troubleshooting
 
 ### Profile Not Found
-If a custom profile is not available, fall back to built-in profiles:
-- Use `subagent_explore` for read-only tasks
-- Use `subagent_general` for general code changes
+Do not fall back to a general worker or broaden permissions automatically.
+The authorized parent reads the matching Devin guide and handles scoped actions.
+Restricted native delegation remains blocked until qualified.
 
 ### CLI or Configuration Not Found
 
@@ -291,10 +292,10 @@ If the CLI is missing or older than `v3000.3`, install or update it before using
 the split `config.json` / `mcp_config.json` layout.
 
 ### Permission Denied
-Background subagents cannot request new permissions. If a background subagent fails due to permissions:
-1. Resume it in foreground mode
-2. Grant the necessary permissions
-3. Continue execution
+Preserve the denial and report the blocked operation. Foreground/background
+switching does not establish isolation or authorize broader permissions. Hand
+the scoped action to the authorized parent; do not auto-grant or resume a
+restricted profile to bypass the qualification block.
 
 ### Model Selection
 - `parent` model uses the same model as the parent agent

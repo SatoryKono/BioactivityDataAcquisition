@@ -222,7 +222,7 @@ def test_mcp_doctor_warns_for_shared_optional_failure_and_fails_required(
         }
 
     monkeypatch.setattr(doctor, "_probe", fake_probe)
-    shared_status = doctor.run_mcp(
+    shared_status = doctor.run_transport(
         ROOT,
         "shared",
         timeout=0.1,
@@ -230,7 +230,7 @@ def test_mcp_doctor_warns_for_shared_optional_failure_and_fails_required(
         output_json=False,
     )
     shared_output = capsys.readouterr().out
-    core_status = doctor.run_mcp(
+    core_status = doctor.run_transport(
         ROOT,
         "core",
         timeout=0.1,
@@ -238,7 +238,7 @@ def test_mcp_doctor_warns_for_shared_optional_failure_and_fails_required(
         output_json=False,
     )
     core_output = capsys.readouterr().out
-    graph_status = doctor.run_mcp(
+    graph_status = doctor.run_transport(
         ROOT,
         "graph",
         timeout=0.1,
@@ -316,7 +316,7 @@ def test_mcp_doctor_writes_only_to_explicit_quality_report(
     )
 
     assert (
-        doctor.run_mcp(
+        doctor.run_transport(
             tmp_path,
             "stable",
             timeout=0.1,
@@ -328,7 +328,7 @@ def test_mcp_doctor_writes_only_to_explicit_quality_report(
     assert not (tmp_path / "logs").exists()
     output = Path("reports/quality/codex-mcp-health.json")
     assert (
-        doctor.run_mcp(
+        doctor.run_transport(
             tmp_path,
             "stable",
             timeout=0.1,
@@ -377,3 +377,156 @@ def test_shared_catalog_daily_flag_matches_stable_local_inventory() -> None:
         mcp_profile_contract.profile_plan("stable", ROOT)["required_local"]
     )
     assert daily == stable_local
+
+
+@pytest.mark.parametrize("runtime", [".codex", ".junie", ".devin"])
+@pytest.mark.parametrize("suffix", [".md", ".toml"])
+def test_skill_allowlists_reject_unresolved_routes(
+    tmp_path: Path, runtime: str, suffix: str
+) -> None:
+    agent = tmp_path / runtime / "agents" / ("py-test-bot" + suffix)
+    agent.parent.mkdir(parents=True)
+    skill = tmp_path / runtime / "skills/valid/SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text("valid entrypoint", encoding="utf-8")
+    agent.write_text(
+        "Allowed skills: `valid`,\n`missing-skill` opt-in.\nAllowed MCP: ast-grep.",
+        encoding="utf-8",
+    )
+    findings = native_runtime_contract.validate_skill_routes(tmp_path)
+    assert len(findings) == 1
+    assert findings[0].code == "skill.route"
+    assert "missing-skill" in findings[0].message
+    agent.write_text("Allowed skills: valid. Allowed MCP: ast-grep.", encoding="utf-8")
+    assert native_runtime_contract.validate_skill_routes(tmp_path) == []
+    agent.write_text(
+        "Allowed skills: valid/valid. Allowed MCP: ast-grep.", encoding="utf-8"
+    )
+    assert (
+        native_runtime_contract.validate_skill_routes(tmp_path)[0].code == "skill.route"
+    )
+
+
+def test_project_agent_skill_allowlists_resolve() -> None:
+    assert native_runtime_contract.validate_skill_routes(ROOT) == []
+
+
+@pytest.mark.parametrize("runtime", [".codex", ".junie", ".devin"])
+def test_research_skill_uses_portable_current_agent_workflow(runtime: str) -> None:
+    text = (ROOT / runtime / "skills/research-workflow/SKILL.md").read_text(
+        encoding="utf-8"
+    )
+    metadata = yaml.safe_load(text.split("---", 2)[1])
+    assert "context" not in metadata
+    assert "agent" not in metadata
+    assert "AskUserQuestion" not in text
+    assert "plain-text question" in text
+    assert "never expands permissions" in text
+
+
+def test_rule_inventory_never_promotes_present_sources_to_loaded(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "AGENTS.md").write_text("Project rules", encoding="utf-8")
+    (tmp_path / "AGENTS.override.md").write_text("Override", encoding="utf-8")
+    config = tmp_path / ".devin/config.json"
+    config.parent.mkdir()
+    config.write_text('{"read_config_from":{"agents_standard":true}}', encoding="utf-8")
+
+    report = native_runtime_contract.rule_loading_inventory(tmp_path)
+
+    assert report["status"] == "NOT_PROVEN"
+    assert report["runtime_process_started"] is False
+    assert {item["runtime"] for item in report["runtimes"]} == {
+        "codex",
+        "junie",
+        "devin",
+        "opencode",
+    }
+    for runtime in report["runtimes"]:
+        assert runtime["version"] is None
+        assert runtime["model_execution"] == "NOT_PROVEN"
+        for source in runtime["sources"]:
+            assert source["loading"] == "NOT_PROVEN"
+            assert source["execution"] == "NOT_PROVEN"
+    devin = next(item for item in report["runtimes"] if item["runtime"] == "devin")
+    config_source = next(
+        item for item in devin["sources"] if item["connection"] == "configuration"
+    )
+    assert config_source["declared_agents_standard"] is True
+    assert config_source["presence"] == "PRESENT"
+    assert len(config_source["sha256"]) == 64
+
+
+@pytest.mark.parametrize("raw", ['{"read_config_from":[]}', "DO_NOT_LEAK_SENTINEL"])
+def test_rule_inventory_sanitizes_invalid_configuration(
+    tmp_path: Path, raw: str
+) -> None:
+    config = tmp_path / ".devin/config.json"
+    config.parent.mkdir()
+    config.write_text(raw, encoding="utf-8")
+    report = native_runtime_contract.rule_loading_inventory(tmp_path)
+    devin = next(item for item in report["runtimes"] if item["runtime"] == "devin")
+    source = next(
+        item for item in devin["sources"] if item["connection"] == "configuration"
+    )
+    assert source["presence"] == "ERROR"
+    assert "DO_NOT_LEAK_SENTINEL" not in json.dumps(report)
+
+
+def test_rule_inventory_bounds_sources(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(native_runtime_contract, "RULE_SOURCE_MAX_BYTES", 10)
+    (tmp_path / "AGENTS.md").write_text("x" * 11, encoding="utf-8")
+    source = native_runtime_contract.rule_loading_inventory(tmp_path)["runtimes"][0][
+        "sources"
+    ][1]
+    assert source["presence"] == "ERROR"
+    assert "sha256" not in source
+
+
+def test_rules_mode_does_not_execute_tools_or_write(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    (tmp_path / "AGENTS.md").write_text("Project rules", encoding="utf-8")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["doctor.py", "rules", "--no-write", "--json", "--repo-root", str(tmp_path)],
+    )
+    monkeypatch.setattr(
+        doctor, "run_static", lambda *a, **k: pytest.fail("static gate called")
+    )
+    monkeypatch.setattr(doctor, "run_mcp", lambda *a, **k: pytest.fail("MCP called"))
+    monkeypatch.setattr(
+        subprocess, "run", lambda *a, **k: pytest.fail("process started")
+    )
+    monkeypatch.setattr(Path, "write_text", lambda *a, **k: pytest.fail("file write"))
+    assert doctor.main() == 2
+    assert json.loads(capsys.readouterr().out)["status"] == "NOT_PROVEN"
+
+
+@pytest.mark.parametrize("target", ["external", "protected"])
+def test_rule_inventory_rejects_resolved_source_before_reading(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, target: str
+) -> None:
+    source = tmp_path / "AGENTS.md"
+    source.write_text("candidate", encoding="utf-8")
+    destination = (
+        tmp_path.parent / "outside-rules.md"
+        if target == "external"
+        else tmp_path / ".env.protected"
+    )
+    original_resolve = Path.resolve
+    monkeypatch.setattr(
+        Path,
+        "resolve",
+        lambda path, *a, **k: (
+            destination if path == source else original_resolve(path, *a, **k)
+        ),
+    )
+    monkeypatch.setattr(Path, "open", lambda *a, **k: pytest.fail("protected read"))
+    result = native_runtime_contract._rule_source(tmp_path, source, "native_candidate")
+    assert result["presence"] == "ERROR"
+    assert "sha256" not in result

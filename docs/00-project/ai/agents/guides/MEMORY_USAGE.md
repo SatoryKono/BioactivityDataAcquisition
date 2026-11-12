@@ -7,7 +7,12 @@
 Define how AI agents should use BioETL memory surfaces without treating memory
 as a replacement for runtime truth.
 
-## Mandatory Read Order
+## Task-selected Read Order
+
+Use the `AGENTS.md` Required AI Context table as the single task-class matrix.
+The list below is the V3/V4 memory package, not an unconditional V1 bootstrap.
+V1 retrieval is optional; V2 pre-task remains required. Reuse already-read current
+sources; re-read on content change, expanded scope, or conflicting evidence.
 
 1. `docs/00-project/ai/memory/agent-memory.md`
 1. matching `docs/00-project/ai/memory/memory-py-*.md` file when a role-specific
@@ -23,7 +28,7 @@ as a replacement for runtime truth.
    `BIOETL_AI_AGENT`; set `BIOETL_AI_MODEL` only when a stable model identifier
    is known. Do not allow durable task records to fall back to an unidentified
    runtime.
-1. Run memory workflow pre-task before substantial work, using `--profile`
+1. Run memory workflow pre-task when selected by the task-class matrix, using `--profile`
    when a task-specific ranking profile applies. Prefer the project venv and
    `PYTHONPATH=src` (or `bash scripts/memory/run_workflow.sh pre-task ...`) so
    `import memory` works outside a fully synced editable install:
@@ -33,6 +38,12 @@ as a replacement for runtime truth.
    full deterministic corpus rebuild.
    RAG retrieval requires a valid catalog/chunk pair whose source contents,
    eligible source set, and source identity still match the checkout.
+   Strict no-file-changes work requires read-only mode, both flags
+   `--skip-refresh-if-missing --skip-session-note`, and
+   `PYTHONDONTWRITEBYTECODE=1` set before Python starts, directly or via a wrapper.
+   Default read-only can still rebuild in a temporary directory; mode alone
+   is insufficient. Do not
+   restore missing artifacts; report DEGRADED and verify source directly.
 1. Read retrieved context in the order `catalog -> graph -> rag -> source`.
 1. Cross-check important claims with repo search, active docs, configs, tests,
    and accepted ADRs.
@@ -99,24 +110,9 @@ Use different precedence depending on the type of conflict.
 
 ### AI Runtime Behavior Conflicts
 
-When agent behavior instructions disagree, use this priority (same model as
-`AGENTS.md` / `AI_RUNTIME_MIRROR_OWNERSHIP.md`):
-
-1. active runtime source for the current agent or skill — equal peers on
-   `main`:
-   - `.codex/**` (`.codex/agents/CODEX-RUNTIME.md`, profiles, skills)
-   - `.junie/**` (`.junie/agents/JUNIE-RUNTIME.md`, `.junie/guidelines.md`,
-     profiles, skills) with parity via
-     `scripts/ai/junie/check_junie_mirror.sh`
-   - `.devin/agents/**` and `.devin/skills/**` for Devin sessions
-   - a matching tracked `.gemini/**` runtime tree only when it exists in the
-     checkout and is verified in the same change
-1. `docs/00-project/NORMATIVE_SOURCES.md`
-1. `docs/00-project/RULES.md`
-1. `docs/01-requirements/REQUIREMENTS.md`
-1. accepted ADRs in `docs/02-architecture/decisions/`
-1. docs mirrors, memory sheets, and helper AI docs in `docs/00-project/ai/**`
-1. machine-readable memory artifacts such as `mcp-memory.json`
+Use only `AGENTS.md`, section `Canonical Precedence`. Memory is navigation,
+not a separate rule hierarchy, and cannot weaken root guardrails or activate
+a prohibited runtime. Load context by the root task-tier matrix.
 
 ### Implementation Fact Conflicts
 
@@ -127,8 +123,7 @@ use this priority:
 1. `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md`,
    `docs/01-requirements/REQUIREMENTS.md`, accepted ADRs
 1. active runtime maps and profiles in tracked equal-peer runtime trees
-   (`.codex/**`, `.junie/**`; `.devin/**` for Devin; tracked `.gemini/**` only
-   when present and verified)
+   (`.codex/**`, `.junie/**`; `.devin/**` for Devin)
 1. `agent-memory.md` and `memory-py-*.md`
 1. machine-readable memory artifacts such as `mcp-memory.json`
 

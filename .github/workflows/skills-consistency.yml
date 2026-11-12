@@ -66,12 +66,85 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prepare explicit manual closeout environment
+        if: github.event_name == 'workflow_dispatch' && !inputs.approve_runtime_sync
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
 
       - name: Verify static native discovery and MCP matrices
         run: python3 scripts/ai/codex/doctor.py static --no-write
 
       - name: Verify catalog-driven MCP wrapper pairs
         run: python3 -m scripts.ai.mcp wrappers check
+
+      - name: Capture source-bound runtime closeout
+        if: github.event_name == 'workflow_dispatch' && !inputs.approve_runtime_sync
+        env:
+          PYTHONPATH: src
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          run_id="ai-runtime-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          task_id="ai-runtime-${GITHUB_RUN_ID}"
+          run_dir="reports/quality/proof-or-stop/${run_id}"
+          mkdir -p "$run_dir"
+          proof=(uv run --frozen --no-build --no-sync python -m scripts.engineering.qa proof-or-stop)
+          common=(--run-id "$run_id" --task-id "$task_id" --claim done --ci-run-id "$GITHUB_RUN_ID")
+          "${proof[@]}" plan "${common[@]}"
+          capture() {
+            local receipt_id="$1" producer="$2" kind="$3"
+            shift 3
+            local started start_ns duration rc=0 state=pass
+            local -a argv=()
+            started="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            start_ns="$(date +%s%N)"
+            if uv run --frozen --no-build --no-sync "$@" >"$run_dir/$receipt_id.log" 2>&1; then
+              rc=0
+            else
+              rc=$?
+              state=fail
+            fi
+            duration=$(( ($(date +%s%N) - start_ns) / 1000000 ))
+            for arg in "$@"; do argv+=("--argv=$arg"); done
+            "${proof[@]}" receipt "${common[@]}" --trust-tier ci \
+              --receipt-id "$receipt_id" --producer "$producer" --evidence-kind "$kind" \
+              --command "$*" "${argv[@]}" --started-at "$started" --duration-ms "$duration" \
+              --status "$state" --exit-code "$rc" --output-artifact "$run_dir/$receipt_id.log"
+          }
+          capture tests test_health tests python -m pytest \
+            tests/architecture/test_codex_native_runtime.py \
+            tests/architecture/test_runtime_agent_docs_drift.py \
+            tests/architecture/test_junie_runtime_ci_contract.py \
+            tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py \
+            tests/architecture/test_runtime_orchestration_surfaces.py \
+            tests/unit/scripts/engineering/ci/test_pr_lane_results.py::test_shadow_compare_routes_devin_permission_configuration \
+            tests/unit/scripts/engineering/ci/test_pr_lane_results.py::test_shadow_compare_routes_guardrail_checker_contract \
+            tests/unit/scripts/test_hook_inventory.py tests/unit/scripts/test_mcp_routes.py \
+            -q --no-cov \
+            --junitxml="$run_dir/tests.xml"
+          capture governance pretest_guardrails governance bash scripts/engineering/dev/pretest_guardrails.sh \
+            --mode check --scope light --skip-cleanup --skip-memory --skip-architecture \
+            --report-json "$run_dir/governance.json"
+          capture docs docs_runtime_checks docs_runtime python -m scripts.docs check-links
+          capture debt debt_governance_gates debt python -m scripts.engineering.qa \
+            report-debt-governance-gates --source-only --check --changed-from-ref origin/main
+          "${proof[@]}" assemble "${common[@]}" --trust-tier ci --actor github-actions --runtime github-actions \
+            --receipt "$run_dir/receipts/tests.json" --receipt "$run_dir/receipts/governance.json" \
+            --receipt "$run_dir/receipts/docs.json" --receipt "$run_dir/receipts/debt.json"
+          "${proof[@]}" verify --bundle "$run_dir/bundle.json"
+
+      - name: Upload explicit manual closeout evidence
+        if: always() && !cancelled() && github.event_name == 'workflow_dispatch' && !inputs.approve_runtime_sync
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ai-runtime-proof-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reports/quality/proof-or-stop/ai-runtime-${{ github.run_id }}-${{ github.run_attempt }}/
+          if-no-files-found: error
+          retention-days: 3
 
   detect-runtime-skill-drift:
     if: github.event_name != 'workflow_dispatch'

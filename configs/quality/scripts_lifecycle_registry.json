@@ -55,11 +55,47 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/ai/codex/mcp_http_probe.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain bounded HTTP transport used by mcp_probe_client; doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
+    },
+    "scripts/ai/codex/mcp_probe_client.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain the bounded stdio/HTTP diagnostic clients imported by doctor; keep supporting because doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
+    },
+    "scripts/ai/codex/mcp_probe_errors.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain sanitized shared MCP diagnostic outcomes; doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
+    },
     "scripts/ai/codex/mcp_profile_contract.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the profile-matrix helper behind doctor.py and ensure-mcp.sh; keep contributor-facing diagnostics routed through the canonical doctor or launcher command.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
+    },
+    "scripts/ai/codex/mcp_readiness.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain the effective-route protocol/control readiness model imported by doctor; keep supporting because doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
+    },
+    "scripts/ai/codex/mcp_routes.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the secret-minimized route projection imported by doctor; keep supporting because doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
+    },
+    "scripts/ai/codex/native_mcp_config.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the bounded native config/read transport imported by doctor; keep supporting because doctor owns the public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
     },
     "scripts/ai/codex/native_runtime_contract.py": {
       "decision": "shared_helper_module",
@@ -391,6 +427,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh": {
+      "decision": "shared_helper_module",
+      "next_step": "Shared sourced Windows interop function for filesystem/fetch MCP launchers; no standalone command. Keep supporting behind the public wrappers.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-09"
+    },
     "scripts/ai/mcp/support/github_project_transport.mjs": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the internal GitHub stdio transport invoked after repository policy checks by the GitHub MCP wrappers. The wrappers remain the configured entrypoints.",
@@ -414,6 +456,12 @@
       "next_step": "Retain as the internal host route launcher for the Context7 and Brave wrappers.",
       "owner": "@bioetl-platform",
       "review_by": "2027-01-31"
+    },
+    "scripts/ai/mcp/support/run_owned_stdio.ps1": {
+      "decision": "shared_helper_module",
+      "next_step": "Shared dot-sourced descriptor validation and stdio forwarding functions for filesystem/fetch MCP launchers; no standalone command. Keep supporting behind the public wrappers.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-09"
     },
     "scripts/ai/mcp/support/uv_resolver.ps1": {
       "decision": "shared_helper_module",
@@ -1717,17 +1765,35 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/repo/budget_guard.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal guard implementation behind the canonical scripts.engineering.repo router; callers use guard-operation or guard-budgets, not a standalone script.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-11"
+    },
     "scripts/engineering/repo/cleanup_root_local_clutter.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as a bounded reviewed-maintenance cleanup utility for exact root-local clutter candidates from the hygiene registry; keep it non-active unless root cleanup becomes a broader governed operator workflow with a dedicated active surface budget.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/repo/create_worktree.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Keep as the stdlib implementation behind the existing scripts.engineering.repo worktree bootstrap and mandatory installed bioetl-create-worktree.py helper. No standalone script entrypoint; preserve active_script_count_max and all env/path/full-tree guardrails.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
+    },
     "scripts/engineering/repo/github_settings_review.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the read-only GitHub governance review implementation behind `python -m scripts.engineering.repo github-settings-review`; keep workflow and runbook invocation routed through the package entrypoint.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
+    },
+    "scripts/engineering/repo/operation_guards.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal guard implementation behind the canonical scripts.engineering.repo router; callers use guard-operation or guard-budgets, not a standalone script.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-11"
     },
     "scripts/generate_test_github_issues.py": {
       "decision": "legacy_manual_utility",
@@ -1891,6 +1957,12 @@
       "review_by": "2026-11-30",
       "next_step": "Standalone main/--check CLI retired in #11854 after reference audit found only two imports from render_nav_bus and no invocation. Retain the actual column/title transformations as an internal helper of the canonical render_nav_bus entrypoint; do not restore a standalone CLI."
     },
+    "scripts/ops/observability/grafana/_run_selection_context.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Internal run-selection provenance transform imported by render_nav_bus and phase25; no standalone CLI. Keep supporting behind the dashboard generators.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-09"
+    },
     "scripts/ops/observability/grafana/_selected_run_panels.py": {
       "decision": "shared_helper_module",
       "next_step": "Keep as an internal transformation invoked by render_nav_bus; no standalone command or active CLI entrypoint.",
@@ -1914,6 +1986,12 @@
       "next_step": "Keep the visual-audit transformations internal to render_nav_bus. This module has no standalone CLI or deployment entrypoint.",
       "owner": "@bioetl-observability",
       "review_by": "2026-12-14"
+    },
+    "scripts/ops/observability/grafana/_workflow_freshness.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Internal workflow publication-age projection imported by _workflow_scope; no standalone CLI. Keep supporting behind the dashboard generators.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-09"
     },
     "scripts/ops/observability/grafana/_workflow_scope.py": {
       "decision": "shared_helper_module",
@@ -2346,6 +2424,42 @@
       "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/ai/codex/hook_inventory.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Internal read-only discovery library imported by doctor.py; retain as shared helper, not a standalone runtime or CLI entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-11"
+    },
+    "scripts/engineering/repo/hook_installation.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
+    },
+    "scripts/engineering/repo/hook_runtime.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
+    },
+    "scripts/engineering/repo/offline_precommit.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
+    },
+    "scripts/engineering/repo/process_deadline.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
+    },
+    "scripts/engineering/repo/process_supervisor.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-12"
     }
   },
   "schema_version": "1.0"

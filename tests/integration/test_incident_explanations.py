@@ -86,6 +86,10 @@ def test_verification_is_presentation_only_and_not_health():
         if pid == 22005:
             assert "expr" not in panels[pid]["targets"][0]
         assert _properties(panels[pid], "provider")["noValue"] == "Not provided"
+        assert "pipeline-failure-critical" in source["targets"][0]["expr"]
+        assert "pipeline-failure-dq" in source["targets"][0]["expr"]
+        assert _properties(panels[pid], "owner")["noValue"] == "See runbook"
+        assert _properties(panels[pid], "next_step")["displayName"] == "Next step"
     assert panels[9401]["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
 
 
