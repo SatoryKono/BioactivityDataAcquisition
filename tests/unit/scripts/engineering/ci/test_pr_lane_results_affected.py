@@ -213,6 +213,21 @@ def test_iuphar_models_and_normalization_have_bounded_owners(tmp_path: Path) -> 
         )
 
 
+def test_iuphar_snapshot_has_a_bounded_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class"
+    owner.mkdir(parents=True)
+    (owner / "test_snapshot.py").write_text(
+        "def test_contract():\n    assert True\n",
+        encoding="utf-8",
+    )
+    report = build_shadow_compare(
+        ["src/iuphar_target_class/snapshot.py"],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == ["tests/unit/iuphar_target_class/test_snapshot.py"]
+    assert report["covers_full_suite"] is False
+
+
 def test_shadow_compare_routes_domain_ports_stub() -> None:
     """Typed ports package stubs map like their .py siblings under tests/unit."""
     repo_root = Path(__file__).resolve().parents[5]
