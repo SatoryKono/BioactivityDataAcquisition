@@ -6,6 +6,7 @@ Usage:
     python -m scripts.engineering.repo --help
 
 Commands:
+    worktree           Bootstrap the governed worktree helper; creation uses it
     guard-operation    Check a structured operation without executing it
     guard-budgets      Compare protected policy limits to trusted Git objects
     check-inventory    Check scripts inventory drift
@@ -110,6 +111,16 @@ def _run_check_all(rest: list[str]) -> int:
     return 0
 
 
+def _run_worktree(rest: list[str]) -> int:
+    from scripts.engineering.repo.create_worktree import main as worktree_main
+
+    if not {"--install-helper", "--validate-only"}.intersection(rest):
+        raise SystemExit(
+            "Creation requires the installed bioetl-create-worktree.py helper"
+        )
+    return worktree_main(rest)
+
+
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
 
@@ -118,6 +129,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     cmd, rest = args[0], args[1:]
+
+    if cmd == "worktree":
+        return _run_worktree(rest)
 
     if cmd == "guard-operation":
         from scripts.engineering.repo.operation_guards import main as guard_main
