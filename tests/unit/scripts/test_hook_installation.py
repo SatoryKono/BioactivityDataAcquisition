@@ -193,6 +193,34 @@ def test_commit_message_does_not_run_tree_and_budget_checks(tmp_path):
     assert hook_runtime._guard_commands(tmp_path, "commit-msg", b"") == []
 
 
+def _assert_callback_budget_rejected(repo, env, git, sha):
+    (repo / "fixture.txt").write_text("changed")
+    git("add", "fixture.txt")
+    attempted = subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.name=Fixture",
+            "-c",
+            "user.email=fixture@example.invalid",
+            "commit",
+            "-m",
+            "must reject callback budget increase",
+        ],
+        cwd=repo,
+        env=env,
+        capture_output=True,
+        timeout=90,
+    )
+    assert attempted.returncode != 0
+    assert git("rev-parse", "HEAD") == sha
+    assert (
+        json.loads(git("show", ":configs/owned_budget.json"))["budgets"]["max_files"]
+        == 6
+    )
+    assert (repo / "foreign-runs.txt").read_text() == "x"
+
+
 @pytest.mark.parametrize("attack", [None, "pre-commit", "commit-msg"])
 @pytest.mark.parametrize("linked", [False, True])
 def test_real_owned_hooks_protocol_and_foreign_callback_once(
@@ -327,33 +355,7 @@ def test_real_owned_hooks_protocol_and_foreign_callback_once(
     assert report["effective_hooks_path"] == str(hooks)
     assert report["execution_status"] == "NOT_TESTED"
     if attack:
-        (repo / "fixture.txt").write_text("changed")
-        git("add", "fixture.txt")
-        attempted = subprocess.run(
-            [
-                "git",
-                "-c",
-                "user.name=Fixture",
-                "-c",
-                "user.email=fixture@example.invalid",
-                "commit",
-                "-m",
-                "must reject callback budget increase",
-            ],
-            cwd=repo,
-            env=env,
-            capture_output=True,
-            timeout=90,
-        )
-        assert attempted.returncode != 0
-        assert git("rev-parse", "HEAD") == sha
-        assert (
-            json.loads(git("show", ":configs/owned_budget.json"))["budgets"][
-                "max_files"
-            ]
-            == 6
-        )
-        assert (repo / "foreign-runs.txt").read_text() == "x"
+        _assert_callback_budget_rejected(repo, env, git, sha)
         return
     (repo / "fixture.txt").write_text("staged change")
     git("add", "fixture.txt")

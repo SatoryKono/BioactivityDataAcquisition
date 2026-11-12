@@ -16,6 +16,7 @@ from pathlib import Path
 import platform
 import re
 import subprocess
+import stat
 import sys
 import time
 from typing import Any
@@ -162,7 +163,7 @@ def protected_state(root: Path, base: str = "origin/main") -> dict[str, str]:
 
 
 def _path_state(
-    root: Path, views: list[str | None]
+    root: Path, views: list[str | None], base: str
 ) -> tuple[dict[str, str], dict[str, str]]:
     names: set[str] = set()
     for view in views:
@@ -192,6 +193,9 @@ def _path_state(
                 for part in _git(root, *args, index_file=view).split(b"\0")
                 if part
             )
+    from scripts.engineering.repo.budget_guard import worktree_policy_paths
+
+    names.update(worktree_policy_paths(root, base))
     measured = {}
     for relative in sorted(names):
         target = root / relative
@@ -216,10 +220,10 @@ def snapshot(
     views = _index_views(root)
     for view in views:
         _index_material(root, view, reject_hidden=True)
-    measured, checkers = _path_state(root, views)
+    measured, checkers = _path_state(root, views, before["base_sha"])
     environment = environment_identity(env)
     if before != protected_state(root, base) or (measured, checkers) != _path_state(
-        root, views
+        root, views, before["base_sha"]
     ):
         raise ValueError("state changed while measuring")
     identity = {
@@ -275,6 +279,26 @@ def write_receipt(
     return target
 
 
+def _read_owned_bytes(owned: Path, directory: Path) -> bytes:
+    before = owned.lstat()
+    if not stat.S_ISREG(before.st_mode):
+        raise ValueError("receipt must be a regular file")
+    flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(owned, flags)
+    with os.fdopen(descriptor, "rb") as stream:
+        opened = os.fstat(stream.fileno())
+        after = owned.lstat()
+        expected = (before.st_dev, before.st_ino)
+        if (
+            (opened.st_dev, opened.st_ino) != expected
+            or (after.st_dev, after.st_ino) != expected
+            or not stat.S_ISREG(after.st_mode)
+            or directory.resolve() != directory
+        ):
+            raise ValueError("receipt changed while opening")
+        return stream.read(RECEIPT_LIMIT + 1)
+
+
 def _read_receipt(root: Path, target: Path) -> dict[str, Any]:
     directory = receipt_directory(root)
     if (
@@ -283,8 +307,9 @@ def _read_receipt(root: Path, target: Path) -> dict[str, Any]:
         or not re.fullmatch(r"[a-f0-9]{32}\.json", target.name)
     ):
         raise ValueError("unowned receipt path")
-    with target.open("rb") as stream:
-        encoded = stream.read(RECEIPT_LIMIT + 1)
+    # Rebuild a canonical UUID slot under trusted metadata, never open the CLI path.
+    owned = directory / (uuid.UUID(hex=target.stem).hex + ".json")
+    encoded = _read_owned_bytes(owned, directory)
     if len(encoded) > RECEIPT_LIMIT:
         raise ValueError("receipt exceeds limit")
     payload = json.loads(encoded)

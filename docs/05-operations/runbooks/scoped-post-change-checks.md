@@ -40,7 +40,10 @@ Never create environment files to exercise this mechanism.
 the selected check identifiers. It does not establish PASS.
 
 `python -m scripts.engineering.repo checks validate` always runs the protected
-tree and debt guards afresh. Additional owners cover runtime parity/static
+tree and debt guards afresh, including working policy bytes and new policy files
+against the pinned trusted base. Both indexes remain independently checked.
+Planning is enclosed by matching state snapshots before any selected check starts.
+Additional owners cover runtime parity/static
 contracts, documentation inventory, module source inventory, workflow policy,
 pre-commit configuration and changed Python lint. Unknown paths require an owner
 and return ERROR. This command does not claim complete test coverage.
@@ -54,14 +57,17 @@ On success, the result includes an immutable observation receipt and, where
 eligible, a separate static cache receipt. Pass the latter via `--reuse <path>`.
 Reuse is limited to 60 seconds and the exact state, interpreter, package set,
 environment digest and checker sources. Time-sensitive gates and protected guards
-always execute again. Ordinary observations cannot substitute for cache receipts.
+always execute again, as do documentation and coverage inventories whose inputs
+may include ignored local artifacts. A cache hit retains its original observation
+and never renews the 60-second lifetime. Ordinary observations cannot substitute for cache receipts.
 `checks receipt --receipt <path>` validates the expected observation against current
 state; it does not grant runtime admission or CI acceptance.
 
 ## State and failure handling
 
 Identity includes HEAD, trusted base, both the default and supplied Git indexes,
-worktree/Git identity, changed source bytes and root dotenv hashes. Hidden index
+worktree/Git identity, changed source bytes (including ignored policy candidates
+under trusted policy prefixes) and root dotenv hashes. Hidden index
 entries, symlink escapes and incomplete measurement fail closed. No source content,
 environment value or child output is stored. Local hashes detect staleness; a user
 who can forge local files is outside this trust boundary.

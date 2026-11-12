@@ -27,6 +27,14 @@ from scripts.engineering.repo.check_no_partial_tree import (
 from scripts.engineering.repo.process_deadline import run_owned
 
 
+PRE_COMMIT_CONFIG = ".pre-commit-config.yaml"
+PYPROJECT = "pyproject.toml"
+PYTEST_CONFIG = "pytest.ini"
+DEPENDENCY_LOCK = "uv.lock"
+WORKFLOW_PREFIX = ".github/"
+DASHBOARD_PREFIX = "grafana/"
+
+
 @dataclass(frozen=True)
 class Check:
     id: str
@@ -88,7 +96,7 @@ def dashboard_input(path: str) -> bool:
     return (
         path.startswith(
             (
-                "grafana/",
+                DASHBOARD_PREFIX,
                 "docs/03-guides/dashboards/",
                 "scripts/ops/observability/grafana/",
                 "tests/integration/_dashboard",
@@ -102,9 +110,9 @@ def dashboard_input(path: str) -> bool:
             "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
             "docker-compose.yml",
             "docker-compose.monitoring.yml",
-            "pyproject.toml",
-            "uv.lock",
-            "pytest.ini",
+            PYPROJECT,
+            DEPENDENCY_LOCK,
+            PYTEST_CONFIG,
         }
         or path.startswith(
             (
@@ -144,8 +152,8 @@ def _module_input(path: str) -> bool:
 def _first_window_input(path: str) -> bool:
     # DASH-FIT-004 explicitly owns a global code/docs gate; do not narrow it.
     return path.startswith(
-        ("src/", "tests/", "docs/", "grafana/", "scripts/", ".github/")
-    ) or path in {".pre-commit-config.yaml", "pyproject.toml", "uv.lock", "pytest.ini"}
+        ("src/", "tests/", "docs/", DASHBOARD_PREFIX, "scripts/", WORKFLOW_PREFIX)
+    ) or path in {PRE_COMMIT_CONFIG, PYPROJECT, DEPENDENCY_LOCK, PYTEST_CONFIG}
 
 
 def _check_rules() -> list[tuple[Callable[[str], bool], Check]]:
@@ -171,7 +179,6 @@ def _check_rules() -> list[tuple[Callable[[str], bool], Check]]:
             Check(
                 "docs-cleanup-inventory",
                 _python("-m", "scripts.docs", "generate-cleanup-inventory", "--check"),
-                cacheable=True,
             ),
         ),
         (
@@ -185,11 +192,10 @@ def _check_rules() -> list[tuple[Callable[[str], bool], Check]]:
                     "--check",
                     "--allow-missing-coverage-xml",
                 ),
-                cacheable=True,
             ),
         ),
         (
-            lambda path: path == ".pre-commit-config.yaml",
+            lambda path: path == PRE_COMMIT_CONFIG,
             Check(
                 "precommit-config",
                 _python("-m", "pre_commit", "validate-config"),
@@ -197,7 +203,7 @@ def _check_rules() -> list[tuple[Callable[[str], bool], Check]]:
             ),
         ),
         (
-            lambda path: path.startswith(".github/"),
+            lambda path: path.startswith(WORKFLOW_PREFIX),
             Check(
                 "actions-runtime-policy",
                 _python(
@@ -268,12 +274,12 @@ def build_plan(root: Path, base: str) -> dict[str, Any]:
         "tests/",
         "scripts/",
         "configs/",
-        ".github/",
+        WORKFLOW_PREFIX,
         ".codex/",
         ".junie/",
         ".devin/",
         ".opencode/",
-        "grafana/",
+        DASHBOARD_PREFIX,
         "reports/",
         "data/",
     )
@@ -282,11 +288,11 @@ def build_plan(root: Path, base: str) -> dict[str, Any]:
         "CONTRIBUTING.md",
         "AGENTS.md",
         "mkdocs.yml",
-        "pyproject.toml",
-        "uv.lock",
-        "pytest.ini",
+        PYPROJECT,
+        DEPENDENCY_LOCK,
+        PYTEST_CONFIG,
         "Makefile",
-        ".pre-commit-config.yaml",
+        PRE_COMMIT_CONFIG,
         ".gitignore",
         ".gitattributes",
         "opencode.json",
@@ -300,6 +306,48 @@ def build_plan(root: Path, base: str) -> dict[str, Any]:
         "checks": select_checks(root, paths),
         "unknown": unknown,
     }
+
+
+def stable_plan(root: Path, base: str) -> tuple[dict[str, Any], dict[str, Any]]:
+    before = receipts.snapshot(root, base=base)
+    plan = build_plan(root, base)
+    after = receipts.snapshot(root, base=base)
+    if before != after or plan["base_sha"] != before["base_sha"]:
+        raise ValueError("state changed during planning")
+    return plan, after
+
+
+def _core_checks(root: Path, base: str) -> list[Check]:
+    core = [
+        Check(
+            name,
+            tuple(base if arg == hook_runtime.TRUSTED_BASE else arg for arg in argv),
+        )
+        for name, argv in hook_runtime._guard_commands(root, "pre-commit", b"")
+    ]
+    core.append(
+        Check(
+            "budgets-worktree",
+            _python(
+                str(Path(__file__).with_name("budget_guard.py")),
+                "--repo-root",
+                str(root),
+                "--base",
+                base,
+                "--worktree",
+            ),
+        )
+    )
+    return core
+
+
+def _expected_ids(plan: dict[str, Any]) -> list[str]:
+    return [
+        "tree",
+        "budgets",
+        "budgets-worktree",
+        *[check.id for check in plan["checks"]],
+    ]
 
 
 def _row(
@@ -374,14 +422,13 @@ def validate(
     ):
         raise ValueError("invalid local check deadline")
     started = time.monotonic()
-    plan = build_plan(root, base)
+    plan, state = stable_plan(root, base)
     if plan["unknown"]:
         return {
             "status": "ERROR",
             "reason": "unknown_surface_requires_owner",
             "runtime_admission": False,
         }
-    state = receipts.snapshot(root, base=plan["base_sha"])
     checks = plan["checks"]
     static = [c for c in checks if c.cacheable]
     cached = False
@@ -398,10 +445,7 @@ def validate(
             }
     directory = receipts.receipt_directory(root)
     directory.mkdir(exist_ok=True)
-    core = [
-        Check(name, tuple(argv))
-        for name, argv in hook_runtime._guard_commands(root, "pre-commit", b"")
-    ]
+    core = _core_checks(root, plan["base_sha"])
     rows = _execute_plan(root, directory, [*core, *checks], cached, started, timeout)
     after = receipts.snapshot(root, base=plan["base_sha"])
     if after != state or resolve_revision(root, base) != plan["base_sha"]:
@@ -414,8 +458,9 @@ def validate(
     passed = len(rows) == len(core) + len(checks) and all(
         row["status"] == "PASS" for row in rows
     )
-    cache_path = None
-    if passed and static:
+    # A cache hit preserves the original observation time, never a sliding TTL.
+    cache_path = reuse if passed and cached else None
+    if passed and static and not cached:
         cache_path = receipts.write_receipt(
             root, state, [row for row in rows if row["cacheable"]]
         )
@@ -442,10 +487,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         root = validate_repo(args.repo)
         if args.action == "plan":
-            plan = build_plan(root, args.base)
+            plan, state = stable_plan(root, args.base)
             result = {
                 "status": "ERROR" if plan["unknown"] else "PLANNED",
-                "check_ids": ["tree", "budgets", *[c.id for c in plan["checks"]]],
+                "check_ids": _expected_ids(plan),
                 "base_sha": plan["base_sha"],
                 "runtime_admission": False,
                 "execution_status": "NOT_RUN",
@@ -453,15 +498,17 @@ def main(argv: list[str] | None = None) -> int:
         elif args.action == "receipt":
             if args.receipt is None:
                 raise ValueError("receipt required")
-            plan = build_plan(root, args.base)
+            plan, state = stable_plan(root, args.base)
             if plan["unknown"]:
                 raise ValueError("unknown surface requires owner")
             result = receipts.validate_receipt(
                 root,
                 args.receipt,
-                receipts.snapshot(root, base=plan["base_sha"]),
-                ["tree", "budgets", *[c.id for c in plan["checks"]]],
+                state,
+                _expected_ids(plan),
             )
+            if state != receipts.snapshot(root, base=args.base):
+                raise ValueError("state changed during receipt validation")
         else:
             result = validate(root, base=args.base, reuse=args.reuse)
     except (

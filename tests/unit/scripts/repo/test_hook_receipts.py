@@ -45,6 +45,19 @@ def private_repo(tmp_path, monkeypatch):
 
     git("init")
     (root / "fixture.txt").write_text("initial")
+    registry = root / "configs/quality/agent_guard_budget_surfaces.json"
+    registry.parent.mkdir(parents=True)
+    registry.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "owner": "fixture",
+                "surfaces": [
+                    {"pattern": "configs/quality/*budget*.json", "kind": "budget"}
+                ],
+            }
+        )
+    )
     git("add", ".")
     git("commit", "-m", "fixture")
     git("update-ref", "refs/remotes/origin/main", "HEAD")
@@ -138,7 +151,42 @@ def test_corrupted_or_wrong_check_receipt_fails(private_repo):
         ]
         == "ERROR"
     )
+
     path.write_text("invalid JSON")
+    assert (
+        receipts.validate_receipt(root, path, state, ["fixture-check"])["status"]
+        == "ERROR"
+    )
+
+
+def test_external_receipt_path_is_refused(private_repo, tmp_path):
+    root, _ = private_repo
+    state = receipts.snapshot(root)
+    outside = tmp_path / ("a" * 32 + ".json")
+    outside.write_text("external fixture content")
+    assert (
+        receipts.validate_receipt(root, outside, state, ["fixture-check"])["status"]
+        == "ERROR"
+    )
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX atomic O_NOFOLLOW qualification")
+def test_symlink_replacement_during_open_is_refused(
+    private_repo, tmp_path, monkeypatch
+):
+    root, _ = private_repo
+    state = receipts.snapshot(root)
+    path = receipts.write_receipt(root, state, _checks())
+    outside = tmp_path / "outside-fixture.json"
+    outside.write_text("must not be read")
+    real_open = receipts.os.open
+
+    def replace_then_open(target, flags, *args, **kwargs):
+        path.unlink()
+        path.symlink_to(outside)
+        return real_open(target, flags, *args, **kwargs)
+
+    monkeypatch.setattr(receipts.os, "open", replace_then_open)
     assert (
         receipts.validate_receipt(root, path, state, ["fixture-check"])["status"]
         == "ERROR"
@@ -179,6 +227,15 @@ def test_hidden_index_input_is_not_cacheable(private_repo):
     git("update-index", "--assume-unchanged", "fixture.txt")
     with pytest.raises(ValueError, match="hidden index"):
         receipts.snapshot(root)
+
+
+def test_ignored_working_policy_invalidates_receipt(private_repo):
+    root, _ = private_repo
+    before = receipts.snapshot(root)
+    relative = "configs/quality/ignored_budget.json"
+    (root / ".git/info/exclude").write_text(relative + "\n")
+    (root / relative).write_text('{"max_count": 99}')
+    assert receipts.snapshot(root)["source_sha256"] != before["source_sha256"]
 
 
 def test_base_ref_drift_changes_receipt_identity(private_repo):

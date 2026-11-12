@@ -211,8 +211,17 @@ def _expiry_change(old: Any, new: Any) -> list[str]:
 def _git(root: Path, *args: str, index_file: str | None = None) -> str:
     """Read Git metadata with a deadline and no ambient repository override."""
     env = os.environ.copy()
-    for name in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_INDEX_FILE"):
-        env.pop(name, None)
+    for name in tuple(env):
+        if name in {
+            "GIT_DIR",
+            "GIT_WORK_TREE",
+            "GIT_COMMON_DIR",
+            "GIT_INDEX_FILE",
+            "GIT_CONFIG",
+            "GIT_CONFIG_COUNT",
+            "GIT_CONFIG_PARAMETERS",
+        } or name.startswith(("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_")):
+            env.pop(name, None)
     if index_file is not None:
         env["GIT_INDEX_FILE"] = index_file
     env["GIT_NO_REPLACE_OBJECTS"] = "1"
@@ -233,7 +242,7 @@ def _git(root: Path, *args: str, index_file: str | None = None) -> str:
         timeout=5,
         check=False,
     )
-    if result.returncode:
+    if result.returncode or len(result.stdout.encode("utf-8")) > 8 * 1024 * 1024:
         raise ValueError("Git object query unavailable")
     return result.stdout
 
@@ -370,6 +379,114 @@ def check_budget_diff(
             "status": "FAIL" if findings else "PASS",
             "base_sha": base_sha,
             "tip_sha": tip_sha,
+            "findings": findings,
+        }
+    except (
+        OSError,
+        ValueError,
+        TypeError,
+        KeyError,
+        RecursionError,
+        subprocess.SubprocessError,
+        ImportError,
+    ):
+        return {
+            "status": "ERROR",
+            "findings": [{"code": "budget.evidence_unavailable"}],
+        }
+
+
+def worktree_policy_paths(root: Path, base: str) -> list[str]:
+    """Include ignored new policies only under trusted, bounded policy prefixes."""
+    surfaces = _registry(_git_document(root, f"{base}:{REGISTRY}"))
+    prefixes = {
+        "configs/quality/",
+        "scripts/engineering/baselines/",
+        "tests/performance/",
+    }
+    for descriptor in surfaces:
+        prefix = re.split(r"[*?\[]", descriptor["pattern"], maxsplit=1)[0]
+        if not prefix or not (root / prefix).resolve().is_relative_to(root):
+            raise ValueError("unqualified policy prefix")
+        prefixes.add(prefix)
+    commands = [
+        (
+            "diff",
+            base,
+            "--no-ext-diff",
+            "--no-textconv",
+            "--no-renames",
+            "--name-only",
+            "-z",
+        ),
+        ("ls-files", "--others", "--exclude-standard", "-z"),
+        ("ls-files", "--others", "-z", "--", *sorted(prefixes)),
+    ]
+    paths = {
+        path for args in commands for path in _git(root, *args).split("\0") if path
+    }
+    return sorted(
+        path
+        for path in paths
+        if path == REGISTRY
+        or is_budget_candidate(path)
+        or any(fnmatchcase(path, item["pattern"]) for item in surfaces)
+    )
+
+
+def _worktree_surface(
+    root: Path,
+    path: str,
+    base: str,
+    surfaces: list[Surface],
+) -> list[dict[str, str]]:
+    matches = [item for item in surfaces if fnmatchcase(path, item["pattern"])]
+    if path != REGISTRY and not matches:
+        return (
+            [{"path": path, "code": "budget.unregistered_surface"}]
+            if is_budget_candidate(path)
+            else []
+        )
+    target = root / path
+    if (
+        target.is_symlink()
+        or not target.resolve().is_relative_to(root)
+        or not target.is_file()
+    ):
+        raise ValueError("non-regular working policy")
+    with target.open("rb") as stream:
+        content = stream.read(2 * 1024 * 1024 + 1)
+    if len(content) > 2 * 1024 * 1024:
+        raise ValueError("policy exceeds size limit")
+    old = _git_document(root, f"{base}:{path}")
+    new = content.decode("utf-8")
+    if path == REGISTRY:
+        return (
+            []
+            if json.loads(old) == json.loads(new)
+            else [{"path": path, "code": "budget.registry_change_requires_review"}]
+        )
+    codes = _compare_registered_documents(
+        _load_document(old, target.suffix),
+        _load_document(new, target.suffix),
+        matches[0],
+    )
+    return [{"path": path, "code": "budget." + code} for code in sorted(set(codes))]
+
+
+def check_worktree_budget_diff(root: Path, base: str) -> dict[str, Any]:
+    """Read proposed working policy bytes without staging or writing Git objects."""
+    try:
+        base_sha = _revision(root, base)
+        surfaces = _registry(_git_document(root, f"{base_sha}:{REGISTRY}"))
+        findings = [
+            finding
+            for path in worktree_policy_paths(root, base_sha)
+            for finding in _worktree_surface(root, path, base_sha, surfaces)
+        ]
+        return {
+            "status": "FAIL" if findings else "PASS",
+            "base_sha": base_sha,
             "findings": findings,
         }
     except (
@@ -554,9 +671,16 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--base", default="origin/main")
-    parser.add_argument("--tip")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--tip")
+    mode.add_argument("--worktree", action="store_true")
     args = parser.parse_args(argv)
-    result = check_budget_diff(args.repo_root.resolve(), args.base, tip=args.tip)
+    root = args.repo_root.resolve()
+    result = (
+        check_worktree_budget_diff(root, args.base)
+        if args.worktree
+        else check_budget_diff(root, args.base, tip=args.tip)
+    )
     print(json.dumps(result))
     return {"PASS": 0, "FAIL": 1, "ERROR": 2}[result["status"]]
 

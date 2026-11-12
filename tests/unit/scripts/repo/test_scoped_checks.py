@@ -92,6 +92,9 @@ def test_exhausted_deadline_never_runs_child(tmp_path, monkeypatch):
 def test_plan_does_not_claim_execution_pass(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(checks, "validate_repo", lambda root: root)
     monkeypatch.setattr(
+        checks.receipts, "snapshot", lambda *args, **kwargs: {"base_sha": "a" * 40}
+    )
+    monkeypatch.setattr(
         checks,
         "build_plan",
         lambda *args: {
@@ -133,7 +136,9 @@ def test_reuse_always_runs_fresh_core_and_stops_on_failure(
     )
     monkeypatch.setattr(checks, "resolve_revision", lambda *args: "a" * 40)
     monkeypatch.setattr(
-        checks.receipts, "snapshot", lambda *args, **kwargs: {"state": "same"}
+        checks.receipts,
+        "snapshot",
+        lambda *args, **kwargs: {"state": "same", "base_sha": "a" * 40},
     )
     monkeypatch.setattr(
         checks.receipts, "receipt_directory", lambda *args: tmp_path / "receipts"
@@ -141,11 +146,15 @@ def test_reuse_always_runs_fresh_core_and_stops_on_failure(
     monkeypatch.setattr(
         checks.receipts, "validate_receipt", lambda *args, **kwargs: {"status": "PASS"}
     )
+    written = []
+
+    def write_receipt(*args):
+        written.append(args)
+        return Path("observation.json")
+
+    monkeypatch.setattr(checks.receipts, "write_receipt", write_receipt)
     monkeypatch.setattr(
-        checks.receipts, "write_receipt", lambda *args: Path("observation.json")
-    )
-    monkeypatch.setattr(
-        checks.hook_runtime, "_guard_commands", lambda *args: [("tree", ["fixture"])]
+        checks, "_core_checks", lambda *args: [checks.Check("tree", ("fixture",))]
     )
     executed = []
 
@@ -163,6 +172,8 @@ def test_reuse_always_runs_fresh_core_and_stops_on_failure(
         else result["status"] == "ERROR"
     )
     assert result["runtime_admission"] is False
+    assert len(written) == 1  # Only a new observation, never a renewed cache TTL.
+    assert result["cache_receipt"] == ("cache.json" if core_status == "PASS" else None)
 
 
 def test_state_change_after_checks_does_not_write_receipt(tmp_path, monkeypatch):
@@ -175,17 +186,41 @@ def test_state_change_after_checks_does_not_write_receipt(tmp_path, monkeypatch)
             "base_sha": "a" * 40,
         },
     )
-    states = iter([{"state": "before"}, {"state": "after"}])
+    states = iter(
+        [
+            {"state": "before", "base_sha": "a" * 40},
+            {"state": "before", "base_sha": "a" * 40},
+            {"state": "after", "base_sha": "a" * 40},
+        ]
+    )
     monkeypatch.setattr(
         checks.receipts, "snapshot", lambda *args, **kwargs: next(states)
     )
     monkeypatch.setattr(
         checks.receipts, "receipt_directory", lambda *args: tmp_path / "receipts"
     )
-    monkeypatch.setattr(checks.hook_runtime, "_guard_commands", lambda *args: [])
+    monkeypatch.setattr(checks, "_core_checks", lambda *args: [])
     monkeypatch.setattr(
         checks.receipts,
         "write_receipt",
         lambda *args: pytest.fail("stale receipt written"),
     )
     assert checks.validate(tmp_path)["reason"] == "state_changed_during_checks"
+
+
+def test_state_change_during_planning_cannot_start_old_checks(tmp_path, monkeypatch):
+    states = iter(
+        [
+            {"base_sha": "a" * 40, "state": "before"},
+            {"base_sha": "a" * 40, "state": "after"},
+        ]
+    )
+    monkeypatch.setattr(
+        checks.receipts, "snapshot", lambda *args, **kwargs: next(states)
+    )
+    monkeypatch.setattr(checks, "build_plan", lambda *args: {"base_sha": "a" * 40})
+    monkeypatch.setattr(
+        checks, "_execute", lambda *args: pytest.fail("old selection executed")
+    )
+    with pytest.raises(ValueError, match="state changed during planning"):
+        checks.validate(tmp_path)
