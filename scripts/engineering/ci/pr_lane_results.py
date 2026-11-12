@@ -17,7 +17,6 @@ import sys
 import xml.etree.ElementTree as ET
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from datetime import date
 from pathlib import Path
 from typing import Any, cast
 
@@ -44,6 +43,12 @@ PYPROJECT_TOML = "pyproject.toml"
 UV_LOCK = "uv.lock"
 PYTHON_DEPENDENCY_FILES = frozenset({PYPROJECT_TOML, UV_LOCK})
 TEST_FILE_GLOB = "test_*.py"
+DASHBOARD_UX_REPORT_FRESHNESS_TEST = (
+    "tests/integration/test_dashboard_ux_report_freshness.py"
+)
+DASHBOARD_OPERATOR_READABILITY_TEST = (
+    "tests/integration/test_dashboard_operator_readability.py"
+)
 CONFTEST_FILENAME = "conftest.py"
 GENERATED_ARTIFACT_TESTS = Path("configs/quality/generated_artifact_tests.json")
 GENERATED_ARTIFACT_ROUTING = Path("configs/quality/generated_artifact_routing.yaml")
@@ -1927,26 +1932,11 @@ def _generated_artifact_targets(path: str, root: Path) -> list[str]:
     return sorted(targets)
 
 
-def _dated_ux_report(name: str) -> bool:
-    """Qualify canonical dated reports without accepting arbitrary peer files."""
-    try:
-        return (
-            name.endswith(".md")
-            and date.fromisoformat(name[:-3]).isoformat() == name[:-3]
-        )
-    except ValueError:
-        return False
-
-
 def _mapped_targets(path: str, root: Path) -> list[str]:
     """Return catalog-mapped tests for one changed path."""
     targets = list(AFFECTED_TESTS_BY_PATH.get(path, ()))
     for prefix, values in AFFECTED_TESTS_BY_PREFIX.items():
         if path.startswith(prefix):
-            if prefix == "docs/reports/dashboard-ux-checks/" and not _dated_ux_report(
-                path[len(prefix) :]
-            ):
-                continue
             targets.extend(values)
     targets.extend(_generated_artifact_targets(path, root))
     return targets

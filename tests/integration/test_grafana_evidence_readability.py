@@ -218,13 +218,17 @@ def test_run_cell_inspection_and_links_use_full_identity():
         for o in panel["fieldConfig"]["overrides"]
     }
     links = rules["Run ID"]["links"]
-    assert len(links) == 2
+    assert len(links) == 6
+    for name in ("Workflow", "Provider", "Saved Evidence", "Data Quality"):
+        assert all(link in links for link in rules[name]["links"])
     assert "var-run_id=${__data.fields.run_id:percentencode}" in links[0]["url"]
     assert links[1]["url"] == "${__data.fields.report_url:raw}"
     assert rules["Run ID"]["custom.inspect"] is True
     assert rules["Run ID"]["custom.wrapText"] is False
-    assert rules["Run ID"]["custom.width"] == 80
-    assert all("tooltip" not in link for link in links)
+    assert rules["Run ID"]["custom.width"] == 110
+    # The original identity/report actions must not invent a tooltip field.
+    # Handoff actions retain their source metadata when copied into the menu.
+    assert all("tooltip" not in link for link in links[:2])
     assert rules["Run ID"]["custom.tooltip.field"] == "run_id"
     for field in ("Overview", "Saved Evidence", "Data Quality", "Replay Readiness"):
         assert all(

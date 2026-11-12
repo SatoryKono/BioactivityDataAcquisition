@@ -70,17 +70,6 @@ def test_dashboard_ux_report_family_keeps_bounded_freshness_guards() -> None:
         )
 
 
-@pytest.mark.parametrize(
-    "name", ["not-reviewed-date.md", "2026-99-99.md", "nested/2026-11-11.md"]
-)
-def test_dashboard_ux_report_family_rejects_unqualified_peer_names(name) -> None:
-    root = Path(__file__).resolve().parents[5]
-    with pytest.raises(ValueError, match="unmapped paths"):
-        build_shadow_compare(
-            ["docs/reports/dashboard-ux-checks/" + name], repo_root=root
-        )
-
-
 def test_runtime_hook_docs_have_bounded_routes_without_accepting_unknown_docs() -> None:
     """Runtime discovery docs select their real guards; unknown peers stay rejected."""
     repo_root = Path(__file__).resolve().parents[5]
@@ -1240,7 +1229,16 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
         (
             "docs/reports/dashboard-ux-checks/2026-11-11.md",
             {"tests/integration/test_dashboard_ux_report_freshness.py"},
+            # Outside AFFECTED_TESTS_BY_PREFIX["docs/reports/dashboard-ux-checks/"]
+            "docs/reports/unmapped-dashboard-ux/not-reviewed-date.md",
+        ),
+        (
             "docs/reports/dashboard-ux-checks/not-reviewed-date.md",
+            {
+                "tests/integration/test_dashboard_ux_report_freshness.py",
+                "tests/integration/test_dashboard_operator_readability.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
         ),
     ],
 )
