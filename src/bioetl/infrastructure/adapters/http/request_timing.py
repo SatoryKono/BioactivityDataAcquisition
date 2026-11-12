@@ -36,7 +36,6 @@ class _RequestKwargs(TypedDict, total=False):
     headers: HeaderTypes | None
     cookies: CookieTypes | None
     auth: AuthTypes | UseClientDefault | None
-    follow_redirects: bool | UseClientDefault
     timeout: TimeoutTypes | UseClientDefault
     extensions: RequestExtensions | None
 
