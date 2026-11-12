@@ -28,7 +28,12 @@ from mcp_profile_contract import (
     profile_plan,
     validate_profile_matrix,
 )  # pyright: ignore[reportImplicitRelativeImport]
-from native_runtime_contract import Finding, REPO_ROOT, validate_native_runtime  # pyright: ignore[reportImplicitRelativeImport]
+from native_runtime_contract import (  # pyright: ignore[reportImplicitRelativeImport]
+    Finding,
+    REPO_ROOT,
+    rule_loading_inventory,
+    validate_native_runtime,
+)
 
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
@@ -484,11 +489,23 @@ def _governed_report_path(repo_root: Path, requested: Path) -> Path:
     return resolved
 
 
+def _print_rule_inventory(repo_root: Path, *, output_json: bool) -> int:
+    """Report declared candidates without claiming native loading or execution."""
+    payload = rule_loading_inventory(repo_root)
+    if output_json:
+        print(json.dumps(payload, indent=2))
+    else:
+        print(
+            "[NOT_PROVEN] Rule candidates inventoried; native loading/execution needs evidence."
+        )
+    return 2
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "mode",
-        choices=("static", "hooks", "mcp", "all", "routes", "transport"),
+        choices=("static", "hooks", "mcp", "all", "rules", "routes", "transport"),
         nargs="?",
         default="static",
     )
@@ -544,7 +561,7 @@ def _validate_options(
 ) -> None:
     if args.no_write and args.output is not None:
         parser.error("--no-write and --output are mutually exclusive")
-    if args.output is not None and args.mode == "static":
+    if args.output is not None and args.mode in {"static", "rules"}:
         parser.error("--output is only valid for mcp, all, or routes mode")
 
     if args.mode != "transport" and (
@@ -558,6 +575,8 @@ def _validate_options(
 
 
 def _dispatch(args: argparse.Namespace, repo_root: Path, profile: str) -> int:
+    if args.mode == "rules":
+        return _print_rule_inventory(repo_root, output_json=args.json)
     if args.mode == "transport":
         return run_transport(
             repo_root,
