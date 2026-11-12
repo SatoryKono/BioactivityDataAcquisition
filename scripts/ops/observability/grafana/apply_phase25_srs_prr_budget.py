@@ -236,15 +236,22 @@ _RUN_REASON_PREVIEW = (
     "$type($display) = 'string' and $length($display) > 20 ? "
     "$substring($display, 0, 19) & '…' : $display)}"
 )
+_DOMAIN_REASON_PREVIEW = (
+    "function($reason){("
+    "$display := $reason = 'run_preflight_provider_observation' ? "
+    "'Provider preflight check' : $reason; "
+    "$type($display) = 'string' and $length($display) > 32 ? "
+    "$substring($display, 0, 31) & '…' : $display)}"
+)
 _OV_DOMAINS = (
     "($preview := "
     + _RUN_REASON_PREVIEW
+    + "; $domainPreview := "
+    + _DOMAIN_REASON_PREVIEW
     + "; $map("
     + _OV_DOMAINS
     + ", function($row){$merge([$row, {"
-    "'domain_reason_brief': $type($row.reason_display) = 'string' and "
-    "$length($row.reason_display) > 32 ? $substring($row.reason_display, 0, 31) & '…' "
-    ": $row.reason_display, "
+    "'domain_reason_brief': $domainPreview($row.reason_display), "
     "'run_reason_brief': $preview($row.run_reason)}])}))"
 )
 
