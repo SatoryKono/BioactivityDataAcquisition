@@ -51,8 +51,8 @@ def build_parser() -> argparse.ArgumentParser:
 def resolve_ref(ref: str, *, repo: Path | None = None) -> str:
     """Resolve a git ref to a commit SHA after rejecting flag injection.
 
-    ``resolve_revision`` stops the process with ``SystemExit`` when the token
-    is not a safe revision. That termination is intentional and is not wrapped.
+    ``resolve_revision`` raises ``EvidenceError`` (a ``ValueError``) for unsafe
+    or unavailable revisions. The CLI reports that failure without running checks.
     """
     resolved = resolve_revision(repo or Path.cwd(), ref)
     matched = _SHA_RE.fullmatch(resolved)
