@@ -185,6 +185,21 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     **dict.fromkeys(
         (
+            "scripts/ai/codex/README.md",
+            "scripts/ai/codex/run-codex.ps1",
+            "scripts/ai/codex/run-codex.sh",
+        ),
+        (
+            CODEX_NATIVE_RUNTIME_TEST,
+            "tests/architecture/test_codex_launcher_bootstrap.py",
+            "tests/unit/scripts/test_mcp_routes.py",
+            "tests/unit/scripts/test_mcp_readiness.py",
+            "tests/unit/scripts/ops/test_codex_exec_env_filter.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    **dict.fromkeys(
+        (
             "AGENTS.md",
             "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
             "docs/00-project/ai/agents/guides/grok-operator-runbook.md",

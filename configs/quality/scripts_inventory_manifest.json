@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T00:10:12.535046+00:00",
+  "generated_at": "2026-11-12T00:35:15.543173+00:00",
   "summary": {
-    "total_scripts": 735,
+    "total_scripts": 739,
     "status_counts": {
       "active": 334,
-      "supporting": 399,
+      "supporting": 403,
       "temporary_diagnostic": 2
     },
     "reference_group_coverage": {
@@ -14,9 +14,9 @@
       "ci": 76,
       "docs": 291,
       "other": 22,
-      "scripts": 630,
+      "scripts": 635,
       "skills": 13,
-      "tests": 548
+      "tests": 552
     }
   },
   "scripts": [
@@ -308,7 +308,7 @@
       "agent_usage": [
         "CODEX-RUNTIME"
       ],
-      "reference_count": 24,
+      "reference_count": 34,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -396,7 +396,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 168,
+          "line": 167,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/headless.ps1` — PowerShell transport for headless mode;"
         }
@@ -411,7 +411,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 179,
+          "line": 178,
           "source_group": "scripts",
           "text": "bash scripts/ai/codex/headless.sh exec \"run a bounded task\""
         },
@@ -569,7 +569,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 169,
+          "line": 168,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/helper/diagnose-hang.ps1` — setup-hang diagnostics;"
         },
@@ -693,7 +693,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 334,
+          "line": 349,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/ensure-mcp.sh\","
         }
@@ -847,7 +847,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 259,
+          "line": 268,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/helper/setup-wsl-complete.sh` for Bash setup;"
         },
@@ -1095,7 +1095,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/doctor.py",
-          "line": 426,
+          "line": 549,
           "source_group": "scripts",
           "text": "from scripts.ai.codex.hook_inventory import collect"
         },
@@ -1153,7 +1153,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 123,
+          "line": 122,
           "source_group": "scripts",
           "text": "Remediation is a separate explicit command in `local_state_audit.py`; it"
         },
@@ -1193,6 +1193,141 @@
       ]
     },
     {
+      "path": "scripts/ai/codex/mcp_http_probe.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "scripts/ai/codex/mcp_probe_client.py",
+          "line": 17,
+          "source_group": "scripts",
+          "text": "from scripts.ai.codex.mcp_http_probe import ("
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 676,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_http_probe import HttpProbeClient"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 811,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_http_probe import HttpProbeClient"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 840,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_http_probe import _connect_before_deadline"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 870,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_http_probe import _open_socket"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 953,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_http_probe import HttpProbeClient"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-11",
+      "next_step": "Retain bounded HTTP transport used by mcp_probe_client; doctor owns the public CLI."
+    },
+    {
+      "path": "scripts/ai/codex/mcp_probe_client.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 10,
+      "references": [
+        {
+          "path": "scripts/ai/codex/mcp_readiness.py",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "from scripts.ai.codex.mcp_probe_client import ProbeError, client_for, probe_environment"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_probe_client import ("
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 463,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_probe_client import client_for"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 534,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_probe_client import StdioProbeClient"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 623,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_probe_client import probe_environment"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 659,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_probe_client import client_for"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 692,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_probe_client import StdioProbeClient"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 710,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_probe_client import StdioProbeClient"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-11",
+      "next_step": "Retain the bounded stdio/HTTP diagnostic clients imported by doctor; keep supporting because doctor owns the public CLI."
+    },
+    {
+      "path": "scripts/ai/codex/mcp_probe_errors.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/codex/mcp_http_probe.py",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "from scripts.ai.codex.mcp_probe_errors import ProbeError, rpc_result"
+        },
+        {
+          "path": "scripts/ai/codex/mcp_probe_client.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from scripts.ai.codex.mcp_probe_errors import ("
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-11",
+      "next_step": "Retain sanitized shared MCP diagnostic outcomes; doctor owns the public CLI."
+    },
+    {
       "path": "scripts/ai/codex/mcp_profile_contract.py",
       "type": "py",
       "status": "supporting",
@@ -1201,7 +1336,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 206,
+          "line": 216,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/mcp_profile_contract.py --check"
         },
@@ -1224,7 +1359,7 @@
       "next_step": "Retain as the profile-matrix helper behind doctor.py and ensure-mcp.sh; keep contributor-facing diagnostics routed through the canonical doctor or launcher command."
     },
     {
-      "path": "scripts/ai/codex/mcp_routes.py",
+      "path": "scripts/ai/codex/mcp_readiness.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -1232,9 +1367,40 @@
       "references": [
         {
           "path": "scripts/ai/codex/doctor.py",
+          "line": 397,
+          "source_group": "scripts",
+          "text": "from scripts.ai.codex.mcp_readiness import readiness_report, SERVICE_EFFECTS"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 18,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.mcp_readiness import readiness_report"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-11",
+      "next_step": "Retain the effective-route protocol/control readiness model imported by doctor; keep supporting because doctor owns the public CLI."
+    },
+    {
+      "path": "scripts/ai/codex/mcp_routes.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ai/codex/doctor.py",
           "line": 325,
           "source_group": "scripts",
           "text": "from scripts.ai.codex.mcp_routes import route_snapshot"
+        },
+        {
+          "path": "scripts/ai/codex/mcp_readiness.py",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "from scripts.ai.codex.mcp_routes import changed_routes, route_snapshot"
         },
         {
           "path": "tests/unit/scripts/test_mcp_routes.py",
@@ -1253,7 +1419,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 9,
       "references": [
         {
           "path": "scripts/ai/codex/doctor.py",
@@ -1262,22 +1428,46 @@
           "text": "from scripts.ai.codex.native_mcp_config import NativeConfigClient, NativeConfigError"
         },
         {
+          "path": "scripts/ai/codex/doctor.py",
+          "line": 396,
+          "source_group": "scripts",
+          "text": "from scripts.ai.codex.native_mcp_config import NativeConfigClient, NativeConfigError"
+        },
+        {
+          "path": "scripts/ai/codex/mcp_probe_client.py",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "from scripts.ai.codex.native_mcp_config import NativeConfigClient, NativeConfigError"
+        },
+        {
+          "path": "scripts/ai/codex/mcp_readiness.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from scripts.ai.codex.native_mcp_config import ConfigCapture"
+        },
+        {
           "path": "scripts/ai/codex/mcp_routes.py",
           "line": 17,
           "source_group": "scripts",
           "text": "from scripts.ai.codex.native_mcp_config import ConfigCapture"
         },
         {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 19,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.native_mcp_config import ConfigCapture"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 535,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.native_mcp_config import NativeConfigError"
+        },
+        {
           "path": "tests/unit/scripts/test_mcp_routes.py",
           "line": 21,
           "source_group": "tests",
           "text": "from scripts.ai.codex.native_mcp_config import ("
-        },
-        {
-          "path": "tests/unit/scripts/test_mcp_routes.py",
-          "line": 257,
-          "source_group": "tests",
-          "text": "from scripts.ai.codex import native_mcp_config"
         }
       ],
       "owner": "@bioetl-platform",
@@ -1314,7 +1504,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 210,
+          "line": 225,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/native_runtime_contract.py\": ("
         },
@@ -1357,7 +1547,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 134,
+          "line": 133,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/profile_benchmark.py \\"
         },
@@ -1384,19 +1574,19 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 155,
+          "line": 154,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/profile_config.py audit"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 156,
+          "line": 155,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/profile_config.py apply --confirm \\"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 158,
+          "line": 157,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/profile_config.py restore --confirm \\"
         },
@@ -1413,7 +1603,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 36,
+      "reference_count": 39,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -1470,14 +1660,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 73,
+      "reference_count": 74,
       "references": [
-        {
-          "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 151,
-          "source_group": "docs",
-          "text": "bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \\"
-        },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
           "line": 194,
@@ -1489,12 +1673,6 @@
           "line": 197,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/run-codex.sh mcp-static"
-        },
-        {
-          "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 200,
-          "source_group": "docs",
-          "text": "bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \\"
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
@@ -1519,6 +1697,18 @@
           "line": 40,
           "source_group": "scripts",
           "text": "return [\"bash\", str((_DIR / \"codex\" / \"run-codex.sh\").resolve()), *rest]"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 74,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/codex/run-codex.sh login"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 75,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/codex/run-codex.sh device-login"
         }
       ]
     },
@@ -1537,7 +1727,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 258,
+          "line": 267,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/setup-codex-wsl.bat` for Windows setup;"
         },
@@ -1588,7 +1778,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 170,
+          "line": 169,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/setup-windows-dns.ps1` — explicit Windows DNS repair;"
         }
@@ -1603,7 +1793,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 171,
+          "line": 170,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/setup-wsl-dns.sh` — explicit WSL DNS repair;"
         }
@@ -1791,7 +1981,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 244,
+          "line": 253,
           "source_group": "scripts",
           "text": "bash scripts/ai/codex/setup_skills.sh --check"
         },
@@ -1898,7 +2088,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 376,
+          "line": 391,
           "source_group": "scripts",
           "text": "\"scripts/ai/cursor/setup_skills.sh\","
         },
@@ -2906,13 +3096,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/governance/script-testing-standards.md",
           "line": 259,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/_check_env_keys.py` - Environment validation"
+        },
+        {
+          "path": "scripts/ai/codex/doctor.py",
+          "line": 398,
+          "source_group": "scripts",
+          "text": "from scripts.ai.mcp._check_env_keys import load_dotenv"
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_check_env_keys.py",
@@ -3014,7 +3210,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1179,
+          "line": 1194,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3133,7 +3329,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 360,
+          "line": 375,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\","
         },
@@ -3196,7 +3392,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 361,
+          "line": 376,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\","
         },
@@ -3272,7 +3468,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 336,
+          "line": 351,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\","
         },
@@ -3297,7 +3493,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 383,
+          "line": 398,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.ps1\","
         },
@@ -3318,7 +3514,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
@@ -3346,7 +3542,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 404,
+          "line": 419,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\","
         },
@@ -3361,6 +3557,12 @@
           "line": 66,
           "source_group": "tests",
           "text": "AST_GREP_SH = MCP_DIR / \"mcp_ast_grep_wrapper.sh\""
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 653,
+          "source_group": "tests",
+          "text": "\"mcp_ast_grep_wrapper.sh\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3377,7 +3579,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 384,
+          "line": 399,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\","
         },
@@ -3438,7 +3640,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 385,
+          "line": 400,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\","
         },
@@ -3520,7 +3722,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 337,
+          "line": 352,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\","
         }
@@ -3583,7 +3785,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 386,
+          "line": 401,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.ps1\","
         },
@@ -3610,7 +3812,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
@@ -3632,7 +3834,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 405,
+          "line": 420,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\","
         },
@@ -3653,6 +3855,12 @@
           "line": 36,
           "source_group": "tests",
           "text": "assert linux_command[1].endswith(\"mcp_context7_wrapper.sh\")"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 652,
+          "source_group": "tests",
+          "text": "\"mcp_context7_wrapper.sh\","
         }
       ]
     },
@@ -3661,13 +3869,19 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 146,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 654,
+          "source_group": "tests",
+          "text": "\"mcp_deja_wrapper.ps1\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3696,7 +3910,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 338,
+          "line": 353,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\","
         }
@@ -3840,7 +4054,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1170,
+          "line": 1185,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -3895,7 +4109,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1169,
+          "line": 1184,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -3940,7 +4154,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1168,
+          "line": 1183,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3995,7 +4209,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1167,
+          "line": 1182,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -4071,7 +4285,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 339,
+          "line": 354,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\","
         },
@@ -4180,11 +4394,17 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
         {
+          "path": "scripts/ai/codex/mcp_probe_client.py",
+          "line": 36,
+          "source_group": "scripts",
+          "text": "in {\"mcp_memory_wrapper.ps1\", \"mcp_memory_wrapper.sh\"}"
+        },
+        {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 342,
+          "line": 357,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.ps1\","
         },
@@ -4199,6 +4419,12 @@
           "line": 205,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_readiness.py",
+          "line": 526,
+          "source_group": "tests",
+          "text": "(\"mcp_memory_wrapper.ps1\", \"ADAPTER_DISABLED_BY_POLICY\"),"
         }
       ]
     },
@@ -4207,7 +4433,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
@@ -4222,8 +4448,14 @@
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\""
         },
         {
+          "path": "scripts/ai/codex/mcp_probe_client.py",
+          "line": 36,
+          "source_group": "scripts",
+          "text": "in {\"mcp_memory_wrapper.ps1\", \"mcp_memory_wrapper.sh\"}"
+        },
+        {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 343,
+          "line": 358,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\","
         },
@@ -4250,12 +4482,6 @@
           "line": 73,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\","
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
-          "line": 159,
-          "source_group": "tests",
-          "text": "Without the executable bit, ``exec ./mcp_memory_wrapper.sh`` returns 126"
         }
       ]
     },
@@ -4399,7 +4625,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 344,
+          "line": 359,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\","
         },
@@ -4442,7 +4668,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 345,
+          "line": 360,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\","
         },
@@ -4475,7 +4701,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 346,
+          "line": 361,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\","
         },
@@ -4831,7 +5057,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1175,
+          "line": 1190,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\": ("
         },
@@ -4880,7 +5106,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 362,
+          "line": 377,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/github_project_transport.mjs\","
         },
@@ -4917,7 +5143,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 387,
+          "line": 402,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/host_transport.mjs\","
         },
@@ -4966,7 +5192,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 388,
+          "line": 403,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/invoke_host_transport.ps1\","
         },
@@ -5027,7 +5253,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 389,
+          "line": 404,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/invoke_host_transport.sh\","
         },
@@ -5250,7 +5476,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1171,
+          "line": 1186,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\": ("
         },
@@ -5511,7 +5737,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 341,
+          "line": 356,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/test_env_loading.sh\","
         },
@@ -11163,7 +11389,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1055,
+          "line": 1070,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -11206,7 +11432,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1197,
+          "line": 1212,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -12124,7 +12350,7 @@
         },
         {
           "path": "scripts/ai/codex/efficiency_baseline.py",
-          "line": 140,
+          "line": 133,
           "source_group": "scripts",
           "text": "\"python\": platform.python_version(),"
         },
@@ -13568,7 +13794,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 668,
+          "line": 683,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -19212,13 +19438,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 243,
+          "line": 258,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/runtime_acceptance_12553.py\","
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 245,
+          "line": 260,
           "source_group": "scripts",
           "text": "\"tests/helpers/runtime_acceptance_12553.py\","
         },
@@ -19267,7 +19493,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 244,
+          "line": 259,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/runtime_acceptance_12553_coverage.py\","
         },
@@ -21497,7 +21723,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1295,
+          "line": 1310,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -22373,7 +22599,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 206,
+          "line": 221,
           "source_group": "scripts",
           "text": "\"scripts/memory/run_workflow.sh\": ("
         },
@@ -23149,7 +23375,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 172,
+          "line": 171,
           "source_group": "scripts",
           "text": "- `scripts/ops/install-codex-cmd.bat` — optional Windows CMD installation."
         }
@@ -24847,7 +25073,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 270,
+          "line": 285,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\": ("
         },
@@ -24965,7 +25191,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1480,
+          "line": 1495,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -25133,7 +25359,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 273,
+          "line": 288,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/dashboard_context_links.py\": ("
         },
@@ -27077,7 +27303,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 398,
+          "line": 413,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/mcp/apply-shared-to-devin.py\","
         },
