@@ -30,6 +30,14 @@ def test_classify_diagnosis_flags_published_port_gap() -> None:
     assert diagnosis == "published_port_unreachable_but_container_healthy"
 
 
+def test_grafana_published_url_is_the_direct_canonical_path() -> None:
+    """No tunnel is required. The published health URL is the operator path."""
+    grafana = next(item for item in subject.CORE_ENDPOINTS if item.name == "grafana")
+    assert grafana.published_url == "http://127.0.0.1:3000/api/health"
+    assert "trycloudflare" in subject.__doc__
+    assert "canonical operator path" in subject.__doc__
+
+
 def test_run_checks_collects_published_and_container_status() -> None:
     endpoint = subject.EndpointSpec(
         name="grafana",
