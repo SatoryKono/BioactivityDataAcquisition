@@ -2422,6 +2422,8 @@ def _collect_nodeids(
         sys.executable,
         "-m",
         "pytest",
+        "--rootdir",
+        str(repo_root.resolve()),
         "--collect-only",
         "-q",
         "-p",
