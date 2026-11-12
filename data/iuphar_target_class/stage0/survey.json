@@ -1,0 +1,145 @@
+{
+  "candidate_files": [
+    {
+      "relative_path": "data/input/activity.csv",
+      "select_as_source": false
+    },
+    {
+      "relative_path": "data/input/assay.csv",
+      "select_as_source": false
+    },
+    {
+      "relative_path": "data/input/cell.csv",
+      "select_as_source": false
+    },
+    {
+      "relative_path": "data/input/document.csv",
+      "select_as_source": false
+    },
+    {
+      "relative_path": "data/input/dois.csv",
+      "select_as_source": false
+    },
+    {
+      "relative_path": "data/input/idmapping_targets.csv",
+      "select_as_source": false
+    },
+    {
+      "relative_path": "data/input/molecule.csv",
+      "select_as_source": false
+    },
+    {
+      "relative_path": "data/input/protein.csv",
+      "select_as_source": false
+    },
+    {
+      "relative_path": "data/input/pubchem_smiles.csv",
+      "select_as_source": false
+    },
+    {
+      "relative_path": "data/input/publication.csv",
+      "select_as_source": false
+    },
+    {
+      "relative_path": "data/input/pubmed.csv",
+      "select_as_source": false
+    },
+    {
+      "relative_path": "data/input/target.csv",
+      "select_as_source": false
+    },
+    {
+      "relative_path": "data/input/target_component.csv",
+      "select_as_source": false
+    },
+    {
+      "relative_path": "data/input/testitem.csv",
+      "select_as_source": false
+    },
+    {
+      "relative_path": "data/input/tissue.csv",
+      "select_as_source": false
+    }
+  ],
+  "expected_materials": [
+    {
+      "material_id": "g2p_snapshot",
+      "note": "Снимок GtoPdb/G2P в репозитории не выбран. Доступность G2P не установлена.",
+      "relative_path": null
+    },
+    {
+      "material_id": "iuphar_source_sections",
+      "note": "Каталог IUPHAR/source_sections из основания плана в этом репозитории отсутствует.",
+      "relative_path": "IUPHAR/source_sections"
+    },
+    {
+      "material_id": "l1_l2_predictions",
+      "note": "Таблица predicted L1/L2 с источником, правилом и ответственным в репозитории не выбрана.",
+      "relative_path": null
+    },
+    {
+      "material_id": "m_code_catalog",
+      "note": "Каталог версий M-кода для этапа 5 в репозитории не найден.",
+      "relative_path": null
+    },
+    {
+      "material_id": "m_processing_results",
+      "note": "Старые результаты M-обработки в набор этапа 0 не выбраны и эталоном без происхождения не считаются.",
+      "relative_path": null
+    },
+    {
+      "material_id": "target_all_table",
+      "note": "Отдельная выгрузка с полем target_all в набор этапа 0 не выбрана. Старые значения target_all эталоном без происхождения не считаются.",
+      "relative_path": null
+    }
+  ],
+  "gold_standard_reviewer": "Cursor",
+  "gold_standard_reviewer_source": "Явное назначение владельцем результата 2026-11-11: Cursor на обе роли — исполнителя модуля и проверяющего эталонов.",
+  "issued_on": "2026-11-10",
+  "local_observations": [
+    {
+      "ci_recheck": false,
+      "location": "D:/github; D:/Storage; D:/KimiData; C:/Users/Fedor/Documents; C:/Users/Fedor/source; C:/Users/Fedor/src; C:/Users/Fedor/Desktop; C:/Users/Fedor/ws",
+      "method": "Get-ChildItem -Recurse -Depth 4 -Directory -Filter source_sections, IUPHAR, iuphar; -File -Filter target_all*",
+      "result": "no matches"
+    }
+  ],
+  "m_code_versions": [],
+  "module_executor": "Cursor",
+  "module_executor_source": "Явное назначение владельцем результата 2026-11-11: Cursor на обе роли — исполнителя модуля и проверяющего эталонов.",
+  "plan_revision": "8",
+  "plan_version": "1",
+  "provenance_claims": [
+    {
+      "confirmation_owner": null,
+      "field_id": "L1",
+      "rule_or_process": null,
+      "source_ref": null,
+      "source_sha256": null
+    },
+    {
+      "confirmation_owner": null,
+      "field_id": "L2",
+      "rule_or_process": null,
+      "source_ref": null,
+      "source_sha256": null
+    },
+    {
+      "confirmation_owner": null,
+      "field_id": "g2p_availability",
+      "rule_or_process": null,
+      "source_ref": null,
+      "source_sha256": null
+    },
+    {
+      "confirmation_owner": null,
+      "field_id": "target_all",
+      "rule_or_process": null,
+      "source_ref": null,
+      "source_sha256": null
+    }
+  ],
+  "recorded_at_utc": "2026-11-11T18:45:00Z",
+  "result_owner_name": "Федор Новиков",
+  "result_owner_source": "план v1 r8 §1.1"
+}

@@ -88,7 +88,7 @@ new spend/safety decision.
 | `import-linter.yml` | `Lint and Architecture Gates` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Ruff/import-linter/architecture fast gates |
 | `main-ghcr-publish.yml` | `Main GHCR Publish` | `workflow_run` | `active` | `active` | After a successful Main Integrity push on main, publish the scanned image for current HEAD through `ghcr-publish` |
 | `main-integrity.yml` | `Main Integrity` | `push`, `workflow_dispatch` | `active` | `active` | Post-merge smoke, root hygiene, and Docker validation through `docker-complete` |
-| `no-partial-tree-commits.yml` | `No partial-tree commits` | `workflow_dispatch` | `active` | `active` | Rejects partial-tree commits that would collapse history for downstream PRs (#11709) |
+| `no-partial-tree-commits.yml` | `No partial-tree commits` | `pull_request_target`, `push`, `workflow_dispatch` | `active` | `active` | Trusted-base checker inspects candidate history without executing candidate code; required-status deployment must be verified separately (#13037) |
 | `opencode-pr-review.yml` | `opencode-pr-review` | `workflow_dispatch` | `active` | `active` | Dispatch-only stub (#11012); remote OpenCode installer removed until a digest pin exists |
 | `opencode-triage.yml` | `opencode-triage` | `workflow_dispatch` | `active` | `active` | Dispatch-only stub (#11012); remote OpenCode installer removed until a digest pin exists |
 | `pr-required.yml` | `PR Gate Complete` | `pull_request`, `workflow_dispatch` | `active` | `active` | Always-materialized fail-closed coordinator; job `pr-gate-complete` is required by ruleset 13643213 (`enforcement: active`, GET 2026-11-06) |

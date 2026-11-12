@@ -23,6 +23,8 @@ src_sidecars:
       role: canonical_runtime_tree
     - path: src/memory
       role: approved_sidecar_memory_subsystem
+    - path: src/iuphar_target_class
+      role: approved_standalone_iuphar_stage0_source
 
 docs_code_zones:
   approved_roots:
