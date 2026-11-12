@@ -33,6 +33,12 @@ Status: rebaselined 2026-07-28 (DOC-GOV-01 / #6873)
 | `project-package-topology/` | Package topology decisions |
 | `technical-debt/` | Historical tech-debt rebaseline markers |
 
+## Dated project observations
+
+- [Scoped MCP memory observation, 2026-11-12](../../../reports/docs-evidence/mcp-memory-user-session-20261112.md):
+  ordinary current-task reads and workspace isolation; fresh-session acceptance
+  remains separate.
+
 ## Bulk historical inventory
 
 Full pack inventory after DOC-GOV-01 relocate:
