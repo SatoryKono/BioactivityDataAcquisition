@@ -122,8 +122,12 @@ def test_telemetry_update_forwards_complete_junit_inventory(
             [
                 "--update",
                 "--telemetry",
-                "--coverage-percent",
-                "96.73",
+                "--coverage-xml",
+                "measured.xml",
+                "--slowest-json",
+                "measured-slowest.json",
+                "--source-event",
+                "workflow_dispatch",
                 "--source-commit",
                 "a" * 40,
                 "--source-run-id",
@@ -139,6 +143,12 @@ def test_telemetry_update_forwards_complete_junit_inventory(
         == 0
     )
     assert commands[0][-2:] == ["--junit=first.xml", "--junit=second.xml"]
+    assert "--coverage-percent" not in commands[0]
+    assert commands[0][commands[0].index("--source-event") + 1] == "workflow_dispatch"
+    assert commands[0][commands[0].index("--coverage-xml") + 1] == "measured.xml"
+    assert (
+        commands[0][commands[0].index("--slowest-json") + 1] == "measured-slowest.json"
+    )
 
 
 def test_junit_override_requires_telemetry_update(
@@ -189,8 +199,8 @@ def test_telemetry_update_rejects_non_ancestor_commit(
             [
                 "--update",
                 "--telemetry",
-                "--coverage-percent",
-                "96.73",
+                "--coverage-xml",
+                "measured.xml",
                 "--source-commit",
                 "deadbeef",
                 "--source-run-id",
@@ -210,8 +220,8 @@ def test_telemetry_update_rejects_flag_like_source_commit(
             [
                 "--update",
                 "--telemetry",
-                "--coverage-percent",
-                "96.73",
+                "--coverage-xml",
+                "measured.xml",
                 "--source-commit=--output=/tmp/x",
                 "--source-run-id",
                 "1",

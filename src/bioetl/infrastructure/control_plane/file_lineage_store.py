@@ -57,10 +57,10 @@ def _lock_byte_range(
 ) -> None:
     """Lock one byte at the start of a lock file, initializing an empty file."""
     os.lseek(lock_fd, 0, os.SEEK_SET)
+    locking(lock_fd, mode, 1)
     if os.fstat(lock_fd).st_size < 1:
         os.write(lock_fd, b"\0")
         os.lseek(lock_fd, 0, os.SEEK_SET)
-    locking(lock_fd, mode, 1)
 
 
 def _acquire_msvcrt_lock(

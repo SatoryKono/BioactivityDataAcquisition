@@ -55,7 +55,15 @@ def test_audit_rewrite_refreshes_score_narrative_without_relabeling_history(
 
 @pytest.mark.parametrize(
     "override",
-    ["coverage_percent", "source_commit", "source_run_id", "source_run_url", "junit"],
+    [
+        "coverage_percent",
+        "coverage_xml",
+        "slowest_json",
+        "source_commit",
+        "source_run_id",
+        "source_run_url",
+        "junit",
+    ],
 )
 def test_local_telemetry_refresh_rejects_ci_identity_overrides(
     monkeypatch, override
@@ -74,6 +82,17 @@ def test_local_telemetry_refresh_rejects_ci_identity_overrides(
     )
     with pytest.raises(SystemExit, match="must come from the manifest"):
         refresh._run_telemetry(check_only=False, telemetry=args)
+    assert calls == []
+
+
+def test_ci_telemetry_wrapper_rejects_percentage_override_before_child(monkeypatch):
+    calls = []
+    monkeypatch.setattr(refresh, "_run", lambda command: calls.append(command) or 0)
+    with pytest.raises(SystemExit, match="percentage overrides"):
+        refresh._run_telemetry(
+            check_only=False,
+            telemetry=SimpleNamespace(local_manifest=None, coverage_percent=100),
+        )
     assert calls == []
 
 
