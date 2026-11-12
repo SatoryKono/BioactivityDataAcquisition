@@ -1146,7 +1146,11 @@ def test_shadow_compare_routes_runtime_profiles_to_governing_tests(path: str) ->
 
 @pytest.mark.parametrize(
     "path",
-    ["AGENTS.md", "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"],
+    [
+        "AGENTS.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+        "docs/05-operations/runbooks/ai-rules-loading.md",
+    ],
 )
 def test_shadow_compare_routes_root_and_delegated_validation_policy(path: str) -> None:
     """Root/policy edits select governing tests without waiving unknown policies."""
@@ -1217,3 +1221,40 @@ def test_native_runtime_checker_uses_architecture_owners() -> None:
     )
     assert "tests/unit/scripts" not in report["selected"]
     assert "tests/unit/repo_backed/scripts" not in report["selected"]
+
+
+@pytest.mark.parametrize(
+    "path,owner",
+    [
+        ("AGENTS.md", "tests/architecture/test_codex_task_routing.py"),
+        (
+            "scripts/memory/run_workflow.sh",
+            "tests/architecture/test_ai_memory_program_contracts.py",
+        ),
+    ],
+)
+def test_root_and_memory_entrypoints_have_reviewed_owners(
+    path: str, owner: str
+) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert owner in report["selected"]
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
+        "docs/00-project/ai/prompts/library/session/bootstrap.md",
+        "docs/03-guides/development/pycharm-setup.md",
+        "docs/03-guides/github-workflow-diagrams.md",
+    ],
+)
+def test_worktree_guidance_routes_to_guardrail_contracts(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert "tests/architecture/test_runtime_agent_docs_drift.py" in report["selected"]
+    assert (
+        "tests/architecture/test_documentation_cleanup_inventory.py"
+        in report["selected"]
+    )

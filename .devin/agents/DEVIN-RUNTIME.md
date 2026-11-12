@@ -24,16 +24,10 @@ reference documents and native configuration presence cannot override them.
 
 ## Context tiers
 
-Follow the `AGENTS.md` Required AI Context table. Hash-only rebind, date stamp,
-and remote-main skip RULES/ADR and full `pre-task` RAG
-(`BIOETL_AI_MEMORY_MODE=off`). V3/V4 keep the full package.
-
-| Task class | Read | Memory |
-| --- | --- | --- |
-| hash-only generated-artifact rebind, date stamp, remote-main | drift runbook + touched reporter | `BIOETL_AI_MEMORY_MODE=off`; skip RAG |
-| V1 docs/prompt | `AGENTS.md` guardrails + POST_CHANGE docs slice | read-only optional |
-| V2 focused code | + matching `.devin` profile/skill for SCOPE | `pre-task` |
-| V3/V4 | full package via `AGENTS.md` | `pre-task` required |
+The `AGENTS.md` Required AI Context table is the single task-class matrix.
+Apply its source-reuse and memory-write rules before loading a role or wrapper;
+this map does not define a second bootstrap table. V3/V4 retain the full package
+and required pre-task. Hash-only work uses `BIOETL_AI_MEMORY_MODE=off`.
 
 ## Purpose
 
@@ -41,9 +35,21 @@ Map logical BioETL `py-*` profiles onto the Devin CLI runtime roles using custom
 
 ## Canonical Launch
 
-Run Devin from the repository root so project discovery loads `AGENTS.md`,
-`.devin/config.json`, `.devin/mcp_config.json`, `.devin/agents/**`, and
-`.devin/skills/**`:
+Hook discovery: `python scripts/ai/codex/doctor.py hooks --no-write --json`.
+Exit 2 means installed capability is NOT_PROVEN. Discovery never runs hooks or
+runtime commands. See `docs/05-operations/runbooks/ai-hook-compatibility.md` for
+platform observations and vendor contracts; documentation alone cannot enable
+a native adapter.
+
+Run Devin from the repository root. These are declared sources, not proof
+that every file is loaded at startup: `AGENTS.md`, `.devin/config.json`,
+`.devin/mcp_config.json`, `.devin/agents/**`, and `.devin/skills/**`.
+Verify resolver/discovery separately with `devin rules list`,
+`devin rules show AGENTS` and `devin skills list --json`. These commands do
+not prove model execution or child-process permission enforcement.
+`make devin-check` is not a no-write loader probe: its prerequisite writes a
+local MCP overlay. Follow `docs/05-operations/runbooks/ai-rules-loading.md`.
+For the established launch workflow:
 
 ```bash
 make devin-check

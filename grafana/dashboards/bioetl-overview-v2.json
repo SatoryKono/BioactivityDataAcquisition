@@ -1616,7 +1616,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_incident_global_alerts",
+          "expr": "topk(2, bioetl_incident_global_alerts)",
           "format": "table",
           "instant": true,
           "refId": "A",

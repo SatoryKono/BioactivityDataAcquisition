@@ -53,6 +53,51 @@ def test_unmapped_path_still_has_no_pytest_target(
     assert "tests gate has no affected pytest target" in capsys.readouterr().err
 
 
+def test_runtime_hook_docs_have_bounded_routes_without_accepting_unknown_docs() -> None:
+    """Runtime discovery docs select their real guards; unknown peers stay rejected."""
+    repo_root = Path(__file__).resolve().parents[5]
+    paths = [
+        ".codex/agents/CODEX-RUNTIME.md",
+        ".junie/agents/JUNIE-RUNTIME.md",
+        ".devin/agents/DEVIN-RUNTIME.md",
+        "docs/05-operations/runbooks/ai-hook-compatibility.md",
+    ]
+    report = build_shadow_compare(paths, repo_root=repo_root)
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == {
+        "tests/unit/scripts/test_hook_inventory.py",
+        "tests/architecture/test_codex_native_runtime.py",
+        "tests/architecture/test_ai_runtime_governance_links.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+        "tests/architecture/test_runtime_agent_docs_drift.py",
+        "tests/architecture/test_devin_setup_guide_codex_models.py",
+        "tests/architecture/test_codex_agent_catalog_inventory.py",
+        "tests/architecture/test_runtime_orchestration_surfaces.py",
+        "tests/architecture/test_junie_runtime_ci_contract.py",
+        "tests/architecture/test_devin_runtime_no_dead_script_refs.py",
+    }
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            [*paths, "docs/05-operations/runbooks/unknown-hook-note.md"],
+            repo_root=repo_root,
+        )
+
+
+def test_normative_index_selects_precedence_guards_and_rejects_unknown_peer() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["docs/00-project/NORMATIVE_SOURCES.md"], repo_root=repo_root
+    )
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == {
+        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+        "tests/architecture/test_ai_runtime_governance_links.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+    }
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(["docs/00-project/UNKNOWN.md"], repo_root=repo_root)
+
+
 def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
     """Select source-layer tests and existing test paths, excluding missing paths."""
     unit_domain = tmp_path / "tests" / "unit" / "domain"
@@ -1036,4 +1081,50 @@ def test_resource_inventory_files_select_integrity_controls(changed_file: str) -
     catalog_test = "tests/architecture/test_external_resource_inventory_catalog.py"
     assert catalog_test in report["selected"]
     assert (root / catalog_test).is_file()
+    assert report["activation"] == "not_applied"
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "scripts/ai/codex/README.md",
+        "scripts/ai/codex/run-codex.ps1",
+        "scripts/ai/codex/run-codex.sh",
+    ],
+)
+def test_codex_launchers_and_guide_have_bounded_impact_routes(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    result = build_shadow_compare([path], repo_root=root)
+    assert result["covers_full_suite"] is False
+    assert {
+        "tests/architecture/test_codex_native_runtime.py",
+        "tests/architecture/test_codex_launcher_bootstrap.py",
+        "tests/unit/scripts/test_mcp_routes.py",
+        "tests/unit/scripts/test_mcp_readiness.py",
+    }.issubset(result["selected"])
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            [path, "scripts/ai/codex/unknown-launcher.ps1"], repo_root=root
+        )
+
+
+@pytest.mark.parametrize(
+    "changed_file",
+    [
+        "scripts/ai/codex/README.md",
+        "scripts/ai/codex/run-codex.ps1",
+        "scripts/ai/codex/run-codex.sh",
+    ],
+)
+def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -> None:
+    """Launcher and CLI guidance changes select their real behavioral contracts."""
+    repo_root = Path(__file__).resolve().parents[5]
+    expected = {
+        "tests/architecture/test_codex_native_runtime.py",
+        "tests/architecture/test_codex_launcher_bootstrap.py",
+        "tests/unit/scripts/ops/test_codex_exec_env_filter.py",
+    }
+    selected = affected_pytest_targets([changed_file], repo_root=repo_root)
+    assert expected.issubset(selected)
+    report = build_shadow_compare([changed_file], repo_root=repo_root)
     assert report["activation"] == "not_applied"
