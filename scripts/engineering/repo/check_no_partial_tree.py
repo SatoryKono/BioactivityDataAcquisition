@@ -238,8 +238,11 @@ def _unrelocated_paths(
 def check_index_tree(repo: str | Path, base: str) -> list[str]:
     """Check the proposed index without write-tree, refresh, or staging."""
     cwd = validate_repo(repo)
-    base_sha = resolve_revision(cwd, base)
+    base_sha = _historical_base(
+        cwd, resolve_revision(cwd, base), resolve_revision(cwd, "HEAD")
+    )
     before = _run_git(cwd, "ls-files", "--stage", "-z")
+    _reject_intent_to_add(cwd)
     roots = set()
     for record in filter(None, before.split("\x00")):
         metadata, path = record.split("\t", 1)
@@ -260,6 +263,36 @@ def check_index_tree(repo: str | Path, base: str) -> list[str]:
     if before != _run_git(cwd, "ls-files", "--stage", "-z"):
         problems.append("index changed during inspection")
     return problems
+
+
+def _reject_intent_to_add(repo: Path) -> None:
+    """ITA entries are not part of an ordinary commit, even with stage zero."""
+    snapshots = [
+        _run_git(
+            repo,
+            "diff",
+            "--cached",
+            "--no-ext-diff",
+            "--no-textconv",
+            "--raw",
+            "--no-abbrev",
+            "-z",
+            visibility,
+            "HEAD",
+            "--",
+        )
+        for visibility in ("--ita-visible-in-index", "--ita-invisible-in-index")
+    ]
+    if snapshots[0] != snapshots[1]:
+        raise EvidenceError("intent-to-add or changing index cannot qualify")
+
+
+def _historical_base(repo: Path, base: str, tip: str) -> str:
+    """Use one unambiguous ancestor for history and proposed-index inspection."""
+    common = _run_git(repo, "merge-base", "--all", base, tip).strip()
+    if not _SHA_RE.fullmatch(common):
+        raise EvidenceError("candidate has no unambiguous trusted ancestor")
+    return common
 
 
 def select_event_range(event_name: str, event: dict[str, Any]) -> tuple[str, str]:
@@ -369,9 +402,7 @@ def find_collapsing_commits(
     base_sha = resolve_revision(cwd, base)
     tip_sha = resolve_revision(cwd, tip)
     shallow = _shallow_boundaries(cwd)
-    common = _run_git(cwd, "merge-base", "--all", base_sha, tip_sha).strip()
-    if not _SHA_RE.fullmatch(common):
-        raise EvidenceError("trusted base and tip have no verified common ancestor")
+    _historical_base(cwd, base_sha, tip_sha)
     revisions = [
         line
         for line in _run_git(
@@ -389,11 +420,7 @@ def find_collapsing_commits(
     for revision in revisions:
         if not _parent_shas(cwd, revision):
             raise EvidenceError("unrelated root cannot qualify for shared history")
-        historical_base = _run_git(
-            cwd, "merge-base", "--all", base_sha, revision
-        ).strip()
-        if not _SHA_RE.fullmatch(historical_base):
-            raise EvidenceError("candidate commit has no unambiguous trusted ancestor")
+        historical_base = _historical_base(cwd, base_sha, revision)
         if is_collapsed_tree(
             _top_level_names(cwd, historical_base), _top_level_names(cwd, revision)
         ) or _missing_directory_content(cwd, historical_base, revision):
