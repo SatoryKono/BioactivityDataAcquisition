@@ -174,9 +174,16 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 def _read_rows(source: Path, *, root: Path) -> tuple[dict[str, str], ...]:
-    """Read a CSV only after its resolved path stays inside ``root``."""
+    """Read a CSV only after its resolved path stays inside ``root``.
+
+    The opened path is rebuilt from the resolved root and the relative parts,
+    so the file handle is not the original CLI path object.
+    """
     resolved = _path_inside_root(source, root)
-    with resolved.open(encoding="utf-8-sig", newline="") as handle:
+    base = root.resolve()
+    relative = resolved.relative_to(base)
+    opened = base.joinpath(*relative.parts)
+    with opened.open(encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
         if not reader.fieldnames or "input_row_id" not in reader.fieldnames:
             raise ValueError("CSV requires an input_row_id header")

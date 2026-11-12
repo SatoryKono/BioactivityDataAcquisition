@@ -274,6 +274,32 @@ def test_batch_cli_writes_beside_the_example(tmp_path: Path) -> None:
     assert document["rules_version"] == "plan-v1-r8"
 
 
+def test_read_rows_opens_a_file_inside_root(tmp_path: Path) -> None:
+    from iuphar_target_class import delivery
+
+    root = tmp_path / "root"
+    source = root / "batch" / "rows.csv"
+    source.parent.mkdir(parents=True)
+    source.write_bytes(
+        "input_row_id,old_iuphar_class\nrow-1,Enzyme\n".encode("utf-8-sig")
+    )
+    assert delivery._read_rows(source, root=root) == (
+        {"input_row_id": "row-1", "old_iuphar_class": "Enzyme"},
+    )
+
+
+def test_read_rows_rejects_a_file_outside_root(tmp_path: Path) -> None:
+    from iuphar_target_class import delivery
+
+    root = tmp_path / "root"
+    root.mkdir()
+    outside = tmp_path / "outside.csv"
+    outside.write_bytes(b"input_row_id,old_iuphar_class\nrow-1,Enzyme\n")
+    with pytest.raises(ValueError, match="path escapes root"):
+        delivery._read_rows(outside, root=root)
+    assert outside.read_bytes().startswith(b"input_row_id")
+
+
 def test_path_outside_root_is_rejected(tmp_path: Path) -> None:
     root = tmp_path / "root"
     root.mkdir()
