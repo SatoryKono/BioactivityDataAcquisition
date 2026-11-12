@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T08:18:54.199617+00:00",
+  "generated_at": "2026-11-12T08:27:31.098140+00:00",
   "summary": {
     "total_scripts": 744,
     "status_counts": {
@@ -24619,7 +24619,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_nav_bus.py",
-          "line": 155,
+          "line": 158,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._latest_complete_run_panel import ("
         }
