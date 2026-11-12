@@ -1018,7 +1018,9 @@ def _validate_ci_capture_inputs(source_commit: str, coverage_xml: Path) -> str:
         check=False,
     )
     untracked = subprocess.run(
-        ["git", "ls-files", "--others", "--exclude-standard", "--", *inputs],
+        ensure_safe_cli_argv(
+            ["git", "ls-files", "--others", "--exclude-standard", "--", *inputs]
+        ),
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,
