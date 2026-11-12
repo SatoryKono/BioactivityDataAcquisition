@@ -2,20 +2,20 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: codex/nightly-coverage-boundaries
-refreshed_at_utc: '2026-11-12T17:34:22.299859+00:00'
+refreshed_at_utc: '2026-11-12T17:14:00.832000+00:00'
 refresh_status: captured
 source_commit: b97e117f226777fafd583cf0809afc09a2468f9d
 source_run_id: '43264909539'
 source_event: workflow_dispatch
 source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/43264909539
-source_tree_sha256: 66992ee111d77a4c60cf43dc56259549612ec7dacc91c2fdfd4064e21274ceb2
+source_tree_sha256: 5d61990a5eb6e3ae47137de81f3964f53fbb124f3e16de24fe03736254982f04
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
   coverage_xml: reports/coverage/coverage.xml
   coverage_log: null
-  coverage_percent_fallback: 99.68
+  coverage_percent_fallback: null
   slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:
@@ -513,7 +513,7 @@ historical_snapshots:
     artifact_inputs:
       coverage_xml: reports/coverage/coverage.xml
       coverage_log: null
-      coverage_percent_fallback: 99.68
+      coverage_percent_fallback: null
       slowest_tests_json: reports/test-telemetry/slowest-tests.json
       junit_inputs: []
     coverage:
