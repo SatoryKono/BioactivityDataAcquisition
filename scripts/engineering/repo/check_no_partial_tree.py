@@ -102,8 +102,15 @@ def _run_git(repo: Path, verb: str, *args: str) -> str:
     if verb not in _GIT_VERBS:
         raise EvidenceError(f"unsupported git verb: {verb!r}")
     env = os.environ.copy()
-    for key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"):
+    for key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_INDEX_FILE"):
         env.pop(key, None)
+    for key in tuple(env):
+        if key in {
+            "GIT_CONFIG",
+            "GIT_CONFIG_COUNT",
+            "GIT_CONFIG_PARAMETERS",
+        } or key.startswith(("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_")):
+            env.pop(key, None)
     env["GIT_NO_REPLACE_OBJECTS"] = "1"
     try:
         result = subprocess.run(

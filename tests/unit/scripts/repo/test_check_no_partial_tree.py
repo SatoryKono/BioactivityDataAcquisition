@@ -500,3 +500,44 @@ def test_event_reader_accepts_in_directory_metadata(tmp_path, monkeypatch):
     path = tmp_path / "event.json"
     path.write_text('{"before":"' + "1" * 40 + '","after":"' + "2" * 40 + '"}')
     assert module._load_event_range("push", path) == ("1" * 40, "2" * 40)
+
+
+def test_alternate_index_cannot_hide_real_skip_worktree_flags(
+    repo: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Qualify the actual repository index, ignoring an ambient clean alternate."""
+    alternate = repo / "alternate-index"
+    alternate.write_bytes((repo / ".git/index").read_bytes())
+    _git(repo, "update-index", "--skip-worktree", "src/keep.txt")
+    real_before = (repo / ".git/index").read_bytes()
+    monkeypatch.setenv("GIT_INDEX_FILE", str(alternate))
+
+    assert "skip-worktree entries exist in index" in module.check_checkout_state(repo)
+    assert (repo / ".git/index").read_bytes() == real_before
+
+
+def test_unrelated_system_exit_is_not_converted_to_evidence_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Preserve a caller's requested termination instead of masking it as bad Git."""
+
+    def stop(*args: object, **kwargs: object) -> int:
+        raise SystemExit(130)
+
+    monkeypatch.setattr(module, "_run_checks", stop)
+    with pytest.raises(SystemExit) as caught:
+        module.main([])
+    assert caught.value.code == 130
+
+
+def test_ambient_config_cannot_hide_real_sparse_checkout(
+    repo: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A command-scoped override must not replace the repository's sparse setting."""
+    _git(repo, "config", "core.sparseCheckout", "true")
+    monkeypatch.setenv("GIT_CONFIG_COUNT", "1")
+    monkeypatch.setenv("GIT_CONFIG_KEY_0", "core.sparseCheckout")
+    monkeypatch.setenv("GIT_CONFIG_VALUE_0", "false")
+    assert "sparse checkout is enabled" in module.check_checkout_state(repo)

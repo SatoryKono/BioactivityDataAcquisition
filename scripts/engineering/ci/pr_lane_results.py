@@ -179,7 +179,19 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
     {"scripts/ai/codex/native_runtime_contract.py"}
 )
 
+NO_PARTIAL_TREE_TEST = "tests/unit/scripts/repo/test_check_no_partial_tree.py"
+
+
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "scripts/engineering/repo/check_no_partial_tree.py": (
+        NO_PARTIAL_TREE_TEST,
+        "tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py",
+    ),
+    "docs/05-operations/runbooks/full-tree-guard.md": (NO_PARTIAL_TREE_TEST,),
+    ".github/workflows/no-partial-tree-commits.yml": (
+        NO_PARTIAL_TREE_TEST,
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
     "configs/quality/agent_guard_budget_surfaces.json": (
         "tests/unit/scripts/repo/test_budget_guard.py",
     ),

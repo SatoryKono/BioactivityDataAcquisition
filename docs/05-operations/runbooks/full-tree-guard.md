@@ -74,7 +74,9 @@ Python, actions, dependencies or hooks. Explicit Git commands fetch the literal
 public origin SatoryKono/BioactivityDataAcquisition and refs/heads/main with no
 credentials or third-party checkout action. Init templates and checkout hooks
 are disabled. A PR field cannot choose executable code. Git metadata queries disable fsmonitor
-and external diff/textconv execution. No agent or service is started.
+and external diff/textconv execution. Ambient index and command-scoped config
+overrides cannot replace the repository state being inspected. No agent or
+service is started.
 PR events are restricted to the protected main target. Push and manual runs
 load their checker from main, including when manual dispatch is requested from
 another ref; they never import the dispatcher ref's candidate Python module.
