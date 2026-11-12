@@ -224,3 +224,15 @@ it('keeps a nonserializable value unknown without crashing the remaining record'
   expect(screen.getByText('UNKNOWN')).toBeInTheDocument();
   expect(screen.getByRole('link', { name: ids[0].slice(0, 8) })).toHaveAttribute('href', `/d/run?var-run_id=${ids[0]}`);
 });
+
+it.each([
+  [123, '123'],
+  [false, 'false'],
+  [BigInt(23), '23'],
+  [Symbol('value'), 'Symbol(value)'],
+])('retains the primitive cell value %p as %s', (value, text) => {
+  const panelProps = props();
+  panelProps.data.series[0].fields.find((field) => field.name === 'Pipeline')!.values[0] = value;
+  render(<AdaptiveTable {...panelProps} />);
+  expect(screen.getByText(text as string)).toBeInTheDocument();
+});

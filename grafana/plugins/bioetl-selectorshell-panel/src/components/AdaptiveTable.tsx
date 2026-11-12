@@ -73,7 +73,11 @@ function rawValueText(raw: unknown): string {
     try { return JSON.stringify(raw) ?? 'UNKNOWN'; }
     catch { return 'UNKNOWN'; }
   }
-  return String(raw);
+  if (typeof raw === 'string') { return raw; }
+  if (typeof raw === 'number' || typeof raw === 'bigint' || typeof raw === 'boolean' || typeof raw === 'symbol') {
+    return raw.toString();
+  }
+  return raw === undefined ? 'undefined' : 'UNKNOWN';
 }
 
 function previewText(name: string, full: string, preview: boolean): string {

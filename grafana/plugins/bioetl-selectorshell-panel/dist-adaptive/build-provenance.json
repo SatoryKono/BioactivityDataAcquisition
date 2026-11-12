@@ -4,8 +4,8 @@
   "inputs_sha256_lf": {
     "grafana/plugins/bioetl-selectorshell-panel/src/adaptive-module.ts": "0d6659fb29cb2037da9068d0792306e98dcd5b382dd7be8769c371c22e8c12a8",
     "grafana/plugins/bioetl-selectorshell-panel/src/adaptive-types.ts": "5396a3d53268da8f4cb1d67abe3b38ffde51597ceabe822f5cffcce72b89e80f",
-    "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.test.tsx": "c12b6bfdb8bb37cd87d0024bc83694902dfb9bdfe795d330b043fce0aa35acfb",
-    "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.tsx": "9832eadc7042e6d174b902828fb850b569f6841af783102b37945e9ba52a4d9d",
+    "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.test.tsx": "d7ba9b642daad73cc747da09c6eca04859e645daf22ca1d7c9a4798e7f15156c",
+    "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.tsx": "15e1195baaa361207b745cc2797ea486a838a715ddca70cc2eee39a791837bd1",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.test.tsx": "124229d28dced94a525ef31452e0252716a71cb6293a2431b38d1266716fd0d1",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.tsx": "9f8962b1bbe000247a588fa2c1b6cb91e0ab22f96b03beb1e9dcb2ec939a5222",
     "grafana/plugins/bioetl-selectorshell-panel/src/img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
@@ -45,8 +45,8 @@
     "LICENSE": "c5accbbd8546e94c34aed24afe689a617627d18eed5a6c48277e48db57c23851",
     "README.md": "21cbe16d6e1b1efb90b085f59b265d5bef9e5f55ac39a80639645245a860a672",
     "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
-    "module.js": "e9f2f9658b55b714a224c74e46cebe1d5dfe1e322ee5235ba2212442ea45e529",
-    "module.js.map": "cfe8bb83ed20ad3e4b0dcd39a6ce59c6ec98d9798585cfcdbe155f9d7a49d6d1",
+    "module.js": "97caf9b5eb18bf85d1844648811a2eb11205c66ff9581d5201dd1d7c73da9566",
+    "module.js.map": "954bdf60bdc793f3ca681fb081a2af1408009287c40cfe2e2ac3394332ec6bcd",
     "plugin.json": "09085cba5ed4f10ec6df95655ab1b5524b6dc908b1201fce19c5ee9bc6aa055e"
   }
 }
