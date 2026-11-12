@@ -52,15 +52,15 @@ def main() -> int:
 
     try:
         target_python = _preferred_python()
-    except ValueError:
+        command = [target_python, *sys.argv[1:]]
+        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+            ensure_safe_cli_argv(command), cwd=REPO_ROOT, check=False
+        )
+    except (ValueError, OSError):
         sys.stderr.write(
-            "BioETL hook ERROR: installed project interpreter unavailable.\n"
+            "BioETL hook ERROR: installed project interpreter or command unavailable.\n"
         )
         return 2
-    command = [target_python, *sys.argv[1:]]
-    completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
-        ensure_safe_cli_argv(command), cwd=REPO_ROOT, check=False
-    )
     return int(completed.returncode)
 
 

@@ -176,7 +176,10 @@ GHA_DISABLED_MAP_TEST = "tests/architecture/test_gha_disabled_map_10263.py"
 # Opt-in only: these modules have reviewed non-unit owners because their native
 # discovery uses dynamic imports. Other scripts retain the conservative fallback.
 EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
-    {"scripts/ai/codex/native_runtime_contract.py"}
+    {
+        "scripts/ai/codex/native_runtime_contract.py",
+        "scripts/engineering/repo/process_supervisor.py",
+    }
 )
 
 NO_PARTIAL_TREE_TEST = "tests/unit/scripts/repo/test_check_no_partial_tree.py"
@@ -185,6 +188,11 @@ IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "scripts/engineering/repo/process_supervisor.py": (
+        "tests/unit/scripts/repo/test_process_deadline.py",
+        HOOK_INSTALLATION_TEST,
+        "tests/unit/scripts/test_offline_precommit.py",
+    ),
     "README.md": (
         "tests/architecture/test_documentation_sync.py",
         "tests/architecture/test_docs_root_surface_governance_alignment.py",
@@ -866,6 +874,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12929_class_lane_review.json",
             "configs/quality/external_resource_inventory_pr12929_domain_accounting_review.json",
             "configs/quality/external_resource_inventory_pr12929_valueerror_review.json",
+            "configs/quality/external_resource_inventory_pr13092_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,

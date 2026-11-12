@@ -1223,3 +1223,22 @@ def test_owned_hook_deployment_surfaces_have_impact_owners(
         build_shadow_compare(
             [path, "scripts/ops/launchers/codex/unknown-setup.sh"], repo_root=root
         )
+
+
+def test_owned_hook_python_inputs_keep_real_bounded_test_owners():
+    root = Path(__file__).resolve().parents[5]
+    selected = affected_pytest_targets(
+        [
+            "scripts/engineering/repo/process_supervisor.py",
+            "scripts/engineering/dev/run_project_python.py",
+        ],
+        repo_root=root,
+    )
+    assert {
+        "tests/unit/scripts/repo/test_process_deadline.py",
+        "tests/unit/scripts/test_hook_installation.py",
+        "tests/unit/scripts/test_offline_precommit.py",
+        "tests/unit/scripts/test_run_project_python.py",
+    }.issubset(selected)
+    assert "tests/unit/scripts" not in selected
+    assert "tests/unit/repo_backed/scripts" not in selected
