@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import runpy
 import subprocess
 import sys
 from pathlib import Path, PurePosixPath
@@ -18,6 +19,7 @@ from pathlib import Path, PurePosixPath
 APPROVED_ROOT = Path("D:/github")
 WORKTREE_ROOT = APPROVED_ROOT / "BioactivityDataAcquisition-worktrees"
 HELPER_NAME = "bioetl-create-worktree.py"
+DEFAULT_START_POINT = "origin/main"
 _TASK = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,99}")
 _RESERVED = {
     "CON",
@@ -177,7 +179,7 @@ def install_helper() -> Path:
     content = (
         '"""Managed BioETL worktree entrypoint; source: scripts/engineering/repo/create_worktree.py."""\n'
         "from pathlib import Path\nimport runpy\n"
-        'runpy.run_path(str(Path(__file__).resolve().parents[2] / "scripts/engineering/repo/create_worktree.py"), run_name="__main__")\n'
+        'raise SystemExit(runpy.run_path(str(Path(__file__).resolve().parents[2] / "scripts/engineering/repo/create_worktree.py"))["main"]())\n'
     )
     if os.path.lexists(target):
         if target.is_symlink() or target.read_text(encoding="utf-8") != content:
@@ -213,10 +215,9 @@ def _populate_existing(destination: Path, sha: str) -> None:
         )
 
 
-def _creation_arguments(
+def _creation_command(
     args: argparse.Namespace, destination: Path, sha: str, branch: str
 ) -> list[str]:
-    """Assemble fixed Git options after destination/ref validation."""
     command = ["worktree", "add"]
     if args.no_checkout or args.existing_branch:
         command.append("--no-checkout")
@@ -231,8 +232,7 @@ def _creation_arguments(
 def _creation_identity(
     args: argparse.Namespace, repo: Path, destination: Path
 ) -> tuple[str, str]:
-    """Resolve an immutable commit and validate the requested branch."""
-    if args.existing_branch and args.start_point != "origin/main":
+    if args.existing_branch and args.start_point != DEFAULT_START_POINT:
         raise ValueError("--existing-branch cannot be combined with --start-point")
     ref = (
         f"refs/heads/{args.existing_branch}"
@@ -250,6 +250,12 @@ def _creation_identity(
 
 def create_worktree(args: argparse.Namespace) -> Path:
     destination = validate_destination(args.destination)
+    # Execute the tracked stdlib guard without importing project packages or
+    # writing bytecode. Keep its ancestor identities in process until creation.
+    path_guard = runpy.run_path(str(Path(__file__).with_name("operation_guards.py")))
+    permit = path_guard["prepare_worktree"](
+        str(destination), allowed_root=APPROVED_ROOT
+    )
     repo = _source_repo()
     approved, _ = _roots()
     _inside(
@@ -265,7 +271,11 @@ def create_worktree(args: argparse.Namespace) -> Path:
         _check_env(repo, sha, args.env_example_approved)
     # Resolve again immediately before creation, after all potentially slow reads.
     validate_destination(args.destination)
-    _git(repo, *_creation_arguments(args, destination, sha, branch))
+    command = _creation_command(args, destination, sha, branch)
+    decision = path_guard["revalidate_worktree"](permit, allowed_root=APPROVED_ROOT)
+    if decision.status != "PASS":
+        raise ValueError("Shared worktree guard refused creation: " + decision.code)
+    _git(repo, *command)
     _created_target(destination)
     if args.existing_branch and not args.no_checkout:
         # Native add reserves the branch without checkout. Populate only the
@@ -284,7 +294,7 @@ def main(argv: list[str] | None = None) -> int:
     branch.add_argument("--branch")
     branch.add_argument("--existing-branch")
     branch.add_argument("--detach", action="store_true")
-    parser.add_argument("--start-point", default="origin/main")
+    parser.add_argument("--start-point", default=DEFAULT_START_POINT)
     parser.add_argument("--no-checkout", action="store_true")
     parser.add_argument("--env-example-approved", action="store_true")
     args = parser.parse_args(argv)
@@ -298,7 +308,7 @@ def main(argv: list[str] | None = None) -> int:
                     args.detach,
                     args.no_checkout,
                     args.env_example_approved,
-                    args.start_point != "origin/main",
+                    args.start_point != DEFAULT_START_POINT,
                 )
             ):
                 raise ValueError(
@@ -315,7 +325,3 @@ def main(argv: list[str] | None = None) -> int:
         parser.error(str(error))
     print(result)
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

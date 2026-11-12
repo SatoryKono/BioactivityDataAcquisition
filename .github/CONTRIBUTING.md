@@ -60,7 +60,7 @@ Hosted CI checkouts are remote workflow inputs, not workstation worktrees.
 From a clean primary checkout, install the governed entrypoint once:
 
 ```powershell
-python scripts/engineering/repo/create_worktree.py --install-helper
+python -B -m scripts.engineering.repo worktree --install-helper
 python D:/github/BioactivityDataAcquisition/.git/hooks/bioetl-create-worktree.py issue-123 --validate-only
 ```
 
@@ -84,6 +84,9 @@ revision expressions. `--existing-branch` attaches
 without moving its ref; a concurrent ref move is reported without resetting it.
 `--no-checkout` creates metadata only and is not permission to commit a partial
 tree or later write an env file. Keep the full-tree gate before every commit.
+Creation retains the shared `operation_guards.py` ancestor permit in process and
+revalidates it immediately before Git. FAIL, ERROR and SKIP all block creation;
+this check cannot eliminate a hostile filesystem race after validation.
 
 Installation refuses an existing different local helper and never overwrites it.
 Preserve that helper, compare it with the tracked implementation, and review its

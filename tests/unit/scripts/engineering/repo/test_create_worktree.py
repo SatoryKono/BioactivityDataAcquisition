@@ -15,6 +15,14 @@ pytestmark = pytest.mark.unit
 SHA = "a" * 40
 
 
+def test_router_refuses_creation_without_mandatory_helper(monkeypatch):
+    from scripts.engineering.repo import __main__ as router
+
+    monkeypatch.setattr(guard, "main", lambda *_: pytest.fail("Must not create"))
+    with pytest.raises(SystemExit, match="installed bioetl-create-worktree.py"):
+        router.main(["worktree", "safe-task", "--no-checkout"])
+
+
 @pytest.mark.parametrize(
     "ref", ["--help", "-c", "main\n--force", "HEAD:path", "a;calc"]
 )
@@ -40,6 +48,56 @@ def test_branch_option_is_rejected_before_native_branch_check(policy, git_calls)
     assert not guard.WORKTREE_ROOT.exists()
 
 
+@pytest.mark.parametrize("status", ["FAIL", "ERROR", "SKIP"])
+def test_shared_guard_non_pass_blocks_git_creation(
+    policy, git_calls, monkeypatch, status
+):
+    from types import SimpleNamespace
+
+    original = guard.runpy.run_path
+
+    def refused(path):
+        namespace = original(path)
+        namespace["revalidate_worktree"] = lambda *_a, **_k: SimpleNamespace(
+            status=status, code="worktree.race"
+        )
+        return namespace
+
+    monkeypatch.setattr(guard.runpy, "run_path", refused)
+    with pytest.raises(SystemExit):
+        guard.main(["safe-task", "--no-checkout"])
+    assert not any(args[:2] == ("worktree", "add") for _, args in git_calls)
+    assert not guard.WORKTREE_ROOT.exists()
+
+
+def test_shared_guard_revalidates_immediately_before_add(
+    policy, git_calls, monkeypatch
+):
+    events = []
+    original_load = guard.runpy.run_path
+    original_git = guard._git
+
+    def loaded(path):
+        namespace = original_load(path)
+        original_check = namespace["revalidate_worktree"]
+
+        def checked(*args, **kwargs):
+            events.append("revalidate")
+            return original_check(*args, **kwargs)
+
+        namespace["revalidate_worktree"] = checked
+        return namespace
+
+    def tracked_git(repo, *args):
+        events.append(args[:2])
+        return original_git(repo, *args)
+
+    monkeypatch.setattr(guard.runpy, "run_path", loaded)
+    monkeypatch.setattr(guard, "_git", tracked_git)
+    guard.main(["safe-task", "--no-checkout"])
+    assert events[-2:] == ["revalidate", ("worktree", "add")]
+
+
 @pytest.fixture
 def policy(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     approved = (tmp_path / "approved").resolve()
@@ -48,9 +106,14 @@ def policy(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     (repo / ".git").mkdir(parents=True)
     implementation = repo / "scripts/engineering/repo/create_worktree.py"
     implementation.parent.mkdir(parents=True)
-    implementation.write_text("print('tracked implementation')\n", encoding="utf-8")
+    implementation.write_text(
+        "def main():\n    print('tracked implementation')\n    return 0\n",
+        encoding="utf-8",
+    )
     monkeypatch.setattr(guard, "APPROVED_ROOT", approved)
-    monkeypatch.setattr(guard, "WORKTREE_ROOT", approved / "worktrees")
+    monkeypatch.setattr(
+        guard, "WORKTREE_ROOT", approved / "BioactivityDataAcquisition-worktrees"
+    )
     monkeypatch.setattr(guard, "_require_windows", lambda: None)
     monkeypatch.setattr(guard, "_source_repo", lambda: repo)
     return repo
@@ -264,7 +327,15 @@ def test_native_validate_only_creates_no_tree(tmp_path: Path) -> None:
     task = "guard-preflight-" + tmp_path.name
     target = Path("D:/github/BioactivityDataAcquisition-worktrees") / task
     result = subprocess.run(
-        [sys.executable, "-B", guard.__file__, task, "--validate-only"],
+        [
+            sys.executable,
+            "-B",
+            "-m",
+            "scripts.engineering.repo",
+            "worktree",
+            task,
+            "--validate-only",
+        ],
         check=True,
         capture_output=True,
         text=True,
@@ -278,7 +349,15 @@ def test_native_validate_only_creates_no_tree(tmp_path: Path) -> None:
 )
 def test_non_windows_cli_fails_closed() -> None:
     result = subprocess.run(
-        [sys.executable, "-B", guard.__file__, "safe-task", "--validate-only"],
+        [
+            sys.executable,
+            "-B",
+            "-m",
+            "scripts.engineering.repo",
+            "worktree",
+            "safe-task",
+            "--validate-only",
+        ],
         capture_output=True,
         text=True,
     )

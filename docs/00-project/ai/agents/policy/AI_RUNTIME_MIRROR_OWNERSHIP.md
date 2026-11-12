@@ -42,8 +42,8 @@ ______________________________________________________________________
 1. `.codex/**` is the authoritative source for tracked Codex runtime behavior.
    Project TOML config and native agent descriptors are Codex-only runtime
    files declared in `junie-mirror-contract.json`; they are not copied into
-   Junie. `.codex/skills/**` is the sole project-scoped Codex skill discovery
-   and behavioral source.
+   Junie. `.codex/skills/**` is the canonical project-scoped skill behavioral
+   source. Native discovery and body injection require separate client evidence.
 1. `.junie/**` is the authoritative source for tracked JetBrains Junie runtime
    behavior and is an **equal peer** to `.codex/**`. Parity between the two
    runtime trees is a governance contract enforced by
