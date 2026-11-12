@@ -1239,3 +1239,22 @@ def test_root_and_memory_entrypoints_have_reviewed_owners(
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare([path], repo_root=root)
     assert owner in report["selected"]
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
+        "docs/00-project/ai/prompts/library/session/bootstrap.md",
+        "docs/03-guides/development/pycharm-setup.md",
+        "docs/03-guides/github-workflow-diagrams.md",
+    ],
+)
+def test_worktree_guidance_routes_to_guardrail_contracts(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert "tests/architecture/test_runtime_agent_docs_drift.py" in report["selected"]
+    assert (
+        "tests/architecture/test_documentation_cleanup_inventory.py"
+        in report["selected"]
+    )
