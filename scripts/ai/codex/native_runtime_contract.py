@@ -29,6 +29,8 @@ READ_ONLY_AGENTS = {
     "py-plan-bot",
 }
 ROOT_CONTRACT_FILE = "AGENTS.md"
+DEVIN_CONFIG_FILE = ".devin/config.json"
+DEVIN_RUNTIME_FILE = ".devin/agents/DEVIN-RUNTIME.md"
 CODEX_RUNTIME_FILE = ".codex/agents/CODEX-RUNTIME.md"
 RULE_NATIVE_CANDIDATE = "native_candidate"
 RULE_CONFIGURATION = "configuration"
@@ -57,8 +59,8 @@ RULE_SOURCE_PATTERNS = {
     ),
     "devin": (
         (RULE_NATIVE_CANDIDATE, ROOT_CONTRACT_FILE),
-        (RULE_CONFIGURATION, ".devin/config.json"),
-        (RULE_INSTRUCTION_DRIVEN, ".devin/agents/DEVIN-RUNTIME.md"),
+        (RULE_CONFIGURATION, DEVIN_CONFIG_FILE),
+        (RULE_INSTRUCTION_DRIVEN, DEVIN_RUNTIME_FILE),
         (RULE_SELECTED_PROFILE, ".devin/agents/*/AGENT.md"),
         (RULE_SELECTED_SKILL, ".devin/skills/*/SKILL.md"),
     ),
@@ -77,7 +79,7 @@ def _rule_configuration(path: Path, raw: bytes) -> dict[str, object]:
     data = tomllib.loads(text) if path.suffix == ".toml" else json.loads(text)
     if not isinstance(data, dict):
         raise ValueError("configuration must be an object")
-    if not path.as_posix().endswith(".devin/config.json"):
+    if not path.as_posix().endswith(DEVIN_CONFIG_FILE):
         return {}
     declared = data.get("read_config_from", {}).get("agents_standard")
     return {
@@ -175,7 +177,7 @@ ACTIVE_RUNTIME_TEXT_PATHS = (
     *tuple(f".codex/agents/{name}.toml" for name in AGENT_NAMES),
     *tuple(f".codex/skills/{name}/SKILL.md" for name in AGENT_NAMES),
     ".junie/agents/JUNIE-RUNTIME.md",
-    ".devin/agents/DEVIN-RUNTIME.md",
+    DEVIN_RUNTIME_FILE,
     ".devin/agents/ORCHESTRATION.md",
     "docs/00-project/ai/memory/agent-memory.md",
     *tuple(f"docs/00-project/ai/memory/memory-{name}.md" for name in AGENT_NAMES),
@@ -590,7 +592,6 @@ DEVIN_RESTRICTED_PROFILES = frozenset(
 )
 DEVIN_READ_TOOLS = frozenset({"read", "grep", "glob"})
 DEVIN_PROFILE_CODE = "devin.profile"
-DEVIN_CONFIG_FILE = ".devin/config.json"
 DEVIN_DELEGATION_BLOCK = "Native delegation of restricted profiles is blocked until"
 
 
@@ -658,7 +659,7 @@ def _declared_string_list(text: str, key: str, indent: int) -> list[str]:
         if match is None:
             break
         value = _frontmatter_value(match[1])
-        if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*(?:\([^\r\n()]+\))?", value):
+        if not re.fullmatch(r"[A-Za-z]\w*(?:\([^\r\n()]+\))?", value, re.ASCII):
             raise ValueError("unsupported list scalar")
         result.append(value)
     if not result:
@@ -673,7 +674,7 @@ def _devin_tool_metadata(path: Path) -> dict[str, Any]:
     if not text.startswith("---\n") or len(parts) != 3:
         raise ValueError("missing metadata")
     header = parts[1]
-    blocks = re.findall(r"(?m)^permissions:\n((?:[ ]+[^\n]*\n|\n)*)", header)
+    blocks = re.findall(r"(?m)^permissions:\n((?: +[^\n]*\n|\n)*)", header)
     if len(blocks) != 1:
         raise ValueError("missing/duplicate permission metadata")
     return {
@@ -766,7 +767,7 @@ def validate_devin_permission_contract(repo_root: Path) -> list[Finding]:
             )
         ]
     findings = _devin_project_findings(config, groups)
-    runtime_path = repo_root / ".devin/agents/DEVIN-RUNTIME.md"
+    runtime_path = repo_root / DEVIN_RUNTIME_FILE
     try:
         blocked = DEVIN_DELEGATION_BLOCK in runtime_path.read_text(encoding="utf-8")
     except OSError:
