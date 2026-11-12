@@ -3,7 +3,7 @@
 Observation date: 2026-11-12. This dated report qualifies memory in the current
 ordinary local Codex task. It does not qualify a fresh Codex session or every MCP
 in issue 13047. It supersedes only the memory-unavailable observation in
-[the earlier route snapshot](mcp-route-snapshot-20261111.md); historical evidence
+[the earlier route snapshot](../../docs/reports/evidence/mcp-route-snapshot-20261111.md); historical evidence
 remains intact.
 
 ## Publication boundary

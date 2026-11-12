@@ -97181,34 +97181,6 @@
       "lifecycle": "docs_reports_retention_sensitive_evidence",
       "outbound_links": 0,
       "owner": "BioETL Team",
-      "path": "docs/reports/evidence/mcp-memory-user-session-20261112.md",
-      "recommended_action": "keep",
-      "root_doc_kind": null,
-      "section": "reports",
-      "status": "Active",
-      "surface_family": "active",
-      "tracking_state": "tracked"
-    },
-    {
-      "canonical_successor": null,
-      "catalog_lifecycle": null,
-      "commit_policy": null,
-      "declared_class": null,
-      "declared_status": null,
-      "diagram_kind": null,
-      "duplicate_group": null,
-      "duplicate_resolution": null,
-      "extension": ".md",
-      "freshness": "current",
-      "generated_route": null,
-      "generated_route_exception": null,
-      "generator": null,
-      "github_issue_number": null,
-      "github_issue_url": null,
-      "inbound_links": 0,
-      "lifecycle": "docs_reports_retention_sensitive_evidence",
-      "outbound_links": 0,
-      "owner": "BioETL Team",
       "path": "docs/reports/evidence/mcp-route-snapshot-20261111.md",
       "recommended_action": "keep",
       "root_doc_kind": null,
@@ -101214,6 +101186,34 @@
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "reports/docs-evidence/http-header-audit-and-provenance.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/docs-evidence/mcp-memory-user-session-20261112.md",
       "recommended_action": "archive-after-migration",
       "root_doc_kind": null,
       "section": "reports",
@@ -118090,7 +118090,7 @@
       "docs_reports_curated_entrypoint": 2,
       "docs_reports_curated_or_historical_report": 42,
       "docs_reports_generated_or_route_owned": 8,
-      "docs_reports_retention_sensitive_evidence": 30,
+      "docs_reports_retention_sensitive_evidence": 29,
       "generated_skill_reference_mirror": 19,
       "generated_test_run_evidence": 6,
       "guide": 2,
@@ -118098,12 +118098,12 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 26,
       "reports_workspace_entrypoint": 1,
-      "working_report": 382
+      "working_report": 383
     },
     "by_recommended_action": {
-      "archive-after-migration": 425,
+      "archive-after-migration": 426,
       "generate-automatically": 1067,
-      "keep": 2695
+      "keep": 2694
     },
     "by_section": {
       ".github": 6,
@@ -118132,23 +118132,23 @@
       "security": 2
     },
     "by_status": {
-      "Active": 771,
+      "Active": 770,
       "Archived": 1554,
       "Canonical": 77,
       "Generated": 1067,
-      "Working": 718
+      "Working": 719
     },
     "by_surface_family": {
-      "active": 771,
+      "active": 770,
       "archive": 1554,
       "canonical": 77,
       "generated": 1067,
-      "working": 718
+      "working": 719
     },
     "by_tracking_state": {
       "tracked": 4187
     },
-    "docs_reports_local_count": 82,
+    "docs_reports_local_count": 81,
     "duplicate_group_count": 80,
     "generated_route_count": 76,
     "generated_without_route_count": 214,

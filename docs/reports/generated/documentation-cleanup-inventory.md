@@ -30,7 +30,7 @@
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 42 |
 | docs_reports_generated_or_route_owned | 8 |
-| docs_reports_retention_sensitive_evidence | 30 |
+| docs_reports_retention_sensitive_evidence | 29 |
 | generated_skill_reference_mirror | 19 |
 | generated_test_run_evidence | 6 |
 | guide | 2 |
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 382 |
+| working_report | 383 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -51,29 +51,29 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 771 |
+| Active | 770 |
 | Archived | 1554 |
 | Canonical | 77 |
 | Generated | 1067 |
-| Working | 718 |
+| Working | 719 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 771 |
+| active | 770 |
 | archive | 1554 |
 | canonical | 77 |
 | generated | 1067 |
-| working | 718 |
+| working | 719 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 425 |
+| archive-after-migration | 426 |
 | generate-automatically | 1067 |
-| keep | 2695 |
+| keep | 2694 |
 
 ## Cleanup Candidates
 
