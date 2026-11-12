@@ -66,8 +66,8 @@ def test_status_panels_have_correct_value_mapping():
         "2": "WARN",
         "3": "CRIT",
     }
-    assert options["0"]["color"] == "green"
-    assert options["3"]["color"] == "red"
+    assert options["0"]["color"] == "#14532d"
+    assert options["3"]["color"] == "#9f1239"
     assert options["1"]["color"] != "green"
     assert defaults["noValue"] == "UNKNOWN"
 

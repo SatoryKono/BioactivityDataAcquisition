@@ -93,6 +93,50 @@ def test_ci_capture_keeps_original_measurement_date(
     )
 
 
+@pytest.mark.parametrize("token", ["HEAD;rm", "HEAD|id", "HEAD&id", "HEAD$IFS"])
+def test_ci_capture_rejects_shell_metacharacters_in_source_commit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, token: str
+) -> None:
+    xml = tmp_path / "coverage.xml"
+    xml.write_text(
+        '<coverage line-rate="0.995" timestamp="1793987375208"/>', encoding="utf-8"
+    )
+
+    def fail(*_args: object, **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        raise AssertionError("subprocess")
+
+    monkeypatch.setattr(subprocess, "run", fail)
+    with pytest.raises(ValueError, match="full 40-character commit SHA"):
+        updater._validate_ci_capture_inputs(token, xml)
+
+
+def test_ci_capture_keeps_literal_git_argv(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    xml = tmp_path / "coverage.xml"
+    xml.write_text(
+        '<coverage line-rate="0.995" timestamp="1793987375208"/>', encoding="utf-8"
+    )
+    calls: list[list[str]] = []
+
+    def run(argv: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        calls.append(list(argv))
+        return subprocess.CompletedProcess(argv, 0, stdout="")
+
+    monkeypatch.setattr(subprocess, "run", run)
+    commit = "a" * 40
+    updater._validate_ci_capture_inputs(commit, xml)
+    assert calls[0][:5] == ["git", "diff", "--quiet", commit, "--"]
+    assert calls[1][:5] == [
+        "git",
+        "ls-files",
+        "--others",
+        "--exclude-standard",
+        "--",
+    ]
+    assert commit not in calls[1]
+
+
 @pytest.mark.parametrize("rate", [None, "nan", "inf", "-0.1", "1.1", "invalid"])
 def test_ci_capture_rejects_xml_without_a_valid_measured_coverage_rate(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, rate: str | None

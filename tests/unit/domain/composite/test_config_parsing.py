@@ -384,3 +384,12 @@ def test_composite_config_parsing_covers_optional_and_error_branches() -> None:
         require_str_tuple(["a", ""], "vals")
     assert optional_str_tuple(None, "vals") is None
     assert optional_str_tuple(["a"], "vals") == ("a",)
+
+
+def test_dq_decoder_rejects_invalid_record_policy() -> None:
+    from bioetl.domain.composite.config_composite_section_decoders import (
+        build_dq_config,
+    )
+
+    with pytest.raises(ValueError, match="invalid_record_policy"):
+        build_dq_config({"invalid_record_policy": "silently_accept"})

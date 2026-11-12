@@ -96,6 +96,18 @@ def test_workflow_composition_passes_configured_report_root(monkeypatch, tmp_pat
         pipeline_runner_service_factory=lambda _: sentinel.pipeline_runner,
     )
     assert service.report_root == settings.report_root
+    from unittest.mock import MagicMock
+
+    verified = MagicMock()
+    monkeypatch.setattr(_workflow_services, "verify_workflow_run_location", verified)
+    service.evidence_location_verify(SimpleNamespace())
+    verified.assert_not_called()
+    service.evidence_location_verify(
+        SimpleNamespace(workflow_name="workflow", workflow_run_id="run-1")
+    )
+    verified.assert_called_once_with(
+        workflow_name="workflow", workflow_run_id="run-1", settings=settings
+    )
 
 
 def test_get_workflow_execution_service_injects_real_manifest_clock(
@@ -217,5 +229,22 @@ def test_workflow_manifest_registration_preserves_manifest_and_settings(monkeypa
         is sentinel.registration
     )
     register.assert_called_once_with(
+        manifest=sentinel.manifest, settings=sentinel.settings
+    )
+
+
+def test_workflow_evidence_registration_passes_manifest_and_typed_settings(monkeypatch):
+    from unittest.mock import MagicMock
+
+    registered = MagicMock(return_value=sentinel.location)
+    monkeypatch.setattr(_workflow_services, "get_settings", lambda: sentinel.settings)
+    monkeypatch.setattr(
+        _workflow_services, "register_workflow_manifest_location", registered
+    )
+    assert (
+        _workflow_services._workflow_evidence_location_register(sentinel.manifest)
+        is sentinel.location
+    )
+    registered.assert_called_once_with(
         manifest=sentinel.manifest, settings=sentinel.settings
     )
