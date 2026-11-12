@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
+from functools import partial
 import json
 import math
 import os
@@ -102,6 +103,8 @@ def dashboard_input(path: str) -> bool:
                 "scripts/ops/observability/grafana/",
                 "tests/integration/_dashboard",
                 "tests/integration/_grafana_test_support",
+                "tests/integration/test_grafana_",
+                "tests/unit/scripts/ops/observability/test_grafana_",
                 "tests/helpers",
                 "tests/integration/test_dashboard",
             )
@@ -410,13 +413,13 @@ def _execute_plan(
     root: Path,
     directory: Path,
     checks: list[Check],
-    cached: bool,
+    can_reuse: Callable[[], bool],
     started: float,
     timeout: float,
 ) -> list[dict[str, Any]]:
     rows = []
     for check in checks:
-        if cached and check.cacheable:
+        if check.cacheable and can_reuse():
             row = _row(check, "PASS", 0, 0, reused=True)
         else:
             row = _execute(
@@ -447,6 +450,21 @@ def _cache_state(
     return cached, not cached and verdict.get(
         "reason"
     ) == "receipt_unavailable_or_invalid"
+
+
+def _can_reuse(
+    enabled: bool,
+    root: Path,
+    reuse: Path | None,
+    state: dict[str, Any],
+    static: list[Check],
+) -> bool:
+    if not enabled:
+        return False
+    cached, invalid = _cache_state(root, reuse, state, static)
+    if invalid:
+        raise ValueError("cache receipt changed during checks")
+    return cached
 
 
 def validate(
@@ -482,7 +500,8 @@ def validate(
     directory = receipts.receipt_directory(root)
     directory.mkdir(exist_ok=True)
     core = _core_checks(root, plan["base_sha"])
-    rows = _execute_plan(root, directory, [*core, *checks], cached, started, timeout)
+    can_reuse = partial(_can_reuse, cached, root, reuse, state, static)
+    rows = _execute_plan(root, directory, [*core, *checks], can_reuse, started, timeout)
     after = receipts.snapshot(root, base=plan["base_sha"])
     if after != state or resolve_revision(root, base) != plan["base_sha"]:
         return {
@@ -495,8 +514,9 @@ def validate(
         row["status"] == "PASS" for row in rows
     )
     # A cache hit preserves the original observation time, never a sliding TTL.
-    cache_path = reuse if passed and cached else None
-    if passed and static and not cached:
+    cache_hit = any(row["reused"] for row in rows)
+    cache_path = reuse if passed and cache_hit else None
+    if passed and static and not cache_hit:
         cache_path = receipts.write_receipt(
             root, state, [row for row in rows if row["cacheable"]]
         )
@@ -508,7 +528,7 @@ def validate(
         "runtime_admission": False,
         "ci_acceptance": False,
         "scope": "local_post_change_only",
-        "cache": "HIT" if cached else "MISS",
+        "cache": "HIT" if cache_hit else "MISS",
     }
 
 

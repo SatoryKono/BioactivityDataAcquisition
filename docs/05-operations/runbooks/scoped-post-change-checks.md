@@ -50,7 +50,8 @@ and return ERROR. This command does not claim complete test coverage.
 
 DASH-FIT-004 requires the first-window check for every code/test/docs change;
 its broad gate remains intact. Other dashboard checks are selected only for
-dashboard sources, declared helpers, quality owners and dependency manifests.
+dashboard sources, declared helpers, quality owners and dependency manifests,
+including the integration and observability unit `test_grafana_*` families.
 No Grafana service or browser renderer is started.
 
 On success, the result includes an immutable observation receipt and, where
@@ -61,8 +62,11 @@ always execute again, as do runtime parity/static contracts and documentation
 and coverage inventories. Their inputs may include byte-sensitive peer files or
 ignored local artifacts. Cache eligibility is limited to root-configured Python
 lint (with the explicit root configuration and no external extends) and pre-commit
-configuration validation. A cache hit retains its original observation
-and never renews the 60-second lifetime. Ordinary observations cannot substitute for cache receipts.
+configuration validation. Check the original receipt again immediately before
+each reuse: expiry during fresh protected checks forces a fresh static run.
+Corruption detected at that point returns ERROR. A partial cache hit retains the
+original cache receipt rather than renewing previously borrowed results. A cache
+hit retains its original observation and never renews the 60-second lifetime. Ordinary observations cannot substitute for cache receipts.
 `checks receipt --receipt <path>` validates the expected observation against current
 state; it does not grant runtime admission or CI acceptance.
 

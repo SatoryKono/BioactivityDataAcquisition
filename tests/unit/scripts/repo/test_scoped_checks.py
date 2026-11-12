@@ -50,6 +50,16 @@ def test_windows_pretest_without_bash_is_error():
         (".devin/agents/DEVIN-RUNTIME.md", "runtime-parity", "dashboard-static-gates"),
         ("grafana/dashboards/example.json", "dashboard-static-gates", "runtime-parity"),
         (
+            "tests/integration/test_grafana_config.py",
+            "dashboard-static-gates",
+            "runtime-parity",
+        ),
+        (
+            "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py",
+            "dashboard-static-gates",
+            "runtime-parity",
+        ),
+        (
             "tests/integration/_grafana_test_support.py",
             "dashboard-static-gates",
             "runtime-parity",
