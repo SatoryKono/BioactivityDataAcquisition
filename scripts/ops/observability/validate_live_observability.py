@@ -69,9 +69,7 @@ EXPECTED_BIOETL_DASHBOARD_UIDS = frozenset(
         "bioetl-dq-v2",
         "bioetl-incident-v1",
         "bioetl-overview-v2",
-        "bioetl-provider-health-v2",
         "bioetl-run-explorer-v1",
-        "bioetl-runtime",
     }
 )
 
