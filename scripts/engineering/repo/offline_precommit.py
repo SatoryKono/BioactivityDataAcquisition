@@ -14,6 +14,7 @@ import inspect
 import os
 from pathlib import Path
 import sqlite3
+import subprocess
 import sys
 from typing import Any
 from unittest.mock import patch
@@ -70,6 +71,10 @@ def _qualified_contract() -> bool:
         (repository.install_hook_envs, ("hooks", "store")),
         (repository._hook_install, ("hook",)),
         (repository._hook_installed, ("hook",)),
+        (
+            importlib.import_module("pre_commit.staged_files_only").staged_files_only,
+            ("patch_dir",),
+        ),
         (importlib.import_module("pre_commit.error_handler").error_handler, ()),
     )
     return all(
@@ -89,6 +94,38 @@ def _quiet_errors() -> Iterator[None]:
         yield
     except Exception:
         raise BootstrapRequired("framework_execution_unavailable") from None
+
+
+@contextmanager
+def _read_only_staged_files(patch_dir: str) -> Iterator[None]:
+    """Never stash/checkout user changes in a process subject to forced kill."""
+    del patch_dir
+    result = subprocess.run(
+        [
+            "git",
+            "-c",
+            "core.fsmonitor=false",
+            "diff",
+            "--quiet",
+            "--no-ext-diff",
+            "--no-textconv",
+            "--ignore-submodules=none",
+            "--",
+        ],
+        env=dict(os.environ, GIT_OPTIONAL_LOCKS="0"),
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        timeout=10,
+        check=False,
+    )
+    if result.returncode:
+        sys.stderr.write(
+            "BioETL hook ERROR: tracked unstaged changes or unavailable diff; preserve changes explicitly outside the hook (no automatic stash).\n"
+        )
+        raise BootstrapRequired(
+            "unstaged_changes_or_diff_unavailable_no_automatic_stash"
+        )
+    yield
 
 
 def run(hook_type: str, hook_dir: Path, args: Sequence[str]) -> int:
@@ -125,6 +162,7 @@ def run(hook_type: str, hook_dir: Path, args: Sequence[str]) -> int:
             with (
                 patch.object(run_module, "install_hook_envs", _require_environments),
                 patch.object(framework_main, "error_handler", _quiet_errors),
+                patch.object(run_module, "staged_files_only", _read_only_staged_files),
             ):
                 return int(
                     framework_main.main(
@@ -147,6 +185,7 @@ def run(hook_type: str, hook_dir: Path, args: Sequence[str]) -> int:
         ImportError,
         OSError,
         sqlite3.Error,
+        subprocess.SubprocessError,
         ValueError,
         TypeError,
     ):

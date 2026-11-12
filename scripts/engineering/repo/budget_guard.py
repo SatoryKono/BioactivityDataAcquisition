@@ -325,7 +325,7 @@ def _valid_exemption_paths(paths: Any) -> bool:
         or not 1 <= len(path) <= 8
         or any(
             not isinstance(part, str)
-            or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", part)
+            or not re.fullmatch(r"[A-Za-z_]\w*", part, flags=re.ASCII)
             for part in path
         )
         for path in paths

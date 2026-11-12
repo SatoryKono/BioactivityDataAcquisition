@@ -107,7 +107,12 @@ set semantics, with additions refused. Concurrent later index changes still need
 The offline framework adapter is qualified only for pre-commit 4.7.0 and the tested
 private API signatures. Unknown versions fail before configured framework callbacks. Missing repository
 cache or unhealthy/missing environments fail instead of cloning or installing.
-Existing checks remain required. The dashboard QA suite now has an explicit
+Existing checks remain required. The qualified adapter replaces pre-commit
+stash/checkout with a read-only unstaged-diff check: if the framework would need
+to hide tracked unstaged changes, it refuses before configured callbacks. Stage
+or preserve those changes explicitly outside the hook and retry. It never creates
+a recovery patch or relies on a killed child to restore user files. Existing
+formatters may still change files they check; they are not data-recovery code. The dashboard QA suite now has an explicit
 pre-push stage, aligned with the other dashboard suites; it no longer inherits
 every framework stage, including commit-msg. Its independent CI gate remains.
 Offline environment switches

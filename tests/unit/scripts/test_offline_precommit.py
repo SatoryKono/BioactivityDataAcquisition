@@ -123,9 +123,12 @@ def test_public_hook_protocol_and_patches_are_restored(monkeypatch, tmp_path):
     assert Store.__init__ is original
 
 
-@pytest.mark.parametrize("language,expected", [("system", 0), ("python", 2)])
+@pytest.mark.parametrize(
+    "language,expected,unstaged",
+    [("system", 0, False), ("python", 2, False), ("system", 2, True)],
+)
 def test_real_framework_runs_cached_system_checks_but_never_installs(
-    tmp_path, language, expected
+    tmp_path, language, expected, unstaged
 ):
     """The synthetic repository contains only a tiny fixture, no project checkout."""
     root = tmp_path / "fixture with spaces"
@@ -185,20 +188,36 @@ def test_real_framework_runs_cached_system_checks_but_never_installs(
     cache.mkdir()
     with closing(sqlite3.connect(cache / "db.db")) as connection, connection:
         connection.execute("CREATE TABLE repos (repo TEXT, ref TEXT, path TEXT)")
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-I",
-            "-B",
-            str(Path(adapter.__file__).resolve()),
-            "pre-commit",
-            str(hooks),
-        ],
-        cwd=root,
-        env=env,
-        capture_output=True,
-        timeout=30,
-    )
-    assert result.returncode == expected, result.stdout.decode(errors="replace")
-    assert marker.exists() is (language == "system")
+    if unstaged:
+        (root / "fixture.txt").write_bytes(b"original user unstaged changes\n")
+        config["repos"][0]["hooks"][0]["entry"] = (
+            f'"{sys.executable}" -c "import time; time.sleep(30)"'
+        )
+        (root / ".pre-commit-config.yaml").write_text(json.dumps(config))
+        git("add", ".pre-commit-config.yaml")
+    command = [
+        sys.executable,
+        "-I",
+        "-B",
+        str(Path(adapter.__file__).resolve()),
+        "pre-commit",
+        str(hooks),
+    ]
+    if unstaged:
+        from scripts.engineering.repo.process_deadline import run_owned
+
+        result = run_owned(
+            command, cwd=root, state_dir=hooks, timeout=5, input_bytes=b"", env=env
+        )
+        assert result.returncode == expected, result
+        assert (
+            root / "fixture.txt"
+        ).read_bytes() == b"original user unstaged changes\n"
+        assert git("show", ":fixture.txt").stdout == b"fixture\n"
+    else:
+        result = subprocess.run(
+            command, cwd=root, env=env, capture_output=True, timeout=30
+        )
+        assert result.returncode == expected, result.stdout.decode(errors="replace")
+    assert marker.exists() is (language == "system" and not unstaged)
     assert sorted(path.name for path in cache.iterdir()) == ["db.db"]

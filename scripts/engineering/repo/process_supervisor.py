@@ -17,7 +17,7 @@ import time
 from typing import Any
 
 
-class _Stopped(BaseException):
+class _Stopped(Exception):
     """A parent stop still requires descendant cleanup."""
 
 

@@ -9,11 +9,13 @@ import shutil
 import subprocess
 import sys
 import time
+from typing import Any
 
 from scripts.engineering.repo import hook_installation as installation
 from scripts.engineering.repo.operation_guards import is_env_target
-from scripts.engineering.repo.process_deadline import run_owned
+from scripts.engineering.repo.process_deadline import ProcessResult, run_owned
 
+TRUSTED_BASE = "origin/main"
 DEADLINES = {"pre-commit": 30, "pre-push": 180, "commit-msg": 10}
 PHASE_CODES = {"tree": 11, "budgets": 12, "foreign": 13, "framework": 14}
 CONTROLLED_REASONS = {
@@ -71,7 +73,7 @@ def _guard_commands(
     if kind == "commit-msg":
         return commands
     for tip in tips:
-        diff = ["--cached"] if kind == "pre-commit" else ["origin/main", tip]
+        diff = ["--cached"] if kind == "pre-commit" else [TRUSTED_BASE, tip]
         paths = installation._git(
             repo,
             "diff",
@@ -89,7 +91,7 @@ def _guard_commands(
             "--repo",
             str(repo),
             "--base",
-            "origin/main",
+            TRUSTED_BASE,
             "--tip",
             tip,
         ]
@@ -98,7 +100,7 @@ def _guard_commands(
             "--repo-root",
             str(repo),
             "--base",
-            "origin/main",
+            TRUSTED_BASE,
         ]
         if kind == "pre-commit":
             full_tree.append("--check-index")
@@ -106,6 +108,57 @@ def _guard_commands(
             budgets.extend(["--tip", tip])
         commands.extend([("tree", prefix + full_tree), ("budgets", prefix + budgets)])
     return commands
+
+
+def _foreign_command(
+    item: dict[str, Any], hooks: Path, args: list[str]
+) -> list[str] | None:
+    if item["chain_foreign"]:
+        backup = hooks / item["backup"]
+        if installation._hash(installation._read(backup)) != item["backup_sha256"]:
+            raise ValueError("foreign callback changed")
+        if os.name == "nt":
+            shell = git_shell()
+            if shell is None:
+                raise ValueError("foreign callback interpreter unavailable")
+            foreign = [shell, "-c", 'exec "$0" "$@"', backup.as_posix(), *args]
+        else:
+            foreign = [str(backup), *args]
+        return foreign
+    return None
+
+
+def _execute_commands(
+    commands: list[tuple[str, list[str]]],
+    repo: Path,
+    hooks: Path,
+    kind: str,
+    payload: bytes,
+    env: dict[str, str],
+    start: float,
+) -> int:
+    for phase, command in commands:
+        remaining = DEADLINES[kind] - (time.monotonic() - start)
+        if remaining <= 0:
+            return 2
+        result = run_owned(
+            command,
+            cwd=repo,
+            state_dir=hooks,
+            timeout=remaining,
+            input_bytes=payload,
+            env=env,
+        )
+        if result.status != "PASS":
+            sys.stderr.write(
+                f"BioETL hook {result.status}: {result.reason}; run the scoped check explicitly for details.\n"
+            )
+            if result.status == "ERROR":
+                return 20
+            if phase != "foreign" and result.returncode != 1:
+                return 22
+            return PHASE_CODES[phase]
+    return 0
 
 
 def run(kind: str, hooks: Path, args: list[str], payload: bytes = b"") -> int:
@@ -121,18 +174,8 @@ def run(kind: str, hooks: Path, args: list[str], payload: bytes = b"") -> int:
         if installation.inspect_installation(repo)["status"] != "PASS":
             raise ValueError("installation changed")
         commands = _guard_commands(repo, kind, payload)
-        item = state["hooks"][kind]
-        if item["chain_foreign"]:
-            backup = hooks / item["backup"]
-            if installation._hash(installation._read(backup)) != item["backup_sha256"]:
-                raise ValueError("foreign callback changed")
-            if os.name == "nt":
-                shell = git_shell()
-                if shell is None:
-                    raise ValueError("foreign callback interpreter unavailable")
-                foreign = [shell, "-c", 'exec "$0" "$@"', backup.as_posix(), *args]
-            else:
-                foreign = [str(backup), *args]
+        foreign = _foreign_command(state["hooks"][kind], hooks, args)
+        if foreign is not None:
             commands.append(("foreign", foreign))
         framework = Path(__file__).with_name("offline_precommit.py")
         commands.append(
@@ -147,28 +190,7 @@ def run(kind: str, hooks: Path, args: list[str], payload: bytes = b"") -> int:
             BIOETL_HOOK_PROJECT_PYTHON=sys.executable,
             PRE_COMMIT_HOME=state["pre_commit_home"],
         )
-        for phase, command in commands:
-            remaining = DEADLINES[kind] - (time.monotonic() - start)
-            if remaining <= 0:
-                return 2
-            result = run_owned(
-                command,
-                cwd=repo,
-                state_dir=hooks,
-                timeout=remaining,
-                input_bytes=payload,
-                env=env,
-            )
-            if result.status != "PASS":
-                sys.stderr.write(
-                    f"BioETL hook {result.status}: {result.reason}; run the scoped check explicitly for details.\n"
-                )
-                if result.status == "ERROR":
-                    return 20
-                if phase != "foreign" and result.returncode != 1:
-                    return 22
-                return PHASE_CODES[phase]
-        return 0
+        return _execute_commands(commands, repo, hooks, kind, payload, env, start)
     except ProtectedOperation:
         return 21
     except (
@@ -183,6 +205,22 @@ def run(kind: str, hooks: Path, args: list[str], payload: bytes = b"") -> int:
             "BioETL hook ERROR: protected operation or installation evidence unavailable.\n"
         )
         return 2
+
+
+def _report_result(result: ProcessResult) -> int:
+    if result.status != "PASS":
+        reason = (
+            CONTROLLED_REASONS.get(result.returncode, result.reason)
+            if result.returncode is not None
+            else result.reason
+        )
+        status = "ERROR" if result.returncode in {2, 20, 21, 22} else result.status
+        sys.stderr.write(
+            f"BioETL hook {status}: {reason}; inspect with hook doctor and scoped checks.\n"
+        )
+    if result.status == "PASS":
+        return 0
+    return 2 if result.status == "ERROR" or result.returncode in {2, 20, 21, 22} else 1
 
 
 def main() -> int:
@@ -211,19 +249,7 @@ def main() -> int:
         timeout=DEADLINES[args[0]],
         input_stream=sys.stdin.buffer if args[0] == "pre-push" else None,
     )
-    if result.status != "PASS":
-        reason = (
-            CONTROLLED_REASONS.get(result.returncode, result.reason)
-            if result.returncode is not None
-            else result.reason
-        )
-        status = "ERROR" if result.returncode in {2, 20, 21, 22} else result.status
-        sys.stderr.write(
-            f"BioETL hook {status}: {reason}; inspect with hook doctor and scoped checks.\n"
-        )
-    if result.status == "PASS":
-        return 0
-    return 2 if result.status == "ERROR" or result.returncode in {2, 20, 21, 22} else 1
+    return _report_result(result)
 
 
 if __name__ == "__main__":
