@@ -10,6 +10,7 @@ import json
 import re
 import tomllib
 from pathlib import Path
+from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -584,6 +585,205 @@ def validate_skill_routes(repo_root: Path = REPO_ROOT) -> list[Finding]:
     return findings
 
 
+DEVIN_RESTRICTED_PROFILES = frozenset(
+    {"py-audit-bot", "py-debug-bot", "py-plan-bot", "py-test-bot"}
+)
+DEVIN_READ_TOOLS = frozenset({"read", "grep", "glob"})
+DEVIN_PROFILE_CODE = "devin.profile"
+DEVIN_CONFIG_FILE = ".devin/config.json"
+DEVIN_DELEGATION_BLOCK = "Native delegation of restricted profiles is blocked until"
+
+
+def _devin_permission_groups(path: Path) -> dict[str, set[str]]:
+    permissions = json.loads(path.read_text(encoding="utf-8"))["permissions"]
+    groups = {}
+    for key in ("ask", "allow", "deny"):
+        values = permissions[key]
+        if not isinstance(values, list) or any(not isinstance(v, str) for v in values):
+            raise ValueError("invalid permission list")
+        groups[key] = set(values)
+    return groups
+
+
+def _devin_project_findings(path: Path, groups: dict[str, set[str]]) -> list[Finding]:
+    findings = []
+    if groups["ask"] & groups["allow"]:
+        findings.append(
+            Finding("devin.permissions", "ask/allow intersection", str(path))
+        )
+    for rule in ("Read(.env*)", "Read(**/.env*)"):
+        if rule not in groups["ask"] or rule in groups["allow"]:
+            findings.append(
+                Finding(
+                    "devin.env", "env read must have one project ask policy", str(path)
+                )
+            )
+    for rule in ("Write(.env*)", "Write(**/.env*)"):
+        if rule not in groups["deny"]:
+            findings.append(
+                Finding("devin.env", "protected env write denial is missing", str(path))
+            )
+    if not {"exec", "Write(**)"}.issubset(groups["ask"]):
+        findings.append(
+            Finding(
+                "devin.parent",
+                "parent command/write actions must remain explicit",
+                str(path),
+            )
+        )
+    if any(
+        rule.casefold() == "exec" or rule.casefold().startswith(("exec(", "write("))
+        for rule in groups["allow"]
+    ):
+        findings.append(
+            Finding(
+                "devin.parent", "automatic command/write grant is prohibited", str(path)
+            )
+        )
+    return findings
+
+
+def _declared_string_list(text: str, key: str, indent: int) -> list[str]:
+    """Accept the governed block-list spelling only, not arbitrary vendor YAML."""
+    lines = text.splitlines()
+    marker = " " * indent + key + ":"
+    positions = [index for index, line in enumerate(lines) if line == marker]
+    if len(positions) != 1:
+        raise ValueError("missing/duplicate declared list")
+    result = []
+    for line in lines[positions[0] + 1 :]:
+        if not line.strip():
+            continue
+        match = re.fullmatch(r" *- (.+)", line)
+        if match is None:
+            break
+        value = _frontmatter_value(match[1])
+        if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*(?:\([^\r\n()]+\))?", value):
+            raise ValueError("unsupported list scalar")
+        result.append(value)
+    if not result:
+        raise ValueError("empty declared list")
+    return result
+
+
+def _devin_tool_metadata(path: Path) -> dict[str, Any]:
+    """Read our bounded declaration subset; this is not a native YAML evaluator."""
+    text = path.read_text(encoding="utf-8")
+    parts = text.split("---", 2)
+    if not text.startswith("---\n") or len(parts) != 3:
+        raise ValueError("missing metadata")
+    header = parts[1]
+    blocks = re.findall(r"(?m)^permissions:\n((?:[ ]+[^\n]*\n|\n)*)", header)
+    if len(blocks) != 1:
+        raise ValueError("missing/duplicate permission metadata")
+    return {
+        "allowed-tools": _declared_string_list(header, "allowed-tools", 0),
+        "permissions": {
+            key: _declared_string_list(blocks[0], key, 2) for key in ("allow", "deny")
+        },
+    }
+
+
+def _devin_profile_findings(repo_root: Path, name: str) -> list[Finding]:
+    path = repo_root / f".devin/agents/{name}/AGENT.md"
+    try:
+        metadata = _devin_tool_metadata(path)
+    except (OSError, ValueError, KeyError, TypeError, SyntaxError):
+        return [Finding(DEVIN_PROFILE_CODE, "invalid profile tool contract", str(path))]
+    findings = []
+    if name in DEVIN_RESTRICTED_PROFILES:
+        if set(metadata["allowed-tools"]) != DEVIN_READ_TOOLS:
+            findings.append(
+                Finding(
+                    DEVIN_PROFILE_CODE,
+                    "restricted profile must expose read/search tools only",
+                    str(path),
+                )
+            )
+        findings.extend(_devin_legacy_denial_findings(metadata, name, path))
+    return findings
+
+
+def _devin_legacy_denial_findings(
+    metadata: dict[str, Any], name: str, path: Path
+) -> list[Finding]:
+    """Preserve declared denials without treating legacy metadata as enforcement."""
+    try:
+        legacy = metadata["permissions"]
+        allow, deny = legacy["allow"], legacy["deny"]
+        if not isinstance(allow, list) or not isinstance(deny, list):
+            raise ValueError("invalid legacy lists")
+        if any(not isinstance(item, str) for item in [*allow, *deny]):
+            raise ValueError("invalid legacy permission")
+    except (KeyError, TypeError, ValueError):
+        return [
+            Finding(
+                DEVIN_PROFILE_CODE,
+                "declared legacy denials must be preserved",
+                str(path),
+            )
+        ]
+    expected = {"write", "edit"}
+    if name == "py-test-bot":
+        expected = {
+            "Write(src/**)",
+            "Write(configs/**)",
+            "Write(docs/**)",
+            "Exec(gh)",
+            "Exec(hub)",
+        }
+    findings = []
+    if not expected.issubset(set(deny)):
+        findings.append(
+            Finding(
+                DEVIN_PROFILE_CODE, "declared legacy denials were weakened", str(path)
+            )
+        )
+    if any(
+        item.casefold() in {"exec", "write", "edit"}
+        or item.casefold().startswith(("exec(", "write("))
+        for item in allow
+    ):
+        findings.append(
+            Finding(
+                DEVIN_PROFILE_CODE,
+                "restricted legacy metadata must not grant commands/writes",
+                str(path),
+            )
+        )
+    return findings
+
+
+def validate_devin_permission_contract(repo_root: Path) -> list[Finding]:
+    """Check declared fail-closed routes; never claim native/OS enforcement."""
+    config = repo_root / DEVIN_CONFIG_FILE
+    try:
+        groups = _devin_permission_groups(config)
+    except (OSError, ValueError, KeyError, TypeError):
+        return [
+            Finding(
+                "devin.permissions", "invalid project permission contract", str(config)
+            )
+        ]
+    findings = _devin_project_findings(config, groups)
+    runtime_path = repo_root / ".devin/agents/DEVIN-RUNTIME.md"
+    try:
+        blocked = DEVIN_DELEGATION_BLOCK in runtime_path.read_text(encoding="utf-8")
+    except OSError:
+        blocked = False
+    if not blocked:
+        findings.append(
+            Finding(
+                "devin.delegation",
+                "unqualified restricted delegation must stay blocked",
+                str(runtime_path),
+            )
+        )
+    for name in AGENT_NAMES:
+        findings.extend(_devin_profile_findings(repo_root, name))
+    return findings
+
+
 def validate_native_runtime(repo_root: Path = REPO_ROOT) -> list[Finding]:
     """Validate every repository-native Codex discovery surface."""
 
@@ -594,4 +794,5 @@ def validate_native_runtime(repo_root: Path = REPO_ROOT) -> list[Finding]:
         *validate_skill_routes(repo_root),
         *validate_runtime_context(repo_root),
         *validate_ai_launcher_safety(repo_root),
+        *validate_devin_permission_contract(repo_root),
     ]
