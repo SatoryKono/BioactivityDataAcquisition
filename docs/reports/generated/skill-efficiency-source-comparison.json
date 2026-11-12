@@ -1,0 +1,542 @@
+{
+  "after": {
+    "commit": "ffbc484dae248889de8e6aa3fc1ed512d209fdb1",
+    "groups": {
+      "codex": {
+        "bytes_lf": 127530,
+        "files": 64,
+        "lines": 3176
+      },
+      "devin": {
+        "bytes_lf": 218607,
+        "files": 48,
+        "lines": 5357
+      },
+      "junie": {
+        "bytes_lf": 124102,
+        "files": 59,
+        "lines": 3192
+      },
+      "shared": {
+        "bytes_lf": 75707,
+        "files": 7,
+        "lines": 1476
+      }
+    }
+  },
+  "baseline": {
+    "commit": "b283d1759fbaedfb1efe731307ccbd0c8024eaa8",
+    "groups": {
+      "codex": {
+        "bytes_lf": 124032,
+        "files": 64,
+        "lines": 3132
+      },
+      "devin": {
+        "bytes_lf": 210589,
+        "files": 48,
+        "lines": 5270
+      },
+      "junie": {
+        "bytes_lf": 120880,
+        "files": 59,
+        "lines": 3146
+      },
+      "shared": {
+        "bytes_lf": 64609,
+        "files": 7,
+        "lines": 1310
+      }
+    }
+  },
+  "changes": [
+    {
+      "after": {
+        "bytes_lf": 8218,
+        "lines": 162,
+        "sha256_lf": "6c380d4835bd046a08a24aff00f8a0d593ee22ebcad55ed6159abc5ff6aa7f01"
+      },
+      "before": {
+        "bytes_lf": 7281,
+        "lines": 148,
+        "sha256_lf": "3f39ab34541745ab35cdc6d5ef17a7491e28fe04581ec272bb76eb9073df557a"
+      },
+      "path": ".codex/agents/CODEX-RUNTIME.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 7051,
+        "lines": 139,
+        "sha256_lf": "793bb0fe28351eb6c402c8b8f3e7a3d2f0632ae67f8b32db58c1c9e252c65b22"
+      },
+      "before": {
+        "bytes_lf": 6311,
+        "lines": 131,
+        "sha256_lf": "52eedbb5ad7537b86ce48beb24f6cc003840a2e97e2b49542d1c74102ae4eb6e"
+      },
+      "path": ".codex/agents/ORCHESTRATION.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 3018,
+        "lines": 80,
+        "sha256_lf": "08920c66ab43ce70614d5ae8feee1e21c6af1d750b5743f8b684286915374bbd"
+      },
+      "before": {
+        "bytes_lf": 2928,
+        "lines": 77,
+        "sha256_lf": "fd6912110ca4e2ae87a6d122f39593e8a67ad56fee30ce08c023d74e786ed6ad"
+      },
+      "path": ".codex/agents/py-config-bot.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 952,
+        "lines": 6,
+        "sha256_lf": "7306fcffb6d7bc2cbb2b93edf2eee52a1246440658d2e8b38c49da4cd65617a0"
+      },
+      "before": {
+        "bytes_lf": 864,
+        "lines": 6,
+        "sha256_lf": "49449dc22550d36e5e601769858459e5657309a02d1d9002e100183a2182ffd8"
+      },
+      "path": ".codex/agents/py-config-bot.toml"
+    },
+    {
+      "after": {
+        "bytes_lf": 3235,
+        "lines": 74,
+        "sha256_lf": "bd3aa0eb113b99dae6a5f089a05565511d0ca43b5dce9c936a78fb0194739744"
+      },
+      "before": {
+        "bytes_lf": 3145,
+        "lines": 71,
+        "sha256_lf": "d0432be7c5b2adec3f1b3bc0e6e177e8639650927a9241ebab88fd7e077b0317"
+      },
+      "path": ".codex/agents/py-doc-bot.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 958,
+        "lines": 6,
+        "sha256_lf": "8a99b5356dfd78056e936ccf5d623a7866e82a1ffdb8890c0857167baa178706"
+      },
+      "before": {
+        "bytes_lf": 870,
+        "lines": 6,
+        "sha256_lf": "0a20cd82e0d84a2084620fc557dff2b053fa49f7d344bb286b79bcefe5cdbd56"
+      },
+      "path": ".codex/agents/py-doc-bot.toml"
+    },
+    {
+      "after": {
+        "bytes_lf": 3321,
+        "lines": 81,
+        "sha256_lf": "ff989e270493f34d173166d8602a86575286a7cbffdce07d84b6ddd5e5b4c055"
+      },
+      "before": {
+        "bytes_lf": 3231,
+        "lines": 79,
+        "sha256_lf": "d48b224355140f96daf6cc32e16900a103a6b8087b16126c21ecd47aeea48923"
+      },
+      "path": ".codex/agents/py-test-bot.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 979,
+        "lines": 6,
+        "sha256_lf": "fa4ee0d0ab1e873c6d3d38e2f679ab71213c24d70ea3b84fa104d491889e40a9"
+      },
+      "before": {
+        "bytes_lf": 891,
+        "lines": 6,
+        "sha256_lf": "3b0d0fe313bdbbdbe1ba4dc7f0c909dda3d83ce0bfd910e6f17d8dc83b6b2de7"
+      },
+      "path": ".codex/agents/py-test-bot.toml"
+    },
+    {
+      "after": {
+        "bytes_lf": 2671,
+        "lines": 59,
+        "sha256_lf": "71f54a76f58c721930cb69bc15479dc14302a51225701208d9b37273c8e92619"
+      },
+      "before": {
+        "bytes_lf": 2176,
+        "lines": 55,
+        "sha256_lf": "ddc0f46efa3be02f5e14eead1515909c2d0e46f0254e85a52d76a27fd9c6a524"
+      },
+      "path": ".codex/skills/py-audit-bot/references/wrapper-contract.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 6781,
+        "lines": 156,
+        "sha256_lf": "cb4131856a51ba1828870fd94f902c11b2cb19712bff956fbfcdd1a9b873b321"
+      },
+      "before": {
+        "bytes_lf": 6358,
+        "lines": 151,
+        "sha256_lf": "805c8b81282fde90d32eca0a4e4786e55892d9dfaefec41f63c615b4229d06a8"
+      },
+      "path": ".codex/skills/research-workflow/SKILL.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 6514,
+        "lines": 165,
+        "sha256_lf": "c587d8240e69f05b68a18b503efe68aa9fd63b2c9df5946611eb148f818f0226"
+      },
+      "before": {
+        "bytes_lf": 6145,
+        "lines": 160,
+        "sha256_lf": "d39b666fc9355efeb6604419d54f99b317ca47a68087d295391af089e4bcc659"
+      },
+      "path": ".codex/skills/technical-designer-mermaid/SKILL.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 14049,
+        "lines": 301,
+        "sha256_lf": "f6ed1312645c028939db40f6c4535ad48ebc41832992869e069b3870003d9d06"
+      },
+      "before": {
+        "bytes_lf": 12898,
+        "lines": 283,
+        "sha256_lf": "5d8dc39c6567dff29a30f738d10296b2a767ba323f0534864705784da1b4ad00"
+      },
+      "path": ".devin/agents/DEVIN-RUNTIME.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 27517,
+        "lines": 436,
+        "sha256_lf": "9827249f491554ed69de3d41441a749d873d80cf89d6d23187de3087a50c5ef8"
+      },
+      "before": {
+        "bytes_lf": 25709,
+        "lines": 420,
+        "sha256_lf": "6708b2b7cb2e3253342b1f1460dbb11a6c321b1db464e1c4cc5b21bd3dff10a8"
+      },
+      "path": ".devin/agents/ORCHESTRATION.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 19411,
+        "lines": 388,
+        "sha256_lf": "6deac679795e914d0ad6ac921d03fc5afa030ae2701686558ebd435873b40ce4"
+      },
+      "before": {
+        "bytes_lf": 19270,
+        "lines": 387,
+        "sha256_lf": "e3cf23ccd657ff3ef5b919c39ecc24d48e31aa65d756ef5a2a38f85ed9dba0e1"
+      },
+      "path": ".devin/agents/py-audit-bot/AGENT.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 11660,
+        "lines": 239,
+        "sha256_lf": "d447d6459990f8173bf77608d20157896ba9f618ed828e4d8e245b556da2bba4"
+      },
+      "before": {
+        "bytes_lf": 11519,
+        "lines": 238,
+        "sha256_lf": "20951948cffdfb1f6fa0013d05ee914ffa9a97dc37c16b9eb70fb57409273b02"
+      },
+      "path": ".devin/agents/py-plan-bot/AGENT.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 15804,
+        "lines": 304,
+        "sha256_lf": "cee0f8aaae5c929feb9642ce3bb2b29adfa4a9d58328ec789d37fb90baca1bc5"
+      },
+      "before": {
+        "bytes_lf": 12314,
+        "lines": 267,
+        "sha256_lf": "a550db4f189d3f325569bc0ed124e987ebec1527fe9bfd3e6e17f4805055b795"
+      },
+      "path": ".devin/agents/py-test-bot/AGENT.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 2671,
+        "lines": 59,
+        "sha256_lf": "71f54a76f58c721930cb69bc15479dc14302a51225701208d9b37273c8e92619"
+      },
+      "before": {
+        "bytes_lf": 2176,
+        "lines": 55,
+        "sha256_lf": "ddc0f46efa3be02f5e14eead1515909c2d0e46f0254e85a52d76a27fd9c6a524"
+      },
+      "path": ".devin/skills/py-audit-bot/references/wrapper-contract.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 14631,
+        "lines": 487,
+        "sha256_lf": "3000d4d855fcf1905d5d8993cefb0bc604880a734a3a41f93d379bbdead54b0e"
+      },
+      "before": {
+        "bytes_lf": 14208,
+        "lines": 482,
+        "sha256_lf": "b3fb90cdc2b82fe966586c39f820de8aea0ba862a8197c985a92a9949bb4b483"
+      },
+      "path": ".devin/skills/research-workflow/SKILL.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 6379,
+        "lines": 164,
+        "sha256_lf": "d1f9ac72fc5dbb41ce1d3cef3b18a379160c1f34e54adf3f0828470af5083f39"
+      },
+      "before": {
+        "bytes_lf": 6010,
+        "lines": 159,
+        "sha256_lf": "85b36ddb088d5e19cb021ca9c94672913b9f4822c70f7b3914ddf735259537c8"
+      },
+      "path": ".devin/skills/technical-designer-mermaid/SKILL.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 1328,
+        "lines": 30,
+        "sha256_lf": "63d9551939dbeadd2bbf3a9bfcddb89f37fbed8f80f932cf4160ec019d4a733a"
+      },
+      "before": {
+        "bytes_lf": 1203,
+        "lines": 27,
+        "sha256_lf": "e3b22ffb062a2afbd1bff0586fc3e5f8dcf850c9d624924f02ba5db13ae3ca9b"
+      },
+      "path": ".junie/agents/CODEX-RUNTIME.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 8946,
+        "lines": 184,
+        "sha256_lf": "27d057c120d3e8ae8d0acf5181c72f1bff1bac6cd85f60b1ce1aa391e12883eb"
+      },
+      "before": {
+        "bytes_lf": 8146,
+        "lines": 171,
+        "sha256_lf": "75e0373558329e468e91a046a4dad1524729c83d64d8bc207fb802b454949251"
+      },
+      "path": ".junie/agents/JUNIE-RUNTIME.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 7051,
+        "lines": 139,
+        "sha256_lf": "793bb0fe28351eb6c402c8b8f3e7a3d2f0632ae67f8b32db58c1c9e252c65b22"
+      },
+      "before": {
+        "bytes_lf": 6311,
+        "lines": 131,
+        "sha256_lf": "52eedbb5ad7537b86ce48beb24f6cc003840a2e97e2b49542d1c74102ae4eb6e"
+      },
+      "path": ".junie/agents/ORCHESTRATION.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 3018,
+        "lines": 80,
+        "sha256_lf": "08920c66ab43ce70614d5ae8feee1e21c6af1d750b5743f8b684286915374bbd"
+      },
+      "before": {
+        "bytes_lf": 2928,
+        "lines": 77,
+        "sha256_lf": "fd6912110ca4e2ae87a6d122f39593e8a67ad56fee30ce08c023d74e786ed6ad"
+      },
+      "path": ".junie/agents/py-config-bot.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 3235,
+        "lines": 74,
+        "sha256_lf": "bd3aa0eb113b99dae6a5f089a05565511d0ca43b5dce9c936a78fb0194739744"
+      },
+      "before": {
+        "bytes_lf": 3145,
+        "lines": 71,
+        "sha256_lf": "d0432be7c5b2adec3f1b3bc0e6e177e8639650927a9241ebab88fd7e077b0317"
+      },
+      "path": ".junie/agents/py-doc-bot.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 3321,
+        "lines": 81,
+        "sha256_lf": "ff989e270493f34d173166d8602a86575286a7cbffdce07d84b6ddd5e5b4c055"
+      },
+      "before": {
+        "bytes_lf": 3231,
+        "lines": 79,
+        "sha256_lf": "d48b224355140f96daf6cc32e16900a103a6b8087b16126c21ecd47aeea48923"
+      },
+      "path": ".junie/agents/py-test-bot.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 16978,
+        "lines": 288,
+        "sha256_lf": "e347ef925da75a21c57a5f869ef9f1d40bab6d166cca8cc922711aa4835f4025"
+      },
+      "before": {
+        "bytes_lf": 11838,
+        "lines": 211,
+        "sha256_lf": "0a54626cd9e45c0713e02c8b2471c1c0a5ab145430e784f01b695dceab8ce5e2"
+      },
+      "path": ".junie/guidelines.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 2671,
+        "lines": 59,
+        "sha256_lf": "71f54a76f58c721930cb69bc15479dc14302a51225701208d9b37273c8e92619"
+      },
+      "before": {
+        "bytes_lf": 2176,
+        "lines": 55,
+        "sha256_lf": "ddc0f46efa3be02f5e14eead1515909c2d0e46f0254e85a52d76a27fd9c6a524"
+      },
+      "path": ".junie/skills/py-audit-bot/references/wrapper-contract.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 6781,
+        "lines": 156,
+        "sha256_lf": "cb4131856a51ba1828870fd94f902c11b2cb19712bff956fbfcdd1a9b873b321"
+      },
+      "before": {
+        "bytes_lf": 6358,
+        "lines": 151,
+        "sha256_lf": "805c8b81282fde90d32eca0a4e4786e55892d9dfaefec41f63c615b4229d06a8"
+      },
+      "path": ".junie/skills/research-workflow/SKILL.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 6514,
+        "lines": 165,
+        "sha256_lf": "c587d8240e69f05b68a18b503efe68aa9fd63b2c9df5946611eb148f818f0226"
+      },
+      "before": {
+        "bytes_lf": 6145,
+        "lines": 160,
+        "sha256_lf": "d39b666fc9355efeb6604419d54f99b317ca47a68087d295391af089e4bcc659"
+      },
+      "path": ".junie/skills/technical-designer-mermaid/SKILL.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 16804,
+        "lines": 280,
+        "sha256_lf": "128cc2df825d11c8a5617d79737d7ed9bcc0ce2dc578b92afd4964082ff3430b"
+      },
+      "before": {
+        "bytes_lf": 11885,
+        "lines": 205,
+        "sha256_lf": "111c8582aac08ada6ef391c04133845a20db2da650c240dd514f1c8ed04a1c86"
+      },
+      "path": "AGENTS.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 6707,
+        "lines": 118,
+        "sha256_lf": "6071d9de13f549d217baae78524a63a8ac2037d17c0ecb53ba9160f02e8c2fcb"
+      },
+      "before": {
+        "bytes_lf": 6420,
+        "lines": 114,
+        "sha256_lf": "e136065acb2d575ac71282b44fb43f1f9ca6f2cc8a73cf54ed6e9e450354d216"
+      },
+      "path": "docs/00-project/NORMATIVE_SOURCES.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 8100,
+        "lines": 170,
+        "sha256_lf": "8769196a6f9850783060506512c7d2e1e3ebb81e063377a5ddabd3d987412e45"
+      },
+      "before": {
+        "bytes_lf": 8160,
+        "lines": 175,
+        "sha256_lf": "6199064ff480a0d50dc770b0080b0e4cfe2b87051d1bc98d8b93dcb32164a3f5"
+      },
+      "path": "docs/00-project/ai/agents/guides/MEMORY_USAGE.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 7140,
+        "lines": 151,
+        "sha256_lf": "82ed153acd3289ab835f5a46f31b1efdd8af7682f9db921d9b7e11dd1b54202c"
+      },
+      "before": {
+        "bytes_lf": 6845,
+        "lines": 144,
+        "sha256_lf": "50ce15ecf4f3061062f90c008e3ad34c50e7bbafc6b5b5f3279bbcd59f683b87"
+      },
+      "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"
+    },
+    {
+      "after": {
+        "bytes_lf": 14004,
+        "lines": 331,
+        "sha256_lf": "f179f935b15f0aa69148504f317ff2593d7446d763775e4def420dc9a091b69d"
+      },
+      "before": {
+        "bytes_lf": 13487,
+        "lines": 323,
+        "sha256_lf": "5d0164913d50c231606b9cacad598f88ec572aacf493fdeaf3def113d19067c3"
+      },
+      "path": "src/memory/DAILY_WORKFLOW.md"
+    }
+  ],
+  "generator_sha256_lf": "db2ef6658df9256f25e46ba73a3c7124d178dc14356562c2c937785f695a30e2",
+  "policy": {
+    "agents_or_probes_started": false,
+    "interpretation": "selected source metadata; not loaded context, tokens, usage frequency or savings",
+    "mode": "offline_local_git",
+    "normalization": "CRLF to LF",
+    "raw_contents_retained": false
+  },
+  "runtime_metrics": {
+    "elapsed_time": "NOT_MEASURED",
+    "loaded_sources": "NOT_MEASURED",
+    "repeated_reads": "NOT_MEASURED",
+    "route_correctness": "NOT_MEASURED",
+    "skipped_checks": "NOT_MEASURED",
+    "task_quality": "NOT_MEASURED",
+    "tokens": "NOT_MEASURED",
+    "tool_calls": "NOT_MEASURED"
+  },
+  "schema_version": "bioetl-instruction-source-comparison-v1",
+  "scope": {
+    "prefixes": [
+      ".codex/agents/",
+      ".codex/skills/",
+      ".junie/agents/",
+      ".junie/skills/",
+      ".devin/agents/",
+      ".devin/skills/"
+    ],
+    "regular_blobs_only": true,
+    "shared_paths": [
+      "AGENTS.md",
+      ".junie/guidelines.md",
+      "docs/00-project/NORMATIVE_SOURCES.md",
+      "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+      "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+      "docs/00-project/ai/memory/agent-memory.md",
+      "src/memory/DAILY_WORKFLOW.md"
+    ],
+    "suffixes": [
+      ".md",
+      ".toml",
+      ".json",
+      ".yaml",
+      ".yml"
+    ]
+  }
+}
