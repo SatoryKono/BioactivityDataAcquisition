@@ -1002,7 +1002,7 @@
   "current_source_binding": {
     "kind": "source_topology_only",
     "source_tree_sha256": "111ab3d1e1b9cabc7cf7386a10a23613a7b2fbd27fd4cf811dfac0ac44c5984d",
-    "test_governance_source_tree_sha256": "285eed3aefdfafdf7ce030722852228fa50379139ec5d482f7a47559478f300a",
+    "test_governance_source_tree_sha256": "29071de6af64a429c3994416448e421a4e93bc96cd01c059c8b93a040123538f",
     "test_file_count": 49,
     "test_files": [
       "tests/unit/composition/bootstrap/cli/test_config.py",
