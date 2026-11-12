@@ -419,6 +419,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/integration/test_dashboard_first_window_noscroll.py",
         ),
     ),
+    "scripts/ops/observability/grafana/capture_scroll_surface.cjs": (
+        "tests/unit/scripts/ops/observability/test_grafana_browser_model_observer.py",
+        "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
+        "tests/unit/scripts/ops/observability/test_grafana_immutable_capture.py",
+        "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py",
+        "tests/unit/scripts/ops/observability/test_table_capture_coverage.py",
+        "tests/integration/test_dashboard_first_window_noscroll.py",
+    ),
     "reports/observability/live-fixes-r6/LF1-17/report.md": (
         GRAFANA_CONTEXT_LINKS_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,

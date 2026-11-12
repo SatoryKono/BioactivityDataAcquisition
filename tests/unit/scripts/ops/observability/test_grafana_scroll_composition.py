@@ -1,5 +1,7 @@
 """Verify that exported scroll captures preserve every document row."""
 
+from __future__ import annotations
+
 import json
 from pathlib import Path
 import subprocess
