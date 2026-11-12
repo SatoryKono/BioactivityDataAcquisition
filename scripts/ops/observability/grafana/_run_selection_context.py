@@ -47,6 +47,15 @@ def stamp_run_selection_context(payload: dict) -> None:
         next(p for p in payload["panels"] if p["id"] == 9002)["gridPos"]["y"] = (
             grid["y"] + 5
         )
+        next(p for p in payload["panels"] if p["id"] == 9002)["gridPos"]["h"] = 8
+    if payload["uid"] == "bioetl-dq-v2":
+        # Close the two-row gap left when accounting shrinks from eight to six.
+        next(p for p in payload["panels"] if p["id"] == 9402)["gridPos"]["y"] = 18
+        # Shift disclosure and its nested evidence together to follow identity.
+        for other in payload["panels"]:
+            if other["gridPos"]["y"] >= 23:
+                other["gridPos"]["y"] -= 2
+                _shift_children(other, -2)
     grid["h"] = 5
     panel.clear()
     panel.update(
@@ -63,7 +72,7 @@ def stamp_run_selection_context(payload: dict) -> None:
                 "Context checked at is this Grafana query evaluation time, not run "
                 "start, browser click, server cache load or catalog freshness. Refresh "
                 "re-evaluates the displayed context. UNKNOWN is missing evidence; request failure "
-                "is Source unavailable. This context is not a fleet verdict. "
+                "is Source unavailable. This context assesses that run only, not a fleet verdict. "
                 "TIME RANGE telemetry never proves this run. Empty is a coverage gap, "
                 "not a pass. Backend failure indicates an unavailable source and must "
                 "not be interpreted as an empty successful response."
@@ -87,6 +96,7 @@ def stamp_run_selection_context(payload: dict) -> None:
                     "custom": {
                         "align": "left",
                         "minWidth": 50,
+                        "inspect": True,
                         "cellOptions": {"type": "auto", "wrapText": True},
                     },
                 },
@@ -95,7 +105,6 @@ def stamp_run_selection_context(payload: dict) -> None:
                         "matcher": {"id": "byName", "options": "Context checked at"},
                         "properties": [
                             {"id": "unit", "value": "time:YYYY-MM-DD HH:mm"},
-                            {"id": "custom.width", "value": 155},
                         ],
                     }
                 ],
@@ -166,16 +175,3 @@ def stamp_run_selection_context(payload: dict) -> None:
             "links": [],
         }
     )
-    if payload["uid"] == "bioetl-overview-v2":
-        for name, width in (
-            ("Context", 110),
-            ("Run ID", 150),
-            ("Execution", 90),
-            ("Verdict", 65),
-        ):
-            panel["fieldConfig"]["overrides"].append(
-                {
-                    "matcher": {"id": "byName", "options": name},
-                    "properties": [{"id": "custom.width", "value": width}],
-                }
-            )

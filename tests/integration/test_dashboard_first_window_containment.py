@@ -304,8 +304,11 @@ def test_row_cap_contracts_are_unique_and_owned() -> None:
 def test_first_window_scope_banners_name_current_range_and_selected_run() -> None:
     """#8923: first-window scope copy must not conflate CURRENT / RANGE / SELECTED RUN."""
     required = {
-        "bioetl-overview-v2.json": ("assesses that run only",),
-        "bioetl-dq-v2.json": ("CURRENT", "SELECTED RUN", "TIME RANGE"),
+        "bioetl-overview-v2.json": (
+            "AUTO shows the latest run",
+            "EXPLICIT keeps the requested Run ID",
+        ),
+        "bioetl-dq-v2.json": ("SELECTED RUN", "TIME RANGE", "never proves this run"),
         "bioetl-incident-v1.json": ("CURRENT", "Run ID does not filter"),
         "bioetl-run-explorer-v1.json": (
             "Last 10 launches",
@@ -322,7 +325,7 @@ def test_first_window_scope_banners_name_current_range_and_selected_run() -> Non
             f"{panel.get('title', '')}\n{panel.get('description', '')}\n"
             f"{((panel.get('options') or {}).get('content') or '')}"
             for panel in first_window
-            if panel.get("type") == "text"
+            if panel.get("type") in {"text", "table"}
         )
         for token in tokens:
             if token not in blob:
@@ -334,10 +337,10 @@ def test_first_window_scope_banners_name_current_range_and_selected_run() -> Non
         for panel in select_first_window_panels(
             _root_panels(by_name["bioetl-overview-v2.json"])
         )
-        if panel.get("type") == "text"
+        if panel.get("type") in {"text", "table"}
     )
     assert "TIME RANGE = Domain Status" not in overview_blob
-    assert "assesses that run only" in overview_blob
+    assert "AUTO shows the latest run" in overview_blob
 
 
 def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
@@ -345,7 +348,11 @@ def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
     panels = {p["id"]: p for p in dashboard["panels"]}
     assert 214 not in panels
     assert 215 not in panels
-    assert panels[9002]["gridPos"]["y"] == panels[9603]["gridPos"]["y"]
+    assert (
+        panels[9002]["gridPos"]["y"]
+        == panels[99]["gridPos"]["y"] + panels[99]["gridPos"]["h"]
+    )
+    assert panels[9603]["gridPos"]["y"] == 5
     panel = panels[9002]
     assert panel_declared_row_cap(panel) == 6
     assert panel["gridPos"]["y"] + panel["gridPos"]["h"] <= FIRST_WINDOW_Y
