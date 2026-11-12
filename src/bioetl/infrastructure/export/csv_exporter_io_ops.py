@@ -12,6 +12,8 @@ from typing import TYPE_CHECKING
 import pyarrow as pa
 import pyarrow.csv as pv
 
+from bioetl.infrastructure.export.csv_exporter_table_ops import spreadsheet_safe_table
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
@@ -83,7 +85,9 @@ def atomic_csv_write(
     temp_path = Path(temp_path_str)
     try:
         os.close(fd)
-        pv.write_csv(data, temp_path, write_options=write_options)
+        pv.write_csv(
+            spreadsheet_safe_table(data), temp_path, write_options=write_options
+        )
         try:
             _publish_csv_payload(temp_path, target_path)
         except PermissionError:
@@ -119,7 +123,9 @@ def append_to_csv(
     try:
         os.close(fd)
         write_options = pv.WriteOptions(include_header=False, delimiter=delimiter)
-        pv.write_csv(data, temp_path, write_options=write_options)
+        pv.write_csv(
+            spreadsheet_safe_table(data), temp_path, write_options=write_options
+        )
         try:
             with open(csv_path, "ab") as target, open(temp_path, "rb") as source:
                 target.write(source.read())

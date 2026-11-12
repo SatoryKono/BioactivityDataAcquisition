@@ -9,6 +9,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.infrastructure.export.csv_exporter_table_ops import (
+    neutralize_spreadsheet_text,
+)
 from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 if TYPE_CHECKING:
@@ -52,7 +55,7 @@ def normalize_csv_value(value: object | None) -> object:
         return ""
     if isinstance(value, (dict, list, tuple)):
         return json.dumps(value, ensure_ascii=False, sort_keys=True)
-    return value
+    return neutralize_spreadsheet_text(value) if isinstance(value, str) else value
 
 
 def write_debug_csv(
@@ -70,7 +73,9 @@ def write_debug_csv(
             extrasaction="ignore",
             quoting=csv.QUOTE_ALL,
         )
-        writer.writeheader()
+        writer.writerow(
+            {header: neutralize_spreadsheet_text(header) for header in headers}
+        )
         for row in rows:
             writer.writerow(
                 {header: normalize_csv_value(row.get(header)) for header in headers}
@@ -132,6 +137,10 @@ def write_sheet_rows(
     sheet.append(headers)
     for row in chunk:
         sheet.append([normalize_csv_value(row.get(header)) for header in headers])
+    for row in sheet.iter_rows():
+        for cell in row:
+            if isinstance(cell.value, str):
+                cell.data_type = "s"
     sheet.auto_filter.ref = sheet.dimensions
 
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import unicodedata
 from builtins import __import__ as _builtin_import
 from typing import TYPE_CHECKING
 
@@ -130,3 +131,31 @@ def deduplicate_table(
     ) as exc:
         logger.warning("CSV deduplication failed", error=str(exc))
         return table
+
+
+def neutralize_spreadsheet_text(value: str) -> str:
+    """Prefix formula-like text only at the spreadsheet export boundary."""
+    for char in value:
+        if char.isspace() or unicodedata.category(char) in {"Cc", "Cf"}:
+            continue
+        return "'" + value if char in "=+-@" else value
+    return value
+
+
+def spreadsheet_safe_table(table: pa.Table) -> pa.Table:
+    """Return a safe export copy; retain numeric types and original input values."""
+    result = table
+    for index, field in enumerate(table.schema):
+        kind = (
+            field.type.value_type if pa.types.is_dictionary(field.type) else field.type
+        )
+        if pa.types.is_string(kind) or pa.types.is_large_string(kind):
+            values = [
+                neutralize_spreadsheet_text(value) if value is not None else None
+                for value in table.column(index).to_pylist()
+            ]
+            result = result.set_column(index, field, pa.array(values, type=field.type))
+    names = [neutralize_spreadsheet_text(name) for name in table.column_names]
+    if len(set(names)) != len(set(table.column_names)):
+        raise ValueError("Spreadsheet-safe column names collide")
+    return result.rename_columns(names)
