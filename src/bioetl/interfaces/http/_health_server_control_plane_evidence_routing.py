@@ -346,21 +346,8 @@ async def _service_payload(
     if error_payload is not None:
         return error_payload
     assert scope is not None
-    if endpoint == "manifest-validation":
-        try:
-            scope = await asyncio.to_thread(
-                reconcile_manifest_validation_scope,
-                scope,
-                report_store=getattr(host, "_run_report_store", None),
-            )
-        except SOURCE_READ_ERRORS:
-            return source_error_payload(
-                endpoint=endpoint,
-                scope=to_evidence_scope(scope),
-                reason=source_reason,
-                check=source_check,
-            )
     try:
+        scope = await _reconcile_validation_scope(host, scope, endpoint=endpoint)
         bound_scope, bound_service = await asyncio.to_thread(
             _bind_selected_validation, host, scope, service
         )
@@ -374,7 +361,34 @@ async def _service_payload(
     scope, service = bound_scope, bound_service
     evidence_scope = to_evidence_scope(scope)
     try:
-        return await _dispatch_bound_evidence(service, scope, endpoint=endpoint)
+        if endpoint == "trust-summary":
+            return await asyncio.to_thread(
+                service.trust_summary, scope=evidence_scope, now=current_utc_time()
+            )
+        if endpoint == "retention-compliance":
+            started = perf_counter()
+            payload = await asyncio.to_thread(
+                service.retention_compliance,
+                scope=evidence_scope,
+                now=current_utc_time(),
+            )
+            payload["forensic_elapsed_seconds"] = round(perf_counter() - started, 4)
+            payload["forensic_deadline_seconds"] = FORENSIC_ENDPOINT_TIMEOUT_SECONDS
+            return payload
+        if endpoint == "manifest-validation":
+            return await asyncio.to_thread(
+                service.manifest_validation,
+                scope=evidence_scope,
+            )
+        if endpoint == "lineage-validation":
+            return await asyncio.to_thread(
+                service.lineage_validation,
+                scope=evidence_scope,
+            )
+        return await asyncio.to_thread(
+            service.failure_reasons,
+            scope=evidence_scope,
+        )
     except SOURCE_READ_ERRORS:
         return source_error_payload(
             endpoint=endpoint,
@@ -384,39 +398,20 @@ async def _service_payload(
         )
 
 
-async def _dispatch_bound_evidence(
-    service: ControlPlaneEvidenceService, scope: _IdentityScope, *, endpoint: str
-) -> dict[str, object]:
-    """Dispatch a validated selection through the existing shared executor."""
-    evidence_scope = to_evidence_scope(scope)
-    if endpoint == "trust-summary":
-        return await asyncio.to_thread(
-            service.trust_summary, scope=evidence_scope, now=current_utc_time()
-        )
-    if endpoint == "retention-compliance":
-        started = perf_counter()
-        payload = await asyncio.to_thread(
-            service.retention_compliance,
-            scope=evidence_scope,
-            now=current_utc_time(),
-        )
-        payload["forensic_elapsed_seconds"] = round(perf_counter() - started, 4)
-        payload["forensic_deadline_seconds"] = FORENSIC_ENDPOINT_TIMEOUT_SECONDS
-        return payload
+async def _reconcile_validation_scope(
+    host: _EvidenceRoutingHost,
+    scope: _IdentityScope,
+    *,
+    endpoint: str,
+) -> _IdentityScope:
+    """Reconcile manifest catalog selection before binding its validation ports."""
     if endpoint == "manifest-validation":
         return await asyncio.to_thread(
-            service.manifest_validation,
-            scope=evidence_scope,
+            reconcile_manifest_validation_scope,
+            scope,
+            report_store=getattr(host, "_run_report_store", None),
         )
-    if endpoint == "lineage-validation":
-        return await asyncio.to_thread(
-            service.lineage_validation,
-            scope=evidence_scope,
-        )
-    return await asyncio.to_thread(
-        service.failure_reasons,
-        scope=evidence_scope,
-    )
+    return scope
 
 
 def _same_run_id(left: object, right: object) -> bool:
