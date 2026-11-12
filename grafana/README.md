@@ -2949,10 +2949,18 @@ availability, and historical manifests must not be rewritten for a green UI.
 ## Appendix: Live Instance Incident Reports
 
 ### Prometheus Stats Dashboard (UID: rpfmFFz7z) - No Data Incident (LA-08)
-*   **Status:** `NOT_VERIFIABLE` in repository.
-*   **Diagnosis:** Dashboard is instance-only and is not tracked in this repository.
-*   **Evidence of Absence:** Exhaustive searches across the repository for UID `rpfmFFz7z`, `Prometheus Stats`, `Local Storage Memory Series`, `Internal Storage Queue Length`, `Samples ingested (rate-5m)`, and `Rule Eval Duration` yielded zero results in tracked JSON dashboard definitions and provisioning configurations.
-*   **Action Required (Live Instance):** 4 of 7 panels show "No data" despite a live Prometheus instance, whereas "Prometheus 2.0 Stats" is fully populated. Remediation (fixing metric names/queries to match the current Prometheus version, or applying a legacy deprecation notice forwarding to "Prometheus 2.0 Stats") must be executed directly on the live Grafana instance by an operator, as the asset does not exist in version control.
+*   **Status:** Instance-only. The UID stays outside the five canonical dashboards and is not a file under `grafana/dashboards/`.
+*   **Diagnosis:** The stock Grafana sample queries Prometheus 1.x local-storage metrics. On the live Prometheus those four series are absent. `POST /api/dashboards/db` for this UID returns `Cannot save provisioned dashboard`, so the sample cannot be edited through the API. Do not add `rpfmFFz7z` to `grafana/provisioning/dashboards/bioetl.yaml`; that provider list is the five canonical boards.
+*   **Live check (2026-11-11, `http://127.0.0.1:9090/api/v1/query`):**
+
+| Panel | Legacy query | Series | Current query |
+| --- | --- | ---: | --- |
+| Local Storage Memory Series | `prometheus_local_storage_memory_series` | 0 | `prometheus_tsdb_head_series` (1 series) |
+| Internal Storage Queue Length | `prometheus_local_storage_indexing_queue_length` | 0 | No replacement series. The local-storage index queue metric is gone. |
+| Samples ingested (rate-5m) | `rate(prometheus_local_storage_ingested_samples_total[5m])` | 0 | `rate(prometheus_tsdb_head_samples_appended_total[5m])` (2 series) |
+| Rule Eval Duration | `prometheus_evaluator_duration_seconds` | 0 | `prometheus_rule_group_last_duration_seconds` (13 series) |
+
+*   **Operator path:** Use Prometheus 2.0 Stats (`UDdpyzz7z`) for the populated sample, or Explore with the current queries above. Uptime, Target Scrapes, and Scrape Duration on `rpfmFFz7z` already return series and stay unchanged.
 
 ### Link Integrity & Context Incident (LA-10) / issue #12944
 *   **Status:** `NOT_VERIFIABLE` in repository.
