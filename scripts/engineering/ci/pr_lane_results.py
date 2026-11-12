@@ -198,6 +198,7 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
 
 NO_PARTIAL_TREE_TEST = "tests/unit/scripts/repo/test_check_no_partial_tree.py"
 HOOK_INSTALLATION_TEST = "tests/unit/scripts/test_hook_installation.py"
+SCOPED_CHECKS_TEST = "tests/unit/scripts/repo/test_scoped_checks.py"
 IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
 DASHBOARD_UX_REPORT_FRESHNESS_TEST = (
     "tests/integration/test_dashboard_ux_report_freshness.py"
@@ -205,6 +206,17 @@ DASHBOARD_UX_REPORT_FRESHNESS_TEST = (
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "scripts/engineering/repo/scoped_checks.py": (
+        SCOPED_CHECKS_TEST,
+        "tests/unit/scripts/repo/test_scoped_checks_cache.py",
+        "tests/unit/scripts/repo/test_hook_receipts.py",
+    ),
+    "scripts/engineering/dev/pretest_guardrails.ps1": (SCOPED_CHECKS_TEST,),
+    "docs/05-operations/runbooks/scoped-post-change-checks.md": (
+        SCOPED_CHECKS_TEST,
+        "tests/unit/scripts/repo/test_hook_receipts.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "scripts/ai/junie/check_junie_mirror.py": (JUNIE_RUNTIME_CI_TEST,),
     "scripts/ai/junie/junie-mirror-contract.json": (JUNIE_RUNTIME_CI_TEST,),
     "scripts/engineering/repo/process_supervisor.py": (
