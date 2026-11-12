@@ -711,3 +711,22 @@ def test_report_fill_keeps_saved_silver_dedup_when_snapshot_equals_artifact() ->
     assert rows["03 silver_filtered_out_records"]["value"].strip() == "0"
     assert rows["04 silver_quarantined_records"]["value"].strip() == "0"
     assert rows["07 gold_written_records"]["value"].strip() == "90"
+
+
+def test_report_accounting_refuses_missing_or_cross_run_ledger_identity():
+    from types import SimpleNamespace
+    from bioetl.interfaces.http._processed_records_report import fill_report_accounting
+
+    values = {"sentinel": 7}
+    for entries in (
+        (),
+        (SimpleNamespace(run_id="first"), SimpleNamespace(run_id="second")),
+    ):
+        fill_report_accounting(
+            values,
+            report={"records": 999},
+            ledger_entries=entries,
+            pipeline="test_pipeline",
+            run_type=None,
+        )
+        assert values == {"sentinel": 7}

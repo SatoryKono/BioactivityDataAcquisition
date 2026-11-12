@@ -250,6 +250,12 @@ async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,t
   return {tiles, inspectedValues};
 }
 
+function cellTextPattern(text) {
+  // Permit only the hover button suffix; never a prefix sibling.
+  // The value is checked again before opening Inspect.
+  return new RegExp('^' + text.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`) + '(?:Inspect value)?$');
+}
+
 async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pngEvidence,timeout,noValue,valueMappings,fieldFormats,seen,inspectCounter}) {
   const results=[];
   const known = seen instanceof Set ? seen : new Set(seen || []);
@@ -257,14 +263,18 @@ async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pn
   const values=[...new Set(cells.filter(c=>c.clipped && c.role!=='columnheader').map(c=>c.text))]
     .filter(text => !known.has(text));
   await sequential(values, async text => {
-    // The accessible name also contains the Inspect button's label.
-    const cell=root.locator('[role="gridcell"]').filter({hasText:new RegExp('^'+text.replace(/[.*+?^${}()|[\]\\]/g,String.raw`\$&`)+'$')}).first();
+    // Match cell text exactly before opening its Inspect action.
+    const cell=root.locator('[role="cell"], [role="gridcell"]').filter({hasText:cellTextPattern(text)}).first();
     if(!await cell.count()){
       // Leave unseen so a later scroll tile can still mount and Inspect this value.
       results.push({text,status:'CELL_NOT_MOUNTED'});return;
     }
     known.add(text);
-    if(await cell.evaluate(el=>el.textContent)!==text)throw new Error('Selected cell differs from requested value');
+    if(await cell.evaluate(el=>{
+      const value=el.cloneNode(true);
+      value.querySelectorAll('button').forEach(button=>button.remove());
+      return value.textContent;
+    })!==text)throw new Error('Selected cell differs from requested value');
     await cell.scrollIntoViewIfNeeded({timeout});
     await cell.hover();
     const inspect=cell.getByRole('button',{name:'Inspect value',exact:true});
@@ -373,6 +383,7 @@ async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeo
   return results;
 }
 module.exports={
+  cellTextPattern,
   captureTablePages,
   captureInspectedValues,
   captureScrollTiles,

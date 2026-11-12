@@ -1316,3 +1316,16 @@ def test_replay_reconstructability_metric_marks_strict_runs_reconstructable_when
             "status": "not_requested",
         },
     )
+
+
+@pytest.mark.unit
+def test_public_ledger_creation_support_preserves_context_and_refusal(monkeypatch):
+    from unittest.mock import Mock, sentinel
+    from bioetl.composition.runtime_builders import (
+        _run_manifest_creation_support as subject,
+    )
+
+    factory = Mock(return_value=None)
+    monkeypatch.setattr(subject, "_create_ledger_service", factory)
+    assert subject.create_ledger_service(sentinel.inputs, sentinel.context) is None
+    factory.assert_called_once_with(sentinel.inputs, sentinel.context)

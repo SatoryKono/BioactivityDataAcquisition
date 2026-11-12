@@ -81,6 +81,9 @@ REQUIRED_CHECKS_PROSE_TEST = (
     "tests/architecture/test_required_checks_prose_consistency.py"
 )
 DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
+DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST = (
+    "tests/integration/test_dashboard_first_window_noscroll.py"
+)
 GRAFANA_METRIC_SEMANTICS_TEST = (
     "tests/integration/test_grafana_dashboard_metric_semantics.py"
 )
@@ -433,7 +436,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
             "tests/unit/scripts/ops/observability/test_grafana_immutable_capture.py",
             "tests/unit/scripts/ops/observability/test_table_capture_coverage.py",
-            "tests/integration/test_dashboard_first_window_noscroll.py",
+            DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST,
         ),
     ),
     "scripts/ops/observability/grafana/capture_scroll_surface.cjs": (
@@ -871,6 +874,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         DASHBOARD_UX_REPORT_FRESHNESS_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
+    "docs/reports/dashboard-ux-checks/2026-11-11.md": (
+        DASHBOARD_UX_REPORT_FRESHNESS_TEST,
+        DASHBOARD_OPERATOR_READABILITY_TEST,
+        DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "docs/reports/audit/N1_SHADOW_STATUS.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
     "src/bioetl/infrastructure/adapters/decorators/README.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
@@ -943,6 +952,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12929_class_lane_review.json",
             "configs/quality/external_resource_inventory_pr12929_domain_accounting_review.json",
             "configs/quality/external_resource_inventory_pr12929_valueerror_review.json",
+            "configs/quality/external_resource_inventory_pr13061_review.json",
             "configs/quality/external_resource_inventory_pr13092_review.json",
             "configs/quality/external_resource_inventory_pr13090_lineage_lock_review.json",
         ),
@@ -2115,6 +2125,8 @@ def _importing_script_tests(
 
 def _dependency_targets(repo_root: Path, dependencies: set[str]) -> list[str]:
     """Reuse source routing and canonical owners for actual dependency consumers."""
+    if not dependencies:
+        return []
     inventory = repo_root / "configs/quality/source_test_owner_inventory.yaml"
     owners: dict[str, list[str]] = {}
     if inventory.is_file():
