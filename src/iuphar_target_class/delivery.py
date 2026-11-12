@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import io
 import os
 import sys
@@ -107,6 +108,10 @@ def run_batch(
     directory = source.parent
     destination = directory / safe_name
     manifest_name = f"{safe_name}.manifest.json"
+    if len(manifest_name.encode("utf-8")) > 255:
+        # Keep the public CSV template; only its companion name needs bounding.
+        digest = hashlib.sha256(safe_name.encode("utf-8")).hexdigest()
+        manifest_name = f"targetclass-{digest}.manifest.json"
     manifest_path = directory / manifest_name
     if _directory_entry(destination) or _directory_entry(manifest_path):
         return DeliveryResult(
@@ -130,13 +135,13 @@ def run_batch(
         return DeliveryResult(
             source.name, safe_name, str(directory), False, "name_collision", None
         )
+    manifest_created = False
     try:
         manifest_created = _create_new(manifest_path, manifest, root=root)
-    except OSError:
-        published.unlink(missing_ok=True)
-        raise
+    finally:
+        if not manifest_created:
+            published.unlink(missing_ok=True)
     if not manifest_created:
-        published.unlink(missing_ok=True)
         return DeliveryResult(
             source.name, safe_name, str(directory), False, "name_collision", None
         )
@@ -172,7 +177,10 @@ def _read_rows(source: Path, *, root: Path) -> tuple[dict[str, str], ...]:
     """Read a CSV only after its resolved path stays inside ``root``."""
     resolved = _path_inside_root(source, root)
     with resolved.open(encoding="utf-8-sig", newline="") as handle:
-        return tuple(dict(row) for row in csv.DictReader(handle))
+        reader = csv.DictReader(handle)
+        if not reader.fieldnames or "input_row_id" not in reader.fieldnames:
+            raise ValueError("CSV requires an input_row_id header")
+        return tuple(dict(row) for row in reader)
 
 
 def _path_inside_root(path: Path, root: Path) -> Path:
