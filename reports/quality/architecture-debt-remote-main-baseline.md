@@ -5,7 +5,7 @@
 - evidence_source: `remote_main_git_tree`
 - remote_main_ref: `refs/heads/main`
 - baseline_artifact_fingerprint: `a53e2d0788bf52b6bbb81bb4a9669b2b9a2dc7fc2763815bd7ce62da02780cc7`
-- local_tracking_ref_matches_remote: `True`
+- local_tracking_ref_matches_remote: `False`
 
 | artifact | blob_sha256 | available | required_on_remote | introduced_after_remote_main |
 | --- | --- | --- | --- | --- |

@@ -500,26 +500,12 @@
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_consume_headers"
-    },
-    {
-      "category": "helper_asserted",
-      "line": "96",
-      "path": "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py",
-      "rationale": "tests that delegate verification to check/validate/verify helper calls",
-      "test_name": "test_generated_heading_measures_age_and_missing_coverage"
-    },
-    {
-      "category": "helper_asserted",
-      "line": "132",
-      "path": "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py",
-      "rationale": "tests that delegate verification to check/validate/verify helper calls",
-      "test_name": "test_freshness_table_keeps_explicit_unknown_rows"
     }
   ],
   "assertless_category_counts": {
     "architecture_helper_guard": 0,
     "benchmark_or_performance": 0,
-    "helper_asserted": 3,
+    "helper_asserted": 1,
     "intentional_no_exception_contract": 66,
     "weak_no_value": 0
   },
@@ -809,15 +795,9 @@
       "categories": {
         "intentional_no_exception_contract": 1
       }
-    },
-    "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py": {
-      "assertless_tests": 2,
-      "categories": {
-        "helper_asserted": 2
-      }
     }
   },
-  "assertless_total_candidates": 69,
+  "assertless_total_candidates": 67,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1507,26 +1487,12 @@
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_consume_headers"
-      },
-      {
-        "category": "helper_asserted",
-        "line": "96",
-        "path": "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py",
-        "rationale": "tests that delegate verification to check/validate/verify helper calls",
-        "test_name": "test_generated_heading_measures_age_and_missing_coverage"
-      },
-      {
-        "category": "helper_asserted",
-        "line": "132",
-        "path": "tests/unit/scripts/ops/observability/test_workflow_freshness_promql.py",
-        "rationale": "tests that delegate verification to check/validate/verify helper calls",
-        "test_name": "test_freshness_table_keeps_explicit_unknown_rows"
       }
     ],
     "assertless_category_counts": {
       "architecture_helper_guard": 0,
       "benchmark_or_performance": 0,
-      "helper_asserted": 3,
+      "helper_asserted": 1,
       "intentional_no_exception_contract": 66,
       "weak_no_value": 0
     },
@@ -1557,7 +1523,7 @@
       "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py:507",
       "tests/unit/infrastructure/test_storage_factory.py:820"
     ],
-    "assertless_total_candidates": 69,
+    "assertless_total_candidates": 67,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -1792,15 +1758,15 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3268,
-    "total_test_functions": 32571,
+    "total_test_functions": 32573,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "70889fd80134bd3f0b6579b72afe9e17f9e214d8c2cbf36dc51b1fc58df99479",
+  "source_tree_sha256": "f86b1369314a39041d0f13625f7fc9c913997670c45c0bbfe7fb5c9374d732da",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 69,
+    "assertless_total_candidates": 67,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
@@ -1860,7 +1826,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3268,
-  "total_test_functions": 32571,
+  "total_test_functions": 32573,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
