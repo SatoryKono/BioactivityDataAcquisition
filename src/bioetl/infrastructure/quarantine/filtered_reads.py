@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import time
+
 import pyarrow as pa
+import pyarrow.dataset as ds
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError
 
@@ -69,6 +72,43 @@ def _load_scoped_pyarrow_table(
     )
 
 
+def _load_bounded_scoped_pyarrow_table(
+    dt: DeltaTable,
+    *,
+    pipeline_single: str,
+    filters: list[tuple[str, str, object]] | None = None,
+    columns: list[str] | None = None,
+) -> pa.Table:
+    """Read rows scoped by pipeline for partitioned and legacy non-partitioned tables."""
+    partitioned = "pipeline" in _delta_partition_columns(dt)
+    dataset = dt.to_pyarrow_dataset(
+        partitions=[("pipeline", "=", pipeline_single)] if partitioned else None,
+    )
+    predicate = ds.field("pipeline") == pipeline_single
+    for name, operator, value in filters or []:
+        if operator != "=":
+            raise ValueError("Unsupported quarantine filter operator")
+        predicate = predicate & (ds.field(name) == value)
+    scanner = dataset.scanner(
+        columns=columns,
+        filter=predicate,
+        batch_size=256,
+        batch_readahead=1,
+        fragment_readahead=1,
+        use_threads=False,
+    )
+    batches = []
+    rows = size = 0
+    deadline = time.monotonic() + 5.0
+    for batch in scanner.to_batches():
+        rows += batch.num_rows
+        size += batch.nbytes
+        if rows > 10_000 or size > 8 * 1024 * 1024 or time.monotonic() > deadline:
+            raise RuntimeError("Quarantine query budget exceeded; narrow the scope")
+        batches.append(batch)
+    return pa.Table.from_batches(batches, schema=scanner.projected_schema)
+
+
 def _filtered_projection_columns(
     dt: DeltaTable,
     *,
@@ -132,7 +172,7 @@ def _load_filtered_rows(
     if payload_hash_single:
         filters.append(("payload_hash", "=", payload_hash_single))
 
-    arrow_table = _load_scoped_pyarrow_table(
+    arrow_table = _load_bounded_scoped_pyarrow_table(
         dt,
         pipeline_single=pipeline_single,
         filters=filters,
@@ -230,7 +270,7 @@ def get_filtered_record(
         ("error_code", "=", "FILTERED_OUT_SILVER"),
         ("payload_hash", "=", payload_hash),
     ]
-    arrow_table = _load_scoped_pyarrow_table(
+    arrow_table = _load_bounded_scoped_pyarrow_table(
         dt,
         pipeline_single=pipeline_single,
         filters=filters,

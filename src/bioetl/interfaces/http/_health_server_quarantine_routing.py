@@ -78,16 +78,35 @@ async def dispatch_quarantine_request(
 
     try:
         handler = _QUARANTINE_EXACT_HANDLERS.get(path)
-        if handler is not None:
+        if handler is handle_filtered_stats:
             await handler(host, writer, query)
+            return
+        if handler is not None:
+            await run_bounded_forensic_operation(
+                limiter=host._forensic_endpoint_limiter,
+                operation_factory=lambda: handler(host, writer, query),
+            )
             return
         if path.startswith("/ops/quarantine/filtered-record/"):
             payload_hash = unquote(path.rsplit("/", maxsplit=1)[-1]).strip()
             if not payload_hash:
                 raise ValueError("Missing payload_hash in path")
-            await handle_filtered_record_detail(host, writer, query, payload_hash)
+            await run_bounded_forensic_operation(
+                limiter=host._forensic_endpoint_limiter,
+                operation_factory=lambda: handle_filtered_record_detail(
+                    host, writer, query, payload_hash
+                ),
+            )
             return
         await host._send_response(writer, 404, _NOT_FOUND_MESSAGE)
+    except ForensicEndpointUnavailable as exc:
+        await host._send_payload_response(
+            writer,
+            exc.status_code,
+            forensic_unavailable_payload(
+                endpoint=path.rsplit("/", maxsplit=1)[-1], reason=exc.reason
+            ),
+        )
     except ValueError as exc:
         await host._send_response(writer, 400, str(exc))
     except (ConnectionError, OSError, RuntimeError):
