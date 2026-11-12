@@ -190,19 +190,21 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     assert '"pipeline": "VALID EMPTY"' in selector
     assert ": items.($merge([$, {" in selector
     handoffs = {
-        "Overview": "bioetl-overview-v2",
-        "Saved Evidence": "bioetl-control-plane-v1",
-        "Data Quality": "bioetl-dq-v2",
-        "Replay Readiness": "bioetl-control-plane-v1",
+        "Overview": ("Overview", "bioetl-overview-v2"),
+        "Saved Evidence": ("Saved Evidence", "bioetl-control-plane-v1"),
+        "Data Quality": ("Data Quality", "bioetl-dq-v2"),
+        "Replay Readiness": ("Replay Readiness", "bioetl-control-plane-v1"),
     }
     overrides = {
-        override["matcher"]["options"]: override["properties"]
+        override["matcher"]["options"]: {
+            prop["id"]: prop["value"] for prop in override["properties"]
+        }
         for override in browse["fieldConfig"]["overrides"]
     }
-    for column, dashboard_uid in handoffs.items():
-        (link,) = next(
-            prop["value"] for prop in overrides[column] if prop["id"] == "links"
-        )
+    menu_by_title = {link["title"]: link for link in overrides["Run ID"]["links"]}
+    for column, (title, dashboard_uid) in handoffs.items():
+        column_links = overrides[column].get("links") or []
+        link = column_links[0] if column_links else menu_by_title[title]
         assert link["url"].startswith(f"/d/{dashboard_uid}/")
         assert "var-run_id=${__data.fields.run_id:percentencode}" in link["url"]
     assert '"run_label": run_id' in selector
