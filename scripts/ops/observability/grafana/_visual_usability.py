@@ -584,7 +584,7 @@ def _preserve_unknown_null_color(value: dict) -> None:
         and value.get("options", {}).get("match") == "null"
     ):
         result = value["options"].get("result", {})
-        if result.get("text") == "UNKNOWN":
+        if result.get("text") in {"UNKNOWN", "NO OBSERVATIONS"}:
             result["color"] = "text"
 
 

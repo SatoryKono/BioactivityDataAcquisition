@@ -381,6 +381,8 @@ _DONOR_SCHEMA = (
             "detail",
             "reason",
             "reason_display",
+            "domain_reason_brief",
+            "run_reason_brief",
             "status_display",
             "run_execution",
             "run_verdict",

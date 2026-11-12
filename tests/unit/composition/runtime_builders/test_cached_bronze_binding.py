@@ -1,5 +1,7 @@
 """Cached Bronze binding preserves type, identity, and explicit refusal behavior."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from types import SimpleNamespace
 
