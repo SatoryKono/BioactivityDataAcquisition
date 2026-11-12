@@ -98,7 +98,7 @@ def run_batch(
 ) -> DeliveryResult:
     """Read one CSV inside ``root`` and write the result beside that file."""
     source = _path_inside_root(source, root)
-    raw_name, safe_name = result_names(
+    _, safe_name = result_names(
         source.name,
         snapshot_id=snapshot_id,
         rules_version=rules_version,
@@ -110,7 +110,7 @@ def run_batch(
     manifest_path = directory / manifest_name
     if _directory_entry(destination) or _directory_entry(manifest_path):
         return DeliveryResult(
-            raw_name, safe_name, str(directory), False, "name_collision", None
+            source.name, safe_name, str(directory), False, "name_collision", None
         )
     rows = _read_rows(source, root=root)
     payload = _csv_bytes(tuple(output_row(row) for row in rows))
@@ -122,13 +122,13 @@ def run_batch(
             "run_id": run_id,
             "schema_version": None,
             "snapshot_id": snapshot_id,
-            "source_name": raw_name,
+            "source_name": source.name,
         }
     )
     published = _publish_name(destination, root)
     if not _create_new(destination, payload, root=root):
         return DeliveryResult(
-            raw_name, safe_name, str(directory), False, "name_collision", None
+            source.name, safe_name, str(directory), False, "name_collision", None
         )
     try:
         manifest_created = _create_new(manifest_path, manifest, root=root)
@@ -138,10 +138,10 @@ def run_batch(
     if not manifest_created:
         published.unlink(missing_ok=True)
         return DeliveryResult(
-            raw_name, safe_name, str(directory), False, "name_collision", None
+            source.name, safe_name, str(directory), False, "name_collision", None
         )
     return DeliveryResult(
-        raw_name, safe_name, str(directory), True, None, manifest_name
+        source.name, safe_name, str(directory), True, None, manifest_name
     )
 
 
@@ -171,7 +171,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 def _read_rows(source: Path, *, root: Path) -> tuple[dict[str, str], ...]:
     """Read a CSV only after its resolved path stays inside ``root``."""
     resolved = _path_inside_root(source, root)
-    with resolved.open(encoding="utf-8", newline="") as handle:
+    with resolved.open(encoding="utf-8-sig", newline="") as handle:
         return tuple(dict(row) for row in csv.DictReader(handle))
 
 

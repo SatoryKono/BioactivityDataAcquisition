@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import json
 import os
 import subprocess
 import sys
@@ -31,6 +32,75 @@ def _copy_example(tmp_path: Path, name: str = "example-input.csv") -> Path:
     destination = tmp_path / name
     destination.write_bytes(_EXAMPLE.read_bytes())
     return destination
+
+
+@pytest.mark.parametrize(
+    "collision", ["none", "result", "manifest", "result_race", "manifest_race"]
+)
+def test_delivery_provenance_keeps_original_source_name(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, collision: str
+) -> None:
+    from iuphar_target_class import delivery
+
+    source = _copy_example(tmp_path, "данные исходные.CSV")
+    original = source.read_bytes()
+    _, safe = result_names(
+        source.name, snapshot_id="snap", rules_version="v1", run_id="provenance"
+    )
+    blocked = tmp_path / (f"{safe}.manifest.json" if "manifest" in collision else safe)
+    if collision in {"result", "manifest"}:
+        blocked.write_bytes(b"keep")
+    publish = delivery._create_new
+
+    def race(path: Path, payload: bytes, *, root: Path) -> bool:
+        if collision.endswith("_race") and path == blocked:
+            return False
+        return publish(path, payload, root=root)
+
+    monkeypatch.setattr(delivery, "_create_new", race)
+    result = run_batch(
+        source,
+        root=tmp_path,
+        snapshot_id="snap",
+        rules_version="v1",
+        run_id="provenance",
+    )
+    assert result.source_name == source.name
+    assert result.normalized_name == safe
+    assert result.written is (collision == "none")
+    assert source.read_bytes() == original
+    if collision == "none":
+        assert result.manifest_name is not None
+        manifest = json.loads(
+            (tmp_path / result.manifest_name).read_text(encoding="utf-8")
+        )
+        assert manifest["source_name"] == source.name
+        assert manifest["normalized_name"] == safe
+    else:
+        assert result.diagnostic == "name_collision"
+    if collision in {"result", "manifest"}:
+        assert blocked.read_bytes() == b"keep"
+
+
+@pytest.mark.parametrize("encoding", ["utf-8", "utf-8-sig"])
+def test_input_row_ids_survive_csv_bom(tmp_path: Path, encoding: str) -> None:
+    source = tmp_path / "bom.csv"
+    original = (
+        "input_row_id,old_iuphar_class\nстрока-1,Receptor\nrow-2,Enzyme\n".encode(
+            encoding
+        )
+    )
+    source.write_bytes(original)
+    result = run_batch(
+        source, root=tmp_path, snapshot_id="snap", rules_version="v1", run_id="bom"
+    )
+    with (tmp_path / result.normalized_name).open(
+        encoding="utf-8", newline=""
+    ) as handle:
+        rows = list(csv.DictReader(handle))
+    assert [row["input_row_id"] for row in rows] == ["строка-1", "row-2"]
+    assert [row["legacy_iuphar_class"] for row in rows] == ["Receptor", "Enzyme"]
+    assert source.read_bytes() == original
 
 
 def test_reserved_characters_are_replaced_in_every_part() -> None:
