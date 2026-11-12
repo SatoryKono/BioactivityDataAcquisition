@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T02:13:16.502608+00:00",
+  "generated_at": "2026-11-12T02:33:34.654576+00:00",
   "summary": {
     "total_scripts": 739,
     "status_counts": {
@@ -429,7 +429,7 @@
         },
         {
           "path": "scripts/ai/codex/efficiency_baseline.py",
-          "line": 234,
+          "line": 236,
           "source_group": "scripts",
           "text": "headless = root / \"scripts\" / \"ai\" / \"codex\" / \"headless.sh\""
         },
@@ -12368,7 +12368,7 @@
         },
         {
           "path": "scripts/ai/codex/efficiency_baseline.py",
-          "line": 326,
+          "line": 328,
           "source_group": "scripts",
           "text": "\"python\": platform.python_version(),"
         },
