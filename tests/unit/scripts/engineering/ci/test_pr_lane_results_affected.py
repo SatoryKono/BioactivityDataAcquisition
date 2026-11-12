@@ -22,7 +22,9 @@ pytestmark = pytest.mark.unit
 HEAD = "a" * 40
 
 
-def test_scroll_capture_shares_capture_cluster_route_and_unknown_peer_stays_rejected() -> None:
+def test_scroll_capture_shares_capture_cluster_route_and_unknown_peer_stays_rejected() -> (
+    None
+):
     """capture_scroll_surface.cjs reuses the existing capture-cluster targets.
 
     Do not map the missing scroll-composition unit here; that file lands with
