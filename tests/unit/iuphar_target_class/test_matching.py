@@ -331,3 +331,21 @@ def test_explicit_id_with_compatible_species_is_still_matched() -> None:
     )
     assert result.match_status == "matched"
     assert result.matched_target_id == "1"
+
+
+@pytest.mark.parametrize("snapshot_complete", [True, False])
+@pytest.mark.parametrize(
+    ("query", "target", "method"),
+    [
+        (_query(name="shared"), _target("1", synonym="shared"), "exact_synonym"),
+        (_query(synonyms=("shared",)), _target("1", name="shared"), "exact_name"),
+    ],
+)
+def test_exact_text_searches_both_catalog_names_and_synonyms(
+    query: MatchQuery, target: CatalogTarget, method: str, snapshot_complete: bool
+) -> None:
+    result = resolve_match(query, (target,), snapshot_complete=snapshot_complete)
+    assert result.match_status == "ambiguous"
+    assert result.matched_target_id is None
+    assert result.candidate_target_ids == ("1",)
+    assert result.match_method == (method,)
