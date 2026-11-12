@@ -8,6 +8,8 @@ import subprocess
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 REPO_ROOT = Path(__file__).resolve().parents[5]
 COMPOSITOR = REPO_ROOT / "scripts/ops/observability/grafana/capture_scroll_surface.cjs"
@@ -34,12 +36,14 @@ plan.slices.forEach((slice, i) => {
 if (rows.length !== (916+offsets.at(-1))*scale) throw new Error('incorrect document height');
 rows.forEach((value, y) => {if (value!==y) throw new Error(`corrupted document row ${y}: ${value}`);});
 """
-    subprocess.run(
+    result = subprocess.run(
         ["node", "-e", script, str(COMPOSITOR), str(scale), json.dumps(offsets)],
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
+        timeout=20,
     )
+    assert result.returncode == 0, result.stderr
 
 
 def test_incomplete_capture_is_rejected():
@@ -54,12 +58,14 @@ try {
 }
 throw new Error('Incomplete capture was accepted');
 """
-    subprocess.run(
+    result = subprocess.run(
         ["node", "-e", script, str(COMPOSITOR)],
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
+        timeout=20,
     )
+    assert result.returncode == 0, result.stderr
 
 
 @pytest.mark.parametrize("scale", [1, 2])
@@ -79,12 +85,14 @@ plan.slices.forEach((slice,i)=>{
 if(rows.length!==2032*scale) throw new Error('Incomplete dashboard');
 rows.forEach((value,y)=>{if(value!==y) throw new Error(`Background or shadow replaced row ${y}`);});
 """
-    subprocess.run(
+    result = subprocess.run(
         ["node", "-e", script, str(COMPOSITOR), str(scale)],
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
+        timeout=20,
     )
+    assert result.returncode == 0, result.stderr
 
 
 @pytest.mark.parametrize("remainder", [1, 2])
@@ -134,7 +142,7 @@ captureScrollSurface(page,{
     throw new Error('Incorrect composite height');
 }).catch(error=>{console.error(error);process.exitCode=1;});
 """
-    subprocess.run(
+    result = subprocess.run(
         [
             "node",
             "-e",
@@ -144,7 +152,9 @@ captureScrollSurface(page,{
             str(remainder),
             str(scale),
         ],
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
+        timeout=20,
     )
+    assert result.returncode == 0, result.stderr
