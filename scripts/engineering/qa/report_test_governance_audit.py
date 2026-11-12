@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import sys
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
@@ -1605,11 +1606,37 @@ def _run_write_mode(
         )
 
 
+def _basename_inventory(root: Path, *, check: bool) -> int:
+    """Materialize the indexed basename census without adding a public script."""
+    tracked = subprocess.check_output(
+        ["git", "ls-files", "-z", "--", "tests"], cwd=root
+    ).decode("utf-8")
+    by_name: dict[str, list[str]] = defaultdict(list)
+    for name in tracked.split("\0"):
+        path = Path(name)
+        if path.name.startswith("test_") and path.suffix == ".py":
+            by_name[path.name].append(name)
+    collisions = {
+        name: sorted(paths) for name, paths in sorted(by_name.items()) if len(paths) > 1
+    }
+    payload = {
+        "duplicate_basename_count": len(collisions),
+        "duplicate_basenames": collisions,
+    }
+    destination = root / "reports/quality/test-basename-collision-inventory.json"
+    expected = json.dumps(payload, indent=2) + "\n"
+    if check:
+        return int(destination.read_text(encoding="utf-8") != expected)
+    destination.write_text(expected, encoding="utf-8")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Report static BioETL test-governance debt budgets.",
     )
     parser.add_argument("--root", type=Path, default=ROOT)
+    parser.add_argument("--basename-inventory", action="store_true")
     parser.add_argument("--config", type=Path, default=ROOT / DEFAULT_CONFIG)
     parser.add_argument("--json-out", type=Path)
     parser.add_argument(
@@ -1635,6 +1662,8 @@ def main(argv: list[str] | None = None) -> int:
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
     safe_root = resolve_output_path(args.root, root=REPO_ROOT)
+    if args.basename_inventory:
+        return _basename_inventory(safe_root, check=args.check)
     safe_config = resolve_output_path(args.config, root=REPO_ROOT)
     # Verification and regeneration must not trust the artifact being checked.
     payload = collect_test_governance_report(safe_root, force_rescan=True)

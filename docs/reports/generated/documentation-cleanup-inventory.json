@@ -116176,7 +116176,7 @@
     {
       "canonical_successor": null,
       "catalog_lifecycle": null,
-      "commit_policy": null,
+      "commit_policy": "tracked_quality_baseline",
       "declared_class": null,
       "declared_status": null,
       "diagram_kind": null,
@@ -116184,9 +116184,9 @@
       "duplicate_resolution": null,
       "extension": ".json",
       "freshness": "current",
-      "generated_route": null,
+      "generated_route": "test-governance-quality-baseline",
       "generated_route_exception": null,
-      "generator": null,
+      "generator": "scripts/engineering/qa/report_test_governance_audit.py",
       "github_issue_number": null,
       "github_issue_url": null,
       "inbound_links": 0,
@@ -118000,7 +118000,8 @@
       "output_kind": "working_report",
       "outputs": [
         "reports/quality/test-governance-current.json",
-        "reports/quality/test-fixture-asset-duplication.json"
+        "reports/quality/test-fixture-asset-duplication.json",
+        "reports/quality/test-basename-collision-inventory.json"
       ]
     },
     {

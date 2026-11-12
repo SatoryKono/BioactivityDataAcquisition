@@ -184,6 +184,55 @@ def test_get_workflow_memory_lock_is_singleton_under_concurrency(
     assert len({id(lock) for lock in locks}) == 1
 
 
+def test_workflow_runner_verifies_only_complete_workflow_identity(
+    monkeypatch, tmp_path
+):
+    from unittest.mock import Mock
+
+    settings = SimpleNamespace(
+        data_dir=tmp_path, gold_path=tmp_path / "gold", report_root=tmp_path / "reports"
+    )
+    monkeypatch.setattr(_workflow_services, "get_settings", lambda: settings)
+    monkeypatch.setattr(
+        _workflow_services, "_create_workflow_metrics", lambda _: sentinel.metrics
+    )
+    monkeypatch.setattr(
+        _workflow_services,
+        "build_workflow_transform_registry",
+        lambda *_args, **_kwargs: {},
+    )
+    verify = Mock()
+    monkeypatch.setattr(_workflow_services, "verify_workflow_run_location", verify)
+    service = _workflow_services.get_workflow_runner_service(
+        pipeline_runner_service_factory=lambda _: sentinel.pipeline_runner
+    )
+    service.evidence_location_verify(SimpleNamespace())
+    verify.assert_not_called()
+    service.evidence_location_verify(
+        SimpleNamespace(workflow_name="workflow", workflow_run_id="run")
+    )
+    verify.assert_called_once_with(
+        workflow_name="workflow", workflow_run_id="run", settings=settings
+    )
+
+
+def test_workflow_manifest_registration_preserves_manifest_and_settings(monkeypatch):
+    from unittest.mock import Mock
+
+    register = Mock(return_value=sentinel.registration)
+    monkeypatch.setattr(_workflow_services, "get_settings", lambda: sentinel.settings)
+    monkeypatch.setattr(
+        _workflow_services, "register_workflow_manifest_location", register
+    )
+    assert (
+        _workflow_services._workflow_evidence_location_register(sentinel.manifest)
+        is sentinel.registration
+    )
+    register.assert_called_once_with(
+        manifest=sentinel.manifest, settings=sentinel.settings
+    )
+
+
 def test_workflow_evidence_registration_passes_manifest_and_typed_settings(monkeypatch):
     from unittest.mock import MagicMock
 

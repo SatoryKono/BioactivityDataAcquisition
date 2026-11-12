@@ -62,6 +62,7 @@ STRICT_GOLD_VALIDATION_MARKERS = (
     "strict = True",
 )
 CONTRACT_TEST_DISCOVERY_TIMEOUT_SECONDS = 30.0
+ENTITY_DIRECTORY_ALIASES = {"activity": frozenset({"bioactivity"})}
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -287,7 +288,6 @@ def _contract_test_paths(
     needles = {
         f"{provider}_{entity}",
         f"{provider}.{entity}",
-        entity,
     }
     paths: set[str] = {
         path
@@ -301,7 +301,21 @@ def _contract_test_paths(
             continue
         if relative_path in paths:
             continue
-        if any(needle.lower() in lowered_path for needle in needles):
+        path = Path(lowered_path)
+        # A namespace such as iuphar_target_class is not target evidence.
+        # Keep existing direct test-name and entity-directory associations.
+        entity_test = entity in path.stem
+        entity_directory = any(
+            part == entity
+            or part.startswith(f"{entity}_")
+            or part in ENTITY_DIRECTORY_ALIASES.get(entity, ())
+            for part in path.parts[:-1]
+        )
+        if (
+            any(needle.lower() in lowered_path for needle in needles)
+            or entity_directory
+            or entity_test
+        ):
             paths.add(relative_path)
     return sorted(paths)
 

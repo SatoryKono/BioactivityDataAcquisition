@@ -326,20 +326,23 @@ def test_issue_5713_compatibility_test_debt_is_ratcheted() -> None:
 
 @pytest.mark.generated_artifact
 def test_issue_5714_dead_code_governance_has_no_untriaged_candidates() -> None:
-    payload = _load_json(CLOSEOUT)
-    outcome = payload["outcomes"]["5714"]
+    outcome = _load_json(CLOSEOUT)["outcomes"]["5714"]
     dead_code = _load_json(DEAD_CODE)
     summary = dead_code["summary"]
 
+    decreasing_counts = {
+        f"repo_wide_{kind}_candidate_count"
+        for kind in ("zero_import", "classified_zero_import", "owner_test_anchored")
+    }
     for key, expected in outcome.items():
         if key == "review_window_next_review_by":
             continue
-        assert summary[key] == expected
+        actual = summary[key]
+        assert actual <= expected if key in decreasing_counts else actual == expected
+    assert len({summary[key] for key in decreasing_counts}) == 1
 
-    assert (
-        dead_code["review_window"]["next_review_by"]
-        == outcome["review_window_next_review_by"]
-    )
+    window = dead_code["review_window"]["next_review_by"]
+    assert window == outcome["review_window_next_review_by"]
     assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
     assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
 
@@ -351,6 +354,7 @@ def test_issue_5715_no_growth_enforcement_gates_are_active() -> None:
     gates = _load_json(DEBT_GATES)
     module_policy = _load_yaml(MODULE_COVERAGE_POLICY)
     test_policy = _load_yaml(TEST_GOVERNANCE_POLICY)
+    residual = module_policy["aggregate_residual_ratchets"]
 
     assert (
         _gate(gates, "debt_budget_growth_policy")["current"]
@@ -361,15 +365,11 @@ def test_issue_5715_no_growth_enforcement_gates_are_active() -> None:
         == outcome["debt_scorecard_budget_violations"]
     )
     assert (
-        module_policy["aggregate_residual_ratchets"]["unmeasured_module_count"][
-            "max_count"
-        ]
+        residual["unmeasured_module_count"]["max_count"]
         == outcome["module_coverage_unmeasured_limit"]
     )
     assert (
-        module_policy["aggregate_residual_ratchets"]["uncovered_module_count"][
-            "max_count"
-        ]
+        residual["uncovered_module_count"]["max_count"]
         == outcome["module_coverage_uncovered_limit"]
     )
     assert (

@@ -24,6 +24,7 @@ CANONICAL_COVERAGE_XML = "reports/coverage/coverage.xml"
 CANONICAL_SLOWEST_TESTS_JSON = "reports/test-telemetry/slowest-tests.json"
 DEFAULT_COVERAGE_THRESHOLD = 85.0
 TELEMETRY_FRESHNESS_MAX_AGE_DAYS = 45
+TESTS_WORKFLOW_PATH = ".github/workflows/tests.yml"
 UNKNOWN_LABEL = "<unknown>"
 SUPPORTED_SOURCE_EVENTS = (
     "pull_request",
@@ -50,7 +51,7 @@ def compute_test_telemetry_source_tree_sha256(repo_root: Path = REPO_ROOT) -> st
         for path in (
             "pyproject.toml",
             "configs/quality/test_matrix.yaml",
-            ".github/workflows/tests.yml",
+            TESTS_WORKFLOW_PATH,
             "scripts/engineering/ci/junit_duration_summary.py",
             "scripts/engineering/dev/pytest_junit_subtests.py",
         )
@@ -96,16 +97,15 @@ def _parse_args() -> argparse.Namespace:
         type=float,
         default=None,
         help=(
-            "Explicit coverage percentage fallback when coverage.xml is unavailable, "
-            "for example when reconstructing the baseline from CI diagnostics."
+            "Legacy flag retained for explicit rejection; captures require "
+            "original coverage XML instead of a supplied percentage."
         ),
     )
     parser.add_argument(
         "--coverage-log",
         default="",
         help=(
-            "Optional log file containing a coverage report line such as "
-            "'TOTAL ... 92.81%%'. Used when coverage.xml is unavailable."
+            "Optional source diagnostic log; it cannot replace original coverage XML."
         ),
     )
     parser.add_argument(
@@ -472,7 +472,7 @@ def build_baseline_payload(
     return {
         "version": 1,
         "policy_scope": "test_telemetry_baseline",
-        "workflow_path": ".github/workflows/tests.yml",
+        "workflow_path": TESTS_WORKFLOW_PATH,
         "source_branch": source_branch,
         "refreshed_at_utc": datetime.now(UTC).isoformat(),
         "refresh_status": status,
@@ -744,14 +744,18 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
             "",
             "## Refresh Procedure",
             "",
-            "1. Preferred path: download `reports/coverage/coverage.xml` and "
-            "`reports/test-telemetry/slowest-tests.json` from a main-branch CI run.",
-            "2. Fallback path: use resilient CI diagnostics artifacts "
-            "(`junit_parallel.xml`, `junit_serial.xml`, and the coverage `TOTAL` line "
-            "from `parallel.log`) when the direct coverage artifact expired.",
+            "1. Download original `reports/coverage/coverage.xml` and "
+            "`reports/test-telemetry/slowest-tests.json` from the same qualified "
+            "CI run. Verify its exact head, all 17 shards, module nonregression "
+            "and both hard coverage gates; report the overall workflow separately.",
+            "2. If XML expired or measured inputs changed, obtain a new complete "
+            "measurement. Use a fresh Nightly or a verified `--local-manifest`; "
+            "logs and supplied percentages cannot replace the original XML.",
             "3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline "
-            "--source-commit <sha> --source-run-id <run-id> ...` with either direct "
-            "artifacts or fallback diagnostics inputs.",
+            "--coverage-xml <original-xml> --source-commit <full-40-character-sha> "
+            "--source-run-id <run-id> ...` with matching same-run duration inputs. "
+            "The CLI rejects percentage overrides and input drift, and retains "
+            "the XML measurement time instead of stamping the current time.",
             "4. A legacy JSON timed-row count requires raw `--junit` inputs for "
             "the complete recorded source inventory; the updater rejects a "
             "partial or legacy-only refresh before writing outputs.",
@@ -994,6 +998,53 @@ def _rebind_current_tree(args: argparse.Namespace) -> int:
     return 0
 
 
+def _validate_ci_capture_inputs(source_commit: str, coverage_xml: Path) -> str:
+    """Reject recapturing historical metrics against unmeasured inputs or dates."""
+    import subprocess
+
+    if not source_commit or not coverage_xml.is_file():
+        raise ValueError(
+            "CI capture requires a source commit and original coverage XML"
+        )
+    if re.fullmatch(r"[0-9a-fA-F]{40}", source_commit) is None:
+        raise ValueError("CI capture requires a full 40-character commit SHA")
+    inputs = (
+        "src",
+        "tests",
+        "scripts/engineering/ci",
+        "scripts/engineering/dev",
+        "scripts/engineering/qa",
+        "pyproject.toml",
+        "configs/quality/test_matrix.yaml",
+        TESTS_WORKFLOW_PATH,
+    )
+    changed = subprocess.run(
+        ["git", "diff", "--quiet", source_commit, "--", *inputs],
+        cwd=REPO_ROOT,
+        check=False,
+    )
+    untracked = subprocess.run(
+        ["git", "ls-files", "--others", "--exclude-standard", "--", *inputs],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if changed.returncode or untracked.returncode or untracked.stdout.strip():
+        raise ValueError(
+            "CI capture source inputs differ; obtain a new complete measurement"
+        )
+    coverage_root = ET.parse(coverage_xml).getroot()
+    if not 0.0 <= float(coverage_root.get("line-rate", "nan")) <= 1.0:
+        raise ValueError(
+            "Original coverage XML must contain a valid measured line-rate"
+        )
+    timestamp = coverage_root.get("timestamp")
+    if timestamp is None:
+        raise ValueError("Original coverage XML must retain its measurement timestamp")
+    return datetime.fromtimestamp(int(timestamp) / 1000, UTC).isoformat()
+
+
 def main() -> int:
     from scripts.engineering.common.repo_paths import resolve_output_path
 
@@ -1030,6 +1081,10 @@ def main() -> int:
             resolve_output_path(str(args.local_manifest)), repo_root=REPO_ROOT
         )
     else:
+        if args.coverage_percent is not None:
+            raise ValueError(
+                "CI capture must read original XML; percentage overrides are forbidden"
+            )
         payload = build_baseline_payload(
             coverage_xml_path=coverage_xml_path,
             coverage_percent=args.coverage_percent,
@@ -1056,6 +1111,9 @@ def main() -> int:
                 "Legacy slowest-tests.json requires --junit inputs before "
                 "refreshing a captured baseline"
             )
+        payload["refreshed_at_utc"] = _validate_ci_capture_inputs(
+            args.source_commit, coverage_xml_path
+        )
     payload = merge_existing_baseline_supplemental_fields(
         payload,
         existing_yaml_path=output_yaml_path,
