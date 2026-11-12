@@ -6,6 +6,7 @@ from copy import deepcopy
 
 from scripts.ops.observability.grafana._dashboard_state_followup import override, walk
 
+_NO_OBSERVATIONS = "NO OBSERVATIONS"
 _WIDTH = "custom.width"
 _CELL = "custom.cellOptions"
 _NO_OBSERVATIONS = "NO OBSERVATIONS"
@@ -182,7 +183,9 @@ def _remap_action_label_texts(panel: dict) -> None:
 def _remap_mapping_texts(mapping: dict) -> None:
     for value in mapping.get("options", {}).values():
         if isinstance(value, dict):
-            value["text"] = _ACTION_LABELS.get(value.get("text"), value.get("text", ""))
+            label = value.get("text", "")
+            if isinstance(label, str):
+                value["text"] = _ACTION_LABELS.get(label, label)
 
 
 def _overview(p: dict[int, dict]) -> None:
@@ -589,7 +592,7 @@ def _preserve_unknown_null_color(value: dict) -> None:
             result["color"] = "text"
 
 
-def _adjust_status_colors(value, palette: dict[str, str]) -> None:
+def _adjust_status_colors(value: object, palette: dict[str, str]) -> None:
     """Apply the panel palette recursively without changing missing evidence."""
     if isinstance(value, dict):
         _preserve_unknown_null_color(value)

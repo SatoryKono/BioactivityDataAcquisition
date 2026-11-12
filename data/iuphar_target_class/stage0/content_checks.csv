@@ -1,0 +1,22 @@
+check_id,subject,status,row_count,byte_count,sha256,column_count,watched_fields,selected_as_stage0_source,note
+candidate:data/input/activity.csv,data/input/activity.csv,inspected_not_selected,145950,1236248,2a7397852d93d20b1ba03b626f1cc1eca26768794baa0190b41598532d066d34,1,none,false,watched=none
+candidate:data/input/assay.csv,data/input/assay.csv,inspected_not_selected,41576,10473290,b612bfd14a062f7885c409521b4c368479ac64932002c6496867e7597c1c5921,23,none,false,watched=none
+candidate:data/input/cell.csv,data/input/cell.csv,inspected_not_selected,9405,131685,45724eed83ad50d9b489b088052e3855f1bc2c078027a6ebd31e752f141185bd,1,none,false,watched=none
+candidate:data/input/document.csv,data/input/document.csv,inspected_not_selected,15675,527066,f7ff402d6379d67d037c93223824d1556596bc8570cf66fb99715933c94e90d8,17,none,false,watched=none
+candidate:data/input/dois.csv,data/input/dois.csv,inspected_not_selected,243,4844,ce9fd7748d969520c33ae03b56ca19cc34e56e6a8d891968765f8e34f5540a3d,1,none,false,watched=none
+candidate:data/input/idmapping_targets.csv,data/input/idmapping_targets.csv,inspected_not_selected,1500,17381,fea047214bc918bfbfa9841448aaf4dd913dd86621514e1f808674b7e1ff3fb4,1,none,false,watched=none
+candidate:data/input/molecule.csv,data/input/molecule.csv,inspected_not_selected,1202,12143,c1d4a168fc9527a378dea458d71e3629babbeb3031dcf94db2bbb40373a05b17,1,none,false,watched=none
+candidate:data/input/protein.csv,data/input/protein.csv,inspected_not_selected,1500,10519,f8c17e6684a18b21c90671baa71aa937eba71aa1a802576f70dc289426e7f3b5,1,none,false,watched=none
+candidate:data/input/pubchem_smiles.csv,data/input/pubchem_smiles.csv,inspected_not_selected,200,2357,182dad5414099044162c655ae7d53501f4bc074c171e302f0127c6865676da47,1,none,false,watched=none
+candidate:data/input/publication.csv,data/input/publication.csv,inspected_not_selected,1500,21015,572347d763932b55e95cc3dabcf89d4c5283e12d627b24d943e245c80592ea02,1,none,false,watched=none
+candidate:data/input/pubmed.csv,data/input/pubmed.csv,inspected_not_selected,1500,6403,9692548fd9320b37965bdef1a7efa604115fe5245016ee27a8eb0aff46f4cdcc,1,none,false,watched=none
+candidate:data/input/target.csv,data/input/target.csv,inspected_not_selected,1960,384522,fb8bef8dcc55663a7d8479c88e1799d16f3b21cc688cb835aab4e7ffeeff1f49,9,none,false,watched=none
+candidate:data/input/target_component.csv,data/input/target_component.csv,inspected_not_selected,1500,6406,e91b1bf9f5c28f7daf8869cafad79dfc9fbe89512f9fc6f0cf48399f11d95951,1,none,false,watched=none
+candidate:data/input/testitem.csv,data/input/testitem.csv,inspected_not_selected,41383,9994224,0b9c97d6b59c8b83b833af48330066a603e3694f6491e77072df7e6dc8f37db2,17,none,false,watched=none
+candidate:data/input/tissue.csv,data/input/tissue.csv,inspected_not_selected,60,857,e2ccbdb3020d47a3fe0d64a50a29a251c269c0e2542bfb8e5b934773a90173ec,1,none,false,watched=none
+material:g2p_snapshot,g2p_snapshot,absent,,,,,none,false,Снимок GtoPdb/G2P в репозитории не выбран. Доступность G2P не установлена.
+material:iuphar_source_sections,iuphar_source_sections,absent,,,,,none,false,Каталог IUPHAR/source_sections из основания плана в этом репозитории отсутствует.
+material:l1_l2_predictions,l1_l2_predictions,absent,,,,,none,false,"Таблица predicted L1/L2 с источником, правилом и ответственным в репозитории не выбрана."
+material:m_code_catalog,m_code_catalog,absent,,,,,none,false,Каталог версий M-кода для этапа 5 в репозитории не найден.
+material:m_processing_results,m_processing_results,absent,,,,,none,false,Старые результаты M-обработки в набор этапа 0 не выбраны и эталоном без происхождения не считаются.
+material:target_all_table,target_all_table,absent,,,,,none,false,Отдельная выгрузка с полем target_all в набор этапа 0 не выбрана. Старые значения target_all эталоном без происхождения не считаются.
