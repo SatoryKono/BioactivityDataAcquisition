@@ -994,6 +994,46 @@ def _rebind_current_tree(args: argparse.Namespace) -> int:
     return 0
 
 
+def _validate_ci_capture_inputs(source_commit: str, coverage_xml: Path) -> str:
+    """Reject recapturing historical metrics against unmeasured inputs or dates."""
+    import subprocess
+
+    if not source_commit or not coverage_xml.is_file():
+        raise ValueError(
+            "CI capture requires a source commit and original coverage XML"
+        )
+    inputs = (
+        "src",
+        "tests",
+        "scripts/engineering/ci",
+        "scripts/engineering/dev",
+        "scripts/engineering/qa",
+        "pyproject.toml",
+        "configs/quality/test_matrix.yaml",
+        ".github/workflows/tests.yml",
+    )
+    changed = subprocess.run(
+        ["git", "diff", "--quiet", source_commit, "--", *inputs],
+        cwd=REPO_ROOT,
+        check=False,
+    )
+    untracked = subprocess.run(
+        ["git", "ls-files", "--others", "--exclude-standard", "--", *inputs],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if changed.returncode or untracked.returncode or untracked.stdout.strip():
+        raise ValueError(
+            "CI capture source inputs differ; obtain a new complete measurement"
+        )
+    timestamp = ET.parse(coverage_xml).getroot().get("timestamp")
+    if timestamp is None:
+        raise ValueError("Original coverage XML must retain its measurement timestamp")
+    return datetime.fromtimestamp(int(timestamp) / 1000, UTC).isoformat()
+
+
 def main() -> int:
     from scripts.engineering.common.repo_paths import resolve_output_path
 
@@ -1056,6 +1096,9 @@ def main() -> int:
                 "Legacy slowest-tests.json requires --junit inputs before "
                 "refreshing a captured baseline"
             )
+        payload["refreshed_at_utc"] = _validate_ci_capture_inputs(
+            args.source_commit, coverage_xml_path
+        )
     payload = merge_existing_baseline_supplemental_fields(
         payload,
         existing_yaml_path=output_yaml_path,
