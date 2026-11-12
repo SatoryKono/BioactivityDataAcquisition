@@ -379,14 +379,21 @@ def test_run_plain_delta_write_subprocess_timeout_reaps_child(
     """Timeout must clean up the child process and pipes without leaking."""
     table_path = tmp_path / "silver" / "entity" / "table"
     request = _make_request(str(table_path))
-    pid_path = tmp_path / "child.pid"
+    from bioetl.infrastructure.storage.silver import support as silver_support
 
-    script = f"""
-import os
+    children: list[subprocess.Popen[bytes]] = []
+    real_start = silver_support.run_protected_subprocess_popen
+
+    def record_child(*args, **kwargs):
+        child = real_start(*args, **kwargs)
+        children.append(child)
+        return child
+
+    monkeypatch.setattr(silver_support, "run_protected_subprocess_popen", record_child)
+
+    script = """
 import sys
 import time
-from pathlib import Path
-Path({str(pid_path)!r}).write_text(str(os.getpid()), encoding="utf-8")
 sys.stdout.write("started\\n")
 sys.stdout.flush()
 time.sleep(10)
@@ -405,8 +412,14 @@ time.sleep(10)
         )
     elapsed = time.monotonic() - start_time
     assert elapsed < 1.0
-    pid = int(pid_path.read_text(encoding="utf-8"))
-    assert not psutil.pid_exists(pid)
+    # Capture the OS-created child in the parent: the 0.1-second timeout may
+    # expire before the interpreter executes its first Python statement.
+    assert len(children) == 1
+    child = children[0]
+    assert child.poll() is not None
+    assert not psutil.pid_exists(child.pid)
+    assert child.stdout is not None and child.stdout.closed
+    assert child.stderr is not None and child.stderr.closed
 
 
 def test_run_plain_delta_write_subprocess_cancel_reaps_child(
