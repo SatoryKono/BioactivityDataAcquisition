@@ -122,6 +122,7 @@ jobs:
             tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py \
             tests/architecture/test_runtime_orchestration_surfaces.py \
             tests/unit/scripts/engineering/ci/test_pr_lane_results.py::test_shadow_compare_routes_devin_permission_configuration \
+            tests/unit/scripts/engineering/ci/test_pr_lane_results.py::test_shadow_compare_routes_guardrail_checker_contract \
             tests/unit/scripts/test_hook_inventory.py tests/unit/scripts/test_mcp_routes.py \
             -q --no-cov \
             --junitxml="$run_dir/tests.xml"
