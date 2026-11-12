@@ -75,7 +75,7 @@ def _pipeline_widths(overrides: list[dict]) -> None:
     # Underscored identifiers need a readable floor, but must stay flex columns:
     # custom.width on Workflow/Pipeline blows the first-window 200% CSS budget.
     min_width = "custom.minWidth"
-    for name, width in (("Pipeline", 70), ("Workflow", 50)):
+    for name, width in (("Pipeline", 80), ("Workflow", 80)):
         override = next(
             (
                 o
