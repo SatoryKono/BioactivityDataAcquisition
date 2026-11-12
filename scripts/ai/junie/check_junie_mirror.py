@@ -344,6 +344,13 @@ def _without_quoted_examples(text: str) -> str:
     return "\n".join(output)
 
 
+def _heading_title(raw: str) -> str:
+    words = raw.split()
+    if words and set(words[-1]) == {"#"}:
+        words.pop()
+    return " ".join(words).casefold()
+
+
 def guardrail_section(text: str, heading: str, level: int = 2) -> str | None:
     """Require one authoritative section; examples/comments cannot satisfy it."""
     text = _without_html_comments(text)
@@ -354,8 +361,12 @@ def guardrail_section(text: str, heading: str, level: int = 2) -> str | None:
     text = "\n".join(
         line for line in text.splitlines() if not line.expandtabs(4).startswith("    ")
     )
-    headers = list(re.finditer(r"(?m)^(#{1,6})[ \t](.*)$", text))
-    matches = [m for m in headers if len(m[1]) == level and m[2].strip() == heading]
+    headers = list(re.finditer(r"(?m)^ {0,3}(#{1,6})(?=[ \t]|$)([^\n]*)", text))
+    matches = [
+        m
+        for m in headers
+        if len(m[1]) == level and _heading_title(m[2]) == _heading_title(heading)
+    ]
     if len(matches) != 1:
         return None
     start = matches[0]

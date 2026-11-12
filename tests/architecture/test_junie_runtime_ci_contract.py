@@ -640,3 +640,39 @@ def test_blank_line_restores_prose_authority_after_quote(tmp_path: Path) -> None
         text.replace(section, "\n> Example only\n\n" + section, 1), encoding="utf-8"
     )
     assert check_obligations(tmp_path, OBLIGATIONS) == []
+
+
+@pytest.mark.parametrize(
+    "header",
+    [
+        "   ## Env File Guardrail",
+        "## Env File Guardrail ##",
+        " ## env file guardrail ###",
+        "##\tEnv File Guardrail\t##",
+    ],
+)
+def test_formatted_duplicate_heading_cannot_hide_conflicting_rule(
+    tmp_path: Path, header: str
+) -> None:
+    _guardrail_fixture_tree(tmp_path)
+    path = tmp_path / "AGENTS.md"
+    path.write_text(
+        path.read_text(encoding="utf-8") + f"\n{header}\nMAY modify env.\n",
+        encoding="utf-8",
+    )
+    assert any(
+        "root-env" in issue and "duplicate" in issue
+        for issue in check_obligations(tmp_path, OBLIGATIONS)
+    )
+
+
+def test_formatted_single_heading_keeps_authoritative_section(tmp_path: Path) -> None:
+    _guardrail_fixture_tree(tmp_path)
+    path = tmp_path / "AGENTS.md"
+    text = path.read_text(encoding="utf-8")
+    assert "## Env File Guardrail\n" in text
+    path.write_text(
+        text.replace("## Env File Guardrail\n", "   ## env file guardrail ###\n", 1),
+        encoding="utf-8",
+    )
+    assert check_obligations(tmp_path, OBLIGATIONS) == []
