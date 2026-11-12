@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Check published observability endpoints against container-internal health."""
+"""Check published observability endpoints against container-internal health.
+
+A missing trycloudflare process is not a failure of this check. The published
+URL is the canonical operator path when no tunnel is running.
+"""
 
 from __future__ import annotations
 

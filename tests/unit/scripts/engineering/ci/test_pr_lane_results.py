@@ -200,6 +200,28 @@ def test_shadow_compare_records_selection_without_activation(tmp_path: Path) -> 
     }
 
 
+def test_shadow_compare_routes_monitoring_guide() -> None:
+    """Monitoring guide edits keep the published-port and docs inventory route."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        [
+            "docs/05-operations/01-monitoring-guide.md",
+            "scripts/ops/observability/check_published_observability_endpoints.py",
+            "tests/unit/scripts/ops/observability/test_check_published_observability_endpoints.py",
+        ],
+        repo_root=repo_root,
+    )
+
+    for target in (
+        "tests/integration/test_grafana_dashboard_links.py",
+        "tests/unit/scripts/ops/observability/test_check_published_observability_endpoints.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+    ):
+        assert target in report["selected"]
+    assert report["covers_full_suite"] is False
+
+
 def test_shadow_compare_routes_domain_layer_doc() -> None:
     """Domain layer doc edits keep a fail-closed impact route."""
     repo_root = Path(__file__).resolve().parents[5]
