@@ -401,6 +401,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/review/grafana-full-tables-20261110/audit.json",
             "reports/review/grafana-full-tables-20261110/chembl_protein_class-overview.png",
             "reports/review/grafana-full-tables-20261110/uniprot_protein-overview.png",
+            "scripts/ops/observability/grafana/capture_scroll_surface.cjs",
             "scripts/ops/observability/grafana/capture_table_pages.cjs",
             "scripts/ops/observability/grafana/capture_tall_panel.cjs",
             "scripts/ops/observability/grafana/native_browser_zoom.cjs",
