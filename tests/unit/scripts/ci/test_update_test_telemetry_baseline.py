@@ -78,6 +78,15 @@ def test_ci_capture_keeps_original_measurement_date(
     )
 
 
+def test_ci_capture_rejects_shell_metacharacters_in_source_commit(
+    tmp_path: Path,
+) -> None:
+    xml = tmp_path / "coverage.xml"
+    xml.write_text('<coverage timestamp="1793987375208"/>', encoding="utf-8")
+    with pytest.raises(ValueError, match="shell metacharacters"):
+        updater._validate_ci_capture_inputs("HEAD;rm", xml)
+
+
 def test_ci_capture_rejects_percentage_without_original_artifact(
     tmp_path: Path,
 ) -> None:

@@ -14,7 +14,7 @@ from typing import Any
 
 import yaml
 
-from scripts.engineering.common.repo_paths import REPO_ROOT
+from scripts.engineering.common.repo_paths import REPO_ROOT, ensure_safe_cli_argv
 from scripts.engineering.ci.junit_duration_summary import (
     derive_summary as _derive_slowest_summary_from_junit_paths,
 )
@@ -1013,7 +1013,7 @@ def _validate_ci_capture_inputs(source_commit: str, coverage_xml: Path) -> str:
         ".github/workflows/tests.yml",
     )
     changed = subprocess.run(
-        ["git", "diff", "--quiet", source_commit, "--", *inputs],
+        ensure_safe_cli_argv(["git", "diff", "--quiet", source_commit, "--", *inputs]),
         cwd=REPO_ROOT,
         check=False,
     )
