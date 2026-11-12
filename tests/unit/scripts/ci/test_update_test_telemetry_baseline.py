@@ -46,6 +46,19 @@ from scripts.engineering.ci.update_test_telemetry_baseline import (
 pytestmark = pytest.mark.unit
 
 
+def test_ci_capture_cannot_override_original_xml_with_a_supplied_percentage(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("sys.argv", ["telemetry", "--coverage-percent", "100"])
+
+    def unexpected_payload(**_kwargs: object) -> None:
+        pytest.fail("A supplied percentage must be rejected before capture")
+
+    monkeypatch.setattr(updater, "build_baseline_payload", unexpected_payload)
+    with pytest.raises(ValueError, match="percentage overrides"):
+        updater.main()
+
+
 @pytest.mark.parametrize("changed,untracked", [(1, ""), (128, ""), (0, "tests/new.py")])
 def test_ci_capture_rejects_unmeasured_inputs(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, changed: int, untracked: str
@@ -678,7 +691,7 @@ def test_legacy_only_refresh_rejects_before_overwriting_baseline(
             source_run_url="",
             source_branch="main",
             source_event="push",
-            coverage_percent=85.0,
+            coverage_percent=None,
             coverage_xml=tmp_path / "missing.xml",
             coverage_log="",
             slowest_json=legacy,

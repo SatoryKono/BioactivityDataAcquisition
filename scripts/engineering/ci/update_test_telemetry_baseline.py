@@ -1073,6 +1073,10 @@ def main() -> int:
             resolve_output_path(str(args.local_manifest)), repo_root=REPO_ROOT
         )
     else:
+        if args.coverage_percent is not None:
+            raise ValueError(
+                "CI capture must read original XML; percentage overrides are forbidden"
+            )
         payload = build_baseline_payload(
             coverage_xml_path=coverage_xml_path,
             coverage_percent=args.coverage_percent,
