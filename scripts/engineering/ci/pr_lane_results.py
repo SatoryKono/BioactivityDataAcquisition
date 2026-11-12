@@ -43,6 +43,12 @@ PYPROJECT_TOML = "pyproject.toml"
 UV_LOCK = "uv.lock"
 PYTHON_DEPENDENCY_FILES = frozenset({PYPROJECT_TOML, UV_LOCK})
 TEST_FILE_GLOB = "test_*.py"
+DASHBOARD_UX_REPORT_FRESHNESS_TEST = (
+    "tests/integration/test_dashboard_ux_report_freshness.py"
+)
+DASHBOARD_OPERATOR_READABILITY_TEST = (
+    "tests/integration/test_dashboard_operator_readability.py"
+)
 CONFTEST_FILENAME = "conftest.py"
 GENERATED_ARTIFACT_TESTS = Path("configs/quality/generated_artifact_tests.json")
 GENERATED_ARTIFACT_ROUTING = Path("configs/quality/generated_artifact_routing.yaml")
@@ -799,11 +805,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/audit/hygiene-passport.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "docs/reports/dashboard-ux-checks/2026-11-07.md": (
-        "tests/integration/test_dashboard_ux_report_freshness.py",
+        DASHBOARD_UX_REPORT_FRESHNESS_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "docs/reports/dashboard-ux-checks/2026-11-09.md": (
-        "tests/integration/test_dashboard_ux_report_freshness.py",
+        DASHBOARD_UX_REPORT_FRESHNESS_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "docs/reports/audit/N1_SHADOW_STATUS.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
@@ -1044,7 +1050,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/observability/live-fixes-r6/LF1-16/report.md",
         ),
         (
-            "tests/integration/test_dashboard_operator_readability.py",
+            DASHBOARD_OPERATOR_READABILITY_TEST,
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
     ),
@@ -1202,7 +1208,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docker-compose.monitoring.yml": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         "tests/integration/test_grafana_datasource_provisioning.py",
-        "tests/integration/test_dashboard_operator_readability.py",
+        DASHBOARD_OPERATOR_READABILITY_TEST,
     ),
     "docs/05-operations/runbooks/docker-security-baseline.md": (
         DOCKER_RUNTIME_CONTRACT_TEST,
@@ -1434,6 +1440,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "docs/reports/dashboard-ux-checks/": (
+        DASHBOARD_UX_REPORT_FRESHNESS_TEST,
+        DASHBOARD_OPERATOR_READABILITY_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "src/iuphar_target_class/stage0/": (IUPHAR_STAGE0_TEST,),
     "data/iuphar_target_class/stage0/": (IUPHAR_STAGE0_TEST,),
     **dict.fromkeys(
