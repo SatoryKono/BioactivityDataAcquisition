@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 import csv
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from threading import Barrier
+from pathlib import Path
 
 import pytest
 
@@ -149,6 +149,76 @@ def test_path_outside_root_is_rejected(tmp_path: Path) -> None:
             run_id="run-1",
         )
     assert list(root.iterdir()) == []
+
+
+def test_comma_in_a_field_stays_one_value(tmp_path: Path) -> None:
+    source = tmp_path / "comma.csv"
+    source.write_text(
+        'input_row_id,old_iuphar_class\nrow-1,"A, B"\n',
+        encoding="utf-8",
+        newline="\n",
+    )
+    result = run_batch(
+        source,
+        root=tmp_path,
+        snapshot_id="snap",
+        rules_version="plan-v1-r8",
+        run_id="run-1",
+    )
+    text = (tmp_path / result.normalized_name).read_text(encoding="utf-8")
+    parsed = list(csv.DictReader(text.splitlines()))
+    assert parsed[0]["legacy_iuphar_class"] == "A, B"
+
+
+def test_manifest_name_keeps_the_result_extension(tmp_path: Path) -> None:
+    lower_dir = tmp_path / "lower"
+    upper_dir = tmp_path / "upper"
+    lower_dir.mkdir()
+    upper_dir.mkdir()
+    lower = _copy_example(lower_dir, "a.csv")
+    upper = _copy_example(upper_dir, "b.CSV")
+    first = run_batch(
+        lower,
+        root=lower_dir,
+        snapshot_id="snap",
+        rules_version="plan-v1-r8",
+        run_id="run-1",
+    )
+    second = run_batch(
+        upper,
+        root=upper_dir,
+        snapshot_id="snap",
+        rules_version="plan-v1-r8",
+        run_id="run-1",
+    )
+    assert first.manifest_name is not None
+    assert second.manifest_name is not None
+    assert first.manifest_name.endswith(".csv.manifest.json")
+    assert second.manifest_name.endswith(".CSV.manifest.json")
+    assert first.manifest_name != second.manifest_name
+
+
+def test_existing_manifest_blocks_without_writing_the_result(tmp_path: Path) -> None:
+    source = _copy_example(tmp_path, "a.csv")
+    _, safe = result_names(
+        "a.csv",
+        snapshot_id="snap",
+        rules_version="plan-v1-r8",
+        run_id="run-1",
+    )
+    manifest = tmp_path / f"{safe}.manifest.json"
+    manifest.write_text("keep\n", encoding="utf-8", newline="\n")
+    result = run_batch(
+        source,
+        root=tmp_path,
+        snapshot_id="snap",
+        rules_version="plan-v1-r8",
+        run_id="run-1",
+    )
+    assert result.written is False
+    assert result.diagnostic == "name_collision"
+    assert manifest.read_text(encoding="utf-8") == "keep\n"
+    assert not (tmp_path / safe).exists()
 
 
 def test_module_cli_runs_in_a_separate_process(tmp_path: Path) -> None:

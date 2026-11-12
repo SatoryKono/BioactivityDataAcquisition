@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import io
 import os
 import sys
 import tempfile
@@ -12,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .policy import PLAN_VERSION
-from .stage0.io import canonical_csv_bytes, canonical_json_bytes
+from .stage0.io import canonical_json_bytes
 
 _FORBIDDEN = set('\\/:*?"<>|')
 _COLUMNS = (
@@ -104,8 +105,9 @@ def run_batch(
     )
     directory = source.parent
     destination = directory / safe_name
-    manifest_name = f"{destination.stem}.manifest.json"
-    if destination.exists() or (directory / manifest_name).exists():
+    manifest_name = f"{safe_name}.manifest.json"
+    manifest_path = directory / manifest_name
+    if destination.exists() or manifest_path.exists():
         return DeliveryResult(
             raw_name, safe_name, str(directory), False, "name_collision", None
         )
@@ -122,10 +124,12 @@ def run_batch(
             "source_name": raw_name,
         }
     )
-    try:
-        _atomic_write_new(destination, payload, root=directory)
-        _atomic_write_new(directory / manifest_name, manifest, root=directory)
-    except FileExistsError:
+    if not _create_new(destination, payload, root=root):
+        return DeliveryResult(
+            raw_name, safe_name, str(directory), False, "name_collision", None
+        )
+    if not _create_new(manifest_path, manifest, root=root):
+        _path_inside_root(destination, root).unlink(missing_ok=True)
         return DeliveryResult(
             raw_name, safe_name, str(directory), False, "name_collision", None
         )
@@ -179,26 +183,36 @@ def _path_inside_root(path: Path, root: Path) -> Path:
 
 
 def _csv_bytes(rows: tuple[Mapping[str, str], ...]) -> bytes:
-    return canonical_csv_bytes(_COLUMNS, [dict(row) for row in rows])
+    """Serialize with the csv module so commas and quotes stay one field."""
+    buffer = io.StringIO(newline="")
+    writer = csv.writer(buffer, lineterminator="\n")
+    writer.writerow(_COLUMNS)
+    for row in rows:
+        writer.writerow(tuple(row[column] for column in _COLUMNS))
+    return buffer.getvalue().encode("utf-8")
 
 
-def _atomic_write_new(path: Path, payload: bytes, *, root: Path) -> None:
-    """Publish complete bytes using a link that cannot replace an occupied name."""
-    destination = _path_inside_root(path, root)
+def _create_new(path: Path, payload: bytes, *, root: Path) -> bool:
+    """Create ``path`` only when it is absent. An existing file is left untouched."""
+    resolved = _path_inside_root(path, root)
     temporary: Path | None = None
     try:
         with tempfile.NamedTemporaryFile(
-            dir=destination.parent,
-            prefix=f".{destination.name}.",
+            dir=resolved.parent,
+            prefix=f".{resolved.name}.",
             suffix=".tmp",
             delete=False,
         ) as handle:
             temporary = Path(handle.name)
             handle.write(payload)
-        os.link(temporary, destination)
+        try:
+            os.link(temporary, resolved)
+        except FileExistsError:
+            return False
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
+    return True
 
 
 if __name__ == "__main__":
