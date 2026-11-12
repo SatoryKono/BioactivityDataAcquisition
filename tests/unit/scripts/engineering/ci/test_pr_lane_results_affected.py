@@ -53,6 +53,25 @@ def test_unmapped_path_still_has_no_pytest_target(
     assert "tests gate has no affected pytest target" in capsys.readouterr().err
 
 
+def test_grafana_capture_scroll_surface_shares_capture_cluster_route() -> None:
+    """Scroll-surface capture stays in the same bounded Grafana capture shadow cluster."""
+    repo_root = Path(__file__).resolve().parents[5]
+    path = "scripts/ops/observability/grafana/capture_scroll_surface.cjs"
+    sibling = "scripts/ops/observability/grafana/capture_table_pages.cjs"
+    report = build_shadow_compare([path], repo_root=repo_root)
+    sibling_report = build_shadow_compare([sibling], repo_root=repo_root)
+    expected = {
+        "tests/unit/scripts/ops/observability/test_grafana_browser_model_observer.py",
+        "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
+        "tests/unit/scripts/ops/observability/test_grafana_immutable_capture.py",
+        "tests/unit/scripts/ops/observability/test_table_capture_coverage.py",
+        "tests/integration/test_dashboard_first_window_noscroll.py",
+    }
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == expected
+    assert set(report["selected"]) == set(sibling_report["selected"])
+
+
 def test_dashboard_ux_report_family_keeps_bounded_freshness_guards() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
