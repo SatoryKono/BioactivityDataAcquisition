@@ -46,6 +46,19 @@ from scripts.engineering.ci.update_test_telemetry_baseline import (
 pytestmark = pytest.mark.unit
 
 
+def test_ci_capture_cannot_override_original_xml_with_a_supplied_percentage(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("sys.argv", ["telemetry", "--coverage-percent", "100"])
+
+    def unexpected_payload(**_kwargs: object) -> None:
+        pytest.fail("A supplied percentage must be rejected before capture")
+
+    monkeypatch.setattr(updater, "build_baseline_payload", unexpected_payload)
+    with pytest.raises(ValueError, match="percentage overrides"):
+        updater.main()
+
+
 @pytest.mark.parametrize("changed,untracked", [(1, ""), (128, ""), (0, "tests/new.py")])
 def test_ci_capture_rejects_unmeasured_inputs(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, changed: int, untracked: str
@@ -67,7 +80,9 @@ def test_ci_capture_keeps_original_measurement_date(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     xml = tmp_path / "coverage.xml"
-    xml.write_text('<coverage timestamp="1793987375208"/>', encoding="utf-8")
+    xml.write_text(
+        '<coverage timestamp="1793987375208" line-rate="0.9"/>', encoding="utf-8"
+    )
     monkeypatch.setattr(
         subprocess,
         "run",
@@ -76,6 +91,24 @@ def test_ci_capture_keeps_original_measurement_date(
     assert updater._validate_ci_capture_inputs("b" * 40, xml) == (
         "2026-11-06T17:49:35.208000+00:00"
     )
+
+
+@pytest.mark.parametrize("rate", [None, "nan", "inf", "-0.1", "1.1", "invalid"])
+def test_ci_capture_rejects_xml_without_a_valid_measured_coverage_rate(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, rate: str | None
+) -> None:
+    xml = tmp_path / "coverage.xml"
+    attributes = {"timestamp": "1793987375208"}
+    if rate is not None:
+        attributes["line-rate"] = rate
+    ET.ElementTree(ET.Element("coverage", attributes)).write(xml)
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *_a, **_k: subprocess.CompletedProcess([], 0, stdout=""),
+    )
+    with pytest.raises(ValueError):
+        updater._validate_ci_capture_inputs("a" * 40, xml)
 
 
 def test_ci_capture_rejects_percentage_without_original_artifact(
@@ -678,7 +711,7 @@ def test_legacy_only_refresh_rejects_before_overwriting_baseline(
             source_run_url="",
             source_branch="main",
             source_event="push",
-            coverage_percent=85.0,
+            coverage_percent=None,
             coverage_xml=tmp_path / "missing.xml",
             coverage_log="",
             slowest_json=legacy,
