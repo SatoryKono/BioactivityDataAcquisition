@@ -104,10 +104,14 @@ python -m scripts.engineering.qa refresh-ci-drift-families --update \
   --test-gov --flaky-fingerprint --evidence --remote-main --dataflow
 ```
 
-`--update --telemetry` additionally requires `--coverage-percent`,
-`--source-commit` (Tests-run ancestor of HEAD), `--source-run-id`,
-`--source-event`, and `--source-run-url`. Do not copy `source_tree_sha256`
-from `test-governance-current.json`. A complete local capture instead uses
+`--update --telemetry` additionally requires original `--coverage-xml`,
+`--source-commit` (full 40-character Tests-run SHA and ancestor of HEAD),
+`--source-run-id`, `--source-event`, and `--source-run-url`. Measured inputs
+must match; ancestry alone does not prove a current measurement.
+Use `--slowest-json` to select the duration artifact from that same run,
+or retain its canonical path. Percentage overrides are rejected.
+Do not copy `source_tree_sha256` from `test-governance-current.json`.
+A complete local capture instead uses
 `--update --telemetry --local-manifest <path>`; CI identity and coverage
 overrides are not accepted by the local updater.
 
