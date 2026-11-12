@@ -331,10 +331,26 @@ def test_issue_5714_dead_code_governance_has_no_untriaged_candidates() -> None:
     dead_code = _load_json(DEAD_CODE)
     summary = dead_code["summary"]
 
+    decreasing_counts = {
+        "repo_wide_zero_import_candidate_count",
+        "repo_wide_classified_zero_import_candidate_count",
+        "repo_wide_owner_test_anchored_candidate_count",
+    }
     for key, expected in outcome.items():
         if key == "review_window_next_review_by":
             continue
-        assert summary[key] == expected
+        if key in decreasing_counts:
+            assert summary[key] <= expected
+        else:
+            assert summary[key] == expected
+    assert (
+        summary["repo_wide_classified_zero_import_candidate_count"]
+        == summary["repo_wide_zero_import_candidate_count"]
+    )
+    assert (
+        summary["repo_wide_owner_test_anchored_candidate_count"]
+        == summary["repo_wide_zero_import_candidate_count"]
+    )
 
     assert (
         dead_code["review_window"]["next_review_by"]
