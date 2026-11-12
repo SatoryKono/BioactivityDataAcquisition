@@ -1765,6 +1765,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/repo/budget_guard.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal guard implementation behind the canonical scripts.engineering.repo router; callers use guard-operation or guard-budgets, not a standalone script.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-11"
+    },
     "scripts/engineering/repo/cleanup_root_local_clutter.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as a bounded reviewed-maintenance cleanup utility for exact root-local clutter candidates from the hygiene registry; keep it non-active unless root cleanup becomes a broader governed operator workflow with a dedicated active surface budget.",
@@ -1776,6 +1782,12 @@
       "next_step": "Retain as the read-only GitHub governance review implementation behind `python -m scripts.engineering.repo github-settings-review`; keep workflow and runbook invocation routed through the package entrypoint.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
+    },
+    "scripts/engineering/repo/operation_guards.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal guard implementation behind the canonical scripts.engineering.repo router; callers use guard-operation or guard-budgets, not a standalone script.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-11"
     },
     "scripts/generate_test_github_issues.py": {
       "decision": "legacy_manual_utility",

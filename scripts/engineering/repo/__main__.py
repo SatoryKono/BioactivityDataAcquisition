@@ -6,6 +6,8 @@ Usage:
     python -m scripts.engineering.repo --help
 
 Commands:
+    guard-operation    Check a structured operation without executing it
+    guard-budgets      Compare protected policy limits to trusted Git objects
     check-inventory    Check scripts inventory drift
     github-settings-review  Collect read-only GitHub governance evidence
     sync-inventory     Refresh scripts inventory manifest
@@ -116,6 +118,16 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     cmd, rest = args[0], args[1:]
+
+    if cmd == "guard-operation":
+        from scripts.engineering.repo.operation_guards import main as guard_main
+
+        return guard_main(rest)
+
+    if cmd == "guard-budgets":
+        from scripts.engineering.repo.budget_guard import main as budgets_main
+
+        return budgets_main(rest)
 
     if cmd == "sync-inventory":
         parser = argparse.ArgumentParser(
