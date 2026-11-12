@@ -292,11 +292,30 @@ $uvPath = Invoke-WslCommand -ArgumentList @(
 $uvPath = $uvPath.Trim()
 if ([string]::IsNullOrWhiteSpace($uvPath)) {
     Show-Step 'Installing uv for the WSL user'
-    $null = Invoke-WslCommand -ArgumentList @(
-        'bash',
-        '-lc',
-        'curl -LsSf https://astral.sh/uv/install.sh | sh'
-    )
+    # Fixed release and content pin; verify before extracting or executing.
+    $uvInstallCommand = @'
+set -euo pipefail
+if [ "$(uname -m)" != x86_64 ]; then
+    echo 'Pinned uv bootstrap supports x86_64 only' >&2
+    exit 1
+fi
+archive="$(mktemp)"
+extracted="$(mktemp -d)"
+staged=''
+trap 'rm -f "$archive"; rm -rf "$extracted"; if [ -n "$staged" ]; then rm -rf "$staged"; fi' EXIT
+curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
+    https://github.com/astral-sh/uv/releases/download/0.11.26/uv-x86_64-unknown-linux-gnu.tar.gz \
+    --output "$archive"
+printf '%s  %s\n' 6426a73c3837e6e2483ee344cbc00f36394d179afcba6183cb77437e67db4af0 "$archive" | sha256sum --check -
+tar -xzf "$archive" -C "$extracted"
+mkdir -p "$HOME/.local/bin"
+staged="$(mktemp -d "$HOME/.local/bin/.uv-install.XXXXXX")"
+install -m 0755 "$extracted/uv-x86_64-unknown-linux-gnu/uv" "$staged/uv"
+install -m 0755 "$extracted/uv-x86_64-unknown-linux-gnu/uvx" "$staged/uvx"
+mv -f "$staged/uv" "$HOME/.local/bin/uv"
+mv -f "$staged/uvx" "$HOME/.local/bin/uvx"
+'@
+    $null = Invoke-WslCommand -ArgumentList @('bash', '-lc', $uvInstallCommand)
     $uvPath = Invoke-WslCommand -ArgumentList @(
         'sh',
         '-lc',
