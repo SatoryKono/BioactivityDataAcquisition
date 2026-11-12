@@ -73,7 +73,7 @@ def test_checkpoint_non_fatal_errors_contains_expected_types(
 
 
 @pytest.mark.unit
-def test_checkpoint_non_fatal_errors_catches_instances() -> None:
+def test_checkpoint_non_fatal_errors_catches_instances_accepts() -> None:
     """Verify the tuple is usable in an except clause for each member.
 
     CheckpointConflictError requires (pipeline, message) — other built-in

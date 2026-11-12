@@ -46,6 +46,45 @@ from scripts.engineering.ci.update_test_telemetry_baseline import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("changed,untracked", [(1, ""), (128, ""), (0, "tests/new.py")])
+def test_ci_capture_rejects_unmeasured_inputs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, changed: int, untracked: str
+) -> None:
+    xml = tmp_path / "coverage.xml"
+    xml.write_text('<coverage timestamp="1793987375208"/>', encoding="utf-8")
+    results = iter(
+        [
+            subprocess.CompletedProcess([], changed),
+            subprocess.CompletedProcess([], 0, stdout=untracked),
+        ]
+    )
+    monkeypatch.setattr(subprocess, "run", lambda *_a, **_k: next(results))
+    with pytest.raises(ValueError, match="new complete measurement"):
+        updater._validate_ci_capture_inputs("historical", xml)
+
+
+def test_ci_capture_keeps_original_measurement_date(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    xml = tmp_path / "coverage.xml"
+    xml.write_text('<coverage timestamp="1793987375208"/>', encoding="utf-8")
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *_a, **_k: subprocess.CompletedProcess([], 0, stdout=""),
+    )
+    assert updater._validate_ci_capture_inputs("same-inputs", xml) == (
+        "2026-11-06T17:49:35.208000+00:00"
+    )
+
+
+def test_ci_capture_rejects_percentage_without_original_artifact(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(ValueError, match="original coverage XML"):
+        updater._validate_ci_capture_inputs("historical", tmp_path / "absent.xml")
+
+
 def test_read_coverage_percent_returns_percentage(tmp_path: Path) -> None:
     coverage_xml = tmp_path / "coverage.xml"
     coverage_xml.write_text(
