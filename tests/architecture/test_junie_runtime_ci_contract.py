@@ -575,3 +575,37 @@ def test_indented_fenced_rules_cannot_satisfy_guardrail(
     assert any(
         "root-env" in issue for issue in check_obligations(tmp_path, OBLIGATIONS)
     )
+
+
+@pytest.mark.parametrize("prefix", ["    ", "        ", "\t", " \t"])
+def test_indented_code_rules_cannot_satisfy_guardrail(
+    tmp_path: Path, prefix: str
+) -> None:
+    _guardrail_fixture_tree(tmp_path)
+    path = tmp_path / "AGENTS.md"
+    text = path.read_text(encoding="utf-8")
+    section = guardrail_section(text, "Env File Guardrail")
+    assert section is not None
+    example = "\n" + "\n".join(prefix + line for line in section.splitlines()) + "\n"
+    path.write_text(text.replace(section, example, 1), encoding="utf-8")
+    assert any(
+        "root-env" in issue for issue in check_obligations(tmp_path, OBLIGATIONS)
+    )
+
+
+@pytest.mark.parametrize("indent", [0, 3])
+def test_supported_prose_indentation_keeps_guardrail_authority(
+    tmp_path: Path, indent: int
+) -> None:
+    _guardrail_fixture_tree(tmp_path)
+    path = tmp_path / "AGENTS.md"
+    text = path.read_text(encoding="utf-8")
+    section = guardrail_section(text, "Env File Guardrail")
+    assert section is not None
+    prose = (
+        "\n"
+        + "\n".join(" " * indent + line.lstrip() for line in section.splitlines())
+        + "\n"
+    )
+    path.write_text(text.replace(section, prose, 1), encoding="utf-8")
+    assert check_obligations(tmp_path, OBLIGATIONS) == []

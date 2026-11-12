@@ -247,6 +247,9 @@ helper containment and bootstrap are tested by the owning worktree tests.
 
 The checker folds prose case/whitespace and Markdown emphasis, preserving code
 literal case/globs. Commented, fenced or quoted examples cannot satisfy an obligation.
+Protected clauses use top-level prose/list continuations with 0–3 leading
+spaces. Deeper indentation, including tab stops, cannot establish authority;
+this bounded format check does not interpret arbitrary nested Markdown lists.
 Missing/duplicate sections, required IDs/clauses and alternate numbered runtime
 precedence fail. Legitimate native sections, implementation-fact precedence,
 and sanctioned Devin wording remain distinct from byte/content mirror scope.

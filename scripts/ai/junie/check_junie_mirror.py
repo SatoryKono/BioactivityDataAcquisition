@@ -334,6 +334,11 @@ def guardrail_section(text: str, heading: str, level: int = 2) -> str | None:
     text = _without_html_comments(text)
     text = _without_fenced_examples(text)
     text = re.sub(r"(?m)^ {0,3}>[^\n]*(?:\n|$)", "", text)
+    # Governed clauses use top-level prose/list continuations (0–3 spaces).
+    # Deeper indentation is not accepted as authority, including tab stops.
+    text = "\n".join(
+        line for line in text.splitlines() if not line.expandtabs(4).startswith("    ")
+    )
     headers = list(re.finditer(r"(?m)^(#{1,6})[ \t](.*)$", text))
     matches = [m for m in headers if len(m[1]) == level and m[2].strip() == heading]
     if len(matches) != 1:
