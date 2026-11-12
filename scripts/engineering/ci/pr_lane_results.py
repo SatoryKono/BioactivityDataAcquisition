@@ -180,6 +180,11 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    ".devin/config.json": (
+        CODEX_NATIVE_RUNTIME_TEST,
+        "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+        "tests/architecture/test_runtime_orchestration_surfaces.py",
+    ),
     "configs/quality/agent_guard_budget_surfaces.json": (
         "tests/unit/scripts/repo/test_budget_guard.py",
     ),

@@ -1239,3 +1239,19 @@ def test_root_and_memory_entrypoints_have_reviewed_owners(
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare([path], repo_root=root)
     assert owner in report["selected"]
+
+
+def test_shadow_compare_routes_devin_permission_configuration() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([".devin/config.json"], repo_root=root)
+    assert (
+        "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/architecture/test_runtime_orchestration_surfaces.py"
+        in report["selected"]
+    )
+    assert "tests/architecture/test_codex_native_runtime.py" in report["selected"]
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare([".devin/unmapped-settings.json"], repo_root=root)
