@@ -24,6 +24,7 @@ CANONICAL_COVERAGE_XML = "reports/coverage/coverage.xml"
 CANONICAL_SLOWEST_TESTS_JSON = "reports/test-telemetry/slowest-tests.json"
 DEFAULT_COVERAGE_THRESHOLD = 85.0
 TELEMETRY_FRESHNESS_MAX_AGE_DAYS = 45
+TESTS_WORKFLOW_PATH = ".github/workflows/tests.yml"
 UNKNOWN_LABEL = "<unknown>"
 SUPPORTED_SOURCE_EVENTS = (
     "pull_request",
@@ -50,7 +51,7 @@ def compute_test_telemetry_source_tree_sha256(repo_root: Path = REPO_ROOT) -> st
         for path in (
             "pyproject.toml",
             "configs/quality/test_matrix.yaml",
-            ".github/workflows/tests.yml",
+            TESTS_WORKFLOW_PATH,
             "scripts/engineering/ci/junit_duration_summary.py",
             "scripts/engineering/dev/pytest_junit_subtests.py",
         )
@@ -472,7 +473,7 @@ def build_baseline_payload(
     return {
         "version": 1,
         "policy_scope": "test_telemetry_baseline",
-        "workflow_path": ".github/workflows/tests.yml",
+        "workflow_path": TESTS_WORKFLOW_PATH,
         "source_branch": source_branch,
         "refreshed_at_utc": datetime.now(UTC).isoformat(),
         "refresh_status": status,
@@ -994,6 +995,48 @@ def _rebind_current_tree(args: argparse.Namespace) -> int:
     return 0
 
 
+def _validate_ci_capture_inputs(source_commit: str, coverage_xml: Path) -> str:
+    """Reject recapturing historical metrics against unmeasured inputs or dates."""
+    import subprocess
+
+    if not source_commit or not coverage_xml.is_file():
+        raise ValueError(
+            "CI capture requires a source commit and original coverage XML"
+        )
+    if re.fullmatch(r"[0-9a-fA-F]{40}", source_commit) is None:
+        raise ValueError("CI capture requires a full 40-character commit SHA")
+    inputs = (
+        "src",
+        "tests",
+        "scripts/engineering/ci",
+        "scripts/engineering/dev",
+        "scripts/engineering/qa",
+        "pyproject.toml",
+        "configs/quality/test_matrix.yaml",
+        TESTS_WORKFLOW_PATH,
+    )
+    changed = subprocess.run(
+        ["git", "diff", "--quiet", source_commit, "--", *inputs],
+        cwd=REPO_ROOT,
+        check=False,
+    )
+    untracked = subprocess.run(
+        ["git", "ls-files", "--others", "--exclude-standard", "--", *inputs],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if changed.returncode or untracked.returncode or untracked.stdout.strip():
+        raise ValueError(
+            "CI capture source inputs differ; obtain a new complete measurement"
+        )
+    timestamp = ET.parse(coverage_xml).getroot().get("timestamp")
+    if timestamp is None:
+        raise ValueError("Original coverage XML must retain its measurement timestamp")
+    return datetime.fromtimestamp(int(timestamp) / 1000, UTC).isoformat()
+
+
 def main() -> int:
     from scripts.engineering.common.repo_paths import resolve_output_path
 
@@ -1056,6 +1099,9 @@ def main() -> int:
                 "Legacy slowest-tests.json requires --junit inputs before "
                 "refreshing a captured baseline"
             )
+        payload["refreshed_at_utc"] = _validate_ci_capture_inputs(
+            args.source_commit, coverage_xml_path
+        )
     payload = merge_existing_baseline_supplemental_fields(
         payload,
         existing_yaml_path=output_yaml_path,
