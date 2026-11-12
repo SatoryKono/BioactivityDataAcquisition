@@ -63,11 +63,17 @@ async def _dispatch_http_request(
 ) -> httpx.Response:
     """Send one HTTPX request, optionally as a streamed response."""
     async with asyncio.timeout(request_timeout):
-        typed_kwargs = cast(_RequestKwargs, httpx_kwargs)
+        if httpx_kwargs.get("follow_redirects") is True:
+            raise ValueError(
+                "Automatic redirects are forbidden; validate Location explicitly"
+            )
+        safe_kwargs = dict(httpx_kwargs)
+        safe_kwargs.pop("follow_redirects", None)
+        typed_kwargs = cast(_RequestKwargs, safe_kwargs)
         if is_stream:
             request = client.build_request(method, url, **typed_kwargs)  # type: ignore[misc]  # technical-reason: httpx unpacked kwargs dynamic signature
-            return await client.send(request, stream=True)
-        return await client.request(method, url, **typed_kwargs)
+            return await client.send(request, stream=True, follow_redirects=False)
+        return await client.request(method, url, follow_redirects=False, **typed_kwargs)
 
 
 def _apply_provider_cooldown(host: RequestTimingHost, response: httpx.Response) -> None:
