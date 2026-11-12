@@ -53,6 +53,23 @@ def test_unmapped_path_still_has_no_pytest_target(
     assert "tests gate has no affected pytest target" in capsys.readouterr().err
 
 
+def test_dashboard_ux_report_family_keeps_bounded_freshness_guards() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["docs/reports/dashboard-ux-checks/2099-01-01.md"], repo_root=repo_root
+    )
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == {
+        "tests/integration/test_dashboard_ux_report_freshness.py",
+        "tests/integration/test_dashboard_operator_readability.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+    }
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            ["docs/reports/UNKNOWN/2099-01-01.md"], repo_root=repo_root
+        )
+
+
 def test_runtime_hook_docs_have_bounded_routes_without_accepting_unknown_docs() -> None:
     """Runtime discovery docs select their real guards; unknown peers stay rejected."""
     repo_root = Path(__file__).resolve().parents[5]
@@ -1266,3 +1283,49 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
     assert expected.issubset(selected)
     report = build_shadow_compare([changed_file], repo_root=repo_root)
     assert report["activation"] == "not_applied"
+
+
+@pytest.mark.parametrize(
+    ("path", "owner"),
+    [
+        ("README.md", "tests/unit/scripts/test_hook_installation.py"),
+        (
+            "docs/05-operations/runbooks/owned-git-hooks.md",
+            "tests/unit/scripts/test_offline_precommit.py",
+        ),
+        (
+            "scripts/ops/launchers/codex/setup_plugins.sh",
+            "tests/architecture/test_ops_ai_setup_scripts.py",
+        ),
+    ],
+)
+def test_owned_hook_deployment_surfaces_have_impact_owners(
+    path: str, owner: str
+) -> None:
+    root = Path(__file__).resolve().parents[5]
+    result = build_shadow_compare([path], repo_root=root)
+    assert owner in result["selected"]
+    assert result["activation"] == "not_applied"
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            [path, "scripts/ops/launchers/codex/unknown-setup.sh"], repo_root=root
+        )
+
+
+def test_owned_hook_python_inputs_keep_real_bounded_test_owners():
+    root = Path(__file__).resolve().parents[5]
+    selected = affected_pytest_targets(
+        [
+            "scripts/engineering/repo/process_supervisor.py",
+            "scripts/engineering/dev/run_project_python.py",
+        ],
+        repo_root=root,
+    )
+    assert {
+        "tests/unit/scripts/repo/test_process_deadline.py",
+        "tests/unit/scripts/test_hook_installation.py",
+        "tests/unit/scripts/test_offline_precommit.py",
+        "tests/unit/scripts/test_run_project_python.py",
+    }.issubset(selected)
+    assert "tests/unit/scripts" not in selected
+    assert "tests/unit/repo_backed/scripts" not in selected
