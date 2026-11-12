@@ -44,10 +44,16 @@ sparse-directory index entries and skip-worktree entries are inspected
 independently. An index replacement during inspection is a refusal, including
 when another agent performs it. No lock is retained across Git's eventual
 commit; malicious races after validation require a stronger host boundary.
+Index anchors use the verified common ancestor of HEAD and the trusted base, so
+a branch predating a new main anchor remains valid before synchronization.
+Intent-to-add entries are refused using Git's visible/invisible index diff modes;
+an empty file staged normally remains valid. Missing Git support is ERROR.
 
 Every commit in base..tip is inspected, including intermediate commits and
-merge ancestry. The directory-anchor comparison uses the verified common
-ancestor; a missing or ambiguous ancestor is an error. Mandatory anchors are
+merge ancestry. The directory-anchor comparison uses each commit's verified
+common ancestor with the trusted base; later additions on main cannot invalidate
+an older branch retroactively. A missing or ambiguous ancestor or an unrelated
+root entering shared history is an error. Mandatory anchors are
 src, tests, scripts, configs, docs, .github and the three canonical runtime
 trees when present in the trusted base. Adding a dummy root does not excuse
 omitting their contents. Git rename evidence can account for relocation;
@@ -68,8 +74,10 @@ intentional deletions from an identical tree produced by a partial index.
 The workflow uses pull_request_target with read-only repository access and a
 job-scoped status-write permission. It checks out the protected main checker,
 fetches candidate objects without checking them out, and executes no candidate
-Python, actions, dependencies or hooks. The checkout ref is the literal
-refs/heads/main, so a PR field cannot choose executable code. Git metadata queries disable fsmonitor
+Python, actions, dependencies or hooks. Explicit Git commands fetch the literal
+public origin SatoryKono/BioactivityDataAcquisition and refs/heads/main with no
+credentials or third-party checkout action. Init templates and checkout hooks
+are disabled. A PR field cannot choose executable code. Git metadata queries disable fsmonitor
 and external diff/textconv execution. No agent or service is started.
 PR events are restricted to the protected main target. Push and manual runs
 load their checker from main, including when manual dispatch is requested from
@@ -81,6 +89,10 @@ explicit trusted base through manual dispatch. Manual dispatch requires base
 and tip inputs and never borrows fields from another event type. The CLI
 supports the same selection through --event-name and --event-json with a
 bounded event read. Unknown event shapes fail closed without dumping payloads.
+Each event resolves base/tip to immutable identities before checking. Missing
+objects are fetched from the fixed origin without checkout, including manual
+branch names, origin-prefixed names and explicit SHAs. Already available local
+revisions can be used directly; a requested SHA must match the resolved object.
 CLI event files must resolve inside the invocation directory, including after
 symlink resolution. The workflow reads GitHub's host-provided event path separately
 and passes bounded bytes to the same parser; it does not widen the CLI boundary.
@@ -88,7 +100,8 @@ and passes bounded bytes to the same parser; it does not widen the CLI boundary.
 Because pull_request_target jobs attach to the base SHA, the workflow publishes
 bioetl/no-partial-tree on the validated candidate SHA. Only a successful guard
 job publishes success; errors publish failure when the candidate identity is
-known. A missing status is not success. Fetch has a 90-second deadline; Git
+known. A missing status is not success. Trusted-main fetch has a 180-second
+deadline and candidate fetch has a 90-second deadline; Git
 queries have ten-second deadlines; the workflow has a ten-minute deadline.
 Missing Python/gh, cancellation or publication failure cannot produce a new
 successful status. Superseded PR runs are cancelled by stable PR identity.

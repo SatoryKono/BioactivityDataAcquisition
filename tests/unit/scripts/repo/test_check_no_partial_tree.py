@@ -113,6 +113,52 @@ def test_resolve_revision_uses_end_of_options(
     assert any(row[0] == "rev-parse" and "--end-of-options" in row for row in seen)
 
 
+def test_branch_before_a_new_main_anchor_is_not_retroactively_partial(
+    repo: Path,
+) -> None:
+    old = _git(repo, "rev-parse", "HEAD").strip()
+    _git(repo, "checkout", "-qb", "feature-before-anchor")
+    (repo / "src/feature.txt").write_text("ordinary feature")
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-qm", "feature before new runtime")
+    _git(repo, "checkout", "--detach", old)
+    (repo / ".devin").mkdir()
+    (repo / ".devin/keep.md").write_text("new required runtime anchor")
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-qm", "add runtime on main")
+    trusted = _git(repo, "rev-parse", "HEAD").strip()
+    _git(repo, "checkout", "feature-before-anchor")
+    before = (repo / ".git/index").read_bytes()
+    assert module.check_index_tree(repo, trusted) == []
+    assert (repo / ".git/index").read_bytes() == before
+    assert module.find_collapsing_commits(trusted, "HEAD", repo=repo) == []
+    _git(repo, "merge", "--no-edit", trusted)
+    assert module.find_collapsing_commits(trusted, "HEAD", repo=repo) == []
+    _git(repo, "rm", "-qr", ".devin")
+    _git(repo, "commit", "-qm", "remove inherited runtime")
+    bad = _git(repo, "rev-parse", "HEAD").strip()
+    assert module.find_collapsing_commits(trusted, "HEAD", repo=repo) == [bad]
+
+
+def test_unrelated_reports_only_root_cannot_hide_in_a_merge(repo: Path) -> None:
+    trusted = _git(repo, "rev-parse", "HEAD").strip()
+    _git(repo, "checkout", "--orphan", "unrelated-report-snapshot")
+    _git(repo, "read-tree", "--empty")
+    _git(repo, "add", "reports")
+    _git(repo, "commit", "-qm", "unrelated reports-only root")
+    # The synthetic orphan leaves untracked copies of the original fixture files.
+    _git(repo, "checkout", "--force", "--detach", trusted)
+    _git(
+        repo,
+        "merge",
+        "--allow-unrelated-histories",
+        "--no-edit",
+        "unrelated-report-snapshot",
+    )
+    with pytest.raises(module.EvidenceError, match="unrelated root"):
+        module.find_collapsing_commits(trusted, "HEAD", repo=repo)
+
+
 def test_guard_passes_clean_range(repo: Path) -> None:
     healthy = _git(repo, "rev-parse", "HEAD").strip()
     (repo / "src" / "feature.txt").write_text("feature", encoding="utf-8")
@@ -283,6 +329,24 @@ def test_root_file_cannot_impersonate_a_directory_anchor(repo: Path) -> None:
     assert module.find_collapsing_commits(healthy, bad, repo=repo) == [bad]
 
 
+@pytest.mark.parametrize("filename", ["new.py", "keep.txt"])
+def test_intent_to_add_cannot_preserve_a_future_commit_anchor(
+    repo: Path, filename: str
+) -> None:
+    trusted = _git(repo, "rev-parse", "HEAD").strip()
+    _git(repo, "rm", "-qr", "src")
+    (repo / "src").mkdir()
+    (repo / "src" / filename).write_text("")
+    _git(repo, "add", "-N", "src")
+    before = (repo / ".git/index").read_bytes()
+    with pytest.raises(module.EvidenceError, match="intent-to-add"):
+        module.check_index_tree(repo, trusted)
+    assert (repo / ".git/index").read_bytes() == before
+    assert module.main(["--repo", str(repo), "--base", trusted, "--check-index"]) == 2
+    _git(repo, "add", "src")
+    assert module.check_index_tree(repo, trusted) == []
+
+
 def test_index_replacement_during_inspection_is_error(
     repo: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -316,19 +380,105 @@ def test_guard_workflow_runs_trusted_base_code_and_publishes_candidate_status() 
     job = workflow["jobs"]["no-partial-tree"]
     assert job["permissions"] == {"contents": "read", "statuses": "write"}
     steps = job["steps"]
-    checkout = next(
-        s for s in steps if s.get("uses", "").startswith("actions/checkout@")
+    checkout = steps[0]["run"]
+    assert (
+        "git remote add origin https://github.com/SatoryKono/BioactivityDataAcquisition.git"
+        in checkout
     )
-    assert checkout["with"]["ref"] == "refs/heads/main"
-    assert checkout["with"]["repository"] == "SatoryKono/BioactivityDataAcquisition"
-    assert checkout["with"]["persist-credentials"] is False
-    assert checkout["with"]["fetch-depth"] == 0
-    assert len([s for s in steps if "uses" in s]) == 1
+    assert "fetch --no-tags origin refs/heads/main" in checkout
+    assert "checkout --detach FETCH_HEAD" in checkout
+    assert "init.templateDir=" in checkout
+    assert "core.hooksPath=/dev/null" in checkout
+    assert "${{" not in checkout
+    assert "GH_TOKEN" not in steps[0].get("env", {})
+    assert not any("uses" in s for s in steps)
     status = steps[-1]
     assert "always()" in status["if"]
     assert "context=bioetl/no-partial-tree" in status["run"]
     assert status["env"]["TIP_SHA"] == "${{ steps.range.outputs.tip }}"
     assert "job.status == 'success'" in status["env"]["RESULT_STATE"]
+
+
+@pytest.mark.parametrize("tip_form", ["sha", "branch", "tracking", "missing"])
+def test_ci_bootstrap_checks_out_main_without_candidate_files(
+    repo: Path, tip_form: str
+) -> None:
+    """Execute the workflow bootstrap against a synthetic local origin, no network."""
+    import shlex
+    import os
+    import subprocess
+    import sys
+    import yaml
+
+    root = Path(__file__).resolve().parents[4]
+    guard = repo / "scripts/engineering/repo/check_no_partial_tree.py"
+    guard.parent.mkdir(parents=True)
+    guard.write_bytes(
+        (root / "scripts/engineering/repo/check_no_partial_tree.py").read_bytes()
+    )
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-qm", "trusted checker fixture")
+    trusted = _git(repo, "rev-parse", "HEAD").strip()
+    if _git(repo, "branch", "--show-current").strip() != "main":
+        _git(repo, "branch", "main", trusted)
+    _git(repo, "checkout", "-qb", "untrusted-candidate")
+    (repo / "src/untrusted.py").write_text("raise RuntimeError('candidate executed')")
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-qm", "candidate must remain data")
+    candidate = _git(repo, "rev-parse", "HEAD").strip()
+    workflow = yaml.safe_load(
+        (root / ".github/workflows/no-partial-tree-commits.yml").read_text()
+    )
+    script = workflow["jobs"]["no-partial-tree"]["steps"][0]["run"]
+    checkout = repo.with_name(repo.name + "-ci")
+    checkout.mkdir()
+    for line in script.splitlines():
+        argv = shlex.split(line)
+        if argv[0] == "timeout":
+            argv = argv[2:]
+        assert argv[0] == "git"
+        argv = [
+            repo.as_uri()
+            if value == "https://github.com/SatoryKono/BioactivityDataAcquisition.git"
+            else value
+            for value in argv
+        ]
+        _git(checkout, *argv[1:])
+    assert _git(checkout, "rev-parse", "HEAD").strip() == trusted
+    fetch_step = next(
+        row
+        for row in workflow["jobs"]["no-partial-tree"]["steps"]
+        if row.get("id") == "objects"
+    )
+    program = fetch_step["run"].split("<<'PY'\n", 1)[1].rsplit("\nPY", 1)[0]
+    tip = {
+        "sha": candidate,
+        "branch": "untrusted-candidate",
+        "tracking": "origin/untrusted-candidate",
+        "missing": "branch-that-does-not-exist",
+    }[tip_form]
+    output = checkout / "outputs.txt"
+    result = subprocess.run(
+        [sys.executable, "-I", "-B", "-c", program],
+        cwd=checkout,
+        env=dict(os.environ, BASE_REF=trusted, TIP_REF=tip, GITHUB_OUTPUT=str(output)),
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if tip_form == "missing":
+        assert result.returncode != 0
+        assert not output.exists()
+        assert _git(checkout, "rev-parse", "HEAD").strip() == trusted
+        assert not (checkout / "src/untrusted.py").exists()
+        return
+    assert result.returncode == 0, result.stderr
+    assert dict(line.split("=", 1) for line in output.read_text().splitlines()) == {
+        "base": trusted,
+        "tip": candidate,
+    }
+    assert _git(checkout, "rev-parse", "HEAD").strip() == trusted
+    assert not (checkout / "src/untrusted.py").exists()
 
 
 def test_real_sparse_index_directory_entries_are_detected(repo: Path) -> None:

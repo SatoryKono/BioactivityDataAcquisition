@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
+import shlex
+import shutil
+import subprocess
 import re
 from pathlib import Path
 from typing import Any
@@ -111,3 +115,84 @@ def test_junie_guidelines_include_full_tree_commits() -> None:
     guidelines = JUNIE_GUIDELINES_PATH.read_text(encoding="utf-8")
     assert "Full-tree commits only" in guidelines
     assert "check_no_partial_tree.py" in guidelines
+
+
+def test_manual_runtime_closeout_uses_existing_producers_and_real_source() -> None:
+    job = _workflow()["jobs"]["verify-native-codex-runtime"]
+    steps = {step["name"]: step for step in job["steps"]}
+    capture = steps["Capture source-bound runtime closeout"]
+    assert (
+        capture["if"]
+        == "github.event_name == 'workflow_dispatch' && !inputs.approve_runtime_sync"
+    )
+    command = capture["run"]
+    for required in (
+        'test "$(git rev-parse HEAD)" = "$GITHUB_SHA"',
+        "capture tests test_health tests python -m pytest",
+        "capture governance pretest_guardrails governance bash",
+        "capture docs docs_runtime_checks docs_runtime python -m scripts.docs check-links",
+        "capture debt debt_governance_gates debt python -m scripts.engineering.qa",
+        "proof-or-stop",
+        '"${proof[@]}" assemble',
+        '"${proof[@]}" verify --bundle',
+        "rc=$?",
+        "state=fail",
+        '--status "$state" --exit-code "$rc"',
+    ):
+        assert required in command
+    assert "--no-source-check" not in command
+    assert "proof-or-stop ingest" not in command
+    assert job["timeout-minutes"] == 5
+    assert steps["Checkout code"]["with"]["fetch-depth"] == 0
+    assert (
+        steps["Upload explicit manual closeout evidence"]["with"]["if-no-files-found"]
+        == "error"
+    )
+
+
+@pytest.mark.parametrize("exit_code,expected", [(0, "pass"), (7, "fail")])
+def test_manual_capture_preserves_actual_command_failure(
+    tmp_path: Path, exit_code: int, expected: str
+) -> None:
+    bash = shutil.which("bash")
+    if os.name == "nt":
+        git = shutil.which("git")
+        candidate = Path(git).resolve().parent.parent / "bin/bash.exe" if git else None
+        bash = str(candidate) if candidate and candidate.is_file() else None
+    if bash is None:
+        pytest.skip("native Bash is unavailable; CI capture is Linux-qualified only")
+    step = next(
+        item
+        for item in _workflow()["jobs"]["verify-native-codex-runtime"]["steps"]
+        if item["name"] == "Capture source-bound runtime closeout"
+    )
+    source = step["run"]
+    start = source.index("capture() {")
+    end = source.index("\n}", start) + 2
+    function = source[start:end]
+    directory = shlex.quote(tmp_path.as_posix())
+    script = tmp_path / "capture-fixture.sh"
+    script.write_text(
+        "set -euo pipefail\n"
+        f"run_dir={directory}\n"
+        "common=()\n"
+        'record_receipt() { printf "%s\\0" "$@" > "$run_dir/receipt.args"; }\n'
+        "proof=(record_receipt)\n"
+        'uv() { shift 4; "$@"; }\n'
+        + function
+        + "\n"
+        + f"capture fixture test_health tests bash -c 'exit {exit_code}'\n",
+        encoding="utf-8",
+    )
+    result = subprocess.run(
+        [bash, "--noprofile", "--norc", script.as_posix()],
+        capture_output=True,
+        text=True,
+        timeout=15,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    args = (tmp_path / "receipt.args").read_bytes().decode().split("\0")
+    assert args[args.index("--status") + 1] == expected
+    assert args[args.index("--exit-code") + 1] == str(exit_code)
+    assert int(args[args.index("--duration-ms") + 1]) >= 0
