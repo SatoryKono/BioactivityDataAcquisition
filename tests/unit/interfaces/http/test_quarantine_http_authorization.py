@@ -1,5 +1,7 @@
 """Quarantine HTTP access must fail closed before reading records."""
 
+from __future__ import annotations
+
 from unittest.mock import AsyncMock, MagicMock
 import httpx
 import pytest
@@ -24,6 +26,13 @@ pytestmark = pytest.mark.unit
             401,
         ),
         ("test-only-token", {"Authorization": "Bearer test-only-token"}, 200),
+        ("test-only-token", {"Authorization": "bearer test-only-token"}, 200),
+        ("test-only-token", {"Authorization": "bEaReR   test-only-token"}, 200),
+        ("test-only-token", {"Authorization": "Bearer TEST-only-token"}, 401),
+        ("test-only-token", {"Authorization": "Bearer test-only-token extra"}, 401),
+        ("test-only-token", {"Authorization": "Basic test-only-token"}, 401),
+        ("test-only-token", {"Authorization": "Bearertest-only-token"}, 401),
+        ("test-only-token", {"Authorization": "Bearer\ttest-only-token"}, 401),
     ],
 )
 async def test_detail_auth_precedes_backend_read(token, headers, expected):

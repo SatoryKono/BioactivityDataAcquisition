@@ -102,15 +102,24 @@ class HealthServerHTTPMixin:
             if token is None:
                 await self._send_response(writer, 404, "Not Found")
                 return
-            expected = f"Bearer {token}".encode()
-            if authorization is None or not hmac.compare_digest(
-                authorization, expected
-            ):
+            if not self._is_authorized_bearer(authorization, token):
                 await self._send_response(writer, 401, "Unauthorized")
                 return
 
         route_support = cast(_RouteRequestSupport, self)  # pyright: ignore[reportInvalidCast]
         await route_support._route_request(writer, path)
+
+    @staticmethod
+    def _is_authorized_bearer(authorization: bytes | None, token: str) -> bool:
+        """Normalize only the scheme and SP separator, never the secret token."""
+        if authorization is None:
+            return False
+        scheme, separator, credentials = authorization.partition(b" ")
+        return (
+            scheme.lower() == b"bearer"
+            and bool(separator)
+            and hmac.compare_digest(credentials.lstrip(b" "), token.encode())
+        )
 
     def _parse_request_line(self, request_line: bytes) -> tuple[str | None, str | None]:
         """Parse HTTP request line into method and path.
