@@ -52,7 +52,10 @@ function compositionSlices(surface, tiles) {
     if (sourceY < minimum || sourceY >= tile.height) {
       throw new Error('Scroll tiles cannot cover the document without sticky chrome or a gap');
     }
-    const height = Math.min(tile.height - sourceY, canvasHeight - covered);
+    // A scroll container can end above the screenshot's lower edge. Never
+    // retain the footer/background below it as if it were dashboard content.
+    const sourceBottom = Math.min(tile.height, Math.round((surface.top + surface.clientHeight) * surface.scale));
+    const height = Math.min(sourceBottom - sourceY, canvasHeight - covered);
     if (height <= 0) throw new Error('Scroll tile adds no document pixels');
     const slice = {sourceY, destinationY: covered, height};
     covered += height;
@@ -117,7 +120,7 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
     const tile = await captureStableTile(page, {tileDir,index:tiles.length,timeout,measure,verify,pngEvidence});
     actual = tile.scrollTop;
     tiles.push({...tile,file:path.relative(path.dirname(filePath),tile.file)});
-    if(actual+surface.clientHeight>=surface.scrollHeight-2)break;
+    if(actual+surface.clientHeight>=surface.scrollHeight)break;
     const next=Math.min(actual+visibleHeight-overlap,surface.scrollHeight-surface.clientHeight);
     if(next<=actual)throw new Error('Dashboard scroll capture made no progress');
     target=next;
