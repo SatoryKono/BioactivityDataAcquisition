@@ -6,10 +6,12 @@ from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 import subprocess
+import time
 
 import pytest
 
 from scripts.engineering.repo import hook_receipts as receipts
+from scripts.engineering.repo import hook_runtime
 
 pytestmark = pytest.mark.unit
 
@@ -20,9 +22,9 @@ def private_repo(tmp_path, monkeypatch):
     root.mkdir()
     disabled = tmp_path / "disabled"
     disabled.mkdir()
-    env = dict(os.environ)
-    for key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_INDEX_FILE"):
-        env.pop(key, None)
+    env = {
+        key: value for key, value in os.environ.items() if not key.startswith("GIT_")
+    }
 
     def git(*args):
         subprocess.run(
@@ -82,6 +84,40 @@ def test_same_state_receipt_qualifies_only_local_observation(private_repo):
     payload = json.loads(path.read_text())
     assert payload["ci_acceptance"] is False
     assert payload["runtime_admission"] is False
+
+
+@pytest.mark.parametrize("consumer", ["receipt", "callback"])
+def test_history_change_without_index_or_head_change_is_rejected(
+    private_repo, consumer
+):
+    root, git = private_repo
+    git("commit", "--allow-empty", "-m", "second fixture revision")
+    before = receipts.protected_state(root)
+    state = receipts.snapshot(root)
+    path = receipts.write_receipt(root, state, _checks())
+    # Only this disposable Git fixture is made shallow; no project history changes.
+    git("fetch", "--depth=1", ".", "HEAD")
+    after = receipts.protected_state(root)
+    for field in ("head_sha", "base_sha", "index_sha256", "dotenv_sha256"):
+        assert after[field] == before[field]
+    if consumer == "receipt":
+        result = receipts.validate_receipt(
+            root, path, receipts.snapshot(root), ["fixture-check"]
+        )
+        assert result["status"] != "PASS"
+    else:
+        assert (
+            hook_runtime._validate_final_state(
+                root,
+                root / ".git/hooks",
+                "pre-commit",
+                b"",
+                {},
+                time.monotonic(),
+                before,
+            )
+            == 2
+        )
 
 
 @pytest.mark.parametrize("change", ["unstaged", "index", "head", "untracked"])
