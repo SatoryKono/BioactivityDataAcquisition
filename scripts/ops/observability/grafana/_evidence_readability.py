@@ -890,6 +890,24 @@ def _overview_selected_run_layout(p: dict[int, dict], summary: dict) -> None:
     _override(summary, _COL_OVERALL_VERDICT, _WIDTH, 115)
     for field in ("Domain", "Status", "Reason"):
         _override(p[9002], field, "links", [])
+    # Backend and datasource failures arrive as the raw cell QUERY ERROR.
+    # Keep that distinct from a saved ERROR verdict.
+    _override(
+        p[9002],
+        "Status",
+        "mappings",
+        [
+            {
+                "type": "value",
+                "options": {
+                    "QUERY ERROR": {
+                        "text": "Source unavailable",
+                        "color": "red",
+                    },
+                },
+            }
+        ],
+    )
     _override(summary, _COL_TRUST, "displayName", _COL_TRUST)
     _override(summary, _COL_TRUST, _WIDTH, 150)
     # Auto-wrapped content grows each table independently. Use the same fixed
