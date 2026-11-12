@@ -94,7 +94,7 @@ Dev tools (`ruff`, `mypy`, `pytest`, `black` при необходимости) 
 
 Оставьте **один канонический clone** проекта для основной работы.
 Дополнительные ветки или эксперименты открывайте в отдельных Git worktree:
-`git worktree add ...`. Не открывайте несколько независимых full-копий одного и
+через governed helper из `AGENTS.md`, только внутри `D:\github`. Не открывайте несколько независимых full-копий одного и
 того же checkout как разные проекты в одном рабочем процессе — это повышает
 дублирование индексации и конфликтов конфигурации.
 
@@ -177,18 +177,18 @@ pytest I/O остаются после того, как IDE уже на `C:`.
 | Surface | Preferred |
 | ------- | --------- |
 | JetBrains config/system | `%APPDATA%` / `%LOCALAPPDATA%\JetBrains` (default) |
-| Canonical clone | local SSD path (e.g. `C:\dev\BioactivityDataAcquisition`) or git worktree |
+| Canonical clone | `D:\github\BioactivityDataAcquisition` or a governed worktree under `D:\github` |
 | `.venv-win` | same volume as clone |
 | UV / pip caches | `%LOCALAPPDATA%` or `%TEMP%` — not under a GDrive project tree |
 
 Steps when relocating:
 
-1. Clone or `git worktree add` on local SSD; open **that** path as the only active PyCharm project.
+1. Reuse a checkout in `D:\github`, or create a worktree through the governed helper after required env approval; open **that** path as the only active PyCharm project.
 2. Bootstrap `.\scripts\engineering\dev\setup_env_windows.ps1` on the new path.
 3. Point Project Interpreter at the new `.venv-win`.
 4. Run `.\scripts\engineering\dev\sync_pycharm_ide_templates.ps1`.
 5. Clean duplicate SDK entries and MCP env paths that still point at the old tree.
-6. Leave the cloud copy as backup/sync-only; do not commit path-specific SDK XML.
+6. Retained Git checkouts, including recovery copies, must also stay in `D:\github`; do not commit path-specific SDK XML or move env files without approval.
 
 ### 2.5 Windows Defender и security policy (по согласованию)
 
