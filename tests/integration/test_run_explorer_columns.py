@@ -50,6 +50,12 @@ def test_ten_columns_keep_full_identity_for_handoffs():
         o["matcher"]["options"]: {p["id"]: p["value"] for p in o["properties"]}
         for o in panel["fieldConfig"]["overrides"]
     }
+    run_id_links = overrides["Run ID"]["links"]
+    hidden_action_titles = {
+        "Provider": "Provider Evidence",
+        "Saved Evidence": "Saved Evidence",
+        "Data Quality": "Data Quality",
+    }
     for column in (
         "Overview",
         "Saved Evidence",
@@ -57,11 +63,19 @@ def test_ten_columns_keep_full_identity_for_handoffs():
         "Replay Readiness",
         "Provider",
     ):
-        url = overrides[column]["links"][0]["url"]
+        if column in hidden_action_titles:
+            matches = [
+                link
+                for link in run_id_links
+                if link["title"] == hidden_action_titles[column]
+            ]
+            assert len(matches) == 1
+            url = matches[0]["url"]
+        else:
+            url = overrides[column]["links"][0]["url"]
         assert "${__data.fields.run_id:percentencode}" in url
         assert "${__data.fields.Pipeline:percentencode}" in url
         assert "${__data.fields.workflow_scope:percentencode}" in url
-    run_id_links = overrides["Run ID"]["links"]
     assert run_id_links[0]["title"] == "Select this run"
     assert "var-run_id=${__data.fields.run_id:percentencode}" in run_id_links[0]["url"]
     assert run_id_links[0]["targetBlank"] is False
@@ -95,10 +109,28 @@ def test_compact_view_keeps_ten_data_fields_and_every_handoff():
         "Replay Readiness",
     ]
     menu = overrides["Run ID"]["links"]
-    for name in ("Workflow", "Provider", "Saved Evidence", "Data Quality"):
-        for link in overrides[name]["links"]:
-            assert link in menu, (name, link)
-            assert "${__value" not in link["url"]
+    assert [link["title"] for link in menu] == [
+        "Select this run",
+        "Report · ${__data.fields.run_id}",
+        "Workflow passport",
+        "Provider Evidence",
+        "Saved Evidence",
+        "Data Quality",
+    ]
+    actions_by_title = {link["title"]: link for link in menu}
+    for name, title in (
+        ("Workflow", "Workflow passport"),
+        ("Provider", "Provider Evidence"),
+        ("Saved Evidence", "Saved Evidence"),
+        ("Data Quality", "Data Quality"),
+    ):
+        assert overrides[name]["custom.hidden"] is True
+        assert overrides[name]["links"] == []
+        assert "${__value" not in actions_by_title[title]["url"]
+    assert (
+        "${__data.fields.workflow_passport_path:raw}"
+        in actions_by_title["Workflow passport"]["url"]
+    )
     retained = next(
         t["options"]["include"]["names"]
         for t in panel["transformations"]

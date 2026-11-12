@@ -200,6 +200,7 @@ def _compact_recent_run_columns(panel: dict, overrides: list[dict]) -> None:
             (p["value"] for p in properties if p["id"] == "links"), []
         )
         actions.extend(deepcopy(links))
+        links.clear()
     panel["description"] += (
         " Compact view: Pipeline, Run ID, Started, Overview and Replay Readiness. "
         "Workflow, Provider, Duration, Saved Evidence and Data Quality remain in "
