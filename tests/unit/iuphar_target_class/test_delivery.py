@@ -22,6 +22,74 @@ from iuphar_target_class.delivery import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize("failure", [KeyboardInterrupt, SystemExit])
+def test_manifest_interrupt_rolls_back_and_allows_retry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: type[BaseException]
+) -> None:
+    from iuphar_target_class import delivery
+
+    source = _copy_example(tmp_path)
+    original = source.read_bytes()
+    publish = delivery._create_new
+
+    def interrupt(path: Path, payload: bytes, *, root: Path) -> bool:
+        if path.name.endswith(".manifest.json"):
+            raise failure()
+        return publish(path, payload, root=root)
+
+    monkeypatch.setattr(delivery, "_create_new", interrupt)
+    with pytest.raises(failure):
+        run_batch(source, root=tmp_path, snapshot_id="s", rules_version="v", run_id="r")
+    assert list(tmp_path.iterdir()) == [source]
+    assert source.read_bytes() == original
+    monkeypatch.setattr(delivery, "_create_new", publish)
+    assert run_batch(
+        source, root=tmp_path, snapshot_id="s", rules_version="v", run_id="r"
+    ).written
+
+
+@pytest.mark.parametrize("contents", ["", "old_iuphar_class\nReceptor\n"])
+def test_missing_identity_header_rejects_before_publication(
+    tmp_path: Path, contents: str
+) -> None:
+    source = tmp_path / "missing.csv"
+    source.write_text(contents, encoding="utf-8")
+    with pytest.raises(ValueError, match="input_row_id"):
+        run_batch(source, root=tmp_path, snapshot_id="s", rules_version="v", run_id="r")
+    assert list(tmp_path.iterdir()) == [source]
+    assert source.read_text(encoding="utf-8") == contents
+
+
+def test_long_result_name_keeps_csv_template_and_uses_bounded_manifest(
+    tmp_path: Path,
+) -> None:
+    source = _copy_example(tmp_path, "a" * 190 + ".csv")
+    original = source.read_bytes()
+    run_id = "12345678-1234-1234-1234-123456789012"
+    _, expected = result_names(
+        source.name, snapshot_id="s", rules_version="v", run_id=run_id
+    )
+    assert len(expected.encode("utf-8")) <= 255
+    assert len((expected + ".manifest.json").encode("utf-8")) > 255
+    result = run_batch(
+        source, root=tmp_path, snapshot_id="s", rules_version="v", run_id=run_id
+    )
+    assert result.written
+    assert result.normalized_name == expected
+    assert result.manifest_name is not None
+    manifest_path = tmp_path / result.manifest_name
+    assert len(manifest_path.name.encode("utf-8")) <= 255
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["normalized_name"] == expected
+    assert manifest["source_name"] == source.name
+    assert source.read_bytes() == original
+    assert not run_batch(
+        source, root=tmp_path, snapshot_id="s", rules_version="v", run_id=run_id
+    ).written
+
+
 _EXAMPLE = (
     Path(__file__).resolve().parents[3]
     / "data/iuphar_target_class/delivery/example-input.csv"
