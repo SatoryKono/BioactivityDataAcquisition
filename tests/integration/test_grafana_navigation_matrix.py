@@ -57,6 +57,28 @@ def _navigation_routes(payload: dict) -> list[dict]:
         properties = [p for p in overrides[0]["properties"] if p.get("id") == "links"]
         assert len(properties) == 1, f"Missing links on {field}"
         field_links = properties[0]["value"]
+        assert isinstance(field_links, list)
+        if field in {"Saved Evidence", "Data Quality"} and any(
+            p.get("id") == "custom.hidden" and p.get("value") is True
+            for p in overrides[0]["properties"]
+        ):
+            assert not field_links, f"Hidden action duplicated outside Run ID: {field}"
+            menus = [
+                o
+                for o in tables[0]["fieldConfig"]["overrides"]
+                if o.get("matcher") == {"id": "byName", "options": "Run ID"}
+            ]
+            assert len(menus) == 1
+            menu_properties = [
+                p for p in menus[0]["properties"] if p.get("id") == "links"
+            ]
+            assert len(menu_properties) == 1
+            assert isinstance(menu_properties[0]["value"], list)
+            field_links = [
+                link
+                for link in menu_properties[0]["value"]
+                if isinstance(link, dict) and link.get("title") == field
+            ]
         assert isinstance(field_links, list) and len(field_links) == 1
         link = field_links[0]
         assert isinstance(link, dict)
@@ -317,13 +339,41 @@ def test_primary_priority_links_are_unique_per_target_uid_and_semantics() -> Non
 
 
 @pytest.mark.parametrize(
-    "damage", ["missing_table", "missing_action", "foreign_run_id"]
+    "damage",
+    [
+        "missing_table",
+        "missing_action",
+        "foreign_run_id",
+        "missing_hidden_action",
+        "duplicate_hidden_action",
+        "foreign_hidden_run_id",
+    ],
 )
 def test_explorer_row_navigation_fails_closed(damage: str) -> None:
     payload = deepcopy(load_dashboard(_DASHBOARDS_DIR / "bioetl-run-explorer-v1.json"))
     table = next(p for p in payload["panels"] if p["id"] == 3010)
     if damage == "missing_table":
         payload["panels"].remove(table)
+    elif damage in {
+        "missing_hidden_action",
+        "duplicate_hidden_action",
+        "foreign_hidden_run_id",
+    }:
+        field = next(
+            o
+            for o in table["fieldConfig"]["overrides"]
+            if o["matcher"] == {"id": "byName", "options": "Run ID"}
+        )
+        menu = next(p["value"] for p in field["properties"] if p["id"] == "links")
+        action = next(link for link in menu if link["title"] == "Data Quality")
+        if damage == "missing_hidden_action":
+            menu.remove(action)
+        elif damage == "duplicate_hidden_action":
+            menu.append(deepcopy(action))
+        else:
+            action["url"] = action["url"].replace(
+                "${__data.fields.run_id:percentencode}", "${run_id}"
+            )
     else:
         field = next(
             o

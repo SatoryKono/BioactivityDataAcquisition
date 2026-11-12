@@ -311,3 +311,13 @@ async def test_fetch_returns_early_when_resume_offset_reaches_limit(adapter) -> 
     assert records == []
     adapter._get_pmids.assert_not_called()
     assert called is False
+
+
+def test_xml_parser_enforces_elapsed_time_budget(monkeypatch):
+    from bioetl.infrastructure.adapters.pubmed import xml_processor as subject
+
+    target = subject.LimitedParseTarget()
+    target.max_time = 0.1
+    monkeypatch.setattr(subject.time, "monotonic", lambda: target.start_time + 1)
+    with pytest.raises(ValueError, match="XML time limit exceeded"):
+        target._raise_if_time_exceeded()

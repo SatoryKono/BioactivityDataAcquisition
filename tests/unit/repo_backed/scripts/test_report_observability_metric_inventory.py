@@ -1456,3 +1456,73 @@ def test_iter_candidate_paths_with_git_grep_includes_no_color_flag(
     assert len(captured_commands) == 1
     assert "--no-color" in captured_commands[0]
     assert paths == [inventory_scan._REPO_ROOT / "src/bioetl/example_module.py"]
+
+
+def test_canonical_inventory_public_entrypoint_reports_repo_signal_contract() -> None:
+    """Exercise the installed engine, including reviewed allowlists, end to end."""
+    from bioetl.infrastructure.observability.metric_inventory import (
+        collect_metric_inventory,
+    )
+    from bioetl.infrastructure.observability.metric_inventory_policy import (
+        validate_metric_inventory,
+    )
+
+    root = Path(__file__).resolve().parents[4]
+    report = collect_metric_inventory(root)
+    assert report["declared_metrics"]
+    assert set(report["emitted_metrics"]).issubset(report["declared_metrics"])
+    assert report["registered_metrics"] == report["declared_metrics"]
+    assert report["live_metrics"] == report["emitted_metrics"]
+    assert isinstance(validate_metric_inventory(report), dict)
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        "null",
+        "[]",
+        "allowed: invalid",
+        "allowed:\n  unused_declared_metrics: invalid\n",
+    ],
+)
+def test_canonical_allowlist_ignores_non_mapping_or_non_list_shapes(tmp_path, content):
+    from bioetl.infrastructure.observability.metric_inventory_policy import (
+        _load_drift_allowlist,
+    )
+
+    path = tmp_path / "allowlist.yaml"
+    path.write_text(content, encoding="utf-8")
+    assert not any(_load_drift_allowlist(path).values())
+
+
+def test_canonical_allowlist_missing_source_and_optional_yaml(tmp_path, monkeypatch):
+    import builtins
+    from bioetl.infrastructure.observability.metric_inventory_policy import (
+        _load_drift_allowlist,
+    )
+
+    assert _load_drift_allowlist(tmp_path / "absent.yaml") == {}
+    path = tmp_path / "allowlist.yaml"
+    path.write_text("allowed: {}", encoding="utf-8")
+    original = builtins.__import__
+
+    def without_yaml(name, *args, **kwargs):
+        if name == "yaml":
+            raise ImportError("optional YAML dependency unavailable")
+        return original(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", without_yaml)
+    assert _load_drift_allowlist(path) == {}
+
+
+def test_canonical_validator_ignores_non_list_report_metadata():
+    from bioetl.infrastructure.observability.metric_inventory_policy import (
+        validate_metric_inventory,
+    )
+
+    assert (
+        validate_metric_inventory(
+            {"unused_declared_metrics": {"metadata": "not a signal list"}}
+        )
+        == {}
+    )
