@@ -143,23 +143,29 @@ def class_chain_defects(
     defects: list[str] = []
     if row.match_status != "matched" or not row.matched_target_id:
         defects.append("matched_target_id")
-    family_evidence = (
-        annotation is not None
-        and annotation.target_id == row.matched_target_id
-        and row.iuphar_annotation_status == "partial"
-        and bool(annotation.family_ids)
-    )
-    if (
-        not row.snapshot_id
-        or (annotation is not None and annotation.target_id != row.matched_target_id)
-        or not (row.iuphar_type_raw or family_evidence)
-    ):
+    if not _has_raw_annotation(row, annotation):
         defects.append("raw_annotation")
     if not row.iuphar_mapping_rule_id or not row.iuphar_mapping_version:
         defects.append("mapping_rule")
     if not row.match_evidence_ids:
         defects.append("mapping_evidence")
     return tuple(defects)
+
+
+def _has_raw_annotation(
+    row: ClassificationResult, annotation: ProviderAnnotation | None
+) -> bool:
+    family_evidence = (
+        annotation is not None
+        and annotation.target_id == row.matched_target_id
+        and row.iuphar_annotation_status == "partial"
+        and bool(annotation.family_ids)
+    )
+    return (
+        bool(row.snapshot_id)
+        and (annotation is None or annotation.target_id == row.matched_target_id)
+        and bool(row.iuphar_type_raw or family_evidence)
+    )
 
 
 def require_class_chain(
@@ -275,17 +281,18 @@ def trace_violation(
 
 def unsupported_class(row: ClassificationResult) -> bool:
     """Invariant 3. A class without a rule and an evidence id stays empty."""
-    if row.local_class and (not row.local_rule_ids or not row.local_evidence_ids):
+    local_supported = bool(row.local_rule_ids and row.local_evidence_ids)
+    direct_supported = bool(row.iuphar_mapping_rule_id and row.match_evidence_ids)
+    if row.local_class and not local_supported:
         return True
-    if row.iuphar_class and (
-        not row.iuphar_mapping_rule_id or not row.match_evidence_ids
-    ):
+    if row.iuphar_class and not direct_supported:
         return True
-    if row.effective_class and row.effective_source == "local_rule":
-        return not row.local_rule_ids or not row.local_evidence_ids
-    if row.effective_class and row.effective_source == "iuphar_normalized":
-        return not row.iuphar_mapping_rule_id or not row.match_evidence_ids
-    return False
+    support_by_source: dict[str | None, bool] = {
+        "local_rule": local_supported,
+        "iuphar_normalized": direct_supported,
+    }
+    selected_supported = support_by_source.get(row.effective_source, True)
+    return bool(row.effective_class) and not selected_supported
 
 
 def match_id_violation(row: ClassificationResult) -> bool:
