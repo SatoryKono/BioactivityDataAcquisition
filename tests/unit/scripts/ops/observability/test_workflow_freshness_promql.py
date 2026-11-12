@@ -93,7 +93,9 @@ def _run_promtool_case(tmp_path, expr, ages, expected):
         ([], "Not verified"),
     ],
 )
-def test_generated_heading_measures_age_and_missing_coverage_helper_asserted(tmp_path, ages, expected):
+def test_generated_heading_measures_age_and_missing_coverage_helper_asserted(
+    tmp_path, ages, expected
+):
     dashboard = json.loads(
         (_ROOT / "grafana/dashboards/bioetl-incident-v1.json").read_text(
             encoding="utf-8"
@@ -129,7 +131,9 @@ def test_generated_heading_measures_age_and_missing_coverage_helper_asserted(tmp
         ([], []),
     ],
 )
-def test_freshness_table_keeps_explicit_unknown_rows_helper_asserted(tmp_path, ages, expected):
+def test_freshness_table_keeps_explicit_unknown_rows_helper_asserted(
+    tmp_path, ages, expected
+):
     """Missing timestamps must emit unknown cells rather than an absent column."""
     dashboard = json.loads(
         (_ROOT / "grafana/dashboards/bioetl-incident-v1.json").read_text(
