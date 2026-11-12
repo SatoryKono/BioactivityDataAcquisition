@@ -71,6 +71,51 @@ def test_ten_columns_keep_full_identity_for_handoffs():
     assert overrides["run_id"]["custom.hidden"] is True
 
 
+def test_compact_view_keeps_ten_data_fields_and_every_handoff():
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-run-explorer-v1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    panel = next(p for p in dashboard["panels"] if p["id"] == 3010)
+    organize = next(
+        t["options"] for t in panel["transformations"] if t["id"] == "organize"
+    )
+    columns = list(organize["renameByName"].values())
+    overrides = {
+        o["matcher"]["options"]: {p["id"]: p["value"] for p in o["properties"]}
+        for o in panel["fieldConfig"]["overrides"]
+    }
+    assert len(columns) == 10
+    assert [name for name in columns if not overrides[name].get("custom.hidden")] == [
+        "Pipeline",
+        "Run ID",
+        "Started",
+        "Overview",
+        "Replay Readiness",
+    ]
+    menu = overrides["Run ID"]["links"]
+    for name in ("Workflow", "Provider", "Saved Evidence", "Data Quality"):
+        for link in overrides[name]["links"]:
+            assert link in menu, (name, link)
+            assert "${__value" not in link["url"]
+    retained = next(
+        t["options"]["include"]["names"]
+        for t in panel["transformations"]
+        if t["id"] == "filterFieldsByName"
+    )
+    assert "run_id" in retained
+    assert set(organize["renameByName"]) <= set(retained)
+    assert (
+        next(
+            t["options"]["limitField"]
+            for t in panel["transformations"]
+            if t["id"] == "limit"
+        )
+        == 10
+    )
+
+
 @pytest.mark.parametrize(
     ("uid", "title"),
     [
