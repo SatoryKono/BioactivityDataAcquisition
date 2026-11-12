@@ -290,7 +290,6 @@ def test_iuphar_resolution_has_a_bounded_owner(tmp_path: Path) -> None:
     assert report["covers_full_suite"] is False
 
 
-
 def test_iuphar_local_layer_has_a_bounded_owner(tmp_path: Path) -> None:
     owner = tmp_path / "tests/unit/iuphar_target_class"
     owner.mkdir(parents=True)
