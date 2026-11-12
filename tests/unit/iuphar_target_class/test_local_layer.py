@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import pytest
 
 from iuphar_target_class.local_layer import Prediction, apply_local
@@ -224,3 +226,33 @@ def test_broken_rule_blocks_processing() -> None:
     broken = _rule("bad", "annotation", "keyword_id=KW-1", "Enzyme", version="")
     with pytest.raises(ValueError, match="missing version"):
         apply_local((), rules=(broken,), keyword_ids=("KW-1",))
+
+
+@pytest.mark.parametrize("family", ["ec_class", "annotation"])
+def test_local_rule_families_cannot_claim_a_direct_layer(family: str) -> None:
+    rule = replace(
+        _rule("local", family, "keyword_id=KW-1", "Enzyme"),
+        marks_direct_layer=True,
+    )
+    with pytest.raises(ValueError, match="must not be marked direct"):
+        apply_local((), rules=(rule,), keyword_ids=("KW-1",))
+
+
+@pytest.mark.parametrize(
+    "hierarchy",
+    [
+        {"Enzyme": "Receptor"},
+        {"Enzyme": "Other Protein Target", "Receptor": "Other Protein Target"},
+    ],
+)
+def test_working_classes_cannot_be_reparented_to_erase_a_conflict(
+    hierarchy: dict[str, str],
+) -> None:
+    rules = (
+        _rule("ec", "annotation", "keyword_id=KW-E", "Enzyme"),
+        _rule("receptor", "annotation", "keyword_id=KW-R", "Receptor"),
+    )
+    with pytest.raises(ValueError, match="working class"):
+        apply_local(
+            (), rules=rules, keyword_ids=("KW-E", "KW-R"), subclass_of=hierarchy
+        )
