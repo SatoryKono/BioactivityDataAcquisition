@@ -1258,3 +1258,20 @@ def test_worktree_guidance_routes_to_guardrail_contracts(path: str) -> None:
         "tests/architecture/test_documentation_cleanup_inventory.py"
         in report["selected"]
     )
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/00-project/ai/agents/guides/SKILL_EFFICIENCY_PROTOCOL.md",
+        "docs/reports/generated/skill-efficiency-source-comparison.json",
+    ],
+)
+def test_skill_measurement_docs_route_to_offline_evidence_contract(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert "tests/unit/scripts/test_codex_efficiency_baseline.py" in report["selected"]
+    assert (
+        "tests/architecture/test_documentation_cleanup_inventory.py"
+        in report["selected"]
+    )

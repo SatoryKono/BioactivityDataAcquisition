@@ -180,6 +180,16 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    **dict.fromkeys(
+        (
+            "docs/00-project/ai/agents/guides/SKILL_EFFICIENCY_PROTOCOL.md",
+            "docs/reports/generated/skill-efficiency-source-comparison.json",
+        ),
+        (
+            "tests/unit/scripts/test_codex_efficiency_baseline.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
     "configs/quality/agent_guard_budget_surfaces.json": (
         "tests/unit/scripts/repo/test_budget_guard.py",
     ),
