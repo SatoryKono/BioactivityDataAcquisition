@@ -626,7 +626,10 @@ def _devin_project_findings(path: Path, groups: dict[str, set[str]]) -> list[Fin
             findings.append(
                 Finding("devin.env", "protected env write denial is missing", str(path))
             )
-    if not {"exec", "Write(**)"}.issubset(groups["ask"]):
+    required_parent_asks = {"exec", "Write(**)"}
+    if not required_parent_asks.issubset(groups["ask"]) or (
+        required_parent_asks & groups["deny"]
+    ):
         findings.append(
             Finding(
                 "devin.parent",

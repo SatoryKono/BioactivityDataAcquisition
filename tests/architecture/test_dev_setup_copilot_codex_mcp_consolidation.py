@@ -525,6 +525,20 @@ def test_accepts_restricted_tools_and_writable_role_variants(tmp_path: Path) -> 
     assert validate_devin_permission_contract(tmp_path) == []
 
 
+@pytest.mark.parametrize("rule", ["exec", "Write(**)"])
+def test_rejects_parent_ask_blocked_by_same_level_deny(
+    tmp_path: Path, rule: str
+) -> None:
+    config = _devin_fixture_tree(tmp_path)
+    data = json.loads(config.read_text(encoding="utf-8"))
+    assert rule in data["permissions"]["ask"]
+    data["permissions"]["deny"].append(rule)
+    config.write_text(json.dumps(data), encoding="utf-8")
+    assert any(
+        f.code == "devin.parent" for f in validate_devin_permission_contract(tmp_path)
+    )
+
+
 @pytest.mark.parametrize(
     "mutation",
     ["overlap", "env_root", "env_nested", "parent_exec", "auto_python", "auto_write"],

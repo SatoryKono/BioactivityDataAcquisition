@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T02:34:37.762214+00:00",
+  "generated_at": "2026-11-12T02:46:03.556128+00:00",
   "summary": {
     "total_scripts": 739,
     "status_counts": {
@@ -1540,7 +1540,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 675,
+          "line": 689,
           "source_group": "tests",
           "text": "from scripts.ai.codex.native_runtime_contract import ("
         }
@@ -22296,13 +22296,13 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 604,
+          "line": 618,
           "source_group": "tests",
           "text": "from scripts.engineering.repo.operation_guards import evaluate_request"
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 615,
+          "line": 629,
           "source_group": "tests",
           "text": "from scripts.engineering.repo.operation_guards import evaluate_request"
         },
