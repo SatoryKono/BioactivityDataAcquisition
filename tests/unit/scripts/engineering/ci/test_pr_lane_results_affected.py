@@ -1229,7 +1229,8 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
         (
             "docs/reports/dashboard-ux-checks/2026-11-11.md",
             {"tests/integration/test_dashboard_ux_report_freshness.py"},
-            "docs/reports/dashboard-ux-checks/not-reviewed-date.md",
+            # Outside AFFECTED_TESTS_BY_PREFIX["docs/reports/dashboard-ux-checks/"]
+            "docs/reports/unmapped-dashboard-ux/not-reviewed-date.md",
         ),
     ],
 )
