@@ -1321,3 +1321,19 @@ def test_nightly_repair_evidence_paths_have_real_owners(path: str, owner: str) -
     report = build_shadow_compare([path], repo_root=root)
     assert owner in report["selected"]
     assert all((root / target).is_file() for target in report["selected"])
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "scripts/ai/junie/check_junie_mirror.py",
+        "scripts/ai/junie/junie-mirror-contract.json",
+        "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
+    ],
+)
+def test_shadow_compare_routes_guardrail_checker_contract(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert "tests/architecture/test_junie_runtime_ci_contract.py" in report["selected"]
+    if path == "scripts/ai/junie/check_junie_mirror.py":
+        assert "tests/unit/scripts" not in report["selected"]
