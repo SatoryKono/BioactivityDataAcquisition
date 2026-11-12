@@ -17,6 +17,7 @@ import sys
 import xml.etree.ElementTree as ET
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 from typing import Any, cast
 
@@ -1450,6 +1451,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "docs/reports/dashboard-ux-checks/": (
+        DASHBOARD_UX_REPORT_FRESHNESS_TEST,
+        DASHBOARD_OPERATOR_READABILITY_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "src/iuphar_target_class/stage0/": (IUPHAR_STAGE0_TEST,),
     "data/iuphar_target_class/stage0/": (IUPHAR_STAGE0_TEST,),
     **dict.fromkeys(
@@ -1921,11 +1927,26 @@ def _generated_artifact_targets(path: str, root: Path) -> list[str]:
     return sorted(targets)
 
 
+def _dated_ux_report(name: str) -> bool:
+    """Qualify canonical dated reports without accepting arbitrary peer files."""
+    try:
+        return (
+            name.endswith(".md")
+            and date.fromisoformat(name[:-3]).isoformat() == name[:-3]
+        )
+    except ValueError:
+        return False
+
+
 def _mapped_targets(path: str, root: Path) -> list[str]:
     """Return catalog-mapped tests for one changed path."""
     targets = list(AFFECTED_TESTS_BY_PATH.get(path, ()))
     for prefix, values in AFFECTED_TESTS_BY_PREFIX.items():
         if path.startswith(prefix):
+            if prefix == "docs/reports/dashboard-ux-checks/" and not _dated_ux_report(
+                path[len(prefix) :]
+            ):
+                continue
             targets.extend(values)
     targets.extend(_generated_artifact_targets(path, root))
     return targets
