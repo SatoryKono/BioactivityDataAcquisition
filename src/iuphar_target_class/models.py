@@ -110,6 +110,7 @@ class Evidence:
     evidence_type: str
     source_id: str
     content: str
+    run_id: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -119,7 +120,7 @@ class MatchResult:
     match_status: str | None
     matched_target_id: str | None
     candidate_target_ids: tuple[str, ...]
-    match_method: str | None
+    match_method: tuple[str, ...]
     match_evidence_ids: tuple[str, ...]
     diagnostics: tuple[Diagnostic, ...] = ()
 
