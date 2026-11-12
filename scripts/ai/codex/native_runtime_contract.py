@@ -719,6 +719,9 @@ def _devin_tool_metadata(path: Path) -> dict[str, Any]:
     if len(blocks) != 1:
         raise ValueError("missing/duplicate permission metadata")
     _validate_devin_mapping_keys(blocks[0], 2, {"allow", "deny"})
+    keys = re.findall(r"(?m)^ {2}([^ \t:#-][^:\n]*):", blocks[0])
+    if len(keys) != 2 or set(keys) != {"allow", "deny"}:
+        raise ValueError("duplicate or unsupported permission key")
     return {
         DEVIN_TOOLS_KEY: _declared_string_list(header, DEVIN_TOOLS_KEY, 0),
         DEVIN_PERMISSIONS_KEY: {
