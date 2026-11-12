@@ -86,7 +86,9 @@ against `origin/main`, then runs existing configured push checks. Missing base,
 unsupported policy format, dependency failure or incomplete evidence blocks the
 operation. Commit-msg retains the existing framework stage and protocol; it does
 not repeat tree/budget checks. No automatic generator, staging or debt ratchet is
-added. An authorized env-file change needs a separate reviewed host procedure;
+added. Existing configured formatters retain their normal mutation/failure behavior;
+that is separate from the read-only protected guards. An authorized env-file change
+needs a separate reviewed host procedure;
 there is no caller-supplied self-approval flag.
 
 The debt guard checks both the default index and any Git-supplied commit index,
@@ -140,6 +142,12 @@ reuse. Repeat qualification after any bundle/framework/interpreter change.
 The fixture also invokes actual Git commit dispatch after installation, checking
 that both Git events run exactly once and a preserved Python callback keeps its
 interpreter. This qualifies discovery as well as direct callback invocation.
+
+A later Windows combined qualification of installer, cached framework, process
+containment, budget and operation guards passed 156 tests with three POSIX-only
+skips. After the source/interpreter freshness checks changed, the installer
+component was repeated: 18 passed and one POSIX-only skip on Windows; 19 passed
+on WSL. These observations supplement, rather than replace, the earlier suites.
 
 ## Limits and additional controls
 
