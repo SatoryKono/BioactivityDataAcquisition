@@ -175,7 +175,7 @@ Notes:
 - The command above is the **minimal local-dev** extra-set (`dev,tests,tracing`). It is not the same as `make install` (`dev,tests,tests_full,export`) or the Testing section (`dev,tests,tests_full,tracing`). Add `tests_full` before architecture / benchmark / observability suites; `export` is only required for export tooling; `docs` is only required for MkDocs/site builds.
 - Documentation site commands require the separate `docs` extra: `uv sync --extra dev --extra tests --extra tracing --extra docs` or `pip install -e ".[dev,tests,tracing,docs]"`.
 - `uv run python -m scripts.ops setup-plugins` configures local pytest and pre-commit tooling.
-- Native Windows PowerShell: `python -m scripts.ops` shell commands (e.g. `setup-plugins`) require POSIX bash and exit with guidance instead of running. Use `.\scripts\engineering\dev\setup_env_windows.ps1` for the venv, then install hooks manually with `uv run python -m pre_commit install --hook-type pre-commit --hook-type pre-push --hook-type commit-msg` (see Testing).
+- Native Windows PowerShell: `python -m scripts.ops` shell commands (e.g. `setup-plugins`) require POSIX bash and exit with guidance instead of running. Use `.\scripts\engineering\dev\setup_env_windows.ps1` for the venv, then use the explicit owned-hook installation below (see Testing).
 - Hook-only reinstall remains available through `bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only`.
 - If you use Codex, GitHub Copilot, or Devin MCP, run `uv run python -m scripts.engineering.dev setup-mcp` after install. If you activated the OS-appropriate environment instead of using `uv`, `python -m scripts.engineering.dev setup-mcp` is also valid.
 - For Devin CLI `v3000.3+`, run `make devin-check` once and `make devin` to
@@ -558,8 +558,23 @@ The project uses `pytest` for testing with a formalized test matrix covering Uni
 
   ```bash
   uv sync --extra dev --extra tests --extra tests_full --extra tracing
-  uv run python -m pre_commit install --hook-type pre-commit --hook-type pre-push --hook-type commit-msg
+  bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only
   ```
+
+  Native Windows hook bootstrap (explicit setup, outside commit/push):
+
+  ```powershell
+  $hookPython = (Resolve-Path .\.venv-win\Scripts\python.exe).Path
+  & $hookPython -m pip install --only-binary=:all: pre-commit==4.7.0
+  & $hookPython -m pre_commit install-hooks
+  & $hookPython -m scripts.engineering.repo hooks install --python $hookPython
+  & $hookPython -m scripts.engineering.repo hooks doctor
+  ```
+
+  Fetch `origin/main` after the installer is merged. The installer preserves
+  existing callbacks and uses that trusted source. Doctor checks installation
+  identity; execution qualification is separate. See
+  [Owned Git Hooks](docs/05-operations/runbooks/owned-git-hooks.md).
 
   Если `pytest` сообщает об отсутствии обязательных плагинов (`pytest-asyncio`, `pytest-cov`, `pytest-xdist`, `pytest-timeout`, `pytest-vcr`), выполните повторную синхронизацию:
 

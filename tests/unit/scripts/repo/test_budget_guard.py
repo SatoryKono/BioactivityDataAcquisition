@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import copy
+
 from fnmatch import fnmatchcase
 import json
 import os
@@ -305,6 +307,131 @@ def test_replace_refs_cannot_substitute_trusted_policy_objects(
     assert guard.check_budget_diff(root, base)["status"] == "FAIL"
 
 
+@pytest.mark.parametrize("protected", ["budget", "registry"])
+@pytest.mark.parametrize("mode", ["120000", "160000"])
+def test_non_regular_policy_objects_are_rejected_staged_and_committed(
+    policy_repo, protected, mode
+):
+    """A symlink's JSON-looking target text must never stand in for policy data."""
+    root, _, budget = policy_repo
+    budget.write_text("{}")
+    _git(root, "add", ".")
+    _git(root, "commit", "-qm", "trusted empty baseline fixture")
+    base = _git(root, "rev-parse", "HEAD")
+    path = (
+        budget.relative_to(root).as_posix() if protected == "budget" else guard.REGISTRY
+    )
+    if mode == "120000":
+        target = budget.parent / "{}"
+        target.write_text('{"allowed_errors":99}')
+        _git(root, "add", str(target))
+        payload = root / ".git/link-text"
+        payload.write_text("{}")
+        object_id = _git(root, "hash-object", "-w", str(payload))
+    else:
+        object_id = base
+    _git(root, "update-index", "--add", "--cacheinfo", f"{mode},{object_id},{path}")
+    staged = guard.check_budget_diff(root, base)
+    assert staged["status"] == "FAIL"
+    assert {"path": path, "code": "budget.non_regular_policy"} in staged["findings"]
+    _git(root, "commit", "-qm", "non-regular candidate fixture")
+    committed = guard.check_budget_diff(root, base, tip="HEAD")
+    assert committed["status"] == "FAIL"
+    assert {"path": path, "code": "budget.non_regular_policy"} in committed["findings"]
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "configs/quality/private_import_ratchet.yaml",
+        "configs/quality/vcr_cassette_size_budget.yaml",
+    ],
+)
+def test_registered_embedded_exemptions_can_retire_but_not_expand(policy_repo, source):
+    """Exercise real current document shapes through the immutable Git interface."""
+    import yaml
+
+    root, _, _ = policy_repo
+    target = root / source
+    target.write_bytes((ROOT / source).read_bytes())
+    _git(root, "add", ".")
+    _git(root, "commit", "-qm", "trusted embedded exemption fixture")
+    base = _git(root, "rev-parse", "HEAD")
+    previous = yaml.safe_load(target.read_text(encoding="utf-8"))
+    proposed = copy.deepcopy(previous)
+    if "pairs" in proposed:
+        proposed["pairs"].pop()
+        proposed["max_count"] -= 1
+    else:
+        proposed["policy"]["allowlist_oversized"].pop()
+    target.write_text(yaml.safe_dump(proposed), encoding="utf-8")
+    _git(root, "add", ".")
+    assert guard.check_budget_diff(root, base)["status"] == "PASS"
+    expanded = copy.deepcopy(previous)
+    records = (
+        expanded["pairs"]
+        if "pairs" in expanded
+        else expanded["policy"]["allowlist_oversized"]
+    )
+    extra = copy.deepcopy(records[0])
+    extra["id" if "pairs" in expanded else "path"] = "new-unreviewed-scope"
+    records.append(extra)
+    target.write_text(yaml.safe_dump(expanded), encoding="utf-8")
+    _git(root, "add", ".")
+    assert guard.check_budget_diff(root, base)["status"] == "FAIL"
+    if "max_count" in previous:
+        missing_limit = copy.deepcopy(proposed)
+        del missing_limit["max_count"]
+        target.write_text(yaml.safe_dump(missing_limit), encoding="utf-8")
+        _git(root, "add", ".")
+        assert guard.check_budget_diff(root, base)["status"] == "FAIL"
+
+
+def test_line_baseline_uses_producer_set_semantics(policy_repo):
+    root, _, _ = policy_repo
+    relative = "scripts/engineering/baselines/not_in_nav_baseline.txt"
+    target = root / relative
+    target.parent.mkdir(parents=True)
+    target.write_text("# fixture\ndocs/keep.md\ndocs/retired.md\ndocs/keep.md\n")
+    _git(root, "add", ".")
+    _git(root, "commit", "-qm", "trusted line baseline fixture")
+    base = _git(root, "rev-parse", "HEAD")
+    target.write_text("  # comment\n\ndocs/keep.md\n")
+    _git(root, "add", ".")
+    assert guard.check_budget_diff(root, base)["status"] == "PASS"
+    target.write_text("docs/keep.md\ndocs/new-unreviewed.md\n")
+    _git(root, "add", ".")
+    assert guard.check_budget_diff(root, base)["status"] == "FAIL"
+
+
+def test_only_whole_registry_entries_can_retire(policy_repo):
+    import yaml
+
+    root, _, _ = policy_repo
+    path = root / "configs/quality/architecture_metric_exemptions.yaml"
+    previous = {
+        "registries": {
+            "file_size_limits": {
+                "src/example.py": {"expires_on": "2027-01-31", "scopes": ["size"]}
+            }
+        }
+    }
+    path.write_text(yaml.safe_dump(previous))
+    _git(root, "add", ".")
+    _git(root, "commit", "-qm", "trusted exemption entry fixture")
+    base = _git(root, "rev-parse", "HEAD")
+    removed_expiry = copy.deepcopy(previous)
+    del removed_expiry["registries"]["file_size_limits"]["src/example.py"]["expires_on"]
+    path.write_text(yaml.safe_dump(removed_expiry))
+    _git(root, "add", ".")
+    assert guard.check_budget_diff(root, base)["status"] == "FAIL"
+    retired = copy.deepcopy(previous)
+    del retired["registries"]["file_size_limits"]["src/example.py"]
+    path.write_text(yaml.safe_dump(retired))
+    _git(root, "add", ".")
+    assert guard.check_budget_diff(root, base)["status"] == "PASS"
+
+
 def test_alternate_index_cannot_hide_staged_growth(
     policy_repo: tuple[Path, str, Path],
     monkeypatch: pytest.MonkeyPatch,
@@ -348,7 +475,11 @@ def test_existing_nested_exemptions_can_shrink(
     value[keypath[-1]].pop()
     if name == "private_import_ratchet.yaml":
         new["max_count"] -= 1
-    assert not guard.compare_documents(old, new)
+    descriptors = guard._registry((ROOT / guard.REGISTRY).read_text(encoding="utf-8"))
+    descriptor = next(
+        item for item in descriptors if item["pattern"] == f"configs/quality/{name}"
+    )
+    assert guard._compare_registered_documents(old, new, descriptor) == []
 
 
 def test_retirement_does_not_remove_fields_from_retained_exemptions() -> None:
@@ -361,11 +492,16 @@ def test_retirement_does_not_remove_fields_from_retained_exemptions() -> None:
     }
     new = json.loads(json.dumps(old))
     del new["registries"]["file_size_limits"]["src/example.py"]["expires_on"]
-    assert guard.compare_documents(old, new, kind="exemptions")
-    assert not guard.compare_documents(
-        old,
-        {"registries": {"file_size_limits": {}}},
-        kind="exemptions",
+    assert "protected_field_removed" in guard.compare_documents(
+        old, new, kind="exemptions"
+    )
+    assert (
+        guard.compare_documents(
+            old,
+            {"registries": {"file_size_limits": {}}},
+            kind="exemptions",
+        )
+        == []
     )
 
 
@@ -378,9 +514,11 @@ def test_text_navigation_baseline_shrinks_without_new_exceptions() -> None:
         if line.strip() and not line.lstrip().startswith("#")
     ]
     new = guard._load_document("# reviewed removal\n" + "\n".join(lines[1:]), ".txt")
-    assert not guard._compare_surface_documents(old, new, "budget")
+    assert guard._compare_surface_documents(old, new, "line_exemptions") == []
     expanded = guard._load_document(raw + "\nnew/unreviewed.md\n", ".txt")
-    assert guard._compare_surface_documents(old, expanded, "budget")
+    assert guard._compare_surface_documents(old, expanded, "line_exemptions") == [
+        "exemption_scope_added"
+    ]
 
 
 @pytest.mark.parametrize("committed", [False, True])
@@ -406,8 +544,31 @@ def test_policy_symlink_object_cannot_masquerade_as_empty_json(
     assert guard.check_budget_diff(root, base, tip=tip)["status"] == "FAIL"
 
 
-def test_budget_record_removal_is_still_rejected() -> None:
+@pytest.mark.parametrize("field", ["budgets", "pairs"])
+def test_budget_record_removal_is_still_rejected(field: str) -> None:
     assert guard.compare_documents(
-        {"budgets": [{"id": "required-cap", "max_count": 2}]},
-        {"budgets": []},
+        {field: [{"id": "required-cap", "max_count": 2}]},
+        {field: []},
+    ) == ["budget_record_removed"]
+
+
+def test_git_supplied_commit_index_growth_is_checked_even_when_default_is_clean(
+    policy_repo, monkeypatch
+):
+    """A real Git commit may supply its own index for a selected-path commit."""
+    root, base, budget = policy_repo
+    budget.write_text('{"baseline":{"count":99},"max_count":99}')
+    _git(root, "add", ".")
+    supplied = root.parent / "git-commit-index"
+    supplied.write_bytes((root / ".git/index").read_bytes())
+    _git(root, "read-tree", "HEAD")
+    default_before = (root / ".git/index").read_bytes()
+    supplied_before = supplied.read_bytes()
+    monkeypatch.setenv("GIT_INDEX_FILE", str(supplied))
+    result = guard.check_budget_diff(root, base)
+    assert result["status"] == "FAIL"
+    assert any(
+        item["code"] == "budget.ceiling_increased" for item in result["findings"]
     )
+    assert (root / ".git/index").read_bytes() == default_before
+    assert supplied.read_bytes() == supplied_before
