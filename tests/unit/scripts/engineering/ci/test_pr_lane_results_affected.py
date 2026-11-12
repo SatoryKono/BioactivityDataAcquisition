@@ -120,6 +120,74 @@ def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
     assert targets == ["tests/unit/domain"]
 
 
+def test_iuphar_source_and_data_keep_bounded_stage0_owners(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class"
+    owner.mkdir(parents=True)
+    (owner / "test_stage0_manifest.py").write_text(
+        "def test_contract():\n    assert True\n", encoding="utf-8"
+    )
+    report = build_shadow_compare(
+        [
+            "src/iuphar_target_class/__init__.py",
+            "src/iuphar_target_class/stage0/build.py",
+            "data/iuphar_target_class/stage0/survey.json",
+            "data/iuphar_target_class/stage0/content_checks.csv",
+        ],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == [
+        "tests/unit/iuphar_target_class/test_stage0_manifest.py"
+    ]
+    assert report["covers_full_suite"] is False
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(["data/unowned_package/survey.json"], repo_root=tmp_path)
+    missing_owner = tmp_path / "missing-owner"
+    missing_owner.mkdir()
+    with pytest.raises(ValueError, match="Missing mandatory mapped test targets"):
+        build_shadow_compare(
+            ["src/iuphar_target_class/stage0/build.py"], repo_root=missing_owner
+        )
+
+
+def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class/test_policy.py"
+    owner.parent.mkdir(parents=True)
+    owner.write_text("def test_policy():\n    assert True\n", encoding="utf-8")
+    report = build_shadow_compare(
+        [
+            "src/iuphar_target_class/policy.py",
+            "data/iuphar_target_class/policy/policy.json",
+        ],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == ["tests/unit/iuphar_target_class/test_policy.py"]
+    assert report["covers_full_suite"] is False
+    for unowned in (
+        "src/iuphar_target_class/unmapped.py",
+        "data/iuphar_target_class/policy/unowned.json",
+    ):
+        with pytest.raises(ValueError, match="unmapped paths"):
+            build_shadow_compare([unowned], repo_root=tmp_path)
+
+
+def test_file_policy_doc_keeps_structure_catalog_owners() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["docs/00-project/governance/03-file-policy.md"], repo_root=root
+    )
+    assert set(report["selected"]) == {
+        "tests/unit/scripts/repo/test_audit_root_cleanliness.py",
+        "tests/unit/scripts/repo/test_check_root_governance_docs.py",
+        "tests/unit/scripts/repo/test_audit_structure.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+    }
+    assert report["covers_full_suite"] is False
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            ["docs/00-project/governance/unowned-file-policy.md"], repo_root=root
+        )
+
+
 def test_shadow_compare_routes_domain_ports_stub() -> None:
     """Typed ports package stubs map like their .py siblings under tests/unit."""
     repo_root = Path(__file__).resolve().parents[5]

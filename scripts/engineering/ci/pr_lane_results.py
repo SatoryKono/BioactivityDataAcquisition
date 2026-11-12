@@ -179,7 +179,33 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
     {"scripts/ai/codex/native_runtime_contract.py"}
 )
 
+NO_PARTIAL_TREE_TEST = "tests/unit/scripts/repo/test_check_no_partial_tree.py"
+IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
+
+
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    ".devin/config.json": (
+        CODEX_NATIVE_RUNTIME_TEST,
+        "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+        "tests/architecture/test_runtime_orchestration_surfaces.py",
+    ),
+    "scripts/engineering/repo/check_no_partial_tree.py": (
+        NO_PARTIAL_TREE_TEST,
+        "tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py",
+    ),
+    "docs/05-operations/runbooks/full-tree-guard.md": (NO_PARTIAL_TREE_TEST,),
+    ".github/workflows/no-partial-tree-commits.yml": (
+        NO_PARTIAL_TREE_TEST,
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
+    "src/iuphar_target_class/__init__.py": (IUPHAR_STAGE0_TEST,),
+    **dict.fromkeys(
+        (
+            "src/iuphar_target_class/policy.py",
+            "data/iuphar_target_class/policy/policy.json",
+        ),
+        ("tests/unit/iuphar_target_class/test_policy.py",),
+    ),
     **dict.fromkeys(
         (
             "docs/00-project/ai/agents/guides/SKILL_EFFICIENCY_PROTOCOL.md",
@@ -475,10 +501,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/architecture_acceptance_baseline.yaml": (
         "tests/architecture/test_architecture_acceptance_baseline.py",
     ),
-    "configs/quality/repo_structure_catalog.yaml": (
-        "tests/unit/scripts/repo/test_audit_root_cleanliness.py",
-        "tests/unit/scripts/repo/test_check_root_governance_docs.py",
-        "tests/unit/scripts/repo/test_audit_structure.py",
+    **dict.fromkeys(
+        (
+            "configs/quality/repo_structure_catalog.yaml",
+            "docs/00-project/governance/03-file-policy.md",
+        ),
+        (
+            "tests/unit/scripts/repo/test_audit_root_cleanliness.py",
+            "tests/unit/scripts/repo/test_check_root_governance_docs.py",
+            "tests/unit/scripts/repo/test_audit_structure.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
     ),
     "docs/plans/ci1-07-negative-merge-protection-plan.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
@@ -1371,6 +1404,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "src/iuphar_target_class/stage0/": (IUPHAR_STAGE0_TEST,),
+    "data/iuphar_target_class/stage0/": (IUPHAR_STAGE0_TEST,),
     **dict.fromkeys(
         (
             ".codex/agents/",
