@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T14:43:26.043618+00:00",
+  "generated_at": "2026-11-12T15:20:43.072404+00:00",
   "summary": {
     "total_scripts": 746,
     "status_counts": {
@@ -22608,7 +22608,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
@@ -22631,6 +22631,12 @@
         {
           "path": "tests/unit/scripts/repo/test_scoped_checks.py",
           "line": 13,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo import scoped_checks as checks"
+        },
+        {
+          "path": "tests/unit/scripts/repo/test_scoped_checks_cache.py",
+          "line": 10,
           "source_group": "tests",
           "text": "from scripts.engineering.repo import scoped_checks as checks"
         }
