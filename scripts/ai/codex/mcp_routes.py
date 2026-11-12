@@ -181,7 +181,17 @@ def _transport(entry: Mapping[str, Any]) -> tuple[dict[str, object], bool]:
             projected["command"] = "[opaque command]"
             complete = False
         projected["transport"] = "stdio"
-        projected["args"], args_complete = _arguments(entry.get("args", []))
+        args = entry.get("args", [])
+        positional_profile = _positional_profile(entry)
+        if positional_profile:
+            # Only the registered controllers define this final value as a
+            # profile identity. Earlier omitted arguments still make the
+            # projection incomplete.
+            arguments, args_complete = _arguments(args[:-1])
+            arguments.append(positional_profile)
+        else:
+            arguments, args_complete = _arguments(args)
+        projected["args"] = arguments
         complete = complete and args_complete
     elif "url" in entry:
         projected["transport"] = "http"
