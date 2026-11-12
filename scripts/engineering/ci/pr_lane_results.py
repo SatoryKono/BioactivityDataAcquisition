@@ -179,7 +179,11 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
     {"scripts/ai/codex/native_runtime_contract.py"}
 )
 
+IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
+
+
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "src/iuphar_target_class/__init__.py": (IUPHAR_STAGE0_TEST,),
     **dict.fromkeys(
         (
             "docs/00-project/ai/agents/guides/SKILL_EFFICIENCY_PROTOCOL.md",
@@ -475,10 +479,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/architecture_acceptance_baseline.yaml": (
         "tests/architecture/test_architecture_acceptance_baseline.py",
     ),
-    "configs/quality/repo_structure_catalog.yaml": (
-        "tests/unit/scripts/repo/test_audit_root_cleanliness.py",
-        "tests/unit/scripts/repo/test_check_root_governance_docs.py",
-        "tests/unit/scripts/repo/test_audit_structure.py",
+    **dict.fromkeys(
+        (
+            "configs/quality/repo_structure_catalog.yaml",
+            "docs/00-project/governance/03-file-policy.md",
+        ),
+        (
+            "tests/unit/scripts/repo/test_audit_root_cleanliness.py",
+            "tests/unit/scripts/repo/test_check_root_governance_docs.py",
+            "tests/unit/scripts/repo/test_audit_structure.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
     ),
     "docs/plans/ci1-07-negative-merge-protection-plan.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
@@ -1371,6 +1382,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "src/iuphar_target_class/stage0/": (IUPHAR_STAGE0_TEST,),
+    "data/iuphar_target_class/stage0/": (IUPHAR_STAGE0_TEST,),
     **dict.fromkeys(
         (
             ".codex/agents/",
