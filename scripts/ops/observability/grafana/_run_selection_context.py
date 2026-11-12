@@ -58,7 +58,8 @@ def stamp_run_selection_context(payload: dict) -> None:
             "datasource": {"type": "datasource", "uid": "-- Dashboard --"},
             "description": (
                 "SELECTED RUN · AUTO shows the latest run by start time in the current "
-                "scope, including unfinished runs. EXPLICIT keeps the requested Run ID. "
+                "scope, including unfinished runs. EXPLICIT keeps the requested Run ID "
+                "and shows evidence for that run only. "
                 "Context checked at is this Grafana query evaluation time, not run "
                 "start, browser click, server cache load or catalog freshness. Refresh "
                 "re-evaluates the displayed context. UNKNOWN is missing evidence; request failure "

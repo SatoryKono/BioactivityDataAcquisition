@@ -542,6 +542,7 @@ nav:
           - "Quarterly GitHub Settings Review": 05-operations/runbooks/github-settings-quarterly-review.md
           - "GitHub Copilot Coding Agent": 05-operations/runbooks/github-copilot-coding-agent.md
           - "AI Hook Compatibility": 05-operations/runbooks/ai-hook-compatibility.md
+          - "Full-tree Guard": 05-operations/runbooks/full-tree-guard.md
           - "VACUUM Procedures": 05-operations/runbooks/vacuum-procedures.md
           - "Observability Checklist": 05-operations/runbooks/observability-checklist.md
           - "Run Manifest Inspection": 05-operations/runbooks/run-manifest-inspection.md
@@ -567,6 +568,7 @@ nav:
           - "CLAUDE": 00-project/ai/agents/guides/CLAUDE.md
           - "CODEX": 00-project/ai/agents/guides/CODEX.md
           - "Codex Task Routing and Validation": 00-project/ai/agents/guides/CODEX_TASK_ROUTING.md
+          - "Skill Efficiency Protocol": 00-project/ai/agents/guides/SKILL_EFFICIENCY_PROTOCOL.md
           - "AI Rule Loading Evidence": 05-operations/runbooks/ai-rules-loading.md
           - "GEMINI": 00-project/ai/agents/guides/GEMINI.md
           - "Test Lane Mental Model": 00-project/ai/agents/guides/TEST_LANE_MENTAL_MODEL.md
