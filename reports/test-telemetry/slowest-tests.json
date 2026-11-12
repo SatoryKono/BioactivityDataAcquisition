@@ -5,7 +5,7 @@
   "source_event": "workflow_dispatch",
   "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/42263682929",
   "source_tree_sha256": "60bdcfd0740d1ca47a722546e01d94301d2200fde8b12402a39e6bd12216699c",
-  "refreshed_at_utc": "2026-11-12T01:52:05.407320+00:00",
+  "refreshed_at_utc": "2026-11-12T02:11:20.492995+00:00",
   "refresh_status": "captured",
   "total_cases": 63747,
   "count_semantics": "non_skipped_junit_records",
