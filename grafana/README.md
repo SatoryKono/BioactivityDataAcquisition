@@ -2949,32 +2949,40 @@ availability, and historical manifests must not be rewritten for a green UI.
 ## Appendix: Live Instance Incident Reports
 
 ### Prometheus Stats Dashboard (UID: rpfmFFz7z) - No Data Incident (LA-08)
-*   **Status:** `NOT_VERIFIABLE` in repository.
-*   **Diagnosis:** Dashboard is instance-only and is not tracked in this repository.
-*   **Evidence of Absence:** Exhaustive searches across the repository for UID `rpfmFFz7z`, `Prometheus Stats`, `Local Storage Memory Series`, `Internal Storage Queue Length`, `Samples ingested (rate-5m)`, and `Rule Eval Duration` yielded zero results in tracked JSON dashboard definitions and provisioning configurations.
-*   **Action Required (Live Instance):** 4 of 7 panels show "No data" despite a live Prometheus instance, whereas "Prometheus 2.0 Stats" is fully populated. Remediation (fixing metric names/queries to match the current Prometheus version, or applying a legacy deprecation notice forwarding to "Prometheus 2.0 Stats") must be executed directly on the live Grafana instance by an operator, as the asset does not exist in version control.
+*   **Status:** `NOT_VERIFIABLE` in repository. Instance-only: the UID stays outside the five canonical dashboards and is not a file under `grafana/dashboards/`.
+*   **Diagnosis:** The stock Grafana sample queries Prometheus 1.x local-storage metrics. On the live Prometheus those four series are absent. `POST /api/dashboards/db` for this UID returns `Cannot save provisioned dashboard`, so the sample cannot be edited through the API. Do not add `rpfmFFz7z` to `grafana/provisioning/dashboards/bioetl.yaml`; that provider list is the five canonical boards.
+*   **Live check (2026-11-11, `http://127.0.0.1:9090/api/v1/query`):**
+
+| Panel | Legacy query | Series | Current query |
+| --- | --- | ---: | --- |
+| Local Storage Memory Series | `prometheus_local_storage_memory_series` | 0 | `prometheus_tsdb_head_series` (1 series) |
+| Internal Storage Queue Length | `prometheus_local_storage_indexing_queue_length` | 0 | No replacement series. The local-storage index queue metric is gone. |
+| Samples ingested (rate-5m) | `rate(prometheus_local_storage_ingested_samples_total[5m])` | 0 | `rate(prometheus_tsdb_head_samples_appended_total[5m])` (2 series) |
+| Rule Eval Duration | `prometheus_evaluator_duration_seconds` | 0 | `prometheus_rule_group_last_duration_seconds` (13 series) |
+
+*   **Operator path:** Use Prometheus 2.0 Stats (`UDdpyzz7z`) for the populated sample, or Explore with the current queries above. Uptime, Target Scrapes, and Scrape Duration on `rpfmFFz7z` already return series and stay unchanged.
 
 ### Link Integrity & Context Incident (LA-10) / issue #12944
-*   **Status:** `NOT_VERIFIABLE` in repository.
+*   **Status:** Live protocol executed 2026-11-11. See the table below.
 *   **Diagnosis:** Issue #12944 (PR #12981). Data links within panels addressed context loss and bad routing targets. Dashboard JSON generation confirmed via CI but live click interactions require manual audit.
 *   **Resolution (Merged in PR #12981):**
     *   `Provider Health` link updated to `Open Provider Evidence` targeting `bioetl-overview-v2`. Removed hardcoded `var-provider=chembl` and `var-pipeline_context=.*`.
     *   `Inspect all trust reasons` link viewPanel corrected from `9414` to `9418` (`Trust`).
     *   `Open domain diagnostics` link template fixed to remove garbage `&UNKNOWN&` parameter.
-    *   Shipped links pass the time range through `${__url_time_range}`. The Stage lag link passes the selected dashboard variables, while Reset filters explicitly resets them. Dashboard settings define the 60-second refresh default. Live refresh behavior and the resulting time representation remain unverified.
+    *   Shipped links pass the time range through `${__url_time_range}`. The Stage lag link passes the selected dashboard variables, while Reset filters explicitly resets them. Dashboard settings define the 60-second refresh default. The 2026-11-11 pass kept `from`/`to` on the clicked links; `refresh=60s` appeared as the board default on the opened view panels, not inside the Reset filters href.
 *   **Evidence of Code Updates:** Dashboard JSON files updated and re-generated successfully by standard scripts in PR #12981. They match canonical codebase assets.
-*   **Action Required (Live Instance):** Execute the click-test protocol detailed below to verify navigation.
+*   **Action Required (Live Instance):** Executed on 2026-11-11 against run `8fb01f96-1120-5a82-b7b4-3947ed967777`, window `2026-11-09T11:00:00Z`–`2026-11-09T15:00:00Z`. Results are in the table below. Dashboard refresh `60s` is the board default and is separate from the link parameters.
 
 ### Click-Test Protocol for LA-10
 
 | Source Panel / Context | Data Link Label | Expected Target | Expected Context Preservation | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| `5. Incident Workspace` | `Open Provider Evidence` | `3. Run Overview` (`bioetl-overview-v2`), panel `9480` | Variables retained, NO override to `chembl` or rogue regex. | `NOT_RUN` (live instance unavailable) |
-| `2. Replay Readiness` | `Inspect all trust reasons` | Panel `9418` (`Trust`) | Run selection preserved. | `NOT_RUN` (live instance unavailable) |
-| `5. Incident Workspace` navigation bar | Current-page item `5. Incident Workspace` | Same dashboard, current-page indicator | The item is rendered as a non-clickable current-page marker. Verify no navigation or selector changes. | `NOT_RUN` (live instance unavailable) |
-| `5. Incident Workspace`, panel `2001` | `Stage lag/backlog measurements` | Same dashboard, panel `22011` | Verify selected workflow, pipeline, run type and run ID. Compare the time range and record how Grafana represents it after navigation. | `NOT_RUN` (live instance unavailable) |
-| `1. Run Explorer` | `Reset filters` | `1. Run Explorer` | Verify the documented selector reset and compare the effective time range. Record refresh separately from the link parameters. | `NOT_RUN` (live instance unavailable) |
-| Any domain diagnostics | `Open domain diagnostics` | Domain Diagnostics | URL free of `&UNKNOWN&` literal. | `NOT_RUN` (live instance unavailable) |
+| `5. Incident Workspace` | `Open Provider Evidence` | `3. Run Overview` (`bioetl-overview-v2`), panel `9480` | Variables retained, NO override to `chembl` or rogue regex. | `PASS` 2026-11-11. Live URL keeps workflow, pipeline, run type, run ID and time, `viewPanel=9480`, no `var-provider=chembl`. Opened the Overview view panel. |
+| `2. Replay Readiness` | `Inspect all trust reasons` | Panel `9418` (`Trust`) | Run selection preserved. | `PASS` 2026-11-11. Live URL has `viewPanel=9418` and the same run ID. Opened the Replay Readiness view panel. |
+| `5. Incident Workspace` navigation bar | Current-page item `5. Incident Workspace` | Same dashboard, current-page indicator | The item is rendered as a non-clickable current-page marker. Verify no navigation or selector changes. | `PASS` 2026-11-11. Live chip is a `span` with `pointer-events:none` and `aria-label="5. Incident Workspace"`. Visible text is `5. Incidents`. It is not an anchor. |
+| `5. Incident Workspace`, panel `2001` | `Stage lag/backlog measurements` | Same dashboard, panel `22011` | Verify selected workflow, pipeline, run type and run ID. Compare the time range and record how Grafana represents it after navigation. | `PASS` 2026-11-11. Live anchor text is `Lag/backlog`. Click landed on `viewPanel=22011` with pipeline `chembl_cell_line`, the same run ID, and the same `from`/`to`. |
+| `1. Run Explorer` | `Reset filters` | `1. Run Explorer` | Verify the documented selector reset and compare the effective time range. Record refresh separately from the link parameters. | `PASS` 2026-11-11. Click set `var-run_id=-` and kept `from`/`to`. Grafana normalized `.*` to `$__all` for pipeline and run type. The href has no refresh parameter; the board default remains `60s`. |
+| Any domain diagnostics | `Open domain diagnostics` | Domain Diagnostics | URL free of `&UNKNOWN&` literal. | `PASS` 2026-11-11. Live incident URLs use `action_dashboard_uid` and contain no literal `&UNKNOWN&`. |
 
 ### Dashboard hygiene (LA-15) / issue #12949
 
