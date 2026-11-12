@@ -148,6 +148,24 @@ def test_result_metadata_without_input_identity_is_not_a_match() -> None:
     assert report.residual == ("<missing identity>",)
 
 
+def test_duplicate_python_rows_preserve_unambiguous_legacy_class() -> None:
+    m_row = {"input_row_id": "1", "legacy_iuphar_class": "Receptor"}
+    reference = Stage0Reference("stage0", 1, (m_row,))
+    python_rows = (
+        {"input_row_id": "1", "iuphar_class": "Receptor"},
+        {"input_row_id": "1", "iuphar_class": "Enzyme"},
+    )
+    for rows in (python_rows, tuple(reversed(python_rows))):
+        report = compare_stage0(reference, rows)
+        assert report.legacy_values == (("input_row_id=1", "Receptor"),)
+        assert report.residual == ("input_row_id=1",)
+        assert report.changes == ()
+        assert report.source_overwritten is False
+    assert m_row == {"input_row_id": "1", "legacy_iuphar_class": "Receptor"}
+    assert python_rows[0]["iuphar_class"] == "Receptor"
+    assert python_rows[1]["iuphar_class"] == "Enzyme"
+
+
 def test_duplicate_full_keys_stay_residual_in_either_order() -> None:
     reference = Stage0Reference(
         "fixture", 1, ({"input_row_id": "1", "legacy_iuphar_class": "Receptor"},)

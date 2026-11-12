@@ -102,12 +102,12 @@ def _classify_key(
 ) -> None:
     """Record one identity key. Duplicates and unexplained gaps stay residual."""
     label = _label(key)
+    m_row = m_group[0] if len(m_group) == 1 else None
+    _record_legacy(label, m_row, legacy)
     if len(m_group) > 1 or len(python_group) > 1:
         residual.append(label)
         return
-    m_row = m_group[0] if m_group else None
     python_row = python_group[0] if python_group else None
-    _record_legacy(label, m_row, legacy)
     if not key or m_row is None or python_row is None:
         residual.append(label)
         return
