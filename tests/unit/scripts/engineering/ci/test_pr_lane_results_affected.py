@@ -1229,7 +1229,15 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
         (
             "docs/reports/dashboard-ux-checks/2026-11-11.md",
             {"tests/integration/test_dashboard_ux_report_freshness.py"},
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
             "docs/reports/dashboard-ux-checks/not-reviewed-date.md",
+            {
+                "tests/integration/test_dashboard_ux_report_freshness.py",
+                "tests/integration/test_dashboard_operator_readability.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
         ),
     ],
 )
