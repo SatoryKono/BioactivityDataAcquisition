@@ -9,7 +9,6 @@ from scripts.ops.observability.grafana._dashboard_state_followup import override
 _NO_OBSERVATIONS = "NO OBSERVATIONS"
 _WIDTH = "custom.width"
 _CELL = "custom.cellOptions"
-_NO_OBSERVATIONS = "NO OBSERVATIONS"
 
 
 def _table(panel: dict, *, compact: bool = True) -> None:
