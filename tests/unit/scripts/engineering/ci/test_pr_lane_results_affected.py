@@ -271,6 +271,51 @@ def test_iuphar_snapshot_has_a_bounded_owner(tmp_path: Path) -> None:
     assert report["covers_full_suite"] is False
 
 
+def test_iuphar_acceptance_has_a_bounded_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class"
+    owner.mkdir(parents=True)
+    (owner / "test_acceptance.py").write_text(
+        "def test_contract():\n    assert True\n",
+        encoding="utf-8",
+    )
+    report = build_shadow_compare(
+        ["src/iuphar_target_class/acceptance.py"],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == ["tests/unit/iuphar_target_class/test_acceptance.py"]
+    assert report["covers_full_suite"] is False
+
+
+def test_iuphar_w153_has_a_bounded_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class"
+    owner.mkdir(parents=True)
+    (owner / "test_w153.py").write_text(
+        "def test_contract():\n    assert True\n",
+        encoding="utf-8",
+    )
+    report = build_shadow_compare(
+        ["src/iuphar_target_class/w153.py"],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == ["tests/unit/iuphar_target_class/test_w153.py"]
+    assert report["covers_full_suite"] is False
+
+
+def test_iuphar_delivery_has_a_bounded_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class"
+    owner.mkdir(parents=True)
+    (owner / "test_delivery.py").write_text(
+        "def test_contract():\n    assert True\n",
+        encoding="utf-8",
+    )
+    report = build_shadow_compare(
+        ["src/iuphar_target_class/delivery.py"],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == ["tests/unit/iuphar_target_class/test_delivery.py"]
+    assert report["covers_full_suite"] is False
+
+
 def test_iuphar_comparison_has_a_bounded_owner(tmp_path: Path) -> None:
     owner = tmp_path / "tests/unit/iuphar_target_class"
     owner.mkdir(parents=True)
