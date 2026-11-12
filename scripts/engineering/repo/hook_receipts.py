@@ -106,6 +106,9 @@ def environment_identity(env: Mapping[str, str] | None = None) -> str:
 def _index_material(
     root: Path, view: str | None, *, reject_hidden: bool
 ) -> dict[str, bytes]:
+    from scripts.engineering.repo.check_no_partial_tree import _reject_intent_to_add
+
+    _reject_intent_to_add(root, index_file=view)
     index = _git(root, "ls-files", "--sparse", "--stage", "-z", index_file=view)
     if any(
         row
@@ -138,10 +141,13 @@ def protected_state(root: Path, base: str = "origin/main") -> dict[str, str]:
     """Cheap semantic index/HEAD/base/env bookend for callbacks; no cache reuse."""
     from scripts.engineering.repo.check_no_partial_tree import (
         _index_views,
+        check_checkout_state,
         validate_revision_token,
     )
 
     base = validate_revision_token(base)
+    if check_checkout_state(root):
+        raise ValueError("checkout state is not qualified")
     indexes = [
         _index_material(root, view, reject_hidden=False) for view in _index_views(root)
     ]
@@ -168,6 +174,16 @@ def _path_state(
     names: set[str] = set()
     for view in views:
         for args in [
+            (
+                "diff",
+                base,
+                "HEAD",
+                "--no-ext-diff",
+                "--no-textconv",
+                "--no-renames",
+                "--name-only",
+                "-z",
+            ),
             (
                 "diff-files",
                 "--no-ext-diff",

@@ -16,6 +16,7 @@ import sys
 import subprocess
 from collections.abc import Callable
 import time
+import tomllib
 from typing import Any
 
 from scripts.engineering.repo import hook_receipts as receipts
@@ -163,7 +164,6 @@ def _check_rules() -> list[tuple[Callable[[str], bool], Check]]:
             Check(
                 "runtime-parity",
                 _python("scripts/ai/junie/check_junie_mirror.py", "--check"),
-                cacheable=True,
             ),
         ),
         (
@@ -171,7 +171,6 @@ def _check_rules() -> list[tuple[Callable[[str], bool], Check]]:
             Check(
                 "runtime-source-contract",
                 _python("scripts/ai/codex/doctor.py", "static", "--no-write"),
-                cacheable=True,
             ),
         ),
         (
@@ -242,6 +241,17 @@ def _check_rules() -> list[tuple[Callable[[str], bool], Check]]:
     ]
 
 
+def _lint_cacheable(root: Path) -> bool:
+    config = root / PYPROJECT
+    if not config.is_file():
+        return False
+    payload = tomllib.loads(config.read_text(encoding="utf-8"))
+    tool = payload.get("tool", {})
+    ruff = tool.get("ruff", {}) if isinstance(tool, dict) else None
+    # External extends need their own input closure; run fresh instead.
+    return isinstance(ruff, dict) and "extend" not in ruff
+
+
 def select_checks(root: Path, paths: list[str]) -> list[Check]:
     """Select additive post-change gates; existing mandatory CI duties remain."""
     result = [
@@ -254,8 +264,16 @@ def select_checks(root: Path, paths: list[str]) -> list[Check]:
         result.append(
             Check(
                 "python-lint",
-                _python("-m", "ruff", "check", "--", *python_files),
-                cacheable=True,
+                _python(
+                    "-m",
+                    "ruff",
+                    "check",
+                    "--config",
+                    str(root / PYPROJECT),
+                    "--",
+                    *python_files,
+                ),
+                cacheable=_lint_cacheable(root),
             )
         )
     return result
@@ -309,6 +327,8 @@ def build_plan(root: Path, base: str) -> dict[str, Any]:
 
 
 def stable_plan(root: Path, base: str) -> tuple[dict[str, Any], dict[str, Any]]:
+    if base != hook_runtime.TRUSTED_BASE:
+        raise ValueError("post-change checks require the trusted base")
     before = receipts.snapshot(root, base=base)
     plan = build_plan(root, base)
     after = receipts.snapshot(root, base=base)

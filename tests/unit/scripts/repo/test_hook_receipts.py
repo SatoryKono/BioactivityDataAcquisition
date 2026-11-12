@@ -229,6 +229,37 @@ def test_hidden_index_input_is_not_cacheable(private_repo):
         receipts.snapshot(root)
 
 
+def test_callback_bookend_rejects_sparse_config_even_without_index_change(private_repo):
+    root, git = private_repo
+    receipts.protected_state(root)
+    git("config", "core.sparseCheckout", "true")
+    with pytest.raises(ValueError, match="checkout state"):
+        receipts.protected_state(root)
+
+
+def test_callback_bookend_rejects_intent_to_add(private_repo):
+    root, git = private_repo
+    (root / "intent.txt").write_text("")
+    git("add", "--intent-to-add", "intent.txt")
+    with pytest.raises(ValueError, match="intent-to-add"):
+        receipts.protected_state(root)
+
+
+def test_committed_check_input_bytes_survive_git_newline_normalization(private_repo):
+    root, git = private_repo
+    target = root / "checked.py"
+    (root / ".gitattributes").write_text("*.py text eol=lf\n")
+    target.write_bytes(b"print('checked')\n")
+    git("add", ".")
+    git("commit", "-m", "committed check input")
+    before = receipts.snapshot(root)
+    target.write_bytes(b"print('checked')\r\n")
+    git("add", "checked.py")  # Canonical blob is unchanged; working bytes differ.
+    after = receipts.snapshot(root)
+    assert before["index_sha256"] == after["index_sha256"]
+    assert before["source_sha256"] != after["source_sha256"]
+
+
 def test_ignored_working_policy_invalidates_receipt(private_repo):
     root, _ = private_repo
     before = receipts.snapshot(root)

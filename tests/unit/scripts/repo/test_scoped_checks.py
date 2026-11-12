@@ -70,6 +70,17 @@ def test_invalid_deadline_cannot_start_checks(tmp_path, timeout):
         checks.validate(tmp_path, timeout=timeout)
 
 
+@pytest.mark.parametrize("base", ["HEAD", "deadbeef" * 5])
+def test_caller_cannot_choose_a_self_baselined_check(tmp_path, monkeypatch, base):
+    monkeypatch.setattr(
+        checks.receipts,
+        "snapshot",
+        lambda *args, **kwargs: pytest.fail("untrusted baseline measured"),
+    )
+    with pytest.raises(ValueError, match="trusted base"):
+        checks.validate(tmp_path, base=base)
+
+
 def test_missing_dependency_returns_error(tmp_path):
     result = checks._execute(
         checks.Check("missing", (str(tmp_path / "does-not-exist"),)),
@@ -125,12 +136,13 @@ def test_reuse_always_runs_fresh_core_and_stops_on_failure(
 ):
     static = checks.Check("static", ("fixture",), cacheable=True)
     fresh = checks.Check("fresh", ("fixture",))
+    runtime = checks.select_checks(tmp_path, [".codex/agents/CODEX-RUNTIME.md"])
     monkeypatch.setattr(
         checks,
         "build_plan",
         lambda *args: {
             "unknown": [],
-            "checks": [static, fresh],
+            "checks": [static, fresh, *runtime],
             "base_sha": "a" * 40,
         },
     )
@@ -165,7 +177,11 @@ def test_reuse_always_runs_fresh_core_and_stops_on_failure(
 
     monkeypatch.setattr(checks, "_execute", execute)
     result = checks.validate(tmp_path, reuse=Path("cache.json"))
-    assert executed == (["tree", "fresh"] if core_status == "PASS" else ["tree"])
+    assert executed == (
+        ["tree", "fresh", *[check.id for check in runtime]]
+        if core_status == "PASS"
+        else ["tree"]
+    )
     assert (
         result["status"] == core_status
         if core_status == "PASS"
@@ -224,3 +240,19 @@ def test_state_change_during_planning_cannot_start_old_checks(tmp_path, monkeypa
     )
     with pytest.raises(ValueError, match="state changed during planning"):
         checks.validate(tmp_path)
+
+
+def test_external_ruff_extends_require_fresh_root_configured_check(tmp_path):
+    source = tmp_path / "scripts/example.py"
+    source.parent.mkdir()
+    source.write_text("print('fixture')\n")
+    config = tmp_path / "pyproject.toml"
+    config.write_text('[tool.ruff]\nextend = "external.toml"\n')
+    lint = next(
+        check
+        for check in checks.select_checks(tmp_path, ["scripts/example.py"])
+        if check.id == "python-lint"
+    )
+    assert lint.cacheable is False
+    position = lint.argv.index("--config")
+    assert lint.argv[position + 1] == str(config)
