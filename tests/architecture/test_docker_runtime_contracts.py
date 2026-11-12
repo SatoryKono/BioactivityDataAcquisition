@@ -1581,6 +1581,40 @@ def test_ghcr_publish_waits_outside_the_main_integrity_conclusion() -> None:
     assert "inputs.artifact-run-id != ''" in cross_run["if"]
 
 
+def test_trivy_sarif_matches_main_configurations_without_dropping_findings() -> None:
+    """Caller changes must not orphan any existing full-image analysis."""
+    steps = _load_yaml(ROOT / ".github/workflows/docker.yml")["jobs"]["docker-build"][
+        "steps"
+    ]
+    uploads = [
+        step
+        for step in steps
+        if str(step.get("uses", "")).startswith("github/codeql-action/upload-sarif@")
+    ]
+    assert {step["with"].get("category") for step in uploads} == {
+        ".github/workflows/docker.yml:docker-build",
+        ".github/workflows/main-integrity.yml:docker-build",
+        ".github/workflows/pr-required.yml:docker-build",
+    }
+    conversion = next(
+        step
+        for step in steps
+        if step.get("name") == "Convert canonical Trivy JSON evidence"
+    )
+    enforcement = next(
+        step
+        for step in steps
+        if step.get("name")
+        == "Enforce canonical Trivy Critical High Medium zero policy"
+    )
+    for upload in uploads:
+        assert upload["with"]["sarif_file"] == "reports/security/trivy-results.sarif"
+        assert upload["with"]["wait-for-processing"] is True
+        assert not upload.get("continue-on-error", False)
+        assert steps.index(conversion) < steps.index(upload) < steps.index(enforcement)
+    assert "--fail-on-blocking" in enforcement["run"]
+
+
 def test_docker_built_image_uses_one_canonical_trivy_scan_and_blocks_all_medium_plus() -> (
     None
 ):
