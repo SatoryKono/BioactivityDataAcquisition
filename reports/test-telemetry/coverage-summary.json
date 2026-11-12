@@ -1,11 +1,11 @@
 {
   "source_branch": "codex/hooks-13038-followup",
-  "source_commit": "24ba79fe5932b73dee1651c1442e50a5a7c83e72",
-  "source_run_id": "43279017693",
+  "source_commit": "0457effef2c56871fe93f5cf39aba7e61dd156cb",
+  "source_run_id": "43295140591",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/43279017693",
-  "source_tree_sha256": "5b246815901157ad1612b52d7fafcee766081af126b6b984eb0ff6acd3f7d61f",
-  "refreshed_at_utc": "2026-11-12T18:30:45.082000+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/43295140591",
+  "source_tree_sha256": "a141351af37fda996e4713938808f9260e06f3cedece7b6e95953980b56b8e8b",
+  "refreshed_at_utc": "2026-11-12T20:06:25.665000+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.68,
   "coverage": {
