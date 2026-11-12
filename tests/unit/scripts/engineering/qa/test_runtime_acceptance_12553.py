@@ -211,7 +211,7 @@ def test_archive_preserves_raw_bytes_and_reads_without_extraction(
     assert capture.read_evidence("run-stdout.txt", tmp_path) == b"later run\n"
 
 
-def test_published_bundle_integrity(capsys):
+def test_published_bundle_integrity_accepts(capsys):
     capture.verify(capture.BUNDLE)
     manifest = json.loads(
         capture.read_evidence(capture.ARTIFACT_MANIFEST, capture.BUNDLE)
