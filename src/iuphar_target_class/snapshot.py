@@ -163,15 +163,15 @@ def assess_completeness(
     if provider_versions not in known:
         message = "provider version state is not recognised"
         raise ValueError(message)
+    version_unverified = provider_versions == VERSION_UNAVAILABLE
     if not coverage_approved:
         return Completeness(
             complete=False,
             publishable=False,
-            version_unverified=False,
+            version_unverified=version_unverified,
             allows_not_found=False,
             reason="охват и набор видов снимка не утверждены",
         )
-    version_unverified = provider_versions == VERSION_UNAVAILABLE
     problems: list[str] = []
     if not required_types_loaded:
         problems.append("обязательные типы не загружены")

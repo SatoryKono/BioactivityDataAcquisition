@@ -126,6 +126,30 @@ def test_differing_versions_are_incomplete() -> None:
     assert absence_status(result) == "source_unavailable"
 
 
+@pytest.mark.parametrize(
+    ("version", "unverified"),
+    [(VERSION_MATCHED, False), (VERSION_DIFFER, False), (VERSION_UNAVAILABLE, True)],
+)
+def test_unapproved_coverage_preserves_independent_version_limitation(
+    version: str, unverified: bool
+) -> None:
+    result = assess_completeness(
+        coverage_approved=False,
+        required_types_loaded=True,
+        pagination_complete=True,
+        transport_or_schema_errors=False,
+        totals_match=True,
+        provider_versions=version,
+        version_limitation_recorded=True,
+    )
+    assert result.version_unverified is unverified
+    assert result.complete is False
+    assert result.publishable is False
+    assert result.allows_not_found is False
+    assert "не утверждены" in result.reason
+    assert absence_status(result) == "source_unavailable"
+
+
 def test_missing_family_is_a_diagnostic_not_silence() -> None:
     provider = SnapshotProvider((), ())
     hit = provider.get_families(("900",))
