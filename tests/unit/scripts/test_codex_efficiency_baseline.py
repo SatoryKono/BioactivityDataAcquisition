@@ -298,3 +298,40 @@ def test_committed_static_comparison_binds_generator_and_marks_live_metrics_miss
 def test_instruction_scope_excludes_all_environment_prefixed_paths(part):
     path = f".codex/skills/{part}/source.md"
     assert efficiency_baseline._instruction_group(path) is None
+
+
+@pytest.mark.parametrize("share", [".envrc", ".ENV-private"])
+def test_environment_unc_share_is_rejected_before_resolution(share):
+    from pathlib import PureWindowsPath
+    from unittest.mock import Mock
+
+    absolute = PureWindowsPath(f"//synthetic-host/{share}/report.json")
+    resolve = Mock(side_effect=AssertionError("No network path resolution"))
+    path = SimpleNamespace(absolute=lambda: absolute, resolve=resolve)
+    with pytest.raises(ValueError, match="environment"):
+        efficiency_baseline._check_output_target(path)
+    resolve.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "resolved_share,denied", [("reports", False), (".ENV-private", True)]
+)
+def test_output_checks_resolved_unc_share_without_blocking_safe_paths(
+    resolved_share, denied
+):
+    from pathlib import PureWindowsPath
+    from unittest.mock import Mock
+
+    resolve = Mock(
+        return_value=PureWindowsPath(f"//synthetic-host/{resolved_share}/report.json")
+    )
+    path = SimpleNamespace(
+        absolute=lambda: PureWindowsPath("//synthetic-host/reports/report.json"),
+        resolve=resolve,
+    )
+    if denied:
+        with pytest.raises(ValueError, match="environment"):
+            efficiency_baseline._check_output_target(path)
+    else:
+        assert efficiency_baseline._check_output_target(path) is None
+    resolve.assert_called_once_with()

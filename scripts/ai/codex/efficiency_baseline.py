@@ -212,8 +212,10 @@ def compare_instructions(root: Path, before: str, after: str) -> dict[str, Any]:
 
 
 def _check_output_target(path: Path) -> None:
-    for candidate in (path.absolute(), path.resolve()):
-        if any(_env_part(part) for part in candidate.parts):
+    for resolve_path in (path.absolute, path.resolve):
+        candidate = resolve_path()
+        parts = str(candidate).replace("\\", "/").split("/")
+        if any(_env_part(part) for part in parts):
             raise ValueError("Reports cannot target environment files or directories")
 
 
