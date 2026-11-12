@@ -572,3 +572,56 @@ def test_git_supplied_commit_index_growth_is_checked_even_when_default_is_clean(
     )
     assert (root / ".git/index").read_bytes() == default_before
     assert supplied.read_bytes() == supplied_before
+
+
+def test_unstaged_working_budget_growth_is_blocked_without_staging(policy_repo):
+    root, base, budget = policy_repo
+    index = (root / ".git/index").read_bytes()
+    budget.write_text('{"baseline":{"count":99},"max_count":99}')
+    assert guard.check_budget_diff(root, base)["status"] == "PASS"
+    result = guard.check_worktree_budget_diff(root, base)
+    assert result["status"] == "FAIL"
+    assert any(row["code"] == "budget.ceiling_increased" for row in result["findings"])
+    assert (root / ".git/index").read_bytes() == index
+
+
+@pytest.mark.parametrize("ignored", [False, True])
+def test_new_policy_without_trusted_baseline_cannot_pass(policy_repo, ignored):
+    root, base, _ = policy_repo
+    path = root / "configs/quality/new_budget.json"
+    if ignored:
+        (root / ".git/info").mkdir(exist_ok=True)
+        (root / ".git/info/exclude").write_text("configs/quality/new_budget.json\n")
+    path.write_text('{"max_count":99}')
+    assert "configs/quality/new_budget.json" in guard.worktree_policy_paths(root, base)
+    assert guard.check_worktree_budget_diff(root, base)["status"] == "ERROR"
+
+
+def test_worktree_guard_ignores_ambient_config_override(policy_repo, monkeypatch):
+    root, base, budget = policy_repo
+    budget.write_text('{"baseline":{"count":99},"max_count":99}')
+    monkeypatch.setenv("GIT_CONFIG_COUNT", "1")
+    monkeypatch.setenv("GIT_CONFIG_KEY_0", "core.worktree")
+    monkeypatch.setenv("GIT_CONFIG_VALUE_0", str(root.parent / "absent"))
+    assert guard.check_worktree_budget_diff(root, base)["status"] == "FAIL"
+
+
+def test_scoped_validation_rejects_real_unstaged_budget_increase(policy_repo):
+    from scripts.engineering.repo import scoped_checks
+
+    root, base, budget = policy_repo
+    _git(root, "update-ref", "refs/remotes/origin/main", base)
+    budget.write_text('{"baseline":{"count":99},"max_count":99}')
+    result = scoped_checks.validate(root)
+    assert result["status"] == "ERROR"
+    assert [(row["id"], row["status"]) for row in result["checks"]] == [
+        ("tree", "PASS"),
+        ("budgets", "PASS"),
+        ("budgets-worktree", "FAIL"),
+    ]
+    assert (
+        json.loads(_git(root, "show", ":configs/quality/example_budget.json"))[
+            "max_count"
+        ]
+        == 2
+    )

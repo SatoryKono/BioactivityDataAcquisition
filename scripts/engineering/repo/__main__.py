@@ -9,6 +9,7 @@ Commands:
     worktree           Bootstrap the governed worktree helper; creation uses it
     guard-operation    Check a structured operation without executing it
     guard-budgets      Compare protected policy limits to trusted Git objects
+    checks             Plan or run state-bound local post-change checks
     hooks              Install, inspect or roll back owned Git hooks explicitly
     check-inventory    Check scripts inventory drift
     github-settings-review  Collect read-only GitHub governance evidence
@@ -147,6 +148,10 @@ def main(argv: list[str] | None = None) -> int:
 
     cmd, rest = args[0], args[1:]
 
+    if cmd == "checks":
+        from scripts.engineering.repo.scoped_checks import main as checks_main
+
+        return checks_main(rest)
     if cmd == "hooks":
         from scripts.engineering.repo.hook_installation import main as hooks_main
 
