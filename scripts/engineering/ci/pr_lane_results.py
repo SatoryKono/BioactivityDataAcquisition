@@ -372,7 +372,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/review/grafana-full-tables-20261110/audit.json",
             "reports/review/grafana-full-tables-20261110/chembl_protein_class-overview.png",
             "reports/review/grafana-full-tables-20261110/uniprot_protein-overview.png",
-            "scripts/ops/observability/grafana/capture_scroll_surface.cjs",
             "scripts/ops/observability/grafana/capture_table_pages.cjs",
             "scripts/ops/observability/grafana/capture_tall_panel.cjs",
             "scripts/ops/observability/grafana/native_browser_zoom.cjs",
@@ -385,6 +384,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/unit/scripts/ops/observability/test_table_capture_coverage.py",
             "tests/integration/test_dashboard_first_window_noscroll.py",
         ),
+    ),
+    "scripts/ops/observability/grafana/capture_scroll_surface.cjs": (
+        "tests/unit/scripts/ops/observability/test_grafana_browser_model_observer.py",
+        "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
+        "tests/unit/scripts/ops/observability/test_grafana_immutable_capture.py",
+        "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py",
+        "tests/unit/scripts/ops/observability/test_table_capture_coverage.py",
+        "tests/integration/test_dashboard_first_window_noscroll.py",
     ),
     "reports/observability/live-fixes-r6/LF1-17/report.md": (
         GRAFANA_CONTEXT_LINKS_TEST,
