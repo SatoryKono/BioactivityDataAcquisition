@@ -267,6 +267,22 @@ def test_proposed_index_is_checked_without_writing_objects_or_index(repo: Path) 
     assert module.main(["--repo", str(repo), "--base", healthy, "--check-index"]) == 2
 
 
+def test_root_file_cannot_impersonate_a_directory_anchor(repo: Path) -> None:
+    healthy = _git(repo, "rev-parse", "HEAD").strip()
+    _git(repo, "rm", "-qr", "src")
+    (repo / "src").write_text("dummy anchor")
+    _git(repo, "add", "src")
+    before = (repo / ".git/index").read_bytes()
+    assert module.check_index_tree(repo, healthy) == [
+        "proposed index loses directory anchors"
+    ]
+    assert (repo / ".git/index").read_bytes() == before
+    assert module.main(["--repo", str(repo), "--base", healthy, "--check-index"]) == 2
+    _git(repo, "commit", "-qm", "replace directory with root file")
+    bad = _git(repo, "rev-parse", "HEAD").strip()
+    assert module.find_collapsing_commits(healthy, bad, repo=repo) == [bad]
+
+
 def test_index_replacement_during_inspection_is_error(
     repo: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -304,6 +320,7 @@ def test_guard_workflow_runs_trusted_base_code_and_publishes_candidate_status() 
         s for s in steps if s.get("uses", "").startswith("actions/checkout@")
     )
     assert checkout["with"]["ref"] == "refs/heads/main"
+    assert checkout["with"]["repository"] == "SatoryKono/BioactivityDataAcquisition"
     assert checkout["with"]["persist-credentials"] is False
     assert checkout["with"]["fetch-depth"] == 0
     assert len([s for s in steps if "uses" in s]) == 1

@@ -238,7 +238,8 @@ def check_index_tree(repo: str | Path, base: str) -> list[str]:
         metadata, path = record.split("\t", 1)
         if metadata.split()[2] != "0":
             raise EvidenceError("unmerged index is unqualified")
-        roots.add(path.split("/", 1)[0])
+        if "/" in path:
+            roots.add(path.split("/", 1)[0])
     missing = (_top_directories(cwd, base_sha) - roots) & DIRECTORY_ANCHORS
     problems = []
     if missing:
