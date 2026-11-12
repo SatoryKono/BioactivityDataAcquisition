@@ -5,9 +5,11 @@
 from __future__ import annotations
 
 import asyncio
+import hmac
 import json
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Any, Protocol, cast
+from urllib.parse import urlsplit
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -27,6 +29,7 @@ class _RouteRequestSupport(Protocol):
 class HealthServerHTTPMixin:
     """Mixin for low-level HTTP request/response lifecycle."""
 
+    _quarantine_http_token: str | None = None
     _logger: LoggerPort | None = cast(Any, None)  # Any: host attr default (PD3)
     # Safe empty defaults so bare mixin use never raises TypeError on except.
     # Concrete HealthServer overwrites with the real allowlists in __init__.
@@ -88,11 +91,23 @@ class HealthServerHTTPMixin:
             await self._send_response(writer, 400, "Bad Request")
             return
 
-        await self._consume_headers(reader)
+        authorization = await self._consume_headers(reader)
 
         if method != "GET":
             await self._send_response(writer, 405, "Method Not Allowed")
             return
+
+        if urlsplit(path).path.startswith("/ops/quarantine/"):
+            token = self._quarantine_http_token
+            if token is None:
+                await self._send_response(writer, 404, "Not Found")
+                return
+            expected = f"Bearer {token}".encode()
+            if authorization is None or not hmac.compare_digest(
+                authorization, expected
+            ):
+                await self._send_response(writer, 401, "Unauthorized")
+                return
 
         route_support = cast(_RouteRequestSupport, self)  # pyright: ignore[reportInvalidCast]
         await route_support._route_request(writer, path)
@@ -112,12 +127,14 @@ class HealthServerHTTPMixin:
             return None, None
         return parts[0], parts[1]
 
-    async def _consume_headers(self, reader: asyncio.StreamReader) -> None:
-        """Read and discard HTTP headers.
+    async def _consume_headers(self, reader: asyncio.StreamReader) -> bytes | None:
+        """Read headers, retaining only a unique Authorization value.
 
         Args:
             reader: Async stream reader positioned after the request line.
         """
+        authorization = None
+        duplicate = False
         for _ in range(self._max_header_lines):
             line = await asyncio.wait_for(
                 reader.readline(),
@@ -125,8 +142,13 @@ class HealthServerHTTPMixin:
             )
             if line in (b"\r\n", b"\n", b""):
                 break
+            name, separator, value = line.partition(b":")
+            if separator and name.strip().lower() == b"authorization":
+                duplicate = duplicate or authorization is not None
+                authorization = value.strip()
         else:
             raise ValueError("Too many request headers")
+        return None if duplicate else authorization
 
     async def _handle_request_error(
         self,
