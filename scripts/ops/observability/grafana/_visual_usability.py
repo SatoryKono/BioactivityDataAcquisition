@@ -6,6 +6,7 @@ from copy import deepcopy
 
 from scripts.ops.observability.grafana._dashboard_state_followup import override, walk
 
+_NO_OBSERVATIONS = "NO OBSERVATIONS"
 _WIDTH = "custom.width"
 _CELL = "custom.cellOptions"
 
@@ -55,13 +56,13 @@ def _replace_rate_intervals(p: dict[int, dict]) -> None:
 
 
 def _stamp_counter_no_observations(panel: dict) -> None:
-    panel["fieldConfig"]["defaults"]["noValue"] = "NO OBSERVATIONS"
+    panel["fieldConfig"]["defaults"]["noValue"] = _NO_OBSERVATIONS
     for mapping in panel["fieldConfig"]["defaults"].get("mappings", []):
         if (
             mapping.get("type") == "special"
             and mapping["options"].get("match") == "null"
         ):
-            mapping["options"]["result"]["text"] = "NO OBSERVATIONS"
+            mapping["options"]["result"]["text"] = _NO_OBSERVATIONS
     note = (
         " No observations means this outcome has no samples in the selected window; "
         "it does not prove zero failures. A measured zero is displayed numerically."
@@ -181,7 +182,9 @@ def _remap_action_label_texts(panel: dict) -> None:
 def _remap_mapping_texts(mapping: dict) -> None:
     for value in mapping.get("options", {}).values():
         if isinstance(value, dict):
-            value["text"] = _ACTION_LABELS.get(value.get("text"), value.get("text", ""))
+            label = value.get("text", "")
+            if isinstance(label, str):
+                value["text"] = _ACTION_LABELS.get(label, label)
 
 
 def _overview(p: dict[int, dict]) -> None:
@@ -575,3 +578,52 @@ def apply_visual_usability(payload: dict) -> None:
                 panel["gridPos"]["h"] += shift
             if panel["id"] != 1000:
                 panel["gridPos"]["y"] -= shift
+
+
+def _preserve_unknown_null_color(value: dict) -> None:
+    """Keep missing-observation text neutral across repeated renders."""
+    if (
+        value.get("type") == "special"
+        and value.get("options", {}).get("match") == "null"
+    ):
+        result = value["options"].get("result", {})
+        if result.get("text") in {"UNKNOWN", _NO_OBSERVATIONS}:
+            result["color"] = "text"
+
+
+def _adjust_status_colors(value: object, palette: dict[str, str]) -> None:
+    """Apply the panel palette recursively without changing missing evidence."""
+    if isinstance(value, dict):
+        _preserve_unknown_null_color(value)
+        for key, child in value.items():
+            if key == "color" and isinstance(child, str) and child in palette:
+                value[key] = palette[child]
+            else:
+                _adjust_status_colors(child, palette)
+    elif isinstance(value, list):
+        for child in value:
+            _adjust_status_colors(child, palette)
+
+
+def apply_accessible_status_colors(payload: dict) -> None:
+    """Preserve state hues while meeting text contrast on the shipped dark theme."""
+    if payload.get("uid") not in {"bioetl-incident-v1", "bioetl-overview-v2"}:
+        return
+    for panel in walk(payload["panels"]):
+        background = panel.get("options", {}).get("colorMode") in {
+            "background",
+            "backgroundSolid",
+        }
+        palette = (
+            {
+                "gray": "#475569",
+                "#555555": "#475569",
+                "green": "#14532d",
+                "orange": "#9a3412",
+                "red": "#9f1239",
+            }
+            if background
+            else {"gray": "text", "#555555": "text", "#9CA3AF": "text"}
+        )
+
+        _adjust_status_colors(panel.get("fieldConfig", {}), palette)

@@ -277,7 +277,7 @@ const root={
         scrollY=arg.y;inspecting=null;
       },
     })};
-    if(sel==='[role="gridcell"]')return{filter:({hasText})=>{
+    if(sel==='[role="cell"], [role="gridcell"]')return{filter:({hasText})=>{
       const text=scrollY>0?'hidden-row':'visible-row';
       if(!hasText.test(text))return{first:()=>({count:async()=>0})};
       return{first:()=>cellFor(text)};
