@@ -775,6 +775,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     **dict.fromkeys(
         (
+            "configs/quality/external_resource_inventory_pr13061_review.json",
             "configs/quality/external_resource_inventory_qm08_review.json",
             "configs/quality/external_resource_inventory_qm09_review.json",
             "configs/quality/external_resource_inventory_pr12688_rf002_review.json",
@@ -1354,6 +1355,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/governance/github-settings-B2-preflight-20261106.md",
         ),
         (REQUIRED_CHECKS_PROSE_TEST,),
+    ),
+    "docs/reports/dashboard-ux-checks/2026-11-11.md": (
+        "tests/integration/test_dashboard_operator_readability.py",
+        "tests/integration/test_dashboard_first_window_noscroll.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
 }
 
@@ -1968,6 +1974,8 @@ def _importing_script_tests(
 
 def _dependency_targets(repo_root: Path, dependencies: set[str]) -> list[str]:
     """Reuse source routing and canonical owners for actual dependency consumers."""
+    if not dependencies:
+        return []
     inventory = repo_root / "configs/quality/source_test_owner_inventory.yaml"
     owners: dict[str, list[str]] = {}
     if inventory.is_file():

@@ -503,3 +503,12 @@ def test_composite_merge_column_groups_optional_paths() -> None:
         "column_groups": [{"name": "ids", "fields": ["id"]}],
     }
     assert len(CompositeConfig.from_dict(groups).merge.column_groups) == 1
+
+
+@pytest.mark.parametrize("factory", ["decoder", "config"])
+def test_dq_invalid_record_policy_is_rejected_at_both_construction_boundaries(factory):
+    with pytest.raises(ValueError, match="invalid_record_policy"):
+        if factory == "decoder":
+            build_dq_config({"invalid_record_policy": "silently_accept"})
+        else:
+            CompositeDQConfig(invalid_record_policy="silently_accept")
