@@ -210,3 +210,42 @@ def test_reason_scalar_normalizers_fail_closed() -> None:
     assert _as_int(object(), default=8) == 8
     assert _as_int("bad", default=9) == 9
     assert _as_int(float("inf"), default=10) == 10
+
+
+def test_saved_accounting_refuses_malformed_full_tracking_sections():
+    from bioetl.domain.run_reports.accounting_projections import (
+        _saved_report_sections,
+        _prefer_conserving_projection,
+    )
+
+    assert (
+        _saved_report_sections(
+            {"tracking_coverage": "full", "identity": [], "layers": {}}
+        )
+        is None
+    )
+    assert _prefer_conserving_projection(
+        records_in=10,
+        records_out=8,
+        removed_total=2,
+        default_in=100,
+        default_out=100,
+        default_removed=0,
+        removed_mapped=0,
+    ) == (10, 8, 2)
+
+
+def test_over_accounted_removals_remain_visible_instead_of_being_rewritten():
+    from bioetl.domain.run_reports.accounting_projections import (
+        _prefer_conserving_projection,
+    )
+
+    assert _prefer_conserving_projection(
+        records_in=10,
+        records_out=9,
+        removed_total=5,
+        default_in=10,
+        default_out=9,
+        default_removed=1,
+        removed_mapped=5,
+    ) == (10, 9, 5)

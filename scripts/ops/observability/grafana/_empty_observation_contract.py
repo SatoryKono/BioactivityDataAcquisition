@@ -61,7 +61,11 @@ def apply_event_empty_copy(panels: list[dict[str, Any]]) -> None:
         if panel.get("id") not in _EVENT_PANELS | {112, 135, 8807}:
             continue
         defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
-        defaults["noValue"] = "UNKNOWN"
+        defaults["noValue"] = (
+            "UNKNOWN — terminal histogram samples unavailable"
+            if panel.get("id") == 239
+            else "UNKNOWN"
+        )
         for mapping in defaults.get("mappings", []):
             options = mapping.get("options", {})
             if (

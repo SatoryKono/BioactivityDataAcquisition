@@ -345,6 +345,7 @@ def _core_checks(root: Path, base: str) -> list[Check]:
         Check(
             name,
             tuple(base if arg == hook_runtime.TRUSTED_BASE else arg for arg in argv),
+            timeout=90 if name == "tree" else 30,
         )
         for name, argv in hook_runtime._guard_commands(root, "pre-commit", b"")
     ]

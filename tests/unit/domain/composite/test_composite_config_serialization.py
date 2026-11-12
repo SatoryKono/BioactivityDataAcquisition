@@ -520,3 +520,8 @@ def test_supported_policy_survives_decoding(policy):
         build_dq_config({"invalid_record_policy": policy}).invalid_record_policy
         == policy
     )
+
+
+def test_dq_config_rejects_invalid_record_policy() -> None:
+    with pytest.raises(ValueError, match="invalid_record_policy"):
+        CompositeDQConfig(invalid_record_policy="silently_accept")

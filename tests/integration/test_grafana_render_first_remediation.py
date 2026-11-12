@@ -1506,3 +1506,19 @@ try {
     data = (tmp_path / "full.png").read_bytes()
     assert int.from_bytes(data[16:20], "big") == 1366
     assert int.from_bytes(data[20:24], "big") == 3500
+
+
+def test_live_status_card_and_neutral_text_meet_normal_text_contrast():
+    incident = _load("bioetl-incident-v1.json")
+    card = _panel(incident, 9401)
+    mapping = card["fieldConfig"]["defaults"]["mappings"][0]["options"]
+    assert all(
+        _contrast_ratio("#f7f8fa", state["color"]) >= 4.5 for state in mapping.values()
+    )
+    zero = _panel(incident, 230)["fieldConfig"]["defaults"]["thresholds"]["steps"][0]
+    assert zero["color"] == "text"
+    # Grafana 13.2.3 resolves the visualization token to colors.text.primary:
+    # https://github.com/grafana/grafana/blob/v13.2.3/packages/grafana-data/src/themes/createVisualizationColors.ts
+    # Stock foregrounds from createColors.ts; retain the 4.5:1 floor in BOTH themes.
+    for foreground, background in (("#ccccdc", "#181b1f"), ("#24292e", "#ffffff")):
+        assert _contrast_ratio(foreground, background) >= 4.5

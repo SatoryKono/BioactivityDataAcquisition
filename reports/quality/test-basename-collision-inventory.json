@@ -1,5 +1,5 @@
 {
-  "duplicate_basename_count": 75,
+  "duplicate_basename_count": 76,
   "duplicate_basenames": {
     "test_adapter.py": [
       "tests/integration/adapters/openalex/test_adapter.py",
@@ -327,6 +327,10 @@
       "tests/integration/workflow/test_workflow_runner_service.py",
       "tests/unit/application/services/test_workflow_runner_service.py",
       "tests/unit/repo_backed/application/services/test_workflow_runner_service.py"
+    ],
+    "test_workflow_step_dispatch.py": [
+      "tests/unit/application/services/execution/test_workflow_step_dispatch.py",
+      "tests/unit/application/services/test_workflow_step_dispatch.py"
     ]
   }
 }
