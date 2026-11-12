@@ -299,6 +299,24 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/normalization.py": (
         "tests/unit/iuphar_target_class/test_normalization.py",
     ),
+    "src/iuphar_target_class/snapshot.py": (
+        "tests/unit/iuphar_target_class/test_snapshot.py",
+    ),
+    "src/iuphar_target_class/matching.py": (
+        "tests/unit/iuphar_target_class/test_matching.py",
+    ),
+    "src/iuphar_target_class/local_layer.py": (
+        "tests/unit/iuphar_target_class/test_local_layer.py",
+    ),
+    "src/iuphar_target_class/resolution.py": (
+        "tests/unit/iuphar_target_class/test_resolution.py",
+    ),
+    "src/iuphar_target_class/evidence.py": (
+        "tests/unit/iuphar_target_class/test_evidence.py",
+    ),
+    "src/iuphar_target_class/comparison.py": (
+        "tests/unit/iuphar_target_class/test_comparison.py",
+    ),
     "scripts/ai/codex/native_runtime_contract.py": (
         CODEX_NATIVE_RUNTIME_TEST,
         "tests/architecture/test_codex_agent_catalog_inventory.py",
@@ -395,6 +413,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/unit/scripts/ops/observability/test_table_capture_coverage.py",
             "tests/integration/test_dashboard_first_window_noscroll.py",
         ),
+    ),
+    "scripts/ops/observability/grafana/capture_scroll_surface.cjs": (
+        "tests/unit/scripts/ops/observability/test_grafana_browser_model_observer.py",
+        "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
+        "tests/unit/scripts/ops/observability/test_grafana_immutable_capture.py",
+        "tests/unit/scripts/ops/observability/test_grafana_scroll_composition.py",
+        "tests/unit/scripts/ops/observability/test_table_capture_coverage.py",
+        "tests/integration/test_dashboard_first_window_noscroll.py",
     ),
     "reports/observability/live-fixes-r6/LF1-17/report.md": (
         GRAFANA_CONTEXT_LINKS_TEST,
