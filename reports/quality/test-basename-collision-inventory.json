@@ -1,5 +1,5 @@
 {
-  "duplicate_basename_count": 74,
+  "duplicate_basename_count": 75,
   "duplicate_basenames": {
     "test_adapter.py": [
       "tests/integration/adapters/openalex/test_adapter.py",
@@ -171,6 +171,10 @@
       "tests/architecture/test_medallion_policy.py",
       "tests/unit/application/core/test_medallion_policy.py"
     ],
+    "test_medallion_write_modes.py": [
+      "tests/integration/infrastructure/storage/test_medallion_write_modes.py",
+      "tests/unit/domain/test_medallion_write_modes.py"
+    ],
     "test_merged_metadata_explainability.py": [
       "tests/unit/domain/behavior/test_merged_metadata_explainability.py",
       "tests/unit/domain/services/test_merged_metadata_explainability.py"
@@ -193,6 +197,10 @@
     "test_noop.py": [
       "tests/unit/composition/bootstrap/cli/test_noop.py",
       "tests/unit/domain/ports/test_noop.py"
+    ],
+    "test_normalization.py": [
+      "tests/unit/domain/test_normalization.py",
+      "tests/unit/iuphar_target_class/test_normalization.py"
     ],
     "test_normalization_service.py": [
       "tests/unit/domain/behavior/test_normalization_service.py",
