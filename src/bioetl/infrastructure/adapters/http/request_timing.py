@@ -100,13 +100,27 @@ async def _read_bounded_response(response: httpx.Response) -> httpx.Response:
     encoding = response.headers.get("Content-Encoding", "identity").lower().strip()
     if encoding not in {"identity", "gzip", "deflate"}:
         raise ValueError("Unsupported HTTP response content encoding")
-    decoder = (
-        None
-        if encoding == "identity"
-        else zlib.decompressobj(
-            16 + zlib.MAX_WBITS if encoding == "gzip" else zlib.MAX_WBITS
-        )
+    body, wire_bytes = await _collect_response_body(response, encoding)
+    headers = response.headers.copy()
+    headers.pop("content-encoding", None)
+    headers["Content-Length"] = str(len(body))
+    response.extensions["bioetl_wire_response_bytes"] = wire_bytes
+    return httpx.Response(
+        response.status_code,
+        headers=headers,
+        content=bytes(body),
+        request=response.request,
+        extensions=response.extensions,
+        history=response.history,
     )
+
+
+async def _collect_response_body(
+    response: httpx.Response, encoding: str
+) -> tuple[bytes, int]:
+    """Read bounded chunks without allocating an unbounded decoder output."""
+    window_bits = 16 + zlib.MAX_WBITS if encoding == "gzip" else zlib.MAX_WBITS
+    decoder = None if encoding == "identity" else zlib.decompressobj(window_bits)
     body = bytearray()
     wire_bytes = 0
     async for raw in response.aiter_raw():
@@ -122,18 +136,7 @@ async def _read_bounded_response(response: httpx.Response) -> httpx.Response:
             raise ValueError("Trailing or concatenated compressed HTTP response")
     if decoder is not None and not decoder.eof:
         raise ValueError("Truncated compressed HTTP response")
-    headers = response.headers.copy()
-    headers.pop("content-encoding", None)
-    headers["Content-Length"] = str(len(body))
-    response.extensions["bioetl_wire_response_bytes"] = wire_bytes
-    return httpx.Response(
-        response.status_code,
-        headers=headers,
-        content=bytes(body),
-        request=response.request,
-        extensions=response.extensions,
-        history=response.history,
-    )
+    return bytes(body), wire_bytes
 
 
 def _apply_provider_cooldown(host: RequestTimingHost, response: httpx.Response) -> None:
