@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError
 
@@ -308,9 +309,18 @@ def test_check_grafana_dashboards_accepts_shipped_portfolio(
 
     assert result.status == "pass"
     assert result.details is not None
-    assert result.details["expected_bioetl_dashboards"] == 7
+    assert result.details["expected_bioetl_dashboards"] == 5
     assert result.details["missing_bioetl_dashboard_uids"] == []
-    assert "7 shipped UIDs expected" in result.message
+    assert "5 shipped UIDs expected" in result.message
+
+
+def test_expected_dashboard_uids_match_shipped_models() -> None:
+    dashboard_root = Path(vlo.__file__).resolve().parents[3] / "grafana/dashboards"
+    shipped_uids = {
+        json.loads(path.read_text(encoding="utf-8"))["uid"]
+        for path in dashboard_root.glob("*.json")
+    }
+    assert vlo.EXPECTED_BIOETL_DASHBOARD_UIDS == shipped_uids
 
 
 def test_check_grafana_dashboards_reports_missing_shipped_uid(
