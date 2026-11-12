@@ -99,6 +99,24 @@ def test_provenance_panels_share_readability_contract() -> None:
             continue
         content = str((provenance.get("options") or {}).get("content") or "")
 
+        if filename in {"bioetl-overview-v2.json", "bioetl-dq-v2.json"}:
+            # Saved-run provenance is a donor table, replacing static HTML.
+            assert provenance["type"] == "table", filename
+            assert provenance["title"] == "Review Run Context", filename
+            assert provenance["gridPos"]["h"] == 5, filename
+            target = provenance["targets"][0]
+            assert target["withTransforms"] is False, filename
+            assert target["panelId"] == (9002 if panel_id == 99 else 9406)
+            assert provenance["fieldConfig"]["defaults"]["custom"]["inspect"] is True
+            assert "selection_context" in json.dumps(provenance["transformations"])
+            assert any(
+                transform["id"] == "limit" and transform["options"]["limitField"] == 1
+                for transform in provenance["transformations"]
+            ), filename
+            for token in ("SELECTED RUN", "AUTO", "EXPLICIT", "UNKNOWN", "TIME RANGE"):
+                assert token in provenance["description"], filename
+            continue
+
         compact_banner = "font-size:16px" in content and (
             "padding:4px 10px" in content or "padding:0 6px" in content
         )
@@ -173,19 +191,21 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     assert '"pipeline_label": "VALID EMPTY"' in selector
     assert ": items.($merge([$, {" in selector
     handoffs = {
-        "Overview": "bioetl-overview-v2",
-        "Saved Evidence": "bioetl-control-plane-v1",
-        "Data Quality": "bioetl-dq-v2",
-        "Replay Readiness": "bioetl-control-plane-v1",
+        "Overview": ("Overview", "bioetl-overview-v2"),
+        "Saved Evidence": ("Saved Evidence", "bioetl-control-plane-v1"),
+        "Data Quality": ("Data Quality", "bioetl-dq-v2"),
+        "Replay Readiness": ("Replay Readiness", "bioetl-control-plane-v1"),
     }
     overrides = {
-        override["matcher"]["options"]: override["properties"]
+        override["matcher"]["options"]: {
+            prop["id"]: prop["value"] for prop in override["properties"]
+        }
         for override in browse["fieldConfig"]["overrides"]
     }
-    for column, dashboard_uid in handoffs.items():
-        (link,) = next(
-            prop["value"] for prop in overrides[column] if prop["id"] == "links"
-        )
+    menu_by_title = {link["title"]: link for link in overrides["Run ID"]["links"]}
+    for column, (title, dashboard_uid) in handoffs.items():
+        column_links = overrides[column].get("links") or []
+        link = column_links[0] if column_links else menu_by_title[title]
         assert link["url"].startswith(f"/d/{dashboard_uid}/")
         assert "var-run_id=${__data.fields.run_id:percentencode}" in link["url"]
     assert '"run_label": $substring(run_id,0,8)' in selector

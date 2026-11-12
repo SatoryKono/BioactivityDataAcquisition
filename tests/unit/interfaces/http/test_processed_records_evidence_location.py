@@ -261,3 +261,82 @@ async def test_foreign_ledger_identity_is_rejected(route):
     route[1]["entries"] = (_entry(RunID(UUID(int=2))),)
     status, payload = await _call(route)
     assert status == 409 and payload["reason"] == "ledger_identity_conflict"
+
+
+def test_validation_rejects_a_foreign_pipeline_before_resolving(route):
+    from bioetl.application.observability.control_plane_evidence import (
+        ControlPlaneEvidenceService,
+    )
+    from bioetl.interfaces.http._health_server_control_plane_evidence_routing import (
+        _bind_selected_validation,
+    )
+    from bioetl.interfaces.http._health_server_control_plane_scope import _IdentityScope
+
+    host, seen = route
+    scope = _IdentityScope(
+        "uniprot_protein",
+        ("uniprot_protein",),
+        (),
+        str(RUN),
+        seen["manifest"],
+        "selected_run_id",
+    )
+    with pytest.raises(ValueError, match="identity does not match"):
+        _bind_selected_validation(host, scope, ControlPlaneEvidenceService())
+    assert "resolve_args" not in seen
+
+
+def test_validation_accepts_equivalent_uppercase_uuid(route):
+    from bioetl.application.observability.control_plane_evidence import (
+        ControlPlaneEvidenceService,
+    )
+    from bioetl.interfaces.http._health_server_control_plane_evidence_routing import (
+        _bind_selected_validation,
+    )
+    from bioetl.interfaces.http._health_server_control_plane_scope import _IdentityScope
+
+    host, seen = route
+    service = ControlPlaneEvidenceService()
+    seen["context"] = SimpleNamespace(
+        get_manifest_by_run_id=lambda _: seen["manifest"],
+        get_validation_service=lambda: service,
+    )
+    scope = _IdentityScope(
+        "chembl_activity",
+        ("chembl_activity",),
+        ("backfill",),
+        str(RUN).upper(),
+        seen["manifest"],
+        "selected_run_id",
+    )
+    resolved, bound = _bind_selected_validation(
+        host, scope, ControlPlaneEvidenceService()
+    )
+    assert resolved.resolved_manifest is seen["manifest"]
+    assert bound is service
+
+
+def test_selected_validation_ledger_refuses_outside_file(tmp_path, monkeypatch):
+    from bioetl.composition.control_plane_paths import (
+        FileEvidenceReadContextFactory,
+        _SelectedRootLedgerPort,
+    )
+    from bioetl.domain.control_plane.run_evidence_location import (
+        EvidenceLocationInvalidError,
+    )
+
+    root = tmp_path / "selected"
+    context = FileEvidenceReadContextFactory().open(root, trusted_alias_base=tmp_path)
+    foreign = tmp_path / "foreign.jsonl"
+    foreign.write_text("must not be read", encoding="utf-8")
+    original = Path.read_text
+    reads = []
+
+    def read_text(path, *args, **kwargs):
+        reads.append(path)
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", read_text)
+    with pytest.raises(EvidenceLocationInvalidError):
+        _SelectedRootLedgerPort(context).list_entries("../../../../foreign")
+    assert foreign not in reads

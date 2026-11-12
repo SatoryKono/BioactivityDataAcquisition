@@ -375,3 +375,34 @@ def test_unrelated_storage_error_still_raises(
             live_base=live,
             source_base=source,
         )
+
+
+def test_windows_catalog_lock_retries_only_deadlock_and_releases_one_byte(monkeypatch):
+    import errno
+    import sys
+    from types import SimpleNamespace
+    from unittest.mock import Mock
+    from bioetl.infrastructure.control_plane import live_run_manifest_catalog as catalog
+
+    fake = SimpleNamespace(LK_LOCK=1, LK_UNLCK=0, locking=Mock())
+    monkeypatch.setitem(sys.modules, "msvcrt", fake)
+    monkeypatch.setattr(catalog, "sys", SimpleNamespace(platform="win32"))
+    fake_os = SimpleNamespace(
+        fstat=lambda fd: SimpleNamespace(st_size=0),
+        write=Mock(),
+        lseek=Mock(),
+        SEEK_SET=0,
+    )
+    monkeypatch.setattr(catalog, "os", fake_os)
+    fake.locking.side_effect = [OSError(errno.EDEADLK, "contended"), None, None]
+    catalog._acquire_exclusive_lock(123)
+    catalog._release_exclusive_lock(123)
+    assert fake.locking.call_args_list[-1].args == (123, 0, 1)
+    assert fake.locking.call_count == 3
+    fake_os.write.assert_any_call(123, b"\0")
+    fake.locking.side_effect = OSError(errno.EACCES, "denied")
+    with pytest.raises(OSError, match="denied"):
+        catalog._acquire_windows_lock(123, 1)
+    monkeypatch.setattr(catalog, "sys", SimpleNamespace(platform="linux"))
+    with pytest.raises(RuntimeError, match="require Windows"):
+        catalog._lock_byte(123, 1)

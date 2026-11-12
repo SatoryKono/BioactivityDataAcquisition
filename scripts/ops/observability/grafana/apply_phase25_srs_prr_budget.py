@@ -36,7 +36,7 @@ DASH_DS = {"type": "datasource", "uid": "-- Dashboard --"}
 MIXED_DS = {"type": "datasource", "uid": "-- Mixed --"}
 SRS_URL = (
     "/ops/observability/selected-run-status"
-    "?pipeline=${pipeline}&run_id=${run_id}"
+    "?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
     "&run_type=${run_type:csv}&workflow=${workflow:csv}"
 )
 FRAME = "_bioetl_frame"
@@ -45,7 +45,7 @@ VIEW_PANEL_TRUST_SIBLING = "viewPanel=9414"
 _SELECT_RUN = "SELECT RUN"
 _NO_RUNS = "NO RUNS"
 _NO_RECORDS = "NO RECORDS"
-_REASON_DETAILS = "Reason details"
+_COL_REASON_DETAILS = "Reason details"
 _CUSTOM_HIDDEN = "custom.hidden"
 
 OV_IDENTITY = (
@@ -225,11 +225,33 @@ _OV_DOMAINS = (
 
 
 # Keep the full explanation for Inspect; the verdict card has a bounded preview.
+_RUN_REASON_PREVIEW = (
+    "function($reason){("
+    "$display := $reason = 'Workflow: workflow_parent_not_finalized' or "
+    "$reason = 'workflow_parent_not_finalized' ? "
+    "'Parent workflow completion has not been recorded' : "
+    "$reason = 'Provider: run_preflight_provider_observation' ? "
+    "'Provider: saved preflight observation' : $reason; "
+    "$type($display) = 'string' and $length($display) > 20 ? "
+    "$substring($display, 0, 19) & '…' : $display)}"
+)
+_DOMAIN_REASON_PREVIEW = (
+    "function($reason){("
+    "$display := $reason = 'run_preflight_provider_observation' ? "
+    "'Provider preflight check' : $reason; "
+    "$type($display) = 'string' and $length($display) > 32 ? "
+    "$substring($display, 0, 31) & '…' : $display)}"
+)
 _OV_DOMAINS = (
-    "$map(" + _OV_DOMAINS + ", function($row){$merge([$row, {"
-    "'run_reason_brief': $type($row.run_reason) = 'string' and "
-    "$length($row.run_reason) > 20 ? $substring($row.run_reason, 0, 19) & '…' "
-    ": $row.run_reason}])})"
+    "($preview := "
+    + _RUN_REASON_PREVIEW
+    + "; $domainPreview := "
+    + _DOMAIN_REASON_PREVIEW
+    + "; $map("
+    + _OV_DOMAINS
+    + ", function($row){$merge([$row, {"
+    "'domain_reason_brief': $domainPreview($row.reason_display), "
+    "'run_reason_brief': $preview($row.run_reason)}])}))"
 )
 
 _OV_IDENTITY = (
@@ -374,6 +396,8 @@ _DONOR_SCHEMA = (
             "detail",
             "reason",
             "reason_display",
+            "domain_reason_brief",
+            "run_reason_brief",
             "status_display",
             "run_execution",
             "run_verdict",
@@ -934,8 +958,76 @@ def _replace_with_handoff(
     )
 
 
+def _configure_overview_donor(data: dict[str, Any]) -> None:
+    """Keep complete donor evidence behind its bounded visible preview."""
+    donor = _by_id(data, 9002)
+    donor["datasource"] = dict(OPS)
+    donor["targets"] = [_infinity_uql(_OV_DONOR, parser="backend")]
+    donor["targets"][0].pop("uql", None)
+    # Keep presentation columns available pre-transform for 9603/9604; donor
+    # visual still filters to Domain/Status/Reason after the frame filter.
+    donor["transformations"] = [
+        _filter_frame("domains"),
+        {"id": "limit", "options": {"limitField": 6}},
+        {
+            "id": "filterFieldsByName",
+            "options": {
+                "include": {
+                    "names": [
+                        "domain",
+                        "status_display",
+                        "reason_display",
+                        "domain_reason_brief",
+                    ]
+                }
+            },
+        },
+        {
+            "id": "organize",
+            "options": {
+                "indexByName": {
+                    "domain": 0,
+                    "status_display": 1,
+                    "reason_display": 2,
+                },
+                "renameByName": {
+                    "domain": "Domain",
+                    "status_display": "Status",
+                    "reason_display": _COL_REASON_DETAILS,
+                    "domain_reason_brief": "Reason",
+                },
+            },
+        },
+    ]
+
+    for transform in donor["transformations"]:
+        if transform["id"] == "organize":
+            transform["options"]["indexByName"].update(
+                domain_reason_brief=2, reason_display=3
+            )
+    overrides = donor["fieldConfig"]["overrides"]
+    overrides[:] = [
+        o for o in overrides if o["matcher"].get("options") != _COL_REASON_DETAILS
+    ]
+    overrides.append(
+        {
+            "matcher": {"id": "byName", "options": _COL_REASON_DETAILS},
+            "properties": [
+                {"id": _CUSTOM_HIDDEN, "value": True},
+                {"id": "custom.inspect", "value": True},
+            ],
+        }
+    )
+    note = (
+        " Reason is a shortened preview; Inspect Data retains complete Reason details."
+    )
+    if note not in donor["description"]:
+        donor["description"] += note
+
+
 def _configure_overview_summary(summary: dict[str, Any]) -> None:
-    """Keep the bounded reason preview and complete inspectable explanation."""
+    """Project canonical execution and retain full reasons for Inspect Data."""
+    # Use the canonical execution column shared with the context block.
     _ensure_field_projection(
         summary,
         (
@@ -953,17 +1045,19 @@ def _configure_overview_summary(summary: dict[str, Any]) -> None:
                 if "run_execution" in values:
                     values["execution_state"] = values.pop("run_execution")
 
+    for transform in summary["transformations"]:
+        if transform["id"] == "organize":
             transform["options"]["indexByName"].update(run_reason_brief=3, run_reason=4)
             transform["options"]["renameByName"].update(
-                run_reason_brief="Reason", run_reason=_REASON_DETAILS
+                run_reason_brief="Reason", run_reason=_COL_REASON_DETAILS
             )
     overrides = summary["fieldConfig"]["overrides"]
     overrides[:] = [
-        o for o in overrides if o["matcher"].get("options") != _REASON_DETAILS
+        o for o in overrides if o["matcher"].get("options") != _COL_REASON_DETAILS
     ]
     overrides.append(
         {
-            "matcher": {"id": "byName", "options": _REASON_DETAILS},
+            "matcher": {"id": "byName", "options": _COL_REASON_DETAILS},
             "properties": [
                 {"id": _CUSTOM_HIDDEN, "value": True},
                 {"id": "custom.inspect", "value": True},
@@ -978,37 +1072,7 @@ def _configure_overview_summary(summary: dict[str, Any]) -> None:
 
 
 def apply_overview(data: dict[str, Any]) -> None:
-    donor = _by_id(data, 9002)
-    donor["datasource"] = dict(OPS)
-    donor["targets"] = [_infinity_uql(_OV_DONOR, parser="backend")]
-    donor["targets"][0].pop("uql", None)
-    # Keep presentation columns available pre-transform for 9603/9604; donor
-    # visual still filters to Domain/Status/Reason after the frame filter.
-    donor["transformations"] = [
-        _filter_frame("domains"),
-        {"id": "limit", "options": {"limitField": 6}},
-        {
-            "id": "filterFieldsByName",
-            "options": {
-                "include": {"names": ["domain", "status_display", "reason_display"]}
-            },
-        },
-        {
-            "id": "organize",
-            "options": {
-                "indexByName": {
-                    "domain": 0,
-                    "status_display": 1,
-                    "reason_display": 2,
-                },
-                "renameByName": {
-                    "domain": "Domain",
-                    "status_display": "Status",
-                    "reason_display": "Reason",
-                },
-            },
-        },
-    ]
+    _configure_overview_donor(data)
 
     for pid, frame in (
         (9603, "domains"),

@@ -477,19 +477,19 @@
               "options": {
                 "0": {
                   "text": "OK",
-                  "color": "green"
+                  "color": "#14532d"
                 },
                 "1": {
                   "text": "UNKNOWN",
-                  "color": "#555555"
+                  "color": "#475569"
                 },
                 "2": {
                   "text": "WARN",
-                  "color": "orange"
+                  "color": "#9a3412"
                 },
                 "3": {
                   "text": "CRIT",
-                  "color": "red"
+                  "color": "#9f1239"
                 }
               }
             },
@@ -499,7 +499,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "#555555"
+                  "color": "text"
                 }
               }
             }
@@ -508,19 +508,19 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "#555555",
+                "color": "#475569",
                 "value": null
               },
               {
-                "color": "#555555",
+                "color": "#475569",
                 "value": 1
               },
               {
-                "color": "orange",
+                "color": "#9a3412",
                 "value": 2
               },
               {
-                "color": "red",
+                "color": "#9f1239",
                 "value": 3
               }
             ]
@@ -764,7 +764,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "gray",
+                "color": "text",
                 "value": null
               },
               {
@@ -1366,7 +1366,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "gray",
+                "color": "text",
                 "value": null
               },
               {
@@ -1874,7 +1874,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "gray",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -1941,7 +1941,7 @@
                       "mode": "absolute",
                       "steps": [
                         {
-                          "color": "gray",
+                          "color": "text",
                           "value": null
                         },
                         {
@@ -2115,7 +2115,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "gray",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -2182,7 +2182,7 @@
                       "mode": "absolute",
                       "steps": [
                         {
-                          "color": "gray",
+                          "color": "text",
                           "value": null
                         },
                         {
@@ -2319,7 +2319,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "gray",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -2413,7 +2413,7 @@
                       "mode": "absolute",
                       "steps": [
                         {
-                          "color": "gray",
+                          "color": "text",
                           "value": null
                         },
                         {
@@ -2785,7 +2785,7 @@
                           },
                           "NO RUNS": {
                             "text": "NO RUNS",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       }
@@ -2819,7 +2819,7 @@
                           },
                           "NO RUNS": {
                             "text": "NO RUNS",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       }
@@ -2913,7 +2913,7 @@
                           },
                           "NO RUNS": {
                             "text": "NO RUNS",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       }
@@ -2937,13 +2937,13 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append(($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'NO RUNS']; [$merge([presentation_summary[0], {'saved_trust': presentation_trust[0].trust_status, 'reason_display': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : ((presentation_summary[0].verdict = 'OK' or presentation_summary[0].verdict = 'SELECT RUN' or presentation_summary[0].verdict = 'NO RUNS') ? (presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason) : presentation_summary[0].reason), '_bioetl_frame': 'status'}])]), $map(presentation_domains, function($row){$merge([$row, {'_bioetl_frame': 'domains'}])})), ($s := summary[0]; $a := $s.started_at; $b := $s.completed_at; $secs := function($t){( $tail := $substring($t, 19); $rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; $zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : ($contains($rest, '+') ? '+' : '-')); $digits := $rest != '' ? $substringBefore($rest, $zone) : ''; $frac := $digits != '' ? $number('0.' & $digits) : 0; $sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); $off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : $substringAfter($tail, '-')); $oh := $off != '' ? $number($substring($off, 0, 2)) : 0; $om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; $toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 + $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac - $sign * ($oh*3600 + $om*60) )}; $start := $a ? $secs($a) : null; $end := $b ? $secs($b) : null; [{'Run duration': $start != null and $end != null ? ($end >= $start ? $end - $start : null) : null, '_bioetl_frame': 'duration'}])), function($row){$merge([$schema, $row])}))",
+              "root_selector": "($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'domain_reason_brief': null, 'run_reason_brief': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append(($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'NO RUNS']; [$merge([presentation_summary[0], {'saved_trust': presentation_trust[0].trust_status, 'reason_display': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : ((presentation_summary[0].verdict = 'OK' or presentation_summary[0].verdict = 'SELECT RUN' or presentation_summary[0].verdict = 'NO RUNS') ? (presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason) : presentation_summary[0].reason), '_bioetl_frame': 'status'}])]), $map(presentation_domains, function($row){$merge([$row, {'_bioetl_frame': 'domains'}])})), ($s := summary[0]; $a := $s.started_at; $b := $s.completed_at; $secs := function($t){( $tail := $substring($t, 19); $rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; $zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : ($contains($rest, '+') ? '+' : '-')); $digits := $rest != '' ? $substringBefore($rest, $zone) : ''; $frac := $digits != '' ? $number('0.' & $digits) : 0; $sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); $off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : $substringAfter($tail, '-')); $oh := $off != '' ? $number($substring($off, 0, 2)) : 0; $om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; $toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 + $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac - $sign * ($oh*3600 + $om*60) )}; $start := $a ? $secs($a) : null; $end := $b ? $secs($b) : null; [{'Run duration': $start != null and $end != null ? ($end >= $start ? $end - $start : null) : null, '_bioetl_frame': 'duration'}])), function($row){$merge([$schema, $row])}))",
               "url": "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",
                 "data": ""
               },
-              "uql": "parse-json | jsonata \"($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append(($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'NO RUNS']; [$merge([presentation_summary[0], {'saved_trust': presentation_trust[0].trust_status, 'reason_display': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : ((presentation_summary[0].verdict = 'OK' or presentation_summary[0].verdict = 'SELECT RUN' or presentation_summary[0].verdict = 'NO RUNS') ? (presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason) : presentation_summary[0].reason), '_bioetl_frame': 'status'}])]), $map(presentation_domains, function($row){$merge([$row, {'_bioetl_frame': 'domains'}])})), ($s := summary[0]; $a := $s.started_at; $b := $s.completed_at; $secs := function($t){( $tail := $substring($t, 19); $rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; $zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : ($contains($rest, '+') ? '+' : '-')); $digits := $rest != '' ? $substringBefore($rest, $zone) : ''; $frac := $digits != '' ? $number('0.' & $digits) : 0; $sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); $off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : $substringAfter($tail, '-')); $oh := $off != '' ? $number($substring($off, 0, 2)) : 0; $om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; $toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 + $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac - $sign * ($oh*3600 + $om*60) )}; $start := $a ? $secs($a) : null; $end := $b ? $secs($b) : null; [{'Run duration': $start != null and $end != null ? ($end >= $start ? $end - $start : null) : null, '_bioetl_frame': 'duration'}])), function($row){$merge([$schema, $row])}))\"",
+              "uql": "parse-json | jsonata \"($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'domain_reason_brief': null, 'run_reason_brief': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append(($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'NO RUNS']; [$merge([presentation_summary[0], {'saved_trust': presentation_trust[0].trust_status, 'reason_display': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : ((presentation_summary[0].verdict = 'OK' or presentation_summary[0].verdict = 'SELECT RUN' or presentation_summary[0].verdict = 'NO RUNS') ? (presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason) : presentation_summary[0].reason), '_bioetl_frame': 'status'}])]), $map(presentation_domains, function($row){$merge([$row, {'_bioetl_frame': 'domains'}])})), ($s := summary[0]; $a := $s.started_at; $b := $s.completed_at; $secs := function($t){( $tail := $substring($t, 19); $rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; $zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : ($contains($rest, '+') ? '+' : '-')); $digits := $rest != '' ? $substringBefore($rest, $zone) : ''; $frac := $digits != '' ? $number('0.' & $digits) : 0; $sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); $off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : $substringAfter($tail, '-')); $oh := $off != '' ? $number($substring($off, 0, 2)) : 0; $om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; $toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 + $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac - $sign * ($oh*3600 + $om*60) )}; $start := $a ? $secs($a) : null; $end := $b ? $secs($b) : null; [{'Run duration': $start != null and $end != null ? ($end >= $start ? $end - $start : null) : null, '_bioetl_frame': 'duration'}])), function($row){$merge([$schema, $row])}))\"",
               "datasource": {
                 "type": "yesoreyeram-infinity-datasource",
                 "uid": "bioetl-ops-http"
@@ -3066,7 +3066,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -3337,7 +3337,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -3460,7 +3460,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -3632,7 +3632,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "#555555"
+                      "color": "text"
                     }
                   }
                 }
@@ -3642,11 +3642,11 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": 1
                   },
                   {
@@ -3751,7 +3751,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3760,7 +3760,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "gray",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -3909,7 +3909,7 @@
                           "match": "null",
                           "result": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       },
@@ -3919,7 +3919,7 @@
                           "match": "nan",
                           "result": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       }
@@ -4750,7 +4750,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "UNKNOWN"
+              "noValue": "UNKNOWN — terminal histogram samples unavailable"
             },
             "overrides": []
           },
@@ -4842,7 +4842,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -4925,7 +4925,7 @@
                   "options": {
                     "0": {
                       "text": "0 blockers",
-                      "color": "gray"
+                      "color": "text"
                     },
                     "1": {
                       "text": "CRIT",
@@ -5025,7 +5025,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -5035,7 +5035,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -5127,7 +5127,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -5211,7 +5211,7 @@
                   "options": {
                     "0": {
                       "text": "0 · valid empty range",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 },
@@ -5231,7 +5231,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "gray",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -5317,7 +5317,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -5401,7 +5401,7 @@
                   "options": {
                     "0": {
                       "text": "0 · valid empty range",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 },
@@ -5421,7 +5421,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "gray",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -5523,7 +5523,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -5646,7 +5646,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "gray",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -5816,7 +5816,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "gray",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -5986,7 +5986,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -6206,7 +6206,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -6460,7 +6460,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -6556,7 +6556,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -6646,7 +6646,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -6788,7 +6788,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -6979,7 +6979,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -7075,7 +7075,7 @@
                     "match": "null",
                     "result": {
                       "text": "NO OBSERVATIONS",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -7084,7 +7084,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -7175,7 +7175,7 @@
                     "match": "null",
                     "result": {
                       "text": "NO OBSERVATIONS",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -7275,7 +7275,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -7284,7 +7284,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -7376,7 +7376,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -7385,7 +7385,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -7485,7 +7485,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -7578,7 +7578,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -7682,7 +7682,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "gray",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -8186,7 +8186,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -8277,7 +8277,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -8286,7 +8286,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -8378,7 +8378,7 @@
                     "match": "null",
                     "result": {
                       "text": "NO OBSERVATIONS",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -8387,7 +8387,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -8488,7 +8488,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "gray",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -8648,7 +8648,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -8657,7 +8657,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -8932,7 +8932,7 @@
                     "match": "null",
                     "result": {
                       "text": "NO OBSERVATIONS",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -8941,7 +8941,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -9216,7 +9216,7 @@
                     "match": "null",
                     "result": {
                       "text": "NO OBSERVATIONS",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -9225,7 +9225,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -9316,7 +9316,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -9325,7 +9325,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -9568,7 +9568,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -10922,7 +10922,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -11224,7 +11224,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "gray",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -11854,7 +11854,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "gray",
+                    "color": "text",
                     "value": null
                   },
                   {

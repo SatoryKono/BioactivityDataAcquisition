@@ -1,4 +1,4 @@
-"""Canonical ten-column Run Explorer and dashboard display names."""
+"""Canonical Run Explorer fields, compact view, and dashboard display names."""
 
 from __future__ import annotations
 
@@ -178,6 +178,34 @@ def _rename_text(value: Any) -> Any:
     if isinstance(value, dict):
         return {key: _rename_text(item) for key, item in value.items()}
     return value
+
+
+def _compact_recent_run_columns(panel: dict, overrides: list[dict]) -> None:
+    """Keep detail fields in Inspect and their exact-row actions in Run ID."""
+    detail_fields = {
+        "Workflow",
+        "Provider",
+        "Duration",
+        "Saved Evidence",
+        _DATA_QUALITY,
+    }
+    run_id = next(o for o in overrides if o["matcher"]["options"] == _RUN_ID_LABEL)
+    actions = next(p["value"] for p in run_id["properties"] if p["id"] == "links")
+    for override in overrides:
+        if override["matcher"]["options"] not in detail_fields:
+            continue
+        properties = override["properties"]
+        properties.append({"id": "custom.hidden", "value": True})
+        links: list[dict[str, Any]] = next(
+            (p["value"] for p in properties if p["id"] == "links"), []
+        )
+        actions.extend(deepcopy(links))
+        links.clear()
+    panel["description"] += (
+        " Compact view: Pipeline, Run ID, Started, Overview and Replay Readiness. "
+        "Workflow, Provider, Duration, Saved Evidence and Data Quality remain in "
+        "the table data inspector. Their handoff actions are also in the Run ID menu."
+    )
 
 
 def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
@@ -442,6 +470,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
             ],
         }
     )
+    _compact_recent_run_columns(panel, overrides)
     panel["fieldConfig"]["overrides"] = overrides
     panel["options"]["sortBy"] = [{"displayName": "Started", "desc": True}]
     for item in panel.get("links") or []:

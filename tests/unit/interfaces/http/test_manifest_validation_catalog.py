@@ -179,3 +179,38 @@ async def test_corrupt_report_catalog_returns_evidence_payload(
     assert isinstance(rows, list)
     assert rows[0]["reason"] == "manifest_parse_error"
     assert rows[0]["check"] == "parse"
+
+
+@pytest.mark.asyncio
+async def test_report_only_run_keeps_manifest_missing_with_resolver(monkeypatch):
+    import bioetl.interfaces.http._health_server_control_plane_evidence_routing as routing
+    from bioetl.application.services.evidence_location.resolver import (
+        EvidenceLocationResolver,
+    )
+
+    async def resolved(*_args, **_kwargs):
+        return _scope(resolved_via="selected_run_id_not_found"), None
+
+    monkeypatch.setattr(routing, "resolve_evidence_scope", resolved)
+    monkeypatch.setattr(
+        routing,
+        "verified_report_identity_for_run",
+        lambda *_args, **_kwargs: {
+            "run_id": _RUN_ID,
+            "pipeline_name": "chembl_activity",
+        },
+    )
+    payload = await _service_payload(
+        SimpleNamespace(
+            _control_plane_evidence_service=ControlPlaneEvidenceService(),
+            _run_report_store=object(),
+            _evidence_location_resolver=EvidenceLocationResolver(
+                locations=None, aliases=None, opener=None
+            ),
+        ),
+        {},
+        endpoint="manifest-validation",
+    )
+    assert payload["resolved_via"] == "resolved_without_manifest"
+    assert payload["rows"][0]["reason"] == "manifest_not_recorded"
+    assert payload["rows"][0]["status"] == "UNKNOWN"

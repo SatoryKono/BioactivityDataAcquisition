@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from copy import deepcopy
 
+import pytest
+
 from scripts.ops.observability.grafana.generate_adaptive_dashboards import project
+
+pytestmark = pytest.mark.unit
 
 
 def test_projection_only_changes_renderer_and_keeps_native_fallback():

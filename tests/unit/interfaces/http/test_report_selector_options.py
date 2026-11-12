@@ -470,3 +470,65 @@ async def test_http_handler_merges_report_only_options(
         200,
         {"items": [{"text": "backfill", "value": "backfill"}]},
     )
+
+
+@pytest.mark.parametrize(
+    "raw,expected",
+    [("invalid-date", None), ("2026-01-02T03:04:05", "2026-01-02T03:04:05+00:00")],
+)
+def test_identity_timestamp_refuses_invalid_and_normalizes_naive_utc(raw, expected):
+    from types import SimpleNamespace
+    from bioetl.interfaces.http._report_selector_options import _identity_started_at
+
+    moment = _identity_started_at({"started_at": raw}, SimpleNamespace(started_at=None))
+    assert (moment.isoformat() if moment is not None else None) == expected
+
+
+def test_incomplete_selector_identity_does_not_invent_provider_or_entity():
+    from bioetl.interfaces.http._control_plane_selector_payloads import (
+        _provider_entity_from_pipeline,
+        UNKNOWN_SCOPE,
+    )
+
+    assert _provider_entity_from_pipeline("unqualified") == (
+        UNKNOWN_SCOPE,
+        UNKNOWN_SCOPE,
+    )
+
+
+def test_empty_catalog_finalize_keeps_unexpected_payload_unchanged():
+    from bioetl.interfaces.http.control_plane_selector_context import (
+        finalize_run_id_empty_catalog_label,
+    )
+
+    payload = {"items": None, "error": "unavailable"}
+    assert finalize_run_id_empty_catalog_label(payload) is payload
+
+
+def test_verified_report_catalog_filters_scope_invalid_identity_and_duplicate_runs(
+    tmp_path, monkeypatch
+):
+    from types import SimpleNamespace
+    from bioetl.interfaces.http import _report_selector_options as subject
+
+    entries = [
+        SimpleNamespace(started_at="2026-01-02T03:04:05Z", identity=identity)
+        for identity in (
+            {"run_id": "foreign", "in_scope": False},
+            {"run_id": ""},
+            {"run_id": "run-a"},
+            {"run_id": "run-a"},
+        )
+    ]
+    monkeypatch.setattr(subject, "_entry_matches_catalog", lambda entry, scopes: True)
+    monkeypatch.setattr(
+        subject, "_checked_identity", lambda entry, root: entry.identity
+    )
+    monkeypatch.setattr(
+        subject,
+        "_identity_matches_scopes",
+        lambda identity, scopes: identity.get("in_scope", True),
+    )
+    rows = subject._iter_verified_report_identities({}, root=tmp_path, entries=entries)
+    assert len(rows) == 1
+    assert rows[0][0] == "run-a"

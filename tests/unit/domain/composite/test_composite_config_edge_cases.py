@@ -55,6 +55,11 @@ from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 pytestmark = pytest.mark.unit
 
 
+def test_dq_constructor_rejects_invalid_record_policy() -> None:
+    with pytest.raises(ValueError, match="invalid_record_policy"):
+        CompositeDQConfig(invalid_record_policy="silently_accept")
+
+
 def _seed() -> SeedConfig:
     return SeedConfig(
         pipeline="chembl_publication",

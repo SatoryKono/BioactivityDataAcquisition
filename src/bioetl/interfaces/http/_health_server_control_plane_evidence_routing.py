@@ -419,6 +419,25 @@ def _same_run_id(left: object, right: object) -> bool:
         return str(left) == str(right)
 
 
+def _selected_validation_pipeline(
+    host: _EvidenceRoutingHost, scope: _IdentityScope
+) -> str:
+    """Resolve one owner while rejecting a conflicting concrete request."""
+    requested = scope.requested_pipeline
+    is_all_scope = getattr(host, "_is_all_scope_token", _is_all_scope)
+    concrete_requested = bool(requested) and not is_all_scope(requested)
+    if concrete_requested:
+        if (
+            scope.resolved_manifest is not None
+            and scope.resolved_manifest.pipeline_name != requested
+        ):
+            raise ValueError("Selected validation manifest identity does not match")
+        return requested
+    return (
+        scope.resolved_manifest.pipeline_name if scope.resolved_manifest else requested
+    )
+
+
 def _bind_selected_validation(
     host: _EvidenceRoutingHost,
     scope: _IdentityScope,
@@ -435,22 +454,7 @@ def _bind_selected_validation(
         or scope.selected_run_id is None
     ):
         return scope, service
-    requested = scope.requested_pipeline
-    is_all_scope = getattr(host, "_is_all_scope_token", _is_all_scope)
-    concrete_requested = bool(requested) and not is_all_scope(requested)
-    if concrete_requested:
-        if (
-            scope.resolved_manifest is not None
-            and scope.resolved_manifest.pipeline_name != requested
-        ):
-            raise ValueError("Selected validation manifest identity does not match")
-        pipeline = requested
-    else:
-        pipeline = (
-            scope.resolved_manifest.pipeline_name
-            if scope.resolved_manifest
-            else requested
-        )
+    pipeline = _selected_validation_pipeline(host, scope)
     resolved = resolver.resolve(
         kind="pipeline",
         owner=pipeline,

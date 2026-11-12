@@ -2828,6 +2828,11 @@ def apply_to_dashboard(
     )
 
     stamp_audit_presentation(payload)
+    from scripts.ops.observability.grafana._visual_usability import (
+        apply_accessible_status_colors,
+    )
+
+    apply_accessible_status_colors(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

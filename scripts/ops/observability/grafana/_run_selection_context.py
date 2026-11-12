@@ -51,11 +51,13 @@ def stamp_run_selection_context(payload: dict) -> None:
     if payload["uid"] == "bioetl-dq-v2":
         # Close the two-row gap left when accounting shrinks from eight to six.
         next(p for p in payload["panels"] if p["id"] == 9402)["gridPos"]["y"] = 18
-        # Shift disclosure and its nested evidence together to follow identity.
-        for other in payload["panels"]:
-            if other["gridPos"]["y"] >= 23:
-                other["gridPos"]["y"] -= 2
-                _shift_children(other, -2)
+        # Anchor disclosure below identity; repeated generation must not drift.
+        disclosure = next(p for p in payload["panels"] if p["id"] == 9450)
+        identity = next(p for p in payload["panels"] if p["id"] == 9402)
+        target_y = identity["gridPos"]["y"] + identity["gridPos"]["h"]
+        disclosure_delta = target_y - disclosure["gridPos"]["y"]
+        disclosure["gridPos"]["y"] = target_y
+        _shift_children(disclosure, disclosure_delta)
     grid["h"] = 5
     panel.clear()
     panel.update(
