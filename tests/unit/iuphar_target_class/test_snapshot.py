@@ -39,6 +39,8 @@ def test_snapshot_immutability() -> None:
     second = provider.get_target("1")
     assert first.payload_sha256 == second.payload_sha256
     assert first.records[0].payload == second.records[0].payload
+    assert provider.indexes.gene_keys == ("OPRM1|human",)
+    assert provider.find_by_gene("OPRM1", "human").records == first.records
     mutated = bytearray(first.records[0].payload)
     mutated[0] = 0
     assert provider.get_target("1").records[0].payload == first.records[0].payload
