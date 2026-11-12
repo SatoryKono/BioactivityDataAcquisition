@@ -1581,10 +1581,8 @@ def test_ghcr_publish_waits_outside_the_main_integrity_conclusion() -> None:
     assert "inputs.artifact-run-id != ''" in cross_run["if"]
 
 
-def test_trivy_sarif_matches_both_main_configurations_without_dropping_findings() -> (
-    None
-):
-    """Caller changes must not orphan either existing full-image analysis."""
+def test_trivy_sarif_matches_main_configurations_without_dropping_findings() -> None:
+    """Caller changes must not orphan any existing full-image analysis."""
     steps = _load_yaml(ROOT / ".github/workflows/docker.yml")["jobs"]["docker-build"][
         "steps"
     ]
@@ -1596,6 +1594,7 @@ def test_trivy_sarif_matches_both_main_configurations_without_dropping_findings(
     assert {step["with"].get("category") for step in uploads} == {
         ".github/workflows/docker.yml:docker-build",
         ".github/workflows/main-integrity.yml:docker-build",
+        ".github/workflows/pr-required.yml:docker-build",
     }
     conversion = next(
         step
