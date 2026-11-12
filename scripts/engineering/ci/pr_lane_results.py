@@ -185,6 +185,16 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
         "tests/architecture/test_runtime_orchestration_surfaces.py",
     ),
+    **dict.fromkeys(
+        (
+            "docs/00-project/ai/agents/guides/SKILL_EFFICIENCY_PROTOCOL.md",
+            "docs/reports/generated/skill-efficiency-source-comparison.json",
+        ),
+        (
+            "tests/unit/scripts/test_codex_efficiency_baseline.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
     "configs/quality/agent_guard_budget_surfaces.json": (
         "tests/unit/scripts/repo/test_budget_guard.py",
     ),
