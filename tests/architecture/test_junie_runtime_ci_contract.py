@@ -677,6 +677,7 @@ def test_formatted_single_heading_keeps_authoritative_section(tmp_path: Path) ->
     )
     assert check_obligations(tmp_path, OBLIGATIONS) == []
 
+
 def _manual_closeout_selection_script() -> str:
     step = next(
         item
@@ -687,7 +688,7 @@ def _manual_closeout_selection_script() -> str:
     script = step["run"]
     assert "inputs.closeout_task_id" not in script
     assert '--task-id "$task_id"' in script
-    return script[script.index("task_id="):script.index("run_dir=")]
+    return script[script.index("task_id=") : script.index("run_dir=")]
 
 
 def _run_manual_closeout_selection(value: str) -> subprocess.CompletedProcess[str]:
@@ -709,7 +710,8 @@ def _run_manual_closeout_selection(value: str) -> subprocess.CompletedProcess[st
 
 
 @pytest.mark.parametrize(
-    "value,expected", [("", "ai-runtime-12345"), ("mcp-memory-13047", "mcp-memory-13047")]
+    "value,expected",
+    [("", "ai-runtime-12345"), ("mcp-memory-13047", "mcp-memory-13047")],
 )
 def test_manual_closeout_task_identity_keeps_defaults_and_explicit_scope(
     value: str, expected: str
@@ -720,7 +722,8 @@ def test_manual_closeout_task_identity_keeps_defaults_and_explicit_scope(
 
 
 @pytest.mark.parametrize(
-    "value", ["$(echo injected)", "x; echo injected", "../scope", "two words", "x\ny", "a" * 97]
+    "value",
+    ["$(echo injected)", "x; echo injected", "../scope", "two words", "x\ny", "a" * 97],
 )
 def test_manual_closeout_task_identity_rejects_unsafe_input(value: str) -> None:
     result = _run_manual_closeout_selection(value)
