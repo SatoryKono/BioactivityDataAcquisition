@@ -226,14 +226,26 @@ _OV_DOMAINS = (
 
 
 # Keep the full explanation for Inspect; the verdict card has a bounded preview.
+_RUN_REASON_PREVIEW = (
+    "function($reason){("
+    "$display := $reason = 'Workflow: workflow_parent_not_finalized' or "
+    "$reason = 'workflow_parent_not_finalized' ? "
+    "'Parent workflow completion has not been recorded' : "
+    "$reason = 'Provider: run_preflight_provider_observation' ? "
+    "'Provider: saved preflight observation' : $reason; "
+    "$type($display) = 'string' and $length($display) > 20 ? "
+    "$substring($display, 0, 19) & '…' : $display)}"
+)
 _OV_DOMAINS = (
-    "$map(" + _OV_DOMAINS + ", function($row){$merge([$row, {"
+    "($preview := "
+    + _RUN_REASON_PREVIEW
+    + "; $map("
+    + _OV_DOMAINS
+    + ", function($row){$merge([$row, {"
     "'domain_reason_brief': $type($row.reason_display) = 'string' and "
     "$length($row.reason_display) > 32 ? $substring($row.reason_display, 0, 31) & '…' "
     ": $row.reason_display, "
-    "'run_reason_brief': $type($row.run_reason) = 'string' and "
-    "$length($row.run_reason) > 20 ? $substring($row.run_reason, 0, 19) & '…' "
-    ": $row.run_reason}])})"
+    "'run_reason_brief': $preview($row.run_reason)}])}))"
 )
 
 _OV_IDENTITY = (

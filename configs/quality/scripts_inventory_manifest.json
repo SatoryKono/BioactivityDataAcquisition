@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T02:33:40.690965+00:00",
+  "generated_at": "2026-11-12T02:45:20.544077+00:00",
   "summary": {
     "total_scripts": 739,
     "status_counts": {
@@ -24689,7 +24689,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/apply_phase25_srs_prr_budget.py",
-          "line": 1660,
+          "line": 1672,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
