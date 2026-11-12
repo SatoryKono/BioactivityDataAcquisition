@@ -1563,7 +1563,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/05-operations/01-monitoring-guide.md",
       "occurrence_count": 1,
-      "first_line": 278,
+      "first_line": 286,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""

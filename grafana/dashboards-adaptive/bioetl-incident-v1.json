@@ -3568,7 +3568,7 @@
       },
       "title": "Observability Signals",
       "collapsed": true,
-      "description": "Visibility evidence, separate from product incidents. Expand for the state legend, coverage and telemetry limits. Missing evidence is never a measured zero."
+      "description": "Visibility evidence, separate from product incidents. Expand for the state legend, coverage and telemetry limits. Missing evidence is never a measured zero. Collapsed header states: OK, WARN, CRIT/FIRING, UNKNOWN, NO OBSERVATIONS, TELEMETRY MISSING, Not verified. A blank cell is not a measured zero."
     },
     {
       "id": 8808,

@@ -16,18 +16,22 @@ export class AdaptiveBuildProvenance {
   apply(compiler: Compiler) {
     const pluginRoot = process.cwd();
     const repoRoot = path.resolve(pluginRoot, '../../..');
-    const inputPaths = [
+    const inputPaths = () => [
       ...files(path.join(pluginRoot, 'src')),
       ...files(path.join(pluginRoot, '.config')),
-      ...['package.json', 'package-lock.json', 'webpack.config.ts', 'webpack.adaptive.config.ts', 'adaptive-build-provenance.ts'].map((name) => path.join(pluginRoot, name)),
+      ...['package.json', 'package-lock.json', 'tsconfig.json', 'eslint.config.mjs', 'webpack.config.ts', 'webpack.adaptive.config.ts', 'adaptive-build-provenance.ts', 'README.md', 'LICENSE', 'CHANGELOG.md'].map((name) => path.join(pluginRoot, name)),
       path.join(pluginRoot, '../../tooling/router-v7-bridge/webpack-public-path.cjs'),
+      path.join(pluginRoot, '../../tooling/router-v7-bridge/host-image.json'),
     ];
-    const snapshot = () => Object.fromEntries(inputPaths.map((name) => [
+    const snapshot = () => Object.fromEntries(inputPaths().map((name) => [
       path.relative(repoRoot, name).replaceAll('\\', '/'),
       hash(readFileSync(name, 'utf8').replaceAll('\r\n', '\n')),
     ]));
     const before = snapshot();
-    compiler.hooks.done.tap('BioetlAdaptiveBuildProvenance', () => {
+    compiler.hooks.done.tap('BioetlAdaptiveBuildProvenance', (stats) => {
+      if (stats.hasErrors()) {
+        throw new Error('Adaptive plugin compilation failed; no provenance receipt written');
+      }
       if (JSON.stringify(before) !== JSON.stringify(snapshot())) {
         throw new Error('Adaptive plugin inputs changed during compilation');
       }

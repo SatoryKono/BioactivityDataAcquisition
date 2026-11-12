@@ -1,10 +1,10 @@
-import path from 'path';
+import path from 'node:path';
 import ReplaceInFileWebpackPlugin from 'replace-in-file-webpack-plugin';
 import baseConfig from './webpack.config';
 import type { Env } from './.config/webpack/webpack.config';
 import { AdaptiveBuildProvenance } from './adaptive-build-provenance';
 
-export default async (env: Env) => {
+export default async function adaptiveWebpackConfig(env: Env) {
   const config = await baseConfig(env);
   return {
     ...config,
@@ -26,4 +26,4 @@ export default async (env: Env) => {
       }])
       : plugin) ?? []), new AdaptiveBuildProvenance()],
   };
-};
+}

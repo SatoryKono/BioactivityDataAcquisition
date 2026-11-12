@@ -68,20 +68,37 @@ function subscribeViewport(listener: () => void) {
   return () => window.removeEventListener('resize', listener);
 }
 
+function rawValueText(raw: unknown): string {
+  if (typeof raw === 'object') {
+    try { return JSON.stringify(raw) ?? 'UNKNOWN'; }
+    catch { return 'UNKNOWN'; }
+  }
+  if (typeof raw === 'string') { return raw; }
+  if (typeof raw === 'number' || typeof raw === 'bigint' || typeof raw === 'boolean' || typeof raw === 'symbol') {
+    return raw.toString();
+  }
+  return raw === undefined ? 'undefined' : 'UNKNOWN';
+}
+
+function previewText(name: string, full: string, preview: boolean): string {
+  if (preview && name === 'Context') { return full.split(' · ')[0]; }
+  if (preview && name === 'Value' && full.length > 44) { return `${full.slice(0, 16)}…${full.slice(-12)}`; }
+  return full;
+}
+
 function valueText(field: Field, row: number): string {
   const raw: unknown = field.values[row];
   if (raw == null) {
     return field.config.noValue ?? 'UNKNOWN';
   }
   const display = field.display?.(raw);
-  return display ? `${display.prefix ?? ''}${display.text}${display.suffix ?? ''}` : String(raw);
+  return display ? `${display.prefix ?? ''}${display.text}${display.suffix ?? ''}` : rawValueText(raw);
 }
 
-function Value({ field, row, preview = false, allLinks = false }: { field: Field; row: number; preview?: boolean; allLinks?: boolean }) {
+function Value({ field, row, preview = false, allLinks = false }: Readonly<{ field: Field; row: number; preview?: boolean; allLinks?: boolean }>) {
   const full = valueText(field, row);
   // The full value remains in the explicit details view. Do not CSS-clip data.
-  const text = preview && label(field) === 'Context' ? full.split(' · ')[0]
-    : preview && label(field) === 'Value' && full.length > 44 ? `${full.slice(0, 16)}…${full.slice(-12)}` : full;
+  const text = previewText(label(field), full, preview);
   const colored = ['color-text', 'color-background'].includes(field.config.custom?.cellOptions?.type);
   const color = colored ? field.display?.(field.values[row])?.color : undefined;
   const links = field.getLinks?.({ valueRowIndex: row })?.filter((item) => item.href && !item.href.includes('${')) ?? [];
@@ -93,6 +110,81 @@ function Value({ field, row, preview = false, allLinks = false }: { field: Field
       {' · '}<a href={item.href} target={item.target} rel="noopener noreferrer">{item.title}</a>
     </React.Fragment>) : null}
   </>;
+}
+
+function orderedRows(frame: DataFrame | undefined, sortBy: AdaptiveTableOptions['sortBy']): number[] {
+  const indices = Array.from({ length: frame?.length ?? 0 }, (_, index) => index);
+  const sort = sortBy?.[0];
+  const field = frame?.fields.find((item) => label(item) === sort?.displayName);
+  if (field && sort) {
+    indices.sort((left, right) => {
+      const a: unknown = field.values[left];
+      const b: unknown = field.values[right];
+      const cmp = typeof a === 'number' && typeof b === 'number' ? a - b : rawValueText(a).localeCompare(rawValueText(b));
+      return sort.desc ? -cmp : cmp;
+    });
+  }
+  return indices;
+}
+
+type CompactRowsProps = Readonly<{
+  fields: Field[]; row: number; isRuns: boolean; isPaged: boolean; title: string;
+  currentPage: number; rowCount: number;
+  onPageChange: (page: number) => void; onDetails: (row: number) => void;
+}>;
+
+function CompactRows({fields, row, isRuns, isPaged, title, currentPage, rowCount, onPageChange, onDetails}: CompactRowsProps) {
+  return (
+        <>
+          <table aria-label={isRuns ? 'Selected catalog row' : title}>
+            <tbody>{fields.map((field, index) => (
+              <tr key={field.name}>
+                <th scope="row">{label(field)}{!isPaged && index === 0 ? (
+                  <button className={more} aria-label="Open full details" title="Full details" onClick={() => onDetails(row)}>⋯</button>
+                ) : null}</th>
+                <td><Value field={field} row={row} preview={!isRuns} /></td>
+              </tr>
+            ))}</tbody>
+          </table>
+          {isPaged ? (
+            <nav className={pager} aria-label={isRuns ? 'Catalog pagination' : 'Evidence pagination'}>
+              <Button size="sm" variant="secondary" aria-label={isRuns ? 'Previous run' : 'Previous row'} disabled={currentPage === 0} onClick={() => onPageChange(currentPage - 1)}>Previous</Button>
+              <span aria-live="polite">{currentPage + 1} / {rowCount}</span>
+              <Button size="sm" variant="secondary" onClick={() => onDetails(row)}>Details</Button>
+              <Button size="sm" variant="secondary" aria-label={isRuns ? 'Next run' : 'Next row'} disabled={currentPage === rowCount - 1} onClick={() => onPageChange(currentPage + 1)}>Next</Button>
+            </nav>
+          ) : null}
+        </>
+  );
+}
+
+function queryStatus(data: PanelProps<AdaptiveTableOptions>['data']): React.ReactNode {
+  if (data.state === 'Error' || (data.errors?.length ?? 0) > 0) {
+    return <div className={shell} role="alert">Source unavailable · {data.errors?.[0]?.message ?? 'Query failed'}</div>;
+  }
+  if (data.state === 'Loading' || data.state === 'NotStarted') {
+    return <output className={shell} style={{ display: 'block' }}>Loading…</output>;
+  }
+  return null;
+}
+
+function RunDetails({fields, row, isRuns, onDismiss}: Readonly<{
+  fields: Field[]; row: number | null; isRuns: boolean; onDismiss: () => void;
+}>) {
+  if (row === null) { return null; }
+  return (
+    <Modal title={isRuns ? 'Run details' : 'Full context'} isOpen onDismiss={onDismiss}>
+      <div className={details}>
+        <dl>{fields.map((field) => (
+          <React.Fragment key={field.name}>
+            <dt>{detailNames[field.name] ?? label(field)}</dt>
+            <dd><Value field={field} row={row} allLinks /></dd>
+          </React.Fragment>
+        ))}</dl>
+      </div>
+      <Modal.ButtonRow><Button onClick={onDismiss}>Close</Button></Modal.ButtonRow>
+    </Modal>
+  );
 }
 
 const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) => {
@@ -123,36 +215,18 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
     })),
   } : undefined, [frame, fields]);
 
-  const rowOrder = useMemo(() => {
-    const indices = Array.from({ length: frame?.length ?? 0 }, (_, index) => index);
-    const sort = options.sortBy?.[0];
-    const field = frame?.fields.find((item) => label(item) === sort?.displayName);
-    if (field && sort) {
-      indices.sort((left, right) => {
-        const a: unknown = field.values[left];
-        const b: unknown = field.values[right];
-        const cmp = typeof a === 'number' && typeof b === 'number' ? a - b : String(a).localeCompare(String(b));
-        return sort.desc ? -cmp : cmp;
-      });
-    }
-    return indices;
-  }, [frame, options.sortBy]);
+  const rowOrder = useMemo(() => orderedRows(frame, options.sortBy), [frame, options.sortBy]);
   const currentPage = Math.min(page, Math.max(0, rowOrder.length - 1));
   const row = rowOrder[currentPage] ?? 0;
   const isRuns = options.viewMode === 'runs';
-  // A docked Grafana menu can constrain the panel on a desktop viewport too.
-  // Ten readable columns need more room than the compact four-field summary.
+  // The docked menu can constrain a desktop panel below the readable ten-column width.
   const isCompact = viewport < 1024 || (isRuns && (bounds?.width ?? width) < 1280);
   const isPaged = isRuns || options.viewMode === 'rows';
 
   // Supported Grafana versions expose query details through errors. A failed
   // request remains unavailable even when no details accompany its state.
-  if (data.state === 'Error' || (data.errors?.length ?? 0) > 0) {
-    return <div className={shell} role="alert">Source unavailable · {data.errors?.[0]?.message ?? 'Query failed'}</div>;
-  }
-  if (data.state === 'Loading' || data.state === 'NotStarted') {
-    return <div className={shell} role="status">Loading…</div>;
-  }
+  const status = queryStatus(data);
+  if (status !== null) { return status; }
   if (!frame || fields.length === 0) {
     return <div className={shell}>UNKNOWN · No matching data</div>;
   }
@@ -170,43 +244,14 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
   const detailFields = frame.fields.filter((field) =>
     fields.includes(field) || ['run_id', 'pipeline', 'run_type', 'workflow_scope'].includes(field.name)
   );
-  const detail = detailRow == null ? null : (
-    <Modal title={isRuns ? 'Run details' : 'Full context'} isOpen onDismiss={() => setDetailRow(null)}>
-      <div className={details}>
-        <dl>{detailFields.map((field) => (
-          <React.Fragment key={field.name}>
-            <dt>{detailNames[field.name] ?? label(field)}</dt>
-            <dd><Value field={field} row={detailRow} allLinks /></dd>
-          </React.Fragment>
-        ))}</dl>
-      </div>
-      <Modal.ButtonRow><Button onClick={() => setDetailRow(null)}>Close</Button></Modal.ButtonRow>
-    </Modal>
-  );
+
 
   return (
     <div ref={setHost} className={isCompact ? `${shell} ${compact}` : nativeShell} data-bioetl-adaptive-table={isCompact ? 'compact' : 'wide'}>
       {isCompact ? (
-        <>
-          <table aria-label={isRuns ? 'Selected catalog row' : props.title}>
-            <tbody>{summaryFields.map((field, index) => (
-              <tr key={field.name}>
-                <th scope="row">{label(field)}{!isPaged && index === 0 ? (
-                  <button className={more} aria-label="Open full details" title="Full details" onClick={() => setDetailRow(row)}>⋯</button>
-                ) : null}</th>
-                <td><Value field={field} row={row} preview={!isRuns} /></td>
-              </tr>
-            ))}</tbody>
-          </table>
-          {isPaged ? (
-            <nav className={pager} aria-label={isRuns ? 'Catalog pagination' : 'Evidence pagination'}>
-              <Button size="sm" variant="secondary" aria-label={isRuns ? 'Previous run' : 'Previous row'} disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>Previous</Button>
-              <span aria-live="polite">{currentPage + 1} / {rowOrder.length}</span>
-              <Button size="sm" variant="secondary" onClick={() => setDetailRow(row)}>Details</Button>
-              <Button size="sm" variant="secondary" aria-label={isRuns ? 'Next run' : 'Next row'} disabled={currentPage === rowOrder.length - 1} onClick={() => setPage(currentPage + 1)}>Next</Button>
-            </nav>
-          ) : null}
-        </>
+        <CompactRows fields={summaryFields} row={row} isRuns={isRuns} isPaged={isPaged}
+          title={props.title} currentPage={currentPage} rowCount={rowOrder.length}
+          onPageChange={setPage} onDetails={setDetailRow} />
       ) : (
         <Table
           data={displayFrame as DataFrame}
@@ -225,7 +270,7 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
           timeRange={timeRange}
         />
       )}
-      {detail}
+      <RunDetails fields={detailFields} row={detailRow} isRuns={isRuns} onDismiss={() => setDetailRow(null)} />
     </div>
   );
 };
