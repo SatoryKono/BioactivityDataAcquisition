@@ -112,10 +112,10 @@ def test_historical_totals_require_measured_integer_counters(snapshot, expected)
 
 
 def test_optional_workflow_observations_are_copied_without_inventing_values():
-    from bioetl.domain.run_reports.workflow_totals import _copy_workflow_observations
+    from bioetl.domain.run_reports.workflow_totals import optional_mapping_copy
 
-    assert _copy_workflow_observations(None) is None
+    assert optional_mapping_copy(None) is None
     source = {"measured": 0, "not_measured": None}
-    copied = _copy_workflow_observations(source)
+    copied = optional_mapping_copy(source)
     assert copied == source
     assert copied is not source
