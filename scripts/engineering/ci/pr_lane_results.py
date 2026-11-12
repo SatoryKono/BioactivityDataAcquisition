@@ -181,6 +181,9 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
 
 NO_PARTIAL_TREE_TEST = "tests/unit/scripts/repo/test_check_no_partial_tree.py"
 IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
+DASHBOARD_UX_REPORT_FRESHNESS_TEST = (
+    "tests/integration/test_dashboard_ux_report_freshness.py"
+)
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
@@ -758,15 +761,15 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/audit/hygiene-passport.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "docs/reports/dashboard-ux-checks/2026-11-07.md": (
-        "tests/integration/test_dashboard_ux_report_freshness.py",
+        DASHBOARD_UX_REPORT_FRESHNESS_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "docs/reports/dashboard-ux-checks/2026-11-09.md": (
-        "tests/integration/test_dashboard_ux_report_freshness.py",
+        DASHBOARD_UX_REPORT_FRESHNESS_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "docs/reports/dashboard-ux-checks/2026-11-11.md": (
-        "tests/integration/test_dashboard_ux_report_freshness.py",
+        DASHBOARD_UX_REPORT_FRESHNESS_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "docs/reports/audit/N1_SHADOW_STATUS.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
