@@ -293,6 +293,51 @@ def test_iuphar_snapshot_has_a_bounded_owner(tmp_path: Path) -> None:
     assert report["covers_full_suite"] is False
 
 
+def test_iuphar_acceptance_has_a_bounded_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class"
+    owner.mkdir(parents=True)
+    (owner / "test_acceptance.py").write_text(
+        "def test_contract():\n    assert True\n",
+        encoding="utf-8",
+    )
+    report = build_shadow_compare(
+        ["src/iuphar_target_class/acceptance.py"],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == ["tests/unit/iuphar_target_class/test_acceptance.py"]
+    assert report["covers_full_suite"] is False
+
+
+def test_iuphar_w153_has_a_bounded_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class"
+    owner.mkdir(parents=True)
+    (owner / "test_w153.py").write_text(
+        "def test_contract():\n    assert True\n",
+        encoding="utf-8",
+    )
+    report = build_shadow_compare(
+        ["src/iuphar_target_class/w153.py"],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == ["tests/unit/iuphar_target_class/test_w153.py"]
+    assert report["covers_full_suite"] is False
+
+
+def test_iuphar_delivery_has_a_bounded_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class"
+    owner.mkdir(parents=True)
+    (owner / "test_delivery.py").write_text(
+        "def test_contract():\n    assert True\n",
+        encoding="utf-8",
+    )
+    report = build_shadow_compare(
+        ["src/iuphar_target_class/delivery.py"],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == ["tests/unit/iuphar_target_class/test_delivery.py"]
+    assert report["covers_full_suite"] is False
+
+
 def test_iuphar_comparison_has_a_bounded_owner(tmp_path: Path) -> None:
     owner = tmp_path / "tests/unit/iuphar_target_class"
     owner.mkdir(parents=True)
@@ -1361,6 +1406,44 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
     assert expected.issubset(selected)
     report = build_shadow_compare([changed_file], repo_root=repo_root)
     assert report["activation"] == "not_applied"
+
+
+@pytest.mark.parametrize(
+    "path,expected,unknown",
+    [
+        (
+            "configs/quality/external_resource_inventory_pr13061_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "docs/reports/dashboard-ux-checks/2026-11-11.md",
+            {"tests/integration/test_dashboard_ux_report_freshness.py"},
+            # Outside AFFECTED_TESTS_BY_PREFIX["docs/reports/dashboard-ux-checks/"]
+            "docs/reports/unmapped-dashboard-ux/not-reviewed-date.md",
+        ),
+        (
+            "docs/reports/dashboard-ux-checks/not-reviewed-date.md",
+            {
+                "tests/integration/test_dashboard_ux_report_freshness.py",
+                "tests/integration/test_dashboard_operator_readability.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+    ],
+)
+def test_nightly_review_and_ux_evidence_have_explicit_bounded_owners(
+    path, expected, unknown
+):
+    root = Path(__file__).resolve().parents[5]
+    selected = affected_pytest_targets([path], repo_root=root)
+    assert expected.issubset(selected)
+    assert build_shadow_compare([path], repo_root=root)["covers_full_suite"] is False
+    with pytest.raises(ValueError, match="unmapped"):
+        build_shadow_compare([path, unknown], repo_root=root)
 
 
 @pytest.mark.parametrize(

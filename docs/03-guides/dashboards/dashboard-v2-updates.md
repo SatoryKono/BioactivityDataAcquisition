@@ -1,3 +1,15 @@
+## Compact Run Explorer catalog — 2026-11-12
+
+The first screen shows Pipeline, Run ID, Started, Overview and Replay Readiness.
+Workflow, Provider, Duration, Saved Evidence and Data Quality remain in the
+table data inspector. The Run ID menu also retains the hidden columns' passport
+and evidence links, using the full identity of that row. The catalog still
+contains the last ten launches and preserves the full UUID in its data.
+
+The static width check includes both fixed and minimum widths and retains its
+existing 643 px budget; the five visible columns require 565 px. Browser/render
+acceptance for this layout remains `NOT_RUN`.
+
 ## Run Explorer first-window follow-up — 2026-11-07
 
 The static UX check at `docs/reports/dashboard-ux-checks/2026-11-07.md` records the local first-window and navigation results and the outstanding browser verification.

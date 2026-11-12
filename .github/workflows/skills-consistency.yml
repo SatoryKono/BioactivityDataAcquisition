@@ -51,6 +51,11 @@ on:
       - "tests/unit/scripts/test_setup_copilot_codex_mcp.py"
   workflow_dispatch:
     inputs:
+      closeout_task_id:
+        description: "Public task identity for source-bound closeout receipts"
+        required: false
+        default: ""
+        type: string
       approve_runtime_sync:
         description: "Approve one-way Codex to Junie/Devin skill synchronization"
         required: true
@@ -85,11 +90,16 @@ jobs:
         env:
           PYTHONPATH: src
           PYTHONDONTWRITEBYTECODE: "1"
+          PROOF_CLOSEOUT_TASK_ID: ${{ inputs.closeout_task_id }}
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           run_id="ai-runtime-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          task_id="ai-runtime-${GITHUB_RUN_ID}"
+          task_id="${PROOF_CLOSEOUT_TASK_ID:-ai-runtime-${GITHUB_RUN_ID}}"
+          if [[ ! "$task_id" =~ ^[A-Za-z0-9][A-Za-z0-9_.-]{0,95}$ ]]; then
+            echo "Invalid public closeout task identity" >&2
+            exit 64
+          fi
           run_dir="reports/quality/proof-or-stop/${run_id}"
           mkdir -p "$run_dir"
           proof=(uv run --frozen --no-build --no-sync python -m scripts.engineering.qa proof-or-stop)
