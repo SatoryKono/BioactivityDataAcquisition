@@ -55,6 +55,7 @@ GENERATED_ARTIFACT_ROUTING = Path("configs/quality/generated_artifact_routing.ya
 
 from scripts.engineering.dev.run_tests import TESTS_ROOT as PYTEST_ALL_ROOT
 
+JUNIE_RUNTIME_CI_TEST = "tests/architecture/test_junie_runtime_ci_contract.py"
 NPM_RUNTIME_TEST = "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py"
 GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
     "tests/architecture/test_github_actions_runtime_policy.py"
@@ -182,10 +183,74 @@ GHA_DISABLED_MAP_TEST = "tests/architecture/test_gha_disabled_map_10263.py"
 # Opt-in only: these modules have reviewed non-unit owners because their native
 # discovery uses dynamic imports. Other scripts retain the conservative fallback.
 EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
-    {"scripts/ai/codex/native_runtime_contract.py"}
+    {
+        "scripts/ai/codex/native_runtime_contract.py",
+        "scripts/ai/junie/check_junie_mirror.py",
+        "scripts/engineering/repo/process_supervisor.py",
+    }
 )
 
+NO_PARTIAL_TREE_TEST = "tests/unit/scripts/repo/test_check_no_partial_tree.py"
+HOOK_INSTALLATION_TEST = "tests/unit/scripts/test_hook_installation.py"
+IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
+
+
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "scripts/ai/junie/check_junie_mirror.py": (JUNIE_RUNTIME_CI_TEST,),
+    "scripts/ai/junie/junie-mirror-contract.json": (JUNIE_RUNTIME_CI_TEST,),
+    "scripts/engineering/repo/process_supervisor.py": (
+        "tests/unit/scripts/repo/test_process_deadline.py",
+        HOOK_INSTALLATION_TEST,
+        "tests/unit/scripts/test_offline_precommit.py",
+    ),
+    "README.md": (
+        "tests/architecture/test_documentation_sync.py",
+        "tests/architecture/test_docs_root_surface_governance_alignment.py",
+        HOOK_INSTALLATION_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "docs/05-operations/runbooks/owned-git-hooks.md": (
+        HOOK_INSTALLATION_TEST,
+        "tests/unit/scripts/test_offline_precommit.py",
+        "tests/unit/scripts/repo/test_process_deadline.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "scripts/ops/launchers/codex/setup_plugins.sh": (
+        "tests/architecture/test_ops_ai_setup_scripts.py",
+        HOOK_INSTALLATION_TEST,
+    ),
+    ".devin/config.json": (
+        CODEX_NATIVE_RUNTIME_TEST,
+        "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+        "tests/architecture/test_runtime_orchestration_surfaces.py",
+    ),
+    "scripts/engineering/repo/check_no_partial_tree.py": (
+        NO_PARTIAL_TREE_TEST,
+        "tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py",
+    ),
+    "docs/05-operations/runbooks/full-tree-guard.md": (NO_PARTIAL_TREE_TEST,),
+    ".github/workflows/no-partial-tree-commits.yml": (
+        NO_PARTIAL_TREE_TEST,
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
+    "src/iuphar_target_class/__init__.py": (IUPHAR_STAGE0_TEST,),
+    **dict.fromkeys(
+        (
+            "src/iuphar_target_class/policy.py",
+            "data/iuphar_target_class/policy/policy.json",
+        ),
+        ("tests/unit/iuphar_target_class/test_policy.py",),
+    ),
+    **dict.fromkeys(
+        (
+            "docs/00-project/ai/agents/guides/SKILL_EFFICIENCY_PROTOCOL.md",
+            "docs/reports/generated/skill-efficiency-source-comparison.json",
+        ),
+        (
+            "tests/unit/scripts/test_codex_efficiency_baseline.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
     "configs/quality/agent_guard_budget_surfaces.json": (
         "tests/unit/scripts/repo/test_budget_guard.py",
     ),
@@ -218,7 +283,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/architecture/test_codex_task_routing.py",
             RUNTIME_AGENT_DOCS_DRIFT_TEST,
             CODEX_NATIVE_RUNTIME_TEST,
-            "tests/architecture/test_junie_runtime_ci_contract.py",
+            JUNIE_RUNTIME_CI_TEST,
             "tests/architecture/test_gitignore_secret_and_agents_policy.py",
             "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
@@ -471,10 +536,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/architecture_acceptance_baseline.yaml": (
         "tests/architecture/test_architecture_acceptance_baseline.py",
     ),
-    "configs/quality/repo_structure_catalog.yaml": (
-        "tests/unit/scripts/repo/test_audit_root_cleanliness.py",
-        "tests/unit/scripts/repo/test_check_root_governance_docs.py",
-        "tests/unit/scripts/repo/test_audit_structure.py",
+    **dict.fromkeys(
+        (
+            "configs/quality/repo_structure_catalog.yaml",
+            "docs/00-project/governance/03-file-policy.md",
+        ),
+        (
+            "tests/unit/scripts/repo/test_audit_root_cleanliness.py",
+            "tests/unit/scripts/repo/test_check_root_governance_docs.py",
+            "tests/unit/scripts/repo/test_audit_structure.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
     ),
     "docs/plans/ci1-07-negative-merge-protection-plan.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
@@ -812,6 +884,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12929_class_lane_review.json",
             "configs/quality/external_resource_inventory_pr12929_domain_accounting_review.json",
             "configs/quality/external_resource_inventory_pr12929_valueerror_review.json",
+            "configs/quality/external_resource_inventory_pr13092_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -1372,6 +1445,8 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         DASHBOARD_OPERATOR_READABILITY_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
+    "src/iuphar_target_class/stage0/": (IUPHAR_STAGE0_TEST,),
+    "data/iuphar_target_class/stage0/": (IUPHAR_STAGE0_TEST,),
     **dict.fromkeys(
         (
             ".codex/agents/",
@@ -1385,7 +1460,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
             RUNTIME_AGENT_DOCS_DRIFT_TEST,
             "tests/architecture/test_runtime_orchestration_surfaces.py",
             AI_RUNTIME_GOVERNANCE_LINKS_TEST,
-            "tests/architecture/test_junie_runtime_ci_contract.py",
+            JUNIE_RUNTIME_CI_TEST,
             "tests/architecture/test_devin_runtime_no_dead_script_refs.py",
             "tests/architecture/test_devin_setup_guide_codex_models.py",
         ),
@@ -1414,6 +1489,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "docs/00-project/ai/rules/": (SYNC_CURSOR_RULES_TEST,),
     ".devin/workflows/qodo-sync.md": (SYNC_CURSOR_RULES_TEST,),
     "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md": (
+        JUNIE_RUNTIME_CI_TEST,
         SYNC_CURSOR_RULES_TEST,
         "tests/architecture/test_documentation_cleanup_inventory.py",
     ),
@@ -2362,6 +2438,8 @@ def _collect_nodeids(
         sys.executable,
         "-m",
         "pytest",
+        "--rootdir",
+        str(repo_root.resolve()),
         "--collect-only",
         "-q",
         "-p",

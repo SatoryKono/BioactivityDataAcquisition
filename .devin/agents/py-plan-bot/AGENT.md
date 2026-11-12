@@ -6,16 +6,25 @@ allowed-tools:
   - read
   - grep
   - glob
-  - exec
 permissions:
   allow:
     - Read(**)
-    - Exec(git)
-    - Exec(find)
   deny:
     - write
     - edit
 ---
+
+
+## Native permission boundary
+
+Native delegation of this restricted profile is blocked by
+`.devin/agents/DEVIN-RUNTIME.md` until version/platform qualification.
+The parent reads this guide and performs authorized commands or writes itself;
+the `read`/`grep`/`glob` declaration does not prove native registration or OS
+isolation. Existing legacy `permissions` denials remain defense in depth,
+not a verified native merge contract. No built-in/foreground fallback expands
+authority. Logical testing/report duties below remain applicable through that
+parent handoff, including the existing focused-first test selection.
 
 ## Canonical Sources
 
