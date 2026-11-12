@@ -1150,3 +1150,49 @@ def test_resource_inventory_files_select_integrity_controls(changed_file: str) -
     assert catalog_test in report["selected"]
     assert (root / catalog_test).is_file()
     assert report["activation"] == "not_applied"
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "scripts/ai/codex/README.md",
+        "scripts/ai/codex/run-codex.ps1",
+        "scripts/ai/codex/run-codex.sh",
+    ],
+)
+def test_codex_launchers_and_guide_have_bounded_impact_routes(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    result = build_shadow_compare([path], repo_root=root)
+    assert result["covers_full_suite"] is False
+    assert {
+        "tests/architecture/test_codex_native_runtime.py",
+        "tests/architecture/test_codex_launcher_bootstrap.py",
+        "tests/unit/scripts/test_mcp_routes.py",
+        "tests/unit/scripts/test_mcp_readiness.py",
+    }.issubset(result["selected"])
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            [path, "scripts/ai/codex/unknown-launcher.ps1"], repo_root=root
+        )
+
+
+@pytest.mark.parametrize(
+    "changed_file",
+    [
+        "scripts/ai/codex/README.md",
+        "scripts/ai/codex/run-codex.ps1",
+        "scripts/ai/codex/run-codex.sh",
+    ],
+)
+def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -> None:
+    """Launcher and CLI guidance changes select their real behavioral contracts."""
+    repo_root = Path(__file__).resolve().parents[5]
+    expected = {
+        "tests/architecture/test_codex_native_runtime.py",
+        "tests/architecture/test_codex_launcher_bootstrap.py",
+        "tests/unit/scripts/ops/test_codex_exec_env_filter.py",
+    }
+    selected = affected_pytest_targets([changed_file], repo_root=repo_root)
+    assert expected.issubset(selected)
+    report = build_shadow_compare([changed_file], repo_root=repo_root)
+    assert report["activation"] == "not_applied"

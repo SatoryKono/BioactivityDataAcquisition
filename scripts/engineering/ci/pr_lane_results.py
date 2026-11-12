@@ -184,8 +184,33 @@ IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/__init__.py": (IUPHAR_STAGE0_TEST,),
+    **dict.fromkeys(
+        (
+            "docs/00-project/ai/agents/guides/SKILL_EFFICIENCY_PROTOCOL.md",
+            "docs/reports/generated/skill-efficiency-source-comparison.json",
+        ),
+        (
+            "tests/unit/scripts/test_codex_efficiency_baseline.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
     "configs/quality/agent_guard_budget_surfaces.json": (
         "tests/unit/scripts/repo/test_budget_guard.py",
+    ),
+    **dict.fromkeys(
+        (
+            "scripts/ai/codex/README.md",
+            "scripts/ai/codex/run-codex.ps1",
+            "scripts/ai/codex/run-codex.sh",
+        ),
+        (
+            CODEX_NATIVE_RUNTIME_TEST,
+            "tests/architecture/test_codex_launcher_bootstrap.py",
+            "tests/unit/scripts/test_mcp_routes.py",
+            "tests/unit/scripts/test_mcp_readiness.py",
+            "tests/unit/scripts/ops/test_codex_exec_env_filter.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
     ),
     **dict.fromkeys(
         (
