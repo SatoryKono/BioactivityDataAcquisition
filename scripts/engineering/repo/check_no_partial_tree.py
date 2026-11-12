@@ -98,7 +98,7 @@ def validate_repo(repo: str | Path) -> Path:
     return path
 
 
-def _run_git(repo: Path, verb: str, *args: str) -> str:
+def _run_git(repo: Path, verb: str, *args: str, index_file: str | None = None) -> str:
     if verb not in _GIT_VERBS:
         raise EvidenceError(f"unsupported git verb: {verb!r}")
     env = os.environ.copy()
@@ -112,6 +112,8 @@ def _run_git(repo: Path, verb: str, *args: str) -> str:
         } or key.startswith(("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_")):
             env.pop(key, None)
     env["GIT_NO_REPLACE_OBJECTS"] = "1"
+    if index_file is not None:
+        env["GIT_INDEX_FILE"] = index_file
     try:
         result = subprocess.run(
             ["git", "--no-optional-locks", "-c", "core.fsmonitor=false", verb, *args],
@@ -125,11 +127,36 @@ def _run_git(repo: Path, verb: str, *args: str) -> str:
             env=env,
             timeout=10,
         )
-    except (OSError, subprocess.TimeoutExpired):
+    except (OSError, ValueError, subprocess.TimeoutExpired):
         raise EvidenceError("Git evidence unavailable or timed out") from None
     if result.returncode != 0:
         raise EvidenceError(f"git {verb} failed; evidence unavailable")
     return result.stdout
+
+
+def _index_git(repo: Path, index_file: str | None, verb: str, *args: str) -> str:
+    options = {"index_file": index_file} if index_file is not None else {}
+    return _run_git(repo, verb, *args, **options)
+
+
+def _index_views(repo: Path) -> list[str | None]:
+    """Always inspect the default index and any distinct Git-supplied commit index."""
+    supplied = os.environ.get("GIT_INDEX_FILE")
+    if supplied is None:
+        return [None]
+    if not supplied:
+        raise EvidenceError("empty supplied index cannot qualify")
+    default = _run_git(
+        repo, "rev-parse", "--path-format=absolute", "--git-path", "index"
+    ).strip()
+    proposed = Path(supplied)
+    if not proposed.is_absolute():
+        proposed = repo / proposed
+    if supplied and os.path.normcase(os.path.abspath(proposed)) == os.path.normcase(
+        os.path.abspath(default)
+    ):
+        return [None]
+    return [None, supplied]
 
 
 def check_checkout_state(repo: str | Path) -> list[str]:
@@ -146,13 +173,14 @@ def check_checkout_state(repo: str | Path) -> list[str]:
     )
     if sparse_index.strip() == "true":
         problems.append("sparse index is enabled")
-    index = _run_git(cwd, "ls-files", "--sparse", "--stage", "-z")
-    if any(row.startswith("040000 ") for row in index.split("\x00")):
-        problems.append("sparse directory entries exist in index")
-    flags = _run_git(cwd, "ls-files", "-v", "-z")
-    if any(row.startswith(("S ", "s ")) for row in flags.split("\x00")):
-        problems.append("skip-worktree entries exist in index")
-    return problems
+    for view in _index_views(cwd):
+        index = _index_git(cwd, view, "ls-files", "--sparse", "--stage", "-z")
+        if any(row.startswith("040000 ") for row in index.split("\x00")):
+            problems.append("sparse directory entries exist in index")
+        flags = _index_git(cwd, view, "ls-files", "-v", "-z")
+        if any(row.startswith(("S ", "s ")) for row in flags.split("\x00")):
+            problems.append("skip-worktree entries exist in index")
+    return list(dict.fromkeys(problems))
 
 
 def _top_directories(repo: Path, sha: str) -> frozenset[str]:
@@ -165,11 +193,14 @@ def _top_directories(repo: Path, sha: str) -> frozenset[str]:
     )
 
 
-def _renamed_paths(repo: Path, base: str, tip: str | None) -> set[str]:
+def _renamed_paths(
+    repo: Path, base: str, tip: str | None, *, index_file: str | None = None
+) -> set[str]:
     """Account for actual file moves, rather than a newly added dummy root."""
     revisions = [base, tip] if tip is not None else ["--cached", base]
-    fields = _run_git(
+    fields = _index_git(
         repo,
+        index_file,
         "diff",
         "--no-ext-diff",
         "--no-textconv",
@@ -210,7 +241,12 @@ def _missing_directory_content(repo: Path, base: str, tip: str) -> bool:
 
 
 def _unrelocated_paths(
-    repo: Path, base: str, tip: str | None, required: set[str]
+    repo: Path,
+    base: str,
+    tip: str | None,
+    required: set[str],
+    *,
+    index_file: str | None = None,
 ) -> bool:
     """Account for ambiguous identical-blob renames without reusing destinations.
 
@@ -226,7 +262,7 @@ def _unrelocated_paths(
     by_blob: dict[str, set[str]] = {}
     for path in required:
         by_blob.setdefault(blobs[path], set()).add(path)
-    for source in _renamed_paths(repo, base, tip):
+    for source in _renamed_paths(repo, base, tip, index_file=index_file):
         candidates = by_blob.get(blobs[source], set())
         if candidates:
             candidates.remove(
@@ -241,8 +277,17 @@ def check_index_tree(repo: str | Path, base: str) -> list[str]:
     base_sha = _historical_base(
         cwd, resolve_revision(cwd, base), resolve_revision(cwd, "HEAD")
     )
-    before = _run_git(cwd, "ls-files", "--stage", "-z")
-    _reject_intent_to_add(cwd)
+    problems = [
+        problem
+        for view in _index_views(cwd)
+        for problem in _index_tree_problems(cwd, base_sha, view)
+    ]
+    return list(dict.fromkeys(problems))
+
+
+def _index_tree_problems(cwd: Path, base_sha: str, index_file: str | None) -> list[str]:
+    before = _index_git(cwd, index_file, "ls-files", "--stage", "-z")
+    _reject_intent_to_add(cwd, index_file=index_file)
     roots = set()
     for record in filter(None, before.split("\x00")):
         metadata, path = record.split("\t", 1)
@@ -257,19 +302,24 @@ def check_index_tree(repo: str | Path, base: str) -> list[str]:
             cwd, "ls-tree", "-r", "--name-only", "-z", base_sha, "--", *sorted(missing)
         )
         if _unrelocated_paths(
-            cwd, base_sha, None, set(filter(None, paths.split("\x00")))
+            cwd,
+            base_sha,
+            None,
+            set(filter(None, paths.split("\x00"))),
+            index_file=index_file,
         ):
             problems.append("proposed index loses directory anchors")
-    if before != _run_git(cwd, "ls-files", "--stage", "-z"):
+    if before != _index_git(cwd, index_file, "ls-files", "--stage", "-z"):
         problems.append("index changed during inspection")
     return problems
 
 
-def _reject_intent_to_add(repo: Path) -> None:
+def _reject_intent_to_add(repo: Path, *, index_file: str | None = None) -> None:
     """ITA entries are not part of an ordinary commit, even with stage zero."""
     snapshots = [
-        _run_git(
+        _index_git(
             repo,
+            index_file,
             "diff",
             "--cached",
             "--no-ext-diff",

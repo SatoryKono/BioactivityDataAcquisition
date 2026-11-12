@@ -81,6 +81,9 @@ are disabled. A PR field cannot choose executable code. Git metadata queries dis
 and external diff/textconv execution. Ambient index and command-scoped config
 overrides cannot replace the repository state being inspected. No agent or
 service is started.
+Both the default index and a distinct Git-supplied commit index are inspected.
+A clean alternate cannot hide the default state, and a clean default cannot hide
+a partial proposed commit. Lexically identical index paths are inspected once.
 PR events are restricted to the protected main target. Push and manual runs
 load their checker from main, including when manual dispatch is requested from
 another ref; they never import the dispatcher ref's candidate Python module.
