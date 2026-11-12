@@ -176,7 +176,10 @@ def test_filtered_child_cannot_publish_unexecuted_passes(
     test_acceptance_report_marks_only_executed_checks()
     requested = {node.rsplit("::", 1)[-1] for node in _NODE_IDS}
     passed = {name for name in requested if reported[name] == "PASS"}
-    assert passed <= observed
+    # Explicit node selection cancels the inherited -k filter: all requested
+    # checks must really execute, rather than passing an empty subset check.
+    assert observed == requested
+    assert passed == requested
 
 
 def test_deselected_child_is_not_reported_as_pass(

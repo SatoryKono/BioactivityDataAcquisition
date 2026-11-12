@@ -15,6 +15,29 @@ from bioetl.infrastructure.control_plane import file_lineage_store as lineage
 pytestmark = pytest.mark.unit
 
 
+def test_empty_lock_file_is_initialized_only_while_owned(tmp_path, monkeypatch):
+    descriptor = os.open(tmp_path / "lock", os.O_CREAT | os.O_RDWR)
+    acquired = False
+    original_write = os.write
+
+    def locking(file_descriptor, mode, nbytes):
+        nonlocal acquired
+        assert (file_descriptor, mode, nbytes) == (descriptor, 1, 1)
+        acquired = True
+
+    def guarded_write(file_descriptor, payload):
+        if file_descriptor == descriptor:
+            assert acquired, "initialization may race with another handle's byte lock"
+        return original_write(file_descriptor, payload)
+
+    monkeypatch.setattr(os, "write", guarded_write)
+    try:
+        lineage._lock_byte_range(descriptor, locking=locking, mode=1)
+        assert os.fstat(descriptor).st_size == 1
+    finally:
+        os.close(descriptor)
+
+
 def test_windows_deadlock_is_retried_but_access_denied_propagates(tmp_path):
     descriptor = os.open(tmp_path / "lock", os.O_CREAT | os.O_RDWR)
     try:

@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "90cfde59217a545a1673d35ed0fad18516e4f417",
+  "source_ref": "105360aff05cb12a095704554e3060cf3e9446f7",
+  "source_reviews": {
+    "src/bioetl/infrastructure/control_plane/file_lineage_store.py": "Separately approved Windows race repair: acquire the existing byte lock before checking and initializing the empty lock file. Microsoft CRT permits locking beyond EOF. Existing os.open acquisition, descriptor ownership, finally-close, unlock suppression, EDEADLK-only retry and EACCES propagation are retained; no acquisition sites are added or removed. Original concurrent-save tests and the new initialization-under-ownership regression pass. All resource identities, historical dispositions and NOT_RUN_12553 runtime qualification remain unchanged."
+  }
+}

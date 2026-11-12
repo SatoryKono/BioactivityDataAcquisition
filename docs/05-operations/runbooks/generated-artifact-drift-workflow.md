@@ -104,10 +104,14 @@ python -m scripts.engineering.qa refresh-ci-drift-families --update \
   --test-gov --flaky-fingerprint --evidence --remote-main --dataflow
 ```
 
-`--update --telemetry` additionally requires `--coverage-percent`,
-`--source-commit` (Tests-run ancestor of HEAD), `--source-run-id`,
-`--source-event`, and `--source-run-url`. Do not copy `source_tree_sha256`
-from `test-governance-current.json`. A complete local capture instead uses
+`--update --telemetry` additionally requires original `--coverage-xml`,
+`--source-commit` (full 40-character Tests-run SHA and ancestor of HEAD),
+`--source-run-id`, `--source-event`, and `--source-run-url`. Measured inputs
+must match; ancestry alone does not prove a current measurement.
+Use `--slowest-json` to select the duration artifact from that same run,
+or retain its canonical path. Percentage overrides are rejected.
+Do not copy `source_tree_sha256` from `test-governance-current.json`.
+A complete local capture instead uses
 `--update --telemetry --local-manifest <path>`; CI identity and coverage
 overrides are not accepted by the local updater.
 
@@ -144,6 +148,7 @@ rows below to diagnose a specific artifact family.
 | Module coverage measurements | `python -m scripts.engineering.qa.run_local_coverage_verify` completes all 17 local shards on one committed source tree; its manifest records every exit code and the combined XML passes line and branch gates at 85% | Copy the validated XML to `reports/coverage/coverage.xml`, then run `python -m scripts.engineering.qa report-module-coverage --refresh-from-coverage-xml --enforce-module-thresholds block-regression --fail-on-regression`. Never use an incomplete or failing local XML. GitHub Actions is not an acceptance source. |
 | Module coverage monotonic adoption | SHA-bound combined coverage XML plus `--enforce-module-thresholds block-regression --fail-on-regression` | `python -m scripts.engineering.qa report-module-coverage --refresh-nonregressing-from-coverage-xml --enforce-module-thresholds block-regression --fail-on-regression`; adds absent rows and accepts only equal or improved measurements. |
 | Test governance snapshots | `python -m scripts.engineering.qa.report_test_governance_audit --check` | `python -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-governance-current.json --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json` |
+| Test basename collision inventory | `python -m scripts.engineering.qa.report_test_governance_audit --basename-inventory --check` | `python -m scripts.engineering.qa.report_test_governance_audit --basename-inventory` |
 | Documentation cleanup inventory | `python -m scripts.docs generate-cleanup-inventory --check` | `python -m scripts.docs generate-cleanup-inventory --update` |
 | Architecture dependency map | `python -m scripts.engineering.qa.generate_architecture_dependency_map --check` | `python -m scripts.engineering.qa.generate_architecture_dependency_map --update` |
 | Committed test telemetry | `pytest tests/architecture/test_test_telemetry_baseline.py tests/architecture/test_test_telemetry_governance.py` | `python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest <verified-manifest>` after all 17 canonical shards pass, or validated original same-run CI coverage XML and duration artifacts. An ancestor commit alone does not prove matching measured inputs. |
