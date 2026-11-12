@@ -13,7 +13,7 @@ This runbook is **not** a runtime SSOT. Canonical AI precedence remains
 | 1 agent = 1 worktree | Parallel cherry-pick/merge in a shared checkout corrupts generated YAML |
 | Reuse the existing worktree of the same branch | Do not `git worktree add` a second copy for CI follow-up |
 | Hash-only / date-stamp / remote-main stay on the parent | No extra `implementer` spawn |
-| Prefer `git worktree add` for a **new** branch | Protect foreign WIP; do not `git checkout` another agent's branch |
+| Use the governed worktree helper for a **new** branch | Protect foreign WIP; do not `git checkout` another agent's branch |
 | Never delete others' uncommitted work | Multi-agent safety |
 | No `git reset --hard` / force-push | Irreversible loss |
 | Push feature branches only | Protected `main` |
@@ -24,7 +24,9 @@ This runbook is **not** a runtime SSOT. Canonical AI precedence remains
 1. `git worktree list` (or `--porcelain`).
 2. If `branch refs/heads/<WORK_BRANCH>` is already listed, `cd` that path.
    Do not `git worktree add` a second copy of a mounted branch.
-3. `git worktree add` only when the branch is not mounted in any tree.
+3. Only when the branch is not mounted, use the governed helper from `AGENTS.md`;
+   destination must resolve inside `D:\github\BioactivityDataAcquisition-worktrees`,
+   with separate per-task env template approval. Never call direct `git worktree add`.
 4. `git worktree prune` / `remove` only for `prunable` entries, and only after
    the operator explicitly confirms. Do not remove dirty, locked, or
    foreign WIP.

@@ -82,7 +82,9 @@ Short start card for everyday work. Not a substitute for audit/closeout cards.
 2. Read only sources needed for SCOPE (do not restate RULES). Hash-only /
    date-stamp / remote-main / `ci-rebind` → drift runbook + reporter, not full RULES/ADR.
 3. One task = one branch. Run `git worktree list`; if `WORK_BRANCH` is already
-   mounted, `cd` that path. `git worktree add` only when the branch is missing.
+   mounted, `cd` that path. Only when the branch is missing, use the governed
+   helper from `AGENTS.md`, inside `D:\github\BioactivityDataAcquisition-worktrees`,
+   after required per-task env approval. Direct `git worktree add` is forbidden.
    Abort foreign `MERGE_HEAD` / `CHERRY_PICK_HEAD`. Prune only `prunable`
    after operator confirmation.
 4. Generated CI: classify family via the included fragment; do not guess SHA
