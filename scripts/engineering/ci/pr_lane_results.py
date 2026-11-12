@@ -193,6 +193,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/architecture/test_codex_launcher_bootstrap.py",
             "tests/unit/scripts/test_mcp_routes.py",
             "tests/unit/scripts/test_mcp_readiness.py",
+            "tests/unit/scripts/ops/test_codex_exec_env_filter.py",
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
     ),

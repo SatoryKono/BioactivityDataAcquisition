@@ -528,6 +528,8 @@ cancel the separately acknowledged adapter cache/log/startup effects.
 Readiness controls honor native `enabled_tools` and `disabled_tools` before
 starting a diagnostic session. An excluded control is reported with
 `control_status: DISABLED` and overall readiness remains `NOT_TESTED`.
+Raw and effective catalogue sizes remain separate; client filters cannot prove
+server-side prohibition of writes. Explicit route env values are preserved.
 Only explicitly declared environment references may inherit process values
 when the repository environment has no value; unrelated credentials stay excluded.
 

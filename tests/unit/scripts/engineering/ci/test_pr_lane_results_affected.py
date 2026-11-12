@@ -1106,3 +1106,25 @@ def test_codex_launchers_and_guide_have_bounded_impact_routes(path: str) -> None
         build_shadow_compare(
             [path, "scripts/ai/codex/unknown-launcher.ps1"], repo_root=root
         )
+
+
+@pytest.mark.parametrize(
+    "changed_file",
+    [
+        "scripts/ai/codex/README.md",
+        "scripts/ai/codex/run-codex.ps1",
+        "scripts/ai/codex/run-codex.sh",
+    ],
+)
+def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -> None:
+    """Launcher and CLI guidance changes select their real behavioral contracts."""
+    repo_root = Path(__file__).resolve().parents[5]
+    expected = {
+        "tests/architecture/test_codex_native_runtime.py",
+        "tests/architecture/test_codex_launcher_bootstrap.py",
+        "tests/unit/scripts/ops/test_codex_exec_env_filter.py",
+    }
+    selected = affected_pytest_targets([changed_file], repo_root=repo_root)
+    assert expected.issubset(selected)
+    report = build_shadow_compare([changed_file], repo_root=repo_root)
+    assert report["activation"] == "not_applied"

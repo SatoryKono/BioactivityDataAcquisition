@@ -213,23 +213,39 @@ def _run_session(
                 "status": "PASS" if client.transport_seen else "NOT_TESTED"
             }
         names = _phase(row, "catalog", lambda: _catalog(client, tool_limit))
-        row["tool_count"] = len(names)
+        row["tool_count_raw"] = len(names)
+        effective_names = _effective_tools(entry, names)
+        row["tool_count"] = len(effective_names)
+        row["native_tool_filters_applied"] = True
         row["memory_write_tools_advertised"] = bool(
             {
                 "create_entities",
                 "delete_entities",
                 "add_observations",
                 "delete_observations",
+                "create_relations",
+                "delete_relations",
             }
             & set(names)
         )
-        if control["tool"] not in names:
+        if control["tool"] not in effective_names:
             raise ProbeError("CONTROL_TOOL_MISSING")
         _phase(row, "tool", lambda: _semantic_call(client, control, tool_limit))
         row["control_status"] = "PASS"
     row["detail"] = (
         "tool control passed; independent backend/access identity NOT_TESTED"
     )
+
+
+def _effective_tools(entry: Mapping, names: Sequence[str]) -> list[str]:
+    """Apply native allow/deny lists without changing the backend catalogue."""
+    enabled = entry.get("enabled_tools")
+    disabled = set(entry.get("disabled_tools") or [])
+    return [
+        name
+        for name in names
+        if (enabled is None or name in enabled) and name not in disabled
+    ]
 
 
 def _control_enabled(entry: Mapping, tool: str) -> bool:

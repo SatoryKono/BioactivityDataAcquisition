@@ -966,3 +966,25 @@ def test_cleartext_remote_credentials_are_refused_before_connection(credential):
         assert HttpProbeClient(
             {"url": url, **credential}, None, environment
         ).url.hostname
+
+
+def test_client_tool_filter_does_not_claim_server_write_prohibition(tmp_path):
+    session = Session(
+        {"tools/list": {"tools": [{"name": "read_file"}, {"name": "create_relations"}]}}
+    )
+    row = report(capture(tmp_path, enabled_tools=["read_file"]), session)["results"][0]
+    assert row["control_status"] == "PASS"
+    assert row["tool_count_raw"] == 2 and row["tool_count"] == 1
+    assert row["memory_write_tools_advertised"] is True
+    assert row["technical_write_prohibition_status"] == "NOT_TESTED"
+
+
+def test_explicit_route_env_is_not_replaced_by_reference_fallback(monkeypatch):
+    from scripts.ai.codex.mcp_probe_client import probe_environment
+
+    monkeypatch.setenv("DECLARED_AUTH", "process-value")
+    result = probe_environment(
+        {"env_vars": ["DECLARED_AUTH"], "env": {"DECLARED_AUTH": "route-value"}},
+        {"DECLARED_AUTH": "repository-value"},
+    )
+    assert result["DECLARED_AUTH"] == "route-value"

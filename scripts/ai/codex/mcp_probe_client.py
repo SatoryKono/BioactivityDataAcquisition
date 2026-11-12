@@ -172,7 +172,10 @@ def _declared_environment(
     )
     if entry.get("bearer_token_env_var"):
         references.add(entry["bearer_token_env_var"])
+    explicit = entry.get("env") or {}
     for key in references:
+        if key in explicit:
+            continue
         if key in repository_env:
             result[key] = repository_env[key]
         elif key in os.environ:
