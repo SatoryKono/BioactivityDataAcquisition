@@ -6,7 +6,9 @@ allowed only as empty values when ``local_status`` is ``not_supported``.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
+from types import MappingProxyType
 
 
 @dataclass(frozen=True, slots=True)
@@ -66,8 +68,8 @@ class ValidatedInput:
     """Normalization output. Original text stays beside the normalized value."""
 
     input_row_id: str
-    raw_fields: dict[str, str | None]
-    normalized_fields: dict[str, str | None]
+    raw_fields: Mapping[str, str | None]
+    normalized_fields: Mapping[str, str | None]
     target_id: str | None
     uniprot_accessions: tuple[str, ...]
     gene_symbol: str | None
@@ -90,6 +92,13 @@ class ValidatedInput:
     diagnostics: tuple[Diagnostic, ...]
     row_sha256: str
     provenance: RunProvenance
+
+    def __post_init__(self) -> None:
+        """Detach read-only field snapshots from caller-owned dictionaries."""
+        object.__setattr__(self, "raw_fields", MappingProxyType(dict(self.raw_fields)))
+        object.__setattr__(
+            self, "normalized_fields", MappingProxyType(dict(self.normalized_fields))
+        )
 
 
 @dataclass(frozen=True, slots=True)

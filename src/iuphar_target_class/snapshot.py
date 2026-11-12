@@ -163,24 +163,22 @@ def assess_completeness(
     if provider_versions not in known:
         message = "provider version state is not recognised"
         raise ValueError(message)
+    version_unverified = provider_versions == VERSION_UNAVAILABLE
     if not coverage_approved:
         return Completeness(
             complete=False,
             publishable=False,
-            version_unverified=False,
+            version_unverified=version_unverified,
             allows_not_found=False,
             reason="охват и набор видов снимка не утверждены",
         )
-    version_unverified = provider_versions == VERSION_UNAVAILABLE
-    problems: list[str] = []
-    if not required_types_loaded:
-        problems.append("обязательные типы не загружены")
-    if not pagination_complete or transport_or_schema_errors:
-        problems.append("пагинация или транспорт/схема")
-    if not totals_match:
-        problems.append("контрольные итоги расходятся")
-    if provider_versions == VERSION_DIFFER:
-        problems.append("версии поставщика различаются")
+    problems = _completeness_problems(
+        required_types_loaded,
+        pagination_complete,
+        transport_or_schema_errors,
+        totals_match,
+        provider_versions,
+    )
     if problems:
         return Completeness(
             complete=False,
@@ -206,6 +204,25 @@ def assess_completeness(
     )
 
 
+def _completeness_problems(
+    required_types_loaded: bool,
+    pagination_complete: bool,
+    transport_or_schema_errors: bool,
+    totals_match: bool,
+    provider_versions: str,
+) -> list[str]:
+    problems: list[str] = []
+    if not required_types_loaded:
+        problems.append("обязательные типы не загружены")
+    if not pagination_complete or transport_or_schema_errors:
+        problems.append("пагинация или транспорт/схема")
+    if not totals_match:
+        problems.append("контрольные итоги расходятся")
+    if provider_versions == VERSION_DIFFER:
+        problems.append("версии поставщика различаются")
+    return problems
+
+
 def absence_status(completeness: Completeness) -> str:
     """Map an empty finished search to not_found only on a complete snapshot."""
     if completeness.allows_not_found:
@@ -221,7 +238,7 @@ def _indexes(
 ) -> SnapshotIndexes:
     target_ids = tuple(sorted(targets))
     uniprot_ids = tuple(sorted(uniprot))
-    gene_keys = tuple(sorted(f"{symbol}|{species}" for symbol, species in gene))
+    gene_keys = tuple(sorted(f"{key[0]}|{key[1]}" for key in gene))
     family_ids = tuple(sorted(families))
     version = sha256_bytes(
         canonical_json_bytes(
