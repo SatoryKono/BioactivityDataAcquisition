@@ -655,15 +655,22 @@ def _declared_string_list(text: str, key: str, indent: int) -> list[str]:
     if len(positions) != 1 or lines[positions[0]] != marker:
         raise ValueError("missing/duplicate declared list")
     result = []
+    item_indent: int | None = None
     for line in lines[positions[0] + 1 :]:
         if not line.strip() or line.lstrip().startswith("#"):
             continue
-        match = re.fullmatch(r" *- (.+)", line)
+        match = re.fullmatch(r"( *)- (.+)", line)
         if match is None:
             if len(line) - len(line.lstrip()) <= indent:
                 break
             raise ValueError("unsupported list continuation")
-        value = match[1].strip()
+        current_indent = len(match[1])
+        if current_indent < indent or (
+            item_indent is not None and current_indent != item_indent
+        ):
+            raise ValueError("unsupported list indentation")
+        item_indent = current_indent
+        value = match[2].strip()
         if value.startswith(("'", '"')):
             # Only the unescaped quoted subset is governed here. Python string
             # escapes differ from YAML (notably single quotes); never decode

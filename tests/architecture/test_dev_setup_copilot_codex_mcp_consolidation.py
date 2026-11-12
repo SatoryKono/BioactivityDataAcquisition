@@ -838,3 +838,20 @@ def test_devin_unescaped_quoted_permission_scalars_remain_supported(
     )
     path.write_text(changed, encoding="utf-8")
     assert validate_devin_permission_contract(tmp_path) == []
+
+
+@pytest.mark.parametrize("extra_indent", [1, 2, 4])
+def test_devin_folded_list_continuations_cannot_hide_lost_denials(
+    tmp_path: Path, extra_indent: int
+) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-audit-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8")
+    assert "  - edit\n" in text
+    changed = text.replace("  - edit\n", " " * extra_indent + "  - edit\n", 1)
+    parsed = yaml.safe_load(changed.split("---", 2)[1])
+    assert "write" not in parsed["permissions"]["deny"]
+    path.write_text(changed, encoding="utf-8")
+    assert any(
+        f.code == "devin.profile" for f in validate_devin_permission_contract(tmp_path)
+    )
