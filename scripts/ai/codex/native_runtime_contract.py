@@ -663,7 +663,16 @@ def _declared_string_list(text: str, key: str, indent: int) -> list[str]:
             if len(line) - len(line.lstrip()) <= indent:
                 break
             raise ValueError("unsupported list continuation")
-        value = _frontmatter_value(match[1])
+        value = match[1].strip()
+        if value.startswith(("'", '"')):
+            # Only the unescaped quoted subset is governed here. Python string
+            # escapes differ from YAML (notably single quotes); never decode
+            # these permission declarations with ast.literal_eval.
+            if len(value) < 2 or value[-1] != value[0]:
+                raise ValueError("unsupported quoted list scalar")
+            value = value[1:-1]
+            if any(char in value for char in ("\\", "'", '"')):
+                raise ValueError("unsupported quoted list escape")
         if not re.fullmatch(r"[A-Za-z]\w*(?:\([^\r\n()]+\))?", value, re.ASCII):
             raise ValueError("unsupported list scalar")
         result.append(value)

@@ -807,3 +807,34 @@ def test_devin_complex_permission_keys_are_not_accepted(
     assert any(
         f.code == "devin.profile" for f in validate_devin_permission_contract(tmp_path)
     )
+
+
+@pytest.mark.parametrize("scalar", [r"'wri\x74e'", r'"wri\x74e"', r"'wri\u0074e'"])
+def test_devin_escaped_permission_scalars_fail_closed(
+    tmp_path: Path, scalar: str
+) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-audit-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8")
+    assert "  - write\n" in text
+    changed = text.replace("  - write\n", f"  - {scalar}\n", 1)
+    yaml.safe_load(changed.split("---", 2)[1])
+    path.write_text(changed, encoding="utf-8")
+    assert any(
+        f.code == "devin.profile" for f in validate_devin_permission_contract(tmp_path)
+    )
+
+
+@pytest.mark.parametrize("scalar", ["'write'", '"write"'])
+def test_devin_unescaped_quoted_permission_scalars_remain_supported(
+    tmp_path: Path, scalar: str
+) -> None:
+    _devin_fixture_tree(tmp_path)
+    path = tmp_path / ".devin/agents/py-audit-bot/AGENT.md"
+    text = path.read_text(encoding="utf-8")
+    changed = text.replace("  - write\n", f"  - {scalar}\n", 1)
+    assert (
+        yaml.safe_load(changed.split("---", 2)[1])["permissions"]["deny"][0] == "write"
+    )
+    path.write_text(changed, encoding="utf-8")
+    assert validate_devin_permission_contract(tmp_path) == []
