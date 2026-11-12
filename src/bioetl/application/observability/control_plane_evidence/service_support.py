@@ -94,10 +94,20 @@ def ledger_entries(
     port: RunLedgerPort | None,
     manifest: RunManifest,
 ) -> tuple[RunLedgerEntry, ...]:
-    """Load one manifest ledger as an immutable tuple."""
+    """Load the selected-run ledger chain as an immutable tuple.
+
+    Prefer ``list_entries_by_run_id`` so validation and Processed Records share
+    the predecessor-inclusive snapshot for the same ``run_id``.
+    """
     if port is None:
         return ()
     with evidence_stage("ledger_read"):
+        by_run = getattr(port, "list_entries_by_run_id", None)
+        if callable(by_run):
+            entries = by_run(manifest.run_id)
+            # MagicMock / incomplete fakes may return a non-list sentinel.
+            if isinstance(entries, list):
+                return tuple(entries)
         return tuple(port.list_entries(manifest.manifest_id))
 
 

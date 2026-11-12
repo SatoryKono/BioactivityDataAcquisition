@@ -6,7 +6,11 @@ from copy import deepcopy
 
 from scripts.ops.observability.grafana.dashboard_context_links import build_handoff_url
 
-STATUS_URL = "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+STATUS_URL = (
+    "/ops/observability/selected-run-status"
+    "?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
+    "&run_type=${run_type:csv}&workflow=${workflow:csv}"
+)
 DESCRIPTION = (
     "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; "
     "missing selection is SELECT RUN; request failure is Source unavailable. "
@@ -646,8 +650,8 @@ def _provider_check_panel(
 
 
 _PROVIDER_SELECTOR_URL = (
-    "/ops/observability/selected-run-status?pipeline=${pipeline}"
-    "&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+    "/ops/observability/selected-run-status?pipeline=${selected_pipeline}"
+    "&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
 )
 _PROVIDER_SELECTOR_ROOT = (
     "$exists(provider_options) and $count(provider_options) > 0 "

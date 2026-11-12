@@ -245,7 +245,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     # the Infinity payload for no UI gain.
     panel["targets"][0]["root_selector"] = (
         'index_state = "valid_empty" and $exists(items) and $count(items) = 0 '
-        '? [{"pipeline": "VALID EMPTY"}] : items.($merge([$, '
+        '? [{"pipeline": "VALID EMPTY", "pipeline_label": "VALID EMPTY"}] : items.($merge([$, '
         '{"workflow_id": workflow_id != "" ? workflow_id : "N/A", "run_label": $substring(run_id,0,8) & "…", '
         '"pipeline_label": $substringAfter(pipeline, provider & "_") ? $substringAfter(pipeline, provider & "_") : pipeline, '
         '"workflow_passport_path": $substringAfter(workflow_passport_url, '

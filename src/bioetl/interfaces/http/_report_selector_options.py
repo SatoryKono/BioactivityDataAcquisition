@@ -121,6 +121,35 @@ def _maybe_report_option(
     return value
 
 
+def _unresolved_run_option_index(
+    items: list[object],
+    *,
+    entry: ReportIndexEntry,
+    dimension: str,
+    response_shape: str,
+) -> int | None:
+    """Index of an unknown ledger option that a report identity may replace."""
+    if dimension != "run_id" or response_shape != "options":
+        return None
+    for index, item in enumerate(items):
+        if (
+            isinstance(item, dict)
+            and item.get("value") == entry.run_id
+            and " · unknown · " in str(item.get("text", ""))
+        ):
+            return index
+    return None
+
+
+def _option_seen_value(option: object, *, dimension: str, entry: ReportIndexEntry) -> object:
+    """Stable catalog key for one appended or replaced selector option."""
+    if dimension == "run_id":
+        return entry.run_id
+    if isinstance(option, dict):
+        return option.get("value")
+    return option
+
+
 def supplement_report_options(
     payload: dict[str, object],
     *,
@@ -144,17 +173,11 @@ def supplement_report_options(
         # A manifest without a terminal ledger event may already advertise this
         # run as unknown. An identity-checked report can resolve that label;
         # preserve known ledger statuses and retain exactly one option per ID.
-        unresolved = next(
-            (
-                index
-                for index, item in enumerate(items)
-                if dimension == "run_id"
-                and response_shape == "options"
-                and isinstance(item, dict)
-                and item.get("value") == entry.run_id
-                and " · unknown · " in str(item.get("text", ""))
-            ),
-            None,
+        unresolved = _unresolved_run_option_index(
+            items,
+            entry=entry,
+            dimension=dimension,
+            response_shape=response_shape,
         )
         candidate_seen = seen - {entry.run_id} if unresolved is not None else seen
         option = _maybe_report_option(
@@ -166,16 +189,13 @@ def supplement_report_options(
             timezone=timezone,
             seen=candidate_seen,
         )
-        if option is not None:
-            if unresolved is not None:
-                items[unresolved] = option
-            else:
-                items.append(option)
-            seen.add(
-                entry.run_id
-                if dimension == "run_id"
-                else (option.get("value") if isinstance(option, dict) else option)
-            )
+        if option is None:
+            continue
+        if unresolved is not None:
+            items[unresolved] = option
+        else:
+            items.append(option)
+        seen.add(_option_seen_value(option, dimension=dimension, entry=entry))
     return {**payload, "items": items}
 
 

@@ -1,5 +1,7 @@
 """An optional renderer must preserve the native portfolio and exact-run context."""
 
+from __future__ import annotations
+
 from copy import deepcopy
 
 from scripts.ops.observability.grafana.generate_adaptive_dashboards import project

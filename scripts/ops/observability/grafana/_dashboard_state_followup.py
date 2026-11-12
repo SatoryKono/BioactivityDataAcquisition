@@ -483,8 +483,8 @@ def _ensure_stage_panel(by_id: dict[int, dict[str, Any]]) -> None:
                 "format": "table",
                 "root_selector": "stage_diagnostics",
                 "url": (
-                    "/ops/observability/selected-run-status?pipeline=${pipeline}"
-                    "&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+                    "/ops/observability/selected-run-status?pipeline=${selected_pipeline}"
+                    "&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
                 ),
                 "url_options": {"method": "GET", "data": ""},
             }

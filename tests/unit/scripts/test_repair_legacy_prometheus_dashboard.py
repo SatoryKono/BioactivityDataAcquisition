@@ -1,5 +1,7 @@
 """Service dashboard migration preserves identity and the meaning of samples."""
 
+from __future__ import annotations
+
 import pytest
 
 from scripts.ops.observability.grafana.repair_legacy_prometheus_dashboard import (

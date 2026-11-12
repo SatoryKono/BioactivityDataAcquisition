@@ -128,7 +128,7 @@
         "datasource_type": "yesoreyeram-infinity-datasource",
         "datasource_uid": "bioetl-ops-http",
         "expressions": [
-          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+          "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
         "target_count": 1
       }
@@ -276,7 +276,7 @@
         "datasource_type": "yesoreyeram-infinity-datasource",
         "datasource_uid": "bioetl-ops-http",
         "expressions": [
-          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+          "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
         "target_count": 1
       }
@@ -603,7 +603,7 @@
         "datasource_type": "yesoreyeram-infinity-datasource",
         "datasource_uid": "bioetl-ops-http",
         "expressions": [
-          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+          "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
         "target_count": 1
       }
@@ -2201,7 +2201,7 @@
         "datasource_type": "yesoreyeram-infinity-datasource",
         "datasource_uid": "bioetl-ops-http",
         "expressions": [
-          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+          "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
         "target_count": 1
       }

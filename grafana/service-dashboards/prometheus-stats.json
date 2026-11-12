@@ -413,7 +413,7 @@
       "id": 8,
       "links": [],
       "options": {
-        "content": "#### Samples Ingested\nThis graph displays the count of samples ingested by the Prometheus server, as measured over the last 5 minutes, per time series in the range vector. When troubleshooting an issue on IRC or GitHub, this is often the first stat requested by the Prometheus team. ",
+        "content": "#### Samples Ingested\nLegacy local-storage export unavailable on the current TSDB. This panel does not show accepted sample counts and is not a diagnostic signal for ingestion health.",
         "mode": "markdown"
       },
       "pluginVersion": "8.1.0-pre",
@@ -640,7 +640,7 @@
       "id": 11,
       "links": [],
       "options": {
-        "content": "#### Scrapes\nPrometheus scrapes metrics from instrumented jobs, either directly or via an intermediary push gateway for short-lived jobs. Target scrapes will show how frequently targets are scraped, as measured over the last 5 minutes, per time series in the range vector. Scrape Duration will show how long the scrapes are taking, with percentiles available as series. ",
+        "content": "#### Scrape Interval\nThis graph shows the observed scrape interval between target scrapes. For scrape execution duration and percentiles, use ``scrape_duration_seconds``; this panel does not show duration.",
         "mode": "markdown"
       },
       "pluginVersion": "8.1.0-pre",
@@ -723,7 +723,7 @@
       "pluginVersion": "8.1.0-pre",
       "targets": [
         {
-          "expr": "prometheus_evaluator_duration_seconds{quantile!=\"0.01\", quantile!=\"0.05\",instance=~\"$node\"}",
+          "expr": "prometheus_rule_group_duration_seconds{quantile!=\"0.01\", quantile!=\"0.05\",instance=~\"$node\"}",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{quantile}}",

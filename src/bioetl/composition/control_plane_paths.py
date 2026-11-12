@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
+from bioetl.application.services.run_reports.paths import resolve_report_root
+from bioetl.domain.control_plane.run_ledger import RunLedgerEntry
+from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane.file_archive_store import FileArchiveStore
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_store import (
     FileControlPlaneArtifactLifecycleStore,
@@ -111,6 +114,59 @@ def control_plane_root(settings: Settings, leaf: str) -> Path:
 
 
 @dataclass(frozen=True, slots=True)
+class _SelectedRootLedgerPort:
+    """Read-only ledger port that contains files under the selected data_root.
+
+    Validation uses the same run-id chain as Processed Records, after each
+    concrete JSONL / predecessor pointer is checked against the selected root.
+    """
+
+    context: FileEvidenceReadContext
+
+    def append(self, entry: RunLedgerEntry) -> None:
+        raise NotImplementedError("selected validation ledger is read-only")
+
+    def list_entries(self, manifest_id: str) -> list[RunLedgerEntry]:
+        self._assert_manifest_chain(manifest_id)
+        entries = self.context.ledger_port.list_entries(manifest_id)
+        if not entries:
+            return []
+        return list(self.context.get_ledger_entries_by_run_id(entries[0].run_id))
+
+    def list_entries_by_run_id(self, run_id: RunID) -> list[RunLedgerEntry]:
+        return list(self.context.get_ledger_entries_by_run_id(run_id))
+
+    def list_entries_after(
+        self,
+        manifest_id: str,
+        after_entry_id: str | None,
+    ) -> list[RunLedgerEntry]:
+        self._assert_manifest_chain(manifest_id)
+        return self.context.ledger_port.list_entries_after(manifest_id, after_entry_id)
+
+    def _assert_manifest_chain(self, manifest_id: str) -> None:
+        base = self.context.data_root / "output" / "control" / "run_ledger"
+        record_id = manifest_id
+        seen: set[str] = set()
+        while record_id and record_id not in seen:
+            seen.add(record_id)
+            assert_path_within_trusted_base(
+                base / f"{record_id}.jsonl",
+                trusted_base=self.context.data_root,
+                field_name="ledger record path",
+            )
+            pointer = base / "_predecessors" / f"{record_id}.txt"
+            assert_path_within_trusted_base(
+                pointer,
+                trusted_base=self.context.data_root,
+                field_name="ledger predecessor",
+            )
+            record_id = (
+                pointer.read_text(encoding="utf-8").strip() if pointer.exists() else ""
+            )
+
+
+@dataclass(frozen=True, slots=True)
 class FileEvidenceReadContextFactory:
     """Open file-backed read ports under a trusted alias base (RF-003)."""
 
@@ -161,25 +217,37 @@ class FileEvidenceReadContextFactory:
             ),
             replay_object_verifier=verifier,
         )
-        return replace(
-            context,
-            validation_service=ControlPlaneEvidenceService(
-                ledger_port=context.ledger_port,
-                lineage_store=context.lineage_port,
-                manifest_inspector=(
-                    context.manifest_port
-                    if isinstance(context.manifest_port, RawRunManifestInspectionPort)
-                    else None
-                ),
-                lifecycle_planner=FileControlPlaneArtifactLifecycleStore(
-                    base_path=output_root, metrics=self.metrics
-                ),
-                archive_verifier=(
-                    FileArchiveStore(safe_root, self.archive_root, self.report_root)
-                    if self.archive_root is not None
-                    else None
-                ),
+        report_root = (
+            resolve_report_root(root=self.report_root)
+            if self.archive_root is not None
+            else self.report_root
+        )
+        validation_service = ControlPlaneEvidenceService(
+            ledger_port=_SelectedRootLedgerPort(context),
+            lineage_store=context.lineage_port,
+            manifest_inspector=(
+                context.manifest_port
+                if isinstance(context.manifest_port, RawRunManifestInspectionPort)
+                else None
             ),
+            lifecycle_planner=FileControlPlaneArtifactLifecycleStore(
+                base_path=output_root, metrics=self.metrics
+            ),
+            archive_verifier=(
+                FileArchiveStore(safe_root, self.archive_root, report_root)
+                if self.archive_root is not None
+                else None
+            ),
+        )
+        return FileEvidenceReadContext(
+            data_root=context.data_root,
+            trusted_alias_base=context.trusted_alias_base,
+            manifest_port=context.manifest_port,
+            ledger_port=context.ledger_port,
+            workflow_manifest_port=context.workflow_manifest_port,
+            lineage_port=context.lineage_port,
+            replay_object_verifier=context.replay_object_verifier,
+            validation_service=validation_service,
         )
 
 

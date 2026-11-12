@@ -7,6 +7,7 @@ from collections.abc import Callable, Coroutine
 from dataclasses import replace
 from time import perf_counter
 from typing import Protocol
+from uuid import UUID
 
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
@@ -45,6 +46,7 @@ from bioetl.interfaces.http._health_server_control_plane_scope import (
     _IdentityScope,
     read_selected_run_id,
 )
+from bioetl.interfaces.http._processed_records_value_support import _is_all_scope
 from bioetl.interfaces.http._report_selector_options import (
     verified_report_identity_for_run,
 )
@@ -409,23 +411,46 @@ async def _service_payload(
         )
 
 
+def _same_run_id(left: object, right: object) -> bool:
+    """Compare run ids as UUID values when both parse; else compare as text."""
+    try:
+        return UUID(str(left)) == UUID(str(right))
+    except (TypeError, ValueError, AttributeError):
+        return str(left) == str(right)
+
+
 def _bind_selected_validation(
     host: _EvidenceRoutingHost,
     scope: _IdentityScope,
     service: ControlPlaneEvidenceService,
 ) -> tuple[_IdentityScope, ControlPlaneEvidenceService]:
     """Keep validation, lifecycle and ledger ports on the selected locator root."""
+    if scope.resolved_via == "resolved_without_manifest":
+        # Report-catalog hit without a recorded manifest must stay
+        # ``manifest_not_recorded``, not a binder/parse error.
+        return scope, service
     resolver = getattr(host, "_evidence_location_resolver", None)
     if (
         not isinstance(resolver, EvidenceLocationResolver)
         or scope.selected_run_id is None
     ):
         return scope, service
-    pipeline = (
-        scope.resolved_manifest.pipeline_name
-        if scope.resolved_manifest
-        else scope.requested_pipeline
-    )
+    requested = scope.requested_pipeline
+    is_all_scope = getattr(host, "_is_all_scope_token", _is_all_scope)
+    concrete_requested = bool(requested) and not is_all_scope(requested)
+    if concrete_requested:
+        if (
+            scope.resolved_manifest is not None
+            and scope.resolved_manifest.pipeline_name != requested
+        ):
+            raise ValueError("Selected validation manifest identity does not match")
+        pipeline = requested
+    else:
+        pipeline = (
+            scope.resolved_manifest.pipeline_name
+            if scope.resolved_manifest
+            else requested
+        )
     resolved = resolver.resolve(
         kind="pipeline",
         owner=pipeline,
@@ -441,7 +466,7 @@ def _bind_selected_validation(
     manifest = context.get_manifest_by_run_id(scope.selected_run_id)
     if (
         not isinstance(manifest, RunManifest)
-        or str(manifest.run_id) != scope.selected_run_id
+        or not _same_run_id(manifest.run_id, scope.selected_run_id)
         or manifest.pipeline_name != pipeline
         or (
             scope.selected_run_types

@@ -1,5 +1,7 @@
 """Exact-run accounting must follow the trusted detail locator, not global totals."""
 
+from __future__ import annotations
+
 import asyncio
 from datetime import UTC, datetime
 from pathlib import Path

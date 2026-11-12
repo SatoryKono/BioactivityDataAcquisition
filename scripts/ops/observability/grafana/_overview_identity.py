@@ -47,7 +47,7 @@ def apply_overview_identity(payload: dict) -> None:
     )
     target = identity["targets"][0]
     target.update(
-        url="/ops/observability/selected-run-status?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&workflow=${workflow:csv}",
+        url="/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_type=${run_type:csv}&run_id=${selected_run_id}&workflow=${workflow:csv}",
         root_selector=(
             '($v := function($x){$exists($x) and $x != "" ? $string($x) : '
             '"Not recorded in saved run evidence"}; '
@@ -534,8 +534,8 @@ def _apply_reconciliation_evidence(payload: dict) -> None:
                     "format": "table",
                     "parser": "backend",
                     "url": (
-                        "/ops/observability/selected-run-status?pipeline=${pipeline}"
-                        "&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+                        "/ops/observability/selected-run-status?pipeline=${selected_pipeline}"
+                        "&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
                     ),
                     "url_options": {"method": "GET", "data": ""},
                     "root_selector": "reconciliation_display",

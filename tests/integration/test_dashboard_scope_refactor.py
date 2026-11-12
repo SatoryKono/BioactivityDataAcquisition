@@ -242,7 +242,8 @@ def test_compact_selected_run_summary_uses_shared_projection() -> None:
             if isinstance(target, dict)
         ]
         if not any(
-            "selected-run-status?pipeline=${pipeline}&run_id=${run_id}" in url
+            "selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
+            in url
             for url in urls
         ):
             missing.append(
@@ -278,7 +279,7 @@ def test_provider_reason_and_causes_share_empty_state() -> None:
     assert saved["datasource"]["uid"] == "-- Dashboard --"
     assert saved["targets"][0]["panelId"] == 9002
     donor = next(p for p in overview["panels"] if p["id"] == 9002)
-    assert "run_id=${run_id}" in donor["targets"][0]["url"]
+    assert "run_id=${selected_run_id}" in donor["targets"][0]["url"]
     assert (
         "No API check" in str(saved)
         or "provider api was not called" in saved["description"].lower()
@@ -316,13 +317,13 @@ def test_run_explorer_selects_rows_without_removed_detail_groups() -> None:
     assert link["targetBlank"] is False
     assert "viewPanel" not in link["url"]
     for token in (
-        "var-pipeline=${__data.fields.Pipeline:percentencode}",
+        "var-pipeline=${__data.fields.pipeline:percentencode}",
         "var-run_type=${__data.fields.run_type:percentencode}",
         "var-run_id=${__data.fields.run_id:percentencode}",
         "${__url_time_range}",
     ):
         assert token in link["url"]
-    assert browse["options"]["footer"]["enablePagination"] is False
+    assert browse["options"]["footer"]["enablePagination"] is True
     assert browse["options"]["cellHeight"] == "sm"
     banner = next(p for p in roots if p["id"] == 1)
     assert "Reset filters" in banner["options"]["content"]

@@ -23,7 +23,8 @@ def repair_dashboard(source: dict[str, Any]) -> dict[str, Any]:
         "Unavailable legacy metrics never establish healthy storage."
     )
     for panel in dashboard.get("panels", []):
-        if panel.get("id") in {3, 6, 7}:
+        panel_id = panel.get("id")
+        if panel_id in {3, 6, 7}:
             panel["description"] = (
                 "Unsupported legacy local-storage metric; use Prometheus 2.0 Stats."
             )
@@ -32,7 +33,37 @@ def repair_dashboard(source: dict[str, Any]) -> dict[str, Any]:
                 noValue="UNSUPPORTED · Legacy metric",
                 color={"mode": "fixed", "fixedColor": "gray"},
             )
-        if panel.get("id") == 14:
+        if panel_id == 8 and panel.get("type") == "text":
+            panel["options"] = {
+                **panel.get("options", {}),
+                "content": (
+                    "#### Samples Ingested\n"
+                    "Legacy local-storage export unavailable on the current TSDB. "
+                    "This panel does not show accepted sample counts and is not a "
+                    "diagnostic signal for ingestion health."
+                ),
+                "mode": "markdown",
+            }
+        if panel_id == 11 and panel.get("type") == "text":
+            panel["options"] = {
+                **panel.get("options", {}),
+                "content": (
+                    "#### Scrape Interval\n"
+                    "This graph shows the observed scrape interval between target "
+                    "scrapes. For scrape execution duration and percentiles, use "
+                    "``scrape_duration_seconds``; this panel does not show duration."
+                ),
+                "mode": "markdown",
+            }
+        if panel_id == 12:
+            for target in panel.get("targets") or []:
+                expr = str(target.get("expr") or "")
+                if "prometheus_evaluator_duration_seconds" in expr:
+                    target["expr"] = expr.replace(
+                        "prometheus_evaluator_duration_seconds",
+                        "prometheus_rule_group_duration_seconds",
+                    )
+        if panel_id == 14:
             # Preserve the actual query and its history rather than silently
             # exchanging the metric underneath an existing graph.
             panel["title"] = "Scrape Interval"

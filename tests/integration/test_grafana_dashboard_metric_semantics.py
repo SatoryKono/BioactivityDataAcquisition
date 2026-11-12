@@ -325,7 +325,7 @@ def test_control_plane_identity_evidence_uses_http_not_prometheus_labels() -> No
     assert identity["targets"][0]["panelId"] == 9418
     source = panels[9418]
     assert source["datasource"]["uid"] == "bioetl-ops-http"
-    assert all("run_id=${run_id}" in t["url"] for t in source["targets"])
+    assert all("run_id=${selected_run_id}" in t["url"] for t in source["targets"])
     for path in Path("grafana/dashboards").glob("*.json"):
         expressions = "\n".join(get_panel_expressions(load_dashboard(path)))
         for forbidden in (

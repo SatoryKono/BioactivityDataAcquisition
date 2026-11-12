@@ -173,6 +173,7 @@ def empty_replay_readiness(
     """HTTP states that are not a domain READY."""
     if verdict not in {
         SELECT_RUN,
+        "NO RUNS",
         "НЕТ ЗАПУСКОВ",
         QUERY_ERROR,
         INSUFFICIENT,

@@ -1367,7 +1367,7 @@
           "format": "table",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items.($merge([$, {\"workflow_id\": workflow_id != \"\" ? workflow_id : \"N/A\", \"run_label\": $substring(run_id,0,8) & \"…\", \"pipeline_label\": $substringAfter(pipeline, provider & \"_\") ? $substringAfter(pipeline, provider & \"_\") : pipeline, \"workflow_passport_path\": $substringAfter(workflow_passport_url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\"), \"pipeline_passport_path\": $substringAfter(pipeline_passport_url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\")}]))",
+          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\", \"pipeline_label\": \"VALID EMPTY\"}] : items.($merge([$, {\"workflow_id\": workflow_id != \"\" ? workflow_id : \"N/A\", \"run_label\": $substring(run_id,0,8) & \"…\", \"pipeline_label\": $substringAfter(pipeline, provider & \"_\") ? $substringAfter(pipeline, provider & \"_\") : pipeline, \"workflow_passport_path\": $substringAfter(workflow_passport_url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\"), \"pipeline_passport_path\": $substringAfter(pipeline_passport_url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\")}]))",
           "source": "url",
           "type": "json",
           "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}",
