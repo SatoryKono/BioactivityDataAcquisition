@@ -117,9 +117,11 @@ def dashboard_input(path: str) -> bool:
 
 
 def _runtime_input(path: str) -> bool:
-    return path.startswith((".codex/", ".junie/", ".devin/")) or path in {
+    return path.startswith(
+        (".codex/", ".junie/", ".devin/", "scripts/ai/junie/", "scripts/ai/codex/")
+    ) or path in {
         "AGENTS.md",
-        "configs/quality/junie-mirror-contract.json",
+        "scripts/ai/junie/junie-mirror-contract.json",
     }
 
 
@@ -143,7 +145,7 @@ def _first_window_input(path: str) -> bool:
     # DASH-FIT-004 explicitly owns a global code/docs gate; do not narrow it.
     return path.startswith(
         ("src/", "tests/", "docs/", "grafana/", "scripts/", ".github/")
-    )
+    ) or path in {".pre-commit-config.yaml", "pyproject.toml", "uv.lock", "pytest.ini"}
 
 
 def _check_rules() -> list[tuple[Callable[[str], bool], Check]]:

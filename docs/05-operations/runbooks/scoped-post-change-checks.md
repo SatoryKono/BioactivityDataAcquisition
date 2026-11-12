@@ -87,7 +87,8 @@ budget increases. Record measured durations separately by platform and scenario.
 Local mechanism tests do not prove native lifecycle loading or current-head CI.
 
 Windows qualification (Python 3.13.7, pre-commit 4.7.0, pytest 9.2.0) passed
-71 tests with one POSIX-only skip. A representative-path experiment executed
+71 tests with one POSIX-only skip. WSL (Python 3.13.18, pre-commit 4.7.0,
+pytest 9.2.0) passed 71 tests with one native-Windows-only skip in 172.87 seconds. A representative-path experiment executed
 the actual selected check commands in this checkout, without editing those
 representative inputs or invoking agents:
 

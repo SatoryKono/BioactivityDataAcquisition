@@ -49,6 +49,7 @@ GENERATED_ARTIFACT_ROUTING = Path("configs/quality/generated_artifact_routing.ya
 
 from scripts.engineering.dev.run_tests import TESTS_ROOT as PYTEST_ALL_ROOT
 
+JUNIE_RUNTIME_CI_TEST = "tests/architecture/test_junie_runtime_ci_contract.py"
 NPM_RUNTIME_TEST = "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py"
 GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
     "tests/architecture/test_github_actions_runtime_policy.py"
@@ -178,6 +179,7 @@ GHA_DISABLED_MAP_TEST = "tests/architecture/test_gha_disabled_map_10263.py"
 EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
     {
         "scripts/ai/codex/native_runtime_contract.py",
+        "scripts/ai/junie/check_junie_mirror.py",
         "scripts/engineering/repo/process_supervisor.py",
     }
 )
@@ -193,6 +195,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/repo/test_hook_receipts.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
+    "scripts/ai/junie/check_junie_mirror.py": (JUNIE_RUNTIME_CI_TEST,),
+    "scripts/ai/junie/junie-mirror-contract.json": (JUNIE_RUNTIME_CI_TEST,),
     "scripts/engineering/repo/process_supervisor.py": (
         "tests/unit/scripts/repo/test_process_deadline.py",
         HOOK_INSTALLATION_TEST,
@@ -278,7 +282,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/architecture/test_codex_task_routing.py",
             RUNTIME_AGENT_DOCS_DRIFT_TEST,
             CODEX_NATIVE_RUNTIME_TEST,
-            "tests/architecture/test_junie_runtime_ci_contract.py",
+            JUNIE_RUNTIME_CI_TEST,
             "tests/architecture/test_gitignore_secret_and_agents_policy.py",
             "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
@@ -1450,7 +1454,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
             RUNTIME_AGENT_DOCS_DRIFT_TEST,
             "tests/architecture/test_runtime_orchestration_surfaces.py",
             AI_RUNTIME_GOVERNANCE_LINKS_TEST,
-            "tests/architecture/test_junie_runtime_ci_contract.py",
+            JUNIE_RUNTIME_CI_TEST,
             "tests/architecture/test_devin_runtime_no_dead_script_refs.py",
             "tests/architecture/test_devin_setup_guide_codex_models.py",
         ),
@@ -1479,6 +1483,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "docs/00-project/ai/rules/": (SYNC_CURSOR_RULES_TEST,),
     ".devin/workflows/qodo-sync.md": (SYNC_CURSOR_RULES_TEST,),
     "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md": (
+        JUNIE_RUNTIME_CI_TEST,
         SYNC_CURSOR_RULES_TEST,
         "tests/architecture/test_documentation_cleanup_inventory.py",
     ),

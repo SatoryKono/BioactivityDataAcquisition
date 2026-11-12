@@ -40,6 +40,12 @@ def test_windows_pretest_without_bash_is_error():
     "path,required,excluded",
     [
         ("docs/guide.md", "docs-cleanup-inventory", "dashboard-static-gates"),
+        (
+            "scripts/ai/junie/junie-mirror-contract.json",
+            "runtime-parity",
+            "dashboard-static-gates",
+        ),
+        (".pre-commit-config.yaml", "dashboard-first-window", "dashboard-static-gates"),
         ("src/bioetl/example.py", "module-coverage-source", "runtime-parity"),
         (".devin/agents/DEVIN-RUNTIME.md", "runtime-parity", "dashboard-static-gates"),
         ("grafana/dashboards/example.json", "dashboard-static-gates", "runtime-parity"),
