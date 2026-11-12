@@ -24,6 +24,92 @@ from iuphar_target_class.delivery import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("snapshot", ["s" * 240, "ж" * 120])
+def test_overlong_csv_name_is_diagnosed_before_destination_stat(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, snapshot: str
+) -> None:
+    from iuphar_target_class import delivery
+
+    source = _copy_example(tmp_path)
+    original = source.read_bytes()
+    _, expected = result_names(
+        source.name, snapshot_id=snapshot, rules_version="v", run_id="r"
+    )
+    assert len(expected.encode("utf-8")) > 255
+
+    def unexpected_stat(path: Path) -> bool:
+        raise AssertionError(f"overlong destination was inspected: {path.name}")
+
+    monkeypatch.setattr(delivery, "_directory_entry", unexpected_stat)
+    result = run_batch(
+        source, root=tmp_path, snapshot_id=snapshot, rules_version="v", run_id="r"
+    )
+    assert not result.written
+    assert result.diagnostic == "name_too_long"
+    assert result.normalized_name == expected
+    assert result.manifest_name is None
+    assert list(tmp_path.iterdir()) == [source]
+    assert source.read_bytes() == original
+
+
+def test_exactly_255_byte_csv_name_keeps_the_published_template(tmp_path: Path) -> None:
+    source = _copy_example(tmp_path)
+    _, empty = result_names(source.name, snapshot_id="", rules_version="v", run_id="r")
+    snapshot = "s" * (255 - len(empty.encode("utf-8")))
+    _, expected = result_names(
+        source.name, snapshot_id=snapshot, rules_version="v", run_id="r"
+    )
+    assert len(expected.encode("utf-8")) == 255
+    result = run_batch(
+        source, root=tmp_path, snapshot_id=snapshot, rules_version="v", run_id="r"
+    )
+    assert result.written
+    assert result.normalized_name == expected
+    assert (tmp_path / expected).is_file()
+    assert result.manifest_name is not None
+    assert len(result.manifest_name.encode("utf-8")) <= 255
+
+
+@pytest.mark.parametrize(
+    "contents",
+    [
+        "input_row_id,input_row_id\nrow-1,\n",
+        "input_row_id,input_row_id\n,row-1\n",
+        "input_row_id,old_iuphar_class\n,Receptor\n",
+        "input_row_id,old_iuphar_class\n   ,Receptor\n",
+        "old_iuphar_class,input_row_id\nReceptor\n",
+        "input_row_id,old_iuphar_class\nrow-1,Enzyme\n,Receptor\n",
+    ],
+)
+def test_invalid_row_identity_rejects_before_any_publication(
+    tmp_path: Path, contents: str
+) -> None:
+    source = tmp_path / "invalid.csv"
+    source.write_text(contents, encoding="utf-8")
+    original = source.read_bytes()
+    with pytest.raises(ValueError, match="input_row_id"):
+        run_batch(source, root=tmp_path, snapshot_id="s", rules_version="v", run_id="r")
+    assert list(tmp_path.iterdir()) == [source]
+    assert source.read_bytes() == original
+
+
+def test_header_only_csv_remains_a_valid_empty_batch(tmp_path: Path) -> None:
+    source = tmp_path / "empty.csv"
+    source.write_text("input_row_id,old_iuphar_class\n", encoding="utf-8")
+    original = source.read_bytes()
+    result = run_batch(
+        source, root=tmp_path, snapshot_id="s", rules_version="v", run_id="r"
+    )
+    assert result.written
+    with (tmp_path / result.normalized_name).open(
+        encoding="utf-8", newline=""
+    ) as handle:
+        reader = csv.DictReader(handle)
+        assert tuple(reader.fieldnames or ()) == tuple(contract_document()["columns"])
+        assert tuple(reader) == ()
+    assert source.read_bytes() == original
+
+
 @pytest.mark.parametrize("failure", [KeyboardInterrupt, SystemExit])
 def test_manifest_interrupt_rolls_back_and_allows_retry(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: type[BaseException]
