@@ -93,6 +93,10 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
       el = document.scrollingElement;
     }
     el.dataset.bioetlCaptureScroll='true';
+    // CSSOM clientHeight is integral, while the reachable scrollTop can be
+    // fractional. Measure the actual range before resetting to the first tile.
+    el.scrollTop=el.scrollHeight;
+    const maxScrollTop=el.scrollTop;
     el.scrollTop=0;
     const r=el.getBoundingClientRect();
     const stickyBottom = [...el.querySelectorAll('*')].reduce((bottom,node)=>{
@@ -100,8 +104,10 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
       return ['sticky','fixed'].includes(style.position) && box.top>=0 && box.top<innerHeight/2 && box.width>innerWidth/2
         ? Math.max(bottom,Math.min(box.bottom,innerHeight/2)) : bottom;
     },Math.max(0,r.top));
-    return {top:Math.max(0,r.top),stickyBottom,clientHeight:Math.min(el.clientHeight,innerHeight-Math.max(0,r.top)),
-      scrollHeight:el.scrollHeight,elementClientHeight:el.clientHeight,layoutViewport:{width:innerWidth,height:innerHeight},scale:devicePixelRatio};
+    return {top:Math.max(0,r.top),stickyBottom,
+      clientHeight:Math.min(el.scrollHeight-maxScrollTop,innerHeight-Math.max(0,r.top)),
+      scrollHeight:el.scrollHeight,maxScrollTop,elementClientHeight:el.clientHeight,
+      layoutViewport:{width:innerWidth,height:innerHeight},scale:devicePixelRatio};
   });
   if (!Number.isFinite(surface.clientHeight) || surface.clientHeight<=0) throw new Error('No measurable dashboard scroll surface');
   const tileDir=filePath.replace(/\.png$/,'-tiles');
@@ -125,7 +131,8 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
     actual = tile.scrollTop;
     tiles.push({...tile,file:path.relative(path.dirname(filePath),tile.file)});
     if(actual+surface.clientHeight>=surface.scrollHeight)break;
-    const next=Math.min(actual+visibleHeight-overlap,surface.scrollHeight-surface.clientHeight);
+    const next=Math.min(actual+visibleHeight-overlap,
+      surface.maxScrollTop ?? surface.scrollHeight-surface.clientHeight);
     if(next<=actual)throw new Error('Dashboard scroll capture made no progress');
     target=next;
   }

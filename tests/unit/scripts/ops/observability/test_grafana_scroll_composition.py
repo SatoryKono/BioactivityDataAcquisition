@@ -11,6 +11,80 @@ REPO_ROOT = Path(__file__).resolve().parents[5]
 COMPOSITOR = REPO_ROOT / "scripts/ops/observability/grafana/capture_scroll_surface.cjs"
 
 
+@pytest.mark.parametrize("scale", [1, 1.25, 2])
+@pytest.mark.parametrize("client_height", [599.6, 600.4, 700.4])
+def test_capture_reaches_fractional_scroll_limit(tmp_path, scale, client_height):
+    """Run the actual DOM measurement and loop against a fractional scroll range."""
+    script = r"""
+const fs=require('node:fs'), path=require('node:path');
+const [modulePath,directory]=process.argv.slice(1);
+const scale=Number(process.argv[3]), height=Number(process.argv[4]);
+global.innerHeight=916; global.innerWidth=1366; global.devicePixelRatio=scale;
+let scrollTop=0;
+const maximum=1800-height;
+const el={
+  dataset:{},clientHeight:Math.round(height),scrollHeight:1800,
+  getBoundingClientRect:()=>({top:232,height,width:1366}),
+  querySelectorAll:selector=>selector==='[data-viz-panel-key]' ? [{},{}] : [],
+  get scrollTop(){return scrollTop;},
+  set scrollTop(value){scrollTop=Math.min(maximum,Math.max(0,value));},
+};
+global.document={
+  querySelectorAll:selector=>selector==='*' ? [el] : [],
+  querySelector:()=>el,scrollingElement:el,
+};
+const native=require(path.join(path.dirname(modulePath),'native_browser_zoom.cjs'));
+native.capturePageScreenshot=async(_page,options)=>{
+  const bytes=Buffer.from('synthetic viewport');fs.writeFileSync(options.path,bytes);return bytes;
+};
+const {captureScrollSurface}=require(modulePath);
+const page={
+  evaluate:async(fn,arg)=>fn(arg),waitForTimeout:async()=>{},
+  context:()=>({newPage:async()=>({
+    evaluate:async()=>Buffer.from('synthetic composite').toString('base64'),close:async()=>{},
+  })}),
+};
+captureScrollSurface(page,{
+  filePath:path.join(directory,'dashboard.png'),timeout:1000,
+  pngEvidence:()=>({width:Math.round(1366*scale),height:Math.round(916*scale)}),
+  measure:async()=>({}),
+}).then(result=>{
+  if(height>684)throw new Error('Accepted an incomplete container clipped below the viewport');
+  const positions=result.tiles.map(tile=>tile.scrollTop);
+  if(positions.at(-1)!==maximum)throw new Error(`Missing actual scroll limit: ${positions}`);
+  if(new Set(positions).size!==positions.length)throw new Error('Captured a stalled duplicate');
+  if(result.surface.maxScrollTop!==maximum)throw new Error('Actual scroll range not measured');
+  if(Math.abs(result.surface.clientHeight-height)>1e-9)throw new Error('Rounded client geometry');
+  let covered=0;
+  result.composition.slices.forEach((slice,i)=>{
+    if(slice.destinationY!==covered)throw new Error('Gap or overwritten pixels');
+    if(slice.sourceY+slice.height>Math.round((232+height)*scale))
+      throw new Error('Copied pixels below the scroll container');
+    if(i>0 && slice.sourceY<Math.ceil(232*scale))throw new Error('Copied sticky chrome');
+    covered+=slice.height;
+  });
+  if(covered!==Math.round(2032*scale))throw new Error('Incomplete physical document');
+}).catch(error=>{
+  if(height>684 && error.message.includes('made no progress'))return;
+  console.error(error);process.exitCode=1;
+});
+"""
+    subprocess.run(
+        [
+            "node",
+            "-e",
+            script,
+            str(COMPOSITOR),
+            str(tmp_path),
+            str(scale),
+            str(client_height),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
 @pytest.mark.parametrize("scale", [1.25, 1.5, 1.75])
 def test_fractional_zoom_preserves_complete_bounded_document(scale):
     script = r"""
