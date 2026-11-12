@@ -159,16 +159,9 @@ def test_devin_test_native_model_and_permissions_remain_bounded() -> None:
         "read",
         "grep",
         "glob",
-        "exec",
-        "write",
-        "edit",
     ]
     assert metadata["permissions"]["allow"] == [
         "Read(**)",
-        "Write(tests/**)",
-        "Exec(pytest)",
-        "Exec(python)",
-        "Exec(make)",
     ]
     assert metadata["permissions"]["deny"] == [
         "Write(src/**)",
@@ -177,3 +170,13 @@ def test_devin_test_native_model_and_permissions_remain_bounded() -> None:
         "Exec(gh)",
         "Exec(hub)",
     ]
+
+
+def test_restricted_devin_test_route_uses_parent_without_permission_escalation() -> (
+    None
+):
+    root = Path(__file__).resolve().parents[2]
+    runtime = (root / ".devin/agents/DEVIN-RUNTIME.md").read_text(encoding="utf-8")
+    assert "Native delegation of restricted profiles is blocked until" in runtime
+    assert "performs scoped commands, test writes, and reports itself" in runtime
+    assert "automatic fallback" in runtime

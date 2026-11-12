@@ -72,8 +72,9 @@ not slim that file without a `setup_mcp.py` review). The daily overlay
 profile: no Grafana/Prometheus/neo4j in the default Devin day, and no MCP
 `github` on `py-*` children. Do not commit `.devin/mcp_config.local.json`.
 
-`py-test-bot` may write `tests/**` (including VCR cassettes) and must deny
-`src/**`, `configs/**`, `docs/**`, and Exec `gh`.
+The logical `py-test-bot` tests-only write scope (including VCR cassettes)
+is carried out by the authorized parent while native delegation is blocked.
+Existing `src/**`, `configs/**`, `docs/**`, and Exec `gh` denials remain.
 
 ## Response Language
 
@@ -148,47 +149,61 @@ Logical `py-*` profiles → Devin custom subagent profiles:
 
 | Logical Profile | Devin Profile | Model | Tool Access | Execution Mode |
 | --- | --- | --- | --- | --- |
-| `py-audit-bot` | `py-audit-bot` | Parent model | Read-only (`read`, `grep`, `glob`, `exec`); modes `baseline`/`final`/`targeted`/`review`/`debt`/`reproducibility` | Foreground |
+| `py-audit-bot` | `py-audit-bot` | Parent model | Read/search declarations only (`read`, `grep`, `glob`); modes `baseline`/`final`/`targeted`/`review`/`debt`/`reproducibility` | Foreground |
 | `py-plan-bot` | `py-plan-bot` | Parent model | Read-only | Foreground |
 | `py-debug-bot` | `py-debug-bot` | Parent model | Read-only (reproduce/isolate/guidance; no `src/` or `tests/` writes) | Foreground |
 | `py-config-bot` | `py-config-bot` | Default subagent model | Read + write (`configs/`) | Foreground |
 | `py-doc-bot` | `py-doc-bot` | Default subagent model | Read + write (`docs/`) | Foreground |
-| `py-test-bot` | `py-test-bot` | Default subagent model | Read + exec (`pytest`/`python`) + `Write(tests/**)`; deny `Write(src/**)`, `Write(configs/**)`, `Write(docs/**)` | Foreground/background |
+| `py-test-bot` | `py-test-bot` | Default subagent model | Read/search declarations only; parent executes tests and authorized `tests/**` writes | Foreground/background |
 
-## Devin Subagent Invocation
+## Permission boundary and qualification
 
-### Standard Pattern
+Native delegation of restricted profiles is blocked until the selected
+binary/version/platform demonstrates registration and effective tool limits.
+This applies to `py-audit-bot`, `py-debug-bot`, `py-plan-bot`, and `py-test-bot`.
+Until then, the authorized parent reads the matching Devin profile/skill and
+performs scoped commands, test writes, and reports itself. Do not substitute
+`subagent_general`, resume in foreground, or grant broader permissions as an
+automatic fallback. Missing qualification is NOT_PROVEN, never sandbox PASS.
 
-```python
-run_subagent(
-    title="py-audit-bot baseline audit",
-    task="Follow .devin/agents/py-audit-bot/AGENT.md for task_id=AUD-001, phase=baseline, scope=src/bioetl/application/.",
-    profile="py-audit-bot",
-    is_background=False,
-)
-```
+For the observed Devin `3000.11.3 (9c803229faa4)`, root resolution and skill
+discovery were observed in the loading runbook; native custom-profile merge
+and child-process enforcement were not. The current vendor permission contract
+uses command prefixes for `Exec(...)`, file-tool scopes for `Write(...)`, and
+restrictive profile `allowed-tools`. Skill `allowed-tools` has a different
+auto-approval role; do not transfer that meaning to profiles. Legacy profile
+`permissions` metadata is retained without claiming its interpretation.
+The static checker accepts the governed block-list spelling and rejects
+duplicate/ambiguous frontmatter keys; it does not emulate arbitrary YAML or
+replace native permission qualification.
 
-### Built-in Profile Fallback
+Project `.devin/config.json` keeps protected reads in `ask` only and denies
+root/nested `.env*` file-tool writes. The root permits reading but this adapter
+retains the additional prompt. There are no automatic Exec/Write grants;
+ordinary commands and writes ask. These declarations cannot constrain arbitrary
+shell children or guarantee absolute-path glob matching on every platform.
+An approval for a command is not per-task approval to mutate `.env`.
 
-When custom profiles are not available, use built-in profiles:
+Vendor config precedence is organization, session, project-local, project, user;
+lists are combined and same-layer deny wins. File-path ask has no narrower-allow
+exception; command/MCP specificity has its own rules. This vendor configuration
+model is distinct from root repository instruction precedence. Active higher
+layers and native enforcement must be inspected before qualification; do not
+infer profile/parent composition from project config alone.
 
-```python
-# For read-only exploration
-run_subagent(
-    title="Codebase exploration",
-    task="Explore the architecture of X",
-    profile="subagent_explore",
-    is_background=True,
-)
+Windows OS isolation is unsupported in the current vendor contract. Project
+settings cannot enable a sandbox. Git/Python/make or nested processes can write
+outside `tests`; a filesystem-tool deny does not prove isolation of Exec.
+The shared `scripts/engineering/repo/operation_guards.py` evaluates structured
+protected mutations without executing them; it does not intercept shell tools.
+Synthetic boundary tests use ordinary files and no real `.env` fixtures.
 
-# For general code changes
-run_subagent(
-    title="Implementation",
-    task="Implement feature X",
-    profile="subagent_general",
-    is_background=False,
-)
-```
+Sources: [permissions](https://docs.devin.ai/cli/reference/permissions),
+[configuration precedence](https://docs.devin.ai/cli/reference/configuration/global-vs-local),
+[subagent fields](https://docs.devin.ai/cli/subagents),
+[sandbox](https://docs.devin.ai/cli/sandbox). These are current vendor contracts,
+not a substitute for version-bound execution evidence. No adapter or service is
+enabled by this change; the remaining native isolation result is NOT_PROVEN.
 
 ## Common Task Routing
 
@@ -208,7 +223,7 @@ Use the smallest existing skill that matches the request:
 it before use; if unavailable, the authorized parent follows repository PR policy
 directly. Review uses the project-local `py-audit-bot` route.
 
-Templates do not broaden user authority. Diagnosis and review stay read-only unless the user also asks for implementation. Load the selected skill and relevant sources/tests; do not load every ADR or the whole repository by default.
+All restricted-profile routes in the table are logical parent-guide routes while the qualification block applies. Templates do not broaden user authority. Diagnosis and review stay read-only unless the user also asks for implementation. Load the selected skill and relevant sources/tests; do not load every ADR or the whole repository by default.
 
 ## Risk-Based Validation
 
@@ -238,6 +253,9 @@ core verifier. EvidenceStore ingestion is a separate, explicitly authorized
 command and never creates a waiver or `DecisionRecord`.
 
 ## Foreground vs Background Strategy
+
+The qualification block above applies before choosing either mode. Neither
+mode is an isolation mechanism or an automatic permission escalation route.
 
 ### Foreground Subagents
 Use for:
@@ -280,11 +298,9 @@ allowed-tools:
   - read
   - grep
   - glob
-  - exec
 permissions:
   allow:
     - Read(**)
-    - Exec(git)
   deny:
     - write
     - edit
@@ -293,7 +309,10 @@ permissions:
 [Profile-specific system prompt and instructions]
 ```
 
-Read-only profiles `py-audit-bot`, `py-plan-bot`, and `py-debug-bot` must not allow bare `Exec(python)`. `deny: write` and `deny: edit` do not stop a child `python` process from writing the product tree. Keep allows on read-only commands such as `Exec(git)`, `Exec(pytest)`, `Exec(mypy)`, and `Exec(pdb)`.
+Restricted profiles expose read/search declarations only. All command execution
+(including Git, pytest, mypy, pdb and Python) and authorized test writes remain
+with the parent until separately qualified. The legacy permission example
+preserves denials; it is not proof of a supported profile merge mechanism.
 
 ## Env File Guardrail
 

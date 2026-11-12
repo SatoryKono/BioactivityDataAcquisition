@@ -184,6 +184,11 @@ IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    ".devin/config.json": (
+        CODEX_NATIVE_RUNTIME_TEST,
+        "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+        "tests/architecture/test_runtime_orchestration_surfaces.py",
+    ),
     "scripts/engineering/repo/check_no_partial_tree.py": (
         NO_PARTIAL_TREE_TEST,
         "tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py",
