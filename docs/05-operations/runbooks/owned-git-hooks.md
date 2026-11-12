@@ -1,8 +1,14 @@
-# Owned Git hooks
+______________________________________________________________________
 
+Version: 1.0.0
 Class: operational
 Owner: @bioetl-platform
 Status: implementation qualification
+Last verified: '2026-11-12'
+
+______________________________________________________________________
+
+# Owned Git hooks
 
 ## Purpose
 
@@ -11,7 +17,23 @@ Git settings or the project's environment files. Git hooks remain bypassable;
 independent full-tree CI and existing required checks protect shared history.
 These callbacks are Git events, not AI runtime lifecycle events.
 
-## Installation
+## Trigger
+
+Use for explicit hook installation, inspection, framework/interpreter upgrade or
+rollback. Requalify after changing the owned callback bundle.
+
+## Impact
+
+Missing or stale callbacks can leave local protections inactive. Invalid ownership,
+dependency or timeout evidence blocks Git operations once this deployment is active.
+
+## Preconditions
+
+Use a full approved checkout and an absolute project interpreter with pre-commit
+4.7.0. Preserve existing callbacks and do not change environment files. Native AI
+runtime loading is outside this Git-hook qualification.
+
+## Procedure
 
 First merge the shared guards, full-tree checker and installer into the protected
 main branch. Fetch that branch in an approved full checkout. Bootstrap dependencies
@@ -87,7 +109,7 @@ sandbox. Windows and WSL installations require separate interpreter qualificatio
 one common hook deployment must not be claimed portable across incompatible
 interpreters. A changed platform requires rollback/reinstall and fresh evidence.
 
-## Qualification evidence
+## Verification
 
 Local mechanism qualification on 2026-11-12 used private synthetic Git fixtures
 and a deployment bundle, without installing callbacks in the project repository.
@@ -121,3 +143,16 @@ are checked before any hook changes. A later owner's edit blocks rollback rather
 than being overwritten. Original callbacks and modes are restored; absent originals
 are removed. Bundles/backups remain for inspection. Removing this deployment never
 removes the independent CI guard or weakens existing required checks.
+
+## Compliance
+
+No debt-budget increase, environment-file mutation, runtime parity exception,
+external-service activation or OpenCode write-path activation belongs to deployment.
+All runtime peers use the same repository guardrails.
+
+## Post-incident
+
+Record source SHA, interpreter/framework versions, effective hook path and the
+controlled failure reason. Preserve bundles and backups. Repair the failing layer,
+then repeat fixture qualification and inspect doctor; do not infer PASS from a
+missing callback, timeout, skipped check or stale receipt.
