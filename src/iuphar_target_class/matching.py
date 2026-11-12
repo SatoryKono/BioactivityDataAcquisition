@@ -200,7 +200,7 @@ def _decide(
     conflict = _identity_conflict(conflict_channels)
     if conflict is not None:
         return conflict
-    if _missing_identity_input(query, exact_channels, uniprot_species_gap):
+    if _missing_identity_input(query, uniprot_species_gap):
         return _result(
             "insufficient_input",
             None,
@@ -254,13 +254,12 @@ def _identity_conflict(
 
 def _missing_identity_input(
     query: MatchQuery,
-    channels: list[tuple[str, tuple[str, ...]]],
     uniprot_species_gap: bool,
 ) -> bool:
     gene_blocked = query.organism is None and (
         query.gene_symbol is not None or query.gene_id is not None
     )
-    return uniprot_species_gap or (gene_blocked and not _single_agreement(channels))
+    return uniprot_species_gap or gene_blocked
 
 
 def enforce_match_invariant(result: MatchResult) -> MatchResult:
