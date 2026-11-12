@@ -97,16 +97,15 @@ def _parse_args() -> argparse.Namespace:
         type=float,
         default=None,
         help=(
-            "Explicit coverage percentage fallback when coverage.xml is unavailable, "
-            "for example when reconstructing the baseline from CI diagnostics."
+            "Legacy flag retained for explicit rejection; captures require "
+            "original coverage XML instead of a supplied percentage."
         ),
     )
     parser.add_argument(
         "--coverage-log",
         default="",
         help=(
-            "Optional log file containing a coverage report line such as "
-            "'TOTAL ... 92.81%%'. Used when coverage.xml is unavailable."
+            "Optional source diagnostic log; it cannot replace original coverage XML."
         ),
     )
     parser.add_argument(
