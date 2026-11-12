@@ -144,7 +144,7 @@ def test_rf001_headline_status_is_evidence_aware() -> None:
     )
     assert _mapping_text(_panel(runtime, 18940), "1") == "UNKNOWN"
 
-    assert "run_id=${run_id}" in str(_panel(dq, 9406).get("targets"))
+    assert "run_id=${selected_run_id}" in str(_panel(dq, 9406).get("targets"))
     provenance = str(_panel(dq, 9400).get("description", ""))
     assert "SELECTED RUN" in provenance
     assert all(
@@ -203,7 +203,7 @@ def _shared_frame_source(dashboard, panel_id, source_id, frame):
         for rule in transform["options"]["filters"]
     )
     assert source["datasource"]["uid"] == "bioetl-ops-http"
-    assert "run_id=${run_id}" in source["targets"][0]["url"]
+    assert "run_id=${selected_run_id}" in source["targets"][0]["url"]
     return source["targets"][0]
 
 
@@ -1013,7 +1013,7 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
         "var-run_id=${__data.fields.run_id:percentencode}" in url for url in first_links
     )
     assert any(
-        "var-pipeline=${__data.fields.Pipeline:percentencode}" in url
+        "var-pipeline=${__data.fields.pipeline:percentencode}" in url
         for url in first_links
     )
     assert any(
@@ -1224,7 +1224,7 @@ def test_visible_trust_reason_count_opens_frozen_reason_details() -> None:
     trust = _panel(_load("bioetl-control-plane-v1.json"), 9418)
     assert trust["targets"][0]["parser"] == "uql"
     assert "presentation_trust" in trust["targets"][0]["uql"]
-    assert "run_id=${run_id}" in trust["targets"][0]["url"]
+    assert "run_id=${selected_run_id}" in trust["targets"][0]["url"]
     overrides = {
         o["matcher"]["options"]: o["properties"]
         for o in trust["fieldConfig"]["overrides"]
@@ -1383,7 +1383,7 @@ def test_overview_routes_and_timelines_exclude_inactive_fallbacks() -> None:
         panel.get("id") for panel in _iter_panels(list(overview.get("panels", [])))
     }
     assert {215, 9018, 9019, 9020}.isdisjoint(present)
-    assert "run_id=${run_id}" in _panel(overview, 9002)["targets"][0]["url"]
+    assert "run_id=${selected_run_id}" in _panel(overview, 9002)["targets"][0]["url"]
 
 
 def test_runtime_evidence_validator_rejects_scraping_as_health() -> None:

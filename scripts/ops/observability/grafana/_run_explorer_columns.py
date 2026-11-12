@@ -47,17 +47,17 @@ _COLORS = {
 }
 _RUN_ID_LABEL = "Run ID"
 _COLUMNS = {
-    "workflow_id": ("Workflow", None, 50),
-    "pipeline_label": ("Pipeline", None, 50),
-    "provider": ("Provider", None, 50),
+    "workflow_id": ("Workflow", None, 100),
+    "pipeline_label": ("Pipeline", None, 80),
+    "provider": ("Provider", 60, 50),
     # Full UUID stays in the hidden identity field and Inspect; keep the preview bounded.
-    "run_label": (_RUN_ID_LABEL, None, 50),
-    "started_at": ("Started", None, 50),
-    "duration_display": ("Duration", None, 50),
-    "status": ("Overview", None, 50),
-    "saved_evidence_status": ("Saved Evidence", None, 50),
-    "data_quality_status": (_DATA_QUALITY, None, 50),
-    "replay_readiness_status": (_REPLAY_READINESS, None, 50),
+    "run_label": (_RUN_ID_LABEL, 110, 50),
+    "started_at": ("Started", 170, 50),
+    "duration_display": ("Duration", 70, 50),
+    "status": ("Overview", 80, 80),
+    "saved_evidence_status": ("Saved Evidence", None, 80),
+    "data_quality_status": (_DATA_QUALITY, None, 80),
+    "replay_readiness_status": (_REPLAY_READINESS, 125, 80),
 }
 _CONTEXT = "var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}"
 _SELECT_RUN_URL = (
@@ -314,7 +314,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         color={"mode": "fixed", "fixedColor": "#E5E7EB"},
     )
     defaults["custom"].update(
-        minWidth=50, wrapText=True, cellOptions={"type": "auto", "wrapText": True}
+        minWidth=50, wrapText=False, cellOptions={"type": "auto", "wrapText": False}
     )
     links = {
         "Workflow": (
@@ -387,10 +387,10 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         if name == _RUN_ID_LABEL:
             properties.extend(
                 [
-                    {"id": "custom.wrapText", "value": True},
+                    {"id": "custom.wrapText", "value": False},
                     {
                         "id": _CELL_OPTIONS_ID,
-                        "value": {"type": "auto", "wrapText": True},
+                        "value": {"type": "auto", "wrapText": False},
                     },
                     {"id": "custom.tooltip.field", "value": "run_id"},
                 ]

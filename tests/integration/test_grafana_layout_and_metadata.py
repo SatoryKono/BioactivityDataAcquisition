@@ -174,7 +174,7 @@ def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
     assert identity["targets"][0].get("panelId") == 9002
     donor = next(p for p in dashboard["panels"] if p["id"] == 9002)
     assert "/ops/observability/selected-run-status?" in donor["targets"][0]["url"]
-    assert "run_id=${run_id}" in donor["targets"][0]["url"]
+    assert "run_id=${selected_run_id}" in donor["targets"][0]["url"]
     assert (
         "custom.inspect" in str(identity["fieldConfig"])
         or identity["fieldConfig"]["defaults"]["custom"]["inspect"] is True
@@ -587,7 +587,7 @@ def test_control_plane_bounded_failure_rows_preserve_unknown_evidence() -> None:
     assert target.get("panelId") == 9418
     donor = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9418)
     assert "replay_checks" in donor["targets"][0]["uql"]
-    assert "run_id=${run_id}" in donor["targets"][0]["url"]
+    assert "run_id=${selected_run_id}" in donor["targets"][0]["url"]
     assert "/ops/observability/selected-run-status?" in donor["targets"][0]["url"]
     assert "QUERY ERROR" in panel["description"]
     assert "unknown" in panel["description"].lower()
@@ -731,7 +731,7 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
     # Phase 2.5: provider evidence reuses donor 9002.
     assert saved["targets"][0].get("panelId") == 9002
     donor = next(p for p in overview["panels"] if p["id"] == 9002)
-    assert "run_id=${run_id}" in str(donor["targets"])
+    assert "run_id=${selected_run_id}" in str(donor["targets"])
     assert "expr" not in saved["targets"][0]
 
 
@@ -925,7 +925,7 @@ def test_dq_score_chart_keeps_readable_height_with_semantic_legend() -> None:
     # Phase 2.5: contract exclusions consume donor 9002 exclusions frame.
     assert quality["targets"][0].get("panelId") == 9002
     donor = next(p for p in overview["panels"] if p["id"] == 9002)
-    assert "run_id=${run_id}" in donor["targets"][0]["url"]
+    assert "run_id=${selected_run_id}" in donor["targets"][0]["url"]
     assert "UNKNOWN" in quality["description"]
     assert "historical run overrides" in quality["description"]
     assert "quarantined" in quality["description"].lower()

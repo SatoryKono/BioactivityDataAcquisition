@@ -11,6 +11,34 @@ from bioetl.interfaces.http._report_selector_options import supplement_report_op
 pytestmark = pytest.mark.unit
 
 
+def test_verified_report_replaces_unknown_option_after_scalar_placeholder(tmp_path):
+    _report(tmp_path)
+    payload = supplement_report_options(
+        {"items": ["-", {"text": "old · unknown · run-a", "value": "run-a"}]},
+        dimension="run_id",
+        response_shape="options",
+        scopes={},
+        root=tmp_path,
+    )
+    assert payload["items"][0] == "-"
+    assert len(payload["items"]) == 2
+    assert payload["items"][1]["value"] == "run-a"
+    assert " · success · " in payload["items"][1]["text"]
+
+
+def test_scalar_report_options_deduplicate_shared_run_type(tmp_path):
+    _report(tmp_path, "run-a")
+    _report(tmp_path, "run-b")
+    payload = supplement_report_options(
+        {"items": []},
+        dimension="run_type",
+        response_shape="values",
+        scopes={},
+        root=tmp_path,
+    )
+    assert payload == {"items": ["backfill"]}
+
+
 @pytest.mark.parametrize("status", ["success", "failed", "unknown"])
 def test_verified_report_resolves_unknown_existing_run_label(tmp_path, status):
     _report(tmp_path, status=status)

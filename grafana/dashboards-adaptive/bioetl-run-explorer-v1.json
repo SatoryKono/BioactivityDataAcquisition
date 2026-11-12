@@ -418,9 +418,9 @@
             "minWidth": 50,
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
-            "wrapText": true,
+            "wrapText": false,
             "wrapHeaderText": true
           },
           "noValue": "UNKNOWN — required launch evidence is unavailable. QUERY ERROR means the backend request failed, not an empty fleet.",
@@ -456,7 +456,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -466,6 +466,10 @@
               {
                 "id": "custom.minWidth",
                 "value": 80
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
               }
             ]
           },
@@ -504,6 +508,17 @@
               {
                 "id": "custom.minWidth",
                 "value": 80
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -522,6 +537,10 @@
                 "value": false
               },
               {
+                "id": "custom.width",
+                "value": 60
+              },
+              {
                 "id": "links",
                 "value": []
               },
@@ -535,6 +554,17 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -551,6 +581,10 @@
               {
                 "id": "custom.inspect",
                 "value": true
+              },
+              {
+                "id": "custom.width",
+                "value": 110
               },
               {
                 "id": "links",
@@ -633,8 +667,23 @@
                 "value": false
               },
               {
+                "id": "custom.width",
+                "value": 170
+              },
+              {
                 "id": "unit",
                 "value": "time:YYYY-MM-DD HH:mm"
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -653,12 +702,27 @@
                 "value": false
               },
               {
+                "id": "custom.width",
+                "value": 70
+              },
+              {
                 "id": "noValue",
                 "value": "UNKNOWN"
               },
               {
                 "id": "custom.hidden",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -670,11 +734,15 @@
             "properties": [
               {
                 "id": "custom.minWidth",
-                "value": 50
+                "value": 80
               },
               {
                 "id": "custom.inspect",
                 "value": false
+              },
+              {
+                "id": "custom.width",
+                "value": 80
               },
               {
                 "id": "links",
@@ -692,7 +760,7 @@
                 "value": {
                   "type": "color-text",
                   "mode": "basic",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -780,6 +848,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
               }
             ]
           },
@@ -791,7 +863,7 @@
             "properties": [
               {
                 "id": "custom.minWidth",
-                "value": 50
+                "value": 80
               },
               {
                 "id": "custom.inspect",
@@ -806,7 +878,7 @@
                 "value": {
                   "type": "color-text",
                   "mode": "basic",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -898,6 +970,10 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
               }
             ]
           },
@@ -909,7 +985,7 @@
             "properties": [
               {
                 "id": "custom.minWidth",
-                "value": 50
+                "value": 80
               },
               {
                 "id": "custom.inspect",
@@ -924,7 +1000,7 @@
                 "value": {
                   "type": "color-text",
                   "mode": "basic",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -1016,6 +1092,10 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
               }
             ]
           },
@@ -1027,11 +1107,15 @@
             "properties": [
               {
                 "id": "custom.minWidth",
-                "value": 50
+                "value": 80
               },
               {
                 "id": "custom.inspect",
                 "value": false
+              },
+              {
+                "id": "custom.width",
+                "value": 125
               },
               {
                 "id": "links",
@@ -1049,7 +1133,7 @@
                 "value": {
                   "type": "color-text",
                   "mode": "basic",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -1137,6 +1221,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
               }
             ]
           },
@@ -1149,6 +1237,17 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -1161,6 +1260,17 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -1173,6 +1283,17 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -1185,6 +1306,17 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -1197,6 +1329,17 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -1209,6 +1352,17 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -1221,6 +1375,17 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -1233,6 +1398,17 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -1245,6 +1421,17 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -1257,6 +1444,17 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -1351,6 +1549,17 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           }
@@ -1360,7 +1569,7 @@
         "showHeader": true,
         "footer": {
           "show": false,
-          "enablePagination": true,
+          "enablePagination": false,
           "countRows": false
         },
         "cellHeight": "sm",

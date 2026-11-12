@@ -28,6 +28,105 @@ pytestmark = pytest.mark.unit
 RUN = RunID(UUID("d890477d-0906-5e56-a673-a4de31b2110e"))
 
 
+@pytest.mark.asyncio
+async def test_missing_selected_manifest_never_reads_any_ledger(route):
+    route[1]["manifest"] = None
+    status, payload = await _call(route)
+    assert status == 404 and payload["reason"] == "manifest_missing"
+    assert route[1]["bound_reads"] == 0
+
+
+@pytest.mark.parametrize("case", ["all_scope", "invalid_uuid", "missing_ports"])
+def test_validation_binding_checks_selector_and_port_capabilities(route, case):
+    from bioetl.application.observability.control_plane_evidence import (
+        ControlPlaneEvidenceService,
+    )
+    from bioetl.interfaces.http._health_server_control_plane_evidence_routing import (
+        _bind_selected_validation,
+    )
+    from bioetl.interfaces.http._health_server_control_plane_scope import _IdentityScope
+
+    host, seen = route
+    service = ControlPlaneEvidenceService()
+    seen["context"] = SimpleNamespace(
+        get_manifest_by_run_id=lambda _: seen["manifest"],
+        get_validation_service=lambda: None if case == "missing_ports" else service,
+    )
+    scope = _IdentityScope(
+        ".*" if case == "all_scope" else "chembl_activity",
+        (),
+        ("backfill",),
+        "not-a-uuid" if case == "invalid_uuid" else str(RUN),
+        seen["manifest"],
+        "selected_run_id",
+    )
+    if case == "all_scope":
+        resolved, bound = _bind_selected_validation(host, scope, service)
+        assert resolved.resolved_manifest is seen["manifest"]
+        assert bound is service
+        assert seen["resolve_args"]["owner"] == "chembl_activity"
+    else:
+        reason = (
+            "identity does not match"
+            if case == "invalid_uuid"
+            else "ports are unavailable"
+        )
+        with pytest.raises(ValueError, match=reason):
+            _bind_selected_validation(host, scope, service)
+    assert seen["global_reads"] == seen["bound_reads"] == 0
+
+
+def test_selected_ledger_chain_preserves_run_and_after_cursor(tmp_path):
+    from bioetl.composition.control_plane_paths import _SelectedRootLedgerPort
+
+    base = tmp_path / "output/control/run_ledger/_predecessors"
+    base.mkdir(parents=True)
+    (base / "current.txt").write_text("previous", encoding="utf-8")
+    (base / "previous.txt").write_text("current", encoding="utf-8")
+    entry = _entry()
+    seen = []
+    entries = [entry]
+
+    def by_run(run_id):
+        seen.append(("run", run_id))
+        return (entry,)
+
+    def after(manifest_id, cursor):
+        seen.append(("after", manifest_id, cursor))
+        return [entry]
+
+    context = SimpleNamespace(
+        data_root=tmp_path,
+        ledger_port=SimpleNamespace(
+            list_entries=lambda _: entries,
+            list_entries_after=after,
+        ),
+        get_ledger_entries_by_run_id=by_run,
+    )
+    port = _SelectedRootLedgerPort(context)
+    assert port.list_entries("current") == [entry]
+    assert seen == [("run", RUN)]
+    assert port.list_entries_after("current", "last-entry") == [entry]
+    assert seen[-1] == ("after", "current", "last-entry")
+    entries.clear()
+    assert port.list_entries("empty") == []
+    assert len(seen) == 2
+
+
+def test_read_context_accepts_manifest_port_without_raw_inspection(
+    tmp_path, monkeypatch
+):
+    from bioetl.composition import control_plane_paths as paths
+
+    monkeypatch.setattr(paths, "FileRunManifestStore", lambda **_: SimpleNamespace())
+    context = paths.FileEvidenceReadContextFactory().open(
+        tmp_path / "selected", trusted_alias_base=tmp_path
+    )
+    service = context.get_validation_service()
+    assert service is not None
+    assert service.manifest_inspector is None
+
+
 def test_retention_uses_selected_config_and_terminal_ledger(route, tmp_path):
     """A live catalog manifest must not redirect isolated validation to global files."""
     import json

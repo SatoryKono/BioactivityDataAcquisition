@@ -57,30 +57,39 @@ def _translate_audit_labels(value: Any) -> None:
 
 def _set_wrap(properties: list[dict[str, Any]], *, enabled: bool) -> None:
     """Toggle wrapText / cellOptions.wrapText on one override property list."""
+    seen: set[str] = set()
     for prop in properties:
         prop_id = prop.get("id")
+        if isinstance(prop_id, str):
+            seen.add(prop_id)
         if prop_id == "custom.wrapText":
             prop["value"] = enabled
         elif prop_id == "custom.cellOptions":
             prop["value"]["wrapText"] = enabled
+    if "custom.wrapText" not in seen:
+        properties.append({"id": "custom.wrapText", "value": enabled})
+    if "custom.cellOptions" not in seen:
+        properties.append(
+            {"id": "custom.cellOptions", "value": {"type": "auto", "wrapText": enabled}}
+        )
 
 
 def _stamp_run_explorer_wrap(panel: dict[str, Any]) -> None:
-    """Keep Run Explorer cells readable without wrapping the Run ID column."""
-    panel["options"].setdefault("footer", {})["enablePagination"] = True
+    """Keep ten native rows stable; full identity stays available in Inspect."""
+    panel["options"].setdefault("footer", {})["enablePagination"] = False
     custom = panel["fieldConfig"]["defaults"]["custom"]
     custom.update(
-        wrapText=True,
+        wrapText=False,
         wrapHeaderText=True,
-        cellOptions={"type": "auto", "wrapText": True},
+        cellOptions={"type": "auto", "wrapText": False},
     )
     overrides = panel["fieldConfig"].get("overrides", [])
     for override in overrides:
-        _set_wrap(override.get("properties", []), enabled=True)
+        properties = override.get("properties", [])
+        # TableRT can apply one field's wrap option to every cell in a row.
+        _set_wrap(properties, enabled=False)
     run_id = next(
-        item
-        for item in overrides
-        if item.get("matcher", {}).get("options") == "Run ID"
+        item for item in overrides if item.get("matcher", {}).get("options") == "Run ID"
     )
     _set_wrap(run_id["properties"], enabled=False)
 

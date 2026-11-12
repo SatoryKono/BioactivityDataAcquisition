@@ -557,8 +557,8 @@ def test_provider_health_selector_follows_selected_run() -> None:
     donor = _panel_by_id("bioetl-overview-v2.json", 9002)
     query = donor["targets"][0]["url"]
     assert query.startswith("/ops/observability/selected-run-status?")
-    assert "pipeline=${pipeline}" in query
-    assert "run_id=${run_id}" in query
+    assert "pipeline=${selected_pipeline}" in query
+    assert "run_id=${selected_run_id}" in query
     assert "saved" in panel["description"].lower()
 
 

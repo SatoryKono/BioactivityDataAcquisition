@@ -233,7 +233,7 @@ def test_run_cell_inspection_and_links_use_full_identity():
     assert links[1]["url"] == "${__data.fields.report_url:raw}"
     assert rules["Run ID"]["custom.inspect"] is True
     assert rules["Run ID"]["custom.wrapText"] is False
-    assert "custom.width" not in rules["Run ID"]
+    assert rules["Run ID"]["custom.width"] == 110
     # The original identity/report actions must not invent a tooltip field.
     # Handoff actions retain their source metadata when copied into the menu.
     assert all("tooltip" not in link for link in links[:2])

@@ -38,6 +38,9 @@ def test_replay_layout_preserves_checks_and_identity_scope():
                 assert target["panelId"] == 9418
                 assert target["withTransforms"] is False
                 target = by_id[9418]["targets"][0]
-            assert "run_id=${run_id}" in target["url"]
+            if "/selected-run-status?" in target["url"]:
+                assert "run_id=${selected_run_id}" in target["url"]
+            else:
+                assert "run_id=${run_id}" in target["url"]
     assert {p["id"] for p in by_id[9430]["panels"]} == {9414, 9415, 9416}
     assert {p["id"] for p in by_id[9431]["panels"]} == {9413, 9406}

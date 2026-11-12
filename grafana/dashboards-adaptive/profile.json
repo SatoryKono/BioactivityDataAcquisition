@@ -7,7 +7,7 @@
     "bioetl-dq-v2.json": "f432a67491258bc713ed3f28c966f8d616579f7f07511313fe77272270113f4c",
     "bioetl-incident-v1.json": "05479f900c8d9ef4160bb5f0770fc68aece57c266937d60b540d9af9049d724d",
     "bioetl-overview-v2.json": "1e8c65e8caa76e4116bff022146854c3767dfa2a47e9370a110bf08211c582a3",
-    "bioetl-run-explorer-v1.json": "4fe61efb621d1c16810c1e8013a9b826f5ae11ae54f18b0359c8b43c9d677982"
+    "bioetl-run-explorer-v1.json": "2e656533634eb5c67d430ce822acdb3830de68624a429a5bd39438429ca4f7ed"
   },
   "plugin_version": "1.1.2",
   "module_sha256": "b43aeac86ece3a61500f2844edb742d342340baec662cc878f80ec8ee3d2c350"

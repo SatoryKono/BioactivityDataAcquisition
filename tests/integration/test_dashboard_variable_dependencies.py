@@ -147,8 +147,8 @@ def test_overview_provider_context_is_derived_from_pipeline():
     panels = {panel["id"]: panel for panel in dashboard["panels"]}
     donor = panels[9002]["targets"][0]
     assert donor["url"].startswith("/ops/observability/selected-run-status?")
-    assert "pipeline=${pipeline}" in donor["url"]
-    assert "run_id=${run_id}" in donor["url"]
+    assert "pipeline=${selected_pipeline}" in donor["url"]
+    assert "run_id=${selected_run_id}" in donor["url"]
     for panel_id in (9480, 9481):
         target = panels[panel_id]["targets"][0]
         assert target.get("panelId") == 9002

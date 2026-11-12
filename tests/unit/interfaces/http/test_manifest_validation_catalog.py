@@ -25,6 +25,33 @@ from bioetl.interfaces.http._health_server_control_plane_scope import _IdentityS
 
 pytestmark = pytest.mark.unit
 
+
+@pytest.mark.asyncio
+async def test_validation_read_error_is_unknown_without_exposing_exception(monkeypatch):
+    import json
+
+    import bioetl.interfaces.http._health_server_control_plane_evidence_routing as routing
+
+    service = ControlPlaneEvidenceService()
+
+    async def resolved(*_args, **_kwargs):
+        return _scope(resolved_via="selected_run_id_not_found"), None
+
+    def fail(_self, **_kwargs):
+        raise OSError("private filesystem diagnostic")
+
+    monkeypatch.setattr(routing, "resolve_evidence_scope", resolved)
+    monkeypatch.setattr(ControlPlaneEvidenceService, "trust_summary", fail)
+    payload = await _service_payload(
+        SimpleNamespace(_control_plane_evidence_service=service),
+        {},
+        endpoint="trust-summary",
+    )
+    assert payload["rows"][0]["status"] == "UNKNOWN"
+    assert payload["rows"][0]["reason"] == "trust_evidence_read_error"
+    assert "private filesystem diagnostic" not in json.dumps(payload)
+
+
 _RUN_ID = "ee3ce1ed-9487-572f-ae24-c98c6f6e3a37"
 
 
