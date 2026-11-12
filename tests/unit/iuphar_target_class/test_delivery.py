@@ -233,6 +233,48 @@ def test_name_collision_blocked(tmp_path: Path) -> None:
     assert written.read_bytes() == before
 
 
+def test_missing_csv_cells_become_empty_strings() -> None:
+    row = output_row(
+        {
+            "input_row_id": None,
+            "old_iuphar_class": None,
+            "iuphar_class": None,
+            "effective_class": None,
+        }  # type: ignore[arg-type]
+    )
+    assert row == {
+        "input_row_id": "",
+        "legacy_iuphar_class": "",
+        "iuphar_class": "",
+        "effective_class": "",
+    }
+
+
+def test_short_csv_row_publishes_empty_fields(tmp_path: Path) -> None:
+    source = tmp_path / "short.csv"
+    source.write_bytes(
+        b"input_row_id,old_iuphar_class,iuphar_class,effective_class\nrow-1\n"
+    )
+    result = run_batch(
+        source, root=tmp_path, snapshot_id="snap", rules_version="v1", run_id="short"
+    )
+    assert result.written is True
+    text = (tmp_path / result.normalized_name).read_text(encoding="utf-8")
+    assert "None" not in text
+    with (tmp_path / result.normalized_name).open(
+        encoding="utf-8", newline=""
+    ) as handle:
+        published = list(csv.DictReader(handle))
+    assert published == [
+        {
+            "input_row_id": "row-1",
+            "legacy_iuphar_class": "",
+            "iuphar_class": "",
+            "effective_class": "",
+        }
+    ]
+
+
 def test_local_class_is_not_copied_into_iuphar_class() -> None:
     row = output_row(
         {

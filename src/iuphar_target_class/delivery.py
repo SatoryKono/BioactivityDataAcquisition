@@ -69,10 +69,10 @@ def output_row(row: Mapping[str, str]) -> dict[str, str]:
     """Copy the old class aside. A local class never fills ``iuphar_class``."""
     legacy = row.get("legacy_iuphar_class") or row.get("old_iuphar_class") or ""
     return {
-        "input_row_id": row.get("input_row_id", ""),
+        "input_row_id": row.get("input_row_id") or "",
         "legacy_iuphar_class": legacy,
-        "iuphar_class": row.get("iuphar_class", ""),
-        "effective_class": row.get("effective_class", ""),
+        "iuphar_class": row.get("iuphar_class") or "",
+        "effective_class": row.get("effective_class") or "",
     }
 
 
