@@ -253,6 +253,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_ai_memory_program_contracts.py",
         "tests/integration/memory/test_workflow_tooling.py",
     ),
+    "src/iuphar_target_class/models.py": (
+        "tests/unit/iuphar_target_class/test_normalization.py",
+    ),
+    "src/iuphar_target_class/normalization.py": (
+        "tests/unit/iuphar_target_class/test_normalization.py",
+    ),
     "scripts/ai/codex/native_runtime_contract.py": (
         CODEX_NATIVE_RUNTIME_TEST,
         "tests/architecture/test_codex_agent_catalog_inventory.py",
