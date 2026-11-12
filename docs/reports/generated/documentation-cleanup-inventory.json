@@ -50755,7 +50755,7 @@
       "github_issue_url": null,
       "inbound_links": 1,
       "lifecycle": null,
-      "outbound_links": 0,
+      "outbound_links": 1,
       "owner": "@bioetl-platform",
       "path": "docs/05-operations/runbooks/owned-git-hooks.md",
       "recommended_action": "keep",
@@ -51010,6 +51010,34 @@
       "outbound_links": 1,
       "owner": "BioETL Team",
       "path": "docs/05-operations/runbooks/schema-evolution.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "05-operations",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": "operational",
+      "declared_status": "implementation qualification",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 1,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "@bioetl-platform",
+      "path": "docs/05-operations/runbooks/scoped-post-change-checks.md",
       "recommended_action": "keep",
       "root_doc_kind": null,
       "section": "05-operations",
@@ -116176,7 +116204,7 @@
     {
       "canonical_successor": null,
       "catalog_lifecycle": null,
-      "commit_policy": null,
+      "commit_policy": "tracked_quality_baseline",
       "declared_class": null,
       "declared_status": null,
       "diagram_kind": null,
@@ -116184,9 +116212,9 @@
       "duplicate_resolution": null,
       "extension": ".json",
       "freshness": "current",
-      "generated_route": null,
+      "generated_route": "test-governance-quality-baseline",
       "generated_route_exception": null,
-      "generator": null,
+      "generator": "scripts/engineering/qa/report_test_governance_audit.py",
       "github_issue_number": null,
       "github_issue_url": null,
       "inbound_links": 0,
@@ -118000,7 +118028,8 @@
       "output_kind": "working_report",
       "outputs": [
         "reports/quality/test-governance-current.json",
-        "reports/quality/test-fixture-asset-duplication.json"
+        "reports/quality/test-fixture-asset-duplication.json",
+        "reports/quality/test-basename-collision-inventory.json"
       ]
     },
     {
@@ -118075,7 +118104,7 @@
     "by_recommended_action": {
       "archive-after-migration": 425,
       "generate-automatically": 1067,
-      "keep": 2694
+      "keep": 2695
     },
     "by_section": {
       ".github": 6,
@@ -118086,7 +118115,7 @@
       "03-guides": 128,
       "04-reference": 334,
       "05-engineering": 3,
-      "05-operations": 96,
+      "05-operations": 97,
       "99-archive": 1554,
       "AGENTS.md": 1,
       "CHANGELOG.md": 1,
@@ -118104,21 +118133,21 @@
       "security": 2
     },
     "by_status": {
-      "Active": 770,
+      "Active": 771,
       "Archived": 1554,
       "Canonical": 77,
       "Generated": 1067,
       "Working": 718
     },
     "by_surface_family": {
-      "active": 770,
+      "active": 771,
       "archive": 1554,
       "canonical": 77,
       "generated": 1067,
       "working": 718
     },
     "by_tracking_state": {
-      "tracked": 4186
+      "tracked": 4187
     },
     "docs_reports_local_count": 81,
     "duplicate_group_count": 80,
@@ -118131,8 +118160,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4186,
+    "total_doc_like": 4187,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4186
+    "total_doc_like_tracked": 4187
   }
 }
