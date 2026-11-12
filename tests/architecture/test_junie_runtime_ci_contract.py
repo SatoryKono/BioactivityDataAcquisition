@@ -676,3 +676,62 @@ def test_formatted_single_heading_keeps_authoritative_section(tmp_path: Path) ->
         encoding="utf-8",
     )
     assert check_obligations(tmp_path, OBLIGATIONS) == []
+
+def _manual_closeout_selection_script() -> str:
+    step = next(
+        item
+        for item in _workflow()["jobs"]["verify-native-codex-runtime"]["steps"]
+        if item.get("name") == "Capture source-bound runtime closeout"
+    )
+    assert step["env"]["PROOF_CLOSEOUT_TASK_ID"] == "${{ inputs.closeout_task_id }}"
+    script = step["run"]
+    assert "inputs.closeout_task_id" not in script
+    assert '--task-id "$task_id"' in script
+    return script[script.index("task_id="):script.index("run_dir=")]
+
+
+def _run_manual_closeout_selection(value: str) -> subprocess.CompletedProcess[str]:
+    bash = shutil.which("bash")
+    if os.name == "nt":
+        installed = Path("C:/Program Files/Git/bin/bash.exe")
+        if installed.is_file():
+            bash = str(installed)
+    assert bash is not None, "Bash is required for the workflow contract"
+    return subprocess.run(
+        [bash, "-c", _manual_closeout_selection_script() + 'printf "%s" "$task_id"'],
+        env={**os.environ, "PROOF_CLOSEOUT_TASK_ID": value, "GITHUB_RUN_ID": "12345"},
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=False,
+        timeout=10,
+    )
+
+
+@pytest.mark.parametrize(
+    "value,expected", [("", "ai-runtime-12345"), ("mcp-memory-13047", "mcp-memory-13047")]
+)
+def test_manual_closeout_task_identity_keeps_defaults_and_explicit_scope(
+    value: str, expected: str
+) -> None:
+    result = _run_manual_closeout_selection(value)
+    assert result.returncode == 0
+    assert result.stdout == expected
+
+
+@pytest.mark.parametrize(
+    "value", ["$(echo injected)", "x; echo injected", "../scope", "two words", "x\ny", "a" * 97]
+)
+def test_manual_closeout_task_identity_rejects_unsafe_input(value: str) -> None:
+    result = _run_manual_closeout_selection(value)
+    assert result.returncode == 64
+    assert result.stdout == ""
+
+
+def test_manual_closeout_task_identity_is_optional_public_input() -> None:
+    workflow = _workflow()
+    events = workflow.get("on", workflow.get(True))
+    field = events["workflow_dispatch"]["inputs"]["closeout_task_id"]
+    assert field["required"] is False
+    assert field["default"] == ""
+    assert field["type"] == "string"
