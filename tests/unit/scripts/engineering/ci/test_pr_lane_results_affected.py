@@ -1196,3 +1196,49 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
     assert expected.issubset(selected)
     report = build_shadow_compare([changed_file], repo_root=repo_root)
     assert report["activation"] == "not_applied"
+
+
+@pytest.mark.parametrize(
+    ("path", "owner"),
+    [
+        ("README.md", "tests/unit/scripts/test_hook_installation.py"),
+        (
+            "docs/05-operations/runbooks/owned-git-hooks.md",
+            "tests/unit/scripts/test_offline_precommit.py",
+        ),
+        (
+            "scripts/ops/launchers/codex/setup_plugins.sh",
+            "tests/architecture/test_ops_ai_setup_scripts.py",
+        ),
+    ],
+)
+def test_owned_hook_deployment_surfaces_have_impact_owners(
+    path: str, owner: str
+) -> None:
+    root = Path(__file__).resolve().parents[5]
+    result = build_shadow_compare([path], repo_root=root)
+    assert owner in result["selected"]
+    assert result["activation"] == "not_applied"
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            [path, "scripts/ops/launchers/codex/unknown-setup.sh"], repo_root=root
+        )
+
+
+def test_owned_hook_python_inputs_keep_real_bounded_test_owners():
+    root = Path(__file__).resolve().parents[5]
+    selected = affected_pytest_targets(
+        [
+            "scripts/engineering/repo/process_supervisor.py",
+            "scripts/engineering/dev/run_project_python.py",
+        ],
+        repo_root=root,
+    )
+    assert {
+        "tests/unit/scripts/repo/test_process_deadline.py",
+        "tests/unit/scripts/test_hook_installation.py",
+        "tests/unit/scripts/test_offline_precommit.py",
+        "tests/unit/scripts/test_run_project_python.py",
+    }.issubset(selected)
+    assert "tests/unit/scripts" not in selected
+    assert "tests/unit/repo_backed/scripts" not in selected
