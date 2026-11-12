@@ -1,0 +1,19 @@
+{
+  "profile": "adaptive",
+  "inputs_sha256_lf": {
+    "grafana/dashboards/bioetl-control-plane-v1.json": "562063ad2aa6dca883d583061ccb438d2288d20af1ff73bd7d4f744d8de69990",
+    "grafana/dashboards/bioetl-dq-v2.json": "97da4fdb7c38824f532ef93536e12158b241ef86f139b986f2182315e4f7d926",
+    "grafana/dashboards/bioetl-incident-v1.json": "d0303f7e91743318bb4dd11d1d1fe5bd101ed3b3d30d55665fdaac497f9bb03e",
+    "grafana/dashboards/bioetl-overview-v2.json": "d4a0e86af5c5abb709237a6f0876ad3528ea95054403692a4fa0cca00709bc8d",
+    "grafana/dashboards/bioetl-run-explorer-v1.json": "f4fe2f4eaa32cc6d410f1e2cbf7e99894cf50fae34ac6889d2f311dcf771d1ec",
+    "grafana/provisioning/dashboards/bioetl.yaml": "40822611cb89b6fde9d03b8194c6dc4fff27d8f023b8548712450c9b73ca068f"
+  },
+  "outputs_sha256_lf": {
+    "grafana/dashboards-adaptive/bioetl-control-plane-v1.json": "759b9e416605d3230a1af6b90c067bd0f4eb943878f1a209a772e2b23850124d",
+    "grafana/dashboards-adaptive/bioetl-dq-v2.json": "abcaafc121c8b0006c07fd5f16254e0d2b59f2d65dc4d46e1e7d51598640c748",
+    "grafana/dashboards-adaptive/bioetl-incident-v1.json": "7b4eb63e8c472dd3956ad4d91c6a858d916cdbf30e71df5fc3ab50867e07a5d6",
+    "grafana/dashboards-adaptive/bioetl-overview-v2.json": "60ca186d9f858b6866a6b42d1de6cb1ca600a59beca00ce4ee84ebde8f3ae42f",
+    "grafana/dashboards-adaptive/bioetl-run-explorer-v1.json": "d16c3552adfbadb2014fc013a5eae9d1484fec01b8294b3bc111eb9b1bfc0864",
+    "grafana/provisioning/dashboards-adaptive/bioetl.yaml": "25dbc0e08032bf8afed5d78d90565d1e3980fdd3593dceb42e783b97827f7062"
+  }
+}

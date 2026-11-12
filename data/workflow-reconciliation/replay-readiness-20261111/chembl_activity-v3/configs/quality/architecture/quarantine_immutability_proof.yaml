@@ -1,0 +1,13 @@
+schema_version: 1
+description: 'Quarantine storage immutability proof pack (architecture audit M6 #6514).'
+domain:
+  type: QuarantineEntry
+  invariants: deepcopy payload + frozen aggregate fields
+  path: src/bioetl/domain/aggregates/
+storage:
+  adapter: src/bioetl/infrastructure/quarantine/unified.py
+  write_mode: append
+  delta_mode: append only (write_deltalake mode=append)
+  status_updates: status_events append-only sidecar; historical payloads not rewritten
+tests:
+- tests/architecture/test_architecture_audit_closeout_gates.py

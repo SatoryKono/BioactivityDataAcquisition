@@ -504,7 +504,7 @@ _EXPECTED_REFRESH_INTERVALS = [
     "5s",
     "10s",
     "30s",
-    "1m",
+    "60s",
     "5m",
     "15m",
     "30m",
@@ -517,11 +517,20 @@ _EXPECTED_REFRESH_INTERVALS = [
 def _lint_timepicker(path: Path, payload: dict[str, Any]) -> list[str]:
     """Phase-4: shared timepicker.refresh_intervals across provisioned boards."""
     intervals = (payload.get("timepicker") or {}).get("refresh_intervals")
-    if intervals == _EXPECTED_REFRESH_INTERVALS:
-        return []
-    return [
-        f"{path.name}: timepicker.refresh_intervals must match shared Phase 4.4 list"
-    ]
+    issues = []
+    if intervals != _EXPECTED_REFRESH_INTERVALS:
+        issues.append(
+            f"{path.name}: timepicker.refresh_intervals must match shared Phase 4.4 list"
+        )
+    refresh = payload.get("refresh")
+    if (
+        isinstance(refresh, str)
+        and refresh not in {"", "off"}
+        and isinstance(intervals, list)
+        and refresh not in intervals
+    ):
+        issues.append(f"{path.name}: configured auto-refresh is absent from the picker")
+    return issues
 
 
 def lint_dashboard(path: Path, *, profile: str = "phase2") -> list[str]:

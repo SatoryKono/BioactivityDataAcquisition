@@ -1,0 +1,20 @@
+# Opt-in source-built UI; the accepted native image and profile stay unchanged.
+services:
+  grafana:
+    environment:
+      BIOETL_GRAFANA_PRESENTATION_PROFILE: adaptive
+    labels:
+      io.bioetl.presentation-profile: adaptive
+    volumes:
+      - type: bind
+        source: ./grafana/dashboards-adaptive
+        target: /var/lib/grafana/dashboards-adaptive
+        read_only: true
+      - type: bind
+        source: ./grafana/provisioning/dashboards-adaptive
+        target: /etc/bioetl-grafana/dashboard-providers/full
+        read_only: true
+      - type: bind
+        source: ./grafana/plugins/bioetl-selectorshell-panel/dist-adaptive
+        target: /var/lib/grafana/plugins/bioetl-selectorshell-panel
+        read_only: true

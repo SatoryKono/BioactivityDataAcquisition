@@ -1,0 +1,11 @@
+{
+  "completed_at": "2026-11-11T18:18:34.883643+00:00",
+  "json_path": "D:/github/BioactivityDataAcquisition/data/workflow-reconciliation/repair-20261111/chembl_core/reports/run-reports/pipeline/chembl_assay/24231b65-d913-5a32-bbc0-65fbfef01716/pipeline-run-report.json",
+  "json_sha256": "0bd631b063721f0a2159ae9516cb1b37486dd4673083ec11e91ef961e653ea31",
+  "kind": "pipeline_run_report",
+  "markdown_path": "D:/github/BioactivityDataAcquisition/data/workflow-reconciliation/repair-20261111/chembl_core/reports/run-reports/pipeline/chembl_assay/24231b65-d913-5a32-bbc0-65fbfef01716/pipeline-run-report.md",
+  "markdown_sha256": "c327cb77e9803c3687685eecd90e46c828762cef24d854730967e94f4d387eb4",
+  "pipeline_name": "chembl_assay",
+  "run_id": "24231b65-d913-5a32-bbc0-65fbfef01716",
+  "status": "success"
+}

@@ -740,7 +740,7 @@ def _overview_share_projection() -> str:
         "$issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'НЕТ ЗАПУСКОВ']; "
         "$map(presentation_domains, function($d) { $merge([$d, {"
         "'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, "
-        "'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, "
+        "'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called' : $d.reason_display, "
         "'run_execution': $s.execution_state, 'run_verdict': $s.verdict, "
         "'saved_trust': $t, "
         "'run_reason': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & "

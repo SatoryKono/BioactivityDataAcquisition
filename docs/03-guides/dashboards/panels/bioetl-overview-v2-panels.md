@@ -44,7 +44,7 @@ Table `9300` consumes the identity frame from Overview donor `9002` through the
 `-- Dashboard --` datasource. Donor `9002` loads BioETL Ops HTTP
 `/ops/observability/selected-run-status`; this is not a Prometheus panel. Five
 fixed parameters retain the full Run ID, Pipeline, Run Type, Started at with
-saved UTC offset, and Total Run Duration. Cell inspection preserves full values.
+saved UTC offset, and Run duration. Cell inspection preserves full values.
 There is no pagination or omitted source row: the JSONata projection contains
 exactly those five parameters.
 

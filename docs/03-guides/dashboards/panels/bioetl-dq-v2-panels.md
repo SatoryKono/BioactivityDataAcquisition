@@ -10,7 +10,7 @@ The page answer is `SELECTED RUN`. A TIME RANGE value is not shown here and neve
 
 Validation score metrics that are not on this page stay on the canonical `0.0-1.0` ratio scale.
 
-Selected-run accounting includes input, accepted, Silver/Gold quarantine, contract exclusions, Gold output and the exact Report link. Gold and Silver percentages use the Bronze count as the denominator; a missing denominator stays N/A.
+Selected-run accounting includes input, accepted, Silver/Gold quarantine, contract exclusions, Gold output and the exact Report link. Gold and Silver percentages use the Bronze count as the denominator; a missing denominator stays UNKNOWN.
 
 ## Key Panels
 
@@ -32,7 +32,7 @@ current telemetry.
 
 ### Review Selected Run Status
 - **Type:** Table
-- **Purpose:** Saved verdict for the exact Run ID. Overall verdict is the data-quality assessment; Processing is the ETL outcome; Trust is the saved Trust verdict and does not authorize replay.
+- **Purpose:** Saved verdict for the exact Run ID. Overall verdict includes all assessed domains, including Workflow; it can be ERROR while Processing is SUCCESS and Data Quality is OK. Trust is the saved Trust verdict and does not authorize replay.
 - **Data sources:** `/ops/observability/selected-run-status` with `run_id`.
 - **Empty:** `QUERY ERROR` when the request fails. `SELECT RUN` is not a successful empty run.
 
@@ -45,8 +45,14 @@ current telemetry.
 ### Inspect Processed Records
 - **Type:** Table
 - **Purpose:** Input, accepted, quarantine, exclusions and Gold output for the selected Run ID. Counts are not TIME RANGE scores. Gold/Silver percentages use the Bronze count as the denominator.
-- **Data sources:** `/ops/observability/processed-records` with `run_id`.
+- **Data sources:** `/ops/observability/processed-records` with `run_id`, joined with saved stage inputs from `/ops/observability/selected-run-status`.
 - **Contract:** BioETL Ops HTTP; this is not a Prometheus panel.
+- StageInput preserves workflow, pipeline and run type, and accepts counts only
+  when the returned Run ID matches the resolved selection. An empty scope does
+  not borrow the latest run from the fleet. Recorded zero stays zero; missing
+  stage input stays UNKNOWN.
+- Accounting values use fixed-height rows and native pagination. All outcome
+  rows remain reachable; no row limit is applied. Inspect retains full values.
 
 ### Inspect Saved Run Evidence
 - **Type:** Row

@@ -1,0 +1,153 @@
+version: 1
+owner: BioETL Team
+last_verified: "2026-04-29"
+policy: replay_safe_cleanup_inventory
+default_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+entries:
+  - id: tracked_input_datasets
+    path: data/input/**
+    classification: tracked_input_dataset_retention
+    retention_class: reproducibility_fixture
+    replay_anchor: fixture_input
+    touches_replay_evidence: true
+    dry_run_required: true
+    canonical_tool: retention-sensitive-cleanup inventory review
+    protection: owner-reviewed-retention-sensitive-cleanup
+    replay_impact_required: true
+    runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+  - id: control_plane_run_manifest
+    path: data/output/control/run_manifest/**
+    classification: control_plane_lifecycle_cleanup
+    retention_class: checkpoint_control_plane_state
+    replay_anchor: run_manifest
+    touches_replay_evidence: true
+    dry_run_required: true
+    canonical_tool: bioetl maintenance control-plane-lifecycle
+    protection: FileControlPlaneArtifactLifecycleStore
+    replay_impact_required: true
+    runbook: docs/05-operations/control-plane-lifecycle.md
+  - id: control_plane_run_ledger
+    path: data/output/control/run_ledger/**
+    classification: control_plane_lifecycle_cleanup
+    retention_class: checkpoint_control_plane_state
+    replay_anchor: run_ledger
+    touches_replay_evidence: true
+    dry_run_required: true
+    canonical_tool: bioetl maintenance control-plane-lifecycle
+    protection: FileControlPlaneArtifactLifecycleStore
+    replay_impact_required: true
+    runbook: docs/05-operations/control-plane-lifecycle.md
+  - id: control_plane_effective_config
+    path: data/output/control/effective_config/**
+    classification: control_plane_lifecycle_cleanup
+    retention_class: checkpoint_control_plane_state
+    replay_anchor: effective_config
+    touches_replay_evidence: true
+    dry_run_required: true
+    canonical_tool: bioetl maintenance control-plane-lifecycle
+    protection: FileControlPlaneArtifactLifecycleStore
+    replay_impact_required: true
+    runbook: docs/05-operations/control-plane-lifecycle.md
+  - id: control_plane_lineage
+    path: data/output/control/lineage/**
+    classification: control_plane_lifecycle_cleanup
+    retention_class: checkpoint_control_plane_state
+    replay_anchor: lineage
+    touches_replay_evidence: true
+    dry_run_required: true
+    canonical_tool: bioetl maintenance control-plane-lifecycle
+    protection: FileControlPlaneArtifactLifecycleStore
+    replay_impact_required: true
+    runbook: docs/05-operations/control-plane-lifecycle.md
+  - id: checkpoints
+    path: data/output/checkpoints/**
+    classification: checkpoint_cleanup
+    retention_class: checkpoint_control_plane_state
+    replay_anchor: checkpoint
+    touches_replay_evidence: true
+    dry_run_required: true
+    canonical_tool: bioetl maintenance control-plane-lifecycle
+    protection: FileControlPlaneArtifactLifecycleStore
+    replay_impact_required: true
+    runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+  - id: cached_bronze_snapshots
+    path: data/output/bronze/**
+    classification: cached_bronze_snapshot_cleanup
+    retention_class: local_runtime_output
+    replay_anchor: cached_bronze_snapshot
+    touches_replay_evidence: true
+    dry_run_required: true
+    canonical_tool: bioetl maintenance control-plane-lifecycle
+    protection: FileControlPlaneArtifactLifecycleStore
+    replay_impact_required: true
+    runbook: docs/05-operations/control-plane-lifecycle.md
+  - id: silver_gold_outputs
+    path: data/output/{silver,gold}/**
+    classification: data_retention_cleanup
+    retention_class: local_runtime_output
+    replay_anchor: semantic_output
+    touches_replay_evidence: true
+    dry_run_required: true
+    canonical_tool: pipeline rebuild/backfill cleanup preview
+    protection: owner-reviewed-retention-sensitive-cleanup
+    replay_impact_required: false
+    runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+  - id: debug_exports
+    path: data/debug_exports/**
+    classification: debug_export_cleanup
+    retention_class: tracked_debug_evidence
+    replay_anchor: quality_exception_evidence
+    touches_replay_evidence: true
+    dry_run_required: true
+    canonical_tool: debug export inventory review before purge
+    protection: owner-reviewed-retention-sensitive-cleanup
+    replay_impact_required: false
+    runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+  - id: quarantine_records
+    path: data/output/quarantine/**
+    classification: quarantine_cleanup
+    retention_class: local_runtime_output
+    replay_anchor: quality_exception_evidence
+    touches_replay_evidence: true
+    dry_run_required: true
+    canonical_tool: bioetl quarantine inspect/replay before purge
+    protection: owner-reviewed-retention-sensitive-cleanup
+    replay_impact_required: false
+    runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+  - id: transient_reports
+    path: reports/**
+    classification: local_cache_cleanup
+    retention_class: disposable_local_output
+    replay_anchor: none
+    touches_replay_evidence: false
+    dry_run_required: true
+    canonical_tool: repo cleanup dry-run
+    protection: generated-output-review
+    replay_impact_required: false
+    runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+  - id: reports_quality_tmp_diagnostics
+    path: reports/quality/_tmp_*
+    classification: working_report_ttl_cleanup
+    retention_class: disposable_local_output
+    replay_anchor: none
+    touches_replay_evidence: false
+    dry_run_required: true
+    canonical_tool: repo cleanup dry-run
+    protection: owner-reviewed-working-report-ttl
+    replay_impact_required: false
+    owner: Engineering / Quality
+    ttl_days: 7
+    runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+  - id: reports_quality_pretest_guardrails_history
+    path: reports/quality/pretest_guardrails_*.json
+    classification: working_report_ttl_cleanup
+    retention_class: disposable_local_output
+    replay_anchor: none
+    touches_replay_evidence: false
+    dry_run_required: true
+    canonical_tool: repo cleanup dry-run
+    protection: owner-reviewed-working-report-ttl
+    replay_impact_required: false
+    owner: Engineering / Quality
+    ttl_days: 30
+    runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md

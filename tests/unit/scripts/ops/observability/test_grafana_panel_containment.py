@@ -596,3 +596,68 @@ process.stdout.write('ok');
 """
     )
     assert output == "ok"
+
+
+def test_variable_row_title_matches_resolved_copy_without_widening_static_text():
+    result = json.loads(
+        _node_eval(r"""
+const {rowTitlePattern} = require(process.argv[1]);
+const pattern = rowTitlePattern('Inspect Workflow [24h] · ${freshness} · threshold 24h');
+let rejected = false;
+try { rowTitlePattern('${freshness}'); } catch { rejected = true; }
+console.log(JSON.stringify({
+  fresh: pattern.test('Expand row Inspect Workflow [24h] · FRESH · threshold 24h'),
+  stale: pattern.test('Inspect Workflow [24h] · STALE · threshold 24h'),
+  wrongPrefix: pattern.test('Inspect Other [24h] · FRESH · threshold 24h'),
+  wrongLiteral: pattern.test('Inspect Workflow 2 · FRESH · threshold 24h'),
+  wrongSuffix: pattern.test('Inspect Workflow [24h] · FRESH · threshold 48h'),
+  rejected,
+}));
+""")
+    )
+    assert result == {
+        "fresh": True,
+        "stale": True,
+        "wrongPrefix": False,
+        "wrongLiteral": False,
+        "wrongSuffix": False,
+        "rejected": True,
+    }
+
+
+def test_viewport_waits_for_first_window_but_full_capture_keeps_expanded_children():
+    result = json.loads(
+        _node_eval(r"""
+const {requiredPanelsForCapture} = require(process.argv[1]);
+const panels = [
+  {id:1,type:'text',title:'Visible',gridPos:{x:0,y:0,w:24,h:3}},
+  {id:2,type:'row',title:'Details',collapsed:true,gridPos:{x:0,y:18,w:24,h:1},
+   panels:[{id:3,type:'table',title:'Virtualized detail',gridPos:{x:0,y:19,w:24,h:8}}]},
+];
+console.log(JSON.stringify({
+  viewport:requiredPanelsForCapture(panels,true,'viewport').map(p=>p.id),
+  full:requiredPanelsForCapture(panels,true,'full').map(p=>p.id),
+}));
+""")
+    )
+    assert result == {"viewport": [1], "full": [1, 3]}
+
+
+def test_inspect_locator_keeps_the_same_value_when_hover_adds_button_text():
+    result = json.loads(
+        _node_eval(r"""
+const path = require('path');
+const {cellTextPattern} = require(path.join(path.dirname(process.argv[1]), 'capture_table_pages.cjs'));
+const pattern = cellTextPattern('value [exact].');
+console.log(JSON.stringify({plain:pattern.test('value [exact].'),
+  hovered:pattern.test('value [exact].Inspect value'),
+  other:pattern.test('other value'),literal:pattern.test('value exactX'),prefix:pattern.test('value [exact].extra')}));
+""")
+    )
+    assert result == {
+        "plain": True,
+        "hovered": True,
+        "other": False,
+        "literal": False,
+        "prefix": False,
+    }

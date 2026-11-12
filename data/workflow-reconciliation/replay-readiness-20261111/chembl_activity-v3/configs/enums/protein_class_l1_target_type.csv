@@ -1,0 +1,14 @@
+source_l1_raw,canonical_l1,counts_for_target_type,notes
+Enzyme,enzyme,true,Countable ChEMBL top-level protein class.
+Ion channel,ion_channel,true,Countable ChEMBL top-level protein class.
+Transporter,transporter,true,Countable ChEMBL top-level protein class.
+Membrane receptor,membrane_receptor,true,Countable ChEMBL top-level protein class; GPCR remains a deeper major_family.
+Transcription factor,transcription_factor,true,Countable ChEMBL top-level protein class; nuclear receptor remains a deeper major_family.
+Epigenetic regulator,epigenetic_regulator,true,Countable ChEMBL top-level protein class; writer/reader/eraser branches do not change top-level count.
+Auxiliary transport protein,auxiliary_transport_protein,true,Countable ChEMBL top-level protein class.
+Secreted protein,secreted_protein,true,Countable ChEMBL top-level protein class.
+Adhesion,adhesion,true,Countable ChEMBL top-level protein class.
+Other cytosolic protein,other_cytosolic_protein,true,"Countable ChEMBL top-level protein class, but monitor share."
+Surface antigen,surface_antigen,true,Countable ChEMBL top-level protein class when observed.
+Unclassified protein,unclassified_protein,false,Preserve for audit but exclude from target_protein_class_type aggregation.
+Unknown,unknown,false,Explicit unknown value is non-counting.

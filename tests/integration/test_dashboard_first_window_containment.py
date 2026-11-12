@@ -12,6 +12,10 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -64,7 +68,9 @@ def test_first_window_panel_selection_is_root_non_row_below_fold() -> None:
 def test_first_window_overflow_allowlist_stays_empty() -> None:
     assert FIRST_WINDOW_OVERFLOW_ALLOWLIST == {}
     assert PANEL_CONTAINMENT_TOLERANCE_PX == 2
-    assert FIRST_WINDOW_CONTAINMENT_TYPES == frozenset({"text", "stat", "table"})
+    assert FIRST_WINDOW_CONTAINMENT_TYPES == frozenset(
+        {"text", "stat", "table", "bioetl-selectorshell-panel"}
+    )
 
 
 def test_horizontal_scroll_allowlist_is_below_fold_only() -> None:
@@ -304,8 +310,11 @@ def test_row_cap_contracts_are_unique_and_owned() -> None:
 def test_first_window_scope_banners_name_current_range_and_selected_run() -> None:
     """#8923: first-window scope copy must not conflate CURRENT / RANGE / SELECTED RUN."""
     required = {
-        "bioetl-overview-v2.json": ("assesses that run only",),
-        "bioetl-dq-v2.json": ("CURRENT", "SELECTED RUN", "TIME RANGE"),
+        "bioetl-overview-v2.json": (
+            "AUTO shows the latest run",
+            "EXPLICIT keeps the requested Run ID",
+        ),
+        "bioetl-dq-v2.json": ("SELECTED RUN", "TIME RANGE", "never proves this run"),
         "bioetl-incident-v1.json": ("CURRENT", "Run ID does not filter"),
         "bioetl-run-explorer-v1.json": (
             "Last 10 launches",
@@ -322,7 +331,7 @@ def test_first_window_scope_banners_name_current_range_and_selected_run() -> Non
             f"{panel.get('title', '')}\n{panel.get('description', '')}\n"
             f"{((panel.get('options') or {}).get('content') or '')}"
             for panel in first_window
-            if panel.get("type") == "text"
+            if panel.get("type") in {"text", "table"}
         )
         for token in tokens:
             if token not in blob:
@@ -334,10 +343,10 @@ def test_first_window_scope_banners_name_current_range_and_selected_run() -> Non
         for panel in select_first_window_panels(
             _root_panels(by_name["bioetl-overview-v2.json"])
         )
-        if panel.get("type") == "text"
+        if panel.get("type") in {"text", "table"}
     )
     assert "TIME RANGE = Domain Status" not in overview_blob
-    assert "assesses that run only" in overview_blob
+    assert "AUTO shows the latest run" in overview_blob
 
 
 def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
@@ -345,7 +354,11 @@ def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
     panels = {p["id"]: p for p in dashboard["panels"]}
     assert 214 not in panels
     assert 215 not in panels
-    assert panels[9002]["gridPos"]["y"] == panels[9603]["gridPos"]["y"]
+    assert (
+        panels[9002]["gridPos"]["y"]
+        == panels[99]["gridPos"]["y"] + panels[99]["gridPos"]["h"]
+    )
+    assert panels[9603]["gridPos"]["y"] == 5
     panel = panels[9002]
     assert panel_declared_row_cap(panel) == 6
     assert panel["gridPos"]["y"] + panel["gridPos"]["h"] <= FIRST_WINDOW_Y
@@ -361,3 +374,88 @@ def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
         }
     ]
     assert panels[9603]["datasource"]["uid"] == "-- Dashboard --"
+
+
+def test_trust_reason_count_is_numeric_and_action_headers_are_unambiguous():
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panel = next(item for item in dashboard["panels"] if item["id"] == 9418)
+    conversions = [
+        entry
+        for transform in panel["transformations"]
+        if transform["id"] == "convertFieldType"
+        for entry in transform["options"]["conversions"]
+    ]
+    assert {"targetField": "reasons_count", "destinationType": "number"} in conversions
+    names = {
+        override["matcher"]["options"]: prop["value"]
+        for override in panel["fieldConfig"]["overrides"]
+        for prop in override["properties"]
+        if prop["id"] == "displayName"
+    }
+    assert names["trust_reasons_action"] == "Trust action"
+    assert names["trust_action_note"] == "Action note"
+
+
+def test_live_dq_accounting_pages_use_space_and_preserve_every_outcome():
+    """Validate observed Grafana pages, independently of wrap option spelling."""
+    manifest_path = os.environ.get("BIOETL_DQ_RENDER_MANIFEST")
+    if not manifest_path:
+        pytest.skip("Set BIOETL_DQ_RENDER_MANIFEST to a populated 1920x1080 capture")
+    manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+    dashboard = next(
+        item for item in manifest["dashboards"] if item["uid"] == "bioetl-dq-v2"
+    )
+    assert dashboard["renderStatus"] == "rendered"
+    assert dashboard["requestedViewport"] == {"width": 1920, "height": 1080}
+    table = next(
+        item for item in dashboard["tablePagination"] if item["panelId"] == 9403
+    )
+    assert table["status"] == "COMPLETE"
+    ranges = []
+    for page in table["pages"]:
+        match = re.fullmatch(r"(\d+)\s*[-–]\s*(\d+) of (\d+) rows", page["summary"])
+        assert match is not None, page["summary"]
+        ranges.append(tuple(map(int, match.groups())))
+    first, last, total = ranges[0]
+    assert first == 1 and total > 1, "Capture a run with multiple accounting outcomes"
+    assert last > 1, (
+        "Accounting wastes the first page on one row despite a full-width panel"
+    )
+    cursor = 1
+    for first, last, observed_total in ranges:
+        assert observed_total == total and first == cursor
+        cursor = last + 1
+    assert cursor == total + 1, "Pagination lost accounting outcomes"
+    source = Path("grafana/dashboards/bioetl-dq-v2.json").read_bytes()
+    assert dashboard["dashboardSource"]["sha256"] in {
+        hashlib.sha256(source).hexdigest(),
+        hashlib.sha256(source.replace(b"\r\n", b"\n")).hexdigest(),
+    }, "Capture must match the current dashboard source"
+
+
+def test_live_dq_empty_scope_has_no_accounting_numbers():
+    manifest_path = os.environ.get("BIOETL_DQ_EMPTY_RENDER_MANIFEST")
+    if not manifest_path:
+        pytest.skip("Set BIOETL_DQ_EMPTY_RENDER_MANIFEST to an empty-scope capture")
+    manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+    dashboard = next(
+        item for item in manifest["dashboards"] if item["uid"] == "bioetl-dq-v2"
+    )
+    assert dashboard["renderStatus"] == "rendered"
+    states = {
+        panel["id"]: panel
+        for panel in dashboard["terminalStateValidation"]["panelStates"]
+    }
+    assert "NO RUN" in states[9400]["bodyText"]
+    table = next(
+        item for item in dashboard["tablePagination"] if item["panelId"] == 9403
+    )
+    cells = [cell for page in table["pages"] for cell in page["cells"]]
+    assert not [cell for cell in cells if cell["role"] in {"cell", "gridcell"}], (
+        "An empty scope must not show accounting rows from another run"
+    )
+    source = Path("grafana/dashboards/bioetl-dq-v2.json").read_bytes()
+    assert dashboard["dashboardSource"]["sha256"] in {
+        hashlib.sha256(source).hexdigest(),
+        hashlib.sha256(source.replace(b"\r\n", b"\n")).hexdigest(),
+    }

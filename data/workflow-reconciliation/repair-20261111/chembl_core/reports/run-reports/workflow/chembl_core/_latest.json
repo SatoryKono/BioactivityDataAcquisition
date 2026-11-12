@@ -1,0 +1,9 @@
+{
+  "completed_at": "2026-11-11T18:20:14.541009+00:00",
+  "json_path": "D:/github/BioactivityDataAcquisition/data/workflow-reconciliation/repair-20261111/chembl_core/reports/run-reports/workflow/chembl_core/e4a9008b-a49f-5f06-851d-27d296237998/workflow-run-report.json",
+  "kind": "workflow_run_report",
+  "markdown_path": "D:/github/BioactivityDataAcquisition/data/workflow-reconciliation/repair-20261111/chembl_core/reports/run-reports/workflow/chembl_core/e4a9008b-a49f-5f06-851d-27d296237998/workflow-run-report.md",
+  "status": "success",
+  "workflow_name": "chembl_core",
+  "workflow_run_id": "e4a9008b-a49f-5f06-851d-27d296237998"
+}

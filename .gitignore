@@ -87,6 +87,7 @@ test-checkpoints/
 # Build / Distribution
 build/
 dist/
+grafana/plugins/*/dist-adaptive/
 *.egg-info/
 *.egg
 *.whl

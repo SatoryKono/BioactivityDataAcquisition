@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, NoReturn, Protocol
+from uuid import UUID
 
 import click
 
@@ -110,6 +111,7 @@ class RunCommandInput:
     ensure_observability_backend: bool = False
     observability_backend_port: int = 8000
     no_control_plane_archive: bool = False
+    run_id: UUID | None = None
 
 
 def prepare_run_request(
@@ -158,6 +160,8 @@ def prepare_run_request(
         )
     )
     if preparation.request is not None:
+        if command_input.run_id is not None:
+            return replace(preparation.request, run_id=command_input.run_id)
         return preparation.request
     if preparation.error_message is not None:
         echo_error(preparation.error_message)

@@ -119,7 +119,7 @@ def test_incident_metrics_evidence_uses_standard_threshold_steps() -> None:
     assert defaults["thresholds"] == {
         "mode": "absolute",
         "steps": [
-            {"color": "#555555", "value": None},
+            {"color": "#9CA3AF", "value": None},
             {"color": "orange", "value": 1},
             {"color": "red", "value": 2},
         ],
@@ -236,9 +236,9 @@ def test_trust_primary_recovery_ssot_title_and_link() -> None:
     assert "Replay Checks" in panels[9400]["options"]["content"]
     verdict = panels[9422]
     mappings = verdict["fieldConfig"]["defaults"]["mappings"][0]["options"]
-    assert mappings["BLOCKED"]["color"] == "red"
-    assert mappings["UNKNOWN"]["color"] == "#555555"
-    assert mappings["INCOMPLETE"]["color"] == "#555555"
+    assert mappings["BLOCKED"]["color"] == "#9f1239"
+    assert mappings["UNKNOWN"]["color"] == "#475569"
+    assert mappings["INCOMPLETE"]["color"] == "#475569"
     assert any("viewPanel=9423" in link["url"] for link in verdict["links"])
     assert all(link["includeVars"] is False for link in verdict["links"])
     assert panels[9423]["gridPos"]["y"] + panels[9423]["gridPos"]["h"] <= 18

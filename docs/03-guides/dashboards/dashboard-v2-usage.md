@@ -88,14 +88,16 @@ Operator triage updates (2026-09-07):
   domain evidence corroborates the cause; sample time is not event freshness.
 - Alert history merges adjacent equal samples. FIRING / PENDING appear in the
   semantic legend; hover an interval for the full alert identity and bounds.
-- The shared navigation occupies three grid rows with the same 19px heading
+- The shared navigation occupies two grid rows with the same 19px heading
   and 16px links. The current destination retains its underline and accessible
   current-page state. Detailed instructions remain available below the fold.
 
-Shipped inventory (**7 dashboards**): Control Plane, Overview, Runtime, Provider
-Provider Health, Data Quality, Incident Workspace, Run Explorer. Primary `0..6` refresh is `60s`.
-Generic primary handoffs preserve HTTP `$run_id` for identity panels only
-(not Prometheus labels).
+Shipped inventory (**5 dashboards**): Run Explorer, Replay Readiness, Run Overview,
+Data Quality and Incident Workspace. Their default refresh is `60s`; the picker
+includes that exact value so Grafana can select the configured interval.
+Detail-to-detail handoffs preserve HTTP `$run_id` for identity panels only
+(not Prometheus labels). The shared Run Explorer link resets scope and Run ID,
+while preserving the time range.
 
 Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navigation-links.yaml` (docs/tests должны соответствовать ему).
 
@@ -570,11 +572,9 @@ Variable handoff policy for dashboard links remains strict and bounded:
 
 ## Default dashboard windows (L0/L1 baseline + L2 forensic exception)
 
-- Единый baseline для operator-facing L0/L1 dashboards:
-  - `overview`, `dq`, `control-plane` -> `time.from=now-12h`, `refresh=60s`.
-- Forensic L2 exception:
-  - `silver-reject-explorer` -> `time.from=now-24h`, `refresh=1m`.
-  - Justification: forensic-поиск по reject payload обычно начинается с более широкого окна и не требует 30s polling; более медленный refresh снижает ненужные перезапросы при row-level drilldown.
+- Все пять shipped dashboards используют `time.from=now-12h`, `refresh=60s`.
+- Историческое исключение `silver-reject-explorer` (`time.from=now-24h`, `refresh=1m`) относится к
+  удалённому профилю и не описывает текущую страницу Run Explorer.
 - Любое отклонение от baseline MUST сопровождаться явным обоснованием в документации и в PR (почему это не L0/L1 operator window).
 - Machine-readable contract source: `docs/03-guides/dashboards/contracts/navigation-links.yaml` -> `default_time_refresh_policy` + `default_time_refresh_policy_exceptions` (for explicit, justified deviations).
 
@@ -923,3 +923,50 @@ Run ID и Run Type не ограничивают этот счётчик.
 покрытие: эти сведения нельзя восстановить из `100%`. Возраст загрузки показан
 отдельно; Run ID не ограничивает эти агрегаты. Отсутствие samples задержки в
 Provider Health означает `TELEMETRY MISSING`, а не нулевую задержку.
+# Optional adaptive presentation
+
+The native dashboard profile remains the default and needs no optional panel
+plugin. The opt-in `adaptive` profile derives all five dashboards from the
+canonical native sources without changing queries, mappings or handoff links.
+Its presentation transform is maintained in
+[`_adaptive_tables.py`](../../../scripts/ops/observability/grafana/_adaptive_tables.py).
+Below 1024 CSS px, affected tables transpose into labelled records. Run Explorer
+keeps all ten columns as labelled fields, paginates every returned run, and puts
+full identity and secondary links in **Details**. Other evidence tables keep
+secondary fields in **Details**. Normal page scrolling is allowed at phone sizes;
+this does not waive the desktop first-window containment checks.
+
+Build the separate entrypoint in `grafana/plugins/bioetl-selectorshell-panel`:
+
+```powershell
+npm ci
+npm exec webpack -- -c webpack.adaptive.config.ts --env production
+```
+
+Then, from the repository root with the project Python environment:
+
+```powershell
+python -m scripts.ops.observability.grafana.generate_adaptive_dashboards
+python -m scripts.ops.observability.grafana.start_adaptive_monitoring recover
+python -m scripts.ops.observability.grafana.start_adaptive_monitoring status
+python -m scripts.ops.observability.grafana.start_adaptive_monitoring render --help
+```
+
+The helper uses the existing monitoring project and persistent volumes through
+the managed runtime contract. It mounts the source-built adaptive bundle read
+only over the already allowed local panel ID; it does not expand permissions or
+change the accepted native image/build manifests. Compiler input/output receipts
+reject stale bundles, and render preflight checks the served module hash. Rebuild
+after plugin source changes and regenerate after native dashboard changes.
+The rendering wrapper reads the existing root `.env` credentials into its
+process; it never writes an environment file. Use it only with the local Grafana.
+To return to the native profile, recover monitoring with the standard runtime
+manager and its canonical contract. Saved acceptance results are independent of
+this opt-in profile; local screenshots and tests are not CI or operator acceptance.
+
+Full-page PNG export retains overlapping viewport tiles and copies each document
+row once. The capture manifest records the composition slices, so sticky-toolbar
+shadows cannot overwrite an earlier part of a panel. Keep the original tiles
+alongside the composite when collecting evidence. Query failures use Grafana's
+current `PanelData.errors` contract; an error state without details still shows
+**Source unavailable** and clears previously successful table content.

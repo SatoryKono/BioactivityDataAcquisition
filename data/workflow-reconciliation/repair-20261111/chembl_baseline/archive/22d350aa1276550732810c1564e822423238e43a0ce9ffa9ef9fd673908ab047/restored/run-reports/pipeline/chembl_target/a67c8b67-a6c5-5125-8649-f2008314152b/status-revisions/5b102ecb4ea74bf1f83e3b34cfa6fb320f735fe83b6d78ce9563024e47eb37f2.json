@@ -1,0 +1,430 @@
+{
+  "assessment": {
+    "checks_verdict": "OK",
+    "domains": [
+      {
+        "action": "Inspect saved evidence",
+        "applicable": true,
+        "domain": "Runtime",
+        "evidence_ref": "#/identity",
+        "reason": "execution_success",
+        "verdict": "OK"
+      },
+      {
+        "action": "Inspect saved evidence",
+        "applicable": true,
+        "domain": "Control Plane",
+        "evidence_ref": "#/observations/Control Plane",
+        "reason": "run_completion_trust_assessment",
+        "verdict": "OK"
+      },
+      {
+        "action": "Inspect saved evidence",
+        "applicable": true,
+        "domain": "Workflow",
+        "evidence_ref": "#/observations/Workflow",
+        "reason": "workflow_success",
+        "verdict": "OK"
+      },
+      {
+        "action": "Inspect saved evidence",
+        "applicable": true,
+        "domain": "Data Quality",
+        "evidence_ref": "#/observations/Data Quality",
+        "reason": "run_dq_threshold_evaluation",
+        "verdict": "OK"
+      },
+      {
+        "action": "Inspect saved evidence",
+        "applicable": false,
+        "domain": "Provider",
+        "evidence_ref": "#/io/use_cached_bronze",
+        "reason": "cached_bronze_no_remote_probe",
+        "verdict": "N/A"
+      },
+      {
+        "action": "Inspect saved evidence",
+        "applicable": true,
+        "domain": "Data Validation",
+        "evidence_ref": "#/observations/Data Validation",
+        "reason": "run_gold_schema_validation",
+        "verdict": "OK"
+      }
+    ],
+    "evidence_completeness": "COMPLETE",
+    "execution_state": "SUCCESS",
+    "rules_version": "selected-run-v2",
+    "verdict": "OK"
+  },
+  "evidence": {
+    "artifacts": [
+      {
+        "kind": "pipeline_run_report_json",
+        "ref": "D:/github/BioactivityDataAcquisition/data/workflow-reconciliation/repair-20261111/chembl_baseline/reports/run-reports/pipeline/chembl_target/a67c8b67-a6c5-5125-8649-f2008314152b/pipeline-run-report.json",
+        "sha256": "c5b6445a61565833fd9fa4159dbd5304b185548c41f960e05bba0c2220eea409"
+      },
+      {
+        "kind": "pipeline_run_report_md",
+        "ref": "D:/github/BioactivityDataAcquisition/data/workflow-reconciliation/repair-20261111/chembl_baseline/reports/run-reports/pipeline/chembl_target/a67c8b67-a6c5-5125-8649-f2008314152b/pipeline-run-report.md",
+        "sha256": "2cb5470a7c00f130def3afe47295c8e2cafd0f672cbe1184387319e3be814b23"
+      }
+    ],
+    "assessment_at": "2026-11-11T18:10:53.208290+00:00",
+    "contract_summary": {
+      "gold_excluded_by_contract": 78,
+      "reasons": [
+        {
+          "count": 78,
+          "outcome": "excluded_by_contract",
+          "reason_code": "column_filter_mismatch:organism_class",
+          "reason_family": "system"
+        }
+      ],
+      "rejection_details": [
+        {
+          "count": 78,
+          "field": "organism_class",
+          "operator": "not_in",
+          "reason_code": "column_filter_mismatch",
+          "rule_type": "column_filters"
+        }
+      ]
+    },
+    "funnel": [
+      {
+        "balance_status": "OK",
+        "records_in": 1000,
+        "records_out": 1000,
+        "removals": [],
+        "removed_total": 0,
+        "stage_id": "extract",
+        "tracking": "full",
+        "unaccounted": 0
+      },
+      {
+        "balance_status": "OK",
+        "records_in": 1000,
+        "records_out": 1000,
+        "removals": [],
+        "removed_total": 0,
+        "stage_id": "bronze",
+        "tracking": "full",
+        "unaccounted": 0
+      },
+      {
+        "balance_status": "OK",
+        "records_in": 1000,
+        "records_out": 1000,
+        "removals": [],
+        "removed_total": 0,
+        "stage_id": "silver",
+        "tracking": "full",
+        "unaccounted": 0
+      },
+      {
+        "balance_status": "OK",
+        "records_in": 1000,
+        "records_out": 922,
+        "removals": [
+          {
+            "count": 78,
+            "outcome": "excluded_by_contract",
+            "reason_code": "column_filter_mismatch:organism_class",
+            "reason_family": "system"
+          }
+        ],
+        "removed_total": 78,
+        "stage_id": "gold",
+        "tracking": "full",
+        "unaccounted": 0
+      }
+    ],
+    "identity": {
+      "completed_at": "2026-11-11T18:08:44.414242+00:00",
+      "duration_seconds": 99.797579,
+      "entity": "target",
+      "manifest_id": "729a9f04-5804-5a77-9424-fe0745c2d845",
+      "pipeline_name": "chembl_target",
+      "provider": "chembl",
+      "run_id": "a67c8b67-a6c5-5125-8649-f2008314152b",
+      "run_type": "backfill",
+      "started_at": "2026-11-11T18:07:04.616663+00:00",
+      "status": "success",
+      "workflow_id": "chembl_baseline",
+      "workflow_run_id": "cbbad724-4f10-58bc-8044-fc627377c052",
+      "workflow_step_id": "run_chembl_target"
+    },
+    "io": {
+      "dry_run": false,
+      "filter_column": "target_id",
+      "filter_id_count": 73,
+      "filter_id_hash": "0089e2d9ce8844bd",
+      "limit": 1000,
+      "pipeline_name": "chembl_target",
+      "run_type": "backfill",
+      "skip_gold": false,
+      "use_cached_bronze": true
+    },
+    "layers": {
+      "bronze_records": 1000,
+      "gold_deduplicated": 0,
+      "gold_excluded_by_contract": 78,
+      "gold_quarantined": 0,
+      "gold_skipped": 0,
+      "gold_written": 922,
+      "silver_deduplicated": 0,
+      "silver_filtered_out": 0,
+      "silver_quarantined": 0,
+      "silver_skipped": 0,
+      "silver_valid": 1000
+    },
+    "observations": {
+      "Control Plane": {
+        "facts": {
+          "checks": {
+            "contract": "control_plane_validation_evidence_v1",
+            "endpoint": "trust-summary",
+            "evidence_freshness": "observed",
+            "manifest_id": "729a9f04-5804-5a77-9424-fe0745c2d845",
+            "pipeline": "chembl_target",
+            "processing_status": "success",
+            "resolved_via": "exact_run",
+            "rows": [
+              {
+                "check": "manifest-validation.parse",
+                "detail": "The persisted manifest contains a JSON object.",
+                "reason": "manifest_parse_ok",
+                "reason_display": "manifest_parse_ok",
+                "status": "OK"
+              },
+              {
+                "check": "manifest-validation.schema",
+                "detail": "The raw manifest satisfies the supported persisted schema.",
+                "reason": "manifest_schema_valid",
+                "reason_display": "manifest_schema_valid",
+                "status": "OK"
+              },
+              {
+                "check": "manifest-validation.schema_version",
+                "detail": "Manifest schema major version is supported.",
+                "reason": "manifest_schema_version_compatible",
+                "reason_display": "manifest_schema_version_compatible",
+                "status": "OK"
+              },
+              {
+                "check": "manifest-validation.persistence_profile",
+                "detail": "The required persistence profile belongs to the supported vocabulary.",
+                "reason": "manifest_persistence_profile_supported",
+                "reason_display": "manifest_persistence_profile_supported",
+                "status": "OK"
+              },
+              {
+                "check": "manifest-validation.contract_compatibility",
+                "detail": "An immutable registry comparison recorded a compatible result.",
+                "reason": "manifest_contract_comparison_compatible",
+                "reason_display": "manifest_contract_comparison_compatible",
+                "status": "OK"
+              },
+              {
+                "check": "manifest-validation.resume_contract",
+                "detail": "Resume contract has a recorded value or explicit N/A reason.",
+                "reason": "resume_contract_recorded",
+                "reason_display": "resume_contract_recorded",
+                "status": "OK"
+              },
+              {
+                "check": "manifest-validation.lock_owner_id",
+                "detail": "Lock owner has a recorded value or explicit N/A reason.",
+                "reason": "lock_owner_id_recorded",
+                "reason_display": "lock_owner_id_recorded",
+                "status": "OK"
+              },
+              {
+                "check": "lineage-validation.closure",
+                "detail": "Every edge endpoint and ledger lineage reference resolves.",
+                "reason": "lineage_closure_complete",
+                "reason_display": "Lineage closed",
+                "status": "OK"
+              },
+              {
+                "check": "lineage-validation.identity_consistency",
+                "detail": "Fragment, edge, run-node, and manifest-node identities match.",
+                "reason": "lineage_identity_consistent",
+                "reason_display": "lineage_identity_consistent",
+                "status": "OK"
+              },
+              {
+                "check": "lineage-validation.cycle_detection",
+                "detail": "No directed cycle was detected in the selected lineage graph.",
+                "reason": "lineage_graph_acyclic",
+                "reason_display": "lineage_graph_acyclic",
+                "status": "OK"
+              },
+              {
+                "check": "lineage-validation.persistence_profile",
+                "detail": "Persisted lineage evidence is present for replay_ready.",
+                "reason": "lineage_persistence_profile_observed",
+                "reason_display": "lineage_persistence_profile_observed",
+                "status": "OK"
+              },
+              {
+                "check": "retention-compliance.retention_policy",
+                "detail": "Selected-run artifacts are retained by the current dry-run policy.",
+                "reason": "retention_policy_satisfied",
+                "reason_display": "Retained by policy",
+                "status": "OK"
+              },
+              {
+                "check": "retention-compliance.evidence_floor",
+                "detail": "Strict replay evidence remains inside the retention window.",
+                "reason": "reproducibility_evidence_within_retention",
+                "reason_display": "Within retention",
+                "status": "OK"
+              },
+              {
+                "check": "retention-compliance.required_evidence",
+                "detail": "Required lifecycle evidence surfaces are represented in the plan.",
+                "reason": "required_evidence_surfaces_present",
+                "reason_display": "Evidence present",
+                "status": "OK"
+              },
+              {
+                "check": "retention-compliance.snapshot_evidence",
+                "detail": "The lifecycle plan contains every manifested cached snapshot.",
+                "reason": "snapshot_lifecycle_evidence_present",
+                "reason_display": "Snapshots present",
+                "status": "OK"
+              },
+              {
+                "check": "retention-compliance.archive",
+                "detail": "Local archive and restored copies are hash-checked against selected-run evidence on every read. This is not an off-host durability guarantee.",
+                "reason": "archive_restore_verified",
+                "reason_display": "Archive verified",
+                "status": "OK"
+              }
+            ],
+            "run_id": "a67c8b67-a6c5-5125-8649-f2008314152b",
+            "run_type": "backfill",
+            "scope_kind": "exact_run",
+            "status": "OK",
+            "summary": {
+              "check_count": 16,
+              "error_count": 0,
+              "ok_count": 16,
+              "unknown_count": 0,
+              "warning_count": 0
+            },
+            "trust": {
+              "evidence_freshness": "observed",
+              "evidence_observed_at": "2026-11-11T18:07:05.059600+00:00",
+              "processing_status": "success",
+              "reasons": [],
+              "reasons_count": 0,
+              "reasons_display": "",
+              "reasons_text": "",
+              "reasons_truncated": false,
+              "scope_kind": "exact_run",
+              "trust_status": "OK"
+            },
+            "trust_status": "OK"
+          },
+          "observed_at": "2026-11-11T18:10:53.208290+00:00"
+        },
+        "reason": "run_completion_trust_assessment",
+        "verdict": "OK"
+      },
+      "Data Quality": {
+        "facts": {
+          "error_rate": 0.0,
+          "has_critical": false,
+          "rule_outcomes_count": 0,
+          "status": "passed"
+        },
+        "reason": "run_dq_threshold_evaluation",
+        "verdict": "OK"
+      },
+      "Data Validation": {
+        "facts": {
+          "records": 13,
+          "valid": true
+        },
+        "reason": "run_gold_schema_validation",
+        "verdict": "OK"
+      },
+      "Evidence Location": {
+        "facts": {
+          "detail": null,
+          "kind": "pipeline",
+          "owner": "chembl_target",
+          "relative_data_root": "workflow-reconciliation/repair-20261111/chembl_baseline/data",
+          "root_alias": "dashboard_data",
+          "run_id": "a67c8b67-a6c5-5125-8649-f2008314152b",
+          "workflow_run_id": "cbbad724-4f10-58bc-8044-fc627377c052"
+        },
+        "reason": "ok",
+        "verdict": "OK"
+      },
+      "Provider": {
+        "facts": {
+          "error_message": "cached Bronze local files healthy; provider API not exercised",
+          "latency_ms": null,
+          "observed_at": "2026-11-11T18:07:05.389948+00:00",
+          "probe_fallback_reason": "cached_bronze_api_not_exercised",
+          "provider": null,
+          "status": "HEALTHY"
+        },
+        "reason": "run_preflight_provider_observation",
+        "verdict": "OK"
+      },
+      "Workflow": {
+        "facts": {
+          "identity": {
+            "completed_at": "2026-11-11T18:10:44.200704+00:00",
+            "duration_seconds": 230.9878658000016,
+            "execution_fingerprint": "a54e4fbcc41f066e18b6814a5e43df1aaf1e3b31c37f5bbcb8ea859530cc7751",
+            "manifest_id": "2af9ea14-793e-5c69-ac01-39de366147b2",
+            "resumed": false,
+            "started_at": "2026-11-11T18:06:53.212841+00:00",
+            "status": "success",
+            "workflow_name": "chembl_baseline",
+            "workflow_run_id": "cbbad724-4f10-58bc-8044-fc627377c052",
+            "workflow_version": "1.2.0"
+          },
+          "step_id": "run_chembl_target",
+          "step_status": "success"
+        },
+        "reason": "workflow_success",
+        "verdict": "OK"
+      }
+    },
+    "performance": {
+      "duration_seconds": 99.797579,
+      "records_per_second": 10.0203
+    },
+    "reason_catalog_version": "reason_catalog_v1",
+    "reasons_top_n": [
+      {
+        "count": 78,
+        "outcome": "excluded_by_contract",
+        "reason_code": "column_filter_mismatch:organism_class",
+        "reason_family": "system"
+      }
+    ],
+    "reconciliation": {
+      "gold_accounted": 1000,
+      "gold_delta": 0,
+      "gold_vs_silver_status": "OK",
+      "silver_accounted": 1000,
+      "silver_delta": 0,
+      "silver_vs_bronze_status": "OK"
+    },
+    "schema_version": "pipeline_run_report_v2",
+    "schema_versions": {
+      "bioetl_version": "6.1.0",
+      "reason_catalog_version": "reason_catalog_v1"
+    },
+    "tracking_coverage": "full"
+  },
+  "revision": "5b102ecb4ea74bf1f83e3b34cfa6fb320f735fe83b6d78ce9563024e47eb37f2",
+  "schema_version": "selected_run_snapshot_v1"
+}

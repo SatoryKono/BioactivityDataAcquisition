@@ -1,0 +1,23 @@
+# ARCH-EPIC #7605 / #7610 — freeze list for application.composite top-level modules.
+# New top-level *.py modules under application/composite/ MUST be added here
+# with owner + rationale, or land under an existing collaborator package
+# (checkpoint/, helpers/, runner_pkg/).
+# Prefer extending protocols in application/composite/protocols.py.
+
+schema_version: 1
+linked_issues:
+  - "7605"
+  - "7610"
+path: src/bioetl/application/composite
+policy:
+  new_top_level_modules: require_allowlist_entry
+  preferred_extension_point: src/bioetl/application/composite/protocols.py
+  allowed_subpackages:
+    - checkpoint
+    - helpers
+    - runner_pkg
+
+# Snapshot of allowlisted top-level modules (basename). Ratchet: no growth without PR note.
+top_level_modules:
+  max: 62
+  # current is validated by architecture test against filesystem

@@ -10,6 +10,7 @@ import sys
 from collections.abc import Mapping
 from functools import partial
 from typing import TYPE_CHECKING, NoReturn
+from uuid import UUID
 
 import click
 
@@ -231,6 +232,8 @@ async def _run_pipeline_async(
     health_server_enabled: bool = True,
     health_port: int = DEFAULT_HEALTH_SERVER_PORT,
     registry: PipelineRegistry | None = None,
+    *,
+    run_id: UUID | None = None,
 ) -> RunResult:
     """Run pipeline asynchronously via service."""
     return await _run_pipeline_async_impl(
@@ -242,6 +245,7 @@ async def _run_pipeline_async(
         metrics_starter=ensure_metrics_server_started,
         health_context_factory=health_server_context,
         runner_service_factory=_run_runtime_helpers.get_pipeline_runner_service,
+        run_id=run_id,
     )
 
 
@@ -288,6 +292,7 @@ def _build_run_command_input_from_options(
         cached_bronze_date=optional_option(options, "cached_bronze_date", str),
         cached_bronze_path=optional_option(options, "cached_bronze_path", str),
         replay_of_run_id=optional_option(options, "replay_of_run_id", str),
+        run_id=optional_option(options, "run_id", UUID),
         replay_of_manifest_id=optional_option(options, "replay_of_manifest_id", str),
         resume_run_id=optional_option(options, "resume_run_id", str),
         resume_manifest_id=optional_option(options, "resume_manifest_id", str),

@@ -414,6 +414,28 @@ def _download_binary(
         return response.read()
 
 
+def _verify_adaptive_runtime(config: RenderConfig) -> None:
+    """A copied dashboard alone does not prove the current frontend is loaded."""
+    if os.environ.get("BIOETL_GRAFANA_PRESENTATION_PROFILE", "native") != "adaptive":
+        return
+    from scripts.ops.observability.grafana.start_adaptive_monitoring import (
+        verify_bundle,
+    )
+
+    root = Path(__file__).resolve().parents[4]
+    provenance = verify_bundle(root)
+    actual = _download_binary(
+        config.base_url.rstrip("/")
+        + "/public/plugins/bioetl-selectorshell-panel/module.js",
+        headers=_auth_headers(config),
+        timeout_seconds=config.timeout_seconds,
+    )
+    if hashlib.sha256(actual).hexdigest() != provenance["outputs_sha256"]["module.js"]:
+        raise RuntimeError(
+            "Grafana serves a different adaptive module than the current checkout"
+        )
+
+
 def _grafana_slugify(title: str) -> str:
     return parse.quote(
         "-".join(
@@ -429,7 +451,11 @@ def _grafana_slugify(title: str) -> str:
 
 
 def _dashboard_dir() -> Path:
-    return Path(__file__).resolve().parents[4] / "grafana" / "dashboards"
+    from scripts.ops.observability.grafana.dashboard_presentation import (
+        dashboard_directory,
+    )
+
+    return dashboard_directory(Path(__file__).resolve().parents[4])
 
 
 def _describe_grafana_auth_failure(config: RenderConfig) -> str:
@@ -1769,6 +1795,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     try:
+        _verify_adaptive_runtime(config)
         if config.fallback == "playwright":
             return _run_playwright_fallback(config)
         _render_via_api(config)

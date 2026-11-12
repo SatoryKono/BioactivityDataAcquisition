@@ -44,7 +44,8 @@ def test_empty_state_distribution_panels_do_not_invent_observations(
     ]
     assert expressions
     assert all("vector(0)" not in expr for expr in expressions)
-    assert "TELEMETRY MISSING" in panel["fieldConfig"]["defaults"]["noValue"]
+    assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert "TELEMETRY MISSING" in panel["description"]
 
 
 def test_unfinished_run_never_inherits_the_success_color() -> None:
@@ -83,3 +84,22 @@ def test_design_system_documents_missing_data_panel_class_contract() -> None:
         "dashboard design-system must document missing-data semantics; "
         f"missing={missing}"
     )
+
+
+@pytest.mark.parametrize(
+    "dashboard_file", ["bioetl-incident-v1.json", "bioetl-overview-v2.json"]
+)
+@pytest.mark.parametrize("panel_id", [2005, 22005])
+def test_missing_alert_response_never_claims_no_matching_signals(
+    dashboard_file: str, panel_id: int
+) -> None:
+    """Grafana uses noValue on transport/query failure as well as an empty frame.
+
+    A failed query hid known FIRING alerts behind NO MATCHING SIGNALS in the
+    browser. Neither the summary nor its disclosed full list may imply that
+    alerts are absent without a successful independent coverage witness.
+    """
+    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == panel_id)
+    assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert all("vector(0)" not in t.get("expr", "") for t in panel.get("targets", []))

@@ -21,7 +21,7 @@ before the global ten-row limit. No dashboard navigation band is shown here.
 | Pipeline | Pipeline name | Pipeline passport |
 | Provider | Recorded provider; N/A when absent | Provider Health |
 | Run ID | Short UUID; Select this run writes `$run_id`; full UUID in report link title | Same dashboard Selected Run, then persisted Report |
-| Started | YY-MM-DD:HH:mm; N/A when absent | None; descending sort |
+| Started | YYYY-MM-DD HH:mm; N/A when absent | None; descending sort |
 | Duration | Compact elapsed duration, e.g. 2m 32s; N/A when unavailable | None |
 | Overview | Execution status | Run Overview |
 | Saved Evidence | Verified saved-evidence status | Selected-run Pipeline Diagnostics |

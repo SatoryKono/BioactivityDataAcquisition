@@ -1,0 +1,99 @@
+version: "1.0.0"
+reviewed_on: "2026-07-01"
+owner: BioETL Team
+
+authorities:
+  - id: canonical_semantic_alias_registry
+    authority_kind: canonical_field_alias_registry
+    evidence_paths:
+      - configs/field_registry/canonical_registry.json
+      - docs/04-reference/contracts/canonical-field-registry.md
+    governed_outputs:
+      - reports/semantic_pipeline_audit/semantic_cluster_registry_2026-07-01.json
+      - reports/semantic_pipeline_audit/semantic_pair_matrix_2026-07-01.csv
+    rationale: >
+      Exact semantic identity claims come only from the reviewed canonical alias
+      registry and its published companion, never from lexical overlap alone.
+
+  - id: residual_semantic_review_policy
+    authority_kind: reviewed_non_exact_cluster_policy
+    evidence_paths:
+      - configs/field_registry/semantic_audit_review_registry.yaml
+      - configs/field_registry/semantic_pair_matrix_budget.yaml
+      - reports/semantic_pipeline_audit/semantic_residual_backlog_2026-07-01.json
+    governed_outputs:
+      - reports/semantic_pipeline_audit/semantic_cluster_registry_2026-07-01.json
+      - reports/semantic_pipeline_audit/semantic_residual_backlog_2026-07-01.md
+    rationale: >
+      PARTIAL, WEAK, and other reviewed residual semantic statuses are governed
+      by explicit owner review, expiry, and ratchet budgets instead of ad-hoc
+      audit narration.
+
+  - id: base_semantic_governance_contracts
+    authority_kind: base_runtime_governance_surface
+    evidence_paths:
+      - configs/base/contract_registry.yaml
+      - configs/base/pipeline.yaml
+      - configs/base/quality.yaml
+      - reports/semantic_pipeline_audit/base_config_semantic_coverage_2026-07-01.json
+    governed_outputs:
+      - reports/semantic_pipeline_audit/semantic_pipeline_audit_manifest_2026-07-01.json
+    rationale: >
+      Repository-wide Medallion defaults, global DQ defaults, and contract
+      identity wiring are governed in configs/base surfaces and must remain
+      visible to the semantic audit.
+
+  - id: composite_schema_authority_registry
+    authority_kind: composite_gold_contract_typing_authority
+    evidence_paths:
+      - configs/field_registry/composite_schema_authority_registry.yaml
+      - docs/04-reference/contracts/gold/composite_activity_v1.0.json
+      - docs/04-reference/contracts/gold/composite_assay_v1.0.json
+      - docs/04-reference/contracts/gold/composite_target_v1.0.json
+    governed_outputs:
+      - reports/semantic_pipeline_audit/semantic_pair_matrix_2026-07-01.csv
+    rationale: >
+      Explicit composite Gold schema typing authority is maintained separately
+      from review notes so inherited composite semantic fields publish durable
+      contract evidence.
+
+  - id: generic_field_ownership_registry
+    authority_kind: generic_lexical_collision_governance
+    evidence_paths:
+      - configs/field_registry/generic_field_ownership.yaml
+    governed_outputs:
+      - reports/semantic_pipeline_audit/semantic_cluster_registry_2026-07-01.json
+    rationale: >
+      Generic lexical fields are permanently blocked from canonical semantic
+      promotion unless an explicit owner registry says otherwise.
+
+  - id: ontology_unit_role_registry
+    authority_kind: ontology_and_unit_role_governance
+    evidence_paths:
+      - configs/field_registry/ontology_unit_semantic_roles.yaml
+    governed_outputs:
+      - reports/semantic_pipeline_audit/semantic_cluster_registry_2026-07-01.json
+    rationale: >
+      Ontology and unit companion fields keep separate semantic roles even when
+      names look close enough to tempt aliasing.
+
+  - id: assay_metadata_semantic_registry
+    authority_kind: source_owned_assay_metadata_registry
+    evidence_paths:
+      - configs/field_registry/assay_metadata_semantic_registry.yaml
+    governed_outputs:
+      - reports/semantic_pipeline_audit/semantic_cluster_registry_2026-07-01.json
+    rationale: >
+      Assay metadata families keep a dedicated owner/lineage registry so they
+      do not rely on generic WEAK-cluster notes for semantic authority.
+
+  - id: partial_identifier_owner_role_registry
+    authority_kind: partial_identifier_owner_registry
+    evidence_paths:
+      - configs/field_registry/partial_identifier_owner_roles.yaml
+    governed_outputs:
+      - reports/semantic_pipeline_audit/semantic_cluster_registry_2026-07-01.json
+    rationale: >
+      PARTIAL identifier clusters require an explicit owner-role registry so
+      provider identity, composite role, and lineage anchor semantics stay
+      visible in generated audit artifacts.

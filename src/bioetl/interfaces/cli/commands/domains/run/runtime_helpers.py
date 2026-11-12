@@ -6,6 +6,7 @@ from __future__ import annotations
 from contextlib import AbstractAsyncContextManager
 from importlib import import_module
 from typing import TYPE_CHECKING, Protocol, cast
+from uuid import UUID
 
 from bioetl.application.services.execution.cli_run_orchestration_models import (
     RunExecutionRequest,
@@ -40,6 +41,7 @@ class PipelineRunnerService(Protocol):
         pipeline: str,
         *,
         options: RunOptions,
+        run_id: UUID | None = None,
     ) -> RunResult: ...
 
 
@@ -65,6 +67,7 @@ async def run_pipeline_async(
     health_port: int = DEFAULT_HEALTH_SERVER_PORT,
     registry: PipelineRegistry | None = None,
     *,
+    run_id: UUID | None = None,
     metrics_starter: Callable[[], bool | None] = ensure_metrics_server_started,
     health_context_factory: Callable[
         ..., AbstractAsyncContextManager[object]
@@ -80,6 +83,8 @@ async def run_pipeline_async(
         port=health_port,
     ):
         service = runner_service_factory(registry=registry)
+        if run_id is not None:
+            return await service.run(pipeline, options=options, run_id=run_id)
         return await service.run(pipeline, options=options)
 
 
@@ -92,6 +97,15 @@ async def run_prepared_request_async(
     ] = run_pipeline_async,
 ) -> RunResult:
     """Execute a prepared request through the canonical runtime helper path."""
+    if request.run_id is not None:
+        return await run_pipeline_async_callable(
+            request.pipeline,
+            request.options,
+            health_server_enabled=request.health_server,
+            health_port=request.health_port,
+            registry=registry,
+            run_id=request.run_id,
+        )
     return await run_pipeline_async_callable(
         request.pipeline,
         request.options,

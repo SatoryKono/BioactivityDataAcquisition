@@ -133,6 +133,9 @@ Expected Run Explorer / Trust (panel 9422) columns for this smoke:
 | `--use-cached-bronze --exact-replay --replay-of-run-id` + `replay_ready` | READY | OK |
 | family outside the exact-replay boundary (`exact_replay_supported=false`) | UNSUPPORTED | N/A |
 
+For standalone `bioetl run --exact-replay`, also provide `--run-id <new-UUID>`.
+The workflow runner supplies child execution identities itself.
+
 INCOMPLETE / N/A on Replay during `degraded_observable` smoke is expected. Do not treat it as a failed workflow. See [Run Manifest Inspection](run-manifest-inspection.md) for `replay_capability` and check `exact_replay_family`.
 
 Run Explorer four columns per launch (Saved Evidence / Replay semantics for

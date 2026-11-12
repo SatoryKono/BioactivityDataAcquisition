@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from uuid import UUID
 
 from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 
@@ -74,6 +75,7 @@ class RunExecutionRequest:
     options: RunOptions
     health_server: bool
     health_port: int
+    run_id: UUID | None = None
 
 
 @dataclass(frozen=True, slots=True)

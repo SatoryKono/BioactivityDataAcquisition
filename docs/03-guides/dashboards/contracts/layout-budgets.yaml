@@ -96,7 +96,18 @@ first_window_containment_types:
 - text
 - stat
 - table
+- bioetl-selectorshell-panel
 first_window_summary_tables:
+- dashboard: bioetl-overview-v2.json
+  id: 99
+  max_rows: 1
+  owner: '@bioetl-observability'
+  bind: limit
+- dashboard: bioetl-dq-v2.json
+  id: 9400
+  max_rows: 1
+  owner: '@bioetl-observability'
+  bind: limit
 - dashboard: bioetl-control-plane-v1.json
   id: 9423
   max_rows: 5

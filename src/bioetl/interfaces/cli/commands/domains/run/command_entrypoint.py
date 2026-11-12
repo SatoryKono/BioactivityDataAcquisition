@@ -225,6 +225,12 @@ def _add_replay_parentage_options() -> CommandDecorator:
 
     def decorator(cmd: CommandCallback) -> CommandCallback:
         cmd = click.option(
+            "--run-id",
+            type=click.UUID,
+            default=None,
+            help="Explicit identity for this execution; required for --exact-replay",
+        )(cmd)
+        cmd = click.option(
             "--replay-of-run-id",
             type=str,
             default=None,

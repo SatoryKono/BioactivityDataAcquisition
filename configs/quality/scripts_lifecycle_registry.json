@@ -391,6 +391,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh": {
+      "decision": "shared_helper_module",
+      "next_step": "Sourced function library for mcp_fetch_wrapper.sh and mcp_filesystem_wrapper.sh; keep standalone invocation on the public wrappers.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
+    },
     "scripts/ai/mcp/support/github_project_transport.mjs": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the internal GitHub stdio transport invoked after repository policy checks by the GitHub MCP wrappers. The wrappers remain the configured entrypoints.",
@@ -414,6 +420,12 @@
       "next_step": "Retain as the internal host route launcher for the Context7 and Brave wrappers.",
       "owner": "@bioetl-platform",
       "review_by": "2027-01-31"
+    },
+    "scripts/ai/mcp/support/run_owned_stdio.ps1": {
+      "decision": "shared_helper_module",
+      "next_step": "Dot-sourced function library for the fetch/filesystem PowerShell wrappers; keep standalone invocation on the public wrappers.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
     },
     "scripts/ai/mcp/support/uv_resolver.ps1": {
       "decision": "shared_helper_module",
@@ -1825,6 +1837,12 @@
       "owner": "@bioetl-observability",
       "review_by": "2026-09-30"
     },
+    "scripts/ops/observability/grafana/_adaptive_tables.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain the presentation-only transformation shared by the opt-in adaptive dashboard generator; native queries and field contracts remain canonical.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-10"
+    },
     "scripts/ops/observability/grafana/_apply_ds2_all.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as a one-off DS2 migration helper for auditability; do not promote it to an active operator workflow.",
@@ -1891,6 +1909,12 @@
       "review_by": "2026-11-30",
       "next_step": "Standalone main/--check CLI retired in #11854 after reference audit found only two imports from render_nav_bus and no invocation. Retain the actual column/title transformations as an internal helper of the canonical render_nav_bus entrypoint; do not restore a standalone CLI."
     },
+    "scripts/ops/observability/grafana/_run_selection_context.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Imported projection helper used by render_nav_bus.py; keep generation through render_nav_bus and do not expose a separate CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
+    },
     "scripts/ops/observability/grafana/_selected_run_panels.py": {
       "decision": "shared_helper_module",
       "next_step": "Keep as an internal transformation invoked by render_nav_bus; no standalone command or active CLI entrypoint.",
@@ -1914,6 +1938,12 @@
       "next_step": "Keep the visual-audit transformations internal to render_nav_bus. This module has no standalone CLI or deployment entrypoint.",
       "owner": "@bioetl-observability",
       "review_by": "2026-12-14"
+    },
+    "scripts/ops/observability/grafana/_workflow_freshness.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Imported workflow freshness projection helper for dashboard generators; retain as a shared module rather than a standalone entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-11"
     },
     "scripts/ops/observability/grafana/_workflow_scope.py": {
       "decision": "shared_helper_module",
@@ -1987,6 +2017,12 @@
       "owner": "@bioetl-observability",
       "review_by": "2026-11-30"
     },
+    "scripts/ops/observability/grafana/dashboard_presentation.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal fixed-profile selector called by the canonical Grafana renderer; it is not a standalone command.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-10"
+    },
     "scripts/ops/observability/grafana/dashboard_state_fixture_v2.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the dashboard_state_fixture_v2 loader used by rerender --fixture-case (#8984); not a standalone entrypoint.",
@@ -1998,6 +2034,12 @@
       "next_step": "Retain only as the fail-closed compatibility stub for the removed Quarantine Explorer command; keep it supporting while documented legacy invocations must receive the explicit exit-2 retirement message.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/ops/observability/grafana/generate_adaptive_dashboards.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain the source-verified derived-profile generator called by the managed adaptive monitoring helper; reject drift with --check.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-10"
     },
     "scripts/ops/observability/grafana/generate_dux4_issue_pack.py": {
       "decision": "legacy_manual_utility",
@@ -2112,6 +2154,12 @@
       "next_step": "Retain only as a bounded legacy Linux bootstrap helper for Grafana screenshot runtime while screenshot orchestration remains primarily governed elsewhere; retire once screenshot bootstrap flows are formalized under a canonical Linux runbook. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
+    },
+    "scripts/ops/observability/grafana/start_adaptive_monitoring.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the optional local adaptive-profile adapter around the canonical runtime manager and renderer. It owns no independent service lifecycle and does not replace their default native entrypoints.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-10"
     },
     "scripts/ops/observability/grafana/start_quarantine_explorer.ps1": {
       "decision": "windows_compatibility_wrapper",

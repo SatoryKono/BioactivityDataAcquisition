@@ -1,0 +1,31 @@
+version: 1
+policy_scope: entity_filter_metadata_registry
+owner: "@bioetl-dq"
+linked_issue: "#5524"
+profiles:
+  shared_publication_filter_metadata:
+    applies_to:
+    - configs/entities/chembl/assay_parameters.yaml
+    - configs/entities/chembl/cell_line.yaml
+    - configs/entities/chembl/compound_record.yaml
+    - configs/entities/chembl/molecule.yaml
+    - configs/entities/chembl/protein_class.yaml
+    - configs/entities/chembl/publication.yaml
+    - configs/entities/chembl/publication_similarity.yaml
+    - configs/entities/chembl/publication_term.yaml
+    - configs/entities/chembl/subcellular_fraction.yaml
+    - configs/entities/chembl/target_component.yaml
+    - configs/entities/chembl/target_protein_classification.yaml
+    - configs/entities/chembl/tissue.yaml
+    - configs/entities/crossref/publication.yaml
+    - configs/entities/openalex/publication.yaml
+    - configs/entities/pubchem/compound.yaml
+    - configs/entities/pubmed/publication.yaml
+    - configs/entities/semanticscholar/publication.yaml
+    - configs/entities/uniprot/idmapping.yaml
+    - configs/entities/uniprot/protein.yaml
+    filter_metadata:
+      publication_filter_policy:
+        scope: source_specific
+        description: SOURCE-SPECIFIC ChEMBL publication filter policy. Silver and Gold filters intentionally constrain
+          this pipeline to the reviewed ChEMBL publication subset and do not redefine the global publication taxonomy.

@@ -126,6 +126,9 @@ def test_ensure_shared_timepicker_refresh_intervals() -> None:
     payload: dict = {"templating": {"list": []}, "panels": [], "timepicker": {}}
     _, cleared = phase4.apply_dashboard_data(payload, path_name=phase4.FILE_INCIDENT)
     assert payload["timepicker"]["refresh_intervals"] == list(phase4._REFRESH_INTERVALS)
+    assert payload["refresh"] in payload["timepicker"]["refresh_intervals"], (
+        "Grafana must be able to select its configured auto-refresh interval"
+    )
     assert "timepicker.refresh_intervals" in cleared
 
 

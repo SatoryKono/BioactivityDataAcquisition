@@ -147,7 +147,8 @@ def _assert_processed_records_target_contract(processed: dict[str, object]) -> N
     ).removesuffix('"')
     assert (
         targets[1]["url"]
-        == "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
+        == "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${selected_run_id}"
+        "&run_type=${run_type:csv}&workflow=${workflow:csv}"
     )
     assert "quality_evidence.funnel" in targets[1]["uql"]
     assert "records_in" in targets[1]["uql"]
@@ -1111,7 +1112,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     identity, processed = panels[9402], panels[9403]
     assert identity["gridPos"]["w"] == processed["gridPos"]["w"] == 24
-    assert identity["gridPos"]["y"] == 20
+    assert identity["gridPos"]["y"] == 18
     assert processed["gridPos"]["y"] == 12
     assert processed["gridPos"]["h"] == 6
     assert processed["options"]["footer"]["enablePagination"] is True

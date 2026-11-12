@@ -49,15 +49,15 @@ _RUN_ID_LABEL = "Run ID"
 _COLUMNS = {
     "workflow_id": ("Workflow", None, 100),
     "pipeline": ("Pipeline", None, 80),
-    "provider": ("Provider", 85, 50),
-    # Phase 4.3: Run ID ≥110; trim siblings so first-window 200% CSS budget holds.
-    "run_label": (_RUN_ID_LABEL, 110, 50),
-    "started_at": ("Started", 170, 50),
+    "provider": ("Provider", 60, 50),
+    # Full UUID stays in the hidden identity field and Inspect; keep the preview bounded.
+    "run_label": (_RUN_ID_LABEL, 80, 50),
+    "started_at": ("Started", 140, 50),
     "duration_display": ("Duration", 70, 50),
     "status": ("Overview", 80, 80),
-    "saved_evidence_status": ("Saved Evidence", None, 90),
-    "data_quality_status": (_DATA_QUALITY, None, 90),
-    "replay_readiness_status": (_REPLAY_READINESS, 125, 90),
+    "saved_evidence_status": ("Saved Evidence", None, 80),
+    "data_quality_status": (_DATA_QUALITY, None, 80),
+    "replay_readiness_status": (_REPLAY_READINESS, 90, 80),
 }
 _CONTEXT = "var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}"
 _SELECT_RUN_URL = (
@@ -244,8 +244,10 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         'index_state = "valid_empty" and $exists(items) and $count(items) = 0 '
         '? [{"pipeline": "VALID EMPTY"}] : items.($merge([$, '
         '{"workflow_id": workflow_id != "" ? workflow_id : "N/A", "run_label": run_id, '
-        '"workflow_passport_path": $substringAfter(workflow_passport_url, '
-        '"https://github.com/SatoryKono/BioactivityDataAcquisition/"), '
+        '"workflow_passport_path": $type(workflow_passport_url) = "string" and workflow_passport_url != "" '
+        "? $substringAfter(workflow_passport_url, "
+        '"https://github.com/SatoryKono/BioactivityDataAcquisition/") '
+        ': "blob/main/docs/03-guides/workflows.md", '
         '"pipeline_passport_path": $substringAfter(pipeline_passport_url, '
         '"https://github.com/SatoryKono/BioactivityDataAcquisition/")}]))'
     )
@@ -398,7 +400,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
                 {"id": "color", "value": {"mode": "fixed", "fixedColor": "#93C5FD"}}
             )
         if name == "Started":
-            properties.append({"id": "unit", "value": "time:YY-MM-DD:HH:mm"})
+            properties.append({"id": "unit", "value": "time:YYYY-MM-DD HH:mm"})
         if name == "Workflow":
             properties.append(
                 {

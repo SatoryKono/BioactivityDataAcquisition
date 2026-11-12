@@ -123,9 +123,9 @@ def _provider_evidence_columns(panel: dict) -> None:
         "'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), "
         "'check_result_display': $cached ? '—' : "
         "($p.check_result = 'QUERY ERROR' ? 'Source unavailable' : ($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN')), "
-        "'reason': $cached ? 'Cached Bronze used; provider API was not called.' : "
-        "($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check.' : "
-        "($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.')), "
+        "'reason': $cached ? 'Cached Bronze used; provider API was not called' : "
+        "($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check' : "
+        "($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded')), "
         "'observed_display': $age != null and $age >= 0 ? "
         "($age<60 ? 'Just now' : $elapsed & ' ago') : 'Not recorded', "
         "'report_label': $saved or $cached ? 'Open report' : '—' }]) })])"
@@ -274,9 +274,8 @@ def apply_provider_evidence_columns(payload: dict) -> None:
         _style_provider_check([evidence, check])
         check["options"]["colorMode"] = "value"
         verdict = next(panel for panel in panels if panel.get("id") == 9604)
-        value_size = (
-            verdict["options"].setdefault("text", {}).setdefault("valueSize", 48)
-        )
+        value_size = 32
+        verdict["options"].setdefault("text", {})["valueSize"] = value_size
         check["options"].setdefault("text", {})["valueSize"] = value_size
         # Overview already owns stage panel 9460 inside saved evidence.
         evidence["id"] = 9480
@@ -321,6 +320,11 @@ def apply_dq_accounting_layout(payload: dict) -> None:
     by_id[9402]["gridPos"].update(x=0, y=18, w=24, h=3)
     by_id[9403]["gridPos"].update(x=0, y=10, w=24, h=8)
     by_id[9403]["options"]["footer"]["enablePagination"] = True
+    # Fixed accounting cells need a fixed row height. Automatic pagination
+    # otherwise reserves wrapped-row space and shows one row per page.
+    custom = by_id[9403]["fieldConfig"]["defaults"]["custom"]
+    custom["wrapText"] = False
+    custom.setdefault("cellOptions", {})["wrapText"] = False
     # Old aliases share the renamed numeric column; pin its displayed name only.
     for override in by_id[9403]["fieldConfig"]["overrides"]:
         if override["matcher"].get("options") == "percentage":

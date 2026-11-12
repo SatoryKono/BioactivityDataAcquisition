@@ -236,7 +236,7 @@ _RECOVERY_ACTION_HTML = (
 _RUN_EXPLORER_UID = "bioetl-run-explorer-v1"
 CHIP_BASE = (
     "box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;"
-    "border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere"
+    "border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;word-break:break-word;overflow-wrap:anywhere"
 )
 # Theme-safe chips: slate link surface works on dark and light Grafana themes.
 LINK_STYLE = (
@@ -2784,7 +2784,13 @@ def apply_to_dashboard(
 
         for panel in _walk_panels(payload.get("panels", [])):
             label = empty_state_label(panel.get("id", -1))
-            if label and panel.get("id") in {2005, 2010}:
+            if panel.get("id") in {2005, 22005}:
+                # noValue also renders on failed browser/backend queries. Only
+                # the independent witness can qualify an empty alert response.
+                panel.setdefault("fieldConfig", {}).setdefault("defaults", {})[
+                    "noValue"
+                ] = "UNKNOWN"
+            elif label and panel.get("id") == 2010:
                 panel.setdefault("fieldConfig", {}).setdefault("defaults", {})[
                     "noValue"
                 ] = label
@@ -2815,6 +2821,11 @@ def apply_to_dashboard(
         )
         embed_global_alerts(payload, incident)
     stamp_run_selection_context(payload)
+    from scripts.ops.observability.grafana._visual_usability import (
+        apply_accessible_status_colors,
+    )
+
+    apply_accessible_status_colors(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

@@ -426,3 +426,11 @@ Overview now materializes complete saved stage rows with the Infinity backend
 parser, avoiding a mixed-frame join that discarded them. The live auditor interpolates All
 as a wildcard for unformatted Prometheus selectors while preserving HTTP selector
 values. Empty monitoring series still require review; they are not healthy zeros.
+
+
+## 2026-11-11 — аудит контрактов и первого экрана
+
+Таблицы контекста сохраняют AUTO/EXPLICIT и общий donor; ширины адаптируются к доступной области, inspect включён. DQ больше не оставляет пустой промежуток перед Run Identity и подробностями. Overview ограничивает запрос краткой сводки двумя приоритетными предупреждениями, полный список сохраняет все строки. [Отчёт аудита](../../reports/dashboard-ux-checks/2026-11-11.md) (`docs/reports/dashboard-ux-checks/2026-11-11.md`) отдельно фиксирует ограничения работающей среды.
+
+
+Продолжение: [привязка runtime и визуальный аудит](../../reports/dashboard-ux-checks/2026-11-11-closeout.md). Overview сохраняет полный текст причины в Inspect; Run Explorer сохраняет все десять колонок и полный UUID при более компактных ширинах. Время Started приведено к общему формату `YYYY-MM-DD HH:mm`.

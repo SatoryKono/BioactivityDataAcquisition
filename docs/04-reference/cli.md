@@ -256,6 +256,7 @@ bioetl run --pipeline <NAME> [OPTIONS]
 | `--cached-bronze-date`                   | str    | None          | Фильтровать Bronze cache по дате `YYYY-MM-DD`                                             |
 | `--cached-bronze-path`                   | path   | None          | Явный путь к каталогу Bronze cache                                                        |
 | `--exact-replay / --no-exact-replay`       | flag   | False         | Включить strict exact replay внутри опубликованной support boundary с fail-closed policy  |
+| `--run-id`                              | UUID   | None          | Явный ID нового выполнения; обязателен для standalone `--exact-replay`                    |
 | `--required-persistence-profile`         | choice | None          | Per-run override для control-plane persistence profile (`degraded_observable`, `replay_ready`, `forensic_grade`) |
 | `--no-control-plane-archive`             | flag   | False         | Skip local control-plane archive pack after a successful run                              |
 | `--replay-of-run-id`                     | str    | None          | Явный parent `run_id` для exact replay                                                    |
@@ -307,6 +308,7 @@ bioetl run --pipeline chembl_publication --limit 1000 --required-persistence-pro
 bioetl run --pipeline chembl_activity \
     --use-cached-bronze \
     --exact-replay \
+    --run-id baf23039-0fc0-4985-a2eb-b4cd226aaf57 \
     --replay-of-run-id 7f26d7b2-2c25-4aef-bf4c-030e4f8a4f87 \
     --replay-of-manifest-id manifest-parent-001
 ```
@@ -343,6 +345,10 @@ Migration: CLI flag `--checkpoint-compatibility` was removed. Operators set
 - `--replay-of-run-id` и `--replay-of-manifest-id` допустимы только вместе с
   `--exact-replay`; они публикуют explicit replay ancestry в manifest/inspection
   surface и не должны использоваться для обычного rerun/rebuild.
+- Для standalone `bioetl run --exact-replay` передавай `--run-id` с UUID нового
+  выполнения. `--replay-of-run-id` указывает на исходный запуск и не заменяет
+  этот идентификатор. Workflow runner передаёт идентификаторы дочерних запусков
+  самостоятельно.
 
 Supported resume modes:
 

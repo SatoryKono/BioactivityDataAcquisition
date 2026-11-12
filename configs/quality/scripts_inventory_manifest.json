@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-11T06:07:43.039467+00:00",
+  "generated_at": "2026-11-11T23:44:26.165371+00:00",
   "summary": {
-    "total_scripts": 725,
+    "total_scripts": 733,
     "status_counts": {
       "active": 334,
-      "supporting": 389,
+      "supporting": 397,
       "temporary_diagnostic": 2
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
       "ci": 76,
-      "docs": 292,
+      "docs": 294,
       "other": 22,
-      "scripts": 619,
+      "scripts": 626,
       "skills": 13,
-      "tests": 539
+      "tests": 542
     }
   },
   "scripts": [
@@ -308,7 +308,7 @@
       "agent_usage": [
         "CODEX-RUNTIME"
       ],
-      "reference_count": 22,
+      "reference_count": 17,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -693,7 +693,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 266,
+          "line": 270,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/ensure-mcp.sh\","
         }
@@ -1613,7 +1613,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 71,
+      "reference_count": 66,
       "references": [
         {
           "path": "Makefile",
@@ -1793,7 +1793,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 308,
+          "line": 312,
           "source_group": "scripts",
           "text": "\"scripts/ai/cursor/setup_skills.sh\","
         },
@@ -2638,7 +2638,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 6,
       "references": [
         {
           "path": "AGENTS.md",
@@ -2671,22 +2671,10 @@
           "text": "- Python: `check_junie_mirror.py`"
         },
         {
-          "path": "docs/ci/gate-platform-matrix-full.md",
-          "line": 154,
-          "source_group": "docs",
-          "text": "| контур не найден | `skills-consistency.yml:verify-native-codex-runtime` (.github/workflows/skills-consistency.yml:43) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {\"push\": {\"paths\": [\".codex/"
-        },
-        {
-          "path": "docs/ci/gate-platform-matrix-full.md",
-          "line": 155,
-          "source_group": "docs",
-          "text": "| контур не найден | `skills-consistency.yml:detect-runtime-skill-drift` (.github/workflows/skills-consistency.yml:58) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {\"push\": {\"paths\": [\".codex/c"
-        },
-        {
-          "path": "docs/ci/gate-platform-matrix-full.md",
-          "line": 156,
-          "source_group": "docs",
-          "text": "| контур не найден | `skills-consistency.yml:approved-runtime-skill-sync` (.github/workflows/skills-consistency.yml:82) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {\"push\": {\"paths\": [\".codex/"
+          "path": "scripts/ai/junie/check_junie_mirror.sh",
+          "line": 43,
+          "source_group": "scripts",
+          "text": "exec \"$PYTHON_BIN\" \"$SCRIPT_DIR/check_junie_mirror.py\" \"$MODE\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -2699,7 +2687,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 40,
+      "reference_count": 35,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -2921,7 +2909,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1092,
+          "line": 1115,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3040,7 +3028,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 292,
+          "line": 296,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\","
         },
@@ -3103,7 +3091,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 293,
+          "line": 297,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\","
         },
@@ -3179,7 +3167,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 268,
+          "line": 272,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\","
         },
@@ -3204,7 +3192,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 315,
+          "line": 319,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.ps1\","
         },
@@ -3253,7 +3241,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 336,
+          "line": 340,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\","
         },
@@ -3284,7 +3272,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 316,
+          "line": 320,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\","
         },
@@ -3345,7 +3333,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 317,
+          "line": 321,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\","
         },
@@ -3427,7 +3415,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 269,
+          "line": 273,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\","
         }
@@ -3490,7 +3478,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 318,
+          "line": 322,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.ps1\","
         },
@@ -3539,7 +3527,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 337,
+          "line": 341,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\","
         },
@@ -3603,7 +3591,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 270,
+          "line": 274,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\","
         }
@@ -3725,13 +3713,49 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 7,
       "references": [
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 22,
+          "source_group": "scripts",
+          "text": "EXPECTED_FETCH_WRAPPER_PS1_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_fetch_wrapper.ps1\""
+        },
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 205,
+          "source_group": "scripts",
+          "text": "require_contains \"$fetch_wrapper_source\" 'mcp_fetch_wrapper.ps1' \"fetch uses the Windows owner launcher\" || status=1"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_fetch_wrapper.sh",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "\"mcp_fetch_wrapper.ps1\" \\"
+        },
+        {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 1106,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\": (MCP_WRAPPER_CONTRACTS_TEST,),"
+        },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
           "line": 57,
           "source_group": "tests",
           "text": "FETCH_PS1 = MCP_DIR / \"mcp_fetch_wrapper.ps1\""
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1187,
+          "source_group": "tests",
+          "text": "assert \"mcp_fetch_wrapper.ps1\" in bash_source"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
+          "line": 447,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3744,7 +3768,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
@@ -3765,10 +3789,22 @@
           "text": "EXPECTED_FETCH_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_fetch_wrapper.sh\""
         },
         {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 1105,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\": (MCP_WRAPPER_CONTRACTS_TEST,),"
+        },
+        {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
           "line": 56,
           "source_group": "tests",
           "text": "FETCH_SH = MCP_DIR / \"mcp_fetch_wrapper.sh\""
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
+          "line": 448,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\","
         }
       ]
     },
@@ -3777,17 +3813,29 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 7,
       "references": [
         {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 237,
-          "source_group": "docs",
-          "text": "| `filesystem` | `scripts/ai/mcp/mcp_filesystem_wrapper.sh` (WSL) / `scripts/ai/mcp/mcp_filesystem_wrapper.ps1` (Windows) | Repo-scoped file access (host-native absolute root) |"
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 21,
+          "source_group": "scripts",
+          "text": "EXPECTED_FILESYSTEM_WRAPPER_PS1_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_filesystem_wrapper.ps1\""
+        },
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 197,
+          "source_group": "scripts",
+          "text": "require_contains \"$filesystem_wrapper_source\" 'mcp_filesystem_wrapper.ps1' \"filesystem uses the Windows owner launcher\" || status=1"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_filesystem_wrapper.sh",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "\"mcp_filesystem_wrapper.ps1\" \\"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1091,
+          "line": 1104,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3799,13 +3847,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 110,
+          "line": 133,
           "source_group": "tests",
-          "text": "for name in (\"mcp_filesystem_wrapper.sh\", \"mcp_filesystem_wrapper.ps1\", \"check.sh\"):"
+          "text": "for name in (\"mcp_filesystem_wrapper.sh\", \"mcp_filesystem_wrapper.ps1\"):"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 195,
+          "line": 220,
           "source_group": "tests",
           "text": "script = ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\""
         }
@@ -3820,19 +3868,13 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
           "line": 71,
           "source_group": "docs",
           "text": "\"filesystem\": { \"type\": \"stdio\", \"command\": \"bash\", \"args\": [\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\"], \"env\": { \"NPM_CONFIG_CACHE\": \".cache/npm-cache\" }, \"mode\": \"optional\" },"
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 237,
-          "source_group": "docs",
-          "text": "| `filesystem` | `scripts/ai/mcp/mcp_filesystem_wrapper.sh` (WSL) / `scripts/ai/mcp/mcp_filesystem_wrapper.ps1` (Windows) | Repo-scoped file access (host-native absolute root) |"
         },
         {
           "path": "scripts/ai/.mcp.json",
@@ -3848,7 +3890,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1090,
+          "line": 1103,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -3860,15 +3902,21 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 110,
+          "line": 133,
           "source_group": "tests",
-          "text": "for name in (\"mcp_filesystem_wrapper.sh\", \"mcp_filesystem_wrapper.ps1\", \"check.sh\"):"
+          "text": "for name in (\"mcp_filesystem_wrapper.sh\", \"mcp_filesystem_wrapper.ps1\"):"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 220,
+          "line": 250,
           "source_group": "tests",
           "text": "script = ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 1160,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         }
       ]
     },
@@ -3918,7 +3966,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 271,
+          "line": 275,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\","
         },
@@ -4031,7 +4079,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 274,
+          "line": 278,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.ps1\","
         },
@@ -4070,7 +4118,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 275,
+          "line": 279,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\","
         },
@@ -4246,7 +4294,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 276,
+          "line": 280,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\","
         },
@@ -4258,7 +4306,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1389,
+          "line": 1346,
           "source_group": "tests",
           "text": "powershell_source = (MCP_DIR / \"mcp_neo4j_cypher_wrapper.ps1\").read_text("
         }
@@ -4289,7 +4337,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 277,
+          "line": 281,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\","
         },
@@ -4322,7 +4370,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 278,
+          "line": 282,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\","
         },
@@ -4535,7 +4583,7 @@
       "references": [
         {
           "path": "scripts/ai/mcp/check.sh",
-          "line": 274,
+          "line": 295,
           "source_group": "scripts",
           "text": "if PYTHONPATH=\"${REPO_ROOT}${PYTHONPATH:+:${PYTHONPATH}}\" python3 \"${SCRIPT_DIR}/protocol_smoke.py\" --config \"${protocol_config}\" --server memory --timeout 15 >/dev/null; then"
         },
@@ -4646,6 +4694,61 @@
       ]
     },
     {
+      "path": "scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh",
+      "type": "sh",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/mcp_fetch_wrapper.sh",
+          "line": 7,
+          "source_group": "scripts",
+          "text": "# shellcheck source=./support/exec_windows_ps1_wrapper.sh"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_fetch_wrapper.sh",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "source \"${SCRIPT_DIR}/support/exec_windows_ps1_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_filesystem_wrapper.sh",
+          "line": 7,
+          "source_group": "scripts",
+          "text": "# shellcheck source=./support/exec_windows_ps1_wrapper.sh"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_filesystem_wrapper.sh",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "source \"${SCRIPT_DIR}/support/exec_windows_ps1_wrapper.sh\""
+        },
+        {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 1111,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\": ("
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1188,
+          "source_group": "tests",
+          "text": "assert \"exec_windows_ps1_wrapper.sh\" in bash_source"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
+          "line": 449,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\","
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-11",
+      "next_step": "Sourced function library for mcp_fetch_wrapper.sh and mcp_filesystem_wrapper.sh; keep standalone invocation on the public wrappers."
+    },
+    {
       "path": "scripts/ai/mcp/support/github_project_transport.mjs",
       "type": "mjs",
       "status": "supporting",
@@ -4672,7 +4775,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 294,
+          "line": 298,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/github_project_transport.mjs\","
         },
@@ -4709,7 +4812,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 319,
+          "line": 323,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/host_transport.mjs\","
         },
@@ -4758,7 +4861,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 320,
+          "line": 324,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/invoke_host_transport.ps1\","
         },
@@ -4819,7 +4922,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 321,
+          "line": 325,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/invoke_host_transport.sh\","
         },
@@ -4840,7 +4943,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 30,
+      "reference_count": 28,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
@@ -5022,6 +5125,49 @@
       ]
     },
     {
+      "path": "scripts/ai/mcp/support/run_owned_stdio.ps1",
+      "type": "ps1",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/mcp_fetch_wrapper.ps1",
+          "line": 6,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/run_owned_stdio.ps1\")"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_filesystem_wrapper.ps1",
+          "line": 6,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/run_owned_stdio.ps1\")"
+        },
+        {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 1107,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\": ("
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1184,
+          "source_group": "tests",
+          "text": "owned_stdio = (MCP_DIR / \"support\" / \"run_owned_stdio.ps1\").read_text("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
+          "line": 450,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\","
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-11",
+      "next_step": "Dot-sourced function library for the fetch/filesystem PowerShell wrappers; keep standalone invocation on the public wrappers."
+    },
+    {
       "path": "scripts/ai/mcp/support/token_validation.ps1",
       "type": "ps1",
       "status": "active",
@@ -5140,16 +5286,10 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_code_interpreter_wrapper.ps1",
-          "line": 11,
-          "source_group": "scripts",
-          "text": ". (Join-Path $PSScriptRoot \"support/uv_resolver.ps1\")"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_fetch_wrapper.ps1",
           "line": 11,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/uv_resolver.ps1\")"
@@ -5177,7 +5317,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 11,
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_code_interpreter_wrapper.sh",
@@ -5188,18 +5328,6 @@
         {
           "path": "scripts/ai/mcp/mcp_code_interpreter_wrapper.sh",
           "line": 14,
-          "source_group": "scripts",
-          "text": "source \"${SCRIPT_DIR}/support/uv_resolver.sh\""
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_fetch_wrapper.sh",
-          "line": 12,
-          "source_group": "scripts",
-          "text": "# shellcheck source=./support/uv_resolver.sh"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_fetch_wrapper.sh",
-          "line": 13,
           "source_group": "scripts",
           "text": "source \"${SCRIPT_DIR}/support/uv_resolver.sh\""
         },
@@ -5226,6 +5354,18 @@
           "line": 11,
           "source_group": "tests",
           "text": "\"\"\"Tests for uv_resolver.sh uv/uvx resolution logic.\"\"\""
+        },
+        {
+          "path": "tests/unit/scripts/ai/mcp/support/test_uv_resolver.py",
+          "line": 22,
+          "source_group": "tests",
+          "text": "UV_RESOLVER_SH = REPO_ROOT / \"scripts\" / \"ai\" / \"mcp\" / \"support\" / \"uv_resolver.sh\""
+        },
+        {
+          "path": "tests/unit/scripts/ai/mcp/support/test_uv_resolver.py",
+          "line": 26,
+          "source_group": "tests",
+          "text": "\"\"\"Test uv_resolver.sh script structure and behavior.\"\"\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -5266,7 +5406,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 273,
+          "line": 277,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/test_env_loading.sh\","
         },
@@ -10847,7 +10987,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 35,
+      "reference_count": 36,
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
@@ -10918,7 +11058,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 987,
+          "line": 991,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10961,7 +11101,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1105,
+          "line": 1133,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -11233,7 +11373,7 @@
         },
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 402,
+          "line": 403,
           "source_group": "docs",
           "text": "[`replay_parity_inputs.py` pytest plugin](../../scripts/engineering/ci/replay_parity_inputs.py)"
         }
@@ -13323,7 +13463,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 600,
+          "line": 604,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -13792,7 +13932,7 @@
       "references": [
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 658,
+          "line": 659,
           "source_group": "docs",
           "text": "and [relevance report builder](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/build_relevance_report.py)."
         }
@@ -13811,7 +13951,7 @@
       "references": [
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 656,
+          "line": 657,
           "source_group": "docs",
           "text": "[findings normalizer](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/normalize_findings.py),"
         }
@@ -13830,7 +13970,7 @@
       "references": [
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 657,
+          "line": 658,
           "source_group": "docs",
           "text": "[triage classifier](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/triage_findings.py),"
         }
@@ -14189,7 +14329,7 @@
       "references": [
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 661,
+          "line": 662,
           "source_group": "docs",
           "text": "The [issue 5376 metric snapshot helper](../../scripts/engineering/qa/_refresh_issue5376_live_metrics.py)"
         }
@@ -14595,7 +14735,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1388,
+          "line": 1391,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
@@ -15671,13 +15811,13 @@
         },
         {
           "path": ".github/workflows/docker.yml",
-          "line": 327,
+          "line": 343,
           "source_group": "ci",
           "text": "python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \\"
         },
         {
           "path": ".github/workflows/docker.yml",
-          "line": 379,
+          "line": 395,
           "source_group": "ci",
           "text": "python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \\"
         },
@@ -18967,13 +19107,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 175,
+          "line": 179,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/runtime_acceptance_12553.py\","
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 177,
+          "line": 181,
           "source_group": "scripts",
           "text": "\"tests/helpers/runtime_acceptance_12553.py\","
         },
@@ -19022,7 +19162,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 176,
+          "line": 180,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/runtime_acceptance_12553_coverage.py\","
         },
@@ -21203,7 +21343,7 @@
         },
         {
           "path": ".github/workflows/security.yml",
-          "line": 123,
+          "line": 124,
           "source_group": "ci",
           "text": "run: python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
@@ -21227,7 +21367,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1203,
+          "line": 1231,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23559,6 +23699,25 @@
       ]
     },
     {
+      "path": "scripts/ops/observability/grafana/_adaptive_tables.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
+          "line": 932,
+          "source_group": "docs",
+          "text": "[`_adaptive_tables.py`](../../../scripts/ops/observability/grafana/_adaptive_tables.py)."
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-10",
+      "next_step": "Retain the presentation-only transformation shared by the opt-in adaptive dashboard generator; native queries and field contracts remain canonical."
+    },
+    {
       "path": "scripts/ops/observability/grafana/_apply_ds2_all.py",
       "type": "py",
       "status": "supporting",
@@ -23586,7 +23745,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2790,
+          "line": 2802,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._apply_dsa_residual import ("
         },
@@ -23650,7 +23809,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/audit_live_grafana_panels.py",
@@ -23660,7 +23819,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2776,
+          "line": 2780,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._empty_observation_contract import ("
         },
@@ -23672,7 +23831,19 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_empty_observation_contract.py",
-          "line": 708,
+          "line": 30,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana._empty_observation_contract import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_empty_observation_contract.py",
+          "line": 76,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana._empty_observation_contract import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_empty_observation_contract.py",
+          "line": 782,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._empty_observation_contract import ("
         }
@@ -23697,13 +23868,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2871,
+          "line": 2889,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 739,
+          "line": 738,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
@@ -23715,7 +23886,7 @@
         },
         {
           "path": "tests/integration/test_grafana_evidence_readability.py",
-          "line": 238,
+          "line": 240,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import _stage_colors"
         }
@@ -23752,7 +23923,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 743,
+          "line": 742,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import ("
         },
@@ -23829,7 +24000,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2803,
+          "line": 2815,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._overview_global_alerts import ("
         },
@@ -23875,7 +24046,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_overview_identity.py",
-          "line": 410,
+          "line": 411,
           "source_group": "scripts",
           "text": "from ._overview_quality import exclusion_quality_expression"
         }
@@ -24014,11 +24185,42 @@
       "next_step": "Standalone main/--check CLI retired in #11854 after reference audit found only two imports from render_nav_bus and no invocation. Retain the actual column/title transformations as an internal helper of the canonical render_nav_bus entrypoint; do not restore a standalone CLI."
     },
     {
+      "path": "scripts/ops/observability/grafana/_run_selection_context.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/apply_phase25_srs_prr_budget.py",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._run_selection_context import ("
+        },
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 2772,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._run_selection_context import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_run_selection_context_projection.py",
+          "line": 15,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana._run_selection_context import ("
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-11",
+      "next_step": "Imported projection helper used by render_nav_bus.py; keep generation through render_nav_bus and do not expose a separate CLI."
+    },
+    {
       "path": "scripts/ops/observability/grafana/_selected_run_panels.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_dashboard_state_followup.py",
@@ -24034,7 +24236,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/apply_phase25_srs_prr_budget.py",
-          "line": 1526,
+          "line": 1639,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
@@ -24064,7 +24266,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 748,
+          "line": 747,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         }
@@ -24083,7 +24285,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2786,
+          "line": 2798,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._table_wrapping import apply_table_wrapping"
         },
@@ -24123,7 +24325,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_evidence_readability.py",
@@ -24136,12 +24338,37 @@
           "line": 2535,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._visual_usability import ("
+        },
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 2824,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._visual_usability import ("
         }
       ],
       "owner": "@bioetl-observability",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-12-14",
       "next_step": "Keep the visual-audit transformations internal to render_nav_bus. This module has no standalone CLI or deployment entrypoint."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/_workflow_freshness.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/_workflow_scope.py",
+          "line": 615,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._workflow_freshness import ("
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-11",
+      "next_step": "Imported workflow freshness projection helper for dashboard generators; retain as a shared module rather than a standalone entrypoint."
     },
     {
       "path": "scripts/ops/observability/grafana/_workflow_scope.py",
@@ -24247,7 +24474,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "scripts/ops/__main__.py",
@@ -24263,13 +24490,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/lint_dashboard_phase2.py",
-          "line": 559,
+          "line": 568,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2845,
+          "line": 2863,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import ("
         },
@@ -24281,9 +24508,15 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_la15_dashboard_hygiene.py",
-          "line": 7,
+          "line": 9,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_overview_donor_jsonata.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import _OV_DONOR"
         }
       ],
       "owner": "@bioetl-platform",
@@ -24312,7 +24545,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2852,
+          "line": 2870,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.apply_phase2_remainder import ("
         },
@@ -24374,13 +24607,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2793,
+          "line": 2805,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.apply_phase4_reflow import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2894,
+          "line": 2912,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.apply_phase4_reflow import ("
         },
@@ -24417,7 +24650,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 202,
+          "line": 206,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\": ("
         },
@@ -24535,19 +24768,19 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1370,
+          "line": 1398,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 124,
+          "line": 149,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\""
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 296,
+          "line": 362,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\""
         }
@@ -24703,7 +24936,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 205,
+          "line": 209,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/dashboard_context_links.py\": ("
         },
@@ -24756,6 +24989,25 @@
       "next_step": "Retain as the canonical /d/ context URL builder used by render_nav_bus.py and dashboard handoff tests; keep it supporting so the active script inventory does not duplicate the nav-bus helper."
     },
     {
+      "path": "scripts/ops/observability/grafana/dashboard_presentation.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
+          "line": 454,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.dashboard_presentation import ("
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-10",
+      "next_step": "Retain as the internal fixed-profile selector called by the canonical Grafana renderer; it is not a standalone command."
+    },
+    {
       "path": "scripts/ops/observability/grafana/dashboard_state_fixture_v2.py",
       "type": "py",
       "status": "supporting",
@@ -24764,7 +25016,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 698,
+          "line": 724,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_state_fixture_v2 import ("
         },
@@ -24800,6 +25052,25 @@
       "next_step": "Retain only as the fail-closed compatibility stub for the removed Quarantine Explorer command; keep it supporting while documented legacy invocations must receive the explicit exit-2 retirement message."
     },
     {
+      "path": "scripts/ops/observability/grafana/generate_adaptive_dashboards.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
+          "line": 949,
+          "source_group": "docs",
+          "text": "python -m scripts.ops.observability.grafana.generate_adaptive_dashboards"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-10",
+      "next_step": "Retain the source-verified derived-profile generator called by the managed adaptive monitoring helper; reject drift with --check."
+    },
+    {
       "path": "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
       "type": "py",
       "status": "supporting",
@@ -24827,7 +25098,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 3053,
+          "line": 3071,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.generate_prometheus_only_dashboards import ("
         },
@@ -25479,7 +25750,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 340,
+          "line": 406,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1\""
         },
@@ -25528,13 +25799,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1567,
+          "line": 1593,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1654,
+          "line": 1680,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
@@ -25555,6 +25826,43 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-11-17",
       "next_step": "Retain only as a bounded legacy Linux bootstrap helper for Grafana screenshot runtime while screenshot orchestration remains primarily governed elsewhere; retire once screenshot bootstrap flows are formalized under a canonical Linux runbook. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/start_adaptive_monitoring.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
+          "line": 950,
+          "source_group": "docs",
+          "text": "python -m scripts.ops.observability.grafana.start_adaptive_monitoring recover"
+        },
+        {
+          "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
+          "line": 951,
+          "source_group": "docs",
+          "text": "python -m scripts.ops.observability.grafana.start_adaptive_monitoring status"
+        },
+        {
+          "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
+          "line": 952,
+          "source_group": "docs",
+          "text": "python -m scripts.ops.observability.grafana.start_adaptive_monitoring render --help"
+        },
+        {
+          "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
+          "line": 421,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.start_adaptive_monitoring import ("
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-10",
+      "next_step": "Retain as the optional local adaptive-profile adapter around the canonical runtime manager and renderer. It owns no independent service lifecycle and does not replace their default native entrypoints."
     },
     {
       "path": "scripts/ops/observability/grafana/start_quarantine_explorer.ps1",
@@ -26647,7 +26955,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 330,
+          "line": 334,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/mcp/apply-shared-to-devin.py\","
         },
@@ -27385,7 +27693,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 16,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -27412,28 +27720,28 @@
           "text": "- `scripts/ops/support/load_repo_env.sh`"
         },
         {
-          "path": "scripts/ai/mcp/support/load_repo_env.sh",
-          "line": 2,
-          "source_group": "scripts",
-          "text": "# GitHub aliases live in scripts/ops/support/load_repo_env.sh (sourced below)."
+          "path": "docs/ci/gate-platform-matrix-full.md",
+          "line": 157,
+          "source_group": "docs",
+          "text": "| контур не найден | `skills-consistency.yml:verify-native-codex-runtime` (.github/workflows/skills-consistency.yml:61) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {\"push\": {\"paths\": [\"AGENTS."
         },
         {
-          "path": "scripts/ai/mcp/support/load_repo_env.sh",
-          "line": 9,
-          "source_group": "scripts",
-          "text": "source \"${_BIOETL_MCP_REPO_ROOT}/scripts/ops/support/load_repo_env.sh\""
+          "path": "docs/ci/gate-platform-matrix-full.md",
+          "line": 158,
+          "source_group": "docs",
+          "text": "| контур не найден | `skills-consistency.yml:detect-runtime-skill-drift` (.github/workflows/skills-consistency.yml:76) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {\"push\": {\"paths\": [\"AGENTS.m"
         },
         {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 281,
-          "source_group": "scripts",
-          "text": "\"scripts/ops/support/load_repo_env.sh\","
+          "path": "docs/ci/gate-platform-matrix-full.md",
+          "line": 159,
+          "source_group": "docs",
+          "text": "| контур не найден | `skills-consistency.yml:approved-runtime-skill-sync` (.github/workflows/skills-consistency.yml:100) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {\"push\": {\"paths\": [\"AGENTS"
         },
         {
-          "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 448,
-          "source_group": "scripts",
-          "text": "\"scripts/ops/support/load_repo_env.sh or pass --username/--password \""
+          "path": "docs/ci/gate-platform-matrix-full.md",
+          "line": 160,
+          "source_group": "docs",
+          "text": "| контур не найден | `skills-consistency.yml:verify-codex-junie-runtime-parity` (.github/workflows/skills-consistency.yml:129) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {\"push\": {\"paths\": [\""
         }
       ],
       "owner": "@bioetl-platform",

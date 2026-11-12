@@ -18,6 +18,26 @@ function tileIsStable(evidence, scrollTop, scrollAfter, verify) {
   return JSON.stringify(ids(evidence.terminal)) === JSON.stringify(ids(evidence.terminalAfter));
 }
 
+function compositionSlices(surface, tiles) {
+  const canvasHeight = Math.round((surface.top + surface.scrollHeight) * surface.scale);
+  let covered = 0;
+  const slices = tiles.map((tile, index) => {
+    const offset = Math.round(tile.scrollTop * surface.scale);
+    const sourceY = index === 0 ? 0 : covered - offset;
+    const minimum = index === 0 ? 0 : Math.ceil(surface.stickyBottom * surface.scale);
+    if (sourceY < minimum || sourceY >= tile.height) {
+      throw new Error('Scroll tiles cannot cover the document without sticky chrome or a gap');
+    }
+    const height = Math.min(tile.height - sourceY, canvasHeight - covered);
+    if (height <= 0) throw new Error('Scroll tile adds no document pixels');
+    const slice = {sourceY, destinationY: covered, height};
+    covered += height;
+    return slice;
+  });
+  if (covered !== canvasHeight) throw new Error('Scroll tiles leave an incomplete document');
+  return {canvasHeight, slices};
+}
+
 async function captureStableTile(page, {tileDir, index, timeout, measure, verify, pngEvidence}) {
   const deadline = Date.now() + timeout;
   const rejected = [];
@@ -84,6 +104,9 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
   let previous=-1;
   const visibleHeight=surface.clientHeight-(surface.stickyBottom-surface.top);
   if(!Number.isFinite(visibleHeight) || visibleHeight<=0)throw new Error('Sticky chrome covers scroll surface');
+  // Leave an overlap so paint extending below a sticky toolbar (for example
+  // its shadow) never becomes the first row of a newly captured strip.
+  const overlap=Math.min(64,Math.floor(visibleHeight/4));
   let target=0;
   for (;;) {
     let actual=await page.evaluate(y=>{
@@ -96,33 +119,30 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
     actual = tile.scrollTop;
     tiles.push({...tile,file:path.relative(path.dirname(filePath),tile.file)});
     if(actual+surface.clientHeight>=surface.scrollHeight-2)break;
-    const next=Math.min(actual+visibleHeight,surface.scrollHeight-surface.clientHeight);
+    const next=Math.min(actual+visibleHeight-overlap,surface.scrollHeight-surface.clientHeight);
     if(next<=actual)throw new Error('Dashboard scroll capture made no progress');
     target=next;
   }
   const buffers=await Promise.all(tiles.map(t=>fs.promises.readFile(path.join(path.dirname(filePath),t.file))));
+  const composition=compositionSlices(surface,tiles);
   const compositor=await page.context().newPage();
   try {
-    const png=await compositor.evaluate(async({surface,tiles,images})=>{
+    const png=await compositor.evaluate(async({composition,tiles,images})=>{
       const canvas=document.createElement('canvas');canvas.width=tiles[0].width;
-      canvas.height=Math.round((surface.top+surface.scrollHeight)*surface.scale);
+      canvas.height=composition.canvasHeight;
       const context=canvas.getContext('2d');
       for(let i=0;i<images.length;i++){
         const img=new Image();img.src='data:image/png;base64,'+images[i];await img.decode();
-        if(i===0)context.drawImage(img,0,0);
-        else {
-          const top=Math.round(surface.stickyBottom*surface.scale);
-          const height=Math.min(Math.round((surface.clientHeight-surface.stickyBottom+surface.top)*surface.scale),img.height-top);
-          context.drawImage(img,0,top,img.width,height,0,Math.round((surface.stickyBottom+tiles[i].scrollTop)*surface.scale),img.width,height);
-        }
+        const {sourceY,destinationY,height}=composition.slices[i];
+        context.drawImage(img,0,sourceY,img.width,height,0,destinationY,img.width,height);
       }
       return canvas.toDataURL('image/png').split(',')[1];
-    },{surface,tiles,images:buffers.map(b=>b.toString('base64'))});
+    },{composition,tiles,images:buffers.map(b=>b.toString('base64'))});
     await fs.promises.writeFile(filePath,Buffer.from(png,'base64'));
   } finally {await compositor.close();}
   await page.evaluate(()=>{
     const el=document.querySelector('[data-bioetl-capture-scroll]');el.scrollTop=0;delete el.dataset.bioetlCaptureScroll;
   });
-  return {method:'vertical tiles at fixed browser viewport; original tiles retained',surface,tiles};
+  return {method:'overlapping vertical tiles; each document row copied once; original tiles retained',surface,overlap,composition,tiles};
 }
-module.exports={captureScrollSurface};
+module.exports={captureScrollSurface,compositionSlices};

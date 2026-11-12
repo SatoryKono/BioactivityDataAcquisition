@@ -1,0 +1,26 @@
+# Exercise the shipped recording rules, not a duplicate display expression.
+rule_files:
+  - ../bioetl_observability.yml
+evaluation_interval: 15s
+tests:
+  - name: global alerts retain pending, transition to firing, and clear stale samples
+    interval: 15s
+    input_series:
+      - series: 'ALERTS{alertname="BioETLAuditScenario",alertstate="pending",severity="warning",pipeline="audit",provider="audit"}'
+        values: '1 1 stale _ _ _'
+      - series: 'ALERTS{alertname="BioETLAuditScenario",alertstate="firing",severity="warning",pipeline="audit",provider="audit"}'
+        values: '_ _ 1 1 stale _'
+    promql_expr_test:
+      - expr: 'sum by (alertstate) (bioetl_incident_global_alerts{alertname="BioETLAuditScenario"})'
+        eval_time: 0s
+        exp_samples:
+          - labels: '{alertstate="pending"}'
+            value: 30
+      - expr: 'sum by (alertstate) (bioetl_incident_global_alerts{alertname="BioETLAuditScenario"})'
+        eval_time: 30s
+        exp_samples:
+          - labels: '{alertstate="firing"}'
+            value: 40
+      - expr: 'bioetl_incident_global_alerts{alertname="BioETLAuditScenario"}'
+        eval_time: 75s
+        exp_samples: []

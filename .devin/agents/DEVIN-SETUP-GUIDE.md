@@ -122,7 +122,7 @@ This provides an interactive menu to help choose the appropriate profile for you
 
 ## Custom Subagent Profiles
 
-BioETL provides 6 custom subagent profiles in `.devin/agents/`. The table below also lists modes of those profiles; repeated names are not additional agents:
+BioETL provides 9 custom subagent profiles in `.devin/agents/`:
 
 | Profile | Model | Role | Execution Mode |
 |---------|-------|------|----------------|
@@ -131,7 +131,7 @@ BioETL provides 6 custom subagent profiles in `.devin/agents/`. The table below 
 | `py-plan-bot` | parent | Task planning, RF-* decomposition | Foreground |
 | `py-test-bot` | swe-1.6 | Tests (baseline/final/retest), coverage | Foreground/background |
 | `py-config-bot` | swe-1.6 | YAML configs (pipeline/DQ/filter/composite) | Foreground |
-| `py-debug-bot` | parent | RCA, remediation guidance, regression debugging (read-only) | Foreground |
+| `py-debug-bot` | parent | RCA, bug fixes, regression debugging | Foreground |
 | `py-doc-bot` | swe-1.6 | Docs, ADR, CHANGELOG, Mermaid diagrams | Foreground |
 | `py-test-bot` | parent | Hierarchical testing (L1→L2→L3) | Background |
 | `py-audit-bot` | parent | Hierarchical code review (S1–S8) | Background |

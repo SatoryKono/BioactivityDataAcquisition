@@ -67,6 +67,9 @@ function collectValueMappings(fieldConfig) {
   for (const override of fieldConfig?.overrides || []) {
     for (const prop of override.properties || []) {
       if (prop?.id === 'mappings') appendMappingList(pairs, prop.value);
+      if (prop?.id === 'noValue' && typeof prop.value === 'string') {
+        pairs.push({type:'value',raw:'',display:prop.value});
+      }
     }
   }
   return pairs;
@@ -131,6 +134,12 @@ function trimFractionalZeros(fixed) {
 }
 
 function unitDisplayCandidates(raw, fmt) {
+  if (fmt.unit === 'time:YYYY-MM-DD HH:mm' && fmt.timeZone && fmt.timeZone !== 'browser' && Number.isFinite(raw)) {
+    try {
+      const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {timeZone:fmt.timeZone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(raw)).map(part=>[part.type,part.value]));
+      return [`${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`];
+    } catch { return []; }
+  }
   const label = unitDisplayLabel(fmt.unit);
   if (label == null || !Number.isFinite(raw)) return [];
   const places = fmt.decimals == null ? [0, 1, 2, 3] : [fmt.decimals];
@@ -250,6 +259,11 @@ async function captureScrollTiles(page, root, {dir,index,outputDir,pngEvidence,t
   return {tiles, inspectedValues};
 }
 
+function cellTextPattern(text) {
+  // Hover adds the Inspect control; reject other values sharing this prefix.
+  return new RegExp('^' + text.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`) + '(?:\\s*Inspect value)?$');
+}
+
 async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pngEvidence,timeout,noValue,valueMappings,fieldFormats,seen,inspectCounter}) {
   const results=[];
   const known = seen instanceof Set ? seen : new Set(seen || []);
@@ -257,21 +271,27 @@ async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pn
   const values=[...new Set(cells.filter(c=>c.clipped && c.role!=='columnheader').map(c=>c.text))]
     .filter(text => !known.has(text));
   await sequential(values, async text => {
+    // Dismiss the preceding cell link popover before moving to another value.
+    await page.keyboard.press('Escape');
+    await page.mouse.move(0, 0);
+    await page.waitForTimeout(150);
     // The accessible name also contains the Inspect button's label.
-    const cell=root.locator('[role="gridcell"]').filter({hasText:new RegExp('^'+text.replace(/[.*+?^${}()|[\]\\]/g,String.raw`\$&`)+'$')}).first();
+    const cell=root.locator('[role="cell"], [role="gridcell"]').filter({hasText:cellTextPattern(text)}).first();
     if(!await cell.count()){
       // Leave unseen so a later scroll tile can still mount and Inspect this value.
       results.push({text,status:'CELL_NOT_MOUNTED'});return;
     }
     known.add(text);
-    if(await cell.evaluate(el=>el.textContent)!==text)throw new Error('Selected cell differs from requested value');
+    if(await cell.evaluate(el=>{const copy=el.cloneNode(true);copy.querySelectorAll('button').forEach(b=>b.remove());return copy.textContent;})!==text)throw new Error('Selected cell differs from requested value');
     await cell.scrollIntoViewIfNeeded({timeout});
     await cell.hover();
     const inspect=cell.getByRole('button',{name:'Inspect value',exact:true});
     if(!await inspect.count()){
       results.push({text,status:'INSPECT_UNAVAILABLE'});return;
     }
-    await inspect.click();
+    // Sticky neighbouring cells can cover this virtualized action on phones.
+    // Activate the actual accessible control through its supported keyboard path.
+    await inspect.press('Enter');
     try {
       await page.getByRole('tab',{name:'Plain text',exact:true}).waitFor({state:'visible',timeout});
       const dialog=page.getByRole('dialog').filter({has:page.getByRole('tab',{name:'Plain text',exact:true})});
@@ -279,7 +299,7 @@ async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pn
       await value.waitFor({state:'visible',timeout});
       const observed=await value.innerText();
       const match=inspectMatchesCell(observed, text, {noValue, valueMappings, fieldFormats});
-      if(!match)throw new Error('Inspect value differs from the captured table cell');
+      if(!match)throw new Error(`Inspect value differs from the captured table cell: ${JSON.stringify({text,observed})}`);
       counter.n += 1;
       const file=path.join(dir,`page-${index}-inspect-${counter.n}.png`);
       const bytes=await require('./native_browser_zoom.cjs').capturePageScreenshot(page,{path:file,animations:'disabled',timeout});
@@ -300,10 +320,14 @@ async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeo
   const transitionTimeout = Number.isFinite(timeout) && timeout > 0 ? timeout : 30000;
   const results = [];
   await sequential(dashboard.tablePanels || dashboard.firstWindowPanels || [], async panel => {
-    if (panel.type !== 'table') return;
+    if (!['table','bioetl-selectorshell-panel'].includes(panel.type)) return;
     const root = page.locator(`[data-viz-panel-key="panel-${panel.id}"]`).first();
     await root.scrollIntoViewIfNeeded({timeout});
     await root.waitFor({state:'visible',timeout});
+    if(panel.type==='bioetl-selectorshell-panel'){
+      const compact=await require('./capture_adaptive_table_pages.cjs').captureAdaptivePages(page,root,{panel,dashboard,outputDir,pngEvidence,timeout:transitionTimeout});
+      if(compact){results.push(compact);return;}
+    }
     const next = root.getByRole('button', {name:'next page', exact:true});
     const paginated = (await next.count()) > 0;
     const previous = root.getByRole('button', {name:'previous page', exact:true});
@@ -322,7 +346,7 @@ async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeo
         dir,index,outputDir,pngEvidence,timeout,
         noValue:panel.noValue,
         valueMappings:panel.valueMappings || [],
-        fieldFormats:panel.fieldFormats || [],
+        fieldFormats:(panel.fieldFormats || []).map(fmt=>({...fmt,timeZone:new URL(page.url()).searchParams.get('timezone')})),
         seen,inspectCounter,
       };
       // Inspect the initial viewport before any scroll restore can unmount rows.
@@ -373,6 +397,7 @@ async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeo
   return results;
 }
 module.exports={
+  cellTextPattern,
   captureTablePages,
   captureInspectedValues,
   captureScrollTiles,

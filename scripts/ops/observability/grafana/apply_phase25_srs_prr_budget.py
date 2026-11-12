@@ -208,7 +208,7 @@ _OV_DOMAINS = (
     "'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') "
     "and $d.verdict = 'N/A' ? '—' : $d.verdict, "
     "'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? "
-    "'Cached Bronze used; provider API was not called.' : $d.reason_display, "
+    "'Cached Bronze used; provider API was not called' : $d.reason_display, "
     "'run_execution': $s.execution_state, "
     "'execution_state': $s.execution_state, "
     "'run_verdict': $s.verdict, "
@@ -222,9 +222,21 @@ _OV_DOMAINS = (
     f", '{FRAME}': 'domains'}}]) }}))"
 )
 
+
+# Keep the full explanation for Inspect; the verdict card has a bounded preview.
+_OV_DOMAINS = (
+    "$map(" + _OV_DOMAINS + ", function($row){$merge([$row, {"
+    "'domain_reason_brief': $type($row.reason_display) = 'string' and "
+    "$length($row.reason_display) > 32 ? $substring($row.reason_display, 0, 31) & '…' "
+    ": $row.reason_display, "
+    "'run_reason_brief': $type($row.run_reason) = 'string' and "
+    "$length($row.run_reason) > 20 ? $substring($row.run_reason, 0, 19) & '…' "
+    ": $row.run_reason}])})"
+)
+
 _OV_IDENTITY = (
     "($v := function($x){$exists($x) and $x != '' ? $string($x) : "
-    "'Not recorded in saved run evidence'}; "
+    "'Not recorded'}; "
     "$s := summary[0]; "
     + _TIMESTAMP_SECONDS
     + "$start := $s.started_at ? $secs($s.started_at) : null; "
@@ -236,15 +248,15 @@ _OV_IDENTITY = (
     "{'parameter':'Started at','value':started_at ? "
     "$substring(started_at,0,10) & ' ' & $substring(started_at,11,5) & ' ' & "
     "($substring(started_at,-1) = 'Z' ? 'UTC' : $substring(started_at,-6)) : "
-    "'Not recorded in saved run evidence'},"
-    "{'parameter':'Total Run Duration','value':$start != null and $end != null "
+    "'Not recorded'},"
+    "{'parameter':'Run duration','value':$start != null and $end != null "
     "? ($end >= $start ? ($n := $floor($end - $start + 0.5); "
     "$parts := [$floor($n / 86400), $floor(($n % 86400) / 3600), "
     "$floor(($n % 3600) / 60), $n % 60]; "
     "$units := [' d', ' h', ' min', ' s']; "
     "$n = 0 ? '0 s' : $join($map($parts, function($v, $i)"
     "{$v > 0 ? $string($v) & $units[$i]}), ' ')) : "
-    "'Not recorded in saved run evidence') : 'Not recorded in saved run evidence'}"
+    "'Not recorded') : 'Not recorded'}"
     f"], function($row){{$merge([$row, {{'{FRAME}':'identity'}}])}}))"
 )
 
@@ -271,10 +283,10 @@ _OV_PROVIDER = (
     "$result := $cached ? '—' : "
     "($p.check_result = 'QUERY ERROR' ? 'Source unavailable' : "
     "($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN')); "
-    "$reason := $cached ? 'Cached Bronze used; provider API was not called.' : "
+    "$reason := $cached ? 'Cached Bronze used; provider API was not called' : "
     "($d.reason = 'run_preflight_provider_observation' ? "
-    "'Saved provider preflight check.' : ($d.reason_display ? $d.reason_display : "
-    "'Provider check evidence was not recorded.')); "
+    "'Saved provider preflight check' : ($d.reason_display ? $d.reason_display : "
+    "'Provider check evidence was not recorded')); "
     "$label := $saved or $cached ? 'Open report' : '—'; "
     "$merge([$p, {'data_source': $source, 'check_performed': $performed, "
     "'check_result_display': $result, 'reason': $reason, "
@@ -513,6 +525,20 @@ _DQ_STAGEINPUT = (
     "{'parameter': $p, 'count in': $f[stage_id = $layerName].records_in, "
     + f"'{FRAME}': 'stageinput'"
     + "}) }))"
+)
+
+_DQ_SELECTED_STAGEINPUT = (
+    "($requested := '${selected_run_id:percentencode}'; "
+    "$sameRun := $type(run_id) = 'string' and run_id != '-' and run_id = $requested; "
+    "$f := $exists(quality_evidence.funnel) ? quality_evidence.funnel : []; "
+    "$sameRun ? [$map(['01 bronze_records','02 silver_valid_records',"
+    "'03 silver_filtered_out_records','04 silver_quarantined_records',"
+    "'06 silver_deduplicated_records','07 gold_written_records',"
+    "'08 gold_excluded_by_contract_records','09 gold_quarantined_records',"
+    "'11 gold_deduplicated_records'], function($p) { "
+    "($layerName := $contains($p, 'bronze') ? 'bronze' : "
+    "($contains($p, 'silver') ? 'silver' : 'gold'); "
+    "{'parameter': $p, 'count in': $f[stage_id = $layerName].records_in}) })] : [])"
 )
 
 _DQ_DONOR = _normalized_donor(
@@ -940,7 +966,14 @@ def apply_overview(data: dict[str, Any]) -> None:
         {
             "id": "filterFieldsByName",
             "options": {
-                "include": {"names": ["domain", "status_display", "reason_display"]}
+                "include": {
+                    "names": [
+                        "domain",
+                        "status_display",
+                        "reason_display",
+                        "domain_reason_brief",
+                    ]
+                }
             },
         },
         {
@@ -954,11 +987,36 @@ def apply_overview(data: dict[str, Any]) -> None:
                 "renameByName": {
                     "domain": "Domain",
                     "status_display": "Status",
-                    "reason_display": "Reason",
+                    "reason_display": "Reason details",
+                    "domain_reason_brief": "Reason",
                 },
             },
         },
     ]
+
+    for transform in donor["transformations"]:
+        if transform["id"] == "organize":
+            transform["options"]["indexByName"].update(
+                domain_reason_brief=2, reason_display=3
+            )
+    overrides = donor["fieldConfig"]["overrides"]
+    overrides[:] = [
+        o for o in overrides if o["matcher"].get("options") != "Reason details"
+    ]
+    overrides.append(
+        {
+            "matcher": {"id": "byName", "options": "Reason details"},
+            "properties": [
+                {"id": "custom.hidden", "value": True},
+                {"id": "custom.inspect", "value": True},
+            ],
+        }
+    )
+    note = (
+        " Reason is a shortened preview; Inspect Data retains complete Reason details."
+    )
+    if note not in donor["description"]:
+        donor["description"] += note
 
     for pid, frame in (
         (9603, "domains"),
@@ -977,7 +1035,14 @@ def apply_overview(data: dict[str, Any]) -> None:
     # Use the canonical execution column shared with the context block.
     summary = _by_id(data, 9603)
     _ensure_field_projection(
-        summary, ("execution_state", "run_verdict", "saved_trust", "run_reason")
+        summary,
+        (
+            "execution_state",
+            "run_verdict",
+            "saved_trust",
+            "run_reason",
+            "run_reason_brief",
+        ),
     )
     for transform in summary["transformations"]:
         if transform["id"] == "organize":
@@ -985,6 +1050,31 @@ def apply_overview(data: dict[str, Any]) -> None:
                 values = transform["options"][key]
                 if "run_execution" in values:
                     values["execution_state"] = values.pop("run_execution")
+
+    for transform in summary["transformations"]:
+        if transform["id"] == "organize":
+            transform["options"]["indexByName"].update(run_reason_brief=3, run_reason=4)
+            transform["options"]["renameByName"].update(
+                run_reason_brief="Reason", run_reason="Reason details"
+            )
+    overrides = summary["fieldConfig"]["overrides"]
+    overrides[:] = [
+        o for o in overrides if o["matcher"].get("options") != "Reason details"
+    ]
+    overrides.append(
+        {
+            "matcher": {"id": "byName", "options": "Reason details"},
+            "properties": [
+                {"id": "custom.hidden", "value": True},
+                {"id": "custom.inspect", "value": True},
+            ],
+        }
+    )
+    note = (
+        " Reason is a shortened preview; Inspect Data retains complete Reason details."
+    )
+    if note not in summary["description"]:
+        summary["description"] += note
 
     # Row filter alone is not enough: project back to the prior column set.
     _ensure_field_projection(_by_id(data, 9300), _IDENTITY_FIELDS)
@@ -1119,6 +1209,14 @@ def apply_dq(data: dict[str, Any]) -> None:
     donor["targets"][0].pop("uql", None)
     donor["transformations"] = _status_donor_transforms()
     _align_status_donor_overrides(donor)
+    # The single-row first-window verdict must fit at 200% browser zoom.
+    # Give the wrapping explanation most of the width; status fields remain
+    # short, while Inspect retains every source value.
+    for override in donor["fieldConfig"]["overrides"]:
+        if override["matcher"] == {"id": "byName", "options": "Reason"}:
+            override["properties"] = [
+                prop for prop in override["properties"] if prop["id"] != "custom.width"
+            ] + [{"id": "custom.width", "value": 480}]
 
     stages = _by_id(data, 9460)
     stages["datasource"] = dict(DASH_DS)
@@ -1193,45 +1291,14 @@ def apply_dq(data: dict[str, Any]) -> None:
                     "source": "url",
                     "parser": "backend",
                     "format": "table",
-                    "root_selector": (
-                        "($f := $exists(quality_evidence.funnel) ? "
-                        "quality_evidence.funnel : []; "
-                        "$map(['01 bronze_records','02 silver_valid_records',"
-                        "'03 silver_filtered_out_records',"
-                        "'04 silver_quarantined_records',"
-                        "'06 silver_deduplicated_records',"
-                        "'07 gold_written_records',"
-                        "'08 gold_excluded_by_contract_records',"
-                        "'09 gold_quarantined_records',"
-                        "'11 gold_deduplicated_records'], function($p) { "
-                        "($layerName := $contains($p, 'bronze') ? 'bronze' : "
-                        "($contains($p, 'silver') ? 'silver' : 'gold'); "
-                        "{'parameter': $p, "
-                        "'count in': $f[stage_id = $layerName].records_in}) }))"
-                    ),
+                    "root_selector": _DQ_SELECTED_STAGEINPUT,
                     "url": (
                         "/ops/observability/selected-run-status"
-                        "?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
+                        "?pipeline=${pipeline}&run_id=${selected_run_id}"
+                        "&run_type=${run_type:csv}&workflow=${workflow:csv}"
                     ),
                     "url_options": {"method": "GET", "data": ""},
-                    "uql": (
-                        'parse-json | jsonata "'
-                        "($f := $exists(quality_evidence.funnel) ? "
-                        "quality_evidence.funnel : []; "
-                        "$map(['01 bronze_records','02 silver_valid_records',"
-                        "'03 silver_filtered_out_records',"
-                        "'04 silver_quarantined_records',"
-                        "'06 silver_deduplicated_records',"
-                        "'07 gold_written_records',"
-                        "'08 gold_excluded_by_contract_records',"
-                        "'09 gold_quarantined_records',"
-                        "'11 gold_deduplicated_records'], function($p) { "
-                        "($layerName := $contains($p, 'bronze') ? 'bronze' : "
-                        "($contains($p, 'silver') ? 'silver' : 'gold'); "
-                        "{'parameter': $p, "
-                        "'count in': $f[stage_id = $layerName].records_in}) }))"
-                        '"'
-                    ),
+                    "uql": 'parse-json | jsonata "' + _DQ_SELECTED_STAGEINPUT + '"',
                     "datasource": dict(OPS),
                 }
             )
@@ -1331,7 +1398,8 @@ def _cp_trust_donor_transforms() -> list[dict[str, Any]]:
                     {
                         "targetField": "evidence_observed_at",
                         "destinationType": "time",
-                    }
+                    },
+                    {"targetField": "reasons_count", "destinationType": "number"},
                 ]
             },
         },
@@ -1524,6 +1592,14 @@ def apply_control_plane(data: dict[str, Any]) -> None:
 
     overrides = donor.setdefault("fieldConfig", {}).setdefault("overrides", [])
     _fix_reasons_count_visibility(overrides)
+    for item in overrides:
+        name = item.get("matcher", {}).get("options")
+        if name in {"trust_reasons_action", "trust_action_note"}:
+            label = "Trust action" if name == "trust_reasons_action" else "Action note"
+            item["properties"] = [
+                prop for prop in item["properties"] if prop["id"] != "displayName"
+            ]
+            item["properties"].append({"id": "displayName", "value": label})
     if VIEW_PANEL_TRUST_SELF in json.dumps(donor):
         _rewrite_trust_self_links(overrides)
 
