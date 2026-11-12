@@ -391,7 +391,7 @@ def workspace_memory_entry(tmp_path: Path) -> dict[str, object]:
             "--workspace",
             str(tmp_path),
             "--project",
-            "bioetl.project-1",
+            "bioetl",
             "--policy",
             "read-write",
         ],
@@ -399,11 +399,14 @@ def workspace_memory_entry(tmp_path: Path) -> dict[str, object]:
 
 
 @pytest.mark.parametrize("policy", ["read-only", "read-write"])
+@pytest.mark.parametrize("project", ["bioetl", "BioETL"])
 def test_workspace_memory_selector_is_complete(
     workspace_memory_entry: dict[str, object],
     policy: str,
+    project: str,
 ) -> None:
     workspace_memory_entry["args"][-1] = policy
+    workspace_memory_entry["args"][7] = project
     projected, complete = transport_projection(workspace_memory_entry)
     assert complete is True
     assert projected["args"] == workspace_memory_entry["args"]
@@ -418,6 +421,7 @@ def test_workspace_memory_selector_is_complete(
         (5, "https://example.org/workspace"),
         (6, "--token"),
         (7, "invalid/project"),
+        (7, "custom.project-1"),
         (9, SECRET),
     ],
 )
@@ -442,16 +446,17 @@ def test_workspace_memory_selector_does_not_accept_extra_secret_arguments(
 
 
 def test_workspace_memory_options_are_not_globally_safe(
+    tmp_path: Path,
     workspace_memory_entry: dict[str, object],
 ) -> None:
-    workspace_memory_entry["args"][3] = "/approved/another-client.py"
+    workspace_memory_entry["args"][3] = str(tmp_path / "another-client.py")
     projected, complete = transport_projection(workspace_memory_entry)
     assert complete is False
-    assert "bioetl.project-1" not in json.dumps(projected)
+    assert "bioetl" not in projected["args"]
     assert "read-write" not in json.dumps(projected)
 
 
-@pytest.mark.parametrize("position,value", [(7, "other-project"), (9, "read-only")])
+@pytest.mark.parametrize("position,value", [(7, "BioETL"), (9, "read-only")])
 def test_workspace_memory_scope_changes_selection_identity(
     tmp_path: Path,
     workspace_memory_entry: dict[str, object],
@@ -474,3 +479,19 @@ def test_workspace_memory_scope_changes_selection_identity(
         == second["routes"]["github"]["selection_fingerprint"]
     )
     assert changed_routes(before, after) == ["memory"]
+
+
+@pytest.mark.parametrize("directory", ["approved", "unknown"])
+def test_memory_project_name_cannot_declassify_a_valid_looking_secret(
+    tmp_path: Path,
+    workspace_memory_entry: dict[str, object],
+    directory: str,
+) -> None:
+    workspace_memory_entry["args"][3] = str(
+        tmp_path / directory / "project-memory-scoped-client.py"
+    )
+    workspace_memory_entry["args"][7] = SECRET
+    projected, complete = transport_projection(workspace_memory_entry)
+    assert SECRET not in json.dumps(projected)
+    assert hashlib.sha256(SECRET.encode()).hexdigest() not in json.dumps(projected)
+    assert complete is False

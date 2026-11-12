@@ -74,7 +74,8 @@ _SAFE_WORDS = frozenset(
 )
 _VARIABLE = re.compile(r"[A-Za-z_]\w*\Z", re.ASCII)
 _PROFILE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,95}\Z")
-_MEMORY_PROJECT = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,95}\Z")
+# Public package/display names from pyproject.toml; custom IDs stay opaque.
+_PUBLIC_MEMORY_PROJECTS = frozenset({"bioetl", "BioETL"})
 _SECRET_FLAG = re.compile(r"token|password|secret|api[-_]?key|authorization", re.I)
 _BINARY_NAMES = frozenset(
     {
@@ -150,11 +151,12 @@ def _arguments(values: object) -> tuple[list[str], bool]:
 
 
 def _memory_workspace_options(values: object) -> list[str] | None:
-    """Recognize only the pinned scoped client's explicit workspace selector.
+    """Recognize the scoped selector only for the public BioETL project names.
 
     These identifiers are not globally safe CLI arguments. Unknown adapters,
     malformed selectors and additional options retain normal opaque handling.
-    The selected branch-specific registration still needs runtime evidence.
+    A matching basename does not authenticate the adapter. Only public literals
+    are declassified; backend and branch registration need separate evidence.
     """
     if not isinstance(values, list) or len(values) != 10:
         return None
@@ -166,7 +168,7 @@ def _memory_workspace_options(values: object) -> list[str] | None:
         Path(values[3].replace("\\", "/")).name == "project-memory-scoped-client.py",
         values[4::2] == ["--workspace", "--project", "--policy"],
         _path_argument(values[5]),
-        bool(_MEMORY_PROJECT.fullmatch(values[7])),
+        values[7] in _PUBLIC_MEMORY_PROJECTS,
         values[9] in {"read-only", "read-write"},
     )
     return values[6:] if all(valid) else None
