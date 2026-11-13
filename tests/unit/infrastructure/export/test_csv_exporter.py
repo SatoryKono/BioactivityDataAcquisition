@@ -1313,7 +1313,9 @@ async def test_legacy_seed_uses_incoming_string_schema(
             published,
             convert_options=pv.ConvertOptions(column_types={"id": pa.string()}),
         )
-        assert set(zip(result["id"].to_pylist(), result["value"].to_pylist())) == {
+        assert set(
+            zip(result["id"].to_pylist(), result["value"].to_pylist(), strict=True)
+        ) == {
             (keys[0], "old"),
             (keys[1], "new"),
         }
