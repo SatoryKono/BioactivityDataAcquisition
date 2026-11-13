@@ -230,3 +230,31 @@ def test_provider_derivation_queries_are_re2_compatible_and_in_sync():
     }
     for case, (pipeline, workflow, expected) in cases.items():
         assert _derive_provider(pipeline, workflow) == expected, case
+
+
+@pytest.mark.parametrize("profile", ["dashboards", "dashboards-adaptive"])
+def test_selected_run_http_targets_reference_declared_dashboard_variables(profile):
+    import json
+
+    root = Path(__file__).resolve().parents[2] / "grafana" / profile
+
+    def panels(items):
+        for panel in items:
+            yield panel
+            yield from panels(panel.get("panels", []))
+
+    for path in root.glob("*.json"):
+        dashboard = json.loads(path.read_text(encoding="utf-8"))
+        if "panels" not in dashboard:
+            continue
+        declared = {v["name"] for v in dashboard["templating"]["list"]}
+        for panel in panels(dashboard["panels"]):
+            for target in panel.get("targets", []):
+                url = target.get("url", "")
+                if "/ops/observability/selected-run-status" in url:
+                    variables = set(re.findall(r"\$\{([^}:]+)(?::[^}]+)?\}", url))
+                    assert variables <= declared, (
+                        path.name,
+                        panel["id"],
+                        variables - declared,
+                    )

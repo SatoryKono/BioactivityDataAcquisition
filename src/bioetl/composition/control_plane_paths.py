@@ -11,7 +11,7 @@ from bioetl.application.services.run_reports.source_identity import (
     RUNTIME_SOURCE_ID_ENV,
     resolve_runtime_source_identity,
 )
-from bioetl.composition.bootstrap.assembly.evidence_context import (
+from bioetl.composition.bootstrap.assembly.checkpoint import (
     bind_selected_evidence_validation,
 )
 from bioetl.composition.bootstrap.composite_infrastructure_context import (

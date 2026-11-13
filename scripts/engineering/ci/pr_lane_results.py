@@ -200,6 +200,10 @@ IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "grafana/service-dashboards/prometheus-stats.json": (
+        "tests/unit/scripts/test_generate_dashboard_content_contract.py",
+        "tests/integration/test_grafana_dashboard_provisioning.py",
+    ),
     "scripts/engineering/repo/scoped_checks.py": (
         SCOPED_CHECKS_TEST,
         "tests/unit/scripts/repo/test_scoped_checks_cache.py",
@@ -1584,6 +1588,18 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/integration/test_grafana_evidence_readability.py",
         GRAFANA_SELECTOR_CONTRACT_TEST,
         GRAFANA_VARIABLE_REFERENCE_TEST,
+    ),
+    # Optional adaptive projection keeps the native dashboard contracts and its profile checks.
+    "grafana/dashboards-adaptive/": (
+        "tests/unit/scripts/test_adaptive_dashboard_profile.py",
+        "tests/integration/test_dashboard_variable_dependencies.py",
+        "tests/integration/test_grafana_dashboard_provisioning.py",
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+    ),
+    "grafana/provisioning/dashboards-adaptive/": (
+        "tests/unit/scripts/test_adaptive_dashboard_profile.py",
+        "tests/integration/test_grafana_dashboard_provisioning.py",
     ),
     # Prometheus-only mirror: shipped dashboard owners plus its provisioning contract.
     "grafana/dashboards-prometheus-only/": (

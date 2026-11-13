@@ -39,6 +39,9 @@ SRS_URL = (
     "?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
     "&run_type=${run_type:csv}&workflow=${workflow:csv}"
 )
+RAW_SRS_URL = SRS_URL.replace("${selected_pipeline}", "${pipeline}").replace(
+    "${selected_run_id}", "${run_id}"
+)
 FRAME = "_bioetl_frame"
 VIEW_PANEL_TRUST_SELF = "viewPanel=9418"
 VIEW_PANEL_TRUST_SIBLING = "viewPanel=9414"
@@ -152,7 +155,9 @@ _RECONCILIATION_FIELDS = (
 _REPLAY_CHECK_FIELDS = ("code", "result", "reason", "evidence_ref")
 
 
-def _infinity_uql(jsonata: str, *, parser: str = "uql") -> dict[str, Any]:
+def _infinity_uql(
+    jsonata: str, *, parser: str = "uql", url: str = SRS_URL
+) -> dict[str, Any]:
     """Infinity target: JSONata in ``root_selector`` and the same UQL wrapper.
 
     ``parser="backend"`` evaluates ``root_selector`` on the server. ``uql``
@@ -167,7 +172,7 @@ def _infinity_uql(jsonata: str, *, parser: str = "uql") -> dict[str, Any]:
         "parser": parser,
         "format": "table",
         "root_selector": jsonata,
-        "url": SRS_URL,
+        "url": url,
         "url_options": {"method": "GET", "data": ""},
         "uql": f'parse-json | jsonata "{jsonata}"',
         "datasource": dict(OPS),
@@ -1381,7 +1386,7 @@ def apply_dq(data: dict[str, Any]) -> None:
 def apply_incident(data: dict[str, Any]) -> None:
     donor = _by_id(data, 2101)
     donor["datasource"] = dict(OPS)
-    donor["targets"] = [_infinity_uql(_INC_DONOR, parser="backend")]
+    donor["targets"] = [_infinity_uql(_INC_DONOR, parser="backend", url=RAW_SRS_URL)]
     donor["transformations"] = _status_donor_transforms()
     _align_status_donor_overrides(donor)
 
@@ -1631,7 +1636,7 @@ def _stamp_overview_empty_reasons(data: dict[str, Any]) -> None:
 def apply_control_plane(data: dict[str, Any]) -> None:
     donor = _by_id(data, 9418)
     donor["datasource"] = dict(OPS)
-    donor["targets"] = [_infinity_uql(_CP_DONOR)]
+    donor["targets"] = [_infinity_uql(_CP_DONOR, url=RAW_SRS_URL)]
     donor["transformations"] = _cp_trust_donor_transforms()
 
     overrides = donor.setdefault("fieldConfig", {}).setdefault("overrides", [])

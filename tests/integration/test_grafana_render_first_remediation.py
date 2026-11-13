@@ -1224,7 +1224,7 @@ def test_visible_trust_reason_count_opens_frozen_reason_details() -> None:
     trust = _panel(_load("bioetl-control-plane-v1.json"), 9418)
     assert trust["targets"][0]["parser"] == "uql"
     assert "presentation_trust" in trust["targets"][0]["uql"]
-    assert "run_id=${selected_run_id}" in trust["targets"][0]["url"]
+    assert "run_id=${run_id}" in trust["targets"][0]["url"]
     overrides = {
         o["matcher"]["options"]: o["properties"]
         for o in trust["fieldConfig"]["overrides"]

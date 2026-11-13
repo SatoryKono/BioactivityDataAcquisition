@@ -93,6 +93,16 @@ def _option_label(
     return f"{started} · {entry.owner} · {identity.get('status', 'unknown')} · {value}"
 
 
+def _seen_option_value(
+    value: object,
+    seen: set[object],
+    *,
+    replace_existing: bool,
+) -> bool:
+    """Allow only an explicitly unresolved option to bypass deduplication."""
+    return not replace_existing and value in seen
+
+
 def _maybe_report_option(
     *,
     entry: ReportIndexEntry,
@@ -102,17 +112,24 @@ def _maybe_report_option(
     root: Path,
     timezone: str,
     seen: set[object],
+    replace_existing: bool = False,
 ) -> object | None:
     if not _entry_matches_catalog(entry, scopes):
         return None
     known_value = entry.owner if dimension == "pipeline" else entry.run_id
-    if dimension in {"pipeline", "run_id"} and known_value in seen:
+    if dimension in {"pipeline", "run_id"} and _seen_option_value(
+        known_value, seen, replace_existing=replace_existing
+    ):
         return None
     identity = _checked_identity(entry, root)
     if not _identity_matches_scopes(identity, scopes):
         return None
     value = identity.get(_FIELDS[dimension])
-    if not isinstance(value, str) or not value or value in seen:
+    if (
+        not isinstance(value, str)
+        or not value
+        or _seen_option_value(value, seen, replace_existing=replace_existing)
+    ):
         return None
     seen.add(value)
     label = _option_label(dimension, identity, entry, value, timezone)
@@ -121,25 +138,23 @@ def _maybe_report_option(
     return value
 
 
-def _unresolved_run_option_index(
+def _unresolved_run_option_indexes(
     items: list[object],
     *,
-    entry: ReportIndexEntry,
     dimension: str,
     response_shape: str,
-) -> int | None:
-    """Index of an unknown ledger option that a report identity may replace."""
+) -> dict[str, int]:
+    """Index unknown run labels once, preserving the first option for each ID."""
     if dimension != "run_id" or response_shape != "options":
-        return None
+        return {}
+    indexes: dict[str, int] = {}
     for index, item in enumerate(items):
         if not isinstance(item, dict):
             continue
-        if item.get("value") != entry.run_id:
-            continue
-        if " · unknown · " not in str(item.get("text", "")):
-            continue
-        return index
-    return None
+        value = item.get("value")
+        if isinstance(value, str) and " · unknown · " in str(item.get("text", "")):
+            indexes.setdefault(value, index)
+    return indexes
 
 
 def _option_seen_value(
@@ -157,6 +172,7 @@ def _merge_report_option(
     *,
     items: list[object],
     seen: set[object],
+    unresolved_indexes: dict[str, int],
     entry: ReportIndexEntry,
     dimension: str,
     response_shape: str,
@@ -168,13 +184,7 @@ def _merge_report_option(
     # A manifest without a terminal ledger event may already advertise this
     # run as unknown. An identity-checked report can resolve that label;
     # preserve known ledger statuses and retain exactly one option per ID.
-    unresolved = _unresolved_run_option_index(
-        items,
-        entry=entry,
-        dimension=dimension,
-        response_shape=response_shape,
-    )
-    candidate_seen = seen - {entry.run_id} if unresolved is not None else seen
+    unresolved = unresolved_indexes.get(entry.run_id)
     option = _maybe_report_option(
         entry=entry,
         dimension=dimension,
@@ -182,12 +192,14 @@ def _merge_report_option(
         scopes=scopes,
         root=root,
         timezone=timezone,
-        seen=candidate_seen,
+        seen=seen,
+        replace_existing=unresolved is not None,
     )
     if option is None:
         return
     if unresolved is not None:
         items[unresolved] = option
+        unresolved_indexes.pop(entry.run_id)
     else:
         items.append(option)
     seen.add(_option_seen_value(option, dimension=dimension, entry=entry))
@@ -212,11 +224,15 @@ def supplement_report_options(
     raw_items = payload.get("items", [])
     items = list(raw_items) if isinstance(raw_items, list) else []
     seen = {item.get("value") if isinstance(item, dict) else item for item in items}
+    unresolved_indexes = _unresolved_run_option_indexes(
+        items, dimension=dimension, response_shape=response_shape
+    )
     ordered = sorted(entries, key=lambda item: item.started_at or "", reverse=True)
     for entry in ordered:
         _merge_report_option(
             items=items,
             seen=seen,
+            unresolved_indexes=unresolved_indexes,
             entry=entry,
             dimension=dimension,
             response_shape=response_shape,

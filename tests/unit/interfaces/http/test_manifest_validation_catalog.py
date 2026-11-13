@@ -6,6 +6,9 @@ from types import SimpleNamespace
 from uuid import UUID
 
 import pytest
+from bioetl.interfaces.http import (
+    _health_server_control_plane_evidence_scope as scope_module,
+)
 
 from bioetl.application.observability.control_plane_evidence.models import (
     unresolved_scope_check,
@@ -78,7 +81,7 @@ def test_report_catalog_run_without_manifest_is_not_a_missing_run(
         return {"run_id": run_id, "pipeline_name": "uniprot_protein"}
 
     monkeypatch.setattr(
-        "bioetl.interfaces.http._health_server_control_plane_evidence_routing.verified_report_identity_for_run",
+        "bioetl.interfaces.http._health_server_control_plane_evidence_scope.verified_report_identity_for_run",
         _identity,
     )
     store = SimpleNamespace()
@@ -123,7 +126,7 @@ def test_run_absent_from_both_catalogs_stays_not_found(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        "bioetl.interfaces.http._health_server_control_plane_evidence_routing.verified_report_identity_for_run",
+        "bioetl.interfaces.http._health_server_control_plane_evidence_scope.verified_report_identity_for_run",
         lambda *_args, **_kwargs: None,
     )
     resolved = reconcile_manifest_validation_scope(
@@ -144,7 +147,7 @@ def test_manifest_catalog_hit_does_not_consult_reports(
         raise AssertionError("report catalog must not be read for a manifest hit")
 
     monkeypatch.setattr(
-        "bioetl.interfaces.http._health_server_control_plane_evidence_routing.verified_report_identity_for_run",
+        "bioetl.interfaces.http._health_server_control_plane_evidence_scope.verified_report_identity_for_run",
         _forbidden,
     )
     manifest = SimpleNamespace(run_id=RunID(UUID(_RUN_ID)))
@@ -185,7 +188,7 @@ async def test_corrupt_report_catalog_returns_evidence_payload(
     monkeypatch.setattr(routing, "resolve_evidence_scope", _resolved)
     monkeypatch.setattr(routing.asyncio, "to_thread", _to_thread)
     monkeypatch.setattr(
-        routing,
+        scope_module,
         "verified_report_identity_for_run",
         lambda *_args, **_kwargs: (_ for _ in ()).throw(
             ValueError("Persisted selector report is unreadable")
@@ -220,7 +223,7 @@ async def test_report_only_run_keeps_manifest_missing_with_resolver(monkeypatch)
 
     monkeypatch.setattr(routing, "resolve_evidence_scope", resolved)
     monkeypatch.setattr(
-        routing,
+        scope_module,
         "verified_report_identity_for_run",
         lambda *_args, **_kwargs: {
             "run_id": _RUN_ID,

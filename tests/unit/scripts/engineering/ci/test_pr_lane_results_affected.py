@@ -1412,6 +1412,27 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
     "path,expected,unknown",
     [
         (
+            "grafana/dashboards-adaptive/profile.json",
+            {
+                "tests/unit/scripts/test_adaptive_dashboard_profile.py",
+                "tests/integration/test_dashboard_variable_dependencies.py",
+            },
+            "grafana/not-reviewed-adaptive/profile.json",
+        ),
+        (
+            "grafana/provisioning/dashboards-adaptive/bioetl.yaml",
+            {
+                "tests/unit/scripts/test_adaptive_dashboard_profile.py",
+                "tests/integration/test_grafana_dashboard_provisioning.py",
+            },
+            "grafana/provisioning/not-reviewed-adaptive/bioetl.yaml",
+        ),
+        (
+            "grafana/service-dashboards/prometheus-stats.json",
+            {"tests/unit/scripts/test_generate_dashboard_content_contract.py"},
+            "grafana/service-dashboards/not-reviewed.json",
+        ),
+        (
             "configs/quality/external_resource_inventory_pr13061_review.json",
             {
                 "tests/architecture/test_external_resource_inventory_catalog.py",
