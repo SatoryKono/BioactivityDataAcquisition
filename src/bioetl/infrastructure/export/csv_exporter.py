@@ -144,19 +144,17 @@ def _unlink_clear_targets(
 
 def _seed_raw_sidecar_if_missing(
     *,
-    csv_full_path: Path,
-    raw_path: Path,
-    root: Path,
+    base_path: Path,
     table_name: str,
 ) -> None:
+    """Seed ``.csv.raw`` from published CSV using confined export-root paths only.
+
+    Paths are rebuilt from ``table_name`` (single segment under export root) at
+    the IO sink so seed read/write cannot follow caller-supplied path objects.
+    """
+    csv_full_path, raw_path = _resolve_table_export_paths(base_path, table_name)
     if raw_path.exists():
         return
-    if not (
-        csv_full_path.is_relative_to(root) and raw_path.is_relative_to(root)
-    ):
-        raise ValueError(
-            f"CSV export path escapes export directory: {table_name!r}"
-        )
     raw_path.write_bytes(csv_full_path.read_bytes())
 
 
@@ -217,9 +215,7 @@ class CsvExporter:
             csv_data = self._sort_table(csv_data, self.sort_by)
         _validate_spreadsheet_safe_column_names(csv_data)
         _require_primary_csv_update(
-            self._atomic_csv_write(
-                csv_data, target_path, self._build_write_options()
-            ),
+            self._atomic_csv_write(csv_data, target_path, self._build_write_options()),
             path=target_path,
             mode="write",
         )
@@ -241,9 +237,7 @@ class CsvExporter:
         return _unlink_clear_targets(targets, self._logger)
 
     def _sort_table(self, table: pa.Table, sort_columns: list[str]) -> pa.Table:
-        return _sort_table(
-            table, sort_columns, sort_ascending=self.sort_ascending
-        )
+        return _sort_table(table, sort_columns, sort_ascending=self.sort_ascending)
 
     def _deduplicate(self, table: pa.Table, primary_keys: list[str]) -> pa.Table:
         return _deduplicate_table(table, primary_keys, logger=self._logger)
@@ -296,7 +290,6 @@ class CsvExporter:
                 csv_data=csv_data,
                 csv_full_path=csv_full_path,
                 raw_path=raw_path,
-                root=root,
             )
         return self._overwrite_export(
             csv_data=csv_data,
@@ -312,12 +305,9 @@ class CsvExporter:
         csv_data: pa.Table,
         csv_full_path: Path,
         raw_path: Path,
-        root: Path,
     ) -> Path:
         _seed_raw_sidecar_if_missing(
-            csv_full_path=csv_full_path,
-            raw_path=raw_path,
-            root=root,
+            base_path=self.base_path,
             table_name=table_name,
         )
         _write_raw_and_published_pair(

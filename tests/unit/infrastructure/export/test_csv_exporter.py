@@ -44,7 +44,10 @@ import pytest
 
 import bioetl.infrastructure.export.csv_exporter_table_ops as csv_exporter_table_ops
 import bioetl.infrastructure.export.csv_exporter_io_ops as csv_exporter_io_ops
-from bioetl.infrastructure.export.csv_exporter import CsvExporter
+from bioetl.infrastructure.export.csv_exporter import (
+    CsvExporter,
+    _seed_raw_sidecar_if_missing,
+)
 
 
 @pytest.fixture
@@ -706,7 +709,9 @@ class TestCsvExporterTrueAppend:
         monkeypatch.setattr("builtins.open", _patched_open)
 
         table2 = pa.Table.from_pydict({"id": [2]})
-        with pytest.raises(RuntimeError, match="backup-only publish is not a successful"):
+        with pytest.raises(
+            RuntimeError, match="backup-only publish is not a successful"
+        ):
             await exporter.export("locked_test", table2)
 
         mock_logger.warning.assert_called()
@@ -735,7 +740,9 @@ class TestCsvExporterTrueAppend:
 
         monkeypatch.setattr("builtins.open", _patched_open)
 
-        with pytest.raises(RuntimeError, match="backup-only publish is not a successful"):
+        with pytest.raises(
+            RuntimeError, match="backup-only publish is not a successful"
+        ):
             await exporter.export("locked_raw", pa.Table.from_pydict({"id": [2]}))
 
         assert published.read_bytes() == before_published
@@ -992,3 +999,30 @@ class TestCsvExporterPathConfinement:
         assert raw_path.name == "chembl.activity.csv.raw"
         assert csv_path.parent == tmp_path.resolve()
         assert raw_path.parent == tmp_path.resolve()
+
+    @pytest.mark.parametrize(
+        "evil_name",
+        [
+            "../escape",
+            "..\\escape",
+            "/tmp/escape",
+            "nested/escape",
+            "a/../../b",
+        ],
+    )
+    def test_seed_raw_sidecar_rejects_path_traversal_table_names(
+        self,
+        tmp_path: Path,
+        evil_name: str,
+    ) -> None:
+        """Seed sink rebuilds paths from table_name; traversal must not touch IO."""
+        outside_before = {
+            path.resolve() for path in tmp_path.parent.glob("*") if path.is_file()
+        }
+        with pytest.raises(ValueError, match="CSV export|table name"):
+            _seed_raw_sidecar_if_missing(base_path=tmp_path, table_name=evil_name)
+        outside_after = {
+            path.resolve() for path in tmp_path.parent.glob("*") if path.is_file()
+        }
+        assert outside_after == outside_before
+        assert list(tmp_path.glob("*")) == []
