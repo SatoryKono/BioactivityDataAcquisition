@@ -1591,3 +1591,16 @@ def test_security_inventory_reviews_route_to_source_qualification_tests(audit):
         "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py"
         in json.dumps(report)
     )
+
+
+def test_branch_hygiene_runbook_routes_only_to_owned_checks():
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["docs/05-operations/runbooks/branch-hygiene-wave.md"], repo_root=root
+    )
+    assert "tests/unit/scripts/repo/test_branch_hygiene.py" in json.dumps(report)
+    with pytest.raises(ValueError, match="unmapped"):
+        build_shadow_compare(
+            ["docs/05-operations/runbooks/branch-hygiene-wave-unknown.md"],
+            repo_root=root,
+        )

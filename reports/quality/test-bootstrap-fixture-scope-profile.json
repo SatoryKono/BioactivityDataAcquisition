@@ -1001,8 +1001,8 @@
   ],
   "current_source_binding": {
     "kind": "source_topology_only",
-    "source_tree_sha256": "54bd9c33edcb570316d4e2fde1dc025ca62eaf39dc23e7119e932f88b08cb1ac",
-    "test_governance_source_tree_sha256": "c4b550d6b0ca19bb5770c38420b5f3db7c00cf6fe95c3db27072b4a3d82f3bf2",
+    "source_tree_sha256": "5627623caadfc937fcdbfe02e19e0843eff826584d99ec33bf00bda4062dd9d4",
+    "test_governance_source_tree_sha256": "4098f1fe34db2982ef7436e38aa52284c64054183d81df54586b2a36fdefb3a9",
     "test_file_count": 49,
     "test_files": [
       "tests/unit/composition/bootstrap/cli/test_config.py",

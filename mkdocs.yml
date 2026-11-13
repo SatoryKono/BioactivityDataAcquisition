@@ -537,6 +537,7 @@ nav:
           - "Schema Evolution": 05-operations/runbooks/schema-evolution.md
           - "Canonical Semantic Field Unification": 05-operations/runbooks/canonical-semantic-field-unification.md
           - "Stale Lock": 05-operations/runbooks/stale-lock.md
+          - "Branch Hygiene Wave": 05-operations/runbooks/branch-hygiene-wave.md
           - "Quarantine Management": 05-operations/runbooks/quarantine-management.md
           - "Retention-Sensitive Cleanup": 05-operations/runbooks/retention-sensitive-cleanup.md
           - "Quarterly GitHub Settings Review": 05-operations/runbooks/github-settings-quarterly-review.md
