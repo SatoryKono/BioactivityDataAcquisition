@@ -356,6 +356,88 @@ def test_lineage_validation_detects_directed_cycle() -> None:
     assert "lineage_identity_consistent" in _reasons(payload)
 
 
+def test_lineage_validation_loads_fragments_for_all_ledger_manifests() -> None:
+    """Successor ledger includes predecessor bronze; fragments must load by ledger manifest_id."""
+    bronze = _manifest(
+        manifest_id="manifest-bronze",
+        execution_fingerprint="fingerprint-bronze",
+        created_at=_NOW - timedelta(hours=2),
+    )
+    gold = _manifest(
+        manifest_id="manifest-gold",
+        execution_fingerprint="fingerprint-gold",
+        created_at=_NOW - timedelta(hours=1),
+    )
+    bronze_node = LineageNodeRef(LineageNodeType.DATASET, "dataset:bronze")
+    gold_node = LineageNodeRef(LineageNodeType.DATASET, "dataset:gold")
+    bronze_fragment = LineageGraphFragment(
+        fragment_id="fragment-bronze",
+        run_id=str(bronze.run_id),
+        manifest_id=bronze.manifest_id,
+        nodes=(bronze_node,),
+    )
+    gold_fragment = LineageGraphFragment(
+        fragment_id="fragment-gold",
+        run_id=str(gold.run_id),
+        manifest_id=gold.manifest_id,
+        nodes=(gold_node,),
+        edges=(
+            LineageEdge(
+                LineageEdgeType.DERIVED_FROM,
+                gold_node,
+                bronze_node,
+            ),
+        ),
+    )
+
+    class _ManifestScopedLineageStore:
+        def __init__(self, fragments: tuple[LineageGraphFragment, ...]) -> None:
+            self._fragments = fragments
+
+        def list_by_manifest_id(self, manifest_id: str) -> list[LineageGraphFragment]:
+            return [f for f in self._fragments if f.manifest_id == manifest_id]
+
+        def list_by_run_id(self, run_id: RunID) -> list[LineageGraphFragment]:
+            _ = run_id
+            return []
+
+    ledger = InMemoryRunLedgerStore()
+    for entry in (
+        RunLedgerEntry(
+            entry_id="entry-bronze",
+            manifest_id=bronze.manifest_id,
+            run_id=bronze.run_id,
+            event_type="artifact_published",
+            occurred_at=bronze.created_at,
+            status="completed",
+            lineage_fragment_id=bronze_fragment.fragment_id,
+        ),
+        RunLedgerEntry(
+            entry_id="entry-gold",
+            manifest_id=gold.manifest_id,
+            run_id=gold.run_id,
+            event_type="artifact_published",
+            occurred_at=gold.created_at,
+            status="completed",
+            lineage_fragment_id=gold_fragment.fragment_id,
+        ),
+    ):
+        ledger.append(entry)
+
+    service = ControlPlaneEvidenceService(
+        lineage_store=_ManifestScopedLineageStore((bronze_fragment, gold_fragment)),
+        ledger_port=ledger,
+    )
+    payload = service.lineage_validation(scope=_scope(gold))
+
+    assert "ledger_fragment_missing" not in _reasons(payload)
+    assert "fragment_manifest" not in " ".join(_reasons(payload))
+    assert "lineage_closure_complete" in _reasons(payload)
+    assert "lineage_identity_consistent" in _reasons(payload)
+    assert payload["fragment_count"] == 2
+    assert payload["status"] == "OK"
+
+
 @pytest.mark.parametrize("reverse", [False, True])
 @pytest.mark.parametrize("reference_version", [None, "1", "2"])
 def test_lineage_partial_references_preserve_real_conflicts(
