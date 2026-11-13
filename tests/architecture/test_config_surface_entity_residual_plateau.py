@@ -21,6 +21,7 @@ from typing import Any
 import yaml
 
 from scripts.engineering.qa.config_surface_governance import INTENTIONAL_PREFIXES
+from scripts.engineering.qa import report_config_surface_backlog as backlog_report
 from scripts.engineering.qa.report_config_surface_backlog import (
     BACKLOG_PATH,
     build_backlog,
@@ -126,7 +127,9 @@ def test_config_surface_duplication_audit_matches_live_backlog() -> None:
         "configs/quality/test_telemetry_baseline.yaml"
     ]
     assert scope["excluded_review_evidence_patterns"] == [
-        "configs/quality/external_resource_inventory_pr*_review.json"
+        "configs/quality/external_resource_inventory_pr*_review.json",
+        "configs/quality/external_resource_inventory_security_aud005_main_merge_review.json",
+        "configs/quality/external_resource_inventory_security_aud006_review.json",
     ]
     assert scope["excluded_shared_contract_blocks"] == [
         {
@@ -164,6 +167,41 @@ def test_config_surface_duplication_audit_matches_live_backlog() -> None:
     assert composite_clusters
     for cluster in composite_clusters:
         assert "composite_config" in cluster["surface_kind_counts"]
+
+
+def test_security_review_evidence_does_not_hide_authored_config_duplicates(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Exclude two known receipts while retaining similarly named config debt."""
+    quality = tmp_path / "configs" / "quality"
+    quality.mkdir(parents=True)
+    evidence_names = {
+        "external_resource_inventory_security_aud005_main_merge_review.json",
+        "external_resource_inventory_security_aud006_review.json",
+    }
+    authored_names = {
+        "external_resource_inventory_security_aud005_runtime_review.json",
+        "external_resource_inventory_security_aud007_review.json",
+    }
+    payload = json.dumps({"source_reviews": {"setting": "retained-config-" * 30}})
+    for name in evidence_names | authored_names:
+        (quality / name).write_text(payload, encoding="utf-8")
+    monkeypatch.setattr(backlog_report, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        backlog_report, "DUPLICATION_SURFACE_ROOT", tmp_path / "configs"
+    )
+    monkeypatch.setattr(backlog_report, "GENERATED_DUPLICATION_SURFACE_DIRS", ())
+    monkeypatch.setattr(backlog_report, "GENERATED_DUPLICATION_SURFACE_FILES", ())
+
+    audit = backlog_report._build_duplication_audit()
+
+    assert audit["scope"]["files_scanned"] == 2
+    assert audit["summary"]["duplicate_cluster_count"] == 1
+    assert {
+        Path(occurrence["path"]).name
+        for cluster in audit["clusters"]
+        for occurrence in cluster["occurrences"]
+    } == authored_names
 
 
 def test_entity_residual_partial_keys_are_intentional_only() -> None:
