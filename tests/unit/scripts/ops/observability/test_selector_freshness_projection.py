@@ -17,7 +17,7 @@ pytestmark = pytest.mark.unit
 @pytest.mark.parametrize(
     ("items", "expected"),
     [
-        ([], [{"text": "НЕТ ЗАПУСКОВ", "value": "-"}]),
+        ([], [{"text": "NO RUNS", "value": "-"}]),
         (
             [{"text": "today [STALE catalog]", "value": "run-1"}],
             [{"text": "today", "value": "run-1"}],

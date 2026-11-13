@@ -101,7 +101,7 @@ def test_dashboard_rows_match_flat_and_forensic_surfaces() -> None:
             assert target["panelId"] == 9002
             source = resolve_dashboard_target(by_id, target)
             assert "reconciliation_display" in source["root_selector"]
-            assert "run_id=${run_id}" in source["url"]
+            assert "run_id=${selected_run_id}" in source["url"]
             assert comparison["transformations"][0] == {
                 "id": "filterByValue",
                 "options": {

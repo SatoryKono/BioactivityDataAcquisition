@@ -47,6 +47,7 @@ function props(): PanelProps<AdaptiveTableOptions> {
         values: name === 'Run ID' ? ids.map((id) => id.slice(0, 8)) : [`${name} one`, `${name} two`, `${name} three`],
       })),
       { name: 'run_id', type: 'string' as FieldType, values: ids, config: { custom: { hidden: true } } },
+      { name: 'pipeline', type: 'string' as FieldType, values: ['chembl_assay', 'chembl_assay', 'chembl_assay'], config: { custom: { hidden: true } } },
       { name: 'run_type', type: 'string' as FieldType, values: ['backfill', 'backfill', 'backfill'], config: { custom: { hidden: true } } },
     ],
   };
@@ -81,6 +82,8 @@ it('keeps all ten fields and every returned run accessible without widening the 
   const modal = screen.getByRole('dialog', { name: 'Run details' });
   expect(within(modal).getByText(ids[2])).toBeInTheDocument();
   expect(within(modal).getByText('backfill')).toBeInTheDocument();
+  expect(within(modal).getByText('Full pipeline')).toBeInTheDocument();
+  expect(within(modal).getByText('chembl_assay')).toBeInTheDocument();
   expect(within(modal).getByRole('link', { name: ids[2].slice(0, 8) })).toHaveAttribute('href', `/d/run?var-run_id=${ids[2]}`);
   expect(within(modal).getByRole('link', { name: 'Open report' })).toHaveAttribute('href', `/report/${ids[2]}`);
 });
@@ -109,6 +112,18 @@ it('returns to the native table at a wide size without dropping fields or identi
   expect(panelProps.data.series[0].fields.find((field) => field.name === 'run_id')?.values).toEqual(ids);
   expect(panelProps.data.series[0].fields.find((field) => field.name === 'Run ID')?.getLinks?.({ valueRowIndex: 2 })[0].href).toBe(`/d/run?var-run_id=${ids[2]}`);
   expect(screen.queryByRole('navigation', { name: 'Catalog pagination' })).not.toBeInTheDocument();
+});
+
+it('keeps a desktop panel constrained by the navigation menu readable', () => {
+  viewport(1366);
+  const panelProps = props();
+  render(<AdaptiveTable {...panelProps} width={944} options={{ ...panelProps.options, compactFields: ['Provider', 'Pipeline', 'Run ID', 'Overview'] }} />);
+  expect(screen.getAllByRole('rowheader')).toHaveLength(4);
+  expect(screen.queryByTestId('native-table')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Next run' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Details' }));
+  expect(within(screen.getByRole('dialog')).getByText(ids[1])).toBeInTheDocument();
+  expect(within(screen.getByRole('dialog')).getByText('Saved Evidence')).toBeInTheDocument();
 });
 
 it.each(['displayName', 'displayNameFromDS'] as const)('uses Grafana %s labels and keeps hidden identity out of the summary', (property) => {

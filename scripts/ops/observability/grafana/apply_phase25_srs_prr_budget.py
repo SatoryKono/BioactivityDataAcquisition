@@ -36,15 +36,18 @@ DASH_DS = {"type": "datasource", "uid": "-- Dashboard --"}
 MIXED_DS = {"type": "datasource", "uid": "-- Mixed --"}
 SRS_URL = (
     "/ops/observability/selected-run-status"
-    "?pipeline=${pipeline}&run_id=${run_id}"
+    "?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
     "&run_type=${run_type:csv}&workflow=${workflow:csv}"
+)
+RAW_SRS_URL = SRS_URL.replace("${selected_pipeline}", "${pipeline}").replace(
+    "${selected_run_id}", "${run_id}"
 )
 FRAME = "_bioetl_frame"
 VIEW_PANEL_TRUST_SELF = "viewPanel=9418"
 VIEW_PANEL_TRUST_SIBLING = "viewPanel=9414"
 _SELECT_RUN = "SELECT RUN"
-_NO_RUNS = "НЕТ ЗАПУСКОВ"
-_NO_RECORDS = "нет записей"
+_NO_RUNS = "NO RUNS"
+_NO_RECORDS = "NO RECORDS"
 _COL_REASON_DETAILS = "Reason details"
 _CUSTOM_HIDDEN = "custom.hidden"
 
@@ -152,7 +155,9 @@ _RECONCILIATION_FIELDS = (
 _REPLAY_CHECK_FIELDS = ("code", "result", "reason", "evidence_ref")
 
 
-def _infinity_uql(jsonata: str, *, parser: str = "uql") -> dict[str, Any]:
+def _infinity_uql(
+    jsonata: str, *, parser: str = "uql", url: str = SRS_URL
+) -> dict[str, Any]:
     """Infinity target: JSONata in ``root_selector`` and the same UQL wrapper.
 
     ``parser="backend"`` evaluates ``root_selector`` on the server. ``uql``
@@ -167,7 +172,7 @@ def _infinity_uql(jsonata: str, *, parser: str = "uql") -> dict[str, Any]:
         "parser": parser,
         "format": "table",
         "root_selector": jsonata,
-        "url": SRS_URL,
+        "url": url,
         "url_options": {"method": "GET", "data": ""},
         "uql": f'parse-json | jsonata "{jsonata}"',
         "datasource": dict(OPS),
@@ -205,12 +210,11 @@ _OV_DOMAINS = (
     "$t := presentation_trust[0].trust_status; "
     "$r := presentation_trust[0].reasons_display; "
     "$issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' "
-    "and verdict != 'SELECT RUN' and verdict != 'НЕТ ЗАПУСКОВ']; "
+    "and verdict != 'SELECT RUN' and verdict != 'NO RUNS']; "
     "$map(presentation_domains, function($d) { $merge([$d, {"
     "'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') "
     "and $d.verdict = 'N/A' ? '—' : $d.verdict, "
-    "'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? "
-    "'Cached Bronze used; provider API was not called.' : $d.reason_display, "
+    "'reason_display': $d.reason_display, "
     "'run_execution': $s.execution_state, "
     "'execution_state': $s.execution_state, "
     "'run_verdict': $s.verdict, "
@@ -219,7 +223,7 @@ _OV_DOMAINS = (
     "$d.domain & ': ' & ($d.reason = 'run_observation_missing' ? "
     "'Result not recorded' : $d.reason_display) }), '; ') : "
     "(($s.verdict = 'OK' or $s.verdict = 'SELECT RUN' or "
-    "$s.verdict = 'НЕТ ЗАПУСКОВ') ? ($r ? $r : $s.reason) : $s.reason)"
+    "$s.verdict = 'NO RUNS') ? ($r ? $r : $s.reason) : $s.reason)"
     # f-string doubles braces; trailing `)` closes the outer `(` block.
     f", '{FRAME}': 'domains'}}]) }}))"
 )
@@ -304,10 +308,7 @@ _OV_PROVIDER = (
     "$result := $cached ? '—' : "
     "($p.check_result = 'QUERY ERROR' ? 'Source unavailable' : "
     "($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN')); "
-    "$reason := $cached ? 'Cached Bronze used; provider API was not called.' : "
-    "($d.reason = 'run_preflight_provider_observation' ? "
-    "'Saved provider preflight check.' : ($d.reason_display ? $d.reason_display : "
-    "'Provider check evidence was not recorded.')); "
+    "$reason := $d.reason_display; "
     "$label := $saved or $cached ? 'Open report' : '—'; "
     "$merge([$p, {'data_source': $source, 'check_performed': $performed, "
     "'check_result_display': $result, 'reason': $reason, "
@@ -323,25 +324,25 @@ _OV_RECON = (
     "$count($recon) > 0 ? "
     "$map($recon, function($row){$merge([$row, "
     "($row.result = 'UNKNOWN' and $row.meaning = 'no_runs_in_scope') ? "
-    "{'result': 'нет записей', 'meaning': 'нет записей — no runs in scope'} : {}, "
+    "{'result': 'NO RECORDS', 'meaning': 'NO RECORDS — no runs in scope'} : {}, "
     "{'_bioetl_frame': 'reconciliation'}])}) : "
-    "[{'step_id': '—', 'mode': 'нет данных', 'scope': '—', 'pins': '—', 'limit': '—', "
-    "'result': verdict = 'SELECT RUN' ? 'не применимо' : "
-    "(verdict = 'НЕТ ЗАПУСКОВ' ? 'нет записей' : 'нет данных'), "
-    "'meaning': verdict = 'SELECT RUN' ? 'не применимо — no Run ID selected' : "
-    "(verdict = 'НЕТ ЗАПУСКОВ' ? 'нет записей — no runs in scope' : "
-    "'нет данных — FK comparison rows were not returned'), "
+    "[{'step_id': '—', 'mode': 'NO DATA', 'scope': '—', 'pins': '—', 'limit': '—', "
+    "'result': verdict = 'SELECT RUN' ? 'N/A' : "
+    "(verdict = 'NO RUNS' ? 'NO RECORDS' : 'NO DATA'), "
+    "'meaning': verdict = 'SELECT RUN' ? 'N/A — no Run ID selected' : "
+    "(verdict = 'NO RUNS' ? 'NO RECORDS — no runs in scope' : "
+    "'NO DATA — FK comparison rows were not returned'), "
     "'_bioetl_frame': 'reconciliation'}])"
 )
 _OV_EXCL = (
     f"[{{'status': (verdict='{_SELECT_RUN}' or verdict='{_NO_RUNS}') ? verdict : "
     f"($exists(contract_exclusions_status) and contract_exclusions_status != '' "
-    f"? contract_exclusions_status : 'нет данных'), "
+    f"? contract_exclusions_status : 'NO DATA'), "
     f"'detail': contract_exclusions_rate != null ? "
     f"'excluded ' & $string($round(contract_exclusions_rate*100,2)) & '%' : "
-    f"(verdict='{_SELECT_RUN}' ? 'не применимо — Choose a run' : "
-    f"(verdict='{_NO_RUNS}' ? 'нет записей — No runs in scope' : "
-    f"'нет данных — excluded UNKNOWN')), "
+    f"(verdict='{_SELECT_RUN}' ? 'N/A — Choose a run' : "
+    f"(verdict='{_NO_RUNS}' ? 'NO RECORDS — No runs in scope' : "
+    f"'NO DATA — excluded UNKNOWN')), "
     f"'{FRAME}': 'exclusions'}}]"
 )
 # Zero checkpoint rows are a successful empty frame. Grafana then draws a blank
@@ -360,14 +361,14 @@ _CHECKPOINT_EMPTY_ROWS = (
     "'checkpoint_value_full': '—'"
     "})}; "
     "$timeout or $msg ? "
-    "($count($listed) > 0 ? $listed : [$state('нет данных', "
-    "$msg ? message : 'нет данных — checkpoint comparison request timed out')]) : "
-    "($not($hasRun) ? [$state('не применимо', 'не применимо — no Run ID selected')] : "
+    "($count($listed) > 0 ? $listed : [$state('NO DATA', "
+    "$msg ? message : 'NO DATA — checkpoint comparison request timed out')]) : "
+    "($not($hasRun) ? [$state('N/A', 'N/A — no Run ID selected')] : "
     "(($exists(checkpoint_compare) and checkpoint_compare.status = 'MISSING') ? "
-    "$append($listed, [$state('нет записей', "
-    "'нет записей — checkpoint anchors were not recorded for this run')]) : "
-    "($count($listed) > 0 ? $listed : [$state('нет данных', "
-    "'нет данных — checkpoint comparison returned no rows')])))"
+    "$append($listed, [$state('NO RECORDS', "
+    "'NO RECORDS — checkpoint anchors were not recorded for this run')]) : "
+    "($count($listed) > 0 ? $listed : [$state('NO DATA', "
+    "'NO DATA — checkpoint comparison returned no rows')])))"
     ")"
 )
 _READ_LATENCY_DESCRIPTION = (
@@ -507,13 +508,13 @@ _DQ_STATUS = (
     "[$merge([presentation_summary[0], {"
     "'saved_trust': presentation_trust[0].trust_status, "
     "'reason_display': ($issues := presentation_domains[verdict != 'OK' and "
-    "verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'НЕТ ЗАПУСКОВ']; "
+    "verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'NO RUNS']; "
     "$count($issues) > 0 ? $join($map($issues, function($d) { "
     "$d.domain & ': ' & ($d.reason = 'run_observation_missing' ? "
     "'Result not recorded' : $d.reason_display) }), '; ') : "
     "((presentation_summary[0].verdict = 'OK' or "
     "presentation_summary[0].verdict = 'SELECT RUN' or "
-    "presentation_summary[0].verdict = 'НЕТ ЗАПУСКОВ') ? "
+    "presentation_summary[0].verdict = 'NO RUNS') ? "
     "(presentation_trust[0].reasons_display ? "
     "presentation_trust[0].reasons_display : presentation_summary[0].reason) : "
     f"presentation_summary[0].reason)), '{FRAME}': 'status'}}])]"
@@ -558,7 +559,7 @@ _DQ_DONOR = _normalized_donor(
 
 _INC_STATUS = (
     "($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' "
-    "and verdict != 'SELECT RUN' and verdict != 'НЕТ ЗАПУСКОВ']; "
+    "and verdict != 'SELECT RUN' and verdict != 'NO RUNS']; "
     "[$merge([presentation_summary[0], {"
     "'saved_trust': presentation_trust[0].trust_status, "
     "'reason_display': $count($issues) > 0 ? $join($map($issues, function($d) { "
@@ -566,7 +567,7 @@ _INC_STATUS = (
     "'Result not recorded' : $d.reason_display) }), '; ') : "
     "((presentation_summary[0].verdict = 'OK' or "
     "presentation_summary[0].verdict = 'SELECT RUN' or "
-    "presentation_summary[0].verdict = 'НЕТ ЗАПУСКОВ') ? "
+    "presentation_summary[0].verdict = 'NO RUNS') ? "
     "(presentation_trust[0].reasons_display ? "
     "presentation_trust[0].reasons_display : presentation_summary[0].reason) : "
     # Close merge object/array, status array, and the outer `($issues := …)` block.
@@ -696,13 +697,13 @@ def _value_mapping_options(item: Any) -> dict[str, Any] | None:
 def _ensure_selection_status_value_maps(
     mappings: list[dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], bool]:
-    """Keep A1 SELECT RUN and A2 empty-catalog НЕТ ЗАПУСКОВ as gray value maps."""
+    """Keep A1 SELECT RUN and A2 empty-catalog NO RUNS as gray value maps."""
     required = {
         _SELECT_RUN: {"text": _SELECT_RUN, "color": "gray"},
         _NO_RUNS: {"text": _NO_RUNS, "color": "gray"},
-        "нет данных": {"text": "нет данных", "color": "gray"},
+        "NO DATA": {"text": "NO DATA", "color": "gray"},
         _NO_RECORDS: {"text": _NO_RECORDS, "color": "gray"},
-        "не применимо": {"text": "не применимо", "color": "gray"},
+        "N/A": {"text": "N/A", "color": "gray"},
     }
     changed = False
     value_maps = [
@@ -1385,7 +1386,7 @@ def apply_dq(data: dict[str, Any]) -> None:
 def apply_incident(data: dict[str, Any]) -> None:
     donor = _by_id(data, 2101)
     donor["datasource"] = dict(OPS)
-    donor["targets"] = [_infinity_uql(_INC_DONOR, parser="backend")]
+    donor["targets"] = [_infinity_uql(_INC_DONOR, parser="backend", url=RAW_SRS_URL)]
     donor["transformations"] = _status_donor_transforms()
     _align_status_donor_overrides(donor)
 
@@ -1543,9 +1544,9 @@ def _stamp_checkpoint_empty_rows(data: dict[str, Any]) -> None:
             target["root_selector"] = _CHECKPOINT_EMPTY_ROWS
     description = str(panel.get("description") or "")
     note = (
-        " A blank grid is not used: не применимо means no Run ID is selected, "
-        "нет записей means this run recorded no checkpoint anchors, "
-        "нет данных means the comparison payload is missing or the request timed out."
+        " A blank grid is not used: N/A means no Run ID is selected, "
+        "NO RECORDS means this run recorded no checkpoint anchors, "
+        "NO DATA means the comparison payload is missing or the request timed out."
     )
     if _NO_RECORDS not in description:
         panel["description"] = description + note
@@ -1614,17 +1615,17 @@ def _stamp_overview_empty_reasons(data: dict[str, Any]) -> None:
     """Name the explicit empty states on the two Overview panels."""
     exclusions = _by_id(data, 9482)
     exclusion_note = (
-        " Empty evidence shows нет данных (excluded UNKNOWN), "
-        "не применимо when no Run ID is selected, "
-        "or нет записей when the catalog has no runs."
+        " Empty evidence shows NO DATA (excluded UNKNOWN), "
+        "N/A when no Run ID is selected, "
+        "or NO RECORDS when the catalog has no runs."
     )
     exclusion_description = str(exclusions.get("description") or "")
-    if "нет данных (excluded UNKNOWN)" not in exclusion_description:
+    if "NO DATA (excluded UNKNOWN)" not in exclusion_description:
         exclusions["description"] = exclusion_description + exclusion_note
     reconciliation = _by_id(data, 9483)
     reconciliation_note = (
-        " An empty comparison is not a blank table: не применимо means no Run ID "
-        "is selected, нет записей means no runs are in scope, нет данных means "
+        " An empty comparison is not a blank table: N/A means no Run ID "
+        "is selected, NO RECORDS means no runs are in scope, NO DATA means "
         "FK comparison rows were not returned."
     )
     reconciliation_description = str(reconciliation.get("description") or "")
@@ -1635,7 +1636,7 @@ def _stamp_overview_empty_reasons(data: dict[str, Any]) -> None:
 def apply_control_plane(data: dict[str, Any]) -> None:
     donor = _by_id(data, 9418)
     donor["datasource"] = dict(OPS)
-    donor["targets"] = [_infinity_uql(_CP_DONOR)]
+    donor["targets"] = [_infinity_uql(_CP_DONOR, url=RAW_SRS_URL)]
     donor["transformations"] = _cp_trust_donor_transforms()
 
     overrides = donor.setdefault("fieldConfig", {}).setdefault("overrides", [])

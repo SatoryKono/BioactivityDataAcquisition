@@ -188,6 +188,7 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     assert "$exists(items)" in selector
     assert "$count(items) = 0" in selector
     assert '"pipeline": "VALID EMPTY"' in selector
+    assert '"pipeline_label": "VALID EMPTY"' in selector
     assert ": items.($merge([$, {" in selector
     handoffs = {
         "Overview": ("Overview", "bioetl-overview-v2"),
@@ -207,7 +208,7 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
         link = column_links[0] if column_links else menu_by_title[title]
         assert link["url"].startswith(f"/d/{dashboard_uid}/")
         assert "var-run_id=${__data.fields.run_id:percentencode}" in link["url"]
-    assert '"run_label": run_id' in selector
+    assert '"run_label": $substring(run_id,0,8)' in selector
     assert '"workflow_id": workflow_id != "" ? workflow_id : "N/A"' in selector
     for field in ("workflow", "pipeline"):
         assert (

@@ -95,6 +95,10 @@ def build_selector_context_payload(
         "contract": SELECTOR_CONTEXT_CONTRACT,
         "resolved_via": outcome.via,
         "selected": outcome.selected_out,
+        "requested": {
+            "pipeline": ",".join(selected_pipelines) or "All",
+            "run_id": explicit_run_id or "-",
+        },
         "options": options_payload(outcome.option_records),
         "defaults": defaults_payload(),
     }

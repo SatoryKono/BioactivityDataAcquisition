@@ -78,7 +78,7 @@ def test_dq_v2_silver_reject_mismatch_is_background_stat() -> None:
     )
     # Saved accounting never borrows a current fleet mismatch stat as this run's verdict.
     status = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9406)
-    assert "run_id=${run_id}" in status["targets"][0]["url"]
+    assert "run_id=${selected_run_id}" in status["targets"][0]["url"]
     assert status["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
 
 

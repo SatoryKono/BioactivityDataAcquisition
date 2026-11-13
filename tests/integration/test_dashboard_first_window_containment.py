@@ -64,7 +64,9 @@ def test_first_window_panel_selection_is_root_non_row_below_fold() -> None:
 def test_first_window_overflow_allowlist_stays_empty() -> None:
     assert FIRST_WINDOW_OVERFLOW_ALLOWLIST == {}
     assert PANEL_CONTAINMENT_TOLERANCE_PX == 2
-    assert FIRST_WINDOW_CONTAINMENT_TYPES == frozenset({"text", "stat", "table"})
+    assert FIRST_WINDOW_CONTAINMENT_TYPES == frozenset(
+        {"text", "stat", "table", "bioetl-selectorshell-panel"}
+    )
 
 
 def test_horizontal_scroll_allowlist_is_below_fold_only() -> None:

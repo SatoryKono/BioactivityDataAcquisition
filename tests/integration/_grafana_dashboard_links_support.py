@@ -873,7 +873,7 @@ def _assert_cross_dashboard_link_policy(
         elif current_uid == "bioetl-run-explorer-v1" and "${__data.fields." in url:
             values = _extract_link_var_values(url)
             assert values["run_id"] == "${__data.fields.run_id:percentencode}"
-            assert values["pipeline"] == "${__data.fields.Pipeline:percentencode}"
+            assert values["pipeline"] == "${__data.fields.pipeline:percentencode}"
             assert values["run_type"] == "${__data.fields.run_type:percentencode}"
         else:
             _assert_preserved_identity_handoff(

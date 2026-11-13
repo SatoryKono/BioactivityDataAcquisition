@@ -189,7 +189,7 @@ async def test_artifact_http_route(monkeypatch, fmt, body, status) -> None:
     if status == 404:
         assert host._send_text_response.await_args.args[1] == 404
         assert "Report not found" in host._send_text_response.await_args.args[2]
-        assert "Отчёт отсутствует" in host._send_text_response.await_args.args[2]
+        assert "Report not found" in host._send_text_response.await_args.args[2]
         assert (
             host._send_text_response.await_args.kwargs["content_type"]
             == "text/plain; charset=utf-8"
