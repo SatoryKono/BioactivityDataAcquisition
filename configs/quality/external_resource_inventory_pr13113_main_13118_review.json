@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "6f99bfbef19e798b96b49eacefba612d14d41a8b",
+  "source_ref": "6f99bfbef19e798b96b49eacefba612d14d41a8b",
+  "source_reviews": {
+    "src/bioetl/application/observability/control_plane_evidence/lineage_graph_validation.py": "Reviewed RUN-node merge helper extraction and SIM103-safe manifest-dependent drift allowance for successor ledger chains. No external resource acquisition, ownership, lifetime, or cleanup changes. Preserves #13113 lineage RUN-identity + Sonar/ruff fixes.",
+    "src/bioetl/application/observability/control_plane_evidence/lineage_identity.py": "Reviewed docstring clarifying allowed RUN manifest_id/execution_fingerprint drift. No resource acquisition or ownership changes.",
+    "src/bioetl/infrastructure/quarantine/filtered_reads.py": "Reviewed pure extraction of bounded batch collection to reduce cognitive complexity, retaining 10000 rows, 8MiB selected data and 5 seconds with identical selection semantics. Existing DeltaTable/dataset/worker ownership unchanged; no new external resource. Integrated from main #13118 (AUD-005) into #13113 merge tip.",
+    "src/bioetl/interfaces/http/_health_server_quarantine_routing.py": "Reviewed quarantine request capacity bounds from main #13118. Existing HTTP socket/reader/writer ownership and close paths unchanged; no new external acquisition."
+  },
+  "line_updates": {
+    "src/bioetl/infrastructure/quarantine/filtered_reads.py": {
+      "180": 299,
+      "121": 238,
+      "225": 344,
+      "146": 265
+    }
+  }
+}

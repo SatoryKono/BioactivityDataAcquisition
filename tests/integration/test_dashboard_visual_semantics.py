@@ -34,7 +34,7 @@ def test_dq_canvas_uses_saved_exclusions_frame_without_inventing_rates() -> None
     assert target["panelId"] == 9002
     assert target["withTransforms"] is False
     query = by_id[9002]["targets"][0]
-    assert "run_id=${run_id}" in query["url"]
+    assert "run_id=${selected_run_id}" in query["url"]
     assert "contract_exclusions_status" in query["root_selector"]
     assert "contract_exclusions_rate != null" in query["root_selector"]
     assert "excluded UNKNOWN" in query["root_selector"]

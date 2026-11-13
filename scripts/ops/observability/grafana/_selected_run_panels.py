@@ -6,7 +6,11 @@ from copy import deepcopy
 
 from scripts.ops.observability.grafana.dashboard_context_links import build_handoff_url
 
-STATUS_URL = "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+STATUS_URL = (
+    "/ops/observability/selected-run-status"
+    "?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
+    "&run_type=${run_type:csv}&workflow=${workflow:csv}"
+)
 DESCRIPTION = (
     "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; "
     "missing selection is SELECT RUN; request failure is Source unavailable. "
@@ -646,8 +650,8 @@ def _provider_check_panel(
 
 
 _PROVIDER_SELECTOR_URL = (
-    "/ops/observability/selected-run-status?pipeline=${pipeline}"
-    "&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+    "/ops/observability/selected-run-status?pipeline=${selected_pipeline}"
+    "&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
 )
 _PROVIDER_SELECTOR_ROOT = (
     "$exists(provider_options) and $count(provider_options) > 0 "
@@ -947,7 +951,7 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
 
 # A2 empty-catalog client fallback (rev7 §3.2): same label as API finalize when
 # filter-options returns items=[]. Keep SELECT RUN only as A1 regression maps.
-_NO_RUNS_LABEL = "НЕТ ЗАПУСКОВ"
+_NO_RUNS_LABEL = "NO RUNS"
 SELECTOR_ROWS = (
     "$exists(items) and $count(items) = 0 ? "
     f'[{{"text":"{_NO_RUNS_LABEL}","value":"-"}}] : '
@@ -956,9 +960,27 @@ SELECTOR_ROWS = (
 )
 
 
+def _stamp_requested_identity_variable(variable: dict[str, object]) -> None:
+    """Preserve requested selector identity without claiming saved evidence."""
+    if variable.get("name") in {"selected_pipeline", "selected_run_id"}:
+        field = "pipeline" if variable["name"] == "selected_pipeline" else "run_id"
+        empty = "unknown" if field == "pipeline" else "-"
+        variable["description"] = (
+            "Resolved saved-run identity when available; otherwise retain the "
+            "original request for missing-run diagnostics, without claiming evidence."
+        )
+        variable["query"]["infinityQuery"]["root_selector"] = (
+            f"($v := selected.{field}; "
+            f'$id := $exists($v) and $v != "" and $v != "{empty}" '
+            f"? $v : requested.{field}; "
+            '[{"text":$string($id),"value":$string($id)}])'
+        )
+
+
 def stamp_selector_columns(payload: dict[str, object]) -> None:
     """Keep Infinity variable frames typed even when the catalog is empty."""
     for variable in payload.get("templating", {}).get("list", []):
+        _stamp_requested_identity_variable(variable)
         if variable.get("name") == "run_id":
             variable["regex"] = ""
             variable["description"] = (

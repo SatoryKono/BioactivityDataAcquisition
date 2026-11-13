@@ -1,3 +1,16 @@
+## Selected-run source and catalog checks — 2026-11-13
+
+Static checks cover dashboard-specific selected-run variables, generated request
+fixtures and bounded catalog traversal. Live browser/render acceptance remains
+`NOT_RUN`; prior acceptance records retain their original scope.
+
+An explicit Run ID that is missing from the selector catalog retains its requested
+pipeline and UUID. Saved-run panels report the missing run; they do not silently
+fall back to the latest run from another pipeline. Automatic selection still uses
+the resolved identity when available.
+Manifest validation preserves a missing-run diagnosis after checking the selected
+evidence root; invalid locations and conflicting identities still fail closed.
+
 ## Compact Run Explorer catalog — 2026-11-12
 
 The first screen shows Pipeline, Run ID, Started, Overview and Replay Readiness.

@@ -14,7 +14,8 @@ from bioetl.application.observability.control_plane_evidence.timing import (
     evidence_stage,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
-from bioetl.domain.ports import RunLedgerPort
+from bioetl.domain.lineage import LineageGraphFragment
+from bioetl.domain.ports import LineageStorePort, RunLedgerPort
 
 
 @dataclass(frozen=True, slots=True)
@@ -94,16 +95,62 @@ def ledger_entries(
     port: RunLedgerPort | None,
     manifest: RunManifest,
 ) -> tuple[RunLedgerEntry, ...]:
-    """Load one manifest ledger as an immutable tuple."""
+    """Load the selected-run ledger chain as an immutable tuple.
+
+    Prefer ``list_entries_by_run_id`` so validation and Processed Records share
+    the predecessor-inclusive snapshot for the same ``run_id``.
+    """
     if port is None:
         return ()
     with evidence_stage("ledger_read"):
+        by_run = getattr(port, "list_entries_by_run_id", None)
+        if callable(by_run):
+            entries = by_run(manifest.run_id)
+            # MagicMock / incomplete fakes may return a non-list sentinel.
+            if isinstance(entries, list):
+                return tuple(entries)
         return tuple(port.list_entries(manifest.manifest_id))
+
+
+def lineage_fragments_for_ledger(
+    store: LineageStorePort,
+    *,
+    manifest: RunManifest,
+    ledger: tuple[RunLedgerEntry, ...],
+) -> tuple[LineageGraphFragment, ...]:
+    """Load lineage fragments for every manifest referenced by the ledger chain.
+
+    ``ledger_entries`` may span predecessor manifests after successor adoption.
+    Closure checks must see Bronze/Silver fragments from those manifests, not
+    only fragments indexed under the current successor ``manifest_id``.
+    """
+    manifest_ids: list[str] = []
+    seen: set[str] = set()
+    for mid in (
+        *(entry.manifest_id for entry in ledger if entry.manifest_id),
+        manifest.manifest_id,
+    ):
+        if mid in seen:
+            continue
+        seen.add(mid)
+        manifest_ids.append(mid)
+
+    fragments_by_key: dict[str, LineageGraphFragment] = {}
+    with evidence_stage("lineage_read"):
+        for mid in manifest_ids:
+            for fragment in store.list_by_manifest_id(mid):
+                key = fragment.stored_fragment_id or fragment.fragment_id
+                fragments_by_key[key] = fragment
+        if fragments_by_key:
+            return tuple(fragments_by_key[key] for key in sorted(fragments_by_key))
+        # Empty ledger / no per-manifest hits: preserve run_id fallback.
+        return tuple(store.list_by_run_id(manifest.run_id))
 
 
 __all__ = [
     "EvidenceScopeContext",
     "ledger_entries",
+    "lineage_fragments_for_ledger",
     "sanitized_manifest_payload_scope",
     "service_payload",
     "source_error_payload",

@@ -557,8 +557,8 @@ def test_provider_health_selector_follows_selected_run() -> None:
     donor = _panel_by_id("bioetl-overview-v2.json", 9002)
     query = donor["targets"][0]["url"]
     assert query.startswith("/ops/observability/selected-run-status?")
-    assert "pipeline=${pipeline}" in query
-    assert "run_id=${run_id}" in query
+    assert "pipeline=${selected_pipeline}" in query
+    assert "run_id=${selected_run_id}" in query
     assert "saved" in panel["description"].lower()
 
 
@@ -577,7 +577,7 @@ def test_http_selector_frames_declare_columns_for_empty_catalogs() -> None:
             assert infinity["parser"] == "backend", path.name
             assert infinity["root_selector"] == SELECTOR_ROWS, path.name
             # A2 empty catalog (rev7 §3.2): client fallback matches API label.
-            assert "НЕТ ЗАПУСКОВ" in SELECTOR_ROWS
+            assert "NO RUNS" in SELECTOR_ROWS
             assert "NO MATCHES" not in SELECTOR_ROWS
             assert infinity["columns"] == [
                 {"selector": field, "text": f"__{field}", "type": "string"}

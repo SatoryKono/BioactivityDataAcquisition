@@ -1330,6 +1330,27 @@ class TestHealthServerControlPlaneSelector:
         assert data["selected"]["run_id"] == str(selected_manifest.run_id)
 
     @pytest.mark.asyncio(loop_scope="module")
+    @pytest.mark.parametrize("pipeline", ["chembl_activity", "pubchem_compound"])
+    async def test_missing_selector_context_retains_requested_identity_over_http(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+        pipeline: str,
+    ) -> None:
+        server, _ = running_server_with_run_catalog
+        missing = "00000000-0000-0000-0000-00003b9ac9ff"
+        status_code, _, body = await self._send_request(
+            self._get_server_port(server),
+            "GET",
+            f"/ops/control-plane/selector-context?pipeline={pipeline}&run_id={missing}",
+        )
+        assert status_code == 200
+        data = json.loads(body)
+        assert data["resolved_via"] == "no_manifest_for_scope"
+        assert data["selected"]["run_id"] == "-"
+        assert data["selected"]["pipeline"] == "unknown"
+        assert data["requested"] == {"pipeline": pipeline, "run_id": missing}
+
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_selector_context_supports_workflow_alias_scope(
         self,
         running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],

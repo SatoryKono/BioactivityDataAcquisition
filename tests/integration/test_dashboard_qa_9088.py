@@ -180,7 +180,7 @@ def test_provider_freshness_is_not_present_ok_on_missing_health_status() -> None
     targets = [resolve_dashboard_target(panels, target) for target in panel["targets"]]
     assert targets
     assert all("expr" not in target for target in targets)
-    assert all("run_id=${run_id}" in target["url"] for target in targets)
+    assert all("run_id=${selected_run_id}" in target["url"] for target in targets)
 
 
 def test_current_card_disposition_covers_first_window_current_panels() -> None:

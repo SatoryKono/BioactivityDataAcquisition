@@ -62,7 +62,7 @@ class HTTPClientContextMixin:
                 pool=self.timeout,
             ),
             headers=headers,
-            follow_redirects=True,
+            follow_redirects=False,
             limits=httpx.Limits(
                 max_connections=self.max_connections,
                 max_keepalive_connections=self.max_keepalive_connections,

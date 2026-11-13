@@ -1,6 +1,18 @@
 {
   "description": "Lifecycle and supporting-taxonomy decisions for non-active scripts.",
   "entries": {
+    "scripts/ops/observability/grafana/_audit_presentation.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as presentation transformations imported by the existing render_nav_bus owner and its adaptive projection; no standalone command surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-10"
+    },
+    "scripts/ops/observability/grafana/repair_legacy_prometheus_dashboard.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the pure transformation for the existing exported legacy Prometheus dashboard; no I/O, provisioning or standalone command surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-10"
+    },
     "scripts/ai/codex/helper/check-env.ps1": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the Windows-side environment-check helper invoked by Codex launcher and setup flows; keep it supporting unless it becomes a standalone documented entrypoint.",
@@ -2033,7 +2045,7 @@
       "decision": "shared_helper_module",
       "owner": "@bioetl-platform",
       "review_by": "2027-01-31",
-      "next_step": "Retain the tested Phase 4.2\u20134.3 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-reflow; keep direct module invocation as a compatibility surface."
+      "next_step": "Retain the tested Phase 4.2–4.3 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-reflow; keep direct module invocation as a compatibility surface."
     },
     "scripts/ops/observability/grafana/capture_acceptance.py": {
       "decision": "shared_helper_module",

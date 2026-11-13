@@ -96,6 +96,7 @@ first_window_containment_types:
 - text
 - stat
 - table
+- bioetl-selectorshell-panel
 first_window_summary_tables:
 - dashboard: bioetl-overview-v2.json
   id: 99

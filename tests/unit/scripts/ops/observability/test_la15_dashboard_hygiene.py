@@ -33,9 +33,9 @@ def test_donor_jsonata_stays_balanced() -> None:
 
 def test_empty_states_name_a_reason() -> None:
     for expression in (_CHECKPOINT_EMPTY_ROWS, _OV_EXCL, _OV_RECON):
-        assert "не применимо" in expression
-        assert "нет записей" in expression
-        assert "нет данных" in expression
+        assert "N/A" in expression
+        assert "NO RECORDS" in expression
+        assert "NO DATA" in expression
     assert "selected_run_id != null" in _CHECKPOINT_EMPTY_ROWS
     assert "$append($listed" in _CHECKPOINT_EMPTY_ROWS
     assert "no Run ID selected" in _CHECKPOINT_EMPTY_ROWS

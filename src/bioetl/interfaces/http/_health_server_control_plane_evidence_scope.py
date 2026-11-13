@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import asyncio
+from dataclasses import replace
 from typing import Protocol
+from uuid import UUID
 
 from bioetl.application.observability.control_plane_evidence import (
+    ControlPlaneEvidenceService,
     EvidenceCheckResult,
     EvidenceScopeContext,
 )
@@ -16,12 +19,20 @@ from bioetl.application.observability.control_plane_evidence.service_support imp
 from bioetl.application.observability.control_plane_evidence.timing import (
     evidence_stage,
 )
+from bioetl.application.services.evidence_location.resolver import (
+    EvidenceLocationResolver,
+)
+from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.exceptions import BioETLError
-from bioetl.domain.ports import RunManifestPort
+from bioetl.domain.ports import RunManifestPort, RunReportStorePort
 from bioetl.interfaces.http._health_server_control_plane_scope import (
     _IdentityScope,
     read_selected_run_id,
     resolve_control_plane_identity_scope,
+)
+from bioetl.interfaces.http._processed_records_value_support import _is_all_scope
+from bioetl.interfaces.http._report_selector_options import (
+    verified_report_identity_for_run,
 )
 
 SOURCE_READ_ERRORS = (BioETLError, OSError, TypeError, ValueError)
@@ -155,3 +166,153 @@ __all__ = [
     "resolve_evidence_scope",
     "to_evidence_scope",
 ]
+
+
+def _same_run_id(left: object, right: object) -> bool:
+    """Compare run ids as UUID values when both parse; else compare as text."""
+    try:
+        return UUID(str(left)) == UUID(str(right))
+    except (TypeError, ValueError, AttributeError):
+        return str(left) == str(right)
+
+
+def _selected_validation_pipeline(
+    host: EvidenceScopeHost, scope: _IdentityScope
+) -> str:
+    """Resolve one owner while rejecting a conflicting concrete request."""
+    requested = scope.requested_pipeline
+    is_all_scope = getattr(host, "_is_all_scope_token", _is_all_scope)
+    concrete_requested = bool(requested) and not is_all_scope(requested)
+    resolved_pipeline = (
+        scope.resolved_manifest.pipeline_name
+        if scope.resolved_manifest is not None
+        else scope.report_pipeline
+    )
+    if concrete_requested:
+        if resolved_pipeline is not None and resolved_pipeline != requested:
+            raise ValueError("Selected validation manifest identity does not match")
+        return requested
+    return resolved_pipeline or "All"
+
+
+def _validate_bound_manifest(
+    manifest: object, *, scope: _IdentityScope, pipeline: str
+) -> RunManifest:
+    """Require a manifest matching the selected run, pipeline and run types."""
+    if (
+        not isinstance(manifest, RunManifest)
+        or not _same_run_id(manifest.run_id, scope.selected_run_id)
+        or manifest.pipeline_name != pipeline
+        or (
+            scope.selected_run_types
+            and manifest.run_type.value not in scope.selected_run_types
+        )
+    ):
+        raise ValueError("Selected validation manifest identity does not match")
+    return manifest
+
+
+def _bind_selected_validation(
+    host: EvidenceScopeHost,
+    scope: _IdentityScope,
+    service: ControlPlaneEvidenceService,
+) -> tuple[_IdentityScope, ControlPlaneEvidenceService]:
+    """Keep validation, lifecycle and ledger ports on the selected locator root."""
+    resolver = getattr(host, "_evidence_location_resolver", None)
+    if (
+        not isinstance(resolver, EvidenceLocationResolver)
+        or scope.selected_run_id is None
+    ):
+        return scope, service
+    pipeline = _selected_validation_pipeline(host, scope)
+    try:
+        resolved = resolver.resolve(
+            kind="pipeline",
+            owner=pipeline,
+            run_id=scope.selected_run_id,
+            expected_runtime_source_id=getattr(host, "_runtime_source_id", None),
+        )
+    except AttributeError as error:
+        raise ValueError(
+            "Selected validation evidence location is unavailable"
+        ) from error
+    if resolved.context is None or resolved.code.value in {
+        "identity_conflict",
+        "location_invalid",
+    }:
+        raise ValueError("Selected validation evidence location is unavailable")
+    context = resolved.context
+    manifest = context.get_manifest_by_run_id(scope.selected_run_id)
+    if manifest is None and scope.resolved_via in {
+        "selected_run_id_not_found",
+        "resolved_without_manifest",
+    }:
+        # The selected root was checked; no evidence ports exist for this UUID.
+        return scope, service
+    manifest = _validate_bound_manifest(manifest, scope=scope, pipeline=pipeline)
+    getter = getattr(context, "get_validation_service", None)
+    bound = getter() if callable(getter) else None
+    if not isinstance(bound, ControlPlaneEvidenceService):
+        raise ValueError("Selected validation ports are unavailable")
+    return replace(scope, resolved_manifest=manifest), bound
+
+
+_CATALOG_MEMBERSHIP_SCOPES: dict[str, tuple[str, ...]] = {
+    "workflow": (),
+    "pipeline": (),
+    "run_type": (),
+    "run_status": (),
+}
+
+
+def reconcile_manifest_validation_scope(
+    scope: _IdentityScope,
+    *,
+    report_store: RunReportStorePort | None,
+) -> _IdentityScope:
+    """Map a report-catalog run that has no manifest off ``selected_run_id_not_found``.
+
+    ``selected_run_id_not_found`` stays only when the run id is absent from the
+    manifest catalog and from the report catalog. A manifest-catalog hit is
+    unchanged. Other validation routes do not call this helper.
+    """
+    if scope.resolved_via != "selected_run_id_not_found":
+        return scope
+    run_id = scope.selected_run_id
+    if run_id is None or report_store is None:
+        return scope
+    identity = verified_report_identity_for_run(
+        run_id,
+        _CATALOG_MEMBERSHIP_SCOPES,
+        store=report_store,
+    )
+    if identity is None:
+        return scope
+    pipeline = identity.get("pipeline_name")
+    # Rebuild via concrete dataclass so the return type stays `_IdentityScope`
+    # (python:S5886 rejects `dataclasses.replace` → `DataclassInstance`).
+    return _IdentityScope(
+        requested_pipeline=scope.requested_pipeline,
+        selected_pipelines=scope.selected_pipelines,
+        selected_run_types=scope.selected_run_types,
+        selected_run_id=scope.selected_run_id,
+        resolved_manifest=scope.resolved_manifest,
+        resolved_via="resolved_without_manifest",
+        report_pipeline=pipeline if isinstance(pipeline, str) and pipeline else None,
+    )
+
+
+async def _reconcile_validation_scope(
+    host: EvidenceScopeHost,
+    scope: _IdentityScope,
+    *,
+    endpoint: str,
+) -> _IdentityScope:
+    """Reconcile manifest catalog selection before binding its validation ports."""
+    if endpoint == "manifest-validation":
+        return await asyncio.to_thread(
+            reconcile_manifest_validation_scope,
+            scope,
+            report_store=getattr(host, "_run_report_store", None),
+        )
+    return scope
