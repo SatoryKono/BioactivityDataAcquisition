@@ -78,7 +78,6 @@ def sort_table(
     return table.sort_by(sort_keys)
 
 
-
 def deduplicate_full_rows(table: pa.Table) -> pa.Table:
     """Drop exact duplicate rows while preserving first-seen order."""
     if table.num_rows < 2:
