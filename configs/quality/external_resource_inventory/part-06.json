@@ -54,7 +54,7 @@
       "lifetime": "process-scoped singleton; each acquisition lasts for one collector with block",
       "creation_sites": [
         {
-          "source_commit": "55d50c19d9838b4693256e77e361733391ff93a4",
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -68,7 +68,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "55d50c19d9838b4693256e77e361733391ff93a4",
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
           "source_blob": "d5aa2dc103b334fc0a1fef4f03cf225aaad3212d",
           "content_sha256": "04529f6059663600e405e54b150068d4582a9033e2fc776ea5c5b85de0cac544",
           "file": "src/bioetl/composition/observability_runtime.py",
@@ -80,7 +80,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "55d50c19d9838b4693256e77e361733391ff93a4",
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -92,7 +92,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "55d50c19d9838b4693256e77e361733391ff93a4",
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -102,7 +102,7 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "55d50c19d9838b4693256e77e361733391ff93a4",
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -165,7 +165,7 @@
       "lifetime": "One descriptor and exclusive lock per live catalog critical section.",
       "creation_sites": [
         {
-          "source_commit": "55d50c19d9838b4693256e77e361733391ff93a4",
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -177,7 +177,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "55d50c19d9838b4693256e77e361733391ff93a4",
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -189,7 +189,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "55d50c19d9838b4693256e77e361733391ff93a4",
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -203,7 +203,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "55d50c19d9838b4693256e77e361733391ff93a4",
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -215,7 +215,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "55d50c19d9838b4693256e77e361733391ff93a4",
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -227,7 +227,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "55d50c19d9838b4693256e77e361733391ff93a4",
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -241,7 +241,7 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "55d50c19d9838b4693256e77e361733391ff93a4",
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -253,7 +253,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "55d50c19d9838b4693256e77e361733391ff93a4",
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -265,6 +265,111 @@
           "context_manager": false
         }
       ]
+    },
+    {
+      "identity": "export.csv.raw_sidecar_seed",
+      "type": "file",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "lifetime": "owner/operation",
+      "creator": [
+        "CsvExporter._export_sync"
+      ],
+      "owner": "CsvExporter._export_sync owning operation (see exact source sites)",
+      "closer": "pathlib.Path.read_bytes/write_bytes internal file context exit",
+      "shutdown_contract": "Synchronous pathlib seed-copy owns temporary file streams inside read_bytes then write_bytes; inspect opening/closing inside the library boundary, not a persistent store connection.",
+      "production_entrypoint": "pipeline/workflow runtime -> StorageFactory -> CsvExporter.export -> _export_sync append seed",
+      "call_path": [
+        "CsvExporter.export -> CsvExporter._export_sync",
+        " -> csv_full_path.read_bytes / raw_path.write_bytes"
+      ],
+      "scenarios": {
+        "normal": {
+          "applicability": "applicable",
+          "expected": "Synchronous pathlib read_bytes/write_bytes own their temporary file streams for the duration of the call; library boundary closes before return. Seed copy runs only when append finds published CSV without .raw sidecar under the confined export root.",
+          "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
+          "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "owning async/thread boundary; primitive itself synchronous",
+          "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
+          "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
+          "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
+          "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
+          "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
+          "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "configuration_predicates": [],
+      "shutdown_by_site": {},
+      "operation_aliases": [],
+      "creation_sites": [
+        {
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
+          "source_blob": "cef6d250ab612ecb8691bcb2345b2ccca2131268",
+          "content_sha256": "7b86bdc9ccbc4f1de9d21611fef11f522023f09d95f364febb6bfe6c6687fbc1",
+          "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+          "line": 226,
+          "expression": "csv_full_path.read_bytes()",
+          "call": "csv_full_path.read_bytes",
+          "creator": "CsvExporter._export_sync",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
+          "source_blob": "cef6d250ab612ecb8691bcb2345b2ccca2131268",
+          "content_sha256": "7b86bdc9ccbc4f1de9d21611fef11f522023f09d95f364febb6bfe6c6687fbc1",
+          "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+          "line": 226,
+          "expression": "raw_path.write_bytes(csv_full_path.read_bytes())",
+          "call": "raw_path.write_bytes",
+          "creator": "CsvExporter._export_sync",
+          "creation_mode": "call",
+          "context_manager": false
+        }
+      ],
+      "production_binding": [
+        {
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
+          "source_blob": "cef6d250ab612ecb8691bcb2345b2ccca2131268",
+          "content_sha256": "7b86bdc9ccbc4f1de9d21611fef11f522023f09d95f364febb6bfe6c6687fbc1",
+          "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+          "line": 226,
+          "expression": "csv_full_path.read_bytes()",
+          "call": "csv_full_path.read_bytes",
+          "creator": "CsvExporter._export_sync",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
+          "source_blob": "cef6d250ab612ecb8691bcb2345b2ccca2131268",
+          "content_sha256": "7b86bdc9ccbc4f1de9d21611fef11f522023f09d95f364febb6bfe6c6687fbc1",
+          "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+          "line": 226,
+          "expression": "raw_path.write_bytes(csv_full_path.read_bytes())",
+          "call": "raw_path.write_bytes",
+          "creator": "CsvExporter._export_sync",
+          "creation_mode": "call",
+          "context_manager": false
+        }
+      ],
+      "cleanup_sources": []
     }
   ]
 }
