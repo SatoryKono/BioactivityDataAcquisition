@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-13T01:10:38.915842+00:00",
+  "generated_at": "2026-11-13T01:32:41.045287+00:00",
   "summary": {
     "total_scripts": 749,
     "status_counts": {
@@ -21659,7 +21659,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 175,
+          "line": 182,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.budget_guard import main as budgets_main"
         },
@@ -22201,7 +22201,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 159,
+          "line": 152,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.closeout_runtime import main as closeout_main"
         },
@@ -22419,7 +22419,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 163,
+          "line": 156,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.hook_installation import main as hooks_main"
         },
@@ -22561,7 +22561,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 170,
+          "line": 177,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.operation_guards import main as guard_main"
         },
@@ -22741,7 +22741,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 153,
+          "line": 146,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.scoped_checks import main as checks_main"
         },

@@ -140,15 +140,8 @@ def _inventory_args(rest: list[str]) -> list[str]:
     ]
 
 
-def main(argv: list[str] | None = None) -> int:
-    args = argv if argv is not None else sys.argv[1:]
-
-    if not args or args[0] in ("--help", "-h"):
-        print_help(__doc__ or "")
-        return 0
-
-    cmd, rest = args[0], args[1:]
-
+def _run_direct_command(cmd: str, rest: list[str]) -> int | None:
+    """Dispatch in-process facades without eagerly importing their modules."""
     if cmd == "checks":
         from scripts.engineering.repo.scoped_checks import main as checks_main
 
@@ -163,6 +156,20 @@ def main(argv: list[str] | None = None) -> int:
         from scripts.engineering.repo.hook_installation import main as hooks_main
 
         return hooks_main(rest)
+    return None
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = argv if argv is not None else sys.argv[1:]
+
+    if not args or args[0] in ("--help", "-h"):
+        print_help(__doc__ or "")
+        return 0
+
+    cmd, rest = args[0], args[1:]
+    direct_result = _run_direct_command(cmd, rest)
+    if direct_result is not None:
+        return direct_result
     if cmd == "worktree":
         return _run_worktree(rest)
 

@@ -120,7 +120,7 @@ def _validate_header(payload: dict[str, Any], request: dict[str, Any]) -> None:
         raise ValueError("inconsistent failure qualification")
 
 
-def _validate_details(payload: dict[str, Any], request: dict[str, Any]) -> None:
+def _validate_observations(payload: dict[str, Any]) -> None:
     if "core_outcome" in payload and payload["core_outcome"] not in {
         "ADMIT",
         "STOP",
@@ -138,6 +138,10 @@ def _validate_details(payload: dict[str, Any], request: dict[str, Any]) -> None:
             or re.fullmatch(r"[a-f0-9]{64}", payload[field]) is None
         ):
             raise ValueError("unqualified result digest")
+
+
+def _validate_details(payload: dict[str, Any], request: dict[str, Any]) -> None:
+    _validate_observations(payload)
     if "state_sha256" in payload and payload["state_sha256"] != hook_receipts.digest(
         request["state"]
     ):
