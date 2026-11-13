@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-13T10:59:49.147659+00:00",
+  "generated_at": "2026-11-13T10:45:19.648941+00:00",
   "summary": {
-    "total_scripts": 750,
+    "total_scripts": 749,
     "status_counts": {
       "active": 334,
-      "supporting": 414,
+      "supporting": 413,
       "temporary_diagnostic": 2
     },
     "reference_group_coverage": {
       "agents": 12,
       "build": 18,
       "ci": 76,
-      "docs": 300,
+      "docs": 298,
       "other": 22,
       "scripts": 644,
       "skills": 13,
-      "tests": 566
+      "tests": 565
     }
   },
   "scripts": [
@@ -3240,7 +3240,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1380,
+          "line": 1379,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -4084,7 +4084,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1371,
+          "line": 1370,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4139,7 +4139,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1370,
+          "line": 1369,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4184,7 +4184,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1369,
+          "line": 1368,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -4239,7 +4239,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1368,
+          "line": 1367,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -5087,7 +5087,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1376,
+          "line": 1375,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\": ("
         },
@@ -5506,7 +5506,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1372,
+          "line": 1371,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\": ("
         },
@@ -11419,7 +11419,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1256,
+          "line": 1255,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -11462,7 +11462,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1398,
+          "line": 1397,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -13860,7 +13860,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 860,
+          "line": 859,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -21681,43 +21681,6 @@
       "next_step": "Retain as the governed manual branch-cleanup implementation behind scripts.engineering.repo commands while it remains dry-run by default; do not expand destructive apply behavior without fresh owner review."
     },
     {
-      "path": "scripts/engineering/repo/branch_hygiene.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 4,
-      "references": [
-        {
-          "path": "docs/05-operations/runbooks/branch-hygiene-wave.md",
-          "line": 21,
-          "source_group": "docs",
-          "text": "[`scripts/engineering/repo/branch_hygiene.py`](../../../scripts/engineering/repo/branch_hygiene.py)"
-        },
-        {
-          "path": "docs/05-operations/runbooks/branch-hygiene-wave.md",
-          "line": 59,
-          "source_group": "docs",
-          "text": "1. `python scripts/engineering/repo/branch_hygiene.py classify`"
-        },
-        {
-          "path": "docs/05-operations/runbooks/branch-hygiene-wave.md",
-          "line": 61,
-          "source_group": "docs",
-          "text": "3. `python scripts/engineering/repo/branch_hygiene.py apply --out <dir>` previews only."
-        },
-        {
-          "path": "tests/unit/scripts/repo/test_branch_hygiene.py",
-          "line": 9,
-          "source_group": "tests",
-          "text": "from scripts.engineering.repo import branch_hygiene as bh"
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2027-02-13",
-      "next_step": "Retain as a reviewed manual repository-maintenance utility for operator-selected classification and explicitly authorized cleanup. Keep it outside automated runtime entrypoints; preserve all archive, environment, path and live-state protections and active_script_count_max=334."
-    },
-    {
       "path": "scripts/engineering/repo/budget_guard.py",
       "type": "py",
       "status": "supporting",
@@ -21850,7 +21813,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1496,
+          "line": 1495,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -22363,19 +22326,13 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 6,
       "references": [
         {
           "path": "AGENTS.md",
           "line": 225,
           "source_group": "agents",
           "text": "The tracked implementation is `scripts/engineering/repo/create_worktree.py`;"
-        },
-        {
-          "path": "docs/05-operations/runbooks/branch-hygiene-wave.md",
-          "line": 71,
-          "source_group": "docs",
-          "text": "[create_worktree.py](../../../scripts/engineering/repo/create_worktree.py)."
         },
         {
           "path": "scripts/ai/junie/junie-mirror-contract.json",
@@ -25748,7 +25705,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1689,
+          "line": 1688,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
