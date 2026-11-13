@@ -34,7 +34,11 @@ def build_lineage_checks(
         return _missing_fragment_checks(manifest)
 
     closure = closure_gaps(fragments, ledger_entries)
-    identities = identity_gaps(manifest=manifest, fragments=fragments)
+    identities = identity_gaps(
+        manifest=manifest,
+        fragments=fragments,
+        ledger_entries=ledger_entries,
+    )
     cycles = cycle_nodes(fragments)
     return (
         _gap_check(
