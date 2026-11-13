@@ -41,7 +41,7 @@ class Stage0Reference:
 
 @dataclass(frozen=True, slots=True)
 class ComparisonReport:
-    """Counts stay null until the reference actually contains M rows."""
+    """Counts stay null until M rows exist; metrics cover the whole Python run."""
 
     measured: bool
     reason: str
@@ -56,7 +56,12 @@ def compare_stage0(
     reference: Stage0Reference,
     python_rows: tuple[Mapping[str, str], ...],
 ) -> ComparisonReport:
-    """Join on the full identity key and leave the M rows untouched."""
+    """Join on the full identity key and leave the M rows untouched.
+
+    Metrics describe every supplied Python row, including duplicate and orphan
+    rows. Changes and residuals describe the identity join separately; missing
+    historical decision fields are not invented as unchanged values.
+    """
     if not reference.m_rows:
         return ComparisonReport(
             False,
@@ -111,9 +116,27 @@ def _classify_key(
     if not key or m_row is None or python_row is None:
         residual.append(label)
         return
-    if _class(m_row) == _class(python_row):
+    if _same_classification(m_row, python_row):
         return
     _record_difference(label, python_row, changes, residual)
+
+
+def _same_classification(
+    m_row: Mapping[str, str], python_row: Mapping[str, str]
+) -> bool:
+    """Compare class projections without inferring missing historical values."""
+    classification_fields = (
+        "effective_class",
+        "effective_source",
+        "decision_status",
+        "match_status",
+        "local_class",
+        "local_status",
+        "iuphar_annotation_status",
+    )
+    return _class(m_row) == _class(python_row) and all(
+        m_row.get(field) == python_row.get(field) for field in classification_fields
+    )
 
 
 def _record_legacy(
