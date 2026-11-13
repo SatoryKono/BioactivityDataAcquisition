@@ -638,3 +638,37 @@ def test_apply_journal_status_matches_failed_actions(
         assert journal["returncode"] == rc
         assert journal["error"]
         assert journal["actions"]
+
+
+def test_renamed_env_source_is_rejected_before_patch_write(monkeypatch, tmp_path):
+    calls = []
+
+    def fake_run(args, **kwargs):
+        calls.append(args)
+        if "--name-only" in args:
+            value = (
+                ".env.fixture\0ordinary.txt\0"
+                if "--no-renames" in args
+                else "ordinary.txt\0"
+            )
+        else:
+            value = b"secret context" if kwargs.get("binary") else ""
+        return SimpleNamespace(returncode=0, stdout=value)
+
+    monkeypatch.setattr(bh, "run", fake_run)
+    with pytest.raises(RuntimeError, match="excluded"):
+        bh.archive_tree(tmp_path, "tree", "abc", tmp_path / "archive")
+    assert not (tmp_path / "archive").exists()
+    assert not any(kwargs for kwargs in calls if "--binary" in kwargs)
+
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_bare_git_metadata_is_preserved(monkeypatch, tmp_path, nested):
+    root = tmp_path / "tree"
+    bare = root / "nested" if nested else root
+    (bare / "objects").mkdir(parents=True)
+    (bare / "refs").mkdir()
+    (bare / "HEAD").write_text("ref: refs/heads/main\n")
+    with pytest.raises(RuntimeError, match="Git"):
+        bh._scan_tree_inputs(root)
+    assert (bare / "HEAD").exists()

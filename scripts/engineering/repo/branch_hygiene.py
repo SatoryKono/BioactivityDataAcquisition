@@ -488,6 +488,7 @@ def archive_tree(path: Path, name: str, head: str, archive: Path) -> dict[str, A
                 "--no-ext-diff",
                 "--no-textconv",
                 *selection,
+                "--no-renames",
                 "--name-only",
                 "-z",
                 "HEAD",
@@ -589,6 +590,8 @@ def _scan_tree_inputs(target: Path) -> None:
     for base, directories, files in os.walk(
         target, followlinks=False, onerror=_raise_walk_error
     ):
+        if {"HEAD", "objects", "refs"}.issubset(set(directories + files)):
+            raise RuntimeError("Refusing bare Git metadata")
         for name in directories + files:
             item = Path(base) / name
             if name == ".git" and Path(base) != target:
