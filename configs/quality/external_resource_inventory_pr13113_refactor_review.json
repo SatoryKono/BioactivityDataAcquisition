@@ -1,15 +1,16 @@
 {
   "schema_version": 1,
-  "catalog_ref": "61144ba5a2010c75d431110a098960b06782f1c0",
-  "source_ref": "237243812f2d8660122b8095184cab79e84214cd",
+  "catalog_ref": "2312efd442296edacf43008b559e9b7525261876",
+  "source_ref": "bcb0241d9d834da972ba97bc9c8b49fb8a55bd30",
   "source_reviews": {
-    "src/bioetl/interfaces/http/_control_plane_selector_context_build.py": "Reviewed additive requested scope/UUID metadata, separate from resolved saved evidence. This preserves an explicit missing request without selecting another run. Existing build_selector_records binding and all file/ledger resource acquisition, closure, executor and cancellation semantics remain unchanged."
+    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_scope.py": "Reviewed missing-run diagnostic preservation after trusted selected-root resolution and manifest lookup. Only a None manifest with selected_run_id_not_found returns the existing unresolved scope/service, without binding or reading evidence ports. Invalid locator/source identity and missing or mismatched known manifests still fail closed. Existing shared-executor reconciliation offload and all resource ownership/cancellation semantics are unchanged."
   },
   "reference_moves": [],
   "exclusion_moves": [],
   "line_updates": {
-    "src/bioetl/interfaces/http/_control_plane_selector_context_build.py": {
-      "62": 62
+    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_scope.py": {
+      "72": 72,
+      "61": 61
     }
   }
 }

@@ -242,6 +242,9 @@ def _bind_selected_validation(
         raise ValueError("Selected validation evidence location is unavailable")
     context = resolved.context
     manifest = context.get_manifest_by_run_id(scope.selected_run_id)
+    if manifest is None and scope.resolved_via == "selected_run_id_not_found":
+        # The selected root was checked; no evidence ports exist for this UUID.
+        return scope, service
     manifest = _validate_bound_manifest(manifest, scope=scope, pipeline=pipeline)
     getter = getattr(context, "get_validation_service", None)
     bound = getter() if callable(getter) else None
