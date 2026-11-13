@@ -234,8 +234,9 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
     const validEmpty = frame.fields.find((field) => label(field) === 'Pipeline')?.values[0] === 'VALID EMPTY';
     return <div className={shell}>{validEmpty ? 'VALID EMPTY · No matching launches' : 'UNKNOWN · No run identity'}</div>;
   }
+  // Explicit compact summaries may use metadata hidden from the wide table.
   const summaryFields = options.compactFields
-    ? options.compactFields.map((name) => fields.find((field) => label(field) === name)).filter((field): field is Field => Boolean(field))
+    ? options.compactFields.map((name) => frame.fields.find((field) => label(field) === name)).filter((field): field is Field => Boolean(field))
     : fields;
   if (isCompact && options.compactFields && summaryFields.length !== options.compactFields.length) {
     return <div className={shell}>UNKNOWN · Required fields unavailable</div>;
