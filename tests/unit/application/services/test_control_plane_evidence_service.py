@@ -511,6 +511,54 @@ def test_conflicting_node_ids_allows_run_manifest_dependent_drift(
     assert conflicting_node_ids((fragments[0], corrupted)) == [f"run:{gold.run_id}"]
 
 
+@pytest.mark.parametrize("with_predecessor", [False, True])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_conflicting_run_fingerprint_within_manifest_is_rejected(
+    with_predecessor: bool, reverse: bool
+) -> None:
+    """Successor adoption must not hide contradictions within one manifest."""
+    from bioetl.application.observability.control_plane_evidence.lineage_graph_validation import (
+        conflicting_node_ids,
+    )
+
+    manifests = [
+        _manifest(manifest_id="manifest-gold", execution_fingerprint="gold-first"),
+        _manifest(manifest_id="manifest-gold", execution_fingerprint="gold-conflict"),
+    ]
+    if with_predecessor:
+        manifests.insert(
+            0, _manifest(manifest_id="manifest-bronze", execution_fingerprint="bronze")
+        )
+    fragments = tuple(
+        LineageGraphFragment(
+            fragment_id=f"fragment-{index}",
+            run_id=str(manifest.run_id),
+            manifest_id=manifest.manifest_id,
+            nodes=(_run_anchor_node(manifest),),
+        )
+        for index, manifest in enumerate(manifests)
+    )
+    ordered = tuple(reversed(fragments)) if reverse else fragments
+    assert conflicting_node_ids(ordered) == [f"run:{_RUN_ID}"]
+
+
+def test_conflicting_run_manifest_anchor_must_match_its_fragment() -> None:
+    """A RUN attribute from another manifest cannot become an ignored drift."""
+    from bioetl.application.observability.control_plane_evidence.lineage_graph_validation import (
+        conflicting_node_ids,
+    )
+
+    selected = _manifest(manifest_id="manifest-gold")
+    foreign = _manifest(manifest_id="unrelated-manifest")
+    fragment = LineageGraphFragment(
+        fragment_id="fragment-contradictory-anchor",
+        run_id=str(selected.run_id),
+        manifest_id=selected.manifest_id,
+        nodes=(_run_anchor_node(selected), _run_anchor_node(foreign)),
+    )
+    assert conflicting_node_ids((fragment,)) == [f"run:{_RUN_ID}"]
+
+
 def test_lineage_validation_run_node_predecessor_successor_file_stores(
     tmp_path,
 ) -> None:

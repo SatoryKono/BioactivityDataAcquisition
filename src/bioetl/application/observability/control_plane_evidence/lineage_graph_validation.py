@@ -15,6 +15,7 @@ def conflicting_node_ids(
 ) -> list[str]:
     """Reject contradictory definitions while allowing partial node references."""
     definitions: dict[str, dict[str, object]] = {}
+    run_definitions: dict[tuple[str, str | None], dict[str, object]] = {}
     conflicts: set[str] = set()
     for fragment in fragments:
         nodes: list[LineageNodeRef] = list(fragment.nodes)
@@ -22,23 +23,26 @@ def conflicting_node_ids(
             nodes.extend((edge.source, edge.target))
         for node in nodes:
             definition = node.to_dict()
+            if node.node_type is LineageNodeType.RUN:
+                scoped = run_definitions.setdefault(
+                    (node.node_id, fragment.manifest_id), {}
+                )
+                if _merge_definition(scoped, definition):
+                    conflicts.add(node.node_id)
+                if node.attributes.get("manifest_id") not in (
+                    None,
+                    fragment.manifest_id,
+                ):
+                    conflicts.add(node.node_id)
+                definition = _shared_run_definition(definition)
             previous = definitions.setdefault(node.node_id, {})
             if _merge_definition(previous, definition):
                 conflicts.add(node.node_id)
     return sorted(conflicts)
 
 
-def _merge_definition(
-    previous: dict[str, object],
-    incoming: dict[str, object],
-    *,
-    path: tuple[str, ...] = (),
-    node_type: object | None = None,
-) -> bool:
+def _merge_definition(previous: dict[str, object], incoming: dict[str, object]) -> bool:
     """Merge known fields; absent and null reference fields carry no assertion."""
-    resolved_type = previous.get("node_type", node_type)
-    if resolved_type is None:
-        resolved_type = incoming.get("node_type")
     conflict = False
     for key, value in incoming.items():
         if value is None:
@@ -46,43 +50,26 @@ def _merge_definition(
         old = previous.get(key)
         if isinstance(value, dict) and (old is None or isinstance(old, dict)):
             nested = dict(old or {})
-            conflict = (
-                _merge_definition(
-                    nested,
-                    value,
-                    path=(*path, key),
-                    node_type=resolved_type,
-                )
-                or conflict
-            )
+            conflict = _merge_definition(nested, value) or conflict
             previous[key] = nested
         elif old is not None and old != value:
-            if _is_run_manifest_dependent_drift(
-                node_type=resolved_type,
-                path=path,
-                key=key,
-            ):
-                # Keep the first observed value; drift is expected across the
-                # predecessor→successor ledger chain for the same run id.
-                continue
             conflict = True
         else:
             previous[key] = value
     return conflict
 
 
-def _is_run_manifest_dependent_drift(
-    *,
-    node_type: object | None,
-    path: tuple[str, ...],
-    key: str,
-) -> bool:
-    """Allow expected RUN attribute changes after successor manifest adoption."""
-    if path != ("attributes",):
-        return False
-    if key not in _RUN_MANIFEST_DEPENDENT_ATTRIBUTES:
-        return False
-    return node_type == LineageNodeType.RUN.value
+def _shared_run_definition(definition: dict[str, object]) -> dict[str, object]:
+    """Compare shared RUN fields after checking each manifest's full definition."""
+    shared = dict(definition)
+    attributes = shared.get("attributes")
+    if isinstance(attributes, dict):
+        shared["attributes"] = {
+            key: value
+            for key, value in attributes.items()
+            if key not in _RUN_MANIFEST_DEPENDENT_ATTRIBUTES
+        }
+    return shared
 
 
 def _adjacency(fragments: tuple[LineageGraphFragment, ...]) -> dict[str, set[str]]:
