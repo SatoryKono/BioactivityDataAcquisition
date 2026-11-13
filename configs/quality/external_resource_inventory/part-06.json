@@ -54,7 +54,7 @@
       "lifetime": "process-scoped singleton; each acquisition lasts for one collector with block",
       "creation_sites": [
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -68,7 +68,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
           "source_blob": "d5aa2dc103b334fc0a1fef4f03cf225aaad3212d",
           "content_sha256": "04529f6059663600e405e54b150068d4582a9033e2fc776ea5c5b85de0cac544",
           "file": "src/bioetl/composition/observability_runtime.py",
@@ -80,7 +80,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -92,7 +92,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -102,7 +102,7 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -165,7 +165,7 @@
       "lifetime": "One descriptor and exclusive lock per live catalog critical section.",
       "creation_sites": [
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -177,7 +177,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -189,7 +189,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -203,7 +203,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -215,7 +215,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -227,7 +227,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -241,7 +241,7 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -253,7 +253,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -275,12 +275,12 @@
         "CsvExporter._export_sync"
       ],
       "owner": "CsvExporter._export_sync owning operation (see exact source sites)",
-      "closer": "pathlib.Path.read_bytes/write_bytes internal file context exit",
-      "shutdown_contract": "Synchronous pathlib seed-copy owns temporary file streams inside read_bytes then write_bytes; inspect opening/closing inside the library boundary, not a persistent store connection.",
+      "closer": "Arrow CSV internal file lifetime and explicit typed IPC sink/writer contexts",
+      "shutdown_contract": "Seed reads legacy CSV using configured delimiter, serializes original typed table into temporary raw IPC under paired rollback. Writer and file stream close at context exit before publication; publication failure restores old sidecar or removes partial new raw.",
       "production_entrypoint": "pipeline/workflow runtime -> StorageFactory -> CsvExporter.export -> _export_sync append seed",
       "call_path": [
-        "CsvExporter.export -> CsvExporter._export_sync",
-        " -> csv_full_path.read_bytes / raw_path.write_bytes"
+        "CsvExporter.export -> _seed_raw_sidecar_if_missing -> write_raw_and_published_pair",
+        "atomic_csv_write -> _write_raw_table"
       ],
       "scenarios": {
         "normal": {
@@ -319,52 +319,52 @@
       "operation_aliases": [],
       "creation_sites": [
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
-          "source_blob": "ef625a6fa618947045432538bd0409affe2ac50e",
-          "content_sha256": "257118bb9fdce8f08101be19123cef13c6e0c4a065c811492c9c28250dcaa488",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "b82cea3e348512b6bad3ca43cb027fb3569aba58",
+          "content_sha256": "16f73bca699e804dd31592fa63e0eb693650b63c3faa9b6b1bc23a0fc3ea6fd7",
           "file": "src/bioetl/infrastructure/export/csv_exporter.py",
-          "line": 113,
-          "expression": "csv_full_path.read_bytes()",
-          "call": "csv_full_path.read_bytes",
+          "line": 122,
+          "expression": "pv.read_csv(source, parse_options=pv.ParseOptions(delimiter=delimiter))",
+          "call": "pv.read_csv",
           "creator": "_seed_raw_sidecar_if_missing",
           "creation_mode": "call",
           "context_manager": false
         },
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
-          "source_blob": "ef625a6fa618947045432538bd0409affe2ac50e",
-          "content_sha256": "257118bb9fdce8f08101be19123cef13c6e0c4a065c811492c9c28250dcaa488",
-          "file": "src/bioetl/infrastructure/export/csv_exporter.py",
-          "line": 113,
-          "expression": "raw_path.write_bytes(csv_full_path.read_bytes())",
-          "call": "raw_path.write_bytes",
-          "creator": "_seed_raw_sidecar_if_missing",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "7d55f9253234241db33b16a203d7fddca1c41c74",
+          "content_sha256": "188ba4707c4c6e1f597235b083a27347c2627a71ad6fd91809f303277a8ecd9b",
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "line": 80,
+          "expression": "path.open('wb')",
+          "call": "path.open",
+          "creator": "_write_raw_table",
           "creation_mode": "call",
           "context_manager": false
         }
       ],
       "production_binding": [
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
-          "source_blob": "ef625a6fa618947045432538bd0409affe2ac50e",
-          "content_sha256": "257118bb9fdce8f08101be19123cef13c6e0c4a065c811492c9c28250dcaa488",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "b82cea3e348512b6bad3ca43cb027fb3569aba58",
+          "content_sha256": "16f73bca699e804dd31592fa63e0eb693650b63c3faa9b6b1bc23a0fc3ea6fd7",
           "file": "src/bioetl/infrastructure/export/csv_exporter.py",
-          "line": 113,
-          "expression": "csv_full_path.read_bytes()",
-          "call": "csv_full_path.read_bytes",
+          "line": 122,
+          "expression": "pv.read_csv(source, parse_options=pv.ParseOptions(delimiter=delimiter))",
+          "call": "pv.read_csv",
           "creator": "_seed_raw_sidecar_if_missing",
           "creation_mode": "call",
           "context_manager": false
         },
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
-          "source_blob": "ef625a6fa618947045432538bd0409affe2ac50e",
-          "content_sha256": "257118bb9fdce8f08101be19123cef13c6e0c4a065c811492c9c28250dcaa488",
-          "file": "src/bioetl/infrastructure/export/csv_exporter.py",
-          "line": 113,
-          "expression": "raw_path.write_bytes(csv_full_path.read_bytes())",
-          "call": "raw_path.write_bytes",
-          "creator": "_seed_raw_sidecar_if_missing",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "7d55f9253234241db33b16a203d7fddca1c41c74",
+          "content_sha256": "188ba4707c4c6e1f597235b083a27347c2627a71ad6fd91809f303277a8ecd9b",
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "line": 80,
+          "expression": "path.open('wb')",
+          "call": "path.open",
+          "creator": "_write_raw_table",
           "creation_mode": "call",
           "context_manager": false
         }
@@ -424,11 +424,11 @@
       "operation_aliases": [],
       "creation_sites": [
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
-          "source_blob": "2b1a300f990ac8f67408cdc6e59e442984c02092",
-          "content_sha256": "2aad60088dd2950c4e537d87e863b5b7c2bb2eedde41a345b907c121b6c73344",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
+          "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
-          "line": 116,
+          "line": 118,
           "expression": "raw_path.read_bytes()",
           "call": "raw_path.read_bytes",
           "creator": "snapshot_raw_sidecar",
@@ -436,11 +436,11 @@
           "context_manager": false
         },
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
-          "source_blob": "2b1a300f990ac8f67408cdc6e59e442984c02092",
-          "content_sha256": "2aad60088dd2950c4e537d87e863b5b7c2bb2eedde41a345b907c121b6c73344",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
+          "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
-          "line": 130,
+          "line": 132,
           "expression": "raw_path.open('wb')",
           "call": "raw_path.open",
           "creator": "restore_raw_sidecar",
@@ -450,11 +450,11 @@
       ],
       "production_binding": [
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
-          "source_blob": "2b1a300f990ac8f67408cdc6e59e442984c02092",
-          "content_sha256": "2aad60088dd2950c4e537d87e863b5b7c2bb2eedde41a345b907c121b6c73344",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
+          "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
-          "line": 116,
+          "line": 118,
           "expression": "raw_path.read_bytes()",
           "call": "raw_path.read_bytes",
           "creator": "snapshot_raw_sidecar",
@@ -462,11 +462,11 @@
           "context_manager": false
         },
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
-          "source_blob": "2b1a300f990ac8f67408cdc6e59e442984c02092",
-          "content_sha256": "2aad60088dd2950c4e537d87e863b5b7c2bb2eedde41a345b907c121b6c73344",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
+          "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
-          "line": 130,
+          "line": 132,
           "expression": "raw_path.open('wb')",
           "call": "raw_path.open",
           "creator": "restore_raw_sidecar",
@@ -476,11 +476,11 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
-          "source_blob": "2b1a300f990ac8f67408cdc6e59e442984c02092",
-          "content_sha256": "2aad60088dd2950c4e537d87e863b5b7c2bb2eedde41a345b907c121b6c73344",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
+          "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
-          "line": 123,
+          "line": 125,
           "expression": "raw_path.unlink(missing_ok=True)",
           "call": "raw_path.unlink",
           "creator": "restore_raw_sidecar",
@@ -542,11 +542,11 @@
       "operation_aliases": [],
       "creation_sites": [
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
-          "source_blob": "2b1a300f990ac8f67408cdc6e59e442984c02092",
-          "content_sha256": "2aad60088dd2950c4e537d87e863b5b7c2bb2eedde41a345b907c121b6c73344",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
+          "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
-          "line": 127,
+          "line": 129,
           "expression": "raw_path.open('r+b')",
           "call": "raw_path.open",
           "creator": "restore_raw_sidecar",
@@ -554,11 +554,11 @@
           "context_manager": false
         },
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
-          "source_blob": "2b1a300f990ac8f67408cdc6e59e442984c02092",
-          "content_sha256": "2aad60088dd2950c4e537d87e863b5b7c2bb2eedde41a345b907c121b6c73344",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
+          "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
-          "line": 129,
+          "line": 131,
           "expression": "raw_path.read_bytes()",
           "call": "raw_path.read_bytes",
           "creator": "restore_raw_sidecar",
@@ -568,11 +568,11 @@
       ],
       "production_binding": [
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
-          "source_blob": "2b1a300f990ac8f67408cdc6e59e442984c02092",
-          "content_sha256": "2aad60088dd2950c4e537d87e863b5b7c2bb2eedde41a345b907c121b6c73344",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
+          "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
-          "line": 127,
+          "line": 129,
           "expression": "raw_path.open('r+b')",
           "call": "raw_path.open",
           "creator": "restore_raw_sidecar",
@@ -580,14 +580,193 @@
           "context_manager": false
         },
         {
-          "source_commit": "e796c6f810600bf26b934ac1ab53a372742c8388",
-          "source_blob": "2b1a300f990ac8f67408cdc6e59e442984c02092",
-          "content_sha256": "2aad60088dd2950c4e537d87e863b5b7c2bb2eedde41a345b907c121b6c73344",
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
+          "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
-          "line": 129,
+          "line": 131,
           "expression": "raw_path.read_bytes()",
           "call": "raw_path.read_bytes",
           "creator": "restore_raw_sidecar",
+          "creation_mode": "call",
+          "context_manager": false
+        }
+      ],
+      "cleanup_sources": []
+    },
+    {
+      "identity": "export.csv.typed_raw_streams",
+      "type": "file",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "lifetime": "owner/operation",
+      "creator": [
+        "raw_sidecar_is_typed",
+        "read_raw_table",
+        "_write_raw_table"
+      ],
+      "owner": "CsvExporter typed working representation operation",
+      "closer": "Explicit file and Arrow IPC reader/writer context exits",
+      "shutdown_contract": "Each temporary writer and per-batch reader closes under with on return and exceptions; no persistent handle. Marker check reads four bytes and closes immediately.",
+      "production_entrypoint": "pipeline/workflow runtime -> StorageFactory -> CsvExporter.export/finalize -> typed raw read/write",
+      "call_path": [
+        "CsvExporter.export -> atomic_csv_write/append_to_csv -> _write_raw_table",
+        "CsvExporter.finalize -> read_raw_table -> IPC reader per stream"
+      ],
+      "scenarios": {
+        "normal": {
+          "applicability": "applicable",
+          "expected": "Write original typed table to a temporary IPC stream and close writer then file before publication; read and close every concatenated IPC reader and the shared source context. Marker inspection reads four bytes and closes.",
+          "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "File and IPC contexts close during exception unwinding; enclosing pair helper restores old raw bytes or length, or removes newly created raw. Retain original write failure unless cleanup itself fails; never claim cleanup from timeout alone.",
+          "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "owning async/thread boundary; primitive itself synchronous",
+          "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
+          "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
+          "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
+          "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
+          "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
+          "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "configuration_predicates": [],
+      "shutdown_by_site": {},
+      "operation_aliases": [],
+      "creation_sites": [
+        {
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "7d55f9253234241db33b16a203d7fddca1c41c74",
+          "content_sha256": "188ba4707c4c6e1f597235b083a27347c2627a71ad6fd91809f303277a8ecd9b",
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "line": 74,
+          "expression": "path.open('rb')",
+          "call": "path.open",
+          "creator": "raw_sidecar_is_typed",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "7d55f9253234241db33b16a203d7fddca1c41c74",
+          "content_sha256": "188ba4707c4c6e1f597235b083a27347c2627a71ad6fd91809f303277a8ecd9b",
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "line": 102,
+          "expression": "path.open('rb')",
+          "call": "path.open",
+          "creator": "read_raw_table",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "7d55f9253234241db33b16a203d7fddca1c41c74",
+          "content_sha256": "188ba4707c4c6e1f597235b083a27347c2627a71ad6fd91809f303277a8ecd9b",
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "line": 80,
+          "expression": "pa.ipc.new_stream(sink, table.schema)",
+          "call": "pa.ipc.new_stream",
+          "creator": "_write_raw_table",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "7d55f9253234241db33b16a203d7fddca1c41c74",
+          "content_sha256": "188ba4707c4c6e1f597235b083a27347c2627a71ad6fd91809f303277a8ecd9b",
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "line": 105,
+          "expression": "pa.ipc.open_stream(source)",
+          "call": "pa.ipc.open_stream",
+          "creator": "read_raw_table",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "7d55f9253234241db33b16a203d7fddca1c41c74",
+          "content_sha256": "188ba4707c4c6e1f597235b083a27347c2627a71ad6fd91809f303277a8ecd9b",
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "line": 100,
+          "expression": "pv.read_csv(path, parse_options=pv.ParseOptions(delimiter=delimiter))",
+          "call": "pv.read_csv",
+          "creator": "read_raw_table",
+          "creation_mode": "call",
+          "context_manager": false
+        }
+      ],
+      "production_binding": [
+        {
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "7d55f9253234241db33b16a203d7fddca1c41c74",
+          "content_sha256": "188ba4707c4c6e1f597235b083a27347c2627a71ad6fd91809f303277a8ecd9b",
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "line": 74,
+          "expression": "path.open('rb')",
+          "call": "path.open",
+          "creator": "raw_sidecar_is_typed",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "7d55f9253234241db33b16a203d7fddca1c41c74",
+          "content_sha256": "188ba4707c4c6e1f597235b083a27347c2627a71ad6fd91809f303277a8ecd9b",
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "line": 102,
+          "expression": "path.open('rb')",
+          "call": "path.open",
+          "creator": "read_raw_table",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "7d55f9253234241db33b16a203d7fddca1c41c74",
+          "content_sha256": "188ba4707c4c6e1f597235b083a27347c2627a71ad6fd91809f303277a8ecd9b",
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "line": 80,
+          "expression": "pa.ipc.new_stream(sink, table.schema)",
+          "call": "pa.ipc.new_stream",
+          "creator": "_write_raw_table",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "7d55f9253234241db33b16a203d7fddca1c41c74",
+          "content_sha256": "188ba4707c4c6e1f597235b083a27347c2627a71ad6fd91809f303277a8ecd9b",
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "line": 105,
+          "expression": "pa.ipc.open_stream(source)",
+          "call": "pa.ipc.open_stream",
+          "creator": "read_raw_table",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
+          "source_blob": "7d55f9253234241db33b16a203d7fddca1c41c74",
+          "content_sha256": "188ba4707c4c6e1f597235b083a27347c2627a71ad6fd91809f303277a8ecd9b",
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "line": 100,
+          "expression": "pv.read_csv(path, parse_options=pv.ParseOptions(delimiter=delimiter))",
+          "call": "pv.read_csv",
+          "creator": "read_raw_table",
           "creation_mode": "call",
           "context_manager": false
         }

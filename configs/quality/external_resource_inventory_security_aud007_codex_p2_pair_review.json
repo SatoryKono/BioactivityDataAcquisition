@@ -1,63 +1,97 @@
 {
   "schema_version": 1,
-  "catalog_ref": "62f91ff77ca1fa6f905fa40ad9651bf3f8a7462c",
-  "source_ref": "e796c6f810600bf26b934ac1ab53a372742c8388",
+  "catalog_ref": "06ba7389786830c92f7e92d04182931ffd282586",
+  "source_ref": "b8b7f0b2eae947d736717fdf13db2a79b17ed5ff",
   "source_reviews": {
-    "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py": "Reviewed rollback file streams: append snapshots only the old byte length and truncates on publication failure; overwrite snapshots bytes and writes them only as stream content. Two explicit with blocks close on normal and error paths. Never treat raw data as a path. Keep prior pair-aware clear and NOT_RUN_12553 qualification."
+    "src/bioetl/infrastructure/adapters/http/client_context_mixin.py": "Accepted HTTP redirect and response-budget changes from merged PR13119: preserve current source and lifecycle bindings; no new runtime qualification. The only changed acquisition expression is AsyncClient follow_redirects=False.",
+    "src/bioetl/infrastructure/adapters/http/request_timing.py": "Accepted HTTP redirect and response-budget changes from merged PR13119: preserve current source and lifecycle bindings; no new runtime qualification. The only changed acquisition expression is AsyncClient follow_redirects=False.",
+    "src/bioetl/infrastructure/adapters/http/response_body.py": "Accepted HTTP redirect and response-budget changes from merged PR13119: preserve current source and lifecycle bindings; no new runtime qualification. The only changed acquisition expression is AsyncClient follow_redirects=False.",
+    "src/bioetl/infrastructure/export/csv_exporter.py": "Reviewed typed Arrow IPC raw streams preserving string keys, numeric values and dictionary logical types; public CSV alone is neutralized. Seed and synchronous overwrite use pair rollback; normalized root owns clear. Explicit stream contexts close on success/error; bounded exception classes retain failure propagation. Local 125 tests pass; runtime lifecycle qualification remains NOT_RUN_12553.",
+    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": "Reviewed typed Arrow IPC raw streams preserving string keys, numeric values and dictionary logical types; public CSV alone is neutralized. Seed and synchronous overwrite use pair rollback; normalized root owns clear. Explicit stream contexts close on success/error; bounded exception classes retain failure propagation. Local 125 tests pass; runtime lifecycle qualification remains NOT_RUN_12553.",
+    "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py": "Reviewed typed Arrow IPC raw streams preserving string keys, numeric values and dictionary logical types; public CSV alone is neutralized. Seed and synchronous overwrite use pair rollback; normalized root owns clear. Explicit stream contexts close on success/error; bounded exception classes retain failure propagation. Local 125 tests pass; runtime lifecycle qualification remains NOT_RUN_12553."
+  },
+  "expression_updates": {
+    "src/bioetl/infrastructure/adapters/http/client_context_mixin.py": {
+      "httpx.AsyncClient(timeout=httpx.Timeout(connect=self.timeout, read=self.timeout * self.read_timeout_multiplier, write=self.timeout, pool=self.timeout), headers=headers, follow_redirects=True, limits=httpx.Limits(max_connections=self.max_connections, max_keepalive_connections=self.max_keepalive_connections), trust_env=self.trust_env)": "httpx.AsyncClient(timeout=httpx.Timeout(connect=self.timeout, read=self.timeout * self.read_timeout_multiplier, write=self.timeout, pool=self.timeout), headers=headers, follow_redirects=False, limits=httpx.Limits(max_connections=self.max_connections, max_keepalive_connections=self.max_keepalive_connections), trust_env=self.trust_env)"
+    }
   },
   "reference_moves": [
     {
-      "identity": "export.csv.raw_sidecar_rollback",
+      "identity": "export.csv.raw_sidecar_seed",
       "fields": [
         "creation_sites",
         "production_binding"
       ],
       "from": {
-        "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
-        "line": 125,
-        "expression": "raw_path.write_bytes(snapshot)"
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "line": 113,
+        "expression": "csv_full_path.read_bytes()"
       },
       "to": {
-        "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
-        "scope": "restore_raw_sidecar",
-        "call": "raw_path.open",
-        "expression": "raw_path.open('wb')"
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "scope": "_seed_raw_sidecar_if_missing",
+        "call": "pv.read_csv",
+        "expression": "pv.read_csv(source, parse_options=pv.ParseOptions(delimiter=delimiter))"
+      }
+    },
+    {
+      "identity": "export.csv.raw_sidecar_seed",
+      "fields": [
+        "creation_sites",
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "line": 113,
+        "expression": "raw_path.write_bytes(csv_full_path.read_bytes())"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+        "scope": "_write_raw_table",
+        "call": "path.open",
+        "expression": "path.open('wb')"
       }
     }
   ],
   "resource_updates": {
-    "export.csv.raw_sidecar_rollback": {
-      "closer": "Explicit raw_path.open context exits and pathlib.read_bytes internal context exit",
-      "shutdown_contract": "Append snapshot reads only stat size; rollback r+b truncation and overwrite wb restoration use explicit with blocks. Both close streams on return and error. Missing original raw is removed after a failed primary publication."
+    "export.csv.raw_sidecar_seed": {
+      "closer": "Arrow CSV internal file lifetime and explicit typed IPC sink/writer contexts",
+      "shutdown_contract": "Seed reads legacy CSV using configured delimiter, serializes original typed table into temporary raw IPC under paired rollback. Writer and file stream close at context exit before publication; publication failure restores old sidecar or removes partial new raw.",
+      "call_path": [
+        "CsvExporter.export -> _seed_raw_sidecar_if_missing -> write_raw_and_published_pair",
+        "atomic_csv_write -> _write_raw_table"
+      ]
     }
   },
   "new_resources": [
     {
-      "identity": "export.csv.raw_sidecar_rollback_validation_and_truncate",
+      "identity": "export.csv.typed_raw_streams",
       "type": "file",
       "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
       "lifetime": "owner/operation",
       "creator": [
-        "restore_raw_sidecar"
+        "raw_sidecar_is_typed",
+        "read_raw_table",
+        "_write_raw_table"
       ],
-      "owner": "write_raw_and_published_pair rollback operation",
-      "closer": "Explicit r+b with block exit; pathlib.read_bytes internal context exit",
-      "shutdown_contract": "Append rollback truncates the same raw sidecar using an explicit r+b context; overwrite checks prior raw bytes before opening wb. Streams close on return and exception; no content is interpreted as a filename.",
-      "production_entrypoint": "pipeline/workflow runtime -> StorageFactory -> CsvExporter.export/finalize -> write_raw_and_published_pair",
+      "owner": "CsvExporter typed working representation operation",
+      "closer": "Explicit file and Arrow IPC reader/writer context exits",
+      "shutdown_contract": "Each temporary writer and per-batch reader closes under with on return and exceptions; no persistent handle. Marker check reads four bytes and closes immediately.",
+      "production_entrypoint": "pipeline/workflow runtime -> StorageFactory -> CsvExporter.export/finalize -> typed raw read/write",
       "call_path": [
-        "CsvExporter.export/finalize -> write_raw_and_published_pair",
-        "write_raw_and_published_pair -> restore_raw_sidecar"
+        "CsvExporter.export -> atomic_csv_write/append_to_csv -> _write_raw_table",
+        "CsvExporter.finalize -> read_raw_table -> IPC reader per stream"
       ],
       "scenarios": {
         "normal": {
           "applicability": "applicable",
-          "expected": "On failure of a pair write, compare the retained raw length or bytes and restore only when necessary; all opened streams close at their with/internal context boundary.",
+          "expected": "Write original typed table to a temporary IPC stream and close writer then file before publication; read and close every concatenated IPC reader and the shared source context. Marker inspection reads four bytes and closes.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles remaining.",
           "runtime_result": "NOT_RUN_12553"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
+          "expected": "File and IPC contexts close during exception unwinding; enclosing pair helper restores old raw bytes or length, or removes newly created raw. Retain original write failure unless cleanup itself fails; never claim cleanup from timeout alone.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
           "runtime_result": "NOT_RUN_12553"
         },
@@ -85,19 +119,49 @@
       "operation_aliases": [],
       "site_selectors": [
         {
-          "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
-          "scope": "restore_raw_sidecar",
-          "call": "raw_path.open",
-          "expression": "raw_path.open('r+b')"
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "scope": "raw_sidecar_is_typed",
+          "call": "path.open",
+          "expression": "path.open('rb')"
         },
         {
-          "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
-          "scope": "restore_raw_sidecar",
-          "call": "raw_path.read_bytes",
-          "expression": "raw_path.read_bytes()"
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "scope": "read_raw_table",
+          "call": "path.open",
+          "expression": "path.open('rb')"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "scope": "_write_raw_table",
+          "call": "pa.ipc.new_stream",
+          "expression": "pa.ipc.new_stream(sink, table.schema)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "scope": "read_raw_table",
+          "call": "pa.ipc.open_stream",
+          "expression": "pa.ipc.open_stream(source)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "scope": "read_raw_table",
+          "call": "pv.read_csv",
+          "expression": "pv.read_csv(path, parse_options=pv.ParseOptions(delimiter=delimiter))"
         }
       ],
       "cleanup_selectors": []
     }
-  ]
+  ],
+  "line_updates": {
+    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": {
+      "118": 159,
+      "171": 215,
+      "175": 219
+    }
+  },
+  "segment_updates": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": {
+      "table = pv.read_csv(source_path, parse_options=parse_options)": "else pv.read_csv(source_path, parse_options=parse_options)"
+    }
+  }
 }
