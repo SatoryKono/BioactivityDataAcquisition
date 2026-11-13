@@ -1,16 +1,14 @@
 {
   "schema_version": 1,
-  "catalog_ref": "bba371fa06ea38e89c2ff3253c1828648db97ee9",
-  "source_ref": "cb313c5b0ffd513c976936d02963d0989b3f260e",
+  "catalog_ref": "3fa6f544d3ddd3dbcb3d9661c20cf30dfad656fd",
+  "source_ref": "7ae9a0b5e60f4df6fdef5f7253282164db7ac70e",
   "source_reviews": {
-    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_scope.py": "Reviewed exact-root manifest discovery for report-catalog-only runs. A successfully resolved trusted context may bind a matching manifest; manifest=None alone retains absent/not-recorded diagnostics without reading validation ports. Resolver source errors, missing contexts, source identity conflicts and invalid locators retain controlled source errors; AttributeError is normalized to ValueError, never missing evidence. Existing executor offload and resource acquisition/cleanup/ownership are unchanged. No new cross-layer import or external resource."
+    "src/bioetl/application/observability/control_plane_evidence/lineage.py": "Reviewed predecessor-manifest lineage closure: load/deduplicate fragments for ledger-chain manifest IDs under the already selected read-only LineageStorePort; retain strict selected run identity and graph/node conflict checks. Existing evidence_stage timing moves with the lookup; no new external acquisition, resource owner, lifetime, cleanup or executor. Existing callers retain current-manifest behavior when no predecessor ledger entries exist.",
+    "src/bioetl/application/observability/control_plane_evidence/lineage_identity.py": "Reviewed predecessor-manifest lineage closure: load/deduplicate fragments for ledger-chain manifest IDs under the already selected read-only LineageStorePort; retain strict selected run identity and graph/node conflict checks. Existing evidence_stage timing moves with the lookup; no new external acquisition, resource owner, lifetime, cleanup or executor. Existing callers retain current-manifest behavior when no predecessor ledger entries exist.",
+    "src/bioetl/application/observability/control_plane_evidence/service.py": "Reviewed predecessor-manifest lineage closure: load/deduplicate fragments for ledger-chain manifest IDs under the already selected read-only LineageStorePort; retain strict selected run identity and graph/node conflict checks. Existing evidence_stage timing moves with the lookup; no new external acquisition, resource owner, lifetime, cleanup or executor. Existing callers retain current-manifest behavior when no predecessor ledger entries exist.",
+    "src/bioetl/application/observability/control_plane_evidence/service_support.py": "Reviewed predecessor-manifest lineage closure: load/deduplicate fragments for ledger-chain manifest IDs under the already selected read-only LineageStorePort; retain strict selected run identity and graph/node conflict checks. Existing evidence_stage timing moves with the lookup; no new external acquisition, resource owner, lifetime, cleanup or executor. Existing callers retain current-manifest behavior when no predecessor ledger entries exist."
   },
   "reference_moves": [],
   "exclusion_moves": [],
-  "line_updates": {
-    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_scope.py": {
-      "61": 61,
-      "72": 72
-    }
-  }
+  "line_updates": {}
 }

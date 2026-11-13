@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-13T06:02:29.953258+00:00",
+  "generated_at": "2026-11-13T06:50:12.351919+00:00",
   "summary": {
     "total_scripts": 748,
     "status_counts": {
@@ -16623,7 +16623,7 @@
         },
         {
           "path": "tests/unit/scripts/test_generate_dashboard_content_contract.py",
-          "line": 5,
+          "line": 8,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.generate_dashboard_content_contract import ("
         }
@@ -26210,7 +26210,7 @@
       "references": [
         {
           "path": "tests/unit/scripts/test_generate_dashboard_content_contract.py",
-          "line": 10,
+          "line": 13,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.repair_legacy_prometheus_dashboard import ("
         }
