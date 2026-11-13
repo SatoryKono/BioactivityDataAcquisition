@@ -69,6 +69,44 @@ def _csv_temp_directory(target_dir: Path) -> Path | None:
     return target_dir
 
 
+def raw_sidecar_is_typed(path: Path) -> bool:
+    """Recognize the IPC stream marker without loading the complete sidecar."""
+    with path.open("rb") as source:
+        return source.read(4) == b"\xff\xff\xff\xff"
+
+
+def _write_raw_table(table: pa.Table, path: Path) -> None:
+    """Store original Arrow types; each appended batch is a separate IPC stream."""
+    with path.open("wb") as sink, pa.ipc.new_stream(sink, table.schema) as writer:
+        writer.write_table(table)
+
+
+def _logical_raw_table(table: pa.Table) -> pa.Table:
+    """Decode dictionary storage while keeping each field's logical value type."""
+    for index, field in enumerate(table.schema):
+        if pa.types.is_dictionary(field.type):
+            logical_type = field.type.value_type
+            table = table.set_column(
+                index,
+                field.with_type(logical_type),
+                table.column(index).cast(logical_type),
+            )
+    return table
+
+
+def read_raw_table(path: Path, *, delimiter: str = ",") -> pa.Table:
+    """Read typed streams, retaining a compatibility path for old CSV sidecars."""
+    if not raw_sidecar_is_typed(path):
+        return pv.read_csv(path, parse_options=pv.ParseOptions(delimiter=delimiter))
+    tables: list[pa.Table] = []
+    with path.open("rb") as source:
+        size = path.stat().st_size
+        while source.tell() < size:
+            with pa.ipc.open_stream(source) as reader:
+                tables.append(_logical_raw_table(reader.read_all()))
+    return pa.concat_tables(tables, promote_options="permissive")
+
+
 def atomic_csv_write(
     data: pa.Table,
     target_path: Path,
@@ -80,7 +118,7 @@ def atomic_csv_write(
     """Write CSV atomically to avoid file lock issues on Windows.
 
     When ``spreadsheet_safe`` is false, write the working raw representation
-    used for append/dedupe; neutralize only the published CSV artifact.
+    used for append/dedupe as typed Arrow IPC streams; neutralize only the published CSV artifact.
 
     Returns ``True`` when the primary ``target_path`` was updated. Returns
     ``False`` when the primary target stayed locked. Raw sidecars never publish
@@ -96,7 +134,10 @@ def atomic_csv_write(
     try:
         os.close(fd)
         payload = spreadsheet_safe_table(data) if spreadsheet_safe else data
-        pv.write_csv(payload, temp_path, write_options=write_options)
+        if spreadsheet_safe:
+            pv.write_csv(payload, temp_path, write_options=write_options)
+        else:
+            _write_raw_table(data, temp_path)
         try:
             _publish_csv_payload(temp_path, target_path)
         except PermissionError:
@@ -131,7 +172,7 @@ def append_to_csv(
     """Append records to an existing CSV without reading it.
 
     When ``spreadsheet_safe`` is false, append to the working raw representation
-    used for append/dedupe; neutralize only the published CSV artifact.
+    used for append/dedupe as typed Arrow IPC streams; neutralize only the published CSV artifact.
 
     Returns ``True`` when the primary ``csv_path`` was updated. Returns
     ``False`` when the primary target stayed locked. Raw sidecars never publish
@@ -147,7 +188,10 @@ def append_to_csv(
         os.close(fd)
         write_options = pv.WriteOptions(include_header=False, delimiter=delimiter)
         payload = spreadsheet_safe_table(data) if spreadsheet_safe else data
-        pv.write_csv(payload, temp_path, write_options=write_options)
+        if spreadsheet_safe:
+            pv.write_csv(payload, temp_path, write_options=write_options)
+        else:
+            _write_raw_table(data, temp_path)
         try:
             with open(csv_path, "ab") as target, open(temp_path, "rb") as source:
                 target.write(source.read())

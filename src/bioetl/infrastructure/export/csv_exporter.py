@@ -17,6 +17,12 @@ from bioetl.infrastructure.export.csv_exporter_io_ops import (
 from bioetl.infrastructure.export.csv_exporter_io_ops import (
     atomic_csv_write as _atomic_csv_write,
 )
+from bioetl.infrastructure.export.csv_exporter_io_ops import (
+    raw_sidecar_is_typed as _raw_sidecar_is_typed,
+)
+from bioetl.infrastructure.export.csv_exporter_io_ops import (
+    read_raw_table as _read_raw_table,
+)
 from bioetl.infrastructure.export.csv_exporter_pair_ops import (
     list_all_clear_pairs as _list_all_clear_pairs,
 )
@@ -25,9 +31,6 @@ from bioetl.infrastructure.export.csv_exporter_pair_ops import (
 )
 from bioetl.infrastructure.export.csv_exporter_pair_ops import (
     raw_csv_path as _raw_csv_path,
-)
-from bioetl.infrastructure.export.csv_exporter_pair_ops import (
-    require_primary_csv_update as _require_primary_csv_update,
 )
 from bioetl.infrastructure.export.csv_exporter_pair_ops import (
     unlink_clear_pairs as _unlink_clear_pairs,
@@ -105,12 +108,28 @@ def _seed_raw_sidecar_if_missing(
     *,
     base_path: Path,
     table_name: str,
+    logger: LoggerPort,
+    delimiter: str = ",",
 ) -> None:
     """Seed ``.csv.raw`` from published CSV using confined export-root paths only."""
     csv_full_path, raw_path = _resolve_table_export_paths(base_path, table_name)
-    if raw_path.exists():
+    if raw_path.exists() and _raw_sidecar_is_typed(raw_path):
         return
-    raw_path.write_bytes(csv_full_path.read_bytes())
+    source = raw_path if raw_path.exists() else csv_full_path
+    table = (
+        _read_raw_table(source, delimiter=delimiter)
+        if raw_path.exists()
+        else pv.read_csv(source, parse_options=pv.ParseOptions(delimiter=delimiter))
+    )
+    _write_raw_and_published_pair(
+        write_raw=lambda: _atomic_csv_write(
+            table, raw_path, pv.WriteOptions(), logger, spreadsheet_safe=False
+        ),
+        write_published=lambda: True,
+        raw_path=raw_path,
+        csv_path=csv_full_path,
+        mode="seed",
+    )
 
 
 class CsvExporter:
@@ -156,17 +175,17 @@ class CsvExporter:
         if self.sort_by:
             csv_data = self._sort_table(csv_data, self.sort_by)
         _validate_spreadsheet_safe_column_names(csv_data)
-        _require_primary_csv_update(
-            self._atomic_csv_write(csv_data, target_path, self._build_write_options()),
-            path=target_path,
-            mode="write",
+        return self._overwrite_export(
+            csv_data=csv_data,
+            csv_full_path=target_path,
+            raw_path=self._raw_csv_path(target_path),
+            sort_by=self.sort_by,
         )
-        return target_path
 
     def clear(self, table_name: str | None = None) -> list[Path]:
-        if not self.base_path.exists():
-            return []
         root = self._export_root()
+        if not root.exists():
+            return []
         if table_name:
             csv_path = self._resolve_table_csv_path(table_name)
             pairs = [
@@ -177,7 +196,7 @@ class CsvExporter:
                 )
             ]
         else:
-            pairs = _list_all_clear_pairs(base_path=self.base_path, root=root)
+            pairs = _list_all_clear_pairs(base_path=root, root=root)
         return _unlink_clear_pairs(pairs, self._logger)
 
     def _sort_table(self, table: pa.Table, sort_columns: list[str]) -> pa.Table:
@@ -253,6 +272,8 @@ class CsvExporter:
         _seed_raw_sidecar_if_missing(
             base_path=self.base_path,
             table_name=table_name,
+            logger=self._logger,
+            delimiter=self.delimiter,
         )
         _write_raw_and_published_pair(
             write_raw=lambda: self._append_to_csv(
@@ -313,7 +334,11 @@ class CsvExporter:
             return None
         parse_options = pv.ParseOptions(delimiter=self.delimiter)
         source_path = raw_path if raw_path.exists() else csv_full_path
-        table = pv.read_csv(source_path, parse_options=parse_options)
+        table = (
+            _read_raw_table(raw_path, delimiter=self.delimiter)
+            if raw_path.exists()
+            else pv.read_csv(source_path, parse_options=parse_options)
+        )
         if primary_keys:
             table = self._deduplicate(table, primary_keys)
         sort_columns = sort_by if sort_by is not None else self.sort_by

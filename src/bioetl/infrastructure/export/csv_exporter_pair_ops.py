@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import pyarrow as pa
+
 if TYPE_CHECKING:
     from collections.abc import Callable
 
@@ -144,6 +146,6 @@ def write_raw_and_published_pair(
     try:
         require_primary_csv_update(write_raw(), path=raw_path, mode=mode)
         require_primary_csv_update(write_published(), path=csv_path, mode=mode)
-    except Exception:
+    except (OSError, pa.ArrowException, ValueError, TypeError, RuntimeError):
         restore_raw_sidecar(raw_path, raw_snapshot)
         raise
