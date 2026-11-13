@@ -205,6 +205,16 @@ def _require_row_evidence(
         _require_owned_record(row, table, records, evidence_id)
     if row.iuphar_class:
         _require_direct_evidence_types(row, table, records)
+    _require_match_list_evidence(row, table, records)
+    _require_local_list_evidence(row, table, records)
+
+
+def _require_match_list_evidence(
+    row: ClassificationResult,
+    table: EvidenceTable,
+    records: dict[str, Evidence],
+) -> None:
+    """Validate match-list ownership, witness types and local-only restrictions."""
     for evidence_id in row.match_evidence_ids:
         if evidence_id not in table.match_evidence_ids:
             raise ContractDefect(
@@ -217,6 +227,14 @@ def _require_row_evidence(
             and records[evidence_id].evidence_type == _MAPPING_EVIDENCE_TYPE
         ):
             raise ContractDefect("local-only evidence cannot claim an IUPHAR mapping")
+
+
+def _require_local_list_evidence(
+    row: ClassificationResult,
+    table: EvidenceTable,
+    records: dict[str, Evidence],
+) -> None:
+    """Require each local witness to use its dedicated list and evidence type."""
     for evidence_id in row.local_evidence_ids:
         if (
             evidence_id not in table.local_evidence_ids
