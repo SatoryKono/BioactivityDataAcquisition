@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-13T10:10:51.841122+00:00",
+  "generated_at": "2026-11-13T10:00:42.723430+00:00",
   "summary": {
     "total_scripts": 749,
     "status_counts": {
@@ -3240,7 +3240,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1383,
+          "line": 1377,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -4084,7 +4084,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1374,
+          "line": 1368,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4139,7 +4139,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1373,
+          "line": 1367,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4184,7 +4184,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1372,
+          "line": 1366,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -4239,7 +4239,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1371,
+          "line": 1365,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -5087,7 +5087,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1379,
+          "line": 1373,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\": ("
         },
@@ -5506,7 +5506,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1375,
+          "line": 1369,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\": ("
         },
@@ -11419,7 +11419,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1259,
+          "line": 1253,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -11462,7 +11462,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1401,
+          "line": 1395,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -13854,13 +13854,13 @@
       "references": [
         {
           "path": "pyproject.toml",
-          "line": 366,
+          "line": 364,
           "source_group": "build",
           "text": "# (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py); memory"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 863,
+          "line": 857,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -17884,7 +17884,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
@@ -17913,6 +17913,12 @@
         {
           "path": "tests/architecture/test_config_surface_entity_residual_plateau.py",
           "line": 24,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import report_config_surface_backlog as backlog_report"
+        },
+        {
+          "path": "tests/architecture/test_config_surface_entity_residual_plateau.py",
+          "line": 25,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_config_surface_backlog import ("
         }
@@ -19504,9 +19510,9 @@
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 123,
+          "line": 130,
           "source_group": "docs",
-          "text": "| 2 | `13.851` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-u"
+          "text": "| 9 | `9.767` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-un"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
@@ -21807,7 +21813,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1499,
+          "line": 1493,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -25699,7 +25705,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1692,
+          "line": 1686,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -28919,7 +28925,7 @@
         },
         {
           "path": "tests/architecture/test_config_surface_entity_residual_plateau.py",
-          "line": 28,
+          "line": 29,
           "source_group": "tests",
           "text": "from scripts.schema.analysis.generate_config_matrix import ("
         },
@@ -29420,7 +29426,7 @@
         },
         {
           "path": "pyproject.toml",
-          "line": 165,
+          "line": 163,
           "source_group": "build",
           "text": "# JSON Schema validation (scripts/validate_pipeline_configs.py)"
         },
