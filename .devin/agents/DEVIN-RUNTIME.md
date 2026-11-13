@@ -95,6 +95,7 @@ Devin CLI and its MCP servers use tokens and parameters from the repository root
 The `.env` file is machine-local and secret-bearing:
 
 ### MCP Server Configuration
+
 MCP servers defined in `.devin/mcp_config.json` use environment variable expansion for secrets:
 
 - `DEEPWIKI_API_KEY` / `DEEPWIKI_ORGANISATION_ID` - DeepWiki MCP server authentication
@@ -104,6 +105,7 @@ MCP servers defined in `.devin/mcp_config.json` use environment variable expansi
 - Other MCP server tokens as configured in `.devin/mcp_config.json`
 
 ### Common Environment Variables
+
 - `GITHUB_TOKEN` / `GITHUB_PERSONAL_ACCESS_TOKEN` - GitHub operations via MCP
 - `OPENAI_API_KEY` - OpenAI API for LLM operations
 - `BRAVE_API_KEY` - Brave Search API via MCP
@@ -111,6 +113,7 @@ MCP servers defined in `.devin/mcp_config.json` use environment variable expansi
 - Provider API keys: `BIOETL_UNIPROT_API_KEY`, `BIOETL_OPENALEX_API_KEY`, etc.
 
 ### Env File Guardrail
+
 - Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
 - Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
 - Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.
@@ -134,27 +137,27 @@ to repository, commit, branch, worktree, task, and source references.
 
 ## Devin vs Codex Runtime Differences
 
-| Aspect | Codex Runtime | Devin Runtime |
-| ------ | ------------- | ------------- |
-| Agent spawning | `spawn_agent(agent_type, message)` | `run_subagent(title, task, profile, is_background)` |
-| Built-in profiles | `default`, `explorer`, `worker` | `subagent_explore`, `subagent_general` |
-| Custom profiles | Native agent roles | Custom subagent profiles in `.devin/agents/*/AGENT.md` |
-| Model assignment | Inherit parent (no provider-specific model labels) | Inherits parent model or explicit `model:` field. Read-only profiles use `model: parent`; write profiles (`py-config-bot`, `py-doc-bot`, `py-test-bot`) may pin `model: swe-1.6` — the sanctioned Devin default subagent model. Other pins are forbidden |
-| Execution modes | Sequential/parallel | Foreground/background with permissions |
-| Tool permissions | Role-based | Profile-based + session grants |
+| Aspect            | Codex Runtime                                      | Devin Runtime                                                                                                                                                                                                                                            |
+| ----------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Agent spawning    | `spawn_agent(agent_type, message)`                 | `run_subagent(title, task, profile, is_background)`                                                                                                                                                                                                      |
+| Built-in profiles | `default`, `explorer`, `worker`                    | `subagent_explore`, `subagent_general`                                                                                                                                                                                                                   |
+| Custom profiles   | Native agent roles                                 | Custom subagent profiles in `.devin/agents/*/AGENT.md`                                                                                                                                                                                                   |
+| Model assignment  | Inherit parent (no provider-specific model labels) | Inherits parent model or explicit `model:` field. Read-only profiles use `model: parent`; write profiles (`py-config-bot`, `py-doc-bot`, `py-test-bot`) may pin `model: swe-1.6` — the sanctioned Devin default subagent model. Other pins are forbidden |
+| Execution modes   | Sequential/parallel                                | Foreground/background with permissions                                                                                                                                                                                                                   |
+| Tool permissions  | Role-based                                         | Profile-based + session grants                                                                                                                                                                                                                           |
 
 ## Recommended Mapping
 
 Logical `py-*` profiles → Devin custom subagent profiles:
 
-| Logical Profile | Devin Profile | Model | Tool Access | Execution Mode |
-| --- | --- | --- | --- | --- |
-| `py-audit-bot` | `py-audit-bot` | Parent model | Read/search declarations only (`read`, `grep`, `glob`); modes `baseline`/`final`/`targeted`/`review`/`debt`/`reproducibility` | Foreground |
-| `py-plan-bot` | `py-plan-bot` | Parent model | Read-only | Foreground |
-| `py-debug-bot` | `py-debug-bot` | Parent model | Read-only (reproduce/isolate/guidance; no `src/` or `tests/` writes) | Foreground |
-| `py-config-bot` | `py-config-bot` | Default subagent model | Read + write (`configs/`) | Foreground |
-| `py-doc-bot` | `py-doc-bot` | Default subagent model | Read + write (`docs/`) | Foreground |
-| `py-test-bot` | `py-test-bot` | Default subagent model | Read/search declarations only; parent executes tests and authorized `tests/**` writes | Foreground/background |
+| Logical Profile | Devin Profile   | Model                  | Tool Access                                                                                                                   | Execution Mode        |
+| --------------- | --------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `py-audit-bot`  | `py-audit-bot`  | Parent model           | Read/search declarations only (`read`, `grep`, `glob`); modes `baseline`/`final`/`targeted`/`review`/`debt`/`reproducibility` | Foreground            |
+| `py-plan-bot`   | `py-plan-bot`   | Parent model           | Read-only                                                                                                                     | Foreground            |
+| `py-debug-bot`  | `py-debug-bot`  | Parent model           | Read-only (reproduce/isolate/guidance; no `src/` or `tests/` writes)                                                          | Foreground            |
+| `py-config-bot` | `py-config-bot` | Default subagent model | Read + write (`configs/`)                                                                                                     | Foreground            |
+| `py-doc-bot`    | `py-doc-bot`    | Default subagent model | Read + write (`docs/`)                                                                                                        | Foreground            |
+| `py-test-bot`   | `py-test-bot`   | Default subagent model | Read/search declarations only; parent executes tests and authorized `tests/**` writes                                         | Foreground/background |
 
 ## Permission boundary and qualification
 
@@ -209,15 +212,15 @@ enabled by this change; the remaining native isolation result is NOT_PROVEN.
 
 Use the smallest existing skill that matches the request:
 
-| Request template | Mutation default | Route | Minimum validation |
-| --- | --- | --- | --- |
-| Diagnose without fixing | read-only | `py-debug-bot` (foreground) | reproduction and evidence only |
-| Implement a focused fix | write in requested scope | direct implementation; `py-config-bot` when configs change | targeted lint/tests |
-| Review the current diff | read-only | `py-audit-bot` (`review`; background when authorized) | diff inspection; no external writes |
-| Diagnose CI failure | read-only | `py-debug-bot` (foreground) | reproduction, root cause, remediation guidance |
-| Implement diagnosed CI remediation | write in requested scope | parent / orchestrator | failed checks plus targeted regression |
-| Prepare a PR | branch/commit/push authorized by request | parent PR workflow; optional external `create-pr` skill when installed | repository quality gates for touched scope |
-| Audit architecture debt | read-only | `py-audit-bot` (foreground) | architecture/debt gates; budgets MUST NOT increase |
+| Request template                   | Mutation default                         | Route                                                                  | Minimum validation                                 |
+| ---------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------- |
+| Diagnose without fixing            | read-only                                | `py-debug-bot` (foreground)                                            | reproduction and evidence only                     |
+| Implement a focused fix            | write in requested scope                 | direct implementation; `py-config-bot` when configs change             | targeted lint/tests                                |
+| Review the current diff            | read-only                                | `py-audit-bot` (`review`; background when authorized)                  | diff inspection; no external writes                |
+| Diagnose CI failure                | read-only                                | `py-debug-bot` (foreground)                                            | reproduction, root cause, remediation guidance     |
+| Implement diagnosed CI remediation | write in requested scope                 | parent / orchestrator                                                  | failed checks plus targeted regression             |
+| Prepare a PR                       | branch/commit/push authorized by request | parent PR workflow; optional external `create-pr` skill when installed | repository quality gates for touched scope         |
+| Audit architecture debt            | read-only                                | `py-audit-bot` (foreground)                                            | architecture/debt gates; budgets MUST NOT increase |
 
 `create-pr` is a user-installed capability, not a project-local skill. Discover
 it before use; if unavailable, the authorized parent follows repository PR policy
@@ -227,12 +230,12 @@ All restricted-profile routes in the table are logical parent-guide routes while
 
 ## Risk-Based Validation
 
-| Tier | Typical scope | Minimum checks |
-| --- | --- | --- |
-| V1 | docs-only | targeted links/drift, cleanup-inventory `--check`, and mirror sync |
-| V2 | focused Python/tooling | targeted Ruff plus related unit tests |
-| V3 | config/runtime contract | schema/contract checks plus related tests |
-| V4 | architecture or broad change | architecture gates, lint/type checks, and relevant broad tests |
+| Tier | Typical scope                | Minimum checks                                                     |
+| ---- | ---------------------------- | ------------------------------------------------------------------ |
+| V1   | docs-only                    | targeted links/drift, cleanup-inventory `--check`, and mirror sync |
+| V2   | focused Python/tooling       | targeted Ruff plus related unit tests                              |
+| V3   | config/runtime contract      | schema/contract checks plus related tests                          |
+| V4   | architecture or broad change | architecture gates, lint/type checks, and relevant broad tests     |
 
 Every closeout reports checks run, skipped checks with exact reasons/follow-up, runtime/docs mirror status, and debt outcome (`improved`, `unchanged`, or `worsened`). A lower tier cannot bypass an applicable architecture, determinism, security, or technical-debt gate. `worsened` cannot be hidden by raising a budget or exemption limit.
 
@@ -252,20 +255,50 @@ Optional vendor evaluators can add evidence but cannot override the offline
 core verifier. EvidenceStore ingestion is a separate, explicitly authorized
 command and never creates a waiver or `DecisionRecord`.
 
+### Explicit local closeout fallback
+
+When a native lifecycle adapter has not been qualified, use the existing
+repository facade after assembling the canonical receipts:
+
+```bash
+<python> -B -m scripts.engineering.repo closeout \
+  --runtime devin --task-id <task-id> --claim done \
+  --bundle reports/quality/proof-or-stop/<run-id>/bundle.json
+```
+
+This explicit command is not native hook registration or proof of client
+loading. It calls the canonical verifier with current-source checks, binds the
+expected task/runtime/claim and local state, and caps local qualification at
+`DEGRADED` (exit 3), even when bundle fields declare CI/independent trust.
+Caller labels do not authenticate execution transport. `STOP`/`ERROR` exit 2;
+an actual parent interruption is `USER_STOP`/130, never a done claim. A worker
+exit 130 alone does not prove user interruption. Missing evidence, crashes,
+timeouts and duplicate events cannot qualify completion.
+
+Native adapters and OpenCode write paths remain disabled/unqualified. The
+command runs no producers, agents, services or EvidenceStore ingestion and
+does not promote the staged CI enforcement policy. Real CI acceptance remains
+separate. See the [explicit closeout runbook](../../docs/05-operations/runbooks/ai-closeout-wrapper.md)
+for supported arguments, limitations and rollback.
+
 ## Foreground vs Background Strategy
 
 The qualification block above applies before choosing either mode. Neither
 mode is an isolation mechanism or an automatic permission escalation route.
 
 ### Foreground Subagents
+
 Use for:
+
 - Tasks requiring user approval (file writes, config changes)
 - Critical path work where parent needs immediate results
 - Debugging sessions requiring interactive permission grants
 - Architecture audits where findings need immediate review
 
 ### Background Subagents
+
 Use for:
+
 - Read-only research and exploration
 - Long-running test suites
 - Documentation generation

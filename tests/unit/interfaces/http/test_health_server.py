@@ -617,7 +617,9 @@ class TestHealthServerQuarantineExplorer:
         self,
     ) -> AsyncGenerator[HealthServer, None]:
         """Start server without quarantine service."""
-        server = HealthServer(host="127.0.0.1", port=0)
+        server = HealthServer(
+            host="127.0.0.1", port=0, quarantine_http_token="audit-test"
+        )
         await server.start()
         yield server
         await server.stop()
@@ -662,6 +664,7 @@ class TestHealthServerQuarantineExplorer:
             host="127.0.0.1",
             port=0,
             quarantine_service=service,
+            quarantine_http_token="audit-test",
         )
         await server.start()
         yield server, service
@@ -681,7 +684,7 @@ class TestHealthServerQuarantineExplorer:
         """Send request and return status code, status text, and body."""
         reader, writer = await asyncio.open_connection("127.0.0.1", port)
         try:
-            request = f"{method} {path} HTTP/1.1\r\nHost: localhost\r\n\r\n"
+            request = f"{method} {path} HTTP/1.1\r\nHost: localhost\r\nAuthorization: Bearer audit-test\r\n\r\n"
             writer.write(request.encode())
             await writer.drain()
 

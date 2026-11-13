@@ -5,7 +5,9 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 import json
 import os
+from pathlib import Path
 import subprocess
+import sys
 import time
 
 import pytest
@@ -14,6 +16,56 @@ from scripts.engineering.repo import hook_receipts as receipts
 from scripts.engineering.repo import hook_runtime
 
 pytestmark = pytest.mark.unit
+
+
+def _fixture_distribution(root: Path) -> None:
+    metadata = root / "closeout_fixture-1.0.dist-info/METADATA"
+    metadata.parent.mkdir(parents=True)
+    metadata.write_text(
+        "Metadata-Version: 2.1\nName: Closeout-Fixture\nVersion: 1.0\n",
+        encoding="utf-8",
+    )
+
+
+@pytest.mark.parametrize(
+    "alias_kind",
+    [
+        "duplicate",
+        "dot_alias",
+        pytest.param(
+            "case_alias",
+            marks=pytest.mark.skipif(os.name != "nt", reason="Windows case folding"),
+        ),
+    ],
+)
+def test_duplicate_search_paths_do_not_change_environment_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, alias_kind: str
+) -> None:
+    location = tmp_path / "site"
+    _fixture_distribution(location)
+    original = sys.path.copy()
+    monkeypatch.setattr(sys, "path", [str(location), *original])
+    single = receipts.environment_identity({})
+    alias = str(location)
+    if alias_kind == "dot_alias":
+        alias = str(location / ".." / location.name)
+    elif alias_kind == "case_alias":
+        alias = alias.upper()
+    monkeypatch.setattr(sys, "path", [str(location), alias, *original])
+    assert receipts.environment_identity({}) == single
+
+
+def test_distinct_distribution_locations_remain_distinct(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    first, second = tmp_path / "first", tmp_path / "second"
+    _fixture_distribution(first)
+    _fixture_distribution(second)
+    original = sys.path.copy()
+    monkeypatch.setattr(sys, "path", [str(first), *original])
+    single = receipts.environment_identity({})
+    monkeypatch.setattr(sys, "path", [str(first), str(second), *original])
+    assert receipts.environment_identity({}) != single
 
 
 @pytest.fixture

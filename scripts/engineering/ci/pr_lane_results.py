@@ -206,9 +206,29 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/repo/test_hook_receipts.py",
     ),
     "scripts/engineering/dev/pretest_guardrails.ps1": (SCOPED_CHECKS_TEST,),
+    "scripts/engineering/dev/setup_bioetl_wsl.ps1": (
+        "tests/unit/scripts/test_wsl_uv_install_integrity.py",
+    ),
     "docs/05-operations/runbooks/scoped-post-change-checks.md": (
         SCOPED_CHECKS_TEST,
         "tests/unit/scripts/repo/test_hook_receipts.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "docs/05-operations/runbooks/ai-closeout-wrapper.md": (
+        "tests/unit/scripts/repo/test_closeout_runtime.py",
+        "tests/unit/scripts/repo/test_closeout_git_safety.py",
+        "tests/unit/scripts/engineering/qa/test_proof_or_stop.py",
+        "tests/architecture/test_proof_or_stop_contract.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "src/memory/proof.py": (
+        "tests/unit/scripts/engineering/qa/test_proof_or_stop.py",
+        "tests/unit/scripts/repo/test_closeout_git_safety.py",
+        "tests/unit/scripts/repo/test_closeout_runtime.py",
+    ),
+    "docs/00-project/ai/agents/README.md": (
+        "tests/architecture/test_ai_runtime_governance_links.py",
+        "tests/architecture/test_runtime_agent_docs_drift.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "scripts/ai/junie/check_junie_mirror.py": (JUNIE_RUNTIME_CI_TEST,),
@@ -623,6 +643,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_security_aud003_extraction_review.json",
             "configs/quality/external_resource_inventory_security_aud004_review.json",
             "configs/quality/external_resource_inventory_security_aud005_review.json",
+            "configs/quality/external_resource_inventory_security_aud005_main_merge_review.json",
+            "configs/quality/external_resource_inventory_security_aud006_review.json",
             "configs/quality/external_resource_inventory_security_aud007_review.json",
         ),
         (
