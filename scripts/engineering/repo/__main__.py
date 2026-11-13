@@ -10,6 +10,7 @@ Commands:
     guard-operation    Check a structured operation without executing it
     guard-budgets      Compare protected policy limits to trusted Git objects
     checks             Plan or run state-bound local post-change checks
+    closeout           Verify local source-bound evidence without CI admission
     hooks              Install, inspect or roll back owned Git hooks explicitly
     check-inventory    Check scripts inventory drift
     github-settings-review  Collect read-only GitHub governance evidence
@@ -139,6 +140,25 @@ def _inventory_args(rest: list[str]) -> list[str]:
     ]
 
 
+def _run_direct_command(cmd: str, rest: list[str]) -> int | None:
+    """Dispatch in-process facades without eagerly importing their modules."""
+    if cmd == "checks":
+        from scripts.engineering.repo.scoped_checks import main as checks_main
+
+        return checks_main(rest)
+    if cmd == "closeout":
+        # Resolve the core from this checkout, not another editable installation.
+        sys.path.insert(0, str(_DIR.parents[2] / "src"))
+        from scripts.engineering.repo.closeout_runtime import main as closeout_main
+
+        return closeout_main(rest)
+    if cmd == "hooks":
+        from scripts.engineering.repo.hook_installation import main as hooks_main
+
+        return hooks_main(rest)
+    return None
+
+
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
 
@@ -147,15 +167,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     cmd, rest = args[0], args[1:]
-
-    if cmd == "checks":
-        from scripts.engineering.repo.scoped_checks import main as checks_main
-
-        return checks_main(rest)
-    if cmd == "hooks":
-        from scripts.engineering.repo.hook_installation import main as hooks_main
-
-        return hooks_main(rest)
+    direct_result = _run_direct_command(cmd, rest)
+    if direct_result is not None:
+        return direct_result
     if cmd == "worktree":
         return _run_worktree(rest)
 

@@ -51,7 +51,7 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 771 |
+| Active | 772 |
 | Archived | 1554 |
 | Canonical | 77 |
 | Generated | 1067 |
@@ -61,7 +61,7 @@
 
 | Surface | Count |
 | --- | --- |
-| active | 771 |
+| active | 772 |
 | archive | 1554 |
 | canonical | 77 |
 | generated | 1067 |
@@ -73,7 +73,7 @@
 | --- | --- |
 | archive-after-migration | 427 |
 | generate-automatically | 1067 |
-| keep | 2695 |
+| keep | 2696 |
 
 ## Cleanup Candidates
 

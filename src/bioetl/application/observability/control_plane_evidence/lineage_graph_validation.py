@@ -24,21 +24,34 @@ def conflicting_node_ids(
         for node in nodes:
             definition = node.to_dict()
             if node.node_type is LineageNodeType.RUN:
-                scoped = run_definitions.setdefault(
-                    (node.node_id, fragment.manifest_id), {}
+                definition = _merge_run_scoped_definition(
+                    node,
+                    definition,
+                    fragment_manifest_id=fragment.manifest_id,
+                    run_definitions=run_definitions,
+                    conflicts=conflicts,
                 )
-                if _merge_definition(scoped, definition):
-                    conflicts.add(node.node_id)
-                if node.attributes.get("manifest_id") not in (
-                    None,
-                    fragment.manifest_id,
-                ):
-                    conflicts.add(node.node_id)
-                definition = _shared_run_definition(definition)
             previous = definitions.setdefault(node.node_id, {})
             if _merge_definition(previous, definition):
                 conflicts.add(node.node_id)
     return sorted(conflicts)
+
+
+def _merge_run_scoped_definition(
+    node: LineageNodeRef,
+    definition: dict[str, object],
+    *,
+    fragment_manifest_id: str | None,
+    run_definitions: dict[tuple[str, str | None], dict[str, object]],
+    conflicts: set[str],
+) -> dict[str, object]:
+    """Merge a RUN node within its manifest scope; return shared cross-manifest view."""
+    scoped = run_definitions.setdefault((node.node_id, fragment_manifest_id), {})
+    if _merge_definition(scoped, definition):
+        conflicts.add(node.node_id)
+    if node.attributes.get("manifest_id") not in (None, fragment_manifest_id):
+        conflicts.add(node.node_id)
+    return _shared_run_definition(definition)
 
 
 def _merge_definition(previous: dict[str, object], incoming: dict[str, object]) -> bool:
