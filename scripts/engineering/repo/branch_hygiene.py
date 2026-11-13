@@ -37,6 +37,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from datetime import UTC, datetime
 from pathlib import Path
@@ -44,6 +45,8 @@ from typing import Any
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from scripts.engineering.repo._branch_cleanup_policy import is_protected_branch
 
 REPO = Path(__file__).resolve().parents[3]
 WT_ROOT = REPO.parent / f"{REPO.name}-worktrees"
@@ -68,18 +71,34 @@ def stamp() -> str:
 
 
 def run(
-    args: list[str], cwd: Path | None = None, timeout: int = 600
+    args: list[str],
+    cwd: Path | None = None,
+    timeout: int = 600,
+    *,
+    binary: bool = False,
 ) -> subprocess.CompletedProcess:
     if not args or args[0] not in {"git", "gh"}:
         raise RuntimeError("Only fixed Git and GitHub CLI executables are permitted")
     command = ["git", *args[1:]] if args[0] == "git" else ["gh", *args[1:]]
+    environment = os.environ.copy()
+    for key in (
+        "GIT_DIR",
+        "GIT_WORK_TREE",
+        "GIT_INDEX_FILE",
+        "GIT_COMMON_DIR",
+        "GIT_OBJECT_DIRECTORY",
+        "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+        "GIT_PREFIX",
+    ):
+        environment.pop(key, None)
     return subprocess.run(
         command,
         shell=False,
         cwd=cwd or REPO,
         capture_output=True,
-        text=True,
-        encoding="utf-8",
+        text=not binary,
+        encoding=None if binary else "utf-8",
+        env=environment,
         timeout=timeout,
     )
 
@@ -234,6 +253,8 @@ def _classify_worktree(
     age = round((_now() - max(commit_ts, modified)) / DAY, 1)
     exists = path.exists()
     status = status_counts(path) if exists else None
+    if status and (status[0] or status[1]):
+        age = min(age, round((_now() - _latest_activity(path)) / DAY, 1))
     action, reason = _worktree_action(
         w, branches, exists, status, age, detached_days, branch_days
     )
@@ -246,6 +267,26 @@ def _classify_worktree(
         "action": action,
         "reason": reason,
     }
+
+
+def _latest_activity(path: Path) -> float:
+    """Keep trees when activity cannot be safely excluded; never read file contents."""
+    latest = 0.0
+    try:
+        for base, directories, files in os.walk(path, followlinks=False):
+            directories[:] = [
+                name
+                for name in directories
+                if name not in EXCLUDE_PARTS and name != ".git"
+            ]
+            for name in directories + files:
+                item = Path(base) / name
+                if name.startswith(".env") or item.is_symlink() or item.is_junction():
+                    return _now()
+                latest = max(latest, item.stat().st_mtime)
+    except OSError:
+        return _now()
+    return latest
 
 
 def classify_worktrees(
@@ -327,7 +368,11 @@ def classify_branches(
             "age_days": age,
             "upstream": b["upstream"],
         }
-        if b["name"] == current or b["name"] in checked_out:
+        if (
+            is_protected_branch(b["name"])
+            or b["name"] == current
+            or b["name"] in checked_out
+        ):
             buckets["D"].append(entry)
             continue
         states = pr_map.get(b["name"], [])
@@ -396,38 +441,41 @@ def _copy_archive_file(src: str, dst: str) -> str:
 
 def archive_tree(path: Path, name: str, head: str, archive: Path) -> dict[str, Any]:
     """Create a complete archive or raise before permitting removal."""
-    changed = run(["git", "-C", str(path), "diff", "--name-only", "-z", "HEAD"])
-    if changed.returncode:
-        raise RuntimeError("Cannot read complete worktree changes")
-    if any(excluded(name) for name in changed.stdout.split("\0") if name):
-        raise RuntimeError("Cannot archive excluded tracked inputs")
+    for selection in ([], ["--cached"]):
+        changed = run(
+            ["git", "-C", str(path), "diff", *selection, "--name-only", "-z", "HEAD"]
+        )
+        if changed.returncode:
+            raise RuntimeError("Cannot read complete worktree changes")
+        if any(excluded(name) for name in changed.stdout.split("\0") if name):
+            raise RuntimeError("Cannot archive excluded tracked inputs")
     archive.mkdir(parents=True, exist_ok=True)
-    diff = run(["git", "-C", str(path), "diff", "--binary", "HEAD"])
+    snapshot = Path(tempfile.mkdtemp(prefix=f"{name}-", dir=archive))
+    for label, selection in (("working", []), ("index", ["--cached"])):
+        diff = run(
+            ["git", "-C", str(path), "diff", *selection, "--binary", "HEAD"],
+            binary=True,
+        )
+        if diff.returncode:
+            raise RuntimeError("Cannot read complete worktree changes")
+        (snapshot / f"{label}.patch").write_bytes(diff.stdout)
     status = run(
-        ["git", "-C", str(path), "status", "--porcelain", "--untracked-files=all"]
+        ["git", "-C", str(path), "ls-files", "--others", "--exclude-standard", "-z"]
     )
-    if diff.returncode or status.returncode:
+    if status.returncode:
         raise RuntimeError("Cannot read complete worktree changes")
-    if diff.stdout:
-        (archive / f"{name}.patch").write_text(diff.stdout, encoding="utf-8")
     copied = 0
-    for line in status.stdout.splitlines():
-        if not line.startswith("??"):
-            continue
-        rel = line[3:]
-        if rel.startswith('"'):
-            rel = json.loads(rel)
+    for rel in filter(None, status.stdout.split("\0")):
         source = path / rel
         if excluded(rel) or source.is_symlink():
             raise RuntimeError(f"Cannot preserve excluded or linked input: {rel}")
-        destination = archive / name / rel
+        destination = snapshot / "untracked" / rel
         destination.parent.mkdir(parents=True, exist_ok=True)
         _copy_archive_file(str(source), str(destination))
         copied += 1
-    with (archive / "heads.txt").open("a", encoding="utf-8") as fh:
-        fh.write(f"{head} {name}\n")
+    (snapshot / "head.txt").write_text(f"{head} {name}\n", encoding="utf-8")
     return {
-        "archive": str(archive / name),
+        "archive": str(snapshot),
         "untracked_copied": copied,
         "complete": True,
     }
@@ -480,12 +528,27 @@ def _safe_tree_target(path: Path, *, must_exist: bool = True) -> Path:
 
 def _report_directory(value: Path | None) -> Path:
     root = REPO / "reports" / "local"
+    if root.resolve(strict=False) != Path(os.path.abspath(root)):
+        raise RuntimeError("Owned reports root was redirected")
     proposed = value if value is not None else root / f"branch-hygiene-{stamp()}"
     candidate = _lexically_confined(proposed, root)
     resolved = candidate.resolve(strict=False)
     if not resolved.is_relative_to(root.resolve(strict=False)):
         raise RuntimeError("Report directory escapes owned reports root")
     return resolved
+
+
+def _bundle_worktree_head(path: Path, archive: Path) -> Path:
+    archive.mkdir(parents=True, exist_ok=True)
+    backup = Path(tempfile.mkdtemp(prefix="head-", dir=archive)) / "history.bundle"
+    commands = (
+        ["git", "-C", str(path), "bundle", "create", str(backup), "HEAD"],
+        ["git", "-C", str(path), "bundle", "verify", str(backup)],
+    )
+    for command in commands:
+        if run(command, timeout=1800).returncode:
+            raise RuntimeError("Cannot preserve complete worktree HEAD history")
+    return backup
 
 
 def _apply_worktree(
@@ -517,9 +580,11 @@ def _apply_worktree(
         return
     try:
         path = _safe_tree_target(path, must_exist=False)
+        if path.exists():
+            entry["head_bundle"] = str(_bundle_worktree_head(path, archive))
         if row["action"] == "REMOVE_ARCHIVE" and path.exists():
             entry["wip"] = archive_tree(path, path.name, row["head"], archive)
-    except (OSError, RuntimeError) as exc:
+    except (OSError, RuntimeError, subprocess.SubprocessError) as exc:
         entry["wip_error"] = str(exc)
         actions.append(entry)
         return
@@ -545,7 +610,17 @@ def _delete_trash(src: Path) -> str:
 
 def _safe_quarantine_destination(destination: Path) -> Path:
     candidate = _lexically_confined(destination, WT_ROOT)
+    configured = Path(os.path.abspath(WT_ROOT))
     root = WT_ROOT.resolve()
+    governed = Path(os.path.abspath(GOVERNED_WORKSPACE_ROOT))
+    if (
+        root != configured
+        or governed.resolve() != governed
+        or not root.is_relative_to(governed)
+    ):
+        raise RuntimeError(
+            "Quarantine root was redirected or outside governed workspace"
+        )
     resolved = candidate.resolve(strict=False)
     if resolved == root or not resolved.is_relative_to(root):
         raise RuntimeError("Quarantine destination escapes governed worktree root")
@@ -609,7 +684,9 @@ def _bundle_and_delete(
 ) -> tuple[int, str | None]:
     if not candidates:
         return 0, None
-    backup = out / f"branches-backup-{stamp()}.bundle"
+    backup = (
+        Path(tempfile.mkdtemp(prefix="branches-backup-", dir=out)) / "history.bundle"
+    )
     refs = [f"refs/heads/{item['name']}" for item in candidates]
     result = run(["git", "bundle", "create", str(backup), *refs], timeout=1800)
     if result.returncode:
@@ -638,33 +715,44 @@ def do_apply(args: argparse.Namespace) -> int:
     archive = out / "wip-archive"
     actions: list[dict[str, Any]] = []
 
-    for row in cls["worktrees"]:
-        if row["action"] in ("REMOVE", "REMOVE_ARCHIVE"):
-            _apply_worktree(row, archive, args, actions)
-
-    for row in cls["orphans"]:
-        actions.append(_apply_orphan(row))
-
-    rc, backup = _bundle_and_delete(
-        _deletion_candidates(cls["branches"]), out, args, actions
-    )
+    rc, backup, error = 1, None, None
+    try:
+        for row in cls["worktrees"]:
+            if row["action"] in ("REMOVE", "REMOVE_ARCHIVE"):
+                _apply_worktree(row, archive, args, actions)
+        for row in cls["orphans"]:
+            actions.append(_apply_orphan(row))
+        rc, backup = _bundle_and_delete(
+            _deletion_candidates(cls["branches"]), out, args, actions
+        )
+        if rc:
+            error = "branch bundle failed; remaining actions stopped"
+        else:
+            result = run(["git", "worktree", "prune"])
+            rc = int(result.returncode != 0)
+    except (OSError, RuntimeError, subprocess.SubprocessError) as exc:
+        rc, error = 1, str(exc)
+    finally:
+        journal = (
+            json.dumps(
+                {
+                    "finished_at": datetime.now(tz=UTC).isoformat(),
+                    "bundle": str(backup) if backup else None,
+                    "actions": actions,
+                    "returncode": rc,
+                    "error": error,
+                },
+                indent=2,
+                ensure_ascii=False,
+            )
+            + "\n"
+        )
+        snapshot = Path(tempfile.mkdtemp(prefix="apply-", dir=out))
+        (snapshot / "apply-actions.json").write_text(journal, encoding="utf-8")
+        (out / "apply-actions.json").write_text(journal, encoding="utf-8")
     if rc:
         return rc
 
-    run(["git", "worktree", "prune"])
-    (out / "apply-actions.json").write_text(
-        json.dumps(
-            {
-                "finished_at": datetime.now(tz=UTC).isoformat(),
-                "bundle": str(backup) if backup else None,
-                "actions": actions,
-            },
-            indent=2,
-            ensure_ascii=False,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
     ok = sum(_action_succeeded(action) for action in actions)
     print(f"[apply] done: {len(actions)} actions, ok {ok}")
     print(
@@ -672,6 +760,7 @@ def do_apply(args: argparse.Namespace) -> int:
     )
     failed = any(
         "wip_error" in action
+        or str(action.get("result", "")).startswith("kept: ")
         or action.get("remove_rc", 0) != 0
         or action.get("rc", 0) != 0
         for action in actions

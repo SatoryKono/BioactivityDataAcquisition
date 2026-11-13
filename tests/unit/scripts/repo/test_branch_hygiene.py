@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from pathlib import Path
 
 import pytest
 
@@ -13,7 +14,11 @@ pytestmark = pytest.mark.unit
 
 def _stub_os(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
-        bh, "os", SimpleNamespace(stat=lambda p, **kw: SimpleNamespace(st_mtime=0))
+        bh,
+        "os",
+        SimpleNamespace(
+            stat=lambda p, **kw: SimpleNamespace(st_mtime=0), walk=lambda *a, **k: []
+        ),
     )
 
 
@@ -153,8 +158,12 @@ def test_archive_command_failure_stops_archive(monkeypatch, tmp_path):
 
 def test_nested_env_is_never_copied(monkeypatch, tmp_path):
     # No env file is created: Git output represents an excluded nested input.
-    def fake_run(args):
-        output = "?? newdir/.env.production\n" if "status" in args else ""
+    def fake_run(args, **kwargs):
+        output = (
+            "newdir/.env.production\0"
+            if "ls-files" in args
+            else (b"" if kwargs.get("binary") else "")
+        )
         return SimpleNamespace(returncode=0, stdout=output)
 
     monkeypatch.setattr(bh, "run", fake_run)
@@ -211,7 +220,9 @@ def test_apply_never_removes_changed_or_unarchived_tree(
     calls = _apply_fixture(
         monkeypatch, tmp_path, changed=changed, archive_error=archive_error
     )
-    assert bh.main(["apply", "--out", str(tmp_path), "--execute"]) == int(archive_error)
+    assert bh.main(["apply", "--out", str(tmp_path), "--execute"]) == int(
+        archive_error or changed
+    )
     assert not any("remove" in args for args in calls)
 
 
@@ -331,3 +342,123 @@ def test_archive_rejects_deleted_tracked_env_before_reading_diff(monkeypatch, tm
     with pytest.raises(RuntimeError, match="excluded tracked"):
         bh.archive_tree(tmp_path, "tree", "abc", tmp_path / "archive")
     assert not (tmp_path / "archive").exists()
+
+
+def test_archive_preserves_index_bytes_unicode_names_and_previous_snapshots(
+    monkeypatch, tmp_path
+):
+    source = tmp_path / "tree"
+    source.mkdir()
+    (source / "café.txt").write_bytes(b"untracked\r\n")
+    calls = []
+
+    def fake_run(args, **kwargs):
+        calls.append(args)
+        if "ls-files" in args:
+            value = "café.txt\0"
+        elif kwargs.get("binary"):
+            value = b"index\r\n" if "--cached" in args else b"working\r\n"
+        else:
+            value = ""
+        return SimpleNamespace(returncode=0, stdout=value)
+
+    monkeypatch.setattr(bh, "run", fake_run)
+    archive = tmp_path / "archive"
+    first = bh.archive_tree(source, "tree", "abc", archive)
+    second = bh.archive_tree(source, "tree", "def", archive)
+    one, two = Path(first["archive"]), Path(second["archive"])
+    assert one != two
+    for snapshot in (one, two):
+        assert (snapshot / "index.patch").read_bytes() == b"index\r\n"
+        assert (snapshot / "working.patch").read_bytes() == b"working\r\n"
+        assert (snapshot / "untracked" / "café.txt").read_bytes() == b"untracked\r\n"
+    assert (one / "head.txt").read_text() == "abc tree\n"
+
+
+@pytest.mark.parametrize("name", ["main", "master", "master_202607-recovery"])
+def test_protected_branches_never_enter_deletion_buckets(monkeypatch, name):
+    monkeypatch.setattr(bh, "pr_state_map", lambda: {})
+    monkeypatch.setattr(bh, "cherry_unique", lambda name: 10)
+    row = {"name": name, "sha": "abc", "upstream": "", "gone": True, "tip_ctime": 0}
+    buckets = bh.classify_branches([row], [], "HEAD", 3)
+    assert [item["name"] for item in buckets["D"]] == [name]
+    assert bh._deletion_candidates(buckets) == []
+
+
+def test_recent_nested_file_keeps_old_dirty_tree(monkeypatch, tmp_path):
+    tree = tmp_path / "tree"
+    nested = tree / "src"
+    nested.mkdir(parents=True)
+    file = nested / "active.py"
+    file.write_text("active")
+    bh.os.utime(file, (99 * bh.DAY, 99 * bh.DAY))
+    bh.os.utime(tree, (1, 1))
+    bh.os.utime(nested, (1, 1))
+    monkeypatch.setattr(bh, "_now", lambda: 100 * bh.DAY)
+    monkeypatch.setattr(bh, "git", lambda *args: "1")
+    monkeypatch.setattr(bh, "status_counts", lambda path: (True, False, True))
+    row = bh._classify_worktree(_wt(str(tree), branch=None, detached=True), [], 2, 3)
+    assert row["action"] == "KEEP"
+
+
+def test_git_child_drops_inherited_repository_location(monkeypatch):
+    observed = {}
+    for key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR"):
+        monkeypatch.setenv(key, "foreign")
+
+    def fake_subprocess(command, **kwargs):
+        observed.update(kwargs)
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(bh.subprocess, "run", fake_subprocess)
+    bh.run(["git", "status"])
+    assert all(
+        key not in observed["env"]
+        for key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR")
+    )
+
+
+def test_redirected_quarantine_root_is_rejected(monkeypatch, tmp_path):
+    root = tmp_path / "worktrees"
+    original = Path.resolve
+
+    def resolve(path, *args, **kwargs):
+        return (
+            tmp_path.parent / "outside"
+            if path == root
+            else original(path, *args, **kwargs)
+        )
+
+    monkeypatch.setattr(bh, "WT_ROOT", root)
+    monkeypatch.setattr(bh, "GOVERNED_WORKSPACE_ROOT", tmp_path)
+    monkeypatch.setattr(Path, "resolve", resolve)
+    with pytest.raises(RuntimeError, match="redirected"):
+        bh._safe_quarantine_destination(root / "quarantine")
+
+
+def test_detached_head_is_bundled_before_worktree_removal(monkeypatch, tmp_path):
+    calls = _apply_fixture(monkeypatch, tmp_path)
+    assert bh.main(["apply", "--out", str(tmp_path), "--execute"]) == 0
+    create = next(
+        i for i, args in enumerate(calls) if "bundle" in args and "create" in args
+    )
+    verify = next(
+        i for i, args in enumerate(calls) if "bundle" in args and "verify" in args
+    )
+    remove = next(
+        i for i, args in enumerate(calls) if "worktree" in args and "remove" in args
+    )
+    assert create < verify < remove
+    assert calls[create][-1] == "HEAD"
+
+
+def test_bundle_failure_keeps_completed_actions_journal(monkeypatch, tmp_path):
+    import json
+
+    _apply_fixture(monkeypatch, tmp_path)
+    monkeypatch.setattr(bh, "_bundle_and_delete", lambda *args: (1, None))
+    assert bh.main(["apply", "--out", str(tmp_path), "--execute"]) == 1
+    journal = json.loads((tmp_path / "apply-actions.json").read_text())
+    assert journal["returncode"] == 1
+    assert journal["actions"][0]["remove_rc"] == 0
+    assert "bundle failed" in journal["error"]
