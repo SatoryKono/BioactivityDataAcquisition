@@ -23,6 +23,12 @@ from httpx._types import (
 from bioetl.domain.ports import CircuitBreakerPort, LoggerPort, RateLimiterPort
 from bioetl.domain.types import JsonDict, RunID
 from bioetl.infrastructure.adapters.http.client_retry_policy import parse_retry_after
+from bioetl.infrastructure.adapters.http.response_body import (
+    ResponseBudgetExceeded as ResponseBudgetExceeded,
+)
+from bioetl.infrastructure.adapters.http.response_body import (
+    read_bounded_response,
+)
 
 
 class _RequestKwargs(TypedDict, total=False):
@@ -72,7 +78,26 @@ async def _dispatch_http_request(
         if is_stream:
             request = client.build_request(method, url, **typed_kwargs)  # type: ignore[misc]  # technical-reason: httpx unpacked kwargs dynamic signature
             return await client.send(request, stream=True, follow_redirects=False)
-        return await client.request(method, url, follow_redirects=False, **typed_kwargs)
+        request = client.build_request(method, url, **typed_kwargs)  # type: ignore[misc]  # technical-reason: HTTPX dynamic request kwargs
+        request.headers["Accept-Encoding"] = "gzip, deflate"
+        response = await client.send(request, stream=True, follow_redirects=False)
+        try:
+            return await _read_bounded_response(response)
+        finally:
+            await response.aclose()
+
+
+_MAX_RESPONSE_WIRE_BYTES = 16 * 1024 * 1024
+_MAX_RESPONSE_DECODED_BYTES = 64 * 1024 * 1024
+
+
+async def _read_bounded_response(response: httpx.Response) -> httpx.Response:
+    """Apply the transport budgets to the dedicated response reader."""
+    return await read_bounded_response(
+        response,
+        wire_limit=_MAX_RESPONSE_WIRE_BYTES,
+        decoded_limit=_MAX_RESPONSE_DECODED_BYTES,
+    )
 
 
 def _apply_provider_cooldown(host: RequestTimingHost, response: httpx.Response) -> None:
