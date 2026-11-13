@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "e920a5c65cfef73b420d6e3ae6f6f0607a3c348d",
+  "source_ref": "e920a5c65cfef73b420d6e3ae6f6f0607a3c348d",
+  "source_reviews": {
+    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_scope.py": "Reviewed S5886-safe rebuild of _IdentityScope in reconcile_manifest_validation_scope instead of dataclasses.replace. Explicit field copy preserves prior unresolved-without-manifest semantics; no new external resource acquisition, ownership, lifetime, or cleanup. Existing asyncio.to_thread exclusion for reconcile_manifest_validation_scope retained (line drift 307→313 only)."
+  },
+  "line_updates": {
+    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_scope.py": {
+      "307": 313
+    }
+  }
+}
