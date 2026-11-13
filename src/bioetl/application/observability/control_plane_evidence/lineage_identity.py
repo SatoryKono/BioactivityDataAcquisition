@@ -25,7 +25,9 @@ def identity_gaps(
     After successor adoption the run ledger may span predecessor manifests.
     Fragment/edge/manifest-node anchors may then name any ``manifest_id`` that
     appears in that chain (plus the current scope manifest), while ``run_id``
-    must still match the selected run.
+    must still match the selected run. Shared ``run:<UUID>`` nodes may also
+    differ on ``attributes.manifest_id`` / ``execution_fingerprint`` (see
+    ``conflicting_node_ids``); other RUN-field contradictions remain errors.
     """
     expected_run = str(manifest.run_id)
     allowed_manifests = frozenset(
