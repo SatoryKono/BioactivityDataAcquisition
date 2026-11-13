@@ -90,16 +90,16 @@ a native adapter.
 
 Use the smallest existing skill that matches the request:
 
-| Request template | Mutation default | Route | Minimum validation |
-| --- | --- | --- | --- |
-| Diagnose without fixing | read-only | `py-debug-bot` | reproduction and evidence only |
-| Implement a focused fix | write in requested scope | direct implementation; `py-config-bot` when configs change | targeted lint/tests |
-| Review the current diff | read-only | `py-audit-bot` (`review`) | diff inspection; no external writes |
-| Diagnose CI failure | read-only | `py-debug-bot` | reproduction, root cause, remediation guidance |
-| Implement diagnosed CI remediation | write in requested scope | direct parent implementation | failed check plus targeted regression |
-| Hash-only / date-stamp / remote-main rebind | write generated artifacts only | parent in the existing worktree; no extra `implementer` | matching `--check` after `--update` |
-| Prepare a PR | branch/commit/push authorized by request | direct parent workflow | repository quality gates for touched scope |
-| Audit architecture debt | read-only | `py-audit-bot` (`debt`) | architecture/debt gates; budgets MUST NOT increase |
+| Request template                            | Mutation default                         | Route                                                      | Minimum validation                                 |
+| ------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------- |
+| Diagnose without fixing                     | read-only                                | `py-debug-bot`                                             | reproduction and evidence only                     |
+| Implement a focused fix                     | write in requested scope                 | direct implementation; `py-config-bot` when configs change | targeted lint/tests                                |
+| Review the current diff                     | read-only                                | `py-audit-bot` (`review`)                                  | diff inspection; no external writes                |
+| Diagnose CI failure                         | read-only                                | `py-debug-bot`                                             | reproduction, root cause, remediation guidance     |
+| Implement diagnosed CI remediation          | write in requested scope                 | direct parent implementation                               | failed check plus targeted regression              |
+| Hash-only / date-stamp / remote-main rebind | write generated artifacts only           | parent in the existing worktree; no extra `implementer`    | matching `--check` after `--update`                |
+| Prepare a PR                                | branch/commit/push authorized by request | direct parent workflow                                     | repository quality gates for touched scope         |
+| Audit architecture debt                     | read-only                                | `py-audit-bot` (`debt`)                                    | architecture/debt gates; budgets MUST NOT increase |
 
 Templates do not broaden user authority. Diagnosis and review stay read-only
 unless the user also asks for implementation. Load the selected skill and
@@ -108,12 +108,12 @@ default.
 
 ## Risk-Based Validation
 
-| Tier | Typical scope | Minimum checks |
-| --- | --- | --- |
-| V1 | docs-only | targeted links/drift, cleanup-inventory `--check`, and mirror sync |
-| V2 | focused Python/tooling | targeted Ruff plus related unit tests |
-| V3 | config/runtime contract | schema/contract checks plus related tests |
-| V4 | architecture or broad change | architecture gates, lint/type checks, and relevant broad tests |
+| Tier | Typical scope                | Minimum checks                                                     |
+| ---- | ---------------------------- | ------------------------------------------------------------------ |
+| V1   | docs-only                    | targeted links/drift, cleanup-inventory `--check`, and mirror sync |
+| V2   | focused Python/tooling       | targeted Ruff plus related unit tests                              |
+| V3   | config/runtime contract      | schema/contract checks plus related tests                          |
+| V4   | architecture or broad change | architecture gates, lint/type checks, and relevant broad tests     |
 
 Every closeout reports checks run, skipped checks with exact reasons/follow-up,
 runtime/docs mirror status, and debt outcome (`improved`, `unchanged`, or
@@ -147,6 +147,32 @@ must be reported with reasons and follow-up; unavailable evidence is never
 pass. Optional vendor evaluators may add receipts but cannot override the core
 verifier. EvidenceStore ingestion is a separate explicit operation and never
 creates a waiver or `DecisionRecord`.
+
+### Explicit local closeout fallback
+
+When a native lifecycle adapter has not been qualified, use the existing
+repository facade after assembling the canonical receipts:
+
+```bash
+<python> -B -m scripts.engineering.repo closeout \
+  --runtime codex --task-id <task-id> --claim done \
+  --bundle reports/quality/proof-or-stop/<run-id>/bundle.json
+```
+
+This explicit command is not native hook registration or proof of client
+loading. It calls the canonical verifier with current-source checks, binds the
+expected task/runtime/claim and local state, and caps local qualification at
+`DEGRADED` (exit 3), even when bundle fields declare CI/independent trust.
+Caller labels do not authenticate execution transport. `STOP`/`ERROR` exit 2;
+an actual parent interruption is `USER_STOP`/130, never a done claim. A worker
+exit 130 alone does not prove user interruption. Missing evidence, crashes,
+timeouts and duplicate events cannot qualify completion.
+
+Native adapters and OpenCode write paths remain disabled/unqualified. The
+command runs no producers, agents, services or EvidenceStore ingestion and
+does not promote the staged CI enforcement policy. Real CI acceptance remains
+separate. See the [explicit closeout runbook](../../docs/05-operations/runbooks/ai-closeout-wrapper.md)
+for supported arguments, limitations and rollback.
 
 ## Related Runtime Surfaces
 
