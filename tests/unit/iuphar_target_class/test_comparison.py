@@ -181,3 +181,55 @@ def test_duplicate_full_keys_stay_residual_in_either_order() -> None:
     assert forward.changes == ()
     assert forward.metrics is not None
     assert forward.metrics["match_status:null"] == 2
+
+
+@pytest.mark.parametrize("explained", [False, True])
+@pytest.mark.parametrize(
+    ("field", "old", "new"),
+    [
+        ("effective_class", "Receptor", "Enzyme"),
+        ("decision_status", "resolved", "requires_review"),
+        ("effective_source", "iuphar_normalized", "local_rule"),
+        ("match_status", "matched", "ambiguous"),
+    ],
+)
+def test_equal_iuphar_class_does_not_hide_a_changed_decision(
+    field: str,
+    old: str,
+    new: str,
+    explained: bool,
+) -> None:
+    previous = {"input_row_id": "1", "iuphar_class": "Receptor", field: old}
+    current = {"input_row_id": "1", "iuphar_class": "Receptor", field: new}
+    if explained:
+        current.update(
+            change_sign="direct_local_separation", explanation="fixture change"
+        )
+    reference = Stage0Reference("fixture", 1, (previous,))
+    report = compare_stage0(reference, (current,))
+    assert reference.m_rows == (previous,)
+    if explained:
+        assert report.changes == (
+            ("input_row_id=1", "direct_local_separation", "fixture change"),
+        )
+        assert report.residual == ()
+    else:
+        assert report.changes == ()
+        assert report.residual == ("input_row_id=1",)
+
+
+def test_absent_historical_decision_is_not_invented_as_unchanged() -> None:
+    report = compare_stage0(
+        Stage0Reference(
+            "fixture", 1, ({"input_row_id": "1", "iuphar_class": "Receptor"},)
+        ),
+        (
+            {
+                "input_row_id": "1",
+                "iuphar_class": "Receptor",
+                "effective_class": "Enzyme",
+            },
+        ),
+    )
+    assert report.changes == ()
+    assert report.residual == ("input_row_id=1",)

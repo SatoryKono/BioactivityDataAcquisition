@@ -924,9 +924,19 @@ def test_shadow_compare_routes_quality_module_move() -> None:
     )
 
 
-def test_shadow_compare_keeps_package_discovery_contract_narrow() -> None:
-    """A package-discovery PR selects its changed contract without all tests."""
+def test_shadow_compare_keeps_package_discovery_contract_narrow(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An empty dependency diff keeps discovery narrow without host package I/O."""
     repo_root = Path(__file__).resolve().parents[5]
+
+    def unexpected_dependency_scan(*args, **kwargs):
+        pytest.fail("Empty dependency changes must not inspect installed distributions")
+
+    monkeypatch.setattr(
+        "scripts.engineering.ci.pr_lane_results.dependency_consumers",
+        unexpected_dependency_scan,
+    )
 
     report = build_shadow_compare(
         ["pyproject.toml"],
@@ -1313,6 +1323,26 @@ def test_skill_measurement_docs_route_to_offline_evidence_contract(path: str) ->
         "tests/architecture/test_documentation_cleanup_inventory.py"
         in report["selected"]
     )
+
+
+@pytest.mark.parametrize(
+    ("path", "owner"),
+    [
+        (
+            "configs/quality/external_resource_inventory_pr13061_review.json",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        ),
+        (
+            "docs/reports/dashboard-ux-checks/2026-11-11.md",
+            "tests/integration/test_dashboard_first_window_noscroll.py",
+        ),
+    ],
+)
+def test_nightly_repair_evidence_paths_have_real_owners(path: str, owner: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert owner in report["selected"]
+    assert all((root / target).is_file() for target in report["selected"])
 
 
 @pytest.mark.parametrize(

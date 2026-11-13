@@ -141,6 +141,7 @@ def protected_state(root: Path, base: str = "origin/main") -> dict[str, str]:
     """Cheap semantic index/HEAD/base/env bookend for callbacks; no cache reuse."""
     from scripts.engineering.repo.check_no_partial_tree import (
         _index_views,
+        _shallow_boundaries,
         check_checkout_state,
         validate_revision_token,
     )
@@ -158,6 +159,7 @@ def protected_state(root: Path, base: str = "origin/main") -> dict[str, str]:
         "base_sha": _git(root, "rev-parse", "--verify", base + "^{commit}")
         .strip()
         .decode("ascii"),
+        "history_sha256": digest(sorted(_shallow_boundaries(root))),
         "index_sha256": digest(
             [
                 {key: hashlib.sha256(value).hexdigest() for key, value in item.items()}
