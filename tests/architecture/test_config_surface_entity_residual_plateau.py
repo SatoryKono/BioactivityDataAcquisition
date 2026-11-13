@@ -179,13 +179,15 @@ def test_security_review_evidence_does_not_hide_authored_config_duplicates(
     quality.mkdir(parents=True)
     evidence_names = {
         "external_resource_inventory_security_aud003_review.json",
-        "external_resource_inventory_security_aud004_review.json",        "external_resource_inventory_security_aud005_main_merge_review.json",
+        "external_resource_inventory_security_aud004_review.json",
+        "external_resource_inventory_security_aud005_main_merge_review.json",
         "external_resource_inventory_security_aud006_review.json",
     }
     authored_names = {
         "external_resource_inventory_security_aud003_runtime_review.json",
         "external_resource_inventory_security_aud004_runtime_review.json",
-        "external_resource_inventory_security_aud099_review.json",        "external_resource_inventory_security_aud005_runtime_review.json",
+        "external_resource_inventory_security_aud099_review.json",
+        "external_resource_inventory_security_aud005_runtime_review.json",
         "external_resource_inventory_security_aud007_review.json",
     }
     payload = json.dumps({"source_reviews": {"setting": "retained-config-" * 30}})
