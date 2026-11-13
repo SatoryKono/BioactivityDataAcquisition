@@ -112,6 +112,56 @@ function Invoke-WslCommand {
     return $text
 }
 
+function Convert-ToNativeArgument {
+    param([AllowEmptyString()][string]$Argument)
+
+    # ProcessStartInfo.Arguments uses Windows command-line quoting on .NET Framework.
+    $escaped = [regex]::Replace($Argument, '(\\*)"', '$1$1\"')
+    $escaped = [regex]::Replace($escaped, '(\\+)$', '$1$1')
+    return '"' + $escaped + '"'
+}
+
+function Invoke-WslScript {
+    param(
+        [Parameter(Mandatory = $true)][string]$Script,
+        [string]$Executable = 'wsl.exe'
+    )
+
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = $Executable
+    $startInfo.Arguments = ((@('--distribution', $Distro, '--exec', 'bash', '-s') |
+        ForEach-Object { Convert-ToNativeArgument $_ }) -join ' ')
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    $startInfo.RedirectStandardInput = $true
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $startInfo
+    try {
+        $null = $process.Start()
+        $stdout = $process.StandardOutput.ReadToEndAsync()
+        $stderr = $process.StandardError.ReadToEndAsync()
+        # Write bytes directly: PowerShell 5.1 pipelines otherwise change encoding
+        # and newlines. Keep the Bash program entirely out of native arguments.
+        $bytes = (New-Object System.Text.UTF8Encoding($false)).GetBytes(
+            $Script.Replace("`r`n", "`n").Replace("`r", "`n"))
+        $inputStream = $process.StandardInput.BaseStream
+        $inputStream.Write($bytes, 0, $bytes.Length)
+        $inputStream.Close()
+        $process.WaitForExit()
+        $outputText = $stdout.GetAwaiter().GetResult()
+        $errorText = $stderr.GetAwaiter().GetResult()
+        if ($process.ExitCode -ne 0) {
+            throw "WSL script failed with exit code $($process.ExitCode): $errorText"
+        }
+        return $outputText.Trim()
+    }
+    finally {
+        $process.Dispose()
+    }
+}
+
 function Resolve-WindowsProjectPath {
     param([Parameter(Mandatory = $true)][string]$Path)
 
@@ -315,7 +365,7 @@ install -m 0755 "$extracted/uv-x86_64-unknown-linux-gnu/uvx" "$staged/uvx"
 mv -f "$staged/uv" "$HOME/.local/bin/uv"
 mv -f "$staged/uvx" "$HOME/.local/bin/uvx"
 '@
-    $null = Invoke-WslCommand -ArgumentList @('bash', '-lc', $uvInstallCommand)
+    $null = Invoke-WslScript -Script $uvInstallCommand
     $uvPath = Invoke-WslCommand -ArgumentList @(
         'sh',
         '-lc',

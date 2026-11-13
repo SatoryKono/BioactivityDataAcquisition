@@ -15,6 +15,92 @@ pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[3]
 
 
+@pytest.mark.parametrize("exit_code", [0, 7])
+def test_powershell_51_preserves_script_bytes_and_native_arguments(tmp_path, exit_code):
+    """Exercise the declared Windows runtime without invoking WSL or networking."""
+    powershell = Path(os.environ.get("SystemRoot", "C:/Windows")) / (
+        "System32/WindowsPowerShell/v1.0/powershell.exe"
+    )
+    if os.name != "nt" or not powershell.exists():
+        pytest.skip("Windows PowerShell 5.1 is required for the native transport test")
+    source = ROOT / "scripts/engineering/dev/setup_bioetl_wsl.ps1"
+    installer = (
+        source.read_text().split("$uvInstallCommand = @'\n", 1)[1].split("\n'@", 1)[0]
+    )
+    payload = installer + '\r\nprintf "%s" "кавычки и пробелы"\r\n'
+    payload_path = tmp_path / "payload.txt"
+    payload_path.write_bytes(payload.encode("utf-8"))
+    fake = tmp_path / "fake wsl.exe"
+    harness = tmp_path / "transport.ps1"
+    harness.write_text(
+        r"""$ErrorActionPreference = 'Stop'
+Add-Type -OutputAssembly $env:AUDIT_EXE -OutputType ConsoleApplication -TypeDefinition @'
+using System;
+using System.IO;
+using System.Text;
+public class FakeWsl {
+    public static int Main(string[] args) {
+        using (var target = File.Create(Environment.GetEnvironmentVariable("AUDIT_INPUT")))
+            Console.OpenStandardInput().CopyTo(target);
+        File.WriteAllLines(Environment.GetEnvironmentVariable("AUDIT_ARGS"),
+            Array.ConvertAll(args, x => Convert.ToBase64String(Encoding.UTF8.GetBytes(x))));
+        Console.WriteLine("transport-ok");
+        Console.Error.WriteLine("fixture-diagnostic");
+        return Int32.Parse(Environment.GetEnvironmentVariable("AUDIT_EXIT"));
+    }
+}
+'@
+$tokens = $null; $errors = $null
+$ast = [System.Management.Automation.Language.Parser]::ParseFile($env:AUDIT_SOURCE, [ref]$tokens, [ref]$errors)
+if ($errors.Count) { throw $errors[0] }
+foreach ($name in @('Convert-ToNativeArgument', 'Invoke-WslScript')) {
+    $function = $ast.Find({ param($node)
+        $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq $name
+    }, $true)
+    Invoke-Expression $function.Extent.Text
+}
+$Distro = $env:AUDIT_DISTRO
+$script = [IO.File]::ReadAllText($env:AUDIT_PAYLOAD, [Text.Encoding]::UTF8)
+try {
+    $result = Invoke-WslScript -Script $script -Executable $env:AUDIT_EXE
+    if ($env:AUDIT_EXIT -ne '0') { throw 'Expected native failure' }
+    if ($result -ne 'transport-ok') { throw 'Unexpected native output' }
+} catch {
+    if ($env:AUDIT_EXIT -eq '0' -or $_.Exception.Message -notmatch 'exit code 7: fixture-diagnostic') { throw }
+}
+""",
+        encoding="utf-8-sig",
+    )
+    distro = 'Ubuntu space "quoted" кириллица\\'
+    env = dict(
+        os.environ,
+        AUDIT_EXE=str(fake),
+        AUDIT_SOURCE=str(source),
+        AUDIT_INPUT=str(tmp_path / "stdin.bin"),
+        AUDIT_ARGS=str(tmp_path / "args.txt"),
+        AUDIT_EXIT=str(exit_code),
+        AUDIT_DISTRO=distro,
+        AUDIT_PAYLOAD=str(payload_path),
+    )
+    result = subprocess.run(
+        [str(powershell), "-NoProfile", "-NonInteractive", "-File", str(harness)],
+        env=env,
+        capture_output=True,
+        timeout=30,
+    )
+    assert result.returncode == 0, result.stderr.decode(errors="replace")
+    assert (tmp_path / "stdin.bin").read_bytes() == payload.replace(
+        "\r\n", "\n"
+    ).encode("utf-8")
+    import base64
+
+    args = [
+        base64.b64decode(line).decode("utf-8")
+        for line in (tmp_path / "args.txt").read_text(encoding="utf-8-sig").splitlines()
+    ]
+    assert args == ["--distribution", distro, "--exec", "bash", "-s"]
+
+
 @pytest.mark.parametrize(
     "mode", ["valid", "bad_hash", "unsupported_arch", "download_failure"]
 )
