@@ -132,7 +132,10 @@ def test_debug_csv_and_xlsx_do_not_create_formulas(tmp_path):
     )
     book = load_workbook(xlsx, data_only=False)
     assert book.active["A1"].data_type == "s"
+    assert book.active["A1"].value == "=title"
     assert book.active["A2"].data_type == "s"
+    # XLSX keeps the original string; CSV neutralization must not leak here.
+    assert book.active["A2"].value == "=1+1"
     assert book.active["B2"].value == -2
     book.close()
 

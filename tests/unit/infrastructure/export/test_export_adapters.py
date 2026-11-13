@@ -397,12 +397,23 @@ async def test_csv_exporter_async_export_and_finalize_branches(
     captured_writes: list[tuple[pa.Table, Path, object]] = []
     captured_appends: list[tuple[pa.Table, Path]] = []
 
-    def capture_write(data: pa.Table, target_path: Path, write_options: object) -> None:
-        captured_writes.append((data, target_path, write_options))
+    def capture_write(
+        data: pa.Table,
+        target_path: Path,
+        write_options: object,
+        *,
+        spreadsheet_safe: bool = True,
+    ) -> None:
+        captured_writes.append((data, target_path, write_options, spreadsheet_safe))
         target_path.write_text("id\n2\n", encoding="utf-8")
 
-    def capture_append(data: pa.Table, csv_path: Path) -> None:
-        captured_appends.append((data, csv_path))
+    def capture_append(
+        data: pa.Table,
+        csv_path: Path,
+        *,
+        spreadsheet_safe: bool = True,
+    ) -> None:
+        captured_appends.append((data, csv_path, spreadsheet_safe))
 
     monkeypatch.setattr(exporter, "_atomic_csv_write", capture_write)
     monkeypatch.setattr(exporter, "_append_to_csv", capture_append)
@@ -417,6 +428,7 @@ async def test_csv_exporter_async_export_and_finalize_branches(
     assert first_path == tmp_path / "records.csv"
     assert captured_writes[-1][1] == first_path
     assert captured_writes[-1][0].column("id").to_pylist() == [2, 1]
+    assert captured_writes[-1][3] is False
 
     second_path = await exporter.export(
         "records",
@@ -427,6 +439,7 @@ async def test_csv_exporter_async_export_and_finalize_branches(
     assert second_path == first_path
     assert captured_appends[-1][1] == first_path
     assert captured_appends[-1][0].to_pylist() == [{"id": 3}]
+    assert captured_appends[-1][2] is False
     assert await exporter.finalize_csv("missing") is None
 
     deduplicated_tables: list[pa.Table] = []
@@ -448,6 +461,7 @@ async def test_csv_exporter_async_export_and_finalize_branches(
     assert await exporter.finalize_csv("records", primary_keys=["id"]) == first_path
     assert deduplicated_tables
     assert sorted_tables
+    assert captured_writes[-1][3] is True
     assert logger.events[-1] == (
         "info",
         "csv_export_finalized",
@@ -468,8 +482,14 @@ def test_csv_exporter_export_table_uses_full_row_dedup_and_configured_sort(
     exporter = CsvExporter(str(tmp_path), logger=logger, sort_by=["id"])
     captured_writes: list[tuple[pa.Table, Path, object]] = []
 
-    def capture_write(data: pa.Table, target_path: Path, write_options: object) -> None:
-        captured_writes.append((data, target_path, write_options))
+    def capture_write(
+        data: pa.Table,
+        target_path: Path,
+        write_options: object,
+        *,
+        spreadsheet_safe: bool = True,
+    ) -> None:
+        captured_writes.append((data, target_path, write_options, spreadsheet_safe))
 
     monkeypatch.setattr(exporter, "_atomic_csv_write", capture_write)
     output_path = tmp_path / "nested" / "records.csv"

@@ -766,3 +766,25 @@ class TestCsvExporterFinalize:
             deduplicated=False,
             sorted=False,
         )
+
+    @pytest.mark.asyncio
+    async def test_finalize_csv_dedupes_on_pre_neutralized_primary_keys(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        """PK dedupe must keep =x and '=x distinct before spreadsheet escaping."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        table = pa.Table.from_pydict(
+            {"id": ["=x", "'=x"], "val": ["formula", "escaped"]}
+        )
+        await exporter.export("keys", table, append=False)
+
+        intermediate = pv.read_csv(tmp_path / "keys.csv")
+        assert intermediate.column("id").to_pylist() == ["=x", "'=x"]
+
+        result_path = await exporter.finalize_csv("keys", primary_keys=["id"])
+        assert result_path is not None
+        result = pv.read_csv(result_path)
+        assert result.num_rows == 2
+        assert set(result.column("val").to_pylist()) == {"formula", "escaped"}
+        # Neutralization maps both keys to the same text, but both rows remain.
+        assert result.column("id").to_pylist() == ["'=x", "'=x"]

@@ -25,6 +25,7 @@ __all__ = [
     "compute_tables_hash",
     "fingerprint_artifact",
     "normalize_csv_value",
+    "normalize_debug_value",
     "resolve_debug_export_root",
     "sheet_name_for_chunk",
     "write_debug_csv",
@@ -50,12 +51,26 @@ def collect_headers(rows: tuple[dict[str, object], ...]) -> list[str]:
     return headers
 
 
-def normalize_csv_value(value: object | None) -> object:
+def normalize_debug_value(value: object | None) -> object:
+    """Canonicalize nested values for debug XLSX and content hashing.
+
+    Does not apply CSV spreadsheet apostrophe neutralization — XLSX cells are
+    protected via explicit string data_type, and hashes must stay injective for
+    ``=x`` vs ``'=x``.
+    """
     if value is None:
         return ""
     if isinstance(value, (dict, list, tuple)):
         return json.dumps(value, ensure_ascii=False, sort_keys=True)
-    return neutralize_spreadsheet_text(value) if isinstance(value, str) else value
+    return value
+
+
+def normalize_csv_value(value: object | None) -> object:
+    """CSV-bound normalization including spreadsheet formula neutralization."""
+    normalized = normalize_debug_value(value)
+    if isinstance(normalized, str):
+        return neutralize_spreadsheet_text(normalized)
+    return normalized
 
 
 def write_debug_csv(
@@ -137,7 +152,8 @@ def write_sheet_rows(
     sheet.freeze_panes = "A2"
     sheet.append(headers)
     for row in chunk:
-        sheet.append([normalize_csv_value(row.get(header)) for header in headers])
+        # Keep original strings; openpyxl cells are forced to data_type "s".
+        sheet.append([normalize_debug_value(row.get(header)) for header in headers])
     for row in sheet.iter_rows():
         for cell in row:
             if isinstance(cell.value, str):
@@ -219,7 +235,8 @@ def compute_tables_hash(
     canonical_tables = {
         table_name: [
             {
-                key: normalize_csv_value(value)
+                # Hash pre-neutralized values so =x and '=x do not collide.
+                key: normalize_debug_value(value)
                 for key, value in row.items()
                 if key != "created_at"
             }

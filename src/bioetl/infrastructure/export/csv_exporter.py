@@ -166,9 +166,17 @@ class CsvExporter:
         data: pa.Table,
         target_path: Path,
         write_options: pv.WriteOptions,
+        *,
+        spreadsheet_safe: bool = True,
     ) -> None:
         """Write CSV atomically (delegates to module-level function)."""
-        _atomic_csv_write(data, target_path, write_options, self._logger)
+        _atomic_csv_write(
+            data,
+            target_path,
+            write_options,
+            self._logger,
+            spreadsheet_safe=spreadsheet_safe,
+        )
 
     async def export(
         self,
@@ -211,8 +219,9 @@ class CsvExporter:
         csv_data = self._flatten_for_csv(data)
 
         # Fast path: true file-append (no read, no sort, no dedup).
+        # Keep pre-neutralized values so finalize can dedupe on original PKs.
         if append and csv_full_path.exists():
-            self._append_to_csv(csv_data, csv_full_path)
+            self._append_to_csv(csv_data, csv_full_path, spreadsheet_safe=False)
             return csv_full_path
 
         # First write or overwrite.
@@ -220,7 +229,12 @@ class CsvExporter:
         if sort_columns:
             csv_data = self._sort_table(csv_data, sort_columns)
         write_options = self._build_write_options()
-        self._atomic_csv_write(csv_data, csv_full_path, write_options)
+        self._atomic_csv_write(
+            csv_data,
+            csv_full_path,
+            write_options,
+            spreadsheet_safe=False,
+        )
         return csv_full_path
 
     async def finalize_csv(
@@ -261,6 +275,7 @@ class CsvExporter:
         table = pv.read_csv(csv_full_path, parse_options=parse_options)
 
         if primary_keys:
+            # Deduplicate on pre-neutralized values so '=x' and =x stay distinct.
             table = self._deduplicate(table, primary_keys)
 
         sort_columns = sort_by if sort_by is not None else self.sort_by
@@ -268,7 +283,13 @@ class CsvExporter:
             table = self._sort_table(table, sort_columns)
 
         write_options = self._build_write_options()
-        self._atomic_csv_write(table, csv_full_path, write_options)
+        # Neutralize only after PK dedupe so formula-like keys do not collide.
+        self._atomic_csv_write(
+            table,
+            csv_full_path,
+            write_options,
+            spreadsheet_safe=True,
+        )
 
         self._logger.info(
             "csv_export_finalized",
@@ -279,9 +300,21 @@ class CsvExporter:
         )
         return csv_full_path
 
-    def _append_to_csv(self, data: pa.Table, csv_path: Path) -> None:
+    def _append_to_csv(
+        self,
+        data: pa.Table,
+        csv_path: Path,
+        *,
+        spreadsheet_safe: bool = True,
+    ) -> None:
         """Append records without reading existing CSV (delegates to module-level)."""
-        _append_to_csv(data, csv_path, self.delimiter, self._logger)
+        _append_to_csv(
+            data,
+            csv_path,
+            self.delimiter,
+            self._logger,
+            spreadsheet_safe=spreadsheet_safe,
+        )
 
     def _deduplicate_full_rows(self, table: pa.Table) -> pa.Table:
         """Drop exact duplicate rows while preserving first-seen order."""

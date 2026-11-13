@@ -17,6 +17,8 @@ from bioetl.infrastructure.export.debug_export_ops import (
     compute_pack_hash,
     compute_tables_hash,
     fingerprint_artifact,
+    normalize_csv_value,
+    normalize_debug_value,
     sheet_name_for_chunk,
     write_debug_xlsx,
     write_sheet_rows,
@@ -58,6 +60,23 @@ def test_write_sheet_rows_sets_navigation_and_normalizes_values() -> None:
     assert sheet.append.call_args_list[0].args[0] == ["id", "payload"]
     assert sheet.append.call_args_list[1].args[0] == [1, '{"a": 1, "b": 2}']
     assert sheet.auto_filter.ref == "A1:B2"
+
+
+def test_write_sheet_rows_keeps_formula_like_strings_without_csv_apostrophe() -> None:
+    sheet = MagicMock()
+    sheet.dimensions = "A1:B2"
+    sheet.auto_filter = SimpleNamespace(ref=None)
+    sheet.iter_rows.return_value = []
+
+    write_sheet_rows(
+        sheet,
+        headers=["text", "neg"],
+        chunk=({"text": "=1+1", "neg": "-1"},),
+    )
+
+    assert sheet.append.call_args_list[1].args[0] == ["=1+1", "-1"]
+    assert normalize_debug_value("=1+1") == "=1+1"
+    assert normalize_csv_value("=1+1") == "'=1+1"
 
 
 def test_acquire_worksheet_reuses_first_sheet_then_creates_named_sheets() -> None:
@@ -142,3 +161,9 @@ def test_pack_and_table_hashes_are_canonical_and_timestamp_independent() -> None
     left = {"records": ({"id": 1, "created_at": "old", "payload": [2, 1]},)}
     right = {"records": ({"id": 1, "created_at": "new", "payload": [2, 1]},)}
     assert compute_tables_hash(left) == compute_tables_hash(right)
+
+
+def test_compute_tables_hash_distinguishes_formula_from_escaped_apostrophe() -> None:
+    formula = {"records": ({"id": "=x"},)}
+    escaped = {"records": ({"id": "'=x"},)}
+    assert compute_tables_hash(formula) != compute_tables_hash(escaped)

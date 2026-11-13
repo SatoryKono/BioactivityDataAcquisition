@@ -74,8 +74,14 @@ def atomic_csv_write(
     target_path: Path,
     write_options: pv.WriteOptions,
     logger: LoggerPort,
+    *,
+    spreadsheet_safe: bool = True,
 ) -> None:
-    """Write CSV atomically to avoid file lock issues on Windows."""
+    """Write CSV atomically to avoid file lock issues on Windows.
+
+    When ``spreadsheet_safe`` is false, write the pre-neutralized table so
+    downstream finalize can deduplicate on original primary-key values.
+    """
     target_dir = target_path.parent
     fd, temp_path_str = tempfile.mkstemp(
         suffix=".csv.tmp",
@@ -85,9 +91,8 @@ def atomic_csv_write(
     temp_path = Path(temp_path_str)
     try:
         os.close(fd)
-        pv.write_csv(
-            spreadsheet_safe_table(data), temp_path, write_options=write_options
-        )
+        payload = spreadsheet_safe_table(data) if spreadsheet_safe else data
+        pv.write_csv(payload, temp_path, write_options=write_options)
         try:
             _publish_csv_payload(temp_path, target_path)
         except PermissionError:
@@ -112,8 +117,14 @@ def append_to_csv(
     csv_path: Path,
     delimiter: str,
     logger: LoggerPort,
+    *,
+    spreadsheet_safe: bool = True,
 ) -> None:
-    """Append records to an existing CSV without reading it."""
+    """Append records to an existing CSV without reading it.
+
+    When ``spreadsheet_safe`` is false, append the pre-neutralized table so
+    downstream finalize can deduplicate on original primary-key values.
+    """
     fd, temp_path_str = tempfile.mkstemp(
         suffix=".csv.tmp",
         prefix=csv_path.stem + "_append_",
@@ -123,9 +134,8 @@ def append_to_csv(
     try:
         os.close(fd)
         write_options = pv.WriteOptions(include_header=False, delimiter=delimiter)
-        pv.write_csv(
-            spreadsheet_safe_table(data), temp_path, write_options=write_options
-        )
+        payload = spreadsheet_safe_table(data) if spreadsheet_safe else data
+        pv.write_csv(payload, temp_path, write_options=write_options)
         try:
             with open(csv_path, "ab") as target, open(temp_path, "rb") as source:
                 target.write(source.read())
