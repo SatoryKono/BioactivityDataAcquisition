@@ -1412,6 +1412,19 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
     "path,expected,unknown",
     [
         (
+            "docs/03-guides/dashboards/contracts/run-explorer-http-catalog.yaml",
+            {"tests/integration/test_run_explorer_request_fixtures.py"},
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "tests/fixtures/grafana/run_explorer/backend_error.json",
+            {
+                "tests/integration/test_run_explorer_request_fixtures.py",
+                "tests/integration/test_run_explorer_http_catalog.py",
+            },
+            "tests/fixtures/grafana/not-reviewed-catalog/example.json",
+        ),
+        (
             "grafana/dashboards-adaptive/profile.json",
             {
                 "tests/unit/scripts/test_adaptive_dashboard_profile.py",

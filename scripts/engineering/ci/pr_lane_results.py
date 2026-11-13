@@ -200,6 +200,12 @@ IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "docs/03-guides/dashboards/contracts/run-explorer-http-catalog.yaml": (
+        DOCUMENTATION_SYNC_TEST,
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        "tests/integration/test_run_explorer_request_fixtures.py",
+    ),
     "grafana/service-dashboards/prometheus-stats.json": (
         "tests/unit/scripts/test_generate_dashboard_content_contract.py",
         "tests/integration/test_grafana_dashboard_provisioning.py",
@@ -1516,6 +1522,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "tests/fixtures/grafana/run_explorer/": (
+        "tests/integration/test_run_explorer_request_fixtures.py",
+        "tests/integration/test_run_explorer_http_catalog.py",
+    ),
     "docs/reports/dashboard-ux-checks/": (
         DASHBOARD_UX_REPORT_FRESHNESS_TEST,
         DASHBOARD_OPERATOR_READABILITY_TEST,

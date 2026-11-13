@@ -241,11 +241,12 @@ def test_compact_selected_run_summary_uses_shared_projection() -> None:
             for target in targets
             if isinstance(target, dict)
         ]
-        if not any(
-            "selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
-            in url
-            for url in urls
-        ):
+        expected_query = (
+            "selected-run-status?pipeline=${pipeline}&run_id=${run_id}"
+            if name == "bioetl-incident-v1.json"
+            else "selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
+        )
+        if not any(expected_query in url for url in urls):
             missing.append(
                 f"{name}:{panel_id} missing exact selected-run-status projection"
             )
@@ -323,7 +324,8 @@ def test_run_explorer_selects_rows_without_removed_detail_groups() -> None:
         "${__url_time_range}",
     ):
         assert token in link["url"]
-    assert browse["options"]["footer"]["enablePagination"] is True
+    assert browse["options"]["footer"]["enablePagination"] is False
+    assert {"id": "limit", "options": {"limitField": 10}} in browse["transformations"]
     assert browse["options"]["cellHeight"] == "sm"
     banner = next(p for p in roots if p["id"] == 1)
     assert "Reset filters" in banner["options"]["content"]

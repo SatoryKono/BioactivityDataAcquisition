@@ -1,3 +1,10 @@
+## Selected-run source and catalog checks — 2026-11-13
+
+The [static UX report](../../reports/dashboard-ux-checks/2026-11-13.md)
+records the dashboard-specific selected-run variables, generated request
+fixtures and bounded catalog traversal. Live browser/render acceptance remains
+`NOT_RUN`; prior acceptance records retain their original scope.
+
 ## Compact Run Explorer catalog — 2026-11-12
 
 The first screen shows Pipeline, Run ID, Started, Overview and Replay Readiness.
