@@ -186,7 +186,7 @@ def _worktree_action(
     w: dict[str, Any],
     branches: list[dict[str, Any]],
     exists: bool,
-    status: tuple | None,
+    status: tuple[bool, bool, bool] | None,
     age: float,
     detached_days: float,
     branch_days: float,
@@ -441,7 +441,10 @@ def trash_date(name: str) -> str | None:
 
 
 def _safe_tree_target(path: Path) -> Path:
-    allowed = Path("D:/github").resolve()
+    configured_root = Path("D:/github")
+    allowed = configured_root.resolve()
+    if allowed != configured_root.absolute():
+        raise RuntimeError("Governed workspace root was redirected")
     target = path.resolve(strict=True)
     if target == allowed or not target.is_relative_to(allowed):
         raise RuntimeError(f"Refusing target outside governed workspace: {path}")
@@ -511,6 +514,15 @@ def _delete_trash(src: Path) -> str:
     return "hard_deleted"
 
 
+def _safe_quarantine_destination(destination: Path) -> None:
+    root = WT_ROOT.resolve()
+    resolved = destination.resolve(strict=False)
+    if resolved == root or not resolved.is_relative_to(root):
+        raise RuntimeError("Quarantine destination escapes governed worktree root")
+    if destination.exists():
+        raise RuntimeError("Quarantine destination already exists")
+
+
 def _apply_orphan(row: dict[str, Any]) -> dict[str, Any]:
     src = Path(row["path"])
     entry = {"kind": row["kind"], "path": str(src), "action": row["action"]}
@@ -520,6 +532,7 @@ def _apply_orphan(row: dict[str, Any]) -> dict[str, Any]:
             entry["result"] = _delete_trash(src)
         else:
             dst = Path(row["quarantine"])
+            _safe_quarantine_destination(dst)
             dst.parent.mkdir(parents=True, exist_ok=True)
             os.rename(src, dst)
             entry["result"] = f"quarantined -> {dst}"
@@ -628,7 +641,13 @@ def do_apply(args: argparse.Namespace) -> int:
     print(
         f"[apply] worktrees now {len(registered_worktrees())}, branches now {len(local_branches())}"
     )
-    return 0
+    failed = any(
+        "wip_error" in action
+        or action.get("remove_rc", 0) != 0
+        or action.get("rc", 0) != 0
+        for action in actions
+    )
+    return int(failed)
 
 
 def build_parser() -> argparse.ArgumentParser:

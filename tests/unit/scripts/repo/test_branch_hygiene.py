@@ -211,7 +211,7 @@ def test_apply_never_removes_changed_or_unarchived_tree(
     calls = _apply_fixture(
         monkeypatch, tmp_path, changed=changed, archive_error=archive_error
     )
-    assert bh.main(["apply", "--out", str(tmp_path), "--execute"]) == 0
+    assert bh.main(["apply", "--out", str(tmp_path), "--execute"]) == int(archive_error)
     assert not any("remove" in args for args in calls)
 
 
@@ -231,3 +231,30 @@ def test_worktree_removal_uses_git_dirty_protection(monkeypatch, tmp_path):
     removals = [args for args in calls if "remove" in args]
     assert len(removals) == 1
     assert "--force" not in removals[0]
+
+
+@pytest.mark.parametrize("target", ["D:/", "D:/github"])
+def test_tree_guard_refuses_drive_or_governed_root(target):
+    with pytest.raises(RuntimeError, match="outside governed workspace"):
+        bh._safe_tree_target(bh.Path(target))
+
+
+def test_worktree_lock_without_reason_is_preserved(monkeypatch):
+    monkeypatch.setattr(
+        bh,
+        "git",
+        lambda *args: (
+            "worktree D:/github/locked-fixture\nHEAD abc123\nbranch refs/heads/topic\nlocked\n\n"
+        ),
+    )
+    worktrees = bh.registered_worktrees()
+    assert worktrees[0]["locked"] == "locked"
+
+
+def test_quarantine_destination_must_stay_in_owned_root(monkeypatch, tmp_path):
+    root = tmp_path / "worktrees"
+    monkeypatch.setattr(bh, "WT_ROOT", root)
+    bh._safe_quarantine_destination(root / ".__trash_20261113" / "retained")
+    with pytest.raises(RuntimeError, match="escapes"):
+        bh._safe_quarantine_destination(tmp_path / "other-project" / "retained")
+    assert not root.exists()
