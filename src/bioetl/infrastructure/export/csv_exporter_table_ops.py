@@ -78,6 +78,26 @@ def sort_table(
     return table.sort_by(sort_keys)
 
 
+
+def deduplicate_full_rows(table: pa.Table) -> pa.Table:
+    """Drop exact duplicate rows while preserving first-seen order."""
+    if table.num_rows < 2:
+        return table
+    rows = table.to_pylist()
+    seen: set[tuple[object, ...]] = set()
+    deduplicated_rows: list[dict[str, object]] = []
+    column_names = table.column_names
+    for row in rows:
+        identity = tuple(row.get(column) for column in column_names)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        deduplicated_rows.append(row)
+    if len(deduplicated_rows) == len(rows):
+        return table
+    return pa.Table.from_pylist(deduplicated_rows, schema=table.schema)
+
+
 def deduplicate_table(
     table: pa.Table,
     primary_keys: list[str],
