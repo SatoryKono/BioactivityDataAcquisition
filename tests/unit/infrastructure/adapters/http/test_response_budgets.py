@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import gzip
+import zlib
 import httpx
 import pytest
 from bioetl.infrastructure.adapters.http import request_timing as timing
@@ -152,7 +153,7 @@ async def test_bodyless_head_keeps_representation_headers(
     def forbidden_decoder(*args, **kwargs):
         raise AssertionError("A bodyless response must not instantiate a decoder")
 
-    monkeypatch.setattr(timing.zlib, "decompressobj", forbidden_decoder)
+    monkeypatch.setattr(zlib, "decompressobj", forbidden_decoder)
     headers = {"Content-Encoding": encoding, "ETag": '"representation-tag"'}
     if length is not None:
         headers["Content-Length"] = length
