@@ -1,6 +1,6 @@
 {
-  "additive_coverage_xml_path": "reports/local/security-remediation/aud003-extraction-coverage.xml",
-  "additive_coverage_xml_sha256": "1f37d63b21b43590f0222915aa39e72ac05fe56b2bbcd2beba5008fe98c18b20",
+  "additive_coverage_xml_path": "reports/local/security-remediation/aud003-raw-deflate-coverage.xml",
+  "additive_coverage_xml_sha256": "255e721ef6f48b4419445a377540920069f7b7917045e112f44555095164978e",
   "additive_measured_module_count": 1,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
@@ -18859,14 +18859,14 @@
       "source_lines": 187
     },
     {
-      "coverage_percent": 98.0,
+      "coverage_percent": 98.67,
       "coverage_status": "partially_covered",
-      "covered_lines": 49,
-      "executable_lines": 50,
+      "covered_lines": 74,
+      "executable_lines": 75,
       "missing_lines": 1,
       "module": "bioetl.infrastructure.adapters.http.response_body",
       "path": "src/bioetl/infrastructure/adapters/http/response_body.py",
-      "source_lines": 104
+      "source_lines": 142
     },
     {
       "coverage_percent": 100.0,
@@ -44991,14 +44991,14 @@
       "source_lines": 187
     },
     {
-      "coverage_percent": 98.0,
+      "coverage_percent": 98.67,
       "coverage_status": "partially_covered",
-      "covered_lines": 49,
-      "executable_lines": 50,
+      "covered_lines": 74,
+      "executable_lines": 75,
       "missing_lines": 1,
       "module": "bioetl.infrastructure.adapters.http.response_body",
       "path": "src/bioetl/infrastructure/adapters/http/response_body.py",
-      "source_lines": 104
+      "source_lines": 142
     },
     {
       "coverage_percent": 100.0,
@@ -52273,7 +52273,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "c613ed14e50581000825352b6aa9f6b3f85c7dc2e4081dc4b619bbefc6566f8d",
+  "source_tree_sha256": "58b455326d57e0751747c5c83520f193541300f7ab2484da747907013f97a7a6",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
