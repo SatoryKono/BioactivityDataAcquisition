@@ -11,7 +11,6 @@ import stat
 import sys
 from types import SimpleNamespace
 from unittest.mock import patch
-import uuid
 
 import pytest
 
@@ -235,7 +234,7 @@ def test_required_receipt_failures_are_not_pass(repository, mutation):
 
 def test_same_event_cannot_be_replayed_or_executed_in_parallel(repository):
     path = _bundle(repository)
-    event = uuid.uuid4().hex
+    event = "a" * 32
     with ThreadPoolExecutor(max_workers=2) as pool:
         results = list(
             pool.map(lambda _: _verify(repository, path, event_id=event), range(2))
@@ -326,7 +325,7 @@ def test_mode_change_after_real_verifier_is_rejected(repository: Path) -> None:
     target.write_text("VALUE = 20\n", encoding="utf-8")
     path = _bundle(root)
     request = {
-        "event_id": uuid.uuid4().hex,
+        "event_id": "b" * 32,
         "state": state.capture(root, os.environ),
         "bundle_sha256": state.sha256(path.read_bytes()),
         "task_id_sha256": state.sha256(b"task-39"),
@@ -418,7 +417,7 @@ def test_successful_child_cannot_hide_state_change_during_the_event(
     "field", ["core_outcome", "errors_count", "findings_sha256", "reason"]
 )
 def test_integrity_valid_but_malformed_metadata_is_not_echoed(repository, field):
-    event = uuid.uuid4().hex
+    event = "c" * 32
     target = state.directory(repository, event, reserve=True)
     request = {
         "event_id": event,
