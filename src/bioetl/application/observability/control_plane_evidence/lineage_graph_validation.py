@@ -56,19 +56,43 @@ def _merge_definition(
                 or conflict
             )
             previous[key] = nested
-        elif old is not None and old != value:
-            if _is_run_manifest_dependent_drift(
-                node_type=resolved_type,
-                path=path,
-                key=key,
-            ):
-                # Keep the first observed value; drift is expected across the
-                # predecessor→successor ledger chain for the same run id.
-                continue
-            conflict = True
         else:
-            previous[key] = value
+            conflict = (
+                _merge_scalar_field(
+                    previous,
+                    key=key,
+                    value=value,
+                    old=old,
+                    path=path,
+                    node_type=resolved_type,
+                )
+                or conflict
+            )
     return conflict
+
+
+def _merge_scalar_field(
+    previous: dict[str, object],
+    *,
+    key: str,
+    value: object,
+    old: object,
+    path: tuple[str, ...],
+    node_type: object | None,
+) -> bool:
+    """Merge a non-dict field; allow expected RUN manifest-dependent drift."""
+    if old is not None and old != value:
+        if _is_run_manifest_dependent_drift(
+            node_type=node_type,
+            path=path,
+            key=key,
+        ):
+            # Keep the first observed value; drift is expected across the
+            # predecessor→successor ledger chain for the same run id.
+            return False
+        return True
+    previous[key] = value
+    return False
 
 
 def _is_run_manifest_dependent_drift(
