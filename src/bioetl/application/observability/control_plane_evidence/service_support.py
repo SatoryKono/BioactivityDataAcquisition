@@ -15,8 +15,7 @@ from bioetl.application.observability.control_plane_evidence.timing import (
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.lineage import LineageGraphFragment
-from bioetl.domain.ports import RunLedgerPort
-from bioetl.domain.ports.control_plane.lineage import LineageStorePort
+from bioetl.domain.ports import LineageStorePort, RunLedgerPort
 
 
 @dataclass(frozen=True, slots=True)
