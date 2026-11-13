@@ -13,6 +13,7 @@ import sys
 from iuphar_target_class.models import GlueFixture, RawTargetRow, RunProvenance
 from iuphar_target_class import normalization as normalization_module
 from iuphar_target_class.normalization import (
+    classify_batch,
     isolated_invalid_result,
     normalize_missing,
     parse_ec_numbers,
@@ -197,6 +198,43 @@ def test_absent_well_formed_id_is_not_found() -> None:
     assert validated.input_validation_status == "valid"
     assert validated.catalog_status == "not_found"
     assert validated.target_id == "840"
+
+
+def test_empty_batch() -> None:
+    first = classify_batch((), provenance=PROVENANCE)
+    second = classify_batch((), provenance=PROVENANCE)
+    assert first == second
+    assert first.status == "empty"
+    assert first.rows == ()
+    assert first.quality.status == "empty"
+    assert first.quality.row_count == 0
+    assert first.quality.invalid_count == 0
+    assert first.quality.classified_count == 0
+    assert first.quality.input_row_ids == ()
+
+
+def test_all_invalid_batch() -> None:
+    rows = (
+        RawTargetRow("", {}, target_kind="other"),
+        RawTargetRow("row-2", {}, target_kind=None),
+    )
+    first = classify_batch(rows, provenance=PROVENANCE)
+    second = classify_batch(rows, provenance=PROVENANCE)
+    assert first == second
+    assert first.status == "rejected"
+    assert first.quality.status == "rejected"
+    assert first.quality.row_count == 2
+    assert first.quality.invalid_count == 2
+    assert first.quality.classified_count == 0
+    assert first.quality.input_row_ids == ("", "row-2")
+    assert first.rows
+    for row in first.rows:
+        assert row.input_validation_status == "invalid_input"
+        assert row.input_errors
+        assert row.iuphar_class is None
+        assert row.local_class is None
+        assert row.effective_class is None
+        assert row.decision_status is None
 
 
 def test_invalid_row_does_not_block_the_batch() -> None:
