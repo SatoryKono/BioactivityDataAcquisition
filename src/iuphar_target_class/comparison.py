@@ -116,6 +116,15 @@ def _classify_key(
     if not key or m_row is None or python_row is None:
         residual.append(label)
         return
+    if _same_classification(m_row, python_row):
+        return
+    _record_difference(label, python_row, changes, residual)
+
+
+def _same_classification(
+    m_row: Mapping[str, str], python_row: Mapping[str, str]
+) -> bool:
+    """Compare class projections without inferring missing historical values."""
     classification_fields = (
         "effective_class",
         "effective_source",
@@ -125,11 +134,9 @@ def _classify_key(
         "local_status",
         "iuphar_annotation_status",
     )
-    if _class(m_row) == _class(python_row) and all(
+    return _class(m_row) == _class(python_row) and all(
         m_row.get(field) == python_row.get(field) for field in classification_fields
-    ):
-        return
-    _record_difference(label, python_row, changes, residual)
+    )
 
 
 def _record_legacy(
