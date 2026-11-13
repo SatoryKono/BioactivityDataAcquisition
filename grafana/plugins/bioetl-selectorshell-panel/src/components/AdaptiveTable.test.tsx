@@ -126,6 +126,35 @@ it('keeps a desktop panel constrained by the navigation menu readable', () => {
   expect(within(screen.getByRole('dialog')).getByText('Saved Evidence')).toBeInTheDocument();
 });
 
+it('uses explicitly requested hidden metadata in the compact summary without revealing wide columns', () => {
+  viewport(1366);
+  const panelProps = props();
+  const provider = panelProps.data.series[0].fields.find((field) => field.name === 'Provider')!;
+  provider.config.custom = { hidden: true };
+  const options = { ...panelProps.options, compactFields: ['Provider', 'Pipeline', 'Run ID', 'Overview'] };
+  const view = render(<AdaptiveTable {...panelProps} width={1268} options={options} />);
+  expect(screen.getByRole('rowheader', { name: 'Provider' })).toBeInTheDocument();
+  expect(screen.getByText('Provider one')).toBeInTheDocument();
+  expect(screen.queryByText('UNKNOWN · Required fields unavailable')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Next run' }));
+  expect(screen.getByText('Provider two')).toBeInTheDocument();
+  viewport(1920);
+  view.rerender(<AdaptiveTable {...panelProps} width={1500} options={options} />);
+  expect(screen.getByTestId('native-table')).not.toHaveTextContent('Provider');
+  expect(provider.config.custom.hidden).toBe(true);
+});
+
+it('keeps a genuinely missing required Provider unavailable at the desktop compact boundary', () => {
+  viewport(1366);
+  const panelProps = props();
+  panelProps.data.series[0].fields = panelProps.data.series[0].fields.filter((field) => field.name !== 'Provider');
+  render(<AdaptiveTable {...panelProps} width={1268}
+    options={{ ...panelProps.options, compactFields: ['Provider', 'Pipeline', 'Run ID', 'Overview'] }} />);
+  expect(screen.getByText('UNKNOWN · Required fields unavailable')).toBeInTheDocument();
+  expect(screen.queryByRole('table')).not.toBeInTheDocument();
+  expect(screen.queryByRole('link')).not.toBeInTheDocument();
+});
+
 it.each(['displayName', 'displayNameFromDS'] as const)('uses Grafana %s labels and keeps hidden identity out of the summary', (property) => {
   const panelProps = props();
   const frame = panelProps.data.series[0];
