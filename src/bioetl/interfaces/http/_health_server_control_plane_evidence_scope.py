@@ -289,11 +289,12 @@ def reconcile_manifest_validation_scope(
     if identity is None:
         return scope
     pipeline = identity.get("pipeline_name")
-    return replace(
+    reconciled_scope: _IdentityScope = replace(
         scope,
         resolved_via="resolved_without_manifest",
         report_pipeline=pipeline if isinstance(pipeline, str) and pipeline else None,
     )
+    return reconciled_scope
 
 
 async def _reconcile_validation_scope(
