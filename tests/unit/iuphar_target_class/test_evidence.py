@@ -402,7 +402,10 @@ def test_local_class_accepts_its_own_evidence_without_an_iuphar_mapping() -> Non
     table = build_evidence_table(
         (_draft("local_rule", "rule", "Receptor", "local"),), run_id="run-1"
     )
-    require_class_chain(_supported_local_row(table.local_evidence_ids), table=table)
+    assert (
+        require_class_chain(_supported_local_row(table.local_evidence_ids), table=table)
+        is None
+    )
 
 
 @pytest.mark.parametrize("missing", ["rule", "evidence"])
