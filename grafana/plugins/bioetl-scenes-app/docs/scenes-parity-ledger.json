@@ -20,9 +20,9 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "905b66daf2431284ecd735662131cbdedc497e2c7fbf3fbdf0c758d40f71aefb",
+    "bioetl-control-plane-v1": "05165e9fd2b24e72547823aa4705ed1f721af3d68172cfb1960138ae0a899f12",
     "bioetl-dq-v2": "f432a67491258bc713ed3f28c966f8d616579f7f07511313fe77272270113f4c",
-    "bioetl-incident-v1": "05479f900c8d9ef4160bb5f0770fc68aece57c266937d60b540d9af9049d724d",
+    "bioetl-incident-v1": "d3d0ef63d53910c0a344080a6dfdd5b3489f42a141d2f01bda71f6dfbf8d8c36",
     "bioetl-overview-v2": "1e8c65e8caa76e4116bff022146854c3767dfa2a47e9370a110bf08211c582a3",
     "bioetl-run-explorer-v1": "2e656533634eb5c67d430ce822acdb3830de68624a429a5bd39438429ca4f7ed"
   },
@@ -128,7 +128,7 @@
         "datasource_type": "yesoreyeram-infinity-datasource",
         "datasource_uid": "bioetl-ops-http",
         "expressions": [
-          "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
         "target_count": 1
       }
@@ -603,7 +603,7 @@
         "datasource_type": "yesoreyeram-infinity-datasource",
         "datasource_uid": "bioetl-ops-http",
         "expressions": [
-          "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
         "target_count": 1
       }
