@@ -496,7 +496,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1252",
+      "line": "1255",
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_consume_headers"
@@ -798,7 +798,20 @@
     }
   },
   "assertless_total_candidates": 67,
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 1,
+      "budget": "duplicate_test_names_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_names"
+    },
+    {
+      "actual": 2,
+      "budget": "duplicate_test_name_occurrences_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_name_occurrences"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -943,16 +956,30 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [],
+  "duplicate_test_name_inventory": [
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/domain/test_transformations.py:362",
+        "tests/unit/iuphar_target_class/test_normalization.py:203"
+      ],
+      "name": "test_empty_batch",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    }
+  ],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 0,
-    "duplicate_occurrences": 0,
+    "cross_file_groups": 1,
+    "duplicate_occurrences": 2,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 0
+    "total_duplicate_names": 1
   },
-  "duplicate_test_name_occurrences": 0,
-  "duplicate_test_names": 0,
+  "duplicate_test_name_occurrences": 2,
+  "duplicate_test_names": 1,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1483,7 +1510,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1252",
+        "line": "1255",
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_consume_headers"
@@ -1668,16 +1695,30 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [],
+    "duplicate_test_name_inventory": [
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/domain/test_transformations.py:362",
+          "tests/unit/iuphar_target_class/test_normalization.py:203"
+        ],
+        "name": "test_empty_batch",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      }
+    ],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 0,
-      "duplicate_occurrences": 0,
+      "cross_file_groups": 1,
+      "duplicate_occurrences": 2,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 0
+      "total_duplicate_names": 1
     },
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
+    "duplicate_test_name_occurrences": 2,
+    "duplicate_test_names": 1,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -1715,8 +1756,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3313,
-      "test_python_file_count": 3565,
+      "test_glob_file_count": 3314,
+      "test_python_file_count": 3566,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1756,21 +1797,30 @@
       "top_level_directory_count": 16,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [],
-    "total_test_files": 3313,
-    "total_test_functions": 32962,
+    "top_duplicate_test_names": [
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/domain/test_transformations.py:362",
+          "tests/unit/iuphar_target_class/test_normalization.py:203"
+        ],
+        "name": "test_empty_batch"
+      }
+    ],
+    "total_test_files": 3314,
+    "total_test_functions": 32968,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "6c32450dea2509a92a002019576c2bfe7e57d00405e5539cd271652061bce355",
+  "source_tree_sha256": "433703f2956d292f0f65b62466264ddb779876b1eb9a92efb899de9dd97efe92",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 67,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
+    "duplicate_test_name_occurrences": 2,
+    "duplicate_test_names": 1,
     "intentional_no_exception_contract": 66,
     "markerless_examples": [],
     "markerless_test_functions": 0,
@@ -1783,8 +1833,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3313,
-    "test_python_file_count": 3565,
+    "test_glob_file_count": 3314,
+    "test_python_file_count": 3566,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -1824,9 +1874,18 @@
     "top_level_directory_count": 16,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [],
-  "total_test_files": 3313,
-  "total_test_functions": 32962,
+  "top_duplicate_test_names": [
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/domain/test_transformations.py:362",
+        "tests/unit/iuphar_target_class/test_normalization.py:203"
+      ],
+      "name": "test_empty_batch"
+    }
+  ],
+  "total_test_files": 3314,
+  "total_test_functions": 32968,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
