@@ -104,7 +104,9 @@ async def _read_bodyless_response(
     return result
 
 
-def _response_body_decoder(encoding: str, window_bits: int):
+def _response_body_decoder(
+    encoding: str, window_bits: int
+) -> _DeflateDecoder | zlib._Decompress | None:
     """Select identity, gzip, or raw-DEFLATE decoder without nested ternaries."""
     if encoding == "identity":
         return None
