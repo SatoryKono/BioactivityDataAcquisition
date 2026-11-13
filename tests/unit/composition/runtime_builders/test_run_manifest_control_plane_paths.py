@@ -102,3 +102,88 @@ def test_prepare_private_runtime_dir_creates_private_directory(tmp_path: Path) -
 
     assert subject._prepare_private_runtime_dir(target) == target
     assert target.is_dir()
+
+
+@pytest.mark.parametrize("module", [subject, paths_subject])
+@pytest.mark.parametrize("configured", [None, "", "   "])
+def test_alias_resolution_keeps_absent_configuration_unbound(module, configured):
+    assert (
+        module.resolve_dashboard_data_alias_base(
+            settings=SimpleNamespace(dashboard_data_root=configured)
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize("module", [subject, paths_subject])
+def test_alias_resolution_contains_write_roots(module, tmp_path):
+    assert (
+        module.resolve_dashboard_data_alias_base(
+            settings=SimpleNamespace(dashboard_data_root=tmp_path)
+        )
+        == tmp_path.resolve()
+    )
+    assert (
+        module.relative_data_root_under_alias(
+            write_data_root=tmp_path, alias_base=tmp_path
+        )
+        == "."
+    )
+    assert (
+        module.relative_data_root_under_alias(
+            write_data_root=tmp_path / "data", alias_base=tmp_path
+        )
+        == "data"
+    )
+    assert (
+        module.relative_data_root_under_alias(
+            write_data_root=tmp_path.parent / "other", alias_base=tmp_path
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize("module", [subject, paths_subject])
+@pytest.mark.parametrize(
+    "source_id,skip,expected",
+    [(None, None, False), ("a" * 64, None, True), ("a" * 64, "outside_alias", False)],
+)
+def test_registration_requires_identity_and_no_skip(
+    module, source_id, skip, expected, tmp_path
+):
+    context = module.EvidenceLocationBindingContext(
+        write_data_root=tmp_path,
+        alias_base=tmp_path,
+        root_alias="dashboard_data",
+        relative_data_root=".",
+        runtime_source_id=source_id,
+        report_root=None,
+        skip_reason=skip,
+    )
+    assert context.registration_allowed is expected
+
+
+@pytest.mark.parametrize(
+    "configured,expected", [("a" * 64, "a" * 64), ("invalid", None), (None, None)]
+)
+def test_registration_source_id_resolves_only_valid_explicit_identity(
+    configured, expected, monkeypatch
+):
+    monkeypatch.setattr(
+        subject, "load_repository_source_environment", lambda *a, **k: {}
+    )
+    assert (
+        subject.resolve_registration_runtime_source_id(
+            SimpleNamespace(runtime_source_id=configured)
+        )
+        == expected
+    )
+
+
+def test_live_catalog_uses_trusted_alias(tmp_path):
+    assert (
+        paths_subject.live_run_manifest_catalog(
+            SimpleNamespace(dashboard_data_root=tmp_path)
+        )
+        == tmp_path / "output/control/run_manifest"
+    )

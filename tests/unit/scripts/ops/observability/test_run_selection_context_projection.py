@@ -111,3 +111,24 @@ def test_query_context_is_explicit_and_clock_is_query_evaluation(
     )
     assert checked_at == checked_clock
     assert "selection_context" not in payload
+
+
+def test_dq_context_generation_keeps_nested_disclosure_position_stable():
+    from copy import deepcopy
+    from scripts.ops.observability.grafana._run_selection_context import (
+        stamp_run_selection_context,
+    )
+
+    root = Path(__file__).resolve().parents[5]
+    payload = json.loads(
+        (root / "grafana/dashboards/bioetl-dq-v2.json").read_text(encoding="utf-8")
+    )
+    disclosure = next(p for p in payload["panels"] if p["id"] == 9450)
+    disclosure["gridPos"]["y"] = 25
+    disclosure["panels"][0]["gridPos"]["y"] = 26
+    stamp_run_selection_context(payload)
+    first = deepcopy(payload)
+    assert disclosure["gridPos"]["y"] == 21
+    assert disclosure["panels"][0]["gridPos"]["y"] == 22
+    stamp_run_selection_context(payload)
+    assert payload == first

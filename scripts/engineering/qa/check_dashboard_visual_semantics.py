@@ -195,13 +195,22 @@ def iter_panels(panels: list[JsonObject]) -> list[JsonObject]:
 
 
 def _semantic_palette(value: object) -> object:
-    """Normalize neutral theme text and gray swatches, never severity colors."""
+    """Compare state hues, including the exact shades qualified for text contrast."""
     if isinstance(value, list):
         return [_semantic_palette(item) for item in value]
     if isinstance(value, dict):
         return {
-            key: "gray"
-            if key == "color" and item in ("#555555", "#A3A3A3", "text")
+            key: {
+                "#555555": "gray",
+                "#A3A3A3": "gray",
+                "text": "gray",
+                "#9CA3AF": "gray",
+                "#475569": "gray",
+                "#14532d": "green",
+                "#9a3412": "orange",
+                "#9f1239": "red",
+            }.get(item, item)
+            if key == "color" and isinstance(item, str)
             else _semantic_palette(item)
             for key, item in value.items()
         }
