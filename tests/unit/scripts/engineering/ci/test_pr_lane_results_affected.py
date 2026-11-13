@@ -1490,3 +1490,19 @@ def test_owned_hook_python_inputs_keep_real_bounded_test_owners():
     }.issubset(selected)
     assert "tests/unit/scripts" not in selected
     assert "tests/unit/repo_backed/scripts" not in selected
+
+
+def test_auth_security_review_routes_to_catalog_and_requalification():
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["configs/quality/external_resource_inventory_security_aud006_review.json"],
+        repo_root=root,
+    )
+    assert (
+        "tests/architecture/test_external_resource_inventory_catalog.py"
+        in json.dumps(report)
+    )
+    assert (
+        "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py"
+        in json.dumps(report)
+    )
