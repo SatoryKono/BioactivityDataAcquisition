@@ -82,15 +82,13 @@ def _merge_scalar_field(
 ) -> bool:
     """Merge a non-dict field; allow expected RUN manifest-dependent drift."""
     if old is not None and old != value:
-        if _is_run_manifest_dependent_drift(
+        # Keep the first observed value when drift is expected across the
+        # predecessor→successor ledger chain for the same run id.
+        return not _is_run_manifest_dependent_drift(
             node_type=node_type,
             path=path,
             key=key,
-        ):
-            # Keep the first observed value; drift is expected across the
-            # predecessor→successor ledger chain for the same run id.
-            return False
-        return True
+        )
     previous[key] = value
     return False
 
