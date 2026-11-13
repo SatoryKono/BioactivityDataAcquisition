@@ -83,7 +83,8 @@ def atomic_csv_write(
     used for append/dedupe; neutralize only the published CSV artifact.
 
     Returns ``True`` when the primary ``target_path`` was updated. Returns
-    ``False`` when the target stayed locked and only a backup file was written.
+    ``False`` when the primary target stayed locked. Raw sidecars never publish
+    a spreadsheet-visible backup; safe CSV output retains its fallback.
     """
     target_dir = target_path.parent
     fd, temp_path_str = tempfile.mkstemp(
@@ -99,6 +100,9 @@ def atomic_csv_write(
         try:
             _publish_csv_payload(temp_path, target_path)
         except PermissionError:
+            if not spreadsheet_safe:
+                temp_path.unlink()
+                return False
             backup_path = _locked_csv_backup_path(
                 target_path,
                 payload_path=temp_path,
@@ -130,7 +134,8 @@ def append_to_csv(
     used for append/dedupe; neutralize only the published CSV artifact.
 
     Returns ``True`` when the primary ``csv_path`` was updated. Returns
-    ``False`` when the target stayed locked and only a backup file was written.
+    ``False`` when the primary target stayed locked. Raw sidecars never publish
+    a spreadsheet-visible backup; safe CSV output retains its fallback.
     """
     fd, temp_path_str = tempfile.mkstemp(
         suffix=".csv.tmp",
@@ -147,6 +152,9 @@ def append_to_csv(
             with open(csv_path, "ab") as target, open(temp_path, "rb") as source:
                 target.write(source.read())
         except PermissionError:
+            if not spreadsheet_safe:
+                temp_path.unlink()
+                return False
             backup_path = _locked_csv_backup_path(
                 csv_path,
                 payload_path=temp_path,

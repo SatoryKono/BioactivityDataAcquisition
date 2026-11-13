@@ -181,3 +181,48 @@ def test_failed_xlsx_write_preserves_error_and_keeps_partial_cells_inert(
     book = load_workbook(tmp_path / "silver_audit.xlsx", data_only=False)
     assert book.active["A1"].data_type == "s"
     book.close()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "operation", ["first_write", "overwrite", "append", "finalize"]
+)
+async def test_raw_sidecar_permission_failure_never_publishes_unsafe_csv_backup(
+    tmp_path, monkeypatch, operation
+):
+    """A failed raw-sidecar write must preserve prior files without raw CSV backups."""
+    import builtins
+    from unittest.mock import MagicMock
+
+    from bioetl.infrastructure.export import csv_exporter_io_ops as io_ops
+    from bioetl.infrastructure.export.csv_exporter import CsvExporter
+
+    exporter = CsvExporter(str(tmp_path), MagicMock())
+    table = pa.table({"id": ["=x", "'=x"], "payload": ["first", "second"]})
+    if operation != "first_write":
+        await exporter.export("audit", table, append=False)
+    before = {p.name: p.read_bytes() for p in tmp_path.iterdir() if p.is_file()}
+    raw_path = tmp_path / "audit.csv.raw"
+    publish = io_ops._publish_csv_payload
+    original_open = builtins.open
+
+    def blocked_publish(source, target):
+        if target == raw_path:
+            raise PermissionError("synthetic raw-sidecar publication failure")
+        return publish(source, target)
+
+    def blocked_append(file, mode="r", *args, **kwargs):
+        if Path(file) == raw_path and mode == "ab":
+            raise PermissionError("synthetic raw-sidecar append failure")
+        return original_open(file, mode, *args, **kwargs)
+
+    monkeypatch.setattr(io_ops, "_publish_csv_payload", blocked_publish)
+    monkeypatch.setattr(io_ops, "_csv_temp_directory", lambda _target: tmp_path)
+    monkeypatch.setattr(builtins, "open", blocked_append)
+    with pytest.raises((OSError, RuntimeError)):
+        if operation == "finalize":
+            await exporter.finalize_csv("audit", primary_keys=["id"])
+        else:
+            await exporter.export("audit", table, append=operation == "append")
+    after = {p.name: p.read_bytes() for p in tmp_path.iterdir() if p.is_file()}
+    assert after == before

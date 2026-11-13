@@ -723,7 +723,7 @@ class TestCsvExporterTrueAppend:
     async def test_append_locked_raw_sidecar_leaves_published_unchanged(
         self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """If .raw append is backup-only, do not mutate the published CSV."""
+        """A locked raw append must not mutate either file or leak a raw CSV backup."""
         exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
         await exporter.export("locked_raw", pa.Table.from_pydict({"id": [1]}))
         published = tmp_path / "locked_raw.csv"
@@ -747,9 +747,7 @@ class TestCsvExporterTrueAppend:
 
         assert published.read_bytes() == before_published
         assert raw.read_bytes() == before_raw
-        assert list(tmp_path.glob("locked_raw.csv.raw.append-locked.*.csv")) or list(
-            tmp_path.glob("*.append-locked.*.csv")
-        )
+        assert not list(tmp_path.glob("*.append-locked.*.csv"))
 
     @pytest.mark.asyncio
     async def test_overwrite_rejects_header_collision_before_touching_raw(
