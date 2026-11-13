@@ -1115,7 +1115,7 @@ jobs:
 
   docker-publish:
     docker:
-      - image: cimg/python:3.13
+      - image: cimg/python:3.13@sha256:9f006263378fea9e9aca04cbcc05f343ccf589a53127e07ad40fb55e50144329
     resource_class: medium
     environment:
       CIRCLE_ORGANIZATION_ID: 116af377-246c-4269-b48e-63c2a8b9dd0e
