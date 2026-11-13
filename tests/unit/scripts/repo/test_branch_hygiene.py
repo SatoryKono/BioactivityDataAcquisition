@@ -258,3 +258,20 @@ def test_quarantine_destination_must_stay_in_owned_root(monkeypatch, tmp_path):
     with pytest.raises(RuntimeError, match="escapes"):
         bh._safe_quarantine_destination(tmp_path / "other-project" / "retained")
     assert not root.exists()
+
+
+def test_fresh_tip_with_finished_pr_is_not_deleted(monkeypatch):
+    monkeypatch.setattr(bh, "_now", lambda: 100 * bh.DAY)
+    monkeypatch.setattr(bh, "pr_state_map", lambda: {"renewed": ["MERGED"]})
+    branches = [
+        {
+            "name": "renewed",
+            "sha": "new",
+            "upstream": "origin/renewed",
+            "gone": False,
+            "tip_ctime": int(99 * bh.DAY),
+        }
+    ]
+    buckets = bh.classify_branches(branches, [], "main", 3)
+    assert [row["name"] for row in buckets["E"]] == ["renewed"]
+    assert not buckets["A"]

@@ -288,6 +288,8 @@ def _branch_bucket(
 ) -> tuple[str, dict[str, Any]]:
     if "OPEN" in states:
         return "E", {"pr_states": states}
+    if age <= branch_days:
+        return "E", {"pr_states": states}
     if branch["upstream"] and not branch["gone"]:
         bucket = "A" if any(state in ("MERGED", "CLOSED") for state in states) else "E"
         return bucket, {"pr_states": states}
