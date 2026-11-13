@@ -201,13 +201,31 @@ def _changed_paths(before: Any, after: Any, prefix: str = "") -> list[str]:
 
 
 def pytest_framework_affected(root: Path, dependencies: set[str]) -> bool:
-    """The global test framework owns the canonical all-tests lane, including helpers."""
+    """Global test runtime and reviewed shared test tooling require all tests."""
     packages = tomllib.loads((root / PYTHON_LOCK).read_text(encoding="utf-8")).get(
         "package", []
     )
     return any(
-        "pytest" in _lock_family(packages, dependency) or _is_pytest_plugin(dependency)
+        "pytest" in _lock_family(packages, dependency)
+        or _is_pytest_plugin(dependency)
+        or _shared_parser_test_tool_affected(root, _lock_family(packages, dependency))
         for dependency in dependencies
+    )
+
+
+def _shared_parser_test_tool_affected(root: Path, family: set[str]) -> bool:
+    """Keep the reviewed test-only BeautifulSoup family on the complete suite.
+
+    Its shared HTML/CSS parsing dependency cannot be narrowed to a first-party
+    import. Require the actual reverse lock edge and exclusively tests/dev
+    declarations; unrelated or production dependencies still fail closed.
+    """
+    if "beautifulsoup4" not in family:
+        return False
+    manifest = tomllib.loads((root / PYTHON_MANIFEST).read_text(encoding="utf-8"))
+    declarations = _requirements(manifest).get("beautifulsoup4", [])
+    return bool(declarations) and all(
+        item.startswith(("optional:tests:", "optional:dev:")) for item in declarations
     )
 
 

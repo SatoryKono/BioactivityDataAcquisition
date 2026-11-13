@@ -258,3 +258,24 @@ def test_selected_run_http_targets_reference_declared_dashboard_variables(profil
                         panel["id"],
                         variables - declared,
                     )
+
+
+@pytest.mark.parametrize("profile", ["dashboards", "dashboards-adaptive"])
+@pytest.mark.parametrize("uid", ["bioetl-overview-v2", "bioetl-dq-v2"])
+def test_hidden_selection_preserves_requested_identity_when_context_is_missing(
+    profile, uid
+):
+    import json
+
+    path = Path(__file__).resolve().parents[2] / "grafana" / profile / f"{uid}.json"
+    dashboard = json.loads(path.read_text(encoding="utf-8"))
+    variables = {v["name"]: v for v in dashboard["templating"]["list"]}
+    for name, field in (
+        ("selected_pipeline", "pipeline"),
+        ("selected_run_id", "run_id"),
+    ):
+        query = variables[name]["query"]["infinityQuery"]
+        assert "pipeline=${pipeline}" in query["url"]
+        assert "run_id=${run_id}" in query["url"]
+        assert f"selected.{field}" in query["root_selector"]
+        assert f"? $v : requested.{field}" in query["root_selector"]
