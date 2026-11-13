@@ -143,9 +143,7 @@ def lineage_fragments_for_ledger(
                 key = fragment.stored_fragment_id or fragment.fragment_id
                 fragments_by_key[key] = fragment
         if fragments_by_key:
-            return tuple(
-                fragments_by_key[key] for key in sorted(fragments_by_key)
-            )
+            return tuple(fragments_by_key[key] for key in sorted(fragments_by_key))
         # Empty ledger / no per-manifest hits: preserve run_id fallback.
         return tuple(store.list_by_run_id(manifest.run_id))
 
