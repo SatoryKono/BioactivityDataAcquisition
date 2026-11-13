@@ -13,6 +13,7 @@ from iuphar_target_class.evidence import (
     build_evidence_table,
     class_chain_defects,
     content_equal,
+    local_only_violation,
     require_class_chain,
     require_resolvable,
     rerun_with_new_rules,
@@ -350,4 +351,140 @@ def test_class_chain_rejects_local_evidence_used_as_mapping_confirmation() -> No
     assert local_id in table.match_evidence_ids
     row = replace(_supported_direct_row(), match_evidence_ids=table.match_evidence_ids)
     with pytest.raises(ContractDefect, match="wrong type"):
+        require_class_chain(row, table=table)
+
+
+@pytest.mark.parametrize("other_type", ["match", "local_rule"])
+def test_evidence_ordinal_is_scoped_to_its_input_row(other_type: str) -> None:
+    witness = EvidenceDraft("row-z", "local_rule", "rule", "Receptor", "local")
+    alone = build_evidence_table((witness,), run_id="run-1")
+    combined = build_evidence_table(
+        (witness, EvidenceDraft("row-a", other_type, "other", "value", "local")),
+        run_id="run-1",
+    )
+    kept = next(record for record in combined.records if record.input_row_id == "row-z")
+    assert kept.evidence_id == alone.records[0].evidence_id
+
+
+def _supported_local_row(evidence_ids: tuple[str, ...]) -> ClassificationResult:
+    return replace(
+        _classified_row(),
+        match_status="not_found",
+        matched_target_id=None,
+        iuphar_annotation_status=None,
+        iuphar_class=None,
+        local_status="supported",
+        local_class="Receptor",
+        local_rule_ids=("rule",),
+        local_evidence_ids=evidence_ids,
+        effective_source="local_rule",
+    )
+
+
+@pytest.mark.parametrize("defect", ["missing", "other-row", "wrong-list"])
+def test_local_class_references_must_resolve_to_the_owned_local_list(
+    defect: str,
+) -> None:
+    draft = EvidenceDraft(
+        "row-2" if defect == "other-row" else "row-1",
+        "local_rule",
+        "rule",
+        "Receptor",
+        "match" if defect == "wrong-list" else "local",
+    )
+    table = build_evidence_table((draft,), run_id="run-1")
+    refs = ("missing",) if defect == "missing" else (table.records[0].evidence_id,)
+    with pytest.raises(ContractDefect):
+        require_class_chain(_supported_local_row(refs), table=table)
+
+
+def test_local_class_accepts_its_own_evidence_without_an_iuphar_mapping() -> None:
+    table = build_evidence_table(
+        (_draft("local_rule", "rule", "Receptor", "local"),), run_id="run-1"
+    )
+    assert (
+        require_class_chain(_supported_local_row(table.local_evidence_ids), table=table)
+        is None
+    )
+
+
+@pytest.mark.parametrize("missing", ["rule", "evidence"])
+def test_class_chain_rejects_local_support_with_a_missing_link(missing: str) -> None:
+    table = build_evidence_table(
+        (_draft("local_rule", "rule", "Receptor", "local"),), run_id="run-1"
+    )
+    row = _supported_local_row(table.local_evidence_ids)
+    row = replace(
+        row, **{"local_rule_ids" if missing == "rule" else "local_evidence_ids": ()}
+    )
+    with pytest.raises(ContractDefect):
+        require_class_chain(row, table=table)
+
+
+def test_every_direct_reference_must_belong_to_the_match_list() -> None:
+    table = build_evidence_table(
+        (*_drafts(), _draft("match", "gene_symbol", "GENE", "local")), run_id="run-1"
+    )
+    misplaced = next(
+        record.evidence_id
+        for record in table.records
+        if record.source_id == "gene_symbol"
+    )
+    row = replace(
+        _supported_direct_row(),
+        match_evidence_ids=(*table.match_evidence_ids, misplaced),
+    )
+    with pytest.raises(ContractDefect):
+        require_class_chain(row, table=table)
+
+
+@pytest.mark.parametrize("matched", [True, False])
+def test_local_only_cannot_claim_a_direct_mapping_rule(matched: bool) -> None:
+    row = replace(
+        _supported_local_row(("local",)),
+        match_status="matched" if matched else "not_found",
+        matched_target_id="1" if matched else None,
+        iuphar_mapping_rule_id="direct-rule",
+    )
+    assert local_only_violation(row)
+
+
+@pytest.mark.parametrize("matched", [True, False])
+def test_local_only_keeps_observed_raw_annotation(matched: bool) -> None:
+    row = replace(
+        _supported_local_row(("local",)),
+        match_status="matched" if matched else "not_found",
+        matched_target_id="1" if matched else None,
+        iuphar_type_raw="observed-provider-value",
+    )
+    assert not local_only_violation(row)
+
+
+@pytest.mark.parametrize("source", [None, "unrecognized"])
+def test_an_effective_class_requires_a_known_supporting_source(
+    source: str | None,
+) -> None:
+    row = replace(_supported_local_row(("local",)), effective_source=source)
+    assert unsupported_class(row)
+
+
+@pytest.mark.parametrize("kind", ["iuphar_mapping", "match", "local_rule"])
+def test_local_only_keeps_candidates_but_cannot_claim_direct_mapping_evidence(
+    kind: str,
+) -> None:
+    table = build_evidence_table(
+        (
+            _draft(kind, "source", "observed", "match"),
+            _draft("local_rule", "rule", "Receptor", "local"),
+        ),
+        run_id="run-1",
+    )
+    row = replace(
+        _supported_local_row(table.local_evidence_ids),
+        match_evidence_ids=table.match_evidence_ids,
+    )
+    if kind != "match":
+        with pytest.raises(ContractDefect):
+            require_class_chain(row, table=table)
+    else:
         require_class_chain(row, table=table)

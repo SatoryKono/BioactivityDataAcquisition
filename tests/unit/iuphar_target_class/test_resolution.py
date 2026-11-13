@@ -711,3 +711,42 @@ def test_broken_resolution_rule_blocks_the_run() -> None:
     damaged = replace(resolution_rules()[0], version="")
     with pytest.raises(ValueError, match="missing version"):
         select_effective_class(_CASES[0][1], (damaged,))
+
+
+@pytest.mark.parametrize("annotation", ["available", "partial"])
+@pytest.mark.parametrize("missing_class", [None, ""])
+def test_a_selected_direct_class_cannot_resolve_to_an_empty_value(
+    annotation: str,
+    missing_class: str | None,
+) -> None:
+    row = _row(
+        iuphar_annotation_status=annotation,
+        iuphar_class=missing_class,
+        partial_basis="type" if annotation == "partial" else None,
+    )
+    result = select_effective_class(row)
+    assert result.effective_class is None
+    assert result.effective_source == "none"
+    assert result.decision_status == "requires_review"
+    assert "contract_error" in result.conflict_codes
+    assert result.matched_target_id == row.matched_target_id
+
+
+@pytest.mark.parametrize("missing_class", [None, ""])
+def test_a_selected_local_class_cannot_resolve_to_an_empty_value(
+    missing_class: str | None,
+) -> None:
+    result = select_effective_class(
+        _row(
+            match_status="not_found",
+            matched_target_id=None,
+            iuphar_annotation_status=None,
+            iuphar_class=None,
+            local_status="supported",
+            local_class=missing_class,
+        )
+    )
+    assert result.effective_class is None
+    assert result.effective_source == "none"
+    assert result.decision_status == "requires_review"
+    assert "contract_error" in result.conflict_codes

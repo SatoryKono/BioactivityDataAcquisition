@@ -162,7 +162,10 @@ def validate_rules(rules: tuple[RuleRecord, ...]) -> None:
             if not getattr(rule, field_name):
                 message = f"rule {rule.rule_id} missing {field_name}"
                 raise ValueError(message)
-        if rule.family in {"ec", "l1_l2", "l2"} and rule.marks_direct_layer:
+        if (
+            rule.family in {"ec", "ec_class", "annotation", "l1_l2", "l2"}
+            and rule.marks_direct_layer
+        ):
             message = f"rule {rule.rule_id} must not be marked direct"
             raise ValueError(message)
         if rule.family == "dictionary" and rule.output not in WORKING_CLASSES:

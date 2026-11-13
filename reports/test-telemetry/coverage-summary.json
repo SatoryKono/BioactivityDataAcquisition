@@ -1,11 +1,11 @@
 {
-  "source_branch": "codex/hooks-13038-followup",
-  "source_commit": "24ba79fe5932b73dee1651c1442e50a5a7c83e72",
-  "source_run_id": "43279017693",
+  "source_branch": "codex/iuphar-evidence-assertion-main-20261113",
+  "source_commit": "129efc0092841397cda47289aa678bc5be57b5b2",
+  "source_run_id": "43352737604",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/43279017693",
-  "source_tree_sha256": "5b246815901157ad1612b52d7fafcee766081af126b6b984eb0ff6acd3f7d61f",
-  "refreshed_at_utc": "2026-11-12T18:30:45.082000+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/43352737604",
+  "source_tree_sha256": "3ee79cfbc8d6d30c424619b8473c07d744d53aaf1f35349b640ca83b87c741b1",
+  "refreshed_at_utc": "2026-11-13T02:40:46.860000+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.68,
   "coverage": {
