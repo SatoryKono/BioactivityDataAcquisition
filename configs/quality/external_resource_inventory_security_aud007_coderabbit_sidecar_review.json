@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "6fd3a66b1ce5274367707f8397d0d4652c563a6c",
+  "source_ref": "7b63f2ef8dd06dd12fe53c92bed9ce614fec934a",
+  "source_reviews": {
+    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": "Reviewed fail-closed raw-sidecar permission failures in atomic write and append. Owned staging files are removed before returning False; raw provider data is never redirected into spreadsheet-visible .csv backups. Existing callers preserve primary-write failure signaling and prior artifacts. The existing safe CSV backup path remains unchanged. No new acquisition, owner, lifetime, executor or persistent resource."
+  },
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "line_updates": {
+    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": {
+      "163": 171,
+      "167": 175,
+      "114": 118
+    }
+  }
+}

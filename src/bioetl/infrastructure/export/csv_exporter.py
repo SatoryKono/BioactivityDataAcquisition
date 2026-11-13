@@ -1,14 +1,4 @@
-"""CSV exporter for data layers.
-
-Provides atomic CSV export functionality with support for complex types
-(lists, structs) serialization to JSON strings.
-
-Architecture:
-- Uses composition pattern - injected into storage writers
-- Supports configurable delimiters, headers, encoding
-- Implements atomic write for Windows compatibility
-- Deterministic output: sorted by specified columns
-"""
+"""CSV exporter with atomic writes, path confinement, and complex-type flattening."""
 
 from __future__ import annotations
 
@@ -27,6 +17,30 @@ from bioetl.infrastructure.export.csv_exporter_io_ops import (
 from bioetl.infrastructure.export.csv_exporter_io_ops import (
     atomic_csv_write as _atomic_csv_write,
 )
+from bioetl.infrastructure.export.csv_exporter_io_ops import (
+    raw_sidecar_is_typed as _raw_sidecar_is_typed,
+)
+from bioetl.infrastructure.export.csv_exporter_io_ops import (
+    read_raw_table as _read_raw_table,
+)
+from bioetl.infrastructure.export.csv_exporter_pair_ops import (
+    list_all_clear_pairs as _list_all_clear_pairs,
+)
+from bioetl.infrastructure.export.csv_exporter_pair_ops import (
+    list_named_clear_pair as _list_named_clear_pair,
+)
+from bioetl.infrastructure.export.csv_exporter_pair_ops import (
+    raw_csv_path as _raw_csv_path,
+)
+from bioetl.infrastructure.export.csv_exporter_pair_ops import (
+    unlink_clear_pairs as _unlink_clear_pairs,
+)
+from bioetl.infrastructure.export.csv_exporter_pair_ops import (
+    write_raw_and_published_pair as _write_raw_and_published_pair,
+)
+from bioetl.infrastructure.export.csv_exporter_table_ops import (
+    deduplicate_full_rows as _deduplicate_full_rows_impl,
+)
 from bioetl.infrastructure.export.csv_exporter_table_ops import (
     deduplicate_table as _deduplicate_table,
 )
@@ -42,22 +56,98 @@ from bioetl.infrastructure.export.csv_exporter_table_ops import (
 from bioetl.infrastructure.export.csv_exporter_table_ops import (
     sort_table as _sort_table,
 )
+from bioetl.infrastructure.export.csv_exporter_table_ops import (
+    validate_spreadsheet_safe_column_names as _validate_spreadsheet_safe_column_names,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
+def _export_root(base_path: Path) -> Path:
+    return base_path.expanduser().resolve(strict=False)
+
+
+def _resolve_table_csv_path(base_path: Path, table_name: str) -> Path:
+    """Resolve ``{table_name}.csv`` under the export root; reject traversal."""
+    name = table_name.strip() if isinstance(table_name, str) else ""
+    if not name:
+        raise ValueError("CSV export table name must be a non-empty string")
+    candidate = Path(name)
+    # Reject separators explicitly: on POSIX a backslash is a legal name
+    # character and would otherwise pass Path.parts checks.
+    if (
+        candidate.is_absolute()
+        or len(candidate.parts) != 1
+        or candidate.name != name
+        or name in {".", ".."}
+        or "/" in name
+        or "\\" in name
+        or "\0" in name
+    ):
+        raise ValueError(f"invalid CSV export table name: {table_name!r}")
+    root = _export_root(base_path)
+    csv_path = (root / f"{name}.csv").resolve(strict=False)
+    if not csv_path.is_relative_to(root):
+        raise ValueError(f"CSV export path escapes export directory: {table_name!r}")
+    return csv_path
+
+
+def _resolve_table_export_paths(base_path: Path, table_name: str) -> tuple[Path, Path]:
+    root = _export_root(base_path)
+    csv_path = _resolve_table_csv_path(base_path, table_name)
+    raw_path = _raw_csv_path(csv_path).resolve(strict=False)
+    if not raw_path.is_relative_to(root):
+        raise ValueError(
+            f"CSV raw sidecar path escapes export directory: {table_name!r}"
+        )
+    return csv_path, raw_path
+
+
+def _seed_raw_sidecar_if_missing(
+    *,
+    base_path: Path,
+    table_name: str,
+    logger: LoggerPort,
+    delimiter: str = ",",
+    schema: pa.Schema | None = None,
+) -> None:
+    """Seed ``.csv.raw`` from published CSV using confined export-root paths only."""
+    csv_full_path, raw_path = _resolve_table_export_paths(base_path, table_name)
+    if raw_path.exists() and _raw_sidecar_is_typed(raw_path):
+        return
+    source = raw_path if raw_path.exists() else csv_full_path
+    # Preserve lexical string keys without narrowing existing numeric values.
+    column_types: dict[str, pa.DataType] = {}
+    for field in schema or []:
+        logical_type = (
+            field.type.value_type if pa.types.is_dictionary(field.type) else field.type
+        )
+        if pa.types.is_string(logical_type) or pa.types.is_large_string(logical_type):
+            column_types[field.name] = logical_type
+    table = pv.read_csv(
+        source,
+        parse_options=pv.ParseOptions(delimiter=delimiter),
+        convert_options=pv.ConvertOptions(column_types=column_types),
+    )
+    _write_raw_and_published_pair(
+        write_raw=lambda: _atomic_csv_write(
+            table, raw_path, pv.WriteOptions(), logger, spreadsheet_safe=False
+        ),
+        write_published=lambda: True,
+        raw_path=raw_path,
+        csv_path=csv_full_path,
+        mode="seed",
+    )
+
+
 class CsvExporter:
-    """Exporter for CSV format with atomic writes.
+    """CSV exporter with atomic writes and spreadsheet-safe publish path."""
 
-    Handles conversion of complex PyArrow types to CSV-compatible format
-    and provides atomic file writes to avoid locking issues.
-    """
-
-    # Backward-compatible static aliases used in tests and legacy callers.
     _is_complex_type = staticmethod(_is_complex_type)
     _serialize_column_to_json = staticmethod(_serialize_column_to_json)
     _flatten_for_csv = staticmethod(_flatten_table_for_csv)
+    _raw_csv_path = staticmethod(_raw_csv_path)
 
     def __init__(
         self,
@@ -69,18 +159,6 @@ class CsvExporter:
         sort_by: list[str] | None = None,
         sort_ascending: bool = True,
     ) -> None:
-        """Initialize CSV exporter.
-
-        Args:
-            base_path: Base directory for CSV files
-            logger: Structured logger for observability (MUST be injected)
-            delimiter: Field delimiter (default: ",")
-            header: Include header row (default: True)
-            encoding: File encoding (default: "utf-8")
-            sort_by: Columns to sort by for deterministic output
-            sort_ascending: Sort direction (default: ascending)
-
-        """
         self.base_path = Path(base_path)
         self._logger = logger
         self.delimiter = delimiter
@@ -89,76 +167,51 @@ class CsvExporter:
         self.sort_by = sort_by or []
         self.sort_ascending = sort_ascending
 
-    def export_table(self, table: pa.Table, output_path: str) -> Path:
-        """Synchronously export one table to an explicit CSV path.
+    def _export_root(self) -> Path:
+        return _export_root(self.base_path)
 
-        This compatibility surface is retained for integration tests and
-        legacy callers that predate the async table-name based exporter API.
-        It performs the same CSV shaping steps as the async exporter:
-        complex-type flattening, full-row deduplication, optional sorting,
-        and atomic write.
-        """
+    def _resolve_table_csv_path(self, table_name: str) -> Path:
+        return _resolve_table_csv_path(self.base_path, table_name)
+
+    def _resolve_table_export_paths(self, table_name: str) -> tuple[Path, Path]:
+        return _resolve_table_export_paths(self.base_path, table_name)
+
+    def export_table(self, table: pa.Table, output_path: str) -> Path:
         target_path = Path(output_path)
         target_path.parent.mkdir(parents=True, exist_ok=True)
-
         csv_data = self._flatten_for_csv(table)
         csv_data = self._deduplicate_full_rows(csv_data)
         if self.sort_by:
             csv_data = self._sort_table(csv_data, self.sort_by)
-
-        self._atomic_csv_write(
-            csv_data,
-            target_path,
-            self._build_write_options(),
+        _validate_spreadsheet_safe_column_names(csv_data)
+        return self._overwrite_export(
+            csv_data=csv_data,
+            csv_full_path=target_path,
+            raw_path=self._raw_csv_path(target_path),
+            sort_by=self.sort_by,
         )
-        return target_path
 
     def clear(self, table_name: str | None = None) -> list[Path]:
-        """Clear CSV files from the export directory.
-
-        Handles PermissionError gracefully on Windows when files are locked.
-
-        Args:
-            table_name: Database table name.
-
-        Returns:
-            Result list.
-        """
-        deleted: list[Path] = []
-        if not self.base_path.exists():
-            return deleted
-
-        files_to_delete = []
+        root = self._export_root()
+        if not root.exists():
+            return []
         if table_name:
-            csv_path = self.base_path / f"{table_name}.csv"
-            if csv_path.exists():
-                files_to_delete.append(csv_path)
-        else:
-            files_to_delete = list(self.base_path.glob("*.csv"))
-
-        for csv_file in files_to_delete:
-            try:
-                csv_file.unlink()
-                deleted.append(csv_file)
-            except PermissionError:
-                self._logger.warning(
-                    "Cannot delete locked CSV file",
-                    path=str(csv_file),
-                    reason="file may be open in another program",
+            csv_path = self._resolve_table_csv_path(table_name)
+            pairs = [
+                _list_named_clear_pair(
+                    csv_path=csv_path,
+                    raw_path=self._raw_csv_path(csv_path),
+                    root=root,
                 )
-
-        return deleted
+            ]
+        else:
+            pairs = _list_all_clear_pairs(base_path=root, root=root)
+        return _unlink_clear_pairs(pairs, self._logger)
 
     def _sort_table(self, table: pa.Table, sort_columns: list[str]) -> pa.Table:
-        """Sort table by specified columns for deterministic output."""
-        return _sort_table(
-            table,
-            sort_columns,
-            sort_ascending=self.sort_ascending,
-        )
+        return _sort_table(table, sort_columns, sort_ascending=self.sort_ascending)
 
     def _deduplicate(self, table: pa.Table, primary_keys: list[str]) -> pa.Table:
-        """Deduplicate table based on primary keys."""
         return _deduplicate_table(table, primary_keys, logger=self._logger)
 
     def _atomic_csv_write(
@@ -166,9 +219,16 @@ class CsvExporter:
         data: pa.Table,
         target_path: Path,
         write_options: pv.WriteOptions,
-    ) -> None:
-        """Write CSV atomically (delegates to module-level function)."""
-        _atomic_csv_write(data, target_path, write_options, self._logger)
+        *,
+        spreadsheet_safe: bool = True,
+    ) -> bool:
+        return _atomic_csv_write(
+            data,
+            target_path,
+            write_options,
+            self._logger,
+            spreadsheet_safe=spreadsheet_safe,
+        )
 
     async def export(
         self,
@@ -178,23 +238,8 @@ class CsvExporter:
         sort_by: list[str] | None = None,
         primary_keys: list[str] | None = None,
     ) -> Path:
-        """Export PyArrow table to CSV file.
-
-        When ``append=True`` and the target file exists, new records are
-        appended directly without re-reading the existing CSV.  This keeps
-        per-batch cost at O(batch_size) instead of O(total_records).
-        Call :meth:`finalize_csv` after all batches to deduplicate and sort.
-
-        Returns:
-            Path to the written CSV file.
-        """
         return await asyncio.to_thread(
-            self._export_sync,
-            table_name,
-            data,
-            append,
-            sort_by,
-            primary_keys,
+            self._export_sync, table_name, data, append, sort_by, primary_keys
         )
 
     def _export_sync(
@@ -206,21 +251,76 @@ class CsvExporter:
         primary_keys: list[str] | None,
     ) -> Path:
         _ = primary_keys
-        csv_full_path = self.base_path / f"{table_name}.csv"
-        csv_full_path.parent.mkdir(parents=True, exist_ok=True)
+        root = self._export_root()
+        csv_full_path, raw_path = self._resolve_table_export_paths(table_name)
+        root.mkdir(parents=True, exist_ok=True)
         csv_data = self._flatten_for_csv(data)
-
-        # Fast path: true file-append (no read, no sort, no dedup).
+        _validate_spreadsheet_safe_column_names(csv_data)
         if append and csv_full_path.exists():
-            self._append_to_csv(csv_data, csv_full_path)
-            return csv_full_path
+            return self._append_existing_export(
+                table_name=table_name,
+                csv_data=csv_data,
+                csv_full_path=csv_full_path,
+                raw_path=raw_path,
+            )
+        return self._overwrite_export(
+            csv_data=csv_data,
+            csv_full_path=csv_full_path,
+            raw_path=raw_path,
+            sort_by=sort_by,
+        )
 
-        # First write or overwrite.
+    def _append_existing_export(
+        self,
+        *,
+        table_name: str,
+        csv_data: pa.Table,
+        csv_full_path: Path,
+        raw_path: Path,
+    ) -> Path:
+        _seed_raw_sidecar_if_missing(
+            base_path=self.base_path,
+            table_name=table_name,
+            logger=self._logger,
+            delimiter=self.delimiter,
+            schema=csv_data.schema,
+        )
+        _write_raw_and_published_pair(
+            write_raw=lambda: self._append_to_csv(
+                csv_data, raw_path, spreadsheet_safe=False
+            ),
+            write_published=lambda: self._append_to_csv(
+                csv_data, csv_full_path, spreadsheet_safe=True
+            ),
+            raw_path=raw_path,
+            csv_path=csv_full_path,
+            mode="append",
+        )
+        return csv_full_path
+
+    def _overwrite_export(
+        self,
+        *,
+        csv_data: pa.Table,
+        csv_full_path: Path,
+        raw_path: Path,
+        sort_by: list[str] | None,
+    ) -> Path:
         sort_columns = sort_by if sort_by is not None else self.sort_by
         if sort_columns:
             csv_data = self._sort_table(csv_data, sort_columns)
         write_options = self._build_write_options()
-        self._atomic_csv_write(csv_data, csv_full_path, write_options)
+        _write_raw_and_published_pair(
+            write_raw=lambda: self._atomic_csv_write(
+                csv_data, raw_path, write_options, spreadsheet_safe=False
+            ),
+            write_published=lambda: self._atomic_csv_write(
+                csv_data, csv_full_path, write_options, spreadsheet_safe=True
+            ),
+            raw_path=raw_path,
+            csv_path=csv_full_path,
+            mode="write",
+        )
         return csv_full_path
 
     async def finalize_csv(
@@ -229,19 +329,6 @@ class CsvExporter:
         sort_by: list[str] | None = None,
         primary_keys: list[str] | None = None,
     ) -> Path | None:
-        """Post-run one-shot: read CSV, deduplicate, sort, rewrite.
-
-        Should be called once after all batches complete.
-
-        Args:
-            table_name: Logical table name (maps to ``{table_name}.csv``).
-            sort_by: Optional column names to sort by; falls back to
-                ``self.sort_by`` when *None*.
-            primary_keys: Optional column names for deduplication.
-
-        Returns:
-            Path to the finalized CSV, or *None* if the file does not exist.
-        """
         return await asyncio.to_thread(
             self._finalize_csv_sync, table_name, sort_by, primary_keys
         )
@@ -252,24 +339,34 @@ class CsvExporter:
         sort_by: list[str] | None,
         primary_keys: list[str] | None,
     ) -> Path | None:
-        csv_full_path = self.base_path / f"{table_name}.csv"
-        if not csv_full_path.exists():
+        csv_full_path, raw_path = self._resolve_table_export_paths(table_name)
+        if not csv_full_path.exists() and not raw_path.exists():
             return None
-
         parse_options = pv.ParseOptions(delimiter=self.delimiter)
-
-        table = pv.read_csv(csv_full_path, parse_options=parse_options)
-
+        source_path = raw_path if raw_path.exists() else csv_full_path
+        table = (
+            _read_raw_table(raw_path, delimiter=self.delimiter)
+            if raw_path.exists()
+            else pv.read_csv(source_path, parse_options=parse_options)
+        )
         if primary_keys:
             table = self._deduplicate(table, primary_keys)
-
         sort_columns = sort_by if sort_by is not None else self.sort_by
         if sort_columns:
             table = self._sort_table(table, sort_columns)
-
         write_options = self._build_write_options()
-        self._atomic_csv_write(table, csv_full_path, write_options)
-
+        _validate_spreadsheet_safe_column_names(table)
+        _write_raw_and_published_pair(
+            write_raw=lambda: self._atomic_csv_write(
+                table, raw_path, write_options, spreadsheet_safe=False
+            ),
+            write_published=lambda: self._atomic_csv_write(
+                table, csv_full_path, write_options, spreadsheet_safe=True
+            ),
+            raw_path=raw_path,
+            csv_path=csv_full_path,
+            mode="write",
+        )
         self._logger.info(
             "csv_export_finalized",
             table_name=table_name,
@@ -279,42 +376,32 @@ class CsvExporter:
         )
         return csv_full_path
 
-    def _append_to_csv(self, data: pa.Table, csv_path: Path) -> None:
-        """Append records without reading existing CSV (delegates to module-level)."""
-        _append_to_csv(data, csv_path, self.delimiter, self._logger)
+    def _append_to_csv(
+        self,
+        data: pa.Table,
+        csv_path: Path,
+        *,
+        spreadsheet_safe: bool = True,
+    ) -> bool:
+        return _append_to_csv(
+            data,
+            csv_path,
+            self.delimiter,
+            self._logger,
+            spreadsheet_safe=spreadsheet_safe,
+        )
 
     def _deduplicate_full_rows(self, table: pa.Table) -> pa.Table:
-        """Drop exact duplicate rows while preserving first-seen order."""
-        if table.num_rows < 2:
-            return table
-
-        rows = table.to_pylist()
-        seen: set[tuple[object, ...]] = set()
-        deduplicated_rows: list[dict[str, object]] = []
-        column_names = table.column_names
-
-        for row in rows:
-            identity = tuple(row.get(column) for column in column_names)
-            if identity in seen:
-                continue
-            seen.add(identity)
-            deduplicated_rows.append(row)
-
-        if len(deduplicated_rows) == len(rows):
-            return table
-
-        self._logger.debug(
-            "csv_export_table_deduplicated",
-            removed_rows=len(rows) - len(deduplicated_rows),
-        )
-        return pa.Table.from_pylist(deduplicated_rows, schema=table.schema)
+        deduplicated = _deduplicate_full_rows_impl(table)
+        removed = table.num_rows - deduplicated.num_rows
+        if removed:
+            self._logger.debug(
+                "csv_export_table_deduplicated",
+                removed_rows=removed,
+            )
+        return deduplicated
 
     def _build_write_options(self) -> pv.WriteOptions:
-        """Build CSV writer options from exporter configuration.
-
-        Returns:
-            WriteOptions instance configured with the exporter's delimiter and header settings.
-        """
         return pv.WriteOptions(
             include_header=self.header,
             delimiter=self.delimiter,

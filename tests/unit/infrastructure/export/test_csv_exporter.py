@@ -44,7 +44,11 @@ import pytest
 
 import bioetl.infrastructure.export.csv_exporter_table_ops as csv_exporter_table_ops
 import bioetl.infrastructure.export.csv_exporter_io_ops as csv_exporter_io_ops
-from bioetl.infrastructure.export.csv_exporter import CsvExporter
+from bioetl.infrastructure.export.csv_exporter_io_ops import read_raw_table
+from bioetl.infrastructure.export.csv_exporter import (
+    CsvExporter,
+    _seed_raw_sidecar_if_missing,
+)
 
 
 @pytest.fixture
@@ -319,13 +323,31 @@ class TestCsvExporterClear:
 
         # Create test files
         (tmp_path / "table1.csv").write_text("data1")
+        (tmp_path / "table1.csv.raw").write_text("raw1")
         (tmp_path / "table2.csv").write_text("data2")
 
         deleted = exporter.clear("table1")
 
-        assert len(deleted) == 1
+        assert set(deleted) == {
+            tmp_path / "table1.csv",
+            tmp_path / "table1.csv.raw",
+        }
         assert not (tmp_path / "table1.csv").exists()
+        assert not (tmp_path / "table1.csv.raw").exists()
         assert (tmp_path / "table2.csv").exists()
+
+    def test_clear_orphan_raw_sidecar_for_named_table(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        """Named clear removes a leftover .csv.raw even when CSV is gone."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        orphan = tmp_path / "records.csv.raw"
+        orphan.write_text("id\n1\n", encoding="utf-8")
+
+        deleted = exporter.clear("records")
+
+        assert deleted == [orphan]
+        assert not orphan.exists()
 
     def test_clear_all_csv_files(self, tmp_path: Path, mock_logger: MagicMock) -> None:
         """Test clearing all CSV files."""
@@ -334,13 +356,19 @@ class TestCsvExporterClear:
         # Create test files
         (tmp_path / "table1.csv").write_text("data1")
         (tmp_path / "table2.csv").write_text("data2")
+        (tmp_path / "orphan.csv.raw").write_text("raw")
         (tmp_path / "other.txt").write_text("not csv")
 
         deleted = exporter.clear()
 
-        assert len(deleted) == 2
+        assert set(deleted) == {
+            tmp_path / "table1.csv",
+            tmp_path / "table2.csv",
+            tmp_path / "orphan.csv.raw",
+        }
         assert not (tmp_path / "table1.csv").exists()
         assert not (tmp_path / "table2.csv").exists()
+        assert not (tmp_path / "orphan.csv.raw").exists()
         assert (tmp_path / "other.txt").exists()  # Non-CSV not deleted
 
     def test_clear_nonexistent_directory(
@@ -387,6 +415,34 @@ class TestCsvExporterClear:
         assert deleted == []
         mock_logger.warning.assert_called()
         assert locked.exists()
+
+    def test_clear_locked_csv_preserves_paired_raw_sidecar(
+        self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Codex P2: do not delete .csv.raw when the published CSV unlink fails."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        published = tmp_path / "t.csv"
+        raw = tmp_path / "t.csv.raw"
+        published.write_text("id\n'=x\n'=x\n", encoding="utf-8")
+        raw.write_text("id\n=x\n'=x\n", encoding="utf-8")
+        before_raw = raw.read_bytes()
+
+        original_unlink = Path.unlink
+
+        def _patched_unlink(path_obj: Path, *args: object, **kwargs: object) -> None:
+            if path_obj == published:
+                raise PermissionError("locked by Excel")
+            original_unlink(path_obj, *args, **kwargs)
+
+        monkeypatch.setattr(Path, "unlink", _patched_unlink)
+
+        deleted = exporter.clear("t")
+
+        assert deleted == []
+        assert published.exists()
+        assert raw.exists()
+        assert raw.read_bytes() == before_raw
+        mock_logger.warning.assert_called()
 
 
 @pytest.mark.unit
@@ -661,16 +717,19 @@ class TestCsvExporterTrueAppend:
         assert rows == [{"id": str(i), "val": f"v{i}"} for i in range(5)]
 
     @pytest.mark.asyncio
-    async def test_append_locked_target_writes_backup(
+    async def test_append_locked_published_csv_does_not_claim_success(
         self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """If target CSV is locked during append, batch goes to backup file."""
+        """Locked published CSV after raw append fails closed (backup is not success)."""
         exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
 
         table1 = pa.Table.from_pydict({"id": [1]})
         await exporter.export("locked_test", table1)
+        published = tmp_path / "locked_test.csv"
+        before = published.read_bytes()
+        raw = tmp_path / "locked_test.csv.raw"
+        before_raw = raw.read_bytes()
 
-        # Make the open() call raise PermissionError for the target file
         original_open = open
 
         def _patched_open(path: object, mode: str = "r", **kwargs: object) -> object:
@@ -681,15 +740,115 @@ class TestCsvExporterTrueAppend:
         monkeypatch.setattr("builtins.open", _patched_open)
 
         table2 = pa.Table.from_pydict({"id": [2]})
-        await exporter.export("locked_test", table2)
+        raw = tmp_path / "locked_test.csv.raw"
+        before_raw = raw.read_bytes()
+
+        with pytest.raises(
+            RuntimeError, match="backup-only publish is not a successful"
+        ):
+            await exporter.export("locked_test", table2)
 
         mock_logger.warning.assert_called()
+        assert published.read_bytes() == before
+        assert raw.read_bytes() == before_raw
         backups = list(tmp_path.glob("locked_test.append-locked.*.csv"))
         assert len(backups) == 1
-        backup = backups[0]
-        expected_digest = hashlib.sha256(backup.read_bytes()).hexdigest()[:12]
-        assert backup.name == f"locked_test.append-locked.{expected_digest}.csv"
-        assert backup.exists()
+
+    @pytest.mark.asyncio
+    async def test_append_locked_raw_sidecar_leaves_published_unchanged(
+        self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A locked raw append must not mutate either file or leak a raw CSV backup."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        await exporter.export("locked_raw", pa.Table.from_pydict({"id": [1]}))
+        published = tmp_path / "locked_raw.csv"
+        raw = tmp_path / "locked_raw.csv.raw"
+        before_published = published.read_bytes()
+        before_raw = raw.read_bytes()
+
+        original_open = open
+
+        def _patched_open(path: object, mode: str = "r", **kwargs: object) -> object:
+            if str(path).endswith("locked_raw.csv.raw") and "b" in mode and "a" in mode:
+                raise PermissionError("locked")
+            return original_open(path, mode, **kwargs)
+
+        monkeypatch.setattr("builtins.open", _patched_open)
+
+        with pytest.raises(
+            RuntimeError, match="backup-only publish is not a successful"
+        ):
+            await exporter.export("locked_raw", pa.Table.from_pydict({"id": [2]}))
+
+        assert published.read_bytes() == before_published
+        assert raw.read_bytes() == before_raw
+        assert not list(tmp_path.glob("*.append-locked.*.csv"))
+
+    @pytest.mark.asyncio
+    async def test_overwrite_locked_published_rolls_back_raw_for_finalize(
+        self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Codex P2: failed published overwrite must not leave raw ahead of CSV."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        await exporter.export("t", pa.Table.from_pydict({"id": [1]}), append=False)
+        published = tmp_path / "t.csv"
+        raw = tmp_path / "t.csv.raw"
+        before_raw = raw.read_bytes()
+
+        original_publish = csv_exporter_io_ops._publish_csv_payload
+        locked = True
+
+        def _patched_publish(src: Path, dst: Path) -> None:
+            if locked and dst == published:
+                raise PermissionError("locked by Excel")
+            original_publish(src, dst)
+
+        monkeypatch.setattr(
+            csv_exporter_io_ops, "_publish_csv_payload", _patched_publish
+        )
+
+        with pytest.raises(
+            RuntimeError, match="backup-only publish is not a successful"
+        ):
+            await exporter.export("t", pa.Table.from_pydict({"id": [2]}), append=False)
+
+        assert raw.read_bytes() == before_raw
+        assert set(pv.read_csv(published).column("id").to_pylist()) == {1}
+
+        locked = False
+        await exporter.export("t", pa.Table.from_pydict({"id": [3]}), append=True)
+        assert set(pv.read_csv(published).column("id").to_pylist()) == {1, 3}
+        assert set(read_raw_table(raw).column("id").to_pylist()) == {1, 3}
+
+        await exporter.finalize_csv("t", primary_keys=["id"])
+        assert set(pv.read_csv(published).column("id").to_pylist()) == {1, 3}
+        assert set(read_raw_table(raw).column("id").to_pylist()) == {1, 3}
+
+    @pytest.mark.asyncio
+    async def test_overwrite_rejects_header_collision_before_touching_raw(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        """Colliding spreadsheet-safe headers must not replace an existing pair."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        await exporter.export(
+            "headers",
+            pa.Table.from_pydict({"id": [1], "name": ["a"]}),
+            append=False,
+        )
+        published = tmp_path / "headers.csv"
+        raw = tmp_path / "headers.csv.raw"
+        before_published = published.read_bytes()
+        before_raw = raw.read_bytes()
+
+        with pytest.raises(ValueError, match="Spreadsheet-safe column names collide"):
+            await exporter.export(
+                "headers",
+                pa.Table.from_pydict({"=x": [1], "'=x": [2]}),
+                append=False,
+            )
+
+        assert published.read_bytes() == before_published
+        assert raw.read_bytes() == before_raw
 
 
 @pytest.mark.unit
@@ -766,3 +925,534 @@ class TestCsvExporterFinalize:
             deduplicated=False,
             sorted=False,
         )
+
+    @pytest.mark.asyncio
+    async def test_finalize_csv_dedupes_on_pre_neutralized_primary_keys(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        """Published CSV is safe; raw sidecar keeps =x and '=x distinct for dedupe."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        table = pa.Table.from_pydict(
+            {"id": ["=x", "'=x"], "val": ["formula", "escaped"]}
+        )
+        await exporter.export("keys", table, append=False)
+
+        published = tmp_path / "keys.csv"
+        raw = published.with_name(f"{published.name}.raw")
+        intermediate = pv.read_csv(published)
+        assert intermediate.column("id").to_pylist() == ["'=x", "'=x"]
+        assert read_raw_table(raw).column("id").to_pylist() == ["=x", "'=x"]
+
+        result_path = await exporter.finalize_csv("keys", primary_keys=["id"])
+        assert result_path is not None
+        result = pv.read_csv(result_path)
+        assert result.num_rows == 2
+        assert set(result.column("val").to_pylist()) == {"formula", "escaped"}
+        # Neutralization maps both keys to the same text, but both rows remain.
+        assert result.column("id").to_pylist() == ["'=x", "'=x"]
+
+    @pytest.mark.asyncio
+    async def test_export_finalize_cycles_keep_formula_keys_then_append(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        """Two export/finalize cycles plus append keep =x, '=x, and z (3 rows)."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        first = pa.Table.from_pydict(
+            {"id": ["=x", "'=x"], "val": ["formula", "escaped"]}
+        )
+        await exporter.export("keys", first, append=False)
+        assert (tmp_path / "keys.csv").read_text(encoding="utf-8").count("=x") >= 1
+        assert '"=x"' not in (tmp_path / "keys.csv").read_text(encoding="utf-8")
+
+        first_path = await exporter.finalize_csv("keys", primary_keys=["id"])
+        assert first_path is not None
+        assert pv.read_csv(first_path).num_rows == 2
+
+        second_path = await exporter.finalize_csv("keys", primary_keys=["id"])
+        assert second_path is not None
+        after_second = pv.read_csv(second_path)
+        assert after_second.num_rows == 2
+        assert set(after_second.column("val").to_pylist()) == {"formula", "escaped"}
+
+        await exporter.export(
+            "keys",
+            pa.Table.from_pydict({"id": ["z"], "val": ["plain"]}),
+            append=True,
+        )
+        third_path = await exporter.finalize_csv("keys", primary_keys=["id"])
+        assert third_path is not None
+        final = pv.read_csv(third_path)
+        assert final.num_rows == 3
+        assert set(final.column("val").to_pylist()) == {
+            "formula",
+            "escaped",
+            "plain",
+        }
+        assert set(
+            read_raw_table(third_path.with_name(f"{third_path.name}.raw"))
+            .column("id")
+            .to_pylist()
+        ) == {
+            "=x",
+            "'=x",
+            "z",
+        }
+
+
+@pytest.mark.unit
+class TestCsvExporterPathConfinement:
+    """table_name must not escape the export directory (Sonar AaHT3lBY8IZ3BlS9H5SG)."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "evil_name",
+        [
+            "../escape",
+            "..\\escape",
+            "/tmp/escape",
+            "nested/escape",
+            "nested\\escape",
+            ".",
+            "..",
+            "",
+            "   ",
+            "a/../../b",
+        ],
+    )
+    async def test_export_rejects_path_traversal_table_names(
+        self,
+        tmp_path: Path,
+        mock_logger: MagicMock,
+        evil_name: str,
+    ) -> None:
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        table = pa.Table.from_pydict({"id": [1]})
+        outside_before = {
+            path.resolve() for path in tmp_path.parent.glob("*") if path.is_file()
+        }
+
+        with pytest.raises(ValueError, match="CSV export|table name"):
+            await exporter.export(evil_name, table, append=False)
+
+        outside_after = {
+            path.resolve() for path in tmp_path.parent.glob("*") if path.is_file()
+        }
+        assert outside_after == outside_before
+        assert list(tmp_path.glob("*")) == []
+
+    @pytest.mark.asyncio
+    async def test_append_seed_raw_sidecar_stays_inside_export_root(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        """Legacy published-only CSV seeds ``.csv.raw`` only under the export root."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        published = tmp_path / "legacy.csv"
+        published.write_text("id\n1\n", encoding="utf-8")
+
+        await exporter.export(
+            "legacy",
+            pa.Table.from_pydict({"id": [2]}),
+            append=True,
+        )
+
+        raw = published.with_name(f"{published.name}.raw")
+        assert raw.is_file()
+        assert raw.resolve().is_relative_to(tmp_path.resolve())
+        assert published.resolve().is_relative_to(tmp_path.resolve())
+        assert set(read_raw_table(raw).column("id").to_pylist()) == {1, 2}
+        # Published path remains spreadsheet-safe for newly appended rows.
+        assert set(pv.read_csv(published).column("id").to_pylist()) == {1, 2}
+
+    def test_resolve_table_export_paths_allows_dotted_table_names(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        csv_path, raw_path = exporter._resolve_table_export_paths("chembl.activity")
+        assert csv_path.name == "chembl.activity.csv"
+        assert raw_path.name == "chembl.activity.csv.raw"
+        assert csv_path.parent == tmp_path.resolve()
+        assert raw_path.parent == tmp_path.resolve()
+
+    @pytest.mark.parametrize(
+        "evil_name",
+        [
+            "../escape",
+            "..\\escape",
+            "/tmp/escape",
+            "nested/escape",
+            "a/../../b",
+        ],
+    )
+    def test_seed_raw_sidecar_rejects_path_traversal_table_names(
+        self,
+        tmp_path: Path,
+        evil_name: str,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Seed sink rebuilds paths from table_name; traversal must not touch IO."""
+        outside_before = {
+            path.resolve() for path in tmp_path.parent.glob("*") if path.is_file()
+        }
+        with pytest.raises(ValueError, match="CSV export|table name"):
+            _seed_raw_sidecar_if_missing(
+                base_path=tmp_path, table_name=evil_name, logger=mock_logger
+            )
+        outside_after = {
+            path.resolve() for path in tmp_path.parent.glob("*") if path.is_file()
+        }
+        assert outside_after == outside_before
+        assert list(tmp_path.glob("*")) == []
+
+
+@pytest.mark.asyncio
+async def test_failed_published_overwrite_restores_pair_before_resume(
+    tmp_path, mock_logger, monkeypatch
+):
+    from bioetl.infrastructure.export import csv_exporter_io_ops as io
+
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    await exporter.export("pair", pa.table({"id": [1]}), append=False)
+    published = tmp_path / "pair.csv"
+    raw = tmp_path / "pair.csv.raw"
+    before = {published: published.read_bytes(), raw: raw.read_bytes()}
+    original = io._publish_csv_payload
+
+    def publish(source, target):
+        if target == published:
+            raise PermissionError("published locked")
+        return original(source, target)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(io, "_publish_csv_payload", publish)
+        with pytest.raises(RuntimeError, match="backup-only"):
+            await exporter.export("pair", pa.table({"id": [2]}), append=False)
+    assert {path: path.read_bytes() for path in before} == before
+    await exporter.export("pair", pa.table({"id": [3]}))
+    await exporter.finalize_csv("pair")
+    assert pv.read_csv(published)["id"].to_pylist() == [1, 3]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("table_name", ["pair", None])
+async def test_failed_published_clear_keeps_raw_identity(
+    tmp_path, mock_logger, monkeypatch, table_name
+):
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    await exporter.export("pair", pa.table({"key": ["=x", "'=x"], "id": [1, 2]}))
+    published = tmp_path / "pair.csv"
+    raw = tmp_path / "pair.csv.raw"
+    before = {published: published.read_bytes(), raw: raw.read_bytes()}
+    original = Path.unlink
+
+    def unlink(path, *args, **kwargs):
+        if path == published:
+            raise PermissionError("published locked")
+        return original(path, *args, **kwargs)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "unlink", unlink)
+        assert exporter.clear(table_name) == []
+    assert {path: path.read_bytes() for path in before} == before
+    await exporter.finalize_csv("pair", primary_keys=["key"], sort_by=["id"])
+    assert pv.read_csv(published)["id"].to_pylist() == [1, 2]
+
+
+@pytest.mark.asyncio
+async def test_successful_append_does_not_read_whole_raw_sidecar(
+    tmp_path, mock_logger, monkeypatch
+):
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    await exporter.export("bounded", pa.table({"id": [1]}))
+    raw = tmp_path / "bounded.csv.raw"
+    original = Path.read_bytes
+
+    def read(path):
+        if path == raw:
+            pytest.fail(
+                "append must snapshot length rather than read the complete raw export"
+            )
+        return original(path)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "read_bytes", read)
+        await exporter.export("bounded", pa.table({"id": [2]}))
+    await exporter.finalize_csv("bounded")
+    assert pv.read_csv(tmp_path / "bounded.csv")["id"].to_pylist() == [1, 2]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("keys", [["-1", "-1.0"], ["001", "1"], ["true", "True"]])
+async def test_finalize_preserves_distinct_string_key_types(
+    tmp_path, mock_logger, keys
+):
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    original = pa.table({"id": keys, "payload": ["a", "b"]})
+    await exporter.export("typed", original)
+    await exporter.finalize_csv("typed", primary_keys=["id"], sort_by=["payload"])
+    assert pv.read_csv(tmp_path / "typed.csv").num_rows == 2
+    assert pv.read_csv(tmp_path / "typed.csv")["payload"].to_pylist() == ["a", "b"]
+
+
+@pytest.mark.asyncio
+async def test_sync_export_updates_existing_raw_before_finalize(tmp_path, mock_logger):
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    await exporter.export("paired", pa.table({"id": [1]}))
+    exporter.export_table(pa.table({"id": [2]}), str(tmp_path / "paired.csv"))
+    await exporter.finalize_csv("paired")
+    assert pv.read_csv(tmp_path / "paired.csv")["id"].to_pylist() == [2]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("table_name", ["normalized", None])
+async def test_clear_expands_the_same_root_as_export(
+    tmp_path, mock_logger, monkeypatch, table_name
+):
+    root = tmp_path / "exports"
+    original = Path.expanduser
+
+    def expand(path):
+        return root if str(path).replace("\\", "/") == "~/exports" else original(path)
+
+    monkeypatch.setattr(Path, "expanduser", expand)
+    exporter = CsvExporter("~/exports", mock_logger)
+    await exporter.export("normalized", pa.table({"id": [1]}))
+    expected = {root / "normalized.csv", root / "normalized.csv.raw"}
+    assert set(exporter.clear(table_name)) == expected
+    assert not any(path.exists() for path in expected)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("legacy_raw_exists", [False, True])
+async def test_seed_partial_publication_preserves_legacy_pair(
+    tmp_path, mock_logger, monkeypatch, legacy_raw_exists
+):
+    published = tmp_path / "legacy.csv"
+    raw = tmp_path / "legacy.csv.raw"
+    published.write_text("id\n1\n", encoding="utf-8")
+    if legacy_raw_exists:
+        raw.write_bytes(published.read_bytes())
+    before = {path: path.read_bytes() for path in tmp_path.iterdir()}
+    original = csv_exporter_io_ops._publish_csv_payload
+
+    def publish(source, target):
+        if target == raw:
+            target.write_bytes(b"incomplete")
+            raise OSError("injected partial filesystem publication")
+        return original(source, target)
+
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    with monkeypatch.context() as patch:
+        patch.setattr(csv_exporter_io_ops, "_publish_csv_payload", publish)
+        with pytest.raises(OSError, match="partial filesystem"):
+            await exporter.export("legacy", pa.table({"id": [2]}))
+    assert {path: path.read_bytes() for path in tmp_path.iterdir()} == before
+
+
+@pytest.mark.asyncio
+async def test_typed_raw_roundtrip_preserves_numeric_and_string_values(
+    tmp_path, mock_logger
+):
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    original = pa.table({"key": ["-1", "-1.0", "001"], "value": [-1.5, 0.0, 3.0]})
+    await exporter.export("schema", original)
+    raw = tmp_path / "schema.csv.raw"
+    with raw.open("rb") as stream, pa.ipc.open_stream(stream) as reader:
+        assert reader.schema == original.schema
+        assert reader.read_all().equals(original)
+    await exporter.finalize_csv("schema", primary_keys=["key"])
+    result = read_raw_table(raw)
+    assert set(result["key"].to_pylist()) == {"-1", "-1.0", "001"}
+    assert sorted(result["value"].to_pylist()) == [-1.5, 0.0, 3.0]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("delimiter", [",", "\t", ";"])
+async def test_legacy_seed_preserves_configured_delimiter(
+    tmp_path, mock_logger, delimiter
+):
+    published = tmp_path / "legacy.csv"
+    published.write_text(f"id{delimiter}value\n1{delimiter}first\n", encoding="utf-8")
+    exporter = CsvExporter(str(tmp_path), mock_logger, delimiter=delimiter)
+    await exporter.export("legacy", pa.table({"id": [2], "value": ["second"]}))
+    await exporter.finalize_csv("legacy", sort_by=["id"])
+    table = pv.read_csv(published, parse_options=pv.ParseOptions(delimiter=delimiter))
+    assert table.to_pydict() == {"id": [1, 2], "value": ["first", "second"]}
+
+
+@pytest.mark.asyncio
+async def test_typed_raw_dictionary_keys_survive_finalize_and_append(
+    tmp_path, mock_logger
+):
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    keys = pa.array(["=a", "'=a"]).dictionary_encode()
+    await exporter.export("dictionary", pa.table({"key": keys, "id": [1, 2]}))
+    await exporter.finalize_csv("dictionary", primary_keys=["key"])
+    await exporter.export(
+        "dictionary",
+        pa.table({"key": pa.array(["next"]).dictionary_encode(), "id": [3]}),
+    )
+    await exporter.finalize_csv("dictionary", primary_keys=["key"], sort_by=["id"])
+    assert pv.read_csv(tmp_path / "dictionary.csv")["id"].to_pylist() == [1, 2, 3]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("legacy_raw", [False, True])
+@pytest.mark.parametrize("keys", [("123", "456"), ("001", "1"), ("true", "True")])
+async def test_legacy_seed_uses_incoming_string_schema(
+    tmp_path, mock_logger, legacy_raw, keys
+):
+    published = tmp_path / "legacy.csv"
+    published.write_text(f'id,value\n"{keys[0]}",old\n', encoding="utf-8")
+    if legacy_raw:
+        (tmp_path / "legacy.csv.raw").write_bytes(published.read_bytes())
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    await exporter.export("legacy", pa.table({"id": [keys[1]], "value": ["new"]}))
+    for _ in range(2):
+        await exporter.finalize_csv("legacy", primary_keys=["id"])
+        result = pv.read_csv(
+            published,
+            convert_options=pv.ConvertOptions(column_types={"id": pa.string()}),
+        )
+        assert set(
+            zip(result["id"].to_pylist(), result["value"].to_pylist(), strict=True)
+        ) == {
+            (keys[0], "old"),
+            (keys[1], "new"),
+        }
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("null_first", [True, False])
+async def test_all_null_string_batch_aligns_with_numeric_values(
+    tmp_path, mock_logger, null_first
+):
+    nulls = pa.table({"id": [1], "value": pa.array([None], type=pa.string())})
+    numbers = pa.table({"id": [2], "value": [1.5]})
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    for batch in [nulls, numbers] if null_first else [numbers, nulls]:
+        await exporter.export("nullable", batch)
+    for _ in range(2):
+        await exporter.finalize_csv("nullable", primary_keys=["id"], sort_by=["id"])
+        result = pv.read_csv(tmp_path / "nullable.csv")
+        assert result["id"].to_pylist() == [1, 2]
+        assert result["value"].to_pylist() == [None, 1.5]
+    await exporter.export("nullable", pa.table({"id": [3], "value": [2.5]}))
+    await exporter.finalize_csv("nullable", sort_by=["id"])
+    assert pv.read_csv(tmp_path / "nullable.csv")["value"].to_pylist() == [
+        None,
+        1.5,
+        2.5,
+    ]
+
+
+@pytest.mark.asyncio
+async def test_all_null_mixed_declared_types_remain_null(tmp_path, mock_logger):
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    await exporter.export(
+        "nullonly", pa.table({"id": [1], "value": pa.array([None], type=pa.string())})
+    )
+    await exporter.export(
+        "nullonly", pa.table({"id": [2], "value": pa.array([None], type=pa.float64())})
+    )
+    result = read_raw_table(tmp_path / "nullonly.csv.raw")
+    assert result["value"].to_pylist() == [None, None]
+    assert result.schema.field("value").type == pa.string()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("legacy_raw", [False, True])
+@pytest.mark.parametrize("old_value,new_value", [(1.5, 2), (1, 2.5)])
+async def test_legacy_seed_does_not_narrow_numeric_values(
+    tmp_path, mock_logger, legacy_raw, old_value, new_value
+):
+    published = tmp_path / "legacy.csv"
+    published.write_text(f"id,value\n1,{old_value}\n", encoding="utf-8")
+    if legacy_raw:
+        (tmp_path / "legacy.csv.raw").write_bytes(published.read_bytes())
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    await exporter.export("legacy", pa.table({"id": [2], "value": [new_value]}))
+    for _ in range(2):
+        await exporter.finalize_csv("legacy", primary_keys=["id"], sort_by=["id"])
+        result = read_raw_table(tmp_path / "legacy.csv.raw")
+        assert result["id"].to_pylist() == [1, 2]
+        assert result["value"].to_pylist() == [old_value, new_value]
+        assert pa.types.is_floating(result.schema.field("value").type)
+
+
+@pytest.mark.asyncio
+async def test_legacy_float_is_not_narrowed_by_integer_append(tmp_path, mock_logger):
+    published = tmp_path / "legacy.csv"
+    published.write_text("id,value\n1,1.5\n", encoding="utf-8")
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    await exporter.export("legacy", pa.table({"id": [2], "value": [2]}))
+    await exporter.finalize_csv("legacy", sort_by=["id"])
+    result = pv.read_csv(published)
+    assert result["value"].to_pylist() == [1.5, 2.0]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("legacy", [False, True])
+@pytest.mark.parametrize("reverse", [False, True])
+async def test_populated_text_and_numeric_batches_finalize(
+    tmp_path, mock_logger, legacy, reverse
+):
+    first, second = (123, "old") if reverse else ("old", 123)
+    published = tmp_path / "mixed.csv"
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    if legacy:
+        published.write_text(f"id,value\n1,{first}\n", encoding="utf-8")
+    else:
+        await exporter.export("mixed", pa.table({"id": [1], "value": [first]}))
+    await exporter.export("mixed", pa.table({"id": [2], "value": [second]}))
+    await exporter.finalize_csv("mixed", sort_by=["id"])
+    result = pv.read_csv(published)
+    assert result["value"].to_pylist() == [str(first), str(second)]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("legacy", [False, True])
+@pytest.mark.parametrize("reverse", [False, True])
+async def test_boolean_and_numeric_batches_finalize(
+    tmp_path, mock_logger, legacy, reverse
+):
+    first, second = (123, True) if reverse else (True, 123)
+    rendered = [str(v).lower() for v in (first, second)]
+    published = tmp_path / "booleans.csv"
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    if legacy:
+        published.write_text(f"id,value\n1,{rendered[0]}\n", encoding="utf-8")
+    else:
+        await exporter.export("booleans", pa.table({"id": [1], "value": [first]}))
+    await exporter.export("booleans", pa.table({"id": [2], "value": [second]}))
+    await exporter.finalize_csv("booleans", sort_by=["id"])
+    assert pv.read_csv(published)["value"].to_pylist() == rendered
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("legacy", [False, True])
+@pytest.mark.parametrize("reverse", [False, True])
+@pytest.mark.parametrize("large", [9007199254740993, -9007199254740993])
+async def test_large_integer_fractional_batches_preserve_exact_raw_and_safe_csv(
+    tmp_path, mock_logger, legacy, reverse, large
+):
+    import csv
+
+    first, second = (1.5, large) if reverse else (large, 1.5)
+    published = tmp_path / "precision.csv"
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    if legacy:
+        published.write_text(f"id,value\n1,{first}\n", encoding="utf-8")
+    else:
+        await exporter.export("precision", pa.table({"id": [1], "value": [first]}))
+    await exporter.export("precision", pa.table({"id": [2], "value": [second]}))
+    await exporter.finalize_csv("precision", sort_by=["id"])
+    with published.open(newline="", encoding="utf-8") as source:
+        rows = list(csv.DictReader(source))
+    expected = [str(first), str(second)]
+    from bioetl.infrastructure.export.csv_exporter_io_ops import read_raw_table
+
+    raw = read_raw_table(published.with_suffix(".csv.raw"))
+    assert raw["value"].to_pylist() == expected
+    assert [row["value"] for row in rows] == [
+        "'" + value if value.startswith("-") else value for value in expected
+    ]
