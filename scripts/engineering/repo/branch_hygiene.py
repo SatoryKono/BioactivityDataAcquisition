@@ -308,7 +308,9 @@ def _latest_activity(path: Path) -> float:
     """Keep trees when activity cannot be safely excluded; never read file contents."""
     latest = 0.0
     try:
-        for base, directories, files in os.walk(path, followlinks=False):
+        for base, directories, files in os.walk(
+            path, followlinks=False, onerror=_raise_walk_error
+        ):
             directories[:] = [
                 name
                 for name in directories
@@ -542,6 +544,11 @@ def _lexically_confined(path: Path, root: Path, *, allow_root: bool = False) -> 
     return candidate
 
 
+def _raise_walk_error(error: OSError) -> None:
+    """An incomplete traversal cannot establish that a tree is safe to modify."""
+    raise error
+
+
 def _safe_tree_target(path: Path, *, must_exist: bool = True) -> Path:
     configured_root = Path(os.path.abspath(GOVERNED_WORKSPACE_ROOT))
     candidate = _lexically_confined(path, configured_root)
@@ -553,12 +560,22 @@ def _safe_tree_target(path: Path, *, must_exist: bool = True) -> Path:
         raise RuntimeError("Refusing target outside governed workspace")
     if candidate.is_symlink() or candidate.is_junction():
         raise RuntimeError("Refusing linked target")
-    for base, directories, files in os.walk(target, followlinks=False):
+    _scan_tree_inputs(target)
+    return target
+
+
+def _scan_tree_inputs(target: Path) -> None:
+    for base, directories, files in os.walk(
+        target, followlinks=False, onerror=_raise_walk_error
+    ):
         for name in directories + files:
             item = Path(base) / name
+            if name == ".git" and Path(base) != target:
+                raise RuntimeError("Refusing nested Git tree")
             if name.startswith(".env") or item.is_symlink() or item.is_junction():
                 raise RuntimeError(f"Refusing env or linked tree input: {item}")
-    return target
+        if Path(base) == target:
+            directories[:] = [name for name in directories if name != ".git"]
 
 
 def _report_directory(value: Path | None) -> Path:
@@ -670,7 +687,8 @@ def _apply_orphan(row: dict[str, Any]) -> dict[str, Any]:
     try:
         src = _safe_tree_target(src)
         if (src / ".git").exists() or any(
-            Path(worktree["path"]).resolve() == src
+            Path(worktree["path"]).resolve().is_relative_to(src)
+            or src.is_relative_to(Path(worktree["path"]).resolve())
             for worktree in registered_worktrees()
         ):
             return {**entry, "result": "kept: registered or recoverable Git tree"}

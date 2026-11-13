@@ -547,3 +547,56 @@ def test_branch_delete_is_conditional_on_bundled_sha(monkeypatch):
     result = bh._delete_one_branch(candidate, argparse.Namespace(branch_days=3))
     assert result["rc"] == 1
     assert calls == [["git", "update-ref", "-d", "refs/heads/stale", candidate["sha"]]]
+
+
+def test_incomplete_tree_traversal_refuses_mutation(monkeypatch, tmp_path):
+    monkeypatch.setattr(bh, "GOVERNED_WORKSPACE_ROOT", tmp_path.parent)
+
+    def scandir(path):
+        raise PermissionError("inaccessible subtree")
+
+    monkeypatch.setattr(bh.os, "scandir", scandir)
+    with pytest.raises(PermissionError, match="inaccessible"):
+        bh._safe_tree_target(tmp_path)
+    monkeypatch.setattr(bh, "_now", lambda: 12345)
+    assert bh._latest_activity(tmp_path) == 12345
+
+
+@pytest.mark.parametrize("marker_directory", [False, True])
+def test_nested_git_metadata_keeps_quarantine(monkeypatch, tmp_path, marker_directory):
+    tree = tmp_path / "old.__trash_20200101"
+    nested = tree / "recovery"
+    nested.mkdir(parents=True)
+    marker = nested / ".git"
+    if marker_directory:
+        marker.mkdir()
+    else:
+        marker.write_text("gitdir: preserved-metadata")
+    monkeypatch.setattr(bh, "GOVERNED_WORKSPACE_ROOT", tmp_path)
+    monkeypatch.setattr(
+        bh.shutil, "rmtree", lambda *args: pytest.fail("deleted nested Git tree")
+    )
+    result = bh._apply_orphan(
+        {"path": str(tree), "kind": "orphan", "action": "HARD_DELETE"}
+    )
+    assert "nested Git" in result["result"] and marker.exists()
+
+
+def test_registered_nested_locked_tree_keeps_parent(monkeypatch, tmp_path):
+    parent = tmp_path / "parent.__trash_20200101"
+    parent.mkdir()
+    monkeypatch.setattr(bh, "_safe_tree_target", lambda path: path)
+    monkeypatch.setattr(
+        bh,
+        "registered_worktrees",
+        lambda: [{"path": str(parent / "nested"), "locked": "recovery"}],
+    )
+    monkeypatch.setattr(
+        bh.shutil,
+        "rmtree",
+        lambda *args: pytest.fail("deleted registered nested worktree"),
+    )
+    result = bh._apply_orphan(
+        {"path": str(parent), "kind": "orphan", "action": "HARD_DELETE"}
+    )
+    assert "registered" in result["result"] and parent.exists()
