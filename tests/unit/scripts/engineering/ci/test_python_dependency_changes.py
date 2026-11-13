@@ -67,6 +67,53 @@ def test_pytest_helper_uses_canonical_all_tests_lane(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize(
+    ("groups", "runtime", "edge", "changed", "admitted"),
+    [
+        (("tests",), False, True, "soupsieve", True),
+        (("dev",), False, True, "soupsieve", True),
+        (("tests", "dev"), False, True, "soupsieve", True),
+        (("tests",), True, True, "soupsieve", False),
+        (("docs",), False, True, "soupsieve", False),
+        (("tests",), False, False, "soupsieve", False),
+        ((), False, True, "soupsieve", False),
+        (("tests",), False, True, "unowned", False),
+    ],
+)
+def test_reviewed_parser_tool_family_requires_test_only_declared_owner(
+    tmp_path: Path,
+    groups: tuple[str, ...],
+    runtime: bool,
+    edge: bool,
+    changed: str,
+    admitted: bool,
+) -> None:
+    """Retain the full suite for reviewed tooling; never invent a narrow consumer."""
+    _consumer(tmp_path, "tests/test_unrelated.py", "httpx")
+    runtime_requirements = '["beautifulsoup4"]' if runtime else "[]"
+    optional = "\n".join(f'{group} = ["beautifulsoup4"]' for group in groups)
+    (tmp_path / "pyproject.toml").write_text(
+        f"[project]\ndependencies = {runtime_requirements}\n"
+        f"[project.optional-dependencies]\n{optional}\n",
+        encoding="utf-8",
+    )
+    lock_edge = 'dependencies = [{ name = "soupsieve" }]\n' if edge else ""
+    (tmp_path / "uv.lock").write_text(
+        '[[package]]\nname = "soupsieve"\n'
+        '[[package]]\nname = "beautifulsoup4"\n' + lock_edge,
+        encoding="utf-8",
+    )
+    if admitted:
+        assert lane.affected_pytest_targets(
+            ["uv.lock"], repo_root=tmp_path, changed_python_dependencies={changed}
+        ) == ["tests"]
+    else:
+        with pytest.raises(ValueError, match="Unconfirmed Python dependency"):
+            lane.affected_pytest_targets(
+                ["uv.lock"], repo_root=tmp_path, changed_python_dependencies={changed}
+            )
+
+
+@pytest.mark.parametrize(
     "plugin", ["pytest-cov", "pytest-xdist", "pytest-timeout", "pytest-recording"]
 )
 def test_entrypoint_plugin_uses_canonical_lane(
