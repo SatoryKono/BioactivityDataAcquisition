@@ -236,7 +236,9 @@
         "configs/_schema"
       ],
       "excluded_review_evidence_patterns": [
-        "configs/quality/external_resource_inventory_pr*_review.json"
+        "configs/quality/external_resource_inventory_pr*_review.json",
+        "configs/quality/external_resource_inventory_security_aud005_main_merge_review.json",
+        "configs/quality/external_resource_inventory_security_aud006_review.json"
       ],
       "excluded_shared_contract_blocks": [
         {

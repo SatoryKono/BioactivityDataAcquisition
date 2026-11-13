@@ -34,6 +34,8 @@ GENERATED_DUPLICATION_SURFACE_FILES = (
 )
 REVIEW_EVIDENCE_DUPLICATION_PATTERNS = (
     "configs/quality/external_resource_inventory_pr*_review.json",
+    "configs/quality/external_resource_inventory_security_aud005_main_merge_review.json",
+    "configs/quality/external_resource_inventory_security_aud006_review.json",
 )
 SHARED_REPORT_CONTRACT_BLOCKS = {
     "properties.observations",
