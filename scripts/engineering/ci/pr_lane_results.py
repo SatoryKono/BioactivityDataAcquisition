@@ -202,12 +202,13 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
 NO_PARTIAL_TREE_TEST = "tests/unit/scripts/repo/test_check_no_partial_tree.py"
 HOOK_INSTALLATION_TEST = "tests/unit/scripts/test_hook_installation.py"
 SCOPED_CHECKS_TEST = "tests/unit/scripts/repo/test_scoped_checks.py"
+HOOK_RECEIPTS_TEST = "tests/unit/scripts/repo/test_hook_receipts.py"
 IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".gitattributes": (
-        "tests/unit/scripts/repo/test_hook_receipts.py",
+        HOOK_RECEIPTS_TEST,
         "tests/architecture/test_config_discrepancy_report_drift.py",
         TECH_DEBT_5847_5852_CLOSEOUT_TEST,
     ),
@@ -224,7 +225,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/engineering/repo/scoped_checks.py": (
         SCOPED_CHECKS_TEST,
         "tests/unit/scripts/repo/test_scoped_checks_cache.py",
-        "tests/unit/scripts/repo/test_hook_receipts.py",
+        HOOK_RECEIPTS_TEST,
     ),
     "scripts/engineering/dev/pretest_guardrails.ps1": (SCOPED_CHECKS_TEST,),
     "scripts/engineering/dev/setup_bioetl_wsl.ps1": (
@@ -232,7 +233,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/05-operations/runbooks/scoped-post-change-checks.md": (
         SCOPED_CHECKS_TEST,
-        "tests/unit/scripts/repo/test_hook_receipts.py",
+        HOOK_RECEIPTS_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "docs/05-operations/runbooks/ai-closeout-wrapper.md": (
