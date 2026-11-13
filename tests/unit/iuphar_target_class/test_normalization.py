@@ -200,7 +200,7 @@ def test_absent_well_formed_id_is_not_found() -> None:
     assert validated.target_id == "840"
 
 
-def test_empty_batch() -> None:
+def test_empty_batch_is_deterministic_and_reports_empty_qc() -> None:
     first = classify_batch((), provenance=PROVENANCE)
     second = classify_batch((), provenance=PROVENANCE)
     assert first == second

@@ -88,6 +88,14 @@ async def dispatch_quarantine_request(
             await handle_filtered_record_detail(host, writer, query, payload_hash)
             return
         await host._send_response(writer, 404, _NOT_FOUND_MESSAGE)
+    except ForensicEndpointUnavailable as exc:
+        await host._send_payload_response(
+            writer,
+            exc.status_code,
+            forensic_unavailable_payload(
+                endpoint=path.rsplit("/", maxsplit=1)[-1], reason=exc.reason
+            ),
+        )
     except ValueError as exc:
         await host._send_response(writer, 400, str(exc))
     except (ConnectionError, OSError, RuntimeError):
@@ -109,19 +117,23 @@ async def handle_filtered_records(
 ) -> None:
     """Handle paginated list endpoint for filtered Silver records."""
     assert host._quarantine_service is not None
+    quarantine_service = host._quarantine_service
     pipeline = host._read_required_param(query, "pipeline")
-    payload = await host._quarantine_service.list_filtered_records(
-        pipeline=pipeline,
-        run_type=host._read_optional_param(query, "run_type"),
-        reason_code=host._read_optional_param(query, "reason_code"),
-        field=host._read_optional_param(query, "field"),
-        run_id=host._read_optional_param(query, "run_id"),
-        payload_hash=host._read_optional_param(query, "payload_hash"),
-        from_ts=host._read_optional_param(query, "from"),
-        to_ts=host._read_optional_param(query, "to"),
-        limit=host._read_int_param(query, "limit", default=50, minimum=1),
-        offset=host._read_int_param(query, "offset", default=0, minimum=0),
-        sort=host._read_optional_param(query, "sort") or "ingestion_ts_desc",
+    payload = await run_bounded_forensic_operation(
+        limiter=host._forensic_endpoint_limiter,
+        operation_factory=lambda: quarantine_service.list_filtered_records(
+            pipeline=pipeline,
+            run_type=host._read_optional_param(query, "run_type"),
+            reason_code=host._read_optional_param(query, "reason_code"),
+            field=host._read_optional_param(query, "field"),
+            run_id=host._read_optional_param(query, "run_id"),
+            payload_hash=host._read_optional_param(query, "payload_hash"),
+            from_ts=host._read_optional_param(query, "from"),
+            to_ts=host._read_optional_param(query, "to"),
+            limit=host._read_int_param(query, "limit", default=50, minimum=1),
+            offset=host._read_int_param(query, "offset", default=0, minimum=0),
+            sort=host._read_optional_param(query, "sort") or "ingestion_ts_desc",
+        ),
     )
     await host._send_payload_response(writer, 200, payload)
 
@@ -179,15 +191,19 @@ async def handle_filter_options(
 ) -> None:
     """Handle variable-options endpoint for filtered Silver records."""
     assert host._quarantine_service is not None
+    quarantine_service = host._quarantine_service
     pipeline = host._read_required_param(query, "pipeline")
-    payload = await host._quarantine_service.get_filtered_filter_options(
-        pipeline=pipeline,
-        run_type=host._read_optional_param(query, "run_type"),
-        reason_code=host._read_optional_param(query, "reason_code"),
-        field=host._read_optional_param(query, "field"),
-        run_id=host._read_optional_param(query, "run_id"),
-        from_ts=host._read_optional_param(query, "from"),
-        to_ts=host._read_optional_param(query, "to"),
+    payload = await run_bounded_forensic_operation(
+        limiter=host._forensic_endpoint_limiter,
+        operation_factory=lambda: quarantine_service.get_filtered_filter_options(
+            pipeline=pipeline,
+            run_type=host._read_optional_param(query, "run_type"),
+            reason_code=host._read_optional_param(query, "reason_code"),
+            field=host._read_optional_param(query, "field"),
+            run_id=host._read_optional_param(query, "run_id"),
+            from_ts=host._read_optional_param(query, "from"),
+            to_ts=host._read_optional_param(query, "to"),
+        ),
     )
     await host._send_payload_response(writer, 200, payload)
 
@@ -199,17 +215,21 @@ async def handle_filtered_timeseries(
 ) -> None:
     """Handle time-bucketed trend endpoint for filtered Silver records."""
     assert host._quarantine_service is not None
+    quarantine_service = host._quarantine_service
     pipeline = host._read_required_param(query, "pipeline")
-    payload = await host._quarantine_service.get_filtered_timeseries(
-        pipeline=pipeline,
-        run_type=host._read_optional_param(query, "run_type"),
-        reason_code=host._read_optional_param(query, "reason_code"),
-        field=host._read_optional_param(query, "field"),
-        run_id=host._read_optional_param(query, "run_id"),
-        payload_hash=host._read_optional_param(query, "payload_hash"),
-        from_ts=host._read_optional_param(query, "from"),
-        to_ts=host._read_optional_param(query, "to"),
-        bucket=host._read_optional_param(query, "bucket") or "1h",
+    payload = await run_bounded_forensic_operation(
+        limiter=host._forensic_endpoint_limiter,
+        operation_factory=lambda: quarantine_service.get_filtered_timeseries(
+            pipeline=pipeline,
+            run_type=host._read_optional_param(query, "run_type"),
+            reason_code=host._read_optional_param(query, "reason_code"),
+            field=host._read_optional_param(query, "field"),
+            run_id=host._read_optional_param(query, "run_id"),
+            payload_hash=host._read_optional_param(query, "payload_hash"),
+            from_ts=host._read_optional_param(query, "from"),
+            to_ts=host._read_optional_param(query, "to"),
+            bucket=host._read_optional_param(query, "bucket") or "1h",
+        ),
     )
     await host._send_payload_response(writer, 200, payload)
 
@@ -222,9 +242,13 @@ async def handle_filtered_record_detail(
 ) -> None:
     """Handle detail endpoint for one filtered Silver record."""
     assert host._quarantine_service is not None
-    payload = await host._quarantine_service.get_filtered_record(
-        payload_hash=payload_hash,
-        pipeline=host._read_required_param(query, "pipeline"),
+    quarantine_service = host._quarantine_service
+    payload = await run_bounded_forensic_operation(
+        limiter=host._forensic_endpoint_limiter,
+        operation_factory=lambda: quarantine_service.get_filtered_record(
+            payload_hash=payload_hash,
+            pipeline=host._read_required_param(query, "pipeline"),
+        ),
     )
     if payload is None:
         await host._send_response(writer, 404, _NOT_FOUND_MESSAGE)

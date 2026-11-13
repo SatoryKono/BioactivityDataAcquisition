@@ -669,7 +669,7 @@ def test_filtered_record_empty_rows(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     monkeypatch.setattr(
         filtered_reads,
-        "_load_scoped_pyarrow_table",
+        "_load_bounded_scoped_pyarrow_table",
         lambda *_args, **_kwargs: SimpleNamespace(
             to_pylist=lambda: [{"payload_hash": "x"}]
         ),
