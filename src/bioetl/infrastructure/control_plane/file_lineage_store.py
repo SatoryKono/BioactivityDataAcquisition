@@ -94,8 +94,8 @@ def _acquire_exclusive_lock(lock_fd: int) -> None:
             locking=msvcrt.locking,
             lock_mode=int(msvcrt.LK_LOCK),
         )
-        return
-    fcntl.flock(lock_fd, fcntl.LOCK_EX)
+    else:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
 
 
 def _release_exclusive_lock(lock_fd: int) -> None:
@@ -104,8 +104,8 @@ def _release_exclusive_lock(lock_fd: int) -> None:
         import msvcrt
 
         _lock_byte_range(lock_fd, locking=msvcrt.locking, mode=int(msvcrt.LK_UNLCK))
-        return
-    fcntl.flock(lock_fd, fcntl.LOCK_UN)
+    else:
+        fcntl.flock(lock_fd, fcntl.LOCK_UN)
 
 
 @contextmanager

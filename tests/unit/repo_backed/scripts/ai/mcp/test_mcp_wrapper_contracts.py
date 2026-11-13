@@ -48,6 +48,8 @@ import pytest
 
 pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
+_SYNTHETIC_HOST_ROUTES: Path | None = None
+
 ROOT = Path(__file__).resolve().parents[6]
 MCP_DIR = ROOT / "scripts" / "ai" / "mcp"
 TOKEN_VALIDATION_PS1 = MCP_DIR / "support" / "token_validation.ps1"
@@ -137,6 +139,22 @@ POWERSHELL_WRAPPER_ENV_NAMES = (
 )
 
 
+@pytest.fixture(autouse=True)
+def _isolate_synthetic_wrapper_routes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Keep fixture executables away from machine-local managed MCP sessions."""
+    routes = tmp_path / "synthetic-host-routes.json"
+    routes.write_text(json.dumps({"version": 1, "workspaces": []}), encoding="utf-8")
+    # Expose only the policy parser, never the real npx alongside Node.
+    node = shutil.which("node")
+    if os.name != "nt" and node:
+        node_bin = tmp_path / "policy-node"
+        node_bin.mkdir()
+        (node_bin / "node").symlink_to(Path(node).resolve())
+    monkeypatch.setattr(sys.modules[__name__], "_SYNTHETIC_HOST_ROUTES", routes)
+
+
 def _clean_env(**updates: str | None) -> dict[str, str]:
     """Return an environment without inherited credentials or proxy settings."""
     sensitive_fragments = ("TOKEN", "API_KEY", "PASSWORD", "SECRET")
@@ -180,7 +198,12 @@ def _skip_if_wsl_service_is_unavailable(
 def _run_bash(
     script: str, *, env: dict[str, str] | None = None
 ) -> subprocess.CompletedProcess[str]:
-    run_env = env or _clean_env()
+    run_env = dict(env or _clean_env())
+    if _SYNTHETIC_HOST_ROUTES is not None:
+        run_env["PC_AGENT_MCP_ROUTES_FILE"] = str(_SYNTHETIC_HOST_ROUTES)
+        node_bin = _SYNTHETIC_HOST_ROUTES.parent / "policy-node"
+        if os.name != "nt" and (node_bin / "node").is_file():
+            run_env["PATH"] = run_env.get("PATH", "/usr/bin:/bin") + ":" + str(node_bin)
     # On Windows the default ``bash`` is often WSL. Write the probe to a file so
     # ``$`` / ``$?`` expansions are not mangled by interop layers, and use
     # ``env -i`` so host/WSL PATH/HOME installs cannot leak into uvx contracts.
@@ -237,6 +260,7 @@ def _run_bash(
                 "HOME",
                 "LOCALAPPDATA",
                 "BIOETL_REPO_ENV_LOADED",
+                "PC_AGENT_MCP_ROUTES_FILE",
                 "BIOETL_ENV_FILE",
                 "BIOETL_UVX_DIRECT_NETWORK",
                 "BIOETL_TEST_CAPTURE",
@@ -483,6 +507,9 @@ def _run_powershell_file(
 @lru_cache(maxsize=1)
 def _windows_fixture_root() -> Path:
     """Keep fake launchers off cloud-synced / DrvFs repo volumes."""
+    override = os.environ.get("BIOETL_PYTEST_TEMP_ROOT")
+    if override:
+        return Path(override) / "mcp-contract-tests"
     windows_powershell = POWERSHELL is not None and str(POWERSHELL).lower().endswith(
         ".exe"
     )

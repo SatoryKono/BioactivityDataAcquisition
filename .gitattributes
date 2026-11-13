@@ -54,6 +54,7 @@ reports/audit/grafana/rf005-rf006-d62d78a0-20260908/** -text
 
 # Preserve captured bytes of config-root main acceptance evidence.
 reports/quality/proof-or-stop/config-root-11899/ci-1401/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/ci-1401/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 reports/quality/proof-or-stop/config-root-11899/full-coverage-wave-46/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 reports/quality/proof-or-stop/config-root-11899/*main-acceptance* -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 reports/quality/proof-or-stop/config-root-11899/ci1401-*.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
@@ -71,3 +72,43 @@ reports/quality/proof-or-stop/config-root-11899/ci-2356/** -text whitespace=-bla
 reports/quality/proof-or-stop/config-root-11899/post-main-2d4507f5/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 reports/quality/proof-or-stop/architecture-meta-closeout-20261005/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 /reports/quality/proof-or-stop/config-root-11899/ci-2772/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+
+# Preserve captured historical bytes in the exact archived evidence families.
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/architecture-coverage-11854-11899/bootstrap-profile-wave-*-with-durations.record.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/architecture-coverage-11854-11899/evidence-refresh-wave-42.record.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/architecture-coverage-11854-11899/nonregressing-adoption-wave-4*.record.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/architecture-coverage-11854-11899/raw-*.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/architecture-coverage-11854-11899/refresh-families-wave-42.record.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/adoption-validation-wave-44.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/architecture-*-acceptance.record.json -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/architecture-ci-wave44-failures.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/ci-2193/local-verification.json -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/ci-2193/raw-module-coverage.json -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/ci-2356/local-verification.json -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/ci-2772/coverage-independent-check.json -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/ci-2772/download-index.json -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/circleci-*.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/cleanup-wave44-final-update.record.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/cleanup-wave44-update.record.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/config-root-targeted-wave-44-final.record.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/config-root-targeted.record.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/debt-*.record.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/docs-passport-repair-acceptance.record.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/docs-postmerge-acceptance.record.json -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/docs-verify-*.record.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/evidence-wave44-*.record.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/full-coverage-wave-46/verified-local-counts.json -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/full-coverage-wave-47/verified-local-counts.json -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/full-coverage-wave-48/raw-candidate-guard-exit.txt -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/full-coverage-wave-48/raw-module-coverage.json -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/full-coverage-wave-48/verified-local-counts.json -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/issue5376-live-wave44-update.record.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/nonregressing-adoption-wave-44.record.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/owning-postmerge-acceptance.record.json -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/passports-refresh.record.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/post-main-2d4507f5/close-comment.md -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/post-main-2d4507f5/issue-before-close.json -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/post-main-2d4507f5/owning.record.json -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/raw-*.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/remote-main-wave44-update.record.json -text
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/repaired-fixtures.record.json -text

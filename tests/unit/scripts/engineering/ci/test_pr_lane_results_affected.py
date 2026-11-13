@@ -1593,6 +1593,31 @@ def test_security_inventory_reviews_route_to_source_qualification_tests(audit):
     )
 
 
+def test_hook_qualification_inputs_have_bounded_shadow_routes() -> None:
+    root = Path(__file__).resolve().parents[5]
+    expected = {
+        ".gitattributes": {
+            "tests/unit/scripts/repo/test_hook_receipts.py",
+            "tests/architecture/test_config_discrepancy_report_drift.py",
+            "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
+        },
+        "configs/quality/external_resource_inventory_pr13133_platform_narrowing_review.json": {
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        },
+    }
+    for path, owning_tests in expected.items():
+        report = build_shadow_compare([path], repo_root=root)
+        assert owning_tests <= set(report["selected"]), path
+        assert report["covers_full_suite"] is False
+    for unknown in (
+        ".gitattributes.unreviewed",
+        "configs/quality/external_resource_inventory_pr99999_unreviewed_review.json",
+    ):
+        with pytest.raises(ValueError, match="unmapped paths"):
+            build_shadow_compare([unknown], repo_root=root)
+
+
 def test_branch_hygiene_runbook_routes_only_to_owned_checks():
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(

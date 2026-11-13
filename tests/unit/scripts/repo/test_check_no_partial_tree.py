@@ -88,6 +88,84 @@ def test_guard_flags_partial_tree_commit_in_range(repo: Path) -> None:
     assert module.find_collapsing_commits(healthy, bad, repo=repo) == [bad]
 
 
+def test_history_scan_keeps_intermediate_loss_with_bounded_git_calls(
+    repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Long histories remain fully inspected without many processes per commit."""
+    healthy = _git(repo, "rev-parse", "HEAD").strip()
+    bad = ""
+    for number in range(8):
+        if number == 3:
+            _git(repo, "rm", "-qr", "src")
+        elif number == 4:
+            _git(repo, "checkout", healthy, "--", "src")
+        (repo / "README.md").write_text(f"revision {number}", encoding="utf-8")
+        _git(repo, "add", ".")
+        _git(repo, "commit", "-qm", f"revision {number}")
+        if number == 3:
+            bad = _git(repo, "rev-parse", "HEAD").strip()
+
+    calls = []
+    original = module._run_git
+
+    def measured(cwd: Path, verb: str, *args: str, **kwargs: object) -> str:
+        calls.append(verb)
+        return original(cwd, verb, *args, **kwargs)
+
+    monkeypatch.setattr(module, "_run_git", measured)
+    assert module.find_collapsing_commits(healthy, "HEAD", repo=repo) == [bad]
+    assert len(calls) <= 4 * 8 + 30
+
+
+@pytest.mark.parametrize("parent", ["--upload-pack=invalid", "1" * 39])
+def test_history_scan_rejects_malformed_parent_evidence(
+    repo: Path, monkeypatch: pytest.MonkeyPatch, parent: str
+) -> None:
+    healthy = _git(repo, "rev-parse", "HEAD").strip()
+    original = module._run_git
+
+    def malformed(cwd: Path, verb: str, *args: str, **kwargs: object) -> str:
+        if verb == "rev-list":
+            return f"{healthy} {parent}\n"
+        return original(cwd, verb, *args, **kwargs)
+
+    monkeypatch.setattr(module, "_run_git", malformed)
+    with pytest.raises(module.EvidenceError, match="candidate history"):
+        module.find_collapsing_commits(healthy, "HEAD", repo=repo)
+
+
+def test_tree_evidence_is_not_reused_between_history_inspections(
+    repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    healthy = _git(repo, "rev-parse", "HEAD").strip()
+    (repo / "README.md").write_text("ordinary change", encoding="utf-8")
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-qm", "ordinary change")
+    assert module.find_collapsing_commits(healthy, "HEAD", repo=repo) == []
+    original = module._run_git
+
+    def unavailable(cwd: Path, verb: str, *args: str, **kwargs: object) -> str:
+        if verb == "ls-tree":
+            raise module.EvidenceError("tree evidence unavailable")
+        return original(cwd, verb, *args, **kwargs)
+
+    monkeypatch.setattr(module, "_run_git", unavailable)
+    with pytest.raises(module.EvidenceError, match="tree evidence unavailable"):
+        module.find_collapsing_commits(healthy, "HEAD", repo=repo)
+
+
+@pytest.mark.parametrize("revision", ["HEAD", "--upload-pack=invalid", "1" * 39])
+def test_tree_snapshot_requires_immutable_identity_before_git(
+    monkeypatch: pytest.MonkeyPatch, revision: str
+) -> None:
+    def unexpected(*args: object, **kwargs: object) -> str:
+        raise AssertionError("invalid tree identity reached Git")
+
+    monkeypatch.setattr(module, "_run_git", unexpected)
+    with pytest.raises(module.EvidenceError, match="immutable commit SHA"):
+        module._top_entries(Path("."), revision)
+
+
 def test_rejects_flag_injection_in_revision_tokens(repo: Path) -> None:
     with pytest.raises(module.EvidenceError, match="invalid git revision"):
         module.find_collapsing_commits("--upload-pack=evil", "HEAD", repo=repo)
