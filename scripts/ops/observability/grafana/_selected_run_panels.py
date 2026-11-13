@@ -963,6 +963,19 @@ SELECTOR_ROWS = (
 def stamp_selector_columns(payload: dict[str, object]) -> None:
     """Keep Infinity variable frames typed even when the catalog is empty."""
     for variable in payload.get("templating", {}).get("list", []):
+        if variable.get("name") in {"selected_pipeline", "selected_run_id"}:
+            field = "pipeline" if variable["name"] == "selected_pipeline" else "run_id"
+            empty = "unknown" if field == "pipeline" else "-"
+            variable["description"] = (
+                "Resolved saved-run identity when available; otherwise retain the "
+                "original request for missing-run diagnostics, without claiming evidence."
+            )
+            variable["query"]["infinityQuery"]["root_selector"] = (
+                f"($v := selected.{field}; "
+                f'$id := $exists($v) and $v != "" and $v != "{empty}" '
+                f"? $v : requested.{field}; "
+                '[{"text":$string($id),"value":$string($id)}])'
+            )
         if variable.get("name") == "run_id":
             variable["regex"] = ""
             variable["description"] = (

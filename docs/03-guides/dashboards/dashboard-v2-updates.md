@@ -1,9 +1,13 @@
 ## Selected-run source and catalog checks — 2026-11-13
 
-The [static UX report](../../reports/dashboard-ux-checks/2026-11-13.md)
-records the dashboard-specific selected-run variables, generated request
+Static checks cover dashboard-specific selected-run variables, generated request
 fixtures and bounded catalog traversal. Live browser/render acceptance remains
 `NOT_RUN`; prior acceptance records retain their original scope.
+
+An explicit Run ID that is missing from the selector catalog retains its requested
+pipeline and UUID. Saved-run panels report the missing run; they do not silently
+fall back to the latest run from another pipeline. Automatic selection still uses
+the resolved identity when available.
 
 ## Compact Run Explorer catalog — 2026-11-12
 

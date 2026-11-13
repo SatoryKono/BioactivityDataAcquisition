@@ -1,90 +1,15 @@
 {
   "schema_version": 1,
-  "catalog_ref": "d8f69df4837f15b41b8fb782d01abdd4a9fcbe6b",
-  "source_ref": "6b253cdae995f4eb666d620ba9f95db54842f2d8",
+  "catalog_ref": "61144ba5a2010c75d431110a098960b06782f1c0",
+  "source_ref": "237243812f2d8660122b8095184cab79e84214cd",
   "source_reviews": {
-    "src/bioetl/application/services/control_plane/manifest/diagnostics/selected_run_replay_readiness.py": "Grouped English/Russian empty aliases; same accepted values and lifetime.",
-    "src/bioetl/composition/control_plane_paths.py": "Delegates validation composition to the isolated bootstrap assembly owner; factory and private ledger-port reexport retain semantics and selected-root path containment.",
-    "src/bioetl/infrastructure/control_plane/file_evidence_read_context.py": "Relocated read-only selected ledger port unchanged. Every predecessor path remains contained before context-managed read, and cycles terminate.",
-    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_routing.py": "Reviewed delegation of selected identity/reconciliation to the existing scope module. Service endpoint offloads remain awaited in the routing owner; source-error scope and response boundaries are preserved.",
-    "src/bioetl/interfaces/http/_health_server_records_table.py": "Extracted manifest identity check preserving missing404 and mismatched409 before selected ledger access.",
-    "src/bioetl/composition/bootstrap/assembly/checkpoint.py": "Reviewed selected-root validation port composition in the existing low-level assembler. Explicit context construction preserves every bound port, root and verifier; lifecycle/archive adapters remain the same lazy objects, with no new retained handle or pool.",
-    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_scope.py": "Reviewed relocated selected manifest identity guard, selected-root binder and report-catalog reconciliation. Only the existing reconcile offload moved here; it still borrows the loop executor and cancellation does not prove worker termination.",
-    "src/bioetl/interfaces/http/_report_selector_options.py": "Reviewed one-pass unresolved-option index and constant-time deduplication override. Known runs avoid catalog identity rereads; validated unknown labels are replaced once. Existing request-local ThreadPoolExecutor acquisition and context-exit join are unchanged."
+    "src/bioetl/interfaces/http/_control_plane_selector_context_build.py": "Reviewed additive requested scope/UUID metadata, separate from resolved saved evidence. This preserves an explicit missing request without selecting another run. Existing build_selector_records binding and all file/ledger resource acquisition, closure, executor and cancellation semantics remain unchanged."
   },
   "reference_moves": [],
-  "exclusion_moves": [
-    {
-      "from": {
-        "file": "src/bioetl/interfaces/http/_health_server_control_plane_evidence_routing.py",
-        "line": 351
-      },
-      "to": {
-        "file": "src/bioetl/interfaces/http/_health_server_control_plane_evidence_scope.py",
-        "scope": "_reconcile_validation_scope",
-        "call": "asyncio.to_thread",
-        "expression": "asyncio.to_thread(reconcile_manifest_validation_scope, scope, report_store=getattr(host, '_run_report_store', None))",
-        "reason": "Submission to the already inventoried asyncio.default-executor; the request does not own or shut down the shared executor."
-      }
-    },
-    {
-      "from": {
-        "file": "src/bioetl/composition/control_plane_paths.py",
-        "line": 165
-      },
-      "to": {
-        "file": "src/bioetl/infrastructure/control_plane/file_evidence_read_context.py",
-        "scope": "_SelectedRootLedgerPort._assert_manifest_chain",
-        "call": "pointer.read_text",
-        "reason": "Synchronous Path.read_text uses its own context-managed file handle and closes it before returning or propagating an error; selected-root containment is checked before this index/predecessor read. It does not create a retained resource owner."
-      }
-    }
-  ],
+  "exclusion_moves": [],
   "line_updates": {
-    "src/bioetl/application/services/control_plane/manifest/diagnostics/selected_run_replay_readiness.py": {},
-    "src/bioetl/composition/control_plane_paths.py": {},
-    "src/bioetl/infrastructure/control_plane/file_evidence_read_context.py": {
-      "101": 101,
-      "117": 117,
-      "187": 187
-    },
-    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_routing.py": {
-      "142": 98,
-      "145": 101,
-      "148": 104,
-      "179": 135,
-      "254": 210,
-      "256": 212,
-      "257": 213,
-      "260": 216,
-      "262": 218,
-      "283": 239,
-      "316": 272,
-      "364": 307,
-      "377": 320,
-      "378": 321,
-      "381": 324,
-      "383": 326,
-      "391": 334,
-      "392": 335,
-      "396": 339,
-      "397": 340,
-      "401": 344
-    },
-    "src/bioetl/interfaces/http/_health_server_records_table.py": {
-      "146": 155
-    },
-    "src/bioetl/composition/bootstrap/assembly/checkpoint.py": {
-      "78": 94,
-      "109": 125,
-      "130": 146
-    },
-    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_scope.py": {
-      "61": 72
-    },
-    "src/bioetl/interfaces/http/_report_selector_options.py": {
-      "353": 369,
-      "375": 391
+    "src/bioetl/interfaces/http/_control_plane_selector_context_build.py": {
+      "62": 62
     }
   }
 }
