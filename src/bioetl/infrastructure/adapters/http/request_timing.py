@@ -92,13 +92,21 @@ class ResponseBudgetExceeded(ValueError):
 
 async def _read_bounded_response(response: httpx.Response) -> httpx.Response:
     """Bound raw reads and decompressor output before materializing JSON input."""
+    if (
+        response.request.method == "HEAD"
+        or response.status_code in {204, 304}
+        or 100 <= response.status_code < 200
+    ):
+        return await _read_bodyless_response(response)
     if response.is_stream_consumed:
         if len(response.content) > _MAX_RESPONSE_DECODED_BYTES:
             raise ResponseBudgetExceeded("Decoded HTTP response budget exceeded")
         return response
     encoding = response.headers.get("Content-Encoding", "identity").lower().strip()
     if encoding not in {"identity", "gzip", "deflate"}:
-        raise ValueError("Unsupported HTTP response content encoding")
+        raise httpx.DecodingError(
+            "Unsupported HTTP response content encoding", request=response.request
+        )
     body, wire_bytes = await _collect_response_body(response, encoding)
     headers = response.headers.copy()
     headers.pop("content-encoding", None)
@@ -114,6 +122,23 @@ async def _read_bounded_response(response: httpx.Response) -> httpx.Response:
     )
 
 
+async def _read_bodyless_response(response: httpx.Response) -> httpx.Response:
+    """Consume protocol EOF without decoding or changing representation headers."""
+    wire_bytes = 0
+    if not response.is_stream_consumed:
+        _, wire_bytes = await _collect_response_body(response, "identity")
+    result = httpx.Response(
+        response.status_code,
+        content=b"",
+        request=response.request,
+        extensions=dict(response.extensions),
+        history=response.history,
+    )
+    result.headers = response.headers.copy()
+    result.extensions["bioetl_wire_response_bytes"] = wire_bytes
+    return result
+
+
 async def _collect_response_body(
     response: httpx.Response, encoding: str
 ) -> tuple[bytes, int]:
@@ -122,19 +147,29 @@ async def _collect_response_body(
     decoder = None if encoding == "identity" else zlib.decompressobj(window_bits)
     body = bytearray()
     wire_bytes = 0
-    async for raw in response.aiter_raw():
-        wire_bytes += len(raw)
-        if wire_bytes > _MAX_RESPONSE_WIRE_BYTES:
-            raise ResponseBudgetExceeded("Wire HTTP response budget exceeded")
-        remaining = _MAX_RESPONSE_DECODED_BYTES - len(body)
-        decoded = raw if decoder is None else decoder.decompress(raw, remaining + 1)
-        if len(decoded) > remaining:
-            raise ResponseBudgetExceeded("Decoded HTTP response budget exceeded")
-        body.extend(decoded)
-        if decoder is not None and decoder.unused_data:
-            raise ValueError("Trailing or concatenated compressed HTTP response")
+    try:
+        async for raw in response.aiter_raw():
+            wire_bytes += len(raw)
+            if wire_bytes > _MAX_RESPONSE_WIRE_BYTES:
+                raise ResponseBudgetExceeded("Wire HTTP response budget exceeded")
+            remaining = _MAX_RESPONSE_DECODED_BYTES - len(body)
+            decoded = raw if decoder is None else decoder.decompress(raw, remaining + 1)
+            if len(decoded) > remaining:
+                raise ResponseBudgetExceeded("Decoded HTTP response budget exceeded")
+            body.extend(decoded)
+            if decoder is not None and decoder.unused_data:
+                raise httpx.DecodingError(
+                    "Trailing or concatenated compressed HTTP response",
+                    request=response.request,
+                )
+    except zlib.error as exc:
+        raise httpx.DecodingError(
+            "Invalid compressed HTTP response", request=response.request
+        ) from exc
     if decoder is not None and not decoder.eof:
-        raise ValueError("Truncated compressed HTTP response")
+        raise httpx.DecodingError(
+            "Truncated compressed HTTP response", request=response.request
+        )
     return bytes(body), wire_bytes
 
 

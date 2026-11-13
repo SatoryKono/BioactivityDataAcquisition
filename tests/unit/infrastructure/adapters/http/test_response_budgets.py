@@ -1,5 +1,7 @@
 """Bound decompression output before allocating an oversized provider response."""
 
+from __future__ import annotations
+
 import gzip
 import httpx
 import pytest
@@ -137,5 +139,124 @@ async def test_timeout_closes_inflight_response():
                 {},
                 is_stream=False,
                 request_timeout=0.01,
+            )
+    assert stream.closed
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("encoding", ["gzip", "deflate", "br", "identity"])
+@pytest.mark.parametrize("length", [None, "123456"])
+async def test_bodyless_head_keeps_representation_headers(
+    monkeypatch, encoding, length
+):
+    def forbidden_decoder(*args, **kwargs):
+        raise AssertionError("A bodyless response must not instantiate a decoder")
+
+    monkeypatch.setattr(timing.zlib, "decompressobj", forbidden_decoder)
+    headers = {"Content-Encoding": encoding, "ETag": '"representation-tag"'}
+    if length is not None:
+        headers["Content-Length"] = length
+    stream = Chunks([])
+    async with httpx.AsyncClient(
+        transport=httpx.MockTransport(
+            lambda _: httpx.Response(200, headers=headers, stream=stream)
+        )
+    ) as client:
+        response = await timing._dispatch_http_request(
+            client,
+            "HEAD",
+            "https://provider.example",
+            {},
+            is_stream=False,
+            request_timeout=1,
+        )
+    assert response.content == b""
+    assert dict(response.headers) == {k.lower(): v for k, v in headers.items()}
+    assert stream.closed
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("status", [204, 304])
+@pytest.mark.parametrize("encoding", ["gzip", "deflate"])
+async def test_bodyless_status_keeps_representation_metadata(status, encoding):
+    headers = {"Content-Encoding": encoding, "ETag": '"representation-tag"'}
+    if status == 304:
+        headers["Content-Length"] = "123456"
+    stream = Chunks([])
+    async with httpx.AsyncClient(
+        transport=httpx.MockTransport(
+            lambda _: httpx.Response(status, headers=headers, stream=stream)
+        )
+    ) as client:
+        response = await timing._dispatch_http_request(
+            client,
+            "GET",
+            "https://provider.example",
+            {},
+            is_stream=False,
+            request_timeout=1,
+        )
+    assert response.content == b""
+    assert dict(response.headers) == {k.lower(): v for k, v in headers.items()}
+    assert stream.closed
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("encoding", ["gzip", "deflate"])
+async def test_corrupt_compression_is_counted_by_breaker_and_health_contract(encoding):
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+    from bioetl.infrastructure.adapters.health_check_contract import HEALTH_CHECK_ERRORS
+
+    stream = Chunks([b"not a compressed response"])
+    breaker = CircuitBreakerGuard(provider="audit")
+    client = UnifiedHTTPClient(
+        rate_limiter=TokenBucketRateLimiter(100, 1),
+        circuit_breaker=breaker,
+        provider="audit",
+    )
+    async with httpx.AsyncClient(
+        transport=httpx.MockTransport(
+            lambda _: httpx.Response(
+                200, headers={"Content-Encoding": encoding}, stream=stream
+            )
+        )
+    ) as transport:
+        client._client = transport
+        with pytest.raises(httpx.DecodingError) as caught:
+            await client.get_once("https://provider.example")
+    assert isinstance(caught.value, HEALTH_CHECK_ERRORS)
+    assert caught.value.request.url == "https://provider.example"
+    assert breaker.get_failure_count() == 1
+    assert stream.closed
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "encoding,raw",
+    [
+        ("gzip", gzip.compress(b"payload")[:-3]),
+        ("gzip", gzip.compress(b"a") + gzip.compress(b"b")),
+        ("unsupported", b"payload"),
+    ],
+)
+async def test_malformed_codec_conditions_have_httpx_error_contract(encoding, raw):
+    stream = Chunks([raw])
+    async with httpx.AsyncClient(
+        transport=httpx.MockTransport(
+            lambda _: httpx.Response(
+                200, headers={"Content-Encoding": encoding}, stream=stream
+            )
+        )
+    ) as client:
+        with pytest.raises(httpx.DecodingError):
+            await timing._dispatch_http_request(
+                client,
+                "GET",
+                "https://provider.example",
+                {},
+                is_stream=False,
+                request_timeout=1,
             )
     assert stream.closed
