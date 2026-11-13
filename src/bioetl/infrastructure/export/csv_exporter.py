@@ -17,10 +17,22 @@ from bioetl.infrastructure.export.csv_exporter_io_ops import (
 from bioetl.infrastructure.export.csv_exporter_io_ops import (
     atomic_csv_write as _atomic_csv_write,
 )
-from bioetl.infrastructure.export.csv_exporter_io_ops import (
+from bioetl.infrastructure.export.csv_exporter_pair_ops import (
+    list_all_clear_pairs as _list_all_clear_pairs,
+)
+from bioetl.infrastructure.export.csv_exporter_pair_ops import (
+    list_named_clear_pair as _list_named_clear_pair,
+)
+from bioetl.infrastructure.export.csv_exporter_pair_ops import (
+    raw_csv_path as _raw_csv_path,
+)
+from bioetl.infrastructure.export.csv_exporter_pair_ops import (
     require_primary_csv_update as _require_primary_csv_update,
 )
-from bioetl.infrastructure.export.csv_exporter_io_ops import (
+from bioetl.infrastructure.export.csv_exporter_pair_ops import (
+    unlink_clear_pairs as _unlink_clear_pairs,
+)
+from bioetl.infrastructure.export.csv_exporter_pair_ops import (
     write_raw_and_published_pair as _write_raw_and_published_pair,
 )
 from bioetl.infrastructure.export.csv_exporter_table_ops import (
@@ -51,10 +63,6 @@ if TYPE_CHECKING:
 
 def _export_root(base_path: Path) -> Path:
     return base_path.expanduser().resolve(strict=False)
-
-
-def _raw_csv_path(csv_path: Path) -> Path:
-    return csv_path.with_name(f"{csv_path.name}.raw")
 
 
 def _resolve_table_csv_path(base_path: Path, table_name: str) -> Path:
@@ -93,61 +101,12 @@ def _resolve_table_export_paths(base_path: Path, table_name: str) -> tuple[Path,
     return csv_path, raw_path
 
 
-def _list_named_clear_targets(
-    *,
-    csv_path: Path,
-    raw_path: Path,
-    root: Path,
-) -> list[Path]:
-    targets: list[Path] = []
-    if csv_path.exists():
-        targets.append(csv_path)
-    if raw_path.exists() and raw_path.resolve(strict=False).is_relative_to(root):
-        targets.append(raw_path)
-    return targets
-
-
-def _list_all_clear_targets(*, base_path: Path, root: Path) -> list[Path]:
-    targets: list[Path] = []
-    for path in base_path.glob("*.csv"):
-        if path.resolve(strict=False).is_relative_to(root):
-            targets.append(path)
-    for path in base_path.glob("*.csv.raw"):
-        if path.resolve(strict=False).is_relative_to(root):
-            targets.append(path)
-    return targets
-
-
-def _unlink_clear_targets(
-    targets: list[Path],
-    logger: LoggerPort,
-) -> list[Path]:
-    deleted: list[Path] = []
-    for target in targets:
-        if target.name.endswith(".csv.raw") and target.with_suffix("").exists():
-            continue
-        try:
-            target.unlink()
-            deleted.append(target)
-        except PermissionError:
-            logger.warning(
-                "Cannot delete locked CSV export artifact",
-                path=str(target),
-                reason="file may be open in another program",
-            )
-    return deleted
-
-
 def _seed_raw_sidecar_if_missing(
     *,
     base_path: Path,
     table_name: str,
 ) -> None:
-    """Seed ``.csv.raw`` from published CSV using confined export-root paths only.
-
-    Paths are rebuilt from ``table_name`` (single segment under export root) at
-    the IO sink so seed read/write cannot follow caller-supplied path objects.
-    """
+    """Seed ``.csv.raw`` from published CSV using confined export-root paths only."""
     csv_full_path, raw_path = _resolve_table_export_paths(base_path, table_name)
     if raw_path.exists():
         return
@@ -210,14 +169,16 @@ class CsvExporter:
         root = self._export_root()
         if table_name:
             csv_path = self._resolve_table_csv_path(table_name)
-            targets = _list_named_clear_targets(
-                csv_path=csv_path,
-                raw_path=self._raw_csv_path(csv_path),
-                root=root,
-            )
+            pairs = [
+                _list_named_clear_pair(
+                    csv_path=csv_path,
+                    raw_path=self._raw_csv_path(csv_path),
+                    root=root,
+                )
+            ]
         else:
-            targets = _list_all_clear_targets(base_path=self.base_path, root=root)
-        return _unlink_clear_targets(targets, self._logger)
+            pairs = _list_all_clear_pairs(base_path=self.base_path, root=root)
+        return _unlink_clear_pairs(pairs, self._logger)
 
     def _sort_table(self, table: pa.Table, sort_columns: list[str]) -> pa.Table:
         return _sort_table(table, sort_columns, sort_ascending=self.sort_ascending)

@@ -6,7 +6,6 @@ import hashlib
 import os
 import shutil
 import tempfile
-from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -175,45 +174,3 @@ def append_to_csv(
         if temp_path.exists():
             temp_path.unlink()
     return True
-
-
-def require_primary_csv_update(updated: bool, *, path: Path, mode: str) -> None:
-    """Fail closed when only a locked-target backup was written."""
-    if updated:
-        return
-    raise RuntimeError(
-        f"CSV {mode} did not update primary target {path}; "
-        "backup-only publish is not a successful export"
-    )
-
-
-def _restore_raw_sidecar(raw_path: Path, before: bytes | int | None) -> None:
-    """Restore a failed pair without reading an entire append-only sidecar."""
-    if before is None:
-        raw_path.unlink(missing_ok=True)
-    elif isinstance(before, int):
-        if raw_path.stat().st_size != before:
-            with raw_path.open("r+b") as stream:
-                stream.truncate(before)
-    elif raw_path.read_bytes() != before:
-        raw_path.write_bytes(before)
-
-
-def write_raw_and_published_pair(
-    *,
-    write_raw: Callable[[], bool],
-    write_published: Callable[[], bool],
-    raw_path: Path,
-    csv_path: Path,
-    mode: str,
-) -> None:
-    """Keep the raw state consistent when either primary publication fails."""
-    before: bytes | int | None = None
-    if raw_path.exists():
-        before = raw_path.stat().st_size if mode == "append" else raw_path.read_bytes()
-    try:
-        require_primary_csv_update(write_raw(), path=raw_path, mode=mode)
-        require_primary_csv_update(write_published(), path=csv_path, mode=mode)
-    except (OSError, pa.ArrowException, ValueError, TypeError, RuntimeError):
-        _restore_raw_sidecar(raw_path, before)
-        raise
