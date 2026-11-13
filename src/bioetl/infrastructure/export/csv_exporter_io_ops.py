@@ -141,6 +141,18 @@ def _align_raw_columns(table: pa.Table, types: dict[str, pa.DataType]) -> pa.Tab
     return table
 
 
+def _fallback_unsafe_raw_types(
+    tables: list[pa.Table], types: dict[str, pa.DataType]
+) -> None:
+    """Use exact textual values when numeric promotion cannot safely cast a batch."""
+    for table in tables:
+        for field, column in zip(table.schema, table.columns, strict=True):
+            try:
+                column.cast(types[field.name])
+            except (pa.ArrowInvalid, pa.ArrowTypeError):
+                types[field.name] = pa.string()
+
+
 def read_raw_table(path: Path, *, delimiter: str = ",") -> pa.Table:
     """Read typed streams, retaining a compatibility path for old CSV sidecars."""
     if not raw_sidecar_is_typed(path):
@@ -153,7 +165,12 @@ def read_raw_table(path: Path, *, delimiter: str = ",") -> pa.Table:
                 tables.append(_logical_raw_table(reader.read_all()))
     types = _raw_column_types(tables)
     aligned = [_align_raw_columns(table, types) for table in tables]
-    return pa.concat_tables(aligned, promote_options="permissive")
+    try:
+        return pa.concat_tables(aligned, promote_options="permissive")
+    except pa.ArrowInvalid:
+        _fallback_unsafe_raw_types(tables, types)
+        aligned = [_align_raw_columns(table, types) for table in tables]
+        return pa.concat_tables(aligned, promote_options="permissive")
 
 
 def atomic_csv_write(

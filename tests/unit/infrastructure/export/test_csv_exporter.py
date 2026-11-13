@@ -1426,3 +1426,33 @@ async def test_boolean_and_numeric_batches_finalize(
     await exporter.export("booleans", pa.table({"id": [2], "value": [second]}))
     await exporter.finalize_csv("booleans", sort_by=["id"])
     assert pv.read_csv(published)["value"].to_pylist() == rendered
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("legacy", [False, True])
+@pytest.mark.parametrize("reverse", [False, True])
+@pytest.mark.parametrize("large", [9007199254740993, -9007199254740993])
+async def test_large_integer_fractional_batches_preserve_exact_raw_and_safe_csv(
+    tmp_path, mock_logger, legacy, reverse, large
+):
+    import csv
+
+    first, second = (1.5, large) if reverse else (large, 1.5)
+    published = tmp_path / "precision.csv"
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    if legacy:
+        published.write_text(f"id,value\n1,{first}\n", encoding="utf-8")
+    else:
+        await exporter.export("precision", pa.table({"id": [1], "value": [first]}))
+    await exporter.export("precision", pa.table({"id": [2], "value": [second]}))
+    await exporter.finalize_csv("precision", sort_by=["id"])
+    with published.open(newline="", encoding="utf-8") as source:
+        rows = list(csv.DictReader(source))
+    expected = [str(first), str(second)]
+    from bioetl.infrastructure.export.csv_exporter_io_ops import read_raw_table
+
+    raw = read_raw_table(published.with_suffix(".csv.raw"))
+    assert raw["value"].to_pylist() == expected
+    assert [row["value"] for row in rows] == [
+        "'" + value if value.startswith("-") else value for value in expected
+    ]
