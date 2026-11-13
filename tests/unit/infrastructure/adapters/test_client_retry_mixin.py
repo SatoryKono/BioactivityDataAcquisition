@@ -555,7 +555,7 @@ async def test_request_with_retry_honors_retry_after_in_full_flow(
         tracer=tracing,
     )
     request = httpx.Request("GET", "https://api.example.com/data")
-    client._client.request.side_effect = [
+    client._client.send.side_effect = [
         httpx.Response(503, headers={"Retry-After": "7.0"}, request=request),
         httpx.Response(200, json={"status": "ok"}, request=request),
     ]
@@ -612,7 +612,7 @@ async def test_request_with_retry_finalizes_span_and_metrics_on_retry_exhausted(
         logger=mock_logger,
         tracer=tracing,
     )
-    client._client.request.side_effect = httpx.ConnectError("Connection failed")
+    client._client.send.side_effect = httpx.ConnectError("Connection failed")
     client.circuit_breaker.call.side_effect = _passthrough_circuit_breaker_call
 
     with patch("asyncio.sleep", new_callable=AsyncMock):
@@ -653,7 +653,7 @@ async def test_request_with_retry_records_retry_budget_exhaustion_end_to_end(
         provider="chembl",
         logger=mock_logger,
     )
-    client._client.request.side_effect = httpx.ConnectError("Connection failed")
+    client._client.send.side_effect = httpx.ConnectError("Connection failed")
     client.circuit_breaker.call.side_effect = _passthrough_circuit_breaker_call
 
     with patch("asyncio.sleep", new_callable=AsyncMock):

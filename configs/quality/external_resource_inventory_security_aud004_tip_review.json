@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "390089d68746d217e6edc59e93da49f318b83ff1",
+  "source_ref": "afd1f7bc9ad60cd576be1c10de2db1d0a8dd361d",
+  "source_reviews": {
+    "src/bioetl/infrastructure/adapters/http/response_body.py": "Reviewed mypy return annotation on _response_body_decoder (_DeflateDecoder | zlib._Decompress | None). Type-only signature change; bounded response buffering/decompression ownership and cleanup unchanged; no new external acquisition or cleanup owner."
+  },
+  "line_updates": {}
+}
