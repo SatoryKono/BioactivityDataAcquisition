@@ -113,8 +113,11 @@ local data changes require their own user authorization.
   [create_worktree.py](../../../scripts/engineering/repo/create_worktree.py).
 - Do not run agents elevated: admin-owned pytest caches are the root cause of
   the Access denied stuck directories.
-- Retain `branches-backup-*.bundle` and `wip-archive/` until their owner explicitly
-  approves disposal; the tool does not purge these recovery originals.
+- Retain `branches-backup-*/history.bundle`, every unique `wip-archive/`
+  snapshot and `apply-*/apply-actions.json` until their owner explicitly approves
+  disposal. Worktree HEAD bundles preserve detached history; separate binary
+  `index.patch` and `working.patch` preserve staged and working versions.
+  The tool does not purge these recovery originals.
 
 ## Evidence
 
