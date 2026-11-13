@@ -211,21 +211,16 @@ def _expiry_change(old: Any, new: Any) -> list[str]:
 
 def _git(root: Path, *args: str, index_file: str | None = None) -> str:
     """Read Git metadata with a deadline and no ambient repository override."""
-    env = os.environ.copy()
-    for name in tuple(env):
-        if name in {
-            "GIT_DIR",
-            "GIT_WORK_TREE",
-            "GIT_COMMON_DIR",
-            "GIT_INDEX_FILE",
-            "GIT_CONFIG",
-            "GIT_CONFIG_COUNT",
-            "GIT_CONFIG_PARAMETERS",
-        } or name.startswith(("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_")):
-            env.pop(name, None)
+    # This guard also runs by filename from an isolated deployment bundle,
+    # without an importable scripts package. Keep its stdlib-only bootstrap.
+    env = {
+        key: value for key, value in os.environ.items() if not key.startswith("GIT_")
+    }
+    env.update(
+        GIT_NO_REPLACE_OBJECTS="1", GIT_OPTIONAL_LOCKS="0", GIT_TERMINAL_PROMPT="0"
+    )
     if index_file is not None:
         env["GIT_INDEX_FILE"] = index_file
-    env["GIT_NO_REPLACE_OBJECTS"] = "1"
     result = subprocess.run(
         [
             "git",
