@@ -89,6 +89,52 @@ class CsvExporter:
         self.sort_by = sort_by or []
         self.sort_ascending = sort_ascending
 
+    def _export_root(self) -> Path:
+        """Return the resolved export directory used as the confinement root."""
+        return self.base_path.expanduser().resolve(strict=False)
+
+    def _resolve_table_csv_path(self, table_name: str) -> Path:
+        """Resolve ``{table_name}.csv`` under the export root; reject traversal.
+
+        ``table_name`` is treated as a single path segment. Separators, absolute
+        paths, ``..``, and other escape forms fail closed so user- or
+        content-controlled names cannot leave the export directory.
+        """
+        name = table_name.strip() if isinstance(table_name, str) else ""
+        if not name:
+            raise ValueError("CSV export table name must be a non-empty string")
+        candidate = Path(name)
+        # Reject separators explicitly: on POSIX a backslash is a legal name
+        # character and would otherwise pass Path.parts checks.
+        if (
+            candidate.is_absolute()
+            or len(candidate.parts) != 1
+            or candidate.name != name
+            or name in {".", ".."}
+            or "/" in name
+            or "\\" in name
+            or "\0" in name
+        ):
+            raise ValueError(f"invalid CSV export table name: {table_name!r}")
+        root = self._export_root()
+        csv_path = (root / f"{name}.csv").resolve(strict=False)
+        if not csv_path.is_relative_to(root):
+            raise ValueError(
+                f"CSV export path escapes export directory: {table_name!r}"
+            )
+        return csv_path
+
+    def _resolve_table_export_paths(self, table_name: str) -> tuple[Path, Path]:
+        """Return confined published CSV and raw-sidecar paths for ``table_name``."""
+        root = self._export_root()
+        csv_path = self._resolve_table_csv_path(table_name)
+        raw_path = self._raw_csv_path(csv_path).resolve(strict=False)
+        if not raw_path.is_relative_to(root):
+            raise ValueError(
+                f"CSV raw sidecar path escapes export directory: {table_name!r}"
+            )
+        return csv_path, raw_path
+
     def export_table(self, table: pa.Table, output_path: str) -> Path:
         """Synchronously export one table to an explicit CSV path.
 
@@ -130,11 +176,16 @@ class CsvExporter:
 
         files_to_delete = []
         if table_name:
-            csv_path = self.base_path / f"{table_name}.csv"
+            csv_path = self._resolve_table_csv_path(table_name)
             if csv_path.exists():
                 files_to_delete.append(csv_path)
         else:
-            files_to_delete = list(self.base_path.glob("*.csv"))
+            root = self._export_root()
+            files_to_delete = [
+                path
+                for path in self.base_path.glob("*.csv")
+                if path.resolve(strict=False).is_relative_to(root)
+            ]
 
         for csv_file in files_to_delete:
             try:
@@ -162,8 +213,12 @@ class CsvExporter:
 
     @staticmethod
     def _raw_csv_path(csv_path: Path) -> Path:
-        """Return the pre-neutralized sidecar used for PK-preserving finalize."""
-        return Path(str(csv_path) + ".raw")
+        """Return the pre-neutralized sidecar used for PK-preserving finalize.
+
+        Uses ``with_name`` so the sidecar stays in the same directory as the
+        published CSV and cannot be redirected by suffix tricks.
+        """
+        return csv_path.with_name(f"{csv_path.name}.raw")
 
     def _sort_table(self, table: pa.Table, sort_columns: list[str]) -> pa.Table:
         """Sort table by specified columns for deterministic output."""
@@ -230,9 +285,9 @@ class CsvExporter:
         primary_keys: list[str] | None,
     ) -> Path:
         _ = primary_keys
-        csv_full_path = self.base_path / f"{table_name}.csv"
-        raw_path = self._raw_csv_path(csv_full_path)
-        csv_full_path.parent.mkdir(parents=True, exist_ok=True)
+        root = self._export_root()
+        csv_full_path, raw_path = self._resolve_table_export_paths(table_name)
+        root.mkdir(parents=True, exist_ok=True)
         csv_data = self._flatten_for_csv(data)
 
         # Fast path: true file-append (no read, no sort, no dedup).
@@ -241,6 +296,14 @@ class CsvExporter:
         if append and csv_full_path.exists():
             if not raw_path.exists():
                 # Legacy published-only file: seed the working raw representation.
+                # Re-check confinement immediately before the copy so Sonar and
+                # runtime agree that neither path can escape the export root.
+                if not (
+                    csv_full_path.is_relative_to(root) and raw_path.is_relative_to(root)
+                ):
+                    raise ValueError(
+                        f"CSV export path escapes export directory: {table_name!r}"
+                    )
                 raw_path.write_bytes(csv_full_path.read_bytes())
             self._append_to_csv(csv_data, raw_path, spreadsheet_safe=False)
             self._append_to_csv(csv_data, csv_full_path, spreadsheet_safe=True)
@@ -294,8 +357,7 @@ class CsvExporter:
         sort_by: list[str] | None,
         primary_keys: list[str] | None,
     ) -> Path | None:
-        csv_full_path = self.base_path / f"{table_name}.csv"
-        raw_path = self._raw_csv_path(csv_full_path)
+        csv_full_path, raw_path = self._resolve_table_export_paths(table_name)
         if not csv_full_path.exists() and not raw_path.exists():
             return None
 

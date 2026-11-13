@@ -779,7 +779,7 @@ class TestCsvExporterFinalize:
         await exporter.export("keys", table, append=False)
 
         published = tmp_path / "keys.csv"
-        raw = Path(str(published) + ".raw")
+        raw = published.with_name(f"{published.name}.raw")
         intermediate = pv.read_csv(published)
         assert intermediate.column("id").to_pylist() == ["'=x", "'=x"]
         assert pv.read_csv(raw).column("id").to_pylist() == ["=x", "'=x"]
@@ -829,8 +829,87 @@ class TestCsvExporterFinalize:
             "escaped",
             "plain",
         }
-        assert set(pv.read_csv(Path(str(third_path) + ".raw")).column("id").to_pylist()) == {
+        assert set(
+            pv.read_csv(third_path.with_name(f"{third_path.name}.raw"))
+            .column("id")
+            .to_pylist()
+        ) == {
             "=x",
             "'=x",
             "z",
         }
+
+
+@pytest.mark.unit
+class TestCsvExporterPathConfinement:
+    """table_name must not escape the export directory (Sonar AaHT3lBY8IZ3BlS9H5SG)."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "evil_name",
+        [
+            "../escape",
+            "..\\escape",
+            "/tmp/escape",
+            "nested/escape",
+            "nested\\escape",
+            ".",
+            "..",
+            "",
+            "   ",
+            "a/../../b",
+        ],
+    )
+    async def test_export_rejects_path_traversal_table_names(
+        self,
+        tmp_path: Path,
+        mock_logger: MagicMock,
+        evil_name: str,
+    ) -> None:
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        table = pa.Table.from_pydict({"id": [1]})
+        outside_before = {
+            path.resolve() for path in tmp_path.parent.glob("*") if path.is_file()
+        }
+
+        with pytest.raises(ValueError, match="CSV export|table name"):
+            await exporter.export(evil_name, table, append=False)
+
+        outside_after = {
+            path.resolve() for path in tmp_path.parent.glob("*") if path.is_file()
+        }
+        assert outside_after == outside_before
+        assert list(tmp_path.glob("*")) == []
+
+    @pytest.mark.asyncio
+    async def test_append_seed_raw_sidecar_stays_inside_export_root(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        """Legacy published-only CSV seeds ``.csv.raw`` only under the export root."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        published = tmp_path / "legacy.csv"
+        published.write_text("id\n1\n", encoding="utf-8")
+
+        await exporter.export(
+            "legacy",
+            pa.Table.from_pydict({"id": [2]}),
+            append=True,
+        )
+
+        raw = published.with_name(f"{published.name}.raw")
+        assert raw.is_file()
+        assert raw.resolve().is_relative_to(tmp_path.resolve())
+        assert published.resolve().is_relative_to(tmp_path.resolve())
+        assert set(pv.read_csv(raw).column("id").to_pylist()) == {1, 2}
+        # Published path remains spreadsheet-safe for newly appended rows.
+        assert set(pv.read_csv(published).column("id").to_pylist()) == {1, 2}
+
+    def test_resolve_table_export_paths_allows_dotted_table_names(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        csv_path, raw_path = exporter._resolve_table_export_paths("chembl.activity")
+        assert csv_path.name == "chembl.activity.csv"
+        assert raw_path.name == "chembl.activity.csv.raw"
+        assert csv_path.parent == tmp_path.resolve()
+        assert raw_path.parent == tmp_path.resolve()
