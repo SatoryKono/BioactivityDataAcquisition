@@ -11,6 +11,9 @@ from __future__ import annotations
 
 import argparse
 import html
+import hashlib
+
+import yaml
 import json
 import re
 import sys
@@ -33,6 +36,7 @@ from scripts.ops.observability.grafana.dashboard_context_links import (
     build_handoff_url,
 )
 
+_NATIVE_DASHBOARD_PATH = "grafana/dashboards"
 ROOT = Path(__file__).resolve().parents[4]
 if __package__ in {None, ""}:
     root_str = str(ROOT)
@@ -80,19 +84,94 @@ FILE_BY_UID = {
 _NAV_HIDDEN_UIDS: frozenset[str] = frozenset()
 
 
+def generate_adaptive_profile(*, check: bool = False) -> int:
+    """Project the optional profile behind the existing navigation renderer."""
+    from scripts.ops.observability.grafana._audit_presentation import (
+        project_adaptive_dashboard,
+    )
+
+    outputs: dict[Path, str] = {}
+    hashes = {}
+    for path in sorted((ROOT / _NATIVE_DASHBOARD_PATH).glob("*.json")):
+        raw = path.read_text(encoding="utf-8")
+        hashes[path.name] = hashlib.sha256(raw.encode()).hexdigest()
+        outputs[ROOT / "grafana/dashboards-adaptive" / path.name] = (
+            json.dumps(
+                project_adaptive_dashboard(json.loads(raw)),
+                ensure_ascii=False,
+                indent=2,
+            )
+            + "\n"
+        )
+    provider = yaml.safe_load(
+        (ROOT / "grafana/provisioning/dashboards/bioetl.yaml").read_text()
+    )
+    for item in provider["providers"]:
+        item["options"]["path"] = item["options"]["path"].replace(
+            "/var/lib/grafana/dashboards/", "/var/lib/grafana/dashboards-adaptive/"
+        )
+    outputs[ROOT / "grafana/provisioning/dashboards-adaptive/bioetl.yaml"] = (
+        yaml.safe_dump(provider, sort_keys=False)
+    )
+    bundle = ROOT / "grafana/plugins/bioetl-selectorshell-panel/dist-adaptive"
+    outputs[ROOT / "grafana/dashboards-adaptive/profile.json"] = (
+        json.dumps(
+            {
+                "profile": "adaptive-table-v1",
+                "selection": "explicit_local_only",
+                "native_fallback": _NATIVE_DASHBOARD_PATH,
+                "canonical_sha256": hashes,
+                "plugin_version": json.loads((bundle / "plugin.json").read_text())[
+                    "info"
+                ]["version"],
+                "module_sha256": hashlib.sha256(
+                    (bundle / "module.js").read_bytes()
+                ).hexdigest(),
+            },
+            indent=2,
+        )
+        + "\n"
+    )
+    drift = []
+    for path, content in outputs.items():
+        if check:
+            if not path.is_file() or path.read_text(encoding="utf-8") != content:
+                drift.append(str(path.relative_to(ROOT)))
+        else:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content, encoding="utf-8")
+    if drift:
+        print("Adaptive profile drift: " + ", ".join(drift))
+        return 1
+    print(
+        "Adaptive profile current"
+        if check
+        else "Generated explicit adaptive profile; native fallbacks unchanged"
+    )
+    return 0
+
+
 def write_dashboard_source(path: Path, serialized: str, *, root: Path) -> None:
     """Persist generated JSON only within either canonical dashboard profile."""
     target = path.resolve()
     allowed = {
-        (root / "grafana/dashboards").resolve(),
+        (root / _NATIVE_DASHBOARD_PATH).resolve(),
         (root / "grafana/dashboards-prometheus-only").resolve(),
     }
     if target.parent not in allowed or target.suffix != ".json":
         raise ValueError("Dashboard generator output must stay in a canonical profile")
-    if not isinstance(json.loads(serialized), dict):
+    payload = json.loads(serialized)
+    if not isinstance(payload, dict):
         raise ValueError("Dashboard generator output must be a JSON object")
+    from scripts.ops.observability.grafana._audit_presentation import (
+        stamp_audit_presentation,
+    )
+
+    stamp_audit_presentation(payload)
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(serialized, encoding="utf-8")
+    target.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
 
 
 def _validate_action_route_uids() -> None:
@@ -235,7 +314,7 @@ _RECOVERY_ACTION_HTML = (
 )
 _RUN_EXPLORER_UID = "bioetl-run-explorer-v1"
 CHIP_BASE = (
-    "box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;"
+    "box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0;"
     "border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere"
 )
 # Theme-safe chips: slate link surface works on dark and light Grafana themes.
@@ -2815,6 +2894,11 @@ def apply_to_dashboard(
         )
         embed_global_alerts(payload, incident)
     stamp_run_selection_context(payload)
+    from scripts.ops.observability.grafana._audit_presentation import (
+        stamp_audit_presentation,
+    )
+
+    stamp_audit_presentation(payload)
     from scripts.ops.observability.grafana._visual_usability import (
         apply_accessible_status_colors,
     )
@@ -3047,7 +3131,14 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Apply the state, evidence-table and navigation follow-up before rendering; combine with --check to verify without writing",
     )
+    parser.add_argument(
+        "--adaptive-profile",
+        action="store_true",
+        help="Generate or check the explicit adaptive profile from current native dashboards",
+    )
     args = parser.parse_args(argv)
+    if args.adaptive_profile:
+        return generate_adaptive_profile(check=args.check)
     ok = True
     # Render the global-alert donor before its Overview consumer.
     for item in sorted(BUS, key=lambda item: item["uid"] != "bioetl-incident-v1"):

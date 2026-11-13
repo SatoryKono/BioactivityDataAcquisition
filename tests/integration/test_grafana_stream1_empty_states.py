@@ -114,7 +114,7 @@ def test_provider_health_fleet_cause_tables_are_retired() -> None:
         ]
         assert targets
         assert all("expr" not in target for target in targets)
-        assert all("run_id=${run_id}" in target["url"] for target in targets)
+        assert all("run_id=${selected_run_id}" in target["url"] for target in targets)
 
 
 def test_provider_cause_contract_declares_unknown_beside_valid_empty() -> None:

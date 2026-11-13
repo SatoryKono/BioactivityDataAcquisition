@@ -21,6 +21,7 @@ class _IdentityScope:
     selected_run_id: str | None
     resolved_manifest: RunManifest | None
     resolved_via: str
+    report_pipeline: str | None = None
 
 
 class _RunManifestLookupPort(Protocol):

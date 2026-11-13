@@ -567,7 +567,7 @@ def _assert_overview_identity_panel(dashboard: dict) -> None:
     donor = next(p for p in get_dashboard_panels(dashboard) if p.get("id") == 9002)
     donor_target = donor["targets"][0]
     assert donor_target["url"].startswith("/ops/observability/selected-run-status?")
-    assert "run_id=${run_id}" in donor_target["url"]
+    assert "run_id=${selected_run_id}" in donor_target["url"]
     assert donor_target["parser"] == "backend"
     assert "uql" not in donor_target
     assert "Run ID" in donor_target["root_selector"]
@@ -1122,7 +1122,7 @@ def test_dq_dashboard_contains_core_dq_metrics():
         if isinstance(target, dict)
     )
     assert "selected-run-status" in urls
-    assert "run_id=${run_id}" in urls
+    assert "run_id=${selected_run_id}" in urls
 
 
 def test_dq_freshness_panel_uses_age_from_timestamp_metric() -> None:
@@ -1421,7 +1421,8 @@ def test_provider_dashboard_uses_pipeline_filters():
     assert panel["targets"][0].get("panelId") == 9002
     donor = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9002)
     assert all(
-        "pipeline=${pipeline}" in t["url"] and "run_id=${run_id}" in t["url"]
+        "pipeline=${selected_pipeline}" in t["url"]
+        and "run_id=${selected_run_id}" in t["url"]
         for t in donor["targets"]
     )
     assert all("expr" not in t for t in panel["targets"])

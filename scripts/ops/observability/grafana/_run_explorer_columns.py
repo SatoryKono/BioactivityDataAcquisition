@@ -48,7 +48,7 @@ _COLORS = {
 _RUN_ID_LABEL = "Run ID"
 _COLUMNS = {
     "workflow_id": ("Workflow", None, 100),
-    "pipeline": ("Pipeline", None, 80),
+    "pipeline_label": ("Pipeline", None, 80),
     "provider": ("Provider", 60, 50),
     # Full UUID stays in the hidden identity field and Inspect; keep the preview bounded.
     "run_label": (_RUN_ID_LABEL, 110, 50),
@@ -59,7 +59,7 @@ _COLUMNS = {
     "data_quality_status": (_DATA_QUALITY, None, 80),
     "replay_readiness_status": (_REPLAY_READINESS, 125, 80),
 }
-_CONTEXT = "var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}"
+_CONTEXT = "var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}"
 _SELECT_RUN_URL = (
     "/d/bioetl-run-explorer-v1/1-run-explorer?" + _CONTEXT + "&var-lookup_run_id="
 )
@@ -69,7 +69,7 @@ _RESET_FILTERS = (
     "&var-lookup_run_id=&${__url_time_range}"
 )
 _OPS_HTTP = "BioETL Ops HTTP"
-_NO_RUNS_LABEL = "НЕТ ЗАПУСКОВ"
+_NO_RUNS_LABEL = "NO RUNS"
 _FILTER_ROOT = (
     "$exists(items) and $count(items) = 0 ? "
     f'[{{"text":"{_NO_RUNS_LABEL}","value":"-"}}] : items'
@@ -242,6 +242,8 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         "GLOBAL · BROWSE the launch catalog filtered by Workflow/Pipeline/Run Type. "
         "Last 10 launches, newest Started first, independent of the time range. "
         "Workflow and Pipeline open passports. Run ID opens the persisted Report. "
+        "Pipeline shows the entity component beside Provider; the full canonical "
+        "pipeline is retained for tooltips and every handoff. "
         "The full UUID is available in the cell tooltip "
         "and cell inspection without widening the column or wrapping the row. "
         "Overview is processing status, not replay readiness. "
@@ -254,6 +256,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         "Running is a recorded state, not proof of current liveness. Missing reports have no link."
     )
     hidden = [
+        "pipeline",
         "run_id",
         "workflow_scope",
         "run_type",
@@ -270,8 +273,9 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     # the Infinity payload for no UI gain.
     panel["targets"][0]["root_selector"] = (
         'index_state = "valid_empty" and $exists(items) and $count(items) = 0 '
-        '? [{"pipeline": "VALID EMPTY"}] : items.($merge([$, '
-        '{"workflow_id": workflow_id != "" ? workflow_id : "N/A", "run_label": run_id, '
+        '? [{"pipeline": "VALID EMPTY", "pipeline_label": "VALID EMPTY"}] : items.($merge([$, '
+        '{"workflow_id": workflow_id != "" ? workflow_id : "N/A", "run_label": $substring(run_id,0,8) & "…", '
+        '"pipeline_label": $substringAfter(pipeline, provider & "_") ? $substringAfter(pipeline, provider & "_") : pipeline, '
         '"workflow_passport_path": $substringAfter(workflow_passport_url, '
         '"https://github.com/SatoryKono/BioactivityDataAcquisition/"), '
         '"pipeline_passport_path": $substringAfter(pipeline_passport_url, '
@@ -391,6 +395,8 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
                     {"id": "custom.tooltip.field", "value": "run_id"},
                 ]
             )
+        if name == "Pipeline":
+            properties.append({"id": "custom.tooltip.field", "value": "pipeline"})
         if name in {"Overview", "Saved Evidence", _DATA_QUALITY, _REPLAY_READINESS}:
             properties.extend(
                 [

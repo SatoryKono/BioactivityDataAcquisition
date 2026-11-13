@@ -5,6 +5,12 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 
+from bioetl.application.services.evidence_location.resolver import (
+    EvidenceLocationResolver,
+)
+from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
+from bioetl.domain.exceptions import BioETLError
+from bioetl.domain.types import RunID
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
     forensic_unavailable_payload,
@@ -13,6 +19,7 @@ from bioetl.interfaces.http._forensic_request_budget import (
 from bioetl.interfaces.http._health_server_observability_protocols import (
     _HealthObservabilityRoutingHost,
 )
+from bioetl.interfaces.http._processed_records_value_support import _selector_tokens
 from bioetl.interfaces.http.processed_records_table import (
     build_processed_records_table_payload_from_ledger,
     build_processed_records_table_payload_from_prometheus,
@@ -21,6 +28,59 @@ from bioetl.interfaces.http.processed_records_table import (
 from bioetl.interfaces.http.run_report_ops import load_pipeline_run_report_payload
 
 __all__ = ["handle_processed_records_table"]
+
+
+def _validate_selected_manifest(
+    manifest: object, *, pipeline: str, run_id: RunID, run_type: str | None
+) -> None:
+    """Reject missing evidence and mismatched selected identity before ledger reads."""
+    if manifest is None:
+        raise ForensicEndpointUnavailable(reason="manifest_missing", status_code=404)
+    requested_types = _selector_tokens(run_type)
+    if (
+        not isinstance(manifest, RunManifest)
+        or str(manifest.run_id) != str(run_id)
+        or manifest.pipeline_name != pipeline
+        or (requested_types and manifest.run_type.value not in requested_types)
+    ):
+        raise ForensicEndpointUnavailable(
+            reason="selector_context_mismatch", status_code=409
+        )
+
+
+def _selected_ledger_entries(
+    host: _HealthObservabilityRoutingHost,
+    *,
+    pipeline: str,
+    run_id: RunID,
+    run_type: str | None,
+) -> tuple[RunLedgerEntry, ...]:
+    """Use the same identity-bound evidence root as the other run details."""
+    resolver = getattr(host, "_evidence_location_resolver", None)
+    if not isinstance(resolver, EvidenceLocationResolver):
+        ledger = host._run_ledger_port
+        return tuple(ledger.list_entries_by_run_id(run_id)) if ledger else ()
+    resolved = resolver.resolve(
+        kind="pipeline",
+        owner=pipeline,
+        run_id=str(run_id),
+        expected_runtime_source_id=getattr(host, "_runtime_source_id", None),
+    )
+    if resolved.context is None or resolved.code.value in {
+        "identity_conflict",
+        "location_invalid",
+    }:
+        raise ForensicEndpointUnavailable(reason=resolved.code.value, status_code=409)
+    manifest = resolved.context.get_manifest_by_run_id(run_id)
+    _validate_selected_manifest(
+        manifest, pipeline=pipeline, run_id=run_id, run_type=run_type
+    )
+    entries = resolved.context.get_ledger_entries_by_run_id(run_id)
+    if any(str(entry.run_id) != str(run_id) for entry in entries):
+        raise ForensicEndpointUnavailable(
+            reason="ledger_identity_conflict", status_code=409
+        )
+    return entries
 
 
 async def handle_processed_records_table(
@@ -50,13 +110,17 @@ async def handle_processed_records_table(
             }
 
         operation = build_selection_required
-    elif run_ledger is not None:
+    elif run_ledger is not None or isinstance(
+        getattr(host, "_evidence_location_resolver", None), EvidenceLocationResolver
+    ):
 
         def build_from_ledger() -> dict[str, object]:
             # Empty ledger entries stay UNKNOWN (DASH-STATE-001). Prometheus
             # current metrics are pipeline/run_type aggregates and MUST NOT
             # be presented as the selected UUID (DASH-SCOPE-001 / DASH-DATA-002).
-            ledger_entries = tuple(run_ledger.list_entries_by_run_id(selected_run_id))
+            ledger_entries = _selected_ledger_entries(
+                host, pipeline=pipeline, run_id=selected_run_id, run_type=run_type
+            )
             # Saved-report fill is unused when the ledger is empty — skip I/O.
             report = (
                 load_pipeline_run_report_payload(
@@ -100,7 +164,7 @@ async def handle_processed_records_table(
             ),
         )
         return
-    except (ConnectionError, OSError, RuntimeError):
+    except (BioETLError, OSError, RuntimeError, ValueError):
         await host._send_payload_response(
             writer,
             503,

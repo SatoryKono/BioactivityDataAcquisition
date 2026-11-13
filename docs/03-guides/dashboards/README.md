@@ -62,6 +62,35 @@ layout acceptance whenever an accessibility fix changes geometry or typography.
 
 ## Versioning strategy (issue #8632)
 
+### Optional adaptive Run Explorer profile
+
+The canonical five dashboards in `grafana/dashboards/` retain native panels.
+An explicitly selected local profile in `grafana/dashboards-adaptive/` uses the
+managed adaptive plugin for Run Explorer panel 3010 and puts the Overview verdict
+first when columns stack. UIDs, queries, row links and selector semantics are
+preserved. This profile does not change historical acceptance results.
+
+Build the adaptive bundle with
+`npm exec webpack -- -c webpack.adaptive.config.ts --env production` from
+`grafana/plugins/bioetl-selectorshell-panel`, then generate the profile with
+`python -m scripts.ops.observability.grafana.render_nav_bus --adaptive-profile`.
+The same generator accepts `--check`; build provenance records its compiler inputs.
+Select `BIOETL_GRAFANA_DASHBOARD_PROFILE_DIR=./grafana/provisioning/dashboards-adaptive`
+in the managed runtime process before starting the existing monitoring stack.
+Do not edit an environment file or restart a service without the required approval.
+The native provider remains the default when this parameter is unset.
+
+Explorer uses a four-field summary when the viewport is below 1024 CSS pixels or
+the catalog panel has less than 1280 pixels available. Previous/Next traverse the
+returned catalog; Details retains every column, the full pipeline and Run ID, and
+all row actions. Larger panels show all ten columns. A source error, an unknown
+identity and a valid empty catalog remain distinct English states.
+
+For rollback, restore the previous plugin bundle and select the default native
+provider through the managed runtime. Keep the existing data volumes and UIDs.
+On this Windows checkout the non-root runtime UID/GID must match the existing
+control-file writer (currently 1000:1000); do not relax private file permissions.
+
 | Track | Status | Where |
 | --- | --- | --- |
 | **Dashboard System 2.0 (stable shipped)** | `Status: active` / published | This index, `dashboard-v2-usage.md`, panel docs, `design-system.md`, `contracts/` |

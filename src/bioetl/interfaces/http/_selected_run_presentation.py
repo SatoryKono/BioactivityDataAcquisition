@@ -6,7 +6,7 @@ from collections.abc import Mapping
 from urllib.parse import urlencode
 
 _SELECT_RUN = "SELECT RUN"
-_NO_RUNS = "НЕТ ЗАПУСКОВ"
+_NO_RUNS = "NO RUNS"
 _RUN_EXPLORER_SELECT_PATH = "d/bioetl-run-explorer-v1/1-run-explorer?var-run_id=-"
 
 
