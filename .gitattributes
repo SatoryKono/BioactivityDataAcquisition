@@ -54,6 +54,7 @@ reports/audit/grafana/rf005-rf006-d62d78a0-20260908/** -text
 
 # Preserve captured bytes of config-root main acceptance evidence.
 reports/quality/proof-or-stop/config-root-11899/ci-1401/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/99-archive/reports-20261015/reports/quality/proof-or-stop/config-root-11899/ci-1401/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 reports/quality/proof-or-stop/config-root-11899/full-coverage-wave-46/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 reports/quality/proof-or-stop/config-root-11899/*main-acceptance* -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 reports/quality/proof-or-stop/config-root-11899/ci1401-*.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
