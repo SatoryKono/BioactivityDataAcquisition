@@ -186,7 +186,7 @@ def _apply_fixture(monkeypatch, tmp_path, *, changed=False, archive_error=False)
         "classify_worktrees",
         lambda *args: [{**row, "head": "new"}] if changed else [row],
     )
-    monkeypatch.setattr(bh, "_safe_tree_target", lambda path: path)
+    monkeypatch.setattr(bh, "_safe_tree_target", lambda path, **kwargs: path)
 
     def archive(*args):
         if archive_error:
@@ -216,6 +216,7 @@ def test_apply_never_removes_changed_or_unarchived_tree(
 
 
 def test_tree_guard_rejects_nested_env_without_creating_env(monkeypatch, tmp_path):
+    monkeypatch.setattr(bh, "GOVERNED_WORKSPACE_ROOT", tmp_path.parent)
     monkeypatch.setattr(
         bh.os,
         "walk",
@@ -233,10 +234,14 @@ def test_worktree_removal_uses_git_dirty_protection(monkeypatch, tmp_path):
     assert "--force" not in removals[0]
 
 
-@pytest.mark.parametrize("target", ["D:/", "D:/github"])
-def test_tree_guard_refuses_drive_or_governed_root(target):
+@pytest.mark.parametrize("use_parent", [False, True])
+def test_tree_guard_refuses_parent_or_governed_root(monkeypatch, tmp_path, use_parent):
+    root = tmp_path / "workspace"
+    root.mkdir()
+    monkeypatch.setattr(bh, "GOVERNED_WORKSPACE_ROOT", root)
+    target = tmp_path if use_parent else root
     with pytest.raises(RuntimeError, match="outside governed workspace"):
-        bh._safe_tree_target(bh.Path(target))
+        bh._safe_tree_target(target)
 
 
 def test_worktree_lock_without_reason_is_preserved(monkeypatch):
@@ -255,7 +260,7 @@ def test_quarantine_destination_must_stay_in_owned_root(monkeypatch, tmp_path):
     root = tmp_path / "worktrees"
     monkeypatch.setattr(bh, "WT_ROOT", root)
     bh._safe_quarantine_destination(root / ".__trash_20261113" / "retained")
-    with pytest.raises(RuntimeError, match="escapes"):
+    with pytest.raises(RuntimeError, match="outside governed|escapes"):
         bh._safe_quarantine_destination(tmp_path / "other-project" / "retained")
     assert not root.exists()
 
@@ -275,3 +280,54 @@ def test_fresh_tip_with_finished_pr_is_not_deleted(monkeypatch):
     buckets = bh.classify_branches(branches, [], "main", 3)
     assert [row["name"] for row in buckets["E"]] == ["renewed"]
     assert not buckets["A"]
+
+
+@pytest.mark.parametrize(
+    "command", [[], ["python", "bad.py"], ["sh", "-c", "bad"], ["../git", "status"]]
+)
+def test_run_rejects_unapproved_executables_before_spawn(monkeypatch, command):
+    monkeypatch.setattr(
+        bh.subprocess,
+        "run",
+        lambda *args, **kwargs: pytest.fail("unapproved process started"),
+    )
+    with pytest.raises(RuntimeError, match="fixed Git"):
+        bh.run(command)
+
+
+def test_report_directory_is_confined_without_creating_files(monkeypatch, tmp_path):
+    root = tmp_path / "repo"
+    monkeypatch.setattr(bh, "REPO", root)
+    allowed = root / "reports" / "local" / "review"
+    assert bh._report_directory(allowed) == allowed.resolve()
+    with pytest.raises(RuntimeError, match="outside governed"):
+        bh._report_directory(tmp_path / "other-project")
+    assert not root.exists()
+
+
+def test_tree_guard_rejects_env_leaf_before_query(monkeypatch, tmp_path):
+    monkeypatch.setattr(bh, "GOVERNED_WORKSPACE_ROOT", tmp_path)
+    with pytest.raises(RuntimeError, match="env or linked"):
+        bh._safe_tree_target(tmp_path / ".env.production")
+    assert not (tmp_path / ".env.production").exists()
+
+
+def test_new_directory_with_old_trash_name_is_not_expired(monkeypatch, tmp_path):
+    directory = tmp_path / "review.__trash_20200101"
+    directory.mkdir()
+    monkeypatch.setattr(bh, "_now", lambda: directory.stat().st_mtime + bh.DAY)
+    monkeypatch.setattr(
+        bh.shutil, "rmtree", lambda *args: pytest.fail("fresh quarantine removed")
+    )
+    assert "kept" in bh._delete_trash(directory)
+
+
+def test_archive_rejects_deleted_tracked_env_before_reading_diff(monkeypatch, tmp_path):
+    def run(args):
+        assert "--name-only" in args, "must not read excluded tracked file contents"
+        return SimpleNamespace(returncode=0, stdout=".env.example\0", stderr="")
+
+    monkeypatch.setattr(bh, "run", run)
+    with pytest.raises(RuntimeError, match="excluded tracked"):
+        bh.archive_tree(tmp_path, "tree", "abc", tmp_path / "archive")
+    assert not (tmp_path / "archive").exists()

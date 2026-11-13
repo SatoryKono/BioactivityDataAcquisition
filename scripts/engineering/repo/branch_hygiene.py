@@ -48,6 +48,7 @@ if __package__ in {None, ""}:
 REPO = Path(__file__).resolve().parents[3]
 WT_ROOT = REPO.parent / f"{REPO.name}-worktrees"
 ROOT = REPO.parent
+GOVERNED_WORKSPACE_ROOT = Path("D:/github")
 DAY = 86400.0
 STALE_HOURS = 12
 SAFE_DIR_ARG = "safe.directory=*"
@@ -69,8 +70,12 @@ def stamp() -> str:
 def run(
     args: list[str], cwd: Path | None = None, timeout: int = 600
 ) -> subprocess.CompletedProcess:
+    if not args or args[0] not in {"git", "gh"}:
+        raise RuntimeError("Only fixed Git and GitHub CLI executables are permitted")
+    command = ["git", *args[1:]] if args[0] == "git" else ["gh", *args[1:]]
     return subprocess.run(
-        args,
+        command,
+        shell=False,
         cwd=cwd or REPO,
         capture_output=True,
         text=True,
@@ -295,7 +300,7 @@ def _branch_bucket(
         return bucket, {"pr_states": states}
     if branch["gone"]:
         return ("A" if age > branch_days else "E"), {}
-    unique = cherry_unique(branch["name"])
+    unique = cherry_unique(f"refs/heads/{branch['name']}")
     if unique == 0:
         return "B", {}
     extra = {"unique_commits": unique}
@@ -337,11 +342,7 @@ def do_classify(args: argparse.Namespace) -> int:
 
 
 def _classify_impl(args: argparse.Namespace) -> Path:
-    out = (
-        Path(args.out)
-        if args.out
-        else REPO / "reports" / "local" / f"branch-hygiene-{stamp()}"
-    )
+    out = _report_directory(args.out)
     out.mkdir(parents=True, exist_ok=True)
     wts = registered_worktrees()
     brs = local_branches()
@@ -395,6 +396,11 @@ def _copy_archive_file(src: str, dst: str) -> str:
 
 def archive_tree(path: Path, name: str, head: str, archive: Path) -> dict[str, Any]:
     """Create a complete archive or raise before permitting removal."""
+    changed = run(["git", "-C", str(path), "diff", "--name-only", "-z", "HEAD"])
+    if changed.returncode:
+        raise RuntimeError("Cannot read complete worktree changes")
+    if any(excluded(name) for name in changed.stdout.split("\0") if name):
+        raise RuntimeError("Cannot archive excluded tracked inputs")
     archive.mkdir(parents=True, exist_ok=True)
     diff = run(["git", "-C", str(path), "diff", "--binary", "HEAD"])
     status = run(
@@ -442,22 +448,44 @@ def trash_date(name: str) -> str | None:
     return token
 
 
-def _safe_tree_target(path: Path) -> Path:
-    configured_root = Path("D:/github")
+def _lexically_confined(path: Path, root: Path, *, allow_root: bool = False) -> Path:
+    """Reject outside locations before querying the caller-supplied filesystem path."""
+    candidate = Path(os.path.abspath(path))
+    base = Path(os.path.abspath(root))
+    if not candidate.is_relative_to(base) or (candidate == base and not allow_root):
+        raise RuntimeError("Refusing target outside governed workspace")
+    if any(part.startswith(".env") for part in candidate.relative_to(base).parts):
+        raise RuntimeError("Refusing env or linked tree input")
+    return candidate
+
+
+def _safe_tree_target(path: Path, *, must_exist: bool = True) -> Path:
+    configured_root = Path(os.path.abspath(GOVERNED_WORKSPACE_ROOT))
+    candidate = _lexically_confined(path, configured_root)
     allowed = configured_root.resolve()
-    if allowed != configured_root.absolute():
+    if allowed != configured_root:
         raise RuntimeError("Governed workspace root was redirected")
-    target = path.resolve(strict=True)
-    if target == allowed or not target.is_relative_to(allowed):
-        raise RuntimeError(f"Refusing target outside governed workspace: {path}")
-    if path.is_symlink() or path.is_junction():
-        raise RuntimeError(f"Refusing linked target: {path}")
+    target = candidate.resolve(strict=must_exist)
+    if not target.is_relative_to(allowed) or target == allowed:
+        raise RuntimeError("Refusing target outside governed workspace")
+    if candidate.is_symlink() or candidate.is_junction():
+        raise RuntimeError("Refusing linked target")
     for base, directories, files in os.walk(target, followlinks=False):
         for name in directories + files:
             item = Path(base) / name
             if name.startswith(".env") or item.is_symlink() or item.is_junction():
                 raise RuntimeError(f"Refusing env or linked tree input: {item}")
     return target
+
+
+def _report_directory(value: Path | None) -> Path:
+    root = REPO / "reports" / "local"
+    proposed = value if value is not None else root / f"branch-hygiene-{stamp()}"
+    candidate = _lexically_confined(proposed, root)
+    resolved = candidate.resolve(strict=False)
+    if not resolved.is_relative_to(root.resolve(strict=False)):
+        raise RuntimeError("Report directory escapes owned reports root")
+    return resolved
 
 
 def _apply_worktree(
@@ -488,8 +516,7 @@ def _apply_worktree(
         actions.append(entry)
         return
     try:
-        if path.exists():
-            _safe_tree_target(path)
+        path = _safe_tree_target(path, must_exist=False)
         if row["action"] == "REMOVE_ARCHIVE" and path.exists():
             entry["wip"] = archive_tree(path, path.name, row["head"], archive)
     except (OSError, RuntimeError) as exc:
@@ -509,32 +536,33 @@ def _delete_trash(src: Path) -> str:
     if date is None:
         return "kept: unknown quarantine date"
     created = datetime.strptime(date, "%Y%m%d").replace(tzinfo=UTC).timestamp()
-    age = (_now() - created) / DAY
+    age = (_now() - max(created, src.stat().st_mtime)) / DAY
     if age < TRASH_TTL_DAYS:
         return f"kept (trash {age:.1f}d < {TRASH_TTL_DAYS}d)"
     shutil.rmtree(src)
     return "hard_deleted"
 
 
-def _safe_quarantine_destination(destination: Path) -> None:
+def _safe_quarantine_destination(destination: Path) -> Path:
+    candidate = _lexically_confined(destination, WT_ROOT)
     root = WT_ROOT.resolve()
-    resolved = destination.resolve(strict=False)
+    resolved = candidate.resolve(strict=False)
     if resolved == root or not resolved.is_relative_to(root):
         raise RuntimeError("Quarantine destination escapes governed worktree root")
-    if destination.exists():
+    if resolved.exists():
         raise RuntimeError("Quarantine destination already exists")
+    return resolved
 
 
 def _apply_orphan(row: dict[str, Any]) -> dict[str, Any]:
     src = Path(row["path"])
     entry = {"kind": row["kind"], "path": str(src), "action": row["action"]}
     try:
-        _safe_tree_target(src)
+        src = _safe_tree_target(src)
         if row["action"] == "HARD_DELETE":
             entry["result"] = _delete_trash(src)
         else:
-            dst = Path(row["quarantine"])
-            _safe_quarantine_destination(dst)
+            dst = _safe_quarantine_destination(Path(row["quarantine"]))
             dst.parent.mkdir(parents=True, exist_ok=True)
             os.rename(src, dst)
             entry["result"] = f"quarantined -> {dst}"
@@ -569,7 +597,7 @@ def _delete_one_branch(
     )
     if not permitted:
         return {**entry, "result": "kept: state changed"}
-    result = run(["git", "branch", "-D", candidate["name"]])
+    result = run(["git", "branch", "-D", "--", candidate["name"]])
     return {**entry, "rc": result.returncode, "error": result.stderr.strip()[:120]}
 
 
@@ -602,7 +630,6 @@ def _action_succeeded(action: dict[str, Any]) -> bool:
 
 
 def do_apply(args: argparse.Namespace) -> int:
-    out = Path(args.out)
     if not args.execute:
         print("[dry-run] no trees or branches changed; pass --execute to apply")
         return 0
