@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-13T01:32:41.045287+00:00",
+  "generated_at": "2026-11-13T01:52:17.554809+00:00",
   "summary": {
     "total_scripts": 749,
     "status_counts": {
@@ -22195,7 +22195,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/ai-closeout-wrapper.md",
-          "line": 38,
+          "line": 44,
           "source_group": "docs",
           "text": "[`closeout_runtime.py`](../../../scripts/engineering/repo/closeout_runtime.py),"
         },
@@ -22226,7 +22226,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/ai-closeout-wrapper.md",
-          "line": 40,
+          "line": 46,
           "source_group": "docs",
           "text": "[`closeout_state.py`](../../../scripts/engineering/repo/closeout_state.py)."
         },
@@ -22263,7 +22263,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/ai-closeout-wrapper.md",
-          "line": 39,
+          "line": 45,
           "source_group": "docs",
           "text": "[`closeout_worker.py`](../../../scripts/engineering/repo/closeout_worker.py) and"
         }

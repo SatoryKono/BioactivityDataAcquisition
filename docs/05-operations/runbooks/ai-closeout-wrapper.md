@@ -18,8 +18,9 @@ validation receipts and bundle are available.
 
 ## Impact
 
-The operation reads evidence and Git/source state and writes only owned command
-metadata. A non-qualified result does not itself establish a pipeline outage.
+The facade explicitly writes owned command metadata while reading evidence and
+Git/source state. This is not a filesystem restriction on its interpreter or
+dependencies. A non-qualified result does not itself establish a pipeline outage.
 It prevents a local observation from being represented as admitted completion;
 it does not rerun QA, deploy hooks or grant additional permissions.
 
@@ -30,6 +31,11 @@ established Python/dependencies. The task must authorize the owned metadata
 write. Preserve other writers and all `.env` restrictions. Keep the expected
 task/runtime/claim explicit and provide a regular bundle within the checkout.
 Do not install dependencies, runtimes or services implicitly.
+
+Start the parent with `-B`, or set `PYTHONDONTWRITEBYTECODE=1` before starting
+Python, to suppress interpreter bytecode-cache writes. The worker already uses
+both. This does not prevent arbitrary dependency or startup-hook side effects;
+the command is not an operating-system sandbox.
 
 ## Authority and supported surface
 
@@ -61,7 +67,7 @@ No native config or event registration is installed by this command.
 After the existing QA commands produce their canonical receipts and bundle:
 
 ```bash
-<python> -m scripts.engineering.repo closeout \
+<python> -B -m scripts.engineering.repo closeout \
   --runtime codex --task-id issue-13039 --claim done \
   --bundle reports/quality/proof-or-stop/<run-id>/bundle.json
 ```
@@ -85,8 +91,9 @@ Arguments:
 
 There is no arbitrary command, policy override, source-check bypass, trust-tier
 override or self-approval argument. Repository `.env` and worktree-location
-guardrails still apply. This operation creates only its owned command metadata,
-not a checkout, machine config or Git hook installation.
+guardrails still apply. The facade's explicit output is its owned command
+metadata; it does not request a checkout, machine config or Git hook installation.
+Interpreter and dependency effects remain subject to the preconditions above.
 
 ## Verification
 

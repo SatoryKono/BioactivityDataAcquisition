@@ -154,7 +154,7 @@ When a native lifecycle adapter has not been qualified, use the existing
 repository facade after assembling the canonical receipts:
 
 ```bash
-<python> -m scripts.engineering.repo closeout \
+<python> -B -m scripts.engineering.repo closeout \
   --runtime codex --task-id <task-id> --claim done \
   --bundle reports/quality/proof-or-stop/<run-id>/bundle.json
 ```
