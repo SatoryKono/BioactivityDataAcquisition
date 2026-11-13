@@ -171,8 +171,16 @@ def _spreadsheet_safe_chunk(chunk: pa.Array) -> pa.Array:
     return pa.array(values, type=chunk.type)
 
 
+def validate_spreadsheet_safe_column_names(table: pa.Table) -> None:
+    """Reject tables whose spreadsheet-safe headers would collide."""
+    names = [neutralize_spreadsheet_text(name) for name in table.column_names]
+    if len(set(names)) != len(set(table.column_names)):
+        raise ValueError("Spreadsheet-safe column names collide")
+
+
 def spreadsheet_safe_table(table: pa.Table) -> pa.Table:
     """Return a safe export copy; retain numeric types and original input values."""
+    validate_spreadsheet_safe_column_names(table)
     result = table
     for index, field in enumerate(table.schema):
         kind = (
@@ -188,6 +196,4 @@ def spreadsheet_safe_table(table: pa.Table) -> pa.Table:
             )
             result = result.set_column(index, field, column)
     names = [neutralize_spreadsheet_text(name) for name in table.column_names]
-    if len(set(names)) != len(set(table.column_names)):
-        raise ValueError("Spreadsheet-safe column names collide")
     return result.rename_columns(names)

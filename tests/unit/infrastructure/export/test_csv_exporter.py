@@ -319,13 +319,31 @@ class TestCsvExporterClear:
 
         # Create test files
         (tmp_path / "table1.csv").write_text("data1")
+        (tmp_path / "table1.csv.raw").write_text("raw1")
         (tmp_path / "table2.csv").write_text("data2")
 
         deleted = exporter.clear("table1")
 
-        assert len(deleted) == 1
+        assert set(deleted) == {
+            tmp_path / "table1.csv",
+            tmp_path / "table1.csv.raw",
+        }
         assert not (tmp_path / "table1.csv").exists()
+        assert not (tmp_path / "table1.csv.raw").exists()
         assert (tmp_path / "table2.csv").exists()
+
+    def test_clear_orphan_raw_sidecar_for_named_table(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        """Named clear removes a leftover .csv.raw even when CSV is gone."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        orphan = tmp_path / "records.csv.raw"
+        orphan.write_text("id\n1\n", encoding="utf-8")
+
+        deleted = exporter.clear("records")
+
+        assert deleted == [orphan]
+        assert not orphan.exists()
 
     def test_clear_all_csv_files(self, tmp_path: Path, mock_logger: MagicMock) -> None:
         """Test clearing all CSV files."""
@@ -334,13 +352,19 @@ class TestCsvExporterClear:
         # Create test files
         (tmp_path / "table1.csv").write_text("data1")
         (tmp_path / "table2.csv").write_text("data2")
+        (tmp_path / "orphan.csv.raw").write_text("raw")
         (tmp_path / "other.txt").write_text("not csv")
 
         deleted = exporter.clear()
 
-        assert len(deleted) == 2
+        assert set(deleted) == {
+            tmp_path / "table1.csv",
+            tmp_path / "table2.csv",
+            tmp_path / "orphan.csv.raw",
+        }
         assert not (tmp_path / "table1.csv").exists()
         assert not (tmp_path / "table2.csv").exists()
+        assert not (tmp_path / "orphan.csv.raw").exists()
         assert (tmp_path / "other.txt").exists()  # Non-CSV not deleted
 
     def test_clear_nonexistent_directory(
@@ -661,16 +685,17 @@ class TestCsvExporterTrueAppend:
         assert rows == [{"id": str(i), "val": f"v{i}"} for i in range(5)]
 
     @pytest.mark.asyncio
-    async def test_append_locked_target_writes_backup(
+    async def test_append_locked_published_csv_does_not_claim_success(
         self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """If target CSV is locked during append, batch goes to backup file."""
+        """Locked published CSV after raw append fails closed (backup is not success)."""
         exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
 
         table1 = pa.Table.from_pydict({"id": [1]})
         await exporter.export("locked_test", table1)
+        published = tmp_path / "locked_test.csv"
+        before = published.read_bytes()
 
-        # Make the open() call raise PermissionError for the target file
         original_open = open
 
         def _patched_open(path: object, mode: str = "r", **kwargs: object) -> object:
@@ -681,15 +706,69 @@ class TestCsvExporterTrueAppend:
         monkeypatch.setattr("builtins.open", _patched_open)
 
         table2 = pa.Table.from_pydict({"id": [2]})
-        await exporter.export("locked_test", table2)
+        with pytest.raises(RuntimeError, match="backup-only publish is not a successful"):
+            await exporter.export("locked_test", table2)
 
         mock_logger.warning.assert_called()
+        assert published.read_bytes() == before
         backups = list(tmp_path.glob("locked_test.append-locked.*.csv"))
         assert len(backups) == 1
-        backup = backups[0]
-        expected_digest = hashlib.sha256(backup.read_bytes()).hexdigest()[:12]
-        assert backup.name == f"locked_test.append-locked.{expected_digest}.csv"
-        assert backup.exists()
+
+    @pytest.mark.asyncio
+    async def test_append_locked_raw_sidecar_leaves_published_unchanged(
+        self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """If .raw append is backup-only, do not mutate the published CSV."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        await exporter.export("locked_raw", pa.Table.from_pydict({"id": [1]}))
+        published = tmp_path / "locked_raw.csv"
+        raw = tmp_path / "locked_raw.csv.raw"
+        before_published = published.read_bytes()
+        before_raw = raw.read_bytes()
+
+        original_open = open
+
+        def _patched_open(path: object, mode: str = "r", **kwargs: object) -> object:
+            if str(path).endswith("locked_raw.csv.raw") and "b" in mode and "a" in mode:
+                raise PermissionError("locked")
+            return original_open(path, mode, **kwargs)
+
+        monkeypatch.setattr("builtins.open", _patched_open)
+
+        with pytest.raises(RuntimeError, match="backup-only publish is not a successful"):
+            await exporter.export("locked_raw", pa.Table.from_pydict({"id": [2]}))
+
+        assert published.read_bytes() == before_published
+        assert raw.read_bytes() == before_raw
+        assert list(tmp_path.glob("locked_raw.csv.raw.append-locked.*.csv")) or list(
+            tmp_path.glob("*.append-locked.*.csv")
+        )
+
+    @pytest.mark.asyncio
+    async def test_overwrite_rejects_header_collision_before_touching_raw(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        """Colliding spreadsheet-safe headers must not replace an existing pair."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        await exporter.export(
+            "headers",
+            pa.Table.from_pydict({"id": [1], "name": ["a"]}),
+            append=False,
+        )
+        published = tmp_path / "headers.csv"
+        raw = tmp_path / "headers.csv.raw"
+        before_published = published.read_bytes()
+        before_raw = raw.read_bytes()
+
+        with pytest.raises(ValueError, match="Spreadsheet-safe column names collide"):
+            await exporter.export(
+                "headers",
+                pa.Table.from_pydict({"=x": [1], "'=x": [2]}),
+                append=False,
+            )
+
+        assert published.read_bytes() == before_published
+        assert raw.read_bytes() == before_raw
 
 
 @pytest.mark.unit

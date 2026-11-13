@@ -357,7 +357,7 @@ def test_csv_exporter_clear_and_deduplicate_branches(
     assert locked.exists()
     assert logger.events[-1] == (
         "warning",
-        "Cannot delete locked CSV file",
+        "Cannot delete locked CSV export artifact",
         {"path": str(locked), "reason": "file may be open in another program"},
     )
 
@@ -403,17 +403,19 @@ async def test_csv_exporter_async_export_and_finalize_branches(
         write_options: object,
         *,
         spreadsheet_safe: bool = True,
-    ) -> None:
+    ) -> bool:
         captured_writes.append((data, target_path, write_options, spreadsheet_safe))
         target_path.write_text("id\n2\n", encoding="utf-8")
+        return True
 
     def capture_append(
         data: pa.Table,
         csv_path: Path,
         *,
         spreadsheet_safe: bool = True,
-    ) -> None:
+    ) -> bool:
         captured_appends.append((data, csv_path, spreadsheet_safe))
+        return True
 
     monkeypatch.setattr(exporter, "_atomic_csv_write", capture_write)
     monkeypatch.setattr(exporter, "_append_to_csv", capture_append)
@@ -493,8 +495,9 @@ def test_csv_exporter_export_table_uses_full_row_dedup_and_configured_sort(
         write_options: object,
         *,
         spreadsheet_safe: bool = True,
-    ) -> None:
+    ) -> bool:
         captured_writes.append((data, target_path, write_options, spreadsheet_safe))
+        return True
 
     monkeypatch.setattr(exporter, "_atomic_csv_write", capture_write)
     output_path = tmp_path / "nested" / "records.csv"

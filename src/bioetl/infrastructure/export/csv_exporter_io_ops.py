@@ -76,11 +76,14 @@ def atomic_csv_write(
     logger: LoggerPort,
     *,
     spreadsheet_safe: bool = True,
-) -> None:
+) -> bool:
     """Write CSV atomically to avoid file lock issues on Windows.
 
     When ``spreadsheet_safe`` is false, write the working raw representation
     used for append/dedupe; neutralize only the published CSV artifact.
+
+    Returns ``True`` when the primary ``target_path`` was updated. Returns
+    ``False`` when the target stayed locked and only a backup file was written.
     """
     target_dir = target_path.parent
     fd, temp_path_str = tempfile.mkstemp(
@@ -105,11 +108,12 @@ def atomic_csv_write(
             logger.warning(
                 "Target CSV locked, wrote to backup", backup_path=str(backup_path)
             )
-            return
+            return False
     except (OSError, pa.ArrowException, ValueError, TypeError, RuntimeError):
         if temp_path.exists():
             temp_path.unlink()
         raise
+    return True
 
 
 def append_to_csv(
@@ -119,11 +123,14 @@ def append_to_csv(
     logger: LoggerPort,
     *,
     spreadsheet_safe: bool = True,
-) -> None:
+) -> bool:
     """Append records to an existing CSV without reading it.
 
     When ``spreadsheet_safe`` is false, append to the working raw representation
     used for append/dedupe; neutralize only the published CSV artifact.
+
+    Returns ``True`` when the primary ``csv_path`` was updated. Returns
+    ``False`` when the target stayed locked and only a backup file was written.
     """
     fd, temp_path_str = tempfile.mkstemp(
         suffix=".csv.tmp",
@@ -150,7 +157,7 @@ def append_to_csv(
                 backup_path=str(backup_path),
             )
             _publish_locked_csv_backup(temp_path, backup_path)
-            return
+            return False
     except (OSError, pa.ArrowException, ValueError, TypeError, RuntimeError):
         if temp_path.exists():
             temp_path.unlink()
@@ -158,3 +165,4 @@ def append_to_csv(
     else:
         if temp_path.exists():
             temp_path.unlink()
+    return True
