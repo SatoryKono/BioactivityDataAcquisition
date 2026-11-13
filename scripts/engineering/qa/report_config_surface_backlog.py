@@ -33,6 +33,8 @@ GENERATED_DUPLICATION_SURFACE_FILES = (
     ROOT / "configs" / "quality" / "test_telemetry_baseline.yaml",
 )
 REVIEW_EVIDENCE_DUPLICATION_PATTERNS = (
+    "configs/quality/external_resource_inventory_security_aud003_review.json",
+    "configs/quality/external_resource_inventory_security_aud004_review.json",
     "configs/quality/external_resource_inventory_pr*_review.json",
     "configs/quality/external_resource_inventory_security_aud005_main_merge_review.json",
     "configs/quality/external_resource_inventory_security_aud006_review.json",
