@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "819fd5109ce21ecbcaaf4f69d3ed9e760e815dd2",
+  "source_ref": "29a996eb00786a7ae54f0a5263df4334e091c836",
+  "source_reviews": {
+    "src/bioetl/application/observability/control_plane_evidence/service_support.py": "Reviewed exact-run ledger chain selection through the injected port; returns immutable snapshots without acquiring a new concrete resource.",
+    "src/bioetl/application/services/control_plane/manifest/diagnostics/selected_run_replay_readiness.py": "Reviewed canonical NO RUNS spelling while retaining the prior empty-state spelling; presentation only, no allocation or cleanup change.",
+    "src/bioetl/application/services/evidence_location/resolver_types.py": "Reviewed read-context protocol for exact-run ledger access; protocol declaration adds no concrete acquisition.",
+    "src/bioetl/composition/bootstrap/assembly/health_server.py": "Reviewed archive/report-root configuration passed to the existing evidence read-context factory; existing host-owned ports and resource bindings retained.",
+    "src/bioetl/composition/control_plane_paths.py": "Reviewed selected-root ledger port and validation-service composition. Every predecessor path is contained before Path.read_text; implicit file contexts close before returning. Service ports remain read-only and bound to the selected root.",
+    "src/bioetl/infrastructure/control_plane/file_evidence_read_context.py": "Reviewed selected-run ledger indexes and predecessor chain: validate selected-root containment before each read, terminate cycles, delegate ledger loading to the bound port. Path.read_text owns and closes its transient file context.",
+    "src/bioetl/interfaces/http/_control_plane_selector_payloads.py": "Reviewed NO RUNS catalog label; scalar constant only, no resource or lifetime change.",
+    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_routing.py": "Reviewed selected validation identity/root binding and manifest-not-recorded preservation. Existing awaited asyncio.to_thread calls and the new binding dispatch borrow the loop default executor; cancellation is not proof of physical worker termination.",
+    "src/bioetl/interfaces/http/_health_server_observability_routing.py": "Reviewed English report-not-found copy; response handling and resource ownership unchanged.",
+    "src/bioetl/interfaces/http/_health_server_records_table.py": "Reviewed identity-bound selected ledger loading via the configured resolver, manifest and ledger ownership checks, and source-error translation. Existing awaited offload still uses the loop-owned default executor.",
+    "src/bioetl/interfaces/http/_report_selector_options.py": "Reviewed replacement of unknown report option labels without duplicating run IDs. The existing operation-local ThreadPoolExecutor allocation, context exit/join and error propagation are unchanged; shifted references require relocation only.",
+    "src/bioetl/interfaces/http/_selected_run_a2_resolve.py": "Reviewed NO RUNS spelling and docstring; auto-selection and catalog error resource boundaries unchanged.",
+    "src/bioetl/interfaces/http/_selected_run_presentation.py": "Reviewed NO RUNS presentation constant; no acquisition.",
+    "src/bioetl/interfaces/http/_selected_run_unavailable.py": "Reviewed English empty-scope explanatory copy; no acquisition.",
+    "src/bioetl/interfaces/http/control_plane_selector_context.py": "Reviewed empty-catalog label documentation and spelling; no resource lifetime change.",
+    "src/bioetl/interfaces/http/selected_run_status.py": "Reviewed documentation spelling only relative to pinned catalog source; loader lifetime and cleanup unchanged."
+  },
+  "new_exclusions": [
+    {
+      "file": "src/bioetl/composition/control_plane_paths.py",
+      "scope": "_SelectedRootLedgerPort._assert_manifest_chain",
+      "call": "pointer.read_text",
+      "reason": "Synchronous Path.read_text uses its own context-managed file handle and closes it before returning or propagating an error; selected-root containment is checked before this index/predecessor read. It does not create a retained resource owner."
+    },
+    {
+      "file": "src/bioetl/infrastructure/control_plane/file_evidence_read_context.py",
+      "scope": "FileEvidenceReadContext.get_ledger_entries_by_run_id",
+      "call": "index.read_text",
+      "reason": "Synchronous Path.read_text uses its own context-managed file handle and closes it before returning or propagating an error; selected-root containment is checked before this index/predecessor read. It does not create a retained resource owner."
+    },
+    {
+      "file": "src/bioetl/infrastructure/control_plane/file_evidence_read_context.py",
+      "scope": "FileEvidenceReadContext.get_ledger_entries_by_run_id",
+      "call": "pointer.read_text",
+      "reason": "Synchronous Path.read_text uses its own context-managed file handle and closes it before returning or propagating an error; selected-root containment is checked before this index/predecessor read. It does not create a retained resource owner."
+    },
+    {
+      "file": "src/bioetl/interfaces/http/_health_server_control_plane_evidence_routing.py",
+      "scope": "_service_payload",
+      "call": "asyncio.to_thread",
+      "expression": "asyncio.to_thread(_bind_selected_validation, host, scope, service)",
+      "reason": "Awaited submission to the already inventoried asyncio.default-executor; this request borrows the loop-owned pool and must not shut it down. Cancellation does not imply the worker stopped; loop/host shutdown retains its existing drain obligation."
+    }
+  ],
+  "line_updates": {
+    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_routing.py": {
+      "255": 262,
+      "309": 316,
+      "382": 401,
+      "250": 257,
+      "344": 351,
+      "359": 378,
+      "364": 383,
+      "373": 392,
+      "378": 397,
+      "249": 256,
+      "253": 260,
+      "372": 391
+    },
+    "src/bioetl/interfaces/http/_health_server_observability_routing.py": {
+      "83": 83,
+      "86": 86,
+      "77": 77,
+      "74": 74,
+      "80": 80,
+      "71": 71,
+      "68": 68,
+      "320": 320,
+      "345": 345,
+      "306": 306,
+      "107": 107,
+      "184": 184,
+      "225": 225,
+      "325": 325,
+      "350": 350,
+      "307": 307,
+      "108": 108,
+      "185": 185,
+      "226": 226,
+      "289": 289,
+      "39": 39,
+      "41": 41,
+      "40": 40
+    },
+    "src/bioetl/interfaces/http/selected_run_status.py": {
+      "370": 370,
+      "396": 396,
+      "199": 199,
+      "307": 307,
+      "129": 129,
+      "188": 188
+    }
+  }
+}

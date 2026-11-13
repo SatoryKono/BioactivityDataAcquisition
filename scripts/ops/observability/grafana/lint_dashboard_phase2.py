@@ -57,7 +57,7 @@ _STATUS_TOKENS = (
     "ERROR",
     "UNKNOWN",
     "SELECT RUN",
-    "НЕТ ЗАПУСКОВ",
+    "NO RUNS",
     "INCOMPLETE",
 )
 

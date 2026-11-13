@@ -6,9 +6,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+
 from bioetl.application.services.run_reports.source_identity import (
     RUNTIME_SOURCE_ID_ENV,
     resolve_runtime_source_identity,
+)
+from bioetl.composition.bootstrap.assembly.checkpoint import (
+    bind_selected_evidence_validation,
 )
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     load_repository_source_environment,
@@ -26,6 +30,7 @@ from bioetl.infrastructure.control_plane.evidence_location_path_safety import (
 )
 from bioetl.infrastructure.control_plane.file_evidence_read_context import (
     FileEvidenceReadContext,
+    _SelectedRootLedgerPort as _SelectedRootLedgerPort,
     validate_control_tree,
 )
 from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
@@ -106,6 +111,8 @@ class FileEvidenceReadContextFactory:
     """Open file-backed read ports under a trusted alias base (RF-003)."""
 
     metrics: MetricsPort | None = None
+    archive_root: Path | None = None
+    report_root: Path | None = None
 
     def open(
         self,
@@ -128,7 +135,7 @@ class FileEvidenceReadContextFactory:
             bronze_root=safe_root / "output" / "bronze",
             trusted_base=alias_base,
         )
-        return FileEvidenceReadContext(
+        context = FileEvidenceReadContext(
             data_root=safe_root,
             trusted_alias_base=alias_base,
             manifest_port=FileRunManifestStore(
@@ -149,6 +156,12 @@ class FileEvidenceReadContextFactory:
                 metrics=self.metrics,
             ),
             replay_object_verifier=verifier,
+        )
+        return bind_selected_evidence_validation(
+            context,
+            archive_root=self.archive_root,
+            report_root=self.report_root,
+            metrics=self.metrics,
         )
 
 

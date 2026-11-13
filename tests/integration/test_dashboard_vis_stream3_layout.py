@@ -64,7 +64,7 @@ def test_overview_dq_timeline_hides_dotstar_and_in_band_state() -> None:
     assert target["withTransforms"] is False
     donor = _panel(dashboard, 9002)["targets"][0]
     assert donor["url"].startswith("/ops/observability/selected-run-status?")
-    assert "run_id=${run_id}" in donor["url"]
+    assert "run_id=${selected_run_id}" in donor["url"]
 
 
 def test_set_range_action_names_run_explorer_handoff() -> None:

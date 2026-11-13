@@ -314,6 +314,67 @@ def test_load_manifest_string_run_id_finds_saved_pipeline_manifest(
     assert lookup.detail == "manifest_present"
 
 
+def test_resolved_context_reads_only_its_ledger_without_mutating_evidence(
+    tmp_path: Path,
+) -> None:
+    from datetime import UTC, datetime
+    from bioetl.domain.control_plane import RunLedgerEntry
+    from bioetl.domain.types import RunID
+    from bioetl.infrastructure.control_plane.file_run_ledger_store import (
+        FileRunLedgerStore,
+    )
+
+    resolver, store, data_root = _resolver(tmp_path)
+    isolated = data_root / "workflow-a" / "chembl_assay"
+    isolated.mkdir(parents=True)
+    store.register(_location())
+    ledger = FileRunLedgerStore(base_path=isolated / "output/control/run_ledger")
+    entry = RunLedgerEntry(
+        entry_id="finish",
+        manifest_id="selected",
+        run_id=RunID(UUID(_RUN_A)),
+        event_type="run_finished",
+        occurred_at=datetime(2026, 11, 12, tzinfo=UTC),
+        status="success",
+    )
+    ledger.append(entry)
+    before = {
+        p.relative_to(data_root): p.read_bytes()
+        for p in data_root.rglob("*")
+        if p.is_file()
+    }
+    context = resolver.resolve(
+        kind="pipeline", owner="chembl_assay", run_id=_RUN_A
+    ).context
+    assert context is not None
+    assert context.get_ledger_entries_by_run_id(_RUN_A) == (entry,)
+    assert before == {
+        p.relative_to(data_root): p.read_bytes()
+        for p in data_root.rglob("*")
+        if p.is_file()
+    }
+
+
+def test_resolved_ledger_refuses_an_outside_predecessor_before_read(
+    tmp_path: Path,
+) -> None:
+    resolver, store, data_root = _resolver(tmp_path)
+    isolated = data_root / "workflow-a" / "chembl_assay"
+    ledger = isolated / "output/control/run_ledger"
+    (ledger / "_by_run_id").mkdir(parents=True)
+    (ledger / "_predecessors").mkdir()
+    (ledger / "_by_run_id" / f"{_RUN_A}.txt").write_text("head")
+    (ledger / "head.jsonl").write_text("not decoded before containment validation")
+    (ledger / "_predecessors/head.txt").write_text("../../../../outside")
+    store.register(_location())
+    context = resolver.resolve(
+        kind="pipeline", owner="chembl_assay", run_id=_RUN_A
+    ).context
+    assert context is not None
+    with pytest.raises(EvidenceLocationInvalidError):
+        context.get_ledger_entries_by_run_id(_RUN_A)
+
+
 def test_resolved_context_uses_standard_verifier_on_real_bytes(
     tmp_path: Path,
 ) -> None:

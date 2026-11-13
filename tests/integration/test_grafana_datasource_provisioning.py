@@ -428,7 +428,7 @@ def test_monitoring_compose_exposes_ops_http_soft_gate_env() -> None:
     )
     volumes = {str(item) for item in grafana["volumes"]}
     assert (
-        "./grafana/provisioning/dashboards:"
+        "${BIOETL_GRAFANA_DASHBOARD_PROFILE_DIR:-./grafana/provisioning/dashboards}:"
         "/etc/bioetl-grafana/dashboard-providers/full:ro" in volumes
     )
     assert (

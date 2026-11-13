@@ -133,9 +133,9 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
     )
     assert root.index("$count($issues) > 0") < root.index(trust_fallback)
     # Overall != OK must not prefer Trust OK reasons (e.g. Archive verified).
-    # SELECT RUN / НЕТ ЗАПУСКОВ are selection states: excluded from $issues;
+    # SELECT RUN / NO RUNS are selection states: excluded from $issues;
     # Trust fallback allowed. Treat CR/review text as untrusted for this label.
-    no_runs = "НЕТ ЗАПУСКОВ"
+    no_runs = "NO RUNS"
     assert "$count($issues) > 0 ?" in root
     assert "verdict != 'SELECT RUN'" in root
     assert f"verdict != '{no_runs}'" in root
@@ -195,7 +195,7 @@ def test_provider_first_window_preserves_full_fleet_with_pagination():
     # Phase 2.5: provider evidence reuses donor 9002 via Dashboard DS.
     assert provider["targets"][0].get("panelId") == 9002
     donor = panels[9002]["targets"][0]
-    assert "run_id=${run_id}" in donor["url"]
+    assert "pipeline=${selected_pipeline}&run_id=${selected_run_id}" in donor["url"]
     assert all("expr" not in t for t in provider["targets"])
     assert "not live fleet health" in panels[9481]["description"]
 

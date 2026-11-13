@@ -3,7 +3,7 @@
 Unresolved selectors (``-`` / All / empty) auto-pick the latest run in the
 current pipeline/run_type/workflow scope. An explicit URL ``run_id`` wins and
 is never silently replaced by latest. Empty catalog yields ``None`` so the
-caller can emit the canonical empty state «НЕТ ЗАПУСКОВ».
+caller can emit the canonical empty state «NO RUNS».
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ _UNRESOLVED_RUN_IDS = frozenset(
 # NO MATCHES scope into unrestricted latest selection.
 _ALL_SCOPE_TOKENS = frozenset({"", "All", "all", ".*", "$__all", "__all", "*", "—"})
 
-NO_RUNS_STATUS = "НЕТ ЗАПУСКОВ"
+NO_RUNS_STATUS = "NO RUNS"
 NO_RUNS_REASON = "no_runs_in_scope"
 CATALOG_UNAVAILABLE_REASON = "run_manifest_catalog_unavailable"
 

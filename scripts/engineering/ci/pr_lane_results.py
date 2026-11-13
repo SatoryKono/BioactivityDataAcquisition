@@ -49,6 +49,12 @@ DASHBOARD_UX_REPORT_FRESHNESS_TEST = (
 DASHBOARD_OPERATOR_READABILITY_TEST = (
     "tests/integration/test_dashboard_operator_readability.py"
 )
+DASHBOARD_VARIABLE_DEPENDENCIES_TEST = (
+    "tests/integration/test_dashboard_variable_dependencies.py"
+)
+GRAFANA_DASHBOARD_PROVISIONING_TEST = (
+    "tests/integration/test_grafana_dashboard_provisioning.py"
+)
 CONFTEST_FILENAME = "conftest.py"
 GENERATED_ARTIFACT_TESTS = Path("configs/quality/generated_artifact_tests.json")
 GENERATED_ARTIFACT_ROUTING = Path("configs/quality/generated_artifact_routing.yaml")
@@ -200,6 +206,16 @@ IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "docs/03-guides/dashboards/contracts/run-explorer-http-catalog.yaml": (
+        DOCUMENTATION_SYNC_TEST,
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+        "tests/integration/test_run_explorer_request_fixtures.py",
+    ),
+    "grafana/service-dashboards/prometheus-stats.json": (
+        "tests/unit/scripts/test_generate_dashboard_content_contract.py",
+        GRAFANA_DASHBOARD_PROVISIONING_TEST,
+    ),
     "scripts/engineering/repo/scoped_checks.py": (
         SCOPED_CHECKS_TEST,
         "tests/unit/scripts/repo/test_scoped_checks_cache.py",
@@ -994,6 +1010,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr13061_review.json",
             "configs/quality/external_resource_inventory_pr13092_review.json",
             "configs/quality/external_resource_inventory_pr13090_lineage_lock_review.json",
+            "configs/quality/external_resource_inventory_pr13113_review.json",
+            "configs/quality/external_resource_inventory_pr13113_refactor_review.json",
+            "configs/quality/external_resource_inventory_pr13113_main_f2f4_merge_review.json",
+            "configs/quality/external_resource_inventory_pr13113_main_13118_review.json",
+            "configs/quality/external_resource_inventory_pr13113_s5886_tip_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -1549,6 +1570,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "tests/fixtures/grafana/run_explorer/": (
+        "tests/integration/test_run_explorer_request_fixtures.py",
+        "tests/integration/test_run_explorer_http_catalog.py",
+    ),
     "docs/reports/dashboard-ux-checks/": (
         DASHBOARD_UX_REPORT_FRESHNESS_TEST,
         DASHBOARD_OPERATOR_READABILITY_TEST,
@@ -1614,7 +1639,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     ),
     "grafana/dashboards/": (
         DASHBOARD_SCENES_CONTRACT_TEST,
-        "tests/integration/test_dashboard_variable_dependencies.py",
+        DASHBOARD_VARIABLE_DEPENDENCIES_TEST,
         "tests/integration/test_grafana_config.py",
         "tests/integration/test_grafana_dashboard_cta_links.py",
         GRAFANA_METRIC_SEMANTICS_TEST,
@@ -1622,14 +1647,26 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         GRAFANA_SELECTOR_CONTRACT_TEST,
         GRAFANA_VARIABLE_REFERENCE_TEST,
     ),
+    # Optional adaptive projection keeps the native dashboard contracts and its profile checks.
+    "grafana/dashboards-adaptive/": (
+        "tests/unit/scripts/test_adaptive_dashboard_profile.py",
+        DASHBOARD_VARIABLE_DEPENDENCIES_TEST,
+        GRAFANA_DASHBOARD_PROVISIONING_TEST,
+        GRAFANA_SELECTOR_CONTRACT_TEST,
+        GRAFANA_VARIABLE_REFERENCE_TEST,
+    ),
+    "grafana/provisioning/dashboards-adaptive/": (
+        "tests/unit/scripts/test_adaptive_dashboard_profile.py",
+        GRAFANA_DASHBOARD_PROVISIONING_TEST,
+    ),
     # Prometheus-only mirror: shipped dashboard owners plus its provisioning contract.
     "grafana/dashboards-prometheus-only/": (
         DASHBOARD_SCENES_CONTRACT_TEST,
-        "tests/integration/test_dashboard_variable_dependencies.py",
+        DASHBOARD_VARIABLE_DEPENDENCIES_TEST,
         "tests/integration/test_grafana_config.py",
         "tests/integration/test_grafana_dashboard_cta_links.py",
         GRAFANA_METRIC_SEMANTICS_TEST,
-        "tests/integration/test_grafana_dashboard_provisioning.py",
+        GRAFANA_DASHBOARD_PROVISIONING_TEST,
         "tests/integration/test_grafana_evidence_readability.py",
         GRAFANA_SELECTOR_CONTRACT_TEST,
         GRAFANA_VARIABLE_REFERENCE_TEST,

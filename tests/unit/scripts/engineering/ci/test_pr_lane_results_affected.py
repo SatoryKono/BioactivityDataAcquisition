@@ -1412,7 +1412,81 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
     "path,expected,unknown",
     [
         (
+            "docs/03-guides/dashboards/contracts/run-explorer-http-catalog.yaml",
+            {"tests/integration/test_run_explorer_request_fixtures.py"},
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "tests/fixtures/grafana/run_explorer/backend_error.json",
+            {
+                "tests/integration/test_run_explorer_request_fixtures.py",
+                "tests/integration/test_run_explorer_http_catalog.py",
+            },
+            "tests/fixtures/grafana/not-reviewed-catalog/example.json",
+        ),
+        (
+            "grafana/dashboards-adaptive/profile.json",
+            {
+                "tests/unit/scripts/test_adaptive_dashboard_profile.py",
+                "tests/integration/test_dashboard_variable_dependencies.py",
+            },
+            "grafana/not-reviewed-adaptive/profile.json",
+        ),
+        (
+            "grafana/provisioning/dashboards-adaptive/bioetl.yaml",
+            {
+                "tests/unit/scripts/test_adaptive_dashboard_profile.py",
+                "tests/integration/test_grafana_dashboard_provisioning.py",
+            },
+            "grafana/provisioning/not-reviewed-adaptive/bioetl.yaml",
+        ),
+        (
+            "grafana/service-dashboards/prometheus-stats.json",
+            {"tests/unit/scripts/test_generate_dashboard_content_contract.py"},
+            "grafana/service-dashboards/not-reviewed.json",
+        ),
+        (
             "configs/quality/external_resource_inventory_pr13061_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "configs/quality/external_resource_inventory_pr13113_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "configs/quality/external_resource_inventory_pr13113_refactor_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "configs/quality/external_resource_inventory_pr13113_main_f2f4_merge_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "configs/quality/external_resource_inventory_pr13113_main_13118_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "configs/quality/external_resource_inventory_pr13113_s5886_tip_review.json",
             {
                 "tests/architecture/test_external_resource_inventory_catalog.py",
                 "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",

@@ -139,7 +139,7 @@ def _run_option_label(
 ) -> str:
     """Readable catalog label; Grafana value stays the stable UUID."""
     if value == RUN_ID_NO_SELECTION:
-        # A2 empty catalog uses «НЕТ ЗАПУСКОВ»; SELECT RUN remains only as the
+        # A2 empty catalog uses «NO RUNS»; SELECT RUN remains only as the
         # legacy A1 sentinel label when concrete runs exist (JSON may still send -).
         return RUN_ID_NO_RUNS_LABEL if empty_catalog else "SELECT RUN"
     if record is None:
@@ -161,7 +161,7 @@ def _run_option_labels(
 
     Empty catalogs keep ``-`` as ``SELECT RUN`` here so report supplements can
     still append report-only UUIDs without dual-labeling ``-`` as
-    «НЕТ ЗАПУСКОВ». Call ``finalize_run_id_empty_catalog_label`` after the
+    «NO RUNS». Call ``finalize_run_id_empty_catalog_label`` after the
     merged catalog is complete.
     """
     by_id = {record.run_id: record for record in records}
@@ -183,7 +183,7 @@ def _run_option_labels(
 def finalize_run_id_empty_catalog_label(
     payload: dict[str, object],
 ) -> dict[str, object]:
-    """Apply «НЕТ ЗАПУСКОВ» only after manifest + report options are merged."""
+    """Apply «NO RUNS» only after manifest + report options are merged."""
     raw_items = payload.get("items")
     if not isinstance(raw_items, list):
         return payload

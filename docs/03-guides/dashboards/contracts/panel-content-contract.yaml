@@ -3388,6 +3388,10 @@ dashboards:
         - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
+        - OK
+        - WARN
+        - CRIT
+        - INCOMPLETE
         required_copy:
         - evidence_scope
         - no_data

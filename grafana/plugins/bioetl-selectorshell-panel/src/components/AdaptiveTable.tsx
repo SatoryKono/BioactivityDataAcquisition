@@ -53,7 +53,7 @@ const more = css`
   font-size: 16px;
   cursor: pointer;
 `;
-const detailNames: Record<string, string> = { run_id: 'Full Run ID', run_type: 'Run Type', workflow_scope: 'Workflow scope' };
+const detailNames: Record<string, string> = { run_id: 'Full Run ID', pipeline: 'Full pipeline', run_type: 'Run Type', workflow_scope: 'Workflow scope' };
 
 function hidden(field: Field): boolean {
   return field.config.custom?.hidden === true || field.config.custom?.hideFrom?.viz === true;
@@ -218,8 +218,9 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
   const rowOrder = useMemo(() => orderedRows(frame, options.sortBy), [frame, options.sortBy]);
   const currentPage = Math.min(page, Math.max(0, rowOrder.length - 1));
   const row = rowOrder[currentPage] ?? 0;
-  const isCompact = viewport < 1024;
   const isRuns = options.viewMode === 'runs';
+  // The docked menu can constrain a desktop panel below the readable ten-column width.
+  const isCompact = viewport < 1024 || (isRuns && (bounds?.width ?? width) < 1280);
   const isPaged = isRuns || options.viewMode === 'rows';
 
   // Supported Grafana versions expose query details through errors. A failed
@@ -241,7 +242,7 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
   }
 
   const detailFields = frame.fields.filter((field) =>
-    fields.includes(field) || ['run_id', 'run_type', 'workflow_scope'].includes(field.name)
+    fields.includes(field) || ['run_id', 'pipeline', 'run_type', 'workflow_scope'].includes(field.name)
   );
 
 
