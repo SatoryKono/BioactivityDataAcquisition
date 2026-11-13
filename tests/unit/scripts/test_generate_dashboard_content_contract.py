@@ -1,5 +1,8 @@
 """Regression guards for scope migration and misleading exact-run telemetry copy."""
 
+import json
+from pathlib import Path
+
 import pytest
 
 from scripts.engineering.qa.generate_dashboard_content_contract import (
@@ -117,3 +120,17 @@ def test_migration_preserves_scope_and_explains_legacy_signals():
     assert result["panels"][3] == source["panels"][3]
     assert source["panels"][0]["options"]["content"] == "old ingestion help"
     assert repair_dashboard(result) == result
+
+
+def test_shipped_prometheus_rule_duration_uses_seconds():
+    path = (
+        Path(__file__).resolve().parents[3]
+        / "grafana/service-dashboards/prometheus-stats.json"
+    )
+    dashboard = json.loads(path.read_text(encoding="utf-8"))
+    panel = next(item for item in dashboard["panels"] if item["id"] == 12)
+    assert panel["fieldConfig"]["defaults"]["unit"] == "s"
+    assert any(
+        "prometheus_rule_group_duration_seconds" in target["expr"]
+        for target in panel["targets"]
+    )
