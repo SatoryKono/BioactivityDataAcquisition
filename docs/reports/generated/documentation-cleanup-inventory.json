@@ -39135,7 +39135,7 @@
       "github_issue_url": null,
       "inbound_links": 1,
       "lifecycle": null,
-      "outbound_links": 3,
+      "outbound_links": 4,
       "owner": "BioETL Team",
       "path": "docs/03-guides/mcp-integration.md",
       "recommended_action": "keep",
@@ -101315,6 +101315,34 @@
       "duplicate_group": null,
       "duplicate_resolution": null,
       "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 1,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/docs-evidence/mcp-ordinary-session-20261113.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
       "freshness": "retention-sensitive",
       "generated_route": null,
       "generated_route_exception": null,
@@ -118183,10 +118211,10 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 26,
       "reports_workspace_entrypoint": 1,
-      "working_report": 383
+      "working_report": 384
     },
     "by_recommended_action": {
-      "archive-after-migration": 427,
+      "archive-after-migration": 428,
       "generate-automatically": 1067,
       "keep": 2696
     },
@@ -118213,7 +118241,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 765,
+      "reports": 766,
       "security": 2
     },
     "by_status": {
@@ -118221,17 +118249,17 @@
       "Archived": 1554,
       "Canonical": 77,
       "Generated": 1067,
-      "Working": 720
+      "Working": 721
     },
     "by_surface_family": {
       "active": 772,
       "archive": 1554,
       "canonical": 77,
       "generated": 1067,
-      "working": 720
+      "working": 721
     },
     "by_tracking_state": {
-      "tracked": 4190
+      "tracked": 4191
     },
     "docs_reports_local_count": 82,
     "duplicate_group_count": 80,
@@ -118244,8 +118272,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4190,
+    "total_doc_like": 4191,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4190
+    "total_doc_like_tracked": 4191
   }
 }
