@@ -104,16 +104,21 @@ async def _read_bodyless_response(
     return result
 
 
+def _response_body_decoder(encoding: str, window_bits: int):
+    """Select identity, gzip, or raw-DEFLATE decoder without nested ternaries."""
+    if encoding == "identity":
+        return None
+    if encoding == "deflate":
+        return _DeflateDecoder()
+    return zlib.decompressobj(window_bits)
+
+
 async def _collect_response_body(
     response: httpx.Response, encoding: str, *, wire_limit: int, decoded_limit: int
 ) -> tuple[bytes, int]:
     """Read bounded chunks without allocating an unbounded decoder output."""
     window_bits = 16 + zlib.MAX_WBITS if encoding == "gzip" else zlib.MAX_WBITS
-    decoder = (
-        _DeflateDecoder()
-        if encoding == "deflate"
-        else (None if encoding == "identity" else zlib.decompressobj(window_bits))
-    )
+    decoder = _response_body_decoder(encoding, window_bits)
     body = bytearray()
     wire_bytes = 0
     try:
