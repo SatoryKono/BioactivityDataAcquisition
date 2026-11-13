@@ -74,6 +74,8 @@ _SAFE_WORDS = frozenset(
 )
 _VARIABLE = re.compile(r"[A-Za-z_]\w*\Z", re.ASCII)
 _PROFILE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,95}\Z")
+# Public package/display names from pyproject.toml; custom IDs stay opaque.
+_PUBLIC_MEMORY_PROJECTS = frozenset({"bioetl", "BioETL"})
 _SECRET_FLAG = re.compile(r"token|password|secret|api[-_]?key|authorization", re.I)
 _BINARY_NAMES = frozenset(
     {
@@ -148,6 +150,30 @@ def _arguments(values: object) -> tuple[list[str], bool]:
     return result, complete
 
 
+def _memory_workspace_options(values: object) -> list[str] | None:
+    """Recognize the scoped selector only for the public BioETL project names.
+
+    These identifiers are not globally safe CLI arguments. Unknown adapters,
+    malformed selectors and additional options retain normal opaque handling.
+    A matching basename does not authenticate the adapter. Only public literals
+    are declassified; backend and branch registration need separate evidence.
+    """
+    if not isinstance(values, list) or len(values) != 10:
+        return None
+    if not all(isinstance(value, str) for value in values):
+        return None
+    valid = (
+        values[:3] == ["-I", "-S", "-B"],
+        _path_argument(values[3]),
+        Path(values[3].replace("\\", "/")).name == "project-memory-scoped-client.py",
+        values[4::2] == ["--workspace", "--project", "--policy"],
+        _path_argument(values[5]),
+        values[7] in _PUBLIC_MEMORY_PROJECTS,
+        values[9] in {"read-only", "read-write"},
+    )
+    return values[6:] if all(valid) else None
+
+
 def _service_address(value: object) -> tuple[str | None, bool]:
     if not isinstance(value, str):
         return None, False
@@ -183,7 +209,11 @@ def _transport(entry: Mapping[str, Any]) -> tuple[dict[str, object], bool]:
         projected["transport"] = "stdio"
         args = entry.get("args", [])
         positional_profile = _positional_profile(entry)
-        if positional_profile:
+        memory_options = _memory_workspace_options(args)
+        if memory_options:
+            arguments, args_complete = _arguments(args[:6])
+            arguments.extend(memory_options)
+        elif positional_profile:
             # Only the registered controllers define this final value as a
             # profile identity. Earlier omitted arguments still make the
             # projection incomplete.
