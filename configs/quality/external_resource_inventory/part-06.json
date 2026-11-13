@@ -54,7 +54,7 @@
       "lifetime": "process-scoped singleton; each acquisition lasts for one collector with block",
       "creation_sites": [
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -68,7 +68,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "d5aa2dc103b334fc0a1fef4f03cf225aaad3212d",
           "content_sha256": "04529f6059663600e405e54b150068d4582a9033e2fc776ea5c5b85de0cac544",
           "file": "src/bioetl/composition/observability_runtime.py",
@@ -80,7 +80,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -92,7 +92,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -102,7 +102,7 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -165,7 +165,7 @@
       "lifetime": "One descriptor and exclusive lock per live catalog critical section.",
       "creation_sites": [
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -177,7 +177,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -189,7 +189,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -203,7 +203,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -215,7 +215,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -227,7 +227,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -241,7 +241,7 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -253,7 +253,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -319,11 +319,11 @@
       "operation_aliases": [],
       "creation_sites": [
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
-          "source_blob": "c9be0b5b70a389555ed1c323f303660dea42afaa",
-          "content_sha256": "3e9ce97e0ed3943c984e2af79257b9ec060c0f99af0a80d262779b11292d12e5",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
+          "source_blob": "7aa687ea3b49d83a25d4bd7dcd4ebd790773aee3",
+          "content_sha256": "576c4bed93ec208ff3766e64743ac94d73d612e05e8ce8ee7bbb5310ad51d024",
           "file": "src/bioetl/infrastructure/export/csv_exporter.py",
-          "line": 127,
+          "line": 128,
           "expression": "pv.read_csv(source, parse_options=pv.ParseOptions(delimiter=delimiter), convert_options=pv.ConvertOptions(column_types=column_types))",
           "call": "pv.read_csv",
           "creator": "_seed_raw_sidecar_if_missing",
@@ -331,7 +331,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "d5b694dd261135d0ec43840113b1cc8ec391362c",
           "content_sha256": "8cf97b7958e7cace613666f31933746a5ead9feaa0bd2d89f6e6db4661baac95",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -345,11 +345,11 @@
       ],
       "production_binding": [
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
-          "source_blob": "c9be0b5b70a389555ed1c323f303660dea42afaa",
-          "content_sha256": "3e9ce97e0ed3943c984e2af79257b9ec060c0f99af0a80d262779b11292d12e5",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
+          "source_blob": "7aa687ea3b49d83a25d4bd7dcd4ebd790773aee3",
+          "content_sha256": "576c4bed93ec208ff3766e64743ac94d73d612e05e8ce8ee7bbb5310ad51d024",
           "file": "src/bioetl/infrastructure/export/csv_exporter.py",
-          "line": 127,
+          "line": 128,
           "expression": "pv.read_csv(source, parse_options=pv.ParseOptions(delimiter=delimiter), convert_options=pv.ConvertOptions(column_types=column_types))",
           "call": "pv.read_csv",
           "creator": "_seed_raw_sidecar_if_missing",
@@ -357,7 +357,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "d5b694dd261135d0ec43840113b1cc8ec391362c",
           "content_sha256": "8cf97b7958e7cace613666f31933746a5ead9feaa0bd2d89f6e6db4661baac95",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -424,7 +424,7 @@
       "operation_aliases": [],
       "creation_sites": [
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -436,7 +436,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -450,7 +450,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -462,7 +462,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -476,7 +476,7 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -542,7 +542,7 @@
       "operation_aliases": [],
       "creation_sites": [
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -554,7 +554,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -568,7 +568,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -580,7 +580,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -649,7 +649,7 @@
       "operation_aliases": [],
       "creation_sites": [
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "d5b694dd261135d0ec43840113b1cc8ec391362c",
           "content_sha256": "8cf97b7958e7cace613666f31933746a5ead9feaa0bd2d89f6e6db4661baac95",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -661,7 +661,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "d5b694dd261135d0ec43840113b1cc8ec391362c",
           "content_sha256": "8cf97b7958e7cace613666f31933746a5ead9feaa0bd2d89f6e6db4661baac95",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -673,7 +673,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "d5b694dd261135d0ec43840113b1cc8ec391362c",
           "content_sha256": "8cf97b7958e7cace613666f31933746a5ead9feaa0bd2d89f6e6db4661baac95",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -685,7 +685,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "d5b694dd261135d0ec43840113b1cc8ec391362c",
           "content_sha256": "8cf97b7958e7cace613666f31933746a5ead9feaa0bd2d89f6e6db4661baac95",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -697,7 +697,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "d5b694dd261135d0ec43840113b1cc8ec391362c",
           "content_sha256": "8cf97b7958e7cace613666f31933746a5ead9feaa0bd2d89f6e6db4661baac95",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -711,7 +711,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "d5b694dd261135d0ec43840113b1cc8ec391362c",
           "content_sha256": "8cf97b7958e7cace613666f31933746a5ead9feaa0bd2d89f6e6db4661baac95",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -723,7 +723,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "d5b694dd261135d0ec43840113b1cc8ec391362c",
           "content_sha256": "8cf97b7958e7cace613666f31933746a5ead9feaa0bd2d89f6e6db4661baac95",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -735,7 +735,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "d5b694dd261135d0ec43840113b1cc8ec391362c",
           "content_sha256": "8cf97b7958e7cace613666f31933746a5ead9feaa0bd2d89f6e6db4661baac95",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -747,7 +747,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "d5b694dd261135d0ec43840113b1cc8ec391362c",
           "content_sha256": "8cf97b7958e7cace613666f31933746a5ead9feaa0bd2d89f6e6db4661baac95",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -759,7 +759,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+          "source_commit": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
           "source_blob": "d5b694dd261135d0ec43840113b1cc8ec391362c",
           "content_sha256": "8cf97b7958e7cace613666f31933746a5ead9feaa0bd2d89f6e6db4661baac95",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",

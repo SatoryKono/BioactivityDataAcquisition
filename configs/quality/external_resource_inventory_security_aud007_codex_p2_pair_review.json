@@ -1,17 +1,8 @@
 {
   "schema_version": 1,
-  "catalog_ref": "062648d8eb050af9090590ec539b3e46a497edec",
-  "source_ref": "1e01e4e775a1b45f2de88466a2c665890e4c4e2c",
+  "catalog_ref": "2b3fde112e8e440dd500790a51f7b951ef95432e",
+  "source_ref": "5be9ee682e3aa91cd170ddae262c5e4ccc5597a8",
   "source_reviews": {
-    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": "Reviewed alignment of wholly-null columns before concatenating typed raw streams. Select first populated logical type, retain first declared type when no batch contains values, and change only all-null arrays. Populated string identifiers are never cast. Three RED regressions become GREEN; 134 export tests and mypy3 pass. Existing file/IPC resource creation and context cleanup expressions unchanged; no new external acquisitions. Runtime remains NOT_RUN_12553."
-  },
-  "line_updates": {
-    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": {
-      "145": 172,
-      "159": 186,
-      "200": 227,
-      "215": 242,
-      "219": 246
-    }
+    "src/bioetl/infrastructure/export/csv_exporter.py": "Reviewed legacy migration: constrain only explicitly textual column types to preserve lexical string keys; allow inference and compatible numeric promotion instead of forcing a narrower incoming integer/float type. Legacy1.5 plus incoming2 finalizes successfully. Full135 export tests, mypy3, Ruff pass. No acquisition/cleanup expression or runtime ownership change; NOT_RUN_12553 retained."
   }
 }
