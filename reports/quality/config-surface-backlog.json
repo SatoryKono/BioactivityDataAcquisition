@@ -190,8 +190,8 @@
         }
       },
       {
-        "block_path": "source_reviews",
-        "fingerprint": "37565a6e61f5",
+        "block_path": "expression_updates",
+        "fingerprint": "e27f74a8005b",
         "governance": {
           "decision": "review_required",
           "linked_issue": "#5568",
@@ -202,17 +202,45 @@
         "occurrence_count": 2,
         "occurrences": [
           {
-            "block_path": "source_reviews",
-            "path": "configs/quality/external_resource_inventory_security_aud005_main_merge_review.json",
+            "block_path": "expression_updates",
+            "path": "configs/quality/external_resource_inventory_security_aud003_review.json",
             "surface_kind": "quality_registry"
           },
           {
-            "block_path": "source_reviews",
-            "path": "configs/quality/external_resource_inventory_security_aud006_review.json",
+            "block_path": "expression_updates",
+            "path": "configs/quality/external_resource_inventory_security_aud004_review.json",
             "surface_kind": "quality_registry"
           }
         ],
-        "serialized_bytes": 548,
+        "serialized_bytes": 746,
+        "surface_kind_counts": {
+          "quality_registry": 2
+        }
+      },
+      {
+        "block_path": "expression_updates.src/bioetl/infrastructure/adapters/http/client_context_mixin.py",
+        "fingerprint": "ff32b599a785",
+        "governance": {
+          "decision": "review_required",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-architecture",
+          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 2,
+        "occurrences": [
+          {
+            "block_path": "expression_updates.src/bioetl/infrastructure/adapters/http/client_context_mixin.py",
+            "path": "configs/quality/external_resource_inventory_security_aud003_review.json",
+            "surface_kind": "quality_registry"
+          },
+          {
+            "block_path": "expression_updates.src/bioetl/infrastructure/adapters/http/client_context_mixin.py",
+            "path": "configs/quality/external_resource_inventory_security_aud004_review.json",
+            "surface_kind": "quality_registry"
+          }
+        ],
+        "serialized_bytes": 677,
         "surface_kind_counts": {
           "quality_registry": 2
         }
@@ -258,7 +286,7 @@
         ".yml",
         ".json"
       ],
-      "files_scanned": 262,
+      "files_scanned": 264,
       "ignored_by_jscpd_patterns": [
         "**/configs/**",
         "**/*.yaml",
@@ -271,9 +299,9 @@
     },
     "summary": {
       "affected_file_count": 12,
-      "duplicate_cluster_count": 7,
-      "duplicate_occurrence_count": 17,
-      "reported_cluster_count": 7
+      "duplicate_cluster_count": 8,
+      "duplicate_occurrence_count": 19,
+      "reported_cluster_count": 8
     }
   },
   "entity_effective": {

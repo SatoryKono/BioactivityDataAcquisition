@@ -1,12 +1,12 @@
 {
   "summary": {
-    "scanned_modules": 2610,
-    "total_internal_imports": 8550,
+    "scanned_modules": 2611,
+    "total_internal_imports": 8532,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "abb3e173383daa56b60768a171b358fcf51c5b4140f5f878eaa197cb79c334e3"
+    "source_fingerprint": "e657e70d8084b0fa1308cee375b00dea90443acfb2232bebfa7ada1574b8850a"
   },
   "layer_edges": [
     {
@@ -18,31 +18,31 @@
     {
       "source": "application",
       "target": "domain",
-      "imports": 1150,
+      "imports": 1148,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "application",
-      "imports": 244,
+      "imports": 241,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 660,
+      "imports": 659,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 328,
+      "imports": 327,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 317,
+      "imports": 314,
       "allowed": true
     },
     {
@@ -60,13 +60,13 @@
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1305,
+      "imports": 1307,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 86,
+      "imports": 84,
       "allowed": true
     },
     {
@@ -78,13 +78,13 @@
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 100,
+      "imports": 96,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 497,
+      "imports": 493,
       "allowed": true
     }
   ],
@@ -92,7 +92,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 159
+      "imports": 158
     },
     {
       "source": "infrastructure.adapters",
@@ -140,14 +140,14 @@
       "imports": 55
     },
     {
-      "source": "composition.bootstrap",
-      "target": "application.services",
-      "imports": 51
-    },
-    {
       "source": "composition.factories",
       "target": "application.core",
       "imports": 50
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "application.services",
+      "imports": 49
     },
     {
       "source": "infrastructure.storage",
@@ -175,14 +175,14 @@
       "imports": 36
     },
     {
-      "source": "composition.bootstrap",
-      "target": "domain.ports",
-      "imports": 35
-    },
-    {
       "source": "infrastructure.control_plane",
       "target": "domain.control_plane",
       "imports": 35
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "domain.ports",
+      "imports": 34
     },
     {
       "source": "interfaces.cli",
@@ -195,19 +195,14 @@
       "imports": 32
     },
     {
-      "source": "interfaces.http",
-      "target": "domain.control_plane",
-      "imports": 32
-    },
-    {
       "source": "infrastructure.storage",
       "target": "domain.medallion",
       "imports": 31
     },
     {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.control_plane",
-      "imports": 29
+      "source": "interfaces.http",
+      "target": "domain.control_plane",
+      "imports": 30
     },
     {
       "source": "composition.bootstrap",
@@ -218,6 +213,11 @@
       "source": "composition.factories",
       "target": "infrastructure.adapters",
       "imports": 27
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "infrastructure.control_plane",
+      "imports": 26
     },
     {
       "source": "composition.factories",
@@ -240,11 +240,6 @@
       "imports": 25
     },
     {
-      "source": "interfaces.http",
-      "target": "application.services",
-      "imports": 25
-    },
-    {
       "source": "infrastructure.adapters",
       "target": "domain.exceptions",
       "imports": 24
@@ -262,6 +257,11 @@
     {
       "source": "interfaces.cli",
       "target": "composition.runtime_builders",
+      "imports": 23
+    },
+    {
+      "source": "interfaces.http",
+      "target": "application.services",
       "imports": 23
     },
     {

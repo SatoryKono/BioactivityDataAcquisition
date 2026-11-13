@@ -29,7 +29,7 @@ import asyncio
 
 import httpx
 import pytest
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.exceptions import RetryExhaustedError
@@ -58,9 +58,12 @@ async def test_unified_client_retries_on_protocol_error():
 
     # Mock httpx AsyncClient
     mock_httpx = AsyncMock()
+    mock_httpx.build_request = MagicMock(
+        side_effect=lambda method, url, **kwargs: httpx.Request(method, url)
+    )
     request = httpx.Request("GET", "https://api.test.com")
     # Simulate RemoteProtocolError on first two attempts, success on third
-    mock_httpx.request.side_effect = [
+    mock_httpx.send.side_effect = [
         httpx.RemoteProtocolError("Server disconnected"),
         httpx.RemoteProtocolError("Server disconnected"),
         httpx.Response(200, content=b'{"status": "ok"}', request=request),
@@ -73,7 +76,7 @@ async def test_unified_client_retries_on_protocol_error():
 
     # Verify
     assert response.status_code == 200
-    assert mock_httpx.request.call_count == 3
+    assert mock_httpx.send.call_count == 3
     assert circuit_breaker.call.call_count == 3
 
 
@@ -98,7 +101,10 @@ async def test_unified_client_exhausts_retries_on_protocol_error():
     )
 
     mock_httpx = AsyncMock()
-    mock_httpx.request.side_effect = httpx.RemoteProtocolError("Server disconnected")
+    mock_httpx.build_request = MagicMock(
+        side_effect=lambda method, url, **kwargs: httpx.Request(method, url)
+    )
+    mock_httpx.send.side_effect = httpx.RemoteProtocolError("Server disconnected")
 
     client._client = mock_httpx
 
@@ -106,7 +112,7 @@ async def test_unified_client_exhausts_retries_on_protocol_error():
     with pytest.raises(RetryExhaustedError):
         await client.get("https://api.test.com")
 
-    assert mock_httpx.request.call_count == 2
+    assert mock_httpx.send.call_count == 2
 
 
 @pytest.mark.asyncio
@@ -132,14 +138,17 @@ async def test_unified_client_bounds_timeout_attempts():
     )
     request = httpx.Request("GET", "https://api.test.example/paper/search")
     mock_httpx = AsyncMock()
-    mock_httpx.request.side_effect = httpx.ReadTimeout("timed out", request=request)
+    mock_httpx.build_request = MagicMock(
+        side_effect=lambda method, url, **kwargs: httpx.Request(method, url)
+    )
+    mock_httpx.send.side_effect = httpx.ReadTimeout("timed out", request=request)
     client._client = mock_httpx
 
     with pytest.raises(RetryExhaustedError) as caught:
         await client.get(str(request.url))
 
     assert caught.value.attempts == 2
-    assert mock_httpx.request.await_count == 2
+    assert mock_httpx.send.await_count == 2
     assert circuit_breaker.call.await_count == 2
 
 
@@ -160,11 +169,14 @@ async def test_unified_client_propagates_cancellation_without_retry():
         provider="test",
     )
     mock_httpx = AsyncMock()
-    mock_httpx.request.side_effect = asyncio.CancelledError
+    mock_httpx.build_request = MagicMock(
+        side_effect=lambda method, url, **kwargs: httpx.Request(method, url)
+    )
+    mock_httpx.send.side_effect = asyncio.CancelledError
     client._client = mock_httpx
 
     with pytest.raises(asyncio.CancelledError):
         await client.get("https://api.test.example/paper/search")
 
-    assert mock_httpx.request.await_count == 1
+    assert mock_httpx.send.await_count == 1
     assert circuit_breaker.call.await_count == 1
