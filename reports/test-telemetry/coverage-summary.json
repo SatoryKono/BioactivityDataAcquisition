@@ -1,11 +1,11 @@
 {
-  "source_branch": "codex/iuphar-common-f1-measurement-20261113",
-  "source_commit": "3adb82865a560943e501359c54ee55900d8dcfe1",
-  "source_run_id": "43313540351",
+  "source_branch": "codex/iuphar-common-f3-measurement-20261113",
+  "source_commit": "e2441437d5d25d3dee4cb2f3d0ac0d955ebd9323",
+  "source_run_id": "43334885187",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/43313540351",
-  "source_tree_sha256": "9bc8fbe8012a7a98593f5902a9c5461c28e3ae287f9f33e9fc66ea82abc3af16",
-  "refreshed_at_utc": "2026-11-12T21:56:08.684000+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/43334885187",
+  "source_tree_sha256": "bba86c95cd90acdbab0ff8207c5a420f1af00945cc3429afdda1ddcead329bc1",
+  "refreshed_at_utc": "2026-11-13T00:18:13.349000+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.68,
   "coverage": {
