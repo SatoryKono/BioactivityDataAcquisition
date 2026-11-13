@@ -5,8 +5,8 @@
     "grafana/plugins/bioetl-selectorshell-panel/src/adaptive-build-provenance.test.js": "3557511b506bc3ec432c6e63c078c239e216ec4541d89aa52a7f0ef343a3a0e6",
     "grafana/plugins/bioetl-selectorshell-panel/src/adaptive-module.ts": "0d6659fb29cb2037da9068d0792306e98dcd5b382dd7be8769c371c22e8c12a8",
     "grafana/plugins/bioetl-selectorshell-panel/src/adaptive-types.ts": "5396a3d53268da8f4cb1d67abe3b38ffde51597ceabe822f5cffcce72b89e80f",
-    "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.test.tsx": "ae27a412337eeec162397d79b513783207f3c435d20837f39cd2dc08179ef4d2",
-    "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.tsx": "9025fcf5f0acdd2a5526a6ca74647620ebfa1d7a52d0c4c4387896bdf2f772a4",
+    "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.test.tsx": "8aff84e3f7bcadc51077d9a7b1675f16274b3c2f7c6fb0f004c3636fd13ee9ea",
+    "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.tsx": "4715f021e56de905415d0b02bf8e240d0f9f3e68fd6aea780404aa3a8b46048d",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.test.tsx": "124229d28dced94a525ef31452e0252716a71cb6293a2431b38d1266716fd0d1",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.tsx": "9f8962b1bbe000247a588fa2c1b6cb91e0ab22f96b03beb1e9dcb2ec939a5222",
     "grafana/plugins/bioetl-selectorshell-panel/src/img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
@@ -52,8 +52,8 @@
     "LICENSE": "c5accbbd8546e94c34aed24afe689a617627d18eed5a6c48277e48db57c23851",
     "README.md": "21cbe16d6e1b1efb90b085f59b265d5bef9e5f55ac39a80639645245a860a672",
     "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
-    "module.js": "b43aeac86ece3a61500f2844edb742d342340baec662cc878f80ec8ee3d2c350",
-    "module.js.map": "b1948da8b939acd81fabab2f89b3fdee00e833e6484c92c1d374a22f84a81990",
+    "module.js": "1d627eddbe95d0b77a1d207c987ae2332cac58762984b28ff957ef675237ca1c",
+    "module.js.map": "30ed4e30ca5bebb47aba0ff5d0630bf8b8f70c83b56abdc9e4c3e848a715a25c",
     "plugin.json": "5bcaf0f39044eff9a5539b1be34af6fd03dde3ac9ea39926bd19320537ed2a4c"
   }
 }
