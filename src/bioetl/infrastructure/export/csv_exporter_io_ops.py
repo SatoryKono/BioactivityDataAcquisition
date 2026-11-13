@@ -94,19 +94,31 @@ def _logical_raw_table(table: pa.Table) -> pa.Table:
     return table
 
 
+def _common_raw_type(left: pa.DataType, right: pa.DataType) -> pa.DataType:
+    """Promote compatible scalar types; use CSV text for incompatible types."""
+    try:
+        schema = pa.unify_schemas(
+            [pa.schema([("value", left)]), pa.schema([("value", right)])],
+            promote_options="permissive",
+        )
+        return schema.field("value").type
+    except (pa.ArrowTypeError, pa.ArrowInvalid):
+        return pa.string()
+
+
 def _raw_column_types(tables: list[pa.Table]) -> dict[str, pa.DataType]:
-    """Preserve populated text across batches; otherwise prefer a populated type."""
+    """Use populated values to choose a compatible, non-narrowing CSV schema."""
     result: dict[str, pa.DataType] = {}
     populated: set[str] = set()
     for table in tables:
         for field, column in zip(table.schema, table.columns, strict=True):
             result.setdefault(field.name, field.type)
             if column.null_count < table.num_rows:
-                textual = pa.types.is_string(field.type) or pa.types.is_large_string(
-                    field.type
+                result[field.name] = (
+                    _common_raw_type(result[field.name], field.type)
+                    if field.name in populated
+                    else field.type
                 )
-                if field.name not in populated or textual:
-                    result[field.name] = field.type
                 populated.add(field.name)
     return result
 
