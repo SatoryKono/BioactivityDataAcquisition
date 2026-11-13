@@ -391,7 +391,7 @@ async def test_bound_missing_uuid_preserves_diagnostic_after_root_validation(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("pipeline", ["chembl_activity", "All"])
+@pytest.mark.parametrize("pipeline", ["chembl_activity", "All", ".*"])
 async def test_missing_uuid_keeps_scope_diagnostic_with_real_selected_file_context(
     monkeypatch, tmp_path, pipeline
 ):

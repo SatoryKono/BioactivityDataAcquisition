@@ -192,7 +192,7 @@ def _selected_validation_pipeline(
         if resolved_pipeline is not None and resolved_pipeline != requested:
             raise ValueError("Selected validation manifest identity does not match")
         return requested
-    return resolved_pipeline or requested
+    return resolved_pipeline or "All"
 
 
 def _validate_bound_manifest(
