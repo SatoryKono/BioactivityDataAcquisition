@@ -1,9 +1,13 @@
 {
   "schema_version": 1,
-  "catalog_ref": "a149f1f02dc92471016018795bbd6e188c01210a",
-  "source_ref": "a77d10ea25ab2f54e144fb6ab6e17e4673b72935",
+  "catalog_ref": "f56c0df1a8d57499ef749c01500182de4c9fdab4",
+  "source_ref": "bb6e11d3dc8744a9669c617dd1f18b9414e550c1",
   "source_reviews": {
-    "src/bioetl/application/observability/control_plane_evidence/service_support.py": "Reviewed the exact source delta: Ruff collapses a multiline tuple return to one line; AST and execution are unchanged. No resource acquisition, ownership, lifetime, cleanup, executor or external integration changes. The predecessor chain validation and strict selected run identity remain intact."
+    "src/bioetl/application/observability/control_plane_evidence/service_support.py": "Reviewed protocol import through the sanctioned bioetl.domain.ports facade. This exposes the same LineageStorePort class and changes no acquisition, owner, lifetime, executor or cleanup.",
+    "src/bioetl/application/observability/control_plane_evidence/lineage_graph_validation.py": "Reviewed pure in-memory RUN definition consistency: validate full definitions per (node_id, fragment manifest), reject contradictory RUN manifest anchors, then compare shared fields across the selected chain. Only manifest_id/execution_fingerprint may vary between valid successor manifests; same-manifest contradictions remain errors. No external resource acquisition, lifecycle or cleanup change.",
+    "src/bioetl/application/observability/control_plane_evidence/lineage_identity.py": "Reviewed documentation of the selected ledger-chain identity rule, with strict selected run and manifest anchors retained. No executable acquisition or lifetime change.",
+    "src/bioetl/infrastructure/quarantine/filtered_reads.py": "Reviewed integrated main #13118: existing DeltaTable/dataset reads use bounded Arrow scanner batches and predicate/projection pushdown. Limits remain 10000 rows, 8 MiB and 5 seconds; overflow is rejected instead of claiming partial totals. Existing table/dataset and worker ownership stays within the call; no new long-lived external resource or cleanup owner.",
+    "src/bioetl/interfaces/http/_health_server_quarantine_routing.py": "Reviewed integrated main #13118: quarantine list/options/timeseries/detail use the existing forensic concurrency/deadline limiter, while stats retains its existing single budget. Slots remain owned until workers finish; no nested acquisition, new executor, socket, external service or lifetime owner."
   },
   "reference_moves": [],
   "exclusion_moves": [],
