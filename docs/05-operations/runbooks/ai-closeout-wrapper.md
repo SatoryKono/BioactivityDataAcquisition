@@ -126,7 +126,11 @@ The expected task/runtime/claim and current branch are checked before expensive
 measurement and independently in the worker. A request binds bundle bytes,
 HEAD/base, semantic default and supplied indexes, shallow-history boundaries,
 changed source/checker bytes, canonical core/policy/schema bytes and environment
-identity. State and bundle bookends reject changes during execution.
+identity. State and bundle bookends reject changes during execution. Both the
+worker and parent recheck that the supplied bundle path still names the open
+regular file inside the checkout; deletion, redirection or atomic replacement
+returns `ERROR/source_or_bundle_changed`, including for ignored evidence paths.
+These bookends are observations, not isolation against a concurrent writer.
 
 Package inventory enumerates equivalent physical metadata search roots once
 and retains entries from distinct roots even when names and versions repeat.
@@ -159,8 +163,8 @@ inspection; no prior event, callback or unrelated state is overwritten or delete
 The command does not automatically retry or reuse a static check cache.
 
 Bundle bytes pass through the inherited regular-file stream, not a copied
-request payload. Metadata stores digests, controlled verdicts and counts; raw
-bundle content, environment values, child output and exception diagnostics are
+request payload. Metadata stores the input path, digests, controlled verdicts
+and counts; raw bundle content, environment values, child output and exception diagnostics are
 not retained. Malformed worker fields are not echoed. Local hashes detect stale
 or corrupt state; a same-user adversary able to forge all local metadata is not
 authenticated by these hashes.

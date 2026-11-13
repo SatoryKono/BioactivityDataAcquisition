@@ -326,6 +326,7 @@ def test_mode_change_after_real_verifier_is_rejected(repository: Path) -> None:
     path = _bundle(root)
     request = {
         "event_id": "b" * 32,
+        "bundle_path": str(path),
         "state": state.capture(root, os.environ),
         "bundle_sha256": state.sha256(path.read_bytes()),
         "task_id_sha256": state.sha256(b"task-39"),
@@ -356,6 +357,68 @@ def test_mode_change_after_real_verifier_is_rejected(repository: Path) -> None:
     assert current.outcome == "STOP"
     assert result["outcome"] == "ERROR", result
     assert result["reason"] == "source_or_bundle_changed", result
+
+
+@pytest.mark.parametrize("change", ["other", "missing", "directory"])
+def test_bundle_path_must_still_name_the_open_regular_file(repository, change):
+    path = _bundle(repository)
+    candidate = path.with_name("changed.json")
+    if change == "other":
+        candidate.write_bytes(path.read_bytes())
+    elif change == "directory":
+        candidate.mkdir()
+    with path.open("rb") as stream:
+        assert state.bundle_path_matches(repository, path, stream)
+        assert not state.bundle_path_matches(repository, candidate, stream)
+
+
+@pytest.mark.skipif(os.name == "nt", reason="Requires replacing an open POSIX file")
+@pytest.mark.parametrize("boundary", ["worker", "parent"])
+def test_atomic_bundle_replacement_after_real_verification_is_rejected(
+    repository, monkeypatch, boundary
+):
+    path = _bundle(repository)
+    replacement = path.with_name("replacement.json")
+    replacement.write_text("{}", encoding="utf-8")
+    if boundary == "parent":
+        original_run = runtime.run_owned
+
+        def run_then_replace(*args, **kwargs):
+            execution = original_run(*args, **kwargs)
+            assert execution.status == "PASS"
+            os.replace(replacement, path)
+            return execution
+
+        monkeypatch.setattr(runtime, "run_owned", run_then_replace)
+        result = _verify(repository, path)
+    else:
+        request = {
+            "event_id": "d" * 32,
+            "bundle_path": str(path),
+            "state": state.capture(repository, os.environ),
+            "bundle_sha256": state.sha256(path.read_bytes()),
+            "task_id_sha256": state.sha256(b"task-39"),
+            "runtime": "codex",
+            "claim": "done",
+        }
+        original_verify = proof.verify_bundle
+
+        def verify_then_replace(**kwargs):
+            verified = original_verify(**kwargs)
+            assert verified.outcome == "ADMIT"
+            os.replace(replacement, path)
+            return verified
+
+        with (
+            path.open("rb") as stream,
+            patch.object(sys, "stdin", SimpleNamespace(buffer=stream)),
+            patch.object(proof, "verify_bundle", verify_then_replace),
+        ):
+            result = worker._verify(request, repository)
+    assert path.read_text() == "{}"
+    assert result["outcome"] == "ERROR", result
+    assert result["reason"] == "source_or_bundle_changed", result
+    assert result["claim_qualified"] is False
 
 
 @pytest.mark.parametrize("different", [False, True])

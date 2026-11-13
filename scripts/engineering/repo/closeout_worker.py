@@ -47,6 +47,7 @@ def _verify(request: dict[str, Any], root: Path) -> dict[str, Any]:
     if (
         state.capture(root, os.environ) != before
         or state.sha256(state.bundle_bytes(stream)) != request["bundle_sha256"]
+        or not state.bundle_path_matches(root, Path(request["bundle_path"]), stream)
     ):
         return state.result("ERROR", "source_or_bundle_changed", request["event_id"])
     return _verdict(verified, request, before)

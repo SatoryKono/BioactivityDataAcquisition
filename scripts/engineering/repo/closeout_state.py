@@ -127,6 +127,22 @@ def bundle_stream(root: Path, path: Path) -> Iterator[BinaryIO]:
         yield stream
 
 
+def bundle_path_matches(root: Path, path: Path, stream: BinaryIO) -> bool:
+    """Recheck the named input, not only an already-open displaced inode."""
+    candidate = path if path.is_absolute() else root / path
+    try:
+        resolved = candidate.resolve(strict=True)
+        named = candidate.lstat()
+        opened = os.fstat(stream.fileno())
+        return (
+            resolved.is_relative_to(root)
+            and stat.S_ISREG(named.st_mode)
+            and (named.st_dev, named.st_ino) == (opened.st_dev, opened.st_ino)
+        )
+    except (OSError, ValueError):
+        return False
+
+
 def bundle_bytes(stream: BinaryIO) -> bytes:
     """Measure stable bounded input; the caller never logs or persists bytes."""
     before = os.fstat(stream.fileno())

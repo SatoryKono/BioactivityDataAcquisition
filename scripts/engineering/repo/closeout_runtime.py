@@ -187,6 +187,7 @@ def _invoke(
     if (
         state.capture(root, env) != request["state"]
         or state.sha256(state.bundle_bytes(stream)) != request["bundle_sha256"]
+        or not state.bundle_path_matches(root, Path(request["bundle_path"]), stream)
     ):
         return state.result("ERROR", "source_or_bundle_changed", event)
     return _consume(target, request)
@@ -215,6 +216,7 @@ def _perform(
                 "kind": state.REQUEST_KIND,
                 "event_id": event,
                 "root": str(root),
+                "bundle_path": str(bundle),
                 "bundle_sha256": state.sha256(raw),
                 "state": state.capture(root, env),
             },
