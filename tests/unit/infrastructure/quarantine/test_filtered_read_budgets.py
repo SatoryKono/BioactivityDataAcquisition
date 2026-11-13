@@ -40,6 +40,51 @@ def test_scan_pushes_down_scope_and_returns_exact_bounded_rows():
     assert result.to_pylist() == [{"value": 1}]
 
 
+def test_time_window_without_timestamp_column_returns_no_rows():
+    table = pa.table({"pipeline": ["audit"], "value": [1]})
+    result = _load_bounded_scoped_pyarrow_table(
+        Table(table), pipeline_single="audit", from_ts="2026-01-02T00:00:00Z"
+    )
+    assert result.num_rows == 0
+    assert result.schema == table.schema
+
+
+def test_scan_rejects_unsupported_filter_operator():
+    table = pa.table({"pipeline": ["audit"], "value": [1]})
+    with pytest.raises(ValueError, match="Unsupported quarantine filter operator"):
+        _load_bounded_scoped_pyarrow_table(
+            Table(table), pipeline_single="audit", filters=[("value", ">", 0)]
+        )
+
+
+@pytest.mark.parametrize(
+    "from_ts,to_ts,expected",
+    [
+        (None, "2026-01-02T00:00:00Z", [1]),
+        ("2026-01-03T00:00:00Z", None, [2]),
+    ],
+)
+def test_typed_timestamp_window_accepts_one_inclusive_bound(from_ts, to_ts, expected):
+    table = pa.table(
+        {
+            "pipeline": ["audit", "audit"],
+            "ingestion_ts": pa.array(
+                [datetime(2026, 1, 2, tzinfo=UTC), datetime(2026, 1, 3, tzinfo=UTC)],
+                type=pa.timestamp("us", tz="UTC"),
+            ),
+            "value": [1, 2],
+        }
+    )
+    result = _load_bounded_scoped_pyarrow_table(
+        Table(table),
+        pipeline_single="audit",
+        columns=["value"],
+        from_ts=from_ts,
+        to_ts=to_ts,
+    )
+    assert result.to_pylist() == [{"value": value} for value in expected]
+
+
 def test_real_delta_scan_retains_partition_and_row_predicates(tmp_path):
     from deltalake import DeltaTable, write_deltalake
 
