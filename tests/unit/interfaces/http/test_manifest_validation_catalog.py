@@ -438,3 +438,113 @@ async def test_missing_uuid_keeps_scope_diagnostic_with_real_selected_file_conte
     assert payload["rows"][0]["reason"] == "selected_run_id_not_found"
     assert not (tmp_path / "reports").exists()
     assert list(root.rglob("*")) == []
+
+
+@pytest.mark.parametrize(
+    "pipeline", ["chembl_activity", "All", ".*", "uniprot_protein"]
+)
+@pytest.mark.parametrize("source_matches", [True, False])
+def test_report_owned_nested_locator_preserves_selector_and_source(
+    tmp_path, monkeypatch, pipeline, source_matches
+):
+    """Verified report ownership must select a real nested root for All tokens."""
+    import json
+
+    from bioetl.application.services.evidence_location.resolver import (
+        EvidenceLocationResolver,
+    )
+    from bioetl.application.services.run_reports.evidence_location_paths import (
+        default_evidence_root_alias_registry,
+    )
+    from bioetl.composition.control_plane_paths import FileEvidenceReadContextFactory
+    from bioetl.composition.observability_runtime import create_run_report_store
+    from bioetl.domain.control_plane import RunManifest
+    from bioetl.domain.control_plane.run_evidence_location import (
+        build_run_evidence_location,
+    )
+    from bioetl.domain.types import RunType
+    from bioetl.infrastructure.control_plane.file_evidence_location_store import (
+        FileEvidenceLocationStore,
+    )
+
+    owner = "chembl_activity"
+    alias = tmp_path / "data"
+    nested = alias / "nested"
+    nested.mkdir(parents=True)
+    reports = tmp_path / "reports"
+    report = reports / "pipeline" / owner / _RUN_ID / "pipeline-run-report.json"
+    report.parent.mkdir(parents=True)
+    report.write_text(
+        json.dumps(
+            {
+                "schema_version": "pipeline_run_report_v1",
+                "identity": {
+                    "pipeline_name": owner,
+                    "run_id": _RUN_ID,
+                    "run_type": "incremental",
+                    "status": "success",
+                    "started_at": "2026-11-13T00:00:00Z",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    opener = FileEvidenceReadContextFactory()
+    manifest = RunManifest(
+        manifest_id="nested-manifest",
+        run_id=RunID(UUID(_RUN_ID)),
+        pipeline_name=owner,
+        run_type=RunType.INCREMENTAL,
+    )
+    opener.open(nested, trusted_alias_base=alias).manifest_port.save(manifest)
+    locations = FileEvidenceLocationStore(report_root=reports)
+    locations.register(
+        build_run_evidence_location(
+            kind="pipeline",
+            owner=owner,
+            run_id=_RUN_ID,
+            workflow_run_id=None,
+            runtime_source_id=("a" if source_matches else "b") * 64,
+            root_alias="dashboard_data",
+            relative_data_root="nested",
+        )
+    )
+    resolver = EvidenceLocationResolver(
+        locations=locations,
+        aliases=default_evidence_root_alias_registry(dashboard_data_root=alias),
+        opener=opener,
+    )
+    verifier = scope_module.verified_report_identity_for_run
+
+    def verify(run_id, scopes, **kwargs):
+        return verifier(run_id, scopes, root=reports, **kwargs)
+
+    monkeypatch.setattr(scope_module, "verified_report_identity_for_run", verify)
+    scope = _IdentityScope(
+        requested_pipeline=pipeline,
+        selected_pipelines=(pipeline,),
+        selected_run_types=("incremental",),
+        selected_run_id=_RUN_ID,
+        resolved_manifest=None,
+        resolved_via="selected_run_id_not_found",
+    )
+    selected = reconcile_manifest_validation_scope(
+        scope,
+        report_store=create_run_report_store(),
+    )
+    assert selected.requested_pipeline == pipeline
+    assert selected.selected_pipelines == (pipeline,)
+    host = SimpleNamespace(
+        _evidence_location_resolver=resolver, _runtime_source_id="a" * 64
+    )
+    service = ControlPlaneEvidenceService()
+    if pipeline == "uniprot_protein":
+        with pytest.raises(ValueError, match="identity does not match"):
+            scope_module._bind_selected_validation(host, selected, service)
+    elif not source_matches:
+        with pytest.raises(ValueError, match="unavailable"):
+            scope_module._bind_selected_validation(host, selected, service)
+    else:
+        bound, _ = scope_module._bind_selected_validation(host, selected, service)
+        assert bound.resolved_manifest == manifest
+        assert bound.requested_pipeline == pipeline

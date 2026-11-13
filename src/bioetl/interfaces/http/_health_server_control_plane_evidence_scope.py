@@ -183,16 +183,16 @@ def _selected_validation_pipeline(
     requested = scope.requested_pipeline
     is_all_scope = getattr(host, "_is_all_scope_token", _is_all_scope)
     concrete_requested = bool(requested) and not is_all_scope(requested)
+    resolved_pipeline = (
+        scope.resolved_manifest.pipeline_name
+        if scope.resolved_manifest is not None
+        else scope.report_pipeline
+    )
     if concrete_requested:
-        if (
-            scope.resolved_manifest is not None
-            and scope.resolved_manifest.pipeline_name != requested
-        ):
+        if resolved_pipeline is not None and resolved_pipeline != requested:
             raise ValueError("Selected validation manifest identity does not match")
         return requested
-    return (
-        scope.resolved_manifest.pipeline_name if scope.resolved_manifest else requested
-    )
+    return resolved_pipeline or requested
 
 
 def _validate_bound_manifest(
@@ -288,13 +288,11 @@ def reconcile_manifest_validation_scope(
     )
     if identity is None:
         return scope
-    return _IdentityScope(
-        requested_pipeline=scope.requested_pipeline,
-        selected_pipelines=scope.selected_pipelines,
-        selected_run_types=scope.selected_run_types,
-        selected_run_id=scope.selected_run_id,
-        resolved_manifest=scope.resolved_manifest,
+    pipeline = identity.get("pipeline_name")
+    return replace(
+        scope,
         resolved_via="resolved_without_manifest",
+        report_pipeline=pipeline if isinstance(pipeline, str) and pipeline else None,
     )
 
 
