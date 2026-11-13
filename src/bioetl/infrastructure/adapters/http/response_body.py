@@ -11,6 +11,40 @@ class ResponseBudgetExceeded(ValueError):
     """Response exceeds the non-retryable transport memory budget."""
 
 
+class _DeflateDecoder:
+    """Keep HTTPX's initial raw-DEFLATE fallback with bounded decoder output."""
+
+    def __init__(self) -> None:
+        self._decoder = zlib.decompressobj(zlib.MAX_WBITS)
+        self._first = True
+        self._prefix = b""
+
+    def decompress(self, data: bytes, max_length: int) -> bytes:
+        if not self._first:
+            return self._decoder.decompress(data, max_length)
+        # A fragmented zlib header must not consume the one initial fallback.
+        # This pending prefix contains at most one byte, never an entire body.
+        data = self._prefix + data
+        if len(data) < 2:
+            self._prefix = data
+            return b""
+        self._prefix = b""
+        self._first = False
+        try:
+            return self._decoder.decompress(data, max_length)
+        except zlib.error:
+            self._decoder = zlib.decompressobj(-zlib.MAX_WBITS)
+            return self._decoder.decompress(data, max_length)
+
+    @property
+    def eof(self) -> bool:
+        return self._decoder.eof
+
+    @property
+    def unused_data(self) -> bytes:
+        return self._decoder.unused_data
+
+
 async def read_bounded_response(
     response: httpx.Response, *, wire_limit: int, decoded_limit: int
 ) -> httpx.Response:
@@ -75,7 +109,11 @@ async def _collect_response_body(
 ) -> tuple[bytes, int]:
     """Read bounded chunks without allocating an unbounded decoder output."""
     window_bits = 16 + zlib.MAX_WBITS if encoding == "gzip" else zlib.MAX_WBITS
-    decoder = None if encoding == "identity" else zlib.decompressobj(window_bits)
+    decoder = (
+        _DeflateDecoder()
+        if encoding == "deflate"
+        else (None if encoding == "identity" else zlib.decompressobj(window_bits))
+    )
     body = bytearray()
     wire_bytes = 0
     try:

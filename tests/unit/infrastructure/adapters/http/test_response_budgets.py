@@ -27,6 +27,104 @@ class Chunks(httpx.AsyncByteStream):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("raw_deflate", [False, True])
+@pytest.mark.parametrize("chunk_size", [1, 3, 100])
+async def test_deflate_formats_preserve_bounded_httpx_compatibility(
+    monkeypatch, raw_deflate, chunk_size
+):
+    data = b'{"ok":true}'
+    compressor = zlib.compressobj(
+        wbits=-zlib.MAX_WBITS if raw_deflate else zlib.MAX_WBITS
+    )
+    compressed = compressor.compress(data) + compressor.flush()
+    monkeypatch.setattr(timing, "_MAX_RESPONSE_DECODED_BYTES", len(data))
+    stream = Chunks(
+        [compressed[i : i + chunk_size] for i in range(0, len(compressed), chunk_size)]
+    )
+    async with httpx.AsyncClient(
+        transport=httpx.MockTransport(
+            lambda _: httpx.Response(
+                200, headers={"Content-Encoding": "deflate"}, stream=stream
+            )
+        )
+    ) as client:
+        result = await timing._dispatch_http_request(
+            client,
+            "GET",
+            "https://provider.example",
+            {},
+            is_stream=False,
+            request_timeout=1,
+        )
+    assert result.content == data
+    assert result.extensions["bioetl_wire_response_bytes"] == len(compressed)
+    assert stream.closed
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("wire_overflow", [False, True])
+async def test_raw_deflate_fallback_keeps_both_budgets(monkeypatch, wire_overflow):
+    compressor = zlib.compressobj(wbits=-zlib.MAX_WBITS)
+    compressed = compressor.compress(b"x" * 10000) + compressor.flush()
+    monkeypatch.setattr(
+        timing,
+        "_MAX_RESPONSE_WIRE_BYTES",
+        len(compressed) - 1 if wire_overflow else 1000,
+    )
+    monkeypatch.setattr(
+        timing, "_MAX_RESPONSE_DECODED_BYTES", 100000 if wire_overflow else 100
+    )
+    stream = Chunks([compressed, b"unused"])
+    async with httpx.AsyncClient(
+        transport=httpx.MockTransport(
+            lambda _: httpx.Response(
+                200, headers={"Content-Encoding": "deflate"}, stream=stream
+            )
+        )
+    ) as client:
+        with pytest.raises(timing.ResponseBudgetExceeded):
+            await timing._dispatch_http_request(
+                client,
+                "GET",
+                "https://provider.example",
+                {},
+                is_stream=False,
+                request_timeout=1,
+            )
+    assert stream.closed and stream.read == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("mode", ["truncated", "trailing", "concatenated"])
+async def test_raw_deflate_rejects_incomplete_or_extra_data(mode):
+    compressor = zlib.compressobj(wbits=-zlib.MAX_WBITS)
+    compressed = compressor.compress(b"payload") + compressor.flush()
+    raw = {
+        "truncated": compressed[:-1],
+        "trailing": compressed + b"extra",
+        "concatenated": compressed + compressed,
+    }[mode]
+    stream = Chunks([raw[:1], raw[1:]])
+    async with httpx.AsyncClient(
+        transport=httpx.MockTransport(
+            lambda _: httpx.Response(
+                200, headers={"Content-Encoding": "deflate"}, stream=stream
+            )
+        )
+    ) as client:
+        with pytest.raises(httpx.DecodingError):
+            await timing._dispatch_http_request(
+                client,
+                "GET",
+                "https://provider.example",
+                {},
+                is_stream=False,
+                request_timeout=1,
+            )
+    assert stream.closed
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "encoding,data,wire,decoded",
     [
