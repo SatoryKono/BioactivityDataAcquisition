@@ -141,7 +141,7 @@ def test_provider_health_descriptions_separate_global_and_selected_scope() -> No
         assert target["withTransforms"] is False
         url = saved[9002]["targets"][0]["url"]
         assert url.startswith("/ops/observability/selected-run-status?")
-        assert "run_id=${run_id}" in url
+        assert "run_id=${selected_run_id}" in url
     assert "not live fleet health" in saved[9481]["description"]
     assert current[2003]["description"].startswith("GLOBAL")
     assert "pipeline and run selectors do not filter" in current[2003]["description"]

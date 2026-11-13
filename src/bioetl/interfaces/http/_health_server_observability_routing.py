@@ -125,7 +125,7 @@ async def handle_pipeline_run_report_artifact(
         await host._send_text_response(
             writer,
             404,
-            "Report not found / Отчёт отсутствует\n\n"
+            "Report not found\n\n"
             "The report may not have been generated yet or may have been removed.\n"
             "Refresh Run Explorer to check availability.\n",
             content_type="text/plain; charset=utf-8",

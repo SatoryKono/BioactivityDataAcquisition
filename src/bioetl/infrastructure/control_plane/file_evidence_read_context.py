@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, TypeVar, cast
 from uuid import UUID
 
-from bioetl.domain.control_plane import RunManifest, WorkflowManifest
+from bioetl.domain.control_plane import RunLedgerEntry, RunManifest, WorkflowManifest
 from bioetl.domain.control_plane.run_evidence_location import (
     EvidenceLocationInvalidError,
 )
@@ -62,6 +62,12 @@ class FileEvidenceReadContext:
     workflow_manifest_port: WorkflowManifestPort
     lineage_port: LineageStorePort
     replay_object_verifier: ReplayObjectVerifier
+    validation_service: object | None = None
+
+    def get_validation_service(self) -> object | None:
+        """Return validation ports composed for this same resolved data root."""
+        self._validate_bound_paths()
+        return self.validation_service
 
     def get_manifest_by_run_id(self, run_id: object) -> RunManifest | None:
         """Delegate to the bound ``RunManifestPort.get_by_run_id``."""
@@ -80,6 +86,37 @@ class FileEvidenceReadContext:
             store_dir="workflow_manifest",
             loader=self.workflow_manifest_port.get_by_run_id,
         )
+
+    def get_ledger_entries_by_run_id(
+        self, run_id: object
+    ) -> tuple[RunLedgerEntry, ...]:
+        """Contain ledger indexes and predecessor files before reading any bytes."""
+        normalized = _coerce_run_id(run_id)
+        self._validate_bound_paths()
+        base = self.data_root / "output" / "control" / "run_ledger"
+        index = base / "_by_run_id" / f"{normalized}.txt"
+        assert_path_within_trusted_base(
+            index, trusted_base=self.data_root, field_name="ledger run index"
+        )
+        record_id = index.read_text(encoding="utf-8").strip() if index.exists() else ""
+        seen: set[str] = set()
+        # Validate only the selected successor chain. No unrelated ledger scan,
+        # and no read outside this run's root even within a shared trusted alias.
+        while record_id and record_id not in seen:
+            seen.add(record_id)
+            assert_path_within_trusted_base(
+                base / f"{record_id}.jsonl",
+                trusted_base=self.data_root,
+                field_name="ledger record path",
+            )
+            pointer = base / "_predecessors" / f"{record_id}.txt"
+            assert_path_within_trusted_base(
+                pointer, trusted_base=self.data_root, field_name="ledger predecessor"
+            )
+            record_id = (
+                pointer.read_text(encoding="utf-8").strip() if pointer.exists() else ""
+            )
+        return tuple(self.ledger_port.list_entries_by_run_id(normalized))
 
     def _get_bound_record_by_run_id(
         self,
@@ -188,3 +225,56 @@ def validate_control_tree(
             trusted_base=trusted_alias_base,
             field_name="control-plane evidence path",
         )
+
+
+@dataclass(frozen=True, slots=True)
+class _SelectedRootLedgerPort:
+    """Read-only ledger port that contains files under the selected data_root.
+
+    Validation uses the same run-id chain as Processed Records, after each
+    concrete JSONL / predecessor pointer is checked against the selected root.
+    """
+
+    context: FileEvidenceReadContext
+
+    def append(self, entry: RunLedgerEntry) -> None:
+        raise NotImplementedError("selected validation ledger is read-only")
+
+    def list_entries(self, manifest_id: str) -> list[RunLedgerEntry]:
+        self._assert_manifest_chain(manifest_id)
+        entries = self.context.ledger_port.list_entries(manifest_id)
+        if not entries:
+            return []
+        return list(self.context.get_ledger_entries_by_run_id(entries[0].run_id))
+
+    def list_entries_by_run_id(self, run_id: RunID) -> list[RunLedgerEntry]:
+        return list(self.context.get_ledger_entries_by_run_id(run_id))
+
+    def list_entries_after(
+        self,
+        manifest_id: str,
+        after_entry_id: str | None,
+    ) -> list[RunLedgerEntry]:
+        self._assert_manifest_chain(manifest_id)
+        return self.context.ledger_port.list_entries_after(manifest_id, after_entry_id)
+
+    def _assert_manifest_chain(self, manifest_id: str) -> None:
+        base = self.context.data_root / "output" / "control" / "run_ledger"
+        record_id = manifest_id
+        seen: set[str] = set()
+        while record_id and record_id not in seen:
+            seen.add(record_id)
+            assert_path_within_trusted_base(
+                base / f"{record_id}.jsonl",
+                trusted_base=self.context.data_root,
+                field_name="ledger record path",
+            )
+            pointer = base / "_predecessors" / f"{record_id}.txt"
+            assert_path_within_trusted_base(
+                pointer,
+                trusted_base=self.context.data_root,
+                field_name="ledger predecessor",
+            )
+            record_id = (
+                pointer.read_text(encoding="utf-8").strip() if pointer.exists() else ""
+            )

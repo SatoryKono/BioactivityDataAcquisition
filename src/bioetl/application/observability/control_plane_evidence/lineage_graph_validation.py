@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from bioetl.domain.lineage import LineageGraphFragment, LineageNodeRef
+from bioetl.domain.lineage import LineageGraphFragment, LineageNodeRef, LineageNodeType
+
+# Successor adoption (`MetadataCoordinator.adopt_manifest_successor`) rebinds
+# these RUN-node attributes while keeping ``run:<UUID>``. Ledger-chain merges
+# must treat that drift as expected, not ``node_definition_conflict``.
+_RUN_MANIFEST_DEPENDENT_ATTRIBUTES = frozenset({"manifest_id", "execution_fingerprint"})
 
 
 def conflicting_node_ids(
@@ -10,6 +15,7 @@ def conflicting_node_ids(
 ) -> list[str]:
     """Reject contradictory definitions while allowing partial node references."""
     definitions: dict[str, dict[str, object]] = {}
+    run_definitions: dict[tuple[str, str | None], dict[str, object]] = {}
     conflicts: set[str] = set()
     for fragment in fragments:
         nodes: list[LineageNodeRef] = list(fragment.nodes)
@@ -17,10 +23,35 @@ def conflicting_node_ids(
             nodes.extend((edge.source, edge.target))
         for node in nodes:
             definition = node.to_dict()
+            if node.node_type is LineageNodeType.RUN:
+                definition = _merge_run_scoped_definition(
+                    node,
+                    definition,
+                    fragment_manifest_id=fragment.manifest_id,
+                    run_definitions=run_definitions,
+                    conflicts=conflicts,
+                )
             previous = definitions.setdefault(node.node_id, {})
             if _merge_definition(previous, definition):
                 conflicts.add(node.node_id)
     return sorted(conflicts)
+
+
+def _merge_run_scoped_definition(
+    node: LineageNodeRef,
+    definition: dict[str, object],
+    *,
+    fragment_manifest_id: str | None,
+    run_definitions: dict[tuple[str, str | None], dict[str, object]],
+    conflicts: set[str],
+) -> dict[str, object]:
+    """Merge a RUN node within its manifest scope; return shared cross-manifest view."""
+    scoped = run_definitions.setdefault((node.node_id, fragment_manifest_id), {})
+    if _merge_definition(scoped, definition):
+        conflicts.add(node.node_id)
+    if node.attributes.get("manifest_id") not in (None, fragment_manifest_id):
+        conflicts.add(node.node_id)
+    return _shared_run_definition(definition)
 
 
 def _merge_definition(previous: dict[str, object], incoming: dict[str, object]) -> bool:
@@ -39,6 +70,19 @@ def _merge_definition(previous: dict[str, object], incoming: dict[str, object]) 
         else:
             previous[key] = value
     return conflict
+
+
+def _shared_run_definition(definition: dict[str, object]) -> dict[str, object]:
+    """Compare shared RUN fields after checking each manifest's full definition."""
+    shared = dict(definition)
+    attributes = shared.get("attributes")
+    if isinstance(attributes, dict):
+        shared["attributes"] = {
+            key: value
+            for key, value in attributes.items()
+            if key not in _RUN_MANIFEST_DEPENDENT_ATTRIBUTES
+        }
+    return shared
 
 
 def _adjacency(fragments: tuple[LineageGraphFragment, ...]) -> dict[str, set[str]]:

@@ -11,6 +11,68 @@ from bioetl.interfaces.http._report_selector_options import supplement_report_op
 pytestmark = pytest.mark.unit
 
 
+def test_verified_report_replaces_unknown_option_after_scalar_placeholder(tmp_path):
+    _report(tmp_path)
+    payload = supplement_report_options(
+        {"items": ["-", {"text": "old · unknown · run-a", "value": "run-a"}]},
+        dimension="run_id",
+        response_shape="options",
+        scopes={},
+        root=tmp_path,
+    )
+    assert payload["items"][0] == "-"
+    assert len(payload["items"]) == 2
+    assert payload["items"][1]["value"] == "run-a"
+    assert " · success · " in payload["items"][1]["text"]
+
+
+def test_scalar_report_options_deduplicate_shared_run_type(tmp_path):
+    _report(tmp_path, "run-a")
+    _report(tmp_path, "run-b")
+    payload = supplement_report_options(
+        {"items": []},
+        dimension="run_type",
+        response_shape="values",
+        scopes={},
+        root=tmp_path,
+    )
+    assert payload == {"items": ["backfill"]}
+
+
+@pytest.mark.parametrize("status", ["success", "failed", "unknown"])
+def test_verified_report_resolves_unknown_existing_run_label(tmp_path, status):
+    _report(tmp_path, status=status)
+    payload = supplement_report_options(
+        {
+            "items": [
+                {
+                    "text": "2026-09-15 · chembl_assay · unknown · run-a",
+                    "value": "run-a",
+                }
+            ]
+        },
+        dimension="run_id",
+        response_shape="options",
+        scopes={},
+        root=tmp_path,
+    )
+    assert len(payload["items"]) == 1
+    assert f" · {status} · " in payload["items"][0]["text"]
+
+
+def test_verified_report_does_not_override_known_ledger_status(tmp_path):
+    _report(tmp_path, status="success")
+    original = {"text": "2026-09-15 · chembl_assay · failed · run-a", "value": "run-a"}
+    payload = supplement_report_options(
+        {"items": [original]},
+        dimension="run_id",
+        response_shape="options",
+        scopes={},
+        root=tmp_path,
+    )
+    assert payload["items"] == [original]
+
+
 @pytest.mark.parametrize(
     "zone,started,label",
     [
@@ -498,3 +560,57 @@ def test_verified_report_catalog_filters_scope_invalid_identity_and_duplicate_ru
     rows = subject._iter_verified_report_identities({}, root=tmp_path, entries=entries)
     assert len(rows) == 1
     assert rows[0][0] == "run-a"
+
+
+def test_large_catalog_indexes_unknown_options_once_without_rereading_known_runs(
+    tmp_path, monkeypatch
+):
+    from types import SimpleNamespace
+    from unittest.mock import Mock
+    from bioetl.interfaces.http import _report_selector_options as subject
+
+    class CatalogOption(dict):
+        value_reads = 0
+
+        def get(self, key, default=None):
+            if key == "value":
+                type(self).value_reads += 1
+            return super().get(key, default)
+
+    count = 1500
+    items = [
+        CatalogOption(
+            value=f"run-{i}",
+            text=f"date · chembl_assay · {'unknown' if i % 2 else 'success'} · run-{i}",
+        )
+        for i in range(count)
+    ]
+    entries = [
+        SimpleNamespace(
+            owner="chembl_assay", run_id=f"run-{i}", started_at="2026-01-02T03:04:05Z"
+        )
+        for i in range(count)
+    ]
+    checked = Mock(
+        side_effect=lambda entry, root: {
+            "run_id": entry.run_id,
+            "pipeline_name": entry.owner,
+            "status": "failed",
+            "started_at": entry.started_at,
+        }
+    )
+    monkeypatch.setattr(subject, "_checked_identity", checked)
+    result = subject.supplement_report_options(
+        {"items": items},
+        dimension="run_id",
+        response_shape="options",
+        scopes={},
+        root=tmp_path,
+        entries=entries + entries,
+    )
+    # Bound observable catalog traversal, rather than asserting wall-clock timing.
+    assert CatalogOption.value_reads <= 3 * count
+    assert checked.call_count == count // 2
+    assert len(result["items"]) == count
+    assert result["items"][0]["text"] == items[0]["text"]
+    assert " · failed · " in result["items"][1]["text"]

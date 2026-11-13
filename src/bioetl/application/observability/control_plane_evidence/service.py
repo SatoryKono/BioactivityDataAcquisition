@@ -37,6 +37,7 @@ from bioetl.application.observability.control_plane_evidence.retention import (
 from bioetl.application.observability.control_plane_evidence.service_support import (
     EvidenceScopeContext,
     ledger_entries,
+    lineage_fragments_for_ledger,
     sanitized_manifest_payload_scope,
     service_payload,
 )
@@ -228,18 +229,15 @@ class ControlPlaneEvidenceService:
                     ),
                 ),
             )
-        with evidence_stage("lineage_read"):
-            fragments = tuple(
-                self.lineage_store.list_by_manifest_id(scope.manifest.manifest_id)
-            )
-            if not fragments:
-                fragments = tuple(
-                    self.lineage_store.list_by_run_id(scope.manifest.run_id)
-                )
         run_ledger_entries = (
             ledger_snapshot
             if ledger_snapshot is not None
             else ledger_entries(self.ledger_port, scope.manifest)
+        )
+        fragments = lineage_fragments_for_ledger(
+            self.lineage_store,
+            manifest=scope.manifest,
+            ledger=run_ledger_entries,
         )
         return service_payload(
             endpoint="lineage-validation",

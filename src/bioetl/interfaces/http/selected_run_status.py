@@ -176,7 +176,7 @@ def load_selected_run_status(
 ) -> dict[str, object]:
     """Load and revalidate the exact report, revision and bound identity each time.
 
-    Unresolved ``run_id`` sentinels are A2 empty-catalog gaps («НЕТ ЗАПУСКОВ»)
+    Unresolved ``run_id`` sentinels are A2 empty-catalog gaps («NO RUNS»)
     when called without a prior auto-select. HTTP handling resolves latest first.
     """
     if is_unresolved_run_id(run_id):
@@ -359,7 +359,7 @@ async def handle_selected_run_status(
     """Bound blocking reads and preserve explicit query errors for Grafana.
 
     Mode A2: unresolved ``run_id`` auto-selects latest in scope; empty catalog
-    returns «НЕТ ЗАПУСКОВ». An explicit URL ``run_id`` wins over auto-select.
+    returns «NO RUNS». An explicit URL ``run_id`` wins over auto-select.
     Missing manifest catalog is QUERY ERROR, not an empty catalog.
 
     §3.4: concurrent identical scopes share one physical load via the

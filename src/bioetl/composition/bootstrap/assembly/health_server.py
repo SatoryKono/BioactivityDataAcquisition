@@ -18,6 +18,7 @@ from bioetl.application.services.evidence_location.resolver import (
 from bioetl.application.services.run_reports.evidence_location_paths import (
     default_evidence_root_alias_registry,
 )
+from bioetl.application.services.run_reports.paths import resolve_report_root
 from bioetl.composition.control_plane_paths import FileEvidenceReadContextFactory
 from bioetl.infrastructure.control_plane.file_evidence_location_store import (
     FileEvidenceLocationStore,
@@ -167,10 +168,19 @@ def _build_evidence_location_resolver(
     report_root: Path,
 ) -> EvidenceLocationResolver:
     """Read locators from the report catalog and open the recorded data root."""
+    settings = get_settings()
     return EvidenceLocationResolver(
         locations=FileEvidenceLocationStore(report_root=report_root),
         aliases=default_evidence_root_alias_registry(dashboard_data_root=data_root),
-        opener=FileEvidenceReadContextFactory(metrics=metrics),
+        opener=FileEvidenceReadContextFactory(
+            metrics=metrics,
+            archive_root=resolve_control_plane_archive_root(
+                Path(settings.archive_root)
+                if settings.archive_root is not None
+                else None
+            ),
+            report_root=report_root,
+        ),
     )
 
 
@@ -205,7 +215,7 @@ def create_health_server_dependencies(
                     if settings.archive_root is not None
                     else None
                 ),
-                settings.report_root,
+                resolve_report_root(root=settings.report_root),
             ),
             ledger_port=control_plane_ports.ledger_port,
             lineage_store=control_plane_ports.lineage_port,

@@ -74,7 +74,7 @@ def test_ten_columns_keep_full_identity_for_handoffs():
         else:
             url = overrides[column]["links"][0]["url"]
         assert "${__data.fields.run_id:percentencode}" in url
-        assert "${__data.fields.Pipeline:percentencode}" in url
+        assert "${__data.fields.pipeline:percentencode}" in url
         assert "${__data.fields.workflow_scope:percentencode}" in url
     assert run_id_links[0]["title"] == "Select this run"
     assert "var-run_id=${__data.fields.run_id:percentencode}" in run_id_links[0]["url"]

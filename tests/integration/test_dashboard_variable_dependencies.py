@@ -147,8 +147,8 @@ def test_overview_provider_context_is_derived_from_pipeline():
     panels = {panel["id"]: panel for panel in dashboard["panels"]}
     donor = panels[9002]["targets"][0]
     assert donor["url"].startswith("/ops/observability/selected-run-status?")
-    assert "pipeline=${pipeline}" in donor["url"]
-    assert "run_id=${run_id}" in donor["url"]
+    assert "pipeline=${selected_pipeline}" in donor["url"]
+    assert "run_id=${selected_run_id}" in donor["url"]
     for panel_id in (9480, 9481):
         target = panels[panel_id]["targets"][0]
         assert target.get("panelId") == 9002
@@ -230,3 +230,52 @@ def test_provider_derivation_queries_are_re2_compatible_and_in_sync():
     }
     for case, (pipeline, workflow, expected) in cases.items():
         assert _derive_provider(pipeline, workflow) == expected, case
+
+
+@pytest.mark.parametrize("profile", ["dashboards", "dashboards-adaptive"])
+def test_selected_run_http_targets_reference_declared_dashboard_variables(profile):
+    import json
+
+    root = Path(__file__).resolve().parents[2] / "grafana" / profile
+
+    def panels(items):
+        for panel in items:
+            yield panel
+            yield from panels(panel.get("panels", []))
+
+    for path in root.glob("*.json"):
+        dashboard = json.loads(path.read_text(encoding="utf-8"))
+        if "panels" not in dashboard:
+            continue
+        declared = {v["name"] for v in dashboard["templating"]["list"]}
+        for panel in panels(dashboard["panels"]):
+            for target in panel.get("targets", []):
+                url = target.get("url", "")
+                if "/ops/observability/selected-run-status" in url:
+                    variables = set(re.findall(r"\$\{([^}:]+)(?::[^}]+)?\}", url))
+                    assert variables <= declared, (
+                        path.name,
+                        panel["id"],
+                        variables - declared,
+                    )
+
+
+@pytest.mark.parametrize("profile", ["dashboards", "dashboards-adaptive"])
+@pytest.mark.parametrize("uid", ["bioetl-overview-v2", "bioetl-dq-v2"])
+def test_hidden_selection_preserves_requested_identity_when_context_is_missing(
+    profile, uid
+):
+    import json
+
+    path = Path(__file__).resolve().parents[2] / "grafana" / profile / f"{uid}.json"
+    dashboard = json.loads(path.read_text(encoding="utf-8"))
+    variables = {v["name"]: v for v in dashboard["templating"]["list"]}
+    for name, field in (
+        ("selected_pipeline", "pipeline"),
+        ("selected_run_id", "run_id"),
+    ):
+        query = variables[name]["query"]["infinityQuery"]
+        assert "pipeline=${pipeline}" in query["url"]
+        assert "run_id=${run_id}" in query["url"]
+        assert f"selected.{field}" in query["root_selector"]
+        assert f"? $v : requested.{field}" in query["root_selector"]

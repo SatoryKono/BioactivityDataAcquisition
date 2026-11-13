@@ -1476,7 +1476,7 @@ def _classify_replay_table(payload: object, *, panel_id: int) -> tuple[str, str]
         return ("invalid_shape", "Replay readiness must contain one verdict row")
     row = readiness[0]
     verdict = row.get("verdict") if isinstance(row, dict) else None
-    if verdict in ("SELECT RUN", "НЕТ ЗАПУСКОВ"):
+    if verdict in ("SELECT RUN", "NO RUNS"):
         return ("no_data", f"{verdict}: no selected replay evidence")
     if verdict == "QUERY ERROR":
         return ("endpoint_execution_error", "Replay readiness reports a query error")

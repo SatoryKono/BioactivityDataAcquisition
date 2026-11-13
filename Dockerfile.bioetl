@@ -15,7 +15,7 @@ ENV UV_HTTP_TIMEOUT=300 \
 
 # Public Wolfi packages are version-pinned. Third-party project dependencies
 # remain binary-only, so the builder does not need a compiler toolchain.
-RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
+RUN echo 'https://storage.googleapis.com/wolfi-production-registry-destination/os' > /etc/apk/repositories \
     && apk add --no-cache \
         bash=5.3-r12 \
         ca-certificates-bundle=20260909-r3 \
@@ -26,7 +26,7 @@ RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
         py3-pip-wheel=26.2.2-r2 \
         python-3.13=3.13.18_git20261030-r0 \
         uv=0.11.26-r0 \
-        zlib=1.3.2.1_rc20260917-r0 \
+        zlib=1.3.2.1_rc20260921-r2 \
     && python3.13 --version \
     && uv --version
 
@@ -64,7 +64,7 @@ FROM chainguard/wolfi-base@sha256:360896efb0753a5701c48f860e17130c205eae5a264797
 # Runtime-root assembles files only; the final scratch stage runs as 999:999.
 # hadolint ignore=DL3002
 USER 0
-RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
+RUN echo 'https://storage.googleapis.com/wolfi-production-registry-destination/os' > /etc/apk/repositories \
     && apk add --no-cache \
         ca-certificates-bundle=20260909-r3 \
         glibc-2.44-locale-posix=2.44-r16 \
@@ -74,7 +74,7 @@ RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
         py3-pip-wheel=26.2.2-r2 \
         python-3.13=3.13.18_git20261030-r0 \
         tzdata=2026c-r0 \
-        zlib=1.3.2.1_rc20260917-r0 \
+        zlib=1.3.2.1_rc20260921-r2 \
     && python3.13 --version \
     && mkdir -p /runtime-fs/tmp \
     && chown 999:999 /runtime-fs/tmp \

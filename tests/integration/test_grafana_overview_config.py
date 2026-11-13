@@ -219,7 +219,10 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
     assert summary.get("id") == 9002
     assert not summary_expr
     target = summary["targets"][0]
-    assert "selected-run-status?pipeline=${pipeline}&run_id=${run_id}" in target["url"]
+    assert (
+        "selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
+        in target["url"]
+    )
     assert "presentation_domains" in target["root_selector"]
     assert "from=" not in target["url"] and "to=" not in target["url"]
     assert "Saved evidence for this Run ID" in summary["description"]
@@ -244,7 +247,10 @@ def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> N
     assert target.get("panelId") == 9002
     assert target.get("withTransforms") is False
     donor = domains["targets"][0]
-    assert "selected-run-status?pipeline=${pipeline}&run_id=${run_id}" in donor["url"]
+    assert (
+        "selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
+        in donor["url"]
+    )
     assert donor["parser"] == "backend"
     assert (
         "uql" not in donor
@@ -336,7 +342,8 @@ def test_overview_queries_are_backed_by_expected_records_and_metrics() -> None:
     )
 
     assert (
-        "selected-run-status?pipeline=${pipeline}&run_id=${run_id}" in all_expressions
+        "selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
+        in all_expressions
     )
     # Stages use the canonical diagnostics projection with exact selected identity.
     assert (

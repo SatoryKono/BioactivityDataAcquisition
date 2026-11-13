@@ -418,6 +418,11 @@ def _retain_selected_run_overview(payload: dict) -> None:
     )
 
     apply_overview_identity(payload)
+    from scripts.ops.observability.grafana._audit_presentation import (
+        stamp_audit_presentation,
+    )
+
+    stamp_audit_presentation(payload)
     domains = next(panel for panel in payload["panels"] if panel.get("id") == 9002)
     handoff = domains.get("fieldConfig", {}).get("defaults", {}).get("links") or []
     domains["links"] = [dict(link) for link in handoff]

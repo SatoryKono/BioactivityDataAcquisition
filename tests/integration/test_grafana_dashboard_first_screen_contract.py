@@ -218,7 +218,8 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
         panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == pid)
         assert panel["gridPos"]["y"] + panel["gridPos"]["h"] <= FIRST_WINDOW_Y
         assert all(
-            "selected-run-status?" in t["url"] and "run_id=${run_id}" in t["url"]
+            "selected-run-status?" in t["url"]
+            and "run_id=${selected_run_id}" in t["url"]
             for t in panel["targets"]
         )
         assert all("expr" not in t for t in panel["targets"])
