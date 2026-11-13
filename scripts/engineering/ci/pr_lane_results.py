@@ -49,6 +49,12 @@ DASHBOARD_UX_REPORT_FRESHNESS_TEST = (
 DASHBOARD_OPERATOR_READABILITY_TEST = (
     "tests/integration/test_dashboard_operator_readability.py"
 )
+DASHBOARD_VARIABLE_DEPENDENCIES_TEST = (
+    "tests/integration/test_dashboard_variable_dependencies.py"
+)
+GRAFANA_DASHBOARD_PROVISIONING_TEST = (
+    "tests/integration/test_grafana_dashboard_provisioning.py"
+)
 CONFTEST_FILENAME = "conftest.py"
 GENERATED_ARTIFACT_TESTS = Path("configs/quality/generated_artifact_tests.json")
 GENERATED_ARTIFACT_ROUTING = Path("configs/quality/generated_artifact_routing.yaml")
@@ -208,7 +214,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "grafana/service-dashboards/prometheus-stats.json": (
         "tests/unit/scripts/test_generate_dashboard_content_contract.py",
-        "tests/integration/test_grafana_dashboard_provisioning.py",
+        GRAFANA_DASHBOARD_PROVISIONING_TEST,
     ),
     "scripts/engineering/repo/scoped_checks.py": (
         SCOPED_CHECKS_TEST,
@@ -1591,7 +1597,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     ),
     "grafana/dashboards/": (
         DASHBOARD_SCENES_CONTRACT_TEST,
-        "tests/integration/test_dashboard_variable_dependencies.py",
+        DASHBOARD_VARIABLE_DEPENDENCIES_TEST,
         "tests/integration/test_grafana_config.py",
         "tests/integration/test_grafana_dashboard_cta_links.py",
         GRAFANA_METRIC_SEMANTICS_TEST,
@@ -1602,23 +1608,23 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     # Optional adaptive projection keeps the native dashboard contracts and its profile checks.
     "grafana/dashboards-adaptive/": (
         "tests/unit/scripts/test_adaptive_dashboard_profile.py",
-        "tests/integration/test_dashboard_variable_dependencies.py",
-        "tests/integration/test_grafana_dashboard_provisioning.py",
+        DASHBOARD_VARIABLE_DEPENDENCIES_TEST,
+        GRAFANA_DASHBOARD_PROVISIONING_TEST,
         GRAFANA_SELECTOR_CONTRACT_TEST,
         GRAFANA_VARIABLE_REFERENCE_TEST,
     ),
     "grafana/provisioning/dashboards-adaptive/": (
         "tests/unit/scripts/test_adaptive_dashboard_profile.py",
-        "tests/integration/test_grafana_dashboard_provisioning.py",
+        GRAFANA_DASHBOARD_PROVISIONING_TEST,
     ),
     # Prometheus-only mirror: shipped dashboard owners plus its provisioning contract.
     "grafana/dashboards-prometheus-only/": (
         DASHBOARD_SCENES_CONTRACT_TEST,
-        "tests/integration/test_dashboard_variable_dependencies.py",
+        DASHBOARD_VARIABLE_DEPENDENCIES_TEST,
         "tests/integration/test_grafana_config.py",
         "tests/integration/test_grafana_dashboard_cta_links.py",
         GRAFANA_METRIC_SEMANTICS_TEST,
-        "tests/integration/test_grafana_dashboard_provisioning.py",
+        GRAFANA_DASHBOARD_PROVISIONING_TEST,
         "tests/integration/test_grafana_evidence_readability.py",
         GRAFANA_SELECTOR_CONTRACT_TEST,
         GRAFANA_VARIABLE_REFERENCE_TEST,
