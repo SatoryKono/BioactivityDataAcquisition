@@ -1319,3 +1319,41 @@ async def test_legacy_seed_uses_incoming_string_schema(
             (keys[0], "old"),
             (keys[1], "new"),
         }
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("null_first", [True, False])
+async def test_all_null_string_batch_aligns_with_numeric_values(
+    tmp_path, mock_logger, null_first
+):
+    nulls = pa.table({"id": [1], "value": pa.array([None], type=pa.string())})
+    numbers = pa.table({"id": [2], "value": [1.5]})
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    for batch in [nulls, numbers] if null_first else [numbers, nulls]:
+        await exporter.export("nullable", batch)
+    for _ in range(2):
+        await exporter.finalize_csv("nullable", primary_keys=["id"], sort_by=["id"])
+        result = pv.read_csv(tmp_path / "nullable.csv")
+        assert result["id"].to_pylist() == [1, 2]
+        assert result["value"].to_pylist() == [None, 1.5]
+    await exporter.export("nullable", pa.table({"id": [3], "value": [2.5]}))
+    await exporter.finalize_csv("nullable", sort_by=["id"])
+    assert pv.read_csv(tmp_path / "nullable.csv")["value"].to_pylist() == [
+        None,
+        1.5,
+        2.5,
+    ]
+
+
+@pytest.mark.asyncio
+async def test_all_null_mixed_declared_types_remain_null(tmp_path, mock_logger):
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    await exporter.export(
+        "nullonly", pa.table({"id": [1], "value": pa.array([None], type=pa.string())})
+    )
+    await exporter.export(
+        "nullonly", pa.table({"id": [2], "value": pa.array([None], type=pa.float64())})
+    )
+    result = read_raw_table(tmp_path / "nullonly.csv.raw")
+    assert result["value"].to_pylist() == [None, None]
+    assert result.schema.field("value").type == pa.string()

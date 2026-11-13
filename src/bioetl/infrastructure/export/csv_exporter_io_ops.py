@@ -94,6 +94,31 @@ def _logical_raw_table(table: pa.Table) -> pa.Table:
     return table
 
 
+def _raw_column_types(tables: list[pa.Table]) -> dict[str, pa.DataType]:
+    """Prefer a type containing values; retain the first type for null-only data."""
+    result: dict[str, pa.DataType] = {}
+    populated: set[str] = set()
+    for table in tables:
+        for field, column in zip(table.schema, table.columns, strict=True):
+            result.setdefault(field.name, field.type)
+            if field.name not in populated and column.null_count < table.num_rows:
+                result[field.name] = field.type
+                populated.add(field.name)
+    return result
+
+
+def _align_null_columns(table: pa.Table, types: dict[str, pa.DataType]) -> pa.Table:
+    """Change only wholly null arrays; populated values keep their original types."""
+    for index, field in enumerate(table.schema):
+        column = table.column(index)
+        target = types[field.name]
+        if column.null_count == table.num_rows and field.type != target:
+            table = table.set_column(
+                index, field.with_type(target), pa.nulls(table.num_rows, type=target)
+            )
+    return table
+
+
 def read_raw_table(path: Path, *, delimiter: str = ",") -> pa.Table:
     """Read typed streams, retaining a compatibility path for old CSV sidecars."""
     if not raw_sidecar_is_typed(path):
@@ -104,7 +129,9 @@ def read_raw_table(path: Path, *, delimiter: str = ",") -> pa.Table:
         while source.tell() < size:
             with pa.ipc.open_stream(source) as reader:
                 tables.append(_logical_raw_table(reader.read_all()))
-    return pa.concat_tables(tables, promote_options="permissive")
+    types = _raw_column_types(tables)
+    aligned = [_align_null_columns(table, types) for table in tables]
+    return pa.concat_tables(aligned, promote_options="permissive")
 
 
 def atomic_csv_write(
