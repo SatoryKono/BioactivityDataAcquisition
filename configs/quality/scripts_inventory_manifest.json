@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-13T00:14:06.127239+00:00",
+  "generated_at": "2026-11-13T00:26:53.639833+00:00",
   "summary": {
     "total_scripts": 746,
     "status_counts": {
@@ -348,7 +348,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 78,
+          "line": 83,
           "source_group": "ci",
           "text": "run: python3 scripts/ai/codex/doctor.py static --no-write"
         },
@@ -3028,7 +3028,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 212,
+          "line": 222,
           "source_group": "ci",
           "text": "run: bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -3079,7 +3079,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 81,
+          "line": 86,
           "source_group": "ci",
           "text": "run: python3 -m scripts.ai.mcp wrappers check"
         },
@@ -6383,13 +6383,13 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 161,
+          "line": 171,
           "source_group": "ci",
           "text": "python -m scripts.ai.sync.runtime_skills"
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 185,
+          "line": 195,
           "source_group": "ci",
           "text": "python -m scripts.ai.sync.runtime_skills"
         },
@@ -9211,7 +9211,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 132,
+          "line": 142,
           "source_group": "ci",
           "text": "capture docs docs_runtime_checks docs_runtime python -m scripts.docs check-links"
         },
@@ -12800,7 +12800,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 129,
+          "line": 139,
           "source_group": "ci",
           "text": "capture governance pretest_guardrails governance bash scripts/engineering/dev/pretest_guardrails.sh \\"
         },
@@ -19480,9 +19480,9 @@
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 124,
+          "line": 123,
           "source_group": "docs",
-          "text": "| 3 | `15.182` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-u"
+          "text": "| 2 | `14.822` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-u"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
@@ -28512,7 +28512,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 227,
+          "line": 237,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_ai_skills_layout.sh"
         },
@@ -28555,7 +28555,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 224,
+          "line": 234,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_skills_mirror.sh --check"
         },
