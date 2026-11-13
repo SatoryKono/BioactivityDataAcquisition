@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
-  "catalog_ref": "2312efd442296edacf43008b559e9b7525261876",
-  "source_ref": "bcb0241d9d834da972ba97bc9c8b49fb8a55bd30",
+  "catalog_ref": "72a4f617e1bcca126e37e4a0e6c97a7e066b0ea3",
+  "source_ref": "72a4f617e1bcca126e37e4a0e6c97a7e066b0ea3",
   "source_reviews": {
-    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_scope.py": "Reviewed missing-run diagnostic preservation after trusted selected-root resolution and manifest lookup. Only a None manifest with selected_run_id_not_found returns the existing unresolved scope/service, without binding or reading evidence ports. Invalid locator/source identity and missing or mismatched known manifests still fail closed. Existing shared-executor reconciliation offload and all resource ownership/cancellation semantics are unchanged."
+    "src/bioetl/interfaces/http/health_server.py": "Merged origin/main #13117 optional quarantine token construction; existing server/task acquisition and cleanup scopes unchanged. No new external resource.",
+    "src/bioetl/interfaces/http/health_server_http_mixin.py": "Merged origin/main #13117 unique Authorization parsing and RFC 9110 scheme normalization / RFC 6750 SP separator. Credential bytes remain case-sensitive and constant-time compared; duplicate headers fail closed. Existing socket/reader/writer ownership and close paths unchanged; no new external acquisition."
   },
-  "reference_moves": [],
-  "exclusion_moves": [],
   "line_updates": {
-    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_scope.py": {
-      "72": 72,
-      "61": 61
+    "src/bioetl/interfaces/http/health_server.py": {
+      "270": 272,
+      "266": 268,
+      "265": 267
     }
   }
 }
