@@ -1,10 +1,9 @@
 {
   "schema_version": 1,
-  "catalog_ref": "b7950a1f03614d4b539ff6c0d5db3335e196a4ba",
-  "source_ref": "d2074b05f3c539cb7eaee46cac792f68a96b1038",
+  "catalog_ref": "8ca8a634212ee923d77c54e92e35b08f16dd5b6c",
+  "source_ref": "424bc817853861ad53783e4eb0def4358556a9e9",
   "source_reviews": {
-    "src/bioetl/application/observability/control_plane_evidence/lineage_graph_validation.py": "Reviewed pure extraction of per-manifest RUN merging into a helper to bound cognitive complexity. Full definitions remain strict per manifest, shared cross-manifest fields retain the same checks and conflicting anchors remain rejected. No acquisition, external resource, lifecycle or cleanup changes.",
-    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_scope.py": "Reviewed normalizing only unresolved All-style locator owners to the safe legacy All token while preserving the original requested selector. Verified report/manifest owners and concrete mismatch refusal remain unchanged; source identity checks are not bypassed. Missing UUID retains scope_resolution/selected_run_id_not_found. No new resource or lifecycle."
+    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_scope.py": "Reviewed returning the concrete _IdentityScope constructor instead of generic dataclasses.replace for static return-type inference. Every existing requested/selected/manifest field and verified report pipeline owner is copied; behavior and source identity refusal are unchanged. No external acquisition, ownership, cleanup, executor or lifetime changes."
   },
   "reference_moves": [],
   "exclusion_moves": [],
