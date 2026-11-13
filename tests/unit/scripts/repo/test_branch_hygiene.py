@@ -280,6 +280,7 @@ def test_worktree_lock_without_reason_is_preserved(monkeypatch):
 
 def test_quarantine_destination_must_stay_in_owned_root(monkeypatch, tmp_path):
     root = tmp_path / "worktrees"
+    monkeypatch.setattr(bh, "GOVERNED_WORKSPACE_ROOT", tmp_path)
     monkeypatch.setattr(bh, "WT_ROOT", root)
     bh._safe_quarantine_destination(root / ".__trash_20261113" / "retained")
     with pytest.raises(RuntimeError, match="outside governed|escapes"):
@@ -600,3 +601,35 @@ def test_registered_nested_locked_tree_keeps_parent(monkeypatch, tmp_path):
         {"path": str(parent), "kind": "orphan", "action": "HARD_DELETE"}
     )
     assert "registered" in result["result"] and parent.exists()
+
+
+def test_failed_action_journal_matches_exit_and_prevents_prune(monkeypatch, tmp_path):
+    import json
+
+    calls = _apply_fixture(monkeypatch, tmp_path, archive_error=True)
+    result = bh.main(["apply", "--out", str(tmp_path), "--execute"])
+    journal = json.loads((tmp_path / "apply-actions.json").read_text())
+    assert result == journal["returncode"] == 1
+    assert journal["error"] and journal["actions"][0]["wip_error"]
+    assert not any("prune" in args for args in calls)
+
+
+@pytest.mark.parametrize("changed,archive_error", [(True, False), (False, True)])
+def test_apply_journal_status_matches_failed_actions(
+    monkeypatch, tmp_path, changed, archive_error
+):
+    import json
+
+    _apply_fixture(monkeypatch, tmp_path, changed=changed, archive_error=archive_error)
+    rc = bh.main(["apply", "--out", str(tmp_path), "--execute"])
+    assert rc == 1
+    journals = [
+        tmp_path / "apply-actions.json",
+        *tmp_path.glob("apply-*/apply-actions.json"),
+    ]
+    assert len(journals) == 2
+    for path in journals:
+        journal = json.loads(path.read_text())
+        assert journal["returncode"] == rc
+        assert journal["error"]
+        assert journal["actions"]

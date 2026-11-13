@@ -766,6 +766,15 @@ def _action_succeeded(action: dict[str, Any]) -> bool:
     )
 
 
+def _action_failed(action: dict[str, Any]) -> bool:
+    return (
+        "wip_error" in action
+        or str(action.get("result", "")).startswith("kept: ")
+        or action.get("remove_rc", 0) != 0
+        or action.get("rc", 0) != 0
+    )
+
+
 def do_apply(args: argparse.Namespace) -> int:
     if not args.execute:
         print("[dry-run] no trees or branches changed; pass --execute to apply")
@@ -787,9 +796,13 @@ def do_apply(args: argparse.Namespace) -> int:
         )
         if rc:
             error = "branch bundle failed; remaining actions stopped"
+        elif any(_action_failed(action) for action in actions):
+            rc, error = 1, "One or more requested actions were not completed"
         else:
             result = run(["git", "worktree", "prune"])
             rc = int(result.returncode != 0)
+            if rc:
+                error = "Worktree prune failed"
     except (OSError, RuntimeError, subprocess.SubprocessError) as exc:
         rc, error = 1, str(exc)
     finally:
@@ -815,17 +828,7 @@ def do_apply(args: argparse.Namespace) -> int:
 
     ok = sum(_action_succeeded(action) for action in actions)
     print(f"[apply] done: {len(actions)} actions, ok {ok}")
-    print(
-        f"[apply] worktrees now {len(registered_worktrees())}, branches now {len(local_branches())}"
-    )
-    failed = any(
-        "wip_error" in action
-        or str(action.get("result", "")).startswith("kept: ")
-        or action.get("remove_rc", 0) != 0
-        or action.get("rc", 0) != 0
-        for action in actions
-    )
-    return int(failed)
+    return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
