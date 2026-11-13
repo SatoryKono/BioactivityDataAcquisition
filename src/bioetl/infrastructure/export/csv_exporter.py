@@ -40,6 +40,8 @@ from bioetl.infrastructure.export.csv_exporter_table_ops import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from bioetl.domain.ports import LoggerPort
 
 
@@ -97,6 +99,80 @@ def _resolve_table_export_paths(base_path: Path, table_name: str) -> tuple[Path,
     return csv_path, raw_path
 
 
+def _list_named_clear_targets(
+    *,
+    csv_path: Path,
+    raw_path: Path,
+    root: Path,
+) -> list[Path]:
+    targets: list[Path] = []
+    if csv_path.exists():
+        targets.append(csv_path)
+    if raw_path.exists() and raw_path.resolve(strict=False).is_relative_to(root):
+        targets.append(raw_path)
+    return targets
+
+
+def _list_all_clear_targets(*, base_path: Path, root: Path) -> list[Path]:
+    targets: list[Path] = []
+    for path in base_path.glob("*.csv"):
+        if path.resolve(strict=False).is_relative_to(root):
+            targets.append(path)
+    for path in base_path.glob("*.csv.raw"):
+        if path.resolve(strict=False).is_relative_to(root):
+            targets.append(path)
+    return targets
+
+
+def _unlink_clear_targets(
+    targets: list[Path],
+    logger: LoggerPort,
+) -> list[Path]:
+    deleted: list[Path] = []
+    for target in targets:
+        try:
+            target.unlink()
+            deleted.append(target)
+        except PermissionError:
+            logger.warning(
+                "Cannot delete locked CSV export artifact",
+                path=str(target),
+                reason="file may be open in another program",
+            )
+    return deleted
+
+
+def _seed_raw_sidecar_if_missing(
+    *,
+    csv_full_path: Path,
+    raw_path: Path,
+    root: Path,
+    table_name: str,
+) -> None:
+    if raw_path.exists():
+        return
+    if not (
+        csv_full_path.is_relative_to(root) and raw_path.is_relative_to(root)
+    ):
+        raise ValueError(
+            f"CSV export path escapes export directory: {table_name!r}"
+        )
+    raw_path.write_bytes(csv_full_path.read_bytes())
+
+
+def _write_raw_and_published_pair(
+    *,
+    write_raw: Callable[[], bool],
+    write_published: Callable[[], bool],
+    raw_path: Path,
+    csv_path: Path,
+    mode: str,
+) -> None:
+    """Update raw then published; fail closed if either primary write is backup-only."""
+    _require_primary_csv_update(write_raw(), path=raw_path, mode=mode)
+    _require_primary_csv_update(write_published(), path=csv_path, mode=mode)
+
+
 class CsvExporter:
     """CSV exporter with atomic writes and spreadsheet-safe publish path."""
 
@@ -150,38 +226,19 @@ class CsvExporter:
         return target_path
 
     def clear(self, table_name: str | None = None) -> list[Path]:
-        deleted: list[Path] = []
         if not self.base_path.exists():
-            return deleted
+            return []
         root = self._export_root()
-        files_to_delete: list[Path] = []
         if table_name:
             csv_path = self._resolve_table_csv_path(table_name)
-            raw_path = self._raw_csv_path(csv_path)
-            if csv_path.exists():
-                files_to_delete.append(csv_path)
-            if raw_path.exists() and raw_path.resolve(strict=False).is_relative_to(
-                root
-            ):
-                files_to_delete.append(raw_path)
+            targets = _list_named_clear_targets(
+                csv_path=csv_path,
+                raw_path=self._raw_csv_path(csv_path),
+                root=root,
+            )
         else:
-            for path in self.base_path.glob("*.csv"):
-                if path.resolve(strict=False).is_relative_to(root):
-                    files_to_delete.append(path)
-            for path in self.base_path.glob("*.csv.raw"):
-                if path.resolve(strict=False).is_relative_to(root):
-                    files_to_delete.append(path)
-        for target in files_to_delete:
-            try:
-                target.unlink()
-                deleted.append(target)
-            except PermissionError:
-                self._logger.warning(
-                    "Cannot delete locked CSV export artifact",
-                    path=str(target),
-                    reason="file may be open in another program",
-                )
-        return deleted
+            targets = _list_all_clear_targets(base_path=self.base_path, root=root)
+        return _unlink_clear_targets(targets, self._logger)
 
     def _sort_table(self, table: pa.Table, sort_columns: list[str]) -> pa.Table:
         return _sort_table(
@@ -234,41 +291,69 @@ class CsvExporter:
         csv_data = self._flatten_for_csv(data)
         _validate_spreadsheet_safe_column_names(csv_data)
         if append and csv_full_path.exists():
-            if not raw_path.exists():
-                if not (
-                    csv_full_path.is_relative_to(root) and raw_path.is_relative_to(root)
-                ):
-                    raise ValueError(
-                        f"CSV export path escapes export directory: {table_name!r}"
-                    )
-                raw_path.write_bytes(csv_full_path.read_bytes())
-            _require_primary_csv_update(
-                self._append_to_csv(csv_data, raw_path, spreadsheet_safe=False),
-                path=raw_path,
-                mode="append",
+            return self._append_existing_export(
+                table_name=table_name,
+                csv_data=csv_data,
+                csv_full_path=csv_full_path,
+                raw_path=raw_path,
+                root=root,
             )
-            _require_primary_csv_update(
-                self._append_to_csv(csv_data, csv_full_path, spreadsheet_safe=True),
-                path=csv_full_path,
-                mode="append",
-            )
-            return csv_full_path
+        return self._overwrite_export(
+            csv_data=csv_data,
+            csv_full_path=csv_full_path,
+            raw_path=raw_path,
+            sort_by=sort_by,
+        )
+
+    def _append_existing_export(
+        self,
+        *,
+        table_name: str,
+        csv_data: pa.Table,
+        csv_full_path: Path,
+        raw_path: Path,
+        root: Path,
+    ) -> Path:
+        _seed_raw_sidecar_if_missing(
+            csv_full_path=csv_full_path,
+            raw_path=raw_path,
+            root=root,
+            table_name=table_name,
+        )
+        _write_raw_and_published_pair(
+            write_raw=lambda: self._append_to_csv(
+                csv_data, raw_path, spreadsheet_safe=False
+            ),
+            write_published=lambda: self._append_to_csv(
+                csv_data, csv_full_path, spreadsheet_safe=True
+            ),
+            raw_path=raw_path,
+            csv_path=csv_full_path,
+            mode="append",
+        )
+        return csv_full_path
+
+    def _overwrite_export(
+        self,
+        *,
+        csv_data: pa.Table,
+        csv_full_path: Path,
+        raw_path: Path,
+        sort_by: list[str] | None,
+    ) -> Path:
         sort_columns = sort_by if sort_by is not None else self.sort_by
         if sort_columns:
             csv_data = self._sort_table(csv_data, sort_columns)
         write_options = self._build_write_options()
-        _require_primary_csv_update(
-            self._atomic_csv_write(
+        _write_raw_and_published_pair(
+            write_raw=lambda: self._atomic_csv_write(
                 csv_data, raw_path, write_options, spreadsheet_safe=False
             ),
-            path=raw_path,
-            mode="write",
-        )
-        _require_primary_csv_update(
-            self._atomic_csv_write(
+            write_published=lambda: self._atomic_csv_write(
                 csv_data, csv_full_path, write_options, spreadsheet_safe=True
             ),
-            path=csv_full_path,
+            raw_path=raw_path,
+            csv_path=csv_full_path,
             mode="write",
         )
         return csv_full_path
@@ -302,18 +387,15 @@ class CsvExporter:
             table = self._sort_table(table, sort_columns)
         write_options = self._build_write_options()
         _validate_spreadsheet_safe_column_names(table)
-        _require_primary_csv_update(
-            self._atomic_csv_write(
+        _write_raw_and_published_pair(
+            write_raw=lambda: self._atomic_csv_write(
                 table, raw_path, write_options, spreadsheet_safe=False
             ),
-            path=raw_path,
-            mode="write",
-        )
-        _require_primary_csv_update(
-            self._atomic_csv_write(
+            write_published=lambda: self._atomic_csv_write(
                 table, csv_full_path, write_options, spreadsheet_safe=True
             ),
-            path=csv_full_path,
+            raw_path=raw_path,
+            csv_path=csv_full_path,
             mode="write",
         )
         self._logger.info(
