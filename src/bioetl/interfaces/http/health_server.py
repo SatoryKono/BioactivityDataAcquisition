@@ -160,6 +160,7 @@ class HealthServer(
         control_plane: HealthServerControlPlaneDeps | None = None,
         prometheus_base_url: str | None = None,
         logger: LoggerPort | None = None,
+        quarantine_http_token: str | None = None,
         **legacy_ports: object,
     ) -> None:
         """Initialize health server.
@@ -170,6 +171,7 @@ class HealthServer(
         # Always validate legacy kwargs so unknown names fail closed even when
         # control_plane is also supplied.
         deps = self._resolve_control_plane_deps(control_plane, legacy_ports)
+        self._quarantine_http_token = quarantine_http_token or None
         self.host = host
         self.port = port
         self._health_monitor = deps.health_monitor
