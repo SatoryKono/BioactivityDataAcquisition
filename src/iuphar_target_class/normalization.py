@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import replace
+from dataclasses import dataclass, replace
 
 from .models import (
     ClassificationResult,
@@ -224,6 +224,64 @@ def isolated_invalid_result(row: ValidatedInput) -> ClassificationResult:
         provenance=row.provenance,
         diagnostics=(),
     )
+
+
+@dataclass(frozen=True, slots=True)
+class BatchQuality:
+    """Stable QC for one batch. It carries no clock and no assigned class."""
+
+    status: str
+    row_count: int
+    invalid_count: int
+    classified_count: int
+    input_row_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class BatchClassification:
+    """Boundary result. Valid rows are not classified here."""
+
+    status: str
+    rows: tuple[ClassificationResult, ...]
+    quality: BatchQuality
+
+
+def classify_batch(
+    rows: tuple[RawTargetRow, ...],
+    *,
+    provenance: RunProvenance,
+    glue_fixtures: tuple[GlueFixture, ...] = (),
+    catalog: frozenset[str] = frozenset(),
+    snapshot_taxon: str | None = None,
+) -> BatchClassification:
+    """Classify only the empty and all-invalid boundaries.
+
+    An empty batch is a deterministic empty result plus QC. A batch whose
+    every row is ``invalid_input`` is rejected and keeps no class. Any valid
+    row is refused so it cannot pass silently.
+    """
+    if not rows:
+        quality = BatchQuality("empty", 0, 0, 0, ())
+        return BatchClassification("empty", (), quality)
+    validated = validate_batch(
+        rows,
+        provenance=provenance,
+        glue_fixtures=glue_fixtures,
+        catalog=catalog,
+        snapshot_taxon=snapshot_taxon,
+    )
+    if any(row.input_validation_status != "invalid_input" for row in validated):
+        message = "classify_batch does not assign classes"
+        raise ValueError(message)
+    results = tuple(isolated_invalid_result(row) for row in validated)
+    quality = BatchQuality(
+        "rejected",
+        len(results),
+        len(results),
+        0,
+        tuple(row.input_row_id for row in results),
+    )
+    return BatchClassification("rejected", results, quality)
 
 
 def require_approved_normalization(provenance: RunProvenance) -> None:
