@@ -385,6 +385,11 @@ def test_archive_preserves_index_bytes_unicode_names_and_previous_snapshots(
         assert (snapshot / "working.patch").read_bytes() == b"working\r\n"
         assert (snapshot / "untracked" / "café.txt").read_bytes() == b"untracked\r\n"
     assert (one / "head.txt").read_text() == "abc tree\n"
+    patch_calls = [args for args in calls if "--binary" in args]
+    assert len(patch_calls) == 4
+    assert all(
+        "--no-ext-diff" in args and "--no-textconv" in args for args in patch_calls
+    )
 
 
 @pytest.mark.parametrize("name", ["main", "master", "master_202607-recovery"])

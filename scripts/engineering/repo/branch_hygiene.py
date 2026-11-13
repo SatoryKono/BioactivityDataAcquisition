@@ -480,7 +480,18 @@ def archive_tree(path: Path, name: str, head: str, archive: Path) -> dict[str, A
     """Create a complete archive or raise before permitting removal."""
     for selection in ([], ["--cached"]):
         changed = run(
-            ["git", "-C", str(path), "diff", *selection, "--name-only", "-z", "HEAD"]
+            [
+                "git",
+                "-C",
+                str(path),
+                "diff",
+                "--no-ext-diff",
+                "--no-textconv",
+                *selection,
+                "--name-only",
+                "-z",
+                "HEAD",
+            ]
         )
         if changed.returncode:
             raise RuntimeError(INCOMPLETE_ARCHIVE)
@@ -490,7 +501,17 @@ def archive_tree(path: Path, name: str, head: str, archive: Path) -> dict[str, A
     snapshot = Path(tempfile.mkdtemp(prefix=f"{name}-", dir=archive))
     for label, selection in (("working", []), ("index", ["--cached"])):
         diff = run(
-            ["git", "-C", str(path), "diff", *selection, "--binary", "HEAD"],
+            [
+                "git",
+                "-C",
+                str(path),
+                "diff",
+                "--no-ext-diff",
+                "--no-textconv",
+                *selection,
+                "--binary",
+                "HEAD",
+            ],
             binary=True,
         )
         if diff.returncode:
