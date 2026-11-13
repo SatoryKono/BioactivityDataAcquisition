@@ -95,26 +95,36 @@ def _logical_raw_table(table: pa.Table) -> pa.Table:
 
 
 def _raw_column_types(tables: list[pa.Table]) -> dict[str, pa.DataType]:
-    """Prefer a type containing values; retain the first type for null-only data."""
+    """Preserve populated text across batches; otherwise prefer a populated type."""
     result: dict[str, pa.DataType] = {}
     populated: set[str] = set()
     for table in tables:
         for field, column in zip(table.schema, table.columns, strict=True):
             result.setdefault(field.name, field.type)
-            if field.name not in populated and column.null_count < table.num_rows:
-                result[field.name] = field.type
+            if column.null_count < table.num_rows:
+                textual = pa.types.is_string(field.type) or pa.types.is_large_string(
+                    field.type
+                )
+                if field.name not in populated or textual:
+                    result[field.name] = field.type
                 populated.add(field.name)
     return result
 
 
-def _align_null_columns(table: pa.Table, types: dict[str, pa.DataType]) -> pa.Table:
-    """Change only wholly null arrays; populated values keep their original types."""
+def _align_raw_columns(table: pa.Table, types: dict[str, pa.DataType]) -> pa.Table:
+    """Align null arrays and mixed text batches without narrowing numeric types."""
     for index, field in enumerate(table.schema):
         column = table.column(index)
         target = types[field.name]
         if column.null_count == table.num_rows and field.type != target:
             table = table.set_column(
                 index, field.with_type(target), pa.nulls(table.num_rows, type=target)
+            )
+        elif field.type != target and (
+            pa.types.is_string(target) or pa.types.is_large_string(target)
+        ):
+            table = table.set_column(
+                index, field.with_type(target), column.cast(target)
             )
     return table
 
@@ -130,7 +140,7 @@ def read_raw_table(path: Path, *, delimiter: str = ",") -> pa.Table:
             with pa.ipc.open_stream(source) as reader:
                 tables.append(_logical_raw_table(reader.read_all()))
     types = _raw_column_types(tables)
-    aligned = [_align_null_columns(table, types) for table in tables]
+    aligned = [_align_raw_columns(table, types) for table in tables]
     return pa.concat_tables(aligned, promote_options="permissive")
 
 

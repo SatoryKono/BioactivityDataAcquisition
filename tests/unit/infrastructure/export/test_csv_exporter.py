@@ -1388,3 +1388,22 @@ async def test_legacy_float_is_not_narrowed_by_integer_append(tmp_path, mock_log
     await exporter.finalize_csv("legacy", sort_by=["id"])
     result = pv.read_csv(published)
     assert result["value"].to_pylist() == [1.5, 2.0]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("legacy", [False, True])
+@pytest.mark.parametrize("reverse", [False, True])
+async def test_populated_text_and_numeric_batches_finalize(
+    tmp_path, mock_logger, legacy, reverse
+):
+    first, second = (123, "old") if reverse else ("old", 123)
+    published = tmp_path / "mixed.csv"
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    if legacy:
+        published.write_text(f"id,value\n1,{first}\n", encoding="utf-8")
+    else:
+        await exporter.export("mixed", pa.table({"id": [1], "value": [first]}))
+    await exporter.export("mixed", pa.table({"id": [2], "value": [second]}))
+    await exporter.finalize_csv("mixed", sort_by=["id"])
+    result = pv.read_csv(published)
+    assert result["value"].to_pylist() == [str(first), str(second)]
