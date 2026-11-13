@@ -798,20 +798,7 @@
     }
   },
   "assertless_total_candidates": 67,
-  "budget_violations": [
-    {
-      "actual": 1,
-      "budget": "duplicate_test_names_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_names"
-    },
-    {
-      "actual": 2,
-      "budget": "duplicate_test_name_occurrences_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_name_occurrences"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -956,30 +943,16 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/domain/test_transformations.py:362",
-        "tests/unit/iuphar_target_class/test_normalization.py:203"
-      ],
-      "name": "test_empty_batch",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    }
-  ],
+  "duplicate_test_name_inventory": [],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 1,
-    "duplicate_occurrences": 2,
+    "cross_file_groups": 0,
+    "duplicate_occurrences": 0,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 1
+    "total_duplicate_names": 0
   },
-  "duplicate_test_name_occurrences": 2,
-  "duplicate_test_names": 1,
+  "duplicate_test_name_occurrences": 0,
+  "duplicate_test_names": 0,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1695,30 +1668,16 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/domain/test_transformations.py:362",
-          "tests/unit/iuphar_target_class/test_normalization.py:203"
-        ],
-        "name": "test_empty_batch",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      }
-    ],
+    "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 1,
-      "duplicate_occurrences": 2,
+      "cross_file_groups": 0,
+      "duplicate_occurrences": 0,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 1
+      "total_duplicate_names": 0
     },
-    "duplicate_test_name_occurrences": 2,
-    "duplicate_test_names": 1,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -1756,8 +1715,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3317,
-      "test_python_file_count": 3569,
+      "test_glob_file_count": 3320,
+      "test_python_file_count": 3572,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1797,30 +1756,21 @@
       "top_level_directory_count": 16,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/domain/test_transformations.py:362",
-          "tests/unit/iuphar_target_class/test_normalization.py:203"
-        ],
-        "name": "test_empty_batch"
-      }
-    ],
-    "total_test_files": 3317,
-    "total_test_functions": 32992,
+    "top_duplicate_test_names": [],
+    "total_test_files": 3320,
+    "total_test_functions": 33025,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "ee59bcaf6c3c4f02176cffb5bc51a922d0cf08c050d3860010af1dc09339ba5a",
+  "source_tree_sha256": "cd307d1a87a7bb85af5834ffa0282a5e50d0eddf9c4e89dacb3c554cd39953d8",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 67,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 2,
-    "duplicate_test_names": 1,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "intentional_no_exception_contract": 66,
     "markerless_examples": [],
     "markerless_test_functions": 0,
@@ -1833,8 +1783,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3317,
-    "test_python_file_count": 3569,
+    "test_glob_file_count": 3320,
+    "test_python_file_count": 3572,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -1874,18 +1824,9 @@
     "top_level_directory_count": 16,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/domain/test_transformations.py:362",
-        "tests/unit/iuphar_target_class/test_normalization.py:203"
-      ],
-      "name": "test_empty_batch"
-    }
-  ],
-  "total_test_files": 3317,
-  "total_test_functions": 32992,
+  "top_duplicate_test_names": [],
+  "total_test_files": 3320,
+  "total_test_functions": 33025,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

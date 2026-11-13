@@ -2479,6 +2479,24 @@
       "owner": "@bioetl-platform",
       "review_by": "2027-02-12"
     },
+    "scripts/engineering/repo/closeout_runtime.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain behind the existing scripts.engineering.repo closeout facade; qualify only explicit local observations, never native lifecycle registration or authenticated CI transport.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-13"
+    },
+    "scripts/engineering/repo/closeout_state.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the source-bound metadata helper for explicit closeout commands; preserve immutable event records and the local trust ceiling.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-13"
+    },
+    "scripts/engineering/repo/closeout_worker.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as a fixed owned-process worker behind scripts.engineering.repo closeout, without standalone CLI or native event activation; never launch producers or ingestion.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-13"
+    },
     "scripts/engineering/repo/scoped_checks.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as a state-bound local validation helper behind scripts.engineering.repo checks; never promote local observations to runtime or CI admission.",

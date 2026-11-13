@@ -98,22 +98,23 @@ def validate_repo(repo: str | Path) -> Path:
     return path
 
 
+def _isolated_git_env(*, index_file: str | None = None) -> dict[str, str]:
+    """Ignore ambient Git controls; only an explicit index is a permitted input."""
+    env = {
+        key: value for key, value in os.environ.items() if not key.startswith("GIT_")
+    }
+    env.update(
+        GIT_NO_REPLACE_OBJECTS="1", GIT_OPTIONAL_LOCKS="0", GIT_TERMINAL_PROMPT="0"
+    )
+    if index_file is not None:
+        env["GIT_INDEX_FILE"] = index_file
+    return env
+
+
 def _run_git(repo: Path, verb: str, *args: str, index_file: str | None = None) -> str:
     if verb not in _GIT_VERBS:
         raise EvidenceError(f"unsupported git verb: {verb!r}")
-    env = os.environ.copy()
-    for key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_INDEX_FILE"):
-        env.pop(key, None)
-    for key in tuple(env):
-        if key in {
-            "GIT_CONFIG",
-            "GIT_CONFIG_COUNT",
-            "GIT_CONFIG_PARAMETERS",
-        } or key.startswith(("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_")):
-            env.pop(key, None)
-    env["GIT_NO_REPLACE_OBJECTS"] = "1"
-    if index_file is not None:
-        env["GIT_INDEX_FILE"] = index_file
+    env = _isolated_git_env(index_file=index_file)
     try:
         result = subprocess.run(
             ["git", "--no-optional-locks", "-c", "core.fsmonitor=false", verb, *args],

@@ -2115,6 +2115,7 @@
         "docs/01-requirements/REQUIREMENTS.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/04-reference/contracts/README.md",
+        "docs/05-operations/runbooks/ai-closeout-wrapper.md",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_proof_or_stop_contract.py"
       ],
