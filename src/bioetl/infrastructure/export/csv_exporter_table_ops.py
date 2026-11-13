@@ -142,6 +142,15 @@ def neutralize_spreadsheet_text(value: str) -> str:
     return value
 
 
+def _spreadsheet_safe_chunk(chunk: pa.Array) -> pa.Array:
+    """Keep dictionary cardinality bounded by each source chunk's index type."""
+    values = [
+        neutralize_spreadsheet_text(value) if value is not None else None
+        for value in chunk.to_pylist()
+    ]
+    return pa.array(values, type=chunk.type)
+
+
 def spreadsheet_safe_table(table: pa.Table) -> pa.Table:
     """Return a safe export copy; retain numeric types and original input values."""
     result = table
@@ -150,11 +159,14 @@ def spreadsheet_safe_table(table: pa.Table) -> pa.Table:
             field.type.value_type if pa.types.is_dictionary(field.type) else field.type
         )
         if pa.types.is_string(kind) or pa.types.is_large_string(kind):
-            values = [
-                neutralize_spreadsheet_text(value) if value is not None else None
-                for value in table.column(index).to_pylist()
-            ]
-            result = result.set_column(index, field, pa.array(values, type=field.type))
+            column = pa.chunked_array(
+                [
+                    _spreadsheet_safe_chunk(chunk)
+                    for chunk in table.column(index).chunks
+                ],
+                type=field.type,
+            )
+            result = result.set_column(index, field, column)
     names = [neutralize_spreadsheet_text(name) for name in table.column_names]
     if len(set(names)) != len(set(table.column_names)):
         raise ValueError("Spreadsheet-safe column names collide")

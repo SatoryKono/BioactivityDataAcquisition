@@ -65,6 +65,9 @@ def write_debug_csv(
     include_bom: bool,
 ) -> None:
     headers = collect_headers(rows)
+    safe_headers = [neutralize_spreadsheet_text(header) for header in headers]
+    if len(set(safe_headers)) != len(headers):
+        raise ValueError("Spreadsheet-safe column names collide")
     encoding = "utf-8-sig" if include_bom else "utf-8"
     with output_path.open("w", encoding=encoding, newline="") as handle:
         writer = csv.DictWriter(
@@ -73,9 +76,7 @@ def write_debug_csv(
             extrasaction="ignore",
             quoting=csv.QUOTE_ALL,
         )
-        writer.writerow(
-            {header: neutralize_spreadsheet_text(header) for header in headers}
-        )
+        writer.writerow(dict(zip(headers, safe_headers, strict=True)))
         for row in rows:
             writer.writerow(
                 {header: normalize_csv_value(row.get(header)) for header in headers}
