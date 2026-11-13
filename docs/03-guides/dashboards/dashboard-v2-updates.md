@@ -8,6 +8,8 @@ An explicit Run ID that is missing from the selector catalog retains its request
 pipeline and UUID. Saved-run panels report the missing run; they do not silently
 fall back to the latest run from another pipeline. Automatic selection still uses
 the resolved identity when available.
+Manifest validation preserves a missing-run diagnosis after checking the selected
+evidence root; invalid locations and conflicting identities still fail closed.
 
 ## Compact Run Explorer catalog — 2026-11-12
 

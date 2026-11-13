@@ -244,3 +244,148 @@ async def test_report_only_run_keeps_manifest_missing_with_resolver(monkeypatch)
     assert payload["resolved_via"] == "resolved_without_manifest"
     assert payload["rows"][0]["reason"] == "manifest_not_recorded"
     assert payload["rows"][0]["status"] == "UNKNOWN"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "lookup_code, via, expected_check, expected_reason",
+    [
+        (
+            "found",
+            "selected_run_id_not_found",
+            "scope_resolution",
+            "selected_run_id_not_found",
+        ),
+        (
+            "location_missing",
+            "selected_run_id_not_found",
+            "scope_resolution",
+            "selected_run_id_not_found",
+        ),
+        (
+            "identity_conflict",
+            "selected_run_id_not_found",
+            "parse",
+            "manifest_parse_error",
+        ),
+        (
+            "location_invalid",
+            "selected_run_id_not_found",
+            "parse",
+            "manifest_parse_error",
+        ),
+        ("found", "selected_run_id", "parse", "manifest_parse_error"),
+    ],
+)
+async def test_bound_missing_uuid_preserves_diagnostic_after_root_validation(
+    monkeypatch, lookup_code, via, expected_check, expected_reason
+):
+    from dataclasses import replace
+    from unittest.mock import Mock
+    import bioetl.interfaces.http._health_server_control_plane_evidence_routing as routing
+    from bioetl.application.services.evidence_location.resolver import (
+        EvidenceLocationResolver,
+    )
+
+    selected = replace(
+        _scope(resolved_via=via),
+        requested_pipeline="chembl_activity",
+        selected_pipelines=("chembl_activity",),
+    )
+
+    async def resolved(*_args, **_kwargs):
+        return selected, None
+
+    manifest_read = Mock(return_value=None)
+    service_getter = Mock(
+        side_effect=AssertionError("missing UUID must not bind evidence ports")
+    )
+    context = SimpleNamespace(
+        get_manifest_by_run_id=manifest_read, get_validation_service=service_getter
+    )
+    location_reads = []
+
+    def resolve_location(_self, **kwargs):
+        location_reads.append(kwargs)
+        return SimpleNamespace(code=SimpleNamespace(value=lookup_code), context=context)
+
+    monkeypatch.setattr(routing, "resolve_evidence_scope", resolved)
+    monkeypatch.setattr(
+        scope_module, "verified_report_identity_for_run", lambda *_a, **_k: None
+    )
+    monkeypatch.setattr(EvidenceLocationResolver, "resolve", resolve_location)
+    payload = await _service_payload(
+        SimpleNamespace(
+            _control_plane_evidence_service=ControlPlaneEvidenceService(),
+            _run_report_store=object(),
+            _runtime_source_id="selected-source",
+            _evidence_location_resolver=EvidenceLocationResolver(None, None, None),
+        ),
+        {},
+        endpoint="manifest-validation",
+    )
+    assert payload["rows"][0]["check"] == expected_check
+    assert payload["rows"][0]["reason"] == expected_reason
+    assert location_reads == [
+        {
+            "kind": "pipeline",
+            "owner": "chembl_activity",
+            "run_id": _RUN_ID,
+            "expected_runtime_source_id": "selected-source",
+        }
+    ]
+    service_getter.assert_not_called()
+    if lookup_code in {"identity_conflict", "location_invalid"}:
+        manifest_read.assert_not_called()
+    else:
+        manifest_read.assert_called_once_with(_RUN_ID)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("pipeline", ["chembl_activity", "All"])
+async def test_missing_uuid_keeps_scope_diagnostic_with_real_selected_file_context(
+    monkeypatch, tmp_path, pipeline
+):
+    from dataclasses import replace
+    import bioetl.interfaces.http._health_server_control_plane_evidence_routing as routing
+    from bioetl.application.services.evidence_location.resolver import (
+        EvidenceLocationResolver,
+    )
+    from bioetl.application.services.run_reports.evidence_location_paths import (
+        default_evidence_root_alias_registry,
+    )
+    from bioetl.composition.control_plane_paths import FileEvidenceReadContextFactory
+    from bioetl.infrastructure.control_plane.file_evidence_location_store import (
+        FileEvidenceLocationStore,
+    )
+
+    selected = replace(
+        _scope(resolved_via="selected_run_id_not_found"),
+        requested_pipeline=pipeline,
+        selected_pipelines=(pipeline,),
+    )
+
+    async def resolved(*_args, **_kwargs):
+        return selected, None
+
+    monkeypatch.setattr(routing, "resolve_evidence_scope", resolved)
+    root = tmp_path / "selected"
+    root.mkdir()
+    resolver = EvidenceLocationResolver(
+        locations=FileEvidenceLocationStore(report_root=tmp_path / "reports"),
+        aliases=default_evidence_root_alias_registry(dashboard_data_root=root),
+        opener=FileEvidenceReadContextFactory(),
+    )
+    payload = await _service_payload(
+        SimpleNamespace(
+            _control_plane_evidence_service=ControlPlaneEvidenceService(),
+            _evidence_location_resolver=resolver,
+            _run_report_store=None,
+        ),
+        {},
+        endpoint="manifest-validation",
+    )
+    assert payload["rows"][0]["check"] == "scope_resolution"
+    assert payload["rows"][0]["reason"] == "selected_run_id_not_found"
+    assert not (tmp_path / "reports").exists()
+    assert list(root.rglob("*")) == []
