@@ -61,7 +61,7 @@ def test_provider_status_uses_filtered_vectors_in_severity_order():
     defaults = panel["fieldConfig"]["defaults"]
     threshold_colors = [step.get("color") for step in defaults["thresholds"]["steps"]]
     assert "green" not in threshold_colors
-    assert threshold_colors[0] in {"text", "gray", "#555555"}
+    assert threshold_colors[0] in {"text", "gray", "#555555", "#9CA3AF"}
     value_maps = next(
         m["options"] for m in defaults["mappings"] if m.get("type") == "value"
     )

@@ -813,6 +813,13 @@ function canonicalNavigationPanels(panels) {
   });
 }
 
+function requiredPanelsForCapture(panels, expanded, surface) {
+  // A viewport capture cannot retain virtualized below-fold rows. Full captures
+  // keep the complete terminal-state contract, including expanded children.
+  const source = surface === 'viewport' ? selectFirstWindowPanels(panels) : panels;
+  return requiredNonRowPanels(source, expanded);
+}
+
 function dashboardEntryFromPayload(payload) {
   const uid = typeof payload.uid === "string" ? payload.uid : "";
   const title = typeof payload.title === "string" ? payload.title : uid;
@@ -828,9 +835,10 @@ function dashboardEntryFromPayload(payload) {
   if (navigationPanels.length > 1) {
     throw new Error(`${uid} has duplicate canonical navigation panels id=1000`);
   }
-  const allRequiredPanels = requiredNonRowPanels(
+  const allRequiredPanels = requiredPanelsForCapture(
     panels,
     CONFIG.expandCollapsedRows,
+    CONFIG.captureSurface,
   );
   const requiredPanels = CONFIG.navigationOnly
     ? allRequiredPanels.filter((panel) => panel.id === 1000)
@@ -897,13 +905,26 @@ function listDashboardsFromRepo() {
   return dashboards.sort((left, right) => left.uid.localeCompare(right.uid));
 }
 
+function rowTitlePattern(title) {
+  const parts = String(title).split(/(\$\{[^}]+\})/g);
+  const variable = part => /^\$\{[^}]+\}$/.test(part);
+  if (!parts.some(part => !variable(part) && part.trim())) {
+    throw new Error('Row title must contain literal text');
+  }
+  const pattern = parts.map(part => variable(part)
+    ? String.raw`[\s\S]*?`
+    : part.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)).join('');
+  return new RegExp(`^(?:Expand row )?${pattern}$`);
+}
+
 async function tryExpandCollapsedRow(page, title, index, total, uid) {
   const escapedTitle = JSON.stringify(title);
-  const candidates = [
-    page.locator(`button:has-text(${escapedTitle})`).first(),
-    page.locator(`[role="button"]:has-text(${escapedTitle})`).first(),
-    page.getByText(title, { exact: true }).first(),
-  ];
+  const candidates = String(title).includes('${')
+    ? [page.getByRole('button', { name: rowTitlePattern(title) }).first(),
+       page.getByText(rowTitlePattern(title)).first()]
+    : [page.locator(`button:has-text(${escapedTitle})`).first(),
+       page.locator(`[role="button"]:has-text(${escapedTitle})`).first(),
+       page.getByText(title, { exact: true }).first()];
 
   const metrics = await dashboardCaptureMetrics(page);
   const step = Math.max(250, Math.floor((await page.evaluate(() => innerHeight)) * 0.75));
@@ -2805,6 +2826,8 @@ if (require.main === module) {
 }
 
 module.exports = {
+  requiredPanelsForCapture,
+  rowTitlePattern,
   browserDashboardResponseKind,
   normalizeBrowserDashboardPayload,
   dashboardEntryFromPayload,

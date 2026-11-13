@@ -196,3 +196,14 @@ class TestPanderaChecks:
 
         assert JSON_OBJECT_CHECK is not None
         assert JSON_OBJECT_CHECK.name == "valid_json_object"
+
+
+@pytest.mark.parametrize("failure", [ValueError, TypeError])
+def test_null_scalar_probe_handles_pandas_conversion_failure(monkeypatch, failure):
+    from bioetl.domain.schemas import validators as subject
+
+    def invalid_scalar(*args, **kwargs):
+        raise failure("unsupported scalar")
+
+    monkeypatch.setattr(subject.pd, "Series", invalid_scalar)
+    assert subject._is_scalar_missing(object()) is False
