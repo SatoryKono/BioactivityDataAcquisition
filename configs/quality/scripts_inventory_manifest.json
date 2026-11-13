@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-13T08:01:13.159724+00:00",
+  "generated_at": "2026-11-13T10:00:42.723430+00:00",
   "summary": {
     "total_scripts": 749,
     "status_counts": {
@@ -17884,7 +17884,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
@@ -17913,6 +17913,12 @@
         {
           "path": "tests/architecture/test_config_surface_entity_residual_plateau.py",
           "line": 24,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import report_config_surface_backlog as backlog_report"
+        },
+        {
+          "path": "tests/architecture/test_config_surface_entity_residual_plateau.py",
+          "line": 25,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_config_surface_backlog import ("
         }
@@ -19504,9 +19510,9 @@
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 123,
+          "line": 130,
           "source_group": "docs",
-          "text": "| 2 | `17.3` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-uni"
+          "text": "| 9 | `9.767` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-un"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
@@ -28919,7 +28925,7 @@
         },
         {
           "path": "tests/architecture/test_config_surface_entity_residual_plateau.py",
-          "line": 28,
+          "line": 29,
           "source_group": "tests",
           "text": "from scripts.schema.analysis.generate_config_matrix import ("
         },

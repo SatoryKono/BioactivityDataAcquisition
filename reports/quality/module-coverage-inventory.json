@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "bcd190c66e6fd62ea1991f81fe0c7610d1e0eefe4d8033af43990e1b89ea816b",
+  "coverage_xml_sha256": "dc888c06da7d096459205d489e545a5d721594a9951d280ec236310570527d8c",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
@@ -22048,8 +22048,8 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 82,
-      "executable_lines": 82,
+      "covered_lines": 137,
+      "executable_lines": 137,
       "missing_lines": 0,
       "module": "bioetl.infrastructure.quarantine.filtered_reads",
       "path": "src/bioetl/infrastructure/quarantine/filtered_reads.py",
@@ -25518,8 +25518,8 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 76,
-      "executable_lines": 76,
+      "covered_lines": 82,
+      "executable_lines": 82,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._health_server_quarantine_routing",
       "path": "src/bioetl/interfaces/http/_health_server_quarantine_routing.py",
@@ -48170,8 +48170,8 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 82,
-      "executable_lines": 82,
+      "covered_lines": 137,
+      "executable_lines": 137,
       "missing_lines": 0,
       "module": "bioetl.infrastructure.quarantine.filtered_reads",
       "path": "src/bioetl/infrastructure/quarantine/filtered_reads.py",
@@ -51640,8 +51640,8 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 76,
-      "executable_lines": 76,
+      "covered_lines": 82,
+      "executable_lines": 82,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._health_server_quarantine_routing",
       "path": "src/bioetl/interfaces/http/_health_server_quarantine_routing.py",
