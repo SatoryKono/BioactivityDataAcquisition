@@ -243,6 +243,8 @@ def _hash_paths(repo_root: Path, paths: list[str]) -> str:
             with path.open("rb") as stream:
                 for chunk in iter(lambda: stream.read(1024 * 1024), b""):
                     digest.update(chunk)
+        elif path.is_dir():
+            raise ProofError("Unqualified directory source input")
         else:
             digest.update(b"missing\0")
         digest.update(b"\0")
@@ -281,6 +283,14 @@ def _reject_active_git_filters(repo_root: Path, *, timeout: float) -> None:
         raise ProofError("Active Git clean/process filter is not qualified")
 
 
+def _reject_gitlinks(repo_root: Path, *, timeout: float) -> None:
+    """Refuse unmeasured nested repositories before any potentially recursive diff."""
+    for args in (("ls-files", "--stage", "-z"), ("ls-tree", "-r", "-z", "HEAD")):
+        rows = _git(repo_root, *args, timeout=timeout).split(b"\0")
+        if any(row.startswith(b"160000 ") for row in rows):
+            raise ProofError("Unqualified gitlink/submodule source input")
+
+
 def _task_diff_state(
     repo_root: Path,
     policy: dict[str, Any],
@@ -288,6 +298,7 @@ def _task_diff_state(
     *,
     timeout: float,
 ) -> tuple[str, bool]:
+    _reject_gitlinks(repo_root, timeout=timeout)
     _reject_active_git_filters(repo_root, timeout=timeout)
     tracked_diff = _git(
         repo_root,
@@ -295,6 +306,7 @@ def _task_diff_state(
         "--binary",
         "--no-ext-diff",
         "--no-textconv",
+        "--submodule=short",
         "HEAD",
         "--",
         timeout=timeout,
@@ -306,6 +318,7 @@ def _task_diff_state(
         "--binary",
         "--no-ext-diff",
         "--no-textconv",
+        "--submodule=short",
         "HEAD",
         "--",
         timeout=timeout,

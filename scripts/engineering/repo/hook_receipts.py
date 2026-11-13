@@ -118,17 +118,17 @@ def _index_material(
 ) -> dict[str, bytes]:
     from scripts.engineering.repo.check_no_partial_tree import _reject_intent_to_add
 
-    _reject_intent_to_add(root, index_file=view)
     index = _git(root, "ls-files", "--sparse", "--stage", "-z", index_file=view)
     if any(
         row
         and (
-            row.startswith(b"040000 ")
+            row.startswith((b"040000 ", b"160000 "))
             or row.split(b"\t", 1)[0].rsplit(b" ", 1)[-1] != b"0"
         )
         for row in index.split(b"\0")
     ):
-        raise ValueError("unmerged or sparse index is not qualified")
+        raise ValueError("gitlink, unmerged or sparse index is not qualified")
+    _reject_intent_to_add(root, index_file=view)
     marked = _git(root, "ls-files", "-v", "-z", index_file=view)
     if reject_hidden and any(
         row and (row[:1].islower() or row.startswith(b"S "))
@@ -136,6 +136,14 @@ def _index_material(
     ):
         raise ValueError("hidden index entries are not qualified")
     return {"index": index, "flags": marked}
+
+
+def _reject_gitlink_revisions(root: Path, *revisions: str) -> None:
+    """A parent commit id does not attest files inside an unqualified submodule."""
+    for revision in dict.fromkeys(revisions):
+        rows = _git(root, "ls-tree", "-r", "-z", revision).split(b"\0")
+        if any(row.startswith(b"160000 ") for row in rows):
+            raise ValueError("gitlink revision is not qualified")
 
 
 def _dotenv_material(root: Path) -> dict[str, str]:
@@ -157,11 +165,12 @@ def protected_state(root: Path, base: str = "origin/main") -> dict[str, str]:
     )
 
     base = validate_revision_token(base)
-    if check_checkout_state(root):
-        raise ValueError("checkout state is not qualified")
+    _reject_gitlink_revisions(root, "HEAD", base)
     indexes = [
         _index_material(root, view, reject_hidden=False) for view in _index_views(root)
     ]
+    if check_checkout_state(root):
+        raise ValueError("checkout state is not qualified")
     return {
         "head_sha": _git(root, "rev-parse", "--verify", "HEAD^{commit}")
         .strip()
@@ -229,6 +238,8 @@ def _path_state(
         target = root / relative
         if not target.resolve().is_relative_to(root) or target.is_symlink():
             raise ValueError("unqualified changed input path")
+        if target.is_dir():
+            raise ValueError("unqualified directory source input")
         measured[relative] = (
             digest(
                 {

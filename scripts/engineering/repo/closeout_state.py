@@ -182,6 +182,7 @@ def capture(root: Path, env: Mapping[str, str]) -> dict[str, Any]:
     expected = SOURCE_ROOT / "src/memory/proof.py"
     if Path(proof.__file__).resolve() != expected:
         raise ValueError("foreign proof core")
+    proof._reject_gitlinks(root, timeout=10)
     proof._reject_active_git_filters(root, timeout=10)
     from scripts.engineering.repo.check_no_partial_tree import _index_views
 

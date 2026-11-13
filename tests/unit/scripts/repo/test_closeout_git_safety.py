@@ -5,12 +5,13 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import shlex
+import shutil
 import sys
 
 import pytest
 
 from memory import proof
-from scripts.engineering.repo import closeout_runtime, closeout_state
+from scripts.engineering.repo import closeout_runtime, closeout_state, hook_receipts
 from tests.helpers.isolated_git import init_tracked_fixture_repo, run_isolated_git
 
 pytestmark = pytest.mark.unit
@@ -46,6 +47,99 @@ def git_case(tmp_path: Path):
 def _dirty(root: Path) -> tuple[str, bool]:
     (root / "tracked.py").write_text("VALUE = 200\n", encoding="utf-8")
     return proof._task_diff_state(root, proof.load_policy(), [], timeout=10)
+
+
+@pytest.fixture
+def gitlink_case(git_case):
+    root, marker, command, git = git_case
+    child = init_tracked_fixture_repo(root / "module")
+    registry = root / "configs/quality/agent_guard_budget_surfaces.json"
+    registry.parent.mkdir(parents=True)
+    registry.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "owner": "fixture",
+                "surfaces": [
+                    {"pattern": "configs/quality/*budget*.json", "kind": "budget"}
+                ],
+            }
+        )
+    )
+    (root / ".gitmodules").write_text(
+        '[submodule "module"]\n path = module\n url = ./module\n'
+    )
+    git("add", ".")
+    git("commit", "--no-gpg-sign", "--no-verify", "-qm", "fixture gitlink")
+    git("update-ref", "refs/remotes/origin/main", "HEAD")
+    git("config", "diff.submodule", "diff")
+    (child / ".git/info").mkdir(exist_ok=True)
+    (child / ".git/info/attributes").write_text("tracked.py diff=probe\n")
+    configured = run_isolated_git(
+        child, "config", "diff.probe.textconv", command + " textconv"
+    )
+    assert configured.returncode == 0, configured.stderr
+    (child / "tracked.py").write_text("VALUE = 20\n")
+    return root, child, marker, git
+
+
+def _gitlink_view(git, view: str) -> None:
+    if view == "index_only":
+        git("reset", "--soft", "HEAD^")
+        git("update-ref", "refs/remotes/origin/main", "HEAD")
+    elif view in {"head_only", "base_only"}:
+        git("update-index", "--force-remove", "module")
+        if view == "base_only":
+            git("commit", "--no-gpg-sign", "--no-verify", "-qm", "unlink module")
+
+
+@pytest.mark.parametrize("view", ["both", "index_only", "head_only"])
+def test_canonical_gitlink_refusal_precedes_nested_textconv(gitlink_case, view):
+    root, _child, marker, git = gitlink_case
+    _gitlink_view(git, view)
+    rejected = None
+    try:
+        proof._task_diff_state(root, proof.load_policy(), [], timeout=10)
+    except proof.ProofError as error:
+        rejected = error
+    assert not marker.exists(), "nested textconv must not execute"
+    assert rejected is not None and "gitlink" in str(rejected).lower()
+
+
+@pytest.mark.parametrize("view", ["both", "index_only", "head_only", "base_only"])
+def test_snapshot_refuses_unmeasured_gitlink_content(gitlink_case, view):
+    root, _child, marker, git = gitlink_case
+    _gitlink_view(git, view)
+    with pytest.raises(ValueError, match="gitlink"):
+        closeout_state.capture(root, closeout_runtime._environment())
+    assert not marker.exists()
+
+
+@pytest.mark.parametrize("layer", ["core", "wrapper"])
+def test_untracked_embedded_repository_is_not_missing_source(gitlink_case, layer):
+    root, _child, marker, git = gitlink_case
+    _gitlink_view(git, "base_only")
+    git("update-ref", "refs/remotes/origin/main", "HEAD")
+    git("config", "diff.submodule", "short")
+    if layer == "core":
+        with pytest.raises(proof.ProofError, match="directory"):
+            proof.discover_context(root, policy=proof.load_policy(), claim="tested")
+    else:
+        with pytest.raises(ValueError, match="directory"):
+            closeout_state.capture(root, closeout_runtime._environment())
+    assert not marker.exists()
+
+
+def test_supplied_index_gitlink_is_refused_before_index_diff(gitlink_case):
+    root, _child, marker, git = gitlink_case
+    supplied = root / ".git/gitlink-proposed-index"
+    shutil.copyfile(root / ".git/index", supplied)
+    git("reset", "--mixed", "HEAD^")
+    default = hook_receipts._index_material(root, None, reject_hidden=True)
+    assert b"160000 " not in default["index"]
+    with pytest.raises(ValueError, match="gitlink"):
+        hook_receipts._index_material(root, str(supplied), reject_hidden=True)
+    assert not marker.exists()
 
 
 def test_configured_fsmonitor_is_never_executed(git_case) -> None:

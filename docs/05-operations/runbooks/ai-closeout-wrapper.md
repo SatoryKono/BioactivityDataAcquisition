@@ -138,6 +138,13 @@ preserves this policy without requiring an importable repository package.
 File-state fingerprints include content and permission mode; the POSIX
 regression exercises an execute-bit change after the canonical verifier.
 
+Gitlinks in the default/supplied index or the HEAD/base revisions are not
+qualified: a submodule commit id does not bind its dirty working files. These
+inputs are refused before diff execution; the canonical diff also explicitly
+uses the short submodule format. Existing directory inputs, including untracked
+embedded Git repositories, are refused instead of being recorded as missing
+files. No recursive submodule support or nested Git callback execution is enabled.
+
 The canonical proof diff now includes the default staged tree. Old bundles must
 be regenerated after this source-binding change, never relabelled. A supplied
 alternate index must match the canonical default index semantically; a different
