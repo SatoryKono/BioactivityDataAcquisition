@@ -1,11 +1,15 @@
 {
   "schema_version": 1,
-  "catalog_ref": "8ca8a634212ee923d77c54e92e35b08f16dd5b6c",
-  "source_ref": "424bc817853861ad53783e4eb0def4358556a9e9",
+  "catalog_ref": "ee83cc0366ea42dfc9a11366ae6f205473631fb6",
+  "source_ref": "564bc08b7061dad70f5b1319c0009ce7dd9ccd94",
   "source_reviews": {
-    "src/bioetl/interfaces/http/_health_server_control_plane_evidence_scope.py": "Reviewed returning the concrete _IdentityScope constructor instead of generic dataclasses.replace for static return-type inference. Every existing requested/selected/manifest field and verified report pipeline owner is copied; behavior and source identity refusal are unchanged. No external acquisition, ownership, cleanup, executor or lifetime changes."
+    "src/bioetl/infrastructure/adapters/http/client_context_mixin.py": "Accepted HTTP redirect and response-budget changes from merged PR13119: preserve current source and lifecycle bindings; no new runtime qualification. The only changed acquisition expression is AsyncClient follow_redirects=False.",
+    "src/bioetl/infrastructure/adapters/http/request_timing.py": "Accepted HTTP redirect and response-budget changes from merged PR13119: preserve current source and lifecycle bindings; no new runtime qualification. The only changed acquisition expression is AsyncClient follow_redirects=False.",
+    "src/bioetl/infrastructure/adapters/http/response_body.py": "Accepted HTTP redirect and response-budget changes from merged PR13119: preserve current source and lifecycle bindings; no new runtime qualification. The only changed acquisition expression is AsyncClient follow_redirects=False."
   },
-  "reference_moves": [],
-  "exclusion_moves": [],
-  "line_updates": {}
+  "expression_updates": {
+    "src/bioetl/infrastructure/adapters/http/client_context_mixin.py": {
+      "httpx.AsyncClient(timeout=httpx.Timeout(connect=self.timeout, read=self.timeout * self.read_timeout_multiplier, write=self.timeout, pool=self.timeout), headers=headers, follow_redirects=True, limits=httpx.Limits(max_connections=self.max_connections, max_keepalive_connections=self.max_keepalive_connections), trust_env=self.trust_env)": "httpx.AsyncClient(timeout=httpx.Timeout(connect=self.timeout, read=self.timeout * self.read_timeout_multiplier, write=self.timeout, pool=self.timeout), headers=headers, follow_redirects=False, limits=httpx.Limits(max_connections=self.max_connections, max_keepalive_connections=self.max_keepalive_connections), trust_env=self.trust_env)"
+    }
+  }
 }
