@@ -154,6 +154,23 @@ def _load_bounded_scoped_pyarrow_table(
         fragment_readahead=1,
         use_threads=False,
     )
+    result = _read_budgeted_batches(
+        scanner,
+        legacy_time_filter=legacy_time_filter,
+        from_bound=from_bound,
+        to_bound=to_bound,
+    )
+    return result.select(columns) if columns is not None else result
+
+
+def _read_budgeted_batches(
+    scanner: ds.Scanner,
+    *,
+    legacy_time_filter: bool,
+    from_bound: datetime | None,
+    to_bound: datetime | None,
+) -> pa.Table:
+    """Collect only selected batches under unchanged row, byte and time limits."""
     batches = []
     rows = size = 0
     deadline = time.monotonic() + 5.0
@@ -166,8 +183,7 @@ def _load_bounded_scoped_pyarrow_table(
             raise RuntimeError("Quarantine query budget exceeded; narrow the scope")
         if batch.num_rows:
             batches.append(batch)
-    result = pa.Table.from_batches(batches, schema=scanner.projected_schema)
-    return result.select(columns) if columns is not None else result
+    return pa.Table.from_batches(batches, schema=scanner.projected_schema)
 
 
 def _filtered_projection_columns(
