@@ -1500,12 +1500,14 @@ def test_wsl_setup_routes_to_installer_integrity_regression():
     assert "tests/unit/scripts/test_wsl_uv_install_integrity.py" in json.dumps(report)
 
 
-def test_auth_security_review_routes_to_catalog_and_requalification():
+@pytest.mark.parametrize("audit", ["003", "004", "005", "006", "007"])
+def test_security_inventory_reviews_route_to_source_qualification_tests(audit):
     root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare(
-        ["configs/quality/external_resource_inventory_security_aud006_review.json"],
-        repo_root=root,
+    path = (
+        f"configs/quality/external_resource_inventory_security_aud{audit}_review.json"
     )
+    report = build_shadow_compare([path], repo_root=root)
+
     assert (
         "tests/architecture/test_external_resource_inventory_catalog.py"
         in json.dumps(report)
