@@ -1499,6 +1499,7 @@ def test_wsl_setup_routes_to_installer_integrity_regression():
     )
     assert "tests/unit/scripts/test_wsl_uv_install_integrity.py" in json.dumps(report)
 
+
 def test_auth_security_review_routes_to_catalog_and_requalification():
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
@@ -1513,4 +1514,3 @@ def test_auth_security_review_routes_to_catalog_and_requalification():
         "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py"
         in json.dumps(report)
     )
-
