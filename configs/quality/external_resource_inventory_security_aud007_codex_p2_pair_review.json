@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "639d547de06956ca430d0df1f418c55cd74da5bc",
+  "source_ref": "a9e5fe4c678faec93afe9497bcf2297bd4470f3b",
+  "source_reviews": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": "AUD-007 Codex P2: clear keeps .csv.raw when published CSV unlink fails; published-write failure rolls raw back via pair helper. Clear/pair helpers moved to csv_exporter_pair_ops; seed read_bytes/write_bytes, asyncio.to_thread, and read_csv remain owned here. No new runtime qualification.",
+    "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py": "AUD-007 Codex P2: extract pair-aware clear (glob/unlink) and raw snapshot/restore around write_raw_and_published_pair. Directory enumeration and clear unlink relocated from csv_exporter helpers; rollback read_bytes/write_bytes/unlink are ephemeral pair consistency IO. No new runtime qualification."
+  },
+  "expression_updates": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": {
+      "base_path.glob('*.csv')": "base_path.glob('*.csv')",
+      "target.unlink()": "target.unlink()"
+    }
+  },
+  "segment_updates": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": {
+      "for path in base_path.glob(\"*.csv\"):": "for csv_path in base_path.glob(\"*.csv\"):",
+      "return _atomic_csv_write(": "return _atomic_csv_write(",
+      "return _append_to_csv(": "return _append_to_csv(",
+      "return await asyncio.to_thread(": "return await asyncio.to_thread(",
+      "class CsvExporter:": "class CsvExporter:"
+    }
+  },
+  "line_updates": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": {
+      "158": 113,
+      "174": 116,
+      "218": 160,
+      "253": 197,
+      "269": 213,
+      "357": 301,
+      "372": 316,
+      "407": 351
+    }
+  },
+  "reference_moves": [
+    {
+      "identity": "infrastructure.export.csv_exporter.directory-enumeration",
+      "fields": ["creation_sites"],
+      "from": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "line": 118,
+        "expression": "base_path.glob('*.csv')"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
+        "scope": "list_all_clear_pairs",
+        "call": "base_path.glob",
+        "expression": "base_path.glob('*.csv')"
+      }
+    },
+    {
+      "identity": "infrastructure.export.csv_exporter.directory-enumeration",
+      "fields": ["cleanup_sources"],
+      "from": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "line": 118
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
+        "scope": "list_all_clear_pairs",
+        "segment": "for csv_path in base_path.glob(\"*.csv\"):"
+      }
+    },
+    {
+      "identity": "asyncio.default-executor",
+      "fields": ["cleanup_sources"],
+      "from": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "line": 134,
+        "expression": "target.unlink()"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
+        "scope": "_try_unlink_clear_target",
+        "call": "target.unlink",
+        "expression": "target.unlink()"
+      }
+    },
+    {
+      "identity": "export.csv.table-file",
+      "fields": ["cleanup_sources"],
+      "from": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "line": 134,
+        "expression": "target.unlink()"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
+        "scope": "_try_unlink_clear_target",
+        "call": "target.unlink",
+        "expression": "target.unlink()"
+      }
+    },
+    {
+      "identity": "export.csv.raw_sidecar_seed",
+      "fields": ["creation_sites", "production_binding"],
+      "from": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "line": 158,
+        "expression": "csv_full_path.read_bytes()"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "scope": "_seed_raw_sidecar_if_missing",
+        "call": "csv_full_path.read_bytes",
+        "expression": "csv_full_path.read_bytes()"
+      }
+    },
+    {
+      "identity": "export.csv.raw_sidecar_seed",
+      "fields": ["creation_sites", "production_binding"],
+      "from": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "line": 158,
+        "expression": "raw_path.write_bytes(csv_full_path.read_bytes())"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "scope": "_seed_raw_sidecar_if_missing",
+        "call": "raw_path.write_bytes",
+        "expression": "raw_path.write_bytes(csv_full_path.read_bytes())"
+      }
+    }
+  ],
+  "exclusion_moves": [
+    {
+      "from": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "line": 121,
+        "expression": "base_path.glob('*.csv.raw')",
+        "call": "base_path.glob"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
+        "scope": "list_all_clear_pairs",
+        "call": "base_path.glob",
+        "expression": "base_path.glob('*.csv.raw')",
+        "reason": "Pair-aware clear orphan-sidecar enumeration relocated with *.csv glob into list_all_clear_pairs; same clear() owner."
+      }
+    }
+  ],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [
+    {
+      "identity": "export.csv.raw_sidecar_rollback",
+      "type": "file",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "lifetime": "owner/operation",
+      "creator": [
+        "write_raw_and_published_pair"
+      ],
+      "owner": "write_raw_and_published_pair owning operation (see exact source sites)",
+      "closer": "pathlib.Path.read_bytes/write_bytes/unlink internal file context exit",
+      "shutdown_contract": "Synchronous pathlib snapshot/restore owns temporary file streams for the duration of the call; used only to keep raw consistent when published primary write fails.",
+      "production_entrypoint": "pipeline/workflow runtime -> StorageFactory -> CsvExporter.export/finalize -> write_raw_and_published_pair",
+      "call_path": [
+        "CsvExporter.export/finalize -> write_raw_and_published_pair",
+        " -> snapshot_raw_sidecar/restore_raw_sidecar"
+      ],
+      "scenarios": {
+        "normal": {
+          "applicability": "applicable",
+          "expected": "Snapshot raw before write_raw; restore only when published primary write fails. Streams close before return.",
+          "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
+          "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "owning async/thread boundary; primitive itself synchronous",
+          "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
+          "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
+          "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
+          "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
+          "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
+          "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "configuration_predicates": [],
+      "shutdown_by_site": {},
+      "operation_aliases": [],
+      "site_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
+          "scope": "snapshot_raw_sidecar",
+          "call": "raw_path.read_bytes",
+          "expression": "raw_path.read_bytes()"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
+          "scope": "restore_raw_sidecar",
+          "call": "raw_path.write_bytes",
+          "expression": "raw_path.write_bytes(snapshot)"
+        }
+      ],
+      "cleanup_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
+          "scope": "restore_raw_sidecar",
+          "call": "raw_path.unlink",
+          "expression": "raw_path.unlink(missing_ok=True)"
+        }
+      ]
+    }
+  ],
+  "new_exclusions": []
+}
