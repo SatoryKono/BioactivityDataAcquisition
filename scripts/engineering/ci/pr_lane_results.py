@@ -812,6 +812,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/integration/test_prometheus_rules_config.py",
         INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
     ),
+    "docs/05-operations/runbooks/branch-hygiene-wave.md": (
+        "tests/unit/scripts/repo/test_branch_hygiene.py",
+    ),
     "docs/05-operations/runbooks/stale-lock.md": (
         INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
     ),

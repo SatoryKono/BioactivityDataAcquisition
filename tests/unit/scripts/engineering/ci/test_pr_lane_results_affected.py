@@ -1616,3 +1616,16 @@ def test_hook_qualification_inputs_have_bounded_shadow_routes() -> None:
     ):
         with pytest.raises(ValueError, match="unmapped paths"):
             build_shadow_compare([unknown], repo_root=root)
+
+
+def test_branch_hygiene_runbook_routes_only_to_owned_checks():
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["docs/05-operations/runbooks/branch-hygiene-wave.md"], repo_root=root
+    )
+    assert "tests/unit/scripts/repo/test_branch_hygiene.py" in json.dumps(report)
+    with pytest.raises(ValueError, match="unmapped"):
+        build_shadow_compare(
+            ["docs/05-operations/runbooks/branch-hygiene-wave-unknown.md"],
+            repo_root=root,
+        )
