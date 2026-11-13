@@ -56,6 +56,7 @@ DAY = 86400.0
 STALE_HOURS = 12
 SAFE_DIR_ARG = "safe.directory=*"
 CLASSIFICATION_FILE = "classification.json"
+INCOMPLETE_ARCHIVE = "Cannot read complete worktree changes"
 TRASH_TTL_DAYS = 7
 EXCLUDE_NAMES = (".env", ".env.local", ".env.example")
 EXCLUDE_PARTS = (".venv", ".venv-win", "node_modules", "__pycache__")
@@ -151,6 +152,23 @@ def status_counts(path: Path) -> tuple[bool, bool, bool] | None:
         )
         if r.returncode != 0:
             return None
+        ignored = run(
+            [
+                "git",
+                "-c",
+                SAFE_DIR_ARG,
+                "ls-files",
+                "--others",
+                "--ignored",
+                "--exclude-standard",
+                "--directory",
+                "-z",
+            ],
+            cwd=path,
+            timeout=180,
+        )
+        if ignored.returncode or ignored.stdout:
+            return None
         lines = [ln for ln in r.stdout.splitlines() if ln.strip()]
         untracked = any(ln.startswith("??") for ln in lines)
         tracked = any(not ln.startswith("??") for ln in lines)
@@ -196,6 +214,23 @@ def pr_state_map() -> dict[str, list[str]]:
     m: dict[str, list[str]] = {}
     for row in json.loads(r.stdout):
         m.setdefault(row["headRefName"], []).append(row["state"])
+    opened = run(
+        [
+            "gh",
+            "api",
+            "--paginate",
+            "--slurp",
+            "repos/SatoryKono/BioactivityDataAcquisition/pulls?state=open&per_page=100",
+        ],
+        timeout=300,
+    )
+    if opened.returncode:
+        raise RuntimeError("Cannot classify safely: complete open PR lookup failed")
+    for page in json.loads(opened.stdout):
+        for row in page:
+            states = m.setdefault(row["head"]["ref"], [])
+            if "OPEN" not in states:
+                states.append("OPEN")
     return m
 
 
@@ -222,7 +257,7 @@ def _worktree_action(
     if not exists:
         return "REMOVE", "directory missing"
     if status is None:
-        return "KEEP", "status unavailable"
+        return "KEEP", "status unavailable or ignored files require owner review"
     dirty = status[0] or status[1]
     removal = "REMOVE_ARCHIVE" if dirty else "REMOVE"
     if w["detached"] and age > detached_days:
@@ -446,7 +481,7 @@ def archive_tree(path: Path, name: str, head: str, archive: Path) -> dict[str, A
             ["git", "-C", str(path), "diff", *selection, "--name-only", "-z", "HEAD"]
         )
         if changed.returncode:
-            raise RuntimeError("Cannot read complete worktree changes")
+            raise RuntimeError(INCOMPLETE_ARCHIVE)
         if any(excluded(name) for name in changed.stdout.split("\0") if name):
             raise RuntimeError("Cannot archive excluded tracked inputs")
     archive.mkdir(parents=True, exist_ok=True)
@@ -457,13 +492,13 @@ def archive_tree(path: Path, name: str, head: str, archive: Path) -> dict[str, A
             binary=True,
         )
         if diff.returncode:
-            raise RuntimeError("Cannot read complete worktree changes")
+            raise RuntimeError(INCOMPLETE_ARCHIVE)
         (snapshot / f"{label}.patch").write_bytes(diff.stdout)
     status = run(
         ["git", "-C", str(path), "ls-files", "--others", "--exclude-standard", "-z"]
     )
     if status.returncode:
-        raise RuntimeError("Cannot read complete worktree changes")
+        raise RuntimeError(INCOMPLETE_ARCHIVE)
     copied = 0
     for rel in filter(None, status.stdout.split("\0")):
         source = path / rel
@@ -634,6 +669,11 @@ def _apply_orphan(row: dict[str, Any]) -> dict[str, Any]:
     entry = {"kind": row["kind"], "path": str(src), "action": row["action"]}
     try:
         src = _safe_tree_target(src)
+        if (src / ".git").exists() or any(
+            Path(worktree["path"]).resolve() == src
+            for worktree in registered_worktrees()
+        ):
+            return {**entry, "result": "kept: registered or recoverable Git tree"}
         if row["action"] == "HARD_DELETE":
             entry["result"] = _delete_trash(src)
         else:
@@ -672,7 +712,9 @@ def _delete_one_branch(
     )
     if not permitted:
         return {**entry, "result": "kept: state changed"}
-    result = run(["git", "branch", "-D", "--", candidate["name"]])
+    result = run(
+        ["git", "update-ref", "-d", f"refs/heads/{candidate['name']}", candidate["sha"]]
+    )
     return {**entry, "rc": result.returncode, "error": result.stderr.strip()[:120]}
 
 

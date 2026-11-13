@@ -49,9 +49,9 @@ be verified. This is a manual maintenance utility, not an automatic runtime job.
 | Tree dirt | tracked or untracked changes | Complete WIP archive first; Git still refuses dirty trees until their owner clears them |
 | Orphan / root clutter | dir not in `git worktree list` under the worktrees root or `D:\github` matching project prefixes | quarantine `.__trash_<yyyymmdd>/` |
 | Trash older than 7 days | `.__trash_<yyyymmdd>` quarantine dir | hard delete (Access denied → reported as stuck) |
-| Branch, PR finished | upstream gone, or `gh pr view` MERGED/CLOSED | `git branch -D` |
-| Branch, no unique work | local-only and `git cherry main` empty | `git branch -D` |
-| Branch, unique work stale | local-only, unique commits, tip > 3 days | `git branch -D` |
+| Branch, PR finished | upstream gone, or `gh pr view` MERGED/CLOSED | Conditional ref deletion against the bundled SHA |
+| Branch, no unique work | local-only and `git cherry main` empty | Conditional ref deletion against the bundled SHA |
+| Branch, unique work stale | local-only, unique commits, tip > 3 days | Conditional ref deletion against the bundled SHA |
 
 Every deleted branch tip is bundled first:
 `git bundle create branches-backup-<ts>.bundle refs/heads/<name>...`.
@@ -66,6 +66,7 @@ Restore with `git fetch <bundle> refs/heads/<name>:refs/heads/<name>`.
 - Trees containing `.env*`, symlinks or junctions; excluded inputs are never copied.
 - Quarantine directories without a valid creation date or younger than the TTL.
 - Any tree whose complete archive cannot be read or saved.
+- Trees with ignored local files or Git metadata requiring owner review.
 
 ## Procedure
 

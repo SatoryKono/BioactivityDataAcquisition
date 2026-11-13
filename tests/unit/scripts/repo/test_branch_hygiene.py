@@ -239,7 +239,18 @@ def test_tree_guard_rejects_nested_env_without_creating_env(monkeypatch, tmp_pat
 
 def test_worktree_removal_uses_git_dirty_protection(monkeypatch, tmp_path):
     calls = _apply_fixture(monkeypatch, tmp_path)
-    assert bh.main(["apply", "--out", str(tmp_path), "--execute"]) == 0
+    original = bh.run
+
+    def run(args, **kwargs):
+        if "worktree" in args and "remove" in args:
+            calls.append(args)
+            return SimpleNamespace(
+                returncode=1, stdout="", stderr="contains modified files"
+            )
+        return original(args, **kwargs)
+
+    monkeypatch.setattr(bh, "run", run)
+    assert bh.main(["apply", "--out", str(tmp_path), "--execute"]) == 1
     removals = [args for args in calls if "remove" in args]
     assert len(removals) == 1
     assert "--force" not in removals[0]
@@ -462,3 +473,77 @@ def test_bundle_failure_keeps_completed_actions_journal(monkeypatch, tmp_path):
     assert journal["returncode"] == 1
     assert journal["actions"][0]["remove_rc"] == 0
     assert "bundle failed" in journal["error"]
+
+
+def test_ignored_local_files_keep_worktree(monkeypatch, tmp_path):
+    def run(args, **kwargs):
+        return SimpleNamespace(
+            returncode=0, stdout="notes.txt\0" if "--ignored" in args else ""
+        )
+
+    monkeypatch.setattr(bh, "run", run)
+    assert bh.status_counts(tmp_path) is None
+    action, _ = bh._worktree_action(
+        _wt(str(tmp_path), branch=None, detached=True), [], True, None, 50, 2, 3
+    )
+    assert action == "KEEP"
+
+
+def test_open_prs_are_paginated_independently_of_history(monkeypatch):
+    calls = []
+
+    def run(args, **kwargs):
+        calls.append(args)
+        return SimpleNamespace(
+            returncode=0,
+            stdout='[[{"head":{"ref":"old-open"}}]]' if "api" in args else "[]",
+        )
+
+    monkeypatch.setattr(bh, "run", run)
+    assert bh.pr_state_map() == {"old-open": ["OPEN"]}
+    assert "--paginate" in calls[1] and "--slurp" in calls[1]
+
+
+def test_newly_registered_orphan_is_preserved(monkeypatch, tmp_path):
+    tree = tmp_path / "recovered"
+    tree.mkdir()
+    monkeypatch.setattr(bh, "_safe_tree_target", lambda path: path)
+    monkeypatch.setattr(
+        bh, "registered_worktrees", lambda: [{"path": str(tree), "locked": "recovery"}]
+    )
+    monkeypatch.setattr(
+        bh.os, "rename", lambda *args: pytest.fail("moved registered worktree")
+    )
+    result = bh._apply_orphan(
+        {
+            "path": str(tree),
+            "kind": "orphan",
+            "action": "QUARANTINE",
+            "quarantine": str(tmp_path / "trash"),
+        }
+    )
+    assert result["result"].startswith("kept:") and tree.exists()
+
+
+def test_branch_delete_is_conditional_on_bundled_sha(monkeypatch):
+    import argparse
+
+    candidate = {"name": "stale", "sha": "1" * 40}
+    monkeypatch.setattr(bh, "local_branches", lambda: [])
+    monkeypatch.setattr(bh, "registered_worktrees", lambda: [])
+    monkeypatch.setattr(bh, "git", lambda *args: "HEAD")
+    monkeypatch.setattr(
+        bh,
+        "classify_branches",
+        lambda *args: {key: [candidate] if key == "A" else [] for key in "ABCDE"},
+    )
+    calls = []
+
+    def run(args):
+        calls.append(args)
+        return SimpleNamespace(returncode=1, stderr="reference changed", stdout="")
+
+    monkeypatch.setattr(bh, "run", run)
+    result = bh._delete_one_branch(candidate, argparse.Namespace(branch_days=3))
+    assert result["rc"] == 1
+    assert calls == [["git", "update-ref", "-d", "refs/heads/stale", candidate["sha"]]]
