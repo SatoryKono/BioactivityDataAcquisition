@@ -113,6 +113,7 @@ def test_migration_preserves_scope_and_explains_legacy_signals():
     assert result["panels"][2]["targets"][0]["expr"] == (
         'prometheus_rule_group_duration_seconds{instance=~"$node",quantile="0.99"}'
     )
+    assert result["panels"][2]["fieldConfig"]["defaults"]["unit"] == "s"
     assert result["panels"][3] == source["panels"][3]
     assert source["panels"][0]["options"]["content"] == "old ingestion help"
     assert repair_dashboard(result) == result

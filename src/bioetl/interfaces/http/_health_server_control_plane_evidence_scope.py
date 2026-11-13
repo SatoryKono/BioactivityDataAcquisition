@@ -218,10 +218,6 @@ def _bind_selected_validation(
     service: ControlPlaneEvidenceService,
 ) -> tuple[_IdentityScope, ControlPlaneEvidenceService]:
     """Keep validation, lifecycle and ledger ports on the selected locator root."""
-    if scope.resolved_via == "resolved_without_manifest":
-        # Report-catalog hit without a recorded manifest must stay
-        # ``manifest_not_recorded``, not a binder/parse error.
-        return scope, service
     resolver = getattr(host, "_evidence_location_resolver", None)
     if (
         not isinstance(resolver, EvidenceLocationResolver)
@@ -229,20 +225,30 @@ def _bind_selected_validation(
     ):
         return scope, service
     pipeline = _selected_validation_pipeline(host, scope)
-    resolved = resolver.resolve(
-        kind="pipeline",
-        owner=pipeline,
-        run_id=scope.selected_run_id,
-        expected_runtime_source_id=getattr(host, "_runtime_source_id", None),
-    )
+    try:
+        resolved = resolver.resolve(
+            kind="pipeline",
+            owner=pipeline,
+            run_id=scope.selected_run_id,
+            expected_runtime_source_id=getattr(host, "_runtime_source_id", None),
+        )
+    except (*SOURCE_READ_ERRORS, AttributeError):
+        if scope.resolved_via == "resolved_without_manifest":
+            return scope, service
+        raise
     if resolved.context is None or resolved.code.value in {
         "identity_conflict",
         "location_invalid",
     }:
+        if scope.resolved_via == "resolved_without_manifest":
+            return scope, service
         raise ValueError("Selected validation evidence location is unavailable")
     context = resolved.context
     manifest = context.get_manifest_by_run_id(scope.selected_run_id)
-    if manifest is None and scope.resolved_via == "selected_run_id_not_found":
+    if manifest is None and scope.resolved_via in {
+        "selected_run_id_not_found",
+        "resolved_without_manifest",
+    }:
         # The selected root was checked; no evidence ports exist for this UUID.
         return scope, service
     manifest = _validate_bound_manifest(manifest, scope=scope, pipeline=pipeline)
