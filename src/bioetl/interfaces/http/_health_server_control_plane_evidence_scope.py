@@ -289,12 +289,17 @@ def reconcile_manifest_validation_scope(
     if identity is None:
         return scope
     pipeline = identity.get("pipeline_name")
-    reconciled_scope: _IdentityScope = replace(
-        scope,
+    # Rebuild via concrete dataclass so the return type stays `_IdentityScope`
+    # (python:S5886 rejects `dataclasses.replace` → `DataclassInstance`).
+    return _IdentityScope(
+        requested_pipeline=scope.requested_pipeline,
+        selected_pipelines=scope.selected_pipelines,
+        selected_run_types=scope.selected_run_types,
+        selected_run_id=scope.selected_run_id,
+        resolved_manifest=scope.resolved_manifest,
         resolved_via="resolved_without_manifest",
         report_pipeline=pipeline if isinstance(pipeline, str) and pipeline else None,
     )
-    return reconciled_scope
 
 
 async def _reconcile_validation_scope(
