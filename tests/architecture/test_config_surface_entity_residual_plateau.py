@@ -127,6 +127,8 @@ def test_config_surface_duplication_audit_matches_live_backlog() -> None:
         "configs/quality/test_telemetry_baseline.yaml"
     ]
     assert scope["excluded_review_evidence_patterns"] == [
+        "configs/quality/external_resource_inventory_security_aud003_review.json",
+        "configs/quality/external_resource_inventory_security_aud004_review.json",
         "configs/quality/external_resource_inventory_pr*_review.json",
         "configs/quality/external_resource_inventory_security_aud005_main_merge_review.json",
         "configs/quality/external_resource_inventory_security_aud006_review.json",
@@ -172,14 +174,19 @@ def test_config_surface_duplication_audit_matches_live_backlog() -> None:
 def test_security_review_evidence_does_not_hide_authored_config_duplicates(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Exclude two known receipts while retaining similarly named config debt."""
+    """Exclude four known receipts while retaining similarly named config debt."""
     quality = tmp_path / "configs" / "quality"
     quality.mkdir(parents=True)
     evidence_names = {
+        "external_resource_inventory_security_aud003_review.json",
+        "external_resource_inventory_security_aud004_review.json",
         "external_resource_inventory_security_aud005_main_merge_review.json",
         "external_resource_inventory_security_aud006_review.json",
     }
     authored_names = {
+        "external_resource_inventory_security_aud003_runtime_review.json",
+        "external_resource_inventory_security_aud004_runtime_review.json",
+        "external_resource_inventory_security_aud099_review.json",
         "external_resource_inventory_security_aud005_runtime_review.json",
         "external_resource_inventory_security_aud007_review.json",
     }
@@ -195,7 +202,7 @@ def test_security_review_evidence_does_not_hide_authored_config_duplicates(
 
     audit = backlog_report._build_duplication_audit()
 
-    assert audit["scope"]["files_scanned"] == 2
+    assert audit["scope"]["files_scanned"] == 5
     assert audit["summary"]["duplicate_cluster_count"] == 1
     assert {
         Path(occurrence["path"]).name
