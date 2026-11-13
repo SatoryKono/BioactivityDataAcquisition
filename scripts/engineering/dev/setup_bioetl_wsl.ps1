@@ -112,6 +112,56 @@ function Invoke-WslCommand {
     return $text
 }
 
+function Convert-ToNativeArgument {
+    param([AllowEmptyString()][string]$Argument)
+
+    # ProcessStartInfo.Arguments uses Windows command-line quoting on .NET Framework.
+    $escaped = [regex]::Replace($Argument, '(\\*)"', '$1$1\"')
+    $escaped = [regex]::Replace($escaped, '(\\+)$', '$1$1')
+    return '"' + $escaped + '"'
+}
+
+function Invoke-WslScript {
+    param(
+        [Parameter(Mandatory = $true)][string]$Script,
+        [string]$Executable = 'wsl.exe'
+    )
+
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = $Executable
+    $startInfo.Arguments = ((@('--distribution', $Distro, '--exec', 'bash', '-s') |
+        ForEach-Object { Convert-ToNativeArgument $_ }) -join ' ')
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    $startInfo.RedirectStandardInput = $true
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $startInfo
+    try {
+        $null = $process.Start()
+        $stdout = $process.StandardOutput.ReadToEndAsync()
+        $stderr = $process.StandardError.ReadToEndAsync()
+        # Write bytes directly: PowerShell 5.1 pipelines otherwise change encoding
+        # and newlines. Keep the Bash program entirely out of native arguments.
+        $bytes = (New-Object System.Text.UTF8Encoding($false)).GetBytes(
+            $Script.Replace("`r`n", "`n").Replace("`r", "`n"))
+        $inputStream = $process.StandardInput.BaseStream
+        $inputStream.Write($bytes, 0, $bytes.Length)
+        $inputStream.Close()
+        $process.WaitForExit()
+        $outputText = $stdout.GetAwaiter().GetResult()
+        $errorText = $stderr.GetAwaiter().GetResult()
+        if ($process.ExitCode -ne 0) {
+            throw "WSL script failed with exit code $($process.ExitCode): $errorText"
+        }
+        return $outputText.Trim()
+    }
+    finally {
+        $process.Dispose()
+    }
+}
+
 function Resolve-WindowsProjectPath {
     param([Parameter(Mandatory = $true)][string]$Path)
 
@@ -292,11 +342,30 @@ $uvPath = Invoke-WslCommand -ArgumentList @(
 $uvPath = $uvPath.Trim()
 if ([string]::IsNullOrWhiteSpace($uvPath)) {
     Show-Step 'Installing uv for the WSL user'
-    $null = Invoke-WslCommand -ArgumentList @(
-        'bash',
-        '-lc',
-        'curl -LsSf https://astral.sh/uv/install.sh | sh'
-    )
+    # Fixed release and content pin; verify before extracting or executing.
+    $uvInstallCommand = @'
+set -euo pipefail
+if [ "$(uname -m)" != x86_64 ]; then
+    echo 'Pinned uv bootstrap supports x86_64 only' >&2
+    exit 1
+fi
+archive="$(mktemp)"
+extracted="$(mktemp -d)"
+staged=''
+trap 'rm -f "$archive"; rm -rf "$extracted"; if [ -n "$staged" ]; then rm -rf "$staged"; fi' EXIT
+curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
+    https://github.com/astral-sh/uv/releases/download/0.11.26/uv-x86_64-unknown-linux-gnu.tar.gz \
+    --output "$archive"
+printf '%s  %s\n' 6426a73c3837e6e2483ee344cbc00f36394d179afcba6183cb77437e67db4af0 "$archive" | sha256sum --check -
+tar -xzf "$archive" -C "$extracted"
+mkdir -p "$HOME/.local/bin"
+staged="$(mktemp -d "$HOME/.local/bin/.uv-install.XXXXXX")"
+install -m 0755 "$extracted/uv-x86_64-unknown-linux-gnu/uv" "$staged/uv"
+install -m 0755 "$extracted/uv-x86_64-unknown-linux-gnu/uvx" "$staged/uvx"
+mv -f "$staged/uv" "$HOME/.local/bin/uv"
+mv -f "$staged/uvx" "$HOME/.local/bin/uvx"
+'@
+    $null = Invoke-WslScript -Script $uvInstallCommand
     $uvPath = Invoke-WslCommand -ArgumentList @(
         'sh',
         '-lc',

@@ -222,6 +222,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/repo/test_hook_receipts.py",
     ),
     "scripts/engineering/dev/pretest_guardrails.ps1": (SCOPED_CHECKS_TEST,),
+    "scripts/engineering/dev/setup_bioetl_wsl.ps1": (
+        "tests/unit/scripts/test_wsl_uv_install_integrity.py",
+    ),
     "docs/05-operations/runbooks/scoped-post-change-checks.md": (
         SCOPED_CHECKS_TEST,
         "tests/unit/scripts/repo/test_hook_receipts.py",

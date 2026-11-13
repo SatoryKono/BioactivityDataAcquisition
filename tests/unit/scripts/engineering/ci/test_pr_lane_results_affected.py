@@ -1550,6 +1550,14 @@ def test_owned_hook_python_inputs_keep_real_bounded_test_owners():
     assert "tests/unit/repo_backed/scripts" not in selected
 
 
+def test_wsl_setup_routes_to_installer_integrity_regression():
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["scripts/engineering/dev/setup_bioetl_wsl.ps1"], repo_root=root
+    )
+    assert "tests/unit/scripts/test_wsl_uv_install_integrity.py" in json.dumps(report)
+
+
 def test_auth_security_review_routes_to_catalog_and_requalification():
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
