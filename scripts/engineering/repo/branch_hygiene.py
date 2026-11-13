@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import shutil
 import subprocess
@@ -146,7 +147,14 @@ def status_counts(path: Path) -> tuple[bool, bool, bool] | None:
     """Return (tracked_dirty, untracked_present, ok)."""
     try:
         r = run(
-            ["git", "-c", SAFE_DIR_ARG, "status", "--porcelain"],
+            [
+                "git",
+                "-c",
+                SAFE_DIR_ARG,
+                "status",
+                "--porcelain",
+                "--untracked-files=all",
+            ],
             cwd=path,
             timeout=180,
         )
@@ -765,6 +773,7 @@ def _bundle_and_delete(
     out: Path,
     args: argparse.Namespace,
     actions: list[dict[str, Any]],
+    backup_state: dict[str, str],
 ) -> tuple[int, str | None]:
     if not candidates:
         return 0, None
@@ -776,6 +785,10 @@ def _bundle_and_delete(
     if result.returncode:
         print(f"[FATAL] bundle failed: {result.stderr}")
         return 1, None
+    backup_state["bundle"] = str(backup)
+    verified = run(["git", "bundle", "verify", str(backup)], timeout=1800)
+    if verified.returncode:
+        return 1, str(backup)
     for item in candidates:
         actions.append(_delete_one_branch(item, args))
     return 0, str(backup)
@@ -799,16 +812,40 @@ def _action_failed(action: dict[str, Any]) -> bool:
     )
 
 
+def _retain_apply_cutoffs(args: argparse.Namespace) -> dict[str, Any]:
+    """Keep the reviewed cutoffs and preserve their classification before refresh."""
+    out = _report_directory(args.out)
+    original = (out / CLASSIFICATION_FILE).read_bytes()
+    reviewed = json.loads(original)
+    cutoffs = reviewed["cutoffs"]
+    for name in ("branch_days", "detached_days"):
+        value = cutoffs[name]
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise RuntimeError("Invalid reviewed cutoff")
+        if not math.isfinite(value) or value < 0:
+            raise RuntimeError("Invalid reviewed cutoff")
+        requested = getattr(args, name)
+        if requested is not None and requested != value:
+            raise RuntimeError(
+                "Cutoffs changed; classify and review again before apply"
+            )
+        setattr(args, name, value)
+    snapshot = Path(tempfile.mkdtemp(prefix="reviewed-", dir=out))
+    (snapshot / CLASSIFICATION_FILE).write_bytes(original)
+    return reviewed
+
+
 def do_apply(args: argparse.Namespace) -> int:
     if not args.execute:
         print("[dry-run] no trees or branches changed; pass --execute to apply")
         return 0
+    cls = _retain_apply_cutoffs(args)
     out = _classify_impl(args)
-    cls = json.loads((out / CLASSIFICATION_FILE).read_text(encoding="utf-8"))
     archive = out / "wip-archive"
     actions: list[dict[str, Any]] = []
 
     rc, backup, error = 1, None, None
+    backup_state: dict[str, str] = {}
     try:
         for row in cls["worktrees"]:
             if row["action"] in ("REMOVE", "REMOVE_ARCHIVE"):
@@ -816,7 +853,7 @@ def do_apply(args: argparse.Namespace) -> int:
         for row in cls["orphans"]:
             actions.append(_apply_orphan(row))
         rc, backup = _bundle_and_delete(
-            _deletion_candidates(cls["branches"]), out, args, actions
+            _deletion_candidates(cls["branches"]), out, args, actions, backup_state
         )
         if rc:
             error = "branch bundle failed; remaining actions stopped"
@@ -834,7 +871,7 @@ def do_apply(args: argparse.Namespace) -> int:
             json.dumps(
                 {
                     "finished_at": datetime.now(tz=UTC).isoformat(),
-                    "bundle": str(backup) if backup else None,
+                    "bundle": backup or backup_state.get("bundle"),
                     "actions": actions,
                     "returncode": rc,
                     "error": error,
@@ -864,8 +901,12 @@ def build_parser() -> argparse.ArgumentParser:
             "--execute", action="store_true", help="Explicitly permit apply mutations"
         )
         s.add_argument("--out", type=Path, default=None)
-        s.add_argument("--detached-days", type=float, default=2.0)
-        s.add_argument("--branch-days", type=float, default=3.0)
+        s.add_argument(
+            "--detached-days", type=float, default=2.0 if name == "classify" else None
+        )
+        s.add_argument(
+            "--branch-days", type=float, default=3.0 if name == "classify" else None
+        )
         s.set_defaults(func=do_classify if name == "classify" else do_apply)
     return p
 

@@ -181,12 +181,14 @@ def _apply_fixture(monkeypatch, tmp_path, *, changed=False, archive_error=False)
     (tmp_path / "classification.json").write_text(
         json.dumps(
             {
+                "cutoffs": {"detached_days": 2.0, "branch_days": 3.0},
                 "worktrees": [row],
                 "orphans": [],
                 "branches": {key: [] for key in "ABCDE"},
             }
         )
     )
+    monkeypatch.setattr(bh, "_report_directory", lambda value: value)
     monkeypatch.setattr(bh, "_classify_impl", lambda args: tmp_path)
     monkeypatch.setattr(bh, "registered_worktrees", lambda: [])
     monkeypatch.setattr(bh, "local_branches", lambda: [])
@@ -672,3 +674,90 @@ def test_bare_git_metadata_is_preserved(monkeypatch, tmp_path, nested):
     with pytest.raises(RuntimeError, match="Git"):
         bh._scan_tree_inputs(root)
     assert (bare / "HEAD").exists()
+
+
+def test_untracked_status_is_independent_of_user_config(monkeypatch, tmp_path):
+    def run(args, **kwargs):
+        stdout = "?? notes.txt\n" if "--untracked-files=all" in args else ""
+        return SimpleNamespace(returncode=0, stdout=stdout)
+
+    monkeypatch.setattr(bh, "run", run)
+    assert bh.status_counts(tmp_path) == (False, True, True)
+
+
+def test_apply_preserves_reviewed_cutoffs(monkeypatch, tmp_path):
+    import json
+
+    _apply_fixture(monkeypatch, tmp_path)
+    path = tmp_path / "classification.json"
+    payload = json.loads(path.read_text())
+    payload["cutoffs"] = {"branch_days": 30.0, "detached_days": 20.0}
+    path.write_text(json.dumps(payload))
+    original = path.read_bytes()
+    observed = []
+
+    def classify(args):
+        observed.append((args.branch_days, args.detached_days))
+        return tmp_path
+
+    monkeypatch.setattr(bh, "_classify_impl", classify)
+    assert bh.main(["apply", "--out", str(tmp_path), "--execute"]) == 0
+    assert observed == [(30.0, 20.0)]
+    assert (
+        next(tmp_path.glob("reviewed-*/classification.json")).read_bytes() == original
+    )
+
+
+def test_apply_rejects_changed_cutoffs_before_classification(monkeypatch, tmp_path):
+    _apply_fixture(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        bh, "_classify_impl", lambda args: pytest.fail("unexpected classification")
+    )
+    with pytest.raises(RuntimeError, match="Cutoffs changed"):
+        bh.main(["apply", "--out", str(tmp_path), "--execute", "--branch-days", "30"])
+
+
+def test_partial_branch_failure_retains_bundle_in_journal(monkeypatch, tmp_path):
+    import json
+
+    _apply_fixture(monkeypatch, tmp_path)
+    path = tmp_path / "classification.json"
+    payload = json.loads(path.read_text())
+    payload["branches"]["A"] = [{"name": "one"}, {"name": "two"}]
+    path.write_text(json.dumps(payload))
+
+    def delete(item, args):
+        if item["name"] == "two":
+            raise RuntimeError("PR lookup unavailable")
+        return {"kind": "branch", "name": "one", "rc": 0}
+
+    monkeypatch.setattr(bh, "_delete_one_branch", delete)
+    assert bh.main(["apply", "--out", str(tmp_path), "--execute"]) == 1
+    journal = json.loads((tmp_path / "apply-actions.json").read_text())
+    assert journal["bundle"].endswith("history.bundle")
+    assert journal["actions"][-1]["name"] == "one"
+    assert "PR lookup" in journal["error"]
+
+
+def test_apply_does_not_add_unreviewed_candidates(monkeypatch, tmp_path):
+    import json
+
+    _apply_fixture(monkeypatch, tmp_path)
+    path = tmp_path / "classification.json"
+    reviewed = json.loads(path.read_text())
+    reviewed["worktrees"] = []
+    path.write_text(json.dumps(reviewed))
+
+    def refresh(args):
+        fresh = {
+            **reviewed,
+            "orphans": [{"path": "new-unreviewed", "action": "HARD_DELETE"}],
+        }
+        path.write_text(json.dumps(fresh))
+        return tmp_path
+
+    monkeypatch.setattr(bh, "_classify_impl", refresh)
+    monkeypatch.setattr(
+        bh, "_apply_orphan", lambda row: pytest.fail("unreviewed target")
+    )
+    assert bh.main(["apply", "--out", str(tmp_path), "--execute"]) == 0

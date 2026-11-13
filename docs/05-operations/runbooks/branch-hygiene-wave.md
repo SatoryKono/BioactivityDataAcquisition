@@ -39,6 +39,9 @@ be verified. This is a manual maintenance utility, not an automatic runtime job.
   Requires `--out <classification-dir>`; defaults to a no-change preview.
   Actual mutations require `--execute`. Re-classification always runs immediately
   before applying, with another state check before each worktree or branch action.
+  It retains the reviewed age cutoffs and a copy of the reviewed classification;
+  changing cutoffs requires a new classification and review. Fresh checks cannot
+  add unreviewed deletion candidates to the execution set.
 
 ## Cutoffs (defaults, override with flags)
 

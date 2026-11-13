@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-13T12:57:47.780301+00:00",
+  "generated_at": "2026-11-13T19:36:12.257917+00:00",
   "summary": {
     "total_scripts": 752,
     "status_counts": {
@@ -21499,7 +21499,7 @@
         },
         {
           "path": "scripts/engineering/repo/branch_hygiene.py",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo._branch_cleanup_policy import is_protected_branch"
         },
@@ -21701,13 +21701,13 @@
         },
         {
           "path": "docs/05-operations/runbooks/branch-hygiene-wave.md",
-          "line": 72,
+          "line": 76,
           "source_group": "docs",
           "text": "1. `python scripts/engineering/repo/branch_hygiene.py classify`"
         },
         {
           "path": "docs/05-operations/runbooks/branch-hygiene-wave.md",
-          "line": 74,
+          "line": 78,
           "source_group": "docs",
           "text": "3. `python scripts/engineering/repo/branch_hygiene.py apply --out <dir>` previews only."
         },
@@ -22379,7 +22379,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/branch-hygiene-wave.md",
-          "line": 113,
+          "line": 117,
           "source_group": "docs",
           "text": "[create_worktree.py](../../../scripts/engineering/repo/create_worktree.py)."
         },
