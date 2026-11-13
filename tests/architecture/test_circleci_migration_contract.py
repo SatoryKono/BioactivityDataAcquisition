@@ -733,3 +733,30 @@ def test_workflow_map_describes_manual_only_performance():
     triggers = workflow.get("on", workflow.get(True))
     assert "workflow_dispatch" in triggers
     assert "schedule" not in triggers
+
+
+def test_publication_context_jobs_use_immutable_executor_images():
+    config = _config()
+    checked = set()
+    for workflow in config["workflows"].values():
+        if not isinstance(workflow, dict):
+            continue
+        for entry in workflow.get("jobs", []):
+            if not isinstance(entry, dict):
+                continue
+            for name, options in entry.items():
+                if not isinstance(options, dict):
+                    continue
+                contexts = options.get("context", [])
+                if isinstance(contexts, str):
+                    contexts = [contexts]
+                if "bioetl-ghcr-publish" not in contexts:
+                    continue
+                images = config["jobs"][name].get("docker", [])
+                assert images, f"Privileged job {name} must declare its executor"
+                for image in images:
+                    assert re.fullmatch(
+                        r"[^\s]+@sha256:[0-9a-f]{64}", image["image"]
+                    ), name
+                checked.add(name)
+    assert "docker-publish" in checked
