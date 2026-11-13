@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "85d8a9708504f2a3b6bcdaad48b6052328041dd5",
+  "source_ref": "46b4954571c626956aa640cf3396ab1ba0172eb6",
+  "source_reviews": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": "AUD-007 CodeRabbit: primary-write success gating for raw/published pair; validate spreadsheet-safe headers before mutating files; clear CSV and .csv.raw independently including orphan sidecars. Existing asyncio/to_thread, read_csv, seed read_bytes/write_bytes, and directory-enumeration ownership retained. Orphan .csv.raw glob under clear is exclusion sibling to existing clear glob.",
+    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": "AUD-007 CodeRabbit: append_to_csv/atomic_csv_write return whether the primary target was updated (False for backup-only locked publish). Cleanup unlink sites retained. No new runtime qualification.",
+    "src/bioetl/infrastructure/export/csv_exporter_table_ops.py": "AUD-007 CodeRabbit: extract validate_spreadsheet_safe_column_names for pre-write header collision checks. No external resource acquisition."
+  },
+  "expression_updates": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": {
+      "csv_file.unlink()": "target.unlink()",
+      "self.base_path.glob('*.csv')": "self.base_path.glob('*.csv')"
+    }
+  },
+  "segment_updates": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": {
+      "_atomic_csv_write(": "return _atomic_csv_write(",
+      "_append_to_csv(": "return _append_to_csv(",
+      "for path in self.base_path.glob(\"*.csv\")": "for path in self.base_path.glob(\"*.csv\"):"
+    },
+    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": {}
+  },
+  "line_updates": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": {
+      "143": 168,
+      "148": 176,
+      "185": 202,
+      "292": 335
+    },
+    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": {
+      "156": 163
+    }
+  },
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [
+    {
+      "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+      "scope": "CsvExporter.clear",
+      "call": "self.base_path.glob",
+      "expression": "self.base_path.glob('*.csv.raw')",
+      "reason": "CsvExporter.clear orphan-sidecar directory enumeration; same clear() owner as the existing *.csv glob resource, not a second persistent acquisition."
+    }
+  ]
+}

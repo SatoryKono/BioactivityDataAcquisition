@@ -335,7 +335,7 @@ by storage technology. Current owner boundaries:
 
 ## Current source inventory binding
 
-- `source_tree_sha256=9bc9af8eb0f0dd343c19714342ace4f0afe1e74bbfde6d94b520b35b52e0924c`
+- `source_tree_sha256=e7f6c5dfbb39c18d10ccd2eb7d0c3cf755d85c1f9963ad461c32a27641652356`
 - `source_module_count=2612`
 - Source modules: `2612`
 - `coverage_inventory_module_count=2612`
