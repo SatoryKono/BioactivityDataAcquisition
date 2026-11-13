@@ -146,8 +146,24 @@ class CsvExporter:
                     path=str(csv_file),
                     reason="file may be open in another program",
                 )
+            raw_path = self._raw_csv_path(csv_file)
+            if raw_path.exists():
+                try:
+                    raw_path.unlink()
+                    deleted.append(raw_path)
+                except PermissionError:
+                    self._logger.warning(
+                        "Cannot delete locked CSV raw sidecar",
+                        path=str(raw_path),
+                        reason="file may be open in another program",
+                    )
 
         return deleted
+
+    @staticmethod
+    def _raw_csv_path(csv_path: Path) -> Path:
+        """Return the pre-neutralized sidecar used for PK-preserving finalize."""
+        return Path(str(csv_path) + ".raw")
 
     def _sort_table(self, table: pa.Table, sort_columns: list[str]) -> pa.Table:
         """Sort table by specified columns for deterministic output."""
@@ -215,13 +231,19 @@ class CsvExporter:
     ) -> Path:
         _ = primary_keys
         csv_full_path = self.base_path / f"{table_name}.csv"
+        raw_path = self._raw_csv_path(csv_full_path)
         csv_full_path.parent.mkdir(parents=True, exist_ok=True)
         csv_data = self._flatten_for_csv(data)
 
         # Fast path: true file-append (no read, no sort, no dedup).
-        # Keep pre-neutralized values so finalize can dedupe on original PKs.
+        # Published CSV stays spreadsheet-safe; raw sidecar keeps original PKs
+        # so finalize can dedupe without collapsing =x and '=x.
         if append and csv_full_path.exists():
-            self._append_to_csv(csv_data, csv_full_path, spreadsheet_safe=False)
+            if not raw_path.exists():
+                # Legacy published-only file: seed the working raw representation.
+                raw_path.write_bytes(csv_full_path.read_bytes())
+            self._append_to_csv(csv_data, raw_path, spreadsheet_safe=False)
+            self._append_to_csv(csv_data, csv_full_path, spreadsheet_safe=True)
             return csv_full_path
 
         # First write or overwrite.
@@ -231,9 +253,15 @@ class CsvExporter:
         write_options = self._build_write_options()
         self._atomic_csv_write(
             csv_data,
-            csv_full_path,
+            raw_path,
             write_options,
             spreadsheet_safe=False,
+        )
+        self._atomic_csv_write(
+            csv_data,
+            csv_full_path,
+            write_options,
+            spreadsheet_safe=True,
         )
         return csv_full_path
 
@@ -267,15 +295,18 @@ class CsvExporter:
         primary_keys: list[str] | None,
     ) -> Path | None:
         csv_full_path = self.base_path / f"{table_name}.csv"
-        if not csv_full_path.exists():
+        raw_path = self._raw_csv_path(csv_full_path)
+        if not csv_full_path.exists() and not raw_path.exists():
             return None
 
         parse_options = pv.ParseOptions(delimiter=self.delimiter)
 
-        table = pv.read_csv(csv_full_path, parse_options=parse_options)
+        # Prefer the raw sidecar so PK dedupe keeps =x and '=x distinct even
+        # when the published CSV already uses spreadsheet-safe text.
+        source_path = raw_path if raw_path.exists() else csv_full_path
+        table = pv.read_csv(source_path, parse_options=parse_options)
 
         if primary_keys:
-            # Deduplicate on pre-neutralized values so '=x' and =x stay distinct.
             table = self._deduplicate(table, primary_keys)
 
         sort_columns = sort_by if sort_by is not None else self.sort_by
@@ -283,7 +314,13 @@ class CsvExporter:
             table = self._sort_table(table, sort_columns)
 
         write_options = self._build_write_options()
-        # Neutralize only after PK dedupe so formula-like keys do not collide.
+        # Persist raw keys for idempotent re-finalize; publish safe CSV only.
+        self._atomic_csv_write(
+            table,
+            raw_path,
+            write_options,
+            spreadsheet_safe=False,
+        )
         self._atomic_csv_write(
             table,
             csv_full_path,

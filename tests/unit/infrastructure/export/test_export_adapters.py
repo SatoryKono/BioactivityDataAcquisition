@@ -426,9 +426,12 @@ async def test_csv_exporter_async_export_and_finalize_branches(
     )
 
     assert first_path == tmp_path / "records.csv"
-    assert captured_writes[-1][1] == first_path
-    assert captured_writes[-1][0].column("id").to_pylist() == [2, 1]
-    assert captured_writes[-1][3] is False
+    raw_path = Path(str(first_path) + ".raw")
+    assert [path for _, path, _, _ in captured_writes] == [raw_path, first_path]
+    assert captured_writes[0][0].column("id").to_pylist() == [2, 1]
+    assert captured_writes[0][3] is False
+    assert captured_writes[1][0].column("id").to_pylist() == [2, 1]
+    assert captured_writes[1][3] is True
 
     second_path = await exporter.export(
         "records",
@@ -437,9 +440,11 @@ async def test_csv_exporter_async_export_and_finalize_branches(
     )
 
     assert second_path == first_path
-    assert captured_appends[-1][1] == first_path
-    assert captured_appends[-1][0].to_pylist() == [{"id": 3}]
-    assert captured_appends[-1][2] is False
+    assert [path for _, path, _ in captured_appends] == [raw_path, first_path]
+    assert captured_appends[0][0].to_pylist() == [{"id": 3}]
+    assert captured_appends[0][2] is False
+    assert captured_appends[1][0].to_pylist() == [{"id": 3}]
+    assert captured_appends[1][2] is True
     assert await exporter.finalize_csv("missing") is None
 
     deduplicated_tables: list[pa.Table] = []

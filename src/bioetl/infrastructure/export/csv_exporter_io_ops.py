@@ -79,8 +79,8 @@ def atomic_csv_write(
 ) -> None:
     """Write CSV atomically to avoid file lock issues on Windows.
 
-    When ``spreadsheet_safe`` is false, write the pre-neutralized table so
-    downstream finalize can deduplicate on original primary-key values.
+    When ``spreadsheet_safe`` is false, write the working raw representation
+    used for append/dedupe; neutralize only the published CSV artifact.
     """
     target_dir = target_path.parent
     fd, temp_path_str = tempfile.mkstemp(
@@ -122,8 +122,8 @@ def append_to_csv(
 ) -> None:
     """Append records to an existing CSV without reading it.
 
-    When ``spreadsheet_safe`` is false, append the pre-neutralized table so
-    downstream finalize can deduplicate on original primary-key values.
+    When ``spreadsheet_safe`` is false, append to the working raw representation
+    used for append/dedupe; neutralize only the published CSV artifact.
     """
     fd, temp_path_str = tempfile.mkstemp(
         suffix=".csv.tmp",

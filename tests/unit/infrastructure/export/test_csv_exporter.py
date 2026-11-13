@@ -771,15 +771,18 @@ class TestCsvExporterFinalize:
     async def test_finalize_csv_dedupes_on_pre_neutralized_primary_keys(
         self, tmp_path: Path, mock_logger: MagicMock
     ) -> None:
-        """PK dedupe must keep =x and '=x distinct before spreadsheet escaping."""
+        """Published CSV is safe; raw sidecar keeps =x and '=x distinct for dedupe."""
         exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
         table = pa.Table.from_pydict(
             {"id": ["=x", "'=x"], "val": ["formula", "escaped"]}
         )
         await exporter.export("keys", table, append=False)
 
-        intermediate = pv.read_csv(tmp_path / "keys.csv")
-        assert intermediate.column("id").to_pylist() == ["=x", "'=x"]
+        published = tmp_path / "keys.csv"
+        raw = Path(str(published) + ".raw")
+        intermediate = pv.read_csv(published)
+        assert intermediate.column("id").to_pylist() == ["'=x", "'=x"]
+        assert pv.read_csv(raw).column("id").to_pylist() == ["=x", "'=x"]
 
         result_path = await exporter.finalize_csv("keys", primary_keys=["id"])
         assert result_path is not None
@@ -788,3 +791,46 @@ class TestCsvExporterFinalize:
         assert set(result.column("val").to_pylist()) == {"formula", "escaped"}
         # Neutralization maps both keys to the same text, but both rows remain.
         assert result.column("id").to_pylist() == ["'=x", "'=x"]
+
+    @pytest.mark.asyncio
+    async def test_export_finalize_cycles_keep_formula_keys_then_append(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        """Two export/finalize cycles plus append keep =x, '=x, and z (3 rows)."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        first = pa.Table.from_pydict(
+            {"id": ["=x", "'=x"], "val": ["formula", "escaped"]}
+        )
+        await exporter.export("keys", first, append=False)
+        assert (tmp_path / "keys.csv").read_text(encoding="utf-8").count("=x") >= 1
+        assert '"=x"' not in (tmp_path / "keys.csv").read_text(encoding="utf-8")
+
+        first_path = await exporter.finalize_csv("keys", primary_keys=["id"])
+        assert first_path is not None
+        assert pv.read_csv(first_path).num_rows == 2
+
+        second_path = await exporter.finalize_csv("keys", primary_keys=["id"])
+        assert second_path is not None
+        after_second = pv.read_csv(second_path)
+        assert after_second.num_rows == 2
+        assert set(after_second.column("val").to_pylist()) == {"formula", "escaped"}
+
+        await exporter.export(
+            "keys",
+            pa.Table.from_pydict({"id": ["z"], "val": ["plain"]}),
+            append=True,
+        )
+        third_path = await exporter.finalize_csv("keys", primary_keys=["id"])
+        assert third_path is not None
+        final = pv.read_csv(third_path)
+        assert final.num_rows == 3
+        assert set(final.column("val").to_pylist()) == {
+            "formula",
+            "escaped",
+            "plain",
+        }
+        assert set(pv.read_csv(Path(str(third_path) + ".raw")).column("id").to_pylist()) == {
+            "=x",
+            "'=x",
+            "z",
+        }
