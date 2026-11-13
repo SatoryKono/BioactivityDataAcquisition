@@ -415,6 +415,34 @@ class TestCsvExporterClear:
         mock_logger.warning.assert_called()
         assert locked.exists()
 
+    def test_clear_locked_csv_preserves_paired_raw_sidecar(
+        self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Codex P2: do not delete .csv.raw when the published CSV unlink fails."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        published = tmp_path / "t.csv"
+        raw = tmp_path / "t.csv.raw"
+        published.write_text("id\n'=x\n'=x\n", encoding="utf-8")
+        raw.write_text("id\n=x\n'=x\n", encoding="utf-8")
+        before_raw = raw.read_bytes()
+
+        original_unlink = Path.unlink
+
+        def _patched_unlink(path_obj: Path, *args: object, **kwargs: object) -> None:
+            if path_obj == published:
+                raise PermissionError("locked by Excel")
+            original_unlink(path_obj, *args, **kwargs)
+
+        monkeypatch.setattr(Path, "unlink", _patched_unlink)
+
+        deleted = exporter.clear("t")
+
+        assert deleted == []
+        assert published.exists()
+        assert raw.exists()
+        assert raw.read_bytes() == before_raw
+        mock_logger.warning.assert_called()
+
 
 @pytest.mark.unit
 class TestCsvExporterInternals:
@@ -709,6 +737,9 @@ class TestCsvExporterTrueAppend:
         monkeypatch.setattr("builtins.open", _patched_open)
 
         table2 = pa.Table.from_pydict({"id": [2]})
+        raw = tmp_path / "locked_test.csv.raw"
+        before_raw = raw.read_bytes()
+
         with pytest.raises(
             RuntimeError, match="backup-only publish is not a successful"
         ):
@@ -716,6 +747,7 @@ class TestCsvExporterTrueAppend:
 
         mock_logger.warning.assert_called()
         assert published.read_bytes() == before
+        assert raw.read_bytes() == before_raw
         backups = list(tmp_path.glob("locked_test.append-locked.*.csv"))
         assert len(backups) == 1
 
@@ -748,6 +780,44 @@ class TestCsvExporterTrueAppend:
         assert published.read_bytes() == before_published
         assert raw.read_bytes() == before_raw
         assert not list(tmp_path.glob("*.append-locked.*.csv"))
+
+    @pytest.mark.asyncio
+    async def test_overwrite_locked_published_rolls_back_raw_for_finalize(
+        self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Codex P2: failed published overwrite must not leave raw ahead of CSV."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        await exporter.export("t", pa.Table.from_pydict({"id": [1]}), append=False)
+        published = tmp_path / "t.csv"
+        raw = tmp_path / "t.csv.raw"
+        before_raw = raw.read_bytes()
+
+        original_replace = os.replace
+        locked = True
+
+        def _patched_replace(src: object, dst: object) -> None:
+            if locked and Path(str(dst)) == published:
+                raise PermissionError("locked by Excel")
+            original_replace(src, dst)
+
+        monkeypatch.setattr(os, "replace", _patched_replace)
+
+        with pytest.raises(
+            RuntimeError, match="backup-only publish is not a successful"
+        ):
+            await exporter.export("t", pa.Table.from_pydict({"id": [2]}), append=False)
+
+        assert raw.read_bytes() == before_raw
+        assert set(pv.read_csv(published).column("id").to_pylist()) == {1}
+
+        locked = False
+        await exporter.export("t", pa.Table.from_pydict({"id": [3]}), append=True)
+        assert set(pv.read_csv(published).column("id").to_pylist()) == {1, 3}
+        assert set(pv.read_csv(raw).column("id").to_pylist()) == {1, 3}
+
+        await exporter.finalize_csv("t", primary_keys=["id"])
+        assert set(pv.read_csv(published).column("id").to_pylist()) == {1, 3}
+        assert set(pv.read_csv(raw).column("id").to_pylist()) == {1, 3}
 
     @pytest.mark.asyncio
     async def test_overwrite_rejects_header_collision_before_touching_raw(
