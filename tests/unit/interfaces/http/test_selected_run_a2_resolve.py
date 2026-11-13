@@ -669,3 +669,54 @@ def test_a2_keeps_top_level_workflow_name_pick_without_workflow_manifests() -> N
     assert isinstance(selected, dict)
     assert selected["run_id"] == str(matching.run_id)
     assert selected["pipeline"] == "chembl_assay"
+
+
+@pytest.mark.parametrize("pipelines", [("chembl_assay",), ()])
+@pytest.mark.asyncio
+async def test_missing_explicit_context_keeps_requested_identity_without_a2(
+    pipelines: tuple[str, ...], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from bioetl.interfaces.http.control_plane_selector_context import (
+        build_selector_context_payload,
+    )
+
+    explicit = str(_run_id(999))
+    foreign = _manifest(2, pipeline="pubchem_activity")
+    context = build_selector_context_payload(
+        manifests=(foreign,),
+        ledger_port=None,
+        selected_pipelines=pipelines,
+        selected_run_id=explicit,
+    )
+    assert context["selected"]["run_id"] == "-"
+    assert context["selected"]["pipeline"] == "unknown"
+    requested = context["requested"]
+    assert requested == {"pipeline": ",".join(pipelines) or "All", "run_id": explicit}
+    resolve = MagicMock(return_value=str(foreign.run_id))
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.selected_run_status.resolve_a2_latest_run_id", resolve
+    )
+    seen = []
+
+    def missing_status(**kwargs: Any) -> dict[str, object]:
+        seen.append((kwargs["pipeline"], kwargs["run_id"]))
+        return {
+            "pipeline": kwargs["pipeline"],
+            "run_id": kwargs["run_id"],
+            "reason": "selected_run_id_not_found",
+            "verdict": "UNKNOWN",
+        }
+
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.selected_run_status.load_selected_run_status",
+        missing_status,
+    )
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.selected_run_status.scope_matches",
+        lambda *_a, **_k: True,
+    )
+    host = _host()
+    await handle_selected_run_status(host, MagicMock(), requested)
+    resolve.assert_not_called()
+    assert seen == [(requested["pipeline"], explicit)]
+    assert host._send_payload_response.await_args.args[2]["run_id"] == explicit

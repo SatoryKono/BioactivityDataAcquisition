@@ -257,7 +257,7 @@
           "uid": "bioetl-ops-http"
         },
         "definition": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
-        "description": "Concrete SELECTED RUN identity from /ops/control-plane/selector-context (selected.run_id). When Grafana $run_id is still '-', A2 latest fills this value so pipeline-run-report / artifact queries do not stay unresolved_scope.",
+        "description": "Resolved saved-run identity when available; otherwise retain the original request for missing-run diagnostics, without claiming evidence.",
         "hide": 2,
         "includeAll": false,
         "label": "Selected Run ID",
@@ -276,7 +276,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "($id := selected.run_id; $exists($id) and $string($id) != \"\" ? [{\"text\":$string($id),\"value\":$string($id)}] : [{\"text\":\"-\",\"value\":\"-\"}])",
+            "root_selector": "($v := selected.run_id; $id := $exists($v) and $v != \"\" and $v != \"-\" ? $v : requested.run_id; [{\"text\":$string($id),\"value\":$string($id)}])",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -320,7 +320,7 @@
           "uid": "bioetl-ops-http"
         },
         "definition": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
-        "description": "Concrete SELECTED RUN pipeline from /ops/control-plane/selector-context (selected.pipeline). When Grafana $pipeline is still All/aggregate and A2 fills selected_run_id, this carries the concrete pipeline so pipeline-run-report / artifact queries do not stay unresolved_scope.",
+        "description": "Resolved saved-run identity when available; otherwise retain the original request for missing-run diagnostics, without claiming evidence.",
         "hide": 2,
         "includeAll": false,
         "label": "Selected Pipeline",
@@ -339,7 +339,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "($p := selected.pipeline; $exists($p) and $string($p) != \"\" and $string($p) != \"unknown\" ? [{\"text\":$string($p),\"value\":$string($p)}] : [{\"text\":\"All\",\"value\":\"All\"}])",
+            "root_selector": "($v := selected.pipeline; $id := $exists($v) and $v != \"\" and $v != \"unknown\" ? $v : requested.pipeline; [{\"text\":$string($id),\"value\":$string($id)}])",
             "type": "json",
             "source": "url",
             "url_options": {
