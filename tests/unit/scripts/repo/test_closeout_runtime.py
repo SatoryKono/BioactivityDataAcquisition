@@ -4,9 +4,13 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
 import json
+import os
 from pathlib import Path
 import shutil
+import stat
 import sys
+from types import SimpleNamespace
+from unittest.mock import patch
 import uuid
 
 import pytest
@@ -14,6 +18,7 @@ import pytest
 from memory import proof
 from scripts.engineering.repo import closeout_runtime as runtime
 from scripts.engineering.repo import closeout_state as state
+from scripts.engineering.repo import closeout_worker as worker
 from scripts.engineering.repo.process_deadline import ProcessResult
 from tests.helpers.clock import FIXED_TEST_TIME
 from tests.helpers.isolated_git import (
@@ -128,6 +133,37 @@ def test_real_worker_caps_declared_ci_to_local_degraded(repository, consumer, cl
             "native_event_observed",
         )
     )
+
+
+def test_real_worker_accepts_equivalent_metadata_search_paths(
+    repository: Path, tmp_path: Path
+) -> None:
+    metadata_root = tmp_path / "editable-site"
+    metadata = metadata_root / "closeout_editable-1.0.dist-info/METADATA"
+    metadata.parent.mkdir(parents=True)
+    metadata.write_text(
+        "Metadata-Version: 2.1\nName: Closeout-Editable\nVersion: 1.0\n",
+        encoding="utf-8",
+    )
+    original = runtime._worker_argv
+
+    def duplicate_entry(*args):
+        command = list(original(*args))
+        entry = command.index("-c") + 1
+        command[entry] = (
+            f"import sys;sys.path[:0]=[{str(metadata_root)!r},{str(metadata_root)!r}];"
+            + command[entry]
+        )
+        return tuple(command)
+
+    with (
+        patch.object(sys, "path", [str(metadata_root), *sys.path]),
+        patch.object(runtime, "_worker_argv", duplicate_entry),
+    ):
+        result = _verify(repository, _bundle(repository))
+    assert result["outcome"] == "DEGRADED", result
+    assert result["core_outcome"] == "ADMIT"
+    assert result["claim_qualified"] is False
 
 
 @pytest.mark.parametrize("change", ["working", "index", "head", "branch"])
@@ -280,6 +316,47 @@ def test_recursive_request_is_rejected_without_starting_worker(repository, monke
     path = _bundle(repository)
     monkeypatch.setenv("BIOETL_CLOSEOUT_WORKER", "1")
     assert _verify(repository, path)["reason"] == "invalid_or_recursive_request"
+
+
+@pytest.mark.skipif(os.name == "nt", reason="Requires POSIX executable-bit semantics")
+def test_mode_change_after_real_verifier_is_rejected(repository: Path) -> None:
+    root = repository
+    assert run_isolated_git(root, "config", "core.filemode", "true").returncode == 0
+    target = root / "tracked.py"
+    target.write_text("VALUE = 20\n", encoding="utf-8")
+    path = _bundle(root)
+    request = {
+        "event_id": uuid.uuid4().hex,
+        "state": state.capture(root, os.environ),
+        "bundle_sha256": state.sha256(path.read_bytes()),
+        "task_id_sha256": state.sha256(b"task-39"),
+        "runtime": "codex",
+        "claim": "done",
+    }
+    original = proof.verify_bundle
+
+    def verify_then_change_mode(**kwargs):
+        verified = original(**kwargs)
+        assert verified.outcome == "ADMIT"
+        target.chmod(target.stat().st_mode ^ stat.S_IXUSR)
+        return verified
+
+    with (
+        path.open("rb") as stream,
+        patch.object(sys, "stdin", SimpleNamespace(buffer=stream)),
+        patch.object(proof, "verify_bundle", verify_then_change_mode),
+    ):
+        result = worker._verify(request, root)
+    current = original(
+        bundle=json.loads(path.read_text()),
+        repo_root=root,
+        policy=proof.load_policy(),
+        schema=proof.load_schema(),
+        check_current_source=True,
+    )
+    assert current.outcome == "STOP"
+    assert result["outcome"] == "ERROR", result
+    assert result["reason"] == "source_or_bundle_changed", result
 
 
 @pytest.mark.parametrize("different", [False, True])

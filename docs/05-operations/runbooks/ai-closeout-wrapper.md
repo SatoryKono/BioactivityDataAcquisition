@@ -128,6 +128,16 @@ HEAD/base, semantic default and supplied indexes, shallow-history boundaries,
 changed source/checker bytes, canonical core/policy/schema bytes and environment
 identity. State and bundle bookends reject changes during execution.
 
+Package inventory enumerates equivalent physical metadata search roots once
+and retains entries from distinct roots even when names and versions repeat.
+It does not attest installed package contents or the location of one replacement
+installation with the same name and version.
+Git evidence queries discard inherited `GIT_*` controls and retain only an
+explicit supplied index as an additional view. The standalone budget guard
+preserves this policy without requiring an importable repository package.
+File-state fingerprints include content and permission mode; the POSIX
+regression exercises an execute-bit change after the canonical verifier.
+
 The canonical proof diff now includes the default staged tree. Old bundles must
 be regenerated after this source-binding change, never relabelled. A supplied
 alternate index must match the canonical default index semantically; a different
