@@ -1357,3 +1357,34 @@ async def test_all_null_mixed_declared_types_remain_null(tmp_path, mock_logger):
     result = read_raw_table(tmp_path / "nullonly.csv.raw")
     assert result["value"].to_pylist() == [None, None]
     assert result.schema.field("value").type == pa.string()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("legacy_raw", [False, True])
+@pytest.mark.parametrize("old_value,new_value", [(1.5, 2), (1, 2.5)])
+async def test_legacy_seed_does_not_narrow_numeric_values(
+    tmp_path, mock_logger, legacy_raw, old_value, new_value
+):
+    published = tmp_path / "legacy.csv"
+    published.write_text(f"id,value\n1,{old_value}\n", encoding="utf-8")
+    if legacy_raw:
+        (tmp_path / "legacy.csv.raw").write_bytes(published.read_bytes())
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    await exporter.export("legacy", pa.table({"id": [2], "value": [new_value]}))
+    for _ in range(2):
+        await exporter.finalize_csv("legacy", primary_keys=["id"], sort_by=["id"])
+        result = read_raw_table(tmp_path / "legacy.csv.raw")
+        assert result["id"].to_pylist() == [1, 2]
+        assert result["value"].to_pylist() == [old_value, new_value]
+        assert pa.types.is_floating(result.schema.field("value").type)
+
+
+@pytest.mark.asyncio
+async def test_legacy_float_is_not_narrowed_by_integer_append(tmp_path, mock_logger):
+    published = tmp_path / "legacy.csv"
+    published.write_text("id,value\n1,1.5\n", encoding="utf-8")
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    await exporter.export("legacy", pa.table({"id": [2], "value": [2]}))
+    await exporter.finalize_csv("legacy", sort_by=["id"])
+    result = pv.read_csv(published)
+    assert result["value"].to_pylist() == [1.5, 2.0]

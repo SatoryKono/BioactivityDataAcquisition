@@ -117,13 +117,14 @@ def _seed_raw_sidecar_if_missing(
     if raw_path.exists() and _raw_sidecar_is_typed(raw_path):
         return
     source = raw_path if raw_path.exists() else csv_full_path
-    column_types = {
-        field.name: field.type.value_type
-        if pa.types.is_dictionary(field.type)
-        else field.type
-        for field in (schema or [])
-        if not pa.types.is_null(field.type)
-    }
+    # Preserve lexical string keys without narrowing existing numeric values.
+    column_types: dict[str, pa.DataType] = {}
+    for field in schema or []:
+        logical_type = (
+            field.type.value_type if pa.types.is_dictionary(field.type) else field.type
+        )
+        if pa.types.is_string(logical_type) or pa.types.is_large_string(logical_type):
+            column_types[field.name] = logical_type
     table = pv.read_csv(
         source,
         parse_options=pv.ParseOptions(delimiter=delimiter),
