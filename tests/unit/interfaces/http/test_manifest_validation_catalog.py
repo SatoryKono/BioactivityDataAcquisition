@@ -212,7 +212,12 @@ async def test_corrupt_report_catalog_returns_evidence_payload(
 
 
 @pytest.mark.asyncio
-async def test_report_only_run_keeps_manifest_missing_with_resolver(monkeypatch):
+@pytest.mark.parametrize(
+    "resolver_error", [OSError("unavailable"), ValueError("invalid locator")]
+)
+async def test_report_only_run_keeps_manifest_missing_with_resolver(
+    monkeypatch, resolver_error
+):
     import bioetl.interfaces.http._health_server_control_plane_evidence_routing as routing
     from bioetl.application.services.evidence_location.resolver import (
         EvidenceLocationResolver,
@@ -220,6 +225,11 @@ async def test_report_only_run_keeps_manifest_missing_with_resolver(monkeypatch)
 
     async def resolved(*_args, **_kwargs):
         return _scope(resolved_via="selected_run_id_not_found"), None
+
+    def fail_resolve(*_args, **_kwargs):
+        raise resolver_error
+
+    monkeypatch.setattr(EvidenceLocationResolver, "resolve", fail_resolve)
 
     monkeypatch.setattr(routing, "resolve_evidence_scope", resolved)
     monkeypatch.setattr(

@@ -7,6 +7,7 @@ import pytest
 
 from scripts.ops.observability.grafana._dashboard_state_followup import (
     DASH,
+    _ensure_stage_panel,
     apply_dashboard,
     walk,
 )
@@ -60,3 +61,13 @@ def test_compact_trust_keeps_multiline_reasons_in_drilldown():
         for item in panel["fieldConfig"]["overrides"]
     )
     assert not panel["fieldConfig"]["defaults"]["custom"]["cellOptions"]["wrapText"]
+
+
+def test_runtime_stage_panel_uses_declared_run_selectors():
+    parent = {"id": 9993, "panels": []}
+    _ensure_stage_panel({9993: parent})
+    panel = parent["panels"][0]
+    assert panel["targets"][0]["url"] == (
+        "/ops/observability/selected-run-status?pipeline=${pipeline}"
+        "&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+    )

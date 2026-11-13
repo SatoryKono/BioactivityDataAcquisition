@@ -85,6 +85,7 @@ def _explain_scrape_interval(panel: dict[str, Any]) -> None:
 
 def _repair_rule_duration(panel: dict[str, Any]) -> None:
     """Migrate the removed evaluator metric without changing filters."""
+    panel.setdefault("fieldConfig", {}).setdefault("defaults", {})["unit"] = "s"
     for target in panel.get("targets") or []:
         expr = str(target.get("expr") or "")
         if "prometheus_evaluator_duration_seconds" in expr:

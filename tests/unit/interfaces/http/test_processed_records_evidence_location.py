@@ -439,3 +439,44 @@ def test_selected_validation_ledger_refuses_outside_file(tmp_path, monkeypatch):
     with pytest.raises(EvidenceLocationInvalidError):
         _SelectedRootLedgerPort(context).list_entries("../../../../foreign")
     assert foreign not in reads
+
+
+@pytest.mark.parametrize("has_manifest", [True, False])
+def test_report_catalog_run_checks_selected_root_for_manifest(route, has_manifest):
+    from bioetl.application.observability.control_plane_evidence import (
+        ControlPlaneEvidenceService,
+    )
+    from bioetl.interfaces.http._health_server_control_plane_evidence_scope import (
+        _bind_selected_validation,
+        to_evidence_scope,
+    )
+    from bioetl.interfaces.http._health_server_control_plane_scope import _IdentityScope
+
+    host, seen = route
+    original = ControlPlaneEvidenceService()
+    selected = ControlPlaneEvidenceService()
+    manifest = seen["manifest"] if has_manifest else None
+    seen["context"] = SimpleNamespace(
+        get_manifest_by_run_id=lambda _: manifest,
+        get_validation_service=lambda: selected,
+    )
+    scope = _IdentityScope(
+        "chembl_activity",
+        ("chembl_activity",),
+        ("backfill",),
+        str(RUN),
+        None,
+        "resolved_without_manifest",
+    )
+    resolved, bound = _bind_selected_validation(host, scope, original)
+    assert resolved.resolved_manifest is manifest
+    assert bound is (selected if has_manifest else original)
+    result = bound.manifest_validation(scope=to_evidence_scope(resolved))
+    reasons = {row["reason"] for row in result["rows"]}
+    assert ("manifest_not_recorded" in reasons) is not has_manifest
+    assert seen["resolve_args"]["run_id"] == str(RUN)
+    if has_manifest:
+        assert any(
+            row["check"] == "schema_version" and row["status"] == "OK"
+            for row in result["rows"]
+        )
