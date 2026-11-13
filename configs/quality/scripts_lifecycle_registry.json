@@ -431,7 +431,7 @@
       "decision": "shared_helper_module",
       "next_step": "Shared sourced Windows interop function for filesystem/fetch MCP launchers; no standalone command. Keep supporting behind the public wrappers.",
       "owner": "@bioetl-platform",
-      "review_by": "2027-02-09"
+      "review_by": "2026-12-11"
     },
     "scripts/ai/mcp/support/github_project_transport.mjs": {
       "decision": "shared_helper_module",
@@ -461,7 +461,7 @@
       "decision": "shared_helper_module",
       "next_step": "Shared dot-sourced descriptor validation and stdio forwarding functions for filesystem/fetch MCP launchers; no standalone command. Keep supporting behind the public wrappers.",
       "owner": "@bioetl-platform",
-      "review_by": "2027-02-09"
+      "review_by": "2026-12-11"
     },
     "scripts/ai/mcp/support/uv_resolver.ps1": {
       "decision": "shared_helper_module",
@@ -1961,7 +1961,7 @@
       "decision": "shared_helper_module",
       "next_step": "Internal run-selection provenance transform imported by render_nav_bus and phase25; no standalone CLI. Keep supporting behind the dashboard generators.",
       "owner": "@bioetl-platform",
-      "review_by": "2027-02-09"
+      "review_by": "2026-12-11"
     },
     "scripts/ops/observability/grafana/_selected_run_panels.py": {
       "decision": "shared_helper_module",
@@ -1991,7 +1991,7 @@
       "decision": "shared_helper_module",
       "next_step": "Internal workflow publication-age projection imported by _workflow_scope; no standalone CLI. Keep supporting behind the dashboard generators.",
       "owner": "@bioetl-platform",
-      "review_by": "2027-02-09"
+      "review_by": "2026-12-11"
     },
     "scripts/ops/observability/grafana/_workflow_scope.py": {
       "decision": "shared_helper_module",

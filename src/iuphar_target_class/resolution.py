@@ -600,6 +600,8 @@ def _finish(
         conflict = _with_subclass_conflict(row, source, subclasses, codes)
     if "subclass_conflict" in conflict:
         decision = "requires_review"
+    if not effective_class and (source != "none" or decision == "resolved"):
+        conflict = (*conflict, "contract_error")
     if "contract_error" in conflict:
         effective_class = None
         source = "none"

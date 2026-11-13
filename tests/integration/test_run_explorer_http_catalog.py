@@ -248,6 +248,31 @@ def test_run_explorer_visible_selectors_use_ops_http_catalog() -> None:
     assert "${__url_time_range}" in reset
 
 
+def _visible_table_width(widths, min_widths, hidden) -> int:
+    return sum(
+        max(widths.get(field, 0), min_widths.get(field, 0))
+        for field in (widths.keys() | min_widths.keys()) - hidden
+    )
+
+
+@pytest.mark.parametrize(
+    ("widths", "min_widths", "hidden", "expected"),
+    [
+        ({}, {"Pipeline": 80}, set(), 80),
+        ({"Replay": 125}, {"Replay": 80}, set(), 125),
+        ({"Pipeline": 60}, {"Pipeline": 80}, set(), 80),
+        ({"Provider": 500}, {"Provider": 500}, {"Provider"}, 0),
+        ({}, {}, set(), 0),
+        ({"Started": 170, "Provider": 900}, {"Pipeline": 80}, {"Provider"}, 250),
+        ({"Started": 644}, {}, set(), 644),
+    ],
+)
+def test_table_width_counts_minimums_and_excludes_only_hidden_fields(
+    widths, min_widths, hidden, expected
+) -> None:
+    assert _visible_table_width(widths, min_widths, hidden) == expected
+
+
 def test_run_explorer_flex_columns_omit_custom_width() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
     panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 3010)
@@ -273,6 +298,6 @@ def test_run_explorer_flex_columns_omit_custom_width() -> None:
     assert min_widths["Run ID"] == 50
     assert widths["Started"] == 170
     assert widths["Overview"] == min_widths["Overview"] == 80
-    visible_width = sum(width for field, width in widths.items() if field not in hidden)
+    visible_width = _visible_table_width(widths, min_widths, hidden)
     budget = (1366 // 2) * panel["gridPos"]["w"] // 24 - 40
     assert visible_width <= budget

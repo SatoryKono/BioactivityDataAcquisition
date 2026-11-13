@@ -79,7 +79,13 @@ def test_recent_report_column_uses_the_row_http_link() -> None:
         for o in panel["fieldConfig"]["overrides"]
         if o["matcher"]["options"] == "Run ID"
     )
-    links = next(p["value"] for p in override["properties"] if p["id"] == "links")
+    menu = next(p["value"] for p in override["properties"] if p["id"] == "links")
+    links = [
+        link
+        for link in menu
+        if link["title"] == "Select this run"
+        or link["url"] == "${__data.fields.report_url:raw}"
+    ]
     assert len(links) == 2
     assert links[0]["title"] == "Select this run"
     assert "var-run_id=${__data.fields.run_id:percentencode}" in links[0]["url"]
