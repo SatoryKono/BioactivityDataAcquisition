@@ -1,7 +1,7 @@
 # Contract Coverage Matrix
 
 - schema_version: `contract-coverage-matrix-v3`
-- snapshot_date: 2026-11-12
+- snapshot_date: 2026-11-13
 - row_count: 27
 - gold_enabled_count: 27
 - gold_contract_available_count: 27

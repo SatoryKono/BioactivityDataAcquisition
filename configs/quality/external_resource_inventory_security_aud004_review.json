@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "951c7c4c055ae3e2798b7e1260920003f1a42ae1",
+  "source_ref": "d8374ed9c1e1c12392fce546d69cc51ed9bf2c2e",
+  "source_reviews": {
+    "src/bioetl/infrastructure/adapters/http/client_context_mixin.py": "Reviewed AsyncClient redirect policy True to False; existing allocation owner and aclose paths unchanged.",
+    "src/bioetl/infrastructure/adapters/http/request_timing.py": "Reviewed explicit no-redirect dispatch, including streamed responses; no new external acquisition or cleanup owner."
+  },
+  "expression_updates": {
+    "src/bioetl/infrastructure/adapters/http/client_context_mixin.py": {
+      "httpx.AsyncClient(timeout=httpx.Timeout(connect=self.timeout, read=self.timeout * self.read_timeout_multiplier, write=self.timeout, pool=self.timeout), headers=headers, follow_redirects=True, limits=httpx.Limits(max_connections=self.max_connections, max_keepalive_connections=self.max_keepalive_connections), trust_env=self.trust_env)": "httpx.AsyncClient(timeout=httpx.Timeout(connect=self.timeout, read=self.timeout * self.read_timeout_multiplier, write=self.timeout, pool=self.timeout), headers=headers, follow_redirects=False, limits=httpx.Limits(max_connections=self.max_connections, max_keepalive_connections=self.max_keepalive_connections), trust_env=self.trust_env)"
+    }
+  }
+}
