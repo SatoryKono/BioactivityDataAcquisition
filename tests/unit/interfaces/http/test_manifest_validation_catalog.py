@@ -342,8 +342,9 @@ async def test_bound_missing_uuid_preserves_diagnostic_after_root_validation(
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("pipeline", ["chembl_activity", "All"])
 async def test_missing_uuid_keeps_scope_diagnostic_with_real_selected_file_context(
-    monkeypatch, tmp_path
+    monkeypatch, tmp_path, pipeline
 ):
     from dataclasses import replace
     import bioetl.interfaces.http._health_server_control_plane_evidence_routing as routing
@@ -354,15 +355,14 @@ async def test_missing_uuid_keeps_scope_diagnostic_with_real_selected_file_conte
         default_evidence_root_alias_registry,
     )
     from bioetl.composition.control_plane_paths import FileEvidenceReadContextFactory
-    from bioetl.domain.control_plane.run_evidence_location import (
-        EvidenceLocationLookupCode,
-        EvidenceLocationLookupResult,
+    from bioetl.infrastructure.control_plane.file_evidence_location_store import (
+        FileEvidenceLocationStore,
     )
 
     selected = replace(
         _scope(resolved_via="selected_run_id_not_found"),
-        requested_pipeline="chembl_activity",
-        selected_pipelines=("chembl_activity",),
+        requested_pipeline=pipeline,
+        selected_pipelines=(pipeline,),
     )
 
     async def resolved(*_args, **_kwargs):
@@ -371,16 +371,8 @@ async def test_missing_uuid_keeps_scope_diagnostic_with_real_selected_file_conte
     monkeypatch.setattr(routing, "resolve_evidence_scope", resolved)
     root = tmp_path / "selected"
     root.mkdir()
-    calls = []
-
-    def lookup(**kwargs):
-        calls.append(kwargs)
-        return EvidenceLocationLookupResult(
-            code=EvidenceLocationLookupCode.LOCATION_MISSING
-        )
-
     resolver = EvidenceLocationResolver(
-        locations=SimpleNamespace(lookup=lookup),
+        locations=FileEvidenceLocationStore(report_root=tmp_path / "reports"),
         aliases=default_evidence_root_alias_registry(dashboard_data_root=root),
         opener=FileEvidenceReadContextFactory(),
     )
@@ -395,5 +387,5 @@ async def test_missing_uuid_keeps_scope_diagnostic_with_real_selected_file_conte
     )
     assert payload["rows"][0]["check"] == "scope_resolution"
     assert payload["rows"][0]["reason"] == "selected_run_id_not_found"
-    assert len(calls) == 1 and calls[0]["owner"] == "chembl_activity"
+    assert not (tmp_path / "reports").exists()
     assert list(root.rglob("*")) == []
