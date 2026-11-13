@@ -1492,13 +1492,14 @@ def test_owned_hook_python_inputs_keep_real_bounded_test_owners():
     assert "tests/unit/repo_backed/scripts" not in selected
 
 
-@pytest.mark.parametrize("audit", ["003", "004", "005", "007"])
+@pytest.mark.parametrize("audit", ["003", "004", "005", "006", "007"])
 def test_security_inventory_reviews_route_to_source_qualification_tests(audit):
     root = Path(__file__).resolve().parents[5]
     path = (
         f"configs/quality/external_resource_inventory_security_aud{audit}_review.json"
     )
     report = build_shadow_compare([path], repo_root=root)
+
     assert (
         "tests/architecture/test_external_resource_inventory_catalog.py"
         in json.dumps(report)
