@@ -698,6 +698,8 @@ class TestCsvExporterTrueAppend:
         await exporter.export("locked_test", table1)
         published = tmp_path / "locked_test.csv"
         before = published.read_bytes()
+        raw = tmp_path / "locked_test.csv.raw"
+        before_raw = raw.read_bytes()
 
         original_open = open
 
@@ -716,6 +718,7 @@ class TestCsvExporterTrueAppend:
 
         mock_logger.warning.assert_called()
         assert published.read_bytes() == before
+        assert raw.read_bytes() == before_raw
         backups = list(tmp_path.glob("locked_test.append-locked.*.csv"))
         assert len(backups) == 1
 
@@ -1024,3 +1027,56 @@ class TestCsvExporterPathConfinement:
         }
         assert outside_after == outside_before
         assert list(tmp_path.glob("*")) == []
+
+
+@pytest.mark.asyncio
+async def test_failed_published_overwrite_restores_pair_before_resume(
+    tmp_path, mock_logger, monkeypatch
+):
+    from bioetl.infrastructure.export import csv_exporter_io_ops as io
+
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    await exporter.export("pair", pa.table({"id": [1]}), append=False)
+    published = tmp_path / "pair.csv"
+    raw = tmp_path / "pair.csv.raw"
+    before = {published: published.read_bytes(), raw: raw.read_bytes()}
+    original = io._publish_csv_payload
+
+    def publish(source, target):
+        if target == published:
+            raise PermissionError("published locked")
+        return original(source, target)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(io, "_publish_csv_payload", publish)
+        with pytest.raises(RuntimeError, match="backup-only"):
+            await exporter.export("pair", pa.table({"id": [2]}), append=False)
+    assert {path: path.read_bytes() for path in before} == before
+    await exporter.export("pair", pa.table({"id": [3]}))
+    await exporter.finalize_csv("pair")
+    assert pv.read_csv(published)["id"].to_pylist() == [1, 3]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("table_name", ["pair", None])
+async def test_failed_published_clear_keeps_raw_identity(
+    tmp_path, mock_logger, monkeypatch, table_name
+):
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    await exporter.export("pair", pa.table({"key": ["=x", "'=x"], "id": [1, 2]}))
+    published = tmp_path / "pair.csv"
+    raw = tmp_path / "pair.csv.raw"
+    before = {published: published.read_bytes(), raw: raw.read_bytes()}
+    original = Path.unlink
+
+    def unlink(path, *args, **kwargs):
+        if path == published:
+            raise PermissionError("published locked")
+        return original(path, *args, **kwargs)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "unlink", unlink)
+        assert exporter.clear(table_name) == []
+    assert {path: path.read_bytes() for path in before} == before
+    await exporter.finalize_csv("pair", primary_keys=["key"], sort_by=["id"])
+    assert pv.read_csv(published)["id"].to_pylist() == [1, 2]

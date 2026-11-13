@@ -17,6 +17,12 @@ from bioetl.infrastructure.export.csv_exporter_io_ops import (
 from bioetl.infrastructure.export.csv_exporter_io_ops import (
     atomic_csv_write as _atomic_csv_write,
 )
+from bioetl.infrastructure.export.csv_exporter_io_ops import (
+    require_primary_csv_update as _require_primary_csv_update,
+)
+from bioetl.infrastructure.export.csv_exporter_io_ops import (
+    write_raw_and_published_pair as _write_raw_and_published_pair,
+)
 from bioetl.infrastructure.export.csv_exporter_table_ops import (
     deduplicate_full_rows as _deduplicate_full_rows_impl,
 )
@@ -40,8 +46,6 @@ from bioetl.infrastructure.export.csv_exporter_table_ops import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from bioetl.domain.ports import LoggerPort
 
 
@@ -51,16 +55,6 @@ def _export_root(base_path: Path) -> Path:
 
 def _raw_csv_path(csv_path: Path) -> Path:
     return csv_path.with_name(f"{csv_path.name}.raw")
-
-
-def _require_primary_csv_update(updated: bool, *, path: Path, mode: str) -> None:
-    """Fail closed when only a locked-target backup was written."""
-    if updated:
-        return
-    raise RuntimeError(
-        f"CSV {mode} did not update primary target {path}; "
-        "backup-only publish is not a successful export"
-    )
 
 
 def _resolve_table_csv_path(base_path: Path, table_name: str) -> Path:
@@ -130,6 +124,8 @@ def _unlink_clear_targets(
 ) -> list[Path]:
     deleted: list[Path] = []
     for target in targets:
+        if target.name.endswith(".csv.raw") and target.with_suffix("").exists():
+            continue
         try:
             target.unlink()
             deleted.append(target)
@@ -156,19 +152,6 @@ def _seed_raw_sidecar_if_missing(
     if raw_path.exists():
         return
     raw_path.write_bytes(csv_full_path.read_bytes())
-
-
-def _write_raw_and_published_pair(
-    *,
-    write_raw: Callable[[], bool],
-    write_published: Callable[[], bool],
-    raw_path: Path,
-    csv_path: Path,
-    mode: str,
-) -> None:
-    """Update raw then published; fail closed if either primary write is backup-only."""
-    _require_primary_csv_update(write_raw(), path=raw_path, mode=mode)
-    _require_primary_csv_update(write_published(), path=csv_path, mode=mode)
 
 
 class CsvExporter:
