@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from bioetl.domain.lineage import LineageGraphFragment, LineageNodeRef
+from bioetl.domain.lineage import LineageGraphFragment, LineageNodeRef, LineageNodeType
+
+# Successor adoption (`MetadataCoordinator.adopt_manifest_successor`) rebinds
+# these RUN-node attributes while keeping ``run:<UUID>``. Ledger-chain merges
+# must treat that drift as expected, not ``node_definition_conflict``.
+_RUN_MANIFEST_DEPENDENT_ATTRIBUTES = frozenset({"manifest_id", "execution_fingerprint"})
 
 
 def conflicting_node_ids(
@@ -23,8 +28,17 @@ def conflicting_node_ids(
     return sorted(conflicts)
 
 
-def _merge_definition(previous: dict[str, object], incoming: dict[str, object]) -> bool:
+def _merge_definition(
+    previous: dict[str, object],
+    incoming: dict[str, object],
+    *,
+    path: tuple[str, ...] = (),
+    node_type: object | None = None,
+) -> bool:
     """Merge known fields; absent and null reference fields carry no assertion."""
+    resolved_type = previous.get("node_type", node_type)
+    if resolved_type is None:
+        resolved_type = incoming.get("node_type")
     conflict = False
     for key, value in incoming.items():
         if value is None:
@@ -32,13 +46,43 @@ def _merge_definition(previous: dict[str, object], incoming: dict[str, object]) 
         old = previous.get(key)
         if isinstance(value, dict) and (old is None or isinstance(old, dict)):
             nested = dict(old or {})
-            conflict = _merge_definition(nested, value) or conflict
+            conflict = (
+                _merge_definition(
+                    nested,
+                    value,
+                    path=(*path, key),
+                    node_type=resolved_type,
+                )
+                or conflict
+            )
             previous[key] = nested
         elif old is not None and old != value:
+            if _is_run_manifest_dependent_drift(
+                node_type=resolved_type,
+                path=path,
+                key=key,
+            ):
+                # Keep the first observed value; drift is expected across the
+                # predecessor→successor ledger chain for the same run id.
+                continue
             conflict = True
         else:
             previous[key] = value
     return conflict
+
+
+def _is_run_manifest_dependent_drift(
+    *,
+    node_type: object | None,
+    path: tuple[str, ...],
+    key: str,
+) -> bool:
+    """Allow expected RUN attribute changes after successor manifest adoption."""
+    if path != ("attributes",):
+        return False
+    if key not in _RUN_MANIFEST_DEPENDENT_ATTRIBUTES:
+        return False
+    return node_type == LineageNodeType.RUN.value
 
 
 def _adjacency(fragments: tuple[LineageGraphFragment, ...]) -> dict[str, set[str]]:

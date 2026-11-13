@@ -53,6 +53,7 @@ _RUN_ID = RunID(UUID("00000000-0000-0000-0000-000000008490"))
 def _manifest(
     *,
     manifest_id: str = "manifest-8490",
+    predecessor_manifest_id: str | None = None,
     execution_fingerprint: str = "fingerprint-8490",
     schema_version: str = "1.0",
     created_at: datetime = _NOW,
@@ -67,6 +68,7 @@ def _manifest(
 ) -> RunManifest:
     return RunManifest(
         manifest_id=manifest_id,
+        predecessor_manifest_id=predecessor_manifest_id,
         execution_fingerprint=execution_fingerprint,
         schema_version=schema_version,
         created_at=created_at,
@@ -434,6 +436,171 @@ def test_lineage_validation_loads_fragments_for_all_ledger_manifests() -> None:
     assert "fragment_manifest" not in " ".join(_reasons(payload))
     assert "lineage_closure_complete" in _reasons(payload)
     assert "lineage_identity_consistent" in _reasons(payload)
+    assert payload["fragment_count"] == 2
+    assert payload["status"] == "OK"
+
+
+def _run_anchor_node(manifest: RunManifest) -> LineageNodeRef:
+    """Build a RUN node the way ``run_node(RunContext)`` does after successor adoption."""
+    return LineageNodeRef(
+        LineageNodeType.RUN,
+        f"run:{manifest.run_id}",
+        label=manifest.pipeline_name,
+        attributes={
+            "run_id": str(manifest.run_id),
+            "pipeline_name": manifest.pipeline_name,
+            "provider": manifest.provider,
+            "entity": manifest.entity,
+            "manifest_id": manifest.manifest_id,
+            "execution_fingerprint": manifest.execution_fingerprint,
+        },
+    )
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_conflicting_node_ids_allows_run_manifest_dependent_drift(
+    reverse: bool,
+) -> None:
+    """Same ``run:<UUID>`` may change manifest_id/fingerprint across successor adoption."""
+    from bioetl.application.observability.control_plane_evidence.lineage_graph_validation import (
+        conflicting_node_ids,
+    )
+
+    bronze = _manifest(
+        manifest_id="manifest-bronze",
+        execution_fingerprint="fingerprint-bronze",
+    )
+    gold = _manifest(
+        manifest_id="manifest-gold",
+        execution_fingerprint="fingerprint-gold",
+    )
+    fragments = (
+        LineageGraphFragment(
+            fragment_id="fragment-bronze",
+            run_id=str(bronze.run_id),
+            manifest_id=bronze.manifest_id,
+            nodes=(_run_anchor_node(bronze),),
+        ),
+        LineageGraphFragment(
+            fragment_id="fragment-gold",
+            run_id=str(gold.run_id),
+            manifest_id=gold.manifest_id,
+            nodes=(_run_anchor_node(gold),),
+        ),
+    )
+    ordered = tuple(reversed(fragments)) if reverse else fragments
+    assert conflicting_node_ids(ordered) == []
+
+    corrupted = LineageGraphFragment(
+        fragment_id="fragment-corrupt",
+        run_id=str(gold.run_id),
+        manifest_id=gold.manifest_id,
+        nodes=(
+            LineageNodeRef(
+                LineageNodeType.RUN,
+                f"run:{gold.run_id}",
+                attributes={
+                    "run_id": str(gold.run_id),
+                    "pipeline_name": "other_pipeline",
+                    "manifest_id": gold.manifest_id,
+                    "execution_fingerprint": gold.execution_fingerprint,
+                },
+            ),
+        ),
+    )
+    assert conflicting_node_ids((fragments[0], corrupted)) == [f"run:{gold.run_id}"]
+
+
+def test_lineage_validation_run_node_predecessor_successor_file_stores(
+    tmp_path,
+) -> None:
+    """File ledger chain with real RUN anchors must stay identity-consistent.
+
+    Codex P2 discussion_r4560819867: DATASET-only coverage missed the case where
+    ``run_node()`` keeps ``run:<UUID>`` while ``adopt_manifest_successor``
+    changes ``attributes.manifest_id`` / ``execution_fingerprint``.
+    """
+    from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
+    from bioetl.infrastructure.control_plane.file_run_ledger_store import (
+        FileRunLedgerStore,
+    )
+
+    bronze = _manifest(
+        manifest_id="manifest-bronze",
+        execution_fingerprint="fingerprint-bronze",
+        created_at=_NOW - timedelta(hours=2),
+    )
+    gold = _manifest(
+        manifest_id="manifest-gold",
+        predecessor_manifest_id=bronze.manifest_id,
+        execution_fingerprint="fingerprint-gold",
+        created_at=_NOW - timedelta(hours=1),
+    )
+    bronze_dataset = LineageNodeRef(LineageNodeType.DATASET, "dataset:bronze")
+    gold_dataset = LineageNodeRef(LineageNodeType.DATASET, "dataset:gold")
+    bronze_fragment = LineageGraphFragment(
+        fragment_id="fragment-bronze",
+        run_id=str(bronze.run_id),
+        manifest_id=bronze.manifest_id,
+        nodes=(_run_anchor_node(bronze), bronze_dataset),
+    )
+    gold_fragment = LineageGraphFragment(
+        fragment_id="fragment-gold",
+        run_id=str(gold.run_id),
+        manifest_id=gold.manifest_id,
+        nodes=(_run_anchor_node(gold), gold_dataset),
+        edges=(
+            LineageEdge(
+                LineageEdgeType.DERIVED_FROM,
+                gold_dataset,
+                bronze_dataset,
+            ),
+        ),
+    )
+
+    lineage_store = FileLineageStore(base_path=tmp_path / "lineage")
+    ledger = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
+    lineage_store.save(bronze_fragment)
+    lineage_store.save(gold_fragment)
+    ledger.append(
+        RunLedgerEntry(
+            entry_id="entry-bronze",
+            manifest_id=bronze.manifest_id,
+            run_id=bronze.run_id,
+            event_type="artifact_published",
+            occurred_at=bronze.created_at,
+            status="completed",
+            lineage_fragment_id=bronze_fragment.fragment_id,
+        )
+    )
+    ledger.record_manifest_successor(
+        run_id=bronze.run_id,
+        predecessor_manifest_id=bronze.manifest_id,
+        successor_manifest_id=gold.manifest_id,
+    )
+    ledger.append(
+        RunLedgerEntry(
+            entry_id="entry-gold",
+            manifest_id=gold.manifest_id,
+            run_id=gold.run_id,
+            event_type="artifact_published",
+            occurred_at=gold.created_at,
+            status="completed",
+            lineage_fragment_id=gold_fragment.fragment_id,
+        )
+    )
+
+    service = ControlPlaneEvidenceService(
+        lineage_store=lineage_store,
+        ledger_port=ledger,
+    )
+    payload = service.lineage_validation(scope=_scope(gold))
+    rows_by_check = {str(row["check"]): row for row in _payload_rows(payload)}
+
+    assert rows_by_check["closure"]["status"] == "OK"
+    assert rows_by_check["identity_consistency"]["status"] == "OK"
+    assert "lineage_identity_consistent" in _reasons(payload)
+    assert "node_definition_conflict:run:" not in str(payload)
     assert payload["fragment_count"] == 2
     assert payload["status"] == "OK"
 
