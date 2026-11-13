@@ -250,7 +250,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "4167ebc941f79c8aa9f2b22d1938b4f529b2c5c474e62d197bc7786d582ec4e5"
+      "source_fingerprint": "4ca1beb177155653c6e62a09b3a9a61343f75863ae09e0ece9bda12cd10985b1"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",

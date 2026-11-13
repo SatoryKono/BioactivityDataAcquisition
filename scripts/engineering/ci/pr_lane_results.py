@@ -206,6 +206,11 @@ IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    ".gitattributes": (
+        "tests/unit/scripts/repo/test_hook_receipts.py",
+        "tests/architecture/test_config_discrepancy_report_drift.py",
+        TECH_DEBT_5847_5852_CLOSEOUT_TEST,
+    ),
     "docs/03-guides/dashboards/contracts/run-explorer-http-catalog.yaml": (
         DOCUMENTATION_SYNC_TEST,
         GRAFANA_SELECTOR_CONTRACT_TEST,
@@ -1012,6 +1017,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr13113_main_f2f4_merge_review.json",
             "configs/quality/external_resource_inventory_pr13113_main_13118_review.json",
             "configs/quality/external_resource_inventory_pr13113_s5886_tip_review.json",
+            "configs/quality/external_resource_inventory_pr13133_platform_narrowing_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
