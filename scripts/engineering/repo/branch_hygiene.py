@@ -20,7 +20,8 @@ Safety invariants:
       checked-out branches, open-PR branches, and fresh tips are never touched;
     * every branch tip is bundled before deletion;
     * every removed worktree dirt is archived to ``wip-archive/`` first;
-    * ``apply`` re-classifies when the input snapshot is older than 12 hours.
+    * ``apply`` defaults to a preview and always re-classifies before --execute;
+    * Git dirty/lock protections stay enabled even after a WIP archive is saved.
 
 Usage:
     python scripts/engineering/repo/branch_hygiene.py classify
@@ -49,6 +50,8 @@ WT_ROOT = REPO.parent / f"{REPO.name}-worktrees"
 ROOT = REPO.parent
 DAY = 86400.0
 STALE_HOURS = 12
+SAFE_DIR_ARG = "safe.directory=*"
+CLASSIFICATION_FILE = "classification.json"
 TRASH_TTL_DAYS = 7
 EXCLUDE_NAMES = (".env", ".env.local", ".env.example")
 EXCLUDE_PARTS = (".venv", ".venv-win", "node_modules", "__pycache__")
@@ -107,7 +110,7 @@ def registered_worktrees() -> list[dict[str, Any]]:
                 "head": r.get("HEAD", ""),
                 "branch": branch_ref.removeprefix("refs/heads/") or None,
                 "detached": "detached" in r,
-                "locked": r.get("locked") if "locked" in r else None,
+                "locked": (r.get("locked") or "locked") if "locked" in r else None,
                 "prunable": "prunable" in r,
             }
         )
@@ -118,7 +121,7 @@ def status_counts(path: Path) -> tuple[bool, bool, bool] | None:
     """Return (tracked_dirty, untracked_present, ok)."""
     try:
         r = run(
-            ["git", "-c", "safe.directory=*", "status", "--porcelain"],
+            ["git", "-c", SAFE_DIR_ARG, "status", "--porcelain"],
             cwd=path,
             timeout=180,
         )
@@ -165,7 +168,7 @@ def pr_state_map() -> dict[str, list[str]]:
         timeout=300,
     )
     if r.returncode != 0:
-        return {}
+        raise RuntimeError("Cannot classify safely: GitHub PR lookup failed")
     m: dict[str, list[str]] = {}
     for row in json.loads(r.stdout):
         m.setdefault(row["headRefName"], []).append(row["state"])
@@ -179,102 +182,124 @@ def cherry_unique(sha_or_name: str) -> int | None:
     return sum(1 for ln in r.stdout.splitlines() if ln.startswith("+"))
 
 
+def _worktree_action(
+    w: dict[str, Any],
+    branches: list[dict[str, Any]],
+    exists: bool,
+    status: tuple | None,
+    age: float,
+    detached_days: float,
+    branch_days: float,
+) -> tuple[str, str]:
+    if Path(w["path"]).resolve() == REPO.resolve():
+        return "KEEP", "main checkout"
+    if w["locked"]:
+        return "KEEP_LOCKED", f"locked: {w['locked']}"
+    if not exists:
+        return "REMOVE", "directory missing"
+    if status is None:
+        return "KEEP", "status unavailable"
+    dirty = status[0] or status[1]
+    removal = "REMOVE_ARCHIVE" if dirty else "REMOVE"
+    if w["detached"] and age > detached_days:
+        return removal, f"detached, idle {age}d"
+    branch = next((item for item in branches if item["name"] == w["branch"]), None)
+    if branch and branch["gone"] and age > branch_days:
+        return removal, f"branch upstream gone, idle {age}d"
+    return "KEEP", "fresh or active branch"
+
+
+def _classify_worktree(
+    w: dict[str, Any],
+    branches: list[dict[str, Any]],
+    detached_days: float,
+    branch_days: float,
+) -> dict[str, Any]:
+    path = Path(w["path"])
+    try:
+        commit_ts = (
+            int(git("log", "-1", "--format=%ct", w["head"]).strip()) if w["head"] else 0
+        )
+    except (RuntimeError, ValueError):
+        commit_ts = 0
+    try:
+        modified = int(os.stat(path).st_mtime)
+    except OSError:
+        modified = 0
+    age = round((_now() - max(commit_ts, modified)) / DAY, 1)
+    exists = path.exists()
+    status = status_counts(path) if exists else None
+    action, reason = _worktree_action(
+        w, branches, exists, status, age, detached_days, branch_days
+    )
+    return {
+        **w,
+        "age_days": age,
+        "tracked_dirty": bool(status and status[0]),
+        "untracked": bool(status and status[1]),
+        "exists": exists,
+        "action": action,
+        "reason": reason,
+    }
+
+
 def classify_worktrees(
     wts: list[dict[str, Any]],
     brs: list[dict[str, Any]],
     detached_days: float,
     branch_days: float,
 ) -> list[dict[str, Any]]:
-    now = _now()
-    rows = []
-    for w in wts:
-        path = Path(w["path"])
-        commit_ts = 0
-        if w["head"]:
-            try:
-                commit_ts = int(git("log", "-1", "--format=%ct", w["head"]).strip())
-            except RuntimeError:
-                commit_ts = 0
-        try:
-            mtime = int(os.stat(path).st_mtime)
-        except OSError:
-            mtime = 0
-        age_days = round((now - max(commit_ts, mtime)) / DAY, 1)
-        st = status_counts(path) if path.exists() else None
-        tracked_dirty = untracked = False
-        if st:
-            tracked_dirty, untracked, _ = st
-        exists = path.exists()
+    return [_classify_worktree(w, brs, detached_days, branch_days) for w in wts]
 
-        action, reason = "KEEP", "fresh or active upstream"
-        if str(path) == str(REPO):
-            action, reason = "KEEP", "main checkout"
-        elif w["locked"]:
-            action, reason = "KEEP_LOCKED", f"locked: {w['locked']}"
-        elif not exists or w["prunable"]:
-            action, reason = "REMOVE", "prunable / dir missing"
-        elif st is None:
-            action, reason = "KEEP", "status unavailable"
-        elif w["detached"] and age_days > detached_days:
-            action = "REMOVE_ARCHIVE" if tracked_dirty else "REMOVE"
-            reason = f"detached, idle {age_days}d"
-        elif w["branch"]:
-            b = next((x for x in brs if x["name"] == w["branch"]), None)
-            if b and b["gone"] and age_days > branch_days:
-                action = "REMOVE_ARCHIVE" if tracked_dirty else "REMOVE"
-                reason = f"branch upstream gone, idle {age_days}d"
-            elif b and not b["upstream"]:
-                action, reason = "KEEP", "local-only branch"
-        elif age_days > detached_days and not tracked_dirty:
-            action = "REMOVE"
-            reason = f"idle {age_days}d"
-        rows.append(
-            {
-                **w,
-                "age_days": age_days,
-                "tracked_dirty": tracked_dirty,
-                "untracked": untracked,
-                "exists": exists,
-                "action": action,
-                "reason": reason,
-            }
-        )
-    return rows
+
+def _orphan_row(
+    entry: Path, base: Path, registered: set[str], trash: Path
+) -> dict[str, Any] | None:
+    if entry in (WT_ROOT, REPO) or str(entry).replace("\\", "/") in registered:
+        return None
+    is_trash = ".__trash_" in entry.name
+    if base == ROOT and (not entry.name.startswith(ROOT_CLUTTER_PREFIXES) or is_trash):
+        return None
+    action = "HARD_DELETE" if is_trash and trash_date(entry.name) else "QUARANTINE"
+    return {
+        "path": str(entry).replace("\\", "/"),
+        "kind": "trash-old" if is_trash else "orphan",
+        "action": action,
+        "quarantine": str(trash / entry.name) if action == "QUARANTINE" else None,
+    }
 
 
 def classify_orphans(wts: list[dict[str, Any]]) -> list[dict[str, Any]]:
     registered = {w["path"].replace("\\", "/") for w in wts}
-    rows: list[dict[str, Any]] = []
     trash = WT_ROOT / f".__trash_{datetime.now(tz=UTC):%Y%m%d}"
+    rows = []
     for base in (WT_ROOT, ROOT):
         if not base.exists():
             continue
         for entry in sorted(base.iterdir()):
-            if entry == WT_ROOT or entry == REPO:
-                continue
-            key = str(entry).replace("\\", "/")
-            if key in registered:
-                continue
-            is_trash = ".__trash_" in entry.name
-            if base == ROOT:
-                if not entry.name.startswith(ROOT_CLUTTER_PREFIXES):
-                    continue
-                action = "KEEP" if is_trash else "QUARANTINE"
-            else:
-                action = "HARD_DELETE" if is_trash else "QUARANTINE"
-            if action == "KEEP":
-                continue
-            rows.append(
-                {
-                    "path": key,
-                    "kind": "trash-old" if is_trash else "orphan",
-                    "action": action,
-                    "quarantine": str(trash / entry.name)
-                    if action == "QUARANTINE"
-                    else None,
-                }
-            )
+            row = _orphan_row(entry, base, registered, trash)
+            if row is not None:
+                rows.append(row)
     return rows
+
+
+def _branch_bucket(
+    branch: dict[str, Any], states: list[str], age: float, branch_days: float
+) -> tuple[str, dict[str, Any]]:
+    if "OPEN" in states:
+        return "E", {"pr_states": states}
+    if branch["upstream"] and not branch["gone"]:
+        bucket = "A" if any(state in ("MERGED", "CLOSED") for state in states) else "E"
+        return bucket, {"pr_states": states}
+    if branch["gone"]:
+        return ("A" if age > branch_days else "E"), {}
+    unique = cherry_unique(branch["name"])
+    if unique == 0:
+        return "B", {}
+    extra = {"unique_commits": unique}
+    if age > branch_days and unique is not None:
+        extra["delete_ok"] = True
+    return "C", extra
 
 
 def classify_branches(
@@ -299,23 +324,8 @@ def classify_branches(
             buckets["D"].append(entry)
             continue
         states = pr_map.get(b["name"], [])
-        if b["upstream"] and not b["gone"]:
-            if any(s in ("MERGED", "CLOSED") for s in states):
-                buckets["A"].append({**entry, "pr_states": states})
-            else:
-                buckets["E"].append({**entry, "pr_states": states})
-        elif b["gone"]:
-            (buckets["A"] if age > branch_days else buckets["E"]).append(entry)
-        else:
-            uniq = cherry_unique(b["name"])
-            if uniq == 0:
-                buckets["B"].append(entry)
-            elif age > branch_days and uniq is not None:
-                buckets["C"].append(
-                    {**entry, "unique_commits": uniq, "delete_ok": True}
-                )
-            else:
-                buckets["C"].append({**entry, "unique_commits": uniq})
+        bucket, extra = _branch_bucket(b, states, age, branch_days)
+        buckets[bucket].append({**entry, **extra})
     return buckets
 
 
@@ -358,7 +368,7 @@ def _classify_impl(args: argparse.Namespace) -> Path:
             "branches": {k: len(v) for k, v in buckets.items()},
         },
     }
-    (out / "classification.json").write_text(
+    (out / CLASSIFICATION_FILE).write_text(
         json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
     print(f"[classify] -> {out}")
@@ -374,47 +384,45 @@ def excluded(rel: str) -> bool:
     return any(p in EXCLUDE_PARTS for p in parts)
 
 
+def _copy_archive_file(src: str, dst: str) -> str:
+    source = Path(src)
+    if source.is_symlink() or excluded(str(source)):
+        raise RuntimeError(f"Excluded or linked archive input: {source}")
+    return shutil.copy2(src, dst)
+
+
 def archive_tree(path: Path, name: str, head: str, archive: Path) -> dict[str, Any]:
-    result: dict[str, Any] = {"archive": str(archive / name)}
+    """Create a complete archive or raise before permitting removal."""
     archive.mkdir(parents=True, exist_ok=True)
-    diff = run(
-        ["git", "-c", "safe.directory=*", "-C", str(path), "diff", "--binary", "HEAD"]
+    diff = run(["git", "-C", str(path), "diff", "--binary", "HEAD"])
+    status = run(
+        ["git", "-C", str(path), "status", "--porcelain", "--untracked-files=all"]
     )
-    if diff.returncode == 0 and diff.stdout.strip():
-        patch = archive / f"{name}.patch"
-        patch.write_text(diff.stdout, encoding="utf-8")
-        result["patch_bytes"] = patch.stat().st_size
-    st = run(
-        ["git", "-c", "safe.directory=*", "-C", str(path), "status", "--porcelain"]
-    )
-    copied = skipped = 0
-    if st.returncode == 0:
-        for rel in [
-            ln[3:].strip().strip('"')
-            for ln in st.stdout.splitlines()
-            if ln.startswith("??")
-        ]:
-            if excluded(rel):
-                skipped += 1
-                continue
-            src = path / rel
-            dst = archive / name / rel
-            try:
-                if src.is_dir():
-                    shutil.copytree(src, dst, dirs_exist_ok=True)
-                elif src.is_file():
-                    dst.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(src, dst)
-                else:
-                    continue
-                copied += 1
-            except OSError:
-                skipped += 1
-    result["untracked_copied"] = copied
-    result["untracked_skipped"] = skipped
+    if diff.returncode or status.returncode:
+        raise RuntimeError("Cannot read complete worktree changes")
+    if diff.stdout:
+        (archive / f"{name}.patch").write_text(diff.stdout, encoding="utf-8")
+    copied = 0
+    for line in status.stdout.splitlines():
+        if not line.startswith("??"):
+            continue
+        rel = line[3:]
+        if rel.startswith('"'):
+            rel = json.loads(rel)
+        source = path / rel
+        if excluded(rel) or source.is_symlink():
+            raise RuntimeError(f"Cannot preserve excluded or linked input: {rel}")
+        destination = archive / name / rel
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        _copy_archive_file(str(source), str(destination))
+        copied += 1
     with (archive / "heads.txt").open("a", encoding="utf-8") as fh:
         fh.write(f"{head} {name}\n")
-    return result
+    return {
+        "archive": str(archive / name),
+        "untracked_copied": copied,
+        "complete": True,
+    }
 
 
 def trash_date(name: str) -> str | None:
@@ -422,95 +430,184 @@ def trash_date(name: str) -> str | None:
     if marker not in name:
         return None
     tail = name.split(marker, 1)[1]
-    digits = "".join(ch for ch in tail if ch.isdigit())
-    return digits[:8] if len(digits) >= 8 else None
+    token = tail[:8]
+    if len(token) != 8 or not token.isdigit():
+        return None
+    try:
+        datetime.strptime(token, "%Y%m%d")
+    except ValueError:
+        return None
+    return token
+
+
+def _safe_tree_target(path: Path) -> Path:
+    allowed = Path("D:/github").resolve()
+    target = path.resolve(strict=True)
+    if target == allowed or not target.is_relative_to(allowed):
+        raise RuntimeError(f"Refusing target outside governed workspace: {path}")
+    if path.is_symlink() or path.is_junction():
+        raise RuntimeError(f"Refusing linked target: {path}")
+    for base, directories, files in os.walk(target, followlinks=False):
+        for name in directories + files:
+            item = Path(base) / name
+            if name.startswith(".env") or item.is_symlink() or item.is_junction():
+                raise RuntimeError(f"Refusing env or linked tree input: {item}")
+    return target
+
+
+def _apply_worktree(
+    row: dict[str, Any],
+    archive: Path,
+    args: argparse.Namespace,
+    actions: list[dict[str, Any]],
+) -> None:
+    path = Path(row["path"])
+    entry: dict[str, Any] = {
+        "kind": "worktree",
+        "path": str(path),
+        "action": row["action"],
+        "head": row["head"],
+    }
+    current = classify_worktrees(
+        registered_worktrees(),
+        local_branches(),
+        args.detached_days,
+        args.branch_days,
+    )
+    fresh = next(
+        (candidate for candidate in current if candidate["path"] == row["path"]),
+        None,
+    )
+    if fresh != row:
+        entry["result"] = "kept: worktree state changed"
+        actions.append(entry)
+        return
+    try:
+        if path.exists():
+            _safe_tree_target(path)
+        if row["action"] == "REMOVE_ARCHIVE" and path.exists():
+            entry["wip"] = archive_tree(path, path.name, row["head"], archive)
+    except (OSError, RuntimeError) as exc:
+        entry["wip_error"] = str(exc)
+        actions.append(entry)
+        return
+    rm = run(["git", "worktree", "remove", str(path)])
+    entry["remove_rc"] = rm.returncode
+    if rm.returncode != 0:
+        entry["remove_err"] = (rm.stderr or "").strip()[:300]
+    actions.append(entry)
+    print(f"[{'OK' if rm.returncode == 0 else 'FAIL'}] worktree {path.name}")
+
+
+def _delete_trash(src: Path) -> str:
+    date = trash_date(src.name)
+    if date is None:
+        return "kept: unknown quarantine date"
+    created = datetime.strptime(date, "%Y%m%d").replace(tzinfo=UTC).timestamp()
+    age = (_now() - created) / DAY
+    if age < TRASH_TTL_DAYS:
+        return f"kept (trash {age:.1f}d < {TRASH_TTL_DAYS}d)"
+    shutil.rmtree(src)
+    return "hard_deleted"
+
+
+def _apply_orphan(row: dict[str, Any]) -> dict[str, Any]:
+    src = Path(row["path"])
+    entry = {"kind": row["kind"], "path": str(src), "action": row["action"]}
+    try:
+        _safe_tree_target(src)
+        if row["action"] == "HARD_DELETE":
+            entry["result"] = _delete_trash(src)
+        else:
+            dst = Path(row["quarantine"])
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            os.rename(src, dst)
+            entry["result"] = f"quarantined -> {dst}"
+    except (OSError, RuntimeError) as exc:
+        entry["result"] = f"kept: {exc}"
+    return entry
+
+
+def _deletion_candidates(
+    buckets: dict[str, list[dict[str, Any]]],
+) -> list[dict[str, Any]]:
+    return (
+        buckets["A"]
+        + buckets["B"]
+        + [item for item in buckets["C"] if item.get("delete_ok")]
+    )
+
+
+def _delete_one_branch(
+    candidate: dict[str, Any], args: argparse.Namespace
+) -> dict[str, Any]:
+    fresh = classify_branches(
+        local_branches(),
+        registered_worktrees(),
+        git("rev-parse", "--abbrev-ref", "HEAD").strip(),
+        args.branch_days,
+    )
+    entry = {"kind": "branch", "name": candidate["name"]}
+    permitted = any(
+        item["name"] == candidate["name"] and item["sha"] == candidate["sha"]
+        for item in _deletion_candidates(fresh)
+    )
+    if not permitted:
+        return {**entry, "result": "kept: state changed"}
+    result = run(["git", "branch", "-D", candidate["name"]])
+    return {**entry, "rc": result.returncode, "error": result.stderr.strip()[:120]}
+
+
+def _bundle_and_delete(
+    candidates: list[dict[str, Any]],
+    out: Path,
+    args: argparse.Namespace,
+    actions: list[dict[str, Any]],
+) -> tuple[int, str | None]:
+    if not candidates:
+        return 0, None
+    backup = out / f"branches-backup-{stamp()}.bundle"
+    refs = [f"refs/heads/{item['name']}" for item in candidates]
+    result = run(["git", "bundle", "create", str(backup), *refs], timeout=1800)
+    if result.returncode:
+        print(f"[FATAL] bundle failed: {result.stderr}")
+        return 1, None
+    for item in candidates:
+        actions.append(_delete_one_branch(item, args))
+    return 0, str(backup)
+
+
+def _action_succeeded(action: dict[str, Any]) -> bool:
+    return (
+        action.get("remove_rc") == 0
+        or action.get("rc") == 0
+        or "quarantined" in str(action.get("result"))
+        or action.get("result") == "hard_deleted"
+    )
 
 
 def do_apply(args: argparse.Namespace) -> int:
     out = Path(args.out)
-    cls_path = out / "classification.json"
-    if (
-        not cls_path.exists()
-        or (_now() - cls_path.stat().st_mtime) > STALE_HOURS * 3600
-    ):
-        print("[apply] classification missing or stale; re-running classify")
-        out = do_classify(args)
-    cls = json.loads((out / "classification.json").read_text(encoding="utf-8"))
+    if not args.execute:
+        print("[dry-run] no trees or branches changed; pass --execute to apply")
+        return 0
+    out = _classify_impl(args)
+    cls = json.loads((out / CLASSIFICATION_FILE).read_text(encoding="utf-8"))
     archive = out / "wip-archive"
     actions: list[dict[str, Any]] = []
 
     for row in cls["worktrees"]:
-        if row["action"] not in ("REMOVE", "REMOVE_ARCHIVE"):
-            continue
-        path = Path(row["path"])
-        entry: dict[str, Any] = {
-            "kind": "worktree",
-            "path": str(path),
-            "action": row["action"],
-            "head": row["head"],
-        }
-        if row["action"] == "REMOVE_ARCHIVE" and path.exists():
-            try:
-                entry["wip"] = archive_tree(path, path.name, row["head"], archive)
-            except Exception as exc:
-                entry["wip_error"] = str(exc)
-        rm = run(["git", "worktree", "remove", "--force", str(path)])
-        entry["remove_rc"] = rm.returncode
-        if rm.returncode != 0:
-            entry["remove_err"] = (rm.stderr or "").strip()[:300]
-        actions.append(entry)
-        print(f"[{'OK' if rm.returncode == 0 else 'FAIL'}] worktree {path.name}")
+        if row["action"] in ("REMOVE", "REMOVE_ARCHIVE"):
+            _apply_worktree(row, archive, args, actions)
 
     for row in cls["orphans"]:
-        src = Path(row["path"])
-        entry = {"kind": row["kind"], "path": str(src), "action": row["action"]}
-        if row["action"] == "HARD_DELETE":
-            date = trash_date(src.name)
-            age_days = (
-                (_now() - time.mktime(time.strptime(date, "%Y%m%d"))) / DAY
-                if date
-                else TRASH_TTL_DAYS + 1
-            )
-            if age_days < TRASH_TTL_DAYS:
-                entry["result"] = f"kept (trash {age_days:.1f}d < {TRASH_TTL_DAYS}d)"
-            else:
-                try:
-                    shutil.rmtree(src)
-                    entry["result"] = "hard_deleted"
-                except OSError as exc:
-                    entry["result"] = f"stuck: {exc}"
-        else:
-            dst = Path(row["quarantine"])
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            try:
-                os.rename(src, dst)
-                entry["result"] = f"quarantined -> {dst}"
-            except OSError as exc:
-                entry["result"] = f"stuck: {exc}"
-        actions.append(entry)
-        print(f"[orphan] {src.name}: {entry['result']}")
+        actions.append(_apply_orphan(row))
 
-    del_candidates = (
-        cls["branches"]["A"]
-        + cls["branches"]["B"]
-        + [c for c in cls["branches"]["C"] if c.get("delete_ok")]
+    rc, backup = _bundle_and_delete(
+        _deletion_candidates(cls["branches"]), out, args, actions
     )
-    if del_candidates:
-        backup = out / f"branches-backup-{stamp()}.bundle"
-        refspecs = [f"refs/heads/{c['name']}" for c in del_candidates]
-        bundle = run(["git", "bundle", "create", str(backup), *refspecs], timeout=1800)
-        if bundle.returncode != 0:
-            print(f"[FATAL] bundle failed: {bundle.stderr}")
-            return 1
-        print(f"[OK] bundle -> {backup} ({backup.stat().st_size} bytes)")
-        for c in del_candidates:
-            r = run(["git", "branch", "-D", c["name"]])
-            actions.append({"kind": "branch", "name": c["name"], "rc": r.returncode})
-            if r.returncode != 0:
-                print(f"[FAIL] branch {c['name']}: {r.stderr.strip()[:120]}")
-    else:
-        backup = None
-        print("[apply] no branch candidates")
+    if rc:
+        return rc
 
     run(["git", "worktree", "prune"])
     (out / "apply-actions.json").write_text(
@@ -526,14 +623,7 @@ def do_apply(args: argparse.Namespace) -> int:
         + "\n",
         encoding="utf-8",
     )
-    ok = sum(
-        1
-        for a in actions
-        if a.get("remove_rc") == 0
-        or a.get("rc") == 0
-        or "quarantined" in str(a.get("result"))
-        or a.get("result") == "hard_deleted"
-    )
+    ok = sum(_action_succeeded(action) for action in actions)
     print(f"[apply] done: {len(actions)} actions, ok {ok}")
     print(
         f"[apply] worktrees now {len(registered_worktrees())}, branches now {len(local_branches())}"
@@ -546,6 +636,9 @@ def build_parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="command", required=True)
     for name in ("classify", "apply"):
         s = sub.add_parser(name)
+        s.add_argument(
+            "--execute", action="store_true", help="Explicitly permit apply mutations"
+        )
         s.add_argument("--out", type=Path, default=None)
         s.add_argument("--detached-days", type=float, default=2.0)
         s.add_argument("--branch-days", type=float, default=3.0)
