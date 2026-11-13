@@ -1,9 +1,8 @@
 {
   "schema_version": 1,
-  "catalog_ref": "951c7c4c055ae3e2798b7e1260920003f1a42ae1",
-  "source_ref": "f74e381f185accaff102f5da2924a151d5423c26",
+  "catalog_ref": "46240c4b52cb498b4027be81eb0f5a5cb7c2400a",
+  "source_ref": "912a3b97442dda8237e7aa433b9a30ab6760eebe",
   "source_reviews": {
-    "src/bioetl/infrastructure/quarantine/filtered_reads.py": "Reviewed bounded Delta scanner with typed timestamp predicate and batch-local legacy timestamp normalization before row/byte budgets; DeltaTable acquisition/ownership scopes unchanged. Legacy fallback materializes timestamp values only, not payload rows. No new external resource.",
-    "src/bioetl/interfaces/http/_health_server_quarantine_routing.py": "Reviewed backend-only forensic budgets for all five routes; shielded late backend completions cannot send responses and slow writer is outside backend deadline. Existing worker helper owns task/limiter lifetime; no new external resource acquisition."
+    "src/bioetl/infrastructure/quarantine/filtered_reads.py": "Reviewed pure extraction of bounded batch collection to reduce cognitive complexity, retaining 10000 rows, 8MiB selected data and 5 seconds with identical selection semantics. Existing DeltaTable/dataset/worker ownership unchanged; no new external resource."
   }
 }
