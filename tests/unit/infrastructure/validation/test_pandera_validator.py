@@ -559,3 +559,26 @@ class TestPanderaValidatorPropertyBased:
         result = validator.validate([record])
         assert result.valid is True
         assert result.errors == []
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "dtype,method",
+    [
+        ("Int64", "_normalize_nullable_integer_columns"),
+        ("boolean", "_normalize_nullable_boolean_columns"),
+    ],
+)
+def test_nullable_normalization_preserves_invalid_lexemes_for_schema_rejection(
+    dtype, method
+):
+    import pandas as pd
+    import pandera.pandas as pa
+    from bioetl.infrastructure.validation.pandera_validator import BasePanderaValidator
+
+    validator = BasePanderaValidator(
+        pa.DataFrameSchema({"value": pa.Column(dtype, nullable=True)})
+    )
+    original = pd.DataFrame({"value": ["invalid-lexeme", None]}, dtype=object)
+    result = getattr(validator, method)(original)
+    pd.testing.assert_frame_equal(result, original)

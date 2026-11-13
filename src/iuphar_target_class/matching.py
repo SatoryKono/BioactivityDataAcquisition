@@ -68,7 +68,18 @@ class Candidate:
 def select_uniprot_accessions(
     references: tuple[CrossReference, ...],
 ) -> tuple[str, ...]:
-    """Keep UniProt accessions wherever they sit in the provider list."""
+    """Keep UniProt accessions wherever they sit in the provider list.
+
+    Parameters
+    ----------
+    references : tuple[CrossReference, ...]
+        Snapshot cross-references in provider order.
+
+    Returns
+    -------
+    tuple[str, ...]
+        Accessions whose database id is UniProt, in their original order.
+    """
     return tuple(
         item.identifier for item in references if item.database.casefold() == "uniprot"
     )
@@ -78,7 +89,21 @@ def collect_candidates(
     query: MatchQuery,
     catalog: tuple[CatalogTarget, ...],
 ) -> tuple[Candidate, ...]:
-    """Ask every channel. The first hit does not stop the search."""
+    """Ask every channel. The first hit does not stop the search.
+
+    Parameters
+    ----------
+    query : MatchQuery
+        Normalized identifiers and text; name and synonyms search both text fields.
+    catalog : tuple[CatalogTarget, ...]
+        Snapshot targets, without network access.
+
+    Returns
+    -------
+    tuple[Candidate, ...]
+        All channel hits in canonical order. Text hits identify the provider
+        field that matched and cannot confirm identity on their own.
+    """
     found = (
         *_identifier_candidates(query, catalog),
         *_gene_candidates(query, catalog),
@@ -144,12 +169,13 @@ def _name_candidates(
     query: MatchQuery, catalog: tuple[CatalogTarget, ...]
 ) -> tuple[Candidate, ...]:
     found: list[Candidate] = []
-    wanted_names = {query.name} if query.name is not None else set()
-    wanted_synonyms = set(query.synonyms)
+    wanted = set(query.synonyms)
+    if query.name is not None:
+        wanted.add(query.name)
     for target in _species_targets(query, catalog):
-        if set(target.names) & wanted_names:
+        if set(target.names) & wanted:
             found.append(Candidate(target.target_id, EXACT_NAME))
-        if set(target.synonyms) & wanted_synonyms:
+        if set(target.synonyms) & wanted:
             found.append(Candidate(target.target_id, EXACT_SYNONYM))
     return tuple(found)
 
@@ -161,7 +187,26 @@ def validate_identity(
     *,
     snapshot_complete: bool,
 ) -> MatchResult:
-    """Turn the full candidate list into one match status."""
+    """Turn the full candidate list into one match status.
+
+    Parameters
+    ----------
+    query : MatchQuery
+        Normalized query; this function does not validate the input-row schema.
+    catalog : tuple[CatalogTarget, ...]
+        Targets from the same snapshot used to collect candidates.
+    candidates : tuple[Candidate, ...]
+        Complete channel hits from ``collect_candidates``.
+    snapshot_complete : bool
+        Whether all required snapshot sources are present.
+
+    Returns
+    -------
+    MatchResult
+        Conservative identity decision retaining all candidate ids. With no
+        searchable query fields, ``not_found`` on a complete snapshot means
+        no query-channel hits; it does not assert biological absence.
+    """
     return _decide(query, catalog, candidates, snapshot_complete=snapshot_complete)
 
 
@@ -171,7 +216,24 @@ def resolve_match(
     *,
     snapshot_complete: bool,
 ) -> MatchResult:
-    """Search every channel, then choose one status. Catalog order is ignored."""
+    """Search every channel, then choose one status. Catalog order is ignored.
+
+    Parameters
+    ----------
+    query : MatchQuery
+        Normalized query, validated separately from this pure matching API.
+    catalog : tuple[CatalogTarget, ...]
+        Provider targets belonging to one snapshot.
+    snapshot_complete : bool
+        Whether the snapshot contains all required sources.
+
+    Returns
+    -------
+    MatchResult
+        Complete candidates and their identity decision. Multiple compatible
+        candidates remain ambiguous; shared identifiers are not silently
+        narrowed into a confirmed match.
+    """
     return validate_identity(
         query,
         catalog,

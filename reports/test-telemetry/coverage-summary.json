@@ -1,11 +1,11 @@
 {
-  "source_branch": "codex/nightly-coverage-boundaries",
-  "source_commit": "b97e117f226777fafd583cf0809afc09a2468f9d",
-  "source_run_id": "43264909539",
+  "source_branch": "codex/iuphar-evidence-assertion-main-20261113",
+  "source_commit": "129efc0092841397cda47289aa678bc5be57b5b2",
+  "source_run_id": "43352737604",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/43264909539",
-  "source_tree_sha256": "5d61990a5eb6e3ae47137de81f3964f53fbb124f3e16de24fe03736254982f04",
-  "refreshed_at_utc": "2026-11-12T17:14:00.832000+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/43352737604",
+  "source_tree_sha256": "3ee79cfbc8d6d30c424619b8473c07d744d53aaf1f35349b640ca83b87c741b1",
+  "refreshed_at_utc": "2026-11-13T02:40:46.860000+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.68,
   "coverage": {

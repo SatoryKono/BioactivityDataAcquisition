@@ -218,20 +218,37 @@ def test_run_cell_inspection_and_links_use_full_identity():
         for o in panel["fieldConfig"]["overrides"]
     }
     links = rules["Run ID"]["links"]
-    assert len(links) == 2
+    assert len(links) == 6
+    menu_by_title = {link["title"]: link for link in links}
+    for name, title in (
+        ("Workflow", "Workflow passport"),
+        ("Provider", "Provider Evidence"),
+        ("Saved Evidence", "Saved Evidence"),
+        ("Data Quality", "Data Quality"),
+    ):
+        assert rules[name]["custom.hidden"] is True
+        assert rules[name]["links"] == []
+        assert title in menu_by_title
     assert "var-run_id=${__data.fields.run_id:percentencode}" in links[0]["url"]
     assert links[1]["url"] == "${__data.fields.report_url:raw}"
     assert rules["Run ID"]["custom.inspect"] is True
     assert rules["Run ID"]["custom.wrapText"] is False
     assert rules["Run ID"]["custom.width"] == 110
-    assert all("tooltip" not in link for link in links)
+    # The original identity/report actions must not invent a tooltip field.
+    # Handoff actions retain their source metadata when copied into the menu.
+    assert all("tooltip" not in link for link in links[:2])
     assert rules["Run ID"]["custom.tooltip.field"] == "run_id"
-    for field in ("Overview", "Saved Evidence", "Data Quality", "Replay Readiness"):
+    for field in ("Overview", "Replay Readiness"):
         assert all(
             "var-run_id=${__data.fields.run_id:percentencode}" in link["url"]
             for link in rules[field]["links"]
         )
-    assert "viewPanel=9418" in rules["Saved Evidence"]["links"][0]["url"]
+    for title in ("Saved Evidence", "Data Quality"):
+        assert (
+            "var-run_id=${__data.fields.run_id:percentencode}"
+            in menu_by_title[title]["url"]
+        )
+    assert "viewPanel=9418" in menu_by_title["Saved Evidence"]["url"]
 
 
 @pytest.mark.parametrize("stage", ["bronze", "silver", "gold", "quarantined"])

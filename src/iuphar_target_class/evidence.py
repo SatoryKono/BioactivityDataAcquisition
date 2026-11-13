@@ -69,7 +69,7 @@ class ContractDefect(ValueError):
 def build_evidence_table(
     drafts: tuple[EvidenceDraft, ...], *, run_id: str
 ) -> EvidenceTable:
-    """Number unique witnesses. The same content keeps the same id."""
+    """Number unique witnesses within each input row, independently of other rows."""
     _reject_bad_parts(drafts)
     order = {name: index for index, name in enumerate(EVIDENCE_TYPE_ORDER)}
     ranked = sorted(
@@ -83,11 +83,13 @@ def build_evidence_table(
     )
     assigned: dict[tuple[str, str, str, str], Evidence] = {}
     records: list[Evidence] = []
+    ordinals: dict[str, int] = {}
     for draft in ranked:
         key = (draft.input_row_id, draft.evidence_type, draft.source_id, draft.content)
         if key in assigned:
             continue
-        ordinal = len(records) + 1
+        ordinal = ordinals.get(draft.input_row_id, 0) + 1
+        ordinals[draft.input_row_id] = ordinal
         evidence_id = _SEPARATOR.join(
             (draft.input_row_id, draft.evidence_type, draft.source_id, f"{ordinal:04d}")
         )
@@ -174,12 +176,20 @@ def require_class_chain(
     annotation: ProviderAnnotation | None = None,
     table: EvidenceTable | None = None,
 ) -> None:
-    """Raise when a non-empty IUPHAR class has a broken provenance chain."""
+    """Validate every referenced witness and support for direct or local classes."""
     defects = class_chain_defects(row, annotation=annotation)
     if defects:
         message = "class chain is incomplete: " + ", ".join(defects)
         raise ContractDefect(message)
-    if row.iuphar_class:
+    if unsupported_class(row) or local_only_violation(row):
+        raise ContractDefect("class chain has unsupported or contradictory support")
+    if (
+        row.iuphar_class
+        or row.local_class
+        or row.effective_class
+        or row.match_evidence_ids
+        or row.local_evidence_ids
+    ):
         _require_row_evidence(row, table)
 
 
@@ -193,7 +203,46 @@ def _require_row_evidence(
     records = {record.evidence_id: record for record in table.records}
     for evidence_id in (*row.match_evidence_ids, *row.local_evidence_ids):
         _require_owned_record(row, table, records, evidence_id)
-    _require_direct_evidence_types(row, table, records)
+    if row.iuphar_class:
+        _require_direct_evidence_types(row, table, records)
+    _require_match_list_evidence(row, table, records)
+    _require_local_list_evidence(row, table, records)
+
+
+def _require_match_list_evidence(
+    row: ClassificationResult,
+    table: EvidenceTable,
+    records: dict[str, Evidence],
+) -> None:
+    """Validate match-list ownership, witness types and local-only restrictions."""
+    for evidence_id in row.match_evidence_ids:
+        if evidence_id not in table.match_evidence_ids:
+            raise ContractDefect(
+                f"row evidence is outside the match list: {evidence_id}"
+            )
+        if records[evidence_id].evidence_type not in _DIRECT_EVIDENCE_TYPES:
+            raise ContractDefect(f"match evidence has the wrong type: {evidence_id}")
+        if (
+            row.effective_source == "local_rule"
+            and records[evidence_id].evidence_type == _MAPPING_EVIDENCE_TYPE
+        ):
+            raise ContractDefect("local-only evidence cannot claim an IUPHAR mapping")
+
+
+def _require_local_list_evidence(
+    row: ClassificationResult,
+    table: EvidenceTable,
+    records: dict[str, Evidence],
+) -> None:
+    """Require each local witness to use its dedicated list and evidence type."""
+    for evidence_id in row.local_evidence_ids:
+        if (
+            evidence_id not in table.local_evidence_ids
+            or records[evidence_id].evidence_type != _LOCAL_EVIDENCE_TYPE
+        ):
+            raise ContractDefect(
+                f"local evidence has the wrong list or type: {evidence_id}"
+            )
 
 
 def _require_owned_record(
@@ -253,11 +302,15 @@ def rerun_with_new_rules(previous: StoredRun, rules_version: str) -> RerunReques
 
 
 def local_only_violation(row: ClassificationResult) -> bool:
-    """Invariant 1. A local-only row has no IUPHAR class, id, or path."""
-    local_only = row.effective_source == "local_rule" and row.match_status != "matched"
+    """Local selection cannot claim direct mapping; observed raw data is retained."""
+    local_only = row.effective_source == "local_rule"
     if not local_only:
         return False
-    return bool(row.iuphar_class or row.matched_target_id or row.iuphar_type_raw)
+    return bool(
+        row.iuphar_class
+        or row.iuphar_mapping_rule_id
+        or (row.match_status != "matched" and row.matched_target_id)
+    )
 
 
 def trace_violation(
@@ -291,7 +344,7 @@ def unsupported_class(row: ClassificationResult) -> bool:
         "local_rule": local_supported,
         "iuphar_normalized": direct_supported,
     }
-    selected_supported = support_by_source.get(row.effective_source, True)
+    selected_supported = support_by_source.get(row.effective_source, False)
     return bool(row.effective_class) and not selected_supported
 
 

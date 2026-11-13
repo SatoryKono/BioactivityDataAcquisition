@@ -267,3 +267,12 @@ def test_trusted_base_rejects_symlinked_effective_config_escape(tmp_path, linked
         objects={},
     )
     assert "effective_config_hash" not in verifier.verify(manifest)
+
+
+def test_replay_file_without_valid_expected_digest_stays_unknown(tmp_path):
+    from bioetl.infrastructure.control_plane.replay_object_verifier import verify_file
+
+    path = tmp_path / "evidence.bin"
+    path.write_bytes(b"saved evidence")
+    assert verify_file(path, "invalid") is None
+    assert verify_file(path, None) is None
