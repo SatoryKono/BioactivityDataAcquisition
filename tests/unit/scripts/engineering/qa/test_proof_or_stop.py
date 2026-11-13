@@ -167,22 +167,23 @@ def test_discover_context_uses_policy_timeout_for_full_diffs(
         repo_root: Path,
         *args: str,
         timeout: float = proof.DEFAULT_GIT_TIMEOUT_SECONDS,
+        input_data: bytes | None = None,
     ) -> bytes:
         if args and args[0] == "diff":
             observed.append(timeout)
-        return original_git(repo_root, *args, timeout=timeout)
+        return original_git(repo_root, *args, timeout=timeout, input_data=input_data)
 
     monkeypatch.setattr(proof, "_git", recording_git)
 
     _, clean_source = discover_context(proof_repo, policy=policy, claim="tested")
 
-    assert observed == [300.0]
+    assert observed == [300.0, 300.0]
     assert clean_source["dirty"] is False
 
     (proof_repo / "tracked.py").write_text("VALUE = 2\n", encoding="utf-8")
     _, dirty_source = discover_context(proof_repo, policy=policy, claim="tested")
 
-    assert observed == [300.0, 300.0]
+    assert observed == [300.0, 300.0, 300.0, 300.0]
     assert dirty_source["dirty"] is True
 
 

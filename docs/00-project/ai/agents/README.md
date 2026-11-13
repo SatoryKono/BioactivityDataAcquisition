@@ -37,25 +37,35 @@ ______________________________________________________________________
 Ownership and sync rules are fixed in
 [AI Runtime Mirror Ownership](policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 
-## BioETL Core (6 активных агентов)
+## BioETL Core (6 управляемых профилей)
 
-Live runtime set is exactly the six `py-*` profiles in `.codex/agents/` (Junie/Devin peers). Retired names `py-test-swarm` and `py-review-orchestrator` are historical only; their duties live as `py-test-bot` campaigns and `py-audit-bot` modes `review`/`debt`.
+The tracked logical profile set is exactly the six `py-*` profiles in
+`.codex/agents/` (Junie/Devin peers). This catalog does not prove native
+registration, loading or execution. Retired names `py-test-swarm` and
+`py-review-orchestrator` are historical only; their duties live as `py-test-bot`
+campaigns and `py-audit-bot` modes `review`/`debt`.
 
-| Agent | Role | Primary Responsibility |
-| --- | --- | --- |
-| `py-audit-bot` | Compliance Gate | Code/architecture audit, review, debt, reproducibility |
-| `py-plan-bot` | Architect | Task planning, RF-\* decomposition |
-| `py-test-bot` | Tester | Tests (baseline/final/retest), coverage, VCR |
-| `py-config-bot` | Config Engineer | YAML configs (pipeline/DQ/filter) |
-| `py-debug-bot` | Troubleshooter | RCA and remediation guidance (read-only) |
-| `py-doc-bot` | Technical Writer | Docs, ADR, CHANGELOG, Mermaid diagrams |
+| Agent           | Role             | Primary Responsibility                                 |
+| --------------- | ---------------- | ------------------------------------------------------ |
+| `py-audit-bot`  | Compliance Gate  | Code/architecture audit, review, debt, reproducibility |
+| `py-plan-bot`   | Architect        | Task planning, RF-\* decomposition                     |
+| `py-test-bot`   | Tester           | Tests (baseline/final/retest), coverage, VCR           |
+| `py-config-bot` | Config Engineer  | YAML configs (pipeline/DQ/filter)                      |
+| `py-debug-bot`  | Troubleshooter   | RCA and remediation guidance (read-only)               |
+| `py-doc-bot`    | Technical Writer | Docs, ADR, CHANGELOG, Mermaid diagrams                 |
 
 ## Related Files
 
+For explicit local closeout, follow the matching canonical runtime map and the
+[command runbook](../../../05-operations/runbooks/ai-closeout-wrapper.md).
+The consumer selector does not prove native loading; local observations cannot
+authenticate CI transport or qualify a done/merge claim. This catalog remains
+navigation, not a second behavioral authority.
+
 - Repository path `.codex/agents/ORCHESTRATION.md` — Codex source-of-truth orchestration
-- Gemini runtime copy: not tracked on `main`; treat Gemini orchestration refs as
-  local-only or mirror guidance until a verified `.gemini/agents/**` tree is
-  added
+- Gemini runtime copy: not a tracked project runtime; `AGENTS.md` prohibits
+  tracked `.gemini/agents/**` and `.gemini/skills/**` trees. Historical navigation
+  references cannot authorize adding them.
 - [ORCHESTRATION.md](./agents/ORCHESTRATION.md) — published mirror for documentation/navigation
 - [AGENT.md](guides/AGENT.md) — Core Engineering Guide
 - [CLAUDE.md](guides/CLAUDE.md) — Claude CLI specific guide

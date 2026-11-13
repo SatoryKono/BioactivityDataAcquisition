@@ -34,20 +34,9 @@ def digest(value: Any) -> str:
 
 
 def _git(root: Path, *args: str, index_file: str | None = None) -> bytes:
-    env = dict(os.environ, GIT_NO_REPLACE_OBJECTS="1", GIT_OPTIONAL_LOCKS="0")
-    for key in tuple(env):
-        if key in {
-            "GIT_DIR",
-            "GIT_WORK_TREE",
-            "GIT_COMMON_DIR",
-            "GIT_INDEX_FILE",
-            "GIT_CONFIG",
-            "GIT_CONFIG_COUNT",
-            "GIT_CONFIG_PARAMETERS",
-        } or key.startswith(("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_")):
-            env.pop(key, None)
-    if index_file is not None:
-        env["GIT_INDEX_FILE"] = index_file
+    from scripts.engineering.repo.check_no_partial_tree import _isolated_git_env
+
+    env = _isolated_git_env(index_file=index_file)
     result = subprocess.run(
         ["git", "-c", "core.fsmonitor=false", *args],
         cwd=root,
@@ -81,11 +70,32 @@ def _file_digest(path: Path, *, limit: int = 16 * 1024 * 1024) -> str:
     return hashed.hexdigest()
 
 
+def _distribution_paths() -> list[str]:
+    """Deduplicate proven physical aliases, retaining distinct installations."""
+    paths = []
+    seen: set[tuple[int, int] | str] = set()
+    for entry in sys.path:
+        path = Path(entry).resolve()
+        try:
+            info = path.stat()
+            identity: tuple[int, int] | str = (
+                (info.st_dev, info.st_ino) if info.st_ino else str(path)
+            )
+        except OSError:
+            identity = str(path)
+        if identity not in seen:
+            seen.add(identity)
+            paths.append(str(path))
+    return paths
+
+
 def environment_identity(env: Mapping[str, str] | None = None) -> str:
     """Require exact compatibility; persist a digest, never environment values."""
+    # Enumerate equivalent editable-install search roots once, not set(name,
+    # version): different metadata installations must remain distinguishable.
     packages = sorted(
         (item.metadata["Name"], item.version)
-        for item in importlib.metadata.distributions()
+        for item in importlib.metadata.distributions(path=_distribution_paths())
     )
     return digest(
         {
@@ -219,7 +229,16 @@ def _path_state(
         target = root / relative
         if not target.resolve().is_relative_to(root) or target.is_symlink():
             raise ValueError("unqualified changed input path")
-        measured[relative] = _file_digest(target) if target.is_file() else "MISSING"
+        measured[relative] = (
+            digest(
+                {
+                    "content_sha256": _file_digest(target),
+                    "mode": stat.S_IMODE(target.stat().st_mode),
+                }
+            )
+            if target.is_file()
+            else "MISSING"
+        )
     checkers = {
         path.name: _file_digest(path)
         for path in sorted(Path(__file__).parent.glob("*.py"))

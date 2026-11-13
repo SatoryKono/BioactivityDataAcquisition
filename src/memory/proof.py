@@ -124,6 +124,7 @@ def _isolated_git_env() -> dict[str, str]:
             env.pop(name, None)
     env["GIT_TERMINAL_PROMPT"] = "0"
     env["GIT_OPTIONAL_LOCKS"] = "0"
+    env["GIT_NO_REPLACE_OBJECTS"] = "1"
     return env
 
 
@@ -131,18 +132,35 @@ def _git(
     repo_root: Path,
     *args: str,
     timeout: float = DEFAULT_GIT_TIMEOUT_SECONDS,
+    input_data: bytes | None = None,
 ) -> bytes:
     repo_root = Path(repo_root)
     git_dir = repo_root / ".git"
-    command = ["git", "--git-dir", str(git_dir), "-C", str(repo_root), *args]
+    command = [
+        "git",
+        "--no-replace-objects",
+        "-c",
+        "core.fsmonitor=false",
+        "--git-dir",
+        str(git_dir),
+        "-C",
+        str(repo_root),
+        *args,
+    ]
+    if input_data is not None and len(input_data) > 8 * 1024 * 1024:
+        raise ProofError("Git input exceeds the verifier limit")
+    protocol: dict[str, Any] = (
+        {"stdin": subprocess.DEVNULL} if input_data is None else {"input": input_data}
+    )
     try:
-        completed = subprocess.run(
+        completed: subprocess.CompletedProcess[bytes] = subprocess.run(
             command,
             check=False,
             capture_output=True,
-            stdin=subprocess.DEVNULL,
+            text=False,
             timeout=timeout,
             env=_isolated_git_env(),
+            **protocol,
         )
     except subprocess.TimeoutExpired as exc:
         raise ProofError(f"git {' '.join(args)} timed out after {timeout:g}s") from exc
@@ -231,6 +249,38 @@ def _hash_paths(repo_root: Path, paths: list[str]) -> str:
     return digest.hexdigest()
 
 
+def _reject_active_git_filters(repo_root: Path, *, timeout: float) -> None:
+    """Refuse selected clean/process drivers before Git can execute them.
+
+    check-attr prints special states and equally named string values identically.
+    A configured driver matching such a value is conservatively refused too.
+    Unused ordinary driver configuration (including LFS) remains harmless.
+    """
+    keys = _git(repo_root, "config", "--null", "--name-only", "--list", timeout=timeout)
+    drivers = {
+        key.split(b".", 1)[1].rsplit(b".", 1)[0]
+        for key in keys.split(b"\0")
+        if key.lower().startswith(b"filter.")
+        and key.lower().endswith((b".clean", b".process"))
+    }
+    if not drivers:
+        return
+    paths = _git(repo_root, "ls-files", "-z", timeout=timeout)
+    attributes = _git(
+        repo_root,
+        "check-attr",
+        "-z",
+        "--stdin",
+        "filter",
+        timeout=timeout,
+        input_data=paths,
+    ).split(b"\0")
+    if attributes[-1:] != [b""] or (len(attributes) - 1) % 3:
+        raise ProofError("Git filter attributes are unavailable")
+    if any(value in drivers for value in attributes[2::3]):
+        raise ProofError("Active Git clean/process filter is not qualified")
+
+
 def _task_diff_state(
     repo_root: Path,
     policy: dict[str, Any],
@@ -238,21 +288,36 @@ def _task_diff_state(
     *,
     timeout: float,
 ) -> tuple[str, bool]:
+    _reject_active_git_filters(repo_root, timeout=timeout)
     tracked_diff = _git(
         repo_root,
         "diff",
         "--binary",
         "--no-ext-diff",
+        "--no-textconv",
+        "HEAD",
+        "--",
+        timeout=timeout,
+    )
+    staged_diff = _git(
+        repo_root,
+        "diff",
+        "--cached",
+        "--binary",
+        "--no-ext-diff",
+        "--no-textconv",
         "HEAD",
         "--",
         timeout=timeout,
     )
     digest = hashlib.sha256()
     digest.update(tracked_diff)
+    digest.update(b"\0default-index\0")
+    digest.update(staged_diff)
     digest.update(b"\0untracked\0")
     digest.update(_hash_paths(repo_root, untracked_paths).encode("ascii"))
     digest.update(canonical_digest(policy).encode("ascii"))
-    return digest.hexdigest(), bool(tracked_diff)
+    return digest.hexdigest(), bool(tracked_diff or staged_diff)
 
 
 def _repo_id(repo_root: Path) -> str:
