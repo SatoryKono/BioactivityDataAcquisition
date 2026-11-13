@@ -4,7 +4,7 @@ Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
-Last verified: '2026-10-15'
+Last verified: '2026-11-13'
 
 ______________________________________________________________________
 
@@ -46,7 +46,9 @@ runtime path and must not become a requirement for Local-Only ETL execution.
 
 1. **Pre-task:** load memory / normative sources (AGENTS.md order).
 2. **During task:** use MCP tools for search/evidence; write code via normal VCS.
-3. **Post-task:** memory post-task workflow; do not store secrets in memory JSON.
+3. **Post-task:** run the memory workflow only in explicitly authorized
+   `read-write` mode; never store secrets in memory JSON. Apply the root
+   contract's no-write pre-task flags when the task forbids file changes.
 
 ## Security
 
@@ -57,11 +59,21 @@ runtime path and must not become a requirement for Local-Only ETL execution.
 
 ## Validation
 
-- MCP server starts without path errors on this machine
-- Tools list matches expected servers for the agent host
-- Memory workflow commands succeed without touching production data paths
+- Record the expected profile separately from the effective configuration of
+  the ordinary user session.
+- Match doctor and client route selection, then independently verify the
+  expected backend, authorization and resource scope.
+- Run a bounded content control through each required tool in that session;
+  configuration, an open port or a tool listing does not establish readiness.
+- Record failures, expected policy denials, disabled routes and untested
+  controls separately; material input drift makes affected evidence STALE.
+- Distinguish diagnostic reads from a server-enforced write prohibition.
+  Memory and RAG checks must preserve the agreed data, response-size and
+  temporary-output boundaries.
 
 ## Related
 
 - [MCP local runtime policy](../00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md)
 - Deployment notes: `docs/05-operations/deployment/NEO4J-MCP-INDEX.md`
+
+- [Ordinary-session MCP evidence, 2026-11-13](../../reports/docs-evidence/mcp-ordinary-session-20261113.md)
