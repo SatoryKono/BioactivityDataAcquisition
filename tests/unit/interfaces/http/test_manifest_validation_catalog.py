@@ -213,11 +213,14 @@ async def test_corrupt_report_catalog_returns_evidence_payload(
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "resolver_error", [OSError("unavailable"), ValueError("invalid locator")]
+    "resolver_error",
+    [
+        OSError("unavailable"),
+        ValueError("invalid locator"),
+        AttributeError("unavailable ports"),
+    ],
 )
-async def test_report_only_run_keeps_manifest_missing_with_resolver(
-    monkeypatch, resolver_error
-):
+async def test_report_only_run_rejects_source_errors(monkeypatch, resolver_error):
     import bioetl.interfaces.http._health_server_control_plane_evidence_routing as routing
     from bioetl.application.services.evidence_location.resolver import (
         EvidenceLocationResolver,
@@ -252,7 +255,8 @@ async def test_report_only_run_keeps_manifest_missing_with_resolver(
         endpoint="manifest-validation",
     )
     assert payload["resolved_via"] == "resolved_without_manifest"
-    assert payload["rows"][0]["reason"] == "manifest_not_recorded"
+    assert payload["rows"][0]["reason"] == "manifest_parse_error"
+    assert payload["rows"][0]["check"] == "parse"
     assert payload["rows"][0]["status"] == "UNKNOWN"
 
 
@@ -285,6 +289,36 @@ async def test_report_only_run_keeps_manifest_missing_with_resolver(
             "manifest_parse_error",
         ),
         ("found", "selected_run_id", "parse", "manifest_parse_error"),
+        (
+            "found",
+            "resolved_without_manifest",
+            "manifest_not_recorded",
+            "manifest_not_recorded",
+        ),
+        (
+            "location_missing",
+            "resolved_without_manifest",
+            "manifest_not_recorded",
+            "manifest_not_recorded",
+        ),
+        (
+            "identity_conflict",
+            "resolved_without_manifest",
+            "parse",
+            "manifest_parse_error",
+        ),
+        (
+            "location_invalid",
+            "resolved_without_manifest",
+            "parse",
+            "manifest_parse_error",
+        ),
+        (
+            "context_missing",
+            "resolved_without_manifest",
+            "parse",
+            "manifest_parse_error",
+        ),
     ],
 )
 async def test_bound_missing_uuid_preserves_diagnostic_after_root_validation(
@@ -317,7 +351,12 @@ async def test_bound_missing_uuid_preserves_diagnostic_after_root_validation(
 
     def resolve_location(_self, **kwargs):
         location_reads.append(kwargs)
-        return SimpleNamespace(code=SimpleNamespace(value=lookup_code), context=context)
+        return SimpleNamespace(
+            code=SimpleNamespace(
+                value="found" if lookup_code == "context_missing" else lookup_code
+            ),
+            context=None if lookup_code == "context_missing" else context,
+        )
 
     monkeypatch.setattr(routing, "resolve_evidence_scope", resolved)
     monkeypatch.setattr(
@@ -345,7 +384,7 @@ async def test_bound_missing_uuid_preserves_diagnostic_after_root_validation(
         }
     ]
     service_getter.assert_not_called()
-    if lookup_code in {"identity_conflict", "location_invalid"}:
+    if lookup_code in {"identity_conflict", "location_invalid", "context_missing"}:
         manifest_read.assert_not_called()
     else:
         manifest_read.assert_called_once_with(_RUN_ID)
