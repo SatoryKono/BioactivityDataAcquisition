@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "6fd3a66b1ce5274367707f8397d0d4652c563a6c",
+  "source_ref": "a1e11ee35f7f53c1286e4598c6b07cee598bdc0e",
+  "source_reviews": {
+    "src/bioetl/infrastructure/export/csv_exporter_table_ops.py": "AUD-007 ruff format: remove extra blank line before deduplicate_full_rows. No external resource acquisition; ownership/cleanup unchanged. No new runtime qualification."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "line_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
