@@ -1545,3 +1545,17 @@ class TestCalculateHash:
         result2 = calculate_hash('{"id": 2}')
 
         assert result1 != result2
+
+
+@pytest.fixture(autouse=True)
+def isolate_normalization_from_arrow_scanner(monkeypatch):
+    """Legacy table doubles cover normalization; real scan budgets have separate tests."""
+    from bioetl.infrastructure.quarantine import filtered_reads
+
+    monkeypatch.setattr(
+        filtered_reads,
+        "_load_bounded_scoped_pyarrow_table",
+        lambda dt, *, from_ts=None, to_ts=None, **kwargs: (
+            filtered_reads._load_scoped_pyarrow_table(dt, **kwargs)
+        ),
+    )
