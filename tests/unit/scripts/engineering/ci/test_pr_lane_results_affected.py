@@ -1492,7 +1492,7 @@ def test_owned_hook_python_inputs_keep_real_bounded_test_owners():
     assert "tests/unit/repo_backed/scripts" not in selected
 
 
-@pytest.mark.parametrize("audit", ["003", "004", "005", "007"])
+@pytest.mark.parametrize("audit", ["003", "003_extraction", "004", "005", "007"])
 def test_security_inventory_reviews_route_to_source_qualification_tests(audit):
     root = Path(__file__).resolve().parents[5]
     path = (

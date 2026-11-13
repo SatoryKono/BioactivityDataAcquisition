@@ -620,6 +620,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     **dict.fromkeys(
         (
             "configs/quality/external_resource_inventory_security_aud003_review.json",
+            "configs/quality/external_resource_inventory_security_aud003_extraction_review.json",
             "configs/quality/external_resource_inventory_security_aud004_review.json",
             "configs/quality/external_resource_inventory_security_aud005_review.json",
             "configs/quality/external_resource_inventory_security_aud007_review.json",
