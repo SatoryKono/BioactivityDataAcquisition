@@ -110,16 +110,24 @@ def _seed_raw_sidecar_if_missing(
     table_name: str,
     logger: LoggerPort,
     delimiter: str = ",",
+    schema: pa.Schema | None = None,
 ) -> None:
     """Seed ``.csv.raw`` from published CSV using confined export-root paths only."""
     csv_full_path, raw_path = _resolve_table_export_paths(base_path, table_name)
     if raw_path.exists() and _raw_sidecar_is_typed(raw_path):
         return
     source = raw_path if raw_path.exists() else csv_full_path
-    table = (
-        _read_raw_table(source, delimiter=delimiter)
-        if raw_path.exists()
-        else pv.read_csv(source, parse_options=pv.ParseOptions(delimiter=delimiter))
+    column_types = {
+        field.name: field.type.value_type
+        if pa.types.is_dictionary(field.type)
+        else field.type
+        for field in (schema or [])
+        if not pa.types.is_null(field.type)
+    }
+    table = pv.read_csv(
+        source,
+        parse_options=pv.ParseOptions(delimiter=delimiter),
+        convert_options=pv.ConvertOptions(column_types=column_types),
     )
     _write_raw_and_published_pair(
         write_raw=lambda: _atomic_csv_write(
@@ -274,6 +282,7 @@ class CsvExporter:
             table_name=table_name,
             logger=self._logger,
             delimiter=self.delimiter,
+            schema=csv_data.schema,
         )
         _write_raw_and_published_pair(
             write_raw=lambda: self._append_to_csv(

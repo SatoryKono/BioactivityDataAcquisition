@@ -1293,3 +1293,27 @@ async def test_typed_raw_dictionary_keys_survive_finalize_and_append(
     )
     await exporter.finalize_csv("dictionary", primary_keys=["key"], sort_by=["id"])
     assert pv.read_csv(tmp_path / "dictionary.csv")["id"].to_pylist() == [1, 2, 3]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("legacy_raw", [False, True])
+@pytest.mark.parametrize("keys", [("123", "456"), ("001", "1"), ("true", "True")])
+async def test_legacy_seed_uses_incoming_string_schema(
+    tmp_path, mock_logger, legacy_raw, keys
+):
+    published = tmp_path / "legacy.csv"
+    published.write_text(f'id,value\n"{keys[0]}",old\n', encoding="utf-8")
+    if legacy_raw:
+        (tmp_path / "legacy.csv.raw").write_bytes(published.read_bytes())
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    await exporter.export("legacy", pa.table({"id": [keys[1]], "value": ["new"]}))
+    for _ in range(2):
+        await exporter.finalize_csv("legacy", primary_keys=["id"])
+        result = pv.read_csv(
+            published,
+            convert_options=pv.ConvertOptions(column_types={"id": pa.string()}),
+        )
+        assert set(zip(result["id"].to_pylist(), result["value"].to_pylist())) == {
+            (keys[0], "old"),
+            (keys[1], "new"),
+        }
