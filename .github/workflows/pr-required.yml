@@ -675,7 +675,7 @@ jobs:
         # Keep the scan result file available so documented residuals do not
         # skip the gate and required-step assertion.
         continue-on-error: true
-        uses: google/osv-scanner-action/osv-scanner-action@b1d267aea5211fa648d9d442fa64b90dbdcbdd36 # v2.7.0
+        uses: google/osv-scanner-action/osv-scanner-action@32d3cd482bdadfb38b186c0ad1b031902d55d932 # v2.7.1
         with:
           scan-args: |-
             --lockfile=uv.lock
@@ -814,7 +814,7 @@ jobs:
       contents: read
     # Pin must stay on trusted main (#11232). docs.yml owns diagram/docs
     # governance so arch-pytest can ignore the expensive Mermaid modules (#12374).
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@02888d30cd4e343eeb9778fb8bbea8098591cf3d
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@f6f924bd6d3cf362e14a20206bd611179ca800a3
 
   docker-lane:
     name: Docker lane
