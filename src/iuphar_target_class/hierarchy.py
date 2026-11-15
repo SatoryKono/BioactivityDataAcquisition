@@ -143,6 +143,19 @@ def normalize_provider_class(
         for family_id in sorted(family_ids)
         if family_id in family_to_class
     )
+    built = build_family_paths(
+        nodes,
+        family_ids,
+        max_paths=max_visited_nodes,
+    )
+    if isinstance(built, Diagnostic):
+        return _graph_error_result(
+            built,
+            type_name=type_name,
+            type_to_class=type_to_class,
+            name=name,
+            path_text=path_text,
+        )
     source = "iuphar_normalized" if assigned.iuphar_class else None
     return HierarchyResult(
         annotation_status=assigned.status,
@@ -151,13 +164,7 @@ def normalize_provider_class(
         iuphar_class_candidates=assigned.candidates,
         proof=proof,
         source=source,
-        paths=_require_paths(
-        build_family_paths(nodes, family_ids, max_paths=max_visited_nodes),
-        type_name=type_name,
-        type_to_class=type_to_class,
-        name=name,
-        path_text=path_text,
-    ),
+        paths=built,
         family_evidence=evidence,
         diagnostics=(),
     )
@@ -202,11 +209,13 @@ def _index_nodes(
         grouped.setdefault(node.family_id, []).append(node)
     indexed: dict[str, FamilyNode] = {}
     for family_id in sorted(grouped):
-        payloads = {item.payload for item in grouped[family_id]}
-        if len(payloads) > 1:
+        signatures = {
+            (item.payload, tuple(sorted(set(item.parent_ids))))
+            for item in grouped[family_id]
+        }
+        if len(signatures) > 1:
             return _defect(_DUPLICATE)
-        parents = tuple(sorted(set(grouped[family_id][0].parent_ids)))
-        payload = grouped[family_id][0].payload
+        payload, parents = next(iter(signatures))
         indexed[family_id] = FamilyNode(family_id, parents, payload)
     return indexed
 
@@ -220,6 +229,7 @@ def _walk_ancestors(
     multiple_parents_allowed: bool,
 ) -> Diagnostic | None:
     seen: set[str] = set()
+    steps = [0]
     for family_id in sorted(family_ids):
         if family_id not in nodes:
             return _defect(_MISSING_FAMILY)
@@ -229,6 +239,7 @@ def _walk_ancestors(
             max_depth=max_depth,
             max_visited_nodes=max_visited_nodes,
             seen=seen,
+            steps=steps,
             multiple_parents_allowed=multiple_parents_allowed,
         )
         if defect is not None:
@@ -243,6 +254,7 @@ def _walk_one(
     max_depth: int,
     max_visited_nodes: int,
     seen: set[str],
+    steps: list[int],
     multiple_parents_allowed: bool,
 ) -> Diagnostic | None:
     frames: list[list[int | str]] = [[start, 0, 0]]
@@ -258,6 +270,7 @@ def _walk_one(
                 node,
                 depth=depth,
                 seen=seen,
+                steps=steps,
                 max_depth=max_depth,
                 max_visited_nodes=max_visited_nodes,
                 multiple_parents_allowed=multiple_parents_allowed,
@@ -283,6 +296,7 @@ def _enter_node(
     *,
     depth: int,
     seen: set[str],
+    steps: list[int],
     max_depth: int,
     max_visited_nodes: int,
     multiple_parents_allowed: bool,
