@@ -1,4 +1,4 @@
-"""Build the separate, fail-closed 207-resource runtime observation register.
+"""Build the separate, fail-closed catalog-wide runtime observation register.
 
 The source inventory is read-only. An observed allocation is partial evidence;
 neither a green suite nor a matching test name certifies all scenario barriers.
@@ -14,6 +14,7 @@ import xml.etree.ElementTree as ET
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from scripts.engineering.qa.external_resource_inventory import load_catalog
 from scripts.engineering.qa.runtime_acceptance_12553 import (
     BUNDLE,
     ROOT,
@@ -241,17 +242,19 @@ def _resource_row(
 def build() -> dict:
     """Require every inventory identity and preserve exact scenario expectations."""
     catalog = ROOT / "configs/quality/external_resource_inventory.json"
-    inventory = json.loads(catalog.read_text(encoding="utf-8"))
-    resources = [
-        r
-        for part in inventory["resource_parts"]
-        for r in json.loads((ROOT / part["file"]).read_text(encoding="utf-8"))[
-            "resources"
-        ]
-    ]
+    inventory = load_catalog(ROOT)
+    resources = inventory["resources"]
+    expected_count = inventory["source_requalification"]["definition_count"]
     identities = {r["identity"] for r in resources}
-    if len(resources) != 207 or len(identities) != 207:
-        raise ValueError("expected exactly 207 unique inventory resources")
+    if (
+        type(expected_count) is not int
+        or expected_count <= 0
+        or len(resources) != expected_count
+        or len(identities) != expected_count
+    ):
+        raise ValueError(
+            "expected catalog-declared count of unique inventory resources"
+        )
     evidence, provenance = _observations(identities)
     control = lock_control()
     rows = [_resource_row(r, evidence[r["identity"]], control) for r in resources]
@@ -278,7 +281,7 @@ def main() -> None:
         json.dumps(payload, indent=2) + "\n", encoding="utf-8"
     )
     lines = [
-        "# 207-resource runtime coverage register",
+        f"# {payload['resource_count']}-resource runtime coverage register",
         "",
         payload["semantics"],
         "",
