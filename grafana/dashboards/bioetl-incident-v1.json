@@ -3229,14 +3229,14 @@
             "x": 0,
             "y": 50,
             "w": 8,
-            "h": 3
+            "h": 8
           },
           "id": 9102,
           "options": {
             "colorMode": "value",
             "graphMode": "none",
             "justifyMode": "center",
-            "orientation": "horizontal",
+            "orientation": "vertical",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -3482,14 +3482,14 @@
             "x": 15,
             "y": 50,
             "w": 8,
-            "h": 3
+            "h": 8
           },
           "id": 9491,
           "options": {
             "colorMode": "value",
             "graphMode": "none",
             "justifyMode": "auto",
-            "orientation": "auto",
+            "orientation": "vertical",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -12747,7 +12747,7 @@
       "description": "SELECTED RUN · Canonical stage table is DQ panel 9460 (rev7 §2.4).",
       "gridPos": {
         "x": 0,
-        "y": 53,
+        "y": 58,
         "w": 12,
         "h": 3
       },
@@ -12764,7 +12764,7 @@
       "description": "SELECTED RUN · Canonical identity is Overview 9300 (rev7 §2.4).",
       "gridPos": {
         "x": 12,
-        "y": 53,
+        "y": 58,
         "w": 12,
         "h": 3
       },

@@ -67,10 +67,28 @@ def test_overview_verdict_is_first_when_columns_stack_without_changing_semantics
         key=lambda p: p["gridPos"]["x"],
     )
     assert first["id"] == 9604
-    for before, after in zip(source["panels"], projected["panels"], strict=True):
-        assert {k: v for k, v in before.items() if k != "gridPos"} == {
-            k: v for k, v in after.items() if k != "gridPos"
-        }
+
+    def walk(panels):
+        for panel in panels:
+            yield panel
+            yield from walk(panel.get("panels", []))
+
+    for before, after in zip(
+        walk(source["panels"]), walk(projected["panels"]), strict=True
+    ):
+        if after.get("options", {}).get("viewMode") == "current":
+            view = after["options"]["currentView"]
+            assert view["queries"] == before["targets"]
+            assert view["transformations"] == before.get("transformations", [])
+            assert view["options"] == before["options"]
+            assert view["pluginId"] == before["type"]
+            assert after["fieldConfig"] == before["fieldConfig"]
+            assert after["targets"] == []
+            assert after["transformations"] == []
+        else:
+            assert {
+                k: v for k, v in before.items() if k not in {"gridPos", "panels"}
+            } == {k: v for k, v in after.items() if k not in {"gridPos", "panels"}}
         assert {k: v for k, v in before["gridPos"].items() if k not in {"x", "w"}} == {
             k: v for k, v in after["gridPos"].items() if k not in {"x", "w"}
         }
@@ -88,3 +106,29 @@ def test_overview_verdict_is_first_when_columns_stack_without_changing_semantics
                 or a["y"] + a["h"] <= b["y"]
                 or b["y"] + b["h"] <= a["y"]
             )
+
+
+def test_current_consumer_uses_raw_donor_queries_and_preserves_its_own_transforms():
+    import json
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[3]
+    source = json.loads(
+        (root / "grafana/dashboards/bioetl-incident-v1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    def walk(panels):
+        return [p for item in panels for p in [item, *walk(item.get("panels", []))]]
+
+    before = {p["id"]: p for p in walk(source["panels"])}
+    after = {p["id"]: p for p in walk(project(source)["panels"])}
+    view = after[22005]["options"]["currentView"]
+    assert view["queries"] == before[2005]["targets"]
+    assert view["transformations"] == before[22005]["transformations"]
+    assert after[22005]["fieldConfig"] == before[22005]["fieldConfig"]
+    assert after[9701]["title"] == "Review Current Workflow Evidence · threshold 24h"
+    assert "workflow_evidence_freshness" not in json.dumps(project(source))
+    # Ranked suspects explicitly describe TIME RANGE and must keep that clock.
+    assert after[2010] == before[2010]

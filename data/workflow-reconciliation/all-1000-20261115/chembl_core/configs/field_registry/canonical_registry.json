@@ -1,0 +1,930 @@
+{
+  "version": "1.2.0",
+  "adr_refs": [
+    "ADR-018",
+    "ADR-026",
+    "ADR-039",
+    "ADR-045"
+  ],
+  "clusters": [
+    {
+      "cluster_id": "chembl_assay_identifier",
+      "semantic_name": "ChEMBL assay business identifier",
+      "canonical_name": "assay_id",
+      "legacy_names": [
+        "assay_chembl_id"
+      ],
+      "raw_provider_names": [
+        "assay_chembl_id"
+      ],
+      "pipelines": [
+        "chembl_assay",
+        "chembl_activity",
+        "composite_assay",
+        "composite_activity"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/assay.yaml",
+        "configs/composites/assay.yaml",
+        "configs/composites/activity.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_native_ingestion_boundary",
+      "notes": "Internal config, DQ, join and contract surfaces use assay_id. Provider-native ChEMBL input filters retain assay_chembl_id as the external column name and normalize it at the transformer ingestion boundary."
+    },
+    {
+      "cluster_id": "chembl_molecule_identifier",
+      "semantic_name": "ChEMBL molecule business identifier",
+      "canonical_name": "molecule_id",
+      "legacy_names": [
+        "molecule_chembl_id"
+      ],
+      "raw_provider_names": [
+        "molecule_chembl_id"
+      ],
+      "pipelines": [
+        "chembl_molecule",
+        "chembl_activity",
+        "chembl_compound_record",
+        "composite_molecule",
+        "composite_activity"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/molecule.yaml",
+        "configs/entities/chembl/compound_record.yaml",
+        "configs/composites/molecule.yaml",
+        "configs/composites/activity.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_native_ingestion_boundary",
+      "notes": "Internal schema, merge and DQ surfaces use molecule_id for ChEMBL-seeded molecule identity. PubChem CID is a provider-local identifier family and must not be treated as the same business identifier. Provider-native ChEMBL filters still accept molecule_chembl_id and normalize it at the transformer ingestion boundary."
+    },
+    {
+      "cluster_id": "pubchem_cid_identifier",
+      "semantic_name": "PubChem CID business identifier",
+      "canonical_name": "pubchem_cid",
+      "legacy_names": [
+        "cid"
+      ],
+      "raw_provider_names": [
+        "molecule_id"
+      ],
+      "pipelines": [
+        "pubchem_compound"
+      ],
+      "affected_paths": [
+        "configs/entities/pubchem/compound.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_local_identity",
+      "notes": "PubChem compound surfaces currently persist CID under the internal field name molecule_id. This identifier is provider-local and is intentionally not semantically identical to the ChEMBL molecule_id family."
+    },
+    {
+      "cluster_id": "pubmed_identifier",
+      "semantic_name": "PubMed publication identifier",
+      "canonical_name": "pmid",
+      "legacy_names": [
+        "pubmed_id"
+      ],
+      "raw_provider_names": [
+        "pubmed_id"
+      ],
+      "pipelines": [
+        "pubmed_publication",
+        "chembl_publication",
+        "crossref_publication",
+        "openalex_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_legacy_input_filter",
+      "notes": "PubMed provider input still arrives as pubmed_id, but normalized schema, join keys and DQ contracts use pmid."
+    },
+    {
+      "cluster_id": "doi_identifier",
+      "semantic_name": "Digital Object Identifier",
+      "canonical_name": "doi",
+      "legacy_names": [],
+      "raw_provider_names": [
+        "doi"
+      ],
+      "pipelines": [
+        "chembl_publication",
+        "crossref_publication",
+        "openalex_publication",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/publication.yaml",
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_and_external",
+      "notes": "doi is already the canonical identifier name across provider, composite and Gold surfaces."
+    },
+    {
+      "cluster_id": "publication_title",
+      "semantic_name": "Publication display title",
+      "canonical_name": "title",
+      "legacy_names": [
+        "pubmed_title",
+        "openalex_title"
+      ],
+      "raw_provider_names": [
+        "title"
+      ],
+      "pipelines": [
+        "pubmed_publication",
+        "openalex_publication",
+        "crossref_publication",
+        "semanticscholar_publication",
+        "chembl_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/entities/chembl/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_legacy_aliases_retired",
+      "notes": "All normalized publication configs and composite join paths use title. Historical provider-prefixed title aliases are retained only as migration references in registry/docs."
+    },
+    {
+      "cluster_id": "publication_abstract",
+      "semantic_name": "Publication abstract text",
+      "canonical_name": "abstract",
+      "legacy_names": [],
+      "raw_provider_names": [
+        "abstract"
+      ],
+      "pipelines": [
+        "chembl_publication",
+        "crossref_publication",
+        "openalex_publication",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/publication.yaml",
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_and_external",
+      "notes": "All publication-family entity configs normalize abstract through the same canonical field name, while composite publication inherits the upstream canonical abstract surface."
+    },
+    {
+      "cluster_id": "publication_authors",
+      "semantic_name": "Publication author evidence payload",
+      "canonical_name": "authors",
+      "legacy_names": [],
+      "raw_provider_names": [
+        "authors"
+      ],
+      "pipelines": [
+        "chembl_publication",
+        "crossref_publication",
+        "openalex_publication",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/publication.yaml",
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_and_external",
+      "notes": "Publication-family pipelines persist authors under one canonical field name and composite publication inherits that canonical author payload without introducing a competing alias surface."
+    },
+    {
+      "cluster_id": "publication_publication_type",
+      "semantic_name": "Publication type classification",
+      "canonical_name": "publication_type",
+      "legacy_names": [
+        "doc_type",
+        "source_type"
+      ],
+      "raw_provider_names": [
+        "publication_type",
+        "doc_type",
+        "source_type"
+      ],
+      "pipelines": [
+        "chembl_publication",
+        "crossref_publication",
+        "openalex_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/publication.yaml",
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "Provider document/source type fields are normalized to publication_type before composite merge and Gold validation."
+    },
+    {
+      "cluster_id": "publication_publication_type_unified",
+      "semantic_name": "Harmonized publication type taxonomy",
+      "canonical_name": "publication_type_unified",
+      "legacy_names": [],
+      "raw_provider_names": [
+        "publication_type_unified"
+      ],
+      "pipelines": [
+        "chembl_publication",
+        "crossref_publication",
+        "openalex_publication",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/publication.yaml",
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_and_external",
+      "notes": "The harmonized publication_type_unified taxonomy is shared across publication-family pipelines and composite publication merge surfaces as the canonical cross-provider classification field."
+    },
+    {
+      "cluster_id": "publication_publication_class",
+      "semantic_name": "Top-level harmonized publication class",
+      "canonical_name": "publication_class",
+      "legacy_names": [],
+      "raw_provider_names": [
+        "publication_class"
+      ],
+      "pipelines": [
+        "chembl_publication",
+        "crossref_publication",
+        "openalex_publication",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/publication.yaml",
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_and_external",
+      "notes": "publication_class is an owner-approved cross-provider taxonomy layer used consistently by publication-family configs and inherited unchanged by composite publication."
+    },
+    {
+      "cluster_id": "publication_publication_subclass",
+      "semantic_name": "Detailed harmonized publication subclass",
+      "canonical_name": "publication_subclass",
+      "legacy_names": [],
+      "raw_provider_names": [
+        "publication_subclass"
+      ],
+      "pipelines": [
+        "chembl_publication",
+        "crossref_publication",
+        "openalex_publication",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/publication.yaml",
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_and_external",
+      "notes": "publication_subclass is governed as the shared detailed publication taxonomy across entity and composite publication surfaces."
+    },
+    {
+      "cluster_id": "publication_publication_year",
+      "semantic_name": "Publication year",
+      "canonical_name": "publication_year",
+      "legacy_names": [
+        "year"
+      ],
+      "raw_provider_names": [
+        "publication_year",
+        "year"
+      ],
+      "pipelines": [
+        "chembl_publication",
+        "crossref_publication",
+        "openalex_publication",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/publication.yaml",
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "Provider year fields are normalized to publication_year. Nullable integer to Gold number compatibility remains explicitly governed by contract tests."
+    },
+    {
+      "cluster_id": "publication_publication_date",
+      "semantic_name": "Publication date",
+      "canonical_name": "publication_date",
+      "legacy_names": [],
+      "raw_provider_names": [
+        "publication_date"
+      ],
+      "pipelines": [
+        "chembl_publication",
+        "crossref_publication",
+        "openalex_publication",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/publication.yaml",
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_and_external",
+      "notes": "publication_date is normalized through the same canonical date policy across publication-family pipelines, and composite publication inherits the canonical field directly."
+    },
+    {
+      "cluster_id": "publication_journal",
+      "semantic_name": "Publication journal title",
+      "canonical_name": "journal",
+      "legacy_names": [
+        "journal_title"
+      ],
+      "raw_provider_names": [
+        "journal",
+        "journal_title"
+      ],
+      "pipelines": [
+        "chembl_publication",
+        "pubmed_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "PubMed journal_title is normalized to the canonical journal field."
+    },
+    {
+      "cluster_id": "publication_journal_name_short",
+      "semantic_name": "Abbreviated journal title",
+      "canonical_name": "journal_name_short",
+      "legacy_names": [
+        "journal_abbrev",
+        "short_container_title"
+      ],
+      "raw_provider_names": [
+        "journal_name_short",
+        "journal_abbrev",
+        "short_container_title"
+      ],
+      "pipelines": [
+        "crossref_publication",
+        "pubmed_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "Provider-specific abbreviated journal fields normalize to journal_name_short."
+    },
+    {
+      "cluster_id": "publication_page_first",
+      "semantic_name": "First publication page",
+      "canonical_name": "page_first",
+      "legacy_names": [
+        "first_page"
+      ],
+      "raw_provider_names": [
+        "page_first",
+        "first_page"
+      ],
+      "pipelines": [
+        "crossref_publication",
+        "openalex_publication",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "Provider first_page fields normalize to page_first."
+    },
+    {
+      "cluster_id": "publication_page_last",
+      "semantic_name": "Last publication page",
+      "canonical_name": "page_last",
+      "legacy_names": [
+        "last_page"
+      ],
+      "raw_provider_names": [
+        "page_last",
+        "last_page"
+      ],
+      "pipelines": [
+        "crossref_publication",
+        "openalex_publication",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "Provider last_page fields normalize to page_last."
+    },
+    {
+      "cluster_id": "publication_page_range",
+      "semantic_name": "Publication page range",
+      "canonical_name": "page_range",
+      "legacy_names": [
+        "pages"
+      ],
+      "raw_provider_names": [
+        "page_range",
+        "pages"
+      ],
+      "pipelines": [
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "Provider pages fields normalize to page_range."
+    },
+    {
+      "cluster_id": "publication_volume",
+      "semantic_name": "Publication volume",
+      "canonical_name": "volume",
+      "legacy_names": [],
+      "raw_provider_names": [
+        "volume"
+      ],
+      "pipelines": [
+        "chembl_publication",
+        "crossref_publication",
+        "openalex_publication",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/publication.yaml",
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_and_external",
+      "notes": "volume is already the shared publication-family field name across entity configs, cross-source validation, and composite publication merge surfaces."
+    },
+    {
+      "cluster_id": "publication_issue",
+      "semantic_name": "Publication issue number",
+      "canonical_name": "issue",
+      "legacy_names": [],
+      "raw_provider_names": [
+        "issue"
+      ],
+      "pipelines": [
+        "chembl_publication",
+        "crossref_publication",
+        "openalex_publication",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/publication.yaml",
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_and_external",
+      "notes": "issue is already shared across publication-family pipelines and participates in composite publication cross-source validation under one canonical field name."
+    },
+    {
+      "cluster_id": "publication_citations_received",
+      "semantic_name": "Inbound citation count",
+      "canonical_name": "citations_received",
+      "legacy_names": [
+        "citation_count"
+      ],
+      "raw_provider_names": [
+        "citations_received",
+        "citation_count"
+      ],
+      "pipelines": [
+        "crossref_publication",
+        "openalex_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "Provider citation_count fields normalize to citations_received."
+    },
+    {
+      "cluster_id": "publication_citations_made",
+      "semantic_name": "Outbound reference count",
+      "canonical_name": "citations_made",
+      "legacy_names": [
+        "reference_count"
+      ],
+      "raw_provider_names": [
+        "citations_made",
+        "reference_count"
+      ],
+      "pipelines": [
+        "crossref_publication",
+        "openalex_publication",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "Provider reference_count fields normalize to citations_made."
+    },
+    {
+      "cluster_id": "publication_subject_keywords",
+      "semantic_name": "Publication subject keywords",
+      "canonical_name": "subject_keywords",
+      "legacy_names": [
+        "keywords",
+        "subjects"
+      ],
+      "raw_provider_names": [
+        "subject_keywords",
+        "keywords",
+        "subjects"
+      ],
+      "pipelines": [
+        "crossref_publication",
+        "openalex_publication",
+        "pubmed_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "Provider keyword/subject arrays normalize to subject_keywords when they represent generic publication keywords."
+    },
+    {
+      "cluster_id": "publication_subject_topics",
+      "semantic_name": "Publication topic taxonomy payload",
+      "canonical_name": "subject_topics",
+      "legacy_names": [
+        "topics"
+      ],
+      "raw_provider_names": [
+        "subject_topics",
+        "topics"
+      ],
+      "pipelines": [
+        "openalex_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/openalex/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "OpenAlex topics normalize to subject_topics."
+    },
+    {
+      "cluster_id": "publication_subject_mesh",
+      "semantic_name": "Publication MeSH subject terms",
+      "canonical_name": "subject_mesh",
+      "legacy_names": [
+        "mesh_terms"
+      ],
+      "raw_provider_names": [
+        "subject_mesh",
+        "mesh_terms"
+      ],
+      "pipelines": [
+        "pubmed_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/pubmed/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "PubMed mesh_terms normalize to subject_mesh and remain distinct from generic subject_keywords."
+    },
+    {
+      "cluster_id": "publication_subject_fields",
+      "semantic_name": "Publication field-of-study labels",
+      "canonical_name": "subject_fields",
+      "legacy_names": [
+        "fields_of_study"
+      ],
+      "raw_provider_names": [
+        "subject_fields",
+        "fields_of_study"
+      ],
+      "pipelines": [
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "SemanticScholar fields_of_study normalize to subject_fields and remain distinct from MeSH/topic clusters."
+    },
+    {
+      "cluster_id": "publication_affiliation_list",
+      "semantic_name": "Publication author affiliation list",
+      "canonical_name": "affiliation_list",
+      "legacy_names": [
+        "affiliations"
+      ],
+      "raw_provider_names": [
+        "affiliation_list",
+        "affiliations"
+      ],
+      "pipelines": [
+        "openalex_publication",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "Provider affiliations fields normalize to affiliation_list."
+    },
+    {
+      "cluster_id": "publication_affiliation_structured",
+      "semantic_name": "Structured publication affiliation payload",
+      "canonical_name": "affiliation_structured",
+      "legacy_names": [
+        "structured_affiliations"
+      ],
+      "raw_provider_names": [
+        "affiliation_structured",
+        "structured_affiliations"
+      ],
+      "pipelines": [
+        "pubmed_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/pubmed/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "PubMed structured_affiliations normalize to affiliation_structured."
+    },
+    {
+      "cluster_id": "molecule_hba_count",
+      "semantic_name": "Hydrogen bond acceptor count",
+      "canonical_name": "hba_count",
+      "legacy_names": [
+        "h_bond_acceptor_count",
+        "hba"
+      ],
+      "raw_provider_names": [
+        "hba_count",
+        "h_bond_acceptor_count",
+        "hba"
+      ],
+      "pipelines": [
+        "chembl_molecule",
+        "pubchem_compound",
+        "composite_molecule"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/molecule.yaml",
+        "configs/entities/pubchem/compound.yaml",
+        "configs/composites/molecule.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "PubChem h_bond_acceptor_count and legacy hba map to the canonical hba_count descriptor."
+    },
+    {
+      "cluster_id": "molecule_hbd_count",
+      "semantic_name": "Hydrogen bond donor count",
+      "canonical_name": "hbd_count",
+      "legacy_names": [
+        "h_bond_donor_count"
+      ],
+      "raw_provider_names": [
+        "hbd_count",
+        "h_bond_donor_count"
+      ],
+      "pipelines": [
+        "chembl_molecule",
+        "pubchem_compound",
+        "composite_molecule"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/molecule.yaml",
+        "configs/entities/pubchem/compound.yaml",
+        "configs/composites/molecule.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "PubChem h_bond_donor_count maps to the canonical hbd_count descriptor."
+    },
+    {
+      "cluster_id": "molecule_polar_surface_area",
+      "semantic_name": "Topological polar surface area",
+      "canonical_name": "polar_surface_area",
+      "legacy_names": [
+        "tpsa"
+      ],
+      "raw_provider_names": [
+        "polar_surface_area",
+        "tpsa"
+      ],
+      "pipelines": [
+        "chembl_molecule",
+        "pubchem_compound",
+        "composite_molecule"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/molecule.yaml",
+        "configs/entities/pubchem/compound.yaml",
+        "configs/composites/molecule.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "PubChem tpsa maps to the canonical polar_surface_area descriptor."
+    },
+    {
+      "cluster_id": "molecule_logp",
+      "semantic_name": "Octanol-water partition coefficient",
+      "canonical_name": "logp",
+      "legacy_names": [
+        "xlogp"
+      ],
+      "raw_provider_names": [
+        "logp",
+        "xlogp"
+      ],
+      "pipelines": [
+        "chembl_molecule",
+        "pubchem_compound",
+        "composite_molecule"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/molecule.yaml",
+        "configs/entities/pubchem/compound.yaml",
+        "configs/composites/molecule.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "PubChem xlogp maps to canonical logp while source-specific method semantics remain documented in molecule contracts."
+    },
+    {
+      "cluster_id": "molecule_standard_inchi",
+      "semantic_name": "Standard IUPAC InChI identifier",
+      "canonical_name": "standard_inchi",
+      "legacy_names": [
+        "inchi"
+      ],
+      "raw_provider_names": [
+        "standard_inchi",
+        "inchi"
+      ],
+      "pipelines": [
+        "chembl_molecule",
+        "pubchem_compound",
+        "composite_molecule"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/molecule.yaml",
+        "configs/entities/pubchem/compound.yaml",
+        "configs/composites/molecule.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "PubChem inchi maps to standard_inchi for composite molecule merge and Gold-facing contracts."
+    },
+    {
+      "cluster_id": "molecule_inchi_key",
+      "semantic_name": "Standard InChIKey identifier",
+      "canonical_name": "inchi_key",
+      "legacy_names": [],
+      "raw_provider_names": [
+        "inchi_key"
+      ],
+      "pipelines": [
+        "chembl_molecule",
+        "pubchem_compound",
+        "composite_molecule"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/molecule.yaml",
+        "configs/entities/pubchem/compound.yaml",
+        "configs/composites/molecule.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "InChIKey is the primary molecule composite join key and is canonical across ChEMBL/PubChem surfaces."
+    },
+    {
+      "cluster_id": "molecule_molecular_weight",
+      "semantic_name": "Molecular weight descriptor",
+      "canonical_name": "molecular_weight",
+      "legacy_names": [],
+      "raw_provider_names": [
+        "molecular_weight"
+      ],
+      "pipelines": [
+        "chembl_molecule",
+        "pubchem_compound",
+        "composite_molecule"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/molecule.yaml",
+        "configs/entities/pubchem/compound.yaml",
+        "configs/composites/molecule.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_aliases",
+      "notes": "molecular_weight is canonical across ChEMBL/PubChem molecule descriptor surfaces."
+    }
+  ]
+}

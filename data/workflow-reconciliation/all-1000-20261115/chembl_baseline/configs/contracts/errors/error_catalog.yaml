@@ -1,0 +1,163 @@
+schema_version: error-catalog-v1
+owner: "@bioetl-observability"
+status: active
+last_verified: "2026-06-30"
+policy:
+  grouping_contract: canonical_code_only
+  versioning: additive_codes_are_minor_breaks
+  severity_changes_require_tests: true
+  unknown_fallback_code: SYS-UNKNOWN
+  dashboard_grouping_forbidden_inputs:
+    - exception_class_name
+    - error_message
+    - raw_payload
+domains:
+  SRC: source ingestion and provider payload acquisition
+  NET: network and transport failures
+  RATE: upstream rate-limit throttling
+  DQ: data-quality validation failures
+  ENR: enrichment and derived-field failures
+  XVAL: cross-validation failures
+  SILVER: Silver layer normalization or schema failures
+  GOLD: Gold/read-model strict contract failures
+  QTN: quarantine projection and inspection failures
+  CFG: configuration and contract registry failures
+  EXP: governed export failures
+  SYS: system, storage, and unknown failures
+codes:
+  - code: NET-TIMEOUT
+    domain: NET
+    stage: acquisition
+    severity: warning
+    retryable: true
+    policy_hooks:
+      - retry_with_backoff
+    safe_user_message: Upstream request timed out.
+    internal_template: "{provider} request timed out during {operation}"
+    owner_area: infrastructure.adapters
+    runbook: docs/05-operations/01-monitoring-guide.md
+    maps_error_types:
+      - TIMEOUT
+      - NETWORK_ERROR
+  - code: RATE-LIMITED
+    domain: RATE
+    stage: acquisition
+    severity: warning
+    retryable: true
+    policy_hooks:
+      - retry_after
+      - circuit_breaker
+    safe_user_message: Upstream provider rate limit was reached.
+    internal_template: "{provider} returned rate-limit response"
+    owner_area: infrastructure.adapters
+    runbook: docs/05-operations/01-monitoring-guide.md
+    maps_error_types:
+      - RATE_LIMIT
+  - code: DQ-SCHEMA-VIOLATION
+    domain: DQ
+    stage: validation
+    severity: error
+    retryable: false
+    policy_hooks:
+      - quarantine_record
+    safe_user_message: Record failed validation and was routed to quarantine.
+    internal_template: "{pipeline} record failed schema validation"
+    owner_area: application.data_quality
+    runbook: docs/04-reference/contracts/dq-contracts.md
+    maps_error_types:
+      - SCHEMA_VIOLATION
+      - MISSING_REQUIRED_FIELD
+      - INVALID_DATA
+      - DATA_QUALITY
+  - code: GOLD-STRICT-SCHEMA
+    domain: GOLD
+    stage: gold_validation
+    severity: critical
+    retryable: false
+    policy_hooks:
+      - fail_pipeline
+      - block_contract_drift
+    safe_user_message: Gold strict schema validation failed.
+    internal_template: "Gold contract rejected {table_name}"
+    owner_area: contracts.gold
+    runbook: docs/04-reference/contracts/gold-schemas.md
+    maps_error_types:
+      - SCHEMA_MISMATCH_GOLD
+      - SCHEMA_EVOLUTION
+  - code: QTN-IMMUTABILITY
+    domain: QTN
+    stage: quarantine
+    severity: critical
+    retryable: false
+    policy_hooks:
+      - block_payload_mutation
+    safe_user_message: Quarantine payload immutability was violated.
+    internal_template: "Quarantine entry {entry_id} mutation attempt detected"
+    owner_area: domain.quarantine
+    runbook: docs/04-reference/contracts/dq-contracts.md
+    maps_error_types:
+      - INVALID_DATA
+  - code: CFG-CONTRACT-DRIFT
+    domain: CFG
+    stage: configuration
+    severity: critical
+    retryable: false
+    policy_hooks:
+      - fail_ci
+      - block_release
+    safe_user_message: Configuration or contract drift was detected.
+    internal_template: "{contract_ref} drift detected by {validator}"
+    owner_area: contracts.config
+    runbook: docs/05-operations/runbooks/observability-checklist.md
+    maps_error_types:
+      - SCHEMA_EVOLUTION
+  - code: EXP-AUTHZ-DENIED
+    domain: EXP
+    stage: export
+    severity: error
+    retryable: false
+    policy_hooks:
+      - deny_export
+      - audit_attempt
+    safe_user_message: Export role is not authorized for the requested fields.
+    internal_template: "{role} attempted export with redaction_profile={redaction_profile}"
+    owner_area: application.export
+    runbook: docs/security/export-policy.md
+    maps_error_types:
+      - AUTH_FAILURE
+  - code: EXP-EXPIRED
+    domain: EXP
+    stage: export
+    severity: warning
+    retryable: false
+    policy_hooks:
+      - deny_download
+      - audit_attempt
+    safe_user_message: Export download has expired.
+    internal_template: "export audit_ref={audit_ref} expired_at={expires_at}"
+    owner_area: application.export
+    runbook: docs/security/export-policy.md
+    maps_error_types:
+      - AUTH_FAILURE
+  - code: SYS-UNKNOWN
+    domain: SYS
+    stage: unknown
+    severity: error
+    retryable: false
+    policy_hooks:
+      - route_unknown_fallback
+      - require_triage
+    safe_user_message: Unknown system failure; see runbook and audit trail.
+    internal_template: "Unknown failure from {surface}"
+    owner_area: platform
+    runbook: docs/05-operations/01-monitoring-guide.md
+    maps_error_types:
+      - DB_UNAVAILABLE
+      - LOCK_LOST
+legacy_mappings:
+  TimeoutError: NET-TIMEOUT
+  RateLimitExceededError: RATE-LIMITED
+  SchemaViolationError: DQ-SCHEMA-VIOLATION
+  MissingRequiredFieldError: DQ-SCHEMA-VIOLATION
+  PermissionError: EXP-AUTHZ-DENIED
+  ValueError: SYS-UNKNOWN

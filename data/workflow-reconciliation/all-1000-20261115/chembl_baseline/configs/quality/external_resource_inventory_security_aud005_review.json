@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "46240c4b52cb498b4027be81eb0f5a5cb7c2400a",
+  "source_ref": "912a3b97442dda8237e7aa433b9a30ab6760eebe",
+  "source_reviews": {
+    "src/bioetl/infrastructure/quarantine/filtered_reads.py": "Reviewed pure extraction of bounded batch collection to reduce cognitive complexity, retaining 10000 rows, 8MiB selected data and 5 seconds with identical selection semantics. Existing DeltaTable/dataset/worker ownership unchanged; no new external resource."
+  }
+}

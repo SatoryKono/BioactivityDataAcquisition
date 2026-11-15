@@ -1,0 +1,13 @@
+schema_version: "1.0.0"
+workflow:
+  name: chembl_tissue
+  version: "1.0.0"
+  defaults:
+    run_options:
+      run_type: backfill
+      dry_run: false
+      log_level: INFO
+  steps:
+    - kind: pipeline
+      step_id: run_chembl_tissue
+      pipeline_name: chembl_tissue

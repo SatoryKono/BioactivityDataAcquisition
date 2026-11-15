@@ -32,13 +32,33 @@ def test_revision_rejects_options_and_expressions_before_git(ref, monkeypatch):
         guard._revision(Path("D:/github/repo"), ref)
 
 
-@pytest.mark.parametrize("argument", ["main\n--force", "$(calc)", "a;calc", "a b"])
+@pytest.mark.parametrize(
+    "argument", ["main\n--force", "$(calc)", "a;calc", "a b", "--config=unsafe"]
+)
 def test_git_argument_allowlist_blocks_before_subprocess(argument, monkeypatch):
     monkeypatch.setattr(
         subprocess, "run", lambda *_a, **_k: pytest.fail("Must not run")
     )
     with pytest.raises(ValueError, match="unsupported characters"):
         guard._git(Path("D:/github/repo"), "rev-parse", argument)
+
+
+def test_git_common_dir_option_reaches_subprocess(monkeypatch):
+    calls = []
+
+    def fake_run(command, **kwargs):
+        calls.append(command)
+        return subprocess.CompletedProcess(command, 0, "D:/github/repo/.git\n")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    result = guard._git(
+        Path("D:/github/repo"),
+        "rev-parse",
+        "--path-format=absolute",
+        "--git-common-dir",
+    )
+    assert result == "D:/github/repo/.git\n"
+    assert calls[0][-3:] == ["rev-parse", "--path-format=absolute", "--git-common-dir"]
 
 
 def test_branch_option_is_rejected_before_native_branch_check(policy, git_calls):

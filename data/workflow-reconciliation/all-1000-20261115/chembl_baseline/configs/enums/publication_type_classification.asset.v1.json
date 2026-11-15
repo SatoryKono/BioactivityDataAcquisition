@@ -1,0 +1,1942 @@
+{
+  "schema_version": 1,
+  "asset": "publication_type_classification",
+  "asset_version": "v1",
+  "columns": [
+    "unified_type",
+    "subclass",
+    "class_code",
+    "openalex_type",
+    "crossref_type",
+    "pubmed_type",
+    "semanticscholar_type"
+  ],
+  "rows": [
+    [
+      "Peer Review",
+      "Peer Review",
+      "PEER",
+      "peer-review",
+      "peer-review",
+      "—",
+      "—"
+    ],
+    [
+      "Journal Article",
+      "Original Experimental Data",
+      "EXP",
+      "article",
+      "journal-article",
+      "Journal Article",
+      "JournalArticle"
+    ],
+    [
+      "Conference Paper",
+      "Original Experimental Data",
+      "EXP",
+      "article*",
+      "proceedings-article",
+      "Congress",
+      "Conference"
+    ],
+    [
+      "Preprint",
+      "Original Experimental Data",
+      "EXP",
+      "preprint",
+      "posted-content",
+      "Preprint",
+      "—"
+    ],
+    [
+      "Dataset",
+      "Original Experimental Data",
+      "EXP",
+      "dataset",
+      "dataset",
+      "Dataset",
+      "Dataset"
+    ],
+    [
+      "Database",
+      "Original Experimental Data",
+      "EXP",
+      "database",
+      "database",
+      "Database",
+      "—"
+    ],
+    [
+      "Dissertation",
+      "Original Experimental Data",
+      "EXP",
+      "dissertation",
+      "dissertation",
+      "Academic Dissertation",
+      "—"
+    ],
+    [
+      "Report",
+      "Original Experimental Data",
+      "EXP",
+      "report",
+      "report",
+      "Technical Report",
+      "—"
+    ],
+    [
+      "Report Component",
+      "Original Experimental Data",
+      "EXP",
+      "report-component",
+      "report-component",
+      "—",
+      "—"
+    ],
+    [
+      "Component (figure/table/suppl)",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "component",
+      "—",
+      "—"
+    ],
+    [
+      "Supplementary Materials",
+      "Original Experimental Data",
+      "EXP",
+      "supplementary-materials",
+      "—",
+      "Electronic Supplementary Materials",
+      "—"
+    ],
+    [
+      "Software",
+      "Original Experimental Data",
+      "EXP",
+      "software",
+      "—",
+      "—",
+      "—"
+    ],
+    [
+      "Patent",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Patent",
+      "—"
+    ],
+    [
+      "Case Report",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Case Reports",
+      "CaseReport"
+    ],
+    [
+      "Clinical Study",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Clinical Study",
+      "Study"
+    ],
+    [
+      "Clinical Trial",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Clinical Trial",
+      "ClinicalTrial"
+    ],
+    [
+      "Clinical Trial Protocol",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Clinical Trial Protocol",
+      "—"
+    ],
+    [
+      "Clinical Trial, Phase I",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Clinical Trial, Phase I",
+      "—"
+    ],
+    [
+      "Clinical Trial, Phase II",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Clinical Trial, Phase II",
+      "—"
+    ],
+    [
+      "Clinical Trial, Phase III",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Clinical Trial, Phase III",
+      "—"
+    ],
+    [
+      "Clinical Trial, Phase IV",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Clinical Trial, Phase IV",
+      "—"
+    ],
+    [
+      "Clinical Trial, Veterinary",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Clinical Trial, Veterinary",
+      "—"
+    ],
+    [
+      "Adaptive Clinical Trial",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Adaptive Clinical Trial",
+      "—"
+    ],
+    [
+      "Pragmatic Clinical Trial",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Pragmatic Clinical Trial",
+      "—"
+    ],
+    [
+      "Equivalence Trial",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Equivalence Trial",
+      "—"
+    ],
+    [
+      "Randomized Controlled Trial",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Randomized Controlled Trial",
+      "—"
+    ],
+    [
+      "Randomized Controlled Trial, Vet",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Randomized Controlled Trial, Veterinary",
+      "—"
+    ],
+    [
+      "Controlled Clinical Trial",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Controlled Clinical Trial",
+      "—"
+    ],
+    [
+      "Observational Study",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Observational Study",
+      "—"
+    ],
+    [
+      "Observational Study, Veterinary",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Observational Study, Veterinary",
+      "—"
+    ],
+    [
+      "Comparative Study",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Comparative Study",
+      "—"
+    ],
+    [
+      "Validation Study",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Validation Study",
+      "—"
+    ],
+    [
+      "Evaluation Study",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Evaluation Study",
+      "—"
+    ],
+    [
+      "Multicenter Study",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Multicenter Study",
+      "—"
+    ],
+    [
+      "Twin Study",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Twin Study",
+      "—"
+    ],
+    [
+      "Clinical Conference",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Clinical Conference",
+      "—"
+    ],
+    [
+      "Annual Report",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Annual Report",
+      "—"
+    ],
+    [
+      "Statistics",
+      "Original Experimental Data",
+      "EXP",
+      "—",
+      "—",
+      "Statistics",
+      "—"
+    ],
+    [
+      "Review",
+      "Reviews & Syntheses",
+      "REV",
+      "review",
+      "—",
+      "Review",
+      "Review"
+    ],
+    [
+      "Systematic Review",
+      "Reviews & Syntheses",
+      "REV",
+      "—",
+      "—",
+      "Systematic Review",
+      "—"
+    ],
+    [
+      "Meta-Analysis",
+      "Reviews & Syntheses",
+      "REV",
+      "—",
+      "—",
+      "Meta-Analysis",
+      "MetaAnalysis"
+    ],
+    [
+      "Network Meta-Analysis",
+      "Reviews & Syntheses",
+      "REV",
+      "—",
+      "—",
+      "Network Meta-Analysis",
+      "—"
+    ],
+    [
+      "Scoping Review",
+      "Reviews & Syntheses",
+      "REV",
+      "—",
+      "—",
+      "Scoping Review",
+      "—"
+    ],
+    [
+      "Scientific Integrity Review",
+      "Reviews & Syntheses",
+      "REV",
+      "—",
+      "—",
+      "Scientific Integrity Review",
+      "—"
+    ],
+    [
+      "Editorial",
+      "Editorial & Commentary",
+      "REV",
+      "editorial",
+      "—",
+      "Editorial",
+      "Editorial"
+    ],
+    [
+      "Letter",
+      "Editorial & Commentary",
+      "REV",
+      "letter",
+      "—",
+      "Letter",
+      "LettersAndComments"
+    ],
+    [
+      "Comment",
+      "Editorial & Commentary",
+      "REV",
+      "—",
+      "—",
+      "Comment",
+      "LettersAndComments"
+    ],
+    [
+      "News",
+      "Editorial & Commentary",
+      "REV",
+      "—",
+      "—",
+      "News",
+      "News"
+    ],
+    [
+      "Newspaper Article",
+      "Editorial & Commentary",
+      "REV",
+      "—",
+      "—",
+      "Newspaper Article",
+      "—"
+    ],
+    [
+      "Interview",
+      "Editorial & Commentary",
+      "REV",
+      "—",
+      "—",
+      "Interview",
+      "—"
+    ],
+    [
+      "Address",
+      "Editorial & Commentary",
+      "REV",
+      "—",
+      "—",
+      "Address",
+      "—"
+    ],
+    [
+      "Introductory Journal Article",
+      "Editorial & Commentary",
+      "REV",
+      "—",
+      "—",
+      "Introductory Journal Article",
+      "—"
+    ],
+    [
+      "Meeting Abstract",
+      "Editorial & Commentary",
+      "REV",
+      "—",
+      "—",
+      "Meeting Abstract",
+      "—"
+    ],
+    [
+      "Popular Work",
+      "Editorial & Commentary",
+      "REV",
+      "—",
+      "—",
+      "Popular Work",
+      "—"
+    ],
+    [
+      "Blog",
+      "Editorial & Commentary",
+      "REV",
+      "—",
+      "—",
+      "Blog",
+      "—"
+    ],
+    [
+      "Webcast",
+      "Editorial & Commentary",
+      "REV",
+      "—",
+      "—",
+      "Webcast",
+      "—"
+    ],
+    [
+      "Erratum",
+      "Corrections & Retractions",
+      "REV",
+      "erratum",
+      "—",
+      "Published Erratum",
+      "—"
+    ],
+    [
+      "Retraction notice",
+      "Corrections & Retractions",
+      "REV",
+      "retraction",
+      "—",
+      "Retraction of Publication",
+      "—"
+    ],
+    [
+      "Retracted Publication",
+      "Corrections & Retractions",
+      "REV",
+      "—",
+      "—",
+      "Retracted Publication",
+      "—"
+    ],
+    [
+      "Corrected and Republished Article",
+      "Corrections & Retractions",
+      "REV",
+      "—",
+      "—",
+      "Corrected and Republished Article",
+      "—"
+    ],
+    [
+      "Expression of Concern",
+      "Corrections & Retractions",
+      "REV",
+      "—",
+      "—",
+      "Expression of Concern",
+      "—"
+    ],
+    [
+      "Duplicate Publication",
+      "Corrections & Retractions",
+      "REV",
+      "—",
+      "—",
+      "Duplicate Publication",
+      "—"
+    ],
+    [
+      "Book",
+      "Books & Monographs",
+      "REV",
+      "book",
+      "book",
+      "—",
+      "Book"
+    ],
+    [
+      "Book Chapter",
+      "Books & Monographs",
+      "REV",
+      "book-chapter",
+      "book-chapter",
+      "—",
+      "BookSection"
+    ],
+    [
+      "Book Section",
+      "Books & Monographs",
+      "REV",
+      "book-section",
+      "book-section",
+      "—",
+      "—"
+    ],
+    [
+      "Book Part",
+      "Books & Monographs",
+      "REV",
+      "—",
+      "book-part",
+      "—",
+      "—"
+    ],
+    [
+      "Book Track",
+      "Books & Monographs",
+      "REV",
+      "—",
+      "book-track",
+      "—",
+      "—"
+    ],
+    [
+      "Book Set",
+      "Books & Monographs",
+      "REV",
+      "—",
+      "book-set",
+      "—",
+      "—"
+    ],
+    [
+      "Book Series",
+      "Books & Monographs",
+      "REV",
+      "—",
+      "book-series",
+      "—",
+      "—"
+    ],
+    [
+      "Edited Book",
+      "Books & Monographs",
+      "REV",
+      "—",
+      "edited-book",
+      "—",
+      "—"
+    ],
+    [
+      "Reference Book",
+      "Books & Monographs",
+      "REV",
+      "—",
+      "reference-book",
+      "—",
+      "—"
+    ],
+    [
+      "Monograph",
+      "Books & Monographs",
+      "REV",
+      "—",
+      "monograph",
+      "Monograph",
+      "—"
+    ],
+    [
+      "Book Review",
+      "Books & Monographs",
+      "REV",
+      "—",
+      "—",
+      "Book Review",
+      "—"
+    ],
+    [
+      "Book Illustrations",
+      "Books & Monographs",
+      "REV",
+      "—",
+      "—",
+      "Book Illustrations",
+      "—"
+    ],
+    [
+      "Collected Work",
+      "Books & Monographs",
+      "REV",
+      "—",
+      "—",
+      "Collected Work",
+      "—"
+    ],
+    [
+      "Collection",
+      "Books & Monographs",
+      "REV",
+      "—",
+      "—",
+      "Collection",
+      "—"
+    ],
+    [
+      "Festschrift",
+      "Books & Monographs",
+      "REV",
+      "—",
+      "—",
+      "Festschrift",
+      "—"
+    ],
+    [
+      "Reference Entry",
+      "Reference & Encyclopedic",
+      "REV",
+      "reference-entry",
+      "reference-entry",
+      "—",
+      "—"
+    ],
+    [
+      "Encyclopedia",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Encyclopedia",
+      "—"
+    ],
+    [
+      "Dictionary",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Dictionary",
+      "—"
+    ],
+    [
+      "Dictionary, Chemical",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Dictionary, Chemical",
+      "—"
+    ],
+    [
+      "Dictionary, Classical",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Dictionary, Classical",
+      "—"
+    ],
+    [
+      "Dictionary, Dental",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Dictionary, Dental",
+      "—"
+    ],
+    [
+      "Dictionary, Medical",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Dictionary, Medical",
+      "—"
+    ],
+    [
+      "Dictionary, Pharmaceutic",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Dictionary, Pharmaceutic",
+      "—"
+    ],
+    [
+      "Dictionary, Polyglot",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Dictionary, Polyglot",
+      "—"
+    ],
+    [
+      "Terminology",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Terminology",
+      "—"
+    ],
+    [
+      "Atlas",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Atlas",
+      "—"
+    ],
+    [
+      "Pharmacopoeia",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Pharmacopoeia",
+      "—"
+    ],
+    [
+      "Pharmacopoeia, Homeopathic",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Pharmacopoeia, Homeopathic",
+      "—"
+    ],
+    [
+      "Formulary",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Formulary",
+      "—"
+    ],
+    [
+      "Formulary, Dental",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Formulary, Dental",
+      "—"
+    ],
+    [
+      "Formulary, Homeopathic",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Formulary, Homeopathic",
+      "—"
+    ],
+    [
+      "Formulary, Hospital",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Formulary, Hospital",
+      "—"
+    ],
+    [
+      "Dispensatory",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Dispensatory",
+      "—"
+    ],
+    [
+      "Herbal",
+      "Reference & Encyclopedic",
+      "REV",
+      "—",
+      "—",
+      "Herbal",
+      "—"
+    ],
+    [
+      "Guideline",
+      "Guidelines & Consensus",
+      "REV",
+      "—",
+      "—",
+      "Guideline",
+      "—"
+    ],
+    [
+      "Practice Guideline",
+      "Guidelines & Consensus",
+      "REV",
+      "—",
+      "—",
+      "Practice Guideline",
+      "—"
+    ],
+    [
+      "Consensus Development Conference",
+      "Guidelines & Consensus",
+      "REV",
+      "—",
+      "—",
+      "Consensus Development Conference",
+      "—"
+    ],
+    [
+      "Consensus Development Conference, NIH",
+      "Guidelines & Consensus",
+      "REV",
+      "—",
+      "—",
+      "Consensus Development Conference, NIH",
+      "—"
+    ],
+    [
+      "Standard",
+      "Standards",
+      "REV",
+      "standard",
+      "standard",
+      "—",
+      "—"
+    ],
+    [
+      "Paratext",
+      "Journal / Proceedings Infrastructure",
+      "REV",
+      "paratext",
+      "—",
+      "—",
+      "—"
+    ],
+    [
+      "Libguides",
+      "Journal / Proceedings Infrastructure",
+      "REV",
+      "libguides",
+      "—",
+      "—",
+      "—"
+    ],
+    [
+      "Journal (container)",
+      "Journal / Proceedings Infrastructure",
+      "REV",
+      "—",
+      "journal",
+      "—",
+      "—"
+    ],
+    [
+      "Journal Issue",
+      "Journal / Proceedings Infrastructure",
+      "REV",
+      "—",
+      "journal-issue",
+      "—",
+      "—"
+    ],
+    [
+      "Journal Volume",
+      "Journal / Proceedings Infrastructure",
+      "REV",
+      "—",
+      "journal-volume",
+      "—",
+      "—"
+    ],
+    [
+      "Proceedings (container)",
+      "Journal / Proceedings Infrastructure",
+      "REV",
+      "—",
+      "proceedings",
+      "—",
+      "—"
+    ],
+    [
+      "Proceedings Series",
+      "Journal / Proceedings Infrastructure",
+      "REV",
+      "—",
+      "proceedings-series",
+      "—",
+      "—"
+    ],
+    [
+      "Report Series",
+      "Journal / Proceedings Infrastructure",
+      "REV",
+      "—",
+      "report-series",
+      "—",
+      "—"
+    ],
+    [
+      "Periodical",
+      "Journal / Proceedings Infrastructure",
+      "REV",
+      "—",
+      "—",
+      "Periodical",
+      "—"
+    ],
+    [
+      "Periodical Index",
+      "Journal / Proceedings Infrastructure",
+      "REV",
+      "—",
+      "—",
+      "Periodical Index",
+      "—"
+    ],
+    [
+      "Grant",
+      "Grants & Funding",
+      "REV",
+      "grant",
+      "grant",
+      "—",
+      "—"
+    ],
+    [
+      "Research Support, ARRA",
+      "Grants & Funding",
+      "REV",
+      "—",
+      "—",
+      "Research Support, American Recovery and Reinvestment Act",
+      "—"
+    ],
+    [
+      "Research Support, NIH Extramural",
+      "Grants & Funding",
+      "REV",
+      "—",
+      "—",
+      "Research Support, N.I.H., Extramural",
+      "—"
+    ],
+    [
+      "Research Support, NIH Intramural",
+      "Grants & Funding",
+      "REV",
+      "—",
+      "—",
+      "Research Support, N.I.H., Intramural",
+      "—"
+    ],
+    [
+      "Research Support, Non-U.S. Gov't",
+      "Grants & Funding",
+      "REV",
+      "—",
+      "—",
+      "Research Support, Non-U.S. Gov't",
+      "—"
+    ],
+    [
+      "Research Support, U.S. Gov't Non-PHS",
+      "Grants & Funding",
+      "REV",
+      "—",
+      "—",
+      "Research Support, U.S. Gov't, Non-P.H.S.",
+      "—"
+    ],
+    [
+      "Research Support, U.S. Gov't PHS",
+      "Grants & Funding",
+      "REV",
+      "—",
+      "—",
+      "Research Support, U.S. Gov't, P.H.S.",
+      "—"
+    ],
+    [
+      "Research Support, U.S. Government",
+      "Grants & Funding",
+      "REV",
+      "—",
+      "—",
+      "Research Support, U.S. Government",
+      "—"
+    ],
+    [
+      "Support of Research",
+      "Grants & Funding",
+      "REV",
+      "—",
+      "—",
+      "Support of Research",
+      "—"
+    ],
+    [
+      "Biography",
+      "Biographical & Historical",
+      "REV",
+      "—",
+      "—",
+      "Biography",
+      "—"
+    ],
+    [
+      "Autobiography",
+      "Biographical & Historical",
+      "REV",
+      "—",
+      "—",
+      "Autobiography",
+      "—"
+    ],
+    [
+      "Biobibliography",
+      "Biographical & Historical",
+      "REV",
+      "—",
+      "—",
+      "Biobibliography",
+      "—"
+    ],
+    [
+      "Bibliography",
+      "Biographical & Historical",
+      "REV",
+      "—",
+      "—",
+      "Bibliography",
+      "—"
+    ],
+    [
+      "Classical Article",
+      "Biographical & Historical",
+      "REV",
+      "—",
+      "—",
+      "Classical Article",
+      "—"
+    ],
+    [
+      "Historical Article",
+      "Biographical & Historical",
+      "REV",
+      "—",
+      "—",
+      "Historical Article",
+      "—"
+    ],
+    [
+      "Personal Narrative",
+      "Biographical & Historical",
+      "REV",
+      "—",
+      "—",
+      "Personal Narrative",
+      "—"
+    ],
+    [
+      "Eulogy",
+      "Biographical & Historical",
+      "REV",
+      "—",
+      "—",
+      "Eulogy",
+      "—"
+    ],
+    [
+      "Portrait",
+      "Biographical & Historical",
+      "REV",
+      "—",
+      "—",
+      "Portrait",
+      "—"
+    ],
+    [
+      "Diary",
+      "Biographical & Historical",
+      "REV",
+      "—",
+      "—",
+      "Diary",
+      "—"
+    ],
+    [
+      "Collected Correspondence",
+      "Biographical & Historical",
+      "REV",
+      "—",
+      "—",
+      "Collected Correspondence",
+      "—"
+    ],
+    [
+      "Textbook",
+      "Educational & Instructional",
+      "REV",
+      "—",
+      "—",
+      "Textbook",
+      "—"
+    ],
+    [
+      "Handbook",
+      "Educational & Instructional",
+      "REV",
+      "—",
+      "—",
+      "Handbook",
+      "—"
+    ],
+    [
+      "Laboratory Manual",
+      "Educational & Instructional",
+      "REV",
+      "—",
+      "—",
+      "Laboratory Manual",
+      "—"
+    ],
+    [
+      "Study Guide",
+      "Educational & Instructional",
+      "REV",
+      "—",
+      "—",
+      "Study Guide",
+      "—"
+    ],
+    [
+      "Resource Guide",
+      "Educational & Instructional",
+      "REV",
+      "—",
+      "—",
+      "Resource Guide",
+      "—"
+    ],
+    [
+      "Guidebook",
+      "Educational & Instructional",
+      "REV",
+      "—",
+      "—",
+      "Guidebook",
+      "—"
+    ],
+    [
+      "Lecture",
+      "Educational & Instructional",
+      "REV",
+      "—",
+      "—",
+      "Lecture",
+      "—"
+    ],
+    [
+      "Lecture Note",
+      "Educational & Instructional",
+      "REV",
+      "—",
+      "—",
+      "Lecture Note",
+      "—"
+    ],
+    [
+      "Nurses Instruction",
+      "Educational & Instructional",
+      "REV",
+      "—",
+      "—",
+      "Nurses Instruction",
+      "—"
+    ],
+    [
+      "Patient Education Handout",
+      "Educational & Instructional",
+      "REV",
+      "—",
+      "—",
+      "Patient Education Handout",
+      "—"
+    ],
+    [
+      "Interactive Tutorial",
+      "Educational & Instructional",
+      "REV",
+      "—",
+      "—",
+      "Interactive Tutorial",
+      "—"
+    ],
+    [
+      "Programmed Instruction",
+      "Educational & Instructional",
+      "REV",
+      "—",
+      "—",
+      "Programmed Instruction",
+      "—"
+    ],
+    [
+      "Examination Questions",
+      "Educational & Instructional",
+      "REV",
+      "—",
+      "—",
+      "Examination Questions",
+      "—"
+    ],
+    [
+      "Problems and Exercises",
+      "Educational & Instructional",
+      "REV",
+      "—",
+      "—",
+      "Problems and Exercises",
+      "—"
+    ],
+    [
+      "Cookbook",
+      "Educational & Instructional",
+      "REV",
+      "—",
+      "—",
+      "Cookbook",
+      "—"
+    ],
+    [
+      "Photograph",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Photograph",
+      "—"
+    ],
+    [
+      "Drawing",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Drawing",
+      "—"
+    ],
+    [
+      "Pictorial Work",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Pictorial Work",
+      "—"
+    ],
+    [
+      "Caricature",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Caricature",
+      "—"
+    ],
+    [
+      "Cartoon",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Cartoon",
+      "—"
+    ],
+    [
+      "Graphic Novel",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Graphic Novel",
+      "—"
+    ],
+    [
+      "Map",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Map",
+      "—"
+    ],
+    [
+      "Poster",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Poster",
+      "—"
+    ],
+    [
+      "Postcard",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Postcard",
+      "—"
+    ],
+    [
+      "Bookplate",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Bookplate",
+      "—"
+    ],
+    [
+      "Broadside",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Broadside",
+      "—"
+    ],
+    [
+      "Architectural Drawing",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Architectural Drawing",
+      "—"
+    ],
+    [
+      "Animation",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Animation",
+      "—"
+    ],
+    [
+      "Documentaries and Factual Films",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Documentaries and Factual Films",
+      "—"
+    ],
+    [
+      "Instructional Film and Video",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Instructional Film and Video",
+      "—"
+    ],
+    [
+      "Unedited Footage",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Unedited Footage",
+      "—"
+    ],
+    [
+      "Video-Audio Media",
+      "Visual / Media",
+      "REV",
+      "—",
+      "—",
+      "Video-Audio Media",
+      "—"
+    ],
+    [
+      "Essay",
+      "Literary / Miscellaneous",
+      "REV",
+      "—",
+      "—",
+      "Essay",
+      "—"
+    ],
+    [
+      "Poetry",
+      "Literary / Miscellaneous",
+      "REV",
+      "—",
+      "—",
+      "Poetry",
+      "—"
+    ],
+    [
+      "Fictional Work",
+      "Literary / Miscellaneous",
+      "REV",
+      "—",
+      "—",
+      "Fictional Work",
+      "—"
+    ],
+    [
+      "Juvenile Literature",
+      "Literary / Miscellaneous",
+      "REV",
+      "—",
+      "—",
+      "Juvenile Literature",
+      "—"
+    ],
+    [
+      "Wit and Humor",
+      "Literary / Miscellaneous",
+      "REV",
+      "—",
+      "—",
+      "Wit and Humor",
+      "—"
+    ],
+    [
+      "Anecdotes",
+      "Literary / Miscellaneous",
+      "REV",
+      "—",
+      "—",
+      "Anecdotes",
+      "—"
+    ],
+    [
+      "Aphorisms and Proverbs",
+      "Literary / Miscellaneous",
+      "REV",
+      "—",
+      "—",
+      "Aphorisms and Proverbs",
+      "—"
+    ],
+    [
+      "Phrases",
+      "Literary / Miscellaneous",
+      "REV",
+      "—",
+      "—",
+      "Phrases",
+      "—"
+    ],
+    [
+      "Sermon",
+      "Literary / Miscellaneous",
+      "REV",
+      "—",
+      "—",
+      "Sermon",
+      "—"
+    ],
+    [
+      "Funeral Sermon",
+      "Literary / Miscellaneous",
+      "REV",
+      "—",
+      "—",
+      "Funeral Sermon",
+      "—"
+    ],
+    [
+      "Movable Books",
+      "Literary / Miscellaneous",
+      "REV",
+      "—",
+      "—",
+      "Movable Books",
+      "—"
+    ],
+    [
+      "Catalog",
+      "Administrative / Catalogs / Legal",
+      "REV",
+      "—",
+      "—",
+      "Catalog",
+      "—"
+    ],
+    [
+      "Catalog, Bookseller",
+      "Administrative / Catalogs / Legal",
+      "REV",
+      "—",
+      "—",
+      "Catalog, Bookseller",
+      "—"
+    ],
+    [
+      "Catalog, Commercial",
+      "Administrative / Catalogs / Legal",
+      "REV",
+      "—",
+      "—",
+      "Catalog, Commercial",
+      "—"
+    ],
+    [
+      "Catalog, Drug",
+      "Administrative / Catalogs / Legal",
+      "REV",
+      "—",
+      "—",
+      "Catalog, Drug",
+      "—"
+    ],
+    [
+      "Catalog, Publisher",
+      "Administrative / Catalogs / Legal",
+      "REV",
+      "—",
+      "—",
+      "Catalog, Publisher",
+      "—"
+    ],
+    [
+      "Catalog, Union",
+      "Administrative / Catalogs / Legal",
+      "REV",
+      "—",
+      "—",
+      "Catalog, Union",
+      "—"
+    ],
+    [
+      "Directory",
+      "Administrative / Catalogs / Legal",
+      "REV",
+      "—",
+      "—",
+      "Directory",
+      "—"
+    ],
+    [
+      "Index",
+      "Administrative / Catalogs / Legal",
+      "REV",
+      "—",
+      "—",
+      "Index",
+      "—"
+    ],
+    [
+      "Union List",
+      "Administrative / Catalogs / Legal",
+      "REV",
+      "—",
+      "—",
+      "Union List",
+      "—"
+    ],
+    [
+      "Price List",
+      "Administrative / Catalogs / Legal",
+      "REV",
+      "—",
+      "—",
+      "Price List",
+      "—"
+    ],
+    [
+      "Legal Case",
+      "Administrative / Catalogs / Legal",
+      "REV",
+      "—",
+      "—",
+      "Legal Case",
+      "—"
+    ],
+    [
+      "Legislation",
+      "Administrative / Catalogs / Legal",
+      "REV",
+      "—",
+      "—",
+      "Legislation",
+      "—"
+    ],
+    [
+      "Government Publication",
+      "Administrative / Catalogs / Legal",
+      "REV",
+      "—",
+      "—",
+      "Government Publication",
+      "—"
+    ],
+    [
+      "Public Service Announcement",
+      "Administrative / Catalogs / Legal",
+      "REV",
+      "—",
+      "—",
+      "Public Service Announcement",
+      "—"
+    ],
+    [
+      "Advertisement",
+      "Administrative / Catalogs / Legal",
+      "REV",
+      "—",
+      "—",
+      "Advertisement",
+      "—"
+    ],
+    [
+      "Prospectus",
+      "Administrative / Catalogs / Legal",
+      "REV",
+      "—",
+      "—",
+      "Prospectus",
+      "—"
+    ],
+    [
+      "Other",
+      "Format / Meta-types",
+      "REV",
+      "other",
+      "other",
+      "—",
+      "—"
+    ],
+    [
+      "Abbreviations",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Abbreviations",
+      "—"
+    ],
+    [
+      "Abstracts",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Abstracts",
+      "—"
+    ],
+    [
+      "English Abstract",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "English Abstract",
+      "—"
+    ],
+    [
+      "Chart",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Chart",
+      "—"
+    ],
+    [
+      "Chronology",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Chronology",
+      "—"
+    ],
+    [
+      "Tables",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Tables",
+      "—"
+    ],
+    [
+      "Form",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Form",
+      "—"
+    ],
+    [
+      "Outline",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Outline",
+      "—"
+    ],
+    [
+      "Almanac",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Almanac",
+      "—"
+    ],
+    [
+      "Calendar",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Calendar",
+      "—"
+    ],
+    [
+      "Ephemera",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Ephemera",
+      "—"
+    ],
+    [
+      "Program",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Program",
+      "—"
+    ],
+    [
+      "Manuscript",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Manuscript",
+      "—"
+    ],
+    [
+      "Manuscript, Medical",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Manuscript, Medical",
+      "—"
+    ],
+    [
+      "Incunabula",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Incunabula",
+      "—"
+    ],
+    [
+      "Unpublished Work",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Unpublished Work",
+      "—"
+    ],
+    [
+      "Web Archive",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Web Archive",
+      "—"
+    ],
+    [
+      "Account Book",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Account Book",
+      "—"
+    ],
+    [
+      "Overall",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Overall",
+      "—"
+    ],
+    [
+      "Publication Components",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Publication Components",
+      "—"
+    ],
+    [
+      "Publication Formats",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Publication Formats",
+      "—"
+    ],
+    [
+      "Study Characteristics",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Study Characteristics",
+      "—"
+    ],
+    [
+      "Exhibition",
+      "Format / Meta-types",
+      "REV",
+      "—",
+      "—",
+      "Exhibition",
+      "—"
+    ]
+  ]
+}

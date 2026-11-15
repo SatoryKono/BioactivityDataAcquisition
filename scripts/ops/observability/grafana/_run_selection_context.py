@@ -6,10 +6,15 @@ RUN_SELECTION_CONTEXT = (
     '($requested := "${run_id:percentencode}"; '
     "$auto := $requested in ['', '-', 'All', '$__all', '%24__all', '__all', '*', '%2A']; "
     "$hasRun := $type(run_id) = 'string' and run_id != '' and run_id != '-'; "
+    '$requestedPipeline := "${pipeline:percentencode}"; '
+    "$pipelineAll := $requestedPipeline in ['', 'All', '$__all', '%24__all', '.*', '*', '%2A', '.%2A']; "
+    "$pipelineMismatch := $hasRun and $type(pipeline) = 'string' and $not($pipelineAll) "
+    "and $encodeUrlComponent(pipeline) != $requestedPipeline; "
     "[{'_bioetl_frame':'selection_context', "
     "'context': $auto ? ($hasRun ? 'AUTO · latest run in scope' : "
     "(reason = 'no_runs_in_scope' ? 'NO RUN · empty scope' : 'Context unavailable')) "
-    ": 'EXPLICIT · requested Run ID', "
+    ": ($pipelineMismatch ? 'EXPLICIT · Run ID overrides Pipeline filter' "
+    ": 'EXPLICIT · requested Run ID'), "
     "'run_id': $type(run_id) = 'string' ? run_id : $requested, "
     "'execution_state': $type(execution_state) = 'string' and execution_state != '' "
     "? execution_state : 'UNKNOWN', "
@@ -70,7 +75,8 @@ def stamp_run_selection_context(payload: dict) -> None:
             "description": (
                 "SELECTED RUN · AUTO shows the latest run by start time in the current "
                 "scope, including unfinished runs. EXPLICIT keeps the requested Run ID "
-                "and shows evidence for that run only. "
+                "and shows evidence for that run only. An explicit Run ID takes precedence "
+                "over Pipeline; an overridden Pipeline filter is identified in Context. "
                 "Context checked at is this Grafana query evaluation time, not run "
                 "start, browser click, server cache load or catalog freshness. Refresh "
                 "re-evaluates the displayed context. UNKNOWN is missing evidence; request failure "

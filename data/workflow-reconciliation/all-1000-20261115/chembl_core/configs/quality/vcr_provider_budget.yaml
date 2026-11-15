@@ -1,0 +1,40 @@
+schema_version: 1
+owner: '@bioetl-platform'
+linked_issues:
+- 7028
+- 6776
+reviewed_on: '2026-07-29'
+policy:
+  scan_root: tests/fixtures/vcr
+  notes: Per-provider ceilings are flat ratchets (must not grow). Age-only delete
+    remains forbidden.
+  providers:
+    chembl:
+      max_cassette_count: 52
+      max_total_bytes: 125078638
+    crossref:
+      max_cassette_count: 24
+      max_total_bytes: 840500
+    integration:
+      max_cassette_count: 0
+      max_total_bytes: 0
+    multi_provider:
+      max_cassette_count: 1
+      max_total_bytes: 104261
+    openalex:
+      max_cassette_count: 25
+      max_total_bytes: 7840477
+    pubchem:
+      max_cassette_count: 31
+      max_total_bytes: 792023
+    pubmed:
+      max_cassette_count: 24
+      max_total_bytes: 1640381
+    semanticscholar:
+      max_cassette_count: 24
+      max_total_bytes: 104090
+    uniprot:
+      max_cassette_count: 17
+      max_total_bytes: 2149816
+enforcement:
+  architecture_test: tests/architecture/test_vcr_provider_budget.py

@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "302b8bba3b976706f51b1e17bed46dcb499ddf8b",
+  "source_ref": "6be7a7d48d2245681da52f1f7f40ef60d2d62ffb",
+  "source_reviews": {
+    "src/bioetl/application/observability/reason_aliases.py": "PR #12783 LF-06: shared Run not found alias constant; no external resource acquisition.",
+    "src/bioetl/interfaces/http/_health_server_control_plane_scope.py": "PR #12783 LF-06: unique resolve wiring for catalog UUID scope; no external resource acquisition.",
+    "src/bioetl/interfaces/http/_run_id_resolver.py": "PR #12783 LF-06: new pure UUID scope resolver with nested workflow and current manifests; no external resource acquisition.",
+    "src/bioetl/interfaces/http/_selected_run_live.py": "PR #12783 LF-06: refuse compact stamps as live run ids; no external resource acquisition."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}

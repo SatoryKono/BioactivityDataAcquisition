@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "1560a3d36e164f69043f8d5b8388af9091b46f57",
+  "source_ref": "1560a3d36e164f69043f8d5b8388af9091b46f57",
+  "source_reviews": {
+    "src/bioetl/application/services/execution/pipeline_runner_service.py": "Class mypy residual: bind evidence_location_verify to a local before the finalize lambda so Optional is narrowed. No new acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/composition/evidence_location_registration.py": "Class mypy residual: annotate bind_pipeline_run_location_verifier return and _verify parameters. Composition wiring only; no new acquisition or lifecycle behavior.",
+    "src/bioetl/interfaces/http/health_server_routing_mixin.py": "Class mypy residual: declare SelectedRunStatusCache host attribute for observability routing protocol. Existing asyncio.to_thread metrics offload is unchanged; no new acquisition or lifecycle behavior."
+  },
+  "expression_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "segment_updates": {},
+  "reference_moves": []
+}

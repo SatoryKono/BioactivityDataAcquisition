@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "source_reviews": {
+    "src/bioetl/composition/runtime_builders/run_manifest_data_roots.py": "Reviewed helper renaming and callers for unchanged runtime path selection and I/O ownership."
+  },
+  "line_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "reference_moves": [],
+  "catalog_ref": "0fb97d523a8d2e921d135affe59cd49efc6e9a91",
+  "source_ref": "e79faa3ff8f5fd4a7d74ea61061e86723ab57880"
+}

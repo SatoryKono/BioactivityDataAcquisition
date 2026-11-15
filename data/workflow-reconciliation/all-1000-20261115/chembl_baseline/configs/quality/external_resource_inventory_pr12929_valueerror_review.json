@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "396b085c227857b0c049e81d5f9a049f07078f3e",
+  "source_ref": "187d3a64e8b7f645f0145bee881257a63c5f04a8",
+  "source_reviews": {
+    "src/bioetl/interfaces/http/run_report_ops.py": "Widen _load_versioned_payload except to ValueError so oversized JSON integers return None instead of raising; acquisition sites (path.read_text / json.loads) and line numbers unchanged. No new sockets/files/subprocess/locks."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "line_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}

@@ -1,0 +1,22 @@
+schema_version: "1.0.0"
+workflow:
+  name: publication_provider_pack
+  version: "1.0.0"
+  defaults:
+    run_options:
+      run_type: backfill
+      dry_run: false
+      log_level: INFO
+  steps:
+    - kind: pipeline
+      step_id: run_crossref_publication
+      pipeline_name: crossref_publication
+    - kind: pipeline
+      step_id: run_openalex_publication
+      pipeline_name: openalex_publication
+    - kind: pipeline
+      step_id: run_pubmed_publication
+      pipeline_name: pubmed_publication
+    - kind: pipeline
+      step_id: run_semanticscholar_publication
+      pipeline_name: semanticscholar_publication

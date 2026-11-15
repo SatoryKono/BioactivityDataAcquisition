@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "339f3eafeb7a173f8599678b730496277162626a",
+  "source_ref": "339f3eafeb7a173f8599678b730496277162626a",
+  "source_reviews": {
+    "src/bioetl/composition/bootstrap/assembly/health_server.py": "PR #12763 builds the existing evidence-location resolver in health-server assembly. No new external resource acquisition.",
+    "src/bioetl/interfaces/cli/commands/domains/health/server_integration_deps.py": "PR #12763 forwards the assembled evidence-location resolver into HealthServer. No new external resource acquisition.",
+    "src/bioetl/interfaces/http/_selected_run_unavailable.py": "PR #12763 keeps resolver refusals fail-closed and adapts an open read context for manifest lookup. No new external resource acquisition.",
+    "src/bioetl/interfaces/http/selected_run_status.py": "PR #12763 reads the saved report from the caller report root and the manifest from the resolved context. No new external resource acquisition."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "reference_moves": [
+    {
+      "identity": "health._selected_run_artifact_probes.file",
+      "fields": ["production_binding"],
+      "from": {
+        "file": "src/bioetl/interfaces/http/selected_run_status.py",
+        "line": 182,
+        "source_segment": "if path is None:"
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/selected_run_status.py",
+        "scope": "load_selected_run_status",
+        "segment": "path, _ = _validated_artifact_paths("
+      }
+    }
+  ],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}

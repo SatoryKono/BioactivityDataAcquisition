@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-15T08:13:49.542988+00:00",
+  "generated_at": "2026-11-15T12:04:17.322946+00:00",
   "summary": {
     "total_scripts": 752,
     "status_counts": {
@@ -22491,7 +22491,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_github_actions_runtime_policy.py",
-          "line": 203,
+          "line": 206,
           "source_group": "scripts",
           "text": "vs this list is reviewed by `github_settings_review.py`, not here."
         },
@@ -25797,7 +25797,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1735,
+          "line": 1738,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -26369,13 +26369,13 @@
       "references": [
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 76,
+          "line": 92,
           "source_group": "docs",
           "text": "`python -m scripts.ops.observability.grafana.render_nav_bus --adaptive-profile`."
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 251,
+          "line": 270,
           "source_group": "docs",
           "text": "`scripts/ops/observability/grafana/render_nav_bus.py` on Replay Readiness,"
         },
@@ -26797,7 +26797,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 244,
+          "line": 263,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },

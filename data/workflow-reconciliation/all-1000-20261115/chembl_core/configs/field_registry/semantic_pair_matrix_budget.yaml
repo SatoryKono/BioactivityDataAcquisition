@@ -1,0 +1,56 @@
+version: "1.2.0"
+matrix_path: reports/semantic_pipeline_audit/semantic_pair_matrix_2026-07-01.csv
+review_registry_path: configs/field_registry/semantic_audit_review_registry.yaml
+reviewed_on: "2026-07-01"
+owner: BioETL Team
+budgets:
+  CRITICAL:
+    max_count: 0
+    require_reviewed_rows: true
+  HIGH:
+    max_count: 0
+    ratchet_only: true
+  MEDIUM:
+    max_count: 0
+    ratchet_only: true
+status_budgets:
+  - column: Semantic Status
+    value: PARTIAL
+    max_count: 68
+    require_reviewed_clusters: true
+    ratchet_only: true
+  - column: Semantic Status
+    value: WEAK
+    max_count: 435
+    require_reviewed_clusters: true
+    ratchet_only: true
+  - column: Semantic Status
+    value: CONFLICTING
+    max_count: 0
+    require_reviewed_clusters: true
+    ratchet_only: true
+  - column: Normalization
+    value: DIFFERENT
+    max_count: 0
+    require_reviewed_clusters: true
+  - column: Normalization
+    value: COMPATIBLE
+    max_count: 887
+    ratchet_only: true
+  - column: Typing
+    value: CONFLICTING
+    max_count: 0
+    require_reviewed_clusters: true
+  - column: Typing
+    value: COMPATIBLE
+    max_count: 666
+    ratchet_only: true
+  - column: Validation
+    value: STRICTNESS_MISMATCH
+    max_count: 0
+    require_reviewed_clusters: true
+  - column: Validation
+    value: COMPATIBLE
+    max_count: 1046
+    ratchet_only: true
+reviewed_critical_rows: []

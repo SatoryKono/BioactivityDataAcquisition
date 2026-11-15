@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "b9e1c5b53d9c1edfbfa0aebcc853d958b0b2bda6",
+  "source_ref": "76d24fa89e7b08789c8a1120a4b1d9868ac85cf7",
+  "source_reviews": {
+    "src/bioetl/infrastructure/adapters/http/request_timing.py": "Reviewed extraction of bounded response reading into response_body: wire and decoded limits, exception types, HEAD/204/304 headers, stream cleanup and allocation ownership preserved; no resource creation or cleanup sites added or removed.",
+    "src/bioetl/infrastructure/adapters/http/response_body.py": "Reviewed extraction of bounded response reading into response_body: wire and decoded limits, exception types, HEAD/204/304 headers, stream cleanup and allocation ownership preserved; no resource creation or cleanup sites added or removed."
+  }
+}
