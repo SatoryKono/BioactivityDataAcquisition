@@ -92,6 +92,8 @@ def validate_input(
     errors: list[str] = []
     if not row.input_row_id:
         errors.append("input_row_id is empty")
+    if any(mark in row.input_row_id for mark in ("/", "\n", "\r")):
+        errors.append("invalid evidence identity")
     if row.target_kind not in _KIND:
         errors.append("target_kind must be protein or complex")
     normalized: dict[str, str | None] = {}
