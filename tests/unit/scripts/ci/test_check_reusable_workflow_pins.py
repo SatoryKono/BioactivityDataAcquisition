@@ -461,7 +461,17 @@ def test_actual_pinned_docker_workflow_preserves_sarif_comparison() -> None:
         check=False,
     )
     assert result.returncode == 0, "Pinned workflow blob requires full Git history"
-    steps = yaml.safe_load(result.stdout)["jobs"]["docker-build"]["steps"]
+    pinned_workflow = yaml.safe_load(result.stdout)
+    caller_permissions = caller["jobs"]["docker-lane"]["permissions"]
+    permission_levels = {"none": 0, "read": 1, "write": 2}
+    # GitHub validates every nested job, including skipped publish jobs.
+    for job in pinned_workflow["jobs"].values():
+        for scope, requested in job.get("permissions", {}).items():
+            assert (
+                permission_levels[requested]
+                <= permission_levels[caller_permissions.get(scope, "none")]
+            ), (scope, requested)
+    steps = pinned_workflow["jobs"]["docker-build"]["steps"]
     uploads = [
         step
         for step in steps
