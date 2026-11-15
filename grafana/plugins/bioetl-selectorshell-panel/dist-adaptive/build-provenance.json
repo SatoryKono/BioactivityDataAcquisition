@@ -47,7 +47,7 @@
     "grafana/plugins/bioetl-selectorshell-panel/LICENSE": "c5accbbd8546e94c34aed24afe689a617627d18eed5a6c48277e48db57c23851",
     "grafana/plugins/bioetl-selectorshell-panel/CHANGELOG.md": "bd93cf170e6c1ce56e2324a5a9406a325c223587ca3665328b6d343c27cdac0d",
     "grafana/tooling/router-v7-bridge/webpack-public-path.cjs": "e938b87e3750165c9cb90b666ddfe0ad15a22a3a9db8c846ca3b3b20c6a0feb0",
-    "grafana/tooling/router-v7-bridge/host-image.json": "4edb8a2d5b66ab5e2296fbbb086e85a046e5a3ba308ba2fb5515c8dda79df883"
+    "grafana/tooling/router-v7-bridge/host-image.json": "57482a07a15ca6e14a142987a471a8e337aeb9af6d5b544a8089b798f40cc626"
   },
   "outputs_sha256": {
     "CHANGELOG.md": "bd93cf170e6c1ce56e2324a5a9406a325c223587ca3665328b6d343c27cdac0d",
