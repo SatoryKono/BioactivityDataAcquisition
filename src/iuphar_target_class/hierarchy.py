@@ -84,14 +84,32 @@ def build_family_paths(
     family_ids: tuple[str, ...],
     *,
     max_paths: int = GRAPH_MAX_VISITED_NODES,
+    max_depth: int = GRAPH_MAX_DEPTH,
+    max_visited_nodes: int = GRAPH_MAX_VISITED_NODES,
+    multiple_parents_allowed: bool = True,
 ) -> tuple[FamilyPath, ...] | Diagnostic:
-    """Build root-to-leaf paths. Too many paths is a limit error."""
+    """Build root-to-leaf paths after the same integrity checks as the walk."""
+    defect = validate_family_graph(
+        nodes,
+        family_ids,
+        max_depth=max_depth,
+        max_visited_nodes=max_visited_nodes,
+        multiple_parents_allowed=multiple_parents_allowed,
+    )
+    if defect is not None:
+        return defect
     indexed = _index_nodes(nodes)
     if isinstance(indexed, Diagnostic):
         return indexed
     paths: list[FamilyPath] = []
     for family_id in sorted(family_ids):
-        built = _paths_from(indexed, family_id, max_paths=max_paths, found=len(paths))
+        built = _paths_from(
+            indexed,
+            family_id,
+            max_paths=max_paths,
+            max_depth=max_depth,
+            found=len(paths),
+        )
         if isinstance(built, Diagnostic):
             return built
         paths.extend(built)
@@ -147,6 +165,9 @@ def normalize_provider_class(
         nodes,
         family_ids,
         max_paths=max_visited_nodes,
+        max_depth=max_depth,
+        max_visited_nodes=max_visited_nodes,
+        multiple_parents_allowed=multiple_parents_allowed,
     )
     if isinstance(built, Diagnostic):
         return _graph_error_result(
@@ -189,7 +210,7 @@ def _graph_error_result(
     )
     mapped = typed.iuphar_class if typed.status == "available" else None
     return HierarchyResult(
-        annotation_status="partial" if type_name else "not_available",
+        annotation_status="partial" if mapped else "not_available",
         iuphar_class=mapped,
         iuphar_subclass=None,
         iuphar_class_candidates=(mapped,) if mapped else (),
@@ -323,31 +344,89 @@ def _paths_from(
     start: str,
     *,
     max_paths: int,
+    max_depth: int,
     found: int,
 ) -> tuple[FamilyPath, ...] | Diagnostic:
     if start not in nodes:
-        return ()
+        return _defect(_MISSING_FAMILY)
     frames: list[tuple[str, tuple[str, ...]]] = [(start, (start,))]
     paths: list[FamilyPath] = []
     while frames:
         if found + len(paths) + len(frames) > max_paths:
             return _defect(_LIMIT)
         node_id, leaf_to_root_ids = frames.pop()
-        parents = nodes[node_id].parent_ids
-        if not parents:
-            if found + len(paths) >= max_paths:
-                return _defect(_LIMIT)
-            paths.append(
-                FamilyPath(
-                    family_id=start,
-                    root_to_leaf=tuple(reversed(leaf_to_root_ids)),
-                    leaf_to_root=" → ".join(leaf_to_root_ids),
-                ),
-            )
-            continue
-        for parent_id in reversed(parents):
-            frames.append((parent_id, (*leaf_to_root_ids, parent_id)))
+        step = _path_step(
+            nodes,
+            start,
+            node_id,
+            leaf_to_root_ids,
+            frames,
+            found=found + len(paths),
+            max_paths=max_paths,
+            max_depth=max_depth,
+        )
+        if isinstance(step, Diagnostic):
+            return step
+        if step is not None:
+            paths.append(step)
     return tuple(paths)
+
+
+def _path_step(
+    nodes: dict[str, FamilyNode],
+    start: str,
+    node_id: str,
+    leaf_to_root_ids: tuple[str, ...],
+    frames: list[tuple[str, tuple[str, ...]]],
+    *,
+    found: int,
+    max_paths: int,
+    max_depth: int,
+) -> FamilyPath | Diagnostic | None:
+    node = nodes.get(node_id)
+    if node is None:
+        return _defect(_MISSING_PARENT)
+    if len(leaf_to_root_ids) - 1 > max_depth:
+        return _defect(_LIMIT)
+    if node.parent_ids:
+        return _queue_parents(nodes, node_id, leaf_to_root_ids, node.parent_ids, frames)
+    if found >= max_paths:
+        return _defect(_LIMIT)
+    return FamilyPath(
+        family_id=start,
+        root_to_leaf=tuple(reversed(leaf_to_root_ids)),
+        leaf_to_root=" → ".join(leaf_to_root_ids),
+    )
+
+
+def _queue_parents(
+    nodes: dict[str, FamilyNode],
+    node_id: str,
+    leaf_to_root_ids: tuple[str, ...],
+    parents: tuple[str, ...],
+    frames: list[tuple[str, tuple[str, ...]]],
+) -> Diagnostic | None:
+    for parent_id in reversed(parents):
+        defect = _parent_defect(nodes, node_id, parent_id, leaf_to_root_ids)
+        if defect is not None:
+            return defect
+        frames.append((parent_id, (*leaf_to_root_ids, parent_id)))
+    return None
+
+
+def _parent_defect(
+    nodes: dict[str, FamilyNode],
+    node_id: str,
+    parent_id: str,
+    leaf_to_root_ids: tuple[str, ...],
+) -> Diagnostic | None:
+    if parent_id == node_id:
+        return _defect(_SELF_LOOP)
+    if parent_id in leaf_to_root_ids:
+        return _defect(_CYCLE)
+    if parent_id not in nodes:
+        return _defect(_MISSING_PARENT)
+    return None
 
 
 def _defect(message: str) -> Diagnostic:
