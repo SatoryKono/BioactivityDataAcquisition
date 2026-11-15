@@ -168,6 +168,7 @@ const result=project({uid:'test',panels:[
  custom(4,{viewMode:'current',currentView:{pluginId:'table'}}),
  custom(5,{viewMode:'current',currentView:{pluginId:'timeseries'}}),
  {id:6,type:'table'},
+ custom(7,{viewMode:'record'}),
 ]});
 console.log(JSON.stringify(result));
 """
@@ -188,7 +189,8 @@ console.log(JSON.stringify(result));
         timeout=15,
     )
     evidence = json.loads(result.stdout)
-    assert [p["id"] for p in evidence["tablePanels"]] == [1, 2, 3, 4, 6]
+    assert [p["id"] for p in evidence["tablePanels"]] == [1, 2, 3, 4, 6, 7]
+    assert evidence["tablePanels"][-1]["adaptiveTable"] is True
     assert [p["adaptiveTable"] for p in evidence["tablePanels"][:4]] == [
         True,
         True,

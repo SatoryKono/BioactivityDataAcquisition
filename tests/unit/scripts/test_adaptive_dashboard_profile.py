@@ -130,6 +130,7 @@ def test_current_consumer_uses_raw_donor_queries_and_preserves_its_own_transform
     assert view["transformations"] == before[22005]["transformations"]
     assert after[22005]["fieldConfig"] == before[22005]["fieldConfig"]
     assert after[9701]["title"] == "Review Current Workflow Evidence · threshold 24h"
+    assert after[16]["options"]["currentView"]["queries"][0]["instant"] is True
     assert "workflow_evidence_freshness" not in json.dumps(project(source))
     # Ranked suspects explicitly describe TIME RANGE and must keep that clock.
     ranked = after[2010]

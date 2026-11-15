@@ -5001,7 +5001,8 @@
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
-              }
+              },
+              "instant": true
             }
           ],
           "title": "Monitor Active Blocker Count",

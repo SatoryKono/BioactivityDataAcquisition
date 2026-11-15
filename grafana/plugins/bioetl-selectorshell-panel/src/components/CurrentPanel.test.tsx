@@ -79,11 +79,14 @@ it('keeps the current clock when only the historical period changes', () => {
 it('cancels refresh generations and rejects late old data', () => {
   render(<CurrentPanel {...props()} />);
   act(() => done(0, 42));
+  const originalRenderer = screen.getByTestId('current-native');
   act(() => jest.advanceTimersByTime(30_000));
   expect(runners[0].destroy).toHaveBeenCalled();
   act(() => done(0, 999));
-  expect(screen.queryByTestId('current-native')).not.toBeInTheDocument();
+  expect(screen.getByTestId('current-native')).toBe(originalRenderer);
+  expect(originalRenderer).toHaveTextContent('"values":[42]');
   act(() => done(1, 7));
+  expect(screen.getByTestId('current-native')).toBe(originalRenderer);
   expect(screen.getByTestId('current-native')).toHaveTextContent('"values":[7]');
   expect(screen.getByTestId('current-native')).not.toHaveTextContent('999');
 });

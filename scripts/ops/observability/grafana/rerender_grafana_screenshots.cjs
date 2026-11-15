@@ -524,12 +524,25 @@ function panelDisplayTitle(panel) {
   return typeof panel.title === "string" ? panel.title.trim() : "";
 }
 
+function managedCaptureVisualization(panel) {
+  if (panel.type !== 'bioetl-selectorshell-panel') return {};
+  const options = panel.options || {};
+  const view = options.currentView;
+  const adaptiveTable = ['rows', 'runs', 'record'].includes(options.viewMode) ||
+    (options.viewMode === 'current' && view?.pluginId === 'table' && Boolean(view.compactFields));
+  let effectiveType = panel.type;
+  if (adaptiveTable) effectiveType = 'table';
+  else if (options.viewMode === 'current') effectiveType = view?.pluginId;
+  return {effectiveType, adaptiveTable};
+}
+
 function summarizeFirstWindowPanel(panel) {
   const grid = panel.gridPos && typeof panel.gridPos === "object" ? panel.gridPos : {};
   return {
     id: panel.id,
     title: panelDisplayTitle(panel),
     type: typeof panel.type === "string" ? panel.type : "unknown",
+    ...managedCaptureVisualization(panel),
     gridPos: {
       x: Number.isInteger(grid.x) ? grid.x : 0,
       y: Number.isInteger(grid.y) ? grid.y : 0,
@@ -735,19 +748,11 @@ function summarizeRequiredPanel(panel) {
     collectFieldFormats,
   } = require('./capture_table_pages.cjs');
   const type = typeof panel.type === "string" ? panel.type : "unknown";
-  const managed = type === "bioetl-selectorshell-panel";
-  const view = panel.options?.currentView;
-  const table = managed && (
-    ["rows", "runs"].includes(panel.options?.viewMode) ||
-    (panel.options?.viewMode === "current" && view?.pluginId === "table" && view.compactFields)
-  );
-  const effectiveType = table ? "table" : managed && panel.options?.viewMode === "current"
-    ? view?.pluginId : type;
   return {
     id: panel.id,
     title: panelDisplayTitle(panel),
     type,
-    ...(managed ? {effectiveType, adaptiveTable: Boolean(table)} : {}),
+    ...managedCaptureVisualization(panel),
     noValue: panel.fieldConfig?.defaults?.noValue,
     valueMappings: collectValueMappings(panel.fieldConfig),
     fieldFormats: collectFieldFormats(panel.fieldConfig),

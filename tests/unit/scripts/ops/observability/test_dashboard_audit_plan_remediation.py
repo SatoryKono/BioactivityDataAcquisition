@@ -1,5 +1,7 @@
 """Preserve coverage semantics while allocating enough rows for their labels."""
 
+from __future__ import annotations
+
 from copy import deepcopy
 
 from scripts.ops.observability.grafana._audit_presentation import (

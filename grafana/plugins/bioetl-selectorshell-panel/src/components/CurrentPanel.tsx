@@ -10,7 +10,7 @@ const TIMEOUT_MS = 15_000;
 
 type Snapshot = { data?: PanelData; evaluatedAt?: number; error?: string };
 
-export const CurrentPanel: React.FC<PanelProps<AdaptiveTableOptions>> = (props) => {
+const CurrentPanelView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) => {
   const view = props.options.currentView;
   const [snapshot, setSnapshot] = useState<Snapshot>({});
   // QueryRunner resolves Grafana variables normally. This key only detects scope changes.
@@ -56,7 +56,9 @@ export const CurrentPanel: React.FC<PanelProps<AdaptiveTableOptions>> = (props) 
           setSnapshot({ error: message });
         }
       };
-      setSnapshot({});
+      // Keep a successful renderer mounted during a same-context poll. Errors
+      // and timeouts still remove stale verdicts immediately.
+      setSnapshot((previous) => previous.error ? {} : previous);
       deadline = setTimeout(() => {
         // A timed-out response must never repopulate a current verdict later.
         fail('CURRENT source unavailable — query timed out');
@@ -155,4 +157,19 @@ export const CurrentPanel: React.FC<PanelProps<AdaptiveTableOptions>> = (props) 
       </div>
     </div>
   );
+};
+
+export const CurrentPanel: React.FC<PanelProps<AdaptiveTableOptions>> = (props) => {
+  const view = props.options.currentView;
+  const duration = view?.pluginId === 'timeseries'
+    ? props.timeRange.to.valueOf() - props.timeRange.from.valueOf()
+    : 15 * 60_000;
+  const context = JSON.stringify([
+    props.id, props.timeZone, duration, view,
+    props.replaceVariables(JSON.stringify(view?.queries ?? [])),
+    props.replaceVariables('${workflow}|${pipeline}|${run_type}|${run_id}'),
+  ]);
+  // A scope change replaces state synchronously during reconciliation, before
+  // passive effects or an old asynchronous callback can expose the old scope.
+  return <CurrentPanelView key={context} {...props} />;
 };

@@ -319,7 +319,7 @@ async function captureCompactDetails(page, root, options) {
       throw new Error('Compact table details are incomplete');
     }
     const fields = [];
-    for (let field = 0; field < names.length; field++) {
+    await sequential(names.map((name, field) => ({name, field})), async ({name, field}) => {
       const value = values.nth(field);
       await value.scrollIntoViewIfNeeded({timeout});
       const observed = await value.evaluate(el => ({
@@ -329,9 +329,9 @@ async function captureCompactDetails(page, root, options) {
       const file = path.join(dir, `page-${index}-detail-${field + 1}.png`);
       const bytes = await require('./native_browser_zoom.cjs').captureElementScreenshot(
         page, value, {path:file, animations:'disabled', timeout});
-      fields.push({name:names[field], ...observed, file:path.relative(outputDir,file),
+      fields.push({name, ...observed, file:path.relative(outputDir,file),
         ...pngEvidence(bytes), viewportTiles:(bytes.viewportTiles || []).map(t=>({...t,file:path.relative(outputDir,t.file)}))});
-    }
+    });
     return {fields};
   } finally {
     await dialog.getByRole('button', {name:'Close', exact:true}).last().click();
@@ -355,9 +355,9 @@ async function captureCompactTable(page, root, panel, options) {
   if (initial.page < 1 || initial.total < initial.page || initial.total > 100) {
     throw new Error('Compact table pagination is invalid or exceeds 100 rows');
   }
-  async function moveTo(target) {
-    let position = await compactPosition(root);
-    for (let moves = 0; position.page !== target; moves++) {
+  async function moveTo(target, moves = 0) {
+      const position = await compactPosition(root);
+      if (position.page === target) return;
       if (moves >= 100 || position.total !== initial.total) {
         throw new Error('Compact table pagination changed during capture');
       }
@@ -376,15 +376,14 @@ async function captureCompactTable(page, root, panel, options) {
       if (next.page !== position.page + direction || next.total !== initial.total) {
         throw new Error('Compact table pagination did not advance one row');
       }
-      position = next;
-    }
+      await moveTo(target, moves + 1);
   }
   const dir = path.join(outputDir,'panels',dashboard.uid,String(panel.id));
   await fs.promises.mkdir(dir,{recursive:true});
   const pages = [];
   try {
     await moveTo(1);
-    for (let index = 1; index <= initial.total; index++) {
+    await sequential(Array.from({length: initial.total}, (_, i) => i + 1), async index => {
       await moveTo(index);
       const cells = await root.locator('table th, table td').allTextContents();
       if (!cells.length) throw new Error('Compact table has no visible fields');
@@ -395,7 +394,7 @@ async function captureCompactTable(page, root, panel, options) {
       pages.push({page:index,cells,details,scrollers:[],scrollTiles:[],inspectedValues:[],
         file:path.relative(outputDir,file),...pngEvidence(bytes),
         viewportTiles:(bytes.viewportTiles || []).map(t=>({...t,file:path.relative(outputDir,t.file)}))});
-    }
+    });
   } finally {
     await moveTo(initial.page);
   }

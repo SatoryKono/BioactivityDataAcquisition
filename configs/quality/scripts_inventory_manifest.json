@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-15T15:35:05.607826+00:00",
+  "generated_at": "2026-11-15T15:42:24.077722+00:00",
   "summary": {
     "total_scripts": 752,
     "status_counts": {
@@ -24780,7 +24780,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_dashboard_audit_plan_remediation.py",
-          "line": 5,
+          "line": 7,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._audit_presentation import ("
         },
@@ -25351,7 +25351,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_dashboard_audit_plan_remediation.py",
-          "line": 8,
+          "line": 10,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._v2_model_parity import _layout"
         }

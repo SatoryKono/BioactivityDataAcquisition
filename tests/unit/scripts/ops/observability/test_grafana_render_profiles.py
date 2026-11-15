@@ -1,5 +1,7 @@
 """Profile-specific render sources must match the dashboard being inspected."""
 
+from __future__ import annotations
+
 from dataclasses import replace
 import hashlib
 import json

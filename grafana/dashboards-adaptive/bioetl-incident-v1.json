@@ -5054,7 +5054,8 @@
                   "datasource": {
                     "type": "prometheus",
                     "uid": "prometheus"
-                  }
+                  },
+                  "instant": true
                 }
               ],
               "transformations": [],
