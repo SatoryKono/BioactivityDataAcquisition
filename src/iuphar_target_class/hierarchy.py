@@ -7,6 +7,7 @@ biological mappings; callers pass those as test or release fixtures.
 
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from typing import overload
@@ -418,17 +419,22 @@ class _FamilyPaths(Sequence[FamilyPath]):
         return sum(self.counts[start] for start in self.starts)
 
     def __iter__(self) -> Iterator[FamilyPath]:
-        for start in self.starts:
-            stack: list[tuple[str, ...]] = [(start,)]
+        for start, copies in sorted(Counter(self.starts).items()):
+            stack: list[tuple[tuple[str, ...], int]] = [((start,), copies)]
             while stack:
-                path = stack.pop()
+                path, multiplicity = stack.pop()
                 parents = self.nodes[path[-1]].parent_ids
                 if parents:
                     stack.extend(
-                        (*path, parent) for parent in sorted(parents, reverse=True)
+                        ((*path, parent), multiplicity * count)
+                        for parent, count in sorted(
+                            Counter(parents).items(), reverse=True
+                        )
                     )
                 else:
-                    yield _family_path(path)
+                    value = _family_path(path)
+                    for _ in range(multiplicity):
+                        yield value
 
     @overload
     def __getitem__(self, index: int) -> FamilyPath: ...
@@ -451,10 +457,10 @@ class _FamilyPaths(Sequence[FamilyPath]):
         return _family_path(tuple(path))
 
     def _select(self, node_ids: tuple[str, ...], index: int) -> tuple[str, int]:
-        for node_id in sorted(node_ids):
-            count = self.counts[node_id]
+        for node_id, copies in sorted(Counter(node_ids).items()):
+            count = self.counts[node_id] * copies
             if index < count:
-                return node_id, index
+                return node_id, index // copies
             index -= count
         raise IndexError("family path index out of range")
 

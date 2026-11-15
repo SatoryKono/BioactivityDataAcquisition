@@ -388,3 +388,19 @@ def test_lazy_paths_match_a_small_independent_dag_oracle() -> None:
         assert len(walk.paths) == len(expected)
         for index, path in enumerate(expected):
             assert tuple(reversed(walk.paths[index].root_to_leaf)) == path
+
+
+def test_duplicate_edges_and_starts_keep_global_sorted_multiplicity() -> None:
+    nodes = (
+        _node("leaf", "a", "a"),
+        _node("a", "b", "c", "c"),
+        _node("b"),
+        _node("c"),
+    )
+    paths = build_family_paths(nodes, family_ids=("leaf", "leaf")).paths
+    expected = [("leaf", "a", "b")] * 4 + [("leaf", "a", "c")] * 8
+    assert [tuple(reversed(path.root_to_leaf)) for path in paths] == expected
+    assert len(paths) == len(expected)
+    assert [
+        tuple(reversed(paths[index].root_to_leaf)) for index in range(len(paths))
+    ] == expected
