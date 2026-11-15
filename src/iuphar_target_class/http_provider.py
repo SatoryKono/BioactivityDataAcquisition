@@ -282,7 +282,7 @@ class HttpProvider:
                 if _is_unavailable(payload):
                     return payload
                 continue
-            matched = _gene_match(payload, symbol, species)
+            matched = _gene_match(payload, symbol, species, record.record_id)
             if matched == "schema":
                 return _seal(_unavailable("schema"), self._api_key)
             if matched:
@@ -598,7 +598,12 @@ def _identifier(value: object) -> str | None:
     return text
 
 
-def _gene_match(payload: object, symbol: str, species: str) -> bool | str:
+def _gene_match(
+    payload: object,
+    symbol: str,
+    species: str,
+    record_id: str,
+) -> bool | str:
     if not isinstance(payload, list):
         return "schema"
     symbol_key = symbol.casefold()
@@ -607,6 +612,8 @@ def _gene_match(payload: object, symbol: str, species: str) -> bool | str:
     for item in payload:
         if not isinstance(item, dict):
             return "schema"
+        if _gene_target(item, record_id) == "schema":
+            return "schema"
         fields = _gene_fields(item)
         if isinstance(fields, str):
             return fields
@@ -614,6 +621,14 @@ def _gene_match(payload: object, symbol: str, species: str) -> bool | str:
         if gene.casefold() == symbol_key and kind.casefold() == species_key:
             matched = True
     return matched
+
+
+def _gene_target(item: Mapping[str, object], record_id: str) -> str | None:
+    if "targetId" not in item:
+        return None
+    if _identifier(item["targetId"]) != record_id:
+        return "schema"
+    return None
 
 
 def _gene_fields(item: Mapping[str, object]) -> tuple[str, str] | str:
