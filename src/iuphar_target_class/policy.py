@@ -1,7 +1,8 @@
-"""Stage-1 policy: class dictionary, comparison rule, and unset parameters.
+"""Stage-1 policy: class dictionary, comparison rule, and recorded limits.
 
-Biological mappings are not approved. Values marked [...] in plan v1 r8 stay
-null. EC, L1, and L2 rules stay on the local layer.
+Biological mappings are not approved. Graph limits and the HTTP adapter
+configuration are the values recorded on 2026-11-15. Other plan [...] values
+stay null. EC, L1, and L2 rules stay on the local layer.
 """
 
 from __future__ import annotations
@@ -41,7 +42,10 @@ EC_CATEGORIES: tuple[tuple[int, str], ...] = (
 UNSET = "не утверждено"
 VOLUME_TEST_SECONDS = 300
 VOLUME_TEST_TIME_STATUS = "утверждено"
+APPROVED = "утверждено"
 NOT_RUN = "NOT_RUN"
+GRAPH_MAX_DEPTH = 8
+GRAPH_MAX_VISITED_NODES = 128
 ROLE_ASSIGNMENT = (
     "владелец результата — Федор Новиков; исполнитель модуля и "
     "проверяющий эталонов — Cursor, назначение владельца 2026-11-11"
@@ -315,6 +319,29 @@ def policy_document() -> dict[str, object]:
             "reason": "закреплённый источник IUPHAR в этапе 0 отсутствует",
             "status": "не подтверждены",
         },
+        "http_adapter": {
+            "approved_on": "2026-11-15",
+            "burst": 1,
+            "client_mapping": (
+                "timeout_sec задаёт connect, write и pool; "
+                "read = timeout_sec * read_timeout_multiplier"
+            ),
+            "failure_threshold": 5,
+            "max_retries": 3,
+            "operational_check": NOT_RUN,
+            "rate_note": (
+                "потолок по документальному ориентиру около 60 запросов/мин; "
+                "лимит сервиса не измерен"
+            ),
+            "read_timeout_multiplier": 2,
+            "recovery_timeout": 60,
+            "requests_per_second": 1,
+            "retry_base_delay": 1,
+            "retry_max_delay": 30,
+            "status": APPROVED,
+            "timeout_sec": 15,
+            "version": "2026-11-15",
+        },
         "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13009",
         "l1_l2_independence": {
             "biological_sample_review": False,
@@ -327,10 +354,12 @@ def policy_document() -> dict[str, object]:
         "local_rules": [_rule_payload(rule) for rule in local_rules()],
         "parameters": {
             "graph_limits": {
+                "approved_on": "2026-11-15",
                 "keys": ["max_depth", "max_visited_nodes"],
-                "max_depth": None,
-                "max_visited_nodes": None,
-                "status": UNSET,
+                "max_depth": GRAPH_MAX_DEPTH,
+                "max_visited_nodes": GRAPH_MAX_VISITED_NODES,
+                "scope": "обход предков familyIds одной мишени",
+                "status": APPROVED,
             },
             "isoform_policy": None,
             "isoform_policy_status": UNSET,

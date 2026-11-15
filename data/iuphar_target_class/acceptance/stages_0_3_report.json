@@ -24,12 +24,12 @@
     },
     {
       "name": "graph_limits_boundary",
-      "reason": "graph_limits.max_depth и graph_limits.max_visited_nodes не утверждены",
+      "reason": "значения graph_limits записаны; граничный прогон на пределе и пределе + 1 не выполнялся",
       "status": "NOT_RUN"
     },
     {
       "name": "http_transport",
-      "reason": "HTTP timeouts, retries и backoff не утверждены",
+      "reason": "параметры адаптера записаны; эксплуатационная проверка HTTP не запускалась",
       "status": "NOT_RUN"
     },
     {
