@@ -605,24 +605,25 @@ def _gene_match(payload: object, symbol: str, species: str) -> bool | str:
         return "schema"
     symbol_key = symbol.casefold()
     species_key = species.casefold()
+    matched = False
     for item in payload:
         if not isinstance(item, dict):
             return "schema"
-        if _gene_item_matches(item, symbol_key, species_key):
-            return True
-    return False
+        fields = _gene_fields(item)
+        if isinstance(fields, str):
+            return fields
+        gene, kind = fields
+        if gene.casefold() == symbol_key and kind.casefold() == species_key:
+            matched = True
+    return matched
 
 
-def _gene_item_matches(
-    item: Mapping[str, object],
-    symbol_key: str,
-    species_key: str,
-) -> bool:
+def _gene_fields(item: Mapping[str, object]) -> tuple[str, str] | str:
     gene = item.get("geneSymbol")
     kind = item.get("species")
     if not isinstance(gene, str) or not isinstance(kind, str):
-        return False
-    return gene.casefold() == symbol_key and kind.casefold() == species_key
+        return "schema"
+    return gene, kind
 
 
 def _retry_after_seconds(value: str | None) -> int | None:

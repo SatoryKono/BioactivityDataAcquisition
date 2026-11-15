@@ -395,6 +395,18 @@ def test_null_gene_information_is_schema_not_not_found() -> None:
     assert hit.records == ()
 
 
+def test_gene_field_with_the_wrong_type_is_schema() -> None:
+    targets = b'[{"targetId":3,"name":"5-HT1D receptor","type":"GPCR"}]'
+    genes = b'[{"geneSymbol":"HTR1D","species":{"name":"Human"}}]'
+    provider, _transport, _clock = _provider(
+        [_response(200, targets), _response(200, genes)]
+    )
+    hit = provider.find_by_gene("HTR1D", "Human")
+    assert hit_status(hit) == "source_unavailable"
+    assert hit.diagnostics == ("source_unavailable:schema",)
+    assert hit.records == ()
+
+
 def test_species_filter_on_an_incomplete_snapshot_is_not_not_found() -> None:
     targets = b'[{"targetId":3,"name":"5-HT1D receptor","type":"GPCR"}]'
     genes = b'[{"targetId":3,"species":"Mouse","geneSymbol":"Htr1d"}]'
