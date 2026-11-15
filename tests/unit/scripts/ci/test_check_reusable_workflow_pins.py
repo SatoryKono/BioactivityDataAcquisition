@@ -261,7 +261,7 @@ def test_local_action_yaml_suffix_passes_and_escape_fails(tmp_path: Path) -> Non
 
 DOCKER_LANE_PIN = (
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml"
-    "@fa8d903223efda3c26c19af08933d8a4000b2a7a"
+    "@84548f8bfed680b9415fc6855d6be059ffd9d1ab"
 )
 DOCS_LANE_PIN = (
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml"
@@ -434,3 +434,46 @@ def test_cli_exit_codes(tmp_path: Path) -> None:
     assert failure.returncode == 1
     assert default_still_checks.returncode == 1
     assert usage.returncode == 2
+
+
+@pytest.mark.subprocess_backed
+def test_actual_pinned_docker_workflow_preserves_sarif_comparison() -> None:
+    """Validate the called immutable workflow, not a newer unexecuted local file.
+
+    This repo-backed Class-lane contract requires its existing full-history
+    checkout. Git may lazily obtain the historical blob in a blob-filtered clone;
+    it never changes a branch, index, worktree file, or remote ref.
+    """
+    caller = yaml.safe_load(COORDINATOR.read_text(encoding="utf-8"))
+    uses = caller["jobs"]["docker-lane"]["uses"]
+    path, revision = uses.rsplit("@", 1)
+    assert path == (
+        "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml"
+    )
+    assert len(revision) == 40 and all(c in "0123456789abcdef" for c in revision)
+    result = subprocess.run(
+        ["git", "show", f"{revision}:.github/workflows/docker.yml"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=30,
+        check=False,
+    )
+    assert result.returncode == 0, "Pinned workflow blob requires full Git history"
+    steps = yaml.safe_load(result.stdout)["jobs"]["docker-build"]["steps"]
+    uploads = [
+        step
+        for step in steps
+        if str(step.get("uses", "")).startswith("github/codeql-action/upload-sarif@")
+    ]
+    assert len(uploads) == 3
+    assert {step["with"].get("category") for step in uploads} == {
+        ".github/workflows/docker.yml:docker-build",
+        ".github/workflows/main-integrity.yml:docker-build",
+        ".github/workflows/pr-required.yml:docker-build",
+    }
+    for step in uploads:
+        assert step["with"]["sarif_file"] == "reports/security/trivy-results.sarif"
+        assert step["with"]["wait-for-processing"] is True
+        assert not step.get("continue-on-error", False)
