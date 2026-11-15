@@ -1851,6 +1851,29 @@
       "published_tree": "3b493c302b0ec625b71ff7c298ace97b9c965a6f",
       "merged_tree": "3b493c302b0ec625b71ff7c298ace97b9c965a6f",
       "trust_statement": "Reviewed publication mapping only; not a CI execution attestation, capture substitution, runtime qualification or trust upgrade."
+    },
+    {
+      "github_pull_request": {
+        "base": {
+          "repo": {
+            "full_name": "SatoryKono/BioactivityDataAcquisition"
+          }
+        },
+        "head": {
+          "sha": "8eb89c88fba5d69b9606a6fca17bb7529c7d5cec"
+        },
+        "merge_commit_sha": "c41cd6f7b7e4f1cb841358837fec6c6d30625106",
+        "merged": true,
+        "number": 13160
+      },
+      "retrieved_at_utc": "2026-11-15T20:00:12.683197+00:00",
+      "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/13160",
+      "reviewed_source_commits": [
+        "780347e4f8bb06dd9aa4611b765bd61fba837275"
+      ],
+      "schema_version": 1,
+      "trust_statement": "Reviewed live GitHub publication mapping; not a signature or CI execution receipt.",
+      "verification_mode": "live_github"
     }
   ],
   "schema_version": 1,
