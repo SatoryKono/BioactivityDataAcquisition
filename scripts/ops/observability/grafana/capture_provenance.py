@@ -353,6 +353,9 @@ def dashboard_attachment_errors(root: Path, dashboard: dict) -> list[str]:
             attachments.extend(
                 v for v in page.get("inspectedValues", []) if v.get("file")
             )
+            for field in page.get("details", {}).get("fields", []):
+                attachments.append(field)
+                attachments.extend(field.get("viewportTiles", []))
     for control in dashboard.get("seriesControls", []):
         attachments.extend(control.get("entries", []))
     return [

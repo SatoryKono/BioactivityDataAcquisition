@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-15T16:01:36.785146+00:00",
+  "generated_at": "2026-11-15T16:12:41.239169+00:00",
   "summary": {
     "total_scripts": 752,
     "status_counts": {
@@ -25956,7 +25956,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/capture_provenance.py",
-          "line": 433,
+          "line": 436,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import ("
         },

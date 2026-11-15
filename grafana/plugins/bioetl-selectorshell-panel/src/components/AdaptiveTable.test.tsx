@@ -251,6 +251,28 @@ it('reports an incomplete required summary rather than rendering partial success
   expect(screen.queryByRole('link')).not.toBeInTheDocument();
 });
 
+it('keeps hidden incident scope fields in row details without adding compact columns', () => {
+  const panel = props();
+  panel.id = 2010;
+  panel.options = { ...panel.options, viewMode: 'rows', compactFields: ['Pipeline', 'Overview'] };
+  const frame = panel.data.series[0];
+  for (const name of ['Pipeline', 'Provider']) {
+    frame.fields.find(field => field.name === name)!.config.custom = { hidden: true };
+  }
+  frame.fields.push({name:'Domain',type:'string' as FieldType,values:['provider','runtime','dq'],config:{custom:{hidden:true}}});
+  render(<AdaptiveTable {...panel} />);
+  const summary = screen.getByRole('table', {name:panel.title});
+  expect(within(summary).getAllByRole('rowheader')).toHaveLength(2);
+  expect(within(summary).queryByText('Provider')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', {name:'Next row'}));
+  fireEvent.click(screen.getByRole('button', {name:'Details'}));
+  const modal = screen.getByRole('dialog', {name:'Full context'});
+  expect(within(modal).getByText('Pipeline two')).toBeInTheDocument();
+  expect(within(modal).getByText('Provider two')).toBeInTheDocument();
+  expect(within(modal).getByText('Domain')).toBeInTheDocument();
+  expect(within(modal).getByText('runtime')).toBeInTheDocument();
+});
+
 it('shows complete object values instead of an object placeholder', () => {
   const panelProps = props();
   panelProps.data.series[0].fields.find((field) => field.name === 'Pipeline')!.values[0] = { name: 'pipeline-a', stages: ['bronze', 'silver'] };

@@ -281,6 +281,40 @@ def test_attachment_path_must_stay_within_pack(capture) -> None:
     assert provenance.attachment_errors(path.parent, evidence)
 
 
+@pytest.mark.parametrize(
+    "mutation",
+    ["missing_field", "corrupt_field", "missing_tile", "corrupt_tile", "escape"],
+)
+def test_compact_full_details_and_viewport_tiles_are_hash_bound(capture, mutation):
+    root, path, manifest = capture
+    dashboard = manifest["dashboards"][0]
+    field = copy.deepcopy(dashboard["screenshotEvidence"])
+    field["file"] = "detail.png"
+    tile = copy.deepcopy(field)
+    tile["file"] = "detail-tile.png"
+    field["viewportTiles"] = [tile]
+    png = (path.parent / "test.png").read_bytes()
+    for name in ("detail.png", "detail-tile.png"):
+        (path.parent / name).write_bytes(png)
+    page = copy.deepcopy(dashboard["screenshotEvidence"])
+    page["details"] = {"fields": [field]}
+    dashboard["tablePagination"] = [{"pages": [page]}]
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "PASS"
+    target = path.parent / (
+        "detail-tile.png" if mutation.endswith("tile") else "detail.png"
+    )
+    if mutation.startswith("missing"):
+        target.unlink()
+    elif mutation == "escape":
+        field["file"] = "../outside.png"
+        (path.parent.parent / "outside.png").write_bytes(png)
+        path.write_text(json.dumps(manifest), encoding="utf-8")
+    else:
+        target.write_bytes(b"corrupt")
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"
+
+
 def test_windows_source_separators_preserve_resource_identity(capture):
     root, path, manifest = capture
     manifest["dashboards"][0]["dashboardSource"]["path"] = (
