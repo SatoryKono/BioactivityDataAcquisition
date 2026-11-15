@@ -134,6 +134,46 @@ def test_duplicate_family_payloads_are_rejected() -> None:
     assert defect.message == "повторяющийся идентификатор"
 
 
+def test_same_payload_with_different_parents_is_order_independent() -> None:
+    records = (
+        (FamilyNode("leaf", (), "same"), FamilyNode("leaf", ("gone",), "same")),
+        (FamilyNode("leaf", ("gone",), "same"), FamilyNode("leaf", (), "same")),
+    )
+    for nodes in records:
+        result = normalize_provider_class(
+            type_name=None,
+            family_ids=("leaf",),
+            nodes=nodes,
+            type_to_class={},
+            family_to_class={"leaf": "Enzyme"},
+        )
+        assert result.diagnostics[0].message == "повторяющийся идентификатор"
+        assert result.iuphar_class is None
+        assert result.paths == ()
+
+
+def test_shared_ancestors_stop_at_the_visit_budget() -> None:
+    nodes = (
+        FamilyNode("leaf", ("a", "b"), "leaf"),
+        FamilyNode("a", ("root",), "a"),
+        FamilyNode("b", ("root",), "b"),
+        FamilyNode("root", (), "root"),
+    )
+    result = normalize_provider_class(
+        type_name=None,
+        family_ids=("leaf",),
+        nodes=nodes,
+        type_to_class={},
+        family_to_class={"leaf": "Enzyme"},
+        max_depth=8,
+        max_visited_nodes=4,
+    )
+    assert result.diagnostics[0].message == "превышение лимита"
+    assert result.iuphar_class is None
+    assert result.annotation_status == "not_available"
+    assert result.paths == ()
+
+
 def test_depth_limit_and_one_past_it() -> None:
     at_limit = validate_family_graph(
         _chain(GRAPH_MAX_DEPTH),
