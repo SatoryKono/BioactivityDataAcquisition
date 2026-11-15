@@ -669,6 +669,13 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_security_aud005_main_merge_review.json",
             "configs/quality/external_resource_inventory_security_aud006_review.json",
             "configs/quality/external_resource_inventory_security_aud007_review.json",
+            "configs/quality/external_resource_inventory_security_aud007_main_merge_review.json",
+            "configs/quality/external_resource_inventory_security_aud007_class_lane_review.json",
+            "configs/quality/external_resource_inventory_security_aud007_coderabbit_sidecar_review.json",
+            "configs/quality/external_resource_inventory_security_aud007_s3776_review.json",
+            "configs/quality/external_resource_inventory_security_aud007_path_seed_review.json",
+            "configs/quality/external_resource_inventory_security_aud007_ruff_table_ops_review.json",
+            "configs/quality/external_resource_inventory_security_aud007_codex_p2_pair_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -1022,6 +1029,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr13113_main_13118_review.json",
             "configs/quality/external_resource_inventory_pr13113_s5886_tip_review.json",
             "configs/quality/external_resource_inventory_pr13133_platform_narrowing_review.json",
+            "configs/quality/external_resource_inventory_pr13133_main_66ef9357_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,

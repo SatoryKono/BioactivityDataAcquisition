@@ -1605,6 +1605,10 @@ def test_hook_qualification_inputs_have_bounded_shadow_routes() -> None:
             "tests/architecture/test_external_resource_inventory_catalog.py",
             "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
         },
+        "configs/quality/external_resource_inventory_pr13133_main_66ef9357_review.json": {
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        },
     }
     for path, owning_tests in expected.items():
         report = build_shadow_compare([path], repo_root=root)
@@ -1613,6 +1617,7 @@ def test_hook_qualification_inputs_have_bounded_shadow_routes() -> None:
     for unknown in (
         ".gitattributes.unreviewed",
         "configs/quality/external_resource_inventory_pr99999_unreviewed_review.json",
+        "configs/quality/external_resource_inventory_pr13133_main_unreviewed_review.json",
     ):
         with pytest.raises(ValueError, match="unmapped paths"):
             build_shadow_compare([unknown], repo_root=root)

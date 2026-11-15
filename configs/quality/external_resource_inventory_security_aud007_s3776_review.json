@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "425571e83ef0bd0aca70cff6ceca8d7092a6bcf2",
+  "source_ref": "82ea8b59574465f80e1c764d9487794ebb55ae12",
+  "source_reviews": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": "S3776: extract clear/export branching into module helpers (_list_*_clear_targets, _unlink_clear_targets, _seed_raw_sidecar_if_missing, _write_raw_and_published_pair) while preserving fail-closed primary writes and path confinement. Glob/unlink/seed acquisitions moved with the helpers; no new runtime qualification."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "line_updates": {},
+  "reference_moves": [
+    {
+      "identity": "infrastructure.export.csv_exporter.directory-enumeration",
+      "fields": [
+        "creation_sites"
+      ],
+      "from": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "line": 168,
+        "expression": "self.base_path.glob('*.csv')"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "scope": "_list_all_clear_targets",
+        "call": "base_path.glob",
+        "expression": "base_path.glob('*.csv')"
+      }
+    },
+    {
+      "identity": "infrastructure.export.csv_exporter.directory-enumeration",
+      "fields": [
+        "cleanup_sources"
+      ],
+      "from": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "line": 168
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "scope": "_list_all_clear_targets",
+        "segment": "for path in base_path.glob(\"*.csv\"):"
+      }
+    },
+    {
+      "identity": "asyncio.default-executor",
+      "fields": [
+        "cleanup_sources"
+      ],
+      "from": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "line": 176,
+        "expression": "target.unlink()"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "scope": "_unlink_clear_targets",
+        "call": "target.unlink",
+        "expression": "target.unlink()"
+      }
+    },
+    {
+      "identity": "export.csv.table-file",
+      "fields": [
+        "cleanup_sources"
+      ],
+      "from": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "line": 176,
+        "expression": "target.unlink()"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "scope": "_unlink_clear_targets",
+        "call": "target.unlink",
+        "expression": "target.unlink()"
+      }
+    },
+    {
+      "identity": "export.csv.raw_sidecar_seed",
+      "fields": [
+        "creation_sites",
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "line": 244,
+        "expression": "csv_full_path.read_bytes()"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "scope": "_seed_raw_sidecar_if_missing",
+        "call": "csv_full_path.read_bytes",
+        "expression": "csv_full_path.read_bytes()"
+      }
+    },
+    {
+      "identity": "export.csv.raw_sidecar_seed",
+      "fields": [
+        "creation_sites",
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "line": 244,
+        "expression": "raw_path.write_bytes(csv_full_path.read_bytes())"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "scope": "_seed_raw_sidecar_if_missing",
+        "call": "raw_path.write_bytes",
+        "expression": "raw_path.write_bytes(csv_full_path.read_bytes())"
+      }
+    }
+  ],
+  "exclusion_moves": [
+    {
+      "from": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "line": 171,
+        "expression": "self.base_path.glob('*.csv.raw')",
+        "call": "self.base_path.glob"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+        "scope": "_list_all_clear_targets",
+        "call": "base_path.glob",
+        "expression": "base_path.glob('*.csv.raw')",
+        "reason": "CsvExporter.clear orphan-sidecar directory enumeration relocated into _list_all_clear_targets; same clear() owner, not a second persistent acquisition."
+      }
+    }
+  ],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
