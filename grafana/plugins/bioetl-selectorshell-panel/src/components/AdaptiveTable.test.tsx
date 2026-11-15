@@ -242,6 +242,27 @@ it('keeps secondary evidence in details when the compact summary selects fewer f
   expect(within(modal).getByRole('link', { name: 'Open report' })).toHaveAttribute('href', `/report/${ids[1]}`);
 });
 
+it.each([['Signal', 'Object'], ['Signal']])('retains hidden ranked-suspect metadata in row Details: %p', (...compactFields) => {
+  const panel = props();
+  panel.id = 2010;
+  panel.options = { ...panel.options, viewMode: 'rows', compactFields };
+  const metadata: Record<string, string> = { Pipeline: 'chembl_activity', Provider: 'chembl', Domain: 'provider' };
+  panel.data.series[0] = { length: 1, fields: ['Signal', 'Object', ...Object.keys(metadata)].map((name) => ({
+    name, type: 'string' as FieldType,
+    config: { custom: { hidden: name in metadata } },
+    values: [metadata[name] ?? name + ' value'],
+  })) };
+  render(<AdaptiveTable {...panel} />);
+  expect(screen.getAllByRole('rowheader')).toHaveLength(compactFields.length);
+  expect(screen.queryByText('chembl_activity')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Details' }));
+  const dialog = screen.getByRole('dialog', { name: 'Full context' });
+  for (const [name, value] of Object.entries(metadata)) {
+    expect(within(dialog).getByText(name)).toBeInTheDocument();
+    expect(within(dialog).getByText(value)).toBeInTheDocument();
+  }
+});
+
 it('reports an incomplete required summary rather than rendering partial success', () => {
   const panelProps = props();
   panelProps.options = { ...panelProps.options, viewMode: 'rows', compactFields: ['Pipeline', 'Missing required status'] };

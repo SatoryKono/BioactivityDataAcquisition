@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-15T16:08:05.642194+00:00",
+  "generated_at": "2026-11-15T16:15:27.370464+00:00",
   "summary": {
     "total_scripts": 752,
     "status_counts": {
@@ -26387,13 +26387,13 @@
       "references": [
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 92,
+          "line": 98,
           "source_group": "docs",
           "text": "`python -m scripts.ops.observability.grafana.render_nav_bus --adaptive-profile`."
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 276,
+          "line": 282,
           "source_group": "docs",
           "text": "`scripts/ops/observability/grafana/render_nav_bus.py` on Replay Readiness,"
         },
@@ -26467,7 +26467,7 @@
       "references": [
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 94,
+          "line": 100,
           "source_group": "docs",
           "text": "Render this profile with `python -m scripts.ops.observability.grafana.rerender_grafana_screenshots --dashboard-profile adaptive --fallback playwright`."
         },
@@ -26815,7 +26815,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 269,
+          "line": 275,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },

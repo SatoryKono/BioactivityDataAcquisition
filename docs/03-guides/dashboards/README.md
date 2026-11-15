@@ -78,6 +78,12 @@ retain the selected duration and end at now. Explicit TIME RANGE panels retain
 the dashboard interval. The native fallback still uses Grafana's dashboard
 clock and does not provide this independent-clock guarantee.
 
+`refresh=off` disables the dashboard timer, while the managed CURRENT clock
+continues to run. A capture pack records one browser occurrence, not an atomic
+snapshot of a single CURRENT query generation. Interpret its pages using their
+visible query evaluation clocks; fixed historical range arguments still apply
+to TIME RANGE panels.
+
 The original query and transformation configuration is retained in each managed
 panel's `options.currentView`; the host panel has no duplicate historical query.
 Use the browser's query requests to inspect the independent evaluation time.
