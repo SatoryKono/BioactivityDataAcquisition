@@ -38,6 +38,55 @@ def read_legacy_batch(content: bytes) -> tuple[RawTargetRow, ...]:
     return tuple(rows)
 
 
+def read_chembl_target_csv_v1(
+    content: bytes, *, source_path: str, target_kind: str
+) -> tuple[RawTargetRow, ...]:
+    """Adapt the pinned project export with an explicitly approved row kind.
+
+    No ChEMBL identifier becomes an IUPHAR ID and no species/kind is guessed.
+    All source columns and byte/record provenance remain alongside aliases.
+    """
+    if not source_path or target_kind not in {"protein", "complex"}:
+        raise ValueError(
+            "project CSV import requires a source and explicit target kind"
+        )
+    reader = csv.DictReader(
+        io.StringIO(content.decode("utf-8-sig"), newline=""), strict=True
+    )
+    expected = (
+        "target_chembl_id",
+        "isoform_ids",
+        "isoform_names",
+        "isoforms",
+        "organism",
+        "pH_dependence",
+        "primaryAccession",
+        "target_names",
+        "target_uniprot_id",
+    )
+    if tuple(reader.fieldnames or ()) != expected:
+        raise ValueError("invalid chembl_target_csv_v1 header")
+    digest = hashlib.sha256(content).hexdigest()
+    identity = hashlib.sha256(source_path.encode("utf-8")).hexdigest()
+    rows = []
+    for record, raw in enumerate(reader, 1):
+        if None in raw or any(value is None for value in raw.values()):
+            raise ValueError("invalid CSV row width")
+        fields = {
+            **raw,
+            "uniprot": raw["primaryAccession"],
+            "name": raw["target_names"],
+            "import_profile": "chembl_target_csv_v1",
+            "source_path": source_path,
+            "source_sha256": digest,
+            "source_record": str(record),
+        }
+        rows.append(
+            RawTargetRow(f"stage0:{identity}:{digest}:{record}", fields, target_kind)
+        )
+    return tuple(rows)
+
+
 def render_batch(result: BatchResult) -> Mapping[str, bytes]:
     """Return deterministic output/evidence/candidates/diagnostics/QC bytes."""
     rows = []
@@ -79,6 +128,13 @@ def render_batch(result: BatchResult) -> Mapping[str, bytes]:
             if output.direct
             else [],
             local_candidates=output.local.local_candidates if output.local else (),
+            ec_categories=output.local.ec_categories if output.local else None,
+            multiple_ec_categories=output.local.multiple_ec_categories
+            if output.local
+            else None,
+            ec_numbers=[asdict(number) for number in output.validated.ec_numbers]
+            if is_valid
+            else None,
             upstream_confidence=_source_confidence(raw) if is_valid else None,
         )
         rows.append(entry)

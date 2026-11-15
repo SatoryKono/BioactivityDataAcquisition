@@ -4,13 +4,21 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import replace
 
 import pytest
 from iuphar_target_class import pipeline
+from iuphar_target_class.evidence import ContractDefect
 from iuphar_target_class.hierarchy import FamilyNode
 from iuphar_target_class.matching import CatalogTarget
-from iuphar_target_class.models import ProviderAnnotation, RawTargetRow, RunProvenance
+from iuphar_target_class.models import (
+    Diagnostic,
+    ProviderAnnotation,
+    RawTargetRow,
+    RunProvenance,
+)
 from iuphar_target_class.pipeline_acceptance import (
+    SourceImport,
     VolumePlan,
     load_admitted_cohort,
     run_admitted_volume,
@@ -18,6 +26,7 @@ from iuphar_target_class.pipeline_acceptance import (
 from iuphar_target_class.pipeline_io import (
     publish_batch,
     read_legacy_batch,
+    read_chembl_target_csv_v1,
     render_batch,
     run_csv_pipeline,
 )
@@ -160,6 +169,78 @@ def test_legacy_original_bytes_and_outputs_preserved(tmp_path):
     assert path.read_bytes() == content
 
 
+@pytest.mark.parametrize(
+    "raw,categories,depths,levels",
+    [
+        ("3.1.-.-", ["Hydrolases"], [2], [["3", "3.1"]]),
+        (
+            "1.1.1.1;3.1.-.-",
+            ["Oxidoreductases", "Hydrolases"],
+            [4, 2],
+            [["1", "1.1", "1.1.1", "1.1.1.1"], ["3", "3.1"]],
+        ),
+    ],
+)
+def test_render_preserves_ec_categories_and_confirmed_depth(
+    raw, categories, depths, levels
+):
+    batch = _run(RawTargetRow("ec-row", {"ec": raw}, "protein"))
+    row = json.loads(render_batch(batch)["classification.json"])[0]
+    assert row["raw_fields"]["ec"] == raw
+    assert row["ec_categories"] == categories
+    assert row["multiple_ec_categories"] is (len(categories) > 1)
+    assert [number["depth"] for number in row["ec_numbers"]] == depths
+    assert [number["confirmed_levels"] for number in row["ec_numbers"]] == levels
+
+
+def test_diagnostic_evidence_resolves_or_is_explicitly_absent():
+    batch = _run(
+        RawTargetRow(
+            "prediction",
+            {"predicted_l1": "Enzyme", "predicted_l2": "Receptor"},
+            "protein",
+        ),
+        RawTargetRow("bad-ec", {"ec": "bad"}, "protein"),
+        RawTargetRow("direct", {"target_id": "1"}, "protein"),
+    )
+    rendered = render_batch(batch)
+    witnesses = {item["evidence_id"] for item in json.loads(rendered["evidence.json"])}
+    diagnostics = json.loads(rendered["diagnostics.json"])
+    assert all(
+        item["evidence_id"] is None or item["evidence_id"] in witnesses
+        for item in diagnostics
+    )
+    predicted = [item for item in diagnostics if item["code"] == "candidate_only"]
+    assert len(predicted) == 2 and all(
+        item["evidence_id"] is None for item in predicted
+    )
+    row = next(row for row in batch.rows if row.result.input_row_id == "prediction")
+    assert row.result.effective_class is None
+
+
+def test_unexpected_dangling_diagnostic_is_a_contract_defect(monkeypatch):
+    original = pipeline.apply_local
+
+    def broken(*args, **kwargs):
+        local = original(*args, **kwargs)
+        return replace(
+            local,
+            diagnostics=(
+                *local.diagnostics,
+                Diagnostic(
+                    "unexpected_witness",
+                    "warning",
+                    "missing real evidence",
+                    "not-in-table",
+                ),
+            ),
+        )
+
+    monkeypatch.setattr(pipeline, "apply_local", broken)
+    with pytest.raises(ContractDefect, match="unresolvable diagnostic"):
+        _run(RawTargetRow("row", {"target_id": "1"}, "protein"))
+
+
 def test_same_chembl_id_does_not_drop_rows_and_io_keeps_source_fields(tmp_path):
     path = tmp_path / "source.csv"
     original = (
@@ -256,6 +337,90 @@ def _stage0_fixture(tmp_path):
             "owning test fixture only",
         ),
     )
+
+
+_PROJECT_TARGET_CSV = (
+    b"target_chembl_id,isoform_ids,isoform_names,isoforms,organism,pH_dependence,primaryAccession,target_names,target_uniprot_id\n"
+    b"CHEMBL1,,,,Human,,P12345,Receptor,P12345\n"
+)
+
+
+def test_stage0_original_target_copies_use_frozen_explicit_profiles(tmp_path):
+    manifest, _, plan = _stage0_fixture(tmp_path)
+    document = json.loads(manifest.read_bytes())
+    copies = []
+    profiles = []
+    for name in ("targets-a.csv", "targets-b.csv"):
+        copy = tmp_path / (name + ".frozen")
+        copy.write_bytes(_PROJECT_TARGET_CSV)
+        copies.append(
+            {
+                "source_path": name,
+                "copy_path": copy.name,
+                "sha256": hashlib.sha256(_PROJECT_TARGET_CSV).hexdigest(),
+                "byte_count": len(_PROJECT_TARGET_CSV),
+            }
+        )
+        profiles.append(SourceImport(name, "chembl_target_csv_v1", "protein"))
+    document["copies"] = copies
+    manifest.write_text(json.dumps(document), encoding="utf-8")
+    plan = replace(
+        plan,
+        manifest_sha256=hashlib.sha256(manifest.read_bytes()).hexdigest(),
+        selected_source_paths=tuple(p.source_path for p in profiles),
+        expected_rows=2,
+        source_imports=tuple(profiles),
+    )
+    cohort = load_admitted_cohort(manifest, plan)
+    assert len({row.input_row_id for row in cohort.rows}) == 2
+    for row in cohort.rows:
+        assert row.target_kind == "protein"
+        assert row.fields["target_chembl_id"] == "CHEMBL1"
+        assert "target_id" not in row.fields
+        assert row.fields["uniprot"] == row.fields["primaryAccession"] == "P12345"
+        assert row.fields["organism"] == "Human"
+        assert row.fields["source_record"] == "1"
+    for entry in copies:
+        assert (tmp_path / entry["copy_path"]).read_bytes() == _PROJECT_TARGET_CSV
+    output = tmp_path / "volume"
+    ticks = iter((1.0, 1.001))
+
+    def clock():
+        frozen = json.loads((output / "volume-config.json").read_bytes())
+        assert frozen["source_imports"] == [
+            {
+                "source_path": p.source_path,
+                "format_version": p.format_version,
+                "target_kind": p.target_kind,
+            }
+            for p in profiles
+        ]
+        return next(ticks)
+
+    _, result = run_admitted_volume(
+        manifest_path=manifest,
+        plan=plan,
+        snapshot=_snapshot(),
+        provenance=_provenance(),
+        run_id="fixture",
+        output_dir=output,
+        clock=clock,
+    )
+    assert result["biological_accuracy_accepted"] is False
+    with pytest.raises(ValueError, match="invalid CSV header"):
+        load_admitted_cohort(manifest, replace(plan, source_imports=()))
+    with pytest.raises(ValueError, match="duplicate or unselected"):
+        load_admitted_cohort(
+            manifest, replace(plan, source_imports=(*profiles, profiles[0]))
+        )
+
+
+@pytest.mark.parametrize("kind", ["", "inferred", "unknown"])
+def test_original_target_import_never_guesses_kind(kind):
+    with pytest.raises(ValueError, match="explicit target kind"):
+        read_chembl_target_csv_v1(
+            _PROJECT_TARGET_CSV, source_path="target.csv", target_kind=kind
+        )
 
 
 def test_volume_refuses_changed_cohort_and_records_config_before_run(tmp_path):

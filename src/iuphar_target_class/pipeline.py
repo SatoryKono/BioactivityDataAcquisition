@@ -11,6 +11,7 @@ from types import MappingProxyType
 from typing import Literal
 
 from .evidence import (
+    ContractDefect,
     EvidenceDraft,
     EvidenceTable,
     build_evidence_table,
@@ -359,13 +360,35 @@ def _classification_diagnostics(
         if direct
         else ()
     )
-    return (
+    diagnostics = (
         *row.diagnostics,
         *match.diagnostics,
         *direct_diagnostics,
         *local.diagnostics,
         *missing_annotation,
     )
+    return _bound_diagnostics(diagnostics, evidence)
+
+
+def _bound_diagnostics(
+    diagnostics: tuple[Diagnostic, ...], evidence: EvidenceTable
+) -> tuple[Diagnostic, ...]:
+    """An unverified candidate has no witness until a real child row exists."""
+    records = {record.evidence_id for record in evidence.records}
+    unverified = {
+        "candidate_only",
+        "dependent_prediction",
+        "prediction_requires_explicit_rule",
+        "invalid_ec",
+    }
+    result = []
+    for item in diagnostics:
+        if item.evidence_id is not None and item.evidence_id not in records:
+            if item.code not in unverified:
+                raise ContractDefect("unresolvable diagnostic evidence reference")
+            item = replace(item, evidence_id=None)
+        result.append(item)
+    return tuple(result)
 
 
 def _partial_basis(
@@ -560,7 +583,9 @@ def classify_batch(
     diagnostics = tuple(
         (x.result.input_row_id, d)
         for x in results
-        for d in (*x.validated.diagnostics, *x.result.diagnostics)
+        for d in _bound_diagnostics(
+            (*x.validated.diagnostics, *x.result.diagnostics), x.evidence
+        )
     )
     status = "processed"
     if not results:

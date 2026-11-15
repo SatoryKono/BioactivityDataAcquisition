@@ -7,15 +7,24 @@ import json
 import platform
 import time
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import TypedDict
 
 from .models import RawTargetRow, RunProvenance
 from .pipeline import BatchResult, IndexedSnapshot, classify_batch
-from .pipeline_io import read_legacy_batch
+from .pipeline_io import read_chembl_target_csv_v1, read_legacy_batch
 from .policy import VOLUME_TEST_SECONDS
 from .stage0.io import atomic_write_bytes, canonical_json_bytes
+
+
+@dataclass(frozen=True, slots=True)
+class SourceImport:
+    """Owner-selected versioned conversion, frozen before volume execution."""
+
+    source_path: str
+    format_version: str
+    target_kind: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -27,6 +36,7 @@ class VolumePlan:
     expected_rows: int
     approval_reference: str
     environment: str
+    source_imports: tuple[SourceImport, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -75,6 +85,7 @@ def _load_verified_copies(
     root: Path,
     copies: list[_ManifestCopy],
     selected_source_paths: tuple[str, ...],
+    imports: Mapping[str, SourceImport],
 ) -> tuple[list[RawTargetRow], list[tuple[str, str]]]:
     entries = {entry["source_path"]: entry for entry in copies}
     requested = tuple(dict.fromkeys(selected_source_paths))
@@ -90,7 +101,17 @@ def _load_verified_copies(
         digest = _sha(content)
         if digest != entry["sha256"] or len(content) != entry["byte_count"]:
             raise ValueError(f"cohort source bytes differ from manifest: {source}")
-        rows.extend(read_legacy_batch(content))
+        profile = imports.get(source)
+        if profile is None:
+            rows.extend(read_legacy_batch(content))
+        elif profile.format_version == "chembl_target_csv_v1":
+            rows.extend(
+                read_chembl_target_csv_v1(
+                    content, source_path=source, target_kind=profile.target_kind
+                )
+            )
+        else:
+            raise ValueError(f"unsupported Stage-0 source import profile: {source}")
         hashes.append((source, digest))
     return rows, hashes
 
@@ -116,7 +137,14 @@ def load_admitted_cohort(manifest_path: Path, plan: VolumePlan) -> AdmittedCohor
         )
     root = manifest_path.parent
     _verified_artifacts(manifest, root)
-    rows, hashes = _load_verified_copies(root, copies, plan.selected_source_paths)
+    imports = {profile.source_path: profile for profile in plan.source_imports}
+    if len(imports) != len(plan.source_imports) or set(imports) - set(
+        plan.selected_source_paths
+    ):
+        raise ValueError("duplicate or unselected Stage-0 source import profile")
+    rows, hashes = _load_verified_copies(
+        root, copies, plan.selected_source_paths, imports
+    )
     if len(rows) != plan.expected_rows or len({r.input_row_id for r in rows}) != len(
         rows
     ):
@@ -152,6 +180,7 @@ def run_admitted_volume(
         {
             "stage0_manifest_sha256": cohort.manifest_sha256,
             "source_digests": dict(cohort.source_digests),
+            "source_imports": [asdict(profile) for profile in plan.source_imports],
             "approval_reference": plan.approval_reference,
             "planned_environment": plan.environment,
             "observed_runtime": platform.python_version(),
