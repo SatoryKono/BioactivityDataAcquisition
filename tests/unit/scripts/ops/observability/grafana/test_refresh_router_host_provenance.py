@@ -541,6 +541,15 @@ class ProvenanceControls(unittest.TestCase):
             plugin = root / "grafana/plugins/bioetl-scenes-app/captured.js"
             plugin.parent.mkdir(parents=True)
             plugin.write_bytes(b"captured plugin\n")
+            adaptive_output = (
+                root
+                / "grafana/plugins/bioetl-selectorshell-panel/dist-adaptive/build-provenance.json"
+            )
+            adaptive_output.parent.mkdir(parents=True)
+            adaptive_output.write_bytes(b"generated receipt\n")
+            adaptive_source = plugin.parent / "src/dist-adaptive/input.ts"
+            adaptive_source.parent.mkdir(parents=True)
+            adaptive_source.write_bytes(b"source with output-like directory\n")
             git("add", "grafana")
             for relative in module.BUILD_SUPPORT:
                 target = root / relative
@@ -571,6 +580,9 @@ class ProvenanceControls(unittest.TestCase):
                     "grafana/plugins/bioetl-scenes-app/captured.js": module.sha256(
                         b"captured plugin\n"
                     ),
+                    "grafana/plugins/bioetl-scenes-app/src/dist-adaptive/input.ts": module.sha256(
+                        b"source with output-like directory\n"
+                    ),
                     **{
                         path: module.sha256(b"support fixture\n")
                         for path in module.BUILD_SUPPORT
@@ -578,6 +590,17 @@ class ProvenanceControls(unittest.TestCase):
                 },
             )
             self.assertEqual(tree, git("rev-parse", "HEAD^{tree}").decode().strip())
+            adaptive_output.write_bytes(b"rebuilt receipt\n")
+            extra_output = adaptive_output.with_name("new-generated.js")
+            extra_output.write_bytes(b"generated output\n")
+            self.assertEqual(
+                module.source_inputs(root, commit, manifest), (inputs, tree)
+            )
+            extra_output.unlink()
+            adaptive_source.write_bytes(b"changed actual source\n")
+            with self.assertRaisesRegex(ValueError, "differs from actual CI"):
+                module.source_inputs(root, commit, manifest)
+            adaptive_source.write_bytes(b"source with output-like directory\n")
             metadata_only = {**manifest, "ci_source_revalidations": [{"ci_run_id": 2}]}
             self.assertEqual(
                 module.source_inputs(root, commit, metadata_only), (inputs, tree)
