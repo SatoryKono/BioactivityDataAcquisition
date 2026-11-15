@@ -1461,18 +1461,18 @@ async def test_large_integer_fractional_batches_preserve_exact_raw_and_safe_csv(
 @pytest.mark.asyncio
 @pytest.mark.parametrize("negative", [False, True])
 @pytest.mark.parametrize("reverse", [False, True])
+@pytest.mark.parametrize(
+    "decimal_text",
+    ["12345678901234567890.123456789", "0.10000000000000001", "1.0000000000000001"],
+)
 async def test_decimal_float_batches_preserve_original_digits(
-    tmp_path, mock_logger, negative, reverse
+    tmp_path, mock_logger, negative, reverse, decimal_text
 ):
     import csv
     from decimal import Decimal
     from bioetl.infrastructure.export.csv_exporter_io_ops import read_raw_table
 
-    value = Decimal(
-        "-12345678901234567890.123456789"
-        if negative
-        else "12345678901234567890.123456789"
-    )
+    value = Decimal("-" + decimal_text if negative else decimal_text)
     first, second = (1.5, value) if reverse else (value, 1.5)
     exporter = CsvExporter(str(tmp_path), mock_logger)
     await exporter.export("decimal", pa.table({"id": [1], "value": [first]}))

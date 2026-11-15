@@ -141,14 +141,12 @@ def _align_raw_columns(table: pa.Table, types: dict[str, pa.DataType]) -> pa.Tab
     return table
 
 
-def _raw_cast_loses_precision(
+def _raw_cast_requires_text(
     original: pa.ChunkedArray, promoted: pa.ChunkedArray
 ) -> bool:
-    """Decimal-to-float casts can succeed while silently losing original digits."""
-    return (
-        pa.types.is_decimal(original.type)
-        and pa.types.is_floating(promoted.type)
-        and not promoted.cast(original.type).equals(original)
+    """Decimal-to-float has no general guarantee of exact serialized digits."""
+    return bool(
+        pa.types.is_decimal(original.type) and pa.types.is_floating(promoted.type)
     )
 
 
@@ -162,7 +160,7 @@ def _fallback_unsafe_raw_types(
                 continue
             try:
                 promoted = column.cast(types[field.name])
-                if _raw_cast_loses_precision(column, promoted):
+                if _raw_cast_requires_text(column, promoted):
                     types[field.name] = pa.string()
             except (pa.ArrowInvalid, pa.ArrowTypeError):
                 types[field.name] = pa.string()
