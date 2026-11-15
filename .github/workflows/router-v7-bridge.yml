@@ -5,6 +5,31 @@ permissions:
 
 on:
   workflow_dispatch:
+    inputs:
+      qualification_target:
+        description: Verify declared delivery, or qualify separately published candidate images
+        type: choice
+        options: [declared_delivery, candidate, produce_candidate]
+        default: declared_delivery
+      candidate_host_image:
+        description: Candidate only; owned immutable host registry digest
+        type: string
+        default: ''
+      candidate_managed_image:
+        description: Candidate only; owned immutable managed registry digest
+        type: string
+        default: ''
+
+      producer_source_sha:
+        description: Producer only; full agreed source SHA expected on the dispatched PR ref
+        type: string
+        default: ''
+
+env:
+  BIOETL_PRODUCER_SOURCE_SHA: ${{ inputs.producer_source_sha }}
+  BIOETL_QUALIFICATION_TARGET: ${{ inputs.qualification_target || 'declared_delivery' }}
+  BIOETL_CANDIDATE_HOST_IMAGE: ${{ inputs.candidate_host_image }}
+  BIOETL_CANDIDATE_MANAGED_IMAGE: ${{ inputs.candidate_managed_image }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -26,6 +51,20 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: "24"
+      - name: Validate qualification inputs before build
+        working-directory: .
+        run: python3 -m scripts.ops verify-router-managed-image --candidate-stage inputs
+      - name: Validate producer ref binding
+        if: ${{ inputs.qualification_target == 'produce_candidate' }}
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import os
+          from scripts.ops.observability.grafana.router_candidate import source_binding
+          expected=os.environ['BIOETL_PRODUCER_SOURCE_SHA']
+          assert os.environ['GITHUB_SHA']==expected, 'Dispatched ref differs from agreed source'
+          source_binding(expected)
+          PY
       - name: Install locked dependencies
         run: npm ci --ignore-scripts
       - name: Verify committed private bridge archive
@@ -41,6 +80,7 @@ jobs:
         run: |
           PYTHONPATH=../../.. /usr/bin/python3 ../../../tests/unit/scripts/ops/test_router_rootfs.py
           PYTHONPATH=../../.. /usr/bin/python3 ../../../tests/unit/scripts/ops/test_router_managed_image.py
+          PYTHONPATH=../../.. /usr/bin/python3 ../../../tests/unit/scripts/ops/test_router_candidate.py
       - name: Check exported TypeScript API
         run: npm run typecheck
       - name: Build browser candidate
@@ -63,6 +103,20 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Validate qualification inputs before plugin build
+        working-directory: .
+        run: python3 -m scripts.ops verify-router-managed-image --candidate-stage inputs
+      - name: Validate producer ref binding
+        if: ${{ inputs.qualification_target == 'produce_candidate' }}
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import os
+          from scripts.ops.observability.grafana.router_candidate import source_binding
+          expected=os.environ['BIOETL_PRODUCER_SOURCE_SHA']
+          assert os.environ['GITHUB_SHA']==expected, 'Dispatched ref differs from agreed source'
+          source_binding(expected)
+          PY
       - name: Set up Node
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
@@ -88,6 +142,7 @@ jobs:
             node@sha256:e7add2a490bb17d97b485b8641bd88455fff7839ade0f5eba493c3508124d413 \
             npm run build
       - name: Verify built bundle against shipped host manifest
+        if: ${{ inputs.qualification_target != 'candidate' && inputs.qualification_target != 'produce_candidate' }}
         env:
           BIOETL_PLUGIN: ${{ matrix.plugin }}
         run: |
@@ -127,6 +182,12 @@ jobs:
           metadata = json.loads((root / f"grafana/plugins/{plugin}/dist/plugin.json").read_text())
           assert metadata["info"]["updated"] == manifest["plugin_release_date"]
           PY
+      - name: Validate complete original candidate plugin output
+        if: ${{ inputs.qualification_target == 'candidate' || inputs.qualification_target == 'produce_candidate' }}
+        working-directory: .
+        env:
+          BIOETL_PLUGIN: ${{ matrix.plugin }}
+        run: python3 -m scripts.ops verify-router-managed-image --candidate-stage plugin
       - name: Transfer verified plugin output
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -149,6 +210,19 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Validate qualification inputs before host build
+        run: python3 -m scripts.ops verify-router-managed-image --candidate-stage inputs
+      - name: Validate producer ref binding
+        if: ${{ inputs.qualification_target == 'produce_candidate' }}
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import os
+          from scripts.ops.observability.grafana.router_candidate import source_binding
+          expected=os.environ['BIOETL_PRODUCER_SOURCE_SHA']
+          assert os.environ['GITHUB_SHA']==expected, 'Dispatched ref differs from agreed source'
+          source_binding(expected)
+          PY
       - name: Qualify the classic image store for config-digest evidence
         run: |
           # Containerd image IDs name a manifest/index, not the config blob.
@@ -251,6 +325,7 @@ jobs:
             -f grafana/tooling/router-v7-bridge/Dockerfile.host \
             -t bioetl-router-host:acceptance reports/qa/router-v7-image-context
       - name: Verify built image against declared delivery image
+        if: ${{ inputs.qualification_target != 'candidate' && inputs.qualification_target != 'produce_candidate' }}
         id: host_parity
         run: |
           image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').image")
@@ -259,6 +334,14 @@ jobs:
           docker pull "$base_image"
           node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
             bioetl-router-host:acceptance
+      - name: Verify complete candidate host parity
+        if: ${{ inputs.qualification_target == 'candidate' }}
+        run: |
+          python3 -m scripts.ops verify-router-managed-image --candidate-stage inputs
+          base_image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').base_image")
+          docker pull "$base_image"
+          docker pull "$BIOETL_CANDIDATE_HOST_IMAGE"
+          python3 -m scripts.ops verify-router-managed-image --candidate-stage host
       - name: Preserve complete rootfs differences when parity fails
         if: ${{ !cancelled() && failure() && steps.host_parity.outcome == 'failure' }}
         run: |
@@ -305,12 +388,22 @@ jobs:
           print('FAIL diagnostics only: rootfs paths differing:', len(differences))
           PY
       - name: Build and verify managed image from the qualified parent
+        if: ${{ inputs.qualification_target != 'produce_candidate' }}
         run: |
           mkdir -p reports/qa/router-v7-managed-context
-          cp grafana/tooling/router-v7-bridge/Dockerfile.managed reports/qa/router-v7-managed-context/Dockerfile
+          if [ "$BIOETL_QUALIFICATION_TARGET" = candidate ]; then
+            python3 -m scripts.ops verify-router-managed-image --candidate-stage recipe
+          else
+            cp grafana/tooling/router-v7-bridge/Dockerfile.managed reports/qa/router-v7-managed-context/Dockerfile
+          fi
           docker buildx build --platform linux/amd64 --load --provenance=false \
             --metadata-file reports/qa/router-v7-managed-image-build.json \
             -t bioetl-router-managed:acceptance reports/qa/router-v7-managed-context
+          if [ "$BIOETL_QUALIFICATION_TARGET" = candidate ]; then
+            docker pull "$BIOETL_CANDIDATE_MANAGED_IMAGE"
+            python3 -m scripts.ops verify-router-managed-image --candidate-stage managed
+            exit 0
+          fi
           image=$(node -p "require('./grafana/tooling/router-v7-bridge/managed-image.json').image")
           docker pull "$image"
           for plugin in bioetl-scenes-app bioetl-selectorshell-panel; do
@@ -324,9 +417,9 @@ jobs:
           import subprocess
           from pathlib import Path
           from scripts.ops.observability.grafana.trusted_docker import docker_path
+          from scripts.ops.observability.refresh_router_host_provenance import build_matches_config
 
-          # Docker exporters can omit config.digest from buildx metadata.
-          # Bind it to the inspected local build, preserving every exporter field.
+          # Verify either exporter schema against the inspected build without rewriting it.
           for stem, tag in (
               ('router-v7-image-build', 'bioetl-router-host:acceptance'),
               ('router-v7-managed-image-build', 'bioetl-router-managed:acceptance'),
@@ -338,14 +431,11 @@ jobs:
                   text=True,
               ).strip()
               assert re.fullmatch(r'sha256:[0-9a-f]{64}', config), 'Invalid built config ID'
-              recorded = metadata.get('containerimage.config.digest')
-              assert recorded is None or recorded == config, 'Conflicting build config ID'
-              metadata['containerimage.config.digest'] = config
-              path.write_text(json.dumps(metadata, indent=2) + '\n')
+              assert build_matches_config(metadata, config), 'Conflicting build config ID'
           PY
           /usr/bin/python3 -m scripts.ops verify-router-managed-image "$built"
       - name: Preserve image build and parity receipts
-        if: ${{ !cancelled() && always() }}
+        if: ${{ !cancelled() && always() && inputs.qualification_target != 'produce_candidate' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: router-v7-host-image-receipts
@@ -356,4 +446,95 @@ jobs:
             reports/qa/router-v7-managed-image-parity.json
             reports/qa/router-v7-rootfs-*.json
           if-no-files-found: warn
+          retention-days: 7
+
+      - name: Generate scratch managed recipe from the freshly built local host
+        if: ${{ inputs.qualification_target == 'produce_candidate' }}
+        working-directory: .
+        run: |
+          cp grafana/tooling/router-v7-bridge/Dockerfile.host reports/qa/router-v7-image-context/Dockerfile.host
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          from scripts.ops.observability.grafana.router_candidate import write_output
+          owner=Path('grafana/tooling/router-v7-bridge')
+          meta=json.loads((owner/'managed-image.json').read_text())
+          raw=(owner/'Dockerfile.managed').read_bytes().replace(b'\r\n',b'\n')
+          assert hashlib.sha256(raw).hexdigest()==meta['dockerfile_sha256'], 'Unreviewed managed recipe'
+          parent=('FROM '+meta['parent_image']+'\n').encode()
+          assert raw.splitlines().count(parent.rstrip(b'\n'))==1 and parent in raw, 'Ambiguous parent'
+          write_output('router-v7-managed-context/Dockerfile',raw.replace(parent,b'FROM bioetl-router-host:acceptance\n',1))
+          PY
+
+      - name: Produce managed image without publishing or touching delivery pins
+        if: ${{ inputs.qualification_target == 'produce_candidate' }}
+        working-directory: .
+        run: |
+          test "$(docker buildx inspect default | awk '$1 == "Driver:" {print $2}')" = docker
+          docker buildx build --builder default --platform linux/amd64 --load --provenance=false   --metadata-file reports/qa/router-v7-managed-image-build.json   -f reports/qa/router-v7-managed-context/Dockerfile   -t bioetl-router-managed:acceptance reports/qa/router-v7-managed-context
+
+      - name: Export immutable build products as explicitly unqualified evidence
+        if: ${{ inputs.qualification_target == 'produce_candidate' }}
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os,re,subprocess,tarfile
+          from pathlib import Path
+          from scripts.ops.observability.grafana.trusted_docker import docker_path
+          from scripts.ops.observability.grafana.router_candidate import source_binding, write_output
+          from scripts.ops.observability.refresh_router_host_provenance import build_matches_config
+          root=Path.cwd()
+          source=os.environ['BIOETL_PRODUCER_SOURCE_SHA'];assert re.fullmatch(r'[0-9a-f]{40}',source), 'Invalid source SHA'
+          assert os.environ['GITHUB_SHA']==source, 'Dispatched source differs from agreed SHA'
+          before=source_binding(source);out=root/'reports/qa/router-v7-unqualified-products'
+          out.mkdir(exist_ok=False);assert out.resolve()==out
+          images={};metadata={}
+          for kind in ('host','managed'):
+              name='router-v7-'+('image' if kind=='host' else 'managed-image')+'-build.json'
+              raw=(root/'reports/qa'/name).read_bytes();build=json.loads(raw)
+              ident=subprocess.check_output([docker_path(),'image','inspect','--format','{{.Id}}','--','bioetl-router-'+kind+':acceptance'],text=True).strip()
+              assert build_matches_config(build,ident), 'Foreign local image'
+              images[kind]=ident;metadata[kind]=hashlib.sha256(raw).hexdigest();(out/name).write_bytes(raw)
+          assert images['host']!=images['managed'], 'Host and managed builds must differ'
+          recipe=root/'reports/qa/router-v7-managed-context/Dockerfile'
+          assert recipe.is_file() and recipe.resolve()==recipe and recipe.stat().st_nlink==1, 'Unsafe managed recipe'
+          (out/'Dockerfile.managed').write_bytes(recipe.read_bytes())
+          with (out/'images.docker.tar').open('xb') as stream:
+              subprocess.run([docker_path(),'image','save','--',images['host'],images['managed']],stdout=stream,check=True)
+          context=root/'reports/qa/router-v7-image-context'
+          assert context.is_dir() and context.resolve()==context, 'Redirected build context'
+          assert any((context/'host-build').glob('*.js')), 'Missing frontend build'
+          for plugin in ('bioetl-scenes-app','bioetl-selectorshell-panel'):
+              for required in ('module.js','module.js.map','plugin.json'):
+                  p=context/plugin/required
+                  assert p.is_file() and p.stat().st_size>0, 'Incomplete original plugin output'
+          with tarfile.open(out/'source-built-context.tar.gz','w:gz') as archive:
+              for name in ('Dockerfile.host','host-build','bioetl-scenes-app','bioetl-selectorshell-panel'):
+                  p=context/name
+                  for entry in [p,*p.rglob('*')] if p.is_dir() else [p]:
+                      assert not entry.is_symlink() and entry.resolve()==entry and (entry.is_dir() or entry.is_file()), 'Unsafe context entry'
+                      assert not entry.is_file() or entry.stat().st_nlink==1, 'Hardlinked context entry'
+                  archive.add(p,arcname=name)
+          assert source_binding(source)==before, 'Source binding changed during export'
+          hashes={}
+          for p in out.iterdir():
+              assert p.is_file() and not p.is_symlink() and p.stat().st_size>0, 'Incomplete build product'
+              with p.open('rb') as stream:hashes[p.name]=hashlib.file_digest(stream,'sha256').hexdigest()
+          packages={}
+          for plugin in ('bioetl-scenes-app','bioetl-selectorshell-panel'):
+              for filename in ('package.json','package-lock.json'):
+                  p=root/'grafana/plugins'/plugin/filename
+                  assert p.is_file() and not p.is_symlink(), 'Missing build package input'
+                  packages[p.relative_to(root).as_posix()]=hashlib.sha256(p.read_bytes()).hexdigest()
+          receipt={'state':'BUILT_UNQUALIFIED','source_sha':source,'source_input_tree_sha256':before,'package_input_sha256':packages,'workflow_definition_sha':os.environ['GITHUB_SHA'],'run_id':os.environ['GITHUB_RUN_ID'],'run_attempt':os.environ['GITHUB_RUN_ATTEMPT'],'local_config_ids':images,'published_registry_digests':None,'build_metadata_sha256':metadata,'artifact_sha256':hashes,'ci_image_parity_claimed':False,'runtime_acceptance_claimed':False}
+          write_output('router-v7-unqualified-products/build-products.json',(json.dumps(receipt,indent=2)+'\n').encode())
+          PY
+
+      - name: Preserve original unqualified build products
+        if: ${{ inputs.qualification_target == 'produce_candidate' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: router-v7-unqualified-build-products
+          path: reports/qa/router-v7-unqualified-products/
+          if-no-files-found: error
           retention-days: 7

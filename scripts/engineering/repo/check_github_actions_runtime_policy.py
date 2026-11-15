@@ -40,7 +40,7 @@ ALLOWED_USES: dict[str, set[str]] = {
     },
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml": {
         "89fbcab7461c6400f8b2df38ebd95375713e7d32",  # #12417
-        "fa8d903223efda3c26c19af08933d8a4000b2a7a",  # Docker workflow pin
+        "84548f8bfed680b9415fc6855d6be059ffd9d1ab",  # Docker workflow pin
     },
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml": {
         "f377cff40abf52d63220346b9ab64814f3081ca6",  # #12374 docs concurrency
