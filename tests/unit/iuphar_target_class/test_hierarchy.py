@@ -204,3 +204,187 @@ def test_same_class_families_are_kept_and_different_classes_conflict() -> None:
         "отображение семейства",
         "отображение семейства",
     )
+
+
+@pytest.mark.parametrize("kind", ["type", "family"])
+@pytest.mark.parametrize("foreign", ["Oxidoreductases", "typo", ""])
+def test_fixture_mapping_rejects_foreign_classes(kind: str, foreign: str) -> None:
+    with pytest.raises(ValueError, match="outside the class dictionary"):
+        ApprovedMapping(
+            type_to_class=(("GPCR", foreign),) if kind == "type" else (),
+            family_to_class=(("fam", foreign),) if kind == "family" else (),
+        )
+
+
+@pytest.mark.parametrize(
+    "unrelated",
+    [
+        (_node("other", "missing"),),
+        (_node("other", "other"),),
+        (_node("other", data="a"), _node("other", data="b")),
+        (_node("other", "second"), _node("second", "other")),
+    ],
+)
+def test_unrelated_defect_does_not_change_this_targets_class(
+    unrelated: tuple[FamilyNode, ...],
+) -> None:
+    nodes = (_node("leaf", "root"), _node("root"), *unrelated)
+    result = normalize_provider_class(
+        _annotation("GPCR", ("leaf",)),
+        nodes,
+        ApprovedMapping(type_to_class=(("GPCR", _RECEPTOR),)),
+    )
+    assert result.iuphar_annotation_status == "available"
+    assert result.iuphar_class == _RECEPTOR
+    assert result.defects == ()
+    assert validate_family_graph(nodes)
+
+
+def test_reachable_duplicate_is_not_hidden_by_target_filtering() -> None:
+    result = build_family_paths(
+        (_node("leaf", "root"), _node("leaf"), _node("root")),
+        family_ids=("leaf",),
+    )
+    assert result.paths == ()
+    assert result.defects[0].defect == "повторяющийся идентификатор"
+
+
+def test_overrides_cannot_increase_approved_limits() -> None:
+    depth = build_family_paths(_chain(9), family_ids=("n0",), max_depth=9)
+    visited = build_family_paths(
+        _star(128), family_ids=("child",), max_visited_nodes=129
+    )
+    assert depth.paths == visited.paths == ()
+    assert depth.defects[0].limit_key == "max_depth"
+    assert visited.defects[0].limit_key == "max_visited_nodes"
+    assert build_family_paths(_chain(3), family_ids=("n0",), max_depth=2).defects
+
+
+def test_no_family_ids_do_not_validate_other_targets() -> None:
+    result = normalize_provider_class(
+        _annotation("GPCR"),
+        (_node("other", "missing"),),
+        ApprovedMapping(type_to_class=(("GPCR", _RECEPTOR),)),
+    )
+    assert result.iuphar_class == _RECEPTOR
+    assert result.defects == ()
+
+
+def _layered_graph(width: int, layers: int) -> tuple[FamilyNode, ...]:
+    nodes: list[FamilyNode] = []
+    for level in range(layers):
+        parents = (
+            tuple(f"l{level + 1}n{i}" for i in range(width))
+            if level + 1 < layers
+            else ()
+        )
+        nodes.extend(FamilyNode(f"l{level}n{i}", parents) for i in range(width))
+    return (FamilyNode("leaf", tuple(f"l0n{i}" for i in range(width))), *nodes)
+
+
+def test_valid_exponential_graph_keeps_paths_lazy_without_new_limits() -> None:
+    import tracemalloc
+
+    nodes = _layered_graph(8, 7)
+    tracemalloc.start()
+    try:
+        assert validate_family_graph(nodes, family_ids=("leaf",)) == ()
+        walk = build_family_paths(nodes, family_ids=("leaf",))
+        assert walk.defects == ()
+        assert len(walk.paths) == 8**7
+        assert walk.paths[0].root_to_leaf[-1] == "leaf"
+        assert walk.paths[-1].root_to_leaf[0] == "l6n7"
+        assert len(walk.paths[:3]) == 3
+        result = normalize_provider_class(
+            _annotation("GPCR", ("leaf",)),
+            nodes,
+            ApprovedMapping(type_to_class=(("GPCR", _RECEPTOR),)),
+        )
+        assert result.iuphar_class == _RECEPTOR
+        _current, peak = tracemalloc.get_traced_memory()
+    finally:
+        tracemalloc.stop()
+    assert peak < 4 * 1024 * 1024
+
+
+def test_lazy_path_sequence_preserves_every_path_and_order() -> None:
+    from itertools import product
+
+    walk = build_family_paths(_layered_graph(2, 3), family_ids=("leaf",))
+    expected = tuple(
+        ("leaf", *(f"l{level}n{index}" for level, index in enumerate(choices)))
+        for choices in product(range(2), repeat=3)
+    )
+    assert tuple(tuple(reversed(path.root_to_leaf)) for path in walk.paths) == expected
+    assert tuple(walk.paths) == walk.paths
+    assert tuple(walk.paths[::-1]) == tuple(reversed(tuple(walk.paths)))
+    with pytest.raises(IndexError):
+        _ = walk.paths[len(walk.paths)]
+    with pytest.raises(IndexError):
+        _ = walk.paths[-len(walk.paths) - 1]
+
+
+def test_shared_ancestor_depth_is_checked_for_every_start() -> None:
+    nodes = (*_chain(8), FamilyNode("extra", ("n0",)))
+    walk = build_family_paths(nodes, family_ids=("n0", "extra"))
+    assert walk.paths == ()
+    assert walk.defects[0].limit_key == "max_depth"
+
+
+def test_ancestor_path_is_not_an_approved_direct_family_mapping() -> None:
+    nodes = (_node("leaf", "root"), _node("root"))
+    mapping = ApprovedMapping(family_to_class=(("root", _ENZYME),))
+    descendant = normalize_provider_class(_annotation(None, ("leaf",)), nodes, mapping)
+    direct = normalize_provider_class(_annotation(None, ("root",)), nodes, mapping)
+    assert descendant.iuphar_annotation_status == "unmapped_type"
+    assert descendant.iuphar_class is None
+    assert direct.iuphar_annotation_status == "partial"
+    assert direct.iuphar_class == _ENZYME
+    assert build_family_paths(nodes, family_ids=("leaf",)).paths[0].root_to_leaf == (
+        "root",
+        "leaf",
+    )
+
+
+def test_lazy_paths_match_a_small_independent_dag_oracle() -> None:
+    import random
+
+    rng = random.Random(13149)
+    for _case in range(100):
+        count = rng.randint(1, 8)
+        nodes = tuple(
+            FamilyNode(
+                str(index),
+                tuple(
+                    str(parent)
+                    for parent in range(index + 1, count)
+                    if rng.random() < 0.5
+                ),
+            )
+            for index in range(count)
+        )
+        by_id = {node.family_id: node for node in nodes}
+        starts = tuple(str(rng.randrange(count)) for _ in range(rng.randint(1, 3)))
+
+        def enumerate_paths(
+            path: tuple[str, ...], graph: dict[str, FamilyNode] = by_id
+        ) -> list[tuple[str, ...]]:
+            parents = graph[path[-1]].parent_ids
+            if not parents:
+                return [path]
+            return [
+                result
+                for parent in parents
+                for result in enumerate_paths((*path, parent))
+            ]
+
+        expected = sorted(
+            path for start in starts for path in enumerate_paths((start,))
+        )
+        walk = build_family_paths(nodes, family_ids=starts)
+        assert walk.defects == ()
+        actual = [tuple(reversed(path.root_to_leaf)) for path in walk.paths]
+        assert actual == expected
+        assert len(walk.paths) == len(expected)
+        for index, path in enumerate(expected):
+            assert tuple(reversed(walk.paths[index].root_to_leaf)) == path

@@ -7,10 +7,12 @@ biological mappings; callers pass those as test or release fixtures.
 
 from __future__ import annotations
 
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
+from typing import overload
 
 from .models import Diagnostic, ProviderAnnotation
-from .policy import policy_document
+from .policy import WORKING_CLASSES, policy_document
 
 LIMIT_EXCEEDED = "превышение лимита"
 FAMILY_MAPPING_PROOF = "отображение семейства"
@@ -60,12 +62,23 @@ class ApprovedMapping:
     type_to_class: tuple[tuple[str, str], ...] = ()
     family_to_class: tuple[tuple[str, str], ...] = ()
 
+    def __post_init__(self) -> None:
+        """Keep caller fixtures within the canonical working-class dictionary."""
+        foreign = sorted(
+            {value for _, value in (*self.type_to_class, *self.family_to_class)}
+            - set(WORKING_CLASSES)
+        )
+        if foreign:
+            raise ValueError(
+                f"mapping targets are outside the class dictionary: {foreign}"
+            )
+
 
 @dataclass(frozen=True, slots=True)
 class GraphWalk:
     """Paths are empty whenever ``defects`` is non-empty."""
 
-    paths: tuple[FamilyPath, ...]
+    paths: Sequence[FamilyPath]
     defects: tuple[GraphDefect, ...]
 
 
@@ -276,6 +289,10 @@ def _walk(
     multiple_parents_allowed: bool,
 ) -> GraphWalk:
     depth_limit, visited_limit = _resolved_limits(max_depth, max_visited_nodes)
+    if family_ids is not None:
+        nodes, reachability_defect = _target_nodes(nodes, family_ids, visited_limit)
+        if reachability_defect is not None:
+            return GraphWalk(paths=(), defects=(reachability_defect,))
     by_id, structural = _structural_defects(nodes, multiple_parents_allowed)
     if structural:
         return GraphWalk(paths=(), defects=structural)
@@ -284,6 +301,36 @@ def _walk(
     if missing_starts:
         return GraphWalk(paths=(), defects=missing_starts)
     return _walk_starts(by_id, starts, depth_limit, visited_limit)
+
+
+def _target_nodes(
+    nodes: tuple[FamilyNode, ...],
+    starts: tuple[str, ...],
+    visited_limit: int,
+) -> tuple[tuple[FamilyNode, ...], GraphDefect | None]:
+    """Select only this target's reachable ancestor closure, including duplicates."""
+    grouped: dict[str, list[FamilyNode]] = {}
+    for node in nodes:
+        grouped.setdefault(node.family_id, []).append(node)
+    selected: list[FamilyNode] = []
+    visited: set[str] = set()
+    pending = list(reversed(starts))
+    while pending:
+        family_id = pending.pop()
+        if family_id in visited:
+            continue
+        visited.add(family_id)
+        if len(visited) > visited_limit:
+            return (), GraphDefect(
+                defect=LIMIT_EXCEEDED,
+                family_id=family_id,
+                limit_key="max_visited_nodes",
+            )
+        variants = grouped.get(family_id, [])
+        selected.extend(variants)
+        for node in variants:
+            pending.extend(reversed(node.parent_ids))
+    return tuple(selected), None
 
 
 def _missing_starts(
@@ -303,89 +350,126 @@ def _walk_starts(
     depth_limit: int,
     visited_limit: int,
 ) -> GraphWalk:
-    leaf_to_root: list[tuple[str, ...]] = []
-    visited: set[str] = set()
-    for start in starts:
-        defect = _walk_from(
-            by_id, start, visited, leaf_to_root, depth_limit, visited_limit
-        )
-        if defect is not None:
-            return GraphWalk(paths=(), defects=(defect,))
-    return GraphWalk(paths=_family_paths(leaf_to_root), defects=())
+    counts, defect = _validate_walk(by_id, starts, depth_limit, visited_limit)
+    if defect is not None:
+        return GraphWalk(paths=(), defects=(defect,))
+    if not starts:
+        return GraphWalk(paths=(), defects=())
+    return GraphWalk(
+        paths=_FamilyPaths(by_id, tuple(sorted(starts)), counts), defects=()
+    )
 
 
-def _walk_from(
+def _validate_walk(
     by_id: dict[str, FamilyNode],
-    start: str,
-    visited: set[str],
-    leaf_to_root: list[tuple[str, ...]],
+    starts: tuple[str, ...],
     depth_limit: int,
     visited_limit: int,
-) -> GraphDefect | None:
-    stack: list[tuple[str, tuple[str, ...]]] = [(start, (start,))]
-    while stack:
-        node_id, path = stack.pop()
-        limit_defect = _limit_defect(node_id, path, visited, depth_limit, visited_limit)
-        if limit_defect is not None:
-            return limit_defect
-        parents = by_id[node_id].parent_ids
-        if not parents:
-            leaf_to_root.append(path)
-            continue
-        parent_defect = _enqueue_parents(stack, by_id, node_id, path, parents)
-        if parent_defect is not None:
-            return parent_defect
-    return None
+) -> tuple[dict[str, int], GraphDefect | None]:
+    """Validate each node once and count paths without enumerating them."""
+    heights: dict[str, int] = {}
+    counts: dict[str, int] = {}
+    active: set[str] = set()
+    visited: set[str] = set()
 
-
-def _limit_defect(
-    node_id: str,
-    path: tuple[str, ...],
-    visited: set[str],
-    depth_limit: int,
-    visited_limit: int,
-) -> GraphDefect | None:
-    if len(path) > depth_limit:
-        return GraphDefect(
-            defect=LIMIT_EXCEEDED,
-            family_id=node_id,
-            limit_key="max_depth",
-        )
-    if node_id not in visited:
+    def visit(node_id: str, depth: int) -> GraphDefect | None:
+        if depth > depth_limit:
+            return _exceeded(node_id, "max_depth")
+        if node_id in active:
+            return GraphDefect(defect=DEFECT_CYCLE, family_id=node_id)
         visited.add(node_id)
         if len(visited) > visited_limit:
-            return GraphDefect(
-                defect=LIMIT_EXCEEDED,
-                family_id=node_id,
-                limit_key="max_visited_nodes",
-            )
-    return None
+            return _exceeded(node_id, "max_visited_nodes")
+        if node_id in heights:
+            if depth + heights[node_id] - 1 > depth_limit:
+                return _exceeded(node_id, "max_depth")
+            return None
+        active.add(node_id)
+        parents = by_id[node_id].parent_ids
+        for parent_id in parents:
+            defect = visit(parent_id, depth + 1)
+            if defect is not None:
+                return defect
+        active.remove(node_id)
+        heights[node_id] = 1 + max((heights[parent] for parent in parents), default=0)
+        counts[node_id] = sum(counts[parent] for parent in parents) if parents else 1
+        return None
+
+    for start in starts:
+        defect = visit(start, 1)
+        if defect is not None:
+            return {}, defect
+    return counts, None
 
 
-def _enqueue_parents(
-    stack: list[tuple[str, tuple[str, ...]]],
-    by_id: dict[str, FamilyNode],
-    node_id: str,
-    path: tuple[str, ...],
-    parents: tuple[str, ...],
-) -> GraphDefect | None:
-    for parent_id in reversed(parents):
-        if parent_id in path:
-            defect = DEFECT_SELF_LOOP if parent_id == node_id else DEFECT_CYCLE
-            return GraphDefect(defect=defect, family_id=node_id)
-        if parent_id not in by_id:
-            return GraphDefect(defect=DEFECT_MISSING_PARENT, family_id=parent_id)
-        stack.append((parent_id, (*path, parent_id)))
-    return None
+def _exceeded(node_id: str, key: str) -> GraphDefect:
+    return GraphDefect(defect=LIMIT_EXCEEDED, family_id=node_id, limit_key=key)
 
 
-def _family_paths(leaf_to_root: list[tuple[str, ...]]) -> tuple[FamilyPath, ...]:
-    return tuple(
-        FamilyPath(
-            root_to_leaf=tuple(reversed(path)),
-            legacy_leaf_to_root=" → ".join(path),
+@dataclass(frozen=True, slots=True, eq=False)
+class _FamilyPaths(Sequence[FamilyPath]):
+    """Immutable lazy sequence preserving the original sorted path contents."""
+
+    nodes: dict[str, FamilyNode]
+    starts: tuple[str, ...]
+    counts: dict[str, int]
+
+    def __len__(self) -> int:
+        return sum(self.counts[start] for start in self.starts)
+
+    def __iter__(self) -> Iterator[FamilyPath]:
+        for start in self.starts:
+            stack: list[tuple[str, ...]] = [(start,)]
+            while stack:
+                path = stack.pop()
+                parents = self.nodes[path[-1]].parent_ids
+                if parents:
+                    stack.extend(
+                        (*path, parent) for parent in sorted(parents, reverse=True)
+                    )
+                else:
+                    yield _family_path(path)
+
+    @overload
+    def __getitem__(self, index: int) -> FamilyPath: ...
+
+    @overload
+    def __getitem__(self, index: slice) -> tuple[FamilyPath, ...]: ...
+
+    def __getitem__(self, index: int | slice) -> FamilyPath | tuple[FamilyPath, ...]:
+        if isinstance(index, slice):
+            return tuple(self[item] for item in range(*index.indices(len(self))))
+        if index < 0:
+            index += len(self)
+        if not 0 <= index < len(self):
+            raise IndexError("family path index out of range")
+        node_id, index = self._select(self.starts, index)
+        path = [node_id]
+        while self.nodes[node_id].parent_ids:
+            node_id, index = self._select(self.nodes[node_id].parent_ids, index)
+            path.append(node_id)
+        return _family_path(tuple(path))
+
+    def _select(self, node_ids: tuple[str, ...], index: int) -> tuple[str, int]:
+        for node_id in sorted(node_ids):
+            count = self.counts[node_id]
+            if index < count:
+                return node_id, index
+            index -= count
+        raise IndexError("family path index out of range")
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Sequence):
+            return NotImplemented
+        return len(self) == len(other) and all(
+            left == right for left, right in zip(self, other, strict=True)
         )
-        for path in sorted(leaf_to_root)
+
+
+def _family_path(path: tuple[str, ...]) -> FamilyPath:
+    return FamilyPath(
+        root_to_leaf=tuple(reversed(path)),
+        legacy_leaf_to_root=" → ".join(path),
     )
 
 
@@ -402,7 +486,7 @@ def _resolved_limits(
         raise ValueError("max_visited_nodes is not approved")
     if depth < 1 or visited < 1:
         raise ValueError("graph_limits must be positive")
-    return depth, visited
+    return min(depth, approved_depth), min(visited, approved_visited)
 
 
 def _structural_defects(
