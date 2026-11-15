@@ -79,12 +79,13 @@ def test_offline_not_run_does_not_block_early_stages() -> None:
     assert operational["blocks_stages_0_to_3"] is False
 
 
-def test_stage1_parameters_stay_unset() -> None:
+def test_only_approved_stage1_parameters_are_set() -> None:
     parameters = policy_document()["parameters"]
     assert isinstance(parameters, dict)
     assert parameters["missing_markers_version"] is None
-    assert parameters["snapshot_coverage"] is None
-    assert parameters["snapshot_species"] is None
+    assert parameters["snapshot_coverage"]
+    assert parameters["snapshot_species"] == [9606, 10090, 10116]
+    assert parameters["snapshot_coverage_status"] == "утверждено"
     assert parameters["isoform_policy"] is None
 
 
@@ -198,3 +199,27 @@ def test_publish_policy_writes_inside_root(tmp_path: Path) -> None:
         == "recorded_without_biological_acceptance"
     )
     validate_rules(all_rules())
+
+
+def test_approved_release_rules_are_versioned_and_do_not_claim_acceptance() -> None:
+    policy = policy_document()
+    mappings = policy["direct_mappings"]
+    assert isinstance(mappings, dict)
+    assert mappings["release"] == "2026.3.1"
+    assert mappings["snapshot_completeness_certified"] is False
+    assert policy["biological_accuracy_accepted"] is False
+    assert mappings["graph_only_type"] == "grouping"
+    type_rules = mappings["types"]
+    family_rules = mappings["families"]
+    assert sum(len(rule["source_types"]) for rule in type_rules) == 9
+    family_ids = [
+        family_id for rule in family_rules for family_id in rule["family_ids"]
+    ]
+    assert len(family_ids) == len(set(family_ids)) == 744
+    assert "694" not in family_ids
+    for rule in [*type_rules, *family_rules]:
+        assert rule["version"] == "2026.3.1"
+        assert rule["marks_direct_layer"] is True
+        assert (
+            rule["input_conditions"] and rule["limits"] and rule["justification_source"]
+        )

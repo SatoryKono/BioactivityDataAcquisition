@@ -96,10 +96,6 @@ def test_unavailable_versions_are_version_unverified() -> None:
 
 
 def test_unapproved_coverage_is_not_a_release() -> None:
-    parameters = policy_document()["parameters"]
-    assert isinstance(parameters, dict)
-    assert parameters["snapshot_coverage"] is None
-    assert parameters["snapshot_species"] is None
     result = assess_completeness(
         coverage_approved=False,
         required_types_loaded=True,
@@ -157,3 +153,14 @@ def test_missing_family_is_a_diagnostic_not_silence() -> None:
     hit = provider.get_families(("900",))
     assert hit.records == ()
     assert hit.diagnostics == ("missing family 900",)
+
+
+def test_approved_species_scope_does_not_certify_snapshot_completeness() -> None:
+    policy = policy_document()
+    parameters = policy["parameters"]
+    mappings = policy["direct_mappings"]
+    assert isinstance(parameters, dict)
+    assert isinstance(mappings, dict)
+    assert parameters["snapshot_species"] == [9606, 10090, 10116]
+    assert parameters["snapshot_coverage_status"] == "утверждено"
+    assert mappings["snapshot_completeness_certified"] is False
