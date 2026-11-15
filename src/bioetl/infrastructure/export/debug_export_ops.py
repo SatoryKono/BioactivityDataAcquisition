@@ -9,6 +9,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.infrastructure.export.csv_exporter_table_ops import (
+    neutralize_spreadsheet_text,
+)
 from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 if TYPE_CHECKING:
@@ -22,6 +25,7 @@ __all__ = [
     "compute_tables_hash",
     "fingerprint_artifact",
     "normalize_csv_value",
+    "normalize_debug_value",
     "resolve_debug_export_root",
     "sheet_name_for_chunk",
     "write_debug_csv",
@@ -47,12 +51,26 @@ def collect_headers(rows: tuple[dict[str, object], ...]) -> list[str]:
     return headers
 
 
-def normalize_csv_value(value: object | None) -> object:
+def normalize_debug_value(value: object | None) -> object:
+    """Canonicalize nested values for debug XLSX and content hashing.
+
+    Does not apply CSV spreadsheet apostrophe neutralization — XLSX cells are
+    protected via explicit string data_type, and hashes must stay injective for
+    ``=x`` vs ``'=x``.
+    """
     if value is None:
         return ""
     if isinstance(value, (dict, list, tuple)):
         return json.dumps(value, ensure_ascii=False, sort_keys=True)
     return value
+
+
+def normalize_csv_value(value: object | None) -> object:
+    """CSV-bound normalization including spreadsheet formula neutralization."""
+    normalized = normalize_debug_value(value)
+    if isinstance(normalized, str):
+        return neutralize_spreadsheet_text(normalized)
+    return normalized
 
 
 def write_debug_csv(
@@ -62,6 +80,9 @@ def write_debug_csv(
     include_bom: bool,
 ) -> None:
     headers = collect_headers(rows)
+    safe_headers = [neutralize_spreadsheet_text(header) for header in headers]
+    if len(set(safe_headers)) != len(headers):
+        raise ValueError("Spreadsheet-safe column names collide")
     encoding = "utf-8-sig" if include_bom else "utf-8"
     with output_path.open("w", encoding=encoding, newline="") as handle:
         writer = csv.DictWriter(
@@ -70,7 +91,7 @@ def write_debug_csv(
             extrasaction="ignore",
             quoting=csv.QUOTE_ALL,
         )
-        writer.writeheader()
+        writer.writerow(dict(zip(headers, safe_headers, strict=True)))
         for row in rows:
             writer.writerow(
                 {header: normalize_csv_value(row.get(header)) for header in headers}
@@ -131,7 +152,12 @@ def write_sheet_rows(
     sheet.freeze_panes = "A2"
     sheet.append(headers)
     for row in chunk:
-        sheet.append([normalize_csv_value(row.get(header)) for header in headers])
+        # Keep original strings; openpyxl cells are forced to data_type "s".
+        sheet.append([normalize_debug_value(row.get(header)) for header in headers])
+    for row in sheet.iter_rows():
+        for cell in row:
+            if isinstance(cell.value, str):
+                cell.data_type = "s"
     sheet.auto_filter.ref = sheet.dimensions
 
 
@@ -209,7 +235,8 @@ def compute_tables_hash(
     canonical_tables = {
         table_name: [
             {
-                key: normalize_csv_value(value)
+                # Hash pre-neutralized values so =x and '=x do not collide.
+                key: normalize_debug_value(value)
                 for key, value in row.items()
                 if key != "created_at"
             }

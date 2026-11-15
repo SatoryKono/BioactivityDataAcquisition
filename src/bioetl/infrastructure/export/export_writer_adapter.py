@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, cast
 
 from bioetl.domain.ports import ExportFileFingerprint, ExportWriterPort
+from bioetl.infrastructure.export.csv_exporter_table_ops import spreadsheet_safe_table
 from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 __all__ = ["ExportWriterAdapter"]
@@ -61,6 +62,11 @@ class ExportWriterAdapter(ExportWriterPort):
         output_dir_obj = Path(output_dir)
         output_dir_obj.mkdir(parents=True, exist_ok=True)
         output_path = output_dir_obj / f"{manifest_name}.json"
+        if manifest_name.endswith(".provenance-manifest"):
+            payload = {
+                **payload,
+                "spreadsheet_text_policy": "csv-tsv-apostrophe-prefix;xlsx-explicit-text;v1",
+            }
         content = json.dumps(payload, indent=2, sort_keys=True) + "\n"
         atomic_write_text(output_path, content)
         return str(output_path)
@@ -93,7 +99,9 @@ def _write_delimited_file(
 
     flattened = flatten_arrow_table_for_export(table)
     write_options = pyarrow_csv.WriteOptions(delimiter=delimiter)
-    pyarrow_csv.write_csv(flattened, output_path, write_options=write_options)
+    pyarrow_csv.write_csv(
+        spreadsheet_safe_table(flattened), output_path, write_options=write_options
+    )
     return output_path
 
 
@@ -108,7 +116,20 @@ def _write_xlsx_file(
     dataframe = flattened.to_pandas()
 
     try:
-        dataframe.to_excel(output_path, index=False, engine="openpyxl")
+        import pandas as pd
+
+        with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
+            if not writer.book.worksheets:
+                writer.book.create_sheet("Sheet1")
+            try:
+                dataframe.to_excel(writer, index=False)
+            finally:
+                # ExcelWriter saves on exceptional exit too: sanitize partial output.
+                for sheet in writer.book.worksheets:
+                    for row in sheet.iter_rows():
+                        for cell in row:
+                            if isinstance(cell.value, str):
+                                cell.data_type = "s"
     except ImportError as exc:
         raise ImportError(
             "openpyxl is required for XLSX export. Install with: pip install openpyxl"
