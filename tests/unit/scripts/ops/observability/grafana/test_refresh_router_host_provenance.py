@@ -776,3 +776,72 @@ def test_materializer_public_api_strict_mypy_and_negative_control(
     )
     assert negative.returncode == 1
     assert "[assignment]" in negative.stdout
+
+
+@pytest.mark.parametrize("recorded", ["missing", "matching", "conflicting"])
+def test_workflow_binds_build_metadata_to_inspected_config(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, recorded: str
+) -> None:
+    import yaml
+    from scripts.ops.observability.grafana import trusted_docker
+
+    workflow = Path(__file__).parents[6] / module.WORKFLOW
+    steps = yaml.safe_load(workflow.read_text())["jobs"]["host-build"]["steps"]
+    run = next(
+        step["run"]
+        for step in steps
+        if step.get("name")
+        == "Build and verify managed image from the qualified parent"
+    )
+    block = run.split("/usr/bin/python3 - <<'PY'\n", 1)[1].split("\nPY\n", 1)[0]
+    configs = {
+        "bioetl-router-host:acceptance": "sha256:" + "a" * 64,
+        "bioetl-router-managed:acceptance": "sha256:" + "b" * 64,
+    }
+    output = tmp_path / "reports/qa"
+    output.mkdir(parents=True)
+    originals = {}
+    for stem, tag in (
+        ("router-v7-image-build", "bioetl-router-host:acceptance"),
+        ("router-v7-managed-image-build", "bioetl-router-managed:acceptance"),
+    ):
+        metadata = {"containerimage.digest": "sha256:" + "c" * 64, "exporter": "kept"}
+        if recorded != "missing":
+            metadata["containerimage.config.digest"] = (
+                configs[tag] if recorded == "matching" else "sha256:" + "d" * 64
+            )
+        path = output / (stem + ".json")
+        path.write_text(json.dumps(metadata))
+        originals[path] = metadata
+
+    def inspect_config(argv: list[str], *, text: bool) -> str:
+        assert text is True
+        assert argv[:-1] == [
+            "trusted-docker",
+            "image",
+            "inspect",
+            "--format",
+            "{{.Id}}",
+            "--",
+        ]
+        return configs[argv[-1]] + "\n"
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(trusted_docker, "docker_path", lambda: "trusted-docker")
+    monkeypatch.setattr(subprocess, "check_output", inspect_config)
+    if recorded == "conflicting":
+        with pytest.raises(AssertionError, match="Conflicting build config ID"):
+            exec(compile(block, str(workflow), "exec"), {})
+        assert all(
+            json.loads(path.read_text()) == original
+            for path, original in originals.items()
+        )
+    else:
+        exec(compile(block, str(workflow), "exec"), {})
+        for (path, original), config in zip(
+            originals.items(), configs.values(), strict=True
+        ):
+            assert json.loads(path.read_text()) == {
+                **original,
+                "containerimage.config.digest": config,
+            }

@@ -286,6 +286,31 @@ jobs:
             cp -a "reports/qa/router-v7-image-context/$plugin/." "grafana/plugins/$plugin/dist/"
           done
           built=$(docker image inspect --format '{{.Id}}' bioetl-router-managed:acceptance)
+          /usr/bin/python3 - <<'PY'
+          import json
+          import re
+          import subprocess
+          from pathlib import Path
+          from scripts.ops.observability.grafana.trusted_docker import docker_path
+
+          # Docker exporters can omit config.digest from buildx metadata.
+          # Bind it to the inspected local build, preserving every exporter field.
+          for stem, tag in (
+              ('router-v7-image-build', 'bioetl-router-host:acceptance'),
+              ('router-v7-managed-image-build', 'bioetl-router-managed:acceptance'),
+          ):
+              path = Path('reports/qa') / (stem + '.json')
+              metadata = json.loads(path.read_text())
+              config = subprocess.check_output(
+                  [docker_path(), 'image', 'inspect', '--format', '{{.Id}}', '--', tag],
+                  text=True,
+              ).strip()
+              assert re.fullmatch(r'sha256:[0-9a-f]{64}', config), 'Invalid built config ID'
+              recorded = metadata.get('containerimage.config.digest')
+              assert recorded is None or recorded == config, 'Conflicting build config ID'
+              metadata['containerimage.config.digest'] = config
+              path.write_text(json.dumps(metadata, indent=2) + '\n')
+          PY
           /usr/bin/python3 -m scripts.ops verify-router-managed-image "$built"
       - name: Preserve image build and parity receipts
         if: ${{ !cancelled() && always() }}
