@@ -67,3 +67,24 @@ def test_non_applicable_evidence_stays_na(manifest):
         checkpoint_status="MISSING",
     )
     assert row["status"] == row["value_short"] == "N/A"
+
+
+@pytest.mark.parametrize(("exact", "expected"), [(False, "N/A"), (True, "CRIT")])
+def test_backfill_parent_manifest_depends_on_replay_intent(manifest, exact, expected):
+    from dataclasses import replace
+
+    candidate = replace(
+        manifest,
+        run_type=RunType.BACKFILL,
+        launch_context={"exact_replay": True} if exact else {},
+        replay_of_run_id=str(manifest.run_id) if exact else None,
+    )
+    row = build_anchor_row(
+        SPEC_BY_NAME["replay_of_manifest_id"],
+        value=None,
+        manifest=candidate,
+        ledger_entries=(),
+        checkpoint_status="MISSING",
+    )
+    assert row["status"] == expected
+    assert row["present"] is False

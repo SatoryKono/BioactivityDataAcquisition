@@ -75,6 +75,23 @@ def test_unmapped_path_still_has_no_pytest_target(
     assert "tests gate has no affected pytest target" in capsys.readouterr().err
 
 
+def test_grafana_capture_canvas_selects_attachment_and_capture_guards() -> None:
+    """Canvas edits must select the strict attachment verifier and capture suite."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["scripts/ops/observability/grafana/capture_canvas_evidence.cjs"],
+        repo_root=repo_root,
+    )
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == {
+        "tests/unit/scripts/ops/observability/test_grafana_browser_model_observer.py",
+        "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
+        "tests/unit/scripts/ops/observability/test_grafana_immutable_capture.py",
+        "tests/unit/scripts/ops/observability/test_table_capture_coverage.py",
+        "tests/integration/test_dashboard_first_window_noscroll.py",
+    }
+
+
 def test_grafana_capture_scroll_surface_shares_capture_cluster_route() -> None:
     """Scroll-surface capture keeps the capture cluster plus composition regression."""
     repo_root = Path(__file__).resolve().parents[5]
@@ -230,6 +247,20 @@ def test_iuphar_release_mapping_and_data_keep_bounded_owners(tmp_path: Path) -> 
             "tests/unit/iuphar_target_class/test_hierarchy.py",
             "tests/unit/iuphar_target_class/test_policy.py",
         ]
+        assert report["covers_full_suite"] is False
+
+
+def test_iuphar_batch_pipeline_keeps_a_bounded_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class/test_pipeline.py"
+    owner.parent.mkdir(parents=True)
+    owner.write_text("def test_owner():\n    assert True\n", encoding="utf-8")
+    for path in (
+        "src/iuphar_target_class/pipeline.py",
+        "src/iuphar_target_class/pipeline_io.py",
+        "src/iuphar_target_class/pipeline_acceptance.py",
+    ):
+        report = build_shadow_compare([path], repo_root=tmp_path)
+        assert report["selected"] == ["tests/unit/iuphar_target_class/test_pipeline.py"]
         assert report["covers_full_suite"] is False
 
 

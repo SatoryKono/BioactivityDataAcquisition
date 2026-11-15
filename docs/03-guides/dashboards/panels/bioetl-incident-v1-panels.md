@@ -165,9 +165,9 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 2101 | Review Selected Run Status | table |
 | 8809 | Observability Signals | row |
 | 8810 | Review Observability States | text |
+| 894 | Review Coverage Limits | text |
 | 9102 | Monitor Coverage | stat |
 | 907 | Monitor Telemetry | stat |
-| 894 | Review Coverage Limits | text |
 | 9491 | Inspect Telemetry Coverage | stat |
 | 8808 | Pipeline fleet and range, not this Run ID | row |
 | 18940 | Monitor Pipeline Status | stat |

@@ -9,6 +9,7 @@ Validates:
 
 from __future__ import annotations
 
+import ast
 import re
 from pathlib import Path
 
@@ -659,6 +660,27 @@ class TestInputValidation:
         )
 
 
+def _has_concatenated_open_argument(source: str) -> bool:
+    """Distinguish addition expressions from plus signs inside mode strings."""
+    for node in ast.walk(ast.parse(source)):
+        if not isinstance(node, ast.Call):
+            continue
+        name = node.func
+        if not (
+            (isinstance(name, ast.Name) and name.id == "open")
+            or (isinstance(name, ast.Attribute) and name.attr == "open")
+        ):
+            continue
+        arguments = [*node.args, *(item.value for item in node.keywords)]
+        if any(
+            isinstance(child, ast.BinOp) and isinstance(child.op, ast.Add)
+            for argument in arguments
+            for child in ast.walk(argument)
+        ):
+            return True
+    return False
+
+
 @pytest.mark.timeout(120)  # File scanning needs more time
 class TestPathTraversal:
     """Tests for path traversal vulnerabilities."""
@@ -688,7 +710,6 @@ class TestPathTraversal:
         dangerous_patterns = [
             r"os\.path\.join\s*\([^)]*request\.",
             r"Path\s*\([^)]*request\.",
-            r"open\s*\([^)]*\+",  # String concatenation in open()
         ]
 
         for py_file, content in source_contents:
@@ -698,8 +719,28 @@ class TestPathTraversal:
                 if re.search(dangerous_pattern, content):
                     rel_path = py_file.relative_to(PROJECT_ROOT)
                     violations.append(f"{rel_path}: Potential path traversal")
+            if _has_concatenated_open_argument(content):
+                rel_path = py_file.relative_to(PROJECT_ROOT)
+                violations.append(f"{rel_path}: Concatenated open argument")
 
         assert not violations, "Path traversal risks:\n" + "\n".join(violations)
+
+    @pytest.mark.parametrize(
+        ("source", "unsafe"),
+        [
+            ('raw_path.open("r+b")', False),
+            ('open(path, "w+")', False),
+            ('open("fixed+name", "r")', False),
+            ("# open(prefix + name)\nopen(path)", False),
+            ("open(prefix + name)", True),
+            ('open("prefix" + name, "r")', True),
+            ('open((prefix + name), "r")', True),
+            ("open(file=prefix + name)", True),
+            ('io.open(prefix + name, "r")', True),
+        ],
+    )
+    def test_concatenation_scanner_distinguishes_mode_literals(self, source, unsafe):
+        assert _has_concatenated_open_argument(source) is unsafe
 
     def test_config_files_use_safe_paths(self) -> None:
         """Verify configuration files don't allow arbitrary path access."""

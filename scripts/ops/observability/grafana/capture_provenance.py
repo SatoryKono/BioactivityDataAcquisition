@@ -12,6 +12,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+_NATIVE_DASHBOARD_DIR = "grafana/dashboards"
+
 
 def query_values_match(key: str, actual: list[str] | None, expected: list[str]) -> bool:
     """Grafana rewrites Unix milliseconds as equivalent ISO UTC timestamps."""
@@ -337,6 +339,15 @@ def attachment_errors(root: Path, evidence: object) -> list[str]:
     )
 
 
+def _compact_detail_attachments(page: dict) -> list[dict]:
+    fields = page.get("details", {}).get("fields", [])
+    return [
+        attachment
+        for field in fields
+        for attachment in (field, *field.get("viewportTiles", []))
+    ]
+
+
 def dashboard_attachment_errors(root: Path, dashboard: dict) -> list[str]:
     """Bind critical closeups, original full-capture tiles and pagination pages."""
     attachments = list(dashboard.get("criticalPanelScreenshots", []))
@@ -344,6 +355,7 @@ def dashboard_attachment_errors(root: Path, dashboard: dict) -> list[str]:
     for table in dashboard.get("tablePagination", []):
         attachments.extend(table.get("pages", []))
         for page in table.get("pages", []):
+            attachments.extend(_compact_detail_attachments(page))
             attachments.extend(page.get("viewportTiles", []))
             attachments.extend(page.get("scrollTiles", []))
             for tile in page.get("scrollTiles", []):
@@ -438,7 +450,11 @@ def _dashboard_errors(
     commit = source.get("commit_sha", "")
     uid = dashboard.get("uid")
     item_errors = []
-    current = path.read_bytes()
+    try:
+        current = path.read_bytes()
+    except OSError:
+        return ["dashboard source is unreadable"]
+    relative_path = path.relative_to(repo_root).as_posix()
     # Git checkouts may materialize LF or CRLF; no other source bytes
     # are normalized. The claimed commit is checked independently below.
     lf = current.replace(b"\r\n", b"\n")
@@ -454,7 +470,7 @@ def _dashboard_errors(
         item_errors.append("source digest mismatch")
     if re.fullmatch(r"[0-9a-f]{40}", commit):
         committed = subprocess.run(
-            ["git", "show", f"{commit}:grafana/dashboards/{path.name}"],
+            ["git", "show", f"{commit}:{relative_path}"],
             cwd=repo_root,
             capture_output=True,
             check=False,
@@ -467,10 +483,7 @@ def _dashboard_errors(
     item_errors.extend(
         model_errors(json.loads(current), dashboard.get("provisionedModel"))
     )
-    if (
-        str(identity.get("path", "")).replace("\\", "/")
-        != f"grafana/dashboards/{path.name}"
-    ):
+    if str(identity.get("path", "")).replace("\\", "/") != relative_path:
         item_errors.append("source path mismatch")
     item_errors.extend(browser_resource_errors(manifest, dashboard))
     if dashboard.get("file") != f"{uid}.png":
@@ -530,6 +543,18 @@ def manifest_identity_errors(
     return errors
 
 
+def dashboard_directory(manifest: dict, repo_root: Path) -> Path:
+    """Resolve only an explicit shipped profile; old captures remain native."""
+    profile = manifest.get("source", {}).get("dashboard_profile", "native")
+    directories = {
+        "native": _NATIVE_DASHBOARD_DIR,
+        "adaptive": "grafana/dashboards-adaptive",
+    }
+    if not isinstance(profile, str) or profile not in directories:
+        raise ValueError("invalid dashboard profile")
+    return repo_root / directories[profile]
+
+
 def verify_capture(
     manifest_path: Path,
     *,
@@ -544,9 +569,16 @@ def verify_capture(
     errors = manifest_identity_errors(
         manifest_path, manifest, raw, expected_sha256, expected_commit
     )
+    try:
+        source_dir = dashboard_directory(manifest, repo_root)
+    except ValueError as exc:
+        errors.append(str(exc))
+        source_dir = repo_root / _NATIVE_DASHBOARD_DIR
+    # The canonical native roster still owns full-set UID coverage. An adaptive
+    # capture must supply the matching committed model for every shipped UID.
     expected = {
-        json.loads(p.read_text(encoding="utf-8"))["uid"]: p
-        for p in (repo_root / "grafana/dashboards").glob("*.json")
+        json.loads(p.read_text(encoding="utf-8"))["uid"]: source_dir / p.name
+        for p in (repo_root / _NATIVE_DASHBOARD_DIR).glob("*.json")
     }
     dashboards = manifest.get("dashboards", [])
     if not expected:

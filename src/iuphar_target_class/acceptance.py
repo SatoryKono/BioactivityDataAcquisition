@@ -186,7 +186,7 @@ def stages_0_3_document() -> dict[str, object]:
     executed = {
         "all_invalid_batch": boundaries["all_invalid_batch"],
         "empty_batch": boundaries["empty_batch"],
-        "volume_scenario": volume.status,
+        "synthetic_volume_smoke": volume.status,
     }
     report = build_acceptance_report(executed)
     return {
@@ -217,13 +217,18 @@ def stages_0_3_document() -> dict[str, object]:
                 ),
             },
             {
-                "check": "volume_scenario",
+                "check": "synthetic_volume_smoke",
                 "status": volume.status,
                 "test": (
                     "tests/unit/iuphar_target_class/"
                     "test_acceptance.py::"
                     "test_volume_scenario_finishes_within_the_approved_limit"
                 ),
+            },
+            {
+                "check": "volume_scenario",
+                "status": "NOT_RUN",
+                "test": "requires admitted full Stage-0 cohort via run_admitted_volume",
             },
         ],
         "volume_test_seconds": limit,

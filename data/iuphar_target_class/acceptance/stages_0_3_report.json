@@ -58,9 +58,14 @@
       "status": "NOT_RUN"
     },
     {
-      "name": "volume_scenario",
+      "name": "synthetic_volume_smoke",
       "reason": "",
       "status": "PASS"
+    },
+    {
+      "name": "volume_scenario",
+      "reason": "объёмный прогон в этом отчёте не выполнялся",
+      "status": "NOT_RUN"
     },
     {
       "name": "w153_integration",
@@ -91,9 +96,14 @@
       "test": "tests/unit/iuphar_target_class/test_normalization.py::test_normalize_iuphar_empty_batch"
     },
     {
-      "check": "volume_scenario",
+      "check": "synthetic_volume_smoke",
       "status": "PASS",
       "test": "tests/unit/iuphar_target_class/test_acceptance.py::test_volume_scenario_finishes_within_the_approved_limit"
+    },
+    {
+      "check": "volume_scenario",
+      "status": "NOT_RUN",
+      "test": "requires admitted full Stage-0 cohort via run_admitted_volume"
     }
   ],
   "volume_test_seconds": 300,

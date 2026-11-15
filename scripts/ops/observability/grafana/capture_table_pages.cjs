@@ -305,15 +305,118 @@ async function captureInspectedValues(page, root, cells, {dir,index,outputDir,pn
   });
   return results;
 }
+async function captureCompactDetails(page, root, options) {
+  const {dir, index, outputDir, pngEvidence, timeout} = options;
+  const details = root.getByRole('button', {name: /^(Details|Open full details)$/});
+  if (await details.count() !== 1) throw new Error('Compact table requires one full-details control');
+  await details.click();
+  const dialog = page.getByRole('dialog').last();
+  await dialog.waitFor({state:'visible', timeout});
+  try {
+    const names = await dialog.locator('dl dt').allTextContents();
+    const values = dialog.locator('dl dd');
+    if (!names.length || names.length !== await values.count()) {
+      throw new Error('Compact table details are incomplete');
+    }
+    const fields = [];
+    await sequential(names.map((name, field) => ({name, field})), async ({name, field}) => {
+      const value = values.nth(field);
+      await value.scrollIntoViewIfNeeded({timeout});
+      const observed = await value.evaluate(el => ({
+        text: el.innerText,
+        links: [...el.querySelectorAll('a[href]')].map(a => ({text:a.textContent, href:a.href})),
+      }));
+      const file = path.join(dir, `page-${index}-detail-${field + 1}.png`);
+      const bytes = await require('./native_browser_zoom.cjs').captureElementScreenshot(
+        page, value, {path:file, animations:'disabled', timeout});
+      fields.push({name, ...observed, file:path.relative(outputDir,file),
+        ...pngEvidence(bytes), viewportTiles:(bytes.viewportTiles || []).map(t=>({...t,file:path.relative(outputDir,t.file)}))});
+    });
+    return {fields};
+  } finally {
+    await dialog.getByRole('button', {name:'Close', exact:true}).last().click();
+    await dialog.waitFor({state:'hidden', timeout});
+  }
+}
+
+async function compactPosition(root) {
+  return root.evaluate(el => {
+    const nav = el.querySelector('nav[aria-label$="pagination"]');
+    if (!nav) return {page:1,total:1,text:''};
+    const text = nav.querySelector('[aria-live="polite"]')?.textContent || '';
+    const match = /^(\d+)\s*\/\s*(\d+)$/.exec(text.trim());
+    return match ? {page:Number(match[1]), total:Number(match[2]), text} : {page:0,total:0,text};
+  });
+}
+
+async function captureCompactTable(page, root, panel, options) {
+  const {dashboard, outputDir, pngEvidence, timeout} = options;
+  const initial = await compactPosition(root);
+  if (initial.page < 1 || initial.total < initial.page || initial.total > 100) {
+    throw new Error('Compact table pagination is invalid or exceeds 100 rows');
+  }
+  async function moveTo(target, moves = 0) {
+      const position = await compactPosition(root);
+      if (moves >= 100 || position.total !== initial.total) {
+        throw new Error('Compact table pagination changed during capture');
+      }
+      if (position.page === target) return;
+      const direction = position.page < target ? 1 : -1;
+      const name = direction > 0 ? /^Next (row|run)$/ : /^Previous (row|run)$/;
+      const button = root.getByRole('button', {name});
+      if (await button.count() !== 1 || await button.isDisabled()) {
+        throw new Error('Compact table pagination cannot reach requested row');
+      }
+      await button.focus();
+      await page.keyboard.press('Enter');
+      await page.waitForFunction(({id,before}) =>
+        document.querySelector(`[data-viz-panel-key="panel-${id}"] nav [aria-live="polite"]`)?.textContent !== before,
+        {id:panel.id,before:position.text},{timeout});
+      const next = await compactPosition(root);
+      if (next.page !== position.page + direction || next.total !== initial.total) {
+        throw new Error('Compact table pagination did not advance one row');
+      }
+      await moveTo(target, moves + 1);
+  }
+  const dir = path.join(outputDir,'panels',dashboard.uid,String(panel.id));
+  await fs.promises.mkdir(dir,{recursive:true});
+  const pages = [];
+  try {
+    await moveTo(1);
+    await sequential(Array.from({length: initial.total}, (_, i) => i + 1), async index => {
+      await moveTo(index);
+      const cells = await root.locator('table th, table td').allTextContents();
+      if (!cells.length) throw new Error('Compact table has no visible fields');
+      const file = path.join(dir,`page-${index}.png`);
+      const bytes = await require('./native_browser_zoom.cjs').captureElementScreenshot(
+        page,root,{path:file,animations:'disabled',timeout});
+      const details = await captureCompactDetails(page,root,{dir,index,outputDir,pngEvidence,timeout});
+      pages.push({page:index,cells,details,scrollers:[],scrollTiles:[],inspectedValues:[],
+        file:path.relative(outputDir,file),...pngEvidence(bytes),
+        viewportTiles:(bytes.viewportTiles || []).map(t=>({...t,file:path.relative(outputDir,t.file)}))});
+    });
+  } finally {
+    await moveTo(initial.page);
+  }
+  return {panelId:panel.id,title:panel.title,paginated:initial.total>1,status:'COMPLETE',
+    method:'compact row controls activated with Enter; every full-details field captured; original row restored',pages};
+}
+
 async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeout}) {
   // PNG capture may legitimately be unlimited; UI transitions never may be.
   const transitionTimeout = Number.isFinite(timeout) && timeout > 0 ? timeout : 30000;
   const results = [];
   await sequential(dashboard.tablePanels || dashboard.firstWindowPanels || [], async panel => {
-    if (panel.type !== 'table') return;
+    if ((panel.effectiveType ?? panel.type) !== 'table') return;
     const root = page.locator(`[data-viz-panel-key="panel-${panel.id}"]`).first();
     await root.scrollIntoViewIfNeeded({timeout});
     await root.waitFor({state:'visible',timeout});
+    if (panel.adaptiveTable && await root.locator('[data-bioetl-adaptive-table="compact"]').count()) {
+      results.push(await captureCompactTable(page,root,panel,{
+        dashboard,outputDir,pngEvidence,timeout:transitionTimeout,
+      }));
+      return;
+    }
     const next = root.getByRole('button', {name:'next page', exact:true});
     const paginated = (await next.count()) > 0;
     const previous = root.getByRole('button', {name:'previous page', exact:true});

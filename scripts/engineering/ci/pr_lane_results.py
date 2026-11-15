@@ -389,6 +389,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     **dict.fromkeys(
         (
+            "src/iuphar_target_class/pipeline.py",
+            "src/iuphar_target_class/pipeline_io.py",
+            "src/iuphar_target_class/pipeline_acceptance.py",
+        ),
+        ("tests/unit/iuphar_target_class/test_pipeline.py",),
+    ),
+    **dict.fromkeys(
+        (
             "src/iuphar_target_class/gtopdb_2026_3_1.py",
             "src/iuphar_target_class/iuphar_mapping.py",
         ),
@@ -484,6 +492,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "reports/review/grafana-full-tables-20261110/audit.json",
             "reports/review/grafana-full-tables-20261110/chembl_protein_class-overview.png",
             "reports/review/grafana-full-tables-20261110/uniprot_protein-overview.png",
+            "scripts/ops/observability/grafana/capture_canvas_evidence.cjs",
             "scripts/ops/observability/grafana/capture_table_pages.cjs",
             "scripts/ops/observability/grafana/capture_tall_panel.cjs",
             "scripts/ops/observability/grafana/native_browser_zoom.cjs",
