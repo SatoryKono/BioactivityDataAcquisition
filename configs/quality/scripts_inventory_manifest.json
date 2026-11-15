@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-15T12:04:17.322946+00:00",
+  "generated_at": "2026-11-15T12:15:14.912355+00:00",
   "summary": {
     "total_scripts": 752,
     "status_counts": {
@@ -22409,7 +22409,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/repo/test_create_worktree.py",
-          "line": 107,
+          "line": 127,
           "source_group": "tests",
           "text": "implementation = repo / \"scripts/engineering/repo/create_worktree.py\""
         }
@@ -22670,7 +22670,7 @@
         },
         {
           "path": "scripts/engineering/repo/create_worktree.py",
-          "line": 255,
+          "line": 257,
           "source_group": "scripts",
           "text": "path_guard = runpy.run_path(str(Path(__file__).with_name(\"operation_guards.py\")))"
         },
