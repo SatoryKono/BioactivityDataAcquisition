@@ -42,10 +42,20 @@ def test_nonzero_command_preserves_both_raw_streams_and_exit(tmp_path, monkeypat
 def test_register_accounts_for_every_identity_without_changing_inventory():
     catalog = coverage.ROOT / "configs/quality/external_resource_inventory.json"
     before = catalog.read_bytes()
+    inventory = json.loads(before)
+    expected_count = inventory["source_requalification"]["definition_count"]
+    expected_ids = {
+        resource["identity"]
+        for part in inventory["resource_parts"]
+        for resource in json.loads((coverage.ROOT / part["file"]).read_text())[
+            "resources"
+        ]
+    }
     result = coverage.build()
     rows = result["resources"]
-    assert len(rows) == len({r["identity"] for r in rows}) == 207
-    assert sum(result["families"].values()) == 207
+    assert {r["identity"] for r in rows} == expected_ids
+    assert len(rows) == len(expected_ids) == expected_count
+    assert sum(result["families"].values()) == expected_count
     assert not result["full_runtime_acceptance"]
     for row in rows:
         assert row["reason"]
@@ -64,6 +74,32 @@ def test_register_accounts_for_every_identity_without_changing_inventory():
             s["runtime_result"] == "NOT_RUN_12553" for s in row["scenarios"].values()
         )
     assert catalog.read_bytes() == before
+
+
+@pytest.mark.parametrize(
+    ("declared", "identities"),
+    [
+        (True, ["one"]),
+        (0, []),
+        (-1, []),
+        ("1", ["one"]),
+        (2, ["one"]),
+        (2, ["one", "one"]),
+    ],
+)
+def test_register_rejects_invalid_or_duplicate_catalog_census(
+    monkeypatch, declared, identities
+):
+    monkeypatch.setattr(
+        coverage,
+        "load_catalog",
+        lambda root: {
+            "resources": [{"identity": identity} for identity in identities],
+            "source_requalification": {"definition_count": declared},
+        },
+    )
+    with pytest.raises(ValueError, match="catalog-declared count"):
+        coverage.build()
 
 
 def test_unknown_trace_identity_is_rejected(tmp_path, monkeypatch):
