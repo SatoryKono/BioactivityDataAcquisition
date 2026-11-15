@@ -822,8 +822,9 @@ jobs:
     if: needs['classify-changes'].outputs['docker'] == 'required'
     # GitHub validates nested job permissions at startup. docker-build asks for
     # security-events, and docker-push asks for packages, id-token, and
-    # attestations, even when the publish job is skipped on pull requests.
+    # attestations plus actions:read, even when publish is skipped on PRs.
     permissions:
+      actions: read
       contents: read
       security-events: write
       packages: write
