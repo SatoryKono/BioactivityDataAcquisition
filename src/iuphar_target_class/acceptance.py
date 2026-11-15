@@ -11,9 +11,13 @@ NOT_RUN_REASONS: dict[str, str] = {
     "api_smoke": "сохранённых ответов API нет",
     "gold_cases": "эталонные случаи не подтверждены",
     "graph_limits_boundary": (
-        "graph_limits.max_depth и graph_limits.max_visited_nodes не утверждены"
+        "значения graph_limits записаны; граничный прогон на пределе и "
+        "пределе + 1 не выполнялся"
     ),
-    "http_transport": "HTTP timeouts, retries и backoff не утверждены",
+    "http_transport": (
+        "параметры адаптера записаны; эксплуатационная проверка HTTP "
+        "не запускалась"
+    ),
     "isoform_policy": "политика изоформ не утверждена",
     "missing_markers_version": "версия missing_markers не утверждена",
     "quality_counts": "эталонный набор этапа 0 пуст, числа качества не измерены",
