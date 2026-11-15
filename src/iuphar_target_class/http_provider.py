@@ -231,9 +231,10 @@ class HttpProvider:
             return _seal(_unavailable("circuit_open"), self._api_key)
         step = self._attempt(path, expect, record_id)
         self._observe(step)
-        if step.cacheable:
-            self._cache[path] = step.hit
-        return _seal(step.hit, self._api_key)
+        sealed = _seal(step.hit, self._api_key)
+        if step.cacheable and sealed is step.hit:
+            self._cache[path] = sealed
+        return sealed
 
     def _attempt(self, path: str, expect: str, record_id: str | None) -> _Step:
         index = 0
@@ -474,14 +475,17 @@ def _retry_after_seconds(value: str | None) -> int | None:
 
 
 def _seal(hit: ProviderHit, api_key: str | None) -> ProviderHit:
-    leaked = _secret_leaked(hit, api_key)
-    if leaked:
-        raise RuntimeError("HTTP adapter leaked a secret into the result")
+    if _secret_leaked(hit, api_key):
+        return _unavailable("secret")
     return hit
 
 
 def _secret_leaked(hit: ProviderHit, api_key: str | None) -> bool:
-    rendered = " ".join(hit.diagnostics)
+    chunks = list(hit.diagnostics)
+    for record in hit.records:
+        chunks.append(record.record_id)
+        chunks.append(record.payload.decode("utf-8", "replace"))
+    rendered = "\n".join(chunks)
     if API_KEY_HEADER in rendered:
         return True
     return bool(api_key) and api_key in rendered

@@ -256,6 +256,21 @@ def test_circuit_opens_after_five_failures_and_retries_after_recovery() -> None:
     assert len(transport.calls) == 24
 
 
+def test_secret_inside_a_record_is_dropped_and_not_cached() -> None:
+    leaked = b'{"id":"1","echo":"super-secret-value"}'
+    provider, transport, _clock = _provider(
+        [_response(200, leaked), _response(200, _TARGET)],
+        api_key=_SECRET,
+    )
+    first = provider.get_target("1")
+    second = provider.get_target("1")
+    assert first.records == ()
+    assert first.diagnostics == ("source_unavailable:secret",)
+    assert _SECRET not in " ".join(first.diagnostics)
+    assert second.records
+    assert len(transport.calls) == 2
+
+
 def test_api_key_stays_out_of_the_url_and_the_result() -> None:
     provider, transport, _clock = _provider([_response(200, _TARGET)], api_key=_SECRET)
     hit = provider.get_target("1")
