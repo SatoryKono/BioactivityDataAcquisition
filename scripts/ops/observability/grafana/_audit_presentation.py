@@ -232,9 +232,10 @@ def _walk_panels(panels: list[dict]):
 def _is_current_panel(panel: dict, spec: dict) -> bool:
     if spec.get("evidence_source") not in {"prometheus", "grafana_builtin"}:
         return False
-    current = spec.get("scope") == "current" or (
-        "CURRENT" in panel.get("description", "")[:45]
-    )
+    scope = spec.get("scope")
+    if scope == "time_range":
+        return False
+    current = scope == "current" or ("CURRENT" in panel.get("description", "")[:45])
     return current and panel.get("type") in {"stat", "table", "timeseries"}
 
 

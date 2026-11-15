@@ -734,10 +734,20 @@ function summarizeRequiredPanel(panel) {
     collectValueMappings,
     collectFieldFormats,
   } = require('./capture_table_pages.cjs');
+  const type = typeof panel.type === "string" ? panel.type : "unknown";
+  const managed = type === "bioetl-selectorshell-panel";
+  const view = panel.options?.currentView;
+  const table = managed && (
+    ["rows", "runs"].includes(panel.options?.viewMode) ||
+    (panel.options?.viewMode === "current" && view?.pluginId === "table" && view.compactFields)
+  );
+  const effectiveType = table ? "table" : managed && panel.options?.viewMode === "current"
+    ? view?.pluginId : type;
   return {
     id: panel.id,
     title: panelDisplayTitle(panel),
-    type: typeof panel.type === "string" ? panel.type : "unknown",
+    type,
+    ...(managed ? {effectiveType, adaptiveTable: Boolean(table)} : {}),
     noValue: panel.fieldConfig?.defaults?.noValue,
     valueMappings: collectValueMappings(panel.fieldConfig),
     fieldFormats: collectFieldFormats(panel.fieldConfig),
@@ -882,7 +892,7 @@ function dashboardEntryFromPayload(payload) {
     url: `/d/${uid}/${slug}`,
     file: `${uid}.png`,
     requiredPanels,
-    tablePanels: requiredPanels.filter(panel => panel.type === "table"),
+    tablePanels: requiredPanels.filter(panel => (panel.effectiveType ?? panel.type) === "table"),
     navigationHtml: navigationPanels[0]?.options?.content || "",
     navigationExpected: navigationPanels.length === 1,
     firstWindowPanels: selectContainmentPanels(panels, CONFIG.navigationOnly).map(summarizeFirstWindowPanel),

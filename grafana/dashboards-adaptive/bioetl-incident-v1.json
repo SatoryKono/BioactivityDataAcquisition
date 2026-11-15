@@ -3364,7 +3364,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · CURRENT · Required telemetry coverage over 5 minutes, independent of Run ID. CRIT means at least two required groups are missing; it does not count failed runs. Inspect Telemetry Coverage below for manifest, ledger, replay-risk, integrity and publication evidence. An empty Pushgateway after restart requires a genuine new publication or verified backup, never synthetic zero counters. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN. Managed CURRENT queries use an independent clock and refresh every 30s. The timestamp is query evaluation time, not publication or event time. The historical dashboard interval does not set the current query end; current trends retain the selected duration and end at now. Timeouts, failed queries and unverified response time remain unavailable.",
+          "description": "TIME RANGE · CURRENT · Required telemetry coverage over 5 minutes, independent of Run ID. CRIT means at least two required groups are missing; it does not count failed runs. Inspect Telemetry Coverage below for manifest, ledger, replay-risk, integrity and publication evidence. An empty Pushgateway after restart requires a genuine new publication or verified backup, never synthetic zero counters. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3430,53 +3430,44 @@
           },
           "id": 907,
           "options": {
-            "viewMode": "current",
-            "currentView": {
-              "pluginId": "stat",
-              "queries": [
-                {
-                  "expr": "clamp_max(max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}), 2)",
-                  "instant": true,
-                  "refId": "A",
-                  "datasource": {
-                    "type": "prometheus",
-                    "uid": "prometheus"
-                  }
-                }
-              ],
-              "transformations": [],
-              "options": {
-                "colorMode": "value",
-                "dataLinks": [
-                  {
-                    "targetBlank": true,
-                    "title": "Open Control-Plane Observability Checklist",
-                    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
-                  }
-                ],
-                "graphMode": "none",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "textMode": "value",
-                "text": {
-                  "valueSize": 20,
-                  "titleSize": 14
-                }
+            "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Control-Plane Observability Checklist",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
               }
+            ],
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
             }
           },
           "pluginVersion": "9.5.0",
-          "targets": [],
+          "targets": [
+            {
+              "expr": "clamp_max(max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}), 2)",
+              "instant": true,
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
+            }
+          ],
           "title": "Monitor Telemetry",
-          "type": "bioetl-selectorshell-panel",
-          "transformations": []
+          "type": "stat"
         },
         {
           "datasource": {
@@ -6275,7 +6266,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · CURRENT · Ledger uses pipeline/run type counters over 15 minutes; Run ID does not filter this card. UNKNOWN means required telemetry or publication evidence is missing, not a confirmed processing failure. Inspect Telemetry Coverage below. Selected-run Trust is assessed separately from persisted evidence. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN. Managed CURRENT queries use an independent clock and refresh every 30s. The timestamp is query evaluation time, not publication or event time. The historical dashboard interval does not set the current query end; current trends retain the selected duration and end at now. Timeouts, failed queries and unverified response time remain unavailable.",
+          "description": "TIME RANGE · CURRENT · Ledger uses pipeline/run type counters over 15 minutes; Run ID does not filter this card. UNKNOWN means required telemetry or publication evidence is missing, not a confirmed processing failure. Inspect Telemetry Coverage below. Selected-run Trust is assessed separately from persisted evidence. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -6341,53 +6332,44 @@
           },
           "id": 893,
           "options": {
-            "viewMode": "current",
-            "currentView": {
-              "pluginId": "stat",
-              "queries": [
-                {
-                  "expr": "clamp_max(max(bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0)), 2)",
-                  "instant": true,
-                  "refId": "A",
-                  "datasource": {
-                    "type": "prometheus",
-                    "uid": "prometheus"
-                  }
-                }
-              ],
-              "transformations": [],
-              "options": {
-                "colorMode": "value",
-                "dataLinks": [
-                  {
-                    "targetBlank": true,
-                    "title": "Open Run Manifest Inspection",
-                    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md"
-                  }
-                ],
-                "graphMode": "none",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "textMode": "value",
-                "text": {
-                  "valueSize": 20,
-                  "titleSize": 14
-                }
+            "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Run Manifest Inspection",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md"
               }
+            ],
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
             }
           },
           "pluginVersion": "9.5.0",
-          "targets": [],
+          "targets": [
+            {
+              "expr": "clamp_max(max(bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0)), 2)",
+              "instant": true,
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
+            }
+          ],
           "title": "Monitor Ledger",
-          "type": "bioetl-selectorshell-panel",
-          "transformations": []
+          "type": "stat"
         },
         {
           "id": 2542,

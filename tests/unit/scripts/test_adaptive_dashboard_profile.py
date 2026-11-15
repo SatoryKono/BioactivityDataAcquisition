@@ -147,6 +147,12 @@ def test_current_consumer_uses_raw_donor_queries_and_preserves_its_own_transform
         "Pipeline",
         "State",
     ]
+    # Explicit TIME RANGE wins over the mixed wording in these descriptions.
+    for panel_id in (893, 907):
+        assert "CURRENT" in before[panel_id]["description"][:45]
+        assert "currentView" not in after[panel_id].get("options", {})
+        for key in ("type", "targets", "transformations", "fieldConfig", "description"):
+            assert after[panel_id].get(key) == before[panel_id].get(key)
     assert ranked["gridPos"]["x"] + ranked["gridPos"]["w"] <= alerts["gridPos"]["x"]
     for panel in (ranked, alerts):
         assert panel["gridPos"]["y"] + panel["gridPos"]["h"] <= 15
