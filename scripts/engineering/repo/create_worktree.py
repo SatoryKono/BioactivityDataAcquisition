@@ -102,7 +102,9 @@ def _git(repo: Path, *args: str) -> str:
     # or revision expressions. Fixed options below are implementation-owned.
     checked_args = []
     for argument in args:
-        if not re.fullmatch(r"[A-Za-z0-9_./:\\{}^-]+", argument):
+        if argument != "--path-format=absolute" and not re.fullmatch(
+            r"[A-Za-z0-9_./:\\{}^-]+", argument
+        ):
             raise ValueError("Git argument contains unsupported characters")
         checked_args.append(argument)
     # -C does not neutralize inherited Git directory/index/config controls.
