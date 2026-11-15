@@ -10,7 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .models import Diagnostic, ProviderAnnotation
-from .policy import policy_document
+from .policy import WORKING_CLASSES, policy_document
 
 LIMIT_EXCEEDED = "превышение лимита"
 FAMILY_MAPPING_PROOF = "отображение семейства"
@@ -80,6 +80,17 @@ class FamilyCandidate:
 
 
 @dataclass(frozen=True, slots=True)
+class _Ready:
+    """Indexed graph that is ready to walk. Defects are already excluded."""
+
+    by_id: dict[str, FamilyNode]
+    local: dict[str, GraphDefect]
+    starts: tuple[str, ...]
+    depth_limit: int
+    visited_limit: int
+
+
+@dataclass(frozen=True, slots=True)
 class DirectAnnotation:
     """Direct-layer outcome. It is not a full classification row."""
 
@@ -124,13 +135,19 @@ def validate_family_graph(
 ) -> tuple[GraphDefect, ...]:
     """Return structural and limit defects. An empty tuple means the walk fits."""
 
-    return _walk(
+    ready = _prepare(
         nodes,
         family_ids=family_ids,
         max_depth=max_depth,
         max_visited_nodes=max_visited_nodes,
         multiple_parents_allowed=multiple_parents_allowed,
-    ).defects
+    )
+    if isinstance(ready, GraphWalk):
+        return ready.defects
+    defect = _probe(ready)
+    if defect is None:
+        return ()
+    return (defect,)
 
 
 def build_family_paths(
@@ -143,12 +160,21 @@ def build_family_paths(
 ) -> GraphWalk:
     """Build root-to-leaf paths. Any defect drops every path."""
 
-    return _walk(
+    ready = _prepare(
         nodes,
         family_ids=family_ids,
         max_depth=max_depth,
         max_visited_nodes=max_visited_nodes,
         multiple_parents_allowed=multiple_parents_allowed,
+    )
+    if isinstance(ready, GraphWalk):
+        return ready
+    return _walk_starts(
+        ready.by_id,
+        ready.local,
+        ready.starts,
+        ready.depth_limit,
+        ready.visited_limit,
     )
 
 
@@ -162,22 +188,23 @@ def normalize_provider_class(
     """Assign a class from an approved fixture, never from a path word."""
 
     resolved = mapping if mapping is not None else ApprovedMapping()
+    _require_known_classes(resolved)
     family_ids = tuple(annotation.family_ids)
-    walk = build_family_paths(
+    defects = validate_family_graph(
         nodes,
         family_ids=family_ids,
         multiple_parents_allowed=multiple_parents_allowed,
     )
     type_raw = annotation.type_raw.strip() if annotation.type_raw else ""
     type_class = dict(resolved.type_to_class).get(type_raw) if type_raw else None
-    if walk.defects:
+    if defects:
         status = STATUS_PARTIAL if type_raw else STATUS_NOT_AVAILABLE
         return _annotation(
             status=status,
             iuphar_class=None,
             candidates=(),
-            diagnostics=_diagnostics(walk.defects),
-            defects=walk.defects,
+            diagnostics=_diagnostics(defects),
+            defects=defects,
         )
     if type_class is not None:
         return _annotation(
@@ -267,38 +294,61 @@ def _diagnostics(defects: tuple[GraphDefect, ...]) -> tuple[Diagnostic, ...]:
     )
 
 
-def _walk(
+def _require_known_classes(mapping: ApprovedMapping) -> None:
+    foreign = sorted(
+        {
+            value
+            for _name, value in (*mapping.type_to_class, *mapping.family_to_class)
+            if value not in WORKING_CLASSES
+        }
+    )
+    if not foreign:
+        return
+    message = "mapping target is outside the class dictionary: " + ", ".join(foreign)
+    raise ValueError(message)
+
+
+def _prepare(
     nodes: tuple[FamilyNode, ...],
     *,
     family_ids: tuple[str, ...] | None,
     max_depth: int | None,
     max_visited_nodes: int | None,
     multiple_parents_allowed: bool,
-) -> GraphWalk:
+) -> _Ready | GraphWalk:
     depth_limit, visited_limit = _resolved_limits(max_depth, max_visited_nodes)
-    by_id, structural = _structural_defects(nodes, multiple_parents_allowed)
-    if structural:
-        return GraphWalk(paths=(), defects=structural)
-    starts = tuple(sorted(by_id)) if family_ids is None else family_ids
-    missing_starts = _missing_starts(starts, by_id)
+    by_id, local = _node_index(nodes, multiple_parents_allowed)
+    if family_ids is None:
+        defects = _global_defects(by_id, local)
+        if defects:
+            return GraphWalk(paths=(), defects=defects)
+        starts = tuple(sorted(by_id))
+        local = {}
+    else:
+        starts = family_ids
+    missing_starts = _missing_starts(starts, by_id, local)
     if missing_starts:
         return GraphWalk(paths=(), defects=missing_starts)
-    return _walk_starts(by_id, starts, depth_limit, visited_limit)
+    return _Ready(by_id, local, starts, depth_limit, visited_limit)
 
 
 def _missing_starts(
     starts: tuple[str, ...],
     by_id: dict[str, FamilyNode],
+    local: dict[str, GraphDefect],
 ) -> tuple[GraphDefect, ...]:
-    return tuple(
-        GraphDefect(defect=DEFECT_MISSING_PARENT, family_id=family_id)
-        for family_id in starts
-        if family_id not in by_id
-    )
+    defects: list[GraphDefect] = []
+    for family_id in starts:
+        if family_id in local:
+            defects.append(local[family_id])
+        elif family_id not in by_id:
+            defects.append(GraphDefect(DEFECT_MISSING_PARENT, family_id))
+    return tuple(defects)
 
 
 def _walk_starts(
     by_id: dict[str, FamilyNode],
+    local: dict[str, GraphDefect],
     starts: tuple[str, ...],
     depth_limit: int,
     visited_limit: int,
@@ -307,7 +357,13 @@ def _walk_starts(
     visited: set[str] = set()
     for start in starts:
         defect = _walk_from(
-            by_id, start, visited, leaf_to_root, depth_limit, visited_limit
+            by_id,
+            local,
+            start,
+            visited,
+            leaf_to_root,
+            depth_limit,
+            visited_limit,
         )
         if defect is not None:
             return GraphWalk(paths=(), defects=(defect,))
@@ -316,6 +372,7 @@ def _walk_starts(
 
 def _walk_from(
     by_id: dict[str, FamilyNode],
+    local: dict[str, GraphDefect],
     start: str,
     visited: set[str],
     leaf_to_root: list[tuple[str, ...]],
@@ -332,7 +389,7 @@ def _walk_from(
         if not parents:
             leaf_to_root.append(path)
             continue
-        parent_defect = _enqueue_parents(stack, by_id, node_id, path, parents)
+        parent_defect = _enqueue_parents(stack, by_id, local, node_id, path, parents)
         if parent_defect is not None:
             return parent_defect
     return None
@@ -365,6 +422,7 @@ def _limit_defect(
 def _enqueue_parents(
     stack: list[tuple[str, tuple[str, ...]]],
     by_id: dict[str, FamilyNode],
+    local: dict[str, GraphDefect],
     node_id: str,
     path: tuple[str, ...],
     parents: tuple[str, ...],
@@ -373,6 +431,9 @@ def _enqueue_parents(
         if parent_id in path:
             defect = DEFECT_SELF_LOOP if parent_id == node_id else DEFECT_CYCLE
             return GraphDefect(defect=defect, family_id=node_id)
+        known = local.get(parent_id)
+        if known is not None:
+            return known
         if parent_id not in by_id:
             return GraphDefect(defect=DEFECT_MISSING_PARENT, family_id=parent_id)
         stack.append((parent_id, (*path, parent_id)))
@@ -405,40 +466,160 @@ def _resolved_limits(
     return depth, visited
 
 
-def _structural_defects(
-    nodes: tuple[FamilyNode, ...],
-    multiple_parents_allowed: bool,
-) -> tuple[dict[str, FamilyNode], tuple[GraphDefect, ...]]:
-    by_id, defects = _collapse_nodes(nodes, multiple_parents_allowed)
-    if defects:
-        return {}, tuple(defects)
-    missing = _missing_parents(by_id)
-    if missing:
-        return {}, missing
-    return by_id, ()
+def _probe(ready: _Ready) -> GraphDefect | None:
+    seen: set[str] = set()
+    longest: dict[str, int] = {}
+    for start in ready.starts:
+        defect = _probe_from(ready, start, seen, longest)
+        if defect is not None:
+            return defect
+    return None
 
 
-def _collapse_nodes(
+def _probe_from(
+    ready: _Ready,
+    start: str,
+    seen: set[str],
+    longest: dict[str, int],
+) -> GraphDefect | None:
+    stack: list[tuple[str, int]] = [(start, 0)]
+    path: list[str] = []
+    while stack:
+        defect = _probe_step(ready, stack, path, seen, longest)
+        if defect is not None:
+            return defect
+    return None
+
+
+def _probe_step(
+    ready: _Ready,
+    stack: list[tuple[str, int]],
+    path: list[str],
+    seen: set[str],
+    longest: dict[str, int],
+) -> GraphDefect | None:
+    node_id, index = stack[-1]
+    if index == 0:
+        entered = _probe_enter(ready, node_id, path, seen, longest)
+        if entered == "skip":
+            stack.pop()
+            return None
+        if isinstance(entered, GraphDefect):
+            return entered
+        path.append(node_id)
+    return _probe_edge(ready, stack, path, longest)
+
+
+def _probe_enter(
+    ready: _Ready,
+    node_id: str,
+    path: list[str],
+    seen: set[str],
+    longest: dict[str, int],
+) -> GraphDefect | str | None:
+    if node_id in ready.local:
+        return ready.local[node_id]
+    if node_id not in ready.by_id:
+        return GraphDefect(DEFECT_MISSING_PARENT, node_id)
+    if node_id in longest:
+        if len(path) + longest[node_id] > ready.depth_limit:
+            return GraphDefect(LIMIT_EXCEEDED, node_id, "max_depth")
+        return "skip"
+    if len(path) + 1 > ready.depth_limit:
+        return GraphDefect(LIMIT_EXCEEDED, node_id, "max_depth")
+    if node_id not in seen:
+        seen.add(node_id)
+        if len(seen) > ready.visited_limit:
+            return GraphDefect(LIMIT_EXCEEDED, node_id, "max_visited_nodes")
+    return None
+
+
+def _probe_edge(
+    ready: _Ready,
+    stack: list[tuple[str, int]],
+    path: list[str],
+    longest: dict[str, int],
+) -> GraphDefect | None:
+    node_id, index = stack[-1]
+    parents = ready.by_id[node_id].parent_ids
+    if index < len(parents):
+        stack[-1] = (node_id, index + 1)
+        return _follow_parent(ready, stack, path, node_id, parents[index], longest)
+    span = _remember_span(node_id, parents, longest)
+    path.pop()
+    stack.pop()
+    if span > ready.depth_limit:
+        return GraphDefect(LIMIT_EXCEEDED, node_id, "max_depth")
+    return None
+
+
+def _follow_parent(
+    ready: _Ready,
+    stack: list[tuple[str, int]],
+    path: list[str],
+    node_id: str,
+    parent_id: str,
+    longest: dict[str, int],
+) -> GraphDefect | None:
+    if parent_id in path:
+        kind = DEFECT_SELF_LOOP if parent_id == node_id else DEFECT_CYCLE
+        return GraphDefect(kind, node_id)
+    known = ready.local.get(parent_id)
+    if known is not None:
+        return known
+    if parent_id not in ready.by_id:
+        return GraphDefect(DEFECT_MISSING_PARENT, parent_id)
+    if parent_id in longest:
+        if len(path) + longest[parent_id] > ready.depth_limit:
+            return GraphDefect(LIMIT_EXCEEDED, parent_id, "max_depth")
+        return None
+    stack.append((parent_id, 0))
+    return None
+
+
+def _remember_span(
+    node_id: str,
+    parents: tuple[str, ...],
+    longest: dict[str, int],
+) -> int:
+    if not parents:
+        longest[node_id] = 1
+        return 1
+    span = 1 + max(longest[parent_id] for parent_id in parents)
+    longest[node_id] = span
+    return span
+
+
+def _global_defects(
+    by_id: dict[str, FamilyNode],
+    local: dict[str, GraphDefect],
+) -> tuple[GraphDefect, ...]:
+    if local:
+        return tuple(local[family_id] for family_id in sorted(local))
+    return _missing_parents(by_id)
+
+
+def _node_index(
     nodes: tuple[FamilyNode, ...],
     multiple_parents_allowed: bool,
-) -> tuple[dict[str, FamilyNode], list[GraphDefect]]:
+) -> tuple[dict[str, FamilyNode], dict[str, GraphDefect]]:
     grouped: dict[str, list[FamilyNode]] = {}
     for node in nodes:
         grouped.setdefault(node.family_id, []).append(node)
-    defects: list[GraphDefect] = []
+    local: dict[str, GraphDefect] = {}
     by_id: dict[str, FamilyNode] = {}
     for family_id in sorted(grouped):
         group = grouped[family_id]
         signatures = {(item.parent_ids, item.data) for item in group}
         if len(signatures) > 1:
-            defects.append(GraphDefect(defect=DEFECT_DUPLICATE, family_id=family_id))
+            local[family_id] = GraphDefect(DEFECT_DUPLICATE, family_id)
             continue
         shape = _shape_defect(group[0], multiple_parents_allowed)
         if shape is not None:
-            defects.append(shape)
+            local[family_id] = shape
             continue
         by_id[family_id] = group[0]
-    return by_id, defects
+    return by_id, local
 
 
 def _shape_defect(
