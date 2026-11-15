@@ -381,6 +381,16 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/hierarchy.py": (
         "tests/unit/iuphar_target_class/test_hierarchy.py",
     ),
+    **dict.fromkeys(
+        (
+            "src/iuphar_target_class/gtopdb_2026_3_1.py",
+            "src/iuphar_target_class/iuphar_mapping.py",
+        ),
+        (
+            "tests/unit/iuphar_target_class/test_hierarchy.py",
+            "tests/unit/iuphar_target_class/test_policy.py",
+        ),
+    ),
     "data/iuphar_target_class/delivery/example-input.csv": (
         "tests/unit/iuphar_target_class/test_delivery.py",
     ),

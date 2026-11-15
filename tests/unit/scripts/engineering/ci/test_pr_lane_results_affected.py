@@ -214,6 +214,25 @@ def test_iuphar_source_and_data_keep_bounded_stage0_owners(tmp_path: Path) -> No
         )
 
 
+def test_iuphar_release_mapping_and_data_keep_bounded_owners(tmp_path: Path) -> None:
+    tests = tmp_path / "tests/unit/iuphar_target_class"
+    tests.mkdir(parents=True)
+    for name in ("test_hierarchy.py", "test_policy.py"):
+        (tests / name).write_text(
+            "def test_owner():\n    assert True\n", encoding="utf-8"
+        )
+    for path in (
+        "src/iuphar_target_class/gtopdb_2026_3_1.py",
+        "src/iuphar_target_class/iuphar_mapping.py",
+    ):
+        report = build_shadow_compare([path], repo_root=tmp_path)
+        assert report["selected"] == [
+            "tests/unit/iuphar_target_class/test_hierarchy.py",
+            "tests/unit/iuphar_target_class/test_policy.py",
+        ]
+        assert report["covers_full_suite"] is False
+
+
 def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
     owner = tmp_path / "tests/unit/iuphar_target_class/test_policy.py"
     owner.parent.mkdir(parents=True)
