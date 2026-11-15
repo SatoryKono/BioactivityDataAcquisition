@@ -344,6 +344,7 @@ def dependency_consumers(root: Path, changed: set[str]) -> list[str]:
                 path for path, modules in imports.items() if stub_owner[1] in modules
             )
         selected |= _declared_reference_consumers(references, declared, family)
+        selected |= _configured_mkdocs_consumers(root, family)
         if selected:
             consumers.update(selected)
         else:
@@ -353,6 +354,46 @@ def dependency_consumers(root: Path, changed: set[str]) -> list[str]:
             "Unconfirmed Python dependency consumer route: " + ", ".join(unresolved)
         )
     return sorted(consumers)
+
+
+def _configured_mkdocs_consumers(root: Path, family: set[str]) -> set[str]:
+    """Bind the docs-only Markdown family to its actual MkDocs configuration."""
+    import yaml
+
+    if "pymdown-extensions" not in family:
+        return set()
+    requirements = _requirements(
+        tomllib.loads((root / PYTHON_MANIFEST).read_text(encoding="utf-8"))
+    )
+    for package in ("mkdocs", "pymdown-extensions"):
+        declarations = requirements.get(package, [])
+        if not declarations or not all(
+            item.startswith("optional:docs:") for item in declarations
+        ):
+            return set()
+    config = root / "mkdocs.yml"
+    if not config.is_file():
+        return set()
+    # Read MkDocs callable references as scalar data, never Python objects.
+    content = re.sub(
+        r"!!python/name:([A-Za-z_][\w.]*)", r"\1", config.read_text(encoding="utf-8")
+    )
+    document = yaml.safe_load(content)
+    if not isinstance(document, dict):
+        return set()
+    extensions = document.get("markdown_extensions", [])
+    if not isinstance(extensions, list):
+        return set()
+    return (
+        {"mkdocs.yml"}
+        if any(
+            name.startswith("pymdownx.")
+            for extension in extensions
+            for name in (extension if isinstance(extension, dict) else [extension])
+            if isinstance(name, str)
+        )
+        else set()
+    )
 
 
 def _package_dependency_edges(package: dict[str, Any]) -> list[dict[str, Any]]:
