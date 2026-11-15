@@ -8,6 +8,7 @@ from collections import defaultdict
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from types import MappingProxyType
+from typing import Literal
 
 from .evidence import (
     EvidenceDraft,
@@ -125,7 +126,7 @@ class IndexedSnapshot:
             MappingProxyType({key: tuple(value) for key, value in families.items()}),
             MappingProxyType(dict(type_to_class)),
             MappingProxyType(dict(family_to_class)),
-            frozenset(value for (kind, value) in lookup if kind != "text"),
+            frozenset(value for (kind, value), _ in lookup.items() if kind != "text"),
             complex_ids,
         )
 
@@ -326,6 +327,55 @@ def classify_target(
     return _complete(row, snapshot, run_id, hits, match, annotation, direct)
 
 
+def _classification_diagnostics(
+    row: ValidatedInput,
+    match: MatchResult,
+    annotation: ProviderAnnotation | None,
+    direct: HierarchyResult | None,
+    local: LocalInference,
+    evidence: EvidenceTable,
+) -> tuple[Diagnostic, ...]:
+    missing_annotation = (
+        (
+            Diagnostic(
+                "provider_annotation_unavailable",
+                "warning",
+                "matched record has no frozen annotation",
+            ),
+        )
+        if match.matched_target_id and annotation is None
+        else ()
+    )
+    raw_ref = next(
+        (
+            item.evidence_id
+            for item in evidence.records
+            if item.evidence_type == "iuphar_raw"
+        ),
+        None,
+    )
+    direct_diagnostics = (
+        tuple(replace(item, evidence_id=raw_ref) for item in direct.diagnostics)
+        if direct
+        else ()
+    )
+    return (
+        *row.diagnostics,
+        *match.diagnostics,
+        *direct_diagnostics,
+        *local.diagnostics,
+        *missing_annotation,
+    )
+
+
+def _partial_basis(
+    direct: HierarchyResult | None, annotation_status: str | None
+) -> Literal["type", "family_mapping"] | None:
+    if annotation_status != "partial":
+        return None
+    return "type" if direct and direct.proof == "type" else "family_mapping"
+
+
 def _complete(
     row: ValidatedInput,
     snapshot: IndexedSnapshot,
@@ -353,11 +403,9 @@ def _complete(
         rule_id = (
             f"iuphar_{'type' if direct.proof == 'type' else 'family'}:{direct_class}"
         )
-    annotation_status = (
-        direct.annotation_status
-        if direct is not None
-        else ("not_available" if match.match_status == "matched" else None)
-    )
+    annotation_status = "not_available" if match.match_status == "matched" else None
+    if direct is not None:
+        annotation_status = direct.annotation_status
     candidate_ids = tuple(
         sorted(set(match.candidate_target_ids) | {hit.target_id for hit in hits})
     )
@@ -369,11 +417,7 @@ def _complete(
             iuphar_class=direct_class,
             local_class=local.local_class,
             local_subclasses=local.local_subclasses,
-            partial_basis=(
-                "type" if direct and direct.proof == "type" else "family_mapping"
-            )
-            if annotation_status == "partial"
-            else None,
+            partial_basis=_partial_basis(direct, annotation_status),
             target_kind=row.target_kind or "protein",
             complex_direct_match=match.matched_target_id in snapshot.complex_ids,
             iuphar_class_candidates=direct.iuphar_class_candidates if direct else (),
@@ -393,37 +437,6 @@ def _complete(
         run_id=run_id,
         rule_id=rule_id,
         mapping_version=snapshot.mapping_version,
-    )
-    missing_annotation = (
-        (
-            Diagnostic(
-                "provider_annotation_unavailable",
-                "warning",
-                "matched record has no frozen annotation",
-            ),
-        )
-        if match.matched_target_id and annotation is None
-        else ()
-    )
-    raw_ref = next(
-        (
-            item.evidence_id
-            for item in evidence.records
-            if item.evidence_type == "iuphar_raw"
-        ),
-        None,
-    )
-    direct_diagnostics = (
-        tuple(replace(item, evidence_id=raw_ref) for item in direct.diagnostics)
-        if direct
-        else ()
-    )
-    diagnostics = (
-        *row.diagnostics,
-        *match.diagnostics,
-        *direct_diagnostics,
-        *local.diagnostics,
-        *missing_annotation,
     )
     result = ClassificationResult(
         input_row_id=row.input_row_id,
@@ -453,7 +466,9 @@ def _complete(
         local_evidence_ids=evidence.local_evidence_ids,
         row_sha256=row.row_sha256,
         provenance=row.provenance,
-        diagnostics=diagnostics,
+        diagnostics=_classification_diagnostics(
+            row, match, annotation, direct, local, evidence
+        ),
     )
     require_class_chain(result, annotation=annotation, table=evidence)
     candidates = tuple(
@@ -547,12 +562,13 @@ def classify_batch(
         for x in results
         for d in (*x.validated.diagnostics, *x.result.diagnostics)
     )
+    status = "processed"
+    if not results:
+        status = "empty"
+    elif invalid == len(results):
+        status = "rejected"
     return BatchResult(
-        "empty"
-        if not results
-        else "rejected"
-        if invalid == len(results)
-        else "processed",
+        status,
         tuple(results),
         tuple(dict.fromkeys(diagnostics)),
         metrics,

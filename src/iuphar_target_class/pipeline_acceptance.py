@@ -9,6 +9,7 @@ import time
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TypedDict
 
 from .models import RawTargetRow, RunProvenance
 from .pipeline import BatchResult, IndexedSnapshot, classify_batch
@@ -63,6 +64,37 @@ def _verified_artifacts(manifest: Mapping[str, object], root: Path) -> None:
             raise ValueError(f"Stage-0 proof hash mismatch: {name}")
 
 
+class _ManifestCopy(TypedDict):
+    source_path: str
+    copy_path: str
+    sha256: str
+    byte_count: int
+
+
+def _load_verified_copies(
+    root: Path,
+    copies: list[_ManifestCopy],
+    selected_source_paths: tuple[str, ...],
+) -> tuple[list[RawTargetRow], list[tuple[str, str]]]:
+    entries = {entry["source_path"]: entry for entry in copies}
+    requested = tuple(dict.fromkeys(selected_source_paths))
+    if len(entries) != len(copies) or requested != selected_source_paths:
+        raise ValueError("duplicate Stage-0 source identity")
+    rows: list[RawTargetRow] = []
+    hashes: list[tuple[str, str]] = []
+    for source in requested:
+        if source not in entries:
+            raise ValueError(f"cohort source has no Stage-0 copy: {source}")
+        entry = entries[source]
+        content = _inside(root, entry["copy_path"]).read_bytes()
+        digest = _sha(content)
+        if digest != entry["sha256"] or len(content) != entry["byte_count"]:
+            raise ValueError(f"cohort source bytes differ from manifest: {source}")
+        rows.extend(read_legacy_batch(content))
+        hashes.append((source, digest))
+    return rows, hashes
+
+
 def load_admitted_cohort(manifest_path: Path, plan: VolumePlan) -> AdmittedCohort:
     """Fail closed on a missing/empty, changed or incompletely selected cohort."""
     raw = manifest_path.read_bytes()
@@ -84,22 +116,7 @@ def load_admitted_cohort(manifest_path: Path, plan: VolumePlan) -> AdmittedCohor
         )
     root = manifest_path.parent
     _verified_artifacts(manifest, root)
-    entries = {entry["source_path"]: entry for entry in copies}
-    requested = tuple(dict.fromkeys(plan.selected_source_paths))
-    if len(entries) != len(copies) or requested != plan.selected_source_paths:
-        raise ValueError("duplicate Stage-0 source identity")
-    rows: list[RawTargetRow] = []
-    hashes: list[tuple[str, str]] = []
-    for source in requested:
-        if source not in entries:
-            raise ValueError(f"cohort source has no Stage-0 copy: {source}")
-        entry = entries[source]
-        content = _inside(root, entry["copy_path"]).read_bytes()
-        digest = _sha(content)
-        if digest != entry["sha256"] or len(content) != entry["byte_count"]:
-            raise ValueError(f"cohort source bytes differ from manifest: {source}")
-        rows.extend(read_legacy_batch(content))
-        hashes.append((source, digest))
+    rows, hashes = _load_verified_copies(root, copies, plan.selected_source_paths)
     if len(rows) != plan.expected_rows or len({r.input_row_id for r in rows}) != len(
         rows
     ):
