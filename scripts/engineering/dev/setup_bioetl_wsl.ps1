@@ -127,38 +127,37 @@ function Invoke-WslScript {
         [string]$Executable = 'wsl.exe'
     )
 
-    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
-    $startInfo.FileName = $Executable
-    $startInfo.Arguments = ((@('--distribution', $Distro, '--exec', 'bash', '-s') |
+    $arguments = ((@('--distribution', $Distro, '--exec', 'bash', '-s') |
         ForEach-Object { Convert-ToNativeArgument $_ }) -join ' ')
-    $startInfo.UseShellExecute = $false
-    $startInfo.CreateNoWindow = $true
-    $startInfo.RedirectStandardInput = $true
-    $startInfo.RedirectStandardOutput = $true
-    $startInfo.RedirectStandardError = $true
-    $process = New-Object System.Diagnostics.Process
-    $process.StartInfo = $startInfo
+    $temporaryFiles = New-Object 'System.Collections.Generic.List[string]'
+    $process = $null
     try {
-        $null = $process.Start()
-        $stdout = $process.StandardOutput.ReadToEndAsync()
-        $stderr = $process.StandardError.ReadToEndAsync()
-        # Write bytes directly: PowerShell 5.1 pipelines otherwise change encoding
-        # and newlines. Keep the Bash program entirely out of native arguments.
-        $bytes = (New-Object System.Text.UTF8Encoding($false)).GetBytes(
-            $Script.Replace("`r`n", "`n").Replace("`r", "`n"))
-        $inputStream = $process.StandardInput.BaseStream
-        $inputStream.Write($bytes, 0, $bytes.Length)
-        $inputStream.Close()
-        $process.WaitForExit()
-        $outputText = $stdout.GetAwaiter().GetResult()
-        $errorText = $stderr.GetAwaiter().GetResult()
+        foreach ($stream in @('input', 'output', 'error')) {
+            $temporaryFiles.Add([IO.Path]::GetTempFileName())
+        }
+        $utf8 = New-Object System.Text.UTF8Encoding($false)
+        [IO.File]::WriteAllText($temporaryFiles[0],
+            $Script.Replace("`r`n", "`n").Replace("`r", "`n"), $utf8)
+        # .NET Framework creates its redirected stdin writer with the console
+        # encoding and can emit a BOM before BaseStream is accessed. File-backed
+        # redirection avoids that writer without changing the shared console.
+        $process = Start-Process -FilePath $Executable -ArgumentList $arguments `
+            -RedirectStandardInput $temporaryFiles[0] `
+            -RedirectStandardOutput $temporaryFiles[1] `
+            -RedirectStandardError $temporaryFiles[2] `
+            -WindowStyle Hidden -Wait -PassThru
+        $outputText = [IO.File]::ReadAllText($temporaryFiles[1], $utf8)
+        $errorText = [IO.File]::ReadAllText($temporaryFiles[2], $utf8)
         if ($process.ExitCode -ne 0) {
             throw "WSL script failed with exit code $($process.ExitCode): $errorText"
         }
         return $outputText.Trim()
     }
     finally {
-        $process.Dispose()
+        if ($null -ne $process) { $process.Dispose() }
+        foreach ($path in $temporaryFiles) {
+            Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
+        }
     }
 }
 
