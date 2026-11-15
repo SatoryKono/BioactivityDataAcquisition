@@ -1,0 +1,366 @@
+{
+  "issue": 13017,
+  "acceptance": "NOT_RUN",
+  "normative_source": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13007#issuecomment-6800191102",
+  "rows": [
+    {
+      "defect": "EC 3/4/6 и класс 7",
+      "scenario": "Параметризованный тест EC 1–7",
+      "expected": "Каждый класс отображается по справочнику IUBMB",
+      "stage": "3",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_local_layer.py::test_ec_categories_1_to_7_are_not_iuphar_classes": {
+          "status": "PASS",
+          "executed_cases": 7
+        }
+      }
+    },
+    {
+      "defect": "Неполный EC как полный класс",
+      "scenario": "Частичные EC: 3.-.-.- и 3.1.-.-",
+      "expected": "3.-.-.- даёт только категорию 3 при ec_depth = 1; 3.1.-.- — категорию 3 и подкатегорию 3.1 при ec_depth = 2; неподтверждённые нижние уровни значений не получают и класс не сужают",
+      "stage": "3",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_local_layer.py::test_partial_ec_keeps_only_the_confirmed_levels": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Исключение EC 3 / multicellular",
+      "scenario": "EC 3; одноклеточная мишень",
+      "expected": "Классификация в local-слое без фильтров",
+      "stage": "3",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_local_layer.py::test_ec3_unicellular_target_is_not_filtered": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Маркеры пропуска",
+      "scenario": "Все значения конфигурации missing_markers",
+      "expected": "Эквивалентны None; валидный текст неизменён",
+      "stage": "2",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_normalization.py::test_missing_markers_become_none": {
+          "status": "PASS",
+          "executed_cases": 8
+        },
+        "test_normalization.py::test_valid_text_is_unchanged": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Первый target/family/gene/xref",
+      "scenario": "Перестановка порядка ответов",
+      "expected": "Результат не зависит от порядка",
+      "stage": "2",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_matching.py::test_catalog_order_does_not_change_the_result": {
+          "status": "PASS",
+          "executed_cases": 1
+        },
+        "test_pipeline.py::test_approved_channels_are_indexed_and_match_is_reproducible": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Склеенные ID",
+      "scenario": "Fixture доказанной склейки (пример 920840); допустимый отсутствующий ID",
+      "expected": "Склейка — invalid_input без исправления в 840; допустимый ID — not_found",
+      "stage": "2",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_normalization.py::test_glued_identifier_is_invalid_and_not_repaired": {
+          "status": "PASS",
+          "executed_cases": 1
+        },
+        "test_normalization.py::test_absent_well_formed_id_is_not_found": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Рекурсия без защиты",
+      "scenario": "Цикл, self-loop, отсутствующий родитель, превышение лимитов обхода (граничные пакеты: значение на лимите и лимит + 1 по каждому ключу graph_limits)",
+      "expected": "Контролируемый статус, зависания нет; на лимите обход завершается, при лимит + 1 — graph_error",
+      "stage": "2",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_hierarchy.py::test_cycle_self_loop_and_missing_parent_stop": {
+          "status": "PASS",
+          "executed_cases": 1
+        },
+        "test_hierarchy.py::test_depth_limit_and_one_past_it": {
+          "status": "PASS",
+          "executed_cases": 1
+        },
+        "test_hierarchy.py::test_visited_node_limit_and_one_past_it": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Distinct по ChEMBL",
+      "scenario": "Две разные аннотации одной мишени",
+      "expected": "Обе сохранены, конфликт зафиксирован",
+      "stage": "2",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_pipeline.py::test_distinct_chembl_rows_keep_conflicting_direct_evidence": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Other Protein Target",
+      "scenario": "Неполные данные без свидетельств",
+      "expected": "Класс null со статусом, подстановки нет",
+      "stage": "2–3",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_local_layer.py::test_other_protein_target_requires_a_real_rule": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Ошибки API под N/A",
+      "scenario": "401, 403, 429, timeout, битое тело ответа (mock); отдельно — успешный пустой поиск на полном снимке",
+      "expected": "Ошибки дают разные причины и source_unavailable, not_found не подставляется; успешный пустой поиск даёт not_found",
+      "stage": "4",
+      "formal_status": "OUT_OF_SCOPE",
+      "observed_named_status": {}
+    },
+    {
+      "defect": "Смешение слоёв",
+      "scenario": "Local-only строка; модульный тест resolution",
+      "expected": "Модуль не присваивает IUPHAR IDs/class/path (инвариант 1); полученная raw-аннотация сохранена",
+      "stage": "2–3",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_evidence.py::test_local_only_keeps_observed_raw_annotation": {
+          "status": "PASS",
+          "executed_cases": 2
+        },
+        "test_local_layer.py::test_local_result_has_no_iuphar_fields": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Потеря evidence/name",
+      "scenario": "Все ветки алгоритма",
+      "expected": "Единый контракт, name и evidence сохранены",
+      "stage": "2",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_pipeline.py::test_approved_channels_are_indexed_and_match_is_reproducible": {
+          "status": "PASS",
+          "executed_cases": 1
+        },
+        "test_evidence.py::test_evidence_reference_integrity": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "GPCR",
+      "scenario": "Тип GPCR в отображении; новый неизвестный тип",
+      "expected": "GPCR покрыт; новый тип — unmapped_type только при отсутствии подтверждённого класса и по type, и по отображению семейства; при классе из семейства — partial",
+      "stage": "2",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_hierarchy.py::test_approved_real_release_classifies_gpcr_and_distinguishes_grouping": {
+          "status": "PASS",
+          "executed_cases": 1
+        },
+        "test_hierarchy.py::test_family_mapping_is_partial_and_unmapped_type_is_not_replaced": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Multifunctional",
+      "scenario": "Конфликт keyword/EC",
+      "expected": "Расхождение и список EC сохранены, фиктивного подкласса нет",
+      "stage": "3",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_local_layer.py::test_keyword_and_ec_conflict_keeps_both_and_no_subclass": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "W153: функция вместо таблицы (контракт)",
+      "scenario": "Проверка return-типов pipeline",
+      "expected": "Возвращаются вычисленные данные по типизированному контракту, не функция",
+      "stage": "2",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_pipeline.py::test_approved_channels_are_indexed_and_match_is_reproducible": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "W153: функция вместо таблицы (интеграция)",
+      "scenario": "Интеграционный join pipeline",
+      "expected": "Join получает вычисленные данные, не функцию",
+      "stage": "6",
+      "formal_status": "OUT_OF_SCOPE",
+      "observed_named_status": {}
+    },
+    {
+      "defect": "target_all без provenance",
+      "scenario": "Заполненная старая колонка",
+      "expected": "Значение в legacy_iuphar_class, direct не создаётся",
+      "stage": "2",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_pipeline.py::test_legacy_target_all_without_provenance_does_not_create_direct": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Суффикс изоформы",
+      "scenario": "Accession с суффиксом изоформы",
+      "expected": "Суффикс и isoform_id сохранены",
+      "stage": "2",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_pipeline.py::test_same_chembl_id_does_not_drop_rows_and_io_keeps_source_fields": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Класс первого белка комплексу",
+      "scenario": "Комплекс из компонентов разных классов",
+      "expected": "Компонентные результаты + requires_review, класса первого компонента нет",
+      "stage": "2",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_pipeline.py::test_heterogeneous_complex_retains_distinct_classes_without_promoting_either": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Угадывание класса по пути/названию",
+      "scenario": "Название/путь содержит слово класса без утверждённого отображения; отдельно — мишень с утверждённым отображением по family ID без нормализуемого type",
+      "expected": "В первом случае класс не присваивается (unmapped_type или null со статусом); во втором класс присваивается по утверждённому отображению семейства",
+      "stage": "2",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_local_layer.py::test_free_text_substrings_do_not_assign_a_class": {
+          "status": "PASS",
+          "executed_cases": 1
+        },
+        "test_hierarchy.py::test_family_mapping_is_partial_and_unmapped_type_is_not_replaced": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Source_unavailable вместо not_found",
+      "scenario": "Неполный снимок; источник недоступен",
+      "expected": "source_unavailable, not_found не выносится",
+      "stage": "2, 4",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_pipeline.py::test_ambiguous_and_source_unavailable_are_not_absence": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Конфликт direct-классов",
+      "scenario": "Две семьи разных классов",
+      "expected": "conflicting, кандидаты сохранены, нормализованные поля null",
+      "stage": "2",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_hierarchy.py::test_same_class_families_stay_and_different_classes_conflict": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Полнота снимка (manifest, офлайн)",
+      "scenario": "Готовый manifest: расхождение контрольных итогов; версии «различаются» / «недоступны»",
+      "expected": "Неполный помечен неполным; при «недоступны» — пометка version_unverified и ограничение not_found по разделу 5",
+      "stage": "2",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_snapshot.py::test_totals_mismatch_marks_snapshot_incomplete": {
+          "status": "PASS",
+          "executed_cases": 1
+        },
+        "test_snapshot.py::test_unavailable_versions_are_version_unverified": {
+          "status": "PASS",
+          "executed_cases": 1
+        },
+        "test_snapshot.py::test_differing_versions_are_incomplete": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    },
+    {
+      "defect": "Полнота снимка (сбор и публикация)",
+      "scenario": "Сетевой сбор: расхождение итогов при сборе, сбой пагинации",
+      "expected": "Неполный снимок как выпуск не публикуется, not_found не выносится",
+      "stage": "4",
+      "formal_status": "OUT_OF_SCOPE",
+      "observed_named_status": {}
+    },
+    {
+      "defect": "Зависимое L1/L2",
+      "scenario": "L1/L2 построены из того же IUPHAR-результата",
+      "expected": "Свидетельство помечено производным и не считается независимым подтверждением",
+      "stage": "3",
+      "formal_status": "NOT_RUN",
+      "observed_named_status": {
+        "test_local_layer.py::test_unknown_and_dependent_predictions_do_not_support_a_class": {
+          "status": "PASS",
+          "executed_cases": 1
+        }
+      }
+    }
+  ],
+  "proof": {
+    "owning_suite": "434 PASS after exact Git verification of all 15 original data/input CSV blobs",
+    "exact_reference_volume": "NOT_RUN: canonical Stage0 admission empty; engineered real trio not a complete reference corpus; missing_markers version not approved",
+    "ci_targeted_route": "14 PASS; full repository gate not executed in isolation"
+  }
+}

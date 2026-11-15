@@ -1,0 +1,31 @@
+{
+  "annotation_status": {
+    "NULL": 243,
+    "available": 1410
+  },
+  "biological_accuracy_accepted": false,
+  "evidence_records": 4230,
+  "execution_config_sha256": "90d5f69bd23647993862ae845abd488b928cacad371a0db40b00f5b4cff3ca9e",
+  "formal_volume_scenario": "NOT_RUN",
+  "full_rows_processed": 1653,
+  "metrics": {
+    "class_null": 243,
+    "classified_rows": 1410,
+    "invalid_rows": 0,
+    "rows": 1653
+  },
+  "output_sha256": {
+    "candidates.json": "f96a7bdc97abe2d96ac09cf1338aa1716e05f4ce75c1035b69a12b3227a216dc",
+    "classification.json": "64af7f485caa3766797a8a4a6353814e3aadcc71caaeafc7494094953a470b55",
+    "components.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "diagnostics.json": "0d574db3e147bad22bde3947ce5a85995acfb8885cb3f7461821c5bcce73bd3a",
+    "evidence.json": "73f2751c2ea295dd1f1487599a5e20e48f45a873084f1b86b110e9f74aafba00",
+    "metrics.json": "5dd4438691e2fa317e86407e0ad41ee23f11c5570b17747f4d5ae18c22030198"
+  },
+  "permuted_byte_identical": true,
+  "raw_provider_hashes_checked_by_snapshot": 3304,
+  "repeat_byte_identical": true,
+  "rows_with_evidence": 1410,
+  "run_duration_seconds": 0.45998779900037334,
+  "status": "ENGINEERING_RUN_PASS"
+}
