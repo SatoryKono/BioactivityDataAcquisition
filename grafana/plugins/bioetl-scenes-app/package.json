@@ -11,7 +11,7 @@
   "author": "BioETL Team",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=20"
+    "node": "^22.22.2 || >=24.15.0"
   },
   "devDependencies": {
     "@grafana/eslint-config": "^10.0.0",
