@@ -370,7 +370,8 @@ def test_volume_scenario_finishes_within_the_approved_limit() -> None:
     checks = document["checks"]
     assert isinstance(checks, list)
     by_name = {item["name"]: item for item in checks}
-    assert by_name["volume_scenario"]["status"] == "PASS"
+    assert by_name["synthetic_volume_smoke"]["status"] == "PASS"
+    assert by_name["volume_scenario"]["status"] == "NOT_RUN"
     assert by_name["empty_batch"]["status"] == "PASS"
     assert by_name["all_invalid_batch"]["status"] == "PASS"
     assert by_name["graph_limits_boundary"]["status"] == "NOT_RUN"

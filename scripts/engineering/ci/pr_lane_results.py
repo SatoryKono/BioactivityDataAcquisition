@@ -383,6 +383,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     **dict.fromkeys(
         (
+            "src/iuphar_target_class/pipeline.py",
+            "src/iuphar_target_class/pipeline_io.py",
+            "src/iuphar_target_class/pipeline_acceptance.py",
+        ),
+        ("tests/unit/iuphar_target_class/test_pipeline.py",),
+    ),
+    **dict.fromkeys(
+        (
             "src/iuphar_target_class/gtopdb_2026_3_1.py",
             "src/iuphar_target_class/iuphar_mapping.py",
         ),
