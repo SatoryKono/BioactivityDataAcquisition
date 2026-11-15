@@ -43,7 +43,7 @@ class ManualClock:
 
 @dataclass
 class ScriptedTransport:
-    script: list[TransportResponse | type[TimeoutError]]
+    script: list[TransportResponse | type[TimeoutError] | BaseException]
     calls: list[tuple[str, str, dict[str, str], HttpTimeouts]] = field(
         default_factory=list
     )
@@ -59,6 +59,8 @@ class ScriptedTransport:
         item = self.script.pop(0)
         if item is TimeoutError:
             raise TimeoutError
+        if isinstance(item, BaseException):
+            raise item
         return item
 
 
@@ -75,7 +77,7 @@ def _completeness(*, approved: bool) -> Completeness:
 
 
 def _provider(
-    script: list[TransportResponse | type[TimeoutError]],
+    script: list[TransportResponse | type[TimeoutError] | BaseException],
     *,
     approved: bool = True,
     api_key: str | None = None,
@@ -262,3 +264,42 @@ def test_api_key_stays_out_of_the_url_and_the_result() -> None:
     assert "GTP-API-Key" not in rendered
     assert transport.calls[0][2] == {"GTP-API-Key": _SECRET}
     assert transport.calls[0][3] == HttpTimeouts(15, 15, 15, 30)
+
+
+def test_zero_retry_after_still_waits_for_the_rate_limit() -> None:
+    script = [_response(429, retry_after="0") for _index in range(4)]
+    provider, transport, clock = _provider(script)
+    hit = provider.get_target("1")
+    assert hit_status(hit) == "source_unavailable"
+    assert clock.sleeps == [1, 1, 1]
+    assert len(transport.calls) == 4
+
+
+def test_connection_reset_is_source_unavailable() -> None:
+    script = [ConnectionResetError("connection reset") for _index in range(4)]
+    provider, transport, _clock = _provider(script)
+    hit = provider.get_target("1")
+    assert hit_status(hit) == "source_unavailable"
+    assert hit.diagnostics == ("source_unavailable:connection",)
+    assert len(transport.calls) == 4
+
+
+def test_mismatched_target_id_is_schema_and_is_not_cached() -> None:
+    body = b'{"id":"2"}'
+    provider, transport, _clock = _provider(
+        [_response(200, body), _response(200, body)]
+    )
+    first = provider.get_target("1")
+    second = provider.get_target("1")
+    assert first.diagnostics == ("source_unavailable:schema",)
+    assert second.diagnostics == ("source_unavailable:schema",)
+    assert len(transport.calls) == 2
+
+
+def test_unfinished_search_page_is_not_not_found() -> None:
+    body = b'{"results":[],"next":"/targets?page=2"}'
+    provider, transport, _clock = _provider([_response(200, body)])
+    hit = provider.find_by_uniprot("P12345")
+    assert hit_status(hit) == "source_unavailable"
+    assert hit.diagnostics == ("source_unavailable:schema",)
+    assert len(transport.calls) == 1

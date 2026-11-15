@@ -191,7 +191,8 @@ class HttpProvider:
 
     def get_target(self, target_id: str) -> ProviderHit:
         """Return one target payload, or an empty hit when it is absent."""
-        return self._get(f"/targets/{quote(target_id, safe='')}", "target")
+        path = f"/targets/{quote(target_id, safe='')}"
+        return self._get(path, "target", target_id)
 
     def find_by_uniprot(self, accession: str) -> ProviderHit:
         """Return targets for one accession. An empty list is an empty search."""
@@ -209,7 +210,8 @@ class HttpProvider:
         records: list[FrozenRecord] = []
         missing: list[str] = []
         for family_id in family_ids:
-            hit = self._get(f"/families/{quote(family_id, safe='')}", "family")
+            path = f"/families/{quote(family_id, safe='')}"
+            hit = self._get(path, "family", family_id)
             if _is_unavailable(hit):
                 return hit
             if hit.records:
@@ -220,34 +222,36 @@ class HttpProvider:
         digest = records[0].payload_sha256 if len(records) == 1 else None
         return _seal(ProviderHit(tuple(records), digest, diagnostics), self._api_key)
 
-    def _get(self, path: str, expect: str) -> ProviderHit:
+    def _get(self, path: str, expect: str, record_id: str | None = None) -> ProviderHit:
         cached = self._cache.get(path)
         if cached is not None:
             return cached
         now = self._clock.time()
         if not self._breaker.allow(now):
             return _seal(_unavailable("circuit_open"), self._api_key)
-        self._rate.acquire()
-        step = self._attempt(path, expect)
+        step = self._attempt(path, expect, record_id)
         self._observe(step)
         if step.cacheable:
             self._cache[path] = step.hit
         return _seal(step.hit, self._api_key)
 
-    def _attempt(self, path: str, expect: str) -> _Step:
+    def _attempt(self, path: str, expect: str, record_id: str | None) -> _Step:
         index = 0
         remaining = self.config.max_retries
         while True:
-            step = self._exchange(path, expect)
+            step = self._exchange(path, expect, record_id)
             if not step.retry:
                 return step
             if remaining == 0:
                 return _exhausted(step)
-            self._clock.sleep(self._delay(index, step.retry_after))
+            delay = self._delay(index, step.retry_after)
+            if delay > 0:
+                self._clock.sleep(delay)
             index += 1
             remaining -= 1
 
-    def _exchange(self, path: str, expect: str) -> _Step:
+    def _exchange(self, path: str, expect: str, record_id: str | None) -> _Step:
+        self._rate.acquire()
         try:
             response = self._transport.exchange(
                 "GET",
@@ -257,7 +261,9 @@ class HttpProvider:
             )
         except TimeoutError:
             return _Step(_unavailable("timeout"), True, True, False, "timeout")
-        return _from_response(response, expect, self._completeness)
+        except OSError:
+            return _Step(_unavailable("connection"), True, True, False, "connection")
+        return _from_response(response, expect, self._completeness, record_id)
 
     def _observe(self, step: _Step) -> None:
         if step.failure:
@@ -341,7 +347,8 @@ def _is_unavailable(hit: ProviderHit) -> bool:
 
 
 def _exhausted(step: _Step) -> _Step:
-    code = "timeout" if step.code == "timeout" else "retries_exhausted"
+    kept = step.code in {"timeout", "connection"}
+    code = step.code if kept else "retries_exhausted"
     return _Step(_unavailable(code), False, True, False, code)
 
 
@@ -349,6 +356,7 @@ def _from_response(
     response: TransportResponse,
     expect: str,
     completeness: Completeness,
+    record_id: str | None,
 ) -> _Step:
     if response.status_code in RETRYABLE_STATUS:
         return _Step(
@@ -377,7 +385,7 @@ def _from_response(
             False,
             f"http_{response.status_code}",
         )
-    return _parsed(response.body, expect, completeness)
+    return _parsed(response.body, expect, completeness, record_id)
 
 
 def _absence(completeness: Completeness) -> _Step:
@@ -386,14 +394,19 @@ def _absence(completeness: Completeness) -> _Step:
     return _Step(_unavailable("incomplete"), False, False, False, "incomplete")
 
 
-def _parsed(body: bytes, expect: str, completeness: Completeness) -> _Step:
+def _parsed(
+    body: bytes,
+    expect: str,
+    completeness: Completeness,
+    record_id: str | None,
+) -> _Step:
     loaded = _load_json(body)
     if isinstance(loaded, str):
         return _Step(_unavailable(loaded), False, False, False, loaded)
     if expect == "search":
         return _parsed_search(loaded, completeness)
     kind = "family" if expect == "family" else "target"
-    record = _one_record(loaded, kind)
+    record = _one_record(loaded, kind, record_id)
     if isinstance(record, str):
         return _Step(_unavailable(record), False, False, False, record)
     hit = ProviderHit((record,), record.payload_sha256, ())
@@ -429,16 +442,24 @@ def _load_json(body: bytes) -> object | str:
 def _search_items(payload: object) -> list[object] | str:
     if isinstance(payload, list):
         return list(payload)
-    if isinstance(payload, dict) and isinstance(payload.get("results"), list):
-        return list(payload["results"])
+    if isinstance(payload, dict) and set(payload) == {"results"}:
+        results = payload["results"]
+        if isinstance(results, list):
+            return list(results)
     return "schema"
 
 
-def _one_record(payload: object, kind: str) -> FrozenRecord | str:
+def _one_record(
+    payload: object,
+    kind: str,
+    expected_id: str | None = None,
+) -> FrozenRecord | str:
     if not isinstance(payload, dict):
         return "schema"
     record_id = payload.get("id")
     if not isinstance(record_id, str) or not record_id:
+        return "schema"
+    if expected_id is not None and record_id != expected_id:
         return "schema"
     return freeze_record(kind, record_id, payload)
 
