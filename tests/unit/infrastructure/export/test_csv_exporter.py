@@ -1456,3 +1456,35 @@ async def test_large_integer_fractional_batches_preserve_exact_raw_and_safe_csv(
     assert [row["value"] for row in rows] == [
         "'" + value if value.startswith("-") else value for value in expected
     ]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("negative", [False, True])
+@pytest.mark.parametrize("reverse", [False, True])
+async def test_decimal_float_batches_preserve_original_digits(
+    tmp_path, mock_logger, negative, reverse
+):
+    import csv
+    from decimal import Decimal
+    from bioetl.infrastructure.export.csv_exporter_io_ops import read_raw_table
+
+    value = Decimal(
+        "-12345678901234567890.123456789"
+        if negative
+        else "12345678901234567890.123456789"
+    )
+    first, second = (1.5, value) if reverse else (value, 1.5)
+    exporter = CsvExporter(str(tmp_path), mock_logger)
+    await exporter.export("decimal", pa.table({"id": [1], "value": [first]}))
+    await exporter.export("decimal", pa.table({"id": [2], "value": [second]}))
+    published = await exporter.finalize_csv("decimal", sort_by=["id"])
+    expected = [str(first), str(second)]
+    assert (
+        read_raw_table(published.with_suffix(".csv.raw"))["value"].to_pylist()
+        == expected
+    )
+    with published.open(newline="", encoding="utf-8") as source:
+        rows = list(csv.DictReader(source))
+    assert [row["value"] for row in rows] == [
+        "'" + item if item.startswith("-") else item for item in expected
+    ]

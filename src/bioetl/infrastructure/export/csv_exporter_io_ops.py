@@ -141,14 +141,29 @@ def _align_raw_columns(table: pa.Table, types: dict[str, pa.DataType]) -> pa.Tab
     return table
 
 
+def _raw_cast_loses_precision(
+    original: pa.ChunkedArray, promoted: pa.ChunkedArray
+) -> bool:
+    """Decimal-to-float casts can succeed while silently losing original digits."""
+    return (
+        pa.types.is_decimal(original.type)
+        and pa.types.is_floating(promoted.type)
+        and not promoted.cast(original.type).equals(original)
+    )
+
+
 def _fallback_unsafe_raw_types(
     tables: list[pa.Table], types: dict[str, pa.DataType]
 ) -> None:
     """Use exact textual values when numeric promotion cannot safely cast a batch."""
     for table in tables:
         for field, column in zip(table.schema, table.columns, strict=True):
+            if field.type == types[field.name]:
+                continue
             try:
-                column.cast(types[field.name])
+                promoted = column.cast(types[field.name])
+                if _raw_cast_loses_precision(column, promoted):
+                    types[field.name] = pa.string()
             except (pa.ArrowInvalid, pa.ArrowTypeError):
                 types[field.name] = pa.string()
 
@@ -164,13 +179,9 @@ def read_raw_table(path: Path, *, delimiter: str = ",") -> pa.Table:
             with pa.ipc.open_stream(source) as reader:
                 tables.append(_logical_raw_table(reader.read_all()))
     types = _raw_column_types(tables)
+    _fallback_unsafe_raw_types(tables, types)
     aligned = [_align_raw_columns(table, types) for table in tables]
-    try:
-        return pa.concat_tables(aligned, promote_options="permissive")
-    except pa.ArrowInvalid:
-        _fallback_unsafe_raw_types(tables, types)
-        aligned = [_align_raw_columns(table, types) for table in tables]
-        return pa.concat_tables(aligned, promote_options="permissive")
+    return pa.concat_tables(aligned, promote_options="permissive")
 
 
 def atomic_csv_write(
