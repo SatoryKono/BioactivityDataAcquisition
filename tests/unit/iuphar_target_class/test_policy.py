@@ -82,15 +82,40 @@ def test_offline_not_run_does_not_block_early_stages() -> None:
 def test_stage1_parameters_stay_unset() -> None:
     parameters = policy_document()["parameters"]
     assert isinstance(parameters, dict)
-    limits = parameters["graph_limits"]
-    assert isinstance(limits, dict)
-    assert limits["max_depth"] is None
-    assert limits["max_visited_nodes"] is None
     assert parameters["missing_markers_version"] is None
     assert parameters["snapshot_coverage"] is None
     assert parameters["snapshot_species"] is None
-    assert parameters["volume_test_seconds"] is None
     assert parameters["isoform_policy"] is None
+
+
+def test_volume_test_seconds_is_approved() -> None:
+    parameters = policy_document()["parameters"]
+    assert isinstance(parameters, dict)
+    assert parameters["volume_test_seconds"] == 300
+    assert parameters["volume_test_time_status"] == "утверждено"
+
+
+def test_recorded_graph_and_http_limits() -> None:
+    parameters = policy_document()["parameters"]
+    assert isinstance(parameters, dict)
+    limits = parameters["graph_limits"]
+    assert isinstance(limits, dict)
+    assert limits["max_depth"] == 8
+    assert limits["max_visited_nodes"] == 128
+    assert limits["status"] == "утверждено"
+    adapter = policy_document()["http_adapter"]
+    assert isinstance(adapter, dict)
+    assert adapter["timeout_sec"] == 15
+    assert adapter["read_timeout_multiplier"] == 2
+    assert adapter["max_retries"] == 3
+    assert adapter["retry_base_delay"] == 1
+    assert adapter["retry_max_delay"] == 30
+    assert adapter["requests_per_second"] == 1
+    assert adapter["burst"] == 1
+    assert adapter["failure_threshold"] == 5
+    assert adapter["recovery_timeout"] == 60
+    assert adapter["operational_check"] == "NOT_RUN"
+    assert adapter["status"] == "утверждено"
 
 
 def test_direct_ec_rule_is_rejected() -> None:

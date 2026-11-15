@@ -100,6 +100,23 @@
     "reason": "закреплённый источник IUPHAR в этапе 0 отсутствует",
     "status": "не подтверждены"
   },
+  "http_adapter": {
+    "approved_on": "2026-11-15",
+    "burst": 1,
+    "client_mapping": "timeout_sec задаёт connect, write и pool; read = timeout_sec * read_timeout_multiplier",
+    "failure_threshold": 5,
+    "max_retries": 3,
+    "operational_check": "NOT_RUN",
+    "rate_note": "потолок по документальному ориентиру около 60 запросов/мин; лимит сервиса не измерен",
+    "read_timeout_multiplier": 2,
+    "recovery_timeout": 60,
+    "requests_per_second": 1,
+    "retry_base_delay": 1,
+    "retry_max_delay": 30,
+    "status": "утверждено",
+    "timeout_sec": 15,
+    "version": "2026-11-15"
+  },
   "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13009",
   "l1_l2_independence": {
     "biological_sample_review": false,
@@ -203,13 +220,15 @@
   ],
   "parameters": {
     "graph_limits": {
+      "approved_on": "2026-11-15",
       "keys": [
         "max_depth",
         "max_visited_nodes"
       ],
-      "max_depth": null,
-      "max_visited_nodes": null,
-      "status": "не утверждено"
+      "max_depth": 8,
+      "max_visited_nodes": 128,
+      "scope": "обход предков familyIds одной мишени",
+      "status": "утверждено"
     },
     "isoform_policy": null,
     "isoform_policy_status": "не утверждено",
@@ -226,8 +245,8 @@
     "snapshot_coverage": null,
     "snapshot_coverage_status": "не утверждено",
     "snapshot_species": null,
-    "volume_test_seconds": null,
-    "volume_test_time_status": "не утверждено"
+    "volume_test_seconds": 300,
+    "volume_test_time_status": "утверждено"
   },
   "plan": {
     "issued_on": "2026-11-10",

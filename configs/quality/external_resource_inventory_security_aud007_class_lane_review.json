@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "55d50c19d9838b4693256e77e361733391ff93a4",
+  "source_ref": "ea8a7bf9e375405cc74c1214fec571152a4b3abb",
+  "source_reviews": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": "Reviewed path confinement and raw-sidecar finalize on CsvExporter: table_name stays a single export-root segment; published CSV is spreadsheet-safe while .raw preserves pre-neutralized PKs. Append seed uses Path.read_bytes/write_bytes under export.csv.raw_sidecar_seed. Existing asyncio.to_thread, clear glob/unlink, and read_csv retain prior ownership/cleanup. No new runtime qualification.",
+    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": "Reviewed spreadsheet_safe flag on atomic write/append: tempfile.mkstemp, pv.write_csv, and open() staging/append retain the same ownership and cleanup; neutralization applies only when publishing.",
+    "src/bioetl/infrastructure/export/csv_exporter_table_ops.py": "Moved full-row dedupe helper here as pure in-memory Arrow shaping. No external acquisition changes.",
+    "src/bioetl/infrastructure/export/debug_export_ops.py": "Reviewed CSV vs debug normalize split: apostrophe neutralization is CSV-only; XLSX and content hash keep original strings. Existing open/Workbook/save/read_bytes contracts unchanged.",
+    "src/bioetl/infrastructure/quarantine/filtered_reads.py": "Reviewed #13118 bounded scan materialization around existing DeltaTable/dataset scanners. Acquisition and release contracts unchanged; budgets only limit materialization. Runtime qualification NOT_RUN_12553.",
+    "src/bioetl/interfaces/http/_health_server_quarantine_routing.py": "Reviewed #13118 forensic/quarantine capacity gating on existing HealthServer response paths. No new socket/server/file acquisition.",
+    "src/bioetl/interfaces/http/health_server.py": "Reviewed optional quarantine token construction setting; existing server/task acquisition and cleanup scopes unchanged. No new external resource.",
+    "src/bioetl/interfaces/http/health_server_http_mixin.py": "Reviewed unique Authorization parsing and RFC 9110 scheme normalization / RFC 6750 SP separator. Credential bytes remain case-sensitive and constant-time compared; duplicate headers fail closed. Existing socket/reader/writer ownership and close paths unchanged; no new external acquisition."
+  },
+  "expression_updates": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": {
+      "pv.read_csv(csv_full_path, parse_options=parse_options)": "pv.read_csv(source_path, parse_options=parse_options)",
+      "_atomic_csv_write(data, target_path, write_options, self._logger)": "_atomic_csv_write(data, target_path, write_options, self._logger, spreadsheet_safe=spreadsheet_safe)"
+    },
+    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": {
+      "pv.write_csv(spreadsheet_safe_table(data), temp_path, write_options=write_options)": "pv.write_csv(payload, temp_path, write_options=write_options)"
+    }
+  },
+  "segment_updates": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": {
+      "class CsvExporter:": "class CsvExporter:",
+      "_atomic_csv_write(data, target_path, write_options, self._logger)": "_atomic_csv_write(",
+      "_append_to_csv(data, csv_path, self.delimiter, self._logger)": "_append_to_csv(",
+      "table = pv.read_csv(csv_full_path, parse_options=parse_options)": "table = pv.read_csv(source_path, parse_options=parse_options)",
+      "return await asyncio.to_thread(": "return await asyncio.to_thread(",
+      "pv.write_csv(": "pv.write_csv(",
+      "files_to_delete = list(self.base_path.glob(\"*.csv\"))": "for path in self.base_path.glob(\"*.csv\")"
+    },
+    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": {
+      "pv.write_csv(": "pv.write_csv(payload, temp_path, write_options=write_options)"
+    }
+  },
+  "line_updates": {
+    "src/bioetl/interfaces/http/health_server.py": {
+      "270": 272,
+      "266": 268,
+      "265": 267
+    },
+    "src/bioetl/infrastructure/export/csv_exporter_io_ops.py": {
+      "150": 156,
+      "146": 156,
+      "88": 95,
+      "126": 138
+    },
+    "src/bioetl/infrastructure/export/csv_exporter.py": {
+      "137": 143
+    }
+  },
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [
+    {
+      "identity": "export.csv.raw_sidecar_seed",
+      "type": "file",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "lifetime": "owner/operation",
+      "creator": [
+        "CsvExporter._export_sync"
+      ],
+      "owner": "CsvExporter._export_sync owning operation (see exact source sites)",
+      "closer": "pathlib.Path.read_bytes/write_bytes internal file context exit",
+      "shutdown_contract": "Synchronous pathlib seed-copy owns temporary file streams inside read_bytes then write_bytes; inspect opening/closing inside the library boundary, not a persistent store connection.",
+      "production_entrypoint": "pipeline/workflow runtime -> StorageFactory -> CsvExporter.export -> _export_sync append seed",
+      "call_path": [
+        "CsvExporter.export -> CsvExporter._export_sync",
+        " -> csv_full_path.read_bytes / raw_path.write_bytes"
+      ],
+      "scenarios": {
+        "normal": {
+          "applicability": "applicable",
+          "expected": "Synchronous pathlib read_bytes/write_bytes own their temporary file streams for the duration of the call; library boundary closes before return. Seed copy runs only when append finds published CSV without .raw sidecar under the confined export root.",
+          "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
+          "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "owning async/thread boundary; primitive itself synchronous",
+          "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
+          "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
+          "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
+          "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
+          "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
+          "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "configuration_predicates": [],
+      "shutdown_by_site": {},
+      "operation_aliases": [],
+      "site_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+          "scope": "CsvExporter._export_sync",
+          "call": "csv_full_path.read_bytes",
+          "expression": "csv_full_path.read_bytes()"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/csv_exporter.py",
+          "scope": "CsvExporter._export_sync",
+          "call": "raw_path.write_bytes",
+          "expression": "raw_path.write_bytes(csv_full_path.read_bytes())"
+        }
+      ],
+      "cleanup_selectors": []
+    }
+  ],
+  "new_exclusions": []
+}
