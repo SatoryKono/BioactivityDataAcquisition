@@ -824,3 +824,117 @@ def test_materializer_public_api_strict_mypy_and_negative_control(
     )
     assert negative.returncode == 1
     assert "[assignment]" in negative.stdout
+
+
+@pytest.mark.parametrize(
+    "recorded", ["missing", "matching", "conflicting", "legacy_conflicting"]
+)
+def test_workflow_binds_build_metadata_to_inspected_config(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, recorded: str
+) -> None:
+    import yaml
+    from scripts.ops.observability.grafana import trusted_docker
+
+    workflow = Path(__file__).parents[6] / module.WORKFLOW
+    steps = yaml.safe_load(workflow.read_text())["jobs"]["host-build"]["steps"]
+    run = next(
+        step["run"]
+        for step in steps
+        if step.get("name")
+        == "Build and verify managed image from the qualified parent"
+    )
+    block = run.split("/usr/bin/python3 - <<'PY'\n", 1)[1].split("\nPY\n", 1)[0]
+    configs = {
+        "bioetl-router-host:acceptance": "sha256:" + "a" * 64,
+        "bioetl-router-managed:acceptance": "sha256:" + "b" * 64,
+    }
+    output = tmp_path / "reports/qa"
+    output.mkdir(parents=True)
+    originals = {}
+    for stem, tag in (
+        ("router-v7-image-build", "bioetl-router-host:acceptance"),
+        ("router-v7-managed-image-build", "bioetl-router-managed:acceptance"),
+    ):
+        metadata = {
+            "containerimage.digest": (
+                "sha256:" + "c" * 64
+                if recorded == "legacy_conflicting"
+                else configs[tag]
+            ),
+            "exporter": "kept",
+        }
+        if recorded not in {"missing", "legacy_conflicting"}:
+            metadata["containerimage.config.digest"] = (
+                configs[tag] if recorded == "matching" else "sha256:" + "d" * 64
+            )
+        path = output / (stem + ".json")
+        path.write_text(json.dumps(metadata))
+        originals[path] = path.read_bytes()
+
+    def inspect_config(argv: list[str], *, text: bool) -> str:
+        assert text is True
+        assert argv[:-1] == [
+            "trusted-docker",
+            "image",
+            "inspect",
+            "--format",
+            "{{.Id}}",
+            "--",
+        ]
+        return configs[argv[-1]] + "\n"
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(trusted_docker, "docker_path", lambda: "trusted-docker")
+    monkeypatch.setattr(subprocess, "check_output", inspect_config)
+    if recorded in {"conflicting", "legacy_conflicting"}:
+        with pytest.raises(AssertionError, match="Conflicting build config ID"):
+            exec(compile(block, str(workflow), "exec"), {})
+        assert all(
+            path.read_bytes() == original for path, original in originals.items()
+        )
+    else:
+        exec(compile(block, str(workflow), "exec"), {})
+        assert all(
+            path.read_bytes() == original for path, original in originals.items()
+        )
+
+
+@pytest.mark.parametrize(
+    "initial",
+    [
+        None,
+        {
+            "debug": False,
+            "features": {"buildkit": True, "containerd-snapshotter": True},
+        },
+    ],
+)
+def test_workflow_selects_config_digest_store_without_losing_daemon_settings(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, initial: dict | None
+) -> None:
+    import pathlib
+    import yaml
+
+    workflow = Path(__file__).parents[6] / module.WORKFLOW
+    steps = yaml.safe_load(workflow.read_text())["jobs"]["host-build"]["steps"]
+    run = next(
+        step["run"]
+        for step in steps
+        if step.get("name") == "Use config-digest image IDs for source qualification"
+    )
+    block = run.split("sudo /usr/bin/python3 - <<'PY'\n", 1)[1].split("\nPY\n", 1)[0]
+    config = tmp_path / "daemon.json"
+    if initial is not None:
+        config.write_text(json.dumps(initial))
+
+    def daemon_path(value: str) -> Path:
+        assert value == "/etc/docker/daemon.json"
+        return config
+
+    with monkeypatch.context() as patch:
+        patch.setattr(pathlib, "Path", daemon_path)
+        exec(compile(block, str(workflow), "exec"), {})
+    settings = json.loads(config.read_text())
+    expected = copy.deepcopy(initial) if initial is not None else {}
+    expected.setdefault("features", {})["containerd-snapshotter"] = False
+    assert settings == expected

@@ -223,6 +223,22 @@ jobs:
           assert os.environ['GITHUB_SHA']==expected, 'Dispatched ref differs from agreed source'
           source_binding(expected)
           PY
+      - name: Use config-digest image IDs for source qualification
+        run: |
+          # Receipts use the classic image-store contract: .Id is config SHA-256.
+          # Docker 29 containerd stores expose manifest/index IDs in that field.
+          sudo /usr/bin/python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path('/etc/docker/daemon.json')
+          settings = json.loads(path.read_text()) if path.exists() else {}
+          features = settings.setdefault('features', {})
+          features['containerd-snapshotter'] = False
+          path.write_text(json.dumps(settings, indent=2) + '\n')
+          PY
+          sudo systemctl restart docker
+          test "$(docker info --format '{{.Driver}}')" = overlay2
       - name: Checkout inspected Grafana source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -379,6 +395,28 @@ jobs:
             cp -a "reports/qa/router-v7-image-context/$plugin/." "grafana/plugins/$plugin/dist/"
           done
           built=$(docker image inspect --format '{{.Id}}' bioetl-router-managed:acceptance)
+          /usr/bin/python3 - <<'PY'
+          import json
+          import re
+          import subprocess
+          from pathlib import Path
+          from scripts.ops.observability.grafana.trusted_docker import docker_path
+          from scripts.ops.observability.refresh_router_host_provenance import build_matches_config
+
+          # Verify either exporter schema against the inspected build without rewriting it.
+          for stem, tag in (
+              ('router-v7-image-build', 'bioetl-router-host:acceptance'),
+              ('router-v7-managed-image-build', 'bioetl-router-managed:acceptance'),
+          ):
+              path = Path('reports/qa') / (stem + '.json')
+              metadata = json.loads(path.read_text())
+              config = subprocess.check_output(
+                  [docker_path(), 'image', 'inspect', '--format', '{{.Id}}', '--', tag],
+                  text=True,
+              ).strip()
+              assert re.fullmatch(r'sha256:[0-9a-f]{64}', config), 'Invalid built config ID'
+              assert build_matches_config(metadata, config), 'Conflicting build config ID'
+          PY
           /usr/bin/python3 -m scripts.ops verify-router-managed-image "$built"
       - name: Preserve image build and parity receipts
         if: ${{ !cancelled() && always() && inputs.qualification_target != 'produce_candidate' }}
