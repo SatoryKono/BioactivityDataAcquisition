@@ -556,8 +556,9 @@ class ProducerExport(unittest.TestCase):
                         )
                     ):
                         exec(code, {"__name__": "synthetic_export"})
-                    self.assertFalse((out / "build-products.json").exists())
-                    return
+                    receipt_exists = (out / "build-products.json").exists()
+                    self.assertFalse(receipt_exists)
+                    return receipt_exists
                 exec(code, {"__name__": "synthetic_export"})
             receipt = json.loads((out / "build-products.json").read_text())
             self.assertEqual(receipt["state"], "BUILT_UNQUALIFIED")
@@ -598,7 +599,7 @@ class ProducerExport(unittest.TestCase):
             "missing_package",
         ):
             with self.subTest(defect=defect):
-                self.run_export(defect)
+                assert self.run_export(defect) is False
 
     def test_unqualified_receipt_is_rejected_even_when_renamed_to_parity(self):
         import io

@@ -503,6 +503,20 @@
     },
     {
       "category": "intentional_no_exception_contract",
+      "line": "244",
+      "path": "tests/unit/scripts/ops/test_router_candidate.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_declared_delivery_defaults_and_distinct_owned_candidates"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "579",
+      "path": "tests/unit/scripts/ops/test_router_candidate.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_complete_unqualified_export_preserves_hashes_and_boundaries"
+    },
+    {
+      "category": "intentional_no_exception_contract",
       "line": "146",
       "path": "tests/unit/scripts/ops/observability/test_run_selection_context_projection.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -513,7 +527,7 @@
     "architecture_helper_guard": 0,
     "benchmark_or_performance": 0,
     "helper_asserted": 1,
-    "intentional_no_exception_contract": 67,
+    "intentional_no_exception_contract": 69,
     "weak_no_value": 0
   },
   "assertless_examples": [
@@ -808,9 +822,15 @@
       "categories": {
         "intentional_no_exception_contract": 1
       }
+    },
+    "tests/unit/scripts/ops/test_router_candidate.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
     }
   },
-  "assertless_total_candidates": 68,
+  "assertless_total_candidates": 70,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -984,7 +1004,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 67,
+  "intentional_no_exception_contract": 69,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
@@ -1503,6 +1523,20 @@
       },
       {
         "category": "intentional_no_exception_contract",
+        "line": "244",
+        "path": "tests/unit/scripts/ops/test_router_candidate.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_declared_delivery_defaults_and_distinct_owned_candidates"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "579",
+        "path": "tests/unit/scripts/ops/test_router_candidate.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_complete_unqualified_export_preserves_hashes_and_boundaries"
+      },
+      {
+        "category": "intentional_no_exception_contract",
         "line": "146",
         "path": "tests/unit/scripts/ops/observability/test_run_selection_context_projection.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -1513,7 +1547,7 @@
       "architecture_helper_guard": 0,
       "benchmark_or_performance": 0,
       "helper_asserted": 1,
-      "intentional_no_exception_contract": 67,
+      "intentional_no_exception_contract": 69,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -1543,7 +1577,7 @@
       "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py:507",
       "tests/unit/infrastructure/test_storage_factory.py:820"
     ],
-    "assertless_total_candidates": 68,
+    "assertless_total_candidates": 70,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -1735,8 +1769,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3329,
-      "test_python_file_count": 3581,
+      "test_glob_file_count": 3330,
+      "test_python_file_count": 3582,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1777,21 +1811,21 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3329,
-    "total_test_functions": 33247,
+    "total_test_files": 3330,
+    "total_test_functions": 33278,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "ad1828d8dc4204f9bc21ff2d5ae38c0f9e2a91c5e921a04b36178f7fe4d484f2",
+  "source_tree_sha256": "a83c5e14394e3977d31d5049e577a36ff2ee22499b083ae226e3674f20f91bf6",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 68,
+    "assertless_total_candidates": 70,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 67,
+    "intentional_no_exception_contract": 69,
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
@@ -1803,8 +1837,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3329,
-    "test_python_file_count": 3581,
+    "test_glob_file_count": 3330,
+    "test_python_file_count": 3582,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -1845,8 +1879,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3329,
-  "total_test_functions": 33247,
+  "total_test_files": 3330,
+  "total_test_functions": 33278,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

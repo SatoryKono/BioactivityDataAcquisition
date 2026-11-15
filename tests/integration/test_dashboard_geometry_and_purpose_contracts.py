@@ -58,6 +58,48 @@ from scripts.engineering.qa import report_dashboard_scalar_density as scalar_rep
 
 pytestmark = pytest.mark.integration
 
+
+@pytest.mark.parametrize("panel_id, query_count", [(9102, 3), (9491, 5)])
+def test_incident_coverage_reduction_survives_current_profile_projection(
+    panel_id: int, query_count: int
+) -> None:
+    path = next(p for p in get_dashboard_files() if p.stem == "bioetl-incident-v1")
+    native = next(
+        p for p in get_dashboard_panels(load_dashboard(path)) if p["id"] == panel_id
+    )
+    reduction = [
+        {
+            "id": "reduce",
+            "options": {"reducers": ["lastNotNull"], "mode": "reduceFields"},
+        }
+    ]
+    assert native["type"] == "stat"
+    assert native["gridPos"]["h"] == 8
+    assert len(native["targets"]) == query_count
+    assert all(t["instant"] is True and not t.get("hide") for t in native["targets"])
+    # Preserve one lastNotNull result per field, including NaN and empty fields,
+    # before displaying individual rows; do not rewrite the status mappings.
+    assert native["transformations"] == reduction
+    assert native["options"]["reduceOptions"] == {
+        "calcs": ["lastNotNull"],
+        "fields": "",
+        "values": True,
+    }
+    assert native["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    adaptive = load_dashboard(path.parent.parent / "dashboards-adaptive" / path.name)
+    current = next(p for p in get_dashboard_panels(adaptive) if p["id"] == panel_id)
+    assert current["type"] == "bioetl-selectorshell-panel"
+    assert current["options"]["viewMode"] == "current"
+    view = current["options"]["currentView"]
+    assert view["pluginId"] == "stat"
+    assert view["queries"] == native["targets"]
+    assert view["transformations"] == reduction
+    assert view["options"] == native["options"]
+    assert current["fieldConfig"] == native["fieldConfig"]
+    assert current["targets"] == []
+    assert current["transformations"] == []
+
+
 _RANGE_RE = re.compile(r"\$__range|\$\{__range")
 
 

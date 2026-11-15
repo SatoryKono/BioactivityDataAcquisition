@@ -203,6 +203,16 @@ def _expand_coverage_row(row: dict[str, Any]) -> tuple[int, int]:
         if panel.get("id") in {9102, 9491}:
             panel["gridPos"]["h"] = max(8, panel["gridPos"]["h"])
             panel["options"]["orientation"] = "vertical"
+            # Retain per-field reduction for NaN and empty fields before
+            # explicitly displaying the resulting individual signal rows.
+            reduction = {
+                "id": "reduce",
+                "options": {"reducers": ["lastNotNull"], "mode": "reduceFields"},
+            }
+            transformations = panel.setdefault("transformations", [])
+            if reduction not in transformations:
+                transformations.append(reduction)
+            panel["options"].setdefault("reduceOptions", {})["values"] = True
     new_bottom = max(
         (p["gridPos"]["y"] + p["gridPos"]["h"] for p in children),
         default=old_bottom,
