@@ -455,15 +455,18 @@ def _resolved_limits(
     max_visited_nodes: int | None,
 ) -> tuple[int, int]:
     approved_depth, approved_visited = graph_limits()
-    depth = approved_depth if max_depth is None else max_depth
-    visited = approved_visited if max_visited_nodes is None else max_visited_nodes
-    if isinstance(depth, bool) or not isinstance(depth, int):
-        raise ValueError("max_depth is not approved")
-    if isinstance(visited, bool) or not isinstance(visited, int):
-        raise ValueError("max_visited_nodes is not approved")
-    if depth < 1 or visited < 1:
-        raise ValueError("graph_limits must be positive")
+    depth = _capped_limit(max_depth, approved_depth, "max_depth")
+    visited = _capped_limit(max_visited_nodes, approved_visited, "max_visited_nodes")
     return depth, visited
+
+
+def _capped_limit(requested: int | None, approved: int, name: str) -> int:
+    value = approved if requested is None else requested
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError(f"{name} is not approved")
+    if value < 1:
+        raise ValueError("graph_limits must be positive")
+    return min(value, approved)
 
 
 def _probe(ready: _Ready) -> GraphDefect | None:

@@ -206,6 +206,27 @@ def test_same_class_families_are_kept_and_different_classes_conflict() -> None:
     )
 
 
+def test_caller_cannot_raise_the_approved_graph_limits() -> None:
+    depth, visited = graph_limits()
+    raised_depth = build_family_paths(
+        _chain(depth + 1),
+        family_ids=("n0",),
+        max_depth=depth + 1,
+    )
+    assert raised_depth.paths == ()
+    assert raised_depth.defects[0].limit_key == "max_depth"
+    stricter = build_family_paths(_chain(2), family_ids=("n0",), max_depth=2)
+    assert stricter.defects == ()
+    past_stricter = build_family_paths(_chain(3), family_ids=("n0",), max_depth=2)
+    assert past_stricter.defects[0].limit_key == "max_depth"
+    raised_visited = validate_family_graph(
+        _star(visited),
+        family_ids=("child",),
+        max_visited_nodes=visited + 1,
+    )
+    assert raised_visited[0].limit_key == "max_visited_nodes"
+
+
 def test_mapping_outside_the_working_classes_is_rejected() -> None:
     nodes = (_node("fam"),)
     with pytest.raises(ValueError, match="class dictionary"):
