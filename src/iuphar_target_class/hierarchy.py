@@ -280,72 +280,113 @@ def _walk(
     if structural:
         return GraphWalk(paths=(), defects=structural)
     starts = tuple(sorted(by_id)) if family_ids is None else family_ids
-    missing_starts = tuple(
+    missing_starts = _missing_starts(starts, by_id)
+    if missing_starts:
+        return GraphWalk(paths=(), defects=missing_starts)
+    return _walk_starts(by_id, starts, depth_limit, visited_limit)
+
+
+def _missing_starts(
+    starts: tuple[str, ...],
+    by_id: dict[str, FamilyNode],
+) -> tuple[GraphDefect, ...]:
+    return tuple(
         GraphDefect(defect=DEFECT_MISSING_PARENT, family_id=family_id)
         for family_id in starts
         if family_id not in by_id
     )
-    if missing_starts:
-        return GraphWalk(paths=(), defects=missing_starts)
+
+
+def _walk_starts(
+    by_id: dict[str, FamilyNode],
+    starts: tuple[str, ...],
+    depth_limit: int,
+    visited_limit: int,
+) -> GraphWalk:
     leaf_to_root: list[tuple[str, ...]] = []
     visited: set[str] = set()
     for start in starts:
-        stack: list[tuple[str, tuple[str, ...]]] = [(start, (start,))]
-        while stack:
-            node_id, path = stack.pop()
-            if len(path) > depth_limit:
-                return GraphWalk(
-                    paths=(),
-                    defects=(
-                        GraphDefect(
-                            defect=LIMIT_EXCEEDED,
-                            family_id=node_id,
-                            limit_key="max_depth",
-                        ),
-                    ),
-                )
-            if node_id not in visited:
-                visited.add(node_id)
-                if len(visited) > visited_limit:
-                    return GraphWalk(
-                        paths=(),
-                        defects=(
-                            GraphDefect(
-                                defect=LIMIT_EXCEEDED,
-                                family_id=node_id,
-                                limit_key="max_visited_nodes",
-                            ),
-                        ),
-                    )
-            parents = by_id[node_id].parent_ids
-            if not parents:
-                leaf_to_root.append(path)
-                continue
-            for parent_id in reversed(parents):
-                if parent_id in path:
-                    defect = DEFECT_SELF_LOOP if parent_id == node_id else DEFECT_CYCLE
-                    return GraphWalk(
-                        paths=(),
-                        defects=(GraphDefect(defect=defect, family_id=node_id),),
-                    )
-                if parent_id not in by_id:
-                    return GraphWalk(
-                        paths=(),
-                        defects=(
-                            GraphDefect(
-                                defect=DEFECT_MISSING_PARENT, family_id=parent_id
-                            ),
-                        ),
-                    )
-                stack.append((parent_id, (*path, parent_id)))
-    paths = tuple(
+        defect = _walk_from(
+            by_id, start, visited, leaf_to_root, depth_limit, visited_limit
+        )
+        if defect is not None:
+            return GraphWalk(paths=(), defects=(defect,))
+    return GraphWalk(paths=_family_paths(leaf_to_root), defects=())
+
+
+def _walk_from(
+    by_id: dict[str, FamilyNode],
+    start: str,
+    visited: set[str],
+    leaf_to_root: list[tuple[str, ...]],
+    depth_limit: int,
+    visited_limit: int,
+) -> GraphDefect | None:
+    stack: list[tuple[str, tuple[str, ...]]] = [(start, (start,))]
+    while stack:
+        node_id, path = stack.pop()
+        limit_defect = _limit_defect(node_id, path, visited, depth_limit, visited_limit)
+        if limit_defect is not None:
+            return limit_defect
+        parents = by_id[node_id].parent_ids
+        if not parents:
+            leaf_to_root.append(path)
+            continue
+        parent_defect = _enqueue_parents(stack, by_id, node_id, path, parents)
+        if parent_defect is not None:
+            return parent_defect
+    return None
+
+
+def _limit_defect(
+    node_id: str,
+    path: tuple[str, ...],
+    visited: set[str],
+    depth_limit: int,
+    visited_limit: int,
+) -> GraphDefect | None:
+    if len(path) > depth_limit:
+        return GraphDefect(
+            defect=LIMIT_EXCEEDED,
+            family_id=node_id,
+            limit_key="max_depth",
+        )
+    if node_id not in visited:
+        visited.add(node_id)
+        if len(visited) > visited_limit:
+            return GraphDefect(
+                defect=LIMIT_EXCEEDED,
+                family_id=node_id,
+                limit_key="max_visited_nodes",
+            )
+    return None
+
+
+def _enqueue_parents(
+    stack: list[tuple[str, tuple[str, ...]]],
+    by_id: dict[str, FamilyNode],
+    node_id: str,
+    path: tuple[str, ...],
+    parents: tuple[str, ...],
+) -> GraphDefect | None:
+    for parent_id in reversed(parents):
+        if parent_id in path:
+            defect = DEFECT_SELF_LOOP if parent_id == node_id else DEFECT_CYCLE
+            return GraphDefect(defect=defect, family_id=node_id)
+        if parent_id not in by_id:
+            return GraphDefect(defect=DEFECT_MISSING_PARENT, family_id=parent_id)
+        stack.append((parent_id, (*path, parent_id)))
+    return None
+
+
+def _family_paths(leaf_to_root: list[tuple[str, ...]]) -> tuple[FamilyPath, ...]:
+    return tuple(
         FamilyPath(
             root_to_leaf=tuple(reversed(path)),
             legacy_leaf_to_root=" → ".join(path),
         )
         for path in sorted(leaf_to_root)
     )
-    return GraphWalk(paths=paths, defects=())
 
 
 def _resolved_limits(
@@ -368,6 +409,19 @@ def _structural_defects(
     nodes: tuple[FamilyNode, ...],
     multiple_parents_allowed: bool,
 ) -> tuple[dict[str, FamilyNode], tuple[GraphDefect, ...]]:
+    by_id, defects = _collapse_nodes(nodes, multiple_parents_allowed)
+    if defects:
+        return {}, tuple(defects)
+    missing = _missing_parents(by_id)
+    if missing:
+        return {}, missing
+    return by_id, ()
+
+
+def _collapse_nodes(
+    nodes: tuple[FamilyNode, ...],
+    multiple_parents_allowed: bool,
+) -> tuple[dict[str, FamilyNode], list[GraphDefect]]:
     grouped: dict[str, list[FamilyNode]] = {}
     for node in nodes:
         grouped.setdefault(node.family_id, []).append(node)
@@ -379,25 +433,30 @@ def _structural_defects(
         if len(signatures) > 1:
             defects.append(GraphDefect(defect=DEFECT_DUPLICATE, family_id=family_id))
             continue
-        node = group[0]
-        if node.family_id in node.parent_ids:
-            defects.append(GraphDefect(defect=DEFECT_SELF_LOOP, family_id=family_id))
+        shape = _shape_defect(group[0], multiple_parents_allowed)
+        if shape is not None:
+            defects.append(shape)
             continue
-        if not multiple_parents_allowed and len(node.parent_ids) > 1:
-            defects.append(
-                GraphDefect(defect=DEFECT_MULTIPLE_PARENTS, family_id=family_id)
-            )
-            continue
-        by_id[family_id] = node
-    if defects:
-        return {}, tuple(defects)
+        by_id[family_id] = group[0]
+    return by_id, defects
+
+
+def _shape_defect(
+    node: FamilyNode,
+    multiple_parents_allowed: bool,
+) -> GraphDefect | None:
+    if node.family_id in node.parent_ids:
+        return GraphDefect(defect=DEFECT_SELF_LOOP, family_id=node.family_id)
+    if not multiple_parents_allowed and len(node.parent_ids) > 1:
+        return GraphDefect(defect=DEFECT_MULTIPLE_PARENTS, family_id=node.family_id)
+    return None
+
+
+def _missing_parents(by_id: dict[str, FamilyNode]) -> tuple[GraphDefect, ...]:
     known = set(by_id)
-    for family_id in sorted(by_id):
-        for parent_id in by_id[family_id].parent_ids:
-            if parent_id not in known:
-                defects.append(
-                    GraphDefect(defect=DEFECT_MISSING_PARENT, family_id=parent_id)
-                )
-    if defects:
-        return {}, tuple(defects)
-    return by_id, ()
+    return tuple(
+        GraphDefect(defect=DEFECT_MISSING_PARENT, family_id=parent_id)
+        for family_id in sorted(by_id)
+        for parent_id in by_id[family_id].parent_ids
+        if parent_id not in known
+    )
