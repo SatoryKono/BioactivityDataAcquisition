@@ -27,6 +27,9 @@ NOT_RUN_REASONS: dict[str, str] = {
     "snapshot_coverage": "охват и набор видов снимка не утверждены",
     "w153_integration": INTEGRATION_REASON,
 }
+UNEXECUTED_REASONS: dict[str, str] = {
+    "volume_scenario": "объёмный прогон в этом отчёте не выполнялся",
+}
 _VOLUME_PROVENANCE = RunProvenance(
     snapshot_id="snapshot-unset",
     normalization_version=None,
@@ -57,7 +60,7 @@ _ROW_META = frozenset({"input_row_id", "target_kind"})
 
 def build_acceptance_report(executed: Mapping[str, str]) -> dict[str, object]:
     """Merge executed results with the checks that cannot be marked PASS."""
-    names = set(executed) | set(NOT_RUN_REASONS)
+    names = set(executed) | set(NOT_RUN_REASONS) | set(UNEXECUTED_REASONS)
     checks: list[dict[str, str]] = []
     for name in sorted(names):
         if executed.get(name) == "FAIL":
@@ -66,6 +69,15 @@ def build_acceptance_report(executed: Mapping[str, str]) -> dict[str, object]:
         if name in NOT_RUN_REASONS:
             checks.append(
                 {"name": name, "reason": NOT_RUN_REASONS[name], "status": "NOT_RUN"}
+            )
+            continue
+        if name not in executed:
+            checks.append(
+                {
+                    "name": name,
+                    "reason": UNEXECUTED_REASONS[name],
+                    "status": "NOT_RUN",
+                }
             )
             continue
         status = executed[name]
@@ -198,7 +210,7 @@ def stages_0_3_document() -> dict[str, object]:
                 "status": boundaries["empty_batch"],
                 "test": (
                     "tests/unit/iuphar_target_class/"
-                    "test_normalization.py::test_empty_batch"
+                    "test_normalization.py::test_normalize_iuphar_empty_batch"
                 ),
             },
             {

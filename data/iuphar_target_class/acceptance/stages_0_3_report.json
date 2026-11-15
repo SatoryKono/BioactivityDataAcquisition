@@ -88,7 +88,7 @@
     {
       "check": "empty_batch",
       "status": "PASS",
-      "test": "tests/unit/iuphar_target_class/test_normalization.py::test_empty_batch"
+      "test": "tests/unit/iuphar_target_class/test_normalization.py::test_normalize_iuphar_empty_batch"
     },
     {
       "check": "volume_scenario",

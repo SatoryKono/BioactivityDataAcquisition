@@ -15,6 +15,7 @@ import pytest
 
 from iuphar_target_class.acceptance import (
     NOT_RUN_REASONS,
+    UNEXECUTED_REASONS,
     build_acceptance_report,
     run_volume_scenario,
     stages_0_3_document,
@@ -327,6 +328,31 @@ def test_acceptance_rejects_failed_computed_invariant(
 
 REPO = Path(__file__).resolve().parents[3]
 _ACCEPTANCE = REPO / "data" / "iuphar_target_class" / "acceptance"
+
+
+def test_unrun_volume_scenario_stays_not_run() -> None:
+    missing = build_acceptance_report({})
+    passed = build_acceptance_report({"volume_scenario": "PASS"})
+    failed = build_acceptance_report({"volume_scenario": "FAIL"})
+    missing_checks = missing["checks"]
+    passed_checks = passed["checks"]
+    failed_checks = failed["checks"]
+    assert isinstance(missing_checks, list)
+    assert isinstance(passed_checks, list)
+    assert isinstance(failed_checks, list)
+    missing_volume = next(
+        item for item in missing_checks if item["name"] == "volume_scenario"
+    )
+    passed_volume = next(
+        item for item in passed_checks if item["name"] == "volume_scenario"
+    )
+    failed_volume = next(
+        item for item in failed_checks if item["name"] == "volume_scenario"
+    )
+    assert missing_volume["status"] == "NOT_RUN"
+    assert missing_volume["reason"] == UNEXECUTED_REASONS["volume_scenario"]
+    assert passed_volume == {"name": "volume_scenario", "reason": "", "status": "PASS"}
+    assert failed_volume["status"] == "FAIL"
 
 
 def test_volume_scenario_finishes_within_the_approved_limit() -> None:
