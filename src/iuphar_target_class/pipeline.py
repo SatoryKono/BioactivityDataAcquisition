@@ -346,7 +346,16 @@ def _publication_hits(
     """Expose the conflicting exact channels without confirming cross-species hits."""
     if match.match_status != "identity_conflict":
         return hits
-    unfiltered = collect_candidates(replace(query, organism=None), catalog)
+    unfiltered_query = MatchQuery(
+        target_id=query.target_id,
+        uniprot_ids=query.uniprot_ids,
+        gene_symbol=query.gene_symbol,
+        gene_id=query.gene_id,
+        organism=None,
+        name=query.name,
+        synonyms=query.synonyms,
+    )
+    unfiltered = collect_candidates(unfiltered_query, catalog)
     conflict = {
         hit
         for hit in unfiltered
