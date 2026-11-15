@@ -210,9 +210,13 @@ def test_same_class_families_are_kept_and_different_classes_conflict() -> None:
 @pytest.mark.parametrize("foreign", ["Oxidoreductases", "typo", ""])
 def test_fixture_mapping_rejects_foreign_classes(kind: str, foreign: str) -> None:
     with pytest.raises(ValueError, match="outside the class dictionary"):
-        ApprovedMapping(
-            type_to_class=(("GPCR", foreign),) if kind == "type" else (),
-            family_to_class=(("fam", foreign),) if kind == "family" else (),
+        normalize_provider_class(
+            _annotation("GPCR", ("fam",)),
+            (_node("fam"),),
+            ApprovedMapping(
+                type_to_class=(("GPCR", foreign),) if kind == "type" else (),
+                family_to_class=(("fam", foreign),) if kind == "family" else (),
+            ),
         )
 
 
@@ -404,3 +408,81 @@ def test_duplicate_edges_and_starts_keep_global_sorted_multiplicity() -> None:
     assert [
         tuple(reversed(paths[index].root_to_leaf)) for index in range(len(paths))
     ] == expected
+
+
+def test_caller_cannot_raise_the_approved_graph_limits() -> None:
+    depth, visited = graph_limits()
+    raised_depth = build_family_paths(
+        _chain(depth + 1),
+        family_ids=("n0",),
+        max_depth=depth + 1,
+    )
+    assert raised_depth.paths == ()
+    assert raised_depth.defects[0].limit_key == "max_depth"
+    stricter = build_family_paths(_chain(2), family_ids=("n0",), max_depth=2)
+    assert stricter.defects == ()
+    past_stricter = build_family_paths(_chain(3), family_ids=("n0",), max_depth=2)
+    assert past_stricter.defects[0].limit_key == "max_depth"
+    raised_visited = validate_family_graph(
+        _star(visited),
+        family_ids=("child",),
+        max_visited_nodes=visited + 1,
+    )
+    assert raised_visited[0].limit_key == "max_visited_nodes"
+
+
+def test_mapping_outside_the_working_classes_is_rejected() -> None:
+    nodes = (_node("fam"),)
+    with pytest.raises(ValueError, match="class dictionary"):
+        normalize_provider_class(
+            _annotation("GPCR", ("fam",)),
+            nodes,
+            ApprovedMapping(type_to_class=(("GPCR", "typo"),)),
+        )
+    with pytest.raises(ValueError, match="class dictionary"):
+        normalize_provider_class(
+            _annotation(None, ("fam",)),
+            nodes,
+            ApprovedMapping(family_to_class=(("fam", "Oxidoreductases"),)),
+        )
+
+
+def test_unrelated_branch_does_not_cancel_the_selected_family() -> None:
+    nodes = (_node("good"), _node("unrelated", "missing"))
+    mapping = ApprovedMapping(type_to_class=(("GPCR", _RECEPTOR),))
+    result = normalize_provider_class(
+        _annotation("GPCR", ("good",)),
+        nodes,
+        mapping,
+    )
+    assert result.iuphar_annotation_status == "available"
+    assert result.iuphar_class == _RECEPTOR
+    assert validate_family_graph(nodes, family_ids=("good",)) == ()
+    whole = validate_family_graph(nodes)
+    assert whole[0].defect == "отсутствующий родитель"
+    reached = validate_family_graph((_node("good", "missing"),), family_ids=("good",))
+    assert reached[0].defect == "отсутствующий родитель"
+    assert reached[0].family_id == "missing"
+
+
+def test_dense_ancestor_graph_does_not_block_a_mapped_type() -> None:
+    layers = 7
+    width = 4
+    nodes: list[FamilyNode] = []
+    for level in range(layers):
+        for index in range(width):
+            if level == layers - 1:
+                parents: tuple[str, ...] = ()
+            else:
+                parents = tuple(f"f{level + 1}-{slot}" for slot in range(width))
+            nodes.append(FamilyNode(f"f{level}-{index}", parents))
+    leaf = "f0-0"
+    stored = tuple(nodes)
+    assert validate_family_graph(stored, family_ids=(leaf,)) == ()
+    result = normalize_provider_class(
+        _annotation("GPCR", (leaf,)),
+        stored,
+        ApprovedMapping(type_to_class=(("GPCR", _RECEPTOR),)),
+    )
+    assert result.iuphar_annotation_status == "available"
+    assert result.iuphar_class == _RECEPTOR
