@@ -89,8 +89,14 @@ def test_stage1_parameters_stay_unset() -> None:
     assert parameters["missing_markers_version"] is None
     assert parameters["snapshot_coverage"] is None
     assert parameters["snapshot_species"] is None
-    assert parameters["volume_test_seconds"] is None
     assert parameters["isoform_policy"] is None
+
+
+def test_volume_test_seconds_is_approved() -> None:
+    parameters = policy_document()["parameters"]
+    assert isinstance(parameters, dict)
+    assert parameters["volume_test_seconds"] == 300
+    assert parameters["volume_test_time_status"] == "утверждено"
 
 
 def test_direct_ec_rule_is_rejected() -> None:

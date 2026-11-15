@@ -39,6 +39,8 @@ EC_CATEGORIES: tuple[tuple[int, str], ...] = (
     (7, "Translocases"),
 )
 UNSET = "не утверждено"
+VOLUME_TEST_SECONDS = 300
+VOLUME_TEST_TIME_STATUS = "утверждено"
 NOT_RUN = "NOT_RUN"
 ROLE_ASSIGNMENT = (
     "владелец результата — Федор Новиков; исполнитель модуля и "
@@ -340,8 +342,8 @@ def policy_document() -> dict[str, object]:
             "snapshot_coverage": None,
             "snapshot_species": None,
             "snapshot_coverage_status": UNSET,
-            "volume_test_seconds": None,
-            "volume_test_time_status": UNSET,
+            "volume_test_seconds": VOLUME_TEST_SECONDS,
+            "volume_test_time_status": VOLUME_TEST_TIME_STATUS,
         },
         "plan": {"issued_on": "2026-11-10", "revision": "8", "version": "1"},
         "result_key": ["input_row_id", "snapshot_id"],

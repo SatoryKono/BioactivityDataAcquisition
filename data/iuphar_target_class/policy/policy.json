@@ -226,8 +226,8 @@
     "snapshot_coverage": null,
     "snapshot_coverage_status": "не утверждено",
     "snapshot_species": null,
-    "volume_test_seconds": null,
-    "volume_test_time_status": "не утверждено"
+    "volume_test_seconds": 300,
+    "volume_test_time_status": "утверждено"
   },
   "plan": {
     "issued_on": "2026-11-10",
