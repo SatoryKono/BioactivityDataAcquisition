@@ -46,6 +46,7 @@ ALLOWED_USES: dict[str, set[str]] = {
         "f377cff40abf52d63220346b9ab64814f3081ca6",  # #12374 docs concurrency
         "0deeafe064844e467b6c5943430dbfb3b80333ba",  # #12565 docs concurrency
         "02888d30cd4e343eeb9778fb8bbea8098591cf3d",  # docs lane base SHA
+        "f6f924bd6d3cf362e14a20206bd611179ca800a3",  # trusted main docs lane
     },
     "actions/attest-build-provenance": {
         "977bb373ede98d70efdf65b84cb5f73e068dcc2a",  # v3
@@ -124,6 +125,7 @@ ALLOWED_USES: dict[str, set[str]] = {
     "docker/login-action": {
         "dbcb813823bdd20940b903addbd779551569679f",  # v4.6.0
         "81c6f93d4bc991e510b342a00b419b3bb4efc5c6",  # v4.7.0
+        "8aa5831fb8d48d8f76594c7ddde61ae58019f550",  # v4.8.0
     },
     "docker/setup-buildx-action": {
         "bb05f3f5519dd87d3ba754cc423b652a5edd6d2c",  # v4.2.0
@@ -158,6 +160,7 @@ ALLOWED_USES: dict[str, set[str]] = {
         "6e4298ebc4db23e847df9b2e2de2939d6f066c67",  # v2.5.1
         "a345acffa64b0eaede81a3d9aae6141214d9c8fc",  # v2.6.0
         "b1d267aea5211fa648d9d442fa64b90dbdcbdd36",  # v2.7.0
+        "32d3cd482bdadfb38b186c0ad1b031902d55d932",  # v2.7.1
     },
     "hadolint/hadolint-action": {
         "06be81baf89a55ffd0e24b8f04a4185738dd3387",  # v3.5.0
