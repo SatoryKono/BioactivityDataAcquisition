@@ -324,6 +324,13 @@ def classify_target(
             ),
         )
     annotation = snapshot.annotations.get(match.matched_target_id or "")
+    if (
+        match.match_status == "matched"
+        and annotation is not None
+        and annotation.taxon
+        and row.taxon is None
+    ):
+        row = replace(row, taxon=annotation.taxon)
     direct = _direct(snapshot, annotation)
     return _complete(row, snapshot, run_id, hits, match, annotation, direct)
 

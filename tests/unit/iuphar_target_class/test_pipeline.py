@@ -139,6 +139,24 @@ def test_graph_defect_and_complex_do_not_promote_the_wrong_class():
     ]
 
 
+def test_confirmed_annotation_supplies_missing_taxon_without_rewriting_input():
+    original = {"target_id": "1"}
+    batch = _run(RawTargetRow("exact", original, "protein"))
+    output = batch.rows[0]
+    assert output.result.match_status == "matched"
+    assert output.annotation.taxon == output.validated.taxon == "Human"
+    assert output.validated.raw_fields == original
+    assert output.validated.normalized_fields["organism"] is None
+    assert (
+        json.loads(render_batch(batch)["classification.json"])[0]["taxon_id"] == "Human"
+    )
+    ambiguous = _run(RawTargetRow("ambiguous", {"uniprot": "Q12345"}, "protein")).rows[
+        0
+    ]
+    assert ambiguous.result.match_status != "matched"
+    assert ambiguous.validated.taxon is None
+
+
 def test_legacy_original_bytes_and_outputs_preserved(tmp_path):
     path = tmp_path / "legacy.csv"
     content = (
@@ -373,6 +391,21 @@ def test_stage0_original_target_copies_use_frozen_explicit_profiles(tmp_path):
     )
     cohort = load_admitted_cohort(manifest, plan)
     assert len({row.input_row_id for row in cohort.rows}) == 2
+    with pytest.raises(ValueError, match="complete pinned Stage-0"):
+        run_admitted_volume(
+            manifest_path=manifest,
+            plan=replace(
+                plan,
+                selected_source_paths=(profiles[0].source_path,),
+                source_imports=(profiles[0],),
+                expected_rows=1,
+            ),
+            snapshot=_snapshot(),
+            provenance=_provenance(),
+            run_id="subset",
+            output_dir=tmp_path / "subset-volume",
+        )
+    assert not (tmp_path / "subset-volume").exists()
     for row in cohort.rows:
         assert row.target_kind == "protein"
         assert row.fields["target_chembl_id"] == "CHEMBL1"

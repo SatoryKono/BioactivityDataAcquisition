@@ -91,6 +91,8 @@ def _load_verified_copies(
     requested = tuple(dict.fromkeys(selected_source_paths))
     if len(entries) != len(copies) or requested != selected_source_paths:
         raise ValueError("duplicate Stage-0 source identity")
+    if set(requested) != set(entries):
+        raise ValueError("volume requires the complete pinned Stage-0 source set")
     rows: list[RawTargetRow] = []
     hashes: list[tuple[str, str]] = []
     for source in requested:
