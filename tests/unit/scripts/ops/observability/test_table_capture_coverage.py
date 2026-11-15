@@ -208,7 +208,9 @@ console.log(JSON.stringify(result));
     assert series["effectiveType"] == "timeseries"
 
 
-@pytest.mark.parametrize("failure", ["none", "stalled", "details", "screenshot"])
+@pytest.mark.parametrize(
+    "failure", ["none", "stalled", "details", "screenshot", "changed_total"]
+)
 def test_compact_capture_reads_every_row_and_full_field_then_restores(
     tmp_path, failure
 ):
@@ -220,10 +222,11 @@ const fs=require('fs'),path=require('path');
 const {captureTablePages}=require(process.argv[1]);
 const zoom=require(path.join(path.dirname(process.argv[1]),'native_browser_zoom.cjs'));
 const failure=process.argv[3];
-let row=2, direction=0, modal=false;
+let row=2, direction=0, modal=false,total=2;
 const shots=[];
 zoom.captureElementScreenshot=async(page,root,options)=>{
  if(failure==='screenshot' && options.path.endsWith('detail-2.png'))throw Error('capture failed');
+ if(failure==='changed_total' && options.path.endsWith('page-2-detail-3.png'))total=3;
  shots.push({row,path:options.path});const b=Buffer.from('capture');fs.writeFileSync(options.path,b);return b;
 };
 const names=['Pipeline','Context','Full Run ID'];
@@ -236,7 +239,7 @@ const dialog={last(){return this;},waitFor:async({state})=>{
 getByRole:()=>({last(){return this;},click:async()=>{modal=false;}})};
 const root={first(){return this;},scrollIntoViewIfNeeded:async()=>{},waitFor:async()=>{},
  locator:selector=>selector.includes('data-bioetl-adaptive-table')?{count:async()=>1}:{allTextContents:async()=>['Pipeline',`summary-${row}`]},
- evaluate:async()=>({page:row,total:2,text:`${row} / 2`}),
+ evaluate:async()=>({page:row,total,text:`${row} / ${total}`}),
  getByRole:(role,{name})=>{
   if(name.test('Details'))return{count:async()=>1,click:async()=>{modal=true;}};
   const step=name.test('Next row')?1:-1;
@@ -286,6 +289,7 @@ const page={locator:()=>root,getByRole:()=>dialog,
                 "stalled": "page did not advance",
                 "details": "Compact table details are incomplete",
                 "screenshot": "capture failed",
+                "changed_total": "Compact table pagination changed during capture",
             }[failure]
         )
         assert "results" not in evidence

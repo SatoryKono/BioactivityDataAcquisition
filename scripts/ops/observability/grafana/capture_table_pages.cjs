@@ -357,10 +357,10 @@ async function captureCompactTable(page, root, panel, options) {
   }
   async function moveTo(target, moves = 0) {
       const position = await compactPosition(root);
-      if (position.page === target) return;
       if (moves >= 100 || position.total !== initial.total) {
         throw new Error('Compact table pagination changed during capture');
       }
+      if (position.page === target) return;
       const direction = position.page < target ? 1 : -1;
       const name = direction > 0 ? /^Next (row|run)$/ : /^Previous (row|run)$/;
       const button = root.getByRole('button', {name});
