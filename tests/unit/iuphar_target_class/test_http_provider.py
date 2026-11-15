@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from datetime import UTC, datetime, timedelta
+from email.utils import format_datetime
 
 import pytest
 
@@ -317,4 +319,100 @@ def test_unfinished_search_page_is_not_not_found() -> None:
     hit = provider.find_by_uniprot("P12345")
     assert hit_status(hit) == "source_unavailable"
     assert hit.diagnostics == ("source_unavailable:schema",)
+    assert transport.calls[0][1] == "/targets?accession=P12345&database=UniProtKB"
     assert len(transport.calls) == 1
+
+
+def test_numeric_target_id_matches_the_documented_schema() -> None:
+    body = b'{"targetId":3,"name":"5-HT1D receptor","type":"GPCR"}'
+    provider, transport, _clock = _provider([_response(200, body)])
+    hit = provider.get_target("3")
+    assert hit_status(hit) == "available"
+    assert hit.records[0].record_id == "3"
+    assert transport.calls[0][1] == "/targets/3"
+
+
+def test_numeric_target_id_must_match_the_request() -> None:
+    body = b'{"targetId":3,"name":"5-HT1D receptor","type":"GPCR"}'
+    provider, transport, _clock = _provider(
+        [_response(200, body), _response(200, body)]
+    )
+    first = provider.get_target("1")
+    second = provider.get_target("1")
+    assert first.diagnostics == ("source_unavailable:schema",)
+    assert second.diagnostics == ("source_unavailable:schema",)
+    assert len(transport.calls) == 2
+
+
+def test_family_request_uses_the_documented_path() -> None:
+    body = b'{"familyId":12,"name":"5-Hydroxytryptamine receptors"}'
+    provider, transport, _clock = _provider([_response(200, body), _response(404)])
+    hit = provider.get_families(("12", "99"))
+    assert [call[1] for call in transport.calls] == [
+        "/targets/families/12",
+        "/targets/families/99",
+    ]
+    assert hit.records[0].record_id == "12"
+    assert hit.diagnostics == ("missing family 99",)
+
+
+def test_uniprot_search_uses_accession_and_database() -> None:
+    body = b'[{"targetId":3,"name":"5-HT1D receptor","type":"GPCR"}]'
+    provider, transport, _clock = _provider([_response(200, body)])
+    hit = provider.find_by_uniprot("P28221")
+    assert transport.calls[0][1] == ("/targets?accession=P28221&database=UniProtKB")
+    assert hit.records[0].record_id == "3"
+    assert "species=" not in transport.calls[0][1]
+
+
+def test_gene_search_filters_species_from_gene_information() -> None:
+    targets = b'[{"targetId":3,"name":"5-HT1D receptor","type":"GPCR"}]'
+    genes = (
+        b'[{"targetId":3,"species":"Human","geneSymbol":"HTR1D",'
+        b'"geneName":"5-hydroxytryptamine receptor 1D"}]'
+    )
+    provider, transport, clock = _provider(
+        [_response(200, targets), _response(200, genes)]
+    )
+    hit = provider.find_by_gene("HTR1D", "human")
+    assert [call[1] for call in transport.calls] == [
+        "/targets?geneSymbol=HTR1D",
+        "/targets/3/geneProteinInformation",
+    ]
+    assert "species=" not in transport.calls[0][1]
+    assert hit.records[0].record_id == "3"
+    assert clock.sleeps == [1]
+
+
+def test_gene_search_drops_a_different_species() -> None:
+    targets = b'[{"targetId":3,"name":"5-HT1D receptor","type":"GPCR"}]'
+    genes = b'[{"targetId":3,"species":"Mouse","geneSymbol":"Htr1d"}]'
+    provider, transport, _clock = _provider(
+        [_response(200, targets), _response(200, genes)]
+    )
+    hit = provider.find_by_gene("HTR1D", "Human")
+    assert hit_status(hit) == "not_found"
+    assert hit.records == ()
+    assert len(transport.calls) == 2
+
+
+def test_retry_after_http_date_stays_inside_the_approved_max_delay() -> None:
+    later = datetime.now(UTC) + timedelta(seconds=120)
+    stamp = format_datetime(later, usegmt=True)
+    provider, transport, clock = _provider(
+        [_response(429, retry_after=stamp), _response(200, _TARGET)]
+    )
+    hit = provider.get_target("1")
+    assert hit_status(hit) == "available"
+    assert clock.sleeps == [30]
+    assert len(transport.calls) == 2
+
+
+def test_past_retry_after_http_date_waits_only_for_the_rate_limit() -> None:
+    earlier = datetime.now(UTC) - timedelta(seconds=30)
+    stamp = format_datetime(earlier, usegmt=True)
+    script = [_response(429, retry_after=stamp) for _index in range(4)]
+    provider, _transport, clock = _provider(script)
+    hit = provider.get_target("1")
+    assert hit.diagnostics == ("source_unavailable:retries_exhausted",)
+    assert clock.sleeps == [1, 1, 1]

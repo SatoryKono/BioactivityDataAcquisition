@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import json
 import time
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from datetime import UTC, datetime
+from email.utils import parsedate_to_datetime
 from typing import Protocol
 from urllib.parse import quote
 
@@ -86,6 +88,7 @@ class _Step:
     cacheable: bool
     code: str
     retry_after: str | None = None
+    payload: object | None = None
 
 
 class Clock(Protocol):
@@ -196,21 +199,34 @@ class HttpProvider:
 
     def find_by_uniprot(self, accession: str) -> ProviderHit:
         """Return targets for one accession. An empty list is an empty search."""
-        path = "/targets?uniprot=" + quote(accession, safe="")
+        path = "/targets?accession=" + quote(accession, safe="")
+        path += "&database=UniProtKB"
         return self._get(path, "search")
 
     def find_by_gene(self, symbol: str, species: str) -> ProviderHit:
-        """Return targets for one gene symbol in one species."""
-        path = "/targets?gene=" + quote(symbol, safe="")
-        path += "&species=" + quote(species, safe="")
-        return self._get(path, "search")
+        """Return targets whose gene information matches symbol and species."""
+        path = "/targets?geneSymbol=" + quote(symbol, safe="")
+        cache_key = "gene\n" + symbol + "\n" + species.casefold()
+        cached = self._cache.get(cache_key)
+        if cached is not None:
+            return cached
+        found = self._get(path, "search")
+        if _is_unavailable(found) or not found.records:
+            return found
+        selected = self._genes_for(found.records, symbol, species)
+        if isinstance(selected, ProviderHit):
+            return selected
+        sealed = _seal(_records_hit(selected), self._api_key)
+        if sealed.records:
+            self._cache[cache_key] = sealed
+        return sealed
 
     def get_families(self, family_ids: tuple[str, ...]) -> ProviderHit:
         """Return stored families. A transport failure drops every record."""
         records: list[FrozenRecord] = []
         missing: list[str] = []
         for family_id in family_ids:
-            path = f"/families/{quote(family_id, safe='')}"
+            path = f"/targets/families/{quote(family_id, safe='')}"
             hit = self._get(path, "family", family_id)
             if _is_unavailable(hit):
                 return hit
@@ -237,10 +253,62 @@ class HttpProvider:
         return sealed
 
     def _attempt(self, path: str, expect: str, record_id: str | None) -> _Step:
+        return self._retry(
+            path,
+            lambda response: _from_response(
+                response,
+                expect,
+                self._completeness,
+                record_id,
+            ),
+        )
+
+    def _genes_for(
+        self,
+        records: tuple[FrozenRecord, ...],
+        symbol: str,
+        species: str,
+    ) -> tuple[FrozenRecord, ...] | ProviderHit:
+        kept: list[FrozenRecord] = []
+        for record in records:
+            path = "/targets/" + quote(record.record_id, safe="")
+            path += "/geneProteinInformation"
+            payload = self._read_payload(path)
+            if isinstance(payload, ProviderHit):
+                if _is_unavailable(payload):
+                    return payload
+                continue
+            matched = _gene_match(payload, symbol, species)
+            if matched == "schema":
+                return _seal(_unavailable("schema"), self._api_key)
+            if matched:
+                kept.append(record)
+        return tuple(sorted(kept, key=lambda item: item.record_id))
+
+    def _read_payload(self, path: str) -> object | ProviderHit:
+        now = self._clock.time()
+        if not self._breaker.allow(now):
+            return _seal(_unavailable("circuit_open"), self._api_key)
+        step = self._retry(
+            path,
+            lambda response: _json_response(response, self._completeness),
+        )
+        self._observe(step)
+        if step.payload is None:
+            return _seal(step.hit, self._api_key)
+        if _payload_secret(step.payload, self._api_key):
+            return _unavailable("secret")
+        return step.payload
+
+    def _retry(
+        self,
+        path: str,
+        parse: Callable[[TransportResponse], _Step],
+    ) -> _Step:
         index = 0
         remaining = self.config.max_retries
         while True:
-            step = self._exchange(path, expect, record_id)
+            step = self._exchange(path, parse)
             if not step.retry:
                 return step
             if remaining == 0:
@@ -251,7 +319,11 @@ class HttpProvider:
             index += 1
             remaining -= 1
 
-    def _exchange(self, path: str, expect: str, record_id: str | None) -> _Step:
+    def _exchange(
+        self,
+        path: str,
+        parse: Callable[[TransportResponse], _Step],
+    ) -> _Step:
         self._rate.acquire()
         try:
             response = self._transport.exchange(
@@ -264,7 +336,7 @@ class HttpProvider:
             return _Step(_unavailable("timeout"), True, True, False, "timeout")
         except OSError:
             return _Step(_unavailable("connection"), True, True, False, "connection")
-        return _from_response(response, expect, self._completeness, record_id)
+        return parse(response)
 
     def _observe(self, step: _Step) -> None:
         if step.failure:
@@ -359,6 +431,33 @@ def _from_response(
     completeness: Completeness,
     record_id: str | None,
 ) -> _Step:
+    status = _status_step(response, completeness)
+    if status is not None:
+        return status
+    return _parsed(response.body, expect, completeness, record_id)
+
+
+def _json_response(response: TransportResponse, completeness: Completeness) -> _Step:
+    status = _status_step(response, completeness)
+    if status is not None:
+        return status
+    loaded = _load_json(response.body)
+    if isinstance(loaded, str):
+        return _Step(_unavailable(loaded), False, False, False, loaded)
+    return _Step(
+        ProviderHit((), None, ()),
+        False,
+        False,
+        False,
+        "available",
+        payload=loaded,
+    )
+
+
+def _status_step(
+    response: TransportResponse,
+    completeness: Completeness,
+) -> _Step | None:
     if response.status_code in RETRYABLE_STATUS:
         return _Step(
             _unavailable(f"http_{response.status_code}"),
@@ -386,7 +485,7 @@ def _from_response(
             False,
             f"http_{response.status_code}",
         )
-    return _parsed(response.body, expect, completeness, record_id)
+    return None
 
 
 def _absence(completeness: Completeness) -> _Step:
@@ -457,27 +556,114 @@ def _one_record(
 ) -> FrozenRecord | str:
     if not isinstance(payload, dict):
         return "schema"
-    record_id = payload.get("id")
-    if not isinstance(record_id, str) or not record_id:
+    record_id = _record_id(payload, kind)
+    if record_id is None:
         return "schema"
     if expected_id is not None and record_id != expected_id:
         return "schema"
     return freeze_record(kind, record_id, payload)
 
 
-def _retry_after_seconds(value: str | None) -> int | None:
-    if value is None:
+def _records_hit(records: tuple[FrozenRecord, ...]) -> ProviderHit:
+    digest = records[0].payload_sha256 if len(records) == 1 else None
+    return ProviderHit(records, digest, ())
+
+
+def _record_id(payload: Mapping[str, object], kind: str) -> str | None:
+    field_name = "familyId" if kind == "family" else "targetId"
+    if field_name in payload:
+        return _identifier(payload[field_name])
+    if "id" not in payload:
+        return None
+    return _identifier(payload["id"])
+
+
+def _identifier(value: object) -> str | None:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        if value < 1:
+            return None
+        return str(value)
+    if not isinstance(value, str):
         return None
     text = value.strip()
     if not text.isdecimal():
         return None
-    return int(text)
+    number = int(text)
+    if number < 1 or str(number) != text:
+        return None
+    return text
+
+
+def _gene_match(payload: object, symbol: str, species: str) -> bool | str:
+    if not isinstance(payload, list):
+        return "schema"
+    symbol_key = symbol.casefold()
+    species_key = species.casefold()
+    for item in payload:
+        if not isinstance(item, dict):
+            return "schema"
+        if _gene_item_matches(item, symbol_key, species_key):
+            return True
+    return False
+
+
+def _gene_item_matches(
+    item: Mapping[str, object],
+    symbol_key: str,
+    species_key: str,
+) -> bool:
+    gene = item.get("geneSymbol")
+    kind = item.get("species")
+    if not isinstance(gene, str) or not isinstance(kind, str):
+        return False
+    return gene.casefold() == symbol_key and kind.casefold() == species_key
+
+
+def _retry_after_seconds(value: str | None) -> int | None:
+    if value is None:
+        return None
+    text = value.strip()
+    if text.isdecimal():
+        return int(text)
+    return _http_date_delay(text)
+
+
+def _http_date_delay(text: str) -> int | None:
+    try:
+        parsed = parsedate_to_datetime(text)
+    except (TypeError, ValueError, IndexError, OverflowError):
+        return None
+    if parsed is None:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=UTC)
+    remaining = (parsed - datetime.now(UTC)).total_seconds()
+    if remaining <= 0:
+        return 0
+    whole = int(remaining)
+    if remaining > whole:
+        return whole + 1
+    return whole
 
 
 def _seal(hit: ProviderHit, api_key: str | None) -> ProviderHit:
     if _secret_leaked(hit, api_key):
         return _unavailable("secret")
     return hit
+
+
+def _payload_secret(payload: object, api_key: str | None) -> bool:
+    rendered = json.dumps(
+        payload,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    )
+    if GTP_HEADER in rendered:
+        return True
+    return bool(api_key) and api_key in rendered
 
 
 def _secret_leaked(hit: ProviderHit, api_key: str | None) -> bool:
