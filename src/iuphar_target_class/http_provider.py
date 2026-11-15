@@ -17,7 +17,7 @@ from .acceptance import NOT_RUN_REASONS
 from .policy import policy_document
 from .snapshot import Completeness, FrozenRecord, ProviderHit, freeze_record
 
-API_KEY_HEADER = "GTP-API-Key"
+GTP_HEADER = "GTP-API-Key"
 RETRYABLE_STATUS = frozenset({429, 500, 502, 503, 504})
 AUTH_STATUS = frozenset({401, 403})
 
@@ -322,7 +322,7 @@ def hit_status(hit: ProviderHit) -> str:
 def _headers(api_key: str | None) -> dict[str, str]:
     if not api_key:
         return {}
-    return {API_KEY_HEADER: api_key}
+    return {GTP_HEADER: api_key}
 
 
 def _number(block: Mapping[str, object], name: str, *, minimum: int = 1) -> int:
@@ -486,6 +486,6 @@ def _secret_leaked(hit: ProviderHit, api_key: str | None) -> bool:
         chunks.append(record.record_id)
         chunks.append(record.payload.decode("utf-8", "replace"))
     rendered = "\n".join(chunks)
-    if API_KEY_HEADER in rendered:
+    if GTP_HEADER in rendered:
         return True
     return bool(api_key) and api_key in rendered
