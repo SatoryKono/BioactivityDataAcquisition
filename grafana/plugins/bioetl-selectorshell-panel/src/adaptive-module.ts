@@ -2,13 +2,21 @@ import React from 'react';
 import { PanelPlugin, type PanelProps } from '@grafana/data';
 import type { TableFieldOptions } from '@grafana/ui';
 import { AdaptiveTable } from './components/AdaptiveTable';
+import { CurrentPanel } from './components/CurrentPanel';
 import { SimplePanel } from './components/SimplePanel';
 import type { AdaptiveTableOptions } from './adaptive-types';
 
 // Separate managed entrypoint: the previously accepted selector-shell build
 // and its immutable host image retain their original inputs and behaviour.
-const ManagedPanel: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
-  React.createElement(props.options.viewMode && props.options.viewMode !== 'selectors' ? AdaptiveTable : SimplePanel, props);
+const ManagedPanel: React.FC<PanelProps<AdaptiveTableOptions>> = (props) => {
+  if (props.options.viewMode === 'current') {
+    return React.createElement(CurrentPanel, props);
+  }
+  if (props.options.viewMode && props.options.viewMode !== 'selectors') {
+    return React.createElement(AdaptiveTable, props);
+  }
+  return React.createElement(SimplePanel, props);
+};
 
 const managedEditor = () => React.createElement('span', null, 'Provided by dashboard provisioning.');
 
@@ -23,7 +31,7 @@ export const plugin = new PanelPlugin<AdaptiveTableOptions, TableFieldOptions>(M
         .addBooleanSwitch({ path: 'filterable', name: 'Filter column', defaultValue: false });
       // Retain the native table's object-valued configuration in this managed,
       // read-only profile. Unregistered custom overrides are dropped by Grafana.
-      for (const key of ['cellOptions', 'hideFrom', 'wrapText', 'align', 'tooltip.field']) {
+      for (const key of ['cellOptions', 'hideFrom', 'wrapText', 'wrapHeaderText', 'align', 'tooltip.field']) {
         builder.addCustomEditor({
           id: key, path: key, name: key,
           editor: managedEditor, override: managedEditor,
@@ -44,6 +52,7 @@ export const plugin = new PanelPlugin<AdaptiveTableOptions, TableFieldOptions>(M
         { label: 'Responsive run catalog', value: 'runs' },
         { label: 'Responsive record', value: 'record' },
         { label: 'Responsive evidence rows', value: 'rows' },
+        { label: 'Independent current observations', value: 'current' },
       ],
     },
   }));

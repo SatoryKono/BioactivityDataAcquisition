@@ -155,6 +155,219 @@ console.log(JSON.stringify(result.tablePanels));
     assert [p["id"] for p in json.loads(result.stdout)] == [2]
 
 
+def test_projection_retains_managed_visualization_and_wrapper_types():
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    program = r"""
+const {dashboardEntryFromPayload:project}=require(process.argv[1]);
+const custom=(id,options)=>({id,type:'bioetl-selectorshell-panel',options});
+const result=project({uid:'test',panels:[
+ custom(1,{viewMode:'rows'}), custom(2,{viewMode:'runs'}),
+ custom(3,{viewMode:'current',currentView:{pluginId:'table',compactFields:['Alert']}}),
+ custom(4,{viewMode:'current',currentView:{pluginId:'table'}}),
+ custom(5,{viewMode:'current',currentView:{pluginId:'timeseries'}}),
+ {id:6,type:'table'},
+ custom(7,{viewMode:'record'}),
+]});
+const fs=require('node:fs');
+const dq=project(JSON.parse(fs.readFileSync('grafana/dashboards-adaptive/bioetl-dq-v2.json','utf8')));
+result.actualRecord=dq.tablePanels.find(panel=>panel.id===9406);
+console.log(JSON.stringify(result));
+"""
+    result = subprocess.run(
+        [
+            node,
+            "-e",
+            program,
+            str(
+                Path(
+                    "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs"
+                ).resolve()
+            ),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    evidence = json.loads(result.stdout)
+    assert [p["id"] for p in evidence["tablePanels"]] == [1, 2, 3, 4, 6, 7]
+    assert evidence["tablePanels"][-1]["adaptiveTable"] is True
+    assert evidence["actualRecord"]["id"] == 9406
+    assert evidence["actualRecord"]["effectiveType"] == "table"
+    assert evidence["actualRecord"]["adaptiveTable"] is True
+    assert [p["adaptiveTable"] for p in evidence["tablePanels"][:4]] == [
+        True,
+        True,
+        True,
+        False,
+    ]
+    series = evidence["requiredPanels"][4]
+    assert series["type"] == "bioetl-selectorshell-panel"
+    assert series["effectiveType"] == "timeseries"
+
+
+@pytest.mark.parametrize(
+    "failure", ["none", "stalled", "details", "screenshot", "changed_total"]
+)
+def test_compact_capture_reads_every_row_and_full_field_then_restores(
+    tmp_path, failure
+):
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    program = r"""
+const fs=require('fs'),path=require('path');
+const {captureTablePages}=require(process.argv[1]);
+const zoom=require(path.join(path.dirname(process.argv[1]),'native_browser_zoom.cjs'));
+const failure=process.argv[3];
+let row=2, direction=0, modal=false,total=2;
+const shots=[];
+zoom.captureElementScreenshot=async(page,root,options)=>{
+ if(failure==='screenshot' && options.path.endsWith('detail-2.png'))throw Error('capture failed');
+ if(failure==='changed_total' && options.path.endsWith('page-2-detail-3.png'))total=3;
+ shots.push({row,path:options.path});const b=Buffer.from('capture');fs.writeFileSync(options.path,b);return b;
+};
+const names=['Pipeline','Context','Full Run ID'];
+const values={count:async()=>failure==='details'?2:3,nth:index=>({
+ scrollIntoViewIfNeeded:async()=>{},evaluate:async()=>({text:`row-${row}-full-field-${index}`,links:[{href:`https://example.test/${row}/${index}`}]}),
+})};
+const dialog={last(){return this;},waitFor:async({state})=>{
+ if((state==='visible')!==modal)throw Error('wrong modal visibility');
+},locator:selector=>selector==='dl dt'?{allTextContents:async()=>names}:values,
+getByRole:()=>({last(){return this;},click:async()=>{modal=false;}})};
+const root={first(){return this;},scrollIntoViewIfNeeded:async()=>{},waitFor:async()=>{},
+ locator:selector=>selector.includes('data-bioetl-adaptive-table')?{count:async()=>1}:{allTextContents:async()=>['Pipeline',`summary-${row}`]},
+ evaluate:async()=>({page:row,total,text:`${row} / ${total}`}),
+ getByRole:(role,{name})=>{
+  if(name.test('Details'))return{count:async()=>1,click:async()=>{modal=true;}};
+  const step=name.test('Next row')?1:-1;
+  return{count:async()=>1,isDisabled:async()=>row+step<1||row+step>2,
+    focus:async()=>{direction=step;}};
+ }};
+const page={locator:()=>root,getByRole:()=>dialog,
+ keyboard:{press:async()=>{if(failure!=='stalled')row+=direction;}},
+ waitForFunction:async(fn,{before},{timeout})=>{
+  if(!(timeout>0))throw Error('unbounded wait');
+  if(`${row} / 2`===before)throw Error('page did not advance');
+ }};
+(async()=>{
+ try {
+  const results=await captureTablePages(page,{dashboard:{uid:'test',tablePanels:[
+   {id:1,type:'bioetl-selectorshell-panel',effectiveType:'table',adaptiveTable:true}
+  ]},outputDir:process.argv[2],pngEvidence:()=>({bytes:7,sha256:'a'.repeat(64)}),timeout:0});
+  console.log(JSON.stringify({results,row,modal,shots}));
+ }catch(error){console.log(JSON.stringify({error:error.message,row,modal,shots}));}
+})();
+"""
+    result = subprocess.run(
+        [
+            node,
+            "-e",
+            program,
+            str(
+                Path(
+                    "scripts/ops/observability/grafana/capture_table_pages.cjs"
+                ).resolve()
+            ),
+            str(tmp_path),
+            failure,
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    evidence = json.loads(result.stdout)
+    assert evidence["row"] == 2
+    assert not evidence["modal"]
+    if failure != "none":
+        assert (
+            evidence["error"]
+            == {
+                "stalled": "page did not advance",
+                "details": "Compact table details are incomplete",
+                "screenshot": "capture failed",
+                "changed_total": "Compact table pagination changed during capture",
+            }[failure]
+        )
+        assert "results" not in evidence
+        return
+    capture = evidence["results"][0]
+    assert capture["status"] == "COMPLETE"
+    assert [page["page"] for page in capture["pages"]] == [1, 2]
+    for row, page in enumerate(capture["pages"], 1):
+        assert [field["name"] for field in page["details"]["fields"]] == [
+            "Pipeline",
+            "Context",
+            "Full Run ID",
+        ]
+        for index, field in enumerate(page["details"]["fields"]):
+            assert field["text"] == f"row-{row}-full-field-{index}"
+            assert field["links"] == [{"href": f"https://example.test/{row}/{index}"}]
+            assert (tmp_path / field["file"]).is_file()
+    assert len(evidence["shots"]) == 8
+
+
+@pytest.mark.parametrize("managed", [False, True])
+def test_series_capture_includes_managed_chart_and_restores_all_series(
+    tmp_path, managed
+):
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    program = r"""
+const fs=require('fs'),path=require('path');
+const {captureSeriesControls}=require(process.argv[1]);
+const zoom=require(path.join(path.dirname(process.argv[1]),'native_browser_zoom.cjs'));
+zoom.captureElementScreenshot=async(page,root,options)=>{
+ const b=Buffer.from('series');fs.writeFileSync(options.path,b);return b;
+};
+const labels=['Ledger append','Ledger replay'];let active=[...labels],focused=-1;
+const buttons={allTextContents:async()=>labels,nth:index=>({
+ focus:async()=>{focused=index;},evaluate:async()=>focused===index,
+})};
+const rows={locator:()=>buttons,evaluateAll:async()=>active};
+const root={locator:()=>rows};
+const page={locator:selector=>selector==='[data-viz-panel-key]'?{evaluateAll:async()=>['panel-8807']}:root,
+ keyboard:{press:async()=>{active=active.length===1?[...labels]:[labels[focused]];}},
+ waitForTimeout:async()=>{},evaluate:async()=>[],
+};
+(async()=>{
+ const managed=process.argv[3]==='true';
+ const results=await captureSeriesControls(page,{dashboard:{uid:'test',requiredPanels:[
+  {id:8807,type:managed?'bioetl-selectorshell-panel':'timeseries',...(managed?{effectiveType:'timeseries'}:{})}
+ ]},outputDir:process.argv[2],pngEvidence:()=>({bytes:6}),timeout:1000});
+ console.log(JSON.stringify({results,active}));
+})().catch(error=>console.log(JSON.stringify({error:error.message})));
+"""
+    result = subprocess.run(
+        [
+            node,
+            "-e",
+            program,
+            str(
+                Path(
+                    "scripts/ops/observability/grafana/capture_canvas_evidence.cjs"
+                ).resolve()
+            ),
+            str(tmp_path),
+            str(managed).lower(),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    evidence = json.loads(result.stdout)
+    assert "error" not in evidence, evidence
+    assert evidence["active"] == ["Ledger append", "Ledger replay"]
+    assert len(evidence["results"]) == 1
+    assert evidence["results"][0]["status"] == "PASS"
+    assert len(evidence["results"][0]["entries"]) == 2
+
+
 @pytest.mark.parametrize(
     ("raw", "displayed", "expect", "mapping_type"),
     [

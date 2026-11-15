@@ -322,6 +322,10 @@ def _correct_incident(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     _correct_incident_stat_thresholds(panels)
     _correct_incident_table_no_value(panels)
     _correct_incident_table_widths(panels)
+    # An old zero in a range must not outlive the trusted CURRENT status.
+    for target in panels.get(16, {}).get("targets", []):
+        target["instant"] = True
+        target.pop("range", None)
     status = panels.get(9401)
     if isinstance(status, dict):
         _ensure_open_run_overview_link(status)

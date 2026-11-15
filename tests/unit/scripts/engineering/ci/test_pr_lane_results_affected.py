@@ -88,6 +88,23 @@ def test_response_body_coverage_receipt_selects_measured_modules() -> None:
     }
 
 
+def test_grafana_capture_canvas_selects_attachment_and_capture_guards() -> None:
+    """Canvas edits must select the strict attachment verifier and capture suite."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["scripts/ops/observability/grafana/capture_canvas_evidence.cjs"],
+        repo_root=repo_root,
+    )
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == {
+        "tests/unit/scripts/ops/observability/test_grafana_browser_model_observer.py",
+        "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
+        "tests/unit/scripts/ops/observability/test_grafana_immutable_capture.py",
+        "tests/unit/scripts/ops/observability/test_table_capture_coverage.py",
+        "tests/integration/test_dashboard_first_window_noscroll.py",
+    }
+
+
 def test_grafana_capture_scroll_surface_shares_capture_cluster_route() -> None:
     """Scroll-surface capture keeps the capture cluster plus composition regression."""
     repo_root = Path(__file__).resolve().parents[5]
