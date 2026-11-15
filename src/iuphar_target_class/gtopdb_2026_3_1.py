@@ -22,17 +22,18 @@ ARCHIVE_SHA256 = "225dd1d3928012d8d0f2f3e79445f6e32d9d284222a212e15a09e56c60da08
 SQL_SHA256 = "5a50518bd2f8ce512ef270fe7ebd4937e7af8debb9db389ce1a8f15fad8c2b0d"
 TARGETS_CSV_SHA256 = "9e91ae4eed1e147f0c5b01dd2e0645c2d57edb39442114d3128c70232b0d39fb"
 SPECIES_TAXON_IDS = (9606, 10090, 10116)
+_ION_CHANNEL_CLASS = "Ion Channel"
 
 TYPE_CLASS_PAIRS: tuple[tuple[str, str], ...] = (
     ("catalytic_receptor", "Receptor"),
     ("enzyme", "Enzyme"),
     ("gpcr", "Receptor"),
-    ("lgic", "Ion Channel"),
+    ("lgic", _ION_CHANNEL_CLASS),
     ("nhr", "Receptor"),
-    ("other_ic", "Ion Channel"),
+    ("other_ic", _ION_CHANNEL_CLASS),
     ("other_protein", "Other Protein Target"),
     ("transporter", "Transporter"),
-    ("vgic", "Ion Channel"),
+    ("vgic", _ION_CHANNEL_CLASS),
 )
 
 # Each row is (source family ID, its own source type, immediate parent IDs).
