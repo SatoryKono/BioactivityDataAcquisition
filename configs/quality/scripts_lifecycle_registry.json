@@ -2167,6 +2167,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/ops/observability/grafana/router_candidate.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-07",
+      "next_step": "Retain candidate image qualification as internal stages of the existing verify-router-managed-image facade; no standalone command or main guard. Preserve full rootfs, immutable image, original plugin artifact and default-delivery checks."
+    },
     "scripts/ops/observability/grafana/router_managed_image.py": {
       "decision": "shared_helper_module",
       "owner": "@bioetl-platform",
