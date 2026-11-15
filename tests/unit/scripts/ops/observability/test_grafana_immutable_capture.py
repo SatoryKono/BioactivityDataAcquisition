@@ -162,6 +162,53 @@ def test_latest_pointer_cannot_select_or_change_acceptance(capture) -> None:
     )
 
 
+def test_adaptive_capture_binds_its_committed_model_and_canonical_roster(
+    capture, monkeypatch
+) -> None:
+    root, path, manifest = capture
+    source = {
+        "uid": "test",
+        "id": None,
+        "version": 1,
+        "panels": [],
+        "title": "Adaptive",
+    }
+    raw = json.dumps(source).encode()
+    folder = root / "grafana/dashboards-adaptive"
+    folder.mkdir()
+    (folder / "test.json").write_bytes(raw)
+    manifest["source"]["dashboard_profile"] = "adaptive"
+    identity = manifest["dashboards"][0]["dashboardSource"]
+    identity.update(
+        path="grafana/dashboards-adaptive/test.json",
+        sha256=hashlib.sha256(raw).hexdigest(),
+    )
+    evidence = manifest["dashboards"][0]["provisionedModel"]
+    evidence.update(before=source, loaded=[source], after=source)
+
+    def committed(args, **kwargs):
+        assert args[-1] == "a" * 40 + ":grafana/dashboards-adaptive/test.json"
+        return SimpleNamespace(returncode=0, stdout=raw)
+
+    monkeypatch.setattr(provenance.subprocess, "run", committed)
+    path.write_text(json.dumps(manifest))
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "PASS"
+    # Selecting adaptive cannot shrink the native shipped UID roster.
+    (root / "grafana/dashboards/other.json").write_text('{"uid":"other"}')
+    result = provenance.verify_capture(path, repo_root=root)
+    assert "full-set UID coverage mismatch" in result["errors"]
+
+
+@pytest.mark.parametrize("profile", ["../../foreign", "unknown", ["adaptive"]])
+def test_capture_rejects_unknown_or_non_scalar_profile(capture, profile) -> None:
+    root, path, manifest = capture
+    manifest["source"]["dashboard_profile"] = profile
+    path.write_text(json.dumps(manifest))
+    result = provenance.verify_capture(path, repo_root=root)
+    assert result["status"] == "FAIL"
+    assert "invalid dashboard profile" in result["errors"]
+
+
 @pytest.mark.parametrize(
     "mutation", ["png", "source", "occurrence", "subset", "missing", "provisioned"]
 )

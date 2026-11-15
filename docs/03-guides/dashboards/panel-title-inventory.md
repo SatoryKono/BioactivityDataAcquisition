@@ -54,9 +54,9 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 2101 | Review Selected Run Status |
 | bioetl-incident-v1.json | 8809 | Observability Signals |
 | bioetl-incident-v1.json | 8810 | Review Observability States |
+| bioetl-incident-v1.json | 894 | Review Coverage Limits |
 | bioetl-incident-v1.json | 9102 | Monitor Coverage |
 | bioetl-incident-v1.json | 907 | Monitor Telemetry |
-| bioetl-incident-v1.json | 894 | Review Coverage Limits |
 | bioetl-incident-v1.json | 9491 | Inspect Telemetry Coverage |
 | bioetl-incident-v1.json | 8808 | Pipeline fleet and range, not this Run ID |
 | bioetl-incident-v1.json | 18940 | Monitor Pipeline Status |
