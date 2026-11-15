@@ -821,6 +821,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/quality/low-coverage-6045-revalidation.xml": (
         "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
     ),
+    "reports/quality/response-body-13160-coverage.xml": (
+        "tests/architecture/test_module_coverage_inventory_freshness.py",
+        "tests/unit/infrastructure/adapters/http/test_response_budgets.py",
+        "tests/unit/infrastructure/export/test_csv_exporter.py",
+    ),
     "reports/quality/issue-12474-api-owner-brief.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
         CHECK_DOC_LINKS_GUARDRAILS_TEST,
