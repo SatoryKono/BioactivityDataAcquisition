@@ -115,12 +115,49 @@ def _response_body_decoder(
     return zlib.decompressobj(window_bits)
 
 
+def _window_bits(encoding: str) -> int:
+    if encoding == "gzip":
+        return 16 + zlib.MAX_WBITS
+    return zlib.MAX_WBITS
+
+
+def _append_decoded_chunk(
+    body: bytearray,
+    raw: bytes,
+    decoder: _DeflateDecoder | zlib._Decompress | None,
+    *,
+    decoded_limit: int,
+    request: httpx.Request,
+) -> None:
+    """Append one bounded chunk and reject trailing compressed bytes."""
+    remaining = decoded_limit - len(body)
+    decoded = raw if decoder is None else decoder.decompress(raw, remaining + 1)
+    if len(decoded) > remaining:
+        raise ResponseBudgetExceeded("Decoded HTTP response budget exceeded")
+    if decoder is not None and decoder.unused_data:
+        raise httpx.DecodingError(
+            "Trailing or concatenated compressed HTTP response",
+            request=request,
+        )
+    body.extend(decoded)
+
+
+def _require_complete_decoder(
+    decoder: _DeflateDecoder | zlib._Decompress | None,
+    request: httpx.Request,
+) -> None:
+    if decoder is not None and not decoder.eof:
+        raise httpx.DecodingError(
+            "Truncated compressed HTTP response",
+            request=request,
+        )
+
+
 async def _collect_response_body(
     response: httpx.Response, encoding: str, *, wire_limit: int, decoded_limit: int
 ) -> tuple[bytes, int]:
     """Read bounded chunks without allocating an unbounded decoder output."""
-    window_bits = 16 + zlib.MAX_WBITS if encoding == "gzip" else zlib.MAX_WBITS
-    decoder = _response_body_decoder(encoding, window_bits)
+    decoder = _response_body_decoder(encoding, _window_bits(encoding))
     body = bytearray()
     wire_bytes = 0
     try:
@@ -128,22 +165,16 @@ async def _collect_response_body(
             wire_bytes += len(raw)
             if wire_bytes > wire_limit:
                 raise ResponseBudgetExceeded("Wire HTTP response budget exceeded")
-            remaining = decoded_limit - len(body)
-            decoded = raw if decoder is None else decoder.decompress(raw, remaining + 1)
-            if len(decoded) > remaining:
-                raise ResponseBudgetExceeded("Decoded HTTP response budget exceeded")
-            body.extend(decoded)
-            if decoder is not None and decoder.unused_data:
-                raise httpx.DecodingError(
-                    "Trailing or concatenated compressed HTTP response",
-                    request=response.request,
-                )
+            _append_decoded_chunk(
+                body,
+                raw,
+                decoder,
+                decoded_limit=decoded_limit,
+                request=response.request,
+            )
     except zlib.error as exc:
         raise httpx.DecodingError(
             "Invalid compressed HTTP response", request=response.request
         ) from exc
-    if decoder is not None and not decoder.eof:
-        raise httpx.DecodingError(
-            "Truncated compressed HTTP response", request=response.request
-        )
+    _require_complete_decoder(decoder, response.request)
     return bytes(body), wire_bytes
