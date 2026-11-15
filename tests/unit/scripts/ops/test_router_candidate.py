@@ -1,5 +1,7 @@
 """Candidate qualification boundaries without Docker, network or service I/O."""
 
+from __future__ import annotations
+
 import copy
 import hashlib
 import json
