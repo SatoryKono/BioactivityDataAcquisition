@@ -1,0 +1,29 @@
+{
+  "artifact": "volume_fixture",
+  "biological_accuracy_accepted": false,
+  "kind": "synthetic",
+  "rows": [
+    {
+      "gene_symbol": "GENE1",
+      "input_row_id": "volume-1",
+      "target_kind": "protein"
+    },
+    {
+      "input_row_id": "volume-2",
+      "target_kind": "protein",
+      "uniprot": "P04637"
+    },
+    {
+      "gene_symbol": "GENE3",
+      "input_row_id": "volume-3",
+      "target_kind": "complex"
+    }
+  ],
+  "stage0_selected_source_count": 0,
+  "stages": [
+    "0",
+    "1",
+    "2",
+    "3"
+  ]
+}

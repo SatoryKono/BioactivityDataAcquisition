@@ -1591,6 +1591,9 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     ),
     "src/iuphar_target_class/stage0/": (IUPHAR_STAGE0_TEST,),
     "data/iuphar_target_class/stage0/": (IUPHAR_STAGE0_TEST,),
+    "data/iuphar_target_class/acceptance/": (
+        "tests/unit/iuphar_target_class/test_acceptance.py",
+    ),
     **dict.fromkeys(
         (
             ".codex/agents/",
