@@ -4,7 +4,7 @@
   "private": true,
   "description": "Pinned Node.js and Gemini CLI toolchain for the managed BioETL launcher.",
   "dependencies": {
-    "@google/gemini-cli": "0.66.0"
+    "@google/gemini-cli": "0.68.0"
   },
   "optionalDependencies": {
     "node-linux-arm64": "26.13.0",
