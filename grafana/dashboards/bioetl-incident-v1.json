@@ -3039,6 +3039,33 @@
           }
         },
         {
+          "gridPos": {
+            "x": 12,
+            "y": 48,
+            "w": 8,
+            "h": 2
+          },
+          "id": 894,
+          "options": {
+            "mode": "html",
+            "content": "<div style=\"font-size:16px;line-height:1.2\">Coverage is not success. Limits: panel info.</div>"
+          },
+          "title": "Review Coverage Limits",
+          "type": "text",
+          "description": "<div style=\"font-size:16px;line-height:1.4\">Coverage contract<ul style=\"margin:6px 0 0 22px;padding:0\"><li style=\"font-size:16px\">Replay duplicate/overwrite risk is covered by bounded <code style=\"font-size:16px\">risk_type</code> telemetry.</li><li style=\"font-size:16px\">Manifest-to-ledger referential integrity is covered by complementary <code style=\"font-size:16px\">consistent</code> / <code style=\"font-size:16px\">inconsistent</code> ratio series.</li><li style=\"font-size:16px\">A zero blocker verdict is trustworthy only while the telemetry-coverage card is complete.</li></ul></div>",
+          "fieldConfig": {
+            "defaults": {
+              "links": [
+                {
+                  "targetBlank": true,
+                  "title": "Open Instrumentation Plan",
+                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
+                }
+              ]
+            }
+          }
+        },
+        {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
@@ -3402,33 +3429,6 @@
           ],
           "title": "Monitor Telemetry",
           "type": "stat"
-        },
-        {
-          "gridPos": {
-            "x": 12,
-            "y": 48,
-            "w": 8,
-            "h": 2
-          },
-          "id": 894,
-          "options": {
-            "mode": "html",
-            "content": "<div style=\"font-size:16px;line-height:1.2\">Coverage is not success. Limits: panel info.</div>"
-          },
-          "title": "Review Coverage Limits",
-          "type": "text",
-          "description": "<div style=\"font-size:16px;line-height:1.4\">Coverage contract<ul style=\"margin:6px 0 0 22px;padding:0\"><li style=\"font-size:16px\">Replay duplicate/overwrite risk is covered by bounded <code style=\"font-size:16px\">risk_type</code> telemetry.</li><li style=\"font-size:16px\">Manifest-to-ledger referential integrity is covered by complementary <code style=\"font-size:16px\">consistent</code> / <code style=\"font-size:16px\">inconsistent</code> ratio series.</li><li style=\"font-size:16px\">A zero blocker verdict is trustworthy only while the telemetry-coverage card is complete.</li></ul></div>",
-          "fieldConfig": {
-            "defaults": {
-              "links": [
-                {
-                  "targetBlank": true,
-                  "title": "Open Instrumentation Plan",
-                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
-                }
-              ]
-            }
-          }
         },
         {
           "datasource": {

@@ -207,6 +207,9 @@ def _expand_coverage_row(row: dict[str, Any]) -> tuple[int, int]:
         (p["gridPos"]["y"] + p["gridPos"]["h"] for p in children),
         default=old_bottom,
     )
+    # Grafana's v2 conversion preserves array order. Keep that order aligned
+    # with the declared grid, including short explanatory cards above stats.
+    children.sort(key=lambda panel: (panel["gridPos"]["y"], panel["gridPos"]["x"]))
     return old_bottom, new_bottom - old_bottom
 
 

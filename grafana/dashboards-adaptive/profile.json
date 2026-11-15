@@ -5,10 +5,10 @@
   "canonical_sha256": {
     "bioetl-control-plane-v1.json": "05165e9fd2b24e72547823aa4705ed1f721af3d68172cfb1960138ae0a899f12",
     "bioetl-dq-v2.json": "7ccac353e685d1ae68a0efbcb62f451f2c0677d998a0ca5eff79eaa19fef96da",
-    "bioetl-incident-v1.json": "3071728ef23ddbb956449b881af5f54f7d46a2881bb0272169d45911bfbaa845",
+    "bioetl-incident-v1.json": "9acb14bdc5c7880e700e9271cd931a72602e4da920481425c4949a7025488d3f",
     "bioetl-overview-v2.json": "9416911e8e6869037f7711a287810eb27a22538f9179602b03c30ba7f9f456f5",
     "bioetl-run-explorer-v1.json": "2e656533634eb5c67d430ce822acdb3830de68624a429a5bd39438429ca4f7ed"
   },
-  "plugin_version": "1.1.6",
+  "plugin_version": "1.1.7",
   "module_sha256": "0cc01e10fbadb65a12022e26a395066a252337e0e83a709c8a5fb81c2229bc69"
 }
