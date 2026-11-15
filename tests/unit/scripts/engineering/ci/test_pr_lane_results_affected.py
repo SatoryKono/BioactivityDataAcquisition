@@ -75,6 +75,19 @@ def test_unmapped_path_still_has_no_pytest_target(
     assert "tests gate has no affected pytest target" in capsys.readouterr().err
 
 
+def test_response_body_coverage_receipt_selects_measured_modules() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["reports/quality/response-body-13160-coverage.xml"], repo_root=repo_root
+    )
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == {
+        "tests/architecture/test_module_coverage_inventory_freshness.py",
+        "tests/unit/infrastructure/adapters/http/test_response_budgets.py",
+        "tests/unit/infrastructure/export/test_csv_exporter.py",
+    }
+
+
 def test_grafana_capture_canvas_selects_attachment_and_capture_guards() -> None:
     """Canvas edits must select the strict attachment verifier and capture suite."""
     repo_root = Path(__file__).resolve().parents[5]
