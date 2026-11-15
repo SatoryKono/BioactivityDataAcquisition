@@ -71,7 +71,7 @@ def test_context_uses_uri_encoded_variable_in_backend_only(uid, donor_id):
     ],
 )
 def test_query_context_is_explicit_and_clock_is_query_evaluation(
-    requested, payload, expected
+    requested, payload, expected, requested_pipeline="$__all"
 ):
     node = shutil.which("node")
     module = os.environ.get("JSONATA_MODULE")
@@ -82,7 +82,7 @@ def test_query_context_is_explicit_and_clock_is_query_evaluation(
     value = requested[0] if isinstance(requested, list) else requested
     expression = RUN_SELECTION_CONTEXT.replace(
         "${run_id:percentencode}", quote(value, safe="~()*!.'")
-    )
+    ).replace("${pipeline:percentencode}", quote(requested_pipeline, safe="~()*!.'"))
     script = "const fs=require('fs'); const q=JSON.parse(fs.readFileSync(0,'utf8')); const expr=require(q.module)(q.expr); expr.registerFunction('now',()=>q.now); expr.evaluate(q.payload).then(x=>process.stdout.write(JSON.stringify(x))).catch(e=>{console.error(e.message);process.exit(1)});"
     checked_clock = datetime(2026, 11, 11, 10, tzinfo=UTC)
     result = subprocess.run(
@@ -132,3 +132,26 @@ def test_dq_context_generation_keeps_nested_disclosure_position_stable():
     assert disclosure["panels"][0]["gridPos"]["y"] == 22
     stamp_run_selection_context(payload)
     assert payload == first
+
+
+@pytest.mark.parametrize(
+    ("pipeline", "expected"),
+    [
+        ("chembl_activity", "EXPLICIT · requested Run ID"),
+        ("$__all", "EXPLICIT · requested Run ID"),
+        ("chembl_assay", "EXPLICIT · Run ID overrides Pipeline filter"),
+        ('id"; $error("injection"); "', "EXPLICIT · Run ID overrides Pipeline filter"),
+    ],
+)
+def test_exact_uuid_context_discloses_overridden_pipeline(pipeline, expected):
+    test_query_context_is_explicit_and_clock_is_query_evaluation(
+        "finished",
+        {
+            "run_id": "finished",
+            "pipeline": "chembl_activity",
+            "execution_state": "SUCCESS",
+            "verdict": "OK",
+        },
+        expected,
+        requested_pipeline=pipeline,
+    )

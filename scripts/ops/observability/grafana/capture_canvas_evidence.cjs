@@ -135,7 +135,7 @@ async function captureSeriesControls(page, {dashboard, outputDir, pngEvidence, t
   const ids=await page.locator('[data-viz-panel-key]').evaluateAll(els=>els.filter(el=>el.querySelector('canvas')).map(el=>el.dataset.vizPanelKey));
   const results=[];
   for(const id of ids){
-    if(!dashboard.requiredPanels.some(p=>p.id===Number(id.replace('panel-',''))&&p.type==='timeseries'))continue;
+    if(!dashboard.requiredPanels.some(p=>p.id===Number(id.replace('panel-',''))&&(p.effectiveType??p.type)==='timeseries'))continue;
     const panel=page.locator(`[data-viz-panel-key="${id}"]`);
     const rows=panel.locator('[data-testid^="data-testid VizLegend series "]');
     const labels=await rows.locator('button').allTextContents();

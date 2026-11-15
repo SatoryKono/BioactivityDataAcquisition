@@ -242,6 +242,27 @@ it('keeps secondary evidence in details when the compact summary selects fewer f
   expect(within(modal).getByRole('link', { name: 'Open report' })).toHaveAttribute('href', `/report/${ids[1]}`);
 });
 
+it.each([['Signal', 'Object'], ['Signal']])('retains hidden ranked-suspect metadata in row Details: %p', (...compactFields) => {
+  const panel = props();
+  panel.id = 2010;
+  panel.options = { ...panel.options, viewMode: 'rows', compactFields };
+  const metadata: Record<string, string> = { Pipeline: 'chembl_activity', Provider: 'chembl', Domain: 'provider' };
+  panel.data.series[0] = { length: 1, fields: ['Signal', 'Object', ...Object.keys(metadata)].map((name) => ({
+    name, type: 'string' as FieldType,
+    config: { custom: { hidden: name in metadata } },
+    values: [metadata[name] ?? name + ' value'],
+  })) };
+  render(<AdaptiveTable {...panel} />);
+  expect(screen.getAllByRole('rowheader')).toHaveLength(compactFields.length);
+  expect(screen.queryByText('chembl_activity')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Details' }));
+  const dialog = screen.getByRole('dialog', { name: 'Full context' });
+  for (const [name, value] of Object.entries(metadata)) {
+    expect(within(dialog).getByText(name)).toBeInTheDocument();
+    expect(within(dialog).getByText(value)).toBeInTheDocument();
+  }
+});
+
 it('reports an incomplete required summary rather than rendering partial success', () => {
   const panelProps = props();
   panelProps.options = { ...panelProps.options, viewMode: 'rows', compactFields: ['Pipeline', 'Missing required status'] };
@@ -279,4 +300,45 @@ it.each([
   panelProps.data.series[0].fields.find((field) => field.name === 'Pipeline')!.values[0] = value;
   render(<AdaptiveTable {...panelProps} />);
   expect(screen.getByText(text as string)).toBeInTheDocument();
+});
+
+it('keeps DQ status and its full reason accessible at 200 percent CSS width', () => {
+  viewport(683);
+  const panel = props();
+  panel.options = { ...panel.options, viewMode: 'record', compactFields: ['Processing', 'Overall verdict', 'Trust'] };
+  panel.data.series[0] = { length: 1, fields: ['Processing', 'Overall verdict', 'Trust', 'Reason'].map((name) => ({
+    name, type: 'string' as FieldType, config: {}, values: [name === 'Processing' ? 'SUCCESS' : name === 'Reason' ? 'Saved run evidence; CURRENT coverage is separate' : 'OK'],
+  })) };
+  render(<AdaptiveTable {...panel} width={585} height={170} />);
+  expect(screen.getByRole('rowheader', { name: 'Overall verdict' })).toBeInTheDocument();
+  expect(screen.getByText('SUCCESS')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Open full details' }));
+  expect(within(screen.getByRole('dialog')).getByText('Saved run evidence; CURRENT coverage is separate')).toBeInTheDocument();
+});
+
+it.each([
+  ['https://github.com/SatoryKono/BioactivityDataAcquisition/UNKNOWN%20required%20evidence', false],
+  ['', false],
+  ['https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/04-reference/passports/workflows/chembl.md', true],
+])('filters missing passport action and retains full hidden metadata: %s', (href, valid) => {
+  const panel = props();
+  const frame = panel.data.series[0];
+  for (const field of frame.fields) {
+    if (['Workflow', 'Provider', 'Duration', 'Saved Evidence', 'Data Quality'].includes(field.name)) {
+      field.config.custom = { hidden: true };
+    }
+  }
+  frame.fields.find((field) => field.name === 'Run ID')!.getLinks = (({ valueRowIndex }: { valueRowIndex: number }) => [
+    { href: '/d/run?var-run_id=' + ids[valueRowIndex], title: 'Select this run', target: '_self' },
+    { href, title: 'Workflow passport', target: '_blank' },
+  ]) as Field['getLinks'];
+  panel.options.compactFields = ['Provider', 'Pipeline', 'Run ID', 'Overview'];
+  render(<AdaptiveTable {...panel} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Details' }));
+  const dialog = screen.getByRole('dialog');
+  expect(within(dialog).getByText('Duration one')).toBeInTheDocument();
+  const passport = within(dialog).queryByRole('link', { name: 'Workflow passport' });
+  if (valid) { expect(passport).toHaveAttribute('href', href); }
+  else { expect(passport).not.toBeInTheDocument(); }
+  expect(within(dialog).getByRole('link', { name: ids[0].slice(0, 8) })).toHaveAttribute('href', '/d/run?var-run_id=' + ids[0]);
 });
