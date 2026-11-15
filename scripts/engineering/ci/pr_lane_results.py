@@ -359,6 +359,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/local_layer.py": (
         "tests/unit/iuphar_target_class/test_local_layer.py",
     ),
+    "src/iuphar_target_class/hierarchy.py": (
+        "tests/unit/iuphar_target_class/test_hierarchy.py",
+    ),
     "src/iuphar_target_class/resolution.py": (
         "tests/unit/iuphar_target_class/test_resolution.py",
     ),
