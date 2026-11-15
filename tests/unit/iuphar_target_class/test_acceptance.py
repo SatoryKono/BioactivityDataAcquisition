@@ -13,7 +13,15 @@ from tempfile import TemporaryDirectory
 
 import pytest
 
-from iuphar_target_class.acceptance import NOT_RUN_REASONS, build_acceptance_report
+from iuphar_target_class.acceptance import (
+    NOT_RUN_REASONS,
+    UNEXECUTED_REASONS,
+    build_acceptance_report,
+    run_volume_scenario,
+    stages_0_3_document,
+    volume_fixture_document,
+    volume_fixture_rows,
+)
 from iuphar_target_class.comparison import Stage0Reference, compare_stage0
 from iuphar_target_class.evidence import (
     EvidenceTable,
@@ -23,11 +31,13 @@ from iuphar_target_class.evidence import (
     match_id_violation,
 )
 from iuphar_target_class.models import ClassificationResult, RunProvenance
+from iuphar_target_class.policy import policy_document
 from iuphar_target_class.resolution import (
     Resolution,
     ResolutionInput,
     select_effective_class,
 )
+from iuphar_target_class.stage0.io import canonical_json_bytes
 
 pytestmark = pytest.mark.unit
 
@@ -314,3 +324,81 @@ def test_acceptance_rejects_failed_computed_invariant(
     with pytest.raises(AssertionError) as failure:
         test_acceptance_report_marks_only_executed_checks()
     assert failed_check in str(failure.value)
+
+
+REPO = Path(__file__).resolve().parents[3]
+_ACCEPTANCE = REPO / "data" / "iuphar_target_class" / "acceptance"
+
+
+def test_unrun_volume_scenario_stays_not_run() -> None:
+    missing = build_acceptance_report({})
+    passed = build_acceptance_report({"volume_scenario": "PASS"})
+    failed = build_acceptance_report({"volume_scenario": "FAIL"})
+    missing_checks = missing["checks"]
+    passed_checks = passed["checks"]
+    failed_checks = failed["checks"]
+    assert isinstance(missing_checks, list)
+    assert isinstance(passed_checks, list)
+    assert isinstance(failed_checks, list)
+    missing_volume = next(
+        item for item in missing_checks if item["name"] == "volume_scenario"
+    )
+    passed_volume = next(
+        item for item in passed_checks if item["name"] == "volume_scenario"
+    )
+    failed_volume = next(
+        item for item in failed_checks if item["name"] == "volume_scenario"
+    )
+    assert missing_volume["status"] == "NOT_RUN"
+    assert missing_volume["reason"] == UNEXECUTED_REASONS["volume_scenario"]
+    assert passed_volume == {"name": "volume_scenario", "reason": "", "status": "PASS"}
+    assert failed_volume["status"] == "FAIL"
+
+
+def test_volume_scenario_finishes_within_the_approved_limit() -> None:
+    parameters = policy_document()["parameters"]
+    assert isinstance(parameters, dict)
+    limit = parameters["volume_test_seconds"]
+    assert limit == 300
+    result = run_volume_scenario(volume_fixture_rows(), limit_seconds=limit)
+    assert result.row_count == 3
+    assert result.status == "PASS"
+    assert result.elapsed_seconds <= limit
+    document = stages_0_3_document()
+    assert document["volume_test_seconds"] == 300
+    assert document["biological_accuracy_accepted"] is False
+    checks = document["checks"]
+    assert isinstance(checks, list)
+    by_name = {item["name"]: item for item in checks}
+    assert by_name["volume_scenario"]["status"] == "PASS"
+    assert by_name["empty_batch"]["status"] == "PASS"
+    assert by_name["all_invalid_batch"]["status"] == "PASS"
+    assert by_name["graph_limits_boundary"]["status"] == "NOT_RUN"
+    assert by_name["http_transport"]["status"] == "NOT_RUN"
+    assert by_name["w153_integration"]["status"] == "NOT_RUN"
+    assert "volume_scenario" not in NOT_RUN_REASONS
+
+
+def test_empty_volume_fixture_fails() -> None:
+    result = run_volume_scenario((), limit_seconds=300)
+    assert result.status == "FAIL"
+    assert result.row_count == 0
+    assert result.reason == "фиксация объёма пуста"
+
+
+def test_volume_over_the_limit_fails() -> None:
+    ticks = iter((0.0, 300.1))
+    result = run_volume_scenario(
+        volume_fixture_rows(),
+        limit_seconds=300,
+        clock=lambda: next(ticks),
+    )
+    assert result.status == "FAIL"
+    assert result.reason == "время превысило volume_test_seconds"
+
+
+def test_committed_volume_artifacts_match_rebuild() -> None:
+    fixture = _ACCEPTANCE / "volume_fixture.json"
+    report = _ACCEPTANCE / "stages_0_3_report.json"
+    assert fixture.read_bytes() == canonical_json_bytes(volume_fixture_document())
+    assert report.read_bytes() == canonical_json_bytes(stages_0_3_document())
