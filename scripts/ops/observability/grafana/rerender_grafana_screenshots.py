@@ -90,6 +90,7 @@ class RenderConfig:
     fixture_case: str = ""
     range_from: str = ""
     range_to: str = ""
+    dashboard_profile: str = "native"
 
 
 @dataclass(frozen=True)
@@ -165,10 +166,10 @@ def _git_capture_source() -> dict[str, object]:
     return {"commit_sha": commit_sha, "working_tree_dirty": dirty}
 
 
-def _dashboard_source_by_uid() -> dict[str, dict[str, object]]:
+def _dashboard_source_by_uid(profile: str = "native") -> dict[str, dict[str, object]]:
     result: dict[str, dict[str, object]] = {}
     repo_root = _repo_root()
-    for dashboard_path in sorted(_dashboard_dir().glob("*.json")):
+    for dashboard_path in sorted(_dashboard_dir(profile).glob("*.json")):
         try:
             payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
@@ -305,7 +306,7 @@ def _finalize_manifest(config: RenderConfig, manifest: dict[str, Any]) -> None:
     dashboards = [
         dict(item) for item in manifest.get("dashboards", []) if isinstance(item, dict)
     ]
-    sources = _dashboard_source_by_uid()
+    sources = _dashboard_source_by_uid(config.dashboard_profile)
     file_set: list[str] = []
     for dashboard in dashboards:
         uid = str(dashboard.get("uid", ""))
@@ -428,8 +429,11 @@ def _grafana_slugify(title: str) -> str:
     )
 
 
-def _dashboard_dir() -> Path:
-    return Path(__file__).resolve().parents[4] / "grafana" / "dashboards"
+def _dashboard_dir(profile: str = "native") -> Path:
+    directories = {"native": "dashboards", "adaptive": "dashboards-adaptive"}
+    if profile not in directories:
+        raise ValueError(f"Unknown dashboard profile: {profile}")
+    return _repo_root() / "grafana" / directories[profile]
 
 
 def _describe_grafana_auth_failure(config: RenderConfig) -> str:
@@ -595,6 +599,12 @@ def _build_render_parser() -> argparse.ArgumentParser:
             "browser path, 'none' disables fallback."
         ),
     )
+    parser.add_argument(
+        "--dashboard-profile",
+        choices=("native", "adaptive"),
+        default="native",
+        help="Dashboard JSON profile used for source provenance and browser checks.",
+    )
     parser.add_argument("--var-workflow", default="")
     parser.add_argument("--var-pipeline", default="")
     parser.add_argument("--var-run-type", default="")
@@ -746,6 +756,7 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         capture_surface=str(args.capture_surface),
         kiosk_mode=str(args.kiosk_mode),
         browser_zoom=int(args.browser_zoom),
+        dashboard_profile=str(args.dashboard_profile),
         variables=variables,
         navigation_only=bool(args.navigation_only),
         fixture_manifest=fixture_manifest,
@@ -791,7 +802,9 @@ def _deduplicate_dashboard_variables(
 
 def _load_dashboards(config: RenderConfig) -> list[DashboardRecord]:
     items: list[DashboardRecord] = []
-    for dashboard_path in sorted(_dashboard_dir().glob("*.json")):
+    for dashboard_path in sorted(
+        _dashboard_dir(config.dashboard_profile).glob("*.json")
+    ):
         try:
             payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
@@ -1228,6 +1241,8 @@ def _run_playwright_process(config: RenderConfig) -> int:
             config.kiosk_mode,
             "--browser-zoom",
             str(config.browser_zoom),
+            "--dashboard-profile",
+            config.dashboard_profile,
         ]
     )
     if config.navigation_only:

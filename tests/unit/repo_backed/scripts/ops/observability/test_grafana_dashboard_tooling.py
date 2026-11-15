@@ -174,7 +174,7 @@ def test_rerender_load_dashboards_filters_and_sorts(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
     dashboard_dir = tmp_path / "tmp-test-dashboards"
-    monkeypatch.setattr(rerender_subject, "_dashboard_dir", lambda: dashboard_dir)
+    monkeypatch.setattr(rerender_subject, "_dashboard_dir", lambda *_: dashboard_dir)
     dashboard_dir.mkdir(exist_ok=True)
     (dashboard_dir / "runtime.json").write_text(
         json.dumps({"uid": "bioetl-runtime", "title": "Runtime"}) + "\n",
@@ -947,6 +947,7 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
         timeout_seconds=45.0,
         selected_uids=("bioetl-dq-v2",),
         fallback="auto",
+        dashboard_profile="adaptive",
     )
 
     result = rerender_subject._run_playwright_process(config)
@@ -967,6 +968,8 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
         "off",
         "--browser-zoom",
         "100",
+        "--dashboard-profile",
+        "adaptive",
         "--scope-query",
         "from=now-12h&to=now&timezone=UTC&theme=dark",
     ]

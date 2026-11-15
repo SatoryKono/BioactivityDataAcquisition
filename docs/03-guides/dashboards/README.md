@@ -66,15 +66,36 @@ layout acceptance whenever an accessibility fix changes geometry or typography.
 
 The canonical five dashboards in `grafana/dashboards/` retain native panels.
 An explicitly selected local profile in `grafana/dashboards-adaptive/` uses the
-managed adaptive plugin for Run Explorer panel 3010 and puts the Overview verdict
-first when columns stack. UIDs, queries, row links and selector semantics are
+managed adaptive plugin for Run Explorer panel 3010, the DQ verdict and CURRENT
+Prometheus panels, and puts the Overview verdict first when columns stack.
+UIDs, expressions, transformations, units, thresholds and row identities are
 preserved. This profile does not change historical acceptance results.
+
+Managed CURRENT panels query now on their own 30-second clock, including when
+the dashboard uses an absolute historical interval. The visible UTC clock is
+query evaluation time; it is not event or publication time. CURRENT trends
+retain the selected duration and end at now. Explicit TIME RANGE panels retain
+the dashboard interval. The native fallback still uses Grafana's dashboard
+clock and does not provide this independent-clock guarantee.
+
+The original query and transformation configuration is retained in each managed
+panel's `options.currentView`; the host panel has no duplicate historical query.
+Use the browser's query requests to inspect the independent evaluation time.
+Responses from a previous scope, errors, missing data, unverified query times
+and responses taking over 15 seconds cannot supply a healthy CURRENT verdict.
+The managed component uses the installed Grafana query runner and native panel
+renderer; deployment requires a matching host version and an actual UI check.
 
 Build the adaptive bundle with
 `npm exec webpack -- -c webpack.adaptive.config.ts --env production` from
 `grafana/plugins/bioetl-selectorshell-panel`, then generate the profile with
 `python -m scripts.ops.observability.grafana.render_nav_bus --adaptive-profile`.
 The same generator accepts `--check`; build provenance records its compiler inputs.
+Render this profile with `python -m scripts.ops.observability.grafana.rerender_grafana_screenshots --dashboard-profile adaptive --fallback playwright`.
+The explicit profile binds source hashes, row expansion and containment checks to the adaptive JSON; the default profile is `native`.
+Publish each changed adaptive bundle with a new plugin version: Grafana uses it
+in the browser module cache key. Reload plugin metadata during the approved
+deployment and verify ordinary navigation loads the new version.
 Select `BIOETL_GRAFANA_DASHBOARD_PROFILE_DIR=./grafana/provisioning/dashboards-adaptive`
 in the managed runtime process before starting the existing monitoring stack.
 Do not edit an environment file or restart a service without the required approval.
@@ -404,3 +425,5 @@ promtool test rules grafana/prometheus-rules/tests/bioetl_observability.test.yml
 `scripts/ops/observability/relayout_trust_review_panels.py`.
 Он не является shipped operator command; после заморозки first-screen
 layout helper удаляется или складывается в governed dashboard command.
+
+In the compact incident view, ranked suspects and CURRENT alerts appear side by side. Use Previous/Next to inspect each row and Details to read every original field.

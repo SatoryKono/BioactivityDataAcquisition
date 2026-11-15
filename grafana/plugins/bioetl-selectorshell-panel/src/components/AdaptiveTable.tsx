@@ -95,13 +95,27 @@ function valueText(field: Field, row: number): string {
   return display ? `${display.prefix ?? ''}${display.text}${display.suffix ?? ''}` : rawValueText(raw);
 }
 
+function usableLink(item: { href?: string; title?: string }): boolean {
+  if (!item.href || item.href.includes('${')) { return false; }
+  if (item.title === 'Workflow passport') {
+    // Grafana can interpolate noValue instead of absent hidden metadata.
+    return /^https:\/\/github\.com\/SatoryKono\/BioactivityDataAcquisition\/blob\/main\/docs\/04-reference\/passports\/workflows\/[a-zA-Z0-9%._-]+\.md$/.test(item.href);
+  }
+  return true;
+}
+
+function safeField(field: Field): Field {
+  const getLinks = field.getLinks;
+  return getLinks ? { ...field, getLinks: (options) => getLinks(options).filter(usableLink) } : field;
+}
+
 function Value({ field, row, preview = false, allLinks = false }: Readonly<{ field: Field; row: number; preview?: boolean; allLinks?: boolean }>) {
   const full = valueText(field, row);
   // The full value remains in the explicit details view. Do not CSS-clip data.
   const text = previewText(label(field), full, preview);
   const colored = ['color-text', 'color-background'].includes(field.config.custom?.cellOptions?.type);
   const color = colored ? field.display?.(field.values[row])?.color : undefined;
-  const links = field.getLinks?.({ valueRowIndex: row })?.filter((item) => item.href && !item.href.includes('${')) ?? [];
+  const links = field.getLinks?.({ valueRowIndex: row })?.filter(usableLink) ?? [];
   const link = links[0];
   return <>
     {link ? <a href={link.href} title={full} target={link.target} rel="noopener noreferrer" style={{ color }}>{text}</a>
@@ -204,7 +218,10 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
     return () => observer.disconnect();
   }, [host]);
   const viewport = useSyncExternalStore(subscribeViewport, () => window.innerWidth, () => 1920);
-  const frame = data.series.find((item) => item.length > 0);
+  const rawFrame = data.series.find((item) => item.length > 0);
+  const frame = useMemo(() => rawFrame ? {
+    ...rawFrame, fields: rawFrame.fields.map(safeField),
+  } : undefined, [rawFrame]);
   const fields = useMemo(() => frame?.fields.filter((field) => !hidden(field)) ?? [], [frame]);
   const displayFrame = useMemo(() => frame ? {
     ...frame,
@@ -220,8 +237,8 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
   const row = rowOrder[currentPage] ?? 0;
   const isRuns = options.viewMode === 'runs';
   // The docked menu can constrain a desktop panel below the readable ten-column width.
-  const isCompact = viewport < 1024 || (isRuns && (bounds?.width ?? width) < 1280);
   const isPaged = isRuns || options.viewMode === 'rows';
+  const isCompact = viewport < 1024 || (isPaged && (bounds?.width ?? width) < 1280);
 
   // Supported Grafana versions expose query details through errors. A failed
   // request remains unavailable even when no details accompany its state.
@@ -244,6 +261,7 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
 
   const detailFields = frame.fields.filter((field) =>
     fields.includes(field) || ['run_id', 'pipeline', 'run_type', 'workflow_scope'].includes(field.name)
+    || (isRuns && ['Workflow', 'Provider', 'Duration', 'Saved Evidence', 'Data Quality'].includes(label(field)))
   );
 
 

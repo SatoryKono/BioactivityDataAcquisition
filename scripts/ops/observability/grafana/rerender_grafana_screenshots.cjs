@@ -12,7 +12,12 @@ const MIN_GRAFANA_BODY_FONT_PX = 12;
 const MIN_GRAFANA_TITLE_FONT_PX = 14;
 const FIRST_WINDOW_Y = 18;
 const CONTAINMENT_TOLERANCE_PX = 2;
-const FIRST_WINDOW_CONTAINMENT_TYPES = Object.freeze(["text", "stat", "table"]);
+const FIRST_WINDOW_CONTAINMENT_TYPES = Object.freeze([
+  "text",
+  "stat",
+  "table",
+  "bioetl-selectorshell-panel",
+]);
 const PANEL_CONTENT_SCROLLER_SELECTORS = Object.freeze([
   '[data-testid="data-testid scrollbar viewport"]',
   '[data-testid="scrollbar viewport"]',
@@ -141,6 +146,7 @@ function defaultScreenshotConfig() {
       process.env.GRAFANA_SCREENSHOT_BROWSER_ZOOM || "100",
       10,
     ),
+    dashboardProfile: "native",
     navigationOnly: /^(1|true|yes)$/i.test(
       process.env.GRAFANA_SCREENSHOT_NAVIGATION_ONLY || "false",
     ),
@@ -190,6 +196,9 @@ function applyScreenshotArg(config, arg, next) {
     "--kiosk-mode": (value) => {
       config.kioskMode = value.trim().toLowerCase();
     },
+    "--dashboard-profile": (value) => {
+      config.dashboardProfile = value.trim().toLowerCase();
+    },
     "--browser-zoom": (value) => {
       config.browserZoom = Number.parseInt(value, 10);
     },
@@ -214,6 +223,9 @@ function applyScreenshotArg(config, arg, next) {
 }
 
 function validateScreenshotConfig(config) {
+  if (!new Set(["native", "adaptive"]).has(config.dashboardProfile)) {
+    throw new Error("Playwright dashboard profile must be native or adaptive");
+  }
   if (!Number.isFinite(config.captureTimeoutMs) || config.captureTimeoutMs <= 0) {
     config.captureTimeoutMs = Math.max(config.timeoutMs, 180000);
   }
@@ -415,8 +427,12 @@ function repoRoot() {
   return path.resolve(__dirname, "..", "..", "..", "..");
 }
 
-function dashboardDir() {
-  return path.join(repoRoot(), "grafana", "dashboards");
+function dashboardDir(profile = CONFIG.dashboardProfile) {
+  const directories = { native: "dashboards", adaptive: "dashboards-adaptive" };
+  if (!Object.hasOwn(directories, profile)) {
+    throw new Error("Unknown dashboard profile: " + profile);
+  }
+  return path.join(repoRoot(), "grafana", directories[profile]);
 }
 
 function grafanaSlugify(title) {
@@ -1559,6 +1575,18 @@ async function applyBrowserZoom(page) {
   });
 }
 
+async function applyRequestedKioskUi(page, mode) {
+  if (mode === "off") return;
+  // A docked mega-menu can survive Grafana's kiosk URL parameter. Use the
+  // native control; the later DOM gate still verifies the resulting mode.
+  const closeMenu = page.getByRole("button", { name: "Close menu", exact: true });
+  if ((await closeMenu.count()) > 0 && (await closeMenu.isVisible())) {
+    await closeMenu.click();
+    await closeMenu.waitFor({ state: "hidden", timeout: 10000 });
+    await page.waitForTimeout(500);
+  }
+}
+
 function browserAndKioskStateFromDom({ requestedZoom, requestedKiosk, physicalViewport }) {
   const visible = (element) => {
     if (!element) return false;
@@ -1581,9 +1609,12 @@ function browserAndKioskStateFromDom({ requestedZoom, requestedKiosk, physicalVi
     '[data-testid="data-testid navigation mega-menu"]',
   ];
   const toolbarSelectors = ['[data-testid="data-testid Nav toolbar"]'];
-  const visibleSelectors = (selectors) => selectors.filter((selector) =>
-    [...document.querySelectorAll(selector)].some(visible));
-  const visibleSidebar = visibleSelectors(sidebarSelectors);
+  const visibleSelectors = (selectors, accept = () => true) => selectors.filter((selector) =>
+    [...document.querySelectorAll(selector)].some(element => accept(element) && visible(element)));
+  // A collapsed navigation exposes a hamburger button labelled Main menu.
+  // The toggle itself is not an open sidebar.
+  const visibleSidebar = visibleSelectors(sidebarSelectors, element =>
+    element.tagName?.toUpperCase() !== "BUTTON" && element.getAttribute?.("role") !== "button");
   const visibleToolbar = visibleSelectors(toolbarSelectors);
   let actualKiosk = "off";
   if (kioskParam === "tv") actualKiosk = "tv";
@@ -2567,6 +2598,7 @@ async function renderDashboard(page, dashboard, index, total) {
   );
   await page.waitForTimeout(CONFIG.settleMs);
   await applyBrowserZoom(page);
+  await applyRequestedKioskUi(page, CONFIG.kioskMode);
   await expandCollapsedRows(page, dashboard, index, total);
   await waitForDashboardContent(page, dashboard, index, total);
   await materializeLazyPanels(page, dashboard, index, total);
@@ -2826,6 +2858,8 @@ if (require.main === module) {
 }
 
 module.exports = {
+  applyRequestedKioskUi,
+  dashboardDir,
   requiredPanelsForCapture,
   rowTitlePattern,
   browserDashboardResponseKind,

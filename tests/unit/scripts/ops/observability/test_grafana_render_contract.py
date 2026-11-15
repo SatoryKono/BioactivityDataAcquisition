@@ -491,7 +491,7 @@ def test_immutable_manifest_rejects_occurrence_overwrite(
     monkeypatch.setattr(
         rerender,
         "_dashboard_source_by_uid",
-        lambda: {
+        lambda *_: {
             "bioetl-overview-v2": {
                 "path": "grafana/dashboards/bioetl-overview-v2.json",
                 "sha256": "b" * 64,
