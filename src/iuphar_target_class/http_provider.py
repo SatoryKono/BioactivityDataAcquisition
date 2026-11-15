@@ -349,7 +349,7 @@ class HttpProvider:
         self._breaker.ok()
 
     def _delay(self, index: int, retry_after: str | None) -> float:
-        parsed = _retry_after_seconds(retry_after)
+        parsed = _retry_after_seconds(retry_after, maximum=self.config.retry_max_delay)
         if parsed is None:
             parsed = self.config.retry_base_delay * (2**index)
         return float(min(parsed, self.config.retry_max_delay))
@@ -538,9 +538,10 @@ def _load_json(body: bytes) -> object | str:
     if not body.strip():
         return "empty_body"
     try:
-        return json.loads(body.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError):
+        loaded: object = json.loads(body.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError):
         return "bad_json"
+    return "schema" if isinstance(loaded, str) else loaded
 
 
 def _search_items(payload: object) -> list[object] | str:
@@ -592,10 +593,7 @@ def _identifier(value: object) -> str | None:
     if not isinstance(value, str):
         return None
     text = value.strip()
-    if not text.isdecimal():
-        return None
-    number = int(text)
-    if number < 1 or str(number) != text:
+    if not text.isascii() or not text.isdecimal() or text.startswith("0"):
         return None
     return text
 
@@ -626,12 +624,18 @@ def _gene_fields(item: Mapping[str, object]) -> tuple[str, str] | str:
     return gene, kind
 
 
-def _retry_after_seconds(value: str | None) -> int | None:
+def _retry_after_seconds(value: str | None, *, maximum: int) -> int | None:
     if value is None:
         return None
     text = value.strip()
-    if text.isdecimal():
-        return int(text)
+    if text.isascii() and text.isdecimal():
+        digits = text.lstrip("0") or "0"
+        ceiling = str(maximum)
+        if len(digits) > len(ceiling) or (
+            len(digits) == len(ceiling) and digits > ceiling
+        ):
+            return maximum
+        return int(digits)
     return _http_date_delay(text)
 
 
@@ -639,8 +643,6 @@ def _http_date_delay(text: str) -> int | None:
     try:
         parsed = parsedate_to_datetime(text)
     except (TypeError, ValueError, IndexError, OverflowError):
-        return None
-    if parsed is None:
         return None
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=UTC)
@@ -668,7 +670,7 @@ def _payload_secret(payload: object, api_key: str | None) -> bool:
     )
     if GTP_HEADER in rendered:
         return True
-    return bool(api_key) and api_key in rendered
+    return api_key is not None and api_key != "" and api_key in rendered
 
 
 def _secret_leaked(hit: ProviderHit, api_key: str | None) -> bool:
@@ -679,4 +681,4 @@ def _secret_leaked(hit: ProviderHit, api_key: str | None) -> bool:
     rendered = "\n".join(chunks)
     if GTP_HEADER in rendered:
         return True
-    return bool(api_key) and api_key in rendered
+    return api_key is not None and api_key != "" and api_key in rendered

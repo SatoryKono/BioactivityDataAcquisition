@@ -452,3 +452,46 @@ def test_past_retry_after_http_date_waits_only_for_the_rate_limit() -> None:
     hit = provider.get_target("1")
     assert hit.diagnostics == ("source_unavailable:retries_exhausted",)
     assert clock.sleeps == [1, 1, 1]
+
+
+@pytest.mark.parametrize(
+    ("header", "expected_delay"),
+    [
+        pytest.param("9" * 5000, 30.0, id="oversized-value"),
+        pytest.param("0" * 5000 + "9", 9.0, id="oversized-leading-zeroes"),
+    ],
+)
+def test_oversized_retry_after_keeps_the_approved_cap(
+    header: str, expected_delay: float
+) -> None:
+    provider, _transport, clock = _provider(
+        [_response(429, retry_after=header), _response(200, _TARGET)]
+    )
+    assert hit_status(provider.get_target("1")) == "available"
+    assert clock.sleeps == [expected_delay]
+
+
+def test_long_numeric_identifier_does_not_require_an_integer_conversion() -> None:
+    import json
+
+    identifier = "9" * 5000
+    body = json.dumps({"targetId": identifier}).encode()
+    provider, _transport, _clock = _provider([_response(200, body)])
+    hit = provider.get_target(identifier)
+    assert hit_status(hit) == "available"
+    assert hit.records[0].record_id == identifier
+
+
+def test_oversized_json_integer_is_a_controlled_source_failure() -> None:
+    body = b'{"targetId":' + b"9" * 5000 + b"}"
+    provider, _transport, _clock = _provider([_response(200, body)])
+    hit = provider.get_target("1")
+    assert hit_status(hit) == "source_unavailable"
+    assert hit.diagnostics == ("source_unavailable:bad_json",)
+
+
+def test_json_string_is_schema_failure_without_echoing_the_body() -> None:
+    provider, _transport, _clock = _provider([_response(200, b'"private-response"')])
+    hit = provider.get_target("1")
+    assert hit_status(hit) == "source_unavailable"
+    assert hit.diagnostics == ("source_unavailable:schema",)
