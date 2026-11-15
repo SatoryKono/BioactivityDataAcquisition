@@ -13,21 +13,29 @@ import pytest
 import scripts.engineering.ci.nightly_shadow_archive as archive_module
 from scripts.engineering.ci.nightly_shadow_archive import (
     JOB_KINDS,
+    PILOT_CONFIGURATION_ID,
+    PILOT_RECORD_NAME,
+    REPO_ROOT,
     ArchiveError,
     _atomic_create,
+    _span_covers_48_minutes,
     aggregate_results,
     archive_runs,
+    assess_reduced_pilot_window,
     assess_shadow_window,
+    build_reduced_pilot_record,
     canonical_bytes,
     job_duty,
     main,
+    nightly_check_inventory,
     oracle_equivalent,
     oracle_pagination,
-    REPO_ROOT,
     oracle_sha256,
     partition_bucket,
     partition_producer,
+    pilot_record_sha256,
     require_accepted,
+    require_pilot_advance,
     verify_archive,
     write_snapshot,
 )
@@ -817,3 +825,537 @@ def test_partition_reports_current_success_retention(
     payload = json.loads(output.read_text(encoding="utf-8"))
     assert payload["success_retention_days"] == 7
     assert payload["diagnostic_retention_target_days"] == 90
+
+
+BASELINE_SHA = "c41cd6f7b7e4f1cb841358837fec6c6d30625106"
+_SHA = "a" * 40
+
+
+def _pilot_options(**overrides: object) -> dict[str, object]:
+    options: dict[str, object] = {
+        "configuration_id": PILOT_CONFIGURATION_ID,
+        "scheduled_success_total_count": None,
+        "successful_evidence_days": 30,
+        "diagnostic_retention_days": 90,
+        "verified_archive_days": 90,
+        "actions_retention_cap_days": 90,
+        "cadence_changed": False,
+        "retention_reduced": False,
+        "shallow_checkout": False,
+        "independent_review": False,
+        "independent_restore": False,
+        "failure_total_count": None,
+        "cancelled_total_count": None,
+        "missing_total_count": None,
+        "unknown_total_count": None,
+    }
+    options.update(overrides)
+    return options
+
+
+def _pilot_success(run_id: int, *, arm: str, created_at: str, **extra: object) -> dict:
+    payload: dict[str, object] = {
+        "arm": arm,
+        "configuration_id": PILOT_CONFIGURATION_ID,
+        "conclusion": "success",
+        "created_at": created_at,
+        "dom": "16",
+        "dow": "Mon",
+        "event": "schedule",
+        "force_weekly": "false",
+        "head_sha": _SHA,
+        "job_conclusions": _results(),
+        "month": "11",
+        "run_id": run_id,
+    }
+    payload.update(extra)
+    return payload
+
+
+def test_reduced_pilot_is_not_opened_without_a_successful_scheduled_pair() -> None:
+    """Zero successful scheduled Nightly runs cannot open the 48-minute window."""
+
+    result = assess_reduced_pilot_window(
+        [
+            {
+                "conclusion": "failure",
+                "configuration_id": PILOT_CONFIGURATION_ID,
+                "created_at": "2026-11-15T03:07:49Z",
+                "event": "schedule",
+                "head_sha": "f" * 40,
+                "run_id": 43670936545,
+            }
+        ],
+        **_pilot_options(scheduled_success_total_count=0, failure_total_count=36),
+    )
+    assert result["status"] == "not_opened"
+    assert result["equivalence"] == "not_passed"
+    assert result["sample_size_pairs"] == 0
+    assert "no_suitable_successful_scheduled_nightly" in result["reason_codes"]
+    assert result["counts"]["api"]["success"] == 0
+    assert result["counts"]["api"]["failure"] == 36
+    assert result["counts"]["sample"]["failure"] == 1
+    assert result["counts"]["sample"]["success"] == 0
+    assert result["n2_blocked"] is True
+    assert result["independent_review"] is False
+
+
+def test_unknown_success_count_is_not_recorded_as_zero() -> None:
+    result = assess_reduced_pilot_window([], **_pilot_options())
+    assert result["status"] == "not_opened"
+    assert result["equivalence"] == "not_passed"
+    assert "successful_scheduled_count_unknown" in result["reason_codes"]
+    assert "no_suitable_successful_scheduled_nightly" not in result["reason_codes"]
+    assert result["counts"]["api"]["success"] is None
+    assert result["counts"]["api"]["missing"] is None
+    assert result["counts"]["api"]["unknown"] is None
+
+
+def test_reduced_pilot_rejects_synthetic_events() -> None:
+    start = "2026-11-16T03:00:00Z"
+    end = "2026-11-16T03:48:00Z"
+    observations = [
+        _pilot_success(20, arm="baseline", created_at=start, dow="Fri"),
+        _pilot_success(21, arm="candidate", created_at=end, dow="Fri"),
+        {
+            "arm": "candidate",
+            "conclusion": "success",
+            "configuration_id": PILOT_CONFIGURATION_ID,
+            "created_at": end,
+            "event": "synthetic",
+            "head_sha": _SHA,
+            "run_id": 22,
+            "synthetic": True,
+        },
+    ]
+    result = assess_reduced_pilot_window(
+        observations,
+        **_pilot_options(scheduled_success_total_count=2),
+    )
+    assert result["equivalence"] == "not_passed"
+    assert result["status"] == "unacceptable"
+    assert "synthetic_event" in result["reason_codes"]
+    assert result["counts"]["sample"]["synthetic"] == 1
+    assert result["counts"]["sample"]["success"] == 2
+
+
+def test_success_failure_and_cancelled_stay_distinct() -> None:
+    result = assess_reduced_pilot_window(
+        [
+            {
+                "conclusion": "failure",
+                "configuration_id": PILOT_CONFIGURATION_ID,
+                "created_at": "2026-11-15T03:00:00Z",
+                "event": "schedule",
+                "head_sha": _SHA,
+                "run_id": 1,
+            },
+            {
+                "conclusion": "cancelled",
+                "configuration_id": PILOT_CONFIGURATION_ID,
+                "created_at": "2026-11-15T04:00:00Z",
+                "event": "schedule",
+                "head_sha": _SHA,
+                "run_id": 2,
+            },
+            {
+                "conclusion": None,
+                "configuration_id": PILOT_CONFIGURATION_ID,
+                "created_at": "2026-11-15T05:00:00Z",
+                "event": "schedule",
+                "head_sha": _SHA,
+                "run_id": 3,
+            },
+            {
+                "conclusion": "unknown",
+                "configuration_id": PILOT_CONFIGURATION_ID,
+                "created_at": "2026-11-15T06:00:00Z",
+                "event": "schedule",
+                "head_sha": _SHA,
+                "run_id": 4,
+            },
+        ],
+        **_pilot_options(scheduled_success_total_count=0),
+    )
+    assert result["counts"]["sample"] == {
+        "cancelled": 1,
+        "failure": 1,
+        "missing": 1,
+        "skipped": 0,
+        "success": 0,
+        "synthetic": 0,
+        "unknown": 1,
+    }
+    assert result["counts"]["api"]["missing"] is None
+    assert result["equivalence"] == "not_passed"
+
+
+def test_two_runs_do_not_replace_a_48_minute_span() -> None:
+    start = "2026-11-16T03:00:00Z"
+    too_soon = "2026-11-16T03:01:00Z"
+    assert (
+        _span_covers_48_minutes([{"created_at": start}, {"created_at": too_soon}])
+        is False
+    )
+    assert (
+        _span_covers_48_minutes(
+            [{"created_at": start}, {"created_at": "2026-11-16T03:48:00Z"}]
+        )
+        is True
+    )
+    result = assess_reduced_pilot_window(
+        [
+            _pilot_success(30, arm="baseline", created_at=start, dow="Fri"),
+            _pilot_success(31, arm="candidate", created_at=too_soon, dow="Fri"),
+        ],
+        **_pilot_options(scheduled_success_total_count=2),
+    )
+    assert result["equivalence"] == "not_passed"
+    assert result["status"] == "unacceptable"
+    assert "shorter_than_48_minutes" in result["reason_codes"]
+    assert result["sample_size_pairs"] == 0
+
+
+def test_expected_weekly_skip_can_pass_and_review_still_blocks_n2() -> None:
+    result = assess_reduced_pilot_window(
+        [
+            _pilot_success(
+                40, arm="baseline", created_at="2026-11-20T03:00:00Z", dow="Fri"
+            ),
+            _pilot_success(
+                41,
+                arm="candidate",
+                created_at="2026-11-20T03:48:00Z",
+                dow="Fri",
+            ),
+        ],
+        **_pilot_options(scheduled_success_total_count=2),
+    )
+    assert result["status"] == "complete"
+    assert result["equivalence"] == "passed"
+    assert result["sample_size_pairs"] == 1
+    assert result["reason_codes"] == []
+    assert result["n2_blocked"] is True
+    assert result["independent_review"] is False
+    assert result["independent_restore"] is False
+
+
+def test_mandatory_skipped_is_not_pilot_success() -> None:
+    monday = _results(codeql="skipped")
+    result = assess_reduced_pilot_window(
+        [
+            _pilot_success(
+                50,
+                arm="baseline",
+                created_at="2026-11-16T03:00:00Z",
+                job_conclusions=monday,
+            ),
+            _pilot_success(
+                51,
+                arm="candidate",
+                created_at="2026-11-16T03:48:00Z",
+                job_conclusions=monday,
+            ),
+        ],
+        **_pilot_options(scheduled_success_total_count=2),
+    )
+    assert result["equivalence"] == "not_passed"
+    assert result["status"] == "not_opened"
+    assert "mandatory_skipped" in result["reason_codes"]
+    forced = assess_reduced_pilot_window(
+        [
+            _pilot_success(
+                52,
+                arm="baseline",
+                created_at="2026-11-20T03:00:00Z",
+                dow="Fri",
+                force_weekly="true",
+            ),
+            _pilot_success(
+                53,
+                arm="candidate",
+                created_at="2026-11-20T03:48:00Z",
+                dow="Fri",
+                force_weekly="true",
+            ),
+        ],
+        **_pilot_options(scheduled_success_total_count=2),
+    )
+    assert forced["equivalence"] == "not_passed"
+    assert "mandatory_skipped" in forced["reason_codes"]
+
+
+def test_unknown_duty_skip_stays_unknown() -> None:
+    jobs = _results(codeql="skipped")
+    result = assess_reduced_pilot_window(
+        [
+            _pilot_success(
+                60,
+                arm="baseline",
+                created_at="2026-11-20T03:00:00Z",
+                dow="",
+                job_conclusions=jobs,
+            )
+        ],
+        **_pilot_options(scheduled_success_total_count=1),
+    )
+    assert result["equivalence"] == "not_passed"
+    assert "duty_unknown" in result["reason_codes"]
+    assert result["counts"]["sample"]["success"] == 1
+    assert result["status"] == "not_opened"
+
+
+def test_a_run_is_not_its_own_oracle() -> None:
+    result = assess_reduced_pilot_window(
+        [
+            _pilot_success(
+                70, arm="baseline", created_at="2026-11-20T03:00:00Z", dow="Fri"
+            ),
+            _pilot_success(
+                70, arm="candidate", created_at="2026-11-20T03:48:00Z", dow="Fri"
+            ),
+        ],
+        **_pilot_options(scheduled_success_total_count=1),
+    )
+    assert result["equivalence"] == "not_passed"
+    assert "run_is_own_oracle" in result["reason_codes"]
+    assert result["comparable_pair_count"] == 0
+
+
+def test_manual_backdated_and_blocking_changes_fail_closed() -> None:
+    manual = assess_reduced_pilot_window(
+        [
+            {
+                "conclusion": "success",
+                "configuration_id": PILOT_CONFIGURATION_ID,
+                "created_at": "2026-11-16T03:00:00Z",
+                "event": "workflow_dispatch",
+                "head_sha": _SHA,
+                "run_id": 80,
+            }
+        ],
+        **_pilot_options(scheduled_success_total_count=0),
+    )
+    assert manual["status"] == "not_opened"
+    assert "manual_event_not_a_start" in manual["reason_codes"]
+    assert "no_suitable_successful_scheduled_nightly" in manual["reason_codes"]
+
+    backdated = assess_reduced_pilot_window(
+        [
+            _pilot_success(
+                81, arm="baseline", created_at="2026-11-14T03:00:00Z", dow="Fri"
+            ),
+            _pilot_success(
+                82, arm="candidate", created_at="2026-11-14T03:48:00Z", dow="Fri"
+            ),
+        ],
+        **_pilot_options(scheduled_success_total_count=2),
+    )
+    assert backdated["status"] == "not_opened"
+    assert "backdated_start" in backdated["reason_codes"]
+
+    blocked = assess_reduced_pilot_window(
+        [
+            _pilot_success(
+                83, arm="baseline", created_at="2026-11-20T03:00:00Z", dow="Fri"
+            ),
+            _pilot_success(
+                84, arm="candidate", created_at="2026-11-20T03:48:00Z", dow="Fri"
+            ),
+        ],
+        **_pilot_options(
+            scheduled_success_total_count=2,
+            cadence_changed=True,
+            retention_reduced=True,
+            shallow_checkout=True,
+            successful_evidence_days=7,
+        ),
+    )
+    assert blocked["equivalence"] == "not_passed"
+    assert blocked["status"] == "unacceptable"
+    assert "cadence_changed" in blocked["reason_codes"]
+    assert "retention_reduced" in blocked["reason_codes"]
+    assert "shallow_checkout" in blocked["reason_codes"]
+    assert "success_retention_below_30" in blocked["reason_codes"]
+
+
+def test_pilot_advance_blocks_on_archive_errors(tmp_path: Path) -> None:
+    assessment = {
+        "equivalence": "passed",
+        "independent_restore": True,
+        "independent_review": True,
+        "n2_blocked": False,
+        "status": "complete",
+    }
+    with pytest.raises(ArchiveError, match="archive unavailable"):
+        require_pilot_advance(assessment, tmp_path / "missing")
+
+    malformed = tmp_path / "malformed"
+    stored = _store(malformed, _raw(), _outcomes())
+    _seal_index(malformed)
+    (stored / "manifest.json").write_text("{", encoding="utf-8")
+    with pytest.raises(ArchiveError, match="malformed"):
+        require_pilot_advance(assessment, malformed)
+
+    checksum = tmp_path / "checksum"
+    stored = _store(checksum, _raw(), _outcomes())
+    _seal_index(checksum)
+    (stored / "raw.json").write_bytes(b'{"id":11}\n')
+    with pytest.raises(ArchiveError, match="checksum mismatch"):
+        require_pilot_advance(assessment, checksum)
+
+    missing = tmp_path / "missing-artifact"
+    removed = _store(missing, _raw(), _outcomes())
+    _seal_index(missing)
+    shutil.rmtree(removed)
+    with pytest.raises(ArchiveError, match="indexed snapshot missing"):
+        require_pilot_advance(assessment, missing)
+
+
+def test_verified_archive_still_blocks_n2_for_an_unopened_pilot(tmp_path: Path) -> None:
+    _store(tmp_path, _raw(), _outcomes())
+    _seal_index(tmp_path)
+    assessment = assess_reduced_pilot_window(
+        [],
+        **_pilot_options(scheduled_success_total_count=0),
+    )
+    with pytest.raises(ArchiveError, match="N2 stays blocked"):
+        require_pilot_advance(assessment, tmp_path)
+
+
+def test_nightly_inventory_matches_workflow_and_fails_on_drift(tmp_path: Path) -> None:
+    inventory = nightly_check_inventory()
+    assert {row["name"] for row in inventory["jobs"]} == set(JOB_KINDS)
+    assert set(inventory["security_and_external_jobs"]) == {
+        "branch-hygiene",
+        "codeql",
+        "github-settings",
+        "scorecard",
+        "security",
+        "zizmor",
+    }
+    by_name = {row["name"]: row for row in inventory["jobs"]}
+    assert by_name["security"]["schedule_kind"] == "security_daily"
+    assert by_name["security"]["observation_class"] == "external_state_security"
+    assert by_name["codeql"]["cadence"] == "weekly_monday"
+    assert by_name["tests"]["observation_class"] == "deterministic"
+    assert inventory["fetch_depth"] == 0
+    assert inventory["shallow_checkout"] is False
+    assert inventory["cron"] == "0 3 * * *"
+    assert inventory["owner"] == "CI"
+    assert inventory["reviewers"] == [
+        "security",
+        "test-subject-owner",
+        "evidence-keeper",
+    ]
+    assert "generated_artifact_checks.py" in " ".join(
+        inventory["generated_artifact_checks"]
+    )
+    workflow = tmp_path / ".github/workflows"
+    workflow.mkdir(parents=True)
+    (workflow / "nightly.yml").write_text(
+        "name: Nightly\njobs:\n  clock:\n    runs-on: ubuntu-latest\n",
+        encoding="utf-8",
+    )
+    checks = tmp_path / "scripts/engineering/ci"
+    checks.mkdir(parents=True)
+    (checks / "generated_artifact_checks.py").write_text(
+        "daily validators\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ArchiveError, match="drifted"):
+        nightly_check_inventory(tmp_path)
+
+
+def test_historical_ledger_bytes_are_unchanged_vs_origin_main() -> None:
+    import subprocess
+
+    ledger = "reports/governance/n1-shadow-window/ledger.json"
+    committed = subprocess.check_output(
+        ["git", "show", f"origin/main:{ledger}"],
+        cwd=REPO_ROOT,
+    )
+    assert (REPO_ROOT / ledger).read_bytes() == committed
+    diff = subprocess.check_output(
+        [
+            "git",
+            "diff",
+            "--name-only",
+            "origin/main",
+            "--",
+            ledger,
+            "reports/governance/n1-shadow-window/unacceptable",
+        ],
+        cwd=REPO_ROOT,
+    )
+    assert diff == b""
+
+
+def test_committed_pilot_record_is_not_opened(tmp_path: Path) -> None:
+    record_path = REPO_ROOT / "reports/governance/n1-shadow-window" / PILOT_RECORD_NAME
+    record = json.loads(record_path.read_text(encoding="utf-8"))
+    assert record_path.read_bytes().endswith(b"\n")
+    assert record["schema_version"] == 1
+    assert record["decision_date"] == "2026-11-15"
+    assert record["duration_minutes"] == 48
+    assert record["configuration_id"] == PILOT_CONFIGURATION_ID
+    assert record["baseline_sha"] == BASELINE_SHA
+    assert record["status"] == "not_opened"
+    assert record["equivalence"] == "not_passed"
+    assert "no_suitable_successful_scheduled_nightly" in record["reason_codes"]
+    assert record["sample"]["sample_size_pairs"] == 0
+    assert record["sample"]["successful_scheduled_nightly_total_count"] == 0
+    assert "48 minutes" in record["sample"]["definition"]
+    assert record["replaces_parent_acceptance"] is False
+    assert record["n2_blocked"] is True
+    assert record["independent_review"] is False
+    assert record["independent_restore"] is False
+    assert record["shallow_checkout"] is False
+    assert record["cadence_changed"] is False
+    assert record["retention_changed"] is False
+    assert record["retention_floors"]["successful_evidence_days"] == 30
+    assert record["retention_floors"]["verified_archive_days"] == 90
+    assert record["api_counts"]["missing"] is None
+    assert record["api_counts"]["unknown"] is None
+    assert record["sha256"] == pilot_record_sha256(record)
+    rebuilt = build_reduced_pilot_record(
+        baseline_sha=BASELINE_SHA,
+        inventory=nightly_check_inventory(),
+    )
+    assert record_path.read_bytes() == canonical_bytes(rebuilt)
+    cited = {item["run_id"]: item for item in record["cited_failure_runs"]}
+    assert cited[43670936545]["created_at"] == "2026-11-15T03:07:49Z"
+    assert cited[43670936545]["head_sha"] == "f6f924bd6d3cf362e14a20206bd611179ca800a3"
+    assert cited[43549950171]["created_at"] == "2026-11-14T03:07:22Z"
+    assert cited[43356852695]["created_at"] == "2026-11-13T03:07:44Z"
+    limitations = "\n".join(record["limitations"])
+    assert "total_count=0" in limitations
+    assert "#12349" in limitations
+    assert "Cadence, retention, and shallow checkout are unchanged." in limitations
+    ledger = json.loads(
+        (REPO_ROOT / "reports/governance/n1-shadow-window/ledger.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert ledger["baseline_sha"] != record["baseline_sha"]
+    assert ledger["historical_window"]["candidate_pairs"] == 0
+    copied = main(
+        [
+            "record-pilot",
+            "--baseline-sha",
+            BASELINE_SHA,
+            "--output",
+            f"reports/governance/n1-shadow-window/{PILOT_RECORD_NAME}",
+        ]
+    )
+    assert copied == 0
+    refused = main(
+        [
+            "record-pilot",
+            "--baseline-sha",
+            BASELINE_SHA,
+            "--output",
+            "reports/governance/n1-shadow-window/other.json",
+        ]
+    )
+    assert refused == 1

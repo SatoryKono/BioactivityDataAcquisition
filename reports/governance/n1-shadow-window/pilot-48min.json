@@ -1,0 +1,286 @@
+{
+  "actions_permissions_http": "403",
+  "actions_permissions_source": "historical ledger observation; not re-probed and not changed",
+  "api_counts": {
+    "cancelled": 1,
+    "failure": 36,
+    "missing": null,
+    "success": 0,
+    "unknown": null
+  },
+  "archive": {
+    "blocks_next_stage": true,
+    "path": null,
+    "status": "unavailable",
+    "verified": false
+  },
+  "assessment": {
+    "cadence_changed": false,
+    "cancellation_upload": "best_effort",
+    "comparable_pair_count": 0,
+    "configuration_id": "daily-deterministic-plus-existing-weekly-security",
+    "counts": {
+      "api": {
+        "cancelled": 1,
+        "failure": 36,
+        "missing": null,
+        "success": 0,
+        "unknown": null
+      },
+      "sample": {
+        "cancelled": 1,
+        "failure": 3,
+        "missing": 0,
+        "skipped": 0,
+        "success": 0,
+        "synthetic": 0,
+        "unknown": 0
+      }
+    },
+    "decision_date": "2026-11-15",
+    "duration_minutes": 48,
+    "equivalence": "not_passed",
+    "independent_restore": false,
+    "independent_review": false,
+    "n2_blocked": true,
+    "reason_codes": [
+      "no_comparable_pair",
+      "no_suitable_successful_scheduled_nightly"
+    ],
+    "retention_reduced": false,
+    "sample_size_pairs": 0,
+    "schema_version": 1,
+    "shallow_checkout": false,
+    "status": "not_opened",
+    "window_end_utc": null,
+    "window_start_utc": null
+  },
+  "baseline_ref": "origin/main",
+  "baseline_sha": "c41cd6f7b7e4f1cb841358837fec6c6d30625106",
+  "cadence_changed": false,
+  "cancellation_upload": "best_effort",
+  "cited_cancelled_run": {
+    "branch": "main",
+    "conclusion": "cancelled",
+    "configuration_id": "daily-deterministic-plus-existing-weekly-security",
+    "created_at": "2026-10-25T08:05:34Z",
+    "event": "schedule",
+    "head_sha": "af5036c3d0ea68b556dd0f7053ab75f85585d871",
+    "run_attempt": 1,
+    "run_id": 40175268711
+  },
+  "cited_failure_runs": [
+    {
+      "branch": "main",
+      "conclusion": "failure",
+      "configuration_id": "daily-deterministic-plus-existing-weekly-security",
+      "created_at": "2026-11-15T03:07:49Z",
+      "event": "schedule",
+      "head_sha": "f6f924bd6d3cf362e14a20206bd611179ca800a3",
+      "run_attempt": 1,
+      "run_id": 43670936545
+    },
+    {
+      "branch": "main",
+      "conclusion": "failure",
+      "configuration_id": "daily-deterministic-plus-existing-weekly-security",
+      "created_at": "2026-11-14T03:07:22Z",
+      "event": "schedule",
+      "head_sha": "f6f924bd6d3cf362e14a20206bd611179ca800a3",
+      "run_attempt": 1,
+      "run_id": 43549950171
+    },
+    {
+      "branch": "main",
+      "conclusion": "failure",
+      "configuration_id": "daily-deterministic-plus-existing-weekly-security",
+      "created_at": "2026-11-13T03:07:44Z",
+      "event": "schedule",
+      "head_sha": "2657f30e8adaf04c0cb58ed38118da235b6a4b51",
+      "run_attempt": 1,
+      "run_id": 43356852695
+    }
+  ],
+  "committed_gap_ledger_is_the_shadow_window": false,
+  "configuration_id": "daily-deterministic-plus-existing-weekly-security",
+  "decision_date": "2026-11-15",
+  "decision_owner": "CI",
+  "duration_minutes": 48,
+  "duration_unit": "wall_clock_minutes",
+  "equivalence": "not_passed",
+  "independent_restore": false,
+  "independent_review": false,
+  "inventory": {
+    "called_workflows": [
+      ".github/workflows/tests.yml",
+      ".github/workflows/e2e-matrix-health.yml",
+      ".github/workflows/security.yml",
+      ".github/workflows/duplication-complexity.yml",
+      ".github/workflows/import-linter.yml",
+      ".github/workflows/zizmor.yml",
+      ".github/workflows/codeql.yml",
+      ".github/workflows/scorecard.yml",
+      ".github/workflows/branch-hygiene.yml",
+      ".github/workflows/github-settings-quarterly-review.yml",
+      ".github/workflows/mutation-testing.yml"
+    ],
+    "cancellation_upload": "best_effort",
+    "cron": "0 3 * * *",
+    "fetch_depth": 0,
+    "generated_artifact_checks": [
+      "scripts/engineering/ci/generated_artifact_checks.py"
+    ],
+    "generated_artifact_modes": [
+      "daily",
+      "validators"
+    ],
+    "jobs": [
+      {
+        "cadence": "every_scheduled_nightly",
+        "name": "clock",
+        "observation_class": "clock",
+        "schedule_kind": "clock"
+      },
+      {
+        "cadence": "every_scheduled_nightly",
+        "name": "tests",
+        "observation_class": "deterministic",
+        "schedule_kind": "deterministic"
+      },
+      {
+        "cadence": "every_scheduled_nightly",
+        "name": "e2e",
+        "observation_class": "deterministic",
+        "schedule_kind": "deterministic"
+      },
+      {
+        "cadence": "every_scheduled_nightly",
+        "name": "security",
+        "observation_class": "external_state_security",
+        "schedule_kind": "security_daily"
+      },
+      {
+        "cadence": "every_scheduled_nightly",
+        "name": "duplication",
+        "observation_class": "deterministic",
+        "schedule_kind": "deterministic"
+      },
+      {
+        "cadence": "every_scheduled_nightly",
+        "name": "import-linter",
+        "observation_class": "deterministic",
+        "schedule_kind": "deterministic"
+      },
+      {
+        "cadence": "every_scheduled_nightly",
+        "name": "zizmor",
+        "observation_class": "external_state_security",
+        "schedule_kind": "security_daily"
+      },
+      {
+        "cadence": "weekly_monday",
+        "name": "codeql",
+        "observation_class": "external_state_security",
+        "schedule_kind": "weekly_monday"
+      },
+      {
+        "cadence": "weekly_monday",
+        "name": "scorecard",
+        "observation_class": "external_state_security",
+        "schedule_kind": "weekly_monday"
+      },
+      {
+        "cadence": "weekly_monday",
+        "name": "branch-hygiene",
+        "observation_class": "external_state",
+        "schedule_kind": "weekly_monday"
+      },
+      {
+        "cadence": "quarterly",
+        "name": "github-settings",
+        "observation_class": "external_state",
+        "schedule_kind": "quarterly"
+      },
+      {
+        "cadence": "weekly_sunday",
+        "name": "mutation",
+        "observation_class": "deterministic",
+        "schedule_kind": "weekly_sunday"
+      },
+      {
+        "cadence": "every_scheduled_nightly",
+        "name": "generated-artifact-daily",
+        "observation_class": "deterministic",
+        "schedule_kind": "deterministic"
+      }
+    ],
+    "owner": "CI",
+    "reviewers": [
+      "security",
+      "test-subject-owner",
+      "evidence-keeper"
+    ],
+    "schema_version": 1,
+    "security_and_external_jobs": [
+      "branch-hygiene",
+      "codeql",
+      "github-settings",
+      "scorecard",
+      "security",
+      "zizmor"
+    ],
+    "shallow_checkout": false,
+    "workflow_diagnostic_artifact_retention_days": 90,
+    "workflow_path": ".github/workflows/nightly.yml",
+    "workflow_success_artifact_retention_days": 7
+  },
+  "issue": 12362,
+  "limitations": [
+    "Zero successful scheduled Nightly runs on main (event=schedule, conclusion=success, total_count=0). The 48-minute window is not open and equivalence is not passed.",
+    "Cited scheduled failures are not the window start: 43670936545 at 2026-11-15T03:07:49Z head f6f924bd6d3cf362e14a20206bd611179ca800a3; 43549950171 at 2026-11-14T03:07:22Z; 43356852695 at 2026-11-13T03:07:44Z.",
+    "The pilot does not replace acceptance of #12349.",
+    "Cadence, retention, and shallow checkout are unchanged.",
+    "No synthetic events were substituted. The committed gap ledger is not the shadow window.",
+    "Successful evidence floor is 30 days, failed or cancelled diagnostics floor is 90 days, verified archive floor is 90 days, and the Actions cap is 90 days. nightly.yml success artifact retention remains 7 days and was not retuned. Actions permissions were not changed (historical observation 403).",
+    "Cancelled scheduled total_count is 1 (run 40175268711) and is not success and not a window start. Missing and unknown API counts were not observed and stay null, not zero."
+  ],
+  "n2_blocked": true,
+  "parent_issue": 12349,
+  "reason_codes": [
+    "no_comparable_pair",
+    "no_suitable_successful_scheduled_nightly"
+  ],
+  "record_kind": "reduced_pilot_48min",
+  "replaces_parent_acceptance": false,
+  "retention_changed": false,
+  "retention_floors": {
+    "actions_cap_days": 90,
+    "failed_or_cancelled_diagnostics_days": 90,
+    "successful_evidence_days": 30,
+    "verified_archive_days": 90
+  },
+  "sample": {
+    "definition": "Reduced pilot. One wall-clock window of 48 minutes, not 48 hours and not two runs. It starts only at the first successful scheduled Nightly (event=schedule, conclusion=success) on configuration daily-deterministic-plus-existing-weekly-security at or after 2026-11-15T00:00:00Z. No backdating. A comparable pair is two different run ids on that same tested SHA and same configuration inside the window, one baseline arm and one candidate arm. A run is not its own oracle. Sample size is the number of such suitable pairs.",
+    "duration_minutes": 48,
+    "limits": [
+      "Synthetic events fail closed.",
+      "workflow_dispatch does not start the window.",
+      "missing, unknown, cancelled, and failure are not success and are not zero.",
+      "Mandatory skipped is not success. Expected skip of a non-mandatory weekly job can be success. Unknown duty plus skip stays unknown.",
+      "Cancellation upload stays best-effort.",
+      "Archive errors block the next stage.",
+      "This pilot does not replace acceptance of #12349.",
+      "Cadence, retention, and shallow checkout stay unchanged.",
+      "N2 stays blocked. independent_review and independent_restore stay false."
+    ],
+    "sample_size_pairs": 0,
+    "successful_scheduled_nightly_total_count": 0
+  },
+  "schema_version": 1,
+  "sha256": "e6b05d5a3d0282fda7beb0ed0ad8a3f7266aef9bdc11c19b0f67b4e1013eaa7d",
+  "shallow_checkout": false,
+  "status": "not_opened",
+  "synthetic_events": false,
+  "workflow_success_artifact_retention_days_unchanged": 7,
+  "workflow_success_artifacts_meet_floor": false
+}
