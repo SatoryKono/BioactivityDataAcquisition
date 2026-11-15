@@ -93,7 +93,10 @@ def test_full_nightly_replay_prompt_and_live_owners_are_fail_closed() -> None:
     assert full["if"] == (
         f"{scheduled_or_reused} || (github.event_name == 'workflow_dispatch')"
     )
-    assert prompt["if"] == f"{scheduled_or_reused} || github.event_name == 'workflow_dispatch'"
+    assert (
+        prompt["if"]
+        == f"{scheduled_or_reused} || github.event_name == 'workflow_dispatch'"
+    )
     assert live["if"] == (
         f"{scheduled_or_reused} || "
         "(github.event_name == 'workflow_dispatch' && github.event.inputs.run_live == 'true')"
