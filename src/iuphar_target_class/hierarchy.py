@@ -82,14 +82,19 @@ def validate_family_graph(
 def build_family_paths(
     nodes: tuple[FamilyNode, ...],
     family_ids: tuple[str, ...],
-) -> tuple[FamilyPath, ...]:
-    """Build root-to-leaf paths. The caller validates the graph first."""
+    *,
+    max_paths: int = GRAPH_MAX_VISITED_NODES,
+) -> tuple[FamilyPath, ...] | Diagnostic:
+    """Build root-to-leaf paths. Too many paths is a limit error."""
     indexed = _index_nodes(nodes)
     if isinstance(indexed, Diagnostic):
-        return ()
+        return indexed
     paths: list[FamilyPath] = []
     for family_id in sorted(family_ids):
-        paths.extend(_paths_from(indexed, family_id))
+        built = _paths_from(indexed, family_id, max_paths=max_paths, found=len(paths))
+        if isinstance(built, Diagnostic):
+            return built
+        paths.extend(built)
     return tuple(sorted(paths, key=lambda item: (item.family_id, item.root_to_leaf)))
 
 
@@ -146,7 +151,13 @@ def normalize_provider_class(
         iuphar_class_candidates=assigned.candidates,
         proof=proof,
         source=source,
-        paths=build_family_paths(nodes, family_ids),
+        paths=_require_paths(
+        build_family_paths(nodes, family_ids, max_paths=max_visited_nodes),
+        type_name=type_name,
+        type_to_class=type_to_class,
+        name=name,
+        path_text=path_text,
+    ),
         family_evidence=evidence,
         diagnostics=(),
     )
