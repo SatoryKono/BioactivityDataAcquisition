@@ -302,9 +302,10 @@ def _enter_node(
     multiple_parents_allowed: bool,
     nodes: dict[str, FamilyNode],
 ) -> Diagnostic | None:
-    if depth > max_depth or (
-        node.family_id not in seen and len(seen) >= max_visited_nodes
-    ):
+    steps[0] += 1
+    too_many_steps = steps[0] > max_visited_nodes
+    new_node = node.family_id not in seen and len(seen) >= max_visited_nodes
+    if depth > max_depth or too_many_steps or new_node:
         return _defect(_LIMIT)
     seen.add(node.family_id)
     if not multiple_parents_allowed and len(node.parent_ids) > 1:
@@ -317,15 +318,25 @@ def _enter_node(
     return None
 
 
-def _paths_from(nodes: dict[str, FamilyNode], start: str) -> tuple[FamilyPath, ...]:
+def _paths_from(
+    nodes: dict[str, FamilyNode],
+    start: str,
+    *,
+    max_paths: int,
+    found: int,
+) -> tuple[FamilyPath, ...] | Diagnostic:
     if start not in nodes:
         return ()
     frames: list[tuple[str, tuple[str, ...]]] = [(start, (start,))]
     paths: list[FamilyPath] = []
     while frames:
+        if found + len(paths) + len(frames) > max_paths:
+            return _defect(_LIMIT)
         node_id, leaf_to_root_ids = frames.pop()
         parents = nodes[node_id].parent_ids
         if not parents:
+            if found + len(paths) >= max_paths:
+                return _defect(_LIMIT)
             paths.append(
                 FamilyPath(
                     family_id=start,
