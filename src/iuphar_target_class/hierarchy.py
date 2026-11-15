@@ -377,6 +377,9 @@ class _FamilyPaths(Sequence[FamilyPath]):
     counts: dict[str, int]
 
     def __len__(self) -> int:
+        return self._total()
+
+    def _total(self) -> int:
         return sum(self.counts[start] for start in self.starts)
 
     def __iter__(self) -> Iterator[FamilyPath]:
@@ -404,11 +407,12 @@ class _FamilyPaths(Sequence[FamilyPath]):
     def __getitem__(self, index: slice) -> tuple[FamilyPath, ...]: ...
 
     def __getitem__(self, index: int | slice) -> FamilyPath | tuple[FamilyPath, ...]:
+        total = self._total()
         if isinstance(index, slice):
-            return tuple(self[item] for item in range(*index.indices(len(self))))
+            return tuple(self[item] for item in range(*index.indices(total)))
         if index < 0:
-            index += len(self)
-        if not 0 <= index < len(self):
+            index += total
+        if not 0 <= index < total:
             raise IndexError("family path index out of range")
         node_id, index = self._select(self.starts, index)
         path = [node_id]
@@ -428,7 +432,7 @@ class _FamilyPaths(Sequence[FamilyPath]):
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Sequence):
             return NotImplemented
-        return len(self) == len(other) and all(
+        return self._total() == len(other) and all(
             left == right for left, right in zip(self, other, strict=True)
         )
 

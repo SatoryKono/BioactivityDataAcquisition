@@ -311,6 +311,21 @@ def test_valid_exponential_graph_keeps_paths_lazy_without_new_limits() -> None:
     assert peak < 4 * 1024 * 1024
 
 
+def test_repeated_parent_links_stay_indexable_past_builtin_len() -> None:
+    nodes = tuple(
+        FamilyNode(
+            f"n{index}",
+            tuple(f"n{index + 1}" for _ in range(512)) if index < 7 else (),
+        )
+        for index in range(8)
+    )
+    walk = build_family_paths(nodes, family_ids=("n0",))
+    assert walk.defects == ()
+    first = walk.paths[0]
+    assert first.root_to_leaf == tuple(f"n{index}" for index in range(7, -1, -1))
+    assert walk.paths[:1] == (first,)
+
+
 def test_lazy_path_sequence_preserves_every_path_and_order() -> None:
     from itertools import product
 
