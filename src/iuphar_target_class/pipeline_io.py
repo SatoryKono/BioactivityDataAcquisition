@@ -72,10 +72,14 @@ def read_chembl_target_csv_v1(
     for record, raw in enumerate(reader, 1):
         if None in raw or any(value is None for value in raw.values()):
             raise ValueError("invalid CSV row width")
+        names = tuple(
+            name.strip() for name in raw["target_names"].split("|") if name.strip()
+        )
         fields = {
             **raw,
             "uniprot": raw["primaryAccession"],
-            "name": raw["target_names"],
+            "name": names[0] if names else None,
+            "synonyms": "|".join(names[1:]),
             "import_profile": "chembl_target_csv_v1",
             "source_path": source_path,
             "source_sha256": digest,

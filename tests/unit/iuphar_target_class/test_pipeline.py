@@ -139,6 +139,65 @@ def test_graph_defect_and_complex_do_not_promote_the_wrong_class():
     ]
 
 
+@pytest.mark.parametrize("identity", ["bad/id", "bad\nid", "bad\rid"])
+def test_invalid_evidence_identity_cannot_publish_derived_fields(identity):
+    raw = {"uniprot": "P12345", "organism": "Human", "ec": "3.1.-.-"}
+    batch = _run(RawTargetRow(identity, raw, "protein"))
+    output = batch.rows[0]
+    assert output.result.input_validation_status == "invalid_input"
+    assert output.validated.taxon is None
+    assert output.validated.uniprot_accessions == ()
+    assert output.validated.ec_numbers == ()
+    assert output.validated.normalized_fields == {}
+    row = json.loads(render_batch(batch)["classification.json"])[0]
+    assert row["taxon_id"] is None and row["uniprot_accessions"] == []
+    assert row["normalized_fields"] == {} and row["ec_numbers"] is None
+    assert row["raw_fields"] == raw
+
+
+def test_identity_conflict_publishes_the_cross_species_witnesses():
+    base = _snapshot()
+    snapshot = pipeline.IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture-release",
+        complete=True,
+        catalog=(
+            base.catalog[0],
+            replace(base.catalog[1], species="Mouse", uniprot_ids=("Q88888",)),
+        ),
+        annotations={},
+        family_nodes=(),
+        type_to_class={},
+        family_to_class={},
+    )
+    batch = _run(
+        RawTargetRow(
+            "conflict",
+            {"target_id": "1", "uniprot": "Q88888", "organism": "Human"},
+            "protein",
+        ),
+        snapshot=snapshot,
+    )
+    result = batch.rows[0].result
+    assert result.match_status == "identity_conflict"
+    assert result.candidate_target_ids == ("1", "2")
+    rendered = render_batch(batch)
+    assert {row["target_id"] for row in json.loads(rendered["candidates.json"])} == {
+        "1",
+        "2",
+    }
+    assert {row["source_id"] for row in json.loads(rendered["evidence.json"])} == {
+        "1",
+        "2",
+    }
+    assert result.effective_class is None
+    only_mouse = _run(
+        RawTargetRow("filtered", {"uniprot": "Q88888", "organism": "Human"}, "protein"),
+        snapshot=snapshot,
+    )
+    assert only_mouse.rows[0].result.match_status != "matched"
+
+
 def test_confirmed_annotation_supplies_missing_taxon_without_rewriting_input():
     original = {"target_id": "1"}
     batch = _run(RawTargetRow("exact", original, "protein"))
@@ -361,6 +420,21 @@ _PROJECT_TARGET_CSV = (
     b"target_chembl_id,isoform_ids,isoform_names,isoforms,organism,pH_dependence,primaryAccession,target_names,target_uniprot_id\n"
     b"CHEMBL1,,,,Human,,P12345,Receptor,P12345\n"
 )
+
+
+def test_project_names_are_separate_channels_and_cannot_hide_ambiguity():
+    raw = _PROJECT_TARGET_CSV.replace(b",Receptor,", b",receptor | shared,")
+    rows = read_chembl_target_csv_v1(
+        raw, source_path="target.csv", target_kind="protein"
+    )
+    assert rows[0].fields["target_names"] == "receptor | shared"
+    assert (
+        rows[0].fields["name"] == "receptor" and rows[0].fields["synonyms"] == "shared"
+    )
+    batch = _run(*rows)
+    assert batch.rows[0].result.match_status == "ambiguous"
+    assert batch.rows[0].result.candidate_target_ids == ("1", "2", "3")
+    assert batch.rows[0].result.effective_class is None
 
 
 def test_stage0_original_target_copies_use_frozen_explicit_profiles(tmp_path):

@@ -22,6 +22,7 @@ from .hierarchy import FamilyNode, HierarchyResult, normalize_provider_class
 from .iuphar_mapping import approved_class_mappings
 from .local_layer import Prediction, apply_local
 from .matching import (
+    METHOD_ORDER,
     Candidate,
     CatalogTarget,
     MatchQuery,
@@ -305,6 +306,7 @@ def classify_target(
     subset = _shortlist(query, snapshot)
     hits = collect_candidates(query, subset)
     match = validate_identity(query, subset, hits, snapshot_complete=snapshot.complete)
+    hits = _publication_hits(query, subset, hits, match)
     if (
         row.target_kind == "complex"
         and match.matched_target_id is not None
@@ -333,6 +335,30 @@ def classify_target(
         row = replace(row, taxon=annotation.taxon)
     direct = _direct(snapshot, annotation)
     return _complete(row, snapshot, run_id, hits, match, annotation, direct)
+
+
+def _publication_hits(
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+    hits: tuple[Candidate, ...],
+    match: MatchResult,
+) -> tuple[Candidate, ...]:
+    """Expose the conflicting exact channels without confirming cross-species hits."""
+    if match.match_status != "identity_conflict":
+        return hits
+    unfiltered = collect_candidates(replace(query, organism=None), catalog)
+    conflict = {
+        hit
+        for hit in unfiltered
+        if hit.target_id in match.candidate_target_ids
+        and hit.match_method in match.match_method
+    }
+    return tuple(
+        sorted(
+            set(hits) | conflict,
+            key=lambda hit: (hit.target_id, METHOD_ORDER.index(hit.match_method)),
+        )
+    )
 
 
 def _classification_diagnostics(
@@ -571,12 +597,6 @@ def classify_batch(
             glue_fixtures=glue_fixtures,
             catalog=snapshot.identifier_catalog,
         )
-        if any(mark in row.input_row_id for mark in ("/", "\n", "\r")):
-            v = replace(
-                v,
-                input_validation_status="invalid_input",
-                input_errors=(*v.input_errors, "invalid evidence identity"),
-            )
         results.append(classify_target(v, snapshot=snapshot, run_id=run_id))
     invalid = sum(x.result.input_validation_status == "invalid_input" for x in results)
     metrics = MappingProxyType(
