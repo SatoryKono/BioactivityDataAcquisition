@@ -18,21 +18,26 @@ RELEASE_DATE = "2026-10-12"
 APPROVED_ON = "2026-11-15"
 TARGETS_CSV_URL = "https://www.guidetopharmacology.org/DATA/targets_and_families.csv"
 ARCHIVE_URL = "https://www.guidetopharmacology.org/DATA/public_iuphardb_v2026.3.1.zip"
-ARCHIVE_SHA256 = "225dd1d3928012d8d0f2f3e79445f6e32d9d284222a212e15a09e56c60da0874"
-SQL_SHA256 = "5a50518bd2f8ce512ef270fe7ebd4937e7af8debb9db389ce1a8f15fad8c2b0d"
-TARGETS_CSV_SHA256 = "9e91ae4eed1e147f0c5b01dd2e0645c2d57edb39442114d3128c70232b0d39fb"
+# Public upstream artifact SHA-256, not an authentication credential.
+ARCHIVE_SHA256 = "225dd1d3928012d8d0f2f3e79445f6e32d9d284222a212e15a09e56c60da0874"  # pragma: allowlist secret
+# Public upstream artifact SHA-256, not an authentication credential.
+SQL_SHA256 = "5a50518bd2f8ce512ef270fe7ebd4937e7af8debb9db389ce1a8f15fad8c2b0d"  # pragma: allowlist secret
+# Public upstream artifact SHA-256, not an authentication credential.
+TARGETS_CSV_SHA256 = "9e91ae4eed1e147f0c5b01dd2e0645c2d57edb39442114d3128c70232b0d39fb"  # pragma: allowlist secret
 SPECIES_TAXON_IDS = (9606, 10090, 10116)
+
+_ION_CHANNEL = "Ion Channel"
 
 TYPE_CLASS_PAIRS: tuple[tuple[str, str], ...] = (
     ("catalytic_receptor", "Receptor"),
     ("enzyme", "Enzyme"),
     ("gpcr", "Receptor"),
-    ("lgic", "Ion Channel"),
+    ("lgic", _ION_CHANNEL),
     ("nhr", "Receptor"),
-    ("other_ic", "Ion Channel"),
+    ("other_ic", _ION_CHANNEL),
     ("other_protein", "Other Protein Target"),
     ("transporter", "Transporter"),
-    ("vgic", "Ion Channel"),
+    ("vgic", _ION_CHANNEL),
 )
 
 # Each row is (source family ID, its own source type, immediate parent IDs).
