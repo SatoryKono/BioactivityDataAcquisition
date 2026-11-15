@@ -27,6 +27,7 @@
     "@types/react-dom": "^19.3.0",
     "@typescript-eslint/eslint-plugin": "^8.72.1",
     "@typescript-eslint/parser": "^8.38.0",
+    "braces": "file:../../../.github/tooling/braces-backport/braces-3.0.4-bioetl.1.tgz",
     "copy-webpack-plugin": "^14.0.0",
     "css-loader": "^7.1.5",
     "eslint": "9.39.5",
@@ -55,8 +56,7 @@
     "webpack-cli": "^7.3.1",
     "webpack-livereload-plugin": "^3.0.2",
     "webpack-subresource-integrity": "^5.1.0",
-    "webpack-virtual-modules": "^0.6.2",
-    "braces": "file:../../../.github/tooling/braces-backport/braces-3.0.4-bioetl.1.tgz"
+    "webpack-virtual-modules": "^0.6.2"
   },
   "engines": {
     "node": ">=20"
@@ -66,8 +66,8 @@
     "@grafana/data": "13.3.0",
     "@grafana/i18n": "13.3.0",
     "@grafana/runtime": "13.3.0",
-    "@grafana/ui": "13.3.0",
     "@grafana/schema": "13.3.0",
+    "@grafana/ui": "13.3.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom-v5-compat": "file:../../tooling/router-v7-bridge/bioetl-grafana-router-v7-bridge-0.3.0.tgz"

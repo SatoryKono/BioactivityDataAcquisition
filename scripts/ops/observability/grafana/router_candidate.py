@@ -19,6 +19,7 @@ from scripts.ops.observability.grafana import router_managed_image as native
 from scripts.ops.observability.grafana.trusted_docker import docker_path
 from scripts.ops.observability.refresh_router_host_provenance import (
     JsonObject,
+    build_matches_config,
     SCOPES,
     json_list,
     json_object,
@@ -32,11 +33,87 @@ PLUGINS = ("bioetl-scenes-app", "bioetl-selectorshell-panel")
 BASE = "grafana/grafana@sha256:d84563330dc9d2fd2bc096d0fb96021b5319c75bf6ed555566709998e823dec4"
 
 
-def inputs(target: str, host: str, managed: str) -> None:
-    """Reject ambiguous mode, arbitrary registries and flags before Docker I/O."""
+SOURCE_INPUTS = (
+    ".gitignore",
+    ".gitattributes",
+    "grafana/plugins",
+    "grafana/tooling/router-v7-bridge",
+    ".github/tooling",
+    ".github/workflows/router-v7-bridge.yml",
+    "scripts/__init__.py",
+    "scripts/ops",
+    "scripts/engineering/__init__.py",
+    "scripts/engineering/common",
+    "tests/unit/scripts/ops",
+)
+GENERATED_DIST = tuple(f"grafana/plugins/{plugin}/dist/" for plugin in PLUGINS)
+
+
+def source_binding(source: str) -> str:
+    """Bind checked source inputs while generated dist is hashed in build artifacts."""
     require(
-        target in {"declared_delivery", "candidate"}, "Invalid qualification target"
+        len(source) == 40 and all(x in "0123456789abcdef" for x in source),
+        "Full agreed producer SHA required",
     )
+    require(
+        subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip()
+        == source,
+        "Source changed during production",
+    )
+    paths = [
+        *SOURCE_INPUTS,
+        *(f":(top,glob,exclude){path}**" for path in GENERATED_DIST),
+    ]
+    subprocess.run(
+        ["git", "diff", "--exit-code", "HEAD", "--", *paths],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+    )
+    require(
+        not subprocess.check_output(
+            ["git", "ls-files", "--others", "--exclude-standard", "-z", "--", *paths],
+            cwd=ROOT,
+        ),
+        "Unexpected untracked build input",
+    )
+    # ls-tree does not implement exclude pathspecs. Filter its NUL-delimited
+    # records by exact directory prefixes instead of passing unsupported magic.
+    tree = subprocess.check_output(
+        ["git", "ls-tree", "-r", "--full-tree", "-z", source, "--", *SOURCE_INPUTS],
+        cwd=ROOT,
+    )
+    prefixes = tuple(path.encode() for path in GENERATED_DIST)
+    selected = []
+    for record in tree.split(b"\0"):
+        if not record:
+            continue
+        _, separator, path = record.partition(b"\t")
+        require(bool(separator), "Invalid source tree record")
+        if not path.startswith(prefixes):
+            selected.append(record + b"\0")
+    require(bool(selected), "Missing source inputs")
+    return hashlib.sha256(b"".join(selected)).hexdigest()
+
+
+def inputs(target: str, host: str, managed: str, source: str = "") -> None:
+    """Keep production, published-image qualification and default delivery distinct."""
+    require(
+        target in {"declared_delivery", "candidate", "produce_candidate"},
+        "Invalid qualification target",
+    )
+    if target == "produce_candidate":
+        require(
+            not host and not managed, "Producer cannot accept published-image inputs"
+        )
+        require(
+            len(source) == 40 and all(x in "0123456789abcdef" for x in source),
+            "Full agreed producer SHA required",
+        )
+        return
+    require(not source, "Producer source SHA requires producer mode")
     if target == "declared_delivery":
         require(not host and not managed, "Candidate images require candidate mode")
         return
@@ -216,7 +293,7 @@ def inspect_build(tag: str, metadata: str) -> JsonObject:
     image = native.inspect(config)
     build = json_object(json.loads((ROOT / "reports/qa" / metadata).read_bytes()))
     require(
-        build.get("containerimage.config.digest") == image["Id"],
+        build_matches_config(build, image["Id"]),
         "Build metadata image mismatch",
     )
     return image
@@ -230,16 +307,17 @@ def main(argv: list[str] | None = None) -> None:
         choices=("inputs", "plugin", "host", "recipe", "managed"),
     )
     args = parser.parse_args(argv)
-    target = os.environ.get("BIOETL_QUALIFICATION_TARGET", "declared_delivery")
+    target = os.environ.get("BIOETL_QUALIFICATION_TARGET") or "declared_delivery"
     host = os.environ.get("BIOETL_CANDIDATE_HOST_IMAGE", "")
     managed = os.environ.get("BIOETL_CANDIDATE_MANAGED_IMAGE", "")
-    inputs(target, host, managed)
+    inputs(target, host, managed, os.environ.get("BIOETL_PRODUCER_SOURCE_SHA", ""))
     if args.stage == "inputs":
         return
-    require(
-        target == "candidate", "Image qualification requires explicit candidate mode"
-    )
     if args.stage == "plugin":
+        require(
+            target in {"candidate", "produce_candidate"},
+            "Plugin build requires explicit build mode",
+        )
         plugin = os.environ.get("BIOETL_PLUGIN", "")
         require(plugin in PLUGINS, "Invalid candidate plugin")
         manifest = json_object(json.loads((OWNER / "host-image.json").read_bytes()))
@@ -248,6 +326,9 @@ def main(argv: list[str] | None = None) -> None:
             text(manifest.get("plugin_release_date"), "Missing plugin release date"),
         )
         return
+    require(
+        target == "candidate", "Image qualification requires explicit candidate mode"
+    )
     if args.stage == "recipe":
         manifest = json_object(json.loads((OWNER / "managed-image.json").read_bytes()))
         recipe = (OWNER / "Dockerfile.managed").read_bytes().replace(b"\r\n", b"\n")

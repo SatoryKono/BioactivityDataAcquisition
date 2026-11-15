@@ -642,6 +642,54 @@ class ProvenanceControls(unittest.TestCase):
                 module.source_inputs(root, commit, manifest)
 
 
+class OriginalBuildMetadataFormats(unittest.TestCase):
+    """Consumer accepts either metadata schema only for the matching built ID."""
+
+    def test_legacy_driver_receipts_preserve_original_identity_checks(self):
+        for damaged in (None, "host", "managed", "explicit_host", "explicit_managed"):
+            with self.subTest(damaged=damaged):
+                run, jobs, artifacts, raw, _, parity = fixture()
+                payloads = {}
+                with zipfile.ZipFile(io.BytesIO(raw)) as source:
+                    for row in source.infolist():
+                        payloads[row.filename] = json.loads(source.read(row))
+                host_config = parity["built_image_config_digest"]
+                managed_config = "sha256:" + "d" * 64
+                payloads["router-v7-image-build.json"] = {
+                    "containerimage.digest": host_config
+                }
+                payloads["router-v7-managed-image-build.json"] = {
+                    "containerimage.digest": managed_config
+                }
+                payloads["router-v7-managed-image-parity.json"] = {
+                    **copy.deepcopy(parity),
+                    "built_image_config_digest": managed_config,
+                    "declared_image_config_digest": "sha256:" + "e" * 64,
+                }
+                if damaged:
+                    kind = "managed-image" if "managed" in damaged else "image"
+                    key = (
+                        "containerimage.config.digest"
+                        if damaged.startswith("explicit_")
+                        else "containerimage.digest"
+                    )
+                    payloads[f"router-v7-{kind}-build.json"][key] = "sha256:" + "f" * 64
+                stream = io.BytesIO()
+                with zipfile.ZipFile(stream, "w") as target:
+                    for name, payload in payloads.items():
+                        target.writestr(name, json.dumps(payload))
+                raw = stream.getvalue()
+                artifacts["artifacts"][0].update(
+                    size_in_bytes=len(raw), digest="sha256:" + module.sha256(raw)
+                )
+                if damaged:
+                    with self.assertRaisesRegex(ValueError, "identity mismatch"):
+                        module.validate_capture(run, jobs, artifacts, raw)
+                else:
+                    _, result = module.validate_capture(run, jobs, artifacts, raw)
+                    self.assertEqual(result, parity)
+
+
 if __name__ == "__main__":
     unittest.main()
 
