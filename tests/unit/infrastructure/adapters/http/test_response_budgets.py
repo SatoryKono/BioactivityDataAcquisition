@@ -130,7 +130,7 @@ async def test_raw_deflate_rejects_incomplete_or_extra_data(mode):
     [
         ("identity", b"x" * 101, 100, 1000),
         ("identity", b"x" * 101, 1000, 100),
-        ("gzip", gzip.compress(b"x" * 10000), 1000, 100),
+        ("gzip", gzip.compress(b"x" * 10000, mtime=0), 1000, 100),
     ],
 )
 async def test_overflow_closes_stream_and_stops_before_next_chunk(
@@ -335,8 +335,8 @@ async def test_corrupt_compression_is_counted_by_breaker_and_health_contract(enc
 @pytest.mark.parametrize(
     "encoding,raw",
     [
-        ("gzip", gzip.compress(b"payload")[:-3]),
-        ("gzip", gzip.compress(b"a") + gzip.compress(b"b")),
+        ("gzip", gzip.compress(b"payload", mtime=0)[:-3]),
+        ("gzip", gzip.compress(b"a", mtime=0) + gzip.compress(b"b", mtime=0)),
         ("unsupported", b"payload"),
     ],
 )
