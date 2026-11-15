@@ -8,8 +8,15 @@ import type { AdaptiveTableOptions } from './adaptive-types';
 
 // Separate managed entrypoint: the previously accepted selector-shell build
 // and its immutable host image retain their original inputs and behaviour.
-const ManagedPanel: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
-  React.createElement(props.options.viewMode === 'current' ? CurrentPanel : props.options.viewMode && props.options.viewMode !== 'selectors' ? AdaptiveTable : SimplePanel, props);
+const ManagedPanel: React.FC<PanelProps<AdaptiveTableOptions>> = (props) => {
+  if (props.options.viewMode === 'current') {
+    return React.createElement(CurrentPanel, props);
+  }
+  if (props.options.viewMode && props.options.viewMode !== 'selectors') {
+    return React.createElement(AdaptiveTable, props);
+  }
+  return React.createElement(SimplePanel, props);
+};
 
 const managedEditor = () => React.createElement('span', null, 'Provided by dashboard provisioning.');
 

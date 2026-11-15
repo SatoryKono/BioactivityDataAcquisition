@@ -3,7 +3,7 @@
   "capability": "adaptive-table-v1",
   "inputs_sha256_lf": {
     "grafana/plugins/bioetl-selectorshell-panel/src/adaptive-build-provenance.test.js": "3557511b506bc3ec432c6e63c078c239e216ec4541d89aa52a7f0ef343a3a0e6",
-    "grafana/plugins/bioetl-selectorshell-panel/src/adaptive-module.ts": "f2eecc8d5490ab4b36032864127d751993fd4eae0c4d8d9007384d2cff80c444",
+    "grafana/plugins/bioetl-selectorshell-panel/src/adaptive-module.ts": "b9c6a13c090ba63fb3eea3f687628f8a98fff2dbf9a2e541b2bc1864e86b9b5d",
     "grafana/plugins/bioetl-selectorshell-panel/src/adaptive-types.ts": "c0e0fdf9d4c41185118006c3a622055aa691123258b271d6f9a050ff6b3b5d4a",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.test.tsx": "e7eb8629c7724e5909fc53e7e5b35e4d5ec9e8e5606606b2f20bd501210cd73c",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.tsx": "763adc27ea745d115d935a327b983a45dcf3ed4b3cf65470d33fecd985d31576",
@@ -41,7 +41,7 @@
     "grafana/plugins/bioetl-selectorshell-panel/tsconfig.json": "8e26b3d5a2e9e5d5c2636f789b0baa16e57916ed46e5776b6032c684cfa22522",
     "grafana/plugins/bioetl-selectorshell-panel/eslint.config.mjs": "f97ee55a03e678066a755a4a3d74a55266eff1c68894feb423d574580a9c3f6f",
     "grafana/plugins/bioetl-selectorshell-panel/webpack.config.ts": "4db8eb4dfc7042637cdcd201dafb0152be2d30b52fa97d497b1aabd98e552411",
-    "grafana/plugins/bioetl-selectorshell-panel/webpack.adaptive.config.ts": "14a728a2447e0ac88da5685b735523c8f3c59c976dfdcb21cea79b986186406b",
+    "grafana/plugins/bioetl-selectorshell-panel/webpack.adaptive.config.ts": "ea8c9d4ff7f8b4616a68511caad97ca66f650d10bea1f8a96ffb4c8cb51a5c86",
     "grafana/plugins/bioetl-selectorshell-panel/adaptive-build-provenance.ts": "8e10ec22abfcc2fdcbd24a93c618cc3e799b8d0dc7550146320e594f69494369",
     "grafana/plugins/bioetl-selectorshell-panel/README.md": "21cbe16d6e1b1efb90b085f59b265d5bef9e5f55ac39a80639645245a860a672",
     "grafana/plugins/bioetl-selectorshell-panel/LICENSE": "c5accbbd8546e94c34aed24afe689a617627d18eed5a6c48277e48db57c23851",
@@ -54,8 +54,8 @@
     "LICENSE": "c5accbbd8546e94c34aed24afe689a617627d18eed5a6c48277e48db57c23851",
     "README.md": "21cbe16d6e1b1efb90b085f59b265d5bef9e5f55ac39a80639645245a860a672",
     "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
-    "module.js": "fab3f3a6a3538423cb36c55dc14506e99c1db0d033630a46a8501e087afd5047",
-    "module.js.map": "39ea02f2715d6389dd3749db7edb6c0d48a1b153d2e540caa044131217ecf508",
-    "plugin.json": "3596b5cb2a2f6a80607c3f71937a200055645b6e3f55c78b89c17b4886d6abae"
+    "module.js": "0cc01e10fbadb65a12022e26a395066a252337e0e83a709c8a5fb81c2229bc69",
+    "module.js.map": "bd466a2f9c5ac988bf42030521adede35f51b021e741a7d4cdde23dc3c91e98d",
+    "plugin.json": "4fc8c64b49e6a9c924205095655fd3800775e33d03147dac0af27cbcb9385c3f"
   }
 }

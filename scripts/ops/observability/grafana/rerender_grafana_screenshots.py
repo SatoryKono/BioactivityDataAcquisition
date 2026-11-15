@@ -337,6 +337,7 @@ def _finalize_manifest(config: RenderConfig, manifest: dict[str, Any]) -> None:
             "file_set": file_set,
             "source": {
                 **_git_capture_source(),
+                "dashboard_profile": config.dashboard_profile,
                 "dashboards": {
                     uid: sources.get(uid, {}) for uid in sorted(rendered_uids)
                 },

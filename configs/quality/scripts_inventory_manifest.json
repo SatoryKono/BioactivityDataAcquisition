@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-15T14:46:10.895431+00:00",
+  "generated_at": "2026-11-15T15:06:53.611189+00:00",
   "summary": {
     "total_scripts": 752,
     "status_counts": {
@@ -24752,7 +24752,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_workflow_scope.py",
@@ -24776,6 +24776,12 @@
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
           "line": 2897,
           "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._audit_presentation import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_dashboard_audit_plan_remediation.py",
+          "line": 5,
+          "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._audit_presentation import ("
         },
         {
@@ -25339,7 +25345,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/capture_provenance.py",
-          "line": 261,
+          "line": 263,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._v2_model_parity import semantic_errors"
         }
@@ -25736,7 +25742,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
-          "line": 1922,
+          "line": 1938,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.capture_acceptance import ("
         },
@@ -25824,7 +25830,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/capture_acceptance.py",
@@ -25834,7 +25840,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
-          "line": 1911,
+          "line": 964,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.capture_provenance import ("
+        },
+        {
+          "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
+          "line": 1927,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.capture_provenance import verify_capture"
         },
@@ -25904,7 +25916,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
@@ -25932,13 +25944,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/capture_provenance.py",
-          "line": 192,
+          "line": 194,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import ("
         },
         {
           "path": "scripts/ops/observability/grafana/capture_provenance.py",
-          "line": 431,
+          "line": 433,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import ("
         },
@@ -26026,7 +26038,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 708,
+          "line": 709,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_state_fixture_v2 import ("
         },
@@ -26375,7 +26387,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 272,
+          "line": 276,
           "source_group": "docs",
           "text": "`scripts/ops/observability/grafana/render_nav_bus.py` on Replay Readiness,"
         },
@@ -26445,7 +26457,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 22,
       "references": [
         {
           "path": "docs/03-guides/dashboards/README.md",
@@ -26797,7 +26809,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 265,
+          "line": 269,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },
@@ -26809,13 +26821,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1582,
+          "line": 1583,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1669,
+          "line": 1670,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },

@@ -48,6 +48,52 @@ def test_adaptive_profile_selects_its_model_and_source_digest(tmp_path, monkeypa
     expected = tmp_path / "grafana/dashboards-adaptive/dashboard.json"
     assert source["path"] == "grafana/dashboards-adaptive/dashboard.json"
     assert source["sha256"] == hashlib.sha256(expected.read_bytes()).hexdigest()
+    config.output_dir.mkdir()
+    monkeypatch.setattr(
+        subject,
+        "_git_capture_source",
+        lambda: {"commit_sha": "a" * 40, "working_tree_dirty": False},
+    )
+    subject._finalize_manifest(
+        config, {"dashboards": [{"uid": "same-uid", "file": "same-uid.png"}]}
+    )
+    manifest = json.loads((config.output_dir / "render-manifest.json").read_text())
+    assert manifest["source"]["dashboard_profile"] == "adaptive"
+    assert manifest["source"]["dashboards"]["same-uid"] == source
+
+
+def test_preflight_rejects_profile_substitution(monkeypatch):
+    from scripts.ops.observability.grafana import (
+        check_grafana_dashboard_audit_preflight as preflight,
+    )
+
+    uid = "bioetl-overview-v2"
+    identity = subject._dashboard_source_by_uid("adaptive")[uid]
+    manifest = {
+        "source": {
+            "commit_sha": "a" * 40,
+            "dashboard_profile": "adaptive",
+            "dashboards": {uid: identity},
+        }
+    }
+    dashboards = {uid: {"dashboardSource": identity}}
+    assert (
+        preflight._validate_dashboard_sources(
+            manifest, expected_uids=(uid,), dashboards=dashboards
+        )
+        is None
+    )
+    manifest["source"]["dashboard_profile"] = "native"
+    assert "source path drift" in preflight._validate_dashboard_sources(
+        manifest, expected_uids=(uid,), dashboards=dashboards
+    )
+    manifest["source"]["dashboard_profile"] = "../../foreign"
+    assert (
+        preflight._validate_dashboard_sources(
+            manifest, expected_uids=(uid,), dashboards=dashboards
+        )
+        == "invalid dashboard profile"
+    )
 
 
 def test_unknown_profile_cannot_select_an_arbitrary_source_path():

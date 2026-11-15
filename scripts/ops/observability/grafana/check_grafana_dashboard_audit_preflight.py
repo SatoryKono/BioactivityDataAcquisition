@@ -961,6 +961,10 @@ def _validate_dashboard_sources(
     expected_uids: tuple[str, ...],
     dashboards: dict[str, dict[str, object]],
 ) -> str | None:
+    from scripts.ops.observability.grafana.capture_provenance import (
+        dashboard_directory,
+    )
+
     source = manifest.get("source")
     if not isinstance(source, dict):
         return "render manifest lacks source provenance"
@@ -970,17 +974,27 @@ def _validate_dashboard_sources(
     source_dashboards = source.get("dashboards")
     if not isinstance(source_dashboards, dict):
         return "render manifest lacks dashboard source provenance"
+    try:
+        source_dir = dashboard_directory(manifest, _REPO_ROOT)
+    except ValueError as exc:
+        return str(exc)
     for uid in expected_uids:
         dashboard_source = dashboards[uid].get("dashboardSource")
         top_source = source_dashboards.get(uid)
-        error = _dashboard_source_error(uid, dashboard_source, top_source)
+        error = _dashboard_source_error(
+            uid, dashboard_source, top_source, source_dir=source_dir
+        )
         if error is not None:
             return error
     return None
 
 
 def _dashboard_source_error(
-    uid: str, dashboard_source: object, top_source: object
+    uid: str,
+    dashboard_source: object,
+    top_source: object,
+    *,
+    source_dir: Path | None = None,
 ) -> str | None:
     if not isinstance(dashboard_source, dict) or dashboard_source != top_source:
         return f"render manifest dashboard {uid} source provenance drift"
@@ -995,7 +1009,9 @@ def _dashboard_source_error(
         return f"render manifest dashboard {uid} source SHA is invalid"
     if not isinstance(version, int):
         return f"render manifest dashboard {uid} version is missing"
-    expected_path = (_REPO_ROOT / _DASHBOARD_DIR / f"{uid}.json").resolve()
+    expected_path = (
+        (source_dir or _REPO_ROOT / _DASHBOARD_DIR) / f"{uid}.json"
+    ).resolve()
     actual_path = (_REPO_ROOT / source_path).resolve()
     if actual_path != expected_path:
         return f"render manifest dashboard {uid} source path drift"

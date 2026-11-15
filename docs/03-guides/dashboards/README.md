@@ -93,6 +93,10 @@ Build the adaptive bundle with
 The same generator accepts `--check`; build provenance records its compiler inputs.
 Render this profile with `python -m scripts.ops.observability.grafana.rerender_grafana_screenshots --dashboard-profile adaptive --fallback playwright`.
 The explicit profile binds source hashes, row expansion and containment checks to the adaptive JSON; the default profile is `native`.
+The immutable verifier uses the recorded profile and checks every shipped UID against its committed JSON.
+
+In the compact incident view, ranked suspects and CURRENT alerts appear side by side. Use Previous/Next to inspect each row and Details to read every original field.
+
 Publish each changed adaptive bundle with a new plugin version: Grafana uses it
 in the browser module cache key. Reload plugin metadata during the approved
 deployment and verify ordinary navigation loads the new version.
@@ -425,5 +429,3 @@ promtool test rules grafana/prometheus-rules/tests/bioetl_observability.test.yml
 `scripts/ops/observability/relayout_trust_review_panels.py`.
 Он не является shipped operator command; после заморозки first-screen
 layout helper удаляется или складывается в governed dashboard command.
-
-In the compact incident view, ranked suspects and CURRENT alerts appear side by side. Use Previous/Next to inspect each row and Details to read every original field.

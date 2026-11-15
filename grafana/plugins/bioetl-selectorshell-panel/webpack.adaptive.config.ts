@@ -15,7 +15,7 @@ export default async function adaptiveWebpackConfig(env: Env) {
         dir: path.resolve('dist-adaptive'),
         test: [/(^|\/)plugin\.json$/, /(^|\/)README\.md$/],
         rules: [
-          { search: /%VERSION%/g, replace: '1.1.5' },
+          { search: /%VERSION%/g, replace: '1.1.6' },
           { search: /%TODAY%/g, replace: '2026-11-15' },
           { search: /%PLUGIN_ID%/g, replace: 'bioetl-selectorshell-panel' },
           { search: /"keywords":\s*\[\s*"panel"\s*\]/g, replace: '"keywords": ["panel", "adaptive-table-v1"]' },
