@@ -5,6 +5,25 @@ permissions:
 
 on:
   workflow_dispatch:
+    inputs:
+      qualification_target:
+        description: Verify declared delivery, or qualify separately published candidate images
+        type: choice
+        options: [declared_delivery, candidate]
+        default: declared_delivery
+      candidate_host_image:
+        description: Candidate only; owned immutable host registry digest
+        type: string
+        default: ''
+      candidate_managed_image:
+        description: Candidate only; owned immutable managed registry digest
+        type: string
+        default: ''
+
+env:
+  BIOETL_QUALIFICATION_TARGET: ${{ inputs.qualification_target }}
+  BIOETL_CANDIDATE_HOST_IMAGE: ${{ inputs.candidate_host_image }}
+  BIOETL_CANDIDATE_MANAGED_IMAGE: ${{ inputs.candidate_managed_image }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -26,6 +45,9 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: "24"
+      - name: Validate qualification inputs before build
+        working-directory: .
+        run: python3 -m scripts.ops verify-router-managed-image --candidate-stage inputs
       - name: Install locked dependencies
         run: npm ci --ignore-scripts
       - name: Verify committed private bridge archive
@@ -41,6 +63,7 @@ jobs:
         run: |
           PYTHONPATH=../../.. /usr/bin/python3 ../../../tests/unit/scripts/ops/test_router_rootfs.py
           PYTHONPATH=../../.. /usr/bin/python3 ../../../tests/unit/scripts/ops/test_router_managed_image.py
+          PYTHONPATH=../../.. /usr/bin/python3 ../../../tests/unit/scripts/ops/test_router_candidate.py
       - name: Check exported TypeScript API
         run: npm run typecheck
       - name: Build browser candidate
@@ -63,6 +86,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Validate qualification inputs before plugin build
+        working-directory: .
+        run: python3 -m scripts.ops verify-router-managed-image --candidate-stage inputs
       - name: Set up Node
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
@@ -88,6 +114,7 @@ jobs:
             node@sha256:e7add2a490bb17d97b485b8641bd88455fff7839ade0f5eba493c3508124d413 \
             npm run build
       - name: Verify built bundle against shipped host manifest
+        if: ${{ inputs.qualification_target != 'candidate' }}
         env:
           BIOETL_PLUGIN: ${{ matrix.plugin }}
         run: |
@@ -127,6 +154,12 @@ jobs:
           metadata = json.loads((root / f"grafana/plugins/{plugin}/dist/plugin.json").read_text())
           assert metadata["info"]["updated"] == manifest["plugin_release_date"]
           PY
+      - name: Validate complete original candidate plugin output
+        if: ${{ inputs.qualification_target == 'candidate' }}
+        working-directory: .
+        env:
+          BIOETL_PLUGIN: ${{ matrix.plugin }}
+        run: python3 -m scripts.ops verify-router-managed-image --candidate-stage plugin
       - name: Transfer verified plugin output
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -149,6 +182,8 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Validate qualification inputs before host build
+        run: python3 -m scripts.ops verify-router-managed-image --candidate-stage inputs
       - name: Checkout inspected Grafana source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -219,6 +254,7 @@ jobs:
             -f grafana/tooling/router-v7-bridge/Dockerfile.host \
             -t bioetl-router-host:acceptance reports/qa/router-v7-image-context
       - name: Verify built image against declared delivery image
+        if: ${{ inputs.qualification_target != 'candidate' }}
         id: host_parity
         run: |
           image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').image")
@@ -227,6 +263,14 @@ jobs:
           docker pull "$base_image"
           node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
             bioetl-router-host:acceptance
+      - name: Verify complete candidate host parity
+        if: ${{ inputs.qualification_target == 'candidate' }}
+        run: |
+          python3 -m scripts.ops verify-router-managed-image --candidate-stage inputs
+          base_image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').base_image")
+          docker pull "$base_image"
+          docker pull "$BIOETL_CANDIDATE_HOST_IMAGE"
+          python3 -m scripts.ops verify-router-managed-image --candidate-stage host
       - name: Preserve complete rootfs differences when parity fails
         if: ${{ !cancelled() && failure() && steps.host_parity.outcome == 'failure' }}
         run: |
@@ -275,10 +319,19 @@ jobs:
       - name: Build and verify managed image from the qualified parent
         run: |
           mkdir -p reports/qa/router-v7-managed-context
-          cp grafana/tooling/router-v7-bridge/Dockerfile.managed reports/qa/router-v7-managed-context/Dockerfile
+          if [ "$BIOETL_QUALIFICATION_TARGET" = candidate ]; then
+            python3 -m scripts.ops verify-router-managed-image --candidate-stage recipe
+          else
+            cp grafana/tooling/router-v7-bridge/Dockerfile.managed reports/qa/router-v7-managed-context/Dockerfile
+          fi
           docker buildx build --platform linux/amd64 --load --provenance=false \
             --metadata-file reports/qa/router-v7-managed-image-build.json \
             -t bioetl-router-managed:acceptance reports/qa/router-v7-managed-context
+          if [ "$BIOETL_QUALIFICATION_TARGET" = candidate ]; then
+            docker pull "$BIOETL_CANDIDATE_MANAGED_IMAGE"
+            python3 -m scripts.ops verify-router-managed-image --candidate-stage managed
+            exit 0
+          fi
           image=$(node -p "require('./grafana/tooling/router-v7-bridge/managed-image.json').image")
           docker pull "$image"
           for plugin in bioetl-scenes-app bioetl-selectorshell-panel; do

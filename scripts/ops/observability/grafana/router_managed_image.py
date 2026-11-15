@@ -171,6 +171,11 @@ def verify(
 
 def main(argv: list[str] | None = None) -> None:
     args = sys.argv[1:] if argv is None else argv
+    if args[:1] == ["--candidate-stage"]:
+        from scripts.ops.observability.grafana.router_candidate import main as candidate
+
+        candidate(["--stage", *args[1:]])
+        return
     if len(args) != 1 or not CONFIG_ID.fullmatch(args[0]):
         raise ValueError(
             "Usage: python -m scripts.ops verify-router-managed-image sha256:BUILT_CONFIG_DIGEST"

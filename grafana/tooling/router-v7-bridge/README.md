@@ -47,3 +47,32 @@ resulting archive as their compat dependency. The upstream Router 7 artifact
 remains unchanged; the archive contains this implemented bridge, not renamed
 Router 6 code. Rebuild the archive and lockfiles together after bridge changes.
 The host and plugin candidates must pass runtime acceptance before rollout.
+
+## Qualifying a changed image delivery
+
+The Router bridge workflow defaults to `declared_delivery`: it retains complete
+plugin-file, source-map, host-rootfs and managed-image parity against the shipped
+pins. Source revalidation is valid only when the rebuilt delivery is unchanged.
+Do not replace old image hashes with output from changed dependencies.
+
+For changed output, an authorized image publisher must first supply separately
+published immutable host and managed candidate digests from the committed source.
+Dispatch the same workflow at that source with `qualification_target=candidate`,
+`candidate_host_image` and `candidate_managed_image`. Both references must use the
+owned `satorykono/bioetl-grafana-router7-canvas@sha256:` namespace and differ.
+Candidate mode preserves dependency audits, type/lint/behavior tests and the
+independent rebuild. It verifies every transferred plugin file, including maps,
+complete image configuration/rootfs and trusted base/parent layers. The managed
+recipe is a generated copy with only its parent rebound; tracked delivery pins
+are not changed by qualification. Image exports use trusted host tools, without
+executing binaries supplied by candidate images.
+
+Only successful original candidate CI artifacts may feed
+`python -m scripts.ops promote-router-host-release`. Keep the original plugin and
+image-receipt artifacts before their seven-day retention expires. Promotion
+materializes coupled pins and preserves release history; it does not qualify
+default delivery, browser acceptance or runtime admission. Repeat the default
+delivery workflow at the resulting head before any authorized rollout. Candidate
+qualification neither publishes images nor deploys services. The promotion
+command, including `--check`, performs API/Docker operations and writes evidence;
+it is not a read-only diagnostic.
