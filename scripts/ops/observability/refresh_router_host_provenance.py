@@ -39,7 +39,11 @@ HOST_BUILD_FIELDS = (
 WORKFLOW = ".github/workflows/router-v7-bridge.yml"
 HEX_SHA256_PATTERN = r"[0-9a-f]{64}"
 SHA256_DIGEST_PATTERN = rf"sha256:{HEX_SHA256_PATTERN}"
-PLUGIN_DIST_FRAGMENT = "/dist/"
+PLUGIN_OUTPUT_PREFIXES = tuple(
+    f"grafana/plugins/{plugin}/{directory}/"
+    for plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel")
+    for directory in ("dist", "dist-adaptive")
+)
 ROUTER_ARCHIVE = (
     "grafana/tooling/router-v7-bridge/bioetl-grafana-router-v7-bridge-0.3.0.tgz"
 )
@@ -364,7 +368,7 @@ def refresh(
         all(
             path in inputs
             for path in json_object(manifest["artifact_sha256"])
-            if PLUGIN_DIST_FRAGMENT not in path
+            if not path.startswith(PLUGIN_OUTPUT_PREFIXES)
         ),
         "Source input inventory shrank",
     )
@@ -432,7 +436,7 @@ def source_inputs(
     paths = {
         path
         for path in json_object(manifest["artifact_sha256"])
-        if PLUGIN_DIST_FRAGMENT not in path
+        if not path.startswith(PLUGIN_OUTPUT_PREFIXES)
     }
     paths.update(BUILD_SUPPORT)
     paths.add(BRACES_ARCHIVE)
@@ -442,19 +446,32 @@ def source_inputs(
         "grafana/plugins/eslint-shared-config.mjs",
         "grafana/tooling/router-v7-bridge/minimatch-legacy-compat",
     )
-    captured_paths = set(
-        git("ls-tree", "-r", "--name-only", source, "--", *roots).decode().splitlines()
-    )
-    current_paths = set(git("ls-files", "--", *roots).decode().splitlines())
+    captured_paths = {
+        path
+        for path in git("ls-tree", "-r", "--name-only", source, "--", *roots)
+        .decode()
+        .splitlines()
+        if not path.startswith(PLUGIN_OUTPUT_PREFIXES)
+    }
+    current_paths = {
+        path
+        for path in git("ls-files", "--", *roots).decode().splitlines()
+        if not path.startswith(PLUGIN_OUTPUT_PREFIXES)
+    }
     require(
-        not git("ls-files", "--others", "--exclude-standard", "--", *roots).strip(),
+        not any(
+            not path.startswith(PLUGIN_OUTPUT_PREFIXES)
+            for path in git("ls-files", "--others", "--exclude-standard", "--", *roots)
+            .decode()
+            .splitlines()
+        ),
         "Uncommitted build input additions",
     )
     require(
         captured_paths == current_paths, "Build source inventory added/deleted after CI"
     )
     paths.update(captured_paths)
-    paths = {path for path in paths if PLUGIN_DIST_FRAGMENT not in path}
+    paths = {path for path in paths if not path.startswith(PLUGIN_OUTPUT_PREFIXES)}
     require(bool(paths), "Empty build source inventory")
     result = {}
     for path in sorted(paths):
