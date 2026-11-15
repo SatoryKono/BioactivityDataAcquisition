@@ -84,14 +84,32 @@ def build_family_paths(
     family_ids: tuple[str, ...],
     *,
     max_paths: int = GRAPH_MAX_VISITED_NODES,
+    max_depth: int = GRAPH_MAX_DEPTH,
+    max_visited_nodes: int = GRAPH_MAX_VISITED_NODES,
+    multiple_parents_allowed: bool = True,
 ) -> tuple[FamilyPath, ...] | Diagnostic:
-    """Build root-to-leaf paths. Too many paths is a limit error."""
+    """Build root-to-leaf paths after the same integrity checks as the walk."""
+    defect = validate_family_graph(
+        nodes,
+        family_ids,
+        max_depth=max_depth,
+        max_visited_nodes=max_visited_nodes,
+        multiple_parents_allowed=multiple_parents_allowed,
+    )
+    if defect is not None:
+        return defect
     indexed = _index_nodes(nodes)
     if isinstance(indexed, Diagnostic):
         return indexed
     paths: list[FamilyPath] = []
     for family_id in sorted(family_ids):
-        built = _paths_from(indexed, family_id, max_paths=max_paths, found=len(paths))
+        built = _paths_from(
+            indexed,
+            family_id,
+            max_paths=max_paths,
+            max_depth=max_depth,
+            found=len(paths),
+        )
         if isinstance(built, Diagnostic):
             return built
         paths.extend(built)
@@ -147,6 +165,9 @@ def normalize_provider_class(
         nodes,
         family_ids,
         max_paths=max_visited_nodes,
+        max_depth=max_depth,
+        max_visited_nodes=max_visited_nodes,
+        multiple_parents_allowed=multiple_parents_allowed,
     )
     if isinstance(built, Diagnostic):
         return _graph_error_result(
@@ -323,17 +344,23 @@ def _paths_from(
     start: str,
     *,
     max_paths: int,
+    max_depth: int,
     found: int,
 ) -> tuple[FamilyPath, ...] | Diagnostic:
     if start not in nodes:
-        return ()
+        return _defect(_MISSING_FAMILY)
     frames: list[tuple[str, tuple[str, ...]]] = [(start, (start,))]
     paths: list[FamilyPath] = []
     while frames:
         if found + len(paths) + len(frames) > max_paths:
             return _defect(_LIMIT)
         node_id, leaf_to_root_ids = frames.pop()
-        parents = nodes[node_id].parent_ids
+        node = nodes.get(node_id)
+        if node is None:
+            return _defect(_MISSING_PARENT)
+        if len(leaf_to_root_ids) - 1 > max_depth:
+            return _defect(_LIMIT)
+        parents = node.parent_ids
         if not parents:
             if found + len(paths) >= max_paths:
                 return _defect(_LIMIT)
@@ -346,6 +373,12 @@ def _paths_from(
             )
             continue
         for parent_id in reversed(parents):
+            if parent_id == node_id:
+                return _defect(_SELF_LOOP)
+            if parent_id in leaf_to_root_ids:
+                return _defect(_CYCLE)
+            if parent_id not in nodes:
+                return _defect(_MISSING_PARENT)
             frames.append((parent_id, (*leaf_to_root_ids, parent_id)))
     return tuple(paths)
 

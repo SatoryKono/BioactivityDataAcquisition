@@ -6,6 +6,7 @@ import pytest
 
 from iuphar_target_class.hierarchy import (
     FamilyNode,
+    build_family_paths,
     normalize_provider_class,
     validate_family_graph,
 )
@@ -150,6 +151,21 @@ def test_same_payload_with_different_parents_is_order_independent() -> None:
         assert result.diagnostics[0].message == "повторяющийся идентификатор"
         assert result.iuphar_class is None
         assert result.paths == ()
+
+
+def test_public_path_builder_rejects_a_cycle_and_a_missing_parent() -> None:
+    cycle = build_family_paths(
+        (FamilyNode("a", ("b",), "a"), FamilyNode("b", ("a",), "b")),
+        ("a",),
+    )
+    assert not isinstance(cycle, tuple)
+    assert cycle.message == "цикл"
+    loop = build_family_paths((FamilyNode("a", ("a",), "a"),), ("a",))
+    assert not isinstance(loop, tuple)
+    assert loop.message == "self-loop"
+    missing = build_family_paths((FamilyNode("a", ("gone",), "a"),), ("a",))
+    assert not isinstance(missing, tuple)
+    assert missing.message == "отсутствующий родитель"
 
 
 def test_unmapped_type_on_a_broken_graph_is_not_partial() -> None:
