@@ -90,16 +90,9 @@ def test_overview_verdict_is_first_when_columns_stack_without_changing_semantics
                 k: v for k, v in before.items() if k not in {"gridPos", "panels"}
             } == {k: v for k, v in after.items() if k not in {"gridPos", "panels"}}
         if before["id"] not in {9604, 9603, 9300}:
-            position_changes = {"x", "w"}
-            if before["id"] == 9002:
-                assert before["gridPos"]["h"] == 8
-                assert after["gridPos"]["h"] == 9
-                position_changes.add("h")
             assert {
-                k: v for k, v in before["gridPos"].items() if k not in position_changes
-            } == {
-                k: v for k, v in after["gridPos"].items() if k not in position_changes
-            }
+                k: v for k, v in before["gridPos"].items() if k not in {"x", "w"}
+            } == {k: v for k, v in after["gridPos"].items() if k not in {"x", "w"}}
     panels = [
         p["gridPos"]
         for p in projected["panels"]

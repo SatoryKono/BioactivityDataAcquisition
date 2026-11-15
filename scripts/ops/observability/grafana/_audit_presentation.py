@@ -357,8 +357,6 @@ def _adapt_overview(dashboard: dict) -> None:
         panels[panel_id]["gridPos"].update(x=0, w=10)
     for panel_id in (99, 9002):
         panels[panel_id]["gridPos"].update(x=10, w=14)
-    # The narrower domain column wraps reasons; keep the native height unchanged.
-    panels[9002]["gridPos"]["h"] = 9
     panels[9604]["gridPos"]["h"] = 2
     panels[9603]["gridPos"].update(y=4, h=4)
     panels[9300]["gridPos"]["y"] = 8
