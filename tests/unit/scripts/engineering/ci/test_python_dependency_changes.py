@@ -833,3 +833,35 @@ def test_native_cli_record_uses_workflow_owner(
         ),
     )
     assert dependencies.repository_cli_affected(tmp_path, {"ruff"})
+
+
+@pytest.mark.parametrize("changed", ["markdown", "pymdown-extensions"])
+@pytest.mark.parametrize("configured", [True, False])
+@pytest.mark.parametrize("production", [True, False])
+def test_mkdocs_family_requires_docs_only_declaration_and_real_config(
+    tmp_path: Path, changed: str, configured: bool, production: bool
+) -> None:
+    """Unconfigured or production consumers must still fail closed."""
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\ndependencies = "
+        + ('["pymdown-extensions"]' if production else "[]")
+        + '\n[project.optional-dependencies]\ndocs = ["mkdocs", "pymdown-extensions"]\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "uv.lock").write_text(
+        '[[package]]\nname = "markdown"\n'
+        '[[package]]\nname = "pymdown-extensions"\ndependencies = [{name = "markdown"}]\n'
+        '[[package]]\nname = "mkdocs"\ndependencies = [{name = "markdown"}]\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "mkdocs.yml").write_text(
+        "markdown_extensions:\n  - "
+        + ("pymdownx.superfences" if configured else "toc")
+        + "\n",
+        encoding="utf-8",
+    )
+    if configured and not production:
+        assert dependencies.dependency_consumers(tmp_path, {changed}) == ["mkdocs.yml"]
+    else:
+        with pytest.raises(ValueError, match="Unconfirmed Python dependency"):
+            dependencies.dependency_consumers(tmp_path, {changed})
