@@ -152,6 +152,20 @@ def test_same_payload_with_different_parents_is_order_independent() -> None:
         assert result.paths == ()
 
 
+def test_unmapped_type_on_a_broken_graph_is_not_partial() -> None:
+    result = normalize_provider_class(
+        type_name="unknown-type",
+        family_ids=("leaf",),
+        nodes=(FamilyNode("leaf", ("gone",), "leaf"),),
+        type_to_class={},
+        family_to_class={"leaf": "Enzyme"},
+    )
+    assert result.diagnostics[0].message == "отсутствующий родитель"
+    assert result.annotation_status == "not_available"
+    assert result.iuphar_class is None
+    assert result.source is None
+
+
 def test_shared_ancestors_stop_at_the_visit_budget() -> None:
     nodes = (
         FamilyNode("leaf", ("a", "b"), "leaf"),

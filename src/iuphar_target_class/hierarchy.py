@@ -189,7 +189,7 @@ def _graph_error_result(
     )
     mapped = typed.iuphar_class if typed.status == "available" else None
     return HierarchyResult(
-        annotation_status="partial" if type_name else "not_available",
+        annotation_status="partial" if mapped else "not_available",
         iuphar_class=mapped,
         iuphar_subclass=None,
         iuphar_class_candidates=(mapped,) if mapped else (),
