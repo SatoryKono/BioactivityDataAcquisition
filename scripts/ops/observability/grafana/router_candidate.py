@@ -33,6 +33,11 @@ PLUGINS = ("bioetl-scenes-app", "bioetl-selectorshell-panel")
 BASE = "grafana/grafana@sha256:d84563330dc9d2fd2bc096d0fb96021b5319c75bf6ed555566709998e823dec4"
 
 
+HOST_IMAGE_MANIFEST = "host-image.json"
+PLUGIN_MODULE = "module.js"
+PLUGIN_METADATA = "plugin.json"
+DOCKER_FROM = "FROM "
+
 SOURCE_INPUTS = (
     ".gitignore",
     ".gitattributes",
@@ -190,10 +195,10 @@ def verify_host(
         if "/plugins-bundled/" in scope:
             plugin = scope.rsplit("/", 1)[-1]
             require(
-                "module.js" in plugins[plugin] and "plugin.json" in plugins[plugin],
+                PLUGIN_MODULE in plugins[plugin] and PLUGIN_METADATA in plugins[plugin],
                 "Incomplete candidate plugin",
             )
-            artifact["module_sha256"] = plugins[plugin]["module.js"]
+            artifact["module_sha256"] = plugins[plugin][PLUGIN_MODULE]
         artifacts[scope] = artifact
     return {
         "status": "PASS",
@@ -217,13 +222,13 @@ def candidate_recipe(recipe: bytes, manifest: JsonObject, host: str) -> bytes:
         "Managed recipe source mismatch",
     )
     parent = text(manifest.get("parent_image"), "Missing declared parent")
-    expected = ("FROM " + parent).encode()
+    expected = (DOCKER_FROM + parent).encode()
     require(
         bool(native.IMAGE.fullmatch(parent))
         and recipe.splitlines().count(expected) == 1,
         "Invalid managed recipe parent",
     )
-    return recipe.replace(expected + b"\n", ("FROM " + host + "\n").encode(), 1)
+    return recipe.replace(expected + b"\n", (DOCKER_FROM + host + "\n").encode(), 1)
 
 
 def build_files(directory: Path, release_date: str) -> dict[str, str]:
@@ -241,8 +246,10 @@ def build_files(directory: Path, release_date: str) -> dict[str, str]:
             files[path.relative_to(directory).as_posix()] = hashlib.sha256(
                 path.read_bytes()
             ).hexdigest()
-    require({"module.js", "plugin.json"} <= files.keys(), "Incomplete candidate plugin")
-    metadata = json_object(json.loads((directory / "plugin.json").read_bytes()))
+    require(
+        {PLUGIN_MODULE, PLUGIN_METADATA} <= files.keys(), "Incomplete candidate plugin"
+    )
+    metadata = json_object(json.loads((directory / PLUGIN_METADATA).read_bytes()))
     require(
         json_object(metadata.get("info", {})).get("updated") == release_date,
         "Plugin release date mismatch",
@@ -252,7 +259,7 @@ def build_files(directory: Path, release_date: str) -> dict[str, str]:
 
 def plugin_files() -> dict[str, dict[str, str]]:
     result: dict[str, dict[str, str]] = {}
-    manifest = json_object(json.loads((OWNER / "host-image.json").read_bytes()))
+    manifest = json_object(json.loads((OWNER / HOST_IMAGE_MANIFEST).read_bytes()))
     release_date = text(
         manifest.get("plugin_release_date"), "Missing plugin release date"
     )
@@ -320,7 +327,7 @@ def main(argv: list[str] | None = None) -> None:
         )
         plugin = os.environ.get("BIOETL_PLUGIN", "")
         require(plugin in PLUGINS, "Invalid candidate plugin")
-        manifest = json_object(json.loads((OWNER / "host-image.json").read_bytes()))
+        manifest = json_object(json.loads((OWNER / HOST_IMAGE_MANIFEST).read_bytes()))
         build_files(
             ROOT / "grafana/plugins" / plugin / "dist",
             text(manifest.get("plugin_release_date"), "Missing plugin release date"),
@@ -341,11 +348,11 @@ def main(argv: list[str] | None = None) -> None:
     parent_files = native.records(host)
     plugins = plugin_files()
     if args.stage == "host":
-        manifest = json_object(json.loads((OWNER / "host-image.json").read_bytes()))
+        manifest = json_object(json.loads((OWNER / HOST_IMAGE_MANIFEST).read_bytes()))
         require(
             manifest.get("base_image") == BASE
             and (OWNER / "Dockerfile.host").read_text().splitlines()[0]
-            == "FROM " + BASE,
+            == DOCKER_FROM + BASE,
             "Unqualified candidate base",
         )
         base = json_list(
