@@ -223,22 +223,38 @@ jobs:
           assert os.environ['GITHUB_SHA']==expected, 'Dispatched ref differs from agreed source'
           source_binding(expected)
           PY
-      - name: Use config-digest image IDs for source qualification
+      - name: Qualify the classic image store for config-digest evidence
         run: |
-          # Receipts use the classic image-store contract: .Id is config SHA-256.
-          # Docker 29 containerd stores expose manifest/index IDs in that field.
-          sudo /usr/bin/python3 - <<'PY'
+          # Containerd image IDs name a manifest/index, not the config blob.
+          # Preserve the original producer's config-ID contract on this runner.
+          sudo python3 - <<'PY'
           import json
           from pathlib import Path
 
           path = Path('/etc/docker/daemon.json')
           settings = json.loads(path.read_text()) if path.exists() else {}
-          features = settings.setdefault('features', {})
-          features['containerd-snapshotter'] = False
+          settings.setdefault('features', {})['containerd-snapshotter'] = False
+          path.parent.mkdir(parents=True, exist_ok=True)
           path.write_text(json.dumps(settings, indent=2) + '\n')
           PY
           sudo systemctl restart docker
-          test "$(docker info --format '{{.Driver}}')" = overlay2
+          python3 - <<'PY'
+          import json
+          import subprocess
+
+          driver = subprocess.check_output(
+              ['docker', 'info', '--format', '{{.Driver}}'], text=True,
+          ).strip()
+          status = json.loads(subprocess.check_output(
+              ['docker', 'info', '--format', '{{json .DriverStatus}}'], text=True,
+          ))
+          assert driver == 'overlay2', 'Expected the qualified classic image store'
+          assert not any(
+              key == 'driver-type' and value == 'io.containerd.snapshotter.v1'
+              for key, value in status
+          ), 'Containerd image IDs cannot attest config digests'
+          print(json.dumps({'driver': driver, 'driver_status': status}))
+          PY
       - name: Checkout inspected Grafana source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

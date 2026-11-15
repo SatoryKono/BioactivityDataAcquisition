@@ -128,7 +128,7 @@ jobs:
           retention-days: 14
 
   matrix-smoke-nightly-live:
-    if: github.event_name == 'workflow_call' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_live == 'true')
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_call' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_live == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -206,7 +206,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
   e2e-nightly-full-replay:
-    if: github.event_name == 'workflow_call' || (github.event_name == 'workflow_dispatch')
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_call' || (github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
@@ -254,7 +254,7 @@ jobs:
           retention-days: 14
 
   prompt-tests-nightly:
-    if: github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions: { contents: read }

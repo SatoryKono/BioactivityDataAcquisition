@@ -920,9 +920,10 @@ def test_workflow_selects_config_digest_store_without_losing_daemon_settings(
     run = next(
         step["run"]
         for step in steps
-        if step.get("name") == "Use config-digest image IDs for source qualification"
+        if step.get("name")
+        == "Qualify the classic image store for config-digest evidence"
     )
-    block = run.split("sudo /usr/bin/python3 - <<'PY'\n", 1)[1].split("\nPY\n", 1)[0]
+    block = run.split("sudo python3 - <<'PY'\n", 1)[1].split("\nPY\n", 1)[0]
     config = tmp_path / "daemon.json"
     if initial is not None:
         config.write_text(json.dumps(initial))

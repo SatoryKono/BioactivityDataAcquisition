@@ -1,8 +1,8 @@
 """Stage-1 policy: class dictionary, comparison rule, and recorded limits.
 
-Biological mappings are not approved. Graph limits and the HTTP adapter
-configuration are the values recorded on 2026-11-15. Other plan [...] values
-stay null. EC, L1, and L2 rules stay on the local layer.
+Direct class mappings, graph limits and the HTTP adapter configuration were
+recorded on 2026-11-15. Biological accuracy is not yet accepted. Unapproved
+plan parameters stay null. EC, L1, and L2 rules stay on the local layer.
 """
 
 from __future__ import annotations
@@ -11,6 +11,18 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
+from .gtopdb_2026_3_1 import (
+    APPROVED_ON,
+    ARCHIVE_SHA256,
+    ARCHIVE_URL,
+    RELEASE,
+    RELEASE_DATE,
+    SPECIES_TAXON_IDS,
+    SQL_SHA256,
+    TARGETS_CSV_SHA256,
+    TARGETS_CSV_URL,
+)
+from .iuphar_mapping import approved_class_mappings
 from .stage0.io import atomic_write_bytes, canonical_json_bytes
 
 WORKING_CLASSES: tuple[str, ...] = (
@@ -196,6 +208,20 @@ def assign_mapped_class(
     del name, path_text
     _reject_foreign_targets(type_to_class)
     _reject_foreign_targets(family_to_class)
+    family_classes = tuple(
+        family_to_class[family_id]
+        for family_id in sorted(family_ids)
+        if family_id in family_to_class
+    )
+    distinct = tuple(sorted(set(family_classes)))
+    if len(distinct) > 1:
+        return ClassAssignment(
+            iuphar_class=None,
+            status="conflicting",
+            proof=None,
+            candidates=family_classes,
+            rule_id=None,
+        )
     if type_name and type_name in type_to_class:
         mapped = type_to_class[type_name]
         return ClassAssignment(
@@ -205,12 +231,6 @@ def assign_mapped_class(
             candidates=(mapped,),
             rule_id=f"class:{mapped}",
         )
-    family_classes = tuple(
-        family_to_class[family_id]
-        for family_id in sorted(family_ids)
-        if family_id in family_to_class
-    )
-    distinct = tuple(sorted(set(family_classes)))
     if len(distinct) == 1:
         mapped = distinct[0]
         return ClassAssignment(
@@ -219,14 +239,6 @@ def assign_mapped_class(
             proof="family_mapping",
             candidates=family_classes,
             rule_id=f"class:{mapped}",
-        )
-    if len(distinct) > 1:
-        return ClassAssignment(
-            iuphar_class=None,
-            status="conflicting",
-            proof=None,
-            candidates=family_classes,
-            rule_id=None,
         )
     return ClassAssignment(
         iuphar_class=None,
@@ -263,6 +275,69 @@ def compare_subclasses(
     if pair in class_subclass_pairs:
         return "class_subclass"
     return "incompatible"
+
+
+def direct_mapping_document() -> dict[str, object]:
+    """Serialize the approved release-specific rules and input provenance."""
+    types, families = approved_class_mappings(RELEASE)
+    source = f"GtoPdb {RELEASE}; {TARGETS_CSV_URL}; {ARCHIVE_URL}"
+    types_by_class: list[dict[str, object]] = []
+    families_by_class: list[dict[str, object]] = []
+    for name in sorted(WORKING_CLASSES):
+        groups = (
+            (
+                "iuphar_type",
+                "source_types",
+                sorted(k for k, v in types.items() if v == name),
+            ),
+            (
+                "iuphar_family",
+                "family_ids",
+                sorted((k for k, v in families.items() if v == name), key=int),
+            ),
+        )
+        for family, field, values in groups:
+            rule = RuleRecord(
+                rule_id=f"{family}:{name}",
+                family=family,
+                input_conditions=f"совпадение с явным значением из {field}",
+                output=name,
+                justification_source=source,
+                version=RELEASE,
+                limits=(
+                    "только выпуск и явно перечисленные значения; "
+                    "не по названию, пути или типу предка"
+                ),
+                marks_direct_layer=True,
+            )
+            validate_rules((rule,))
+            payload = _rule_payload(rule)
+            payload[field] = values
+            if family == "iuphar_type":
+                types_by_class.append(payload)
+            else:
+                families_by_class.append(payload)
+    return {
+        "approved_on": APPROVED_ON,
+        "families": families_by_class,
+        "graph_only_type": "grouping",
+        "provenance": {
+            "archive_sha256": ARCHIVE_SHA256,
+            "archive_url": ARCHIVE_URL,
+            "attribution": "IUPHAR/BPS Guide to PHARMACOLOGY",
+            "contents_license": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "database_license": "https://opendatacommons.org/licenses/odbl/1-0/",
+            "license_scope": "provider-derived family/target records only",
+            "release_date": RELEASE_DATE,
+            "source_homepage": "https://www.guidetopharmacology.org/",
+            "sql_sha256": SQL_SHA256,
+            "targets_csv_sha256": TARGETS_CSV_SHA256,
+            "targets_csv_url": TARGETS_CSV_URL,
+        },
+        "release": RELEASE,
+        "snapshot_completeness_certified": False,
+        "types": types_by_class,
+    }
 
 
 def policy_document() -> dict[str, object]:
@@ -307,16 +382,11 @@ def policy_document() -> dict[str, object]:
         },
         "biological_accuracy_accepted": False,
         "class_dictionary": [_rule_payload(rule) for rule in class_rules()],
-        "direct_mappings": {
-            "families": [],
-            "reason": "выпуск снимка не выбран: охват и набор видов не утверждены",
-            "release": None,
-            "types": [],
-        },
+        "direct_mappings": direct_mapping_document(),
         "gold_cases": {
             "cases": [],
             "checker": "Cursor",
-            "reason": "закреплённый источник IUPHAR в этапе 0 отсутствует",
+            "reason": "проверяющий не подтвердил биологические эталоны",
             "status": "не подтверждены",
         },
         "http_adapter": {
@@ -368,9 +438,12 @@ def policy_document() -> dict[str, object]:
             "missing_markers_version": None,
             "missing_markers_whitespace_only": True,
             "missing_markers_version_status": UNSET,
-            "snapshot_coverage": None,
-            "snapshot_species": None,
-            "snapshot_coverage_status": UNSET,
+            "snapshot_coverage": (
+                "все мишени в согласованном охвате, их семейства и предки, "
+                "генные и белковые идентификаторы"
+            ),
+            "snapshot_species": list(SPECIES_TAXON_IDS),
+            "snapshot_coverage_status": APPROVED,
             "volume_test_seconds": VOLUME_TEST_SECONDS,
             "volume_test_time_status": VOLUME_TEST_TIME_STATUS,
         },
