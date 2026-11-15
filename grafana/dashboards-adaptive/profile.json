@@ -9,6 +9,6 @@
     "bioetl-overview-v2.json": "9416911e8e6869037f7711a287810eb27a22538f9179602b03c30ba7f9f456f5",
     "bioetl-run-explorer-v1.json": "2e656533634eb5c67d430ce822acdb3830de68624a429a5bd39438429ca4f7ed"
   },
-  "plugin_version": "1.1.8",
-  "module_sha256": "ecf65e7d4c6867ada666775bc4a80aa0a7b40d119b249701142dcda377d53be0"
+  "plugin_version": "1.1.9",
+  "module_sha256": "807318a242647dd6b791cf4c7a2b0259cd661931911c6e8c5722b3d1576a049a"
 }

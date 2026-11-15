@@ -170,6 +170,9 @@ const result=project({uid:'test',panels:[
  {id:6,type:'table'},
  custom(7,{viewMode:'record'}),
 ]});
+const fs=require('node:fs');
+const dq=project(JSON.parse(fs.readFileSync('grafana/dashboards-adaptive/bioetl-dq-v2.json','utf8')));
+result.actualRecord=dq.tablePanels.find(panel=>panel.id===9406);
 console.log(JSON.stringify(result));
 """
     result = subprocess.run(
@@ -191,6 +194,9 @@ console.log(JSON.stringify(result));
     evidence = json.loads(result.stdout)
     assert [p["id"] for p in evidence["tablePanels"]] == [1, 2, 3, 4, 6, 7]
     assert evidence["tablePanels"][-1]["adaptiveTable"] is True
+    assert evidence["actualRecord"]["id"] == 9406
+    assert evidence["actualRecord"]["effectiveType"] == "table"
+    assert evidence["actualRecord"]["adaptiveTable"] is True
     assert [p["adaptiveTable"] for p in evidence["tablePanels"][:4]] == [
         True,
         True,

@@ -271,6 +271,37 @@ def test_every_linked_capture_surface_is_hash_bound(capture, kind: str) -> None:
     assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"
 
 
+@pytest.mark.parametrize("surface", ["field", "viewport_tile"])
+@pytest.mark.parametrize("damage", ["missing", "corrupt", "digest"])
+def test_compact_full_details_and_tiles_are_bound(capture, surface, damage):
+    root, path, manifest = capture
+    dashboard = manifest["dashboards"][0]
+    field = copy.deepcopy(dashboard["screenshotEvidence"])
+    tile = copy.deepcopy(field)
+    field["file"] = "detail.png"
+    tile["file"] = "detail-tile.png"
+    original = (path.parent / "test.png").read_bytes()
+    for item in (field, tile):
+        (path.parent / item["file"]).write_bytes(original)
+    field["viewportTiles"] = [tile]
+    page = {**dashboard["screenshotEvidence"], "details": {"fields": [field]}}
+    dashboard["tablePagination"] = [{"pages": [page]}]
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "PASS"
+    damaged = field if surface == "field" else tile
+    target = path.parent / damaged["file"]
+    if damage == "missing":
+        target.unlink()
+    elif damage == "corrupt":
+        target.write_bytes(b"corrupt PNG")
+    else:
+        damaged["sha256"] = "0" * 64
+        path.write_text(json.dumps(manifest), encoding="utf-8")
+    result = provenance.verify_capture(path, repo_root=root)
+    assert result["status"] == "FAIL"
+    assert damaged["file"] in json.dumps(result)
+
+
 def test_attachment_path_must_stay_within_pack(capture) -> None:
     root, path, manifest = capture
     evidence = copy.deepcopy(manifest["dashboards"][0]["screenshotEvidence"])

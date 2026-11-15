@@ -260,7 +260,7 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
   }
 
   const detailFields = frame.fields.filter((field) =>
-    fields.includes(field) || ['run_id', 'pipeline', 'run_type', 'workflow_scope'].includes(field.name)
+    options.viewMode === 'rows' || fields.includes(field) || ['run_id', 'pipeline', 'run_type', 'workflow_scope'].includes(field.name)
     || (isRuns && ['Workflow', 'Provider', 'Duration', 'Saved Evidence', 'Data Quality'].includes(label(field)))
   );
 
