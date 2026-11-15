@@ -355,32 +355,78 @@ def _paths_from(
         if found + len(paths) + len(frames) > max_paths:
             return _defect(_LIMIT)
         node_id, leaf_to_root_ids = frames.pop()
-        node = nodes.get(node_id)
-        if node is None:
-            return _defect(_MISSING_PARENT)
-        if len(leaf_to_root_ids) - 1 > max_depth:
-            return _defect(_LIMIT)
-        parents = node.parent_ids
-        if not parents:
-            if found + len(paths) >= max_paths:
-                return _defect(_LIMIT)
-            paths.append(
-                FamilyPath(
-                    family_id=start,
-                    root_to_leaf=tuple(reversed(leaf_to_root_ids)),
-                    leaf_to_root=" → ".join(leaf_to_root_ids),
-                ),
-            )
-            continue
-        for parent_id in reversed(parents):
-            if parent_id == node_id:
-                return _defect(_SELF_LOOP)
-            if parent_id in leaf_to_root_ids:
-                return _defect(_CYCLE)
-            if parent_id not in nodes:
-                return _defect(_MISSING_PARENT)
-            frames.append((parent_id, (*leaf_to_root_ids, parent_id)))
+        step = _path_step(
+            nodes,
+            start,
+            node_id,
+            leaf_to_root_ids,
+            frames,
+            found=found + len(paths),
+            max_paths=max_paths,
+            max_depth=max_depth,
+        )
+        if isinstance(step, Diagnostic):
+            return step
+        if step is not None:
+            paths.append(step)
     return tuple(paths)
+
+
+def _path_step(
+    nodes: dict[str, FamilyNode],
+    start: str,
+    node_id: str,
+    leaf_to_root_ids: tuple[str, ...],
+    frames: list[tuple[str, tuple[str, ...]]],
+    *,
+    found: int,
+    max_paths: int,
+    max_depth: int,
+) -> FamilyPath | Diagnostic | None:
+    node = nodes.get(node_id)
+    if node is None:
+        return _defect(_MISSING_PARENT)
+    if len(leaf_to_root_ids) - 1 > max_depth:
+        return _defect(_LIMIT)
+    if node.parent_ids:
+        return _queue_parents(nodes, node_id, leaf_to_root_ids, node.parent_ids, frames)
+    if found >= max_paths:
+        return _defect(_LIMIT)
+    return FamilyPath(
+        family_id=start,
+        root_to_leaf=tuple(reversed(leaf_to_root_ids)),
+        leaf_to_root=" → ".join(leaf_to_root_ids),
+    )
+
+
+def _queue_parents(
+    nodes: dict[str, FamilyNode],
+    node_id: str,
+    leaf_to_root_ids: tuple[str, ...],
+    parents: tuple[str, ...],
+    frames: list[tuple[str, tuple[str, ...]]],
+) -> Diagnostic | None:
+    for parent_id in reversed(parents):
+        defect = _parent_defect(nodes, node_id, parent_id, leaf_to_root_ids)
+        if defect is not None:
+            return defect
+        frames.append((parent_id, (*leaf_to_root_ids, parent_id)))
+    return None
+
+
+def _parent_defect(
+    nodes: dict[str, FamilyNode],
+    node_id: str,
+    parent_id: str,
+    leaf_to_root_ids: tuple[str, ...],
+) -> Diagnostic | None:
+    if parent_id == node_id:
+        return _defect(_SELF_LOOP)
+    if parent_id in leaf_to_root_ids:
+        return _defect(_CYCLE)
+    if parent_id not in nodes:
+        return _defect(_MISSING_PARENT)
+    return None
 
 
 def _defect(message: str) -> Diagnostic:
