@@ -52,8 +52,8 @@ def stamp_run_selection_context(payload: dict) -> None:
         next(p for p in payload["panels"] if p["id"] == 9002)["gridPos"]["y"] = (
             grid["y"] + 5
         )
-        # Six domain rows and their wrapped reasons must fit without internal scroll.
-        next(p for p in payload["panels"] if p["id"] == 9002)["gridPos"]["h"] = 9
+        # Retain the compact eight-row budget; full reasons remain inspectable.
+        next(p for p in payload["panels"] if p["id"] == 9002)["gridPos"]["h"] = 8
     if payload["uid"] == "bioetl-dq-v2":
         # Close the two-row gap left when accounting shrinks from eight to six.
         next(p for p in payload["panels"] if p["id"] == 9402)["gridPos"]["y"] = 18
