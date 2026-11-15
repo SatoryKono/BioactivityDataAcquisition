@@ -413,7 +413,9 @@ def test_write_xlsx_file_success_return(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     output = tmp_path / "out.xlsx"
-    dataframe = SimpleNamespace(to_excel=lambda *_args, **_kwargs: None)
+    import pandas as pd
+
+    dataframe = pd.DataFrame({"title": ["=1+1"], "number": [-2]})
     monkeypatch.setattr(
         "bioetl.domain.serialization.flatten_arrow_table_for_export",
         lambda _table: SimpleNamespace(to_pandas=lambda: dataframe),

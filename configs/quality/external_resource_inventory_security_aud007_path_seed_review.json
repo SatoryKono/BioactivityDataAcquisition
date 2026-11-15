@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "70f16d570f693e3f9183191bbff6d7fb907ff29d",
+  "source_ref": "3abc5561dba663a3906722b46fac88ea3fdef65b",
+  "source_reviews": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": "AUD-007 Sonar AaHUJwv0gNNEil3-1nYP: _seed_raw_sidecar_if_missing rebuilds csv/raw paths from single-segment table_name via _resolve_table_export_paths at the IO sink instead of accepting caller Path args. Same read_bytes/write_bytes seed pair under export.csv.raw_sidecar_seed; asyncio.to_thread and read_csv sites retained with line drift only. No new runtime qualification."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "line_updates": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": {
+      "160": 158,
+      "176": 174,
+      "259": 253,
+      "275": 269,
+      "367": 357,
+      "382": 372,
+      "417": 407
+    }
+  },
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import unicodedata
 from builtins import __import__ as _builtin_import
 from typing import TYPE_CHECKING
 
@@ -77,6 +78,25 @@ def sort_table(
     return table.sort_by(sort_keys)
 
 
+def deduplicate_full_rows(table: pa.Table) -> pa.Table:
+    """Drop exact duplicate rows while preserving first-seen order."""
+    if table.num_rows < 2:
+        return table
+    rows = table.to_pylist()
+    seen: set[tuple[object, ...]] = set()
+    deduplicated_rows: list[dict[str, object]] = []
+    column_names = table.column_names
+    for row in rows:
+        identity = tuple(row.get(column) for column in column_names)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        deduplicated_rows.append(row)
+    if len(deduplicated_rows) == len(rows):
+        return table
+    return pa.Table.from_pylist(deduplicated_rows, schema=table.schema)
+
+
 def deduplicate_table(
     table: pa.Table,
     primary_keys: list[str],
@@ -130,3 +150,49 @@ def deduplicate_table(
     ) as exc:
         logger.warning("CSV deduplication failed", error=str(exc))
         return table
+
+
+def neutralize_spreadsheet_text(value: str) -> str:
+    """Prefix formula-like text only at the spreadsheet export boundary."""
+    for char in value:
+        if char.isspace() or unicodedata.category(char) in {"Cc", "Cf"}:
+            continue
+        return "'" + value if char in "=+-@" else value
+    return value
+
+
+def _spreadsheet_safe_chunk(chunk: pa.Array) -> pa.Array:
+    """Keep dictionary cardinality bounded by each source chunk's index type."""
+    values = [
+        neutralize_spreadsheet_text(value) if value is not None else None
+        for value in chunk.to_pylist()
+    ]
+    return pa.array(values, type=chunk.type)
+
+
+def validate_spreadsheet_safe_column_names(table: pa.Table) -> None:
+    """Reject tables whose spreadsheet-safe headers would collide."""
+    names = [neutralize_spreadsheet_text(name) for name in table.column_names]
+    if len(set(names)) != len(set(table.column_names)):
+        raise ValueError("Spreadsheet-safe column names collide")
+
+
+def spreadsheet_safe_table(table: pa.Table) -> pa.Table:
+    """Return a safe export copy; retain numeric types and original input values."""
+    validate_spreadsheet_safe_column_names(table)
+    result = table
+    for index, field in enumerate(table.schema):
+        kind = (
+            field.type.value_type if pa.types.is_dictionary(field.type) else field.type
+        )
+        if pa.types.is_string(kind) or pa.types.is_large_string(kind):
+            column = pa.chunked_array(
+                [
+                    _spreadsheet_safe_chunk(chunk)
+                    for chunk in table.column(index).chunks
+                ],
+                type=field.type,
+            )
+            result = result.set_column(index, field, column)
+    names = [neutralize_spreadsheet_text(name) for name in table.column_names]
+    return result.rename_columns(names)
