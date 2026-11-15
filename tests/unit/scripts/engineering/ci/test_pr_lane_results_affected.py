@@ -233,6 +233,20 @@ def test_iuphar_release_mapping_and_data_keep_bounded_owners(tmp_path: Path) -> 
         assert report["covers_full_suite"] is False
 
 
+def test_iuphar_batch_pipeline_keeps_a_bounded_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class/test_pipeline.py"
+    owner.parent.mkdir(parents=True)
+    owner.write_text("def test_owner():\n    assert True\n", encoding="utf-8")
+    for path in (
+        "src/iuphar_target_class/pipeline.py",
+        "src/iuphar_target_class/pipeline_io.py",
+        "src/iuphar_target_class/pipeline_acceptance.py",
+    ):
+        report = build_shadow_compare([path], repo_root=tmp_path)
+        assert report["selected"] == ["tests/unit/iuphar_target_class/test_pipeline.py"]
+        assert report["covers_full_suite"] is False
+
+
 def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
     owner = tmp_path / "tests/unit/iuphar_target_class/test_policy.py"
     owner.parent.mkdir(parents=True)
