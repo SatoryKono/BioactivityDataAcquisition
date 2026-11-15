@@ -93,7 +93,13 @@ def test_write_manifest_creates_stable_json(tmp_path: Path) -> None:
     )
 
     assert output_path.name == "silver_chembl_activity.provenance-manifest.json"
-    assert output_path.read_text(encoding="utf-8") == '{\n  "a": 1,\n  "b": 2\n}\n'
+    import json
+
+    assert json.loads(output_path.read_text(encoding="utf-8")) == {
+        "a": 1,
+        "b": 2,
+        "spreadsheet_text_policy": "csv-tsv-apostrophe-prefix;xlsx-explicit-text;v1",
+    }
 
 
 def test_fingerprint_file_returns_sha256_and_size(tmp_path: Path) -> None:
