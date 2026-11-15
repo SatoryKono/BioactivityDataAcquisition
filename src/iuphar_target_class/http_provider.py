@@ -22,6 +22,7 @@ from .snapshot import Completeness, FrozenRecord, ProviderHit, freeze_record
 GTP_HEADER = "GTP-API-Key"
 RETRYABLE_STATUS = frozenset({429, 500, 502, 503, 504})
 AUTH_STATUS = frozenset({401, 403})
+_MISSING: object = object()
 
 
 @dataclass(frozen=True, slots=True)
@@ -88,7 +89,7 @@ class _Step:
     cacheable: bool
     code: str
     retry_after: str | None = None
-    payload: object | None = None
+    payload: object = _MISSING
 
 
 class Clock(Protocol):
@@ -216,6 +217,9 @@ class HttpProvider:
         selected = self._genes_for(found.records, symbol, species)
         if isinstance(selected, ProviderHit):
             return selected
+        if not selected:
+            absence = _absence(self._completeness)
+            return _seal(absence.hit, self._api_key)
         sealed = _seal(_records_hit(selected), self._api_key)
         if sealed.records:
             self._cache[cache_key] = sealed
@@ -294,7 +298,7 @@ class HttpProvider:
             lambda response: _json_response(response, self._completeness),
         )
         self._observe(step)
-        if step.payload is None:
+        if step.payload is _MISSING:
             return _seal(step.hit, self._api_key)
         if _payload_secret(step.payload, self._api_key):
             return _unavailable("secret")

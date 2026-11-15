@@ -384,6 +384,30 @@ def test_gene_search_filters_species_from_gene_information() -> None:
     assert clock.sleeps == [1]
 
 
+def test_null_gene_information_is_schema_not_not_found() -> None:
+    targets = b'[{"targetId":3,"name":"5-HT1D receptor","type":"GPCR"}]'
+    provider, _transport, _clock = _provider(
+        [_response(200, targets), _response(200, b"null")]
+    )
+    hit = provider.find_by_gene("HTR1D", "Human")
+    assert hit_status(hit) == "source_unavailable"
+    assert hit.diagnostics == ("source_unavailable:schema",)
+    assert hit.records == ()
+
+
+def test_species_filter_on_an_incomplete_snapshot_is_not_not_found() -> None:
+    targets = b'[{"targetId":3,"name":"5-HT1D receptor","type":"GPCR"}]'
+    genes = b'[{"targetId":3,"species":"Mouse","geneSymbol":"Htr1d"}]'
+    provider, _transport, _clock = _provider(
+        [_response(200, targets), _response(200, genes)],
+        approved=False,
+    )
+    hit = provider.find_by_gene("HTR1D", "Human")
+    assert hit_status(hit) == "source_unavailable"
+    assert hit.diagnostics == ("source_unavailable:incomplete",)
+    assert hit.records == ()
+
+
 def test_gene_search_drops_a_different_species() -> None:
     targets = b'[{"targetId":3,"name":"5-HT1D receptor","type":"GPCR"}]'
     genes = b'[{"targetId":3,"species":"Mouse","geneSymbol":"Htr1d"}]'
