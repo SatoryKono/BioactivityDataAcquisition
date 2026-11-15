@@ -7,6 +7,7 @@ import pytest
 from iuphar_target_class.hierarchy import (
     FamilyNode,
     build_family_paths,
+    normalize_approved_provider_class,
     normalize_provider_class,
     validate_family_graph,
 )
@@ -293,3 +294,56 @@ def test_two_parents_make_two_paths_when_the_schema_allows_them() -> None:
     )
     assert blocked is not None
     assert blocked.message == "множественные родители"
+
+
+def test_approved_real_release_classifies_gpcr_and_distinguishes_grouping() -> None:
+    gpcr = normalize_approved_provider_class(
+        release="2026.3.1",
+        type_name="GPCR",
+        family_ids=("1",),
+    )
+    assert gpcr.annotation_status == "available"
+    assert gpcr.iuphar_class == "Receptor"
+    assert gpcr.iuphar_subclass is None
+    assert gpcr.family_evidence == (("1", "Receptor"),)
+    assert gpcr.paths and all("694" in path.root_to_leaf for path in gpcr.paths)
+    fallback = normalize_approved_provider_class(
+        release="2026.3.1",
+        type_name=None,
+        family_ids=("1",),
+    )
+    assert fallback.annotation_status == "partial"
+    assert fallback.proof == "отображение семейства"
+    assert fallback.source == "iuphar_normalized"
+    assert fallback.iuphar_class == "Receptor"
+    group = normalize_approved_provider_class(
+        release="2026.3.1",
+        type_name="grouping",
+        family_ids=("694",),
+    )
+    assert group.annotation_status == "unmapped_type"
+    assert group.iuphar_class is None
+    assert group.family_evidence == ()
+
+
+def test_approved_mapping_is_rejected_for_a_different_release() -> None:
+    with pytest.raises(ValueError, match="does not match approved mapping"):
+        normalize_approved_provider_class(
+            release="2026.3.2",
+            type_name="gpcr",
+            family_ids=("1",),
+        )
+
+
+def test_conflicting_family_evidence_is_not_hidden_by_a_known_type() -> None:
+    conflict = normalize_provider_class(
+        type_name="gpcr",
+        family_ids=("1", "2"),
+        nodes=(FamilyNode("1", (), "one"), FamilyNode("2", (), "two")),
+        type_to_class={"gpcr": "Receptor"},
+        family_to_class={"1": "Receptor", "2": "Ion Channel"},
+    )
+    assert conflict.annotation_status == "conflicting"
+    assert conflict.iuphar_class is None
+    assert conflict.iuphar_subclass is None
+    assert conflict.family_evidence == (("1", "Receptor"), ("2", "Ion Channel"))

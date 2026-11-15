@@ -8,7 +8,10 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+from functools import cache
 
+from .gtopdb_2026_3_1 import FAMILY_ROWS
+from .iuphar_mapping import approved_class_mappings
 from .models import Diagnostic
 from .policy import (
     GRAPH_MAX_DEPTH,
@@ -114,6 +117,31 @@ def build_family_paths(
             return built
         paths.extend(built)
     return tuple(sorted(paths, key=lambda item: (item.family_id, item.root_to_leaf)))
+
+
+@cache
+def _pinned_family_graph() -> tuple[FamilyNode, ...]:
+    return tuple(
+        FamilyNode(str(family_id), tuple(map(str, parents)), source_type)
+        for family_id, source_type, parents in FAMILY_ROWS
+    )
+
+
+def normalize_approved_provider_class(
+    *,
+    release: str,
+    type_name: str | None,
+    family_ids: tuple[str, ...],
+) -> HierarchyResult:
+    """Classify against the approved mapping and matching release graph only."""
+    types, families = approved_class_mappings(release)
+    return normalize_provider_class(
+        type_name=type_name.strip().lower() if type_name else None,
+        family_ids=family_ids,
+        nodes=_pinned_family_graph(),
+        type_to_class=types,
+        family_to_class=families,
+    )
 
 
 def normalize_provider_class(
