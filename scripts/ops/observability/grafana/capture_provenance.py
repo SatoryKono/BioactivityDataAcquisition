@@ -339,6 +339,15 @@ def attachment_errors(root: Path, evidence: object) -> list[str]:
     )
 
 
+def _compact_detail_attachments(page: dict) -> list[dict]:
+    fields = page.get("details", {}).get("fields", [])
+    return [
+        attachment
+        for field in fields
+        for attachment in (field, *field.get("viewportTiles", []))
+    ]
+
+
 def dashboard_attachment_errors(root: Path, dashboard: dict) -> list[str]:
     """Bind critical closeups, original full-capture tiles and pagination pages."""
     attachments = list(dashboard.get("criticalPanelScreenshots", []))
@@ -346,6 +355,7 @@ def dashboard_attachment_errors(root: Path, dashboard: dict) -> list[str]:
     for table in dashboard.get("tablePagination", []):
         attachments.extend(table.get("pages", []))
         for page in table.get("pages", []):
+            attachments.extend(_compact_detail_attachments(page))
             attachments.extend(page.get("viewportTiles", []))
             attachments.extend(page.get("scrollTiles", []))
             for tile in page.get("scrollTiles", []):
@@ -353,9 +363,6 @@ def dashboard_attachment_errors(root: Path, dashboard: dict) -> list[str]:
             attachments.extend(
                 v for v in page.get("inspectedValues", []) if v.get("file")
             )
-            for field in page.get("details", {}).get("fields", []):
-                attachments.append(field)
-                attachments.extend(field.get("viewportTiles", []))
     for control in dashboard.get("seriesControls", []):
         attachments.extend(control.get("entries", []))
     return [
