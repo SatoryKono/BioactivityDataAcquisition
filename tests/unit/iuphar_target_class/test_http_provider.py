@@ -6,9 +6,11 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from email.utils import format_datetime
+from types import SimpleNamespace
 
 import pytest
 
+from iuphar_target_class import http_provider
 from iuphar_target_class.http_provider import (
     HttpProvider,
     HttpTimeouts,
@@ -432,8 +434,20 @@ def test_gene_search_drops_a_different_species() -> None:
     assert len(transport.calls) == 2
 
 
-def test_retry_after_http_date_stays_inside_the_approved_max_delay() -> None:
-    later = datetime.now(UTC) + timedelta(seconds=120)
+@pytest.fixture
+def fixed_retry_after_time(monkeypatch: pytest.MonkeyPatch) -> datetime:
+    """Freeze the wall clock used to interpret Retry-After HTTP dates."""
+    reference = datetime(2026, 11, 15, 12, tzinfo=UTC)
+    monkeypatch.setattr(
+        http_provider, "datetime", SimpleNamespace(now=lambda _tz: reference)
+    )
+    return reference
+
+
+def test_retry_after_http_date_stays_inside_the_approved_max_delay(
+    fixed_retry_after_time: datetime,
+) -> None:
+    later = fixed_retry_after_time + timedelta(seconds=120)
     stamp = format_datetime(later, usegmt=True)
     provider, transport, clock = _provider(
         [_response(429, retry_after=stamp), _response(200, _TARGET)]
@@ -444,8 +458,10 @@ def test_retry_after_http_date_stays_inside_the_approved_max_delay() -> None:
     assert len(transport.calls) == 2
 
 
-def test_past_retry_after_http_date_waits_only_for_the_rate_limit() -> None:
-    earlier = datetime.now(UTC) - timedelta(seconds=30)
+def test_past_retry_after_http_date_waits_only_for_the_rate_limit(
+    fixed_retry_after_time: datetime,
+) -> None:
+    earlier = fixed_retry_after_time - timedelta(seconds=30)
     stamp = format_datetime(earlier, usegmt=True)
     script = [_response(429, retry_after=stamp) for _index in range(4)]
     provider, _transport, clock = _provider(script)
