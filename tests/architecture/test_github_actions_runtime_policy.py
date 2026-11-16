@@ -1407,15 +1407,22 @@ def test_pr_required_fetch_depth_keeps_class_lane_history() -> None:
     assert checkout_depth("fast-governance") == 1
     assert checkout_depth("pr-gate-complete") == 1
 
-    checkouts = checkout_steps("class-lane")
-    assert len(checkouts) == 1
-    checkout = checkouts[0]
-    assert checkout["with"]["persist-credentials"] is False
-    assert checkout["with"]["ref"] == "${{ github.sha }}"
-    assert "needs" not in str(checkout["with"]["ref"])
-    assert "head_sha" not in str(checkout["with"]["ref"])
-    assert int(checkout["with"]["fetch-depth"]) == 0
-    assert checkout["with"]["filter"] == "blob:none"
+    pull_request, dispatch = checkout_steps("class-lane")
+    assert pull_request["if"] == "github.event_name == 'pull_request'"
+    assert pull_request["with"]["persist-credentials"] is False
+    assert (
+        pull_request["with"]["ref"]
+        == "${{ needs['classify-changes'].outputs.head_sha }}"
+    )
+    assert int(pull_request["with"]["fetch-depth"]) == 0
+    assert pull_request["with"]["filter"] == "blob:none"
+    assert dispatch["if"] == "github.event_name == 'workflow_dispatch'"
+    assert dispatch["with"]["ref"] == "${{ github.sha }}"
+    assert "needs" not in str(dispatch["with"]["ref"])
+    assert "head_sha" not in str(dispatch["with"]["ref"])
+    assert dispatch["with"]["persist-credentials"] is False
+    assert int(dispatch["with"]["fetch-depth"]) == 0
+    assert dispatch["with"]["filter"] == "blob:none"
     setup_node = next(
         step for step in jobs["class-lane"]["steps"] if step.get("id") == "setup-node"
     )
