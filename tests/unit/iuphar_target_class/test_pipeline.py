@@ -31,6 +31,8 @@ from iuphar_target_class.pipeline_io import (
     run_csv_pipeline,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _provenance() -> RunProvenance:
     return RunProvenance(
@@ -74,13 +76,13 @@ def _run(*rows, snapshot=None):
     )
 
 
-def test_empty_batch():
+def test_indexed_pipeline__empty_batch__reports_empty():
     result = _run()
     assert result.status == "empty"
     assert result.metrics["rows"] == 0 and not result.rows
 
 
-def test_all_invalid_batch():
+def test_indexed_pipeline__all_invalid_rows__rejects_batch():
     result = _run(RawTargetRow("row", {}, "invented"))
     assert result.status == "rejected"
     assert result.rows[0].result.match_status is None

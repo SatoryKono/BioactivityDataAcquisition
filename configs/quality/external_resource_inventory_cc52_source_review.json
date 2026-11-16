@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "884f31f98b9eddfb07068080ef58689a61afd48a",
+  "source_ref": "afcfdef7e392df2079566e9112da5df5c239c485",
+  "source_reviews": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": "Reviewed pure extraction of the existing cross-platform table-name rejection predicate. Entire CsvExporter class and _seed_raw_sidecar_if_missing/_export_root/_resolve_table_export_paths ASTs remain identical to the published catalog source; all asyncio.to_thread, Arrow CSV reads, atomic/append/owner/cleanup expressions are unchanged. Existing acquisition and ownership references require only exact owning relocation of source lines. Preserves export-root confinement, validation/error order, delimiters, raw-sidecar handling, every resource identity/site/census, historical dispositions and runtime NOT_RUN_12553. No resource-free classification or exclusion is claimed. C3 independently read the entire CSV change; local frozen candidate passed1256 tests with3 disclosed Windows symlink skips."
+  }
+}

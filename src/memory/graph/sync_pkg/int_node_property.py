@@ -90,19 +90,7 @@ def _module_surface_complexity_metrics(
     children = indexes.declared_children.get(surface_key, ())
     functions = [child for child in children if child.label == "function_surface"]
     classes = [child for child in children if child.label == "class_surface"]
-    methods = [
-        method_key
-        for class_key in classes
-        for method_key in indexes.declared_children.get(class_key, ())
-        if method_key.label == "method_surface"
-    ]
-    callable_metrics = [
-        *[
-            _aggregate_callable_metrics(snapshot, function_key)
-            for function_key in functions
-        ],
-        *[_aggregate_callable_metrics(snapshot, method_key) for method_key in methods],
-    ]
+    callable_metrics = _module_callable_metrics(snapshot, indexes, functions, classes)
     branch_count = sum(metric[0] for metric in callable_metrics)
     abstraction_fanout = len(functions) + len(classes)
     return ComplexityMetrics(
@@ -142,3 +130,25 @@ def _casefolded_markers(
     return tuple(
         marker.casefold() for marker in (_as_string_list(payload.get(key)) or defaults)
     )
+
+
+def _module_callable_metrics(
+    snapshot: GraphSnapshot,
+    indexes: SurfaceRelationIndexes,
+    functions: list[NodeKey],
+    classes: list[NodeKey],
+) -> list[tuple[int, int, int, int]]:
+    methods = [
+        method_key
+        for class_key in classes
+        for method_key in indexes.declared_children.get(class_key, ())
+        if method_key.label == "method_surface"
+    ]
+    callable_metrics = [
+        *[
+            _aggregate_callable_metrics(snapshot, function_key)
+            for function_key in functions
+        ],
+        *[_aggregate_callable_metrics(snapshot, method_key) for method_key in methods],
+    ]
+    return callable_metrics

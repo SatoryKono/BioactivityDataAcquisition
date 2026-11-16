@@ -642,6 +642,54 @@ class ProvenanceControls(unittest.TestCase):
                 module.source_inputs(root, commit, manifest)
 
 
+class OriginalBuildMetadataFormats(unittest.TestCase):
+    """Consumer accepts either metadata schema only for the matching built ID."""
+
+    def test_legacy_driver_receipts_preserve_original_identity_checks(self):
+        for damaged in (None, "host", "managed", "explicit_host", "explicit_managed"):
+            with self.subTest(damaged=damaged):
+                run, jobs, artifacts, raw, _, parity = fixture()
+                payloads = {}
+                with zipfile.ZipFile(io.BytesIO(raw)) as source:
+                    for row in source.infolist():
+                        payloads[row.filename] = json.loads(source.read(row))
+                host_config = parity["built_image_config_digest"]
+                managed_config = "sha256:" + "d" * 64
+                payloads["router-v7-image-build.json"] = {
+                    "containerimage.digest": host_config
+                }
+                payloads["router-v7-managed-image-build.json"] = {
+                    "containerimage.digest": managed_config
+                }
+                payloads["router-v7-managed-image-parity.json"] = {
+                    **copy.deepcopy(parity),
+                    "built_image_config_digest": managed_config,
+                    "declared_image_config_digest": "sha256:" + "e" * 64,
+                }
+                if damaged:
+                    kind = "managed-image" if "managed" in damaged else "image"
+                    key = (
+                        "containerimage.config.digest"
+                        if damaged.startswith("explicit_")
+                        else "containerimage.digest"
+                    )
+                    payloads[f"router-v7-{kind}-build.json"][key] = "sha256:" + "f" * 64
+                stream = io.BytesIO()
+                with zipfile.ZipFile(stream, "w") as target:
+                    for name, payload in payloads.items():
+                        target.writestr(name, json.dumps(payload))
+                raw = stream.getvalue()
+                artifacts["artifacts"][0].update(
+                    size_in_bytes=len(raw), digest="sha256:" + module.sha256(raw)
+                )
+                if damaged:
+                    with self.assertRaisesRegex(ValueError, "identity mismatch"):
+                        module.validate_capture(run, jobs, artifacts, raw)
+                else:
+                    _, result = module.validate_capture(run, jobs, artifacts, raw)
+                    self.assertEqual(result, parity)
+
+
 if __name__ == "__main__":
     unittest.main()
 
@@ -778,7 +826,9 @@ def test_materializer_public_api_strict_mypy_and_negative_control(
     assert "[assignment]" in negative.stdout
 
 
-@pytest.mark.parametrize("recorded", ["missing", "matching", "conflicting"])
+@pytest.mark.parametrize(
+    "recorded", ["missing", "matching", "conflicting", "legacy_conflicting"]
+)
 def test_workflow_binds_build_metadata_to_inspected_config(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, recorded: str
 ) -> None:
@@ -805,14 +855,21 @@ def test_workflow_binds_build_metadata_to_inspected_config(
         ("router-v7-image-build", "bioetl-router-host:acceptance"),
         ("router-v7-managed-image-build", "bioetl-router-managed:acceptance"),
     ):
-        metadata = {"containerimage.digest": "sha256:" + "c" * 64, "exporter": "kept"}
-        if recorded != "missing":
+        metadata = {
+            "containerimage.digest": (
+                "sha256:" + "c" * 64
+                if recorded == "legacy_conflicting"
+                else configs[tag]
+            ),
+            "exporter": "kept",
+        }
+        if recorded not in {"missing", "legacy_conflicting"}:
             metadata["containerimage.config.digest"] = (
                 configs[tag] if recorded == "matching" else "sha256:" + "d" * 64
             )
         path = output / (stem + ".json")
         path.write_text(json.dumps(metadata))
-        originals[path] = metadata
+        originals[path] = path.read_bytes()
 
     def inspect_config(argv: list[str], *, text: bool) -> str:
         assert text is True
@@ -829,19 +886,56 @@ def test_workflow_binds_build_metadata_to_inspected_config(
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(trusted_docker, "docker_path", lambda: "trusted-docker")
     monkeypatch.setattr(subprocess, "check_output", inspect_config)
-    if recorded == "conflicting":
+    if recorded in {"conflicting", "legacy_conflicting"}:
         with pytest.raises(AssertionError, match="Conflicting build config ID"):
             exec(compile(block, str(workflow), "exec"), {})
         assert all(
-            json.loads(path.read_text()) == original
-            for path, original in originals.items()
+            path.read_bytes() == original for path, original in originals.items()
         )
     else:
         exec(compile(block, str(workflow), "exec"), {})
-        for (path, original), config in zip(
-            originals.items(), configs.values(), strict=True
-        ):
-            assert json.loads(path.read_text()) == {
-                **original,
-                "containerimage.config.digest": config,
-            }
+        assert all(
+            path.read_bytes() == original for path, original in originals.items()
+        )
+
+
+@pytest.mark.parametrize(
+    "initial",
+    [
+        None,
+        {
+            "debug": False,
+            "features": {"buildkit": True, "containerd-snapshotter": True},
+        },
+    ],
+)
+def test_workflow_selects_config_digest_store_without_losing_daemon_settings(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, initial: dict | None
+) -> None:
+    import pathlib
+    import yaml
+
+    workflow = Path(__file__).parents[6] / module.WORKFLOW
+    steps = yaml.safe_load(workflow.read_text())["jobs"]["host-build"]["steps"]
+    run = next(
+        step["run"]
+        for step in steps
+        if step.get("name")
+        == "Qualify the classic image store for config-digest evidence"
+    )
+    block = run.split("sudo python3 - <<'PY'\n", 1)[1].split("\nPY\n", 1)[0]
+    config = tmp_path / "daemon.json"
+    if initial is not None:
+        config.write_text(json.dumps(initial))
+
+    def daemon_path(value: str) -> Path:
+        assert value == "/etc/docker/daemon.json"
+        return config
+
+    with monkeypatch.context() as patch:
+        patch.setattr(pathlib, "Path", daemon_path)
+        exec(compile(block, str(workflow), "exec"), {})
+    settings = json.loads(config.read_text())
+    expected = copy.deepcopy(initial) if initial is not None else {}
+    expected.setdefault("features", {})["containerd-snapshotter"] = False
+    assert settings == expected

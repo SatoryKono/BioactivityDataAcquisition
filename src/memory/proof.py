@@ -607,19 +607,7 @@ def _receipt_scope_errors(receipt: dict[str, Any], bundle: dict[str, Any]) -> li
     errors: list[str] = []
     if receipt.get("task_id") != bundle.get("task_id"):
         errors.append("cross_scope:task_id")
-    receipt_repo = receipt.get("repository", {})
-    bundle_repo = bundle.get("repository", {})
-    if bundle.get("trust_tier") == "ci":
-        ci_run = bundle_repo.get("ci_run_id")
-        if not ci_run or receipt_repo.get("ci_run_id") != ci_run:
-            errors.append("cross_scope:ci_run_id")
-    for field in ("repo_id", "branch"):
-        if receipt_repo.get(field) != bundle_repo.get(field):
-            errors.append(f"cross_scope:{field}")
-    if receipt_repo.get("worktree_id") != bundle_repo.get("worktree_id"):
-        shared_ci_run = receipt_repo.get("ci_run_id")
-        if not shared_ci_run or shared_ci_run != bundle_repo.get("ci_run_id"):
-            errors.append("cross_scope:worktree_id")
+    _receipt_repository_scope_errors(receipt, bundle, errors)
     source = receipt.get("source", {})
     bundle_source = bundle.get("source", {})
     for field in (
@@ -643,23 +631,7 @@ def _canonical_full_suite_command(command: str, argv: object) -> bool:
     prefix = ["python", "-m", "scripts.engineering.dev", "run-tests", "all"]
     if tokens[:5] != prefix or tokens != argv:
         return False
-    seen: set[str] = set()
-    arguments = iter(tokens[5:])
-    for argument in arguments:
-        if argument == "-p":
-            if argument in seen or next(arguments, None) != "no:cacheprovider":
-                return False
-            seen.add(argument)
-            continue
-        name, separator, value = argument.partition("=")
-        if name not in {"--junitxml", "--basetemp", "--vcr-record"}:
-            return False
-        if name in seen or not separator or not value or value.startswith("-"):
-            return False
-        if name == "--vcr-record" and value != "none":
-            return False
-        seen.add(name)
-    return seen == {"--junitxml", "--basetemp", "--vcr-record", "-p"}
+    return _canonical_full_suite_arguments(tokens)
 
 
 def _verify_receipt(
@@ -675,34 +647,13 @@ def _verify_receipt(
 
     kind = str(receipt.get("evidence_kind", ""))
     producer = str(receipt.get("producer", ""))
-    kind_policy = policy.get("evidence_kinds", {}).get(kind)
-    if not isinstance(kind_policy, dict):
-        errors.append(f"unknown_evidence_kind:{kind}")
-        return errors, degradations
-    if producer not in kind_policy.get("authorized_producers", []):
-        errors.append(f"unauthorized_producer:{kind}:{producer}")
-    command = str(receipt.get("command", ""))
-    families = [str(item) for item in kind_policy.get("command_families", [])]
-    command_authorized = any(command.startswith(family) for family in families)
-    if command.startswith("python -m scripts.engineering.dev"):
-        command_authorized = command_authorized and _canonical_full_suite_command(
-            command, receipt.get("argv")
-        )
-    if not command_authorized:
-        errors.append(f"command_not_authorized:{kind}")
+    command_result = _receipt_command_errors(
+        receipt, policy, errors, degradations, kind, producer
+    )
+    if command_result is not None:
+        return command_result
 
-    status = receipt.get("status")
-    if status == "fail":
-        errors.append(f"failed_receipt:{kind}")
-    elif status in {"skip", "unavailable"}:
-        if not str(receipt.get("skip_reason") or "").strip():
-            errors.append(f"missing_skip_reason:{kind}")
-        if not str(receipt.get("follow_up") or "").strip():
-            errors.append(f"missing_follow_up:{kind}")
-        degradations.append(f"{status}_receipt:{kind}")
-    elif status == "pass" and receipt.get("exit_code") != 0:
-        errors.append(f"failed_reported_as_pass:{kind}")
-    return errors, degradations
+    return _receipt_status_result(receipt, errors, degradations, kind)
 
 
 def verify_bundle(
@@ -866,3 +817,90 @@ def _verification_result(
             tuple(sorted(set(degradations))),
         )
     return VerificationResult("ADMIT", True, (), ())
+
+
+def _receipt_command_errors(
+    receipt: dict[str, Any],
+    policy: dict[str, Any],
+    errors: list[str],
+    degradations: list[str],
+    kind: str,
+    producer: str,
+) -> tuple[list[str], list[str]] | None:
+    kind_policy = policy.get("evidence_kinds", {}).get(kind)
+    if not isinstance(kind_policy, dict):
+        errors.append(f"unknown_evidence_kind:{kind}")
+        return errors, degradations
+    if producer not in kind_policy.get("authorized_producers", []):
+        errors.append(f"unauthorized_producer:{kind}:{producer}")
+    command = str(receipt.get("command", ""))
+    families = [str(item) for item in kind_policy.get("command_families", [])]
+    command_authorized = any(command.startswith(family) for family in families)
+    if command.startswith("python -m scripts.engineering.dev"):
+        command_authorized = command_authorized and _canonical_full_suite_command(
+            command, receipt.get("argv")
+        )
+    if not command_authorized:
+        errors.append(f"command_not_authorized:{kind}")
+    return None
+
+
+def _receipt_status_result(
+    receipt: dict[str, Any], errors: list[str], degradations: list[str], kind: str
+) -> tuple[list[str], list[str]]:
+    status = receipt.get("status")
+    if status == "fail":
+        errors.append(f"failed_receipt:{kind}")
+    elif status in {"skip", "unavailable"}:
+        if not str(receipt.get("skip_reason") or "").strip():
+            errors.append(f"missing_skip_reason:{kind}")
+        if not str(receipt.get("follow_up") or "").strip():
+            errors.append(f"missing_follow_up:{kind}")
+        degradations.append(f"{status}_receipt:{kind}")
+    elif status == "pass" and receipt.get("exit_code") != 0:
+        errors.append(f"failed_reported_as_pass:{kind}")
+    return errors, degradations
+
+
+def _receipt_repository_scope_errors(
+    receipt: dict[str, Any], bundle: dict[str, Any], errors: list[str]
+) -> None:
+    receipt_repo = receipt.get("repository", {})
+    bundle_repo = bundle.get("repository", {})
+    if bundle.get("trust_tier") == "ci":
+        ci_run = bundle_repo.get("ci_run_id")
+        if not ci_run or receipt_repo.get("ci_run_id") != ci_run:
+            errors.append("cross_scope:ci_run_id")
+    for field in ("repo_id", "branch"):
+        if receipt_repo.get(field) != bundle_repo.get(field):
+            errors.append(f"cross_scope:{field}")
+    if receipt_repo.get("worktree_id") != bundle_repo.get("worktree_id"):
+        shared_ci_run = receipt_repo.get("ci_run_id")
+        if not shared_ci_run or shared_ci_run != bundle_repo.get("ci_run_id"):
+            errors.append("cross_scope:worktree_id")
+
+
+def _canonical_full_suite_arguments(tokens: list[str]) -> bool:
+    seen: set[str] = set()
+    arguments = iter(tokens[5:])
+    for argument in arguments:
+        if argument == "-p":
+            if argument in seen or next(arguments, None) != "no:cacheprovider":
+                return False
+            seen.add(argument)
+            continue
+        if not _accept_full_suite_option(argument, seen):
+            return False
+    return seen == {"--junitxml", "--basetemp", "--vcr-record", "-p"}
+
+
+def _accept_full_suite_option(argument: str, seen: set[str]) -> bool:
+    name, separator, value = argument.partition("=")
+    if name not in {"--junitxml", "--basetemp", "--vcr-record"}:
+        return False
+    if name in seen or not separator or not value or value.startswith("-"):
+        return False
+    if name == "--vcr-record" and value != "none":
+        return False
+    seen.add(name)
+    return True

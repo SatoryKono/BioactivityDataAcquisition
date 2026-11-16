@@ -214,6 +214,41 @@ def test_split_config_sections_serializes_dates_deterministically() -> None:
     assert sections[1].content == json.dumps("2026-04-29T12:34:56", ensure_ascii=True)
 
 
+@pytest.mark.parametrize(
+    ("suffix", "text", "expected"),
+    [
+        (
+            "yaml",
+            "nothing: null\nflag: false\nrelease_date: 2026-04-29\nnested: [null, true, 3]\n",
+            {
+                "nothing": None,
+                "flag": False,
+                "release_date": "2026-04-29",
+                "nested": [None, True, 3],
+            },
+        ),
+        (
+            "toml",
+            "release_date = 2026-04-29\ngenerated_at = 2026-04-29T12:34:56\nflag = true\n",
+            {
+                "release_date": "2026-04-29",
+                "generated_at": "2026-04-29T12:34:56",
+                "flag": True,
+            },
+        ),
+    ],
+)
+def test_config_sections_preserve_native_scalar_values(
+    suffix: str, text: str, expected: dict[str, Any]
+) -> None:
+    """RAG JSON sections preserve null/boolean values and normalize native dates."""
+    sections = split_config_sections(text, Path(f"configs/example.{suffix}"))
+    assert [section.title for section in sections] == list(expected)
+    assert {
+        section.title: json.loads(section.content) for section in sections
+    } == expected
+
+
 def test_build_rag_manifests_indexes_devin_wiki_pages(tmp_path: Path) -> None:
     (tmp_path / ".devin").mkdir(parents=True)
     (tmp_path / ".devin" / "wiki.json").write_text(

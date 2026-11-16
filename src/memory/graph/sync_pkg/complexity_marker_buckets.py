@@ -78,22 +78,7 @@ def _retirement_scores(
     if inputs.doc_count > 0 and inputs.runtime_count == 0:
         cycle_score += 1
 
-    deletion_score = 0
-    if inputs.runtime_count == 0:
-        deletion_score += 3
-    if inputs.config_count == 0:
-        deletion_score += 2
-    if inputs.doc_count == 0:
-        deletion_score += 1
-    if only_test_referenced:
-        deletion_score += 2
-    if inputs.deprecation_markers:
-        deletion_score += 2
-    if (
-        inputs.recent_age_days is not None
-        and inputs.recent_age_days >= config.stale_age_days
-    ):
-        deletion_score += 2
+    deletion_score = _retirement_deletion_score(config, inputs, only_test_referenced)
     return cycle_score, deletion_score - cycle_score, only_test_referenced
 
 
@@ -186,3 +171,27 @@ def _configured_duplicate_families(
         if family_name in duplication_families
     )
     return configured_families or duplication_families
+
+
+def _retirement_deletion_score(
+    config: RetirementAnalysisConfig,
+    inputs: RetirementScoreInputs,
+    only_test_referenced: bool,
+) -> int:
+    deletion_score = 0
+    if inputs.runtime_count == 0:
+        deletion_score += 3
+    if inputs.config_count == 0:
+        deletion_score += 2
+    if inputs.doc_count == 0:
+        deletion_score += 1
+    if only_test_referenced:
+        deletion_score += 2
+    if inputs.deprecation_markers:
+        deletion_score += 2
+    if (
+        inputs.recent_age_days is not None
+        and inputs.recent_age_days >= config.stale_age_days
+    ):
+        deletion_score += 2
+    return deletion_score

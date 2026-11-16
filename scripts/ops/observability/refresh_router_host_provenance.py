@@ -61,6 +61,7 @@ BUILD_SUPPORT = (
     "grafana/tooling/router-v7-bridge/verify-packed-bridge.mjs",
     "scripts/ops/observability/grafana/router_rootfs.py",
     "scripts/ops/observability/grafana/router_managed_image.py",
+    "scripts/ops/observability/grafana/router_candidate.py",
     "scripts/ops/observability/grafana/trusted_docker.py",
     "scripts/ops/observability/refresh_router_host_provenance.py",
 )
@@ -214,6 +215,25 @@ def _selected_artifact(
     return artifact
 
 
+def build_matches_config(build: JsonObject, config: object) -> bool:
+    """Bind original Buildx metadata to an independently verified image config ID.
+
+    The Docker driver can emit only containerimage.digest as its image ID.
+    An explicit config field is authoritative; a conflicting value is never
+    rescued by the legacy field. A manifest digest cannot substitute for Id.
+    """
+    key = (
+        "containerimage.config.digest"
+        if "containerimage.config.digest" in build
+        else "containerimage.digest"
+    )
+    return (
+        isinstance(config, str)
+        and re.fullmatch(SHA256_DIGEST_PATTERN, config) is not None
+        and build.get(key) == config
+    )
+
+
 def _receipt_payloads(archive: bytes) -> dict[str, JsonObject]:
     """Read the required host receipts and optional managed receipt pair."""
     host_receipts = {"router-v7-image-build.json", "router-v7-image-parity.json"}
@@ -255,8 +275,7 @@ def _receipt_payloads(archive: bytes) -> dict[str, JsonObject]:
                 "Missing/invalid managed image config digest",
             )
         require(
-            build.get("containerimage.config.digest")
-            == parity.get("built_image_config_digest"),
+            build_matches_config(build, parity.get("built_image_config_digest")),
             "Managed build/image-parity identity mismatch",
         )
         rootfs_digest = text(
@@ -285,8 +304,7 @@ def validate_capture(
             "Missing/invalid image config digest",
         )
     require(
-        build.get("containerimage.config.digest")
-        == parity.get("built_image_config_digest"),
+        build_matches_config(build, parity.get("built_image_config_digest")),
         "Build/image-parity identity mismatch",
     )
     require(

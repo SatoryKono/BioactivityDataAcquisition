@@ -105,19 +105,8 @@ class IndexedSnapshot:
         complex_ids: frozenset[str] = frozenset(),
     ) -> IndexedSnapshot:
         """Index all channels once and verify recorded provider payload hashes."""
-        lookup: dict[tuple[str, str], list[int]] = defaultdict(list)
-        families: dict[str, list[FamilyNode]] = defaultdict(list)
-        for index, record in enumerate(catalog):
-            for pair in set(_channels(record)):
-                lookup[pair].append(index)
-        for node in family_nodes:
-            families[node.family_id].append(node)
-        for key, value in annotations.items():
-            if not value.raw_payload or not value.payload_sha256:
-                raise ValueError("missing frozen provider payload or digest")
-            actual = hashlib.sha256(value.raw_payload.encode()).hexdigest()
-            if value.target_id != key or value.payload_sha256 != actual:
-                raise ValueError("provider record identity or digest mismatch")
+        lookup, families = _snapshot_indexes(catalog, family_nodes)
+        _validate_provider_payloads(annotations)
         return cls(
             snapshot_id,
             mapping_version,
@@ -131,6 +120,30 @@ class IndexedSnapshot:
             frozenset(value for (kind, value), _ in lookup.items() if kind != "text"),
             complex_ids,
         )
+
+
+def _snapshot_indexes(
+    catalog: tuple[CatalogTarget, ...], family_nodes: tuple[FamilyNode, ...]
+) -> tuple[dict[tuple[str, str], list[int]], dict[str, list[FamilyNode]]]:
+    """Retain source order inside each channel and family bucket."""
+    lookup: dict[tuple[str, str], list[int]] = defaultdict(list)
+    families: dict[str, list[FamilyNode]] = defaultdict(list)
+    for index, record in enumerate(catalog):
+        for pair in set(_channels(record)):
+            lookup[pair].append(index)
+    for node in family_nodes:
+        families[node.family_id].append(node)
+    return lookup, families
+
+
+def _validate_provider_payloads(annotations: Mapping[str, ProviderAnnotation]) -> None:
+    """Validate identity only after requiring the frozen payload and digest."""
+    for key, value in annotations.items():
+        if not value.raw_payload or not value.payload_sha256:
+            raise ValueError("missing frozen provider payload or digest")
+        actual = hashlib.sha256(value.raw_payload.encode()).hexdigest()
+        if value.target_id != key or value.payload_sha256 != actual:
+            raise ValueError("provider record identity or digest mismatch")
 
 
 @dataclass(frozen=True, slots=True)
@@ -307,6 +320,23 @@ def classify_target(
     hits = collect_candidates(query, subset)
     match = validate_identity(query, subset, hits, snapshot_complete=snapshot.complete)
     hits = _publication_hits(query, subset, hits, match)
+    match = _match_complex_target(row, match, snapshot)
+    annotation = snapshot.annotations.get(match.matched_target_id or "")
+    if (
+        match.match_status == "matched"
+        and annotation is not None
+        and annotation.taxon
+        and row.taxon is None
+    ):
+        row = replace(row, taxon=annotation.taxon)
+    direct = _direct(snapshot, annotation)
+    return _complete(row, snapshot, run_id, hits, match, annotation, direct)
+
+
+def _match_complex_target(
+    row: ValidatedInput, match: MatchResult, snapshot: IndexedSnapshot
+) -> MatchResult:
+    """A matching component alone cannot establish the complex identity."""
     if (
         row.target_kind == "complex"
         and match.matched_target_id is not None
@@ -325,16 +355,7 @@ def classify_target(
                 ),
             ),
         )
-    annotation = snapshot.annotations.get(match.matched_target_id or "")
-    if (
-        match.match_status == "matched"
-        and annotation is not None
-        and annotation.taxon
-        and row.taxon is None
-    ):
-        row = replace(row, taxon=annotation.taxon)
-    direct = _direct(snapshot, annotation)
-    return _complete(row, snapshot, run_id, hits, match, annotation, direct)
+    return match
 
 
 def _publication_hits(
@@ -441,6 +462,52 @@ def _partial_basis(
     return "type" if direct and direct.proof == "type" else "family_mapping"
 
 
+def _direct_metadata(
+    direct: HierarchyResult | None, match: MatchResult
+) -> tuple[str | None, str | None, str | None]:
+    """Distinguish an unavailable matched annotation from an unmatched row."""
+    direct_class = direct.iuphar_class if direct is not None else None
+    rule_id = None
+    if direct_class and direct is not None:
+        rule_id = (
+            f"iuphar_{'type' if direct.proof == 'type' else 'family'}:{direct_class}"
+        )
+    annotation_status = "not_available" if match.match_status == "matched" else None
+    if direct is not None:
+        annotation_status = direct.annotation_status
+    return direct_class, rule_id, annotation_status
+
+
+def _resolution_input(
+    row: ValidatedInput,
+    snapshot: IndexedSnapshot,
+    match: MatchResult,
+    annotation: ProviderAnnotation | None,
+    direct: HierarchyResult | None,
+    local: LocalInference,
+    annotation_status: str | None,
+    candidate_ids: tuple[str, ...],
+    direct_class: str | None,
+) -> ResolutionInput:
+    """Project frozen classification inputs without changing fallback rules."""
+    return ResolutionInput(
+        match_status=match.match_status or "contract_error",
+        iuphar_annotation_status=annotation_status,
+        local_status=local.local_status or "not_supported",
+        iuphar_class=direct_class,
+        local_class=local.local_class,
+        local_subclasses=local.local_subclasses,
+        partial_basis=_partial_basis(direct, annotation_status),
+        target_kind=row.target_kind or "protein",
+        complex_direct_match=match.matched_target_id in snapshot.complex_ids,
+        iuphar_class_candidates=direct.iuphar_class_candidates if direct else (),
+        local_candidates=local.local_candidates,
+        raw_type=annotation.type_raw if annotation else None,
+        matched_target_id=match.matched_target_id,
+        candidate_target_ids=candidate_ids,
+    )
+
+
 def _complete(
     row: ValidatedInput,
     snapshot: IndexedSnapshot,
@@ -462,34 +529,21 @@ def _complete(
             if value is not None
         ),
     )
-    direct_class = direct.iuphar_class if direct is not None else None
-    rule_id = None
-    if direct_class and direct is not None:
-        rule_id = (
-            f"iuphar_{'type' if direct.proof == 'type' else 'family'}:{direct_class}"
-        )
-    annotation_status = "not_available" if match.match_status == "matched" else None
-    if direct is not None:
-        annotation_status = direct.annotation_status
+    direct_class, rule_id, annotation_status = _direct_metadata(direct, match)
     candidate_ids = tuple(
         sorted(set(match.candidate_target_ids) | {hit.target_id for hit in hits})
     )
     outcome = select_effective_class(
-        ResolutionInput(
-            match_status=match.match_status or "contract_error",
-            iuphar_annotation_status=annotation_status,
-            local_status=local.local_status or "not_supported",
-            iuphar_class=direct_class,
-            local_class=local.local_class,
-            local_subclasses=local.local_subclasses,
-            partial_basis=_partial_basis(direct, annotation_status),
-            target_kind=row.target_kind or "protein",
-            complex_direct_match=match.matched_target_id in snapshot.complex_ids,
-            iuphar_class_candidates=direct.iuphar_class_candidates if direct else (),
-            local_candidates=local.local_candidates,
-            raw_type=annotation.type_raw if annotation else None,
-            matched_target_id=match.matched_target_id,
-            candidate_target_ids=candidate_ids,
+        _resolution_input(
+            row,
+            snapshot,
+            match,
+            annotation,
+            direct,
+            local,
+            annotation_status,
+            candidate_ids,
+            direct_class,
         )
     )
     evidence = _evidence(
@@ -559,28 +613,65 @@ def _components(row: RowResult, snapshot: IndexedSnapshot) -> tuple[ComponentRow
     ):
         return ()
     raw = row.validated.raw_fields.get("component_ids") or ""
-    result = []
-    for component_id in sorted(
-        {part.strip() for part in re.split(r"[;|]", raw) if part.strip()}
-    ):
-        namespace, sep, key = component_id.partition(":")
-        annotation = (
-            snapshot.annotations.get(key)
-            if sep and namespace.casefold() == "iuphar"
-            else None
+    return tuple(
+        _component_row(row.result.input_row_id, component_id, snapshot)
+        for component_id in _component_ids(raw)
+    )
+
+
+def _component_ids(raw: str) -> list[str]:
+    return sorted({part.strip() for part in re.split(r"[;|]", raw) if part.strip()})
+
+
+def _component_row(
+    input_row_id: str, component_id: str, snapshot: IndexedSnapshot
+) -> ComponentRow:
+    namespace, sep, key = component_id.partition(":")
+    annotation = (
+        snapshot.annotations.get(key)
+        if sep and namespace.casefold() == "iuphar"
+        else None
+    )
+    direct = _direct(snapshot, annotation)
+    return ComponentRow(
+        input_row_id,
+        component_id,
+        annotation.type_raw if annotation else None,
+        direct.iuphar_class if direct else None,
+        direct.annotation_status if direct else "not_available",
+        annotation.payload_sha256 if annotation else None,
+    )
+
+
+def _batch_metrics(results: list[RowResult], invalid: int) -> Mapping[str, int]:
+    return MappingProxyType(
+        {
+            "rows": len(results),
+            "invalid_rows": invalid,
+            "classified_rows": sum(bool(x.result.effective_class) for x in results),
+            "class_null": sum(x.result.effective_class is None for x in results),
+        }
+    )
+
+
+def _batch_diagnostics(
+    results: list[RowResult],
+) -> tuple[tuple[str, Diagnostic], ...]:
+    return tuple(
+        (x.result.input_row_id, d)
+        for x in results
+        for d in _bound_diagnostics(
+            (*x.validated.diagnostics, *x.result.diagnostics), x.evidence
         )
-        direct = _direct(snapshot, annotation)
-        result.append(
-            ComponentRow(
-                row.result.input_row_id,
-                component_id,
-                annotation.type_raw if annotation else None,
-                direct.iuphar_class if direct else None,
-                direct.annotation_status if direct else "not_available",
-                annotation.payload_sha256 if annotation else None,
-            )
-        )
-    return tuple(result)
+    )
+
+
+def _batch_status(results: list[RowResult], invalid: int) -> str:
+    if not results:
+        return "empty"
+    if invalid == len(results):
+        return "rejected"
+    return "processed"
 
 
 def classify_batch(
@@ -608,26 +699,9 @@ def classify_batch(
         )
         results.append(classify_target(v, snapshot=snapshot, run_id=run_id))
     invalid = sum(x.result.input_validation_status == "invalid_input" for x in results)
-    metrics = MappingProxyType(
-        {
-            "rows": len(results),
-            "invalid_rows": invalid,
-            "classified_rows": sum(bool(x.result.effective_class) for x in results),
-            "class_null": sum(x.result.effective_class is None for x in results),
-        }
-    )
-    diagnostics = tuple(
-        (x.result.input_row_id, d)
-        for x in results
-        for d in _bound_diagnostics(
-            (*x.validated.diagnostics, *x.result.diagnostics), x.evidence
-        )
-    )
-    status = "processed"
-    if not results:
-        status = "empty"
-    elif invalid == len(results):
-        status = "rejected"
+    metrics = _batch_metrics(results, invalid)
+    diagnostics = _batch_diagnostics(results)
+    status = _batch_status(results, invalid)
     return BatchResult(
         status,
         tuple(results),

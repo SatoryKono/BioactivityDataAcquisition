@@ -661,25 +661,7 @@ def _validate_note_field_types(
     for field_name, field_schema in properties.items():
         if field_name not in metadata or not isinstance(field_schema, dict):
             continue
-        expected_type = field_schema.get("type")
-        if expected_type is not None and not _schema_value_matches(
-            expected_type, metadata[field_name]
-        ):
-            issues.append(
-                ValidationIssue(
-                    path=str(path),
-                    message=f"note field has invalid type for {field_name}",
-                )
-            )
-        if field_name == "ttl_days" and isinstance(metadata[field_name], int):
-            minimum = field_schema.get("minimum")
-            if isinstance(minimum, int) and metadata[field_name] < minimum:
-                issues.append(
-                    ValidationIssue(
-                        path=str(path),
-                        message=f"note field ttl_days must be >= {minimum}",
-                    )
-                )
+        _validate_note_field_type(path, field_name, field_schema, metadata, issues)
 
 
 def _validate_note_source_refs(
@@ -1051,11 +1033,7 @@ def validate_memory_scaffold(
     registry_payload = load_yaml_resource(registry_path)
     registry_schema = load_json_resource(registry_schema_path)
 
-    for name, payload in {**policy_payloads, **catalog_payloads}.items():
-        if not isinstance(payload, dict):
-            issues.append(
-                ValidationIssue(path=name, message="YAML root must be a mapping")
-            )
+    _validate_yaml_mapping_roots(policy_payloads, catalog_payloads, issues)
 
     for name, payload in schema_payloads.items():
         _validate_schema_shape(Path("schemas") / name, payload, issues)
@@ -1065,14 +1043,7 @@ def validate_memory_scaffold(
         for issue in validate_memory_registry(registry_payload)
     )
 
-    source_priority = policy_payloads.get("source_priority.yaml")
-    storage_policy = policy_payloads.get("storage.yaml")
-    retention_policy = policy_payloads.get("retention.yaml")
-    source_registry = catalog_payloads.get("source_registry.yaml")
-    if isinstance(source_priority, dict) and isinstance(source_registry, dict):
-        _validate_source_priority(source_priority, source_registry, issues)
-    if isinstance(storage_policy, dict) and isinstance(retention_policy, dict):
-        _validate_storage_policy(storage_policy, retention_policy, issues)
+    _validate_scaffold_policies(policy_payloads, catalog_payloads, issues)
     _validate_tracked_generated_artifacts(memory_root, issues)
     if include_working_tree_junk:
         _validate_working_tree_junk(memory_root, issues)
@@ -1088,3 +1059,58 @@ def validate_memory_scaffold(
         )
 
     return issues
+
+
+def _validate_note_field_type(
+    path: Path,
+    field_name: str,
+    field_schema: dict[str, Any],
+    metadata: dict[str, Any],
+    issues: list[ValidationIssue],
+) -> None:
+    expected_type = field_schema.get("type")
+    if expected_type is not None and not _schema_value_matches(
+        expected_type, metadata[field_name]
+    ):
+        issues.append(
+            ValidationIssue(
+                path=str(path),
+                message=f"note field has invalid type for {field_name}",
+            )
+        )
+    if field_name == "ttl_days" and isinstance(metadata[field_name], int):
+        minimum = field_schema.get("minimum")
+        if isinstance(minimum, int) and metadata[field_name] < minimum:
+            issues.append(
+                ValidationIssue(
+                    path=str(path),
+                    message=f"note field ttl_days must be >= {minimum}",
+                )
+            )
+
+
+def _validate_scaffold_policies(
+    policy_payloads: dict[str, Any],
+    catalog_payloads: dict[str, Any],
+    issues: list[ValidationIssue],
+) -> None:
+    source_priority = policy_payloads.get("source_priority.yaml")
+    storage_policy = policy_payloads.get("storage.yaml")
+    retention_policy = policy_payloads.get("retention.yaml")
+    source_registry = catalog_payloads.get("source_registry.yaml")
+    if isinstance(source_priority, dict) and isinstance(source_registry, dict):
+        _validate_source_priority(source_priority, source_registry, issues)
+    if isinstance(storage_policy, dict) and isinstance(retention_policy, dict):
+        _validate_storage_policy(storage_policy, retention_policy, issues)
+
+
+def _validate_yaml_mapping_roots(
+    policy_payloads: dict[str, Any],
+    catalog_payloads: dict[str, Any],
+    issues: list[ValidationIssue],
+) -> None:
+    for name, payload in {**policy_payloads, **catalog_payloads}.items():
+        if not isinstance(payload, dict):
+            issues.append(
+                ValidationIssue(path=name, message="YAML root must be a mapping")
+            )
