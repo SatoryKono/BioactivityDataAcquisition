@@ -26,6 +26,7 @@ from bioetl.infrastructure.storage.target_classification_migration import (
 )
 from bioetl.infrastructure.storage.target_deployment_binding import (
     TargetDeploymentBinding,
+    validate_rehearsal_paths,
 )
 from iuphar_target_class.stage0.io import (
     canonical_json_bytes,
@@ -107,4 +108,98 @@ def bind_target_deployment(
     )
 
 
-__all__ = ["bind_target_deployment"]
+def _rehearsal_locations(
+    paths: TargetMigrationPaths,
+    rehearsal_root: Path,
+    configs_root: Path,
+    settings: Settings,
+    active_configs_root: Path | None,
+) -> tuple[dict[str, Path], Path, Path]:
+    checked = paths.checked()
+    active = resolve_configs_root(active_configs_root).resolve()
+    if paths.workspace.resolve() != active.parent:
+        raise ValueError("rehearsal workspace must match the active repository/config root")
+    root = validate_rehearsal_paths(
+        checked, workspace=paths.workspace, rehearsal_root=rehearsal_root
+    )
+    copied = resolve_configs_root(configs_root).resolve()
+    if not copied.is_relative_to(root) or checked["config"] != (copied / "entities/chembl/target.yaml"):
+        raise ValueError("rehearsal must load its copied configs tree")
+    canonical = active / "entities/chembl/target.yaml"
+    if sha256_file(canonical) != sha256_file(checked["config"]):
+        raise ValueError("rehearsal old configuration must equal the active canonical bytes")
+    if not settings.test_mode or not settings.data_dir.resolve().is_relative_to(root):
+        raise ValueError("rehearsal requires explicit isolated test_mode storage settings")
+    return checked, copied, active
+
+
+def _rehearsal_future(checked: dict[str, Path], configs_root: Path):
+    original = _entity_document(checked["config"])
+    deployment = _entity_document(checked["candidate_config"])
+    if _without_classification(original) != _without_classification(deployment):
+        raise ValueError("deployment YAML may change only target_classification")
+    pipeline = cast("dict[str, object]", deployment["pipeline"])
+    classification = TargetClassificationYamlConfig.model_validate(pipeline.get("target_classification"))
+    if classification.mode != "enrich":
+        raise ValueError("deployment configuration must select enrich")
+    baseline = load_pipeline_config_uncached("chembl_target", configs_root=configs_root)
+    future = baseline.model_copy(update={"target_classification": classification})
+    return resolve_target_classification_profile(future).resolved_yaml_config
+
+
+def _protect_active_resources(checked: dict[str, Path], active_configs_root: Path) -> None:
+    settings = get_settings()
+    target = load_pipeline_config_uncached("chembl_target", configs_root=active_configs_root)
+    assay = load_pipeline_config_uncached("chembl_assay", configs_root=active_configs_root)
+    protected = (
+        active_configs_root / "entities/chembl/target.yaml",
+        *resolve_target_table_paths(settings, target),
+        resolve_target_table_paths(settings, assay)[1],
+    )
+    for path in checked.values():
+        if any(path == item.resolve() or path.is_relative_to(item.resolve()) or item.resolve().is_relative_to(path)
+               for item in protected):
+            raise ValueError("rehearsal resources overlap active canonical data/configuration")
+
+
+def bind_target_rehearsal(
+    paths: TargetMigrationPaths,
+    *,
+    rehearsal_root: Path,
+    configs_root: Path,
+    settings: Settings,
+    active_configs_root: Path | None = None,
+) -> TargetDeploymentBinding:
+    """Bind an isolated physical rehearsal through the real loader and admission.
+
+    The approved repository remains the read-only dependency scope, allowing
+    exact pinned absolute receipt URIs. Every resource moved or written by
+    migration is fenced inside the explicit copy occurrence. The existing
+    repository advisory lock is shared with production maintenance.
+    """
+    checked, copied, active = _rehearsal_locations(
+        paths, rehearsal_root, configs_root, settings, active_configs_root
+    )
+    _protect_active_resources(checked, active)
+    future = _rehearsal_future(checked, copied)
+    profile = load_target_runtime_profile(future)
+    if profile is None:
+        raise ValueError("rehearsal has no admitted profile")
+    silver, gold = resolve_target_table_paths(settings, future)
+    if (silver.resolve(), gold.resolve()) != (checked["silver"], checked["gold"]):
+        raise ValueError("rehearsal resolves different physical target destinations")
+    settings_digest = sha256_bytes(canonical_json_bytes({
+        "data_dir": str(settings.data_dir.resolve()), "configs_root": str(copied),
+        "silver": str(silver.resolve()), "gold": str(gold.resolve()),
+        "role": "rehearsal", "rehearsal_root": str(rehearsal_root.resolve()),
+        "approved_workspace": str(paths.workspace.resolve()),
+    }))
+    return TargetDeploymentBinding(
+        str(checked["config"]), sha256_file(checked["config"]), sha256_file(checked["candidate_config"]),
+        str(silver.resolve()), str(gold.resolve()), profile.profile_sha256, settings_digest,
+        role="rehearsal", rehearsal_root=str(rehearsal_root.resolve()),
+        approved_workspace=str(paths.workspace.resolve()),
+    )
+
+
+__all__ = ["bind_target_deployment", "bind_target_rehearsal"]
