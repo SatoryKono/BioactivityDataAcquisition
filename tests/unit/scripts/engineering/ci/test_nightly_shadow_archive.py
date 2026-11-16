@@ -1398,7 +1398,7 @@ class _PilotApiClient:
         self.workflow = (REPO_ROOT / archive_module.WORKFLOW_PATH).read_bytes()
         self.clock_ranges = {
             130: ("2026-11-20T03:00:00Z", "2026-11-20T03:00:01Z"),
-            131: ("2026-11-20T03:48:00Z", "2026-11-20T03:48:01Z"),
+            131: ("2026-11-20T03:47:00Z", "2026-11-20T03:48:00Z"),
         }
         self.jobs = []
         for job_id, conclusion in _results().items():
@@ -1466,7 +1466,7 @@ def _pilot_api_runs() -> list[dict]:
         {**_raw(run_id, head=_SHA), "created_at": stamp}
         for run_id, stamp in (
             (130, "2026-11-20T03:00:00Z"),
-            (131, "2026-11-20T03:48:00Z"),
+            (131, "2026-11-20T03:47:00Z"),
         )
     ]
 
@@ -1598,9 +1598,14 @@ def test_archived_clock_with_ambiguous_or_missing_date_stays_unknown(
     assert archive_module._job_block_reason(observation) == "duty_unknown"
 
 
-@pytest.mark.parametrize("evidence", ["late_week", "missing", "late_child"])
+@pytest.mark.parametrize(
+    "evidence", ["late_week", "missing", "late_child", "missing_child"]
+)
+@pytest.mark.parametrize("attempt", [1, 2])
 def test_retry_cannot_retroactively_complete_a_historical_window(
-    tmp_path: Path, evidence: str
+    tmp_path: Path,
+    evidence: str,
+    attempt: int,
 ) -> None:
     client = _PilotApiClient()
     if evidence == "late_week":
@@ -1611,16 +1616,21 @@ def test_retry_cannot_retroactively_complete_a_historical_window(
         client.clock_ranges = dict.fromkeys((130, 131), (None, None))
     for run in _pilot_api_runs():
         raw, outcomes, manifest = build_attempt_archive(
-            client, "owner/repository", {**run, "run_attempt": 2}, pilot=True
+            client, "owner/repository", {**run, "run_attempt": attempt}, pilot=True
         )
         if evidence == "late_child":
             # Preserve clock's valid day while another executed job finishes a week later.
             outcomes["jobs"][1]["completed_at"] = "2026-11-27T03:00:01Z"
             archive_module._bind_hashes(raw, outcomes, manifest)
+        elif evidence == "missing_child":
+            outcomes["jobs"][1]["started_at"] = None
+            archive_module._bind_hashes(raw, outcomes, manifest)
         write_snapshot(tmp_path, raw=raw, outcomes=outcomes, manifest=manifest)
     _seal_index(tmp_path)
     observations = [
-        pilot_observation_from_archive(tmp_path, run_id=run_id, run_attempt=2, arm=arm)
+        pilot_observation_from_archive(
+            tmp_path, run_id=run_id, run_attempt=attempt, arm=arm
+        )
         for run_id, arm in ((130, "baseline"), (131, "candidate"))
     ]
     result = assess_reduced_pilot_window(
@@ -1647,13 +1657,17 @@ def test_retry_inside_window_requires_confirmed_execution_bounds() -> None:
             "completed_at": "2026-11-20T03:47:00Z",
         },
     }
-    assert archive_module._retry_execution_in_window(observation, start, close) is True
     assert (
-        archive_module._retry_execution_in_window({"run_attempt": 2}, start, close)
+        archive_module._attempt_execution_in_window(observation, start, close) is True
+    )
+    assert (
+        archive_module._attempt_execution_in_window({"run_attempt": 2}, start, close)
         is False
     )
     observation["attempt_execution"]["completed_at"] = "2026-11-20T03:49:00Z"
-    assert archive_module._retry_execution_in_window(observation, start, close) is False
+    assert (
+        archive_module._attempt_execution_in_window(observation, start, close) is False
+    )
 
 
 def test_archive_gate_accepts_a_retry_with_confirmed_execution_inside_window(
@@ -1701,7 +1715,7 @@ def test_attempt_execution_keeps_precision_at_the_window_boundary() -> None:
     assert execution is not None
     observation = {"run_attempt": 2, "attempt_execution": execution}
     assert (
-        archive_module._retry_execution_in_window(
+        archive_module._attempt_execution_in_window(
             observation,
             datetime(2026, 11, 20, 3, tzinfo=UTC),
             datetime(2026, 11, 20, 3, 48, tzinfo=UTC),

@@ -1144,6 +1144,14 @@ def _span_covers_48_minutes(runs: Sequence[Mapping[str, object]]) -> bool:
     return (closed - opened) >= timedelta(minutes=PILOT_DURATION_MINUTES)
 
 
+def _pilot_latest_stamp(observation: Mapping[str, object]) -> datetime | None:
+    stamps = [_parse_utc(observation.get("created_at"))]
+    execution = observation.get("attempt_execution")
+    if isinstance(execution, Mapping):
+        stamps.append(_parse_utc(execution.get("completed_at")))
+    return max((stamp for stamp in stamps if stamp is not None), default=None)
+
+
 def _pilot_duration_elapsed(
     start: datetime,
     observations: Sequence[Mapping[str, object]],
@@ -1155,7 +1163,7 @@ def _pilot_duration_elapsed(
     for observation in observations:
         if _is_synthetic_observation(observation):
             continue
-        stamp = _parse_utc(observation.get("created_at"))
+        stamp = _pilot_latest_stamp(observation)
         if stamp is None or stamp < start:
             continue
         seen = True
@@ -1180,16 +1188,18 @@ def _inside_pilot_window(
     stamp = _parse_utc(observation.get("created_at"))
     if stamp is None or stamp < start or stamp > close:
         return False
-    return _observation_run_id(observation) is not None and _retry_execution_in_window(
-        observation, start, close
-    )
+    return _observation_run_id(
+        observation
+    ) is not None and _attempt_execution_in_window(observation, start, close)
 
 
-def _retry_execution_in_window(
+def _attempt_execution_in_window(
     observation: Mapping[str, object], start: datetime, close: datetime
 ) -> bool:
-    if observation.get("run_attempt", 1) == 1:
-        return True
+    if "attempt_execution" not in observation:
+        # Legacy direct assessments may lack archive evidence; the archive gate
+        # always reconstructs this field and never uses this compatibility path.
+        return observation.get("run_attempt", 1) == 1
     execution = observation.get("attempt_execution")
     if not isinstance(execution, Mapping):
         return False
@@ -1302,7 +1312,7 @@ def _scheduled_start_reason(
         return "created_at_unknown"
     if stamp < decision:
         return "backdated_start"
-    if not _retry_execution_in_window(
+    if not _attempt_execution_in_window(
         observation, stamp, stamp + timedelta(minutes=PILOT_DURATION_MINUTES)
     ):
         return "attempt_execution_not_in_window"
