@@ -535,14 +535,15 @@ def _publish_manifest_pair(
     output_dir: Path,
 ) -> tuple[Path, Path]:
     """Publish a validated pair transactionally and restore old files on failure."""
-    from scripts.engineering.common.repo_paths import resolve_output_path
+    from scripts.engineering.common.repo_paths import confined_io_path
 
-    # resolve_output_path keeps relative paths under the repo root while still
+    # confined_io_path keeps relative paths under the repo root while still
     # accepting absolute temporary/workflow destinations used by tests and
-    # workflow-scoped builds.
-    staged_catalog = resolve_output_path(staged_catalog)
-    staged_chunks = resolve_output_path(staged_chunks)
-    output_dir = resolve_output_path(output_dir)
+    # workflow-scoped builds. The rebuilt path is what static analysis treats
+    # as sanitized for CLI/LLM path taint.
+    staged_catalog = confined_io_path(staged_catalog, allow_external_absolute=True)
+    staged_chunks = confined_io_path(staged_chunks, allow_external_absolute=True)
+    output_dir = confined_io_path(output_dir, allow_external_absolute=True)
     output_dir.mkdir(parents=True, exist_ok=True)
     targets = (
         (staged_catalog, output_dir / "corpus_catalog.json"),
@@ -590,14 +591,22 @@ def write_rag_manifests(
         focus_query=focus_query,
         max_sources=max_sources,
     )
+    from scripts.engineering.common.repo_paths import write_text_confined
+
     staging_dir = Path(
         tempfile.mkdtemp(prefix=".rag-manifests-", dir=output_dir.parent)
     )
     try:
-        staged_catalog = staging_dir / "corpus_catalog.json"
-        staged_chunks = staging_dir / "chunks.jsonl"
-        staged_catalog.write_text(_serialize_catalog(catalog), encoding="utf-8")
-        staged_chunks.write_text(_serialize_chunks(chunks), encoding="utf-8")
+        staged_catalog = write_text_confined(
+            staging_dir / "corpus_catalog.json",
+            _serialize_catalog(catalog),
+            allow_external_absolute=True,
+        )
+        staged_chunks = write_text_confined(
+            staging_dir / "chunks.jsonl",
+            _serialize_chunks(chunks),
+            allow_external_absolute=True,
+        )
         require_valid_rag_manifest(
             validate_rag_manifest_files(
                 root,

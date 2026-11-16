@@ -491,11 +491,15 @@ def test_shadow_compare_routes_docker_and_remote_main_report() -> None:
     report = build_shadow_compare(
         [
             ".github/workflows/docker.yml",
+            ".github/workflows/docker-publish.yml",
             "reports/quality/architecture-debt-remote-main-baseline.md",
         ],
         repo_root=repo_root,
     )
     assert "tests/architecture/test_docker_runtime_contracts.py" in report["selected"]
+    assert (
+        "tests/architecture/test_github_actions_runtime_policy.py" in report["selected"]
+    )
     assert (
         "tests/unit/scripts/qa/test_report_architecture_debt_remote_main_baseline.py"
         in report["selected"]

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from pathlib import Path
 
 import pytest
 
@@ -670,3 +671,19 @@ def test_failure_archive_preserves_conflicting_evidence(tmp_path, monkeypatch, f
         _archive_validation_failures([output], tmp_path / "validation.json", tmp_path)
     assert output.read_bytes() == (raw if failure == "collision" else foreign)
     assert archived.read_bytes() == (foreign if failure == "collision" else raw)
+
+
+def test_common_gitdir_accepts_only_a_relative_git_parent(tmp_path: Path) -> None:
+    """A commondir pointer cannot probe an absolute path."""
+    from scripts.engineering.qa.generate_hotspot_degradation_report import (
+        _common_gitdir,
+    )
+
+    gitdir = tmp_path / "repo" / ".git" / "worktrees" / "linked"
+    gitdir.mkdir(parents=True)
+    (gitdir / "commondir").write_text("../..\n", encoding="utf-8")
+    assert _common_gitdir(gitdir) == (tmp_path / "repo" / ".git").resolve()
+    (gitdir / "commondir").write_text("C:/Windows/System32\n", encoding="utf-8")
+    assert _common_gitdir(gitdir) == gitdir
+    (gitdir / "commondir").write_text("../outside\n", encoding="utf-8")
+    assert _common_gitdir(gitdir) == gitdir

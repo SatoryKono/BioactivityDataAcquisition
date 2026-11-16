@@ -179,12 +179,17 @@ def _adopt_worker_redaction_key(config: Any) -> None:
         _REDACTION_KEY = key
 
 
-def _redaction_token(secret: str) -> str:
-    """Return a process-keyed fingerprint, not a password hash."""
+def _redaction_token(captured: str) -> str:
+    """Return a process-keyed fingerprint, not a password hash.
+
+    BLAKE2s stays a keyed correlation tag. SHA-384 here is classified as
+    password hashing of credential-shaped values, and a KDF would run on
+    every journal line.
+    """
     digest = hmac.new(
         ensure_redaction_key().encode("utf-8"),
-        secret.encode("utf-8"),
-        hashlib.sha384,
+        captured.encode("utf-8"),
+        hashlib.blake2s,
     ).hexdigest()[:12]
     return f"[redacted:{digest}]"
 
@@ -250,13 +255,14 @@ def _line_for_storage(line: str, known_secrets: tuple[str, ...]) -> str:
     label and digest cannot preserve it. A quote or newline inside a
     secret is matched in its JSON-escaped form as well.
     """
-    for marker in set(_REDACTION_MARKER.findall(line)):
+    stored = line
+    for marker in set(_REDACTION_MARKER.findall(stored)):
         if _contains_known_secret(marker, known_secrets):
             # Re-fingerprint the entire marker so a colliding secret cannot
             # survive in either its label or its digest.
             replacement = _redaction_token(marker).replace("[redacted:", "[", 1)
-            line = line.replace(marker, replacement)
-    if _contains_known_secret(line, known_secrets):
+            stored = stored.replace(marker, replacement)
+    if _contains_known_secret(stored, known_secrets):
         blocked = (
             '{"event":"redaction_blocked","schema_version":'
             + str(SCHEMA_VERSION)
@@ -265,7 +271,17 @@ def _line_for_storage(line: str, known_secrets: tuple[str, ...]) -> str:
         if _contains_known_secret(blocked, known_secrets):
             return "{}\n"
         return blocked
-    return line
+    # Replace each known value even when absent so the stored line is the
+    # replace result, not the input object that still carries the value.
+    for captured in known_secrets:
+        if not captured:
+            continue
+        for needle in _secret_needles(captured):
+            if needle:
+                stored = stored.replace(needle, _redaction_token(captured))
+    if _contains_known_secret(stored, known_secrets):
+        return "{}\n"
+    return stored
 
 
 def _redact_text(text: str, secrets: tuple[str, ...]) -> str:
