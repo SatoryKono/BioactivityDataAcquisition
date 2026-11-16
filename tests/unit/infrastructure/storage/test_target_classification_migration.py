@@ -25,6 +25,9 @@ def paths(tmp_path, monkeypatch):
     for name in ("config", "candidate_config"):
         (tmp_path / (name + ".yaml")).write_text(name)
     monkeypatch.setattr(migration, "assert_no_managed_writers", lambda: None)
+    # These tests isolate filesystem recovery; actual deployment policy has
+    # independent loader/resolver regressions.
+    monkeypatch.setattr(migration, "validate_deployment_binding", lambda *_: None)
     monkeypatch.setattr(
         migration, "validate_target_candidate", lambda *_: {"synthetic_test": True}
     )

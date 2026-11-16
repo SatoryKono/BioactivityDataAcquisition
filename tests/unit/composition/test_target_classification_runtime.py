@@ -139,44 +139,32 @@ def _context() -> PipelineContext:
 
 def _admitted_synthetic_config(config: PipelineYamlConfig) -> PipelineYamlConfig:
     """Tagged fixture only; no claim of executed scientific reference admission."""
-    from bioetl.infrastructure.adapters.iuphar.snapshot_loader import (
-        OUTPUT_NAMES,
-        REQUIRED_ACCEPTANCE_CHECKS,
+    from tests.helpers.iuphar_snapshot import (
+        synthetic_snapshot_bundle,
+        synthetic_reference_receipt,
+        write_fixture_json,
     )
 
     path = Path(config.target_classification.snapshot_manifest)
-    profile = json.loads(path.read_bytes())
-    receipt = {
-        "artifact": "bioetl_iuphar_acceptance",
-        "schema_version": 1,
-        "fixture_kind": "synthetic_contract_fixture",
-        "scope": "offline_target_integration",
-        "status": "PASS",
-        "snapshot_manifest_sha256": profile["snapshot"]["sha256"],
-        "stage0_manifest_sha256": "a" * 64,
-        "expected_labels_sha256": "b" * 64,
-        "output_sha256": dict.fromkeys(OUTPUT_NAMES, "c" * 64),
-        "checks": dict.fromkeys(REQUIRED_ACCEPTANCE_CHECKS, "PASS"),
-        "reference_cases_accepted": True,
-        "biological_accuracy_accepted": False,
-        "run_id": "synthetic-contract-run",
-        "reviewer_reference": "synthetic-unit-test-only",
-        "normalization_version": "bioetl-iuphar-input-v1",
-        "rules_version": "plan-v1-r8",
-        "classification_schema_version": "3.1.0",
-    }
-    raw = json.dumps(receipt, sort_keys=True).encode()
-    (path.parent / "synthetic-acceptance.json").write_bytes(raw)
+    output, bundle = synthetic_snapshot_bundle(path.parent / "verified-v2")
+    profile = json.loads((output / "profile.json").read_bytes())
+    receipt_hash = write_fixture_json(
+        output / "synthetic-acceptance.json",
+        synthetic_reference_receipt(
+            bundle.snapshot_sha256, root=output / "reference-fixture"
+        ),
+    )
     profile["acceptance"] = {
         "path": "synthetic-acceptance.json",
-        "sha256": hashlib.sha256(raw).hexdigest(),
+        "sha256": receipt_hash,
     }
-    raw = json.dumps(profile, sort_keys=True).encode()
-    path.write_bytes(raw)
+    admitted_path = output / "enrich-profile.json"
+    profile_hash = write_fixture_json(admitted_path, profile)
     classification = config.target_classification.model_copy(
         update={
             "mode": "enrich",
-            "snapshot_manifest_sha256": hashlib.sha256(raw).hexdigest(),
+            "snapshot_manifest": str(admitted_path),
+            "snapshot_manifest_sha256": profile_hash,
         }
     )
     return config.model_copy(update={"target_classification": classification})
@@ -234,7 +222,7 @@ async def test_enrich_uses_v31_schema_and_identical_direct_staged_hash(
         ),
     )
     assert result == normalizer.finalize_pre_silver(payload, context, 0)
-    assert result["iuphar_class"] == "Enzyme"
+    assert result["iuphar_class"] == "Receptor"
     assert (
         result["target_class_profile_sha256"]
         == config.target_classification.snapshot_manifest_sha256
@@ -315,7 +303,10 @@ async def test_shadow_preserves_old_output_and_staged_direct_parity(
     assert evidence["artifact_sha256"]
 
 
-def test_target_preflight_uses_actual_writer_paths_even_when_off(monkeypatch, tmp_path):
+@pytest.mark.parametrize("dry_run", [False, True])
+def test_target_preflight_uses_actual_writer_paths_even_when_off(
+    monkeypatch, tmp_path, dry_run
+):
     from bioetl.composition.factories.services.preflight import (
         _validate_target_dependencies,
     )
@@ -328,7 +319,7 @@ def test_target_preflight_uses_actual_writer_paths_even_when_off(monkeypatch, tm
     )
     pipeline = SimpleNamespace(
         services=SimpleNamespace(storage=SimpleNamespace(silver=silver, gold=gold)),
-        runtime=SimpleNamespace(run_type=RunType.INCREMENTAL),
+        runtime=SimpleNamespace(run_type=RunType.INCREMENTAL, dry_run=dry_run),
         config=SimpleNamespace(
             effective_silver_table="chembl.target", effective_gold_table="chembl.target"
         ),
@@ -339,6 +330,11 @@ def test_target_preflight_uses_actual_writer_paths_even_when_off(monkeypatch, tm
         guard,
     )
     _validate_target_dependencies(pipeline, load_pipeline_config("chembl_target"))
+    if dry_run:
+        guard.assert_not_called()
+        silver._resolve_table_path.assert_not_called()
+        gold._resolve_table_path.assert_not_called()
+        return
     guard.assert_called_once_with(
         silver_path=tmp_path / "configured-silver",
         gold_path=tmp_path / "configured-gold",
@@ -385,8 +381,8 @@ def test_workflow_resume_restores_and_forbids_replacing_pinned_dependency(
         "bioetl.composition.target_classification.load_pipeline_config",
         lambda _: shadow_config,
     )
-    config = SimpleNamespace(
-        name="chembl_baseline", steps=[SimpleNamespace(pipeline_name="chembl_target")]
+    config = WorkflowConfig(
+        name="chembl_baseline", steps=(WorkflowStepConfig("target", "chembl_target"),)
     )
     binding = preflight_workflow_target_dependencies(config, {})[
         TARGET_CLASSIFICATION_DEPENDENCY_KEY
@@ -456,7 +452,9 @@ def test_workflow_dependency_pins_profile_and_rechecks_bytes(
         "bioetl.composition.target_classification.load_pipeline_config",
         lambda _: shadow_config,
     )
-    workflow = SimpleNamespace(steps=[SimpleNamespace(pipeline_name="chembl_target")])
+    workflow = WorkflowConfig(
+        "target", steps=(WorkflowStepConfig("target", "chembl_target"),)
+    )
     launch = preflight_workflow_target_dependencies(workflow, {})
     binding = launch[TARGET_CLASSIFICATION_DEPENDENCY_KEY]
     assert (
@@ -494,18 +492,59 @@ def test_workflow_resume_rejects_changed_dependency_identity(
         "bioetl.composition.target_classification.load_pipeline_config",
         lambda _: shadow_config,
     )
-    workflow = SimpleNamespace(steps=[SimpleNamespace(pipeline_name="chembl_target")])
+    workflow = WorkflowConfig(
+        "target", steps=(WorkflowStepConfig("target", "chembl_target"),)
+    )
     launch = preflight_workflow_target_dependencies(workflow, {})
     launch[TARGET_CLASSIFICATION_DEPENDENCY_KEY]["snapshot_manifest_sha256"] = "f" * 64
     with pytest.raises(ValueError, match="identity changed"):
         preflight_workflow_target_dependencies(workflow, launch)
 
 
-def test_enrich_refuses_missing_acceptance_before_session(shadow_config, tmp_path):
+def test_completed_resume_verifies_legacy_pin_without_new_enrich_admission(
+    shadow_config, monkeypatch
+):
+    from bioetl.application.services.workflow.control_plane.mutation_plan import (
+        WorkflowMutationPlan,
+    )
+
     config = shadow_config.model_copy(
         update={
             "target_classification": shadow_config.target_classification.model_copy(
                 update={"mode": "enrich"}
+            )
+        }
+    )
+    workflow = WorkflowConfig(
+        "historic", steps=(WorkflowStepConfig("target", "chembl_target"),)
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.target_classification.load_pipeline_config",
+        lambda _: config,
+    )
+    plan = WorkflowMutationPlan(frozenset(), resumed=True)
+    binding = preflight_workflow_target_dependencies(workflow, {}, plan)
+    assert (
+        binding[TARGET_CLASSIFICATION_DEPENDENCY_KEY]["profile_sha256"]
+        == config.target_classification.snapshot_manifest_sha256
+    )
+    Path(config.target_classification.snapshot_manifest).write_bytes(b"replaced")
+    with pytest.raises(ValueError, match="SHA|hash|digest"):
+        preflight_workflow_target_dependencies(workflow, binding, plan)
+
+
+def test_enrich_refuses_missing_acceptance_before_session(shadow_config, tmp_path):
+    from tests.helpers.iuphar_snapshot import synthetic_snapshot_bundle
+
+    output, bundle = synthetic_snapshot_bundle(tmp_path / "unaccepted-v2")
+    config = shadow_config.model_copy(
+        update={
+            "target_classification": shadow_config.target_classification.model_copy(
+                update={
+                    "mode": "enrich",
+                    "snapshot_manifest": str(output / "profile.json"),
+                    "snapshot_manifest_sha256": bundle.profile_sha256,
+                }
             )
         }
     )
@@ -688,8 +727,8 @@ async def test_real_runner_persists_both_layers_and_completes_evidence(
     gold = DeltaTable(settings.gold_path / "chembl/target").to_pyarrow_table()
     assert silver.num_rows == gold.num_rows == 1
     if mode == "enrich":
-        assert silver.column("iuphar_class").to_pylist() == ["Enzyme"]
-        assert gold.column("iuphar_class").to_pylist() == ["Enzyme"]
+        assert silver.column("iuphar_class").to_pylist() == ["Receptor"]
+        assert gold.column("iuphar_class").to_pylist() == ["Receptor"]
     else:
         assert "iuphar_class" not in silver.column_names
     manifest_path = (
@@ -718,7 +757,9 @@ async def test_real_runner_persists_both_layers_and_completes_evidence(
 
         monkeypatch.setattr(
             "bioetl.composition.target_classification.load_pipeline_config",
-            lambda _: config,
+            lambda name: (
+                config if name == "chembl_target" else load_pipeline_config(name)
+            ),
         )
         workflow = WorkflowConfig(
             name="chembl_baseline",

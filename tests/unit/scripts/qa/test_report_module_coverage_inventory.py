@@ -50,7 +50,7 @@ def test_failed_regression_gate_preserves_published_inventory(
     monkeypatch.setattr(
         reporter, "evaluate_module_coverage_gates", lambda *_, **__: ["regression"]
     )
-    monkeypatch.setattr(reporter, "_report_gate_violations", lambda *_: gate_exit)
+    monkeypatch.setattr(reporter, "_report_gate_violations", lambda *_, **__: gate_exit)
     code = reporter.main(
         [
             "--repo-root",

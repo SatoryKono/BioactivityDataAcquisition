@@ -68,6 +68,8 @@ def _validate_target_dependencies(
     pipeline: BasePipeline, config: PipelineYamlConfig
 ) -> None:
     validate_target_runtime_dependency(config)
+    if pipeline.runtime.dry_run:
+        return
     storage = pipeline.services.storage
     silver = getattr(storage, "silver", None)
     gold = getattr(storage, "gold", None)

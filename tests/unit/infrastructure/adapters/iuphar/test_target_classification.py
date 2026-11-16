@@ -27,6 +27,11 @@ from bioetl.infrastructure.adapters.iuphar.snapshot_loader import (
     OUTPUT_NAMES,
     REQUIRED_ACCEPTANCE_CHECKS,
 )
+from tests.helpers.iuphar_snapshot import (
+    synthetic_export_row,
+    synthetic_snapshot_bundle,
+    synthetic_reference_receipt,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -66,6 +71,22 @@ def _profile(
     target_changes: dict[str, object] | None = None,
     **snapshot_changes: object,
 ):
+    if accepted:
+        root, bundle = synthetic_snapshot_bundle(
+            tmp_path / "verified",
+            rows=[synthetic_export_row(family_id="471", family_type="enzyme")],
+        )
+        acceptance = _write(
+            root,
+            "acceptance.json",
+            synthetic_reference_receipt(
+                bundle.snapshot_sha256, root=root / "reference-fixture"
+            ),
+        )
+        document = json.loads((root / "profile.json").read_bytes())
+        document["acceptance"] = acceptance
+        reference = _write(root, "enrich-profile.json", document)
+        return load_profile(root / reference["path"], reference["sha256"])
     targets = _write(
         tmp_path,
         "targets.json",
@@ -172,7 +193,7 @@ def test_direct_class_uses_payload_and_preserves_input(tmp_path):
 def test_enrich_requires_accepted_references_and_publishable_snapshot(tmp_path):
     profile = _profile(tmp_path)
     path = _profile_path(profile)
-    with pytest.raises(ValueError, match="requires executed"):
+    with pytest.raises(ValueError, match="source-verified snapshot schema 2"):
         load_profile(path, profile.profile_sha256)
 
 
@@ -201,7 +222,7 @@ def test_complete_version_unverified_snapshot_is_not_publishable(tmp_path):
     assert profile.snapshot.completeness.complete
     assert not profile.snapshot.completeness.publishable
     path = _profile_path(profile)
-    with pytest.raises(ValueError, match="publishable"):
+    with pytest.raises(ValueError, match="source-verified snapshot schema 2"):
         load_profile(path, profile.profile_sha256)
 
 

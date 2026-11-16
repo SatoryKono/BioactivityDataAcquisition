@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import replace
 
 from iuphar_target_class.matching import CatalogTarget
 from iuphar_target_class.models import ProviderAnnotation
@@ -84,4 +85,26 @@ def parse_target_payloads(
             raise ValueError("duplicate target identity in snapshot")
         catalog.append(target)
         annotations[target.target_id] = annotation
+    return tuple(catalog), annotations
+
+
+def parse_target_species_payloads(
+    content: bytes,
+) -> tuple[tuple[CatalogTarget, ...], dict[tuple[str, str], ProviderAnnotation]]:
+    """Keep provider identity public while indexing annotations by target/species."""
+    rows = decode_json(content)
+    if not isinstance(rows, list) or not rows:
+        raise ValueError("snapshot targets must be a nonempty JSON array")
+    catalog: list[CatalogTarget] = []
+    annotations: dict[tuple[str, str], ProviderAnnotation] = {}
+    for row in rows:
+        target, annotation = _target_payload(row)
+        key = (target.target_id, target.species or "")
+        if key in annotations:
+            raise ValueError("duplicate target/species identity in snapshot")
+        names = _strings(row, "names")
+        catalog.append(
+            replace(target, names=tuple(dict.fromkeys((*target.names, *names))))
+        )
+        annotations[key] = annotation
     return tuple(catalog), annotations

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -35,27 +35,17 @@ class _PipelineIntent:
     destructive: bool
     bounded: bool
 
+    @property
+    def bounded_destructive(self) -> bool:
+        return self.destructive and self.bounded
+
 
 @dataclass(frozen=True, slots=True)
 class WorkflowTargetAdmission:
+    """Separate dependency verification from admission of pending target writes."""
+
     required: bool
     pending_writes: bool
-
-
-def workflow_target_relevant(config: WorkflowConfig) -> bool:
-    """Include transform-only writes; reference-only reads need no classification."""
-    for step in config.steps:
-        if (
-            isinstance(step, WorkflowStepConfig)
-            and step.pipeline_name == "chembl_target"
-        ):
-            return True
-        if (
-            isinstance(step, TransformStepConfig)
-            and (step.config or {}).get("source_table") == "chembl.target"
-        ):
-            return True
-    return False
 
 
 def validate_workflow_target_mutations(
@@ -67,34 +57,69 @@ def validate_workflow_target_mutations(
 ) -> WorkflowTargetAdmission:
     """Validate writes before execution; runtime FK ownership checks remain required."""
     intents = _pipeline_intents(config, target, settings, load_pipeline_config)
-    bundles = _target_bundles(target, settings)
+    admissions = [
+        _validate_bundle(config, target, settings, plan, intents, paths)
+        for paths in _target_bundles(target, settings)
+    ]
     required = any(item.step.pipeline_name == "chembl_target" for item in intents)
-    pending_writes = False
-    for paths in bundles:
-        writers = _pending_pipeline_writers(intents, paths, plan)
-        transforms = _target_transforms(config, target, settings, paths, plan)
-        if not (required or writers or transforms):
-            continue
-        required = True
-        pending_writes = (
-            pending_writes
-            or bool(writers)
-            or any(not _verification_only(step) for step in transforms)
+    return WorkflowTargetAdmission(
+        required or any(item.required for item in admissions),
+        any(item.pending_writes for item in admissions),
+    )
+
+
+def _validate_bundle(
+    config: WorkflowConfig,
+    target: PipelineYamlConfig,
+    settings: Settings,
+    plan: WorkflowMutationPlan,
+    intents: tuple[_PipelineIntent, ...],
+    paths: tuple[Path, Path],
+) -> WorkflowTargetAdmission:
+    writers = _pending_pipeline_writers(intents, paths, plan)
+    transforms = _target_transforms(config, settings, paths, plan)
+    risky = _bounded_destructive_upstream(
+        config, settings, intents, transforms, plan, paths
+    )
+    if not (writers or transforms or risky):
+        return WorkflowTargetAdmission(False, False)
+    profile = get_target_table_profile(silver_path=paths[0], gold_path=paths[1])
+    _validate_upstream_profile(profile, risky)
+    if writers:
+        _validate_pipeline_writers(writers, paths, target, profile)
+    _validate_existing_transforms(
+        profile, config, transforms, intents, paths, target, settings
+    )
+    return WorkflowTargetAdmission(True, _has_pending_writes(writers, transforms))
+
+
+def _has_pending_writes(
+    writers: tuple[_PipelineIntent, ...], transforms: tuple[TransformStepConfig, ...]
+) -> bool:
+    return bool(writers) or any(not _verification_only(step) for step in transforms)
+
+
+def _validate_upstream_profile(
+    profile: str, risky: tuple[_PipelineIntent, ...]
+) -> None:
+    if profile == "V31" and risky:
+        raise ValueError(
+            "bounded destructive upstream cannot replace the reference cohort of an existing V31 target"
         )
-        profile = get_target_table_profile(silver_path=paths[0], gold_path=paths[1])
-        if writers:
-            _validate_pipeline_writers(writers, paths, target, profile)
-        if profile != "V31":
-            continue
-        if (
-            writers
-            or transforms
-            or any(item.step.pipeline_name == "chembl_target" for item in intents)
-        ):
-            _reject_bounded_destructive_upstream(config, intents, transforms, plan)
+
+
+def _validate_existing_transforms(
+    profile: str,
+    config: WorkflowConfig,
+    transforms: tuple[TransformStepConfig, ...],
+    intents: tuple[_PipelineIntent, ...],
+    paths: tuple[Path, Path],
+    target: PipelineYamlConfig,
+    settings: Settings,
+) -> None:
+    if profile == "V31":
         for step in transforms:
-            _validate_target_transform(config, step, intents, paths, target)
-    return WorkflowTargetAdmission(required, pending_writes)
+            _validate_target_transform(config, step, intents, paths, target, settings)
 
 
 def _verification_only(step: TransformStepConfig) -> bool:
@@ -123,10 +148,10 @@ def _pipeline_intents(
         result.append(
             _PipelineIntent(
                 step,
-                resolve_target_table_paths(settings, yaml_config),
+                _resolved_pipeline_paths(settings, yaml_config),
                 bool(options.dry_run),
                 (options.run_type or "incremental") in {"backfill", "rebuild"},
-                _bounded_options(options.to_mapping()),
+                _bounded_pipeline(yaml_config, options.to_mapping()),
             )
         )
     return tuple(result)
@@ -141,15 +166,33 @@ def _bounded_options(options: dict[str, object]) -> bool:
             "input_csv",
             "filter_ids",
             "multi_filter_ids",
+            "cached_bronze_path",
+            "cached_bronze_date",
         )
     )
+
+
+def _bounded_pipeline(config: PipelineYamlConfig, options: dict[str, object]) -> bool:
+    yaml_subset = config.input_filter.enabled and not options.get("ignore_yaml_filter")
+    return (
+        _bounded_options(options)
+        or bool(options.get("use_cached_bronze"))
+        or yaml_subset
+    )
+
+
+def _resolved_pipeline_paths(
+    settings: Settings, config: PipelineYamlConfig
+) -> tuple[Path, Path]:
+    silver, gold = resolve_target_table_paths(settings, config)
+    return silver.resolve(), gold.resolve()
 
 
 def _target_bundles(
     target: PipelineYamlConfig, settings: Settings
 ) -> tuple[tuple[Path, Path], ...]:
     domain = yaml_config_to_domain(target)
-    direct = resolve_target_table_paths(settings, target)
+    direct = _resolved_pipeline_paths(settings, target)
     transforms = (
         _transform_path(settings, "silver", domain.effective_silver_table),
         _transform_path(settings, "gold", domain.effective_gold_table),
@@ -163,7 +206,7 @@ def _transform_path(settings: Settings, layer: str, table: str) -> Path:
         resolve_delta_table_path(
             base_path=str(base), table_name=table, flat_structure=False
         )
-    )
+    ).resolve()
 
 
 def _pending_pipeline_writers(
@@ -202,12 +245,10 @@ def _validate_pipeline_writers(
 
 def _target_transforms(
     config: WorkflowConfig,
-    target: PipelineYamlConfig,
     settings: Settings,
     paths: tuple[Path, Path],
     plan: WorkflowMutationPlan,
 ) -> tuple[TransformStepConfig, ...]:
-    del target
     if config.defaults.dry_run:
         return ()
     return tuple(
@@ -244,34 +285,79 @@ def _ancestors(config: WorkflowConfig, step_id: str) -> frozenset[str]:
     return frozenset(found)
 
 
-def _reject_bounded_destructive_upstream(
+def _bounded_destructive_upstream(
     config: WorkflowConfig,
+    settings: Settings,
     intents: tuple[_PipelineIntent, ...],
     transforms: tuple[TransformStepConfig, ...],
     plan: WorkflowMutationPlan,
-) -> None:
-    affected = {
-        item.step.step_id
+    paths: tuple[Path, Path],
+) -> tuple[_PipelineIntent, ...]:
+    upstream = _reference_producers(config, settings, intents, transforms, paths)
+    active = (
+        item
+        for item in intents
+        if item.step.step_id in plan.pending_step_ids and not item.dry_run
+    )
+    return tuple(
+        item
+        for item in active
+        if item.step.step_id in upstream and item.bounded_destructive
+    )
+
+
+def _reference_producers(
+    config: WorkflowConfig,
+    settings: Settings,
+    intents: tuple[_PipelineIntent, ...],
+    transforms: tuple[TransformStepConfig, ...],
+    paths: tuple[Path, Path],
+) -> set[str]:
+    producers = _target_reference_producers(intents, paths)
+    for step in transforms:
+        producers.update(
+            _transform_reference_producers(config, settings, intents, step)
+        )
+    return producers
+
+
+def _target_reference_producers(
+    intents: tuple[_PipelineIntent, ...], paths: tuple[Path, Path]
+) -> set[str]:
+    return {
+        item.step.reference_cohort.step_id
         for item in intents
         if item.step.pipeline_name == "chembl_target"
+        and bool(set(item.paths).intersection(paths))
+        and item.step.reference_cohort is not None
     }
-    affected.update(step.step_id for step in transforms)
-    upstream = (
-        set().union(*(_ancestors(config, step_id) for step_id in affected))
-        if affected
-        else set()
-    )
-    if any(
-        item.step.step_id in upstream
-        and item.step.step_id in plan.pending_step_ids
-        and item.destructive
-        and item.bounded
-        and not item.dry_run
+
+
+def _transform_reference_producers(
+    config: WorkflowConfig,
+    settings: Settings,
+    intents: tuple[_PipelineIntent, ...],
+    step: TransformStepConfig,
+) -> set[str]:
+    values = step.config or {}
+    if values.get("reconciliation_mode", "complete-reference") == "selected-snapshot":
+        return set()
+    reference = _declared_transform_path(settings, values, "reference")
+    ancestors = _ancestors(config, step.step_id)
+    return {
+        item.step.step_id
         for item in intents
-    ):
-        raise ValueError(
-            "bounded destructive upstream cannot replace the reference cohort of an existing V31 target"
-        )
+        if item.step.step_id in ancestors and reference in item.paths
+    }
+
+
+def _declared_transform_path(
+    settings: Settings, values: Mapping[str, object], role: str
+) -> Path | None:
+    table = values.get(role + "_table")
+    if not isinstance(table, str):
+        return None
+    return _transform_path(settings, str(values.get(role + "_layer", "silver")), table)
 
 
 def _validate_target_transform(
@@ -280,6 +366,7 @@ def _validate_target_transform(
     intents: tuple[_PipelineIntent, ...],
     paths: tuple[Path, Path],
     target: PipelineYamlConfig,
+    settings: Settings,
 ) -> None:
     values = step.config or {}
     mode = values.get("reconciliation_mode", "complete-reference")
@@ -290,40 +377,43 @@ def _validate_target_transform(
         raise ValueError(
             "target mutation requires a declared supported workflow transform"
         )
-    if values.get("require_closed_cohort") is True and mode == "complete-reference":
+    if _verification_only(step):
         return  # The canonical adapter either verifies closure or raises before mutation.
     assert_target_table_compatibility(
         silver_path=paths[0], gold_path=paths[1], mode=target.target_classification.mode
     )
     upstream = _ancestors(config, step.step_id)
     if mode == "selected-snapshot":
-        _require_scoped_producers(step, intents, upstream)
-    elif (
-        any(item.bounded and item.step.step_id in upstream for item in intents)
-        and values.get("source_scope", "all_current") != "current_run"
-    ):
-        raise ValueError(
-            "bounded complete-reference target mutation requires a bound current-run source scope"
-        )
+        _require_scoped_producers(step, intents, upstream, settings)
 
 
 def _require_scoped_producers(
     step: TransformStepConfig,
     intents: tuple[_PipelineIntent, ...],
     upstream: frozenset[str],
+    settings: Settings,
 ) -> None:
     values = step.config or {}
     if values.get("source_scope") != "current_run":
         raise ValueError("selected-snapshot target mutation requires current_run scope")
-    producers = {
-        item.step.pipeline_name.replace("_", ".", 1)
-        for item in intents
-        if item.step.step_id in upstream
-    }
-    if (
-        values.get("source_table") not in producers
-        or values.get("reference_table") not in producers
+    if not all(
+        _has_bound_producer(settings, values, role, intents, upstream)
+        for role in ("source", "reference")
     ):
         raise ValueError(
             "selected-snapshot target mutation requires both bound workflow producers"
         )
+
+
+def _has_bound_producer(
+    settings: Settings,
+    values: Mapping[str, object],
+    role: str,
+    intents: tuple[_PipelineIntent, ...],
+    upstream: frozenset[str],
+) -> bool:
+    path = _declared_transform_path(settings, values, role)
+    index = int(values.get(role + "_layer", "silver") == "gold")
+    return any(
+        item.step.step_id in upstream and item.paths[index] == path for item in intents
+    )

@@ -6,6 +6,7 @@ Usage:
     python -m scripts.ops --help
 
 Stable commands:
+    iuphar-target-cohort Export canonical targets and assemble Stage 0 evidence
     target-classification-migration
                        Prepare, promote, or restore paired target tables
     salt-rotate        Rotate PII hashing salt
@@ -101,6 +102,7 @@ COMMAND_SPECS = {
 
 COMMAND_SPECS.update(
     {
+        "iuphar-target-cohort": module_command("scripts.ops.iuphar_target_cohort"),
         "target-classification-migration": module_command(
             "scripts.ops.target_classification_migration"
         ),

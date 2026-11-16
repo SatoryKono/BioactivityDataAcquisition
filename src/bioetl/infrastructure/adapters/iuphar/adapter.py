@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import json
-import math
-import re
 from collections.abc import Mapping
 from dataclasses import replace
 
@@ -19,6 +16,15 @@ from iuphar_target_class.pipeline import BatchResult, classify_batch
 from iuphar_target_class.pipeline_io import render_batch
 from iuphar_target_class.stage0.io import canonical_json_bytes
 
+from ._input_projection import (
+    plain_target_value as _plain,
+)
+from ._input_projection import (
+    project_target_fields as _raw_fields,
+)
+from ._input_projection import (
+    target_input_eligibility as _eligibility,
+)
 from .snapshot_loader import LoadedIupharProfile
 
 _FIELD_MAP = {
@@ -31,11 +37,6 @@ _FIELD_MAP = {
     "effective_source": "effective_source",
     "decision_status": "decision_status",
 }
-from ._input_projection import (
-    plain_target_value as _plain,
-    project_target_fields as _raw_fields,
-    target_input_eligibility as _eligibility,
-)
 
 
 def _unclassified(

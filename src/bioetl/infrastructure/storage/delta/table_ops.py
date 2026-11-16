@@ -49,21 +49,46 @@ def _read_records_from_active_parquet_files(
     if not file_uris:
         return []
 
-    tables = [
-        pq.read_table(
-            resolve_parquet_file_uri(file_uri),
-            columns=columns,
-            # Threaded parquet reads have hung on some Windows checkouts during
-            # first-touch native library bring-up; keep single-thread IO here.
-            use_threads=False,
-        )
-        for file_uri in file_uris
-    ]
+    tables = [_read_active_file(table, uri, columns) for uri in file_uris]
     if len(tables) == 1:
         rows: list[BronzeRecord] = tables[0].to_pylist()
         return rows
     concatenated = pa.concat_tables(tables)
     return cast("list[BronzeRecord]", concatenated.to_pylist())
+
+
+def _read_active_file(
+    table: DeltaTable, file_uri: str, columns: list[str] | None
+) -> pa.Table:
+    """Restore partition columns from Delta actions, including typed nulls.
+
+    Parquet payloads omit partition fields. Inferring them from Hive directory
+    names loses Delta's types and depends on PyArrow's version-specific defaults.
+    """
+    partition_columns = table.metadata().partition_columns
+    physical_columns = (
+        None if columns is None else [c for c in columns if c not in partition_columns]
+    )
+    result = pq.read_table(
+        resolve_parquet_file_uri(file_uri), columns=physical_columns, use_threads=False
+    )
+    if not partition_columns:
+        return result
+    schema = delta_schema_to_pyarrow(table.schema())
+    root = Path(resolve_parquet_file_uri(table.table_uri)).resolve()
+    relative = (
+        Path(resolve_parquet_file_uri(file_uri)).resolve().relative_to(root).as_posix()
+    )
+    actions = {item["path"]: item for item in table.get_add_actions().to_pylist()}
+    values = actions[relative]["partition_values"]
+    for name in partition_columns:
+        if columns is not None and name not in columns:
+            continue
+        value = pa.scalar(values[name]).cast(schema.field(name).type)
+        result = result.append_column(
+            name, pa.array([value.as_py()] * result.num_rows, type=value.type)
+        )
+    return result.select(columns if columns is not None else schema.names)
 
 
 def read_delta_records(

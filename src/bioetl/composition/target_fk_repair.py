@@ -1,0 +1,183 @@
+"""Offline V30 target recovery through the actual pipeline and Delta writers."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import AsyncIterator
+from uuid import UUID
+
+from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
+from bioetl.composition.factories.pipeline.assembler import create_pipeline_factory
+from bioetl.composition.factories.pipeline.registry import chembl_target_factory
+from bioetl.composition.runtime_builders.observability_builder import (
+    build_observability_bundle,
+)
+from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.ports import PipelineCreateRunnerRequest
+from bioetl.domain.types import BronzeRecord, HealthStatus, RunType
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config_from_root
+from bioetl.infrastructure.config.settings_api import Settings
+from bioetl.infrastructure.storage.target_fk_repair import (
+    RecoveredTargetSource,
+    TargetRepairBaseline,
+    freeze_target_baseline,
+    publish_repair_candidate,
+    read_recovered_target_source,
+)
+
+
+@dataclass(frozen=True)
+class TargetFKRepairRequest:
+    """Explicit immutable inputs; output is restricted to a new local report root."""
+
+    repo_root: Path
+    source_directory: Path
+    output_directory: Path
+    run_id: UUID
+    started_at: datetime
+
+
+class _FrozenAPISource:
+    """DataSourcePort seam yielding hash-verified API records without network I/O."""
+
+    provider_name = "chembl"
+
+    def __init__(self, source: RecoveredTargetSource) -> None:
+        self._source = source
+
+    async def __aenter__(self) -> _FrozenAPISource:
+        return self
+
+    async def __aexit__(self, *args: object) -> None:
+        await self.aclose()
+
+    async def aclose(self) -> None:
+        """No network session or external resource is opened."""
+
+    async def health_check(self) -> HealthStatus:
+        """The local immutable response has already passed acquisition checks."""
+        return HealthStatus.HEALTHY
+
+    async def fetch(self, entity_type: str, **kwargs: object) -> AsyncIterator[BronzeRecord]:
+        """Replay the complete verified missing-target cohort once."""
+        if entity_type != "target":
+            raise ValueError("Recovery source supports target only")
+        for record in self._source.records:
+            # Separate copies prevent any pipeline normalizer changing frozen inputs.
+            yield json.loads(json.dumps(record))
+
+
+def _prepare_inputs(
+    request: TargetFKRepairRequest,
+) -> tuple[TargetRepairBaseline, RecoveredTargetSource, Path]:
+    root = request.repo_root.resolve(strict=True)
+    reports = (root / "reports" / "local").resolve()
+    destination = request.output_directory.resolve()
+    if not destination.is_relative_to(reports) or destination == reports:
+        raise ValueError("Recovery output must be a new directory under reports/local")
+    if destination.exists():
+        raise ValueError("Recovery output directory must be new")
+    if request.started_at.tzinfo is None:
+        raise ValueError("Recovery started_at must include a timezone")
+    data = root / "data" / "output"
+    baseline = freeze_target_baseline(
+        data / "silver" / "chembl" / "target",
+        data / "gold" / "chembl" / "target",
+        data / "gold" / "chembl" / "assay",
+    )
+    source = read_recovered_target_source(
+        request.source_directory, expected_ids=baseline.missing_ids
+    )
+    return baseline, source, destination
+
+
+async def prepare_target_fk_repair(request: TargetFKRepairRequest) -> Path:
+    """Run actual V30 transforms in isolation, then publish additive candidates.
+
+    ``test_mode`` selects isolated storage roots instead of YAML canonical sink
+    paths. It does not replace the transformer, normalizer, filters, schemas,
+    identity/hash generator, or Silver/Gold writers with test doubles.
+    """
+    baseline, source, destination = _prepare_inputs(request)
+    config = load_pipeline_config_from_root(
+        "chembl_target", configs_root=request.repo_root / "configs"
+    )
+    if config.target_classification.mode != "off":
+        raise ValueError("V30 recovery requires classification mode off")
+    if config.contracts.active_version != "3.0.0" or config.contracts.write_versions != ["3.0.0"]:
+        raise ValueError("V30 recovery requires the single 3.0.0 write contract")
+    settings = Settings(
+        test_mode=True,
+        env="dev",
+        data_dir=destination / "execution" / "data",
+        report_root=destination / "execution" / "reports",
+        metrics_enabled=False,
+        observability={"metrics_enabled": False, "metrics_server_enabled": False, "tracing_enabled": False, "dq_monitor_enabled": False},
+        _env_file=None,
+    )
+    observability = build_observability_bundle(
+        pipeline="chembl_target",
+        run_id=request.run_id,
+        settings=settings,
+        yaml_config=config,
+    )
+    source_adapter = _FrozenAPISource(source)
+    factory = create_pipeline_factory(
+        "chembl_target",
+        chembl_target_factory.pipeline_class,
+        "chembl",
+        silver_schema=chembl_target_factory.silver_schema,
+        gold_schema=chembl_target_factory.gold_schema,
+        pandera_silver_schema=chembl_target_factory.pandera_silver_schema,
+        transformer_class=TargetTransformer,
+        data_source_creator=lambda *args, **kwargs: source_adapter,
+    )
+    runtime = RuntimeConfig(
+        run_type=RunType.INCREMENTAL,
+        limit=len(source.records),
+        strict_validation=True,
+        strict_gold_validation=True,
+    )
+    runner = factory.create_runner(
+        PipelineCreateRunnerRequest(
+            run_id=request.run_id,
+            started_at=request.started_at,
+            runtime=runtime,
+            settings=settings,
+            config=config,
+            observability=observability,
+        )
+    )
+    await runner.run()
+    metrics = runner.execution_metrics
+    for key in ("records_silver", "records_gold"):
+        if metrics.get(key) != len(source.records):
+            raise ValueError(f"Actual pipeline did not retain full recovery cohort: {key}")
+    reread = read_recovered_target_source(
+        request.source_directory, expected_ids=baseline.missing_ids
+    )
+    if reread.reference != source.reference:
+        raise ValueError("Recovery acquisition changed during execution")
+    serialized = config.model_dump(mode="json")
+    execution = {
+        "pipeline": "chembl_target",
+        "run_id": str(request.run_id),
+        "started_at": request.started_at.isoformat(),
+        "status": "completed",
+        "metrics": dict(metrics),
+        "resolved_config_sha256": hashlib.sha256(
+            json.dumps(serialized, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest(),
+        "settings": {"isolated_storage_paths": True, "test_mode": True, "network_source": False},
+    }
+    return publish_repair_candidate(
+        baseline,
+        isolated_data_root=settings.data_dir,
+        destination=destination / "tables",
+        source=source,
+        execution=execution,
+    )

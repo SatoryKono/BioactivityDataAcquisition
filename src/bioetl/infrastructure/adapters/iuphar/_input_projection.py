@@ -62,7 +62,9 @@ def plain_target_value(value: object) -> object:
     return value
 
 
-def project_target_fields(data: Mapping[str, object], taxon: str | None) -> dict[str, str | None]:
+def project_target_fields(
+    data: Mapping[str, object], taxon: str | None
+) -> dict[str, str | None]:
     accessions = tuple(
         dict.fromkeys(
             (
@@ -91,7 +93,9 @@ def project_target_fields(data: Mapping[str, object], taxon: str | None) -> dict
         "ec": "|".join(_tokens(data.get("target_ec_numbers"))) or None,
         "gene_symbol": _text(data.get("gene_symbol")),
         "gene_id": _text(data.get("gene_id")),
-        "source_business_data": canonical_json_bytes(plain_target_value(data)).decode("utf-8"),
+        "source_business_data": canonical_json_bytes(plain_target_value(data)).decode(
+            "utf-8"
+        ),
     }
 
 
@@ -110,7 +114,6 @@ def target_input_eligibility(
     if taxon is not None and source_taxon is not None and taxon != source_taxon:
         return taxon, "taxonomy_name_conflict"
     return taxon, None
-
 
 
 __all__ = ["plain_target_value", "project_target_fields", "target_input_eligibility"]

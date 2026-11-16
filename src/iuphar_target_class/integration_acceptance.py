@@ -24,6 +24,12 @@ from .pipeline_acceptance import (
 from .pipeline_io import render_batch
 from .pipeline_proof import verify_stored_pipeline_proof
 from .policy import VOLUME_TEST_SECONDS
+from .reference_coverage import (
+    SUPPORTED_REFERENCE_FIELDS,
+    validate_executed_reference_coverage,
+    validate_reference_coverage_receipt,
+    validate_reference_specification,
+)
 from .stage0.io import canonical_json_bytes, sha256_bytes, sha256_file
 
 CHECKS = (
@@ -78,6 +84,14 @@ class _ReferenceSpecification(TypedDict):
     expected_rows: int
     source_imports: NotRequired[list[_SourceImportSpec]]
     cases: list[_ReferenceCase]
+    cohort_manifest_sha256: NotRequired[str]
+    conversion_ledger_sha256: NotRequired[str]
+    scope_declaration: NotRequired[dict[str, object]]
+    reference_matrix: NotRequired[dict[str, object]]
+    normalization_version: NotRequired[str]
+    rules_version: NotRequired[str]
+    classification_schema_version: NotRequired[str]
+    taxonomy_scope: NotRequired[list[str]]
 
 
 @dataclass(frozen=True, slots=True)
@@ -101,7 +115,7 @@ def _verified_labels(request: IntegrationAcceptanceRequest) -> _ReferenceSpecifi
     spec = cast("_ReferenceSpecification", json.loads(raw))
     if (
         spec.get("artifact") != "bioetl_iuphar_reference_cases"
-        or spec.get("schema_version") != 1
+        or spec.get("schema_version") not in {1, 2}
         or not spec.get("reviewer_reference")
         or not spec.get("approval_reference")
         or not spec.get("environment")
@@ -132,7 +146,12 @@ def _check_cases(batch: BatchResult, spec: _ReferenceSpecification, root: Path) 
     if not cases or len(set(identities)) != len(identities):
         raise ValueError("reference cases must have distinct row identities")
     for case in cases:
-        _check_reference_case(case, results.get(case["input_row_id"]), root)
+        allowed = (
+            SUPPORTED_REFERENCE_FIELDS
+            if spec["schema_version"] == 2
+            else _EXPECTED_FIELDS
+        )
+        _check_reference_case(case, results.get(case["input_row_id"]), root, allowed)
 
 
 def _check_reference_sources(references: list[_SourceReference], root: Path) -> None:
@@ -146,12 +165,15 @@ def _check_reference_sources(references: list[_SourceReference], root: Path) -> 
 
 
 def _check_reference_case(
-    case: _ReferenceCase, actual: ClassificationResult | None, root: Path
+    case: _ReferenceCase,
+    actual: ClassificationResult | None,
+    root: Path,
+    allowed_fields: frozenset[str] = _EXPECTED_FIELDS,
 ) -> None:
     """Compare one source-backed expectation with the executed row result."""
     references = case.get("source_references", [])
     expected = case.get("expected", {})
-    if not references or not expected or not set(expected).issubset(_EXPECTED_FIELDS):
+    if not references or not expected or not set(expected).issubset(allowed_fields):
         raise ValueError("each reference case needs reviewed source proof and outcomes")
     _check_reference_sources(references, root)
     if actual is None:
@@ -238,6 +260,8 @@ def _execute_acceptance(
 ) -> None:
     spec = _verified_labels(request)
     cohort = _admit_acceptance_cohort(request, snapshot, spec)
+    if spec["schema_version"] == 2:
+        _prepare_reference_scope(request, cohort, spec, receipt)
     checks["stage0_admission"] = "PASS"
     receipt.update(
         stage0_manifest_sha256=cohort.manifest_sha256,
@@ -257,6 +281,11 @@ def _execute_acceptance(
     for name, raw in rendered.items():
         (output_dir / name).write_bytes(raw)
     _record_pipeline_acceptance(request, receipt)
+    if spec["schema_version"] == 2:
+        receipt["artifact_references"] = _publication_references(
+            request, cohort, output_dir, rendered
+        )
+        validate_reference_coverage_receipt(receipt)
     checks["pipeline_integration"] = "PASS"
     receipt["status"] = "PASS"
 
@@ -285,12 +314,37 @@ def _admit_acceptance_cohort(
     _require_canonical_imports(spec)
     if request.provenance.snapshot_id != snapshot.snapshot_id:
         raise ValueError("execution provenance belongs to another snapshot")
-    if not snapshot.complete:
+    admitted = (
+        snapshot.admission_complete
+        if snapshot.admission_complete is not None
+        else snapshot.complete
+    )
+    if not admitted:
         raise ValueError("complete admitted snapshot required")
     cohort = load_admitted_cohort(request.stage0_manifest, _volume_plan(spec))
     if not cohort.rows or len(cohort.rows) != spec["expected_rows"]:
         raise ValueError("full admitted cohort count differs from the frozen plan")
     return cohort
+
+
+def _prepare_reference_scope(
+    request: IntegrationAcceptanceRequest,
+    cohort: AdmittedCohort,
+    spec: _ReferenceSpecification,
+    receipt: dict[str, object],
+) -> None:
+    if request.pipeline_report is None or request.pipeline_proof is None:
+        raise ValueError(
+            "V2 reference acceptance requires explicit pipeline proof and report paths"
+        )
+    receipt.update(
+        validate_reference_specification(
+            spec,
+            cohort=cohort,
+            provenance=request.provenance,
+            root=request.expected_labels.parent,
+        )
+    )
 
 
 def _write_execution_config(
@@ -337,6 +391,8 @@ def _verify_batch_outputs(
 ) -> Mapping[str, bytes]:
     """Verify reviewed outcomes, evidence and frozen permutation determinism."""
     _check_cases(batch, spec, request.expected_labels.parent)
+    if spec["schema_version"] == 2:
+        validate_executed_reference_coverage(batch, spec)
     checks["reference_cases"] = "PASS"
     _check_evidence(batch)
     checks["evidence_integrity"] = "PASS"
@@ -367,3 +423,67 @@ def _record_pipeline_acceptance(
     )
     if request.pipeline_report is not None:
         receipt["pipeline_report_sha256"] = sha256_file(request.pipeline_report)
+
+
+def _publication_references(
+    request: IntegrationAcceptanceRequest,
+    cohort: AdmittedCohort,
+    output_dir: Path,
+    rendered: Mapping[str, bytes],
+) -> list[dict[str, str]]:
+    references = [
+        _artifact_reference(
+            "stage0_manifest", request.stage0_manifest, cohort.manifest_sha256
+        ),
+        _artifact_reference(
+            "expected_labels", request.expected_labels, request.expected_labels_sha256
+        ),
+    ]
+    for kind, path in (
+        ("pipeline_proof", request.pipeline_proof),
+        ("pipeline_report", request.pipeline_report),
+    ):
+        if path is not None:
+            references.append(_artifact_reference(kind, path, sha256_file(path)))
+    references.extend(_stage0_dependency_references(request.stage0_manifest))
+    references.extend(
+        _artifact_reference(name, output_dir / name, sha256_bytes(raw))
+        for name, raw in rendered.items()
+    )
+    return references
+
+
+def _artifact_reference(kind: str, path: Path, digest: str) -> dict[str, str]:
+    if sha256_file(path) != digest:
+        raise ValueError(
+            "acceptance dependency bytes changed before receipt publication"
+        )
+    return {
+        "kind": kind,
+        "immutable_uri": path.resolve(strict=True).as_uri(),
+        "sha256": digest,
+    }
+
+
+def _stage0_dependency_references(path: Path) -> list[dict[str, str]]:
+    document = json.loads(path.read_bytes())
+    references = []
+    names = {
+        "cohort_manifest.json": "cohort_manifest",
+        "conversion_ledgers.json": "conversion_ledger",
+    }
+    for name, digest in document["artifact_sha256"].items():
+        references.append(
+            _artifact_reference(
+                names.get(name, "stage0_proof:" + name), path.parent / name, digest
+            )
+        )
+    for material in document["copies"]:
+        references.append(
+            _artifact_reference(
+                "stage0_" + material["role"],
+                path.parent / material["copy_path"],
+                material["sha256"],
+            )
+        )
+    return references

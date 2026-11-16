@@ -16,6 +16,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import NotRequired, TypedDict, cast
 
+from bioetl.infrastructure.storage.target_deployment_binding import (
+    TargetDeploymentBinding,
+    validate_deployment_binding,
+)
+from bioetl.infrastructure.storage.target_migration_dependencies import (
+    backup_target_dependencies,
+    collect_target_dependencies,
+    verify_target_dependencies,
+)
 from bioetl.infrastructure.storage.target_migration_validation import (
     assert_no_managed_writers,
     validate_target_candidate,
@@ -38,6 +47,9 @@ class TargetMigrationJournal(TypedDict):
     legacy_include_fields: list[str]
     assay_hashes: dict[str, str]
     restored: NotRequired[list[str]]
+    deployment_binding: dict[str, str]
+    dependencies: dict[str, str]
+    dependency_backups: dict[str, str]
 
 
 @dataclass(frozen=True, slots=True)
@@ -158,12 +170,23 @@ def prepare_target_migration(
     paths: TargetMigrationPaths,
     *,
     legacy_include_fields: tuple[str, ...],
+    deployment: TargetDeploymentBinding | None = None,
 ) -> TargetMigrationJournal:
     """Validate complete cohorts and copy the entire recoverable old bundle."""
     checked = paths.checked()
+    validate_deployment_binding(checked, deployment)
     with _lock(paths.workspace):
         validation = validate_target_candidate(checked, legacy_include_fields)
+        dependencies = collect_target_dependencies(
+            workspace=paths.workspace,
+            configs=(checked["config"], checked["candidate_config"]),
+        )
         checked["backup"].mkdir(parents=True, exist_ok=False)
+        dependency_backups = backup_target_dependencies(
+            workspace=paths.workspace,
+            dependencies=dependencies,
+            destination=checked["backup"] / "dependencies",
+        )
         before = {
             name: _tree_hashes(checked[name]) for name in ("silver", "gold", "config")
         }
@@ -195,14 +218,20 @@ def prepare_target_migration(
             "activated": [],
             "legacy_include_fields": list(legacy_include_fields),
             "assay_hashes": _tree_hashes(checked["assay"]),
+            "deployment_binding": deployment.document() if deployment else {},
+            "dependencies": dependencies,
+            "dependency_backups": dependency_backups,
         }
         _save(checked["backup"], state)
         return state
 
 
-def promote_target_migration(paths: TargetMigrationPaths) -> TargetMigrationJournal:
+def promote_target_migration(
+    paths: TargetMigrationPaths, *, deployment: TargetDeploymentBinding | None = None
+) -> TargetMigrationJournal:
     """Cut over a validated complete bundle, retaining originals for rollback."""
     checked = paths.checked()
+    validate_deployment_binding(checked, deployment)
     with _lock(paths.workspace):
         state = cast(
             "TargetMigrationJournal",
@@ -212,6 +241,12 @@ def promote_target_migration(paths: TargetMigrationPaths) -> TargetMigrationJour
             k: str(v) for k, v in checked.items()
         }:
             raise ValueError("migration is not the prepared occurrence")
+        if state.get("deployment_binding") != (
+            deployment.document() if deployment else {}
+        ):
+            raise ValueError("deployment settings/config changed since preparation")
+        verify_target_dependencies(paths.workspace, state["dependencies"])
+        verify_target_dependencies(paths.workspace, state["dependency_backups"])
         for name in ("silver", "gold", "config"):
             if _tree_hashes(checked[name]) != state["original_hashes"][name]:
                 raise ValueError("canonical bytes changed since preparation")
@@ -233,7 +268,10 @@ def promote_target_migration(paths: TargetMigrationPaths) -> TargetMigrationJour
                 checked["candidate_" + name].rename(checked[name])
                 state["activated"].append(name)
                 _save(checked["backup"], state)
-        except OSError:
+            for name in ("silver", "gold", "config"):
+                if _tree_hashes(checked[name]) != state["candidate_hashes"][name]:
+                    raise ValueError("activated target bundle differs from validated bytes")
+        except (OSError, ValueError):
             _restore_pairs(checked, state)
             raise
         state["phase"] = "promoted"
@@ -253,6 +291,7 @@ def rollback_target_migration(paths: TargetMigrationPaths) -> TargetMigrationJou
             raise ValueError("migration has no activated bundle to restore")
         if state["paths"] != {k: str(v) for k, v in checked.items()}:
             raise ValueError("rollback paths differ from the prepared bundle")
+        verify_target_dependencies(paths.workspace, state["dependency_backups"])
         for name in state["moved"]:
             original = checked["backup"] / ("original-" + name)
             if name in state.get("restored", []) or not original.exists():

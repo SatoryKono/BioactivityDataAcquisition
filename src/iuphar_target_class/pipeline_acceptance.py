@@ -9,7 +9,7 @@ import time
 from collections.abc import Callable, Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import TypedDict
+from typing import TypedDict, cast
 
 from .models import RawTargetRow, RunProvenance
 from .pipeline import BatchResult, IndexedSnapshot, classify_batch
@@ -188,23 +188,45 @@ def load_admitted_cohort(manifest_path: Path, plan: VolumePlan) -> AdmittedCohor
 def _load_admitted_cohort_v2(manifest_path: Path, plan: VolumePlan) -> AdmittedCohort:
     """Verify evidence bytes as well as the entire selected cohort material set."""
     _require_cohort_plan(plan)
-    frozen = verify_stage0_v2(manifest_path, plan.manifest_sha256, plan.selected_source_paths)
+    frozen = verify_stage0_v2(
+        manifest_path, plan.manifest_sha256, plan.selected_source_paths
+    )
     imports = _cohort_source_profiles(plan)
     if set(imports) != set(frozen.cohort_payloads):
-        raise ValueError("Stage-0 V2 requires an explicit profile for every cohort copy")
-    entries = {item["source_path"]: item for item in frozen.document["copies"]}
+        raise ValueError(
+            "Stage-0 V2 requires an explicit profile for every cohort copy"
+        )
+    entries = {
+        item["source_path"]: item
+        for item in cast("list[dict[str, object]]", frozen.document["copies"])
+    }
     rows: list[RawTargetRow] = []
     for source in plan.selected_source_paths:
         profile = imports[source]
         entry = entries[source]
-        if (profile.format_version, profile.target_kind) != (entry["format_version"], entry["target_kind"]):
-            raise ValueError("cohort import profile differs from its frozen Stage-0 declaration")
-        rows.extend(_cohort_source_rows(frozen.cohort_payloads[source], source, profile))
-    if len(rows) != plan.expected_rows or len({row.input_row_id for row in rows}) != len(rows):
+        if (profile.format_version, profile.target_kind) != (
+            entry["format_version"],
+            entry["target_kind"],
+        ):
+            raise ValueError(
+                "cohort import profile differs from its frozen Stage-0 declaration"
+            )
+        rows.extend(
+            _cohort_source_rows(frozen.cohort_payloads[source], source, profile)
+        )
+    if len(rows) != plan.expected_rows or len(
+        {row.input_row_id for row in rows}
+    ) != len(rows):
         raise ValueError("cohort count differs or row identities are not unique")
-    return AdmittedCohort(plan.manifest_sha256, frozen.cohort_digests, tuple(rows),
-                         2, frozen.evidence_digests, frozen.cohort_manifest_sha256,
-                         frozen.conversion_ledger_sha256)
+    return AdmittedCohort(
+        plan.manifest_sha256,
+        frozen.cohort_digests,
+        tuple(rows),
+        2,
+        frozen.evidence_digests,
+        frozen.cohort_manifest_sha256,
+        frozen.conversion_ledger_sha256,
+    )
 
 
 def run_admitted_volume(

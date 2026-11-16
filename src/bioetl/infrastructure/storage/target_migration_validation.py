@@ -11,7 +11,6 @@ import psutil
 import yaml
 
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
-from bioetl.domain.normalization.json import serialize_json_canonical
 from bioetl.domain.normalization.profiles.chembl_target import CHEMBL_TARGET_PROFILE
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,
@@ -64,8 +63,8 @@ def _business(row: Mapping[str, object]) -> dict[str, object]:
 
 def _hash_input(row: Mapping[str, object]) -> dict[str, object]:
     record = _business(row)
-    if "description" in record:
-        record["target_description"] = record.pop("description")
+    if "description" in record and "target_description" not in record:
+        record["target_description"] = record["description"]
     return record
 
 
@@ -128,14 +127,15 @@ def _scoped_target_hash(
     Gold's description alias is projected back to the canonical Silver field.
     """
     record = _hash_input(row)
-    normalized = {
-        field: _normalize_hash_field(profile, field, record[field], record)
-        for field in include_fields
-        if field in record
-    }
+    # Persisted values have already crossed the normalization boundary. Applying
+    # display-name or JSON rules again can be lossy (for example virus strains).
+    # Only restore the reviewed Gold storage coercion of the integer TaxID.
+    taxonomy_id = record.get("taxonomy_id")
+    if isinstance(taxonomy_id, float) and taxonomy_id.is_integer():
+        record["taxonomy_id"] = int(taxonomy_id)
     return str(
         generate_content_hash(
-            normalized,
+            record,
             "chembl",
             exclude_none=True,
             include_fields=set(include_fields),
@@ -143,22 +143,6 @@ def _scoped_target_hash(
             datetime_policy="v2_datetime_utc",
         )
     )
-
-
-def _normalize_hash_field(
-    profile: NormalizationProfile,
-    field: str,
-    value: object,
-    record: Mapping[str, object],
-) -> object:
-    """Restore canonical domain field types after Gold storage coercions."""
-    rule = profile.rule_for(field)
-    if rule is None:
-        raise ValueError(f"migration hash field has no normalization rule: {field}")
-    normalized = rule.apply(value, record=record)
-    if isinstance(normalized, dict | list):
-        return serialize_json_canonical(normalized)
-    return normalized
 
 
 def _frozen_v31_hash_fields(
@@ -176,6 +160,7 @@ def _frozen_v31_hash_fields(
 
 def _read_delta(path: Path) -> list[dict[str, object]]:
     from deltalake import DeltaTable
+
     from bioetl.infrastructure.storage.delta.table_ops import read_delta_records
 
     # Arrow's JSON-compatible row boundary is untyped in the installed stubs.
@@ -307,7 +292,7 @@ def _assert_classification_projection(
 def _assert_candidate_cohort_closure(
     paths: dict[str, Path], gold_rows: Sequence[Mapping[str, object]]
 ) -> None:
-    """Keep final Gold targets closed against final Gold assay references.
+    """Require every final assay FK, preserving additional Gold targets.
 
     Baseline reconciliation mutates Gold only; Silver can retain a superset.
     Each old/new layer's full identity set is checked independently above.
@@ -317,5 +302,5 @@ def _assert_candidate_cohort_closure(
         for row in _read_delta(paths["assay"])
         if row.get("target_id") is not None
     }
-    if assay_targets != set(_by_id(gold_rows)):
+    if not assay_targets.issubset(_by_id(gold_rows)):
         raise ValueError("baseline assay/target foreign-key closure failed")

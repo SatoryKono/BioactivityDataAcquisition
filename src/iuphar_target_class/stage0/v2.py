@@ -29,15 +29,29 @@ class Stage0MaterialV2:
     conversion_ledger_source: str | None = None
 
     def __post_init__(self) -> None:
-        _required_text(self.source_path)
+        _require_material_source_path(self.source_path)
         _required_text(self.format_version)
         _require_sha256(self.source_sha256)
         if self.role not in {"cohort", "evidence"}:
             raise ValueError("unknown Stage-0 material role")
         if self.role == "cohort" and (
-            self.target_kind != "protein" or not self.conversion_ledger_source
+            self.target_kind != "protein"
+            or not self.conversion_ledger_source
+            or self.format_version != "bioetl_target_kernel_csv_v1"
         ):
-            raise ValueError("cohort needs an explicit protein import and conversion ledger")
+            raise ValueError(
+                "cohort needs an explicit protein import and conversion ledger"
+            )
+
+
+def _require_material_source_path(source_path: str) -> None:
+    _required_text(source_path)
+    if Path(source_path).is_absolute() or ".." in Path(source_path).parts:
+        raise ValueError("Stage-0 source identity must be a relative workspace path")
+    if any(
+        part == ".env" or part.startswith(".env.") for part in Path(source_path).parts
+    ):
+        raise ValueError("environment files cannot enter a Stage-0 bundle")
 
 
 @dataclass(frozen=True, slots=True)
@@ -115,9 +129,12 @@ def _provenance_bindings(
 ) -> list[dict[str, object]]:
     bindings: list[dict[str, object]] = []
     for claim in claims:
-        if claim.source_ref not in materials:
-            raise ValueError("provenance must bind a copied cohort or evidence material")
-        source = materials[claim.source_ref]
+        source_ref = _required_text(claim.source_ref)
+        if source_ref not in materials:
+            raise ValueError(
+                "provenance must bind a copied cohort or evidence material"
+            )
+        source = materials[source_ref]
         if claim.source_sha256 != source.source_sha256:
             raise ValueError("provenance source digest differs from copied material")
         for value in (claim.field_id, claim.rule_or_process, claim.confirmation_owner):
@@ -135,56 +152,99 @@ def publish_stage0_v2(
         raise ValueError("Stage-0 output must be a new directory inside the workspace")
     materials = _request_materials(request)
     bindings = _provenance_bindings(request.provenance_claims, materials)
-    payloads = {name: _inside(root, name).read_bytes() for name in materials}
-    for name, item in materials.items():
-        if sha256_bytes(payloads[name]) != item.source_sha256:
-            raise ValueError("Stage-0 source digest mismatch before copy")
+    payloads = _read_material_payloads(root, materials)
     output.mkdir(parents=True, exist_ok=False)
     copies = _publish_copies(output, materials, payloads)
-    artifacts = {
-        "content_checks.json": canonical_json_bytes(copies),
-        "provenance_map.json": canonical_json_bytes(bindings),
-        "stage_report.json": canonical_json_bytes({
-            "stage_status": "recorded_without_biological_acceptance",
-            "biological_accuracy_accepted": False,
-        }),
-        "cohort_manifest.json": canonical_json_bytes({
-            "artifact": "bioetl_target_cohort", "schema_version": 1,
-            "cohort_id": request.cohort_id,
-            "sources": [asdict(item) for item in request.materials if item.role == "cohort"],
-        }),
-        "conversion_ledgers.json": canonical_json_bytes({
-            item.source_path: materials[item.conversion_ledger_source or ""].source_sha256
-            for item in request.materials if item.role == "cohort"
-        }),
-    }
+    artifacts = _stage0_artifacts(request, materials, copies, bindings)
     for name, raw in artifacts.items():
         (output / name).write_bytes(raw)
     manifest = {
-        "artifact": "stage0_manifest", "schema_version": 2, "stage": "0",
-        "cohort_id": request.cohort_id, "approval_reference": request.approval_reference,
-        "environment": request.environment, "copies": copies,
-        "provenance_bindings": bindings, "biological_accuracy_accepted": False,
+        "artifact": "stage0_manifest",
+        "schema_version": 2,
+        "stage": "0",
+        "cohort_id": request.cohort_id,
+        "approval_reference": request.approval_reference,
+        "environment": request.environment,
+        "copies": copies,
+        "provenance_bindings": bindings,
+        "biological_accuracy_accepted": False,
         "artifact_sha256": {name: sha256_bytes(raw) for name, raw in artifacts.items()},
     }
     path = output / "manifest.json"
     path.write_bytes(canonical_json_bytes(manifest))
-    verify_stage0_v2(path, sha256_bytes(path.read_bytes()), tuple(
-        name for name, item in materials.items() if item.role == "cohort"
-    ))
+    verify_stage0_v2(
+        path,
+        sha256_bytes(path.read_bytes()),
+        tuple(name for name, item in materials.items() if item.role == "cohort"),
+    )
     return path
 
 
+def _read_material_payloads(
+    root: Path, materials: Mapping[str, Stage0MaterialV2]
+) -> dict[str, bytes]:
+    payloads = {name: _inside(root, name).read_bytes() for name in materials}
+    for name, item in materials.items():
+        if sha256_bytes(payloads[name]) != item.source_sha256:
+            raise ValueError("Stage-0 source digest mismatch before copy")
+    return payloads
+
+
+def _stage0_artifacts(
+    request: Stage0V2Request,
+    materials: Mapping[str, Stage0MaterialV2],
+    copies: list[dict[str, object]],
+    bindings: list[dict[str, object]],
+) -> dict[str, bytes]:
+    return {
+        "content_checks.json": canonical_json_bytes(copies),
+        "provenance_map.json": canonical_json_bytes(bindings),
+        "stage_report.json": canonical_json_bytes(
+            {
+                "stage_status": "recorded_without_biological_acceptance",
+                "biological_accuracy_accepted": False,
+            }
+        ),
+        "cohort_manifest.json": canonical_json_bytes(
+            {
+                "artifact": "bioetl_target_cohort",
+                "schema_version": 1,
+                "cohort_id": request.cohort_id,
+                "sources": [
+                    asdict(item) for item in request.materials if item.role == "cohort"
+                ],
+            }
+        ),
+        "conversion_ledgers.json": canonical_json_bytes(
+            {
+                item.source_path: materials[
+                    item.conversion_ledger_source or ""
+                ].source_sha256
+                for item in request.materials
+                if item.role == "cohort"
+            }
+        ),
+    }
+
+
 def _publish_copies(
-    output: Path, materials: Mapping[str, Stage0MaterialV2], payloads: Mapping[str, bytes]
+    output: Path,
+    materials: Mapping[str, Stage0MaterialV2],
+    payloads: Mapping[str, bytes],
 ) -> list[dict[str, object]]:
     (output / "copies").mkdir()
     copies: list[dict[str, object]] = []
     for index, (name, material) in enumerate(sorted(materials.items())):
         relative = f"copies/{index:04d}-{material.source_sha256}.bin"
         (output / relative).write_bytes(payloads[name])
-        copies.append({**asdict(material), "sha256": material.source_sha256,
-                       "copy_path": relative, "byte_count": len(payloads[name])})
+        copies.append(
+            {
+                **asdict(material),
+                "sha256": material.source_sha256,
+                "copy_path": relative,
+                "byte_count": len(payloads[name]),
+            }
+        )
     return copies
 
 
@@ -196,31 +256,60 @@ def verify_stage0_v2(
     if sha256_bytes(raw) != _require_sha256(expected_sha256):
         raise ValueError("expected pinned Stage-0 manifest")
     document = _object(raw)
-    if (document.get("artifact"), document.get("schema_version"), document.get("stage")) != (
-        "stage0_manifest", 2, "0"
-    ):
+    if (
+        document.get("artifact"),
+        document.get("schema_version"),
+        document.get("stage"),
+    ) != ("stage0_manifest", 2, "0"):
         raise ValueError("not a Stage-0 V2 manifest")
     entries, payloads = _verified_materials(path.parent, document)
-    cohorts = {name: raw for name, raw in payloads.items() if entries[name].role == "cohort"}
-    if not cohorts or set(selected_cohort_sources) != set(cohorts):
-        raise ValueError("volume requires the complete pinned Stage-0 cohort source set")
-    if len(selected_cohort_sources) != len(set(selected_cohort_sources)):
-        raise ValueError("duplicate Stage-0 cohort selection")
-    evidence = {name: raw for name, raw in payloads.items() if entries[name].role == "evidence"}
+    cohorts = _role_payloads("cohort", entries, payloads)
+    _require_cohort_selection(cohorts, selected_cohort_sources)
+    evidence = _role_payloads("evidence", entries, payloads)
     ledgers = _verify_conversion_ledgers(entries, payloads)
     artifacts = cast("dict[str, str]", document["artifact_sha256"])
-    return VerifiedStage0V2(document, cohorts, evidence,
+    return VerifiedStage0V2(
+        document,
+        cohorts,
+        evidence,
         tuple((name, sha256_bytes(raw)) for name, raw in sorted(cohorts.items())),
-        tuple((name, sha256_bytes(raw)) for name, raw in sorted(evidence.items())), ledgers,
-        artifacts["cohort_manifest.json"], artifacts["conversion_ledgers.json"])
+        tuple((name, sha256_bytes(raw)) for name, raw in sorted(evidence.items())),
+        ledgers,
+        artifacts["cohort_manifest.json"],
+        artifacts["conversion_ledgers.json"],
+    )
+
+
+def _role_payloads(
+    role: MaterialRole,
+    entries: Mapping[str, Stage0MaterialV2],
+    payloads: Mapping[str, bytes],
+) -> dict[str, bytes]:
+    return {name: raw for name, raw in payloads.items() if entries[name].role == role}
+
+
+def _require_cohort_selection(
+    cohorts: Mapping[str, bytes], selected: tuple[str, ...]
+) -> None:
+    if not cohorts or set(selected) != set(cohorts):
+        raise ValueError(
+            "volume requires the complete pinned Stage-0 cohort source set"
+        )
+    if len(selected) != len(set(selected)):
+        raise ValueError("duplicate Stage-0 cohort selection")
 
 
 def _verified_materials(
     root: Path, document: Mapping[str, object]
 ) -> tuple[dict[str, Stage0MaterialV2], dict[str, bytes]]:
     artifacts = cast("dict[str, str]", document["artifact_sha256"])
-    if not {"content_checks.json", "provenance_map.json", "stage_report.json",
-            "cohort_manifest.json", "conversion_ledgers.json"}.issubset(artifacts):
+    if not {
+        "content_checks.json",
+        "provenance_map.json",
+        "stage_report.json",
+        "cohort_manifest.json",
+        "conversion_ledgers.json",
+    }.issubset(artifacts):
         raise ValueError("missing Stage-0 V2 proof artifacts")
     for name, digest in artifacts.items():
         if sha256_bytes(_inside(root, name).read_bytes()) != _require_sha256(digest):
@@ -237,13 +326,52 @@ def _verified_materials(
             raise ValueError("Stage-0 source and copy digest differ")
         entries[material.source_path], payloads[material.source_path] = material, raw
     _verify_provenance(document, entries)
+    _verify_role_artifacts(root, document, entries)
     return entries, payloads
+
+
+def _verify_role_artifacts(
+    root: Path, document: Mapping[str, object], entries: Mapping[str, Stage0MaterialV2]
+) -> None:
+    for key in ("cohort_id", "approval_reference", "environment"):
+        _required_text(document.get(key))
+    cohort = _object((root / "cohort_manifest.json").read_bytes())
+    sources = cast("list[dict[str, object]]", cohort.get("sources"))
+    expected = [asdict(item) for item in entries.values() if item.role == "cohort"]
+    if cohort.get("cohort_id") != document["cohort_id"] or sorted(
+        sources, key=lambda row: str(row["source_path"])
+    ) != sorted(expected, key=lambda row: str(row["source_path"])):
+        raise ValueError("Stage-0 cohort role manifest differs from verified copies")
+    _verify_ledger_index(root, entries)
+    if json.loads((root / "content_checks.json").read_bytes()) != document["copies"]:
+        raise ValueError("Stage-0 content checks differ from verified copies")
+    if json.loads((root / "provenance_map.json").read_bytes()) != document.get(
+        "provenance_bindings", []
+    ):
+        raise ValueError("Stage-0 provenance artifact differs from verified bindings")
+
+
+def _verify_ledger_index(root: Path, entries: Mapping[str, Stage0MaterialV2]) -> None:
+    expected = {
+        name: entries[item.conversion_ledger_source or ""].source_sha256
+        for name, item in entries.items()
+        if item.role == "cohort"
+    }
+    if _object((root / "conversion_ledgers.json").read_bytes()) != expected:
+        raise ValueError(
+            "Stage-0 conversion ledger index differs from verified evidence"
+        )
+    report = _object((root / "stage_report.json").read_bytes())
+    if report.get("biological_accuracy_accepted") is not False:
+        raise ValueError("technical Stage-0 cannot approve biological accuracy")
 
 
 def _material_from_mapping(item: Mapping[str, object]) -> Stage0MaterialV2:
     return Stage0MaterialV2(
-        _required_text(item["source_path"]), _require_sha256(item["source_sha256"]),
-        cast("MaterialRole", item["role"]), _required_text(item["format_version"]),
+        _required_text(item["source_path"]),
+        _require_sha256(item["source_sha256"]),
+        cast("MaterialRole", item["role"]),
+        _required_text(item["format_version"]),
         cast("str | None", item["target_kind"]),
         cast("str | None", item["conversion_ledger_source"]),
     )
@@ -252,15 +380,21 @@ def _material_from_mapping(item: Mapping[str, object]) -> Stage0MaterialV2:
 def _verify_provenance(
     document: Mapping[str, object], entries: Mapping[str, Stage0MaterialV2]
 ) -> None:
-    for claim in cast("list[dict[str, object]]", document.get("provenance_bindings", [])):
+    for claim in cast(
+        "list[dict[str, object]]", document.get("provenance_bindings", [])
+    ):
         bound = ProvenanceClaim(
-            _required_text(claim["field_id"]), _required_text(claim["source_ref"]),
-            _require_sha256(claim["source_sha256"]), _required_text(claim["rule_or_process"]),
+            _required_text(claim["field_id"]),
+            _required_text(claim["source_ref"]),
+            _require_sha256(claim["source_sha256"]),
+            _required_text(claim["rule_or_process"]),
             _required_text(claim["confirmation_owner"]),
         )
         result = _provenance_bindings((bound,), entries)
         if result[0] != claim:
-            raise ValueError("Stage-0 provenance binding differs from copied source role")
+            raise ValueError(
+                "Stage-0 provenance binding differs from copied source role"
+            )
 
 
 def _verify_conversion_ledgers(
@@ -270,25 +404,40 @@ def _verify_conversion_ledgers(
     for name, entry in entries.items():
         if entry.role != "cohort":
             continue
-        ledger_name = entry.conversion_ledger_source or ""
-        if ledger_name not in entries or entries[ledger_name].role != "evidence":
-            raise ValueError("cohort conversion ledger must be copied evidence")
-        ledger = _object(payloads[ledger_name])
-        if (ledger.get("artifact"), ledger.get("schema_version")) != ("bioetl_target_cohort_conversion", 1):
-            raise ValueError("unsupported cohort conversion ledger")
-        canonical = cast("dict[str, object]", ledger["canonical"])
-        if canonical.get("format_version") != entry.format_version:
-            raise ValueError("conversion ledger canonical format differs from cohort")
-        _checked(payloads[name], canonical["sha256"], canonical["byte_count"])
-        raw = cast("dict[str, object]", ledger["raw_source"])
-        matching = [key for key, material in entries.items()
-                    if material.role == "evidence" and material.source_sha256 == raw["sha256"]]
-        if not matching:
-            raise ValueError("conversion ledger has no copied raw-source evidence")
-        _checked(payloads[matching[0]], raw["sha256"], raw["byte_count"])
-        _verify_conversion_rows(payloads[name], ledger)
-        result.append((name, sha256_bytes(payloads[ledger_name])))
+        result.append((name, _verify_one_conversion(name, entry, entries, payloads)))
     return tuple(sorted(result))
+
+
+def _verify_one_conversion(
+    name: str,
+    entry: Stage0MaterialV2,
+    entries: Mapping[str, Stage0MaterialV2],
+    payloads: Mapping[str, bytes],
+) -> str:
+    ledger_name = entry.conversion_ledger_source or ""
+    if ledger_name not in entries or entries[ledger_name].role != "evidence":
+        raise ValueError("cohort conversion ledger must be copied evidence")
+    ledger = _object(payloads[ledger_name])
+    if (ledger.get("artifact"), ledger.get("schema_version")) != (
+        "bioetl_target_cohort_conversion",
+        1,
+    ):
+        raise ValueError("unsupported cohort conversion ledger")
+    canonical = cast("dict[str, object]", ledger["canonical"])
+    if canonical.get("format_version") != entry.format_version:
+        raise ValueError("conversion ledger canonical format differs from cohort")
+    _checked(payloads[name], canonical["sha256"], canonical["byte_count"])
+    raw = cast("dict[str, object]", ledger["raw_source"])
+    matching = [
+        key
+        for key, material in entries.items()
+        if material.role == "evidence" and material.source_sha256 == raw["sha256"]
+    ]
+    if not matching:
+        raise ValueError("conversion ledger has no copied raw-source evidence")
+    _checked(payloads[matching[0]], raw["sha256"], raw["byte_count"])
+    _verify_conversion_rows(payloads[name], ledger)
+    return sha256_bytes(payloads[ledger_name])
 
 
 def _verify_conversion_rows(canonical: bytes, ledger: Mapping[str, object]) -> None:
@@ -301,13 +450,23 @@ def _verify_conversion_rows(canonical: bytes, ledger: Mapping[str, object]) -> N
     records = cast("list[dict[str, object]]", ledger["records"])
     metadata = cast("dict[str, object]", ledger["canonical"])
     if not rows or len(rows) != len(records) or metadata.get("row_count") != len(rows):
-        raise ValueError("conversion row count differs from the frozen canonical cohort")
+        raise ValueError(
+            "conversion row count differs from the frozen canonical cohort"
+        )
     for index, (row, record) in enumerate(zip(rows, records, strict=True), 1):
-        expected = {"source_record": index, "canonical_row_id": row["input_row_id"],
-                    "canonical_row_sha256": sha256_bytes(canonical_json_bytes(row))}
+        expected = {
+            "source_record": index,
+            "canonical_row_id": row["input_row_id"],
+            "canonical_row_sha256": sha256_bytes(canonical_json_bytes(row)),
+        }
         if record != expected:
             raise ValueError("conversion ledger row binding mismatch")
 
 
-__all__ = ["Stage0MaterialV2", "Stage0V2Request", "VerifiedStage0V2",
-           "publish_stage0_v2", "verify_stage0_v2"]
+__all__ = [
+    "Stage0MaterialV2",
+    "Stage0V2Request",
+    "VerifiedStage0V2",
+    "publish_stage0_v2",
+    "verify_stage0_v2",
+]

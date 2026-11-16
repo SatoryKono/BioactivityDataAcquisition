@@ -42,7 +42,6 @@ from bioetl.infrastructure.config.contract_identity_resolution import (
     RunManifestContractIdentity,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-from bioetl.domain.workflow import WorkflowConfig
 
 if TYPE_CHECKING:
     from bioetl.domain.workflow import WorkflowConfig

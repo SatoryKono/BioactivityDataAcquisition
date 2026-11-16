@@ -25,10 +25,12 @@ no dedicated workflow or pipeline CLI flag.
 ## Impact
 
 The production configuration remains `mode: "off"`. The historical dictionary
-available during implementation is an unqualified legacy source with unresolved
-classification disagreements. An approved snapshot and independently reviewed
-reference cases have not been supplied. Historical reports and synthetic test
-fixtures do not qualify those inputs or establish biological accuracy.
+is an unqualified legacy source with unresolved classification disagreements.
+Retrieving official export bytes and passing software tests does not approve a
+snapshot's coverage or reference cases. Require the actual acquisition,
+independent scope review, and executed acceptance artifacts below before
+promotion. Historical reports and synthetic fixtures establish no biological
+accuracy or reviewer approval.
 
 The configuration applies to every writer of the same Silver/Gold target
 tables: direct `chembl_target` runs and workflows `chembl_baseline`, `chembl_core`,
@@ -40,7 +42,7 @@ configuration and contract during a deployment.
 | --- | --- | --- |
 | `"off"` | Unchanged V30, contract 3.0.0 | None |
 | `shadow` | Unchanged V30, contract 3.0.0; separate classification evidence | Pinned profile envelope and snapshot |
-| `enrich` | V31, contract 3.1.0; nine additional nullable business columns enter the explicit hash scope | Complete, publishable snapshot and executed reference acceptance; compatible physical tables |
+| `enrich` | V31, contract 3.1.0; nine additional nullable business columns enter the explicit hash scope | Admitted, publishable scoped snapshot and executed V2 reference acceptance; compatible physical tables |
 
 The registry's current identity remains 3.0.0. Publishing the
 [V31 contract](../../04-reference/contracts/gold/chembl_target_v3.1.json) does
@@ -55,7 +57,7 @@ not promote production or enable generic dual writing.
   files unchanged throughout this procedure.
 - Keep the existing target eligibility filters. This integration does not
   expand the pipeline to protein complexes or change baseline cohort selection.
-- For promotion or rollback, stop and quiesce all writers listed above and
+- For preparation, promotion, or rollback, stop and quiesce all writers listed above and
   hold the maintenance window until both tables and their configuration agree.
   The migration helper additionally refuses recognized managed writers; this
   does not replace the operator's check for other processes.
@@ -102,7 +104,7 @@ must stay inside that directory, and bind exact bytes:
 ```json
 {
   "artifact": "bioetl_iuphar_profile",
-  "schema_version": 1,
+  "schema_version": 2,
   "snapshot": {"path": "snapshot.json", "sha256": "SNAPSHOT_SHA256"},
   "acceptance": null,
   "normalization_version": "bioetl-iuphar-input-v1",
@@ -111,21 +113,54 @@ must stay inside that directory, and bind exact bytes:
 }
 ```
 
-The snapshot manifest uses artifact `bioetl_iuphar_snapshot`, schema version 1,
-and format `gtopdb_target_payload_v1`. It binds frozen target payload bytes and
-records the release, retrieval time, approved species/type scope, expected
-count, pagination completion, coverage approval, and provider-version evidence.
-The loader checks those facts against the payload. A caller-supplied
-`complete: true` is not admission evidence.
+New snapshots use artifact `bioetl_iuphar_snapshot`, schema version 2, and
+format `gtopdb_target_species_payload_v2`. The official wide CSV can contain
+multiple records for one public target ID and Human/Rat/Mouse annotation
+columns. The builder retains the public ID and derives separately checked
+species variants; it does not choose the first record or collapse taxa.
+This export provides `annotation_capability: family_only`. The builder does
+not manufacture a direct target type, and an available family can yield a
+coarse direct class with annotation status `partial`.
 
-`shadow` can inspect an incomplete dependency. Its missing coverage must remain
-`source_unavailable`, rather than becoming a claim that the target was not
-found. `enrich` requires both `complete` and `publishable`; a complete snapshot
-with unverified provider versions is insufficient for publication.
+Supply a pinned `bioetl_iuphar_acquisition` receipt containing the release,
+timezone-bearing retrieval time, source format, and every raw artifact's
+relative path, HTTPS source URL, SHA-256, and byte count. Supply a separate
+`bioetl_iuphar_coverage` receipt binding that acquisition, explicit included
+IDs, species/family scope, exclusions with source-record rationales, and raw
+row/public-target/species-variant counts. Its `bioetl_iuphar_scope_review`
+artifact must independently bind the acquisition and exact scope digest.
+The source-derived projection and audit are recomputed during loading;
+manifest flags alone cannot establish admission.
+
+```powershell
+.\.venv-win\Scripts\python.exe -m scripts.engineering.qa iuphar-snapshot-build `
+  --acquisition 'PATH_TO_ACQUISITION_JSON' `
+  --acquisition-sha256 'ACQUISITION_SHA256' `
+  --coverage 'PATH_TO_REVIEWED_COVERAGE_JSON' `
+  --coverage-sha256 'COVERAGE_SHA256' `
+  --output-dir 'NEW_SHADOW_SNAPSHOT_BUNDLE_DIRECTORY'
+```
+
+The output includes the frozen sources/review, targets, projection audit,
+snapshot, and a shadow profile with `acceptance: null`. Keep all files.
+V1 snapshot/profile validation remains available for historical compatibility;
+new enrich admission uses V2 source and acceptance contracts.
+
+`admission_complete` means the declared, independently reviewed scope is
+complete for admission. `complete` means global identity/absence coverage.
+A family-only bounded snapshot can have `admission_complete: true` and
+`complete: false`: unrepresented targets must retain `source_unavailable`,
+not become negative matches. `enrich` requires admission completeness,
+publication evidence, and the matching V2 acceptance receipt. Neither a
+caller-supplied boolean nor an unverified provider version qualifies it.
 
 Workflow dependency preflight pins and checks the target configuration and
 profile before the first workflow step, including `chembl_baseline` assay
-ingestion. Target preflight rechecks the pinned bytes and both actual writer
+ingestion. It considers pending pipeline writers and declared target-mutating
+transform steps at their actual destinations, including transform-only and
+resumed execution. Already completed steps and dry runs do not count as
+pending writes; dependency verification remains distinct from new-write
+admission. Target preflight rechecks the pinned bytes and both actual writer
 destinations before a backfill can clear target outputs. A V30 destination
 blocks `enrich`; a V31 destination blocks `off`/`shadow`; partial or unrecognized
 table schemas require recovery. Empty candidate destinations are allowed.
@@ -163,23 +198,104 @@ Check evidence IDs against their referenced records and frozen payload hashes.
 Keep run/batch clocks and evidence paths outside business content hashing.
 V31 hashes include the nine columns above; V30 hash scope remains unchanged.
 
+### Freeze a canonical cohort and its evidence
+
+Stage0 V2 assigns every copied material an explicit `cohort` or `evidence`
+role. Executable source selection must equal the complete cohort set;
+reference documents, raw inputs, and ledgers stay evidence. Every copy is
+hash-checked, including evidence that is not an execution input. Provenance
+claims may bind either role. The historical V1 publisher and reader retain
+their original contract.
+
+Export only a frozen normalized ChEMBL target Silver CSV or Arrow IPC stream
+with schema tag `chembl.target.normalized_silver.v1`. Required fields are
+`target_id`, `target_type`, `taxonomy_id`, `pref_name`, `organism`, and
+`component_accessions`. Each row needs a unique `CHEMBL` target identity,
+`SINGLE PROTEIN` type, and a confirmed canonical positive ASCII TaxID in
+`taxonomy_id`. The exporter rejects missing TaxIDs, species names in that
+field, guessed eligibility, importer-reserved fields, and pre-existing
+classification output fields.
+
+```powershell
+.\.venv-win\Scripts\python.exe -m scripts.ops iuphar-target-cohort export `
+  --source 'PATH_TO_FROZEN_NORMALIZED_TARGET_CSV' `
+  --source-sha256 'RAW_SOURCE_SHA256' `
+  --source-format chembl_target_silver_csv_v1 `
+  --source-schema-version chembl.target.normalized_silver.v1 `
+  --mapping-approval-reference 'ACTUAL_TECHNICAL_MAPPING_REFERENCE' `
+  --environment 'ACTUAL_ENVIRONMENT' `
+  --output-dir 'NEW_CONVERSION_DIRECTORY'
+```
+
+Use `chembl_target_silver_arrow_ipc_v1` for a frozen Arrow IPC stream. A
+separately confirmed provider-ID column can be declared with
+`--direct-iuphar-id-column`; a ChEMBL target ID must never be passed as that
+column. The shared adapter projection produces `bioetl_target_kernel_csv_v1`
+with stable row IDs `chembl.target:<target_id>` and canonical TaxID in the
+kernel's `organism` field. The output preserves `raw-source.bin`, `cohort.csv`,
+and `conversion-ledger.json` with separate raw/canonical hashes, byte counts,
+row identities, and per-row hashes. Duplicate target IDs stop conversion and
+leave a rejected diagnostic ledger; the exporter does not select one duplicate.
+The technical mapping reference grants no biological or eligibility approval.
+
+Create a Stage0 request JSON with `cohort_id`, `approval_reference`,
+`environment`, and `materials`. Each material declares a workspace-relative
+`source_path`, `source_sha256`, `role`, and `format_version`. Each cohort
+material additionally needs `target_kind: "protein"` and
+`conversion_ledger_source` naming a separately copied evidence material.
+Copy the ledger and its exact raw source as evidence; additional review
+documents may also be evidence. Both roles may appear in `provenance_claims`
+using the existing claim contract.
+
+```powershell
+.\.venv-win\Scripts\python.exe -m scripts.ops iuphar-target-cohort stage0 `
+  --request 'PATH_TO_REVIEWED_STAGE0_V2_REQUEST_JSON' `
+  --repo-root 'D:/github/BioactivityDataAcquisition' `
+  --output-dir 'NEW_STAGE0_OCCURRENCE_DIRECTORY'
+```
+
+Retain `manifest.json`, `cohort_manifest.json`, `conversion_ledgers.json`,
+content checks, provenance map, stage report, and every copy. Stage0 verifies
+ledger/raw/canonical byte bindings and row hashes. Its report explicitly
+records no biological acceptance. Publish a separate occurrence when any
+input changes; do not replace an earlier occurrence.
+
 ### Execute independent reference acceptance
 
-1. Obtain a complete, publishable snapshot and an admitted, frozen Stage-0
-   cohort. Freeze a versioned `bioetl_iuphar_reference_cases` document with
+1. Obtain a publishable snapshot with admitted reviewed scope and an admitted,
+   frozen Stage0 V2 cohort. Freeze a schema-version-2
+   `bioetl_iuphar_reference_cases` document with
    reviewer/approval references, environment, full source selection, expected
    row count, snapshot digest, and independently reviewed per-case outcomes.
    Each case needs source references with verified byte hashes. Do not derive
    expected labels from the classifier output under test.
-   Every selected source must declare the `bioetl_target_kernel_csv_v1`
-   import profile with `target_kind: protein`; its `organism` field contains
-   a canonical positive ASCII TaxID or is empty. Species names are rejected
-   at this boundary. Retain raw source columns and the approved conversion
-   ledger separately; never guess a TaxID or protein eligibility.
-2. Run the actual `chembl_target` pipeline in `shadow` using that same snapshot.
+   Pin the cohort manifest, conversion-ledger index, normalization/rules/schema
+   versions, and the complete selected cohort sources. Every selected source
+   declares `bioetl_target_kernel_csv_v1` and `target_kind: protein`.
+2. Declare every mandatory reference category before execution:
+   `direct_type`, `direct_family`, `partial_direct`, `ambiguous`, `unmatched`,
+   `identity_conflict`, `taxonomy_boundary`, `local_vs_direct`, and
+   `non_applicable`. Each category has disposition `real_reference`,
+   `engineering_only`, or `out_of_scope`, case IDs, a rationale, and independent
+   hash-pinned source references. Out-of-scope categories have no case IDs.
+   A family-only snapshot cannot qualify direct-type cases by inventing a
+   target type; explicitly record that limitation.
+3. Supply `scope_declaration` with `kind: bounded_reviewed_reference`, a scope
+   ID, actual approval reference, limitations, reviewed and unreviewed row IDs.
+   These disjoint sets must account for the full cohort. Real cases require
+   expected `match_status`, `matched_target_id`, `iuphar_class`,
+   `iuphar_annotation_status`, and `decision_status`, including explicit nulls
+   where appropriate. `local_vs_direct` additionally requires `local_class`,
+   `effective_class`, and `effective_source`; `non_applicable` additionally
+   requires `input_validation_status`. The producer verifies that declared
+   scenarios actually occur. Engineering-only cases do not inflate real
+   reviewed coverage. Keep expected labels and proof bytes frozen before the
+   run; do not generate them from its results.
+4. Run the actual `chembl_target` pipeline in isolated `shadow` destinations
+   using that same snapshot.
    Preserve its completed evidence manifest and successful run report. A
    standalone kernel invocation does not prove pipeline integration.
-3. Run the following command after replacing every uppercase placeholder with
+5. Run the following command after replacing every uppercase placeholder with
    an approved value. Choose a new output directory; acceptance does not
    overwrite an earlier occurrence.
 
@@ -200,8 +316,20 @@ V31 hashes include the nine columns above; V30 hash scope remains unchanged.
 The command checks the full admitted cohort, reviewed cases, evidence
 integrity, frozen-provenance permutation determinism, execution bounds, and the
 matching successful pipeline occurrence. Exit 0 and receipt status `PASS`
-qualify only that supplied scope; `biological_accuracy_accepted` remains false.
+qualify only that supplied scope. Receipt V2 records the category matrix,
+reviewed/unreviewed IDs, pinned versions, and
+`scientific_status: bounded_reference_cases_only`;
+`biological_accuracy_accepted` remains false.
 `BLOCKED_INPUT` or `FAIL` is not admission.
+
+Receipt `artifact_references` binds actual local file URIs and exact hashes
+for the Stage0 manifest, cohort manifest, ledger index and copied evidence,
+expected labels, matching pipeline proof/report, and all six kernel outputs.
+The pipeline evidence manifest also binds the completed row-store artifacts.
+Keep the dependency closure, not just the receipt JSON. The current pipeline
+report producer does not expose effective-config or run-manifest immutable
+URI/hash references; preserve those artifacts separately using their recorded
+run identities, rather than inferring a path from `manifest_id`.
 
 For an enrich profile, replace `acceptance: null` with the relative path and
 SHA-256 of the accepted receipt. This creates new profile bytes and a new
@@ -211,17 +339,29 @@ digest before building enriched candidates.
 
 ### Prepare and promote complete physical tables
 
-Build V31 Silver and Gold candidates at separate approved destinations. Use
-the complete canonical target cohort and the admitted enrich profile. A
-`--limit 1000` smoke is not a migration candidate unless it independently
-covers the entire canonical cohort.
+Build V31 Silver and Gold candidates at separate approved destinations from
+the persisted complete old tables. The candidate builder does not refetch
+provider records or run the ordinary limited pipeline. It preserves the
+complete old target cohort independently in each layer, including Silver
+targets removed from Gold by the final baseline reconciliation. A
+`--limit 1000` smoke supplies no full-table migration proof.
+
+Keep execution routing separate from deployment routing. An isolated shadow
+execution uses its own configuration and empty destinations. The full
+deployment entity YAML retains canonical sinks, filters, and business rules;
+only its `pipeline.target_classification` section may change to the newly
+pinned enrich profile. The migration loader resolves that YAML with the
+actual configs root and settings and requires its destinations to equal the
+canonical table paths. Candidate destinations come from the explicit plan.
+Do not promote a YAML whose sinks point at temporary candidates.
 
 Prepare a JSON migration plan outside the repository root. This example uses
 placeholders deliberately; resolve the actual writer paths and replace them
 before execution. Every path must be inside the existing approved workspace,
 with no symlink/junction, nesting, overlap, or `.env` resource. The backup path
-must not exist yet. `candidate_config` is the complete candidate entity YAML;
-`config` is the canonical entity YAML.
+must not exist yet. Despite its name, `candidate_config` is the complete
+**deployment** entity YAML to be promoted; `config` is the canonical entity
+YAML. Neither file is the isolated shadow/build routing configuration.
 
 ```json
 {
@@ -245,14 +385,42 @@ target entity configuration into `legacy_include_fields`. Keep it frozen
 through preparation, promotion, and recovery.
 
 ```powershell
+.\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration freeze-inputs `
+  --plan 'PATH_TO_APPROVED_PLAN_JSON' `
+  --output 'NEW_FROZEN_INPUT_MANIFEST_JSON'
+.\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration build-candidates `
+  --plan 'PATH_TO_APPROVED_PLAN_JSON' `
+  --input-manifest 'PATH_TO_FROZEN_INPUT_MANIFEST_JSON' `
+  --input-manifest-sha256 'FROZEN_INPUT_MANIFEST_SHA256' `
+  --output 'NEW_CANDIDATE_EVIDENCE_DIRECTORY' `
+  --run-id 'NEW_CANDIDATE_BUILD_RUN_ID' `
+  --run-started-at 'FROZEN_ISO8601_TIMESTAMP'
+```
+
+`freeze-inputs` records table IDs, versions, physical file hashes, complete
+Silver and Gold target IDs, assay facts, and original configuration digest.
+`build-candidates` requires those exact inputs still to exist. It classifies
+every old Silver row with the admitted profile, computes V31 business hashes,
+and uses the matching Silver projection for each old Gold target. It validates
+the full candidates and publishes a completed build manifest and per-row
+classification evidence. Preserve the input manifest and build evidence.
+
+Rehearse promotion and recovery against separate complete copies. Before the
+real `prepare`, stop and quiesce every canonical writer and hold the maintenance
+window through backup, promotion, verification, or rollback. A stable freeze
+does not itself prevent a later writer. Do not start preparation while a
+pipeline or reconciliation transform can still mutate these resources.
+
+```powershell
 .\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration prepare --plan 'PATH_TO_APPROVED_PLAN_JSON'
 .\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration promote --plan 'PATH_TO_APPROVED_PLAN_JSON'
 ```
 
 `prepare` validates admission, strict V31 schemas, unique target IDs, unchanged
 legacy business values and identities, V30/V31 hash recomputation, the complete original target
-cohort separately in each layer, and Gold closure with the non-null final
-baseline assay target cohort. Silver can retain targets removed from Gold
+cohort separately in each layer, and inclusion of the non-null final baseline
+assay target IDs in Gold. Gold may contain additional preserved target IDs;
+Silver can retain targets removed from Gold
 by the workflow's final reconciliation. Gold's
 `description` alias is mapped back to Silver's `target_description` for the
 legacy hash check. Every candidate Silver row is classified again against the
@@ -273,7 +441,8 @@ error. Keep the maintenance window open through verification.
 - For shadow, verify unchanged V30 rows/hash scope plus complete separate
   evidence. For enrich, verify V31 on both tables, coherent profile values,
   completed evidence, full cohort preservation, and baseline FK closure.
-- Inspect the receipt's five executed checks, source digests, output hashes,
+- Inspect all executed receipt checks, category dispositions, bounded scope,
+  source digests, output hashes,
   and matching successful integration report. Retain unresolved disagreements
   for owner review; a green software test is not reference-case approval.
 - For replay, retain the exact profile, snapshot, payload, receipt, effective
@@ -317,10 +486,16 @@ acceptance evidence are available and reviewed.
 ## Source owners
 
 - [Profile and snapshot admission](../../../src/bioetl/infrastructure/adapters/iuphar/snapshot_loader.py)
+- [Official snapshot builder](../../../src/bioetl/infrastructure/adapters/iuphar/snapshot_builder.py)
+- [Canonical cohort exporter](../../../src/bioetl/infrastructure/adapters/iuphar/cohort_builder.py)
+- [Stage0 V2 roles and immutable copies](../../../src/iuphar_target_class/stage0/v2.py)
+- [Bounded reference coverage contract](../../../src/iuphar_target_class/reference_coverage.py)
 - [Workflow/runtime dependency binding](../../../src/bioetl/composition/target_classification.py)
 - [Schema and hash profile selection](../../../src/bioetl/infrastructure/config/target_classification_profile.py)
 - [Evidence publication](../../../src/bioetl/infrastructure/adapters/iuphar/evidence_store.py)
 - [Acceptance implementation](../../../src/iuphar_target_class/integration_acceptance.py)
 - [Acceptance CLI](../../../scripts/engineering/qa/iuphar_target_acceptance.py)
 - [Physical migration and journal](../../../src/bioetl/infrastructure/storage/target_classification_migration.py)
+- [Full persisted-cohort candidate builder](../../../src/bioetl/infrastructure/storage/target_candidate_builder.py)
+- [Deployment configuration binding](../../../src/bioetl/composition/target_migration.py)
 - [Physical migration CLI](../../../scripts/ops/target_classification_migration.py)

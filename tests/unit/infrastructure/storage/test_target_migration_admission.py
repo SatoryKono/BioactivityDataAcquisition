@@ -178,6 +178,39 @@ def test_silver_superset_preserves_each_complete_layer_and_final_gold_closure(
     assert report["fk_closure"] == "PASS"
 
 
+@pytest.mark.parametrize(
+    "organism",
+    [
+        "Human herpesvirus 1 (strain SC16)",
+        "Human cytomegalovirus (strain AD169)",
+    ],
+)
+def test_hash_verification_preserves_persisted_organism_text(organism):
+    config = yaml.safe_load((ROOT / "configs/entities/chembl/target.yaml").read_bytes())
+    fields = tuple(config["hash_policy"]["hash_policy"]["include_fields"])
+    row = {**_old_row("CHEMBL1", fields), "organism": organism}
+    row["content_hash"] = _processor(fields, enrich=False).compute_content_hash(row)
+    assert validation.compare_target_rows([row], [dict(row)], fields)["rows"] == 1
+
+
+def test_gold_targets_unused_by_assay_are_preserved(admitted_candidate):
+    paths, fields, tables = admitted_candidate
+    tables[paths["gold"]].append(_gold(tables[paths["silver"]][1]))
+    tables[paths["candidate_gold"]].append(_gold(tables[paths["candidate_silver"]][1]))
+    report = validation.validate_target_candidate(paths, fields)
+    assert report["gold"]["rows"] == 2
+    assert report["fk_closure"] == "PASS"
+
+
+def test_canonical_description_wins_over_legacy_alias():
+    assert (
+        validation._hash_input(
+            {"target_description": "canonical", "description": "legacy"}
+        )["target_description"]
+        == "canonical"
+    )
+
+
 def test_candidate_entity_identity_cannot_change(admitted_candidate):
     paths, fields, tables = admitted_candidate
     tables[paths["candidate_silver"]][0]["entity_id"] = "forged:identity"

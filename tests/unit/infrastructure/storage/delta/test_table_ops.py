@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -113,6 +114,9 @@ def test_read_delta_records_uses_active_parquet_files_when_scanner_disabled(
             observed["file_uris"] = True
             return ["file:///C:/tmp/part-0.parquet"]
 
+        def metadata(self):
+            return SimpleNamespace(partition_columns=[])
+
         def to_pyarrow_dataset(self) -> _FakeDataset:
             raise AssertionError("Windows path must not import dataset scanner")
 
@@ -143,6 +147,32 @@ def test_read_delta_records_uses_active_parquet_files_when_scanner_disabled(
         "columns": ["entity_id"],
         "use_threads": False,
     }
+
+
+@pytest.mark.parametrize(
+    "columns", [None, [], ["target_type"], ["entity_id", "taxonomy_id"]]
+)
+def test_windows_read_restores_typed_partition_values(tmp_path, monkeypatch, columns):
+    import pyarrow as pa
+    from deltalake import DeltaTable, write_deltalake
+
+    path = tmp_path / "partitioned"
+    rows = [
+        {"entity_id": "a", "target_type": "SINGLE PROTEIN", "taxonomy_id": 9606},
+        {"entity_id": "b", "target_type": None, "taxonomy_id": None},
+    ]
+    write_deltalake(
+        str(path),
+        pa.Table.from_pylist(rows),
+        partition_by=["target_type", "taxonomy_id"],
+    )
+    monkeypatch.setattr(table_ops, "_can_use_pyarrow_dataset_scanner", lambda: False)
+    actual = table_ops.read_delta_records(DeltaTable(str(path)), columns=columns)
+    expected = [
+        {k: v for k, v in row.items() if columns is None or k in columns}
+        for row in rows
+    ]
+    assert sorted(actual, key=str) == sorted(expected, key=str)
 
 
 def test_resolve_parquet_file_uri_strips_windows_file_uri_prefix() -> None:
