@@ -40,12 +40,14 @@
     "decision_date": "2026-11-15",
     "duration_minutes": 48,
     "equivalence": "not_passed",
+    "evaluated_pairs": [],
     "independent_restore": false,
     "independent_review": false,
     "n2_blocked": true,
     "reason_codes": [
       "no_comparable_pair",
-      "no_suitable_successful_scheduled_nightly"
+      "no_suitable_successful_scheduled_nightly",
+      "success_retention_below_30"
     ],
     "retention_reduced": false,
     "sample_size_pairs": 0,
@@ -248,7 +250,8 @@
   "parent_issue": 12349,
   "reason_codes": [
     "no_comparable_pair",
-    "no_suitable_successful_scheduled_nightly"
+    "no_suitable_successful_scheduled_nightly",
+    "success_retention_below_30"
   ],
   "record_kind": "reduced_pilot_48min",
   "replaces_parent_acceptance": false,
@@ -277,7 +280,7 @@
     "successful_scheduled_nightly_total_count": 0
   },
   "schema_version": 1,
-  "sha256": "e6b05d5a3d0282fda7beb0ed0ad8a3f7266aef9bdc11c19b0f67b4e1013eaa7d",
+  "sha256": "93218e7e3a0cf5b63a22f6e7dd66c39bca1415d168a4349faad6a2c8a4190fa0",
   "shallow_checkout": false,
   "status": "not_opened",
   "synthetic_events": false,

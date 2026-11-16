@@ -6,6 +6,7 @@ import inspect
 import json
 import shutil
 from datetime import UTC, datetime, timedelta
+from itertools import permutations
 from pathlib import Path
 
 import pytest
@@ -844,10 +845,10 @@ def _pilot_options(**overrides: object) -> dict[str, object]:
         "shallow_checkout": False,
         "independent_review": False,
         "independent_restore": False,
-        "failure_total_count": None,
-        "cancelled_total_count": None,
-        "missing_total_count": None,
-        "unknown_total_count": None,
+        "observation_totals": {
+            name: overrides.pop(f"{name}_total_count", None)
+            for name in ("failure", "cancelled", "missing", "unknown")
+        },
     }
     options.update(overrides)
     return options
@@ -867,6 +868,7 @@ def _pilot_success(run_id: int, *, arm: str, created_at: str, **extra: object) -
         "job_conclusions": _results(),
         "month": "11",
         "run_id": run_id,
+        "run_attempt": 1,
     }
     payload.update(extra)
     return payload
@@ -1122,6 +1124,93 @@ def test_a_run_is_not_its_own_oracle() -> None:
     assert result["comparable_pair_count"] == 0
 
 
+@pytest.mark.parametrize("failure_kind", ["failed_run", "weekly_job_difference"])
+def test_every_pair_is_evaluated_independently_of_input_order(
+    failure_kind: str,
+) -> None:
+    baseline = _pilot_success(
+        101, arm="baseline", created_at="2026-11-20T03:00:00Z", dow="Fri"
+    )
+    candidate = _pilot_success(
+        102, arm="candidate", created_at="2026-11-20T03:48:00Z", dow="Fri"
+    )
+    later = _pilot_success(
+        103, arm="candidate", created_at="2026-11-20T03:47:00Z", dow="Fri"
+    )
+    reason = "pair_not_success"
+    if failure_kind == "failed_run":
+        later["conclusion"] = "failure"
+    else:
+        later["job_conclusions"] = _results(codeql="success")
+        reason = "pair_not_equivalent"
+    results = [
+        assess_reduced_pilot_window(
+            list(items), **_pilot_options(scheduled_success_total_count=2)
+        )
+        for items in permutations([baseline, candidate, later])
+    ]
+    assert all(result == results[0] for result in results)
+    assert results[0]["status"] == "unacceptable"
+    assert results[0]["equivalence"] == "not_passed"
+    assert results[0]["comparable_pair_count"] == 2
+    assert results[0]["sample_size_pairs"] == 0
+    assert reason in results[0]["reason_codes"]
+
+
+def test_pair_count_covers_all_unique_pairs() -> None:
+    observations = [
+        _pilot_success(run_id, arm=arm, created_at=stamp, dow="Fri")
+        for run_id, arm, stamp in (
+            (110, "baseline", "2026-11-20T03:00:00Z"),
+            (111, "baseline", "2026-11-20T03:01:00Z"),
+            (112, "candidate", "2026-11-20T03:47:00Z"),
+            (113, "candidate", "2026-11-20T03:48:00Z"),
+        )
+    ]
+    result = assess_reduced_pilot_window(
+        [*observations, observations[0]],
+        **_pilot_options(scheduled_success_total_count=4),
+    )
+    assert result["status"] == "complete"
+    assert result["comparable_pair_count"] == 4
+    assert result["sample_size_pairs"] == 4
+
+
+def test_manual_candidate_does_not_block_a_scheduled_window() -> None:
+    observations = [
+        _pilot_success(
+            120, arm="baseline", created_at="2026-11-20T03:00:00Z", dow="Fri"
+        ),
+        _pilot_success(
+            121,
+            arm="candidate",
+            created_at="2026-11-20T03:48:00Z",
+            dow="Fri",
+            event="workflow_dispatch",
+        ),
+        _pilot_success(
+            122,
+            arm="candidate",
+            created_at="2026-11-20T02:00:00Z",
+            dow="Fri",
+            event="workflow_dispatch",
+        ),
+        _pilot_success(
+            123,
+            arm="candidate",
+            created_at="2026-11-20T04:00:00Z",
+            dow="Fri",
+            event="workflow_dispatch",
+        ),
+    ]
+    result = assess_reduced_pilot_window(
+        observations, **_pilot_options(scheduled_success_total_count=1)
+    )
+    assert result["status"] == "complete"
+    assert result["sample_size_pairs"] == 1
+    assert result["reason_codes"] == []
+
+
 def test_manual_backdated_and_blocking_changes_fail_closed() -> None:
     manual = assess_reduced_pilot_window(
         [
@@ -1223,6 +1312,121 @@ def test_verified_archive_still_blocks_n2_for_an_unopened_pilot(tmp_path: Path) 
         require_pilot_advance(assessment, tmp_path)
 
 
+def _archived_pilot_pair(root: Path) -> dict[str, object]:
+    observations = []
+    for run_id, arm, stamp in (
+        (130, "baseline", "2026-11-20T03:00:00Z"),
+        (131, "candidate", "2026-11-20T03:48:00Z"),
+    ):
+        raw = {
+            **_raw(run_id, head=_SHA),
+            "created_at": stamp,
+            "configuration_id": PILOT_CONFIGURATION_ID,
+        }
+        outcomes = _outcomes(fetched=len(JOB_KINDS), total=len(JOB_KINDS))
+        outcomes["jobs"] = [
+            {"name": name, "status": "completed", "conclusion": result}
+            for name, result in _results().items()
+        ]
+        _store(root, raw, outcomes)
+        observations.append(
+            _pilot_success(
+                run_id,
+                arm=arm,
+                created_at=stamp,
+                dow="Fri",
+                dom="20",
+                raw_sha256=oracle_sha256(canonical_bytes(raw)),
+                outcomes_sha256=oracle_sha256(canonical_bytes(outcomes)),
+            )
+        )
+    _seal_index(root)
+    return assess_reduced_pilot_window(
+        observations,
+        **_pilot_options(
+            scheduled_success_total_count=2,
+            independent_review=True,
+            independent_restore=True,
+        ),
+    )
+
+
+def test_pilot_advance_requires_the_evaluated_archive(tmp_path: Path) -> None:
+    assessment = _archived_pilot_pair(tmp_path / "pilot")
+    assert assessment["n2_blocked"] is False
+    require_pilot_advance(assessment, tmp_path / "pilot")
+    unrelated = tmp_path / "unrelated"
+    _store(unrelated, _raw(), _outcomes())
+    _seal_index(unrelated)
+    assert verify_archive(unrelated)["status"] == "verified"
+    with pytest.raises(ArchiveError, match="pilot snapshot missing"):
+        require_pilot_advance(assessment, unrelated)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("run_attempt", 2),
+        ("head_sha", "b" * 40),
+        ("tested_sha", "b" * 40),
+        ("configuration_id", "other"),
+        ("raw_sha256", "0" * 64),
+        ("outcomes_sha256", "0" * 64),
+        ("job_conclusions", {"clock": "failure"}),
+    ],
+)
+def test_pilot_advance_rejects_mismatched_evidence(
+    tmp_path: Path, field: str, value: object
+) -> None:
+    assessment = _archived_pilot_pair(tmp_path)
+    assessment["evaluated_pairs"][0]["candidate"][field] = value
+    with pytest.raises(ArchiveError):
+        require_pilot_advance(assessment, tmp_path)
+
+
+@pytest.mark.parametrize(
+    "job,old,new",
+    [
+        ("codeql", "'Mon'", "'Fri'"),
+        ("scorecard", "'Mon'", "'Fri'"),
+        ("branch-hygiene", "'Mon'", "'Fri'"),
+        ("mutation", "'Sun'", "'Fri'"),
+        ("github-settings", "dom == '01'", "dom == '02'"),
+        ("github-settings", "month == '04'", "month == '05'"),
+    ],
+)
+def test_inventory_rejects_cadence_drift_in_each_job(
+    tmp_path: Path, job: str, old: str, new: str
+) -> None:
+    text = (REPO_ROOT / ".github/workflows/nightly.yml").read_text(encoding="utf-8")
+    start = text.index(f"\n  {job}:\n")
+    # Bound the replacement to the selected top-level job, preserving other jobs.
+    following = [
+        offset
+        for offset in range(start + 1, len(text))
+        if text.startswith("\n  ", offset) and not text.startswith("\n   ", offset)
+    ]
+    end = following[0] if following else len(text)
+    block = text[start:end]
+    assert old in block
+    changed = text[:start] + block.replace(old, new, 1) + text[end:]
+    workflow = tmp_path / ".github/workflows"
+    workflow.mkdir(parents=True)
+    (workflow / "nightly.yml").write_text(changed, encoding="utf-8")
+    with pytest.raises(ArchiveError, match=f"cadence drifted: {job}"):
+        nightly_check_inventory(tmp_path)
+
+
+def test_pilot_record_reports_observed_retention_below_the_floor() -> None:
+    inventory = nightly_check_inventory()
+    assert inventory["workflow_success_artifact_retention_days"] == 7
+    record = build_reduced_pilot_record(baseline_sha=BASELINE_SHA, inventory=inventory)
+    assert "success_retention_below_30" in record["assessment"]["reason_codes"]
+    assert record["status"] == "not_opened"
+    assert record["retention_floors"]["successful_evidence_days"] == 30
+    assert record["n2_blocked"] is True
+
+
 def test_nightly_inventory_matches_workflow_and_fails_on_drift(tmp_path: Path) -> None:
     inventory = nightly_check_inventory()
     assert {row["name"] for row in inventory["jobs"]} == set(JOB_KINDS)
@@ -1267,28 +1471,18 @@ def test_nightly_inventory_matches_workflow_and_fails_on_drift(tmp_path: Path) -
         nightly_check_inventory(tmp_path)
 
 
-def test_historical_ledger_bytes_are_unchanged_vs_origin_main() -> None:
-    import subprocess
-
-    ledger = "reports/governance/n1-shadow-window/ledger.json"
-    committed = subprocess.check_output(
-        ["git", "show", f"origin/main:{ledger}"],
-        cwd=REPO_ROOT,
-    )
-    assert (REPO_ROOT / ledger).read_bytes() == committed
-    diff = subprocess.check_output(
-        [
-            "git",
-            "diff",
-            "--name-only",
-            "origin/main",
-            "--",
-            ledger,
-            "reports/governance/n1-shadow-window/unacceptable",
-        ],
-        cwd=REPO_ROOT,
-    )
-    assert diff == b""
+def test_historical_ledger_and_archive_bytes_match_pinned_baseline() -> None:
+    fixture = Path(__file__).with_name("fixtures") / "n1_historical_baseline.json"
+    baseline = json.loads(fixture.read_text(encoding="utf-8"))
+    assert baseline["baseline_sha"] == BASELINE_SHA
+    archive = REPO_ROOT / "reports/governance/n1-shadow-window/unacceptable"
+    paths = [REPO_ROOT / "reports/governance/n1-shadow-window/ledger.json"]
+    paths.extend(path for path in archive.rglob("*") if path.is_file())
+    actual = {
+        path.relative_to(REPO_ROOT).as_posix(): oracle_sha256(path.read_bytes())
+        for path in paths
+    }
+    assert actual == baseline["files"]
 
 
 def test_committed_pilot_record_is_not_opened(tmp_path: Path) -> None:

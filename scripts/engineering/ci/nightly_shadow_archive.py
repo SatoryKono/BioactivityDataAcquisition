@@ -19,6 +19,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote, urlencode
 
+import yaml
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 if __package__ in {None, ""}:
     sys.path.insert(0, str(REPO_ROOT))
@@ -57,6 +59,7 @@ PILOT_VERIFIED_ARCHIVE_FLOOR_DAYS = 90
 PILOT_RECORD_NAME = "pilot-48min.json"
 PILOT_ISSUE = 12362
 PARENT_ACCEPTANCE_ISSUE = 12349
+MISSING_PILOT_FAILURES = "pilot facts are missing cited failure runs"
 _SYNTHETIC_EVENTS = frozenset({"synthetic", "fabricated"})
 _EXTERNAL_OBSERVATION = frozenset({"external_state", "external_state_security"})
 REQUIRED_EXTERNAL_JOBS = (
@@ -71,6 +74,7 @@ RUN_ID_LABEL = "run id"
 RUN_ATTEMPT_LABEL = "run attempt"
 UTC_OFFSET_SUFFIX = "+00:00"
 WEEKDAYS = frozenset({"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"})
+UTC_WEEKDAY_NAMES = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 QUARTER_MONTHS = frozenset({"01", "04", "07", "10"})
 JOB_KINDS: dict[str, str] = {
     "clock": "clock",
@@ -109,6 +113,15 @@ _CADENCE_LABEL = {
     "weekly_monday": "weekly_monday",
     "weekly_sunday": "weekly_sunday",
     "quarterly": "quarterly",
+}
+_CADENCE_CONDITIONS = {
+    "weekly_monday": "needs.clock.outputs.dow == 'Mon'",
+    "weekly_sunday": "needs.clock.outputs.dow == 'Sun'",
+    "quarterly": (
+        "needs.clock.outputs.dom == '01' && "
+        "(needs.clock.outputs.month == '01' || needs.clock.outputs.month == '04' || "
+        "needs.clock.outputs.month == '07' || needs.clock.outputs.month == '10')"
+    ),
 }
 _WORKFLOW_DRIFT_SNIPPETS = (
     'cron: "0 3 * * *"',
@@ -1090,18 +1103,33 @@ def _inside_pilot_window(
     return _observation_run_id(observation) is not None
 
 
-def _find_comparable_pair(
+def _pair_observation_eligible(observation: Mapping[str, object]) -> bool:
+    return _observation_sha(observation) is not None and _conclusion_name(
+        observation
+    ) not in {"missing", "unknown", "synthetic"}
+
+
+def _pilot_pair_arms(
     observations: Sequence[Mapping[str, object]],
     *,
     configuration_id: str,
     start: datetime,
     close: datetime,
-) -> tuple[Mapping[str, object] | None, Mapping[str, object] | None, bool]:
-    """Return one baseline/candidate pair. The same run id is not a pair."""
+) -> dict[str, list[Mapping[str, object]]]:
+    """Collect unique observations in a stable order, including failed runs."""
 
-    baselines: list[Mapping[str, object]] = []
-    candidates: list[Mapping[str, object]] = []
+    arms: dict[str, dict[bytes, Mapping[str, object]]] = {
+        "baseline": {},
+        "candidate": {},
+    }
     for observation in observations:
+        arm = observation.get("arm")
+        if (
+            not isinstance(arm, str)
+            or arm not in arms
+            or not _pair_observation_eligible(observation)
+        ):
+            continue
         if not _inside_pilot_window(
             observation,
             configuration_id=configuration_id,
@@ -1109,33 +1137,28 @@ def _find_comparable_pair(
             close=close,
         ):
             continue
-        arm = observation.get("arm")
-        if arm == "baseline":
-            baselines.append(observation)
-        elif arm == "candidate":
-            candidates.append(observation)
-    self_oracle = False
-    for left in baselines:
-        left_id = _observation_run_id(left)
-        left_sha = _observation_sha(left)
-        if left_id is None or left_sha is None:
-            continue
-        if _conclusion_name(left) in {"missing", "unknown", "synthetic"}:
-            continue
-        for right in candidates:
-            right_id = _observation_run_id(right)
-            right_sha = _observation_sha(right)
-            if right_id is None or right_sha is None:
-                continue
-            if _conclusion_name(right) in {"missing", "unknown", "synthetic"}:
-                continue
-            if left_id == right_id:
-                self_oracle = True
-                continue
-            if left_sha != right_sha:
-                continue
-            return left, right, self_oracle
-    return None, None, self_oracle
+        arms[arm][canonical_bytes(observation)] = observation
+    return {
+        arm: [by_bytes[key] for key in sorted(by_bytes)]
+        for arm, by_bytes in arms.items()
+    }
+
+
+def _find_comparable_pairs(
+    arms: Mapping[str, Sequence[Mapping[str, object]]],
+) -> tuple[list[tuple[Mapping[str, object], Mapping[str, object]]], bool]:
+    """Return every distinct baseline/candidate pair, regardless of input order."""
+
+    baseline_ids = {_observation_run_id(item) for item in arms["baseline"]}
+    candidate_ids = {_observation_run_id(item) for item in arms["candidate"]}
+    pairs = [
+        (left, right)
+        for left in arms["baseline"]
+        for right in arms["candidate"]
+        if _observation_run_id(left) != _observation_run_id(right)
+        and _observation_sha(left) == _observation_sha(right)
+    ]
+    return pairs, bool(baseline_ids & candidate_ids)
 
 
 def _retention_reason_codes(
@@ -1164,13 +1187,33 @@ def _retention_reason_codes(
     return reasons
 
 
+def _scheduled_start_reason(
+    observation: Mapping[str, object], configuration_id: str, decision: datetime
+) -> str | None:
+    if observation.get("configuration_id") != configuration_id:
+        return "configuration_mismatch"
+    block = _job_block_reason(observation)
+    if block is not None:
+        return block
+    if _observation_sha(observation) is None:
+        return "missing_tested_sha"
+    if _observation_run_id(observation) is None:
+        return "missing_run_id"
+    stamp = _parse_utc(observation.get("created_at"))
+    if stamp is None:
+        return "created_at_unknown"
+    if stamp < decision:
+        return "backdated_start"
+    return None
+
+
 def _suitable_scheduled_successes(
     observations: Sequence[Mapping[str, object]],
     *,
     configuration_id: str,
     reasons: list[str],
 ) -> list[Mapping[str, object]]:
-    """Keep only post-decision scheduled successes. Failures stay out."""
+    """Manual runs can be candidates but can never start the window."""
 
     decision = _parse_utc(PILOT_DECISION_UTC)
     if decision is None:
@@ -1180,34 +1223,21 @@ def _suitable_scheduled_successes(
         if _is_synthetic_observation(observation):
             reasons.append("synthetic_event")
             continue
-        event = observation.get("event")
-        conclusion = observation.get("conclusion")
-        if event == "workflow_dispatch" and conclusion == "success":
-            reasons.append("manual_event_not_a_start")
+        if (
+            observation.get("event") != "schedule"
+            or observation.get("conclusion") != "success"
+        ):
             continue
-        if event != "schedule" or conclusion != "success":
-            continue
-        if observation.get("configuration_id") != configuration_id:
-            reasons.append("configuration_mismatch")
-            continue
-        block = _job_block_reason(observation)
-        if block is not None:
-            reasons.append(block)
-            continue
-        if _observation_sha(observation) is None:
-            reasons.append("missing_tested_sha")
-            continue
-        if _observation_run_id(observation) is None:
-            reasons.append("missing_run_id")
-            continue
-        stamp = _parse_utc(observation.get("created_at"))
-        if stamp is None:
-            reasons.append("created_at_unknown")
-            continue
-        if stamp < decision:
-            reasons.append("backdated_start")
-            continue
-        suitable.append(observation)
+        reason = _scheduled_start_reason(observation, configuration_id, decision)
+        if reason is None:
+            suitable.append(observation)
+        else:
+            reasons.append(reason)
+    if not suitable and any(
+        item.get("event") == "workflow_dispatch" and item.get("conclusion") == "success"
+        for item in observations
+    ):
+        reasons.append("manual_event_not_a_start")
     return suitable
 
 
@@ -1237,6 +1267,109 @@ def _pair_equivalence(
     return "not_passed"
 
 
+def _pilot_success_total(
+    total: int | None,
+    suitable: Sequence[Mapping[str, object]],
+    reasons: list[str],
+) -> int | None:
+    if isinstance(total, bool) or (
+        total is not None and (not isinstance(total, int) or total < 0)
+    ):
+        reasons.append("successful_scheduled_count_unknown")
+        total = None
+    if total == 0:
+        reasons.append("no_suitable_successful_scheduled_nightly")
+        if suitable:
+            reasons.append("success_count_contradiction")
+    elif total is None and not suitable:
+        reasons.append("successful_scheduled_count_unknown")
+    elif total is not None and not suitable:
+        reasons.append("successful_scheduled_observations_missing")
+    return total
+
+
+def _pilot_observation_binding(observation: Mapping[str, object]) -> dict[str, Any]:
+    fields = (
+        "run_id",
+        "run_attempt",
+        "head_sha",
+        "configuration_id",
+        "created_at",
+        "event",
+        "conclusion",
+        "job_conclusions",
+        "dow",
+        "dom",
+        "month",
+        "force_weekly",
+        "raw_sha256",
+        "outcomes_sha256",
+    )
+    binding = {key: observation.get(key) for key in fields}
+    binding["run_id"] = _observation_run_id(observation)
+    binding["tested_sha"] = _observation_sha(observation)
+    binding["force_weekly"] = parse_force(observation.get("force_weekly"))
+    return binding
+
+
+def _assess_pilot_pairs(
+    observations: Sequence[Mapping[str, object]],
+    suitable: Sequence[Mapping[str, object]],
+    configuration_id: str,
+    reasons: list[str],
+) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "window_start_utc": None,
+        "window_end_utc": None,
+        "comparable_pair_count": 0,
+        "evaluated_pairs": [],
+        "equivalence": "not_passed",
+    }
+    if not suitable:
+        reasons.append("no_comparable_pair")
+        return result
+    starts = [
+        stamp
+        for item in suitable
+        if (stamp := _parse_utc(item["created_at"])) is not None
+    ]
+    if not starts:
+        raise ArchiveError("pilot start is not UTC")
+    start = min(starts)
+    close = start + timedelta(minutes=PILOT_DURATION_MINUTES)
+    result["window_start_utc"] = start.strftime("%Y-%m-%dT%H:%M:%SZ")
+    result["window_end_utc"] = close.strftime("%Y-%m-%dT%H:%M:%SZ")
+    elapsed = _pilot_duration_elapsed(start, observations)
+    if not elapsed:
+        reasons.append("shorter_than_48_minutes")
+    arms = _pilot_pair_arms(
+        observations, configuration_id=configuration_id, start=start, close=close
+    )
+    pairs, self_oracle = _find_comparable_pairs(arms)
+    if self_oracle:
+        reasons.append("run_is_own_oracle")
+    if not pairs:
+        reasons.append("no_comparable_pair")
+        return result
+    result["comparable_pair_count"] = len(pairs)
+    result["evaluated_pairs"] = [
+        {
+            "baseline": _pilot_observation_binding(left),
+            "candidate": _pilot_observation_binding(right),
+        }
+        for left, right in pairs
+    ]
+    # Evaluate every pair; a short-circuiting all(generator) would hide later reasons.
+    outcomes = [_pair_equivalence(left, right, reasons) for left, right in pairs]
+    if (
+        elapsed
+        and "synthetic_event" not in reasons
+        and all(item == "passed" for item in outcomes)
+    ):
+        result["equivalence"] = "passed"
+    return result
+
+
 def assess_reduced_pilot_window(
     observations: Sequence[Mapping[str, object]],
     *,
@@ -1251,10 +1384,7 @@ def assess_reduced_pilot_window(
     shallow_checkout: bool,
     independent_review: bool,
     independent_restore: bool,
-    failure_total_count: int | None = None,
-    cancelled_total_count: int | None = None,
-    missing_total_count: int | None = None,
-    unknown_total_count: int | None = None,
+    observation_totals: Mapping[str, int | None] | None = None,
 ) -> dict[str, Any]:
     """Judge the 48-minute pilot. This is not the 48-hour historical judge."""
 
@@ -1272,80 +1402,29 @@ def assess_reduced_pilot_window(
             retention_reduced=retention_reduced,
         )
     )
-    api_success = scheduled_success_total_count
-    if isinstance(api_success, bool) or (
-        api_success is not None
-        and (not isinstance(api_success, int) or api_success < 0)
-    ):
-        reasons.append("successful_scheduled_count_unknown")
-        api_success = None
     suitable = _suitable_scheduled_successes(
         observations,
         configuration_id=configuration_id,
         reasons=reasons,
     )
-    if api_success == 0:
-        reasons.append("no_suitable_successful_scheduled_nightly")
-        if suitable:
-            reasons.append("success_count_contradiction")
-    elif api_success is None and not suitable:
-        reasons.append("successful_scheduled_count_unknown")
-    elif isinstance(api_success, int) and api_success > 0 and not suitable:
-        reasons.append("successful_scheduled_observations_missing")
-
-    window_start: str | None = None
-    window_end: str | None = None
-    comparable_pair_count = 0
-    sample_size_pairs = 0
-    equivalence = "not_passed"
-    opened = bool(suitable) and "success_count_contradiction" not in reasons
-    if api_success == 0:
-        opened = False
+    api_success = _pilot_success_total(scheduled_success_total_count, suitable, reasons)
+    opened = (
+        bool(suitable)
+        and api_success != 0
+        and "success_count_contradiction" not in reasons
+    )
+    window = _assess_pilot_pairs(
+        observations, suitable if opened else [], configuration_id, reasons
+    )
+    status = "not_opened"
     if opened:
-        start_obs = min(
-            suitable,
-            key=lambda item: (
-                _parse_utc(item.get("created_at")) or datetime.max.replace(tzinfo=UTC),
-                _observation_run_id(item) or 0,
-            ),
+        status = (
+            "complete"
+            if window["equivalence"] == "passed" and not reasons
+            else "unacceptable"
         )
-        start_at = _parse_utc(start_obs.get("created_at"))
-        if start_at is None:
-            reasons.append("created_at_unknown")
-            opened = False
-        else:
-            close_at = start_at + timedelta(minutes=PILOT_DURATION_MINUTES)
-            window_start = start_at.strftime("%Y-%m-%dT%H:%M:%SZ")
-            window_end = close_at.strftime("%Y-%m-%dT%H:%M:%SZ")
-            elapsed = _pilot_duration_elapsed(start_at, observations)
-            if not elapsed:
-                reasons.append("shorter_than_48_minutes")
-            left, right, self_oracle = _find_comparable_pair(
-                observations,
-                configuration_id=configuration_id,
-                start=start_at,
-                close=close_at,
-            )
-            if self_oracle:
-                reasons.append("run_is_own_oracle")
-            if left is None or right is None:
-                reasons.append("no_comparable_pair")
-            else:
-                comparable_pair_count = 1
-                if elapsed and "synthetic_event" not in reasons:
-                    equivalence = _pair_equivalence(left, right, reasons)
-    else:
-        reasons.append("no_comparable_pair")
-
-    if not opened:
-        status = "not_opened"
-        equivalence = "not_passed"
-    elif equivalence == "passed" and not reasons:
-        status = "complete"
-        sample_size_pairs = comparable_pair_count
-    else:
-        status = "unacceptable"
-        equivalence = "not_passed"
+    equivalence = "passed" if status == "complete" else "not_passed"
+    totals = {} if observation_totals is None else observation_totals
     n2_blocked = not (
         independent_review is True
         and independent_restore is True
@@ -1360,17 +1439,20 @@ def assess_reduced_pilot_window(
         "status": status,
         "equivalence": equivalence,
         "reason_codes": sorted(set(reasons)),
-        "window_start_utc": window_start,
-        "window_end_utc": window_end,
-        "comparable_pair_count": comparable_pair_count,
-        "sample_size_pairs": sample_size_pairs,
+        "window_start_utc": window["window_start_utc"],
+        "window_end_utc": window["window_end_utc"],
+        "comparable_pair_count": window["comparable_pair_count"],
+        "sample_size_pairs": window["comparable_pair_count"]
+        if status == "complete"
+        else 0,
+        "evaluated_pairs": window["evaluated_pairs"],
         "counts": {
             "api": {
                 "success": api_success,
-                "failure": failure_total_count,
-                "cancelled": cancelled_total_count,
-                "missing": missing_total_count,
-                "unknown": unknown_total_count,
+                "failure": totals.get("failure"),
+                "cancelled": totals.get("cancelled"),
+                "missing": totals.get("missing"),
+                "unknown": totals.get("unknown"),
             },
             "sample": _sample_counts(observations),
         },
@@ -1417,6 +1499,68 @@ def _called_workflow_paths(text: str) -> list[str]:
     return found
 
 
+def _normalized_job_condition(value: object) -> str:
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        raise ArchiveError("nightly job condition is not a string")
+    return "".join(value.strip().removeprefix("${{").removesuffix("}}").split())
+
+
+def _validated_workflow_jobs(text: str) -> dict[str, Any]:
+    try:
+        workflow = yaml.safe_load(text)
+    except yaml.YAMLError as exc:
+        raise ArchiveError("malformed nightly workflow") from exc
+    jobs = workflow.get("jobs") if isinstance(workflow, Mapping) else None
+    if not isinstance(jobs, dict) or set(jobs) != set(JOB_KINDS):
+        raise ArchiveError("JOB_KINDS drifted from nightly.yml")
+    for name, job in jobs.items():
+        if not isinstance(job, Mapping):
+            raise ArchiveError(f"nightly job is not a mapping: {name}")
+        expected = _CADENCE_CONDITIONS.get(JOB_KINDS[name], "")
+        if _normalized_job_condition(job.get("if")) != _normalized_job_condition(
+            expected
+        ):
+            raise ArchiveError(f"nightly cadence drifted: {name}")
+        needs = job.get("needs", [])
+        if expected and "clock" not in ([needs] if isinstance(needs, str) else needs):
+            raise ArchiveError(f"nightly clock dependency drifted: {name}")
+    return jobs
+
+
+def _workflow_artifact_retention(job: Mapping[str, Any], artifact: str) -> int:
+    steps = job.get("steps", [])
+    matches = [
+        step.get("with", {})
+        for step in steps
+        if isinstance(step, Mapping)
+        and isinstance(step.get("with"), Mapping)
+        and step["with"].get("name") == artifact
+    ]
+    if len(matches) != 1:
+        raise ArchiveError(f"nightly artifact drifted: {artifact}")
+    return _positive_int(matches[0].get("retention-days"), "artifact retention days")
+
+
+def _check_inventory_sources(root: Path) -> tuple[list[str], list[str]]:
+    check_dir = root / "scripts/engineering/ci"
+    check_paths = sorted(
+        path.relative_to(root).as_posix()
+        for path in check_dir.glob("generated_artifact_checks*")
+        if path.is_file()
+    )
+    if not check_paths:
+        raise ArchiveError("generated_artifact_checks sources are missing")
+    joined = "\n".join(
+        (root / relative).read_text(encoding="utf-8") for relative in check_paths
+    )
+    for mode in ("daily", "validators"):
+        if mode not in joined:
+            raise ArchiveError(f"generated_artifact_checks missing mode {mode}")
+    return check_paths, ["daily", "validators"]
+
+
 def nightly_check_inventory(repo_root: Path | None = None) -> dict[str, Any]:
     """Classify nightly jobs and fail when the workflow inventory drifts."""
 
@@ -1425,6 +1569,7 @@ def nightly_check_inventory(repo_root: Path | None = None) -> dict[str, Any]:
     if not workflow_path.is_file():
         raise ArchiveError(f"nightly workflow unavailable: {workflow_path}")
     text = workflow_path.read_text(encoding="utf-8")
+    jobs = _validated_workflow_jobs(text)
     job_names = _workflow_job_names(text)
     if set(job_names) != set(JOB_KINDS) or set(CHECK_CLASS) != set(JOB_KINDS):
         raise ArchiveError(
@@ -1440,20 +1585,7 @@ def nightly_check_inventory(repo_root: Path | None = None) -> dict[str, Any]:
     for relative in called:
         if not (root / relative).is_file():
             raise ArchiveError(f"called workflow missing: {relative}")
-    check_dir = root / "scripts/engineering/ci"
-    check_paths = sorted(
-        path.relative_to(root).as_posix()
-        for path in check_dir.glob("generated_artifact_checks*")
-        if path.is_file()
-    )
-    if not check_paths:
-        raise ArchiveError("generated_artifact_checks sources are missing")
-    joined = "\n".join(
-        (root / relative).read_text(encoding="utf-8") for relative in check_paths
-    )
-    for mode in ("daily", "validators"):
-        if mode not in joined:
-            raise ArchiveError(f"generated_artifact_checks missing mode {mode}")
+    check_paths, modes = _check_inventory_sources(root)
     missing_external = [
         name for name in REQUIRED_EXTERNAL_JOBS if name not in job_names
     ]
@@ -1487,14 +1619,18 @@ def nightly_check_inventory(repo_root: Path | None = None) -> dict[str, Any]:
         "jobs": rows,
         "called_workflows": called,
         "generated_artifact_checks": check_paths,
-        "generated_artifact_modes": ["daily", "validators"],
+        "generated_artifact_modes": modes,
         "cron": "0 3 * * *",
         "fetch_depth": 0,
         "shallow_checkout": False,
         "security_and_external_jobs": sorted(external),
         "cancellation_upload": "best_effort",
-        "workflow_success_artifact_retention_days": 7,
-        "workflow_diagnostic_artifact_retention_days": 90,
+        "workflow_success_artifact_retention_days": _workflow_artifact_retention(
+            jobs["generated-artifact-daily"], "generated-artifact-daily-success"
+        ),
+        "workflow_diagnostic_artifact_retention_days": _workflow_artifact_retention(
+            jobs["generated-artifact-daily"], "generated-artifact-daily-diagnostics"
+        ),
     }
 
 
@@ -1562,10 +1698,10 @@ def verified_scheduled_nightly_facts() -> dict[str, Any]:
 def _pilot_limitations(facts: Mapping[str, Any]) -> list[str]:
     failures = facts["cited_failure_runs"]
     if not isinstance(failures, Sequence) or len(failures) < 3:
-        raise ArchiveError("pilot facts are missing cited failure runs")
+        raise ArchiveError(MISSING_PILOT_FAILURES)
     first, second, third = failures[0], failures[1], failures[2]
     if not all(isinstance(item, Mapping) for item in (first, second, third)):
-        raise ArchiveError("pilot facts are missing cited failure runs")
+        raise ArchiveError(MISSING_PILOT_FAILURES)
     cancelled = facts["cited_cancelled_run"]
     if not isinstance(cancelled, Mapping):
         raise ArchiveError("pilot facts are missing the cited cancelled run")
@@ -1630,7 +1766,7 @@ def build_reduced_pilot_record(
     observed = verified_scheduled_nightly_facts() if facts is None else dict(facts)
     cited = observed["cited_failure_runs"]
     if not isinstance(cited, list):
-        raise ArchiveError("pilot facts are missing cited failure runs")
+        raise ArchiveError(MISSING_PILOT_FAILURES)
     observations: list[dict[str, Any]] = [dict(item) for item in cited]
     cancelled = observed.get("cited_cancelled_run")
     if isinstance(cancelled, Mapping):
@@ -1639,12 +1775,14 @@ def build_reduced_pilot_record(
         observations,
         configuration_id=PILOT_CONFIGURATION_ID,
         scheduled_success_total_count=observed["successful_total_count"],
-        failure_total_count=observed["failure_total_count"],
-        cancelled_total_count=observed["cancelled_total_count"],
-        missing_total_count=observed["missing_total_count"],
-        unknown_total_count=observed["unknown_total_count"],
-        successful_evidence_days=PILOT_SUCCESS_RETENTION_FLOOR_DAYS,
-        diagnostic_retention_days=PILOT_DIAGNOSTIC_RETENTION_FLOOR_DAYS,
+        observation_totals={
+            name: observed[f"{name}_total_count"]
+            for name in ("failure", "cancelled", "missing", "unknown")
+        },
+        successful_evidence_days=inventory["workflow_success_artifact_retention_days"],
+        diagnostic_retention_days=inventory[
+            "workflow_diagnostic_artifact_retention_days"
+        ],
         verified_archive_days=PILOT_VERIFIED_ARCHIVE_FLOOR_DAYS,
         actions_retention_cap_days=ACTIONS_RETENTION_CAP_DAYS,
         cadence_changed=False,
@@ -1738,13 +1876,136 @@ def build_reduced_pilot_record(
     return record
 
 
+def _pilot_archive_job_results(outcomes: Mapping[str, Any]) -> dict[str, object]:
+    pagination = outcomes.get("pagination")
+    if not isinstance(pagination, Mapping) or pagination.get("status") != "complete":
+        raise ArchiveError("pilot archive pagination is not complete")
+    results: dict[str, object] = {}
+    for job in outcomes.get("jobs", []):
+        if not isinstance(job, Mapping) or not isinstance(job.get("name"), str):
+            raise ArchiveError("pilot archive job identity is missing")
+        name = job["name"]
+        if name in results or job.get("status") != "completed":
+            raise ArchiveError("pilot archive job is duplicate or incomplete")
+        results[name] = job.get("conclusion")
+    return results
+
+
+def _pilot_archive_binding(
+    archive_root: Path, snapshot: Mapping[str, Any]
+) -> dict[str, Any]:
+    run_id, attempt = _snapshot_key(snapshot)
+    destination = archive_root / f"run-{run_id}" / f"attempt-{attempt}"
+    # Recheck against the verified identity before reading the evaluated bytes.
+    if _verify_one(destination / "manifest.json") != snapshot:
+        raise ArchiveError("pilot snapshot changed after verification")
+    raw_bytes = (destination / "raw.json").read_bytes()
+    outcomes_bytes = (destination / "outcomes.json").read_bytes()
+    manifest = json.loads((destination / "manifest.json").read_text(encoding="utf-8"))
+    raw = json.loads(raw_bytes)
+    outcomes = json.loads(outcomes_bytes)
+    if raw.get("path") != WORKFLOW_PATH:
+        raise ArchiveError("pilot snapshot is not a Nightly run")
+    if manifest.get("tested_sha") not in {None, raw.get("head_sha")}:
+        raise ArchiveError("pilot Nightly tested SHA does not match its code SHA")
+    if oracle_sha256(raw_bytes) != manifest.get("raw_sha256") or oracle_sha256(
+        outcomes_bytes
+    ) != manifest.get("outcomes_sha256"):
+        raise ArchiveError("pilot snapshot checksum changed after verification")
+    stamp = _parse_utc(raw.get("created_at"))
+    if stamp is None:
+        raise ArchiveError("pilot snapshot timestamp is unknown")
+    observation = {
+        **raw,
+        "run_id": run_id,
+        "run_attempt": attempt,
+        "tested_sha": manifest.get("tested_sha"),
+        "dow": UTC_WEEKDAY_NAMES[stamp.weekday()],
+        "dom": stamp.strftime("%d"),
+        "month": stamp.strftime("%m"),
+        "job_conclusions": _pilot_archive_job_results(outcomes),
+        "raw_sha256": oracle_sha256(raw_bytes),
+        "outcomes_sha256": oracle_sha256(outcomes_bytes),
+    }
+    return _pilot_observation_binding(observation)
+
+
+def _require_pilot_member_in_window(
+    binding: Mapping[str, Any], assessment: Mapping[str, Any]
+) -> None:
+    if binding.get("configuration_id") != assessment.get("configuration_id"):
+        raise ArchiveError("pilot snapshot configuration mismatch")
+    start = _parse_utc(assessment.get("window_start_utc"))
+    close = _parse_utc(assessment.get("window_end_utc"))
+    if (
+        start is None
+        or close is None
+        or close - start != timedelta(minutes=PILOT_DURATION_MINUTES)
+    ):
+        raise ArchiveError("pilot window bounds are missing or invalid")
+    if not _inside_pilot_window(
+        binding,
+        configuration_id=assessment["configuration_id"],
+        start=start,
+        close=close,
+    ):
+        raise ArchiveError("pilot snapshot is outside the evaluated window")
+
+
+def _require_pilot_pair(
+    pair: Mapping[str, Any],
+    assessment: Mapping[str, Any],
+    archived: Mapping[tuple[int, int], Mapping[str, Any]],
+    archive_root: Path,
+) -> None:
+    members = []
+    for arm in ("baseline", "candidate"):
+        binding = pair.get(arm)
+        if not isinstance(binding, Mapping):
+            raise ArchiveError("pilot pair binding is missing")
+        snapshot = archived.get(_snapshot_key(binding))
+        if snapshot is None:
+            raise ArchiveError("pilot snapshot missing from the verified archive")
+        if binding != _pilot_archive_binding(archive_root, snapshot):
+            raise ArchiveError("pilot snapshot does not match evaluated evidence")
+        _require_pilot_member_in_window(binding, assessment)
+        members.append(binding)
+    left, right = members
+    if _observation_run_id(left) == _observation_run_id(right) or _observation_sha(
+        left
+    ) != _observation_sha(right):
+        raise ArchiveError("pilot archive pair is not comparable")
+    reasons: list[str] = []
+    if _pair_equivalence(left, right, reasons) != "passed":
+        raise ArchiveError("pilot archived outcomes are not equivalent")
+
+
+def _require_pilot_archive_pairs(
+    assessment: Mapping[str, Any],
+    verified: Mapping[str, Any],
+    archive_root: Path,
+) -> None:
+    pairs = assessment.get("evaluated_pairs")
+    if not isinstance(pairs, list) or not pairs:
+        raise ArchiveError("pilot evaluated pair bindings are missing")
+    if len(pairs) != assessment.get("comparable_pair_count") or len(
+        pairs
+    ) != assessment.get("sample_size_pairs"):
+        raise ArchiveError("pilot pair count does not match evaluated evidence")
+    archived = {_snapshot_key(row): row for row in verified["snapshots"]}
+    for pair in pairs:
+        if not isinstance(pair, Mapping):
+            raise ArchiveError("pilot evaluated pair is malformed")
+        _require_pilot_pair(pair, assessment, archived, archive_root)
+
+
 def require_pilot_advance(
     assessment: Mapping[str, Any],
     archive_root: Path,
 ) -> None:
     """Block the next stage. Archive errors come from verify_archive."""
 
-    verify_archive(archive_root)
+    verified = verify_archive(archive_root)
     if assessment.get("n2_blocked") is not False:
         raise ArchiveError("N2 stays blocked")
     if assessment.get("independent_review") is not True:
@@ -1756,6 +2017,7 @@ def require_pilot_advance(
         or assessment.get("status") != "complete"
     ):
         raise ArchiveError("pilot window is not accepted")
+    _require_pilot_archive_pairs(assessment, verified, archive_root)
 
 
 def _write_canonical_record(destination: Path, record: Mapping[str, Any]) -> None:
