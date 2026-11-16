@@ -18,11 +18,13 @@ from typing import Any, TypedDict, cast
 
 import yaml
 
+from scripts.engineering.common.repo_paths import REPO_ROOT
+
 DASHBOARDS_DIR = Path("grafana/dashboards")
 VARIABLES_GUIDE = Path("docs/03-guides/dashboards/variables-guide.md")
 MONITORING_INDEX = Path("docs/03-guides/dashboards/monitoring-index.md")
 SELECTOR_CONTRACT = Path("docs/03-guides/dashboards/contracts/selector-contracts.yaml")
-DASHBOARD_INVENTORY_CONTRACT = Path(
+DASHBOARD_INVENTORY_CONTRACT = REPO_ROOT / Path(
     "docs/03-guides/dashboards/contracts/dashboard-inventory.yaml"
 )
 PROVISIONING_CONFIG = Path("grafana/provisioning/dashboards/bioetl.yaml")

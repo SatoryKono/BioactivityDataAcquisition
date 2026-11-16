@@ -4,7 +4,7 @@ Version: 1.0.3
 Status: active
 Class: published
 Owner: BioETL Team
-Last verified: '2026-10-18'
+Last verified: '2026-11-16'
 
 ______________________________________________________________________
 
@@ -311,7 +311,8 @@ acceptance gates; workflow deletion is no longer a completion criterion.
 | `consolidation-gates.yml` | consolidation-gates | Consolidation / cleanup governance gates |
 | `dashboard-first-window-noscroll.yml` | Dashboard first-window no-scroll | First-window no-scroll gate for all seven shipped dashboard UIDs (DASH-FIT-004) |
 | `dependency-review.yml` | Dependency review | PR-time HIGH/CRITICAL lockfile/manifest review |
-| `docker.yml` | Docker Build & Compose Validation | Optional Docker contract (ADR-010 adjunct), reproducible Trivy/SBOM baseline, blocking CRITICAL+HIGH+MEDIUM image gate, and no-rebuild promotion when `publish` is true; no direct push trigger. `main-integrity.yml` calls with `publish: false` |
+| `docker-publish.yml` | Docker GHCR Publish | Reusable checkout-free publication of the scanned Main Integrity image; `main-ghcr-publish.yml` supplies the source SHA and artifact run. Publication requires the current main HEAD |
+| `docker.yml` | Docker Build & Compose Validation | Optional Docker contract (ADR-010 adjunct), reproducible Trivy/SBOM baseline, and blocking CRITICAL+HIGH+MEDIUM image gate; no direct push trigger. GHCR publication is owned by `docker-publish.yml` |
 | `docs.yml` | Docs & Diagrams | MkDocs, links, Mermaid lint, targeted ChEMBL render, drift; `pr-required.yml` owner (re-enabled #10263) |
 | `duplication-complexity.yml` | Duplication and Complexity Checks | Dup/complexity quality gates |
 | `e2e-matrix-health.yml` | E2E Matrix Health | End-to-end matrix health |
