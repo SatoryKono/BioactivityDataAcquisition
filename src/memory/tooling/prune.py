@@ -148,21 +148,9 @@ def find_prunable_episodic_notes(
             continue
         if path.name == README_NAME or not _is_prunable_note_path(path, resolved_root):
             continue
-        metadata = _extract_metadata(path)
-        created_at = _coerce_created_at(metadata.get("created_at"))
-        if created_at is None:
-            continue
-        ttl_days = int(metadata.get("ttl_days", default_ttl))
-        expires_at = created_at + timedelta(days=ttl_days)
-        if expires_at <= current_time:
-            candidates.append(
-                PruneCandidate(
-                    path=str(path),
-                    created_at=created_at.isoformat(),
-                    ttl_days=ttl_days,
-                    expires_at=expires_at.isoformat(),
-                )
-            )
+        candidate = _expired_note_candidate(path, default_ttl, current_time)
+        if candidate is not None:
+            candidates.append(candidate)
     return candidates
 
 
@@ -313,6 +301,25 @@ def main(argv: list[str] | None = None) -> int:
                 f"expires_at={candidate['expires_at']})"
             )
     return 1 if args.check and report["policy_violation"] else 0
+
+
+def _expired_note_candidate(
+    path: Path, default_ttl: int, current_time: datetime
+) -> PruneCandidate | None:
+    metadata = _extract_metadata(path)
+    created_at = _coerce_created_at(metadata.get("created_at"))
+    if created_at is None:
+        return None
+    ttl_days = int(metadata.get("ttl_days", default_ttl))
+    expires_at = created_at + timedelta(days=ttl_days)
+    if expires_at <= current_time:
+        return PruneCandidate(
+            path=str(path),
+            created_at=created_at.isoformat(),
+            ttl_days=ttl_days,
+            expires_at=expires_at.isoformat(),
+        )
+    return None
 
 
 if __name__ == "__main__":

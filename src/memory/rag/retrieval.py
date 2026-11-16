@@ -172,15 +172,7 @@ def _chunk_matches_filters(
         return False
     if symbol_kind is not None and chunk.get("symbol_kind") != symbol_kind:
         return False
-    if lowered_query is None:
-        return True
-    haystack = _chunk_search_haystack(chunk)
-    tokens = _tokenize_focus_query(lowered_query)
-    return (
-        any(token in haystack for token in tokens)
-        if tokens
-        else lowered_query in haystack
-    )
+    return _chunk_matches_query(chunk, lowered_query)
 
 
 def _chunk_search_haystack(chunk: dict[str, Any]) -> str:
@@ -387,3 +379,15 @@ def rank_chunks(
         )
     )
     return ranked
+
+
+def _chunk_matches_query(chunk: dict[str, Any], lowered_query: str | None) -> bool:
+    if lowered_query is None:
+        return True
+    haystack = _chunk_search_haystack(chunk)
+    tokens = _tokenize_focus_query(lowered_query)
+    return (
+        any(token in haystack for token in tokens)
+        if tokens
+        else lowered_query in haystack
+    )

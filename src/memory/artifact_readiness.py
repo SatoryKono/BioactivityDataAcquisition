@@ -116,18 +116,7 @@ def _timeline_manifest_files_valid(
         entry.get("path") for entry in entries if isinstance(entry, dict)
     } != expected_names:
         return False
-    for entry in entries:
-        if not isinstance(entry, dict):
-            return False
-        path = events_dir / str(entry.get("path", ""))
-        if (
-            not path.is_file()
-            or path.stat().st_size != entry.get("size")
-            or _file_sha256(path) != entry.get("sha256")
-            or not _valid_timeline_jsonl(path)
-        ):
-            return False
-    return True
+    return _timeline_entries_valid(events_dir, entries)
 
 
 def _timeline_manifest_matches_repository(
@@ -167,4 +156,19 @@ def _valid_timeline_jsonl(path: Path) -> bool:
                 return False
     except (OSError, UnicodeError, json.JSONDecodeError):
         return False
+    return True
+
+
+def _timeline_entries_valid(events_dir: Path, entries: list[object]) -> bool:
+    for entry in entries:
+        if not isinstance(entry, dict):
+            return False
+        path = events_dir / str(entry.get("path", ""))
+        if (
+            not path.is_file()
+            or path.stat().st_size != entry.get("size")
+            or _file_sha256(path) != entry.get("sha256")
+            or not _valid_timeline_jsonl(path)
+        ):
+            return False
     return True

@@ -103,39 +103,7 @@ def validate_catalog_metadata(
             f"required {require_build_scope!r}, found {build_scope!r}",
         )
 
-    generator_version = catalog.get("generator_version")
-    if not isinstance(generator_version, int) or isinstance(generator_version, bool):
-        add_issue(
-            issues,
-            "invalid_generator_version",
-            "catalog.generator_version",
-            "generator_version must be an integer",
-        )
-    git_head_sha = catalog.get("git_head_sha")
-    if git_head_sha is not None and not (
-        isinstance(git_head_sha, str) and re.fullmatch(r"[0-9a-f]{40,64}", git_head_sha)
-    ):
-        add_issue(
-            issues,
-            "invalid_source_identity",
-            "catalog.git_head_sha",
-            "git_head_sha must be null or a lowercase Git object id",
-        )
-    source_hash = catalog.get("source_surface_sha256")
-    if not isinstance(source_hash, str) or not SHA256_PATTERN.fullmatch(source_hash):
-        add_issue(
-            issues,
-            "invalid_source_identity",
-            "catalog.source_surface_sha256",
-            "source_surface_sha256 must be a lowercase SHA-256 digest",
-        )
-    if catalog.get("working_tree_state") not in {"clean", "dirty", "unavailable"}:
-        add_issue(
-            issues,
-            "invalid_source_identity",
-            "catalog.working_tree_state",
-            "working_tree_state must be clean, dirty, or unavailable",
-        )
+    _validate_catalog_source_identity(catalog, issues)
     return normalized_scope
 
 
@@ -401,3 +369,41 @@ def validate_source_identity(
             "catalog source snapshot does not match the current repository surface",
         )
     return current_hash if isinstance(current_hash, str) else None, identity_mismatch
+
+
+def _validate_catalog_source_identity(
+    catalog: dict[str, Any], issues: list[RagValidationIssue]
+) -> None:
+    generator_version = catalog.get("generator_version")
+    if not isinstance(generator_version, int) or isinstance(generator_version, bool):
+        add_issue(
+            issues,
+            "invalid_generator_version",
+            "catalog.generator_version",
+            "generator_version must be an integer",
+        )
+    git_head_sha = catalog.get("git_head_sha")
+    if git_head_sha is not None and not (
+        isinstance(git_head_sha, str) and re.fullmatch(r"[0-9a-f]{40,64}", git_head_sha)
+    ):
+        add_issue(
+            issues,
+            "invalid_source_identity",
+            "catalog.git_head_sha",
+            "git_head_sha must be null or a lowercase Git object id",
+        )
+    source_hash = catalog.get("source_surface_sha256")
+    if not isinstance(source_hash, str) or not SHA256_PATTERN.fullmatch(source_hash):
+        add_issue(
+            issues,
+            "invalid_source_identity",
+            "catalog.source_surface_sha256",
+            "source_surface_sha256 must be a lowercase SHA-256 digest",
+        )
+    if catalog.get("working_tree_state") not in {"clean", "dirty", "unavailable"}:
+        add_issue(
+            issues,
+            "invalid_source_identity",
+            "catalog.working_tree_state",
+            "working_tree_state must be clean, dirty, or unavailable",
+        )

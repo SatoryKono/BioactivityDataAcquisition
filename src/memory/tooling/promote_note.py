@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from typing import Any
 
 from memory.notes import (
     normalize_text_key,
@@ -171,18 +172,7 @@ def promote_note(
     metadata = dict(note.metadata)
     title = str(metadata.get("title") or source.stem)
     note_id = str(metadata.get("id") or source.stem)
-    source_refs = metadata.get("source_refs") or []
-    if not isinstance(source_refs, list) or not source_refs:
-        raise ValueError(
-            "source episodic note must contain non-empty source_refs before promotion"
-        )
-    if any(_contains_placeholder(str(ref)) for ref in source_refs):
-        raise ValueError("source episodic note still contains placeholder source_refs")
-    if _contains_placeholder(summary):
-        raise ValueError("promotion summary must be explicit and non-placeholder")
-    duplicates = _detect_duplicates(note_id, title)
-    if duplicates and not force_duplicate:
-        raise ValueError(f"duplicate curated note detected: {', '.join(duplicates)}")
+    _validate_promotion_source(metadata, summary, note_id, title, force_duplicate)
 
     metadata.pop("task_id", None)
     metadata.pop("created_at", None)
@@ -230,6 +220,27 @@ def main(argv: list[str] | None = None) -> int:
     )
     print(f"Promoted memory note: {path}")
     return 0
+
+
+def _validate_promotion_source(
+    metadata: dict[str, Any],
+    summary: str,
+    note_id: str,
+    title: str,
+    force_duplicate: bool,
+) -> None:
+    source_refs = metadata.get("source_refs") or []
+    if not isinstance(source_refs, list) or not source_refs:
+        raise ValueError(
+            "source episodic note must contain non-empty source_refs before promotion"
+        )
+    if any(_contains_placeholder(str(ref)) for ref in source_refs):
+        raise ValueError("source episodic note still contains placeholder source_refs")
+    if _contains_placeholder(summary):
+        raise ValueError("promotion summary must be explicit and non-placeholder")
+    duplicates = _detect_duplicates(note_id, title)
+    if duplicates and not force_duplicate:
+        raise ValueError(f"duplicate curated note detected: {', '.join(duplicates)}")
 
 
 if __name__ == "__main__":

@@ -81,15 +81,7 @@ def _is_excluded_file_structure_path(
     if any(part in {"svg", "png"} for part in path.parts):
         return True
 
-    excluded_prefixes = [
-        prefix.strip("/")
-        for prefix in _as_string_list(config.get("excluded_prefixes"))
-        if prefix
-    ]
-    return any(
-        normalized == prefix or normalized.startswith(f"{prefix}/")
-        for prefix in excluded_prefixes
-    )
+    return _matches_excluded_prefix(normalized, config)
 
 
 def _promoted_directory_hubs(
@@ -117,3 +109,15 @@ def _supplemental_directory_hubs_for_node(
     ):
         return ("scripts/ops",)
     return ()
+
+
+def _matches_excluded_prefix(normalized: str, config: dict[str, object]) -> bool:
+    excluded_prefixes = [
+        prefix.strip("/")
+        for prefix in _as_string_list(config.get("excluded_prefixes"))
+        if prefix
+    ]
+    return any(
+        normalized == prefix or normalized.startswith(f"{prefix}/")
+        for prefix in excluded_prefixes
+    )

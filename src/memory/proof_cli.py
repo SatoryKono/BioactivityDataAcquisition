@@ -437,45 +437,10 @@ def _pilot(args: argparse.Namespace) -> int:
                 "degradations": list(result.degradations),
             }
         )
-    false_admit = sum(
-        1
-        for scenario in scenarios
-        if scenario["actual"] == "ADMIT" and scenario["expected"] != "ADMIT"
+    false_admit, tamper_accepts, stale_tamper_names, stale_tamper_accepts, failures = (
+        _pilot_safety_counts(scenarios)
     )
-    tamper_accepts = sum(
-        1
-        for scenario in scenarios
-        if "tampered" in scenario["name"] and scenario["actual"] == "ADMIT"
-    )
-    stale_tamper_names = {
-        "stale_source",
-        "stale_diff",
-        "policy_drift",
-        "command_set_drift",
-        "tampered_receipt",
-    }
-    stale_tamper_accepts = sum(
-        1
-        for scenario in scenarios
-        if scenario["name"] in stale_tamper_names and scenario["actual"] == "ADMIT"
-    )
-    failures = [scenario["name"] for scenario in scenarios if not scenario["passed"]]
-    non_admit = [scenario for scenario in scenarios if scenario["expected"] != "ADMIT"]
-    reason_covered = sum(
-        1 for scenario in non_admit if scenario["errors"] or scenario["degradations"]
-    )
-    binding_names = {
-        "stale_source",
-        "stale_diff",
-        "policy_drift",
-        "command_set_drift",
-        "unauthorized_vendor_override",
-        "cross_scope_receipt",
-        "sharded_ci_identity",
-    }
-    binding_scenarios = [
-        scenario for scenario in scenarios if scenario["name"] in binding_names
-    ]
+    non_admit, reason_covered, binding_scenarios = _pilot_reason_context(scenarios)
     replay = verify_bundle(
         bundle=baseline,
         repo_root=args.repo_root,
@@ -495,7 +460,7 @@ def _pilot(args: argparse.Namespace) -> int:
         "repository_mutation": 0,
         "unauthorized_durable_memory_write": 0,
     }
-    ok = not failures and all(value == 0 for value in absolute_blockers.values())
+    ok = _pilot_checks_pass(failures, absolute_blockers)
     payload = {
         "schema_version": 1,
         "protocol_version": "1.0.0",
@@ -736,6 +701,72 @@ def main(argv: list[str] | None = None) -> int:
         }
         print(json.dumps(payload, sort_keys=True), file=sys.stderr)
         return OUTCOME_EXIT_CODES["STOP"]
+
+
+def _pilot_safety_counts(
+    scenarios: list[dict[str, Any]],
+) -> tuple[int, int, set[str], int, list[str]]:
+    false_admit = sum(
+        1
+        for scenario in scenarios
+        if scenario["actual"] == "ADMIT" and scenario["expected"] != "ADMIT"
+    )
+    tamper_accepts = sum(
+        1
+        for scenario in scenarios
+        if "tampered" in scenario["name"] and scenario["actual"] == "ADMIT"
+    )
+    stale_tamper_names = {
+        "stale_source",
+        "stale_diff",
+        "policy_drift",
+        "command_set_drift",
+        "tampered_receipt",
+    }
+    stale_tamper_accepts = sum(
+        1
+        for scenario in scenarios
+        if scenario["name"] in stale_tamper_names and scenario["actual"] == "ADMIT"
+    )
+    failures = _pilot_failed_scenarios(scenarios)
+    return (
+        false_admit,
+        tamper_accepts,
+        stale_tamper_names,
+        stale_tamper_accepts,
+        failures,
+    )
+
+
+def _pilot_reason_context(
+    scenarios: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], int, list[dict[str, Any]]]:
+    non_admit = [scenario for scenario in scenarios if scenario["expected"] != "ADMIT"]
+    reason_covered = sum(
+        1 for scenario in non_admit if scenario["errors"] or scenario["degradations"]
+    )
+    binding_names = {
+        "stale_source",
+        "stale_diff",
+        "policy_drift",
+        "command_set_drift",
+        "unauthorized_vendor_override",
+        "cross_scope_receipt",
+        "sharded_ci_identity",
+    }
+    binding_scenarios = [
+        scenario for scenario in scenarios if scenario["name"] in binding_names
+    ]
+    return non_admit, reason_covered, binding_scenarios
+
+
+def _pilot_failed_scenarios(scenarios: list[dict[str, Any]]) -> list[str]:
+    failures = [scenario["name"] for scenario in scenarios if not scenario["passed"]]
+    return failures
+
+
+def _pilot_checks_pass(failures: list[str], absolute_blockers: dict[str, int]) -> bool:
+    return not failures and all(value == 0 for value in absolute_blockers.values())
 
 
 if __name__ == "__main__":
