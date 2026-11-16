@@ -8,6 +8,7 @@ decide which weekly job should run.
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 import os
@@ -44,6 +45,9 @@ from scripts.engineering.repo.github_settings_review import (
 
 SCHEMA_VERSION = 1
 ARCHIVE_INDEX_NAME = "index.json"
+RAW_NAME = "raw.json"
+OUTCOMES_NAME = "outcomes.json"
+MANIFEST_NAME = "manifest.json"
 PARTITION_NAME = "generated-artifact-daily-partition.json"
 WORKFLOW_PATH = ".github/workflows/nightly.yml"
 ACTIONS_RETENTION_CAP_DAYS = 90
@@ -399,9 +403,9 @@ def write_snapshot(
         root,
     )
     files = {
-        "raw.json": canonical_bytes(raw),
-        "outcomes.json": canonical_bytes(outcomes),
-        "manifest.json": canonical_bytes(manifest),
+        RAW_NAME: canonical_bytes(raw),
+        OUTCOMES_NAME: canonical_bytes(outcomes),
+        MANIFEST_NAME: canonical_bytes(manifest),
     }
     existing = [destination / name for name in files if (destination / name).exists()]
     if existing and not _same_snapshot(destination, files):
@@ -452,10 +456,75 @@ def require_accepted(ledger: Mapping[str, Any]) -> None:
         raise ArchiveError("durable archive has not aged 90 days")
 
 
+def _collect_pilot_configuration(
+    client: JsonGitHubClient, repository: str, raw: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Keep the actual workflow source separately from the unmodified API run."""
+
+    head = raw.get("head_sha")
+    if not isinstance(head, str) or raw.get("path") != WORKFLOW_PATH:
+        raise ArchiveError("pilot collection requires a Nightly code SHA")
+    _require_commit_sha(head)
+    endpoint = f"repos/{repository}/contents/{WORKFLOW_PATH}?{urlencode({'ref': head})}"
+    payload = client.json(["api", endpoint])
+    if not isinstance(payload, Mapping) or payload.get("encoding") != "base64":
+        raise ArchiveError("pilot workflow source is unavailable")
+    try:
+        content = "".join(payload["content"].splitlines())
+        source = base64.b64decode(content, validate=True).decode("utf-8")
+    except (KeyError, AttributeError, ValueError, UnicodeError) as exc:
+        raise ArchiveError("pilot workflow source is malformed") from exc
+    configuration = {
+        "configuration_id": PILOT_CONFIGURATION_ID,
+        "workflow_path": WORKFLOW_PATH,
+        "workflow_code_sha": head,
+        "workflow_blob_sha": payload.get("sha"),
+        "workflow_source": source,
+    }
+    _pilot_configuration_jobs(raw, {"pilot_configuration": configuration})
+    return configuration
+
+
+def _pilot_configuration_jobs(
+    raw: Mapping[str, Any], outcomes: Mapping[str, Any]
+) -> dict[str, Any]:
+    head = raw.get("head_sha")
+    if not isinstance(head, str) or raw.get("path") != WORKFLOW_PATH:
+        raise ArchiveError("pilot configuration has no Nightly code SHA")
+    _require_commit_sha(head)
+    configuration = outcomes.get("pilot_configuration")
+    if not isinstance(configuration, Mapping):
+        raise ArchiveError(
+            "pilot configuration evidence is missing; collect with --pilot"
+        )
+    expected = {
+        "configuration_id": PILOT_CONFIGURATION_ID,
+        "workflow_path": WORKFLOW_PATH,
+        "workflow_code_sha": raw.get("head_sha"),
+    }
+    if any(configuration.get(key) != value for key, value in expected.items()):
+        raise ArchiveError("pilot workflow configuration identity mismatch")
+    source = configuration.get("workflow_source")
+    if not isinstance(source, str):
+        raise ArchiveError("pilot workflow source is missing")
+    encoded = source.encode("utf-8")
+    blob = hashlib.sha1(
+        f"blob {len(encoded)}\0".encode() + encoded, usedforsecurity=False
+    ).hexdigest()
+    if blob != configuration.get("workflow_blob_sha"):
+        raise ArchiveError("pilot workflow source checksum mismatch")
+    jobs = _validated_workflow_jobs(source)
+    if any(snippet not in source for snippet in _WORKFLOW_DRIFT_SNIPPETS):
+        raise ArchiveError("pilot workflow configuration drifted")
+    return jobs
+
+
 def build_attempt_archive(
     client: JsonGitHubClient,
     repository: str,
     run: Mapping[str, Any],
+    *,
+    pilot: bool = False,
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     """Collect one attempt through the shared timing collector."""
 
@@ -495,6 +564,10 @@ def build_attempt_archive(
             "status": pagination_status,
         },
     }
+    if pilot:
+        outcomes["pilot_configuration"] = _collect_pilot_configuration(
+            client, repository, raw
+        )
     base_sha, tested_sha = pull_request_shas(dict(raw))
     head_sha = raw.get("head_sha") if isinstance(raw.get("head_sha"), str) else None
     manifest = {
@@ -532,6 +605,7 @@ def archive_runs(
     event: str | None,
     limit: int,
     output: Path,
+    pilot: bool = False,
 ) -> dict[str, Any]:
     """Write immutable attempt snapshots and a derived index."""
 
@@ -551,7 +625,9 @@ def archive_runs(
     )
     index_path = ensure_path_within_root(output / ARCHIVE_INDEX_NAME, output)
     index, previous_index_bytes = _existing_archive_index(output, index_path)
-    index, snapshots = _collect_archive_snapshots(client, repository, runs, index)
+    index, snapshots = _collect_archive_snapshots(
+        client, repository, runs, index, pilot=pilot
+    )
     _persist_archive_snapshots(
         output, index_path, index, previous_index_bytes, snapshots
     )
@@ -575,6 +651,8 @@ def _collect_archive_snapshots(
     repository: str,
     runs: Sequence[Mapping[str, Any]],
     existing_index: Sequence[dict[str, Any]],
+    *,
+    pilot: bool = False,
 ) -> tuple[
     list[dict[str, Any]],
     list[tuple[Mapping[str, Any], Mapping[str, Any], dict[str, Any]]],
@@ -596,7 +674,9 @@ def _collect_archive_snapshots(
         # can change even when this completed attempt has not changed.
         if key in index_by_key:
             continue
-        raw, outcomes, manifest = build_attempt_archive(client, repository, run)
+        raw, outcomes, manifest = build_attempt_archive(
+            client, repository, run, **({"pilot": True} if pilot else {})
+        )
         _bind_hashes(raw, outcomes, manifest)
         row = _index_row(manifest)
         key = _snapshot_key(row)
@@ -882,8 +962,8 @@ def _verify_one(manifest_path: Path) -> dict[str, Any]:
     destination = manifest_path.parent
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        raw_bytes = (destination / "raw.json").read_bytes()
-        outcomes_bytes = (destination / "outcomes.json").read_bytes()
+        raw_bytes = (destination / RAW_NAME).read_bytes()
+        outcomes_bytes = (destination / OUTCOMES_NAME).read_bytes()
         raw = json.loads(raw_bytes.decode("utf-8"))
         outcomes = json.loads(outcomes_bytes.decode("utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
@@ -893,9 +973,9 @@ def _verify_one(manifest_path: Path) -> dict[str, Any]:
     if manifest.get("schema_version") != SCHEMA_VERSION:
         raise ArchiveError(f"schema mismatch: {destination}")
     if oracle_sha256(raw_bytes) != manifest.get("raw_sha256"):
-        raise ArchiveError(f"checksum mismatch: {destination / 'raw.json'}")
+        raise ArchiveError(f"checksum mismatch: {destination / RAW_NAME}")
     if oracle_sha256(outcomes_bytes) != manifest.get("outcomes_sha256"):
-        raise ArchiveError(f"checksum mismatch: {destination / 'outcomes.json'}")
+        raise ArchiveError(f"checksum mismatch: {destination / OUTCOMES_NAME}")
     _verify_identity(destination, manifest, raw, outcomes)
     return _index_row(manifest)
 
@@ -1261,10 +1341,27 @@ def _pair_equivalence(
         return "not_passed"
     names = sorted(set(JOB_KINDS) | set(left_jobs) | set(right_jobs))
     compared = oracle_equivalent(left_jobs, right_jobs, job_names=names)
-    if compared["equivalent"] is True:
+    if compared["equivalent"] is True and _pilot_api_jobs_equivalent(left, right):
         return "passed"
     reasons.append("pair_not_equivalent")
     return "not_passed"
+
+
+def _pilot_api_jobs_equivalent(
+    left: Mapping[str, object], right: Mapping[str, object]
+) -> bool:
+    left_jobs = left.get("api_job_conclusions")
+    right_jobs = right.get("api_job_conclusions")
+    if left_jobs is None and right_jobs is None:
+        return True
+    if not isinstance(left_jobs, Mapping) or not isinstance(right_jobs, Mapping):
+        return False
+    return (
+        oracle_equivalent(
+            left_jobs, right_jobs, job_names=sorted(set(left_jobs) | set(right_jobs))
+        )["equivalent"]
+        is True
+    )
 
 
 def _pilot_success_total(
@@ -1294,10 +1391,12 @@ def _pilot_observation_binding(observation: Mapping[str, object]) -> dict[str, A
         "run_attempt",
         "head_sha",
         "configuration_id",
+        "configuration_sha256",
         "created_at",
         "event",
         "conclusion",
         "job_conclusions",
+        "api_job_conclusions",
         "dow",
         "dom",
         "month",
@@ -1321,6 +1420,7 @@ def _assess_pilot_pairs(
     result: dict[str, Any] = {
         "window_start_utc": None,
         "window_end_utc": None,
+        "window_start_observation": None,
         "comparable_pair_count": 0,
         "evaluated_pairs": [],
         "equivalence": "not_passed",
@@ -1328,22 +1428,29 @@ def _assess_pilot_pairs(
     if not suitable:
         reasons.append("no_comparable_pair")
         return result
-    starts = [
-        stamp
-        for item in suitable
-        if (stamp := _parse_utc(item["created_at"])) is not None
-    ]
-    if not starts:
+    opener = min(
+        suitable,
+        key=lambda item: (_parse_utc(item["created_at"]), canonical_bytes(item)),
+    )
+    start = _parse_utc(opener["created_at"])
+    if start is None:
         raise ArchiveError("pilot start is not UTC")
-    start = min(starts)
     close = start + timedelta(minutes=PILOT_DURATION_MINUTES)
     result["window_start_utc"] = start.strftime("%Y-%m-%dT%H:%M:%SZ")
     result["window_end_utc"] = close.strftime("%Y-%m-%dT%H:%M:%SZ")
+    result["window_start_observation"] = _pilot_observation_binding(opener)
     elapsed = _pilot_duration_elapsed(start, observations)
     if not elapsed:
         reasons.append("shorter_than_48_minutes")
     arms = _pilot_pair_arms(
-        observations, configuration_id=configuration_id, start=start, close=close
+        [
+            item
+            for item in observations
+            if _observation_sha(item) == _observation_sha(opener)
+        ],
+        configuration_id=configuration_id,
+        start=start,
+        close=close,
     )
     pairs, self_oracle = _find_comparable_pairs(arms)
     if self_oracle:
@@ -1441,6 +1548,7 @@ def assess_reduced_pilot_window(
         "reason_codes": sorted(set(reasons)),
         "window_start_utc": window["window_start_utc"],
         "window_end_utc": window["window_end_utc"],
+        "window_start_observation": window["window_start_observation"],
         "comparable_pair_count": window["comparable_pair_count"],
         "sample_size_pairs": window["comparable_pair_count"]
         if status == "complete"
@@ -1876,11 +1984,39 @@ def build_reduced_pilot_record(
     return record
 
 
-def _pilot_archive_job_results(outcomes: Mapping[str, Any]) -> dict[str, object]:
+def _pilot_job_id(name: str, jobs: Mapping[str, Any]) -> str:
+    matches = [
+        job_id
+        for job_id, job in jobs.items()
+        if name == (alias := job.get("name", job_id))
+        or ("uses" in job and name.startswith(f"{alias} / "))
+    ]
+    if len(matches) != 1:
+        raise ArchiveError(
+            f"pilot archive job identity is ambiguous or unknown: {name}"
+        )
+    return matches[0]
+
+
+def _pilot_job_group_result(conclusions: Sequence[object]) -> str:
+    for token in ("failure", "cancelled", "timed_out", "action_required", "stale"):
+        if token in conclusions:
+            return token
+    if not conclusions or any(
+        value not in {"success", "skipped"} for value in conclusions
+    ):
+        return "unknown"
+    return "success" if "success" in conclusions else "skipped"
+
+
+def _pilot_archive_job_results(
+    outcomes: Mapping[str, Any], jobs: Mapping[str, Any]
+) -> tuple[dict[str, object], dict[str, object]]:
     pagination = outcomes.get("pagination")
     if not isinstance(pagination, Mapping) or pagination.get("status") != "complete":
         raise ArchiveError("pilot archive pagination is not complete")
     results: dict[str, object] = {}
+    grouped: dict[str, list[object]] = {}
     for job in outcomes.get("jobs", []):
         if not isinstance(job, Mapping) or not isinstance(job.get("name"), str):
             raise ArchiveError("pilot archive job identity is missing")
@@ -1888,7 +2024,10 @@ def _pilot_archive_job_results(outcomes: Mapping[str, Any]) -> dict[str, object]
         if name in results or job.get("status") != "completed":
             raise ArchiveError("pilot archive job is duplicate or incomplete")
         results[name] = job.get("conclusion")
-    return results
+        grouped.setdefault(_pilot_job_id(name, jobs), []).append(job.get("conclusion"))
+    return {
+        name: _pilot_job_group_result(grouped.get(name, [])) for name in jobs
+    }, results
 
 
 def _pilot_archive_binding(
@@ -1897,11 +2036,11 @@ def _pilot_archive_binding(
     run_id, attempt = _snapshot_key(snapshot)
     destination = archive_root / f"run-{run_id}" / f"attempt-{attempt}"
     # Recheck against the verified identity before reading the evaluated bytes.
-    if _verify_one(destination / "manifest.json") != snapshot:
+    if _verify_one(destination / MANIFEST_NAME) != snapshot:
         raise ArchiveError("pilot snapshot changed after verification")
-    raw_bytes = (destination / "raw.json").read_bytes()
-    outcomes_bytes = (destination / "outcomes.json").read_bytes()
-    manifest = json.loads((destination / "manifest.json").read_text(encoding="utf-8"))
+    raw_bytes = (destination / RAW_NAME).read_bytes()
+    outcomes_bytes = (destination / OUTCOMES_NAME).read_bytes()
+    manifest = json.loads((destination / MANIFEST_NAME).read_text(encoding="utf-8"))
     raw = json.loads(raw_bytes)
     outcomes = json.loads(outcomes_bytes)
     if raw.get("path") != WORKFLOW_PATH:
@@ -1915,19 +2054,42 @@ def _pilot_archive_binding(
     stamp = _parse_utc(raw.get("created_at"))
     if stamp is None:
         raise ArchiveError("pilot snapshot timestamp is unknown")
+    jobs = _pilot_configuration_jobs(raw, outcomes)
+    configuration = outcomes["pilot_configuration"]
+    normalized_jobs, api_jobs = _pilot_archive_job_results(outcomes, jobs)
     observation = {
         **raw,
         "run_id": run_id,
         "run_attempt": attempt,
         "tested_sha": manifest.get("tested_sha"),
+        "configuration_id": configuration["configuration_id"],
+        "configuration_sha256": oracle_sha256(
+            configuration["workflow_source"].encode("utf-8")
+        ),
         "dow": UTC_WEEKDAY_NAMES[stamp.weekday()],
         "dom": stamp.strftime("%d"),
         "month": stamp.strftime("%m"),
-        "job_conclusions": _pilot_archive_job_results(outcomes),
+        "job_conclusions": normalized_jobs,
+        "api_job_conclusions": api_jobs,
         "raw_sha256": oracle_sha256(raw_bytes),
         "outcomes_sha256": oracle_sha256(outcomes_bytes),
     }
     return _pilot_observation_binding(observation)
+
+
+def pilot_observation_from_archive(
+    archive_root: Path, *, run_id: int, run_attempt: int, arm: str
+) -> dict[str, Any]:
+    """Use the same verified configuration and job mapping for assessment and restore."""
+
+    if arm not in {"baseline", "candidate"}:
+        raise ArchiveError("pilot arm must be baseline or candidate")
+    verified = verify_archive(archive_root)
+    snapshots = {_snapshot_key(row): row for row in verified["snapshots"]}
+    snapshot = snapshots.get((run_id, run_attempt))
+    if snapshot is None:
+        raise ArchiveError("pilot snapshot is missing")
+    return {**_pilot_archive_binding(archive_root, snapshot), "arm": arm}
 
 
 def _require_pilot_member_in_window(
@@ -1950,6 +2112,11 @@ def _require_pilot_member_in_window(
         close=close,
     ):
         raise ArchiveError("pilot snapshot is outside the evaluated window")
+    opener = assessment.get("window_start_observation")
+    if not isinstance(opener, Mapping) or _observation_sha(binding) != _observation_sha(
+        opener
+    ):
+        raise ArchiveError("pilot snapshot does not match the window start SHA")
 
 
 def _require_pilot_pair(
@@ -1993,10 +2160,32 @@ def _require_pilot_archive_pairs(
     ) != assessment.get("sample_size_pairs"):
         raise ArchiveError("pilot pair count does not match evaluated evidence")
     archived = {_snapshot_key(row): row for row in verified["snapshots"]}
+    _require_pilot_opener(assessment, archived, archive_root)
     for pair in pairs:
         if not isinstance(pair, Mapping):
             raise ArchiveError("pilot evaluated pair is malformed")
         _require_pilot_pair(pair, assessment, archived, archive_root)
+
+
+def _require_pilot_opener(
+    assessment: Mapping[str, Any],
+    archived: Mapping[tuple[int, int], Mapping[str, Any]],
+    archive_root: Path,
+) -> None:
+    opener = assessment.get("window_start_observation")
+    if not isinstance(opener, Mapping):
+        raise ArchiveError("pilot window start evidence is missing")
+    snapshot = archived.get(_snapshot_key(opener))
+    if snapshot is None or opener != _pilot_archive_binding(archive_root, snapshot):
+        raise ArchiveError("pilot window start is not in the verified archive")
+    if (
+        opener.get("event") != "schedule"
+        or opener.get("conclusion") != "success"
+        or opener.get("created_at") != assessment.get("window_start_utc")
+        or _job_block_reason(opener) is not None
+    ):
+        raise ArchiveError("pilot window start is not a successful scheduled run")
+    _require_pilot_member_in_window(opener, assessment)
 
 
 def require_pilot_advance(
@@ -2151,6 +2340,11 @@ def _command_archive(argv: Sequence[str]) -> int:
     parser.add_argument("--event", default="schedule")
     parser.add_argument("--limit", type=int, default=40)
     parser.add_argument("--output", required=True)
+    parser.add_argument(
+        "--pilot",
+        action="store_true",
+        help="bind the Nightly workflow at the run SHA for 48-minute pilot evidence",
+    )
     args = parser.parse_args(argv)
     output = resolve_cli_path(args.output, root=REPO_ROOT)
     output.mkdir(parents=True, exist_ok=True)
@@ -2163,6 +2357,7 @@ def _command_archive(argv: Sequence[str]) -> int:
         event=args.event or None,
         limit=args.limit,
         output=output,
+        pilot=args.pilot,
     )
     print(json.dumps(report, sort_keys=True))
     return 0

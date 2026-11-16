@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import inspect
+import base64
+import hashlib
 import json
 import shutil
 from datetime import UTC, datetime, timedelta
@@ -25,6 +27,7 @@ from scripts.engineering.ci.nightly_shadow_archive import (
     assess_reduced_pilot_window,
     assess_shadow_window,
     build_reduced_pilot_record,
+    build_attempt_archive,
     canonical_bytes,
     job_duty,
     main,
@@ -35,6 +38,7 @@ from scripts.engineering.ci.nightly_shadow_archive import (
     partition_bucket,
     partition_producer,
     pilot_record_sha256,
+    pilot_observation_from_archive,
     require_accepted,
     require_pilot_advance,
     verify_archive,
@@ -1176,6 +1180,43 @@ def test_pair_count_covers_all_unique_pairs() -> None:
     assert result["sample_size_pairs"] == 4
 
 
+def test_pilot_pairs_cannot_borrow_a_scheduled_start_from_another_sha() -> None:
+    observations = [
+        _pilot_success(
+            401, arm="baseline", created_at="2026-11-20T03:00:00Z", dow="Fri"
+        ),
+        _pilot_success(
+            402,
+            arm="baseline",
+            created_at="2026-11-20T03:01:00Z",
+            dow="Fri",
+            event="workflow_dispatch",
+            head_sha="b" * 40,
+        ),
+        _pilot_success(
+            403,
+            arm="candidate",
+            created_at="2026-11-20T03:48:00Z",
+            dow="Fri",
+            event="workflow_dispatch",
+            head_sha="b" * 40,
+        ),
+    ]
+    for items in permutations(observations):
+        result = assess_reduced_pilot_window(
+            list(items),
+            **_pilot_options(
+                scheduled_success_total_count=1,
+                independent_review=True,
+                independent_restore=True,
+            ),
+        )
+        assert result["n2_blocked"] is True
+        assert result["comparable_pair_count"] == 0
+        assert result["window_start_observation"]["tested_sha"] == _SHA
+        assert "no_comparable_pair" in result["reason_codes"]
+
+
 def test_manual_candidate_does_not_block_a_scheduled_window() -> None:
     observations = [
         _pilot_success(
@@ -1312,35 +1353,72 @@ def test_verified_archive_still_blocks_n2_for_an_unopened_pilot(tmp_path: Path) 
         require_pilot_advance(assessment, tmp_path)
 
 
-def _archived_pilot_pair(root: Path) -> dict[str, object]:
-    observations = []
-    for run_id, arm, stamp in (
-        (130, "baseline", "2026-11-20T03:00:00Z"),
-        (131, "candidate", "2026-11-20T03:48:00Z"),
-    ):
-        raw = {
-            **_raw(run_id, head=_SHA),
-            "created_at": stamp,
-            "configuration_id": PILOT_CONFIGURATION_ID,
-        }
-        outcomes = _outcomes(fetched=len(JOB_KINDS), total=len(JOB_KINDS))
-        outcomes["jobs"] = [
-            {"name": name, "status": "completed", "conclusion": result}
-            for name, result in _results().items()
-        ]
-        _store(root, raw, outcomes)
-        observations.append(
-            _pilot_success(
-                run_id,
-                arm=arm,
-                created_at=stamp,
-                dow="Fri",
-                dom="20",
-                raw_sha256=oracle_sha256(canonical_bytes(raw)),
-                outcomes_sha256=oracle_sha256(canonical_bytes(outcomes)),
+class _PilotApiClient:
+    def __init__(self) -> None:
+        self.workflow = (REPO_ROOT / archive_module.WORKFLOW_PATH).read_bytes()
+        self.jobs = []
+        for job_id, conclusion in _results().items():
+            name = job_id
+            if job_id == "generated-artifact-daily":
+                name = "Generated artifact assertions (daily)"
+            elif job_id in {
+                "tests",
+                "e2e",
+                "security",
+                "duplication",
+                "import-linter",
+                "zizmor",
+            }:
+                name = f"{job_id} / {job_id}-complete"
+            self.jobs.append(
+                {"name": name, "status": "completed", "conclusion": conclusion}
             )
+        self.jobs.extend(
+            [
+                {
+                    "name": "tests / Unit fast (unit-domain)",
+                    "status": "completed",
+                    "conclusion": "success",
+                },
+                {
+                    "name": "tests / conditional lane",
+                    "status": "completed",
+                    "conclusion": "skipped",
+                },
+            ]
         )
-    _seal_index(root)
+
+    def json(self, args: list[str]) -> dict:
+        if "/contents/" in args[1]:
+            assert args[1].endswith(f"?ref={_SHA}")
+            blob = hashlib.sha1(
+                f"blob {len(self.workflow)}\0".encode() + self.workflow,
+                usedforsecurity=False,
+            ).hexdigest()
+            return {
+                "encoding": "base64",
+                "content": base64.b64encode(self.workflow).decode(),
+                "sha": blob,
+            }
+        assert "/attempts/1/jobs?" in args[1]
+        return {"jobs": self.jobs, "total_count": len(self.jobs)}
+
+
+def _pilot_api_runs() -> list[dict]:
+    return [
+        {**_raw(run_id, head=_SHA), "created_at": stamp}
+        for run_id, stamp in (
+            (130, "2026-11-20T03:00:00Z"),
+            (131, "2026-11-20T03:48:00Z"),
+        )
+    ]
+
+
+def _archived_pilot_assessment(root: Path) -> dict[str, object]:
+    observations = [
+        pilot_observation_from_archive(root, run_id=run_id, run_attempt=1, arm=arm)
+        for run_id, arm in ((130, "baseline"), (131, "candidate"))
+    ]
     return assess_reduced_pilot_window(
         observations,
         **_pilot_options(
@@ -1351,6 +1429,50 @@ def _archived_pilot_pair(root: Path) -> dict[str, object]:
     )
 
 
+def _archived_pilot_pair(root: Path) -> dict[str, object]:
+    client = _PilotApiClient()
+    for run in _pilot_api_runs():
+        raw, outcomes, manifest = build_attempt_archive(
+            client, "owner/repository", run, pilot=True
+        )
+        assert "configuration_id" not in raw
+        write_snapshot(root, raw=raw, outcomes=outcomes, manifest=manifest)
+    _seal_index(root)
+    return _archived_pilot_assessment(root)
+
+
+def test_pilot_archive_runs_binds_real_api_configuration_and_job_names(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runs = _pilot_api_runs()
+    monkeypatch.setattr(
+        archive_module, "collect_selected_runs", lambda *args, **kwargs: runs
+    )
+    archive_runs(
+        _PilotApiClient(),
+        "owner/repository",
+        workflow="nightly.yml",
+        branch="main",
+        event="schedule",
+        limit=2,
+        output=tmp_path,
+        pilot=True,
+    )
+    assessment = _archived_pilot_assessment(tmp_path)
+    assert assessment["n2_blocked"] is False
+    jobs = assessment["evaluated_pairs"][0]["baseline"]["job_conclusions"]
+    assert jobs["generated-artifact-daily"] == "success"
+    assert jobs["tests"] == "success"
+    assert (
+        assessment["evaluated_pairs"][0]["baseline"]["api_job_conclusions"][
+            "tests / conditional lane"
+        ]
+        == "skipped"
+    )
+    require_pilot_advance(assessment, tmp_path)
+
+
 def test_pilot_advance_requires_the_evaluated_archive(tmp_path: Path) -> None:
     assessment = _archived_pilot_pair(tmp_path / "pilot")
     assert assessment["n2_blocked"] is False
@@ -1359,8 +1481,121 @@ def test_pilot_advance_requires_the_evaluated_archive(tmp_path: Path) -> None:
     _store(unrelated, _raw(), _outcomes())
     _seal_index(unrelated)
     assert verify_archive(unrelated)["status"] == "verified"
-    with pytest.raises(ArchiveError, match="pilot snapshot missing"):
+    with pytest.raises(
+        ArchiveError, match="window start is not in the verified archive"
+    ):
         require_pilot_advance(assessment, unrelated)
+
+
+def test_pilot_requires_collected_configuration_instead_of_an_api_custom_field(
+    tmp_path: Path,
+) -> None:
+    raw = {**_raw(130, head=_SHA), "configuration_id": PILOT_CONFIGURATION_ID}
+    _store(tmp_path, raw, _outcomes())
+    _seal_index(tmp_path)
+    with pytest.raises(ArchiveError, match="configuration evidence is missing"):
+        pilot_observation_from_archive(
+            tmp_path, run_id=130, run_attempt=1, arm="baseline"
+        )
+
+
+@pytest.mark.parametrize("mutation", ["cadence", "checksum", "code_sha"])
+def test_pilot_collector_rejects_unverified_workflow_configuration(
+    mutation: str,
+) -> None:
+    client = _PilotApiClient()
+    if mutation == "cadence":
+        client.workflow = client.workflow.replace(b"dow == 'Mon'", b"dow == 'Fri'", 1)
+    if mutation == "cadence":
+        with pytest.raises(ArchiveError, match="cadence drifted"):
+            build_attempt_archive(
+                client, "owner/repository", _pilot_api_runs()[0], pilot=True
+            )
+        return
+    raw, outcomes, _ = build_attempt_archive(
+        client, "owner/repository", _pilot_api_runs()[0], pilot=True
+    )
+    configuration = outcomes["pilot_configuration"]
+    configuration[
+        "workflow_blob_sha" if mutation == "checksum" else "workflow_code_sha"
+    ] = "0" * 40
+    with pytest.raises(ArchiveError, match="checksum mismatch|identity mismatch"):
+        archive_module._pilot_configuration_jobs(raw, outcomes)
+
+
+@pytest.mark.parametrize("conclusion", ["failure", "cancelled", "unknown", "skipped"])
+def test_pilot_reusable_job_results_fail_closed(conclusion: str) -> None:
+    client = _PilotApiClient()
+    for job in client.jobs:
+        if job["name"].startswith("tests / "):
+            job["conclusion"] = conclusion
+    raw, outcomes, _ = build_attempt_archive(
+        client, "owner/repository", _pilot_api_runs()[0], pilot=True
+    )
+    jobs = archive_module._pilot_configuration_jobs(raw, outcomes)
+    normalized, _ = archive_module._pilot_archive_job_results(outcomes, jobs)
+    observation = _pilot_success(
+        130,
+        arm="baseline",
+        created_at="2026-11-20T03:00:00Z",
+        dow="Fri",
+        job_conclusions=normalized,
+    )
+    assert archive_module._job_block_reason(observation) is not None
+
+
+def test_pilot_equivalence_preserves_reusable_child_outcome_differences(
+    tmp_path: Path,
+) -> None:
+    assessment = _archived_pilot_pair(tmp_path)
+    pair = assessment["evaluated_pairs"][0]
+    pair["candidate"]["api_job_conclusions"]["tests / conditional lane"] = "success"
+    reasons = []
+    assert (
+        archive_module._pair_equivalence(pair["baseline"], pair["candidate"], reasons)
+        == "not_passed"
+    )
+    assert "pair_not_equivalent" in reasons
+
+
+@pytest.mark.parametrize("change", ["unknown_name", "duplicate_name", "incomplete"])
+def test_pilot_job_mapping_rejects_ambiguous_or_incomplete_evidence(
+    change: str,
+) -> None:
+    client = _PilotApiClient()
+    if change == "unknown_name":
+        client.jobs[0]["name"] = "unrecognized job"
+    elif change == "duplicate_name":
+        client.jobs.append(dict(client.jobs[0]))
+    else:
+        client.jobs[0]["status"] = "in_progress"
+    raw, outcomes, _ = build_attempt_archive(
+        client, "owner/repository", _pilot_api_runs()[0], pilot=True
+    )
+    jobs = archive_module._pilot_configuration_jobs(raw, outcomes)
+    with pytest.raises(
+        ArchiveError, match="identity is ambiguous or unknown|duplicate or incomplete"
+    ):
+        archive_module._pilot_archive_job_results(outcomes, jobs)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("head_sha", "b" * 40),
+        ("event", "workflow_dispatch"),
+        ("created_at", "2026-11-20T03:01:00Z"),
+    ],
+)
+def test_pilot_advance_rechecks_the_archived_window_start(
+    tmp_path: Path, field: str, value: str
+) -> None:
+    assessment = _archived_pilot_pair(tmp_path)
+    assessment["window_start_observation"][field] = value
+    with pytest.raises(
+        ArchiveError, match="window start is not in the verified archive"
+    ):
+        require_pilot_advance(assessment, tmp_path)
 
 
 @pytest.mark.parametrize(

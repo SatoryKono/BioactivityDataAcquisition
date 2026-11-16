@@ -55,6 +55,7 @@
     "shallow_checkout": false,
     "status": "not_opened",
     "window_end_utc": null,
+    "window_start_observation": null,
     "window_start_utc": null
   },
   "baseline_ref": "origin/main",
@@ -280,7 +281,7 @@
     "successful_scheduled_nightly_total_count": 0
   },
   "schema_version": 1,
-  "sha256": "93218e7e3a0cf5b63a22f6e7dd66c39bca1415d168a4349faad6a2c8a4190fa0",
+  "sha256": "8d8824f60299c031f89cfcb4e09f31e94a413d3461455d16670bd344e517b258",
   "shallow_checkout": false,
   "status": "not_opened",
   "synthetic_events": false,
