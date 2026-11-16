@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-16T00:59:46.056088+00:00",
+  "generated_at": "2026-11-16T02:50:59.160902+00:00",
   "summary": {
     "total_scripts": 753,
     "status_counts": {
@@ -3034,7 +3034,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1972,
+          "line": 2008,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check >> \"$log\" 2>&1"
         },
@@ -11095,7 +11095,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1862,
+          "line": 1898,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.junit_duration_summary"
         },
@@ -11573,7 +11573,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1487,
+          "line": 1523,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.pytest_event_journal \\"
         },
@@ -11665,7 +11665,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2064,
+          "line": 2100,
           "source_group": "ci",
           "text": "\"python -m scripts.engineering.ci.quality_integral_gate\" \\"
         },
@@ -11891,7 +11891,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1461,
+          "line": 1497,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -12806,7 +12806,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2050,
+          "line": 2086,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -16666,7 +16666,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1374,
+          "line": 1410,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa.generate_hotspot_degradation_report \\"
         },
@@ -25240,7 +25240,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_run_selection_context_projection.py",
-          "line": 118,
+          "line": 126,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._run_selection_context import ("
         }
@@ -26520,7 +26520,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -26537,6 +26537,12 @@
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
           "line": 1766,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_candidate.py\": \"e435d491abd9d8a8e07d05b820cafb5b90c381c961bfacf42f60a1ae2bd7a7d1\","
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 1965,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_candidate.py\": \"e435d491abd9d8a8e07d05b820cafb5b90c381c961bfacf42f60a1ae2bd7a7d1\","
         },
@@ -26575,7 +26581,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 19,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -26636,7 +26642,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -26934,7 +26940,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
@@ -27077,7 +27083,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
