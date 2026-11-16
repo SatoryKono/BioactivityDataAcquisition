@@ -112,6 +112,10 @@ DOCUMENTATION_CLEANUP_INVENTORY_TEST = (
 NIGHTLY_SHADOW_ARCHIVE_TEST = (
     "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py"
 )
+NIGHTLY_SHADOW_INVENTORY_TEST = (
+    "tests/unit/scripts/engineering/ci/test_nightly_shadow_inventory.py"
+)
+NIGHTLY_SHADOW_TESTS = (NIGHTLY_SHADOW_ARCHIVE_TEST, NIGHTLY_SHADOW_INVENTORY_TEST)
 ISSUE_12475_PHYSICAL_PARITY_TESTS = (
     "tests/integration/infrastructure/storage/test_issue_12475_physical_parity.py",
     "tests/integration/infrastructure/storage/test_gold_writer_versioning.py",
@@ -972,7 +976,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
-    "docs/reports/audit/N1_SHADOW_STATUS.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
+    "docs/reports/audit/N1_SHADOW_STATUS.md": NIGHTLY_SHADOW_TESTS,
     "src/bioetl/infrastructure/adapters/decorators/README.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
     ),
@@ -980,7 +984,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/domain/services/test_composite_metadata_helpers.py",
     ),
     # N1 coordinator status note (sibling of reports/governance/n1-shadow-window/).
-    "reports/governance/n1-shadow-window-status.md": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
+    "reports/governance/n1-shadow-window-status.md": NIGHTLY_SHADOW_TESTS,
     "docs/04-reference/environment-variables.md": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
@@ -1419,6 +1423,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "tests/unit/scripts/engineering/ci/fixtures/n1_historical_baseline.json": (
         NIGHTLY_SHADOW_ARCHIVE_TEST,
     ),
+    "scripts/engineering/ci/nightly_shadow_archive.py": NIGHTLY_SHADOW_TESTS,
     "package.json": (
         "tests/architecture/test_observability_dashboard_tooling.py",
         NPM_RUNTIME_TEST,
@@ -1764,7 +1769,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     ),
     "reports/test-telemetry/": TELEMETRY_BASELINE_TESTS,
     "reports/performance/": BENCHMARK_EVIDENCE_TESTS,
-    "reports/governance/n1-shadow-window/": (NIGHTLY_SHADOW_ARCHIVE_TEST,),
+    "reports/governance/n1-shadow-window/": NIGHTLY_SHADOW_TESTS,
     "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.": (
         NPM_RUNTIME_TEST,
     ),
