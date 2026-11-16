@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 
 from .models import (
     ClassificationResult,
@@ -108,7 +108,11 @@ def _normalized_input_fields(
 
 def _copy_input_row(row: RawTargetRow) -> RawTargetRow:
     """Keep the concrete row type while detaching caller-owned source fields."""
-    return replace(row, fields=dict(row.fields))
+    return RawTargetRow(
+        input_row_id=row.input_row_id,
+        fields=dict(row.fields),
+        target_kind=row.target_kind,
+    )
 
 
 def validate_input(
