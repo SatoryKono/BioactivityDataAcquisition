@@ -455,11 +455,11 @@ def test_hooks_manifest_points_at_existing_script() -> None:
     }
     for name in ("beforeShellExecution", "preToolUse"):
         entry = hooks[name][0]
-        assert entry["command"] == "python .cursor/hooks/gate.py"
+        assert entry["command"] == "python3 .cursor/hooks/gate.py"
         assert entry["failClosed"] is True
         assert "matcher" not in entry
     for name in ("sessionStart", "postToolUse"):
         entry = hooks[name][0]
-        assert entry["command"] == "python .cursor/hooks/gate.py"
+        assert entry["command"] == "python3 .cursor/hooks/gate.py"
         assert "failClosed" not in entry
     assert _GATE_PATH.is_file()
