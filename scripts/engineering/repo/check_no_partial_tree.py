@@ -184,13 +184,31 @@ def check_checkout_state(repo: str | Path) -> list[str]:
     return list(dict.fromkeys(problems))
 
 
+def _top_entries(repo: Path, sha: str) -> dict[str, str]:
+    """Read names and object kinds together from one immutable tree."""
+    if not _SHA_RE.fullmatch(sha):
+        raise EvidenceError("tree identity must be an immutable commit SHA")
+    rows = _run_git(repo, "ls-tree", "-z", "--end-of-options", sha)
+    entries = {}
+    for row in filter(None, rows.split("\x00")):
+        metadata, separator, name = row.partition("\t")
+        fields = metadata.split()
+        if (
+            not separator
+            or not name
+            or len(fields) != 3
+            or fields[1] not in {"tree", "blob", "commit"}
+            or not _SHA_RE.fullmatch(fields[2])
+        ):
+            raise EvidenceError("tree entries are unavailable or invalid")
+        entries[name] = fields[1]
+    return entries
+
+
 def _top_directories(repo: Path, sha: str) -> frozenset[str]:
     """Read directory anchors; optional root-file removal is a separate policy."""
-    rows = _run_git(repo, "ls-tree", "-z", "--end-of-options", sha)
     return frozenset(
-        row.split("\t", 1)[1]
-        for row in rows.split("\x00")
-        if row and row.split()[1] == "tree"
+        name for name, kind in _top_entries(repo, sha).items() if kind == "tree"
     )
 
 
@@ -223,16 +241,22 @@ def _renamed_paths(
     return renamed
 
 
-def _missing_directory_content(repo: Path, base: str, tip: str) -> bool:
+def _missing_directory_content(
+    repo: Path,
+    base: str,
+    tip: str,
+    base_entries: dict[str, str],
+    tip_entries: dict[str, str],
+) -> bool:
     """Reject loss of whole directory anchors, allowing evidenced relocations.
 
     A tree cannot prove whether individual deletions were intentional. Existing
     root, artifact and product contracts remain necessary for intra-directory
     omissions. Local sparse provenance is checked independently.
     """
-    missing = (
-        _top_directories(repo, base) - _top_directories(repo, tip)
-    ) & DIRECTORY_ANCHORS
+    base_directories = {name for name, kind in base_entries.items() if kind == "tree"}
+    tip_directories = {name for name, kind in tip_entries.items() if kind == "tree"}
+    missing = (base_directories - tip_directories) & DIRECTORY_ANCHORS
     if not missing:
         return False
     paths = _run_git(
@@ -401,18 +425,18 @@ def _git(repo: str | Path, *args: str) -> str:
     return _run_git(cwd, verb, *extra)
 
 
-def _top_level_names(repo: str | Path, revision: str) -> frozenset[str]:
-    cwd = validate_repo(repo)
-    sha = resolve_revision(cwd, revision)
-    stdout = _run_git(cwd, "ls-tree", "--name-only", "--end-of-options", sha)
-    return frozenset(line for line in stdout.splitlines() if line)
-
-
-def _parent_shas(repo: str | Path, revision: str) -> list[str]:
-    cwd = validate_repo(repo)
-    sha = resolve_revision(cwd, revision)
-    stdout = _run_git(cwd, "log", "--format=%P", "-1", "--end-of-options", sha)
-    return stdout.split()
+def _history_commits(repo: Path, base: str, tip: str) -> list[tuple[str, list[str]]]:
+    """Read every candidate and its parents in one bounded Git invocation."""
+    stdout = _run_git(
+        repo, "rev-list", "--parents", "--reverse", "--end-of-options", f"{base}..{tip}"
+    )
+    commits = []
+    for line in stdout.splitlines():
+        fields = line.split()
+        if not fields or not all(_SHA_RE.fullmatch(sha) for sha in fields):
+            raise EvidenceError("candidate history is unavailable or invalid")
+        commits.append((fields[0], fields[1:]))
+    return commits
 
 
 def _shallow_boundaries(repo: Path) -> frozenset[str]:
@@ -454,27 +478,27 @@ def find_collapsing_commits(
     tip_sha = resolve_revision(cwd, tip)
     shallow = _shallow_boundaries(cwd)
     _historical_base(cwd, base_sha, tip_sha)
-    revisions = [
-        line
-        for line in _run_git(
-            cwd,
-            "rev-list",
-            "--reverse",
-            "--end-of-options",
-            f"{base_sha}..{tip_sha}",
-        ).splitlines()
-        if line
-    ]
+    commits = _history_commits(cwd, base_sha, tip_sha)
+    revisions = [revision for revision, _ in commits]
     if shallow.intersection(revisions):
         raise EvidenceError("candidate range crosses incomplete shallow history")
     offenders: list[str] = []
-    for revision in revisions:
-        if not _parent_shas(cwd, revision):
+    # Only immutable commit trees are reused, and only within this inspection.
+    # Mutable refs, index state and shallow boundaries are always read afresh.
+    trees: dict[str, dict[str, str]] = {}
+    for revision, parents in commits:
+        if not parents:
             raise EvidenceError("unrelated root cannot qualify for shared history")
         historical_base = _historical_base(cwd, base_sha, revision)
+        for sha in (historical_base, revision):
+            if sha not in trees:
+                trees[sha] = _top_entries(cwd, sha)
+        base_entries, tip_entries = trees[historical_base], trees[revision]
         if is_collapsed_tree(
-            _top_level_names(cwd, historical_base), _top_level_names(cwd, revision)
-        ) or _missing_directory_content(cwd, historical_base, revision):
+            frozenset(base_entries), frozenset(tip_entries)
+        ) or _missing_directory_content(
+            cwd, historical_base, revision, base_entries, tip_entries
+        ):
             offenders.append(revision)
     if shallow != _shallow_boundaries(cwd):
         raise EvidenceError("history completeness changed during inspection")

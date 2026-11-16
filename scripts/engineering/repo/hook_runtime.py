@@ -205,6 +205,12 @@ def run(kind: str, hooks: Path, args: list[str], payload: bytes = b"") -> int:
             BIOETL_HOOK_PROJECT_PYTHON=sys.executable,
             PRE_COMMIT_HOME=state["pre_commit_home"],
         )
+        # Older checkout launchers do not bind imports themselves. The shared
+        # interpreter's editable install must not select another worktree.
+        env["PYTHONPATH"] = os.pathsep.join(
+            [str(repo / "src"), str(repo)]
+            + ([env["PYTHONPATH"]] if env.get("PYTHONPATH") else [])
+        )
         result = _execute_commands(commands, repo, hooks, kind, payload, env, start)
         if result:
             return result

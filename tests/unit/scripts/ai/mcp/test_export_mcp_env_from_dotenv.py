@@ -26,6 +26,7 @@ EXPORT_SCRIPT = REPO_ROOT / "scripts" / "ai" / "mcp" / "export_mcp_env_from_dote
 
 # Keys that the export script may surface from process env / .env aliases.
 _MCP_ENV_KEYS = (
+    "GH_TOKEN",
     "GITHUB_TOKEN",
     "GITHUB_PERSONAL_ACCESS_TOKEN",
     "GITHUB_CDX_PERSONAL_ACCESS_TOKEN",
@@ -263,14 +264,19 @@ class TestExportMcpEnvFromDotenv:
             )
 
     @POWERSHELL_MARK
-    def test_empty_env_reports_zero_keys(self, tmp_path: Path) -> None:
+    def test_empty_env_reports_zero_keys(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Test that empty .env reports zero exported keys."""
         env_file = tmp_path / ".env"
         env_file.write_text("", encoding="utf-8")
+        host_token = "inherited-host-token-sentinel"
+        monkeypatch.setenv("GH_TOKEN", host_token)
 
         result = run_export_script(tmp_path)
         assert result.returncode == 0, result.stderr or result.stdout
         assert "0 MCP-related keys present" in result.stdout
+        assert os.environ["GH_TOKEN"] == host_token
 
     @POWERSHELL_MARK
     def test_script_uses_provided_repo_root(self, tmp_path: Path) -> None:
