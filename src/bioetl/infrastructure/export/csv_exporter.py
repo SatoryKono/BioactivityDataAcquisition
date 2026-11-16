@@ -68,6 +68,19 @@ def _export_root(base_path: Path) -> Path:
     return base_path.expanduser().resolve(strict=False)
 
 
+def _invalid_table_name(candidate: Path, name: str) -> bool:
+    """Reject both native path components and cross-platform separators."""
+    return (
+        candidate.is_absolute()
+        or len(candidate.parts) != 1
+        or candidate.name != name
+        or name in {".", ".."}
+        or "/" in name
+        or "\\" in name
+        or "\0" in name
+    )
+
+
 def _resolve_table_csv_path(base_path: Path, table_name: str) -> Path:
     """Resolve ``{table_name}.csv`` under the export root; reject traversal."""
     name = table_name.strip() if isinstance(table_name, str) else ""
@@ -76,15 +89,7 @@ def _resolve_table_csv_path(base_path: Path, table_name: str) -> Path:
     candidate = Path(name)
     # Reject separators explicitly: on POSIX a backslash is a legal name
     # character and would otherwise pass Path.parts checks.
-    if (
-        candidate.is_absolute()
-        or len(candidate.parts) != 1
-        or candidate.name != name
-        or name in {".", ".."}
-        or "/" in name
-        or "\\" in name
-        or "\0" in name
-    ):
+    if _invalid_table_name(candidate, name):
         raise ValueError(f"invalid CSV export table name: {table_name!r}")
     root = _export_root(base_path)
     csv_path = (root / f"{name}.csv").resolve(strict=False)

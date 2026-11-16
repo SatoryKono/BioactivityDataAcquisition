@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pytest
-from dataclasses import replace
+from dataclasses import dataclass, replace
 import json
 import os
 from pathlib import Path
@@ -53,6 +53,26 @@ def _row(**fields: str | None) -> RawTargetRow:
     }
     payload.update(fields)
     return RawTargetRow("row-1", payload, target_kind="protein")
+
+
+@dataclass(frozen=True, slots=True)
+class _ExtendedRawTargetRow(RawTargetRow):
+    note: str = "subclass metadata"
+
+
+@pytest.mark.parametrize("row_type", (RawTargetRow, _ExtendedRawTargetRow))
+def test_input_snapshot_preserves_concrete_row_class_and_detaches_fields(
+    row_type: type[RawTargetRow],
+) -> None:
+    row = row_type("row-1", {"target_id": "840"}, "protein")
+    snapshot = normalization_module._copy_input_row(row)
+    assert type(snapshot) is row_type
+    assert snapshot == row
+    assert snapshot is not row
+    assert snapshot.fields is not row.fields
+    assert getattr(snapshot, "note", None) == getattr(row, "note", None)
+    snapshot.fields["target_id"] = "detached snapshot"
+    assert row.fields == {"target_id": "840"}
 
 
 @pytest.mark.parametrize(

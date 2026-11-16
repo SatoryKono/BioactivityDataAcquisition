@@ -78,25 +78,7 @@ def _git_last_commit_age_days_bulk(
         chunk = pending_paths[start_index : start_index + chunk_size]
         if not chunk:
             continue
-        tracked_chunk = _git_chunk_tracked_paths(
-            git_executable=git_executable,
-            root=root,
-            chunk=chunk,
-        )
-        untracked_paths = sorted(set(chunk) - set(tracked_chunk))
-        for path in untracked_paths:
-            cache[path] = None
-            resolved[path] = None
-        if not tracked_chunk:
-            continue
-        chunk_results = _git_chunk_commit_ages(
-            git_executable=git_executable,
-            root=root,
-            chunk=tracked_chunk,
-            today=today,
-        )
-        cache.update(chunk_results)
-        resolved.update(chunk_results)
+        _resolve_commit_age_chunk(git_executable, root, chunk, today, cache, resolved)
     return {path: resolved.get(path) for path in unique_paths}
 
 
@@ -219,3 +201,32 @@ def _parse_git_chunk_age_output(
         if not unresolved:
             break
     return chunk_results
+
+
+def _resolve_commit_age_chunk(
+    git_executable: str,
+    root: Path,
+    chunk: list[str],
+    today: date,
+    cache: dict[str, int | None],
+    resolved: dict[str, int | None],
+) -> None:
+    tracked_chunk = _git_chunk_tracked_paths(
+        git_executable=git_executable,
+        root=root,
+        chunk=chunk,
+    )
+    untracked_paths = sorted(set(chunk) - set(tracked_chunk))
+    for path in untracked_paths:
+        cache[path] = None
+        resolved[path] = None
+    if not tracked_chunk:
+        return
+    chunk_results = _git_chunk_commit_ages(
+        git_executable=git_executable,
+        root=root,
+        chunk=tracked_chunk,
+        today=today,
+    )
+    cache.update(chunk_results)
+    resolved.update(chunk_results)

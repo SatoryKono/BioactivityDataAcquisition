@@ -540,9 +540,11 @@ def test_relocated_router_verifiers_trigger_both_ci_event_filters():
     paths = (
         "scripts/ops/observability/grafana/router_rootfs.py",
         "scripts/ops/observability/grafana/router_managed_image.py",
+        "scripts/ops/observability/grafana/router_candidate.py",
         "scripts/ops/__main__.py",
         "tests/unit/scripts/ops/test_router_rootfs.py",
         "tests/unit/scripts/ops/test_router_managed_image.py",
+        "tests/unit/scripts/ops/test_router_candidate.py",
     )
     workflow = yaml.safe_load(
         (ROOT / ".github/workflows/router-v7-bridge.yml").read_text(encoding="utf-8")
@@ -575,7 +577,11 @@ def test_relocated_router_verifiers_trigger_both_ci_event_filters():
         for job in workflow["jobs"].values()
         for step in job.get("steps", [])
     )
-    for test_name in ("test_router_rootfs.py", "test_router_managed_image.py"):
+    for test_name in (
+        "test_router_rootfs.py",
+        "test_router_managed_image.py",
+        "test_router_candidate.py",
+    ):
         invocation = f"/usr/bin/python3 ../../../tests/unit/scripts/ops/{test_name}"
         assert invocation in circle_runs
         assert invocation in github_runs

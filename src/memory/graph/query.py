@@ -1067,12 +1067,7 @@ def _format_neighbors_rows(
         direction = str(row.get("direction") or "")
         if not relation_type or not neighbor_name:
             continue
-        neighbor_labels = row.get("neighbor_labels")
-        label_str = (
-            ",".join(str(label) for label in neighbor_labels)
-            if isinstance(neighbor_labels, list)
-            else ""
-        )
+        label_str = _neighbor_label_string(row)
         key = (direction, relation_type, neighbor_name, label_str)
         if key in seen:
             continue
@@ -1971,6 +1966,17 @@ def graph_query_main(argv: list[str] | None = None) -> int:
 
 
 main = graph_query_main
+
+
+def _neighbor_label_string(row: dict[str, JsonValue]) -> str:
+    neighbor_labels = row.get("neighbor_labels")
+    label_str = (
+        ",".join(str(label) for label in neighbor_labels)
+        if isinstance(neighbor_labels, list)
+        else ""
+    )
+
+    return label_str
 
 
 if __name__ == "__main__":

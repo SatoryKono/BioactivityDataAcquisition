@@ -42,15 +42,7 @@ def _neo4j_property_value(value: JsonValue) -> JsonScalar | list[JsonScalar]:
     if isinstance(value, Mapping):
         return json.dumps(value, sort_keys=True)
     if isinstance(value, Sequence) and not isinstance(value, str | bytes):
-        normalized_items: list[JsonScalar] = []
-        for item in value:
-            if isinstance(item, Mapping | Sequence) and not isinstance(
-                item, str | bytes
-            ):
-                normalized_items.append(json.dumps(item, sort_keys=True))
-            elif isinstance(item, str | int | float | bool) or item is None:
-                normalized_items.append(item)
-        return normalized_items
+        return _neo4j_sequence_value(value)
     if isinstance(value, str | int | float | bool) or value is None:
         return value
     return str(value)
@@ -182,3 +174,13 @@ def _prune_legacy_unmanaged_nodes_statement(
             "managed_labels": managed_labels,
         },
     }
+
+
+def _neo4j_sequence_value(value: Sequence[JsonValue]) -> list[JsonScalar]:
+    normalized_items: list[JsonScalar] = []
+    for item in value:
+        if isinstance(item, Mapping | Sequence) and not isinstance(item, str | bytes):
+            normalized_items.append(json.dumps(item, sort_keys=True))
+        elif isinstance(item, str | int | float | bool) or item is None:
+            normalized_items.append(item)
+    return normalized_items

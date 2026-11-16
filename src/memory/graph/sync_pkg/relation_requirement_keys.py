@@ -113,18 +113,7 @@ def _excluded_file_structure_paths(snapshot: GraphSnapshot) -> list[str]:
         node.key.name
         for node in snapshot.nodes.values()
         if node.key.label in {"directory_surface", "file_surface"}
-        and (
-            node.key.name.startswith("docs/site")
-            or node.key.name.startswith("docs/site/")
-            or node.key.name.startswith("docs/99-archive")
-            or node.key.name.startswith("docs/exports")
-            or node.key.name.startswith("docs/reports/generated")
-            or node.key.name.startswith("docs/02-architecture/generated")
-            or node.key.name.startswith("docs/02-architecture/diagrams/bundles")
-            or node.key.name.startswith("scripts/archive")
-            or "/png" in node.key.name
-            or "/svg" in node.key.name
-        )
+        and _is_excluded_structure_name(node.key.name)
     ]
 
 
@@ -209,3 +198,18 @@ def _audit_report_payload(
             ),
         },
     }
+
+
+def _is_excluded_structure_name(name: str) -> bool:
+    return (
+        name.startswith("docs/site")
+        or name.startswith("docs/site/")
+        or name.startswith("docs/99-archive")
+        or name.startswith("docs/exports")
+        or name.startswith("docs/reports/generated")
+        or name.startswith("docs/02-architecture/generated")
+        or name.startswith("docs/02-architecture/diagrams/bundles")
+        or name.startswith("scripts/archive")
+        or "/png" in name
+        or "/svg" in name
+    )

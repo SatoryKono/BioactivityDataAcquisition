@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-15T18:52:40.903636+00:00",
+  "generated_at": "2026-11-16T08:48:07.535413+00:00",
   "summary": {
-    "total_scripts": 752,
+    "total_scripts": 753,
     "status_counts": {
       "active": 334,
-      "supporting": 416,
+      "supporting": 417,
       "temporary_diagnostic": 2
     },
     "reference_group_coverage": {
       "agents": 12,
       "build": 18,
-      "ci": 76,
+      "ci": 77,
       "docs": 300,
-      "other": 26,
-      "scripts": 645,
+      "other": 27,
+      "scripts": 646,
       "skills": 13,
-      "tests": 570
+      "tests": 571
     }
   },
   "scripts": [
@@ -312,7 +312,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 1669,
+          "line": 1670,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/ai/codex/doctor.py static --no-write"
         },
@@ -705,7 +705,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 543,
+          "line": 889,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/ensure-mcp.sh\","
         }
@@ -1516,7 +1516,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 405,
+          "line": 751,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/native_runtime_contract.py\": ("
         },
@@ -2106,7 +2106,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 585,
+          "line": 931,
           "source_group": "scripts",
           "text": "\"scripts/ai/cursor/setup_skills.sh\","
         },
@@ -3016,13 +3016,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 1663,
+          "line": 1664,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1697,
+          "line": 1698,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -3073,7 +3073,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 1670,
+          "line": 1671,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.ai.mcp wrappers check"
         },
@@ -3240,7 +3240,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1440,
+          "line": 1787,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3359,7 +3359,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 569,
+          "line": 915,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\","
         },
@@ -3422,7 +3422,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 570,
+          "line": 916,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\","
         },
@@ -3498,7 +3498,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 545,
+          "line": 891,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\","
         },
@@ -3523,7 +3523,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 592,
+          "line": 938,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.ps1\","
         },
@@ -3572,7 +3572,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 613,
+          "line": 959,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\","
         },
@@ -3609,7 +3609,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 593,
+          "line": 939,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\","
         },
@@ -3670,7 +3670,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 594,
+          "line": 940,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\","
         },
@@ -3752,7 +3752,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 546,
+          "line": 892,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\","
         }
@@ -3815,7 +3815,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 595,
+          "line": 941,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.ps1\","
         },
@@ -3864,7 +3864,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 614,
+          "line": 960,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\","
         },
@@ -3940,7 +3940,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 547,
+          "line": 893,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\","
         }
@@ -4084,7 +4084,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1431,
+          "line": 1778,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4139,7 +4139,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1430,
+          "line": 1777,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4184,7 +4184,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1429,
+          "line": 1776,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -4239,7 +4239,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1428,
+          "line": 1775,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -4315,7 +4315,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 548,
+          "line": 894,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\","
         },
@@ -4434,7 +4434,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 551,
+          "line": 897,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.ps1\","
         },
@@ -4485,7 +4485,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 552,
+          "line": 898,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\","
         },
@@ -4655,7 +4655,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 553,
+          "line": 899,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\","
         },
@@ -4698,7 +4698,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 554,
+          "line": 900,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\","
         },
@@ -4731,7 +4731,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 555,
+          "line": 901,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\","
         },
@@ -5087,7 +5087,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1436,
+          "line": 1783,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\": ("
         },
@@ -5136,7 +5136,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 571,
+          "line": 917,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/github_project_transport.mjs\","
         },
@@ -5173,7 +5173,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 596,
+          "line": 942,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/host_transport.mjs\","
         },
@@ -5222,7 +5222,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 597,
+          "line": 943,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/invoke_host_transport.ps1\","
         },
@@ -5283,7 +5283,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 598,
+          "line": 944,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/invoke_host_transport.sh\","
         },
@@ -5506,7 +5506,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1432,
+          "line": 1779,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\": ("
         },
@@ -5767,7 +5767,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 550,
+          "line": 896,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/test_env_loading.sh\","
         },
@@ -6365,13 +6365,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 1675,
+          "line": 1676,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.ai.sync.runtime_skills \\"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1694,
+          "line": 1695,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.ai.sync.runtime_skills \\"
         },
@@ -6993,13 +6993,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2898,
+          "line": 2899,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3331,
+          "line": 3332,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check"
         },
@@ -7107,7 +7107,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2575,
+          "line": 2576,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
@@ -7313,7 +7313,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2578,
+          "line": 2579,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
@@ -8034,7 +8034,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2546,
+          "line": 2547,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/lint_diagrams.py \"${lint_targets[@]}\" --json > /tmp/diagram-lint.json"
         },
@@ -8091,7 +8091,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2549,
+          "line": 2550,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -8322,13 +8322,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2907,
+          "line": 2908,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3340,
+          "line": 3341,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check"
         },
@@ -8379,7 +8379,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 1181,
+          "line": 1182,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_package_family_class_diagrams.py --check"
         },
@@ -8839,13 +8839,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2476,
+          "line": 2477,
           "source_group": "ci",
           "text": "# Export so validate_mermaid_syntax.sh resolve_chrome_headless_shell and"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2510,
+          "line": 2511,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -8961,43 +8961,43 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 491,
+          "line": 492,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.docs passports check --require-clean-source"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1177,
+          "line": 1178,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.docs passports generate --output-root /tmp/bioetl-passports --manual-root docs/04-reference/passports/manual --source-revision \"$CIRCLE_SHA1\""
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1229,
+          "line": 1230,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.docs generate-pipeline-normalization-matrix --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1934,
+          "line": 1935,
           "source_group": "ci",
           "text": "command: uv run --frozen --no-build python -m scripts.docs check-drift --runtime-mirrors --freshness"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1939,
+          "line": 1940,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.docs check-kpi \\"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2899,
+          "line": 2900,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.docs passports check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3332,
+          "line": 3333,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.docs passports check"
         },
@@ -10419,7 +10419,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 13,
       "references": [
         {
           "path": "docs/02-architecture/03-infrastructure-layer.md",
@@ -10623,19 +10623,19 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 764,
+          "line": 765,
           "source_group": "ci",
           "text": "timeout --signal=TERM --kill-after=30s 10m python3 -m scripts.engineering.ci publish-scorecard \\"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1156,
+          "line": 1157,
           "source_group": "ci",
           "text": "command: timeout --signal=TERM --kill-after=30s 25m python3 -m scripts.engineering.ci publish-docker"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1993,
+          "line": 1994,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify \\"
         },
@@ -10846,19 +10846,19 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 1795,
+          "line": 1796,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1818,
+          "line": 1819,
           "source_group": "ci",
           "text": "pathspecs: tests/e2e tests/fixtures/vcr scripts/engineering/ci/check_e2e_matrix_skip_rate.py scripts/engineering/ci/check_e2e_rerun_stability.py configs/entities .circleci/config.yml"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1857,
+          "line": 1858,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
@@ -10903,13 +10903,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 1818,
+          "line": 1819,
           "source_group": "ci",
           "text": "pathspecs: tests/e2e tests/fixtures/vcr scripts/engineering/ci/check_e2e_matrix_skip_rate.py scripts/engineering/ci/check_e2e_rerun_stability.py configs/entities .circleci/config.yml"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1864,
+          "line": 1865,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_rerun_stability.py \\"
         },
@@ -11352,7 +11352,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 878,
+          "line": 880,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -11419,7 +11419,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1316,
+          "line": 1663,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -11462,7 +11462,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1458,
+          "line": 1805,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -11722,13 +11722,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 1468,
+          "line": 1469,
           "source_group": "ci",
           "text": "-p scripts.engineering.ci.replay_parity_inputs \\"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1479,
+          "line": 1480,
           "source_group": "ci",
           "text": "-p scripts.engineering.ci.replay_parity_inputs \\"
         },
@@ -12046,13 +12046,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 3157,
+          "line": 3158,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest reports/quality/proof-or-stop/shared/coverage/coverage/manifest.json"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3592,
+          "line": 3593,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest \"$ROOT/coverage/manifest.json\""
         },
@@ -12103,7 +12103,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2840,
+          "line": 2841,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_contract_identity.py"
         },
@@ -12130,7 +12130,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2841,
+          "line": 2842,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_contract_registry.py"
         },
@@ -12190,7 +12190,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2845,
+          "line": 2846,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_registry_dq_refs.py"
         },
@@ -12247,7 +12247,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2844,
+          "line": 2845,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python -m scripts.engineering.ci.validate_schema_classifier_gate --base-sha \"$BASE\" --head-sha \"$CIRCLE_SHA1\""
         },
@@ -12282,7 +12282,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
         {
           "path": "scripts/ai/mcp/__main__.py",
@@ -12374,7 +12374,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 1545,
+          "line": 1546,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -c 'import os,platform; print(\"python=\" + platform.python_version()); print(\"platform=\" + platform.platform()); print(\"cpu_count=\" + str(os.cpu_count())); print(\"cpu_"
         },
@@ -12757,7 +12757,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 224,
+          "line": 540,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/pretest_guardrails.ps1\": (SCOPED_CHECKS_TEST,),"
         },
@@ -12788,13 +12788,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 3083,
+          "line": 3084,
           "source_group": "ci",
           "text": "(\"governance\", \"pretest_guardrails\", [\"bash\", \"scripts/engineering/dev/pretest_guardrails.sh\", \"--mode\", \"check\", \"--scope\", \"governance\"]),"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3538,
+          "line": 3539,
           "source_group": "ci",
           "text": "(\"governance\", \"pretest_guardrails\", [\"bash\", \"scripts/engineering/dev/pretest_guardrails.sh\","
         },
@@ -13480,7 +13480,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 225,
+          "line": 541,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/setup_bioetl_wsl.ps1\": ("
         },
@@ -13860,7 +13860,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 915,
+          "line": 1261,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -14061,7 +14061,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2275,
+          "line": 2276,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.diagnostics audit-structure --path ."
         },
@@ -14650,43 +14650,43 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1227,
+          "line": 1228,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1231,
+          "line": 1232,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa report-provider-contract-drift --output reports/quality/provider-contract-drift-report.json --fail-on breaking"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1564,
+          "line": 1565,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa report-hotspots \\"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2061,
+          "line": 2062,
           "source_group": "ci",
           "text": "if python -m scripts.engineering.qa proof-or-stop ci enabled; then"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2062,
+          "line": 2063,
           "source_group": "ci",
           "text": "python -m scripts.engineering.qa proof-or-stop ci produce --check architecture"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2251,
+          "line": 2252,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa validate-dq-consistency"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2761,
+          "line": 2762,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-duplication-complexity-exemptions"
         }
@@ -15689,7 +15689,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 1215,
+          "line": 1216,
           "source_group": "ci",
           "text": "pathspecs: tests/contract tests/fixtures/vcr tests/unit/application/services/test_export_manifests.py scripts/engineering/qa/report_provider_contract_drift.py scripts/engineering/qa/check_xwalk_missin"
         },
@@ -16075,7 +16075,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 82,
+      "reference_count": 86,
       "references": [
         {
           "path": "docs/00-project/RULES.md",
@@ -16196,13 +16196,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 1073,
+          "line": 1074,
           "source_group": "ci",
           "text": "python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \\"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1099,
+          "line": 1100,
           "source_group": "ci",
           "text": "python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \\"
         },
@@ -16509,7 +16509,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 1183,
+          "line": 1184,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa.generate_architecture_dependency_map --update"
         },
@@ -17010,13 +17010,13 @@
         },
         {
           "path": "scripts/engineering/qa/check_naming_package_consistency.py",
-          "line": 32,
+          "line": 33,
           "source_group": "scripts",
           "text": "CANONICAL_NAMING_AUDIT_PATH = Path(\"scripts/engineering/qa/naming_audit.py\")"
         },
         {
           "path": "scripts/engineering/qa/check_naming_package_consistency.py",
-          "line": 247,
+          "line": 249,
           "source_group": "scripts",
           "text": "location=\"scripts/engineering/qa/naming_audit.py --check\","
         },
@@ -18923,7 +18923,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 1215,
+          "line": 1216,
           "source_group": "ci",
           "text": "pathspecs: tests/contract tests/fixtures/vcr tests/unit/application/services/test_export_manifests.py scripts/engineering/qa/report_provider_contract_drift.py scripts/engineering/qa/check_xwalk_missin"
         },
@@ -19516,13 +19516,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 438,
+          "line": 784,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/runtime_acceptance_12553.py\","
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 440,
+          "line": 786,
           "source_group": "scripts",
           "text": "\"tests/helpers/runtime_acceptance_12553.py\","
         },
@@ -19565,7 +19565,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 439,
+          "line": 785,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/runtime_acceptance_12553_coverage.py\","
         },
@@ -19802,7 +19802,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2170,
+          "line": 2171,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-secrets"
         },
@@ -21436,49 +21436,49 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 490,
+          "line": 491,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-versions"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1278,
+          "line": 1279,
           "source_group": "ci",
           "text": "timeout 15m uv run --frozen --no-build python -m scripts.engineering.repo \\"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1917,
+          "line": 1918,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo github-settings-review \\"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2271,
+          "line": 2272,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-cleanliness --strict-untracked --check-local-forbidden-outputs"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2272,
+          "line": 2273,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-cleanup-governance"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2273,
+          "line": 2274,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-root-governance-docs"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2274,
+          "line": 2275,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-root-review-registry"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2310,
+          "line": 2311,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-cleanliness"
         }
@@ -21814,7 +21814,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2377,
+          "line": 2378,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
@@ -21856,7 +21856,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1556,
+          "line": 1904,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -21871,19 +21871,19 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2276,
+          "line": 2277,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3314,
+          "line": 3315,
           "source_group": "ci",
           "text": "python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3426,
+          "line": 3427,
           "source_group": "ci",
           "text": "\\ scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD\\n\""
         },
@@ -22807,7 +22807,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 252,
+          "line": 598,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/process_supervisor.py\": ("
         },
@@ -22838,7 +22838,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 219,
+          "line": 535,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/scoped_checks.py\": ("
         },
@@ -23144,7 +23144,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 343,
+          "line": 689,
           "source_group": "scripts",
           "text": "\"scripts/memory/run_workflow.sh\": ("
         },
@@ -23295,7 +23295,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 68,
+      "reference_count": 80,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -23305,7 +23305,7 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3040,
+          "line": 3041,
           "source_group": "ci",
           "text": "python -m scripts.ops verify-router-managed-image \"$BUILT\""
         },
@@ -23323,27 +23323,27 @@
         },
         {
           "path": ".github/workflows/router-v7-bridge.yml",
-          "line": 346,
+          "line": 56,
           "source_group": "ci",
-          "text": "/usr/bin/python3 -m scripts.ops verify-router-managed-image \"$built\""
+          "text": "run: python3 -m scripts.ops verify-router-managed-image --candidate-stage inputs"
         },
         {
-          "path": "Makefile",
-          "line": 107,
-          "source_group": "build",
-          "text": "$(RUN) python -m scripts.ops setup-plugins"
+          "path": ".github/workflows/router-v7-bridge.yml",
+          "line": 108,
+          "source_group": "ci",
+          "text": "run: python3 -m scripts.ops verify-router-managed-image --candidate-stage inputs"
         },
         {
-          "path": "docs/00-project/RULES.md",
-          "line": 1154,
-          "source_group": "docs",
-          "text": "uv run python -m scripts.ops setup-plugins"
+          "path": ".github/workflows/router-v7-bridge.yml",
+          "line": 190,
+          "source_group": "ci",
+          "text": "run: python3 -m scripts.ops verify-router-managed-image --candidate-stage plugin"
         },
         {
-          "path": "docs/00-project/RULES.md",
-          "line": 1809,
-          "source_group": "docs",
-          "text": "uv run python -m scripts.ops setup-plugins"
+          "path": ".github/workflows/router-v7-bridge.yml",
+          "line": 214,
+          "source_group": "ci",
+          "text": "run: python3 -m scripts.ops verify-router-managed-image --candidate-stage inputs"
         }
       ]
     },
@@ -24244,7 +24244,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 269,
+          "line": 615,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/setup_plugins.sh\": ("
         },
@@ -24780,7 +24780,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_dashboard_audit_plan_remediation.py",
-          "line": 7,
+          "line": 9,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._audit_presentation import ("
         },
@@ -25240,7 +25240,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_run_selection_context_projection.py",
-          "line": 118,
+          "line": 126,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._run_selection_context import ("
         }
@@ -25351,7 +25351,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_dashboard_audit_plan_remediation.py",
-          "line": 10,
+          "line": 12,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._v2_model_parity import _layout"
         }
@@ -25691,7 +25691,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 465,
+          "line": 811,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\": ("
         },
@@ -25809,7 +25809,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1768,
+          "line": 2116,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -25983,7 +25983,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 468,
+          "line": 814,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/dashboard_context_links.py\": ("
         },
@@ -26516,11 +26516,66 @@
       ]
     },
     {
+      "path": "scripts/ops/observability/grafana/router_candidate.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": ".circleci/config.yml",
+          "line": 147,
+          "source_group": "ci",
+          "text": "git diff --name-only \"$base\"...HEAD -- 'grafana/tooling/router-v7-bridge/**' 'grafana/plugins/bioetl-scenes-app/**' 'grafana/plugins/bioetl-selectorshell-panel/**' '.github/workflows/router-v7-bridge."
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 196,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_candidate.py\": \"e435d491abd9d8a8e07d05b820cafb5b90c381c961bfacf42f60a1ae2bd7a7d1\""
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 1766,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_candidate.py\": \"e435d491abd9d8a8e07d05b820cafb5b90c381c961bfacf42f60a1ae2bd7a7d1\","
+        },
+        {
+          "path": "scripts/ops/observability/grafana/router_managed_image.py",
+          "line": 175,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.router_candidate import main as candidate"
+        },
+        {
+          "path": "scripts/ops/observability/refresh_router_host_provenance.py",
+          "line": 64,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/observability/grafana/router_candidate.py\","
+        },
+        {
+          "path": "tests/architecture/test_circleci_migration_contract.py",
+          "line": 543,
+          "source_group": "tests",
+          "text": "\"scripts/ops/observability/grafana/router_candidate.py\","
+        },
+        {
+          "path": "tests/unit/scripts/ops/test_router_candidate.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana import router_candidate as candidate"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-07",
+      "next_step": "Retain candidate image qualification as internal stages of the existing verify-router-managed-image facade; no standalone command or main guard. Preserve full rootfs, immutable image, original plugin artifact and default-delivery checks."
+    },
+    {
       "path": "scripts/ops/observability/grafana/router_managed_image.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 18,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -26532,41 +26587,41 @@
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
           "line": 190,
           "source_group": "other",
-          "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"f48e0159d78251802a896a760e48e4cf2cd3a4f80d679a2411de3c362fe49645\","
+          "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"17c4c0516389f7092c820c37f02f4a6602b5e67a9567f81c1cfe740d401deb1e\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 581,
+          "line": 582,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"f48e0159d78251802a896a760e48e4cf2cd3a4f80d679a2411de3c362fe49645\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 777,
+          "line": 778,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"f48e0159d78251802a896a760e48e4cf2cd3a4f80d679a2411de3c362fe49645\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 973,
+          "line": 974,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"f48e0159d78251802a896a760e48e4cf2cd3a4f80d679a2411de3c362fe49645\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1171,
+          "line": 1172,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"f48e0159d78251802a896a760e48e4cf2cd3a4f80d679a2411de3c362fe49645\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1369,
+          "line": 1370,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"f48e0159d78251802a896a760e48e4cf2cd3a4f80d679a2411de3c362fe49645\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1567,
+          "line": 1568,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"f48e0159d78251802a896a760e48e4cf2cd3a4f80d679a2411de3c362fe49645\","
         }
@@ -26581,7 +26636,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 16,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -26597,37 +26652,37 @@
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 582,
+          "line": 583,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"28c1914c4104413695381c6d44c73d6c81a6a8d7d6136e497e61cfcde2561dfc\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 778,
+          "line": 779,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"28c1914c4104413695381c6d44c73d6c81a6a8d7d6136e497e61cfcde2561dfc\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 974,
+          "line": 975,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"28c1914c4104413695381c6d44c73d6c81a6a8d7d6136e497e61cfcde2561dfc\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1172,
+          "line": 1173,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"28c1914c4104413695381c6d44c73d6c81a6a8d7d6136e497e61cfcde2561dfc\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1370,
+          "line": 1371,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"28c1914c4104413695381c6d44c73d6c81a6a8d7d6136e497e61cfcde2561dfc\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1568,
+          "line": 1569,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"28c1914c4104413695381c6d44c73d6c81a6a8d7d6136e497e61cfcde2561dfc\","
         }
@@ -26803,7 +26858,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 3436,
+          "line": 3437,
           "source_group": "ci",
           "text": "bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh --attempt-system-install"
         },
@@ -26879,7 +26934,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 14,
       "references": [
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
@@ -26889,45 +26944,45 @@
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 583,
+          "line": 584,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/trusted_docker.py\": \"0e2f171c358b1930e336962463630f2638c736c2db8c2d40d0bd3160e7166c9f\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 779,
+          "line": 780,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/trusted_docker.py\": \"0e2f171c358b1930e336962463630f2638c736c2db8c2d40d0bd3160e7166c9f\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 975,
+          "line": 976,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/trusted_docker.py\": \"0e2f171c358b1930e336962463630f2638c736c2db8c2d40d0bd3160e7166c9f\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1173,
+          "line": 1174,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/trusted_docker.py\": \"0e2f171c358b1930e336962463630f2638c736c2db8c2d40d0bd3160e7166c9f\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1371,
+          "line": 1372,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/trusted_docker.py\": \"0e2f171c358b1930e336962463630f2638c736c2db8c2d40d0bd3160e7166c9f\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1569,
+          "line": 1570,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/trusted_docker.py\": \"0e2f171c358b1930e336962463630f2638c736c2db8c2d40d0bd3160e7166c9f\","
         },
         {
-          "path": "scripts/ops/observability/grafana/router_managed_image.py",
-          "line": 22,
-          "source_group": "scripts",
-          "text": "from scripts.ops.observability.grafana.trusted_docker import docker_path"
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 1769,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/trusted_docker.py\": \"0e2f171c358b1930e336962463630f2638c736c2db8c2d40d0bd3160e7166c9f\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -27022,55 +27077,55 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 17,
       "references": [
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
           "line": 193,
           "source_group": "other",
-          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\","
+          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"6199a8c07353d4e214f4fdf57fd799f8dbda431f5e3bc2475c7a7081512ea07f\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 584,
+          "line": 585,
           "source_group": "other",
           "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 780,
+          "line": 781,
           "source_group": "other",
           "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 976,
+          "line": 977,
           "source_group": "other",
           "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1174,
+          "line": 1175,
           "source_group": "other",
           "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1372,
+          "line": 1373,
           "source_group": "other",
           "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1570,
+          "line": 1571,
           "source_group": "other",
           "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
         },
         {
-          "path": "scripts/ops/__main__.py",
-          "line": 106,
-          "source_group": "scripts",
-          "text": "\"scripts.ops.observability.refresh_router_host_provenance\""
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 1770,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"6199a8c07353d4e214f4fdf57fd799f8dbda431f5e3bc2475c7a7081512ea07f\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -27982,7 +28037,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 607,
+          "line": 953,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/mcp/apply-shared-to-devin.py\","
         },
@@ -28785,7 +28840,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2280,
+          "line": 2281,
           "source_group": "ci",
           "text": "mkdir -p reports/quality && uv run --frozen --no-build python scripts/ops/support/repo/cleanup_repository.py --dry-run --detail-limit 0 --report-json reports/quality/root-hygiene-cleanup-classificatio"
         },
@@ -28842,7 +28897,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 1665,
+          "line": 1666,
           "source_group": "ci",
           "text": "bash scripts/ops/support/skills/check_ai_skills_layout.sh"
         },
@@ -28879,13 +28934,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 1664,
+          "line": 1665,
           "source_group": "ci",
           "text": "bash scripts/ops/support/skills/check_skills_mirror.sh --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 1698,
+          "line": 1699,
           "source_group": "ci",
           "text": "bash scripts/ops/support/skills/check_skills_mirror.sh --check"
         },
@@ -28958,19 +29013,19 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2256,
+          "line": 2257,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.schema validate-configs"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2827,
+          "line": 2828,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.schema generate-artifacts --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2828,
+          "line": 2829,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking"
         },

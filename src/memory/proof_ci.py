@@ -165,21 +165,7 @@ def produce(name: str) -> int:
     started = datetime.now(UTC).isoformat()
     clock = time.monotonic()
     log = folder / PRODUCER_LOG
-    env = dict(os.environ)
-    env.pop("BASH_ENV", None)
-    with log.open("w", encoding="utf-8") as stream:
-        process = subprocess.Popen(
-            command, cwd=ROOT, env=env, stdout=stream, stderr=subprocess.STDOUT
-        )
-        while process.poll() is None:
-            try:
-                process.wait(timeout=30)
-            except subprocess.TimeoutExpired:
-                print(
-                    f"[proof] {name} running {int(time.monotonic() - clock)}s",
-                    flush=True,
-                )
-    duration = round((time.monotonic() - clock) * 1000)
+    process, duration = _run_producer_process(name, command, log, clock)
     sanitize_outputs(folder)
     _, after = discover_context(
         ROOT, policy=policy, claim=plan["claim"], ci_run_id=ci_run
@@ -359,3 +345,24 @@ def main(argv: list[str] | None = None) -> int:
             )
         print(f"[proof] STOP: {exc}")
         return 2
+
+
+def _run_producer_process(
+    name: str, command: list[str], log: Path, clock: float
+) -> tuple[subprocess.Popen[Any], int]:
+    env = dict(os.environ)
+    env.pop("BASH_ENV", None)
+    with log.open("w", encoding="utf-8") as stream:
+        process = subprocess.Popen(
+            command, cwd=ROOT, env=env, stdout=stream, stderr=subprocess.STDOUT
+        )
+        while process.poll() is None:
+            try:
+                process.wait(timeout=30)
+            except subprocess.TimeoutExpired:
+                print(
+                    f"[proof] {name} running {int(time.monotonic() - clock)}s",
+                    flush=True,
+                )
+    duration = round((time.monotonic() - clock) * 1000)
+    return process, duration

@@ -285,37 +285,7 @@ def _content_focus_scores(
     if not focus_tokens:
         return {}
     candidates = eligible
-    if (root / ".git").exists():
-        specs = tuple(
-            dict.fromkeys(
-                base.as_posix()
-                for _, base in _load_source_specs(selected_ids=selected_ids)
-            )
-        )
-        try:
-            result = subprocess.run(
-                [
-                    "git",
-                    "grep",
-                    "--untracked",
-                    "-i",
-                    "-l",
-                    "-F",
-                    *(arg for token in focus_tokens for arg in ("-e", token)),
-                    "--",
-                    *specs,
-                ],
-                cwd=root,
-                check=False,
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-            )
-            if result.returncode in {0, 1}:
-                candidates = set(result.stdout.splitlines()) & eligible
-        except OSError:
-            pass
+    candidates = _focus_content_candidates(root, eligible, selected_ids, focus_tokens)
     scores: dict[str, int] = {}
     exact_query = (focus_query or "").strip().lower()
     for rel_path in candidates:
@@ -402,3 +372,44 @@ def iter_markdown_sources(root: Path) -> list[Path]:
         for path in iter_rag_sources(root)
         if path.suffix.lower() in MARKDOWN_SUFFIXES
     ]
+
+
+def _focus_content_candidates(
+    root: Path,
+    eligible: set[str],
+    selected_ids: tuple[str, ...],
+    focus_tokens: tuple[str, ...],
+) -> set[str]:
+    candidates = eligible
+    if (root / ".git").exists():
+        specs = tuple(
+            dict.fromkeys(
+                base.as_posix()
+                for _, base in _load_source_specs(selected_ids=selected_ids)
+            )
+        )
+        try:
+            result = subprocess.run(
+                [
+                    "git",
+                    "grep",
+                    "--untracked",
+                    "-i",
+                    "-l",
+                    "-F",
+                    *(arg for token in focus_tokens for arg in ("-e", token)),
+                    "--",
+                    *specs,
+                ],
+                cwd=root,
+                check=False,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+            if result.returncode in {0, 1}:
+                candidates = set(result.stdout.splitlines()) & eligible
+        except OSError:
+            pass
+    return candidates
