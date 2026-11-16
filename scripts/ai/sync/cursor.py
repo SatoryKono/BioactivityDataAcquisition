@@ -169,6 +169,25 @@ def _is_managed_command(content: str) -> bool:
     return MANAGED_COMMAND_MARKER in content.splitlines()
 
 
+def _command_body_without_marker(content: str) -> str:
+    """Drop the managed marker and the blank spacer that precedes it."""
+    lines = [
+        line
+        for line in content.splitlines()
+        if line.strip() != MANAGED_COMMAND_MARKER
+    ]
+    while lines and not lines[-1].strip():
+        lines.pop()
+    return "\n".join(lines)
+
+
+def _marker_only_difference(existing: str, canonical: str) -> bool:
+    """True when a deploy copy matches the canon except for a removed marker."""
+    return _command_body_without_marker(existing) == _command_body_without_marker(
+        canonical
+    )
+
+
 def _prune_managed_commands(deploy_dir: Path, keep: set[str]) -> list[str]:
     """Remove marked copies whose canonical command is gone or invalid."""
     from scripts.engineering.common.repo_paths import ensure_path_within_root
@@ -190,16 +209,20 @@ def _prune_managed_commands(deploy_dir: Path, keep: set[str]) -> list[str]:
 def _deploy_one_command(
     source: Path, target: Path, *, deploy_dir: Path, safe_root: Path
 ) -> list[str]:
-    """Keep unmarked local commands and links out of managed writes."""
+    """Keep a distinct unmarked command. Restore a copy that only lost its marker."""
     from scripts.engineering.common.repo_paths import ensure_path_within_root
 
     if target.is_symlink():
         return [f"{target.relative_to(safe_root)}: local command is a symlink"]
     target = ensure_path_within_root(target, deploy_dir)
-    if target.exists() and not _is_managed_command(
-        target.read_text(encoding="utf-8", errors="replace")
-    ):
-        return [f"{target.relative_to(safe_root)}: unmarked local command preserved"]
+    if target.exists():
+        existing = target.read_text(encoding="utf-8", errors="replace")
+        if not _is_managed_command(existing):
+            canonical = source.read_text(encoding="utf-8")
+            if not _marker_only_difference(existing, canonical):
+                return [
+                    f"{target.relative_to(safe_root)}: unmarked local command preserved"
+                ]
     _atomic_copy(source, target, allowed_root=safe_root)
     return []
 
