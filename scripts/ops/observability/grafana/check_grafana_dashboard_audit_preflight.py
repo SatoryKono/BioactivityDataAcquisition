@@ -1927,12 +1927,15 @@ def _immutable_acceptance(args: argparse.Namespace) -> int:
     from scripts.engineering.common.repo_paths import read_bytes_confined
     from scripts.ops.observability.grafana.capture_provenance import verify_capture
 
+    # Resolve relative --immutable-manifest against CWD before confinement so
+    # PNG/attachment checks via manifest_path.parent stay on the same tree.
+    manifest_path = args.immutable_manifest.resolve()
     manifest_bytes = read_bytes_confined(
-        args.immutable_manifest,
+        manifest_path,
         allow_external_absolute=True,
     )
     result = verify_capture(
-        args.immutable_manifest,
+        manifest_path,
         repo_root=_REPO_ROOT,
         expected_sha256=args.manifest_sha256,
         expected_commit=args.expected_commit,
