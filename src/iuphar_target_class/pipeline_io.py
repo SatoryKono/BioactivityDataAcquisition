@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-import csv
 import hashlib
-import io
 import re
 from collections.abc import Mapping, Sequence
 from dataclasses import asdict
 from pathlib import Path
 from types import MappingProxyType
 
+from .csv_io import read_csv_records
 from .delivery import _create_new, _path_inside_root, result_names
 from .models import RawTargetRow, RunProvenance
 from .pipeline import BatchResult, IndexedSnapshot, RowResult, classify_batch
@@ -46,15 +45,12 @@ def read_bioetl_target_kernel_csv_v1(
         raise ValueError(
             "canonical CSV import requires a source and explicit target kind"
         )
-    reader = csv.DictReader(
-        io.StringIO(content.decode("utf-8-sig"), newline=""), strict=True
-    )
-    headers = reader.fieldnames or []
+    headers, source_rows = read_csv_records(content)
     _require_bioetl_kernel_header(headers)
     digest = hashlib.sha256(content).hexdigest()
     rows = tuple(
         _bioetl_kernel_row(raw, record, source_path, target_kind, digest)
-        for record, raw in enumerate(reader, 1)
+        for record, raw in enumerate(source_rows, 1)
     )
     if len({row.input_row_id for row in rows}) != len(rows):
         raise ValueError("duplicate canonical CSV input_row_id")
@@ -115,19 +111,17 @@ def _bioetl_kernel_row(
 
 def read_legacy_batch(content: bytes) -> tuple[RawTargetRow, ...]:
     """Decode a CSV, retaining original legacy class only as a source field."""
-    stream = io.StringIO(content.decode("utf-8-sig"), newline="")
-    reader = csv.DictReader(stream, strict=True)
-    headers = reader.fieldnames or []
+    headers, source_rows = read_csv_records(content)
     if len(headers) != len(set(headers)) or not {
         "input_row_id",
         "target_kind",
     }.issubset(headers):
         raise ValueError("invalid CSV header: expected unique columns and row ID/kind")
     rows: list[RawTargetRow] = []
-    for row in reader:
+    for row in source_rows:
         if None in row or any(value is None for value in row.values()):
             raise ValueError("invalid CSV row width")
-        fields = {
+        fields: dict[str, str | None] = {
             k: v for k, v in row.items() if k not in {"input_row_id", "target_kind"}
         }
         rows.append(RawTargetRow(row["input_row_id"], fields, row["target_kind"]))
@@ -146,9 +140,7 @@ def read_chembl_target_csv_v1(
         raise ValueError(
             "project CSV import requires a source and explicit target kind"
         )
-    reader = csv.DictReader(
-        io.StringIO(content.decode("utf-8-sig"), newline=""), strict=True
-    )
+    headers, source_rows = read_csv_records(content)
     expected = (
         "target_chembl_id",
         "isoform_ids",
@@ -160,13 +152,13 @@ def read_chembl_target_csv_v1(
         "target_names",
         "target_uniprot_id",
     )
-    if tuple(reader.fieldnames or ()) != expected:
+    if headers != expected:
         raise ValueError("invalid chembl_target_csv_v1 header")
     digest = hashlib.sha256(content).hexdigest()
     identity = hashlib.sha256(source_path.encode("utf-8")).hexdigest()
     rows = [
         _chembl_target_row(raw, record, source_path, target_kind, digest, identity)
-        for record, raw in enumerate(reader, 1)
+        for record, raw in enumerate(source_rows, 1)
     ]
     return tuple(rows)
 

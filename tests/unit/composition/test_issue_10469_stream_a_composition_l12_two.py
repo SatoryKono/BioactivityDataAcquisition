@@ -98,6 +98,7 @@ def test_build_batch_executor_reads_dq_paths(
         staticmethod(lambda _request: "executor"),
     )
     context = MagicMock()
+    context.settings = None
     result = assembly.build_batch_executor(
         context,
         checkpoint_manager=MagicMock(),

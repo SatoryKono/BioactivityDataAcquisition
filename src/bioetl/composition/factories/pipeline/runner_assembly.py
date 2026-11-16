@@ -39,6 +39,7 @@ from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
+    from bioetl.infrastructure.config.settings_api import Settings
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
@@ -199,6 +200,7 @@ def assemble_runner_impl(
         DQConfigsContext,
     ],
     yaml_config: PipelineYamlConfig | None = None,
+    settings: Settings | None = None,
 ) -> PipelineRunner:
     """Assemble the fully wired PipelineRunner for one configured pipeline."""
     if pipeline.config.pipeline_name == "chembl_target" and yaml_config is not None:
@@ -219,6 +221,7 @@ def assemble_runner_impl(
         gold_schema=gold_schema,
         strict_gold_validation=strict_gold_validation,
         dq_configs_extractor=dq_configs_extractor,
+        settings=settings,
     )
     assembly_parts = _assemble_runner_parts(assembly_context)
     constructor_payload = _build_runner_constructor_payload(

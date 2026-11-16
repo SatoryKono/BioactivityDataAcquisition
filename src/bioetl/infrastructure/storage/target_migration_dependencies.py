@@ -127,6 +127,7 @@ class _DependencyCollector:
             "coverage": self.coverage,
             "scope_review": self.scope_review,
             "acceptance": self.acceptance,
+            "expected_labels": self.expected_labels,
             "pipeline_proof": self.proof,
             "stage0_manifest": self.stage0,
             "row_manifest": self.row,
@@ -191,10 +192,27 @@ class _DependencyCollector:
             )
             digest = _digest(reference.get("sha256"))
             kind = _acceptance_kind(reference.get("kind"))
-            if kind in {"pipeline_proof", "stage0_manifest"}:
+            if kind in {"pipeline_proof", "stage0_manifest", "expected_labels"}:
                 self.document(target, str(kind), digest)
             else:
                 self.add(target, digest)
+
+    def expected_labels(self, path: Path, document: Mapping[str, object]) -> None:
+        _header(document, "bioetl_iuphar_reference_cases", (1, 2))
+        cases = document.get("cases")
+        if not isinstance(cases, list) or not cases:
+            raise ValueError("expected labels need typed reviewed case proofs")
+        for case in cases:
+            self.review_proofs(path.parent, _mapping(case).get("source_references"))
+        matrix = _mapping(document.get("reference_matrix", {}))
+        for category in matrix.values():
+            self.review_proofs(path.parent, _mapping(category).get("source_references"))
+
+    def review_proofs(self, root: Path, references: object) -> None:
+        if not isinstance(references, list) or not references:
+            raise ValueError("reference review needs declared source proof files")
+        for reference in references:
+            self.reference(root, reference)
 
     def proof(self, path: Path, document: Mapping[str, object]) -> None:
         _header(document, "bioetl_iuphar_pipeline_evidence", (1,))
@@ -245,6 +263,8 @@ def _acceptance_kind(value: object) -> str:
         "conversion_ledger",
         "pipeline_proof",
         "pipeline_report",
+        "stage0_cohort",
+        "stage0_evidence",
     }
     if kind not in known | OUTPUT_NAMES and not kind.startswith("stage0_proof:"):
         raise ValueError("unsupported acceptance artifact reference kind")

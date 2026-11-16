@@ -134,7 +134,7 @@ def test_manifest_publication_identity_resolution(
         "resolve_contract_identity",
         lambda **_k: "cid",
     )
-    ctx = SimpleNamespace(exact_replay=False)
+    ctx = SimpleNamespace(exact_replay=False, pipeline_name="chembl_activity")
     resolved = publication.ensure_manifest_publication_identity(
         ctx=ctx,  # type: ignore[arg-type]
         inputs=object(),  # type: ignore[arg-type]
@@ -389,6 +389,7 @@ def test_exact_replay_and_small_seams(monkeypatch: pytest.MonkeyPatch) -> None:
     assert bound.cached_bronze == "new"
 
     manifest = SimpleNamespace(
+        pipeline_name="chembl_activity",
         provider="chembl",
         entity="activity",
         source_refs=(

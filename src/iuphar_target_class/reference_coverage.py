@@ -248,7 +248,9 @@ def _validate_artifact_references(document: Mapping[str, object]) -> None:
                 "reference artifacts require actual local immutable file URIs"
             )
         if any(
-            part == ".env" or part.startswith(".env.")
+            part.lower() == ".env"
+            or part.lower().startswith(".env.")
+            or part.lower().endswith(".env")
             for part in PurePosixPath(unquote(uri.path)).parts
         ):
             raise ValueError(

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import csv
-import io
 import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -13,6 +11,7 @@ from typing import Literal
 import pyarrow as pa
 
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from iuphar_target_class.csv_io import read_csv_records
 from iuphar_target_class.pipeline_io import BIOETL_TARGET_KERNEL_CSV_V1
 from iuphar_target_class.stage0.io import (
     canonical_csv_bytes,
@@ -225,13 +224,9 @@ def _source_rows(raw: bytes, source_format: str) -> tuple[Mapping[str, object], 
     if source_format == ARROW_SOURCE_FORMAT:
         with pa.ipc.open_stream(pa.BufferReader(raw)) as reader:
             return tuple(reader.read_all().to_pylist())
-    reader = csv.DictReader(
-        io.StringIO(raw.decode("utf-8-sig"), newline=""), strict=True
-    )
-    headers = reader.fieldnames or []
+    headers, rows = read_csv_records(raw)
     if len(headers) != len(set(headers)) or not headers:
         raise ValueError("normalized source needs distinct nonempty CSV headers")
-    rows = tuple(reader)
     if any(None in row or any(value is None for value in row.values()) for row in rows):
         raise ValueError("invalid normalized source CSV row width")
     return rows

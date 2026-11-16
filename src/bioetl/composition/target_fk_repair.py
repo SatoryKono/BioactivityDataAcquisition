@@ -18,6 +18,7 @@ from bioetl.composition.factories.pipeline.assembler import (
     create_pipeline_factory,
 )
 from bioetl.composition.factories.pipeline.registry import chembl_target_factory
+from bioetl.composition.factories.storage.target_paths import resolve_target_table_paths
 from bioetl.composition.runtime_builders.observability_builder import (
     build_observability_bundle,
 )
@@ -38,6 +39,7 @@ from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config_from_root,
 )
 from bioetl.infrastructure.config.settings_api import Settings
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.storage.target_fk_repair import (
     RecoveredTargetSource,
     TargetRepairBaseline,
@@ -122,6 +124,49 @@ def _prepare_inputs(
     return baseline, source, destination
 
 
+def isolate_recovery_config(
+    config: PipelineYamlConfig, data_root: Path
+) -> PipelineYamlConfig:
+    """Rebind every ingress path that could feed a writer or metadata exporter."""
+    sink = {}
+    for layer, item in config.sink.items():
+        path = data_root / "output" / layer / "chembl" / "target"
+        sink[layer] = item.model_copy(
+            update={
+                "path": str(path),
+                "csv_export": item.csv_export.model_copy(update={"path": str(path)}),
+                "dq_report": item.dq_report.model_copy(
+                    update={"output_path": str(path / "dq")}
+                ),
+            }
+        )
+    report = config.dq_overrides.report.model_copy(
+        update={"output_path": str(data_root / "output" / "dq")}
+    )
+    return config.model_copy(
+        update={
+            "sink": sink,
+            "dq_overrides": config.dq_overrides.model_copy(update={"report": report}),
+            "input_filter": config.input_filter.model_copy(
+                update={"source_path": str(data_root / "input" / "target.csv")}
+            ),
+        }
+    )
+
+
+def _verify_isolated_paths(config: PipelineYamlConfig, settings: Settings) -> None:
+    root = settings.data_dir.resolve()
+    planned = list(resolve_target_table_paths(settings, config))
+    for item in config.sink.values():
+        planned.extend(
+            Path(str(value))
+            for value in (item.path, item.csv_export.path, item.dq_report.output_path)
+        )
+    planned.append(Path(str(config.dq_overrides.report.output_path)))
+    if any(not path.resolve().is_relative_to(root) for path in planned):
+        raise ValueError("Recovery writer or metadata path escapes isolated data root")
+
+
 async def prepare_target_fk_repair(request: TargetFKRepairRequest) -> Path:
     """Run actual V30 transforms in isolation, then publish additive candidates.
 
@@ -138,6 +183,7 @@ async def prepare_target_fk_repair(request: TargetFKRepairRequest) -> Path:
     contract = load_pipeline_contract_policy("chembl", "target")
     if contract.active_version != "3.0.0" or contract.write_versions != ["3.0.0"]:
         raise ValueError("V30 recovery requires the single 3.0.0 write contract")
+    config = isolate_recovery_config(config, destination / "execution" / "data")
     configuration_bytes = json.dumps(
         {
             "pipeline": config.model_dump(mode="json"),
@@ -147,8 +193,6 @@ async def prepare_target_fk_repair(request: TargetFKRepairRequest) -> Path:
         separators=(",", ":"),
     ).encode()
     configuration_path = destination / "execution" / "configuration.json"
-    configuration_path.parent.mkdir(parents=True)
-    configuration_path.write_bytes(configuration_bytes + b"\n")
     settings = Settings(
         test_mode=True,
         env="dev",
@@ -163,6 +207,9 @@ async def prepare_target_fk_repair(request: TargetFKRepairRequest) -> Path:
         ),
         _env_file=None,  # type: ignore[call-arg]  # BaseSettings runtime-only kwarg.
     )
+    _verify_isolated_paths(config, settings)
+    configuration_path.parent.mkdir(parents=True)
+    configuration_path.write_bytes(configuration_bytes + b"\n")
     observability = build_observability_bundle(
         pipeline="chembl_target",
         run_id=RunID(request.run_id),

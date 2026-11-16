@@ -240,7 +240,12 @@ def run_admitted_volume(
     clock: Callable[[], float] = time.perf_counter,
 ) -> tuple[BatchResult, dict[str, object]]:
     """Write the frozen config before running the full indexed pipeline."""
-    if not snapshot.complete or not all(
+    admitted = (
+        snapshot.admission_complete
+        if snapshot.admission_complete is not None
+        else snapshot.complete
+    )
+    if not admitted or not all(
         (
             provenance.normalization_version,
             provenance.rules_version,
@@ -250,7 +255,7 @@ def run_admitted_volume(
         )
     ):
         raise ValueError(
-            "qualified volume needs complete snapshot and versioned provenance"
+            "qualified volume needs admitted snapshot scope and versioned provenance"
         )
     cohort = load_admitted_cohort(manifest_path, plan)
     config = canonical_json_bytes(

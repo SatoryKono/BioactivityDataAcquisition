@@ -274,6 +274,16 @@ def test_scientific_status_cannot_be_promoted_by_receipt_flag(
         validate_reference_coverage_receipt(receipt)
 
 
+@pytest.mark.parametrize("suffix", [".env", ".ENV.local", "config.EnV", "config%2EENV"])
+def test_receipt_rejects_environment_uris_without_creating_files(
+    tmp_path: Path, reference_inputs, suffix: str
+):
+    receipt = _full_receipt(reference_inputs, tmp_path)
+    receipt["artifact_references"][0]["immutable_uri"] = "file:///proof/" + suffix
+    with pytest.raises(ValueError, match="environment files"):
+        validate_reference_coverage_receipt(receipt)
+
+
 def test_declared_scenario_must_actually_occur(tmp_path: Path, reference_inputs):
     cohort, provenance, spec = reference_inputs
     _validate(reference_inputs, tmp_path)

@@ -101,10 +101,13 @@ def has_flat_structure(config: object) -> bool:
 
 def extract_dq_output_paths(
     yaml_config: PipelineYamlConfig | None,
+    *,
+    settings: Settings | None = None,
 ) -> DQOutputPathsContext:
     """Extract per-layer DQ output paths and flat-structure mode."""
     return extract_dq_output_paths_impl(
         yaml_config,
+        settings=settings,
         get_layer_path_fn=get_layer_path,
         has_flat_structure_fn=has_flat_structure,
     )

@@ -557,6 +557,44 @@ def test_volume_refuses_changed_cohort_and_records_config_before_run(tmp_path):
         load_admitted_cohort(manifest, plan)
 
 
+@pytest.mark.parametrize("admission_complete", [True, False, None])
+def test_volume_respects_scoped_admission_without_global_absence_claims(
+    tmp_path, admission_complete
+):
+    manifest, _, plan = _stage0_fixture(tmp_path)
+    scoped = pipeline.IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture-release",
+        complete=False,
+        admission_complete=admission_complete,
+        catalog=(),
+        annotations={},
+        family_nodes=(),
+        type_to_class={},
+        family_to_class={},
+    )
+    output = tmp_path / "scoped-volume"
+    kwargs = {
+        "manifest_path": manifest,
+        "plan": plan,
+        "snapshot": scoped,
+        "provenance": _provenance(),
+        "run_id": "scoped-fixture",
+        "output_dir": output,
+    }
+    if not admission_complete:
+        with pytest.raises(ValueError, match="admitted snapshot scope"):
+            run_admitted_volume(**kwargs)
+        assert not output.exists()
+        return
+    batch, report = run_admitted_volume(**kwargs)
+    assert report["status"] == "PASS"
+    assert report["biological_accuracy_accepted"] is False
+    assert batch.rows[0].result.match_status == "source_unavailable"
+    assert batch.rows[0].result.iuphar_class is None
+    assert batch.rows[0].result.matched_target_id is None
+
+
 def test_legacy_target_all_without_provenance_does_not_create_direct():
     source = (
         b"input_row_id,target_kind,target_id,old_iuphar_class\n"

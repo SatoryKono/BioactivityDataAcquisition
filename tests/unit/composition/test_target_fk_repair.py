@@ -13,8 +13,12 @@ from deltalake import DeltaTable, write_deltalake
 
 from bioetl.composition.target_fk_repair import (
     TargetFKRepairRequest,
+    _verify_isolated_paths,
+    isolate_recovery_config,
     prepare_target_fk_repair,
 )
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+from bioetl.infrastructure.config.settings_api import Settings
 from tests.unit.infrastructure.storage.test_target_fk_repair import make_source
 
 
@@ -131,3 +135,40 @@ async def test_output_outside_local_reports_is_rejected(repair_request):
     )
     with pytest.raises(ValueError, match="reports/local"):
         await prepare_target_fk_repair(repair_request)
+
+
+def test_all_sink_csv_and_dq_paths_are_rebound_before_factory(tmp_path):
+    config = load_pipeline_config("chembl_target")
+    original_path = config.sink["silver"].path
+    root = tmp_path / "isolated-data"
+    isolated = isolate_recovery_config(config, root)
+    settings = Settings(test_mode=True, data_dir=root, _env_file=None)
+    _verify_isolated_paths(isolated, settings)
+    assert config.sink["silver"].path == original_path
+    assert isolated.sink["silver"].path != original_path
+    assert Path(isolated.sink["silver"].dq_report.output_path).is_relative_to(root)
+
+
+def test_sidecar_path_outside_isolation_is_rejected(tmp_path):
+    root = tmp_path / "isolated-data"
+    config = isolate_recovery_config(load_pipeline_config("chembl_target"), root)
+    silver = config.sink["silver"]
+    config = config.model_copy(
+        update={
+            "sink": {
+                **config.sink,
+                "silver": silver.model_copy(
+                    update={
+                        "dq_report": silver.dq_report.model_copy(
+                            update={
+                                "output_path": str(tmp_path / "protected-canonical")
+                            }
+                        )
+                    }
+                ),
+            }
+        }
+    )
+    settings = Settings(test_mode=True, data_dir=root, _env_file=None)
+    with pytest.raises(ValueError, match="escapes isolated"):
+        _verify_isolated_paths(config, settings)

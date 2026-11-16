@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import csv
-import io
 import json
 import re
 from collections.abc import Mapping, Sequence
@@ -11,6 +9,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Literal, cast
 
+from ..csv_io import read_csv_records
 from .io import canonical_json_bytes, sha256_bytes
 from .models import ProvenanceClaim
 
@@ -49,7 +48,10 @@ def _require_material_source_path(source_path: str) -> None:
     if Path(source_path).is_absolute() or ".." in Path(source_path).parts:
         raise ValueError("Stage-0 source identity must be a relative workspace path")
     if any(
-        part == ".env" or part.startswith(".env.") for part in Path(source_path).parts
+        part.lower() == ".env"
+        or part.lower().startswith(".env.")
+        or part.lower().endswith(".env")
+        for part in Path(source_path).parts
     ):
         raise ValueError("environment files cannot enter a Stage-0 bundle")
 
@@ -446,7 +448,7 @@ def _verify_conversion_rows(canonical: bytes, ledger: Mapping[str, object]) -> N
         raise ValueError("conversion requires the normalized ChEMBL target v1 schema")
     _required_text(ledger.get("technical_mapping_reference"))
     _required_text(ledger.get("environment"))
-    rows = list(csv.DictReader(io.StringIO(canonical.decode("utf-8"), newline="")))
+    _, rows = read_csv_records(canonical, strict=False)
     records = cast("list[dict[str, object]]", ledger["records"])
     metadata = cast("dict[str, object]", ledger["canonical"])
     if not rows or len(rows) != len(records) or metadata.get("row_count") != len(rows):

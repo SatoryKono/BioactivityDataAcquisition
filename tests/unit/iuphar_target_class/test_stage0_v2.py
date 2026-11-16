@@ -42,6 +42,14 @@ from iuphar_target_class.stage0.v2 import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize(
+    "source", [".env", ".ENV.local", "config.env", "evidence/secret.EnV"]
+)
+def test_material_rejects_environment_identities_without_opening_files(source: str):
+    with pytest.raises(ValueError, match="environment files"):
+        Stage0MaterialV2(source, "a" * 64, "evidence", "text/plain")
+
+
 def _source(tmp_path: Path, **updates: str) -> tuple[Path, dict[str, str]]:
     row = {
         "target_id": "CHEMBL1",
@@ -80,8 +88,8 @@ def _export(tmp_path: Path, **updates: str):
     )
 
 
-def _bundle(tmp_path: Path):
-    export, _, _ = _export(tmp_path)
+def _bundle(tmp_path: Path, **updates: str):
+    export, _, _ = _export(tmp_path, **updates)
     proof = tmp_path / "review.txt"
     proof.write_bytes(b"synthetic engineering evidence, not biological review")
     materials = (
@@ -131,6 +139,24 @@ def _bundle(tmp_path: Path):
         (SourceImport("export/cohort.csv", BIOETL_TARGET_KERNEL_CSV_V1, "protein"),),
     )
     return manifest, plan, export
+
+
+def test_large_business_field_survives_export_stage0_and_canonical_import(
+    tmp_path: Path,
+):
+    original_limit = csv.field_size_limit()
+    large_value = 'large,quoted"value\n' * 12000
+    manifest, plan, export = _bundle(tmp_path, target_protein_synonyms=large_value)
+    frozen = verify_stage0_v2(
+        manifest, plan.manifest_sha256, plan.selected_source_paths
+    )
+    cohort = load_admitted_cohort(manifest, plan)
+    business = json.loads(cohort.rows[0].fields["source_business_data"])
+    assert business["target_protein_synonyms"] == large_value
+    assert export.raw_sha256 == sha256_file(tmp_path / "normalized.csv")
+    assert dict(frozen.cohort_digests)["export/cohort.csv"] == export.canonical_sha256
+    assert len(cohort.rows) == 1
+    assert csv.field_size_limit() == original_limit
 
 
 def test_v2_selects_all_cohort_and_keeps_bound_evidence_separate(tmp_path: Path):

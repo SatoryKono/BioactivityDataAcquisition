@@ -58,6 +58,17 @@ def deployment(tmp_path):
     receipt = synthetic_reference_receipt(bundle.snapshot_sha256, root=artifacts)
     raw = artifacts / "copied-source.bin"
     raw.write_bytes(b"preserved Stage0 source bytes\x00\xff")
+    labels = artifacts / "expected_labels.json"
+    write_fixture_json(
+        labels,
+        {
+            "artifact": "bioetl_iuphar_reference_cases",
+            "schema_version": 2,
+            "cases": [{"source_references": [{"path": raw.name, "sha256": _sha(raw)}]}],
+            "reference_matrix": {},
+        },
+    )
+    _refresh_reference(receipt, "expected_labels", labels)
     stage0 = artifacts / "stage0_manifest.json"
     write_fixture_json(
         stage0,
@@ -158,6 +169,49 @@ def test_collects_complete_typed_closure_and_preserves_raw_bytes(deployment):
         )
         == copied
     )
+
+
+def test_independent_expected_case_proofs_enter_backup_closure(tmp_path):
+    proof = tmp_path / "independent-review.txt"
+    proof.write_bytes(b"Synthetic frozen expected-case evidence")
+    labels = tmp_path / "expected.json"
+    write_fixture_json(
+        labels,
+        {
+            "artifact": "bioetl_iuphar_reference_cases",
+            "schema_version": 2,
+            "cases": [
+                {"source_references": [{"path": proof.name, "sha256": _sha(proof)}]}
+            ],
+            "reference_matrix": {},
+        },
+    )
+    collector = _DependencyCollector(tmp_path)
+    collector.document(labels, "expected_labels")
+    assert collector.dependencies[proof.name] == _sha(proof)
+    proof.write_bytes(b"Changed after independent review")
+    with pytest.raises(ValueError, match="digest mismatch"):
+        _DependencyCollector(tmp_path).document(labels, "expected_labels")
+
+
+@pytest.mark.parametrize("kind", ["stage0_cohort", "stage0_evidence"])
+def test_actual_stage0_material_roles_are_collected(deployment, kind):
+    workspace, configs, output, _ = deployment
+    extra = output / "additional-material.bin"
+    extra.write_bytes(b"Synthetic copied Stage0 material")
+    receipt_path = output / "acceptance.json"
+    receipt = json.loads(receipt_path.read_bytes())
+    receipt["artifact_references"].append(
+        {"kind": kind, "immutable_uri": extra.as_uri(), "sha256": _sha(extra)}
+    )
+    digest = write_fixture_json(receipt_path, receipt)
+    profile_path = output / "enrich-profile.json"
+    profile = json.loads(profile_path.read_bytes())
+    profile["acceptance"]["sha256"] = digest
+    write_fixture_json(profile_path, profile)
+    _config(configs[1], profile_path, "enrich")
+    dependencies = collect_target_dependencies(workspace=workspace, configs=configs)
+    assert dependencies[extra.relative_to(workspace).as_posix()] == _sha(extra)
 
 
 def test_collects_both_old_shadow_and_new_enrich_profiles(deployment):

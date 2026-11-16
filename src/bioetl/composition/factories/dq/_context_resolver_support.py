@@ -10,6 +10,12 @@ from typing import TYPE_CHECKING, cast, get_args, get_origin
 from pydantic import BaseModel
 
 from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
+from bioetl.composition.factories.storage._context_resolution import (
+    get_layer_configs,
+    resolve_flat_structure_flags,
+    resolve_storage_paths,
+)
+from bioetl.composition.factories.storage.target_paths import resolve_target_table_paths
 from bioetl.domain.value_objects.dq_report import SilverDQCheckType
 
 if TYPE_CHECKING:
@@ -201,7 +207,10 @@ def extract_dq_output_paths_impl(
     *,
     get_layer_path_fn: Callable[[object], str | None],
     has_flat_structure_fn: Callable[[object], bool],
+    settings: Settings | None = None,
 ) -> DQOutputPathsContext:
+    if settings is not None and yaml_config is not None:
+        return _resolved_dq_output_paths(settings, yaml_config)
     if yaml_config is None:
         return DQOutputPathsContext(
             bronze_path=None,
@@ -229,6 +238,29 @@ def extract_dq_output_paths_impl(
         gold_path=get_layer_path_fn(gold_config),
         flat_structure=has_flat_structure_fn(silver_config)
         or has_flat_structure_fn(gold_config),
+    )
+
+
+def _resolved_dq_output_paths(
+    settings: Settings, config: PipelineYamlConfig
+) -> DQOutputPathsContext:
+    """Follow the same runtime root, table and flat-path decisions as data writers."""
+    bronze, silver, gold = get_layer_configs(config)
+    use_yaml, bronze_path, _, _ = resolve_storage_paths(settings, bronze, silver, gold)
+    bronze_flat, _, _ = resolve_flat_structure_flags(
+        bronze_config=bronze,
+        silver_config=silver,
+        gold_config=gold,
+        use_yaml_paths=use_yaml,
+    )
+    if not bronze_flat:
+        bronze_path = bronze_path / config.provider / config.entity_type
+    silver_path, gold_path = resolve_target_table_paths(settings, config)
+    return DQOutputPathsContext(
+        bronze_path=str(bronze_path),
+        silver_path=str(silver_path),
+        gold_path=str(gold_path),
+        flat_structure=True,
     )
 
 

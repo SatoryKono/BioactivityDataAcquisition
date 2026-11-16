@@ -43,6 +43,7 @@ from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 if TYPE_CHECKING:
+    from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
     from bioetl.application.core.wiring.transformer import (
         BaseTransformer,
@@ -105,6 +106,7 @@ def assemble_runner(
         DQConfigsContext,
     ]
     | None = None,
+    settings: Settings | None = None,
 ) -> PipelineRunner:
     return _assemble_runner_impl(
         pipeline=pipeline,
@@ -118,6 +120,7 @@ def assemble_runner(
             else dq_configs_extractor
         ),
         yaml_config=yaml_config,
+        settings=settings,
     )
 
 
