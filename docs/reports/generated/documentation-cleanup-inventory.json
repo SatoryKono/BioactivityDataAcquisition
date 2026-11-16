@@ -98103,7 +98103,7 @@
       "github_issue_url": null,
       "inbound_links": 1,
       "lifecycle": "docs_reports_curated_entrypoint",
-      "outbound_links": 6,
+      "outbound_links": 7,
       "owner": "BioETL Team",
       "path": "docs/reports/index.md",
       "recommended_action": "keep",
