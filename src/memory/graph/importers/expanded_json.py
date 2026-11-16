@@ -77,35 +77,11 @@ def iter_file_reference_records(
     records: list[dict[str, Any]] = []
 
     for edge_id, edge in edges.items():
-        if edge.get("edge_type") != "references_file":
-            continue
-        source_node = nodes.get(str(edge.get("source"))) or {}
-        target_node = nodes.get(str(edge.get("target"))) or {}
-        source_path = _node_source_path(source_node)
-        target_path = _node_source_path(target_node)
-        if not source_path or not target_path:
-            continue
-        raw_evidence = edge.get("meta")
-        evidence: dict[str, Any] = (
-            raw_evidence if isinstance(raw_evidence, dict) else {}
+        record = _file_reference_record(
+            edge_id, edge, nodes, source_snapshot, snapshot_generated_at
         )
-        records.append(
-            {
-                "id": f"{source_path}|references_file|{target_path}",
-                "source_id": str(edge.get("source") or ""),
-                "source_path": source_path,
-                "target_id": str(edge.get("target") or ""),
-                "target_path": target_path,
-                "relation": "references_file",
-                "confidence": "derived",
-                "provenance": "bioetl_knowledge_graph_expanded.references_file",
-                "source_snapshot": source_snapshot,
-                "source_generated_at": snapshot_generated_at,
-                "edge_id": str(edge_id),
-                "description": str(edge.get("description") or ""),
-                "evidence": evidence,
-            }
-        )
+        if record is not None:
+            records.append(record)
     records.sort(key=lambda item: (item["source_path"], item["target_path"]))
     return records
 
@@ -159,23 +135,18 @@ def _module_reference_record(
     target_name = _node_module_name(target_node, target_id)
     if not source_name or not target_name:
         return None
-    return {
-        "id": f"{source_name}|references|{target_name}",
-        "source_id": source_id,
-        "source_name": source_name,
-        "source_path": _node_source_path(source_node),
-        "target_id": target_id,
-        "target_name": target_name,
-        "target_path": _node_source_path(target_node),
-        "relation": "references",
-        "confidence": "derived",
-        "provenance": "bioetl_knowledge_graph_expanded.references",
-        "source_snapshot": source_snapshot,
-        "source_generated_at": snapshot_generated_at,
-        "edge_id": str(edge_id),
-        "description": str(edge.get("description") or ""),
-        "evidence": edge.get("meta") if isinstance(edge.get("meta"), dict) else {},
-    }
+    return _module_reference_payload(
+        edge_id,
+        edge,
+        source_node,
+        target_node,
+        source_id,
+        target_id,
+        source_name,
+        target_name,
+        source_snapshot,
+        snapshot_generated_at,
+    )
 
 
 def iter_entity_relation_records(
@@ -260,36 +231,11 @@ def iter_graph_semantic_relation_records(
     records: list[dict[str, Any]] = []
 
     for edge_id, edge in edges.items():
-        edge_type = str(edge.get("edge_type") or "")
-        relation = SEMANTIC_GRAPH_EDGE_RELATIONS.get(edge_type)
-        if relation is None:
-            continue
-        source_id = str(edge.get("source") or "")
-        target_id = str(edge.get("target") or "")
-        source_node = nodes.get(source_id) or {}
-        target_node = nodes.get(target_id) or {}
-        if not _is_supported_graph_semantic_edge(edge_type, source_node, target_node):
-            continue
-        raw_evidence = edge.get("meta")
-        evidence: dict[str, Any] = (
-            raw_evidence if isinstance(raw_evidence, dict) else {}
+        record = _graph_semantic_relation_record(
+            edge_id, edge, nodes, source_snapshot, snapshot_generated_at
         )
-        records.append(
-            _entity_relation_record(
-                source_node=source_node,
-                source_id=source_id,
-                target_node=target_node,
-                target_id=target_id,
-                relation=relation,
-                confidence="derived",
-                provenance=f"bioetl_knowledge_graph_expanded.{edge_type}",
-                source_snapshot=source_snapshot,
-                source_generated_at=snapshot_generated_at,
-                edge_id=str(edge_id),
-                evidence=evidence,
-                description=str(edge.get("description") or ""),
-            )
-        )
+        if record is not None:
+            records.append(record)
     return records
 
 
@@ -326,32 +272,11 @@ def iter_pipeline_test_relation_records(
     pipeline_nodes = _pipeline_nodes_by_name(payload)
     records: list[dict[str, Any]] = []
     for entity_ref, test_paths in sorted(ownership.items()):
-        if not isinstance(entity_ref, str) or not isinstance(test_paths, list):
-            continue
-        pipeline_name = entity_ref.replace(".", "_")
-        source_node = pipeline_nodes.get(pipeline_name)
-        if source_node is None:
-            continue
-        for test_path in sorted(
-            str(path) for path in test_paths if isinstance(path, str)
-        ):
-            records.append(
-                _path_target_relation_record(
-                    source_node=source_node,
-                    source_id=str(source_node.get("id") or f"pipeline:{pipeline_name}"),
-                    target_path=test_path,
-                    target_kind="Test",
-                    target_id=f"test:{test_path}",
-                    relation="tested_by",
-                    confidence="derived",
-                    provenance="configs/quality/test_matrix.entity_test_ownership",
-                    source_snapshot=source_snapshot,
-                    evidence={
-                        "test_matrix_path": "configs/quality/test_matrix.yaml",
-                        "entity_ref": entity_ref,
-                    },
-                )
+        records.extend(
+            _pipeline_test_records_for_entity(
+                entity_ref, test_paths, pipeline_nodes, source_snapshot
             )
+        )
     return records
 
 
@@ -372,39 +297,11 @@ def iter_config_test_relation_records(
     pipeline_nodes = _pipeline_nodes_by_name(payload)
     records: list[dict[str, Any]] = []
     for entity_ref, test_paths in sorted(ownership.items()):
-        if not isinstance(entity_ref, str) or not isinstance(test_paths, list):
-            continue
-        pipeline_name = entity_ref.replace(".", "_")
-        source_node = pipeline_nodes.get(pipeline_name)
-        if source_node is None:
-            continue
-        config_path = _node_source_path(source_node)
-        if not config_path.startswith(CONFIGS_DIR_PREFIX):
-            continue
-        for test_path in sorted(
-            str(path) for path in test_paths if isinstance(path, str)
-        ):
-            records.append(
-                _path_relation_record(
-                    source_path=config_path,
-                    source_kind="Config",
-                    source_id=_path_entity_id(config_path),
-                    source_name=config_path,
-                    target_path=test_path,
-                    target_kind="Test",
-                    target_id=f"test:{test_path}",
-                    target_name=test_path,
-                    relation="tested_by",
-                    confidence="derived",
-                    provenance="configs/quality/test_matrix.entity_test_ownership",
-                    source_snapshot=source_snapshot,
-                    evidence={
-                        "test_matrix_path": "configs/quality/test_matrix.yaml",
-                        "entity_ref": entity_ref,
-                        "pipeline_name": pipeline_name,
-                    },
-                )
+        records.extend(
+            _config_test_records_for_entity(
+                entity_ref, test_paths, pipeline_nodes, source_snapshot
             )
+        )
     return records
 
 
@@ -775,20 +672,7 @@ def _pipeline_doc_paths(source_node: dict[str, Any], repo_root: Path) -> list[st
     if not provider or not entity:
         return []
 
-    entity_dash = entity.replace("_", "-")
-    candidates = [
-        *(
-            path.relative_to(repo_root).as_posix()
-            for path in (
-                repo_root / "docs" / "04-reference" / "pipelines" / provider
-            ).glob(f"*-{entity_dash}-spec.md")
-        ),
-        f"docs/04-reference/providers/{provider}/{entity_dash}.md",
-        f"docs/04-reference/pipelines/{provider}-{entity_dash}.md",
-    ]
-    return sorted(
-        {candidate for candidate in candidates if (repo_root / candidate).is_file()}
-    )
+    return _existing_pipeline_doc_paths(provider, entity, repo_root)
 
 
 def _explicit_path_refs(text: str) -> set[str]:
@@ -1445,25 +1329,18 @@ def _pipeline_artifact_relation_record(
     target_entity_id = (
         target_ref if target_ref.startswith("artifact:") else f"artifact:{target_ref}"
     )
-    return {
-        "id": f"{source_ref}|emits_artifact|{target_entity_id}",
-        "source_id": source_ref,
-        "source_name": _node_display_name(source_node, source_id),
-        "source_kind": str(source_node.get("node_type") or "Unknown"),
-        "source_path": _node_source_path(source_node),
-        "target_id": target_entity_id,
-        "target_name": _node_display_name(target_node, target_id),
-        "target_kind": "Artifact",
-        "target_path": _node_source_path(target_node),
-        "relation": "emits_artifact",
-        "confidence": "derived",
-        "provenance": "bioetl_knowledge_graph_expanded.writes_to",
-        "source_snapshot": source_snapshot,
-        "source_generated_at": snapshot_generated_at,
-        "edge_id": str(edge_id),
-        "description": str(edge.get("description") or ""),
-        "evidence": edge.get("meta") if isinstance(edge.get("meta"), dict) else {},
-    }
+    return _pipeline_artifact_payload(
+        edge_id,
+        edge,
+        source_node,
+        target_node,
+        source_id,
+        target_id,
+        source_ref,
+        target_entity_id,
+        source_snapshot,
+        snapshot_generated_at,
+    )
 
 
 def _adr_paths_by_number(decisions_dir: Path) -> dict[str, Path]:
@@ -1756,15 +1633,9 @@ def resolve_index_entity(index: dict[str, Any], query: str) -> str | None:
         return normalized_query
     matches: list[str] = []
     for entity_id, entry in by_entity.items():
-        entry_map = entry if isinstance(entry, dict) else {}
-        name = str(entry_map.get("name") or "")
-        path = str(entry_map.get("path") or "")
-        entity_key = str(entity_id)
-        if normalized_query in {name, path}:
-            matches.append(entity_key)
-            continue
-        if entity_key.endswith(normalized_query) or path.endswith(normalized_query):
-            matches.append(entity_key)
+        matched_entity = _index_entity_entry_match(entity_id, entry, normalized_query)
+        if matched_entity is not None:
+            matches.append(matched_entity)
     if len(matches) == 1:
         return matches[0]
     return None
@@ -1824,6 +1695,249 @@ def main(argv: list[str] | None = None) -> int:
         sys.stdout.write(f"- entity projection: {summary['entity_projection_path']}\n")
         sys.stdout.write(f"- entity index: {summary['entity_index_path']}\n")
     return 0
+
+
+def _file_reference_record(
+    edge_id: object,
+    edge: dict[str, Any],
+    nodes: dict[str, dict[str, Any]],
+    source_snapshot: str,
+    snapshot_generated_at: str,
+) -> dict[str, Any] | None:
+    if edge.get("edge_type") != "references_file":
+        return None
+    source_node = nodes.get(str(edge.get("source"))) or {}
+    target_node = nodes.get(str(edge.get("target"))) or {}
+    source_path = _node_source_path(source_node)
+    target_path = _node_source_path(target_node)
+    if not source_path or not target_path:
+        return None
+    raw_evidence = edge.get("meta")
+    evidence: dict[str, Any] = raw_evidence if isinstance(raw_evidence, dict) else {}
+    return {
+        "id": f"{source_path}|references_file|{target_path}",
+        "source_id": str(edge.get("source") or ""),
+        "source_path": source_path,
+        "target_id": str(edge.get("target") or ""),
+        "target_path": target_path,
+        "relation": "references_file",
+        "confidence": "derived",
+        "provenance": "bioetl_knowledge_graph_expanded.references_file",
+        "source_snapshot": source_snapshot,
+        "source_generated_at": snapshot_generated_at,
+        "edge_id": str(edge_id),
+        "description": str(edge.get("description") or ""),
+        "evidence": evidence,
+    }
+
+
+def _graph_semantic_relation_record(
+    edge_id: object,
+    edge: dict[str, Any],
+    nodes: dict[str, dict[str, Any]],
+    source_snapshot: str,
+    snapshot_generated_at: str,
+) -> dict[str, Any] | None:
+    edge_type = str(edge.get("edge_type") or "")
+    relation = SEMANTIC_GRAPH_EDGE_RELATIONS.get(edge_type)
+    if relation is None:
+        return None
+    source_id = str(edge.get("source") or "")
+    target_id = str(edge.get("target") or "")
+    source_node = nodes.get(source_id) or {}
+    target_node = nodes.get(target_id) or {}
+    if not _is_supported_graph_semantic_edge(edge_type, source_node, target_node):
+        return None
+    raw_evidence = edge.get("meta")
+    evidence: dict[str, Any] = raw_evidence if isinstance(raw_evidence, dict) else {}
+    return _entity_relation_record(
+        source_node=source_node,
+        source_id=source_id,
+        target_node=target_node,
+        target_id=target_id,
+        relation=relation,
+        confidence="derived",
+        provenance=f"bioetl_knowledge_graph_expanded.{edge_type}",
+        source_snapshot=source_snapshot,
+        source_generated_at=snapshot_generated_at,
+        edge_id=str(edge_id),
+        evidence=evidence,
+        description=str(edge.get("description") or ""),
+    )
+
+
+def _module_reference_payload(
+    edge_id: str,
+    edge: dict[str, Any],
+    source_node: dict[str, Any],
+    target_node: dict[str, Any],
+    source_id: str,
+    target_id: str,
+    source_name: str,
+    target_name: str,
+    source_snapshot: str,
+    snapshot_generated_at: str,
+) -> dict[str, Any]:
+    return {
+        "id": f"{source_name}|references|{target_name}",
+        "source_id": source_id,
+        "source_name": source_name,
+        "source_path": _node_source_path(source_node),
+        "target_id": target_id,
+        "target_name": target_name,
+        "target_path": _node_source_path(target_node),
+        "relation": "references",
+        "confidence": "derived",
+        "provenance": "bioetl_knowledge_graph_expanded.references",
+        "source_snapshot": source_snapshot,
+        "source_generated_at": snapshot_generated_at,
+        "edge_id": str(edge_id),
+        "description": str(edge.get("description") or ""),
+        "evidence": edge.get("meta") if isinstance(edge.get("meta"), dict) else {},
+    }
+
+
+def _pipeline_test_records_for_entity(
+    entity_ref: object,
+    test_paths: object,
+    pipeline_nodes: dict[str, dict[str, Any]],
+    source_snapshot: str,
+) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    if not isinstance(entity_ref, str) or not isinstance(test_paths, list):
+        return []
+    pipeline_name = entity_ref.replace(".", "_")
+    source_node = pipeline_nodes.get(pipeline_name)
+    if source_node is None:
+        return []
+    for test_path in sorted(str(path) for path in test_paths if isinstance(path, str)):
+        records.append(
+            _path_target_relation_record(
+                source_node=source_node,
+                source_id=str(source_node.get("id") or f"pipeline:{pipeline_name}"),
+                target_path=test_path,
+                target_kind="Test",
+                target_id=f"test:{test_path}",
+                relation="tested_by",
+                confidence="derived",
+                provenance="configs/quality/test_matrix.entity_test_ownership",
+                source_snapshot=source_snapshot,
+                evidence={
+                    "test_matrix_path": "configs/quality/test_matrix.yaml",
+                    "entity_ref": entity_ref,
+                },
+            )
+        )
+    return records
+
+
+def _config_test_records_for_entity(
+    entity_ref: object,
+    test_paths: object,
+    pipeline_nodes: dict[str, dict[str, Any]],
+    source_snapshot: str,
+) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    if not isinstance(entity_ref, str) or not isinstance(test_paths, list):
+        return []
+    pipeline_name = entity_ref.replace(".", "_")
+    source_node = pipeline_nodes.get(pipeline_name)
+    if source_node is None:
+        return []
+    config_path = _node_source_path(source_node)
+    if not config_path.startswith(CONFIGS_DIR_PREFIX):
+        return []
+    for test_path in sorted(str(path) for path in test_paths if isinstance(path, str)):
+        records.append(
+            _path_relation_record(
+                source_path=config_path,
+                source_kind="Config",
+                source_id=_path_entity_id(config_path),
+                source_name=config_path,
+                target_path=test_path,
+                target_kind="Test",
+                target_id=f"test:{test_path}",
+                target_name=test_path,
+                relation="tested_by",
+                confidence="derived",
+                provenance="configs/quality/test_matrix.entity_test_ownership",
+                source_snapshot=source_snapshot,
+                evidence={
+                    "test_matrix_path": "configs/quality/test_matrix.yaml",
+                    "entity_ref": entity_ref,
+                    "pipeline_name": pipeline_name,
+                },
+            )
+        )
+    return records
+
+
+def _existing_pipeline_doc_paths(
+    provider: str, entity: str, repo_root: Path
+) -> list[str]:
+    entity_dash = entity.replace("_", "-")
+    candidates = [
+        *(
+            path.relative_to(repo_root).as_posix()
+            for path in (
+                repo_root / "docs" / "04-reference" / "pipelines" / provider
+            ).glob(f"*-{entity_dash}-spec.md")
+        ),
+        f"docs/04-reference/providers/{provider}/{entity_dash}.md",
+        f"docs/04-reference/pipelines/{provider}-{entity_dash}.md",
+    ]
+    return sorted(
+        {candidate for candidate in candidates if (repo_root / candidate).is_file()}
+    )
+
+
+def _pipeline_artifact_payload(
+    edge_id: object,
+    edge: dict[str, Any],
+    source_node: dict[str, Any],
+    target_node: dict[str, Any],
+    source_id: str,
+    target_id: str,
+    source_ref: str,
+    target_entity_id: str,
+    source_snapshot: str,
+    snapshot_generated_at: str,
+) -> dict[str, Any]:
+    return {
+        "id": f"{source_ref}|emits_artifact|{target_entity_id}",
+        "source_id": source_ref,
+        "source_name": _node_display_name(source_node, source_id),
+        "source_kind": str(source_node.get("node_type") or "Unknown"),
+        "source_path": _node_source_path(source_node),
+        "target_id": target_entity_id,
+        "target_name": _node_display_name(target_node, target_id),
+        "target_kind": "Artifact",
+        "target_path": _node_source_path(target_node),
+        "relation": "emits_artifact",
+        "confidence": "derived",
+        "provenance": "bioetl_knowledge_graph_expanded.writes_to",
+        "source_snapshot": source_snapshot,
+        "source_generated_at": snapshot_generated_at,
+        "edge_id": str(edge_id),
+        "description": str(edge.get("description") or ""),
+        "evidence": edge.get("meta") if isinstance(edge.get("meta"), dict) else {},
+    }
+
+
+def _index_entity_entry_match(
+    entity_id: object, entry: object, normalized_query: str
+) -> str | None:
+    entry_map = entry if isinstance(entry, dict) else {}
+    name = str(entry_map.get("name") or "")
+    path = str(entry_map.get("path") or "")
+    entity_key = str(entity_id)
+    if normalized_query in {name, path}:
+        return entity_key
+    return (
+        entity_key
+        if entity_key.endswith(normalized_query) or path.endswith(normalized_query)
+        else None
+    )
 
 
 if __name__ == "__main__":

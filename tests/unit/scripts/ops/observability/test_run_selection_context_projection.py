@@ -73,6 +73,13 @@ def test_context_uses_uri_encoded_variable_in_backend_only(uid, donor_id):
 def test_query_context_is_explicit_and_clock_is_query_evaluation(
     requested, payload, expected, requested_pipeline="$__all"
 ):
+    row = _assert_query_context(
+        requested, payload, expected, requested_pipeline=requested_pipeline
+    )
+    assert row["context"] == expected
+
+
+def _assert_query_context(requested, payload, expected, requested_pipeline="$__all"):
     node = shutil.which("node")
     module = os.environ.get("JSONATA_MODULE")
     if not node or not module or not Path(module).exists():
@@ -111,6 +118,7 @@ def test_query_context_is_explicit_and_clock_is_query_evaluation(
     )
     assert checked_at == checked_clock
     assert "selection_context" not in payload
+    return row
 
 
 def test_dq_context_generation_keeps_nested_disclosure_position_stable():
@@ -144,7 +152,7 @@ def test_dq_context_generation_keeps_nested_disclosure_position_stable():
     ],
 )
 def test_exact_uuid_context_discloses_overridden_pipeline(pipeline, expected):
-    test_query_context_is_explicit_and_clock_is_query_evaluation(
+    row = _assert_query_context(
         "finished",
         {
             "run_id": "finished",
@@ -155,3 +163,4 @@ def test_exact_uuid_context_discloses_overridden_pipeline(pipeline, expected):
         expected,
         requested_pipeline=pipeline,
     )
+    assert row["context"] == expected

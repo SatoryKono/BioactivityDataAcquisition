@@ -1522,50 +1522,43 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     try:
-        if args.command == "catalog":
-            return _emit(query_catalog(args.view), as_json=args.json)
-        if args.command == "rag":
-            return _emit(
-                query_rag(
-                    RagQueryOptions(
-                        query=args.query,
-                        source_type=args.source_type,
-                        domain=args.domain,
-                        repo_zone=args.repo_zone,
-                        symbol_kind=args.symbol_kind,
-                        chunks_path=args.chunks_path,
-                        limit=args.limit,
-                        profile=args.profile,
-                        auto_refresh=args.auto_refresh,
-                        refresh_output_root=args.refresh_output_root,
-                        file_context=args.file_context,
-                        file_relation_index_path=args.file_relation_index,
-                        expanded_graph_path=args.expanded_graph_path,
-                        file_context_depth=args.file_context_depth,
-                    )
-                ),
-                as_json=args.json,
-            )
-        if args.command == "timeline":
-            return _emit(
-                query_timeline(
+        if args.command in ("catalog", "rag", "timeline", "all"):
+            return _dispatch_content_query(args)
+        if args.command in (
+            "refs",
+            "impact",
+            "neighborhood",
+            "module-refs",
+            "module-impact",
+            "module-neighborhood",
+        ):
+            return _dispatch_file_module_query(args)
+        if args.command in (
+            "entity-refs",
+            "entity-impact",
+            "entity-neighborhood",
+            "graph",
+        ):
+            return _dispatch_entity_query(args)
+    except FileNotFoundError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    parser.error(f"unsupported command: {args.command}")
+
+
+def _dispatch_content_query(args: argparse.Namespace) -> int:
+    if args.command == "catalog":
+        return _emit(query_catalog(args.view), as_json=args.json)
+    if args.command == "rag":
+        return _emit(
+            query_rag(
+                RagQueryOptions(
                     query=args.query,
-                    event_family=args.event_family,
-                    event_type=args.event_type,
-                    events_dir=args.events_dir,
-                    limit=args.limit,
-                    profile=args.profile,
-                    auto_refresh=args.auto_refresh,
-                    refresh_output_root=args.refresh_output_root,
-                ),
-                as_json=args.json,
-            )
-        if args.command == "all":
-            return _emit(
-                query_all(
-                    query=args.query,
+                    source_type=args.source_type,
+                    domain=args.domain,
+                    repo_zone=args.repo_zone,
+                    symbol_kind=args.symbol_kind,
                     chunks_path=args.chunks_path,
-                    events_dir=args.events_dir,
                     limit=args.limit,
                     profile=args.profile,
                     auto_refresh=args.auto_refresh,
@@ -1574,130 +1567,167 @@ def main(argv: list[str] | None = None) -> int:
                     file_relation_index_path=args.file_relation_index,
                     expanded_graph_path=args.expanded_graph_path,
                     file_context_depth=args.file_context_depth,
-                ),
-                as_json=args.json,
-            )
-        if args.command == "refs":
-            return _emit(
-                query_file_refs(
-                    source_path=args.source_path,
-                    direction=args.direction,
-                    index_path=args.index_path,
-                    limit=args.limit,
-                    auto_refresh=args.auto_refresh,
-                    refresh_output_root=args.refresh_output_root,
-                    expanded_graph_path=args.expanded_graph_path,
-                ),
-                as_json=args.json,
-            )
-        if args.command == "impact":
-            return _emit(
-                query_file_impact(
-                    source_path=args.source_path,
-                    index_path=args.index_path,
-                    limit=args.limit,
-                    auto_refresh=args.auto_refresh,
-                    refresh_output_root=args.refresh_output_root,
-                    expanded_graph_path=args.expanded_graph_path,
-                ),
-                as_json=args.json,
-            )
-        if args.command == "neighborhood":
-            return _emit(
-                query_file_neighborhood(
-                    source_path=args.source_path,
-                    depth=args.depth,
-                    index_path=args.index_path,
-                    limit=args.limit,
-                    auto_refresh=args.auto_refresh,
-                    refresh_output_root=args.refresh_output_root,
-                    expanded_graph_path=args.expanded_graph_path,
-                ),
-                as_json=args.json,
-            )
-        if args.command == "module-refs":
-            return _emit(
-                query_module_refs(
-                    module_name=args.module_name,
-                    direction=args.direction,
-                    index_path=args.index_path,
-                    limit=args.limit,
-                    auto_refresh=args.auto_refresh,
-                    refresh_output_root=args.refresh_output_root,
-                    expanded_graph_path=args.expanded_graph_path,
-                ),
-                as_json=args.json,
-            )
-        if args.command == "module-impact":
-            return _emit(
-                query_module_impact(
-                    module_name=args.module_name,
-                    index_path=args.index_path,
-                    limit=args.limit,
-                    auto_refresh=args.auto_refresh,
-                    refresh_output_root=args.refresh_output_root,
-                    expanded_graph_path=args.expanded_graph_path,
-                ),
-                as_json=args.json,
-            )
-        if args.command == "module-neighborhood":
-            return _emit(
-                query_module_neighborhood(
-                    module_name=args.module_name,
-                    depth=args.depth,
-                    index_path=args.index_path,
-                    limit=args.limit,
-                    auto_refresh=args.auto_refresh,
-                    refresh_output_root=args.refresh_output_root,
-                    expanded_graph_path=args.expanded_graph_path,
-                ),
-                as_json=args.json,
-            )
-        if args.command == "entity-refs":
-            return _emit(
-                query_entity_refs(
-                    entity=args.entity,
-                    direction=args.direction,
-                    relation=args.relation,
-                    index_path=args.index_path,
-                    limit=args.limit,
-                    auto_refresh=args.auto_refresh,
-                    refresh_output_root=args.refresh_output_root,
-                    expanded_graph_path=args.expanded_graph_path,
-                ),
-                as_json=args.json,
-            )
-        if args.command == "entity-impact":
-            return _emit(
-                query_entity_impact(
-                    entity=args.entity,
-                    index_path=args.index_path,
-                    limit=args.limit,
-                    auto_refresh=args.auto_refresh,
-                    refresh_output_root=args.refresh_output_root,
-                    expanded_graph_path=args.expanded_graph_path,
-                ),
-                as_json=args.json,
-            )
-        if args.command == "entity-neighborhood":
-            return _emit(
-                query_entity_neighborhood(
-                    entity=args.entity,
-                    depth=args.depth,
-                    index_path=args.index_path,
-                    limit=args.limit,
-                    auto_refresh=args.auto_refresh,
-                    refresh_output_root=args.refresh_output_root,
-                    expanded_graph_path=args.expanded_graph_path,
-                ),
-                as_json=args.json,
-            )
-        if args.command == "graph":
-            return graph_query.main(args.graph_args)
-    except FileNotFoundError as exc:
-        print(str(exc), file=sys.stderr)
-        return 1
-    parser.error(f"unsupported command: {args.command}")
+                )
+            ),
+            as_json=args.json,
+        )
+    if args.command == "timeline":
+        return _emit(
+            query_timeline(
+                query=args.query,
+                event_family=args.event_family,
+                event_type=args.event_type,
+                events_dir=args.events_dir,
+                limit=args.limit,
+                profile=args.profile,
+                auto_refresh=args.auto_refresh,
+                refresh_output_root=args.refresh_output_root,
+            ),
+            as_json=args.json,
+        )
+    if args.command == "all":
+        return _emit(
+            query_all(
+                query=args.query,
+                chunks_path=args.chunks_path,
+                events_dir=args.events_dir,
+                limit=args.limit,
+                profile=args.profile,
+                auto_refresh=args.auto_refresh,
+                refresh_output_root=args.refresh_output_root,
+                file_context=args.file_context,
+                file_relation_index_path=args.file_relation_index,
+                expanded_graph_path=args.expanded_graph_path,
+                file_context_depth=args.file_context_depth,
+            ),
+            as_json=args.json,
+        )
+    raise AssertionError("query dispatch received an unsupported command")
+
+
+def _dispatch_file_module_query(args: argparse.Namespace) -> int:
+    if args.command == "refs":
+        return _emit(
+            query_file_refs(
+                source_path=args.source_path,
+                direction=args.direction,
+                index_path=args.index_path,
+                limit=args.limit,
+                auto_refresh=args.auto_refresh,
+                refresh_output_root=args.refresh_output_root,
+                expanded_graph_path=args.expanded_graph_path,
+            ),
+            as_json=args.json,
+        )
+    if args.command == "impact":
+        return _emit(
+            query_file_impact(
+                source_path=args.source_path,
+                index_path=args.index_path,
+                limit=args.limit,
+                auto_refresh=args.auto_refresh,
+                refresh_output_root=args.refresh_output_root,
+                expanded_graph_path=args.expanded_graph_path,
+            ),
+            as_json=args.json,
+        )
+    if args.command == "neighborhood":
+        return _emit(
+            query_file_neighborhood(
+                source_path=args.source_path,
+                depth=args.depth,
+                index_path=args.index_path,
+                limit=args.limit,
+                auto_refresh=args.auto_refresh,
+                refresh_output_root=args.refresh_output_root,
+                expanded_graph_path=args.expanded_graph_path,
+            ),
+            as_json=args.json,
+        )
+    if args.command == "module-refs":
+        return _emit(
+            query_module_refs(
+                module_name=args.module_name,
+                direction=args.direction,
+                index_path=args.index_path,
+                limit=args.limit,
+                auto_refresh=args.auto_refresh,
+                refresh_output_root=args.refresh_output_root,
+                expanded_graph_path=args.expanded_graph_path,
+            ),
+            as_json=args.json,
+        )
+    if args.command == "module-impact":
+        return _emit(
+            query_module_impact(
+                module_name=args.module_name,
+                index_path=args.index_path,
+                limit=args.limit,
+                auto_refresh=args.auto_refresh,
+                refresh_output_root=args.refresh_output_root,
+                expanded_graph_path=args.expanded_graph_path,
+            ),
+            as_json=args.json,
+        )
+    if args.command == "module-neighborhood":
+        return _emit(
+            query_module_neighborhood(
+                module_name=args.module_name,
+                depth=args.depth,
+                index_path=args.index_path,
+                limit=args.limit,
+                auto_refresh=args.auto_refresh,
+                refresh_output_root=args.refresh_output_root,
+                expanded_graph_path=args.expanded_graph_path,
+            ),
+            as_json=args.json,
+        )
+    raise AssertionError("query dispatch received an unsupported command")
+
+
+def _dispatch_entity_query(args: argparse.Namespace) -> int:
+    if args.command == "entity-refs":
+        return _emit(
+            query_entity_refs(
+                entity=args.entity,
+                direction=args.direction,
+                relation=args.relation,
+                index_path=args.index_path,
+                limit=args.limit,
+                auto_refresh=args.auto_refresh,
+                refresh_output_root=args.refresh_output_root,
+                expanded_graph_path=args.expanded_graph_path,
+            ),
+            as_json=args.json,
+        )
+    if args.command == "entity-impact":
+        return _emit(
+            query_entity_impact(
+                entity=args.entity,
+                index_path=args.index_path,
+                limit=args.limit,
+                auto_refresh=args.auto_refresh,
+                refresh_output_root=args.refresh_output_root,
+                expanded_graph_path=args.expanded_graph_path,
+            ),
+            as_json=args.json,
+        )
+    if args.command == "entity-neighborhood":
+        return _emit(
+            query_entity_neighborhood(
+                entity=args.entity,
+                depth=args.depth,
+                index_path=args.index_path,
+                limit=args.limit,
+                auto_refresh=args.auto_refresh,
+                refresh_output_root=args.refresh_output_root,
+                expanded_graph_path=args.expanded_graph_path,
+            ),
+            as_json=args.json,
+        )
+    if args.command == "graph":
+        return graph_query.main(args.graph_args)
+    raise AssertionError("query dispatch received an unsupported command")
 
 
 if __name__ == "__main__":
