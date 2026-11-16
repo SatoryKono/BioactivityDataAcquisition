@@ -405,8 +405,45 @@ and uses the matching Silver projection for each old Gold target. It validates
 the full candidates and publishes a completed build manifest and per-row
 classification evidence. Preserve the input manifest and build evidence.
 
-Rehearse promotion and recovery against separate complete copies. Before the
-real `prepare`, stop and quiesce every canonical writer and hold the maintenance
+Historical tables use the migration-only physical contract
+`legacy_physical_target_v30_to_v31_v1`: candidates must contain exactly the old
+physical columns plus the nine classification fields. Preserve every old value,
+including technical metadata, except the recomputed `content_hash`. The validator
+records known runtime metadata columns absent from the historical source rather
+than inventing run provenance. For an absent nullable Gold `description`, only the
+logical validation view supplies `None`; persisted columns remain unchanged.
+Gold's existing four-column SCD envelope is validated separately, retaining its
+datetime or ISO8601 text values. Present business and metadata fields and all nine
+new fields remain validated. These bounded migration adaptations do not change
+the schemas required for new runtime writes.
+
+Rehearse promotion and recovery against separate complete copies. The production
+CLI binds the active configuration and canonical destinations; use the composition
+API `bind_target_rehearsal` for a copy rehearsal. Keep `paths.workspace` at the
+approved repository. Put every mutable plan resource, a complete copied configs
+tree (excluding `.env*` and `*.env`), candidate tables, evidence, and a new backup
+directory inside one dedicated `reports/local/<occurrence>` directory. The old
+copied target configuration must match the active configuration byte for byte.
+Pass explicit `Settings(_env_file=None, test_mode=True, data_dir=...)` with its
+data directory inside that occurrence, then resolve the binding:
+
+```python
+binding = bind_target_rehearsal(
+    paths,
+    rehearsal_root=occurrence,
+    configs_root=occurrence / "configs",
+    settings=settings,
+)
+```
+
+Supply that binding as `deployment` to candidate construction, preparation, and
+promotion. The real profile loader, receipt admission, physical destination
+resolution, validation, backup, and recovery remain active. Pinned dependencies
+may be read from the approved repository; migration resources may not overlap
+active tables or configuration. Verify complete copied table/configuration byte
+identity after rollback and unchanged canonical resources throughout the rehearsal.
+
+Before the real `prepare`, stop and quiesce every canonical writer and hold the maintenance
 window through backup, promotion, verification, or rollback. A stable freeze
 does not itself prevent a later writer. Do not start preparation while a
 pipeline or reconciliation transform can still mutate these resources.

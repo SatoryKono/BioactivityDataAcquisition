@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import os
+import re
 from collections.abc import Mapping, Sequence
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
@@ -15,6 +17,7 @@ from bioetl.domain.normalization.profiles.chembl_target import CHEMBL_TARGET_PRO
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,
 )
+from bioetl.domain.schemas.base import ISO8601_TIMESTAMP_REGEX
 from bioetl.domain.transformations import generate_content_hash
 from bioetl.infrastructure.adapters.iuphar.adapter import (
     IupharTargetClassificationAdapter,
@@ -22,7 +25,8 @@ from bioetl.infrastructure.adapters.iuphar.adapter import (
 from bioetl.infrastructure.adapters.iuphar.snapshot_loader import load_profile
 
 if TYPE_CHECKING:
-    from pandera.pandas import DataFrameModel
+    from pandas import DataFrame
+    from pandera.pandas import DataFrameModel, DataFrameSchema
 
     from bioetl.domain.normalization.profiles.base import NormalizationProfile
     from bioetl.infrastructure.adapters.iuphar.snapshot_loader import (
@@ -30,6 +34,12 @@ if TYPE_CHECKING:
     )
 
 _META = frozenset({"entity_id", "content_hash"})
+_LEGACY_PHYSICAL_POLICY = "legacy_physical_target_v30_to_v31_v1"
+_OMITTABLE_RUNTIME_COLUMNS = {
+    "silver": frozenset({"_run_id", "_run_type", "_ingestion_ts"}),
+    "gold": frozenset({"_index", "_dq_error", "_dq_warn"}),
+}
+_GOLD_SCD_COLUMNS = frozenset({"_valid_from", "_valid_to", "_is_current", "_version"})
 
 
 def assert_no_managed_writers() -> None:
@@ -121,12 +131,19 @@ def compare_target_rows(
 def _assert_legacy_values(
     key: str, previous: Mapping[str, object], current: Mapping[str, object]
 ) -> None:
-    """Preserve the original entity identity and every old business value."""
+    """Preserve every old physical value, including storage/runtime metadata."""
     if previous.get("entity_id") != current.get("entity_id"):
         raise ValueError(f"candidate changed legacy entity_id: {key}")
-    for field, value in _business(previous).items():
-        if field not in current or current[field] != value:
-            raise ValueError(f"candidate changed legacy business field: {key}/{field}")
+    for field, value in previous.items():
+        if field == "content_hash":
+            continue
+        if (
+            field not in current
+            or type(current[field]) is not type(value)
+            or current[field] != value
+        ):
+            kind = "technical" if field.startswith("_") else "business"
+            raise ValueError(f"candidate changed legacy {kind} field: {key}/{field}")
 
 
 def _scoped_target_hash(
@@ -241,18 +258,127 @@ def _validate_candidate_layer(
     profile_sha256: str,
     legacy_include_fields: tuple[str, ...],
     v31_include_fields: tuple[str, ...],
-) -> tuple[dict[str, int], list[dict[str, object]]]:
+) -> tuple[dict[str, object], list[dict[str, object]]]:
     """Validate one full layer and its unchanged legacy/hash projection."""
     old = _read_delta(paths[name])
     new = _read_delta(paths["candidate_" + name])
-    import pandas as pd
-
-    schema.validate(pd.DataFrame(new), lazy=True)
+    result: dict[str, object] = dict(
+        compare_target_rows(old, new, legacy_include_fields)
+    )
+    result["physical_projection"] = _validate_physical_projection(
+        name, schema, old, new
+    )
     if any(row.get("target_class_profile_sha256") != profile_sha256 for row in new):
         raise ValueError("candidate rows belong to another IUPHAR profile")
-    result = compare_target_rows(old, new, legacy_include_fields)
     _verify_candidate_hashes(new, v31_include_fields)
     return result, new
+
+
+def _physical_columns(rows: Sequence[Mapping[str, object]]) -> set[str]:
+    if not rows:
+        raise ValueError("empty physical target cohort")
+    columns = set(rows[0])
+    if any(set(row) != columns for row in rows):
+        raise ValueError("target physical cohort has inconsistent columns")
+    return columns
+
+
+def _validate_physical_projection(
+    layer: str,
+    model: type[DataFrameModel],
+    old: Sequence[Mapping[str, object]],
+    new: Sequence[Mapping[str, object]],
+) -> dict[str, object]:
+    """Validate a frozen physical projection without changing runtime schemas.
+
+    Only declared historical technical omissions are permitted. Gold's absent
+    nullable description is represented as unknown in the validation view,
+    never materialized into the preserved rows or used as invented provenance.
+    """
+    import pandas as pd
+
+    previous, current = _physical_columns(old), _physical_columns(new)
+    if previous.intersection(TARGET_CLASSIFICATION_FIELDS):
+        raise ValueError("physical target migration requires a legacy V30 cohort")
+    if current != previous.union(TARGET_CLASSIFICATION_FIELDS):
+        raise ValueError(
+            "candidate physical columns must equal old columns plus nine classification fields"
+        )
+    schema = model.to_schema()
+    omissions = sorted(
+        _OMITTABLE_RUNTIME_COLUMNS[layer].intersection(schema.columns) - previous
+    )
+    if omissions:
+        schema = schema.remove_columns(omissions)
+    frame = pd.DataFrame(new)
+    storage = _validate_storage_envelope(layer, previous, old)
+    if storage:
+        frame = frame.drop(columns=storage)
+    nullable_absences = _logical_nullable_absences(layer, previous, schema, frame)
+    schema.validate(frame, lazy=True)
+    return {
+        "policy_id": _LEGACY_PHYSICAL_POLICY
+        if any((omissions, storage, nullable_absences))
+        else "target_v31_runtime_shape",
+        "omitted_runtime_columns": omissions,
+        "logical_nullable_absences": nullable_absences,
+        "storage_envelope_columns": storage,
+        "physical_columns_preserved": True,
+    }
+
+
+def _logical_nullable_absences(
+    layer: str, previous: set[str], schema: DataFrameSchema, frame: DataFrame
+) -> list[str]:
+    if layer != "gold" or "description" in previous:
+        return []
+    if not schema.columns["description"].nullable:
+        raise ValueError("Gold description is no longer a nullable logical field")
+    frame["description"] = None
+    return ["description"]
+
+
+def _validate_storage_envelope(
+    layer: str, columns: set[str], rows: Sequence[Mapping[str, object]]
+) -> list[str]:
+    storage = columns.intersection(_GOLD_SCD_COLUMNS)
+    if not storage:
+        return []
+    if layer != "gold" or storage != _GOLD_SCD_COLUMNS:
+        raise ValueError("unsupported or incomplete target storage envelope")
+    for row in rows:
+        _validate_scd_types(row)
+    return sorted(storage)
+
+
+def _validate_scd_types(row: Mapping[str, object]) -> None:
+    if not _scd_timestamp(row["_valid_from"]):
+        raise ValueError("Gold SCD _valid_from requires datetime or valid ISO8601 text")
+    valid_to = row["_valid_to"]
+    if valid_to is not None and not _scd_timestamp(valid_to):
+        raise ValueError(
+            "Gold SCD _valid_to requires nullable datetime or valid ISO8601 text"
+        )
+    if type(row["_is_current"]) is not bool:
+        raise ValueError("Gold SCD _is_current must retain its boolean type")
+    version = row["_version"]
+    if not isinstance(version, int) or isinstance(version, bool) or version < 1:
+        raise ValueError("Gold SCD _version must retain its positive integer type")
+
+
+def _scd_timestamp(value: object) -> bool:
+    if isinstance(value, datetime):
+        return True
+    if (
+        not isinstance(value, str)
+        or re.fullmatch(ISO8601_TIMESTAMP_REGEX, value) is None
+    ):
+        return False
+    try:
+        datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return True
 
 
 def _verify_candidate_hashes(

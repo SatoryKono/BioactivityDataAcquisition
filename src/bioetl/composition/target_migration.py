@@ -21,6 +21,7 @@ from bioetl.infrastructure.config.target_classification_profile import (
 from bioetl.infrastructure.schemas.target_classification_config import (
     TargetClassificationYamlConfig,
 )
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.storage.target_classification_migration import (
     TargetMigrationPaths,
 )
@@ -118,28 +119,40 @@ def _rehearsal_locations(
     checked = paths.checked()
     active = resolve_configs_root(active_configs_root).resolve()
     if paths.workspace.resolve() != active.parent:
-        raise ValueError("rehearsal workspace must match the active repository/config root")
+        raise ValueError(
+            "rehearsal workspace must match the active repository/config root"
+        )
     root = validate_rehearsal_paths(
         checked, workspace=paths.workspace, rehearsal_root=rehearsal_root
     )
     copied = resolve_configs_root(configs_root).resolve()
-    if not copied.is_relative_to(root) or checked["config"] != (copied / "entities/chembl/target.yaml"):
+    if not copied.is_relative_to(root) or checked["config"] != (
+        copied / "entities/chembl/target.yaml"
+    ):
         raise ValueError("rehearsal must load its copied configs tree")
     canonical = active / "entities/chembl/target.yaml"
     if sha256_file(canonical) != sha256_file(checked["config"]):
-        raise ValueError("rehearsal old configuration must equal the active canonical bytes")
+        raise ValueError(
+            "rehearsal old configuration must equal the active canonical bytes"
+        )
     if not settings.test_mode or not settings.data_dir.resolve().is_relative_to(root):
-        raise ValueError("rehearsal requires explicit isolated test_mode storage settings")
+        raise ValueError(
+            "rehearsal requires explicit isolated test_mode storage settings"
+        )
     return checked, copied, active
 
 
-def _rehearsal_future(checked: dict[str, Path], configs_root: Path):
+def _rehearsal_future(
+    checked: dict[str, Path], configs_root: Path
+) -> PipelineYamlConfig:
     original = _entity_document(checked["config"])
     deployment = _entity_document(checked["candidate_config"])
     if _without_classification(original) != _without_classification(deployment):
         raise ValueError("deployment YAML may change only target_classification")
     pipeline = cast("dict[str, object]", deployment["pipeline"])
-    classification = TargetClassificationYamlConfig.model_validate(pipeline.get("target_classification"))
+    classification = TargetClassificationYamlConfig.model_validate(
+        pipeline.get("target_classification")
+    )
     if classification.mode != "enrich":
         raise ValueError("deployment configuration must select enrich")
     baseline = load_pipeline_config_uncached("chembl_target", configs_root=configs_root)
@@ -147,19 +160,32 @@ def _rehearsal_future(checked: dict[str, Path], configs_root: Path):
     return resolve_target_classification_profile(future).resolved_yaml_config
 
 
-def _protect_active_resources(checked: dict[str, Path], active_configs_root: Path) -> None:
+def _protect_active_resources(
+    checked: dict[str, Path], active_configs_root: Path
+) -> None:
     settings = get_settings()
-    target = load_pipeline_config_uncached("chembl_target", configs_root=active_configs_root)
-    assay = load_pipeline_config_uncached("chembl_assay", configs_root=active_configs_root)
-    protected = (
-        active_configs_root / "entities/chembl/target.yaml",
-        *resolve_target_table_paths(settings, target),
-        resolve_target_table_paths(settings, assay)[1],
+    target = load_pipeline_config_uncached(
+        "chembl_target", configs_root=active_configs_root
+    )
+    assay = load_pipeline_config_uncached(
+        "chembl_assay", configs_root=active_configs_root
+    )
+    protected = tuple(
+        path.resolve()
+        for path in (
+            active_configs_root / "entities/chembl/target.yaml",
+            *resolve_target_table_paths(settings, target),
+            resolve_target_table_paths(settings, assay)[1],
+        )
     )
     for path in checked.values():
-        if any(path == item.resolve() or path.is_relative_to(item.resolve()) or item.resolve().is_relative_to(path)
-               for item in protected):
-            raise ValueError("rehearsal resources overlap active canonical data/configuration")
+        if any(
+            path == item or path.is_relative_to(item) or item.is_relative_to(path)
+            for item in protected
+        ):
+            raise ValueError(
+                "rehearsal resources overlap active canonical data/configuration"
+            )
 
 
 def bind_target_rehearsal(
@@ -188,16 +214,29 @@ def bind_target_rehearsal(
     silver, gold = resolve_target_table_paths(settings, future)
     if (silver.resolve(), gold.resolve()) != (checked["silver"], checked["gold"]):
         raise ValueError("rehearsal resolves different physical target destinations")
-    settings_digest = sha256_bytes(canonical_json_bytes({
-        "data_dir": str(settings.data_dir.resolve()), "configs_root": str(copied),
-        "silver": str(silver.resolve()), "gold": str(gold.resolve()),
-        "role": "rehearsal", "rehearsal_root": str(rehearsal_root.resolve()),
-        "approved_workspace": str(paths.workspace.resolve()),
-    }))
+    settings_digest = sha256_bytes(
+        canonical_json_bytes(
+            {
+                "data_dir": str(settings.data_dir.resolve()),
+                "configs_root": str(copied),
+                "silver": str(silver.resolve()),
+                "gold": str(gold.resolve()),
+                "role": "rehearsal",
+                "rehearsal_root": str(rehearsal_root.resolve()),
+                "approved_workspace": str(paths.workspace.resolve()),
+            }
+        )
+    )
     return TargetDeploymentBinding(
-        str(checked["config"]), sha256_file(checked["config"]), sha256_file(checked["candidate_config"]),
-        str(silver.resolve()), str(gold.resolve()), profile.profile_sha256, settings_digest,
-        role="rehearsal", rehearsal_root=str(rehearsal_root.resolve()),
+        str(checked["config"]),
+        sha256_file(checked["config"]),
+        sha256_file(checked["candidate_config"]),
+        str(silver.resolve()),
+        str(gold.resolve()),
+        profile.profile_sha256,
+        settings_digest,
+        role="rehearsal",
+        rehearsal_root=str(rehearsal_root.resolve()),
         approved_workspace=str(paths.workspace.resolve()),
     )
 

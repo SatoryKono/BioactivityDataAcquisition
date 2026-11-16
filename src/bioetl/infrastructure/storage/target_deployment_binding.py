@@ -25,7 +25,9 @@ class TargetDeploymentBinding:
 
     def document(self) -> dict[str, str]:
         document = asdict(self)
-        if self.role == "deployment" and not (self.rehearsal_root or self.approved_workspace):
+        if self.role == "deployment" and not (
+            self.rehearsal_root or self.approved_workspace
+        ):
             # Preserve historical production journal/plan identities.
             for key in ("role", "rehearsal_root", "approved_workspace"):
                 document.pop(key)
@@ -36,29 +38,42 @@ def validate_rehearsal_paths(
     paths: dict[str, Path], *, workspace: Path, rehearsal_root: Path
 ) -> Path:
     """Fence every mutable resource inside one unredirected local occurrence."""
-    for path in (workspace, rehearsal_root):
-        if not path.is_absolute() or ".." in path.parts:
-            raise ValueError("rehearsal needs explicit absolute workspace/root paths")
-        if any(part.is_symlink() or part.is_junction() for part in (path, *path.parents)):
-            raise ValueError("rehearsal refuses symlink/junction paths")
+    _unredirected_absolute(workspace)
+    _unredirected_absolute(rehearsal_root)
     workspace = workspace.resolve(strict=True)
     root = rehearsal_root.resolve(strict=True)
     local = workspace / "reports" / "local"
     if root == local or not root.is_relative_to(local):
         raise ValueError("rehearsal root must be a dedicated reports/local occurrence")
-    if any(path.resolve() == root or not path.resolve().is_relative_to(root) for path in paths.values()):
+    if any(
+        path.resolve() == root or not path.resolve().is_relative_to(root)
+        for path in paths.values()
+    ):
         raise ValueError("all rehearsal resources must stay inside the rehearsal root")
     return root
 
 
-def _validate_binding_role(paths: dict[str, Path], binding: TargetDeploymentBinding) -> None:
+def _unredirected_absolute(path: Path) -> None:
+    if not path.is_absolute() or ".." in path.parts:
+        raise ValueError("rehearsal needs explicit absolute workspace/root paths")
+    if any(part.is_symlink() or part.is_junction() for part in (path, *path.parents)):
+        raise ValueError("rehearsal refuses symlink/junction paths")
+
+
+def _validate_binding_role(
+    paths: dict[str, Path], binding: TargetDeploymentBinding
+) -> None:
     if binding.role == "rehearsal":
         validate_rehearsal_paths(
             paths,
             workspace=Path(binding.approved_workspace),
             rehearsal_root=Path(binding.rehearsal_root),
         )
-    elif binding.role != "deployment" or binding.rehearsal_root or binding.approved_workspace:
+    elif (
+        binding.role != "deployment"
+        or binding.rehearsal_root
+        or binding.approved_workspace
+    ):
         raise ValueError("unsupported or mixed target deployment binding role")
 
 
@@ -82,4 +97,8 @@ def validate_deployment_binding(
         )
 
 
-__all__ = ["TargetDeploymentBinding", "validate_deployment_binding", "validate_rehearsal_paths"]
+__all__ = [
+    "TargetDeploymentBinding",
+    "validate_deployment_binding",
+    "validate_rehearsal_paths",
+]

@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from pathlib import Path
+from datetime import UTC, datetime
 
 import pyarrow as pa
 import pytest
 import yaml
 from deltalake import write_deltalake
+from pandera.errors import SchemaErrors
 
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
@@ -335,3 +337,155 @@ def test_destructive_enrich_allows_empty_candidate_destinations(tmp_path: Path):
         mode="enrich",
         destructive=True,
     )
+
+
+def _as_legacy_physical(admitted_candidate):
+    paths, fields, tables = admitted_candidate
+    for layer in ("silver", "candidate_silver"):
+        for row in tables[paths[layer]]:
+            for field in ("_run_id", "_run_type", "_ingestion_ts", "_source_batch_id"):
+                row.pop(field, None)
+    for layer in ("gold", "candidate_gold"):
+        for row in tables[paths[layer]]:
+            for field in ("_index", "_dq_error", "_dq_warn", "description"):
+                row.pop(field, None)
+            row.update(
+                {
+                    "_valid_from": datetime(2026, 11, 16, tzinfo=UTC),
+                    "_valid_to": None,
+                    "_is_current": True,
+                    "_version": 1,
+                }
+            )
+    return paths, fields, tables
+
+
+def test_explicit_historical_physical_projection_preserves_rows_without_provenance_fabrication(
+    admitted_candidate,
+):
+    paths, fields, tables = _as_legacy_physical(admitted_candidate)
+    report = validation.validate_target_candidate(paths, fields)
+    silver = report["silver"]["physical_projection"]
+    gold = report["gold"]["physical_projection"]
+    assert silver["policy_id"] == "legacy_physical_target_v30_to_v31_v1"
+    assert silver["omitted_runtime_columns"] == [
+        "_ingestion_ts",
+        "_run_id",
+        "_run_type",
+    ]
+    assert gold["logical_nullable_absences"] == ["description"]
+    assert gold["storage_envelope_columns"] == [
+        "_is_current",
+        "_valid_from",
+        "_valid_to",
+        "_version",
+    ]
+    assert "description" not in tables[paths["candidate_gold"]][0]
+    assert "_run_id" not in tables[paths["candidate_silver"]][0]
+    import pandas as pd
+    from bioetl.domain.schemas.chembl.target import TargetSchemaV31
+
+    with pytest.raises(SchemaErrors, match="_run_id"):
+        TargetSchemaV31.validate(
+            pd.DataFrame(tables[paths["candidate_silver"]]), lazy=True
+        )
+
+
+@pytest.mark.parametrize(
+    "field", ["_valid_from", "_valid_to", "_is_current", "_version"]
+)
+@pytest.mark.parametrize("remove", [True, False])
+def test_old_scd_metadata_cannot_be_removed_or_changed(
+    admitted_candidate, field, remove
+):
+    paths, fields, tables = _as_legacy_physical(admitted_candidate)
+    row = tables[paths["candidate_gold"]][0]
+    if remove:
+        row.pop(field)
+    else:
+        row[field] = "changed"
+    with pytest.raises(ValueError, match="legacy technical field"):
+        validation.validate_target_candidate(paths, fields)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("_valid_from", "2026-11-16"),
+        ("_valid_from", 123),
+        ("_valid_from", "2026-99-16T10:28:06+00:00"),
+        ("_valid_to", "tomorrow"),
+        ("_is_current", 1),
+        ("_version", True),
+        ("_version", 0),
+    ],
+)
+def test_existing_scd_envelope_types_are_validated(admitted_candidate, field, value):
+    paths, fields, tables = _as_legacy_physical(admitted_candidate)
+    for layer in ("gold", "candidate_gold"):
+        tables[paths[layer]][0][field] = value
+    with pytest.raises(ValueError, match="Gold SCD"):
+        validation.validate_target_candidate(paths, fields)
+
+
+def test_present_runtime_lineage_remains_nonnullable(admitted_candidate):
+    paths, fields, tables = admitted_candidate
+    for layer in ("silver", "candidate_silver"):
+        tables[paths[layer]][0]["_run_id"] = None
+    with pytest.raises(SchemaErrors, match="_run_id"):
+        validation.validate_target_candidate(paths, fields)
+
+
+def test_unknown_nullable_business_omission_is_not_adapted(admitted_candidate):
+    paths, fields, tables = _as_legacy_physical(admitted_candidate)
+    for layer in ("gold", "candidate_gold"):
+        row = tables[paths[layer]][0]
+        row.pop("target_gene_synonyms")
+        include = (
+            fields if layer == "gold" else (*fields, *TARGET_CLASSIFICATION_FIELDS)
+        )
+        row["content_hash"] = validation._scoped_target_hash(
+            row,
+            include,
+            CHEMBL_TARGET_PROFILE
+            if layer == "gold"
+            else target_v31_normalization_profile(),
+        )
+    with pytest.raises(SchemaErrors, match="target_gene_synonyms"):
+        validation.validate_target_candidate(paths, fields)
+
+
+@pytest.mark.parametrize("field", ["_invented_provenance", "unexpected_business"])
+def test_unexpected_physical_candidate_columns_are_rejected(admitted_candidate, field):
+    paths, fields, tables = _as_legacy_physical(admitted_candidate)
+    for row in tables[paths["candidate_silver"]]:
+        row[field] = "invented"
+    with pytest.raises(ValueError, match="old columns plus nine"):
+        validation.validate_target_candidate(paths, fields)
+
+
+def test_existing_lineage_column_cannot_be_deleted(admitted_candidate):
+    paths, fields, tables = admitted_candidate
+    for row in tables[paths["candidate_silver"]]:
+        row.pop("_run_id")
+    with pytest.raises(ValueError, match="legacy technical field"):
+        validation.validate_target_candidate(paths, fields)
+
+
+def test_historical_scd_iso8601_text_remains_exactly_preserved(admitted_candidate):
+    paths, fields, tables = _as_legacy_physical(admitted_candidate)
+    value = "2026-11-16T10:28:06.795495+00:00"
+    for layer in ("gold", "candidate_gold"):
+        tables[paths[layer]][0]["_valid_from"] = value
+    assert validation.validate_target_candidate(paths, fields)["fk_closure"] == "PASS"
+    assert tables[paths["candidate_gold"]][0]["_valid_from"] == value
+
+
+@pytest.mark.parametrize("field,value", [("_version", True), ("_is_current", 1)])
+def test_equal_numeric_value_cannot_hide_technical_type_drift(
+    admitted_candidate, field, value
+):
+    paths, fields, tables = _as_legacy_physical(admitted_candidate)
+    tables[paths["candidate_gold"]][0][field] = value
+    with pytest.raises(ValueError, match="legacy technical field"):
+        validation.validate_target_candidate(paths, fields)
