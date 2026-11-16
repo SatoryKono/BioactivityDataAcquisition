@@ -463,6 +463,5 @@ values. Empty monitoring series still require review; they are not healthy zeros
 `reduceFields:lastNotNull`. Запросы, mappings и высоты 8 сохранены; adaptive
 CURRENT stat получает то же преобразование ровно один раз. Источники, 14
 библиотечных случаев и ограничения описаны в
-[UX-отчёте](../../reports/dashboard-ux-checks/2026-11-15.md)
-(`docs/reports/dashboard-ux-checks/2026-11-15.md`). Live browser/render acceptance
+UX-отчёте `docs/reports/dashboard-ux-checks/2026-11-15.md`. Live browser/render acceptance
 остаётся `NOT_RUN`; полный integration и итоговый CI ещё требуются.
