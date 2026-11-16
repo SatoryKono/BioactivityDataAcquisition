@@ -32,6 +32,7 @@ guidance lives under `docs/00-05`.
 - [../../reports/README.md](../../reports/README.md) — working-output taxonomy
 - [docs/plans/README.md](../plans/README.md) — planning lane (thin)
 - [docs/99-archive/README.md](../99-archive/README.md) — archive index
+- [../../reports/review/ai-rules-epic-13056-acceptance.md](../../reports/review/ai-rules-epic-13056-acceptance.md) — паспорт сквозной приёмки эпика #13056
 
 ## Allowlisted generated artifacts
 
