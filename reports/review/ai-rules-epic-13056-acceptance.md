@@ -31,7 +31,7 @@ Evidence #13133 не используется как PASS. Зависимые п
 | 2. Паспорт runtime | PASS | Четыре состояния разделены. `NOT_PROVEN` и `UNKNOWN` не названы PASS. |
 | 3. Сценарии | NOT_VERIFIABLE | Контрактные тесты: 276 passed / 2 skipped / 0 failed. V3/V4 pre-task — DEGRADED. Hash-only и полный read-only architecture audit на чистом дереве не запускались. |
 | 4. Дисциплина статусов | PASS | SKIP, DEGRADED, ERROR, exit 2 и невлитый #13133 не переведены в PASS. |
-| 5. Guardrails | PASS | Тексты ограничений на месте. Числовое повышение потолков не найдено. Изменение реестра budget guard явное и не молчаливое. |
+| 5. Guardrails | PASS (тексты); NOT_VERIFIABLE (числовые потолки) | Тексты ограничений на месте. Числовые потолки проверены только для диапазона `c3818114..origin/main`. Guard от `cc441a7` завершился `ERROR` (`budget.evidence_unavailable`), а `budget_guard.py` добавлен в диапазоне `cc441a7..c3818114`. Изменение реестра budget guard явное и не молчаливое. |
 | 6. Inventories и mirrors | NOT_VERIFIABLE | Локально mirror `--check` exit 0 и cleanup inventory обновлён вместе с этим файлом. CI на head этого PR в момент коммита не исполнен и не объявляется PASS. |
 | 7. Эффект #13033 | UNKNOWN | Статический снимок воспроизведён. Tokens, tool calls, repeated reads и loaded-source effect — `NOT_MEASURED`. |
 | 8. Откат | PASS | У каждого закрывающего commit один parent. Способ — `git revert <sha>` без переписывания истории. Репетиция revert не выполнялась. |
@@ -92,9 +92,10 @@ Evidence #13133 не используется как PASS. Зависимые п
 без активации OpenCode и без model turn.
 `PYTHONDONTWRITEBYTECODE=1`.
 
-Общий прогон, exit 0:
+Общий прогон, exit 0. Полный argv запуска в evidence не зафиксирован
+(не восстанавливается); известны только список файлов и итог:
 
-`pytest` файлов
+файлы
 `tests/architecture/test_codex_task_routing.py`,
 `tests/architecture/test_junie_runtime_ci_contract.py`,
 `tests/unit/scripts/engineering/repo/test_create_worktree.py`,
