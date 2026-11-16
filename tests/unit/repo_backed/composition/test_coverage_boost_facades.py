@@ -899,10 +899,12 @@ def test_exact_replay_collect_ledger_bronze_dates_covers_mismatch_and_source_ref
     None
 ):
     manifest = SimpleNamespace(
+        pipeline_name="chembl_activity",
         provider="chembl",
         entity="activity",
         source_refs=(
             SimpleNamespace(
+                pipeline_name="chembl_activity",
                 provider="chembl",
                 entity="activity",
                 input_snapshots=(
@@ -945,10 +947,12 @@ def test_exact_replay_collect_ledger_bronze_dates_covers_mismatch_and_source_ref
             ledger_entries=entity_mismatch_entries,
         )
     mixed_source_ref_manifest = SimpleNamespace(
+        pipeline_name="chembl_activity",
         provider="chembl",
         entity="activity",
         source_refs=(
             SimpleNamespace(
+                pipeline_name="pubchem_activity",
                 provider="pubchem",
                 entity="activity",
                 input_snapshots=(
@@ -968,10 +972,12 @@ def test_exact_replay_prefers_published_ledger_snapshot_over_manifest_fallback()
     None
 ):
     manifest = SimpleNamespace(
+        pipeline_name="chembl_activity",
         provider="chembl",
         entity="activity",
         source_refs=(
             SimpleNamespace(
+                pipeline_name="chembl_activity",
                 provider="chembl",
                 entity="activity",
                 input_snapshots=(
