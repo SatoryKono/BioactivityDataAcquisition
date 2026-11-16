@@ -413,6 +413,24 @@ def test_live_catalog_classifies_gemini_code_assist_config() -> None:
     assert matrix["decisions"]["security"]["decision"] == NOT_APPLICABLE
 
 
+def test_live_catalog_classifies_gitattributes() -> None:
+    """`.gitattributes` is an unknown_path_anchor hit and does not fail-close lanes."""
+    catalog = load_catalog(
+        Path(__file__).resolve().parents[6]
+        / "configs/quality/github_required_checks.yaml"
+    )
+    matrix = classify_changes(catalog, [".gitattributes"], head_sha=HEAD_SHA)
+
+    assert matrix["unclassified_files"] == []
+    assert matrix["decisions"]["docs-governance"]["decision"] == REQUIRED
+    assert matrix["decisions"]["docs-governance"]["reason"] == "path_match"
+    assert matrix["decisions"]["commit-governance"]["decision"] == REQUIRED
+    assert matrix["decisions"]["lint-arch"]["decision"] == NOT_APPLICABLE
+    assert matrix["decisions"]["tests"]["decision"] == NOT_APPLICABLE
+    assert matrix["decisions"]["docker"]["decision"] == NOT_APPLICABLE
+    assert matrix["decisions"]["security"]["decision"] == NOT_APPLICABLE
+
+
 @pytest.mark.parametrize(
     "changed_path",
     [
