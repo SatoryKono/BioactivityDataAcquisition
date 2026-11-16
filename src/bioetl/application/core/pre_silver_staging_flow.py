@@ -56,6 +56,10 @@ class _PreSilverStagingFlowMixin:
             build_silver_record=self._build_pre_silver_json_record,
             apply_structural_policy=self._apply_pre_silver_structural_policy,
             apply_silver_filter=self._apply_pre_silver_filter,
+            enrich_normalized_business_data=getattr(
+                self, "_enrich_normalized_business_data", None
+            ),
+            publish_business_evidence=getattr(self, "_publish_business_evidence", None),
         )
 
     def _build_pre_silver_from_business_data(

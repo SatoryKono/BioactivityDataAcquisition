@@ -72,6 +72,10 @@ def finalize_pre_silver_record(
     normalized_business_data = normalizer.normalize_business_data(
         pre_silver.business_data
     )
+    if pre_silver.enrich_normalized_business_data is not None:
+        normalized_business_data = pre_silver.enrich_normalized_business_data(
+            context, index, normalized_business_data
+        )
     version_hashes = normalizer.compute_content_hashes_by_version(
         normalized_business_data
     )
@@ -105,4 +109,6 @@ def finalize_pre_silver_record(
         silver_record = projected_record
     if pre_silver.apply_silver_filter is not None:
         pre_silver.apply_silver_filter(context, silver_record, index)
+    if pre_silver.publish_business_evidence is not None:
+        pre_silver.publish_business_evidence(context, index)
     return silver_record

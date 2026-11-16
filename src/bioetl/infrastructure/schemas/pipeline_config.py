@@ -54,6 +54,9 @@ from bioetl.infrastructure.schemas.pipeline_config_provider import (
     RateLimitSourceConfig,
     SourceConfig,
 )
+from bioetl.infrastructure.schemas.target_classification_config import (
+    TargetClassificationYamlConfig,
+)
 
 __all__ = [
     "ApiConfig",
@@ -309,6 +312,10 @@ class PipelineYamlConfig(BaseModel):
             "It fingerprints extraction_params separately from Silver filtering."
         ),
     )
+    target_classification: TargetClassificationYamlConfig = Field(
+        default_factory=TargetClassificationYamlConfig,
+        description="Offline IUPHAR profile; enabled modes require a pinned manifest.",
+    )
     loading_strategy: Literal["full_scan_only"] | None = Field(
         default=None,
         description="Explicit loading strategy for the pipeline. "
@@ -417,6 +424,12 @@ class PipelineYamlConfig(BaseModel):
         )
         if error_msg:
             raise ValueError(error_msg)
+        if self.target_classification.mode != "off" and (
+            self.provider != "chembl" or self.entity_type != "target"
+        ):
+            raise ValueError(
+                "target classification is supported only for chembl_target"
+            )
         return self
 
     @model_validator(mode="after")

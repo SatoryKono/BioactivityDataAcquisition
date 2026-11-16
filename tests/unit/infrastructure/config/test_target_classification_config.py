@@ -1,0 +1,258 @@
+"""Opt-in target profiles must keep legacy outputs and hash scope intact."""
+
+from __future__ import annotations
+
+from dataclasses import FrozenInstanceError, fields
+from pathlib import Path
+
+import pandas as pd
+import pandera.errors
+import pytest
+from pydantic import ValidationError
+
+from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
+from bioetl.domain.config import PipelineConfig, TableConfig
+from bioetl.domain.config.target_classification import (
+    TARGET_CLASSIFICATION_FIELDS,
+    TargetClassificationConfig,
+)
+from bioetl.domain.contracts.gold import ChEMBLTargetGoldSchema
+from bioetl.domain.contracts.gold.chembl_target_classification import (
+    ChEMBLTargetGoldSchemaV31,
+)
+from bioetl.domain.entities.chembl_structures_foundation import Target
+from bioetl.domain.entities.chembl_target_classification import TargetV31
+from bioetl.domain.schemas.chembl.target import TargetSchema, TargetSchemaV31
+from bioetl.infrastructure.config.contract_policy_loader import (
+    load_pipeline_contract_policy,
+)
+from bioetl.infrastructure.config.converters import yaml_config_to_domain
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config_from_root,
+)
+from bioetl.infrastructure.config.target_classification_profile import (
+    resolve_target_classification_profile,
+)
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.infrastructure.schemas.silver_chembl_core import CHEMBL_TARGET_SCHEMA
+from bioetl.infrastructure.schemas.silver_chembl_target_classification import (
+    CHEMBL_TARGET_SCHEMA_V31,
+)
+from bioetl.infrastructure.schemas.target_classification_config import (
+    TargetClassificationYamlConfig,
+)
+
+pytestmark = pytest.mark.unit
+ROOT = Path(__file__).resolve().parents[4]
+
+
+def _config(mode: str = "off") -> PipelineYamlConfig:
+    base = load_pipeline_config_from_root(
+        "chembl_target", configs_root=ROOT / "configs"
+    )
+    options = {"mode": mode}
+    if mode != "off":
+        options.update(
+            snapshot_manifest="snapshot.json", snapshot_manifest_sha256="a" * 64
+        )
+    return base.model_copy(
+        update={
+            "target_classification": TargetClassificationYamlConfig.model_validate(
+                options
+            )
+        }
+    )
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"mode": "guess"},
+        {"mode": "enrich"},
+        {"mode": "shadow", "snapshot_manifest": "x.json"},
+        {"snapshot_manifest": "x.json", "snapshot_manifest_sha256": "ABC"},
+        {"snapshot_manifest": " ", "snapshot_manifest_sha256": "a" * 64},
+        {"snapshot_manifest": "x.json", "snapshot_manifest_sha256": "A" * 64},
+        {"unexpected": "value"},
+    ],
+)
+def test_invalid_and_unpinned_profiles_are_rejected(payload: dict[str, str]) -> None:
+    with pytest.raises(ValidationError):
+        TargetClassificationYamlConfig.model_validate(payload)
+
+
+def test_yaml_profile_roundtrips_to_immutable_domain_config() -> None:
+    config = _config("shadow")
+    domain = yaml_config_to_domain(config)
+    assert domain.target_classification.mode == "shadow"
+    assert domain.target_classification.snapshot_manifest_sha256 == "a" * 64
+    assert domain.target_classification.contract_version == "3.0.0"
+    with pytest.raises(FrozenInstanceError):
+        domain.target_classification.mode = "enrich"  # type: ignore[misc]
+
+
+def test_other_pipelines_cannot_enable_iuphar_target_classification() -> None:
+    config = _config("enrich")
+    payload = {
+        "pipeline_name": "chembl_assay",
+        "provider": "chembl",
+        "entity_type": "assay",
+        "business_primary_keys": ["assay_id"],
+        "target_classification": config.target_classification.model_dump(),
+    }
+    with pytest.raises(ValidationError, match="only for chembl_target"):
+        PipelineYamlConfig.model_validate(payload)
+    with pytest.raises(ValueError, match="only for chembl_target"):
+        PipelineConfig(
+            pipeline_name="chembl_assay",
+            provider="chembl",
+            entity_type="assay",
+            table=TableConfig(primary_keys=("assay_id",)),
+            target_classification=config.target_classification.to_domain(),
+        )
+
+
+@pytest.mark.parametrize("mode", ["off", "shadow"])
+def test_off_and_shadow_keep_exact_legacy_bindings(mode: str) -> None:
+    config = _config(mode)
+    before = config.model_dump()
+    contract = load_pipeline_contract_policy("chembl", "target")
+    profile = resolve_target_classification_profile(config, contract)
+    assert profile.resolved_yaml_config is config
+    assert profile.contract_policy is contract
+    assert profile.contract_version == "3.0.0"
+    assert profile.silver_schema is CHEMBL_TARGET_SCHEMA
+    assert profile.pandera_silver_schema is TargetSchema
+    assert profile.gold_schema is ChEMBLTargetGoldSchema
+    assert profile.entity_class is Target
+    assert not set(TARGET_CLASSIFICATION_FIELDS) & set(
+        profile.content_hash_include_fields
+    )
+    assert config.model_dump() == before
+
+
+def test_enrich_selects_one_consistent_additive_contract_without_mutating_input() -> (
+    None
+):
+    config = _config("enrich")
+    before = config.model_dump()
+    contract = load_pipeline_contract_policy("chembl", "target")
+    profile = resolve_target_classification_profile(config, contract)
+    assert profile.contract_version == "3.1.0"
+    assert profile.silver_schema is CHEMBL_TARGET_SCHEMA_V31
+    assert profile.pandera_silver_schema is TargetSchemaV31
+    assert profile.gold_schema is ChEMBLTargetGoldSchemaV31
+    assert profile.entity_class is TargetV31
+    assert profile.contract_policy.active_version == "3.1.0"
+    assert profile.contract_policy.read_order == ["3.1.0"]
+    assert profile.contract_policy.write_versions == ["3.1.0"]
+    assert profile.contract_policy.rollout_mode == "single"
+    assert profile.contract_policy.hash_include == list(
+        profile.content_hash_include_fields
+    )
+    assert profile.resolved_yaml_config.content_hash_policy.contract.version == "3.1.0"
+    domain = yaml_config_to_domain(profile.resolved_yaml_config)
+    business = next(group for group in domain.column_groups if group.name == "business")
+    assert set(TARGET_CLASSIFICATION_FIELDS) <= set(business.fields)
+    assert set(TARGET_CLASSIFICATION_FIELDS) <= set(
+        next(g for g in domain.data_schema.column_groups if g.name == "business").fields
+    )
+    assert config.model_dump() == before
+    assert contract.active_version == "3.0.0"
+
+
+def test_enrich_cannot_fall_back_to_an_unscoped_hash_policy() -> None:
+    config = _config("enrich").model_copy(update={"content_hash_policy": None})
+    with pytest.raises(ValueError, match="explicit V30/V31"):
+        resolve_target_classification_profile(config)
+
+
+def test_v31_arrow_and_entities_do_not_modify_the_v30_shape() -> None:
+    old = CHEMBL_TARGET_SCHEMA.names
+    new = CHEMBL_TARGET_SCHEMA_V31.names
+    assert [name for name in new if name not in TARGET_CLASSIFICATION_FIELDS] == old
+    assert all(
+        CHEMBL_TARGET_SCHEMA_V31.field(name).nullable
+        for name in TARGET_CLASSIFICATION_FIELDS
+    )
+    first_dq = next(i for i, name in enumerate(new) if name.startswith("_dq_"))
+    assert all(new.index(name) < first_dq for name in TARGET_CLASSIFICATION_FIELDS)
+    assert not set(TARGET_CLASSIFICATION_FIELDS) & {
+        field.name for field in fields(Target)
+    }
+    assert set(TARGET_CLASSIFICATION_FIELDS) <= {
+        field.name for field in fields(TargetV31)
+    }
+
+
+def _gold_frame() -> pd.DataFrame:
+    row: dict[str, object] = dict.fromkeys(
+        ChEMBLTargetGoldSchemaV31.to_schema().columns
+    )
+    row.update(
+        entity_id="chembl:CHEMBL1",
+        content_hash="a" * 64,
+        target_id="CHEMBL1",
+        species_group_flag=False,
+        _index=0,
+        _dq_warn=False,
+        _dq_error=False,
+        iuphar_class="Enzyme",
+        iuphar_annotation_status="partial",
+        target_class_profile_sha256="b" * 64,
+    )
+    return pd.DataFrame([row])
+
+
+def test_v31_gold_accepts_direct_partial_and_nullable_unassigned_fields() -> None:
+    validated = ChEMBLTargetGoldSchemaV31.validate(_gold_frame())
+    assert validated.iloc[0]["iuphar_class"] == "Enzyme"
+    assert validated.iloc[0]["local_class"] is None
+    with pytest.raises((pandera.errors.SchemaError, pandera.errors.SchemaErrors)):
+        ChEMBLTargetGoldSchema.validate(_gold_frame())
+
+
+def test_v31_gold_rejects_missing_projection_and_malformed_profile_hash() -> None:
+    with pytest.raises(pandera.errors.SchemaError):
+        ChEMBLTargetGoldSchemaV31.validate(_gold_frame().drop(columns=["iuphar_class"]))
+    frame = _gold_frame()
+    frame["target_class_profile_sha256"] = "not-a-hash"
+    with pytest.raises(pandera.errors.SchemaError):
+        ChEMBLTargetGoldSchemaV31.validate(frame)
+
+
+def test_legacy_hash_is_unchanged_while_v31_tracks_class_and_profile() -> None:
+    old = resolve_target_classification_profile(_config("shadow"))
+    new = resolve_target_classification_profile(_config("enrich"))
+    v30 = EntityIdentityGenerator(
+        content_hash_include_fields=set(old.content_hash_include_fields)
+    )
+    v31 = EntityIdentityGenerator(
+        content_hash_include_fields=set(new.content_hash_include_fields)
+    )
+    source = {"target_id": "CHEMBL1", "pref_name": "Example", "taxonomy_id": 9606}
+    classified = {
+        **source,
+        "iuphar_class": "Enzyme",
+        "target_class_profile_sha256": "a" * 64,
+    }
+    assert v30.compute_content_hash("chembl", source) == v30.compute_content_hash(
+        "chembl", classified
+    )
+    first = v31.compute_content_hash("chembl", classified)
+    assert first != v31.compute_content_hash(
+        "chembl", {**classified, "iuphar_class": "Receptor"}
+    )
+    assert first != v31.compute_content_hash(
+        "chembl", {**classified, "target_class_profile_sha256": "b" * 64}
+    )
+    assert first == v31.compute_content_hash(
+        "chembl", {**classified, "_run_id": "another", "_ingestion_ts": "later"}
+    )
+
+
+def test_domain_default_is_disabled_without_a_snapshot_claim() -> None:
+    value = TargetClassificationConfig()
+    assert not value.enabled
+    assert value.snapshot_manifest is None
+    assert value.snapshot_manifest_sha256 is None

@@ -18,6 +18,7 @@ from bioetl.domain.schemas.constants import (
 
 __all__ = [
     "TargetSchema",
+    "TargetSchemaV31",
 ]
 
 
@@ -199,3 +200,19 @@ class TargetSchema(ETLRecordSchema):
         strict = True
         ordered = False
         coerce = False
+
+
+class TargetSchemaV31(TargetSchema):
+    """Add the complete nullable IUPHAR projection only for enrich runs."""
+
+    iuphar_target_id: Series[str] = pa.Field(nullable=True)
+    iuphar_class: Series[str] = pa.Field(nullable=True)
+    iuphar_match_status: Series[str] = pa.Field(nullable=True)
+    iuphar_annotation_status: Series[str] = pa.Field(nullable=True)
+    local_class: Series[str] = pa.Field(nullable=True)
+    effective_class: Series[str] = pa.Field(nullable=True)
+    effective_source: Series[str] = pa.Field(nullable=True)
+    decision_status: Series[str] = pa.Field(nullable=True)
+    target_class_profile_sha256: Series[str] = pa.Field(
+        nullable=True, str_matches=r"^[0-9a-f]{64}$"
+    )

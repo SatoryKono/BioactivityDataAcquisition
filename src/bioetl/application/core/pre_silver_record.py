@@ -53,6 +53,20 @@ class PreSilverFilterProtocol(Protocol):
         ...
 
 
+class PreSilverEnrichmentProtocol(Protocol):
+    """Pure, optional enrichment after canonical normalization and before hash."""
+
+    def __call__(
+        self, context: PipelineContext, index: int, business_data: JsonDict
+    ) -> JsonDict: ...
+
+
+class PreSilverEvidenceProtocol(Protocol):
+    """Application-owned publication of evidence for a finalized row."""
+
+    def __call__(self, context: PipelineContext, index: int) -> None: ...
+
+
 @dataclass(frozen=True, slots=True)
 class PreSilverRecord:
     """Intermediate business payload awaiting normalization and hash finalization."""
@@ -62,3 +76,5 @@ class PreSilverRecord:
     build_silver_record: PreSilverBuilderProtocol
     apply_structural_policy: PreSilverStructuralPolicy | None = None
     apply_silver_filter: PreSilverFilterProtocol | None = None
+    enrich_normalized_business_data: PreSilverEnrichmentProtocol | None = None
+    publish_business_evidence: PreSilverEvidenceProtocol | None = None
