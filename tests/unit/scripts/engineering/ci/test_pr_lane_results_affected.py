@@ -22,6 +22,52 @@ pytestmark = pytest.mark.unit
 HEAD = "a" * 40
 
 
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "scripts/engineering/ci/nightly_shadow_archive.py",
+        "reports/governance/n1-shadow-window/pilot-48min.json",
+        "reports/governance/n1-shadow-window-status.md",
+        "docs/reports/audit/N1_SHADOW_STATUS.md",
+    ],
+)
+def test_nightly_shadow_changes_keep_both_archive_and_inventory_owners(
+    changed: str,
+) -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    owners = {
+        "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
+        "tests/unit/scripts/engineering/ci/test_nightly_shadow_inventory.py",
+    }
+    assert owners <= set(affected_pytest_targets([changed], repo_root=repo_root))
+    report = build_shadow_compare([changed], repo_root=repo_root)
+    assert owners <= set(report["selected"])
+    assert report["covers_full_suite"] is False
+
+
+def test_nightly_historical_fixture_selects_its_owner_in_both_impact_paths() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    fixture = "tests/unit/scripts/engineering/ci/fixtures/n1_historical_baseline.json"
+    owner = "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py"
+    assert affected_pytest_targets([fixture], repo_root=repo_root) == [owner]
+    report = build_shadow_compare([fixture], repo_root=repo_root)
+    assert report["selected"] == [owner]
+    assert report["selected_count"] == 1
+    assert report["covers_full_suite"] is False
+
+
+@pytest.mark.parametrize("peer", ["unknown.json", "n1_historical_baseline-copy.json"])
+def test_unknown_nightly_fixture_still_fails_shadow_compare_closed(peer: str) -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    unknown = f"tests/unit/scripts/engineering/ci/fixtures/{peer}"
+    known = "tests/unit/scripts/engineering/ci/fixtures/n1_historical_baseline.json"
+    assert affected_pytest_targets([unknown], repo_root=repo_root) == []
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare([unknown], repo_root=repo_root)
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare([known, unknown], repo_root=repo_root)
+
+
 def test_scroll_capture_has_bounded_route_and_unknown_peer_stays_rejected() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(

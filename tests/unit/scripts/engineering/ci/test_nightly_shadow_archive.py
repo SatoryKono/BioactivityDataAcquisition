@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import inspect
+import base64
+import hashlib
 import json
 import shutil
 from datetime import UTC, datetime, timedelta
+from itertools import permutations
 from pathlib import Path
 
 import pytest
@@ -13,21 +16,27 @@ import pytest
 import scripts.engineering.ci.nightly_shadow_archive as archive_module
 from scripts.engineering.ci.nightly_shadow_archive import (
     JOB_KINDS,
+    PILOT_CONFIGURATION_ID,
+    REPO_ROOT,
     ArchiveError,
     _atomic_create,
+    _span_covers_48_minutes,
     aggregate_results,
     archive_runs,
+    assess_reduced_pilot_window,
     assess_shadow_window,
+    build_attempt_archive,
     canonical_bytes,
     job_duty,
     main,
     oracle_equivalent,
     oracle_pagination,
-    REPO_ROOT,
     oracle_sha256,
     partition_bucket,
     partition_producer,
+    pilot_observation_from_archive,
     require_accepted,
+    require_pilot_advance,
     verify_archive,
     write_snapshot,
 )
@@ -817,3 +826,1056 @@ def test_partition_reports_current_success_retention(
     payload = json.loads(output.read_text(encoding="utf-8"))
     assert payload["success_retention_days"] == 7
     assert payload["diagnostic_retention_target_days"] == 90
+
+
+BASELINE_SHA = "c41cd6f7b7e4f1cb841358837fec6c6d30625106"
+_SHA = "a" * 40
+
+
+def _pilot_options(**overrides: object) -> dict[str, object]:
+    options: dict[str, object] = {
+        "configuration_id": PILOT_CONFIGURATION_ID,
+        "scheduled_success_total_count": None,
+        "successful_evidence_days": 30,
+        "diagnostic_retention_days": 90,
+        "verified_archive_days": 90,
+        "actions_retention_cap_days": 90,
+        "cadence_changed": False,
+        "retention_reduced": False,
+        "shallow_checkout": False,
+        "independent_review": False,
+        "independent_restore": False,
+        "observation_totals": {
+            name: overrides.pop(f"{name}_total_count", None)
+            for name in ("failure", "cancelled", "missing", "unknown")
+        },
+    }
+    options.update(overrides)
+    return options
+
+
+def _pilot_success(run_id: int, *, arm: str, created_at: str, **extra: object) -> dict:
+    payload: dict[str, object] = {
+        "arm": arm,
+        "configuration_id": PILOT_CONFIGURATION_ID,
+        "conclusion": "success",
+        "created_at": created_at,
+        "dom": "16",
+        "dow": "Mon",
+        "event": "schedule",
+        "force_weekly": "false",
+        "head_sha": _SHA,
+        "job_conclusions": _results(),
+        "month": "11",
+        "run_id": run_id,
+        "run_attempt": 1,
+    }
+    payload.update(extra)
+    return payload
+
+
+def test_reduced_pilot_is_not_opened_without_a_successful_scheduled_pair() -> None:
+    """Zero successful scheduled Nightly runs cannot open the 48-minute window."""
+
+    result = assess_reduced_pilot_window(
+        [
+            {
+                "conclusion": "failure",
+                "configuration_id": PILOT_CONFIGURATION_ID,
+                "created_at": "2026-11-15T03:07:49Z",
+                "event": "schedule",
+                "head_sha": "f" * 40,
+                "run_id": 43670936545,
+            }
+        ],
+        **_pilot_options(scheduled_success_total_count=0, failure_total_count=36),
+    )
+    assert result["status"] == "not_opened"
+    assert result["equivalence"] == "not_passed"
+    assert result["sample_size_pairs"] == 0
+    assert "no_suitable_successful_scheduled_nightly" in result["reason_codes"]
+    assert result["counts"]["api"]["success"] == 0
+    assert result["counts"]["api"]["failure"] == 36
+    assert result["counts"]["sample"]["failure"] == 1
+    assert result["counts"]["sample"]["success"] == 0
+    assert result["n2_blocked"] is True
+    assert result["independent_review"] is False
+
+
+def test_unknown_success_count_is_not_recorded_as_zero() -> None:
+    result = assess_reduced_pilot_window([], **_pilot_options())
+    assert result["status"] == "not_opened"
+    assert result["equivalence"] == "not_passed"
+    assert "successful_scheduled_count_unknown" in result["reason_codes"]
+    assert "no_suitable_successful_scheduled_nightly" not in result["reason_codes"]
+    assert result["counts"]["api"]["success"] is None
+    assert result["counts"]["api"]["missing"] is None
+    assert result["counts"]["api"]["unknown"] is None
+
+
+def test_reduced_pilot_rejects_synthetic_events() -> None:
+    start = "2026-11-16T03:00:00Z"
+    end = "2026-11-16T03:48:00Z"
+    observations = [
+        _pilot_success(20, arm="baseline", created_at=start, dow="Fri"),
+        _pilot_success(21, arm="candidate", created_at=end, dow="Fri"),
+        {
+            "arm": "candidate",
+            "conclusion": "success",
+            "configuration_id": PILOT_CONFIGURATION_ID,
+            "created_at": end,
+            "event": "synthetic",
+            "head_sha": _SHA,
+            "run_id": 22,
+            "synthetic": True,
+        },
+    ]
+    result = assess_reduced_pilot_window(
+        observations,
+        **_pilot_options(scheduled_success_total_count=2),
+    )
+    assert result["equivalence"] == "not_passed"
+    assert result["status"] == "unacceptable"
+    assert "synthetic_event" in result["reason_codes"]
+    assert result["counts"]["sample"]["synthetic"] == 1
+    assert result["counts"]["sample"]["success"] == 2
+
+
+def test_success_failure_and_cancelled_stay_distinct() -> None:
+    result = assess_reduced_pilot_window(
+        [
+            {
+                "conclusion": "failure",
+                "configuration_id": PILOT_CONFIGURATION_ID,
+                "created_at": "2026-11-15T03:00:00Z",
+                "event": "schedule",
+                "head_sha": _SHA,
+                "run_id": 1,
+            },
+            {
+                "conclusion": "cancelled",
+                "configuration_id": PILOT_CONFIGURATION_ID,
+                "created_at": "2026-11-15T04:00:00Z",
+                "event": "schedule",
+                "head_sha": _SHA,
+                "run_id": 2,
+            },
+            {
+                "conclusion": None,
+                "configuration_id": PILOT_CONFIGURATION_ID,
+                "created_at": "2026-11-15T05:00:00Z",
+                "event": "schedule",
+                "head_sha": _SHA,
+                "run_id": 3,
+            },
+            {
+                "conclusion": "unknown",
+                "configuration_id": PILOT_CONFIGURATION_ID,
+                "created_at": "2026-11-15T06:00:00Z",
+                "event": "schedule",
+                "head_sha": _SHA,
+                "run_id": 4,
+            },
+        ],
+        **_pilot_options(scheduled_success_total_count=0),
+    )
+    assert result["counts"]["sample"] == {
+        "cancelled": 1,
+        "failure": 1,
+        "missing": 1,
+        "skipped": 0,
+        "success": 0,
+        "synthetic": 0,
+        "unknown": 1,
+    }
+    assert result["counts"]["api"]["missing"] is None
+    assert result["equivalence"] == "not_passed"
+
+
+def test_two_runs_do_not_replace_a_48_minute_span() -> None:
+    start = "2026-11-16T03:00:00Z"
+    too_soon = "2026-11-16T03:01:00Z"
+    assert (
+        _span_covers_48_minutes([{"created_at": start}, {"created_at": too_soon}])
+        is False
+    )
+    assert (
+        _span_covers_48_minutes(
+            [{"created_at": start}, {"created_at": "2026-11-16T03:48:00Z"}]
+        )
+        is True
+    )
+    result = assess_reduced_pilot_window(
+        [
+            _pilot_success(30, arm="baseline", created_at=start, dow="Fri"),
+            _pilot_success(31, arm="candidate", created_at=too_soon, dow="Fri"),
+        ],
+        **_pilot_options(scheduled_success_total_count=2),
+    )
+    assert result["equivalence"] == "not_passed"
+    assert result["status"] == "unacceptable"
+    assert "shorter_than_48_minutes" in result["reason_codes"]
+    assert result["sample_size_pairs"] == 0
+
+
+def test_expected_weekly_skip_can_pass_and_review_still_blocks_n2() -> None:
+    result = assess_reduced_pilot_window(
+        [
+            _pilot_success(
+                40, arm="baseline", created_at="2026-11-20T03:00:00Z", dow="Fri"
+            ),
+            _pilot_success(
+                41,
+                arm="candidate",
+                created_at="2026-11-20T03:48:00Z",
+                dow="Fri",
+            ),
+        ],
+        **_pilot_options(scheduled_success_total_count=2),
+    )
+    assert result["status"] == "complete"
+    assert result["equivalence"] == "passed"
+    assert result["sample_size_pairs"] == 1
+    assert result["reason_codes"] == []
+    assert result["n2_blocked"] is True
+    assert result["independent_review"] is False
+    assert result["independent_restore"] is False
+
+
+def test_mandatory_skipped_is_not_pilot_success() -> None:
+    monday = _results(codeql="skipped")
+    result = assess_reduced_pilot_window(
+        [
+            _pilot_success(
+                50,
+                arm="baseline",
+                created_at="2026-11-16T03:00:00Z",
+                job_conclusions=monday,
+            ),
+            _pilot_success(
+                51,
+                arm="candidate",
+                created_at="2026-11-16T03:48:00Z",
+                job_conclusions=monday,
+            ),
+        ],
+        **_pilot_options(scheduled_success_total_count=2),
+    )
+    assert result["equivalence"] == "not_passed"
+    assert result["status"] == "not_opened"
+    assert "mandatory_skipped" in result["reason_codes"]
+    forced = assess_reduced_pilot_window(
+        [
+            _pilot_success(
+                52,
+                arm="baseline",
+                created_at="2026-11-20T03:00:00Z",
+                dow="Fri",
+                force_weekly="true",
+            ),
+            _pilot_success(
+                53,
+                arm="candidate",
+                created_at="2026-11-20T03:48:00Z",
+                dow="Fri",
+                force_weekly="true",
+            ),
+        ],
+        **_pilot_options(scheduled_success_total_count=2),
+    )
+    assert forced["equivalence"] == "not_passed"
+    assert "mandatory_skipped" in forced["reason_codes"]
+
+
+def test_unknown_duty_skip_stays_unknown() -> None:
+    jobs = _results(codeql="skipped")
+    result = assess_reduced_pilot_window(
+        [
+            _pilot_success(
+                60,
+                arm="baseline",
+                created_at="2026-11-20T03:00:00Z",
+                dow="",
+                job_conclusions=jobs,
+            )
+        ],
+        **_pilot_options(scheduled_success_total_count=1),
+    )
+    assert result["equivalence"] == "not_passed"
+    assert "duty_unknown" in result["reason_codes"]
+    assert result["counts"]["sample"]["success"] == 1
+    assert result["status"] == "not_opened"
+
+
+def test_a_run_is_not_its_own_oracle() -> None:
+    result = assess_reduced_pilot_window(
+        [
+            _pilot_success(
+                70, arm="baseline", created_at="2026-11-20T03:00:00Z", dow="Fri"
+            ),
+            _pilot_success(
+                70, arm="candidate", created_at="2026-11-20T03:48:00Z", dow="Fri"
+            ),
+        ],
+        **_pilot_options(scheduled_success_total_count=1),
+    )
+    assert result["equivalence"] == "not_passed"
+    assert "run_is_own_oracle" in result["reason_codes"]
+    assert result["comparable_pair_count"] == 0
+
+
+@pytest.mark.parametrize(
+    "failure_kind,conclusion",
+    [
+        ("failed_run", "failure"),
+        ("weekly_job_difference", "success"),
+        ("missing_conclusion", None),
+        ("unknown_conclusion", "unknown"),
+        ("empty_conclusion", ""),
+    ],
+)
+def test_every_pair_is_evaluated_independently_of_input_order(
+    failure_kind: str,
+    conclusion: str | None,
+) -> None:
+    baseline = _pilot_success(
+        101, arm="baseline", created_at="2026-11-20T03:00:00Z", dow="Fri"
+    )
+    candidate = _pilot_success(
+        102, arm="candidate", created_at="2026-11-20T03:48:00Z", dow="Fri"
+    )
+    later = _pilot_success(
+        103, arm="candidate", created_at="2026-11-20T03:47:00Z", dow="Fri"
+    )
+    reason = "pair_not_success"
+    later["conclusion"] = conclusion
+    if failure_kind == "weekly_job_difference":
+        later["job_conclusions"] = _results(codeql="success")
+        reason = "pair_not_equivalent"
+    results = [
+        assess_reduced_pilot_window(
+            list(items), **_pilot_options(scheduled_success_total_count=2)
+        )
+        for items in permutations([baseline, candidate, later])
+    ]
+    assert all(result == results[0] for result in results)
+    assert results[0]["status"] == "unacceptable"
+    assert results[0]["equivalence"] == "not_passed"
+    assert results[0]["comparable_pair_count"] == 2
+    assert results[0]["sample_size_pairs"] == 0
+    assert reason in results[0]["reason_codes"]
+
+
+def test_pair_count_covers_all_unique_pairs() -> None:
+    observations = [
+        _pilot_success(run_id, arm=arm, created_at=stamp, dow="Fri")
+        for run_id, arm, stamp in (
+            (110, "baseline", "2026-11-20T03:00:00Z"),
+            (111, "baseline", "2026-11-20T03:01:00Z"),
+            (112, "candidate", "2026-11-20T03:47:00Z"),
+            (113, "candidate", "2026-11-20T03:48:00Z"),
+        )
+    ]
+    result = assess_reduced_pilot_window(
+        [*observations, observations[0]],
+        **_pilot_options(scheduled_success_total_count=4),
+    )
+    assert result["status"] == "complete"
+    assert result["comparable_pair_count"] == 4
+    assert result["sample_size_pairs"] == 4
+
+
+def test_pilot_pairs_cannot_borrow_a_scheduled_start_from_another_sha() -> None:
+    observations = [
+        _pilot_success(
+            401, arm="baseline", created_at="2026-11-20T03:00:00Z", dow="Fri"
+        ),
+        _pilot_success(
+            402,
+            arm="baseline",
+            created_at="2026-11-20T03:01:00Z",
+            dow="Fri",
+            event="workflow_dispatch",
+            head_sha="b" * 40,
+        ),
+        _pilot_success(
+            403,
+            arm="candidate",
+            created_at="2026-11-20T03:48:00Z",
+            dow="Fri",
+            event="workflow_dispatch",
+            head_sha="b" * 40,
+        ),
+    ]
+    for items in permutations(observations):
+        result = assess_reduced_pilot_window(
+            list(items),
+            **_pilot_options(
+                scheduled_success_total_count=1,
+                independent_review=True,
+                independent_restore=True,
+            ),
+        )
+        assert result["n2_blocked"] is True
+        assert result["comparable_pair_count"] == 0
+        assert result["window_start_observation"]["tested_sha"] == _SHA
+        assert "no_comparable_pair" in result["reason_codes"]
+
+
+def test_excluded_historical_start_does_not_poison_a_valid_window() -> None:
+    observations = [
+        _pilot_success(
+            101, arm="baseline", created_at="2026-11-20T03:00:00Z", dow="Fri"
+        ),
+        _pilot_success(
+            102, arm="candidate", created_at="2026-11-20T03:48:00Z", dow="Fri"
+        ),
+        _pilot_success(
+            99, arm="baseline", created_at="2026-11-13T03:00:00Z", dow="Fri"
+        ),
+    ]
+    results = [
+        assess_reduced_pilot_window(
+            list(items),
+            **_pilot_options(
+                scheduled_success_total_count=3,
+                independent_review=True,
+                independent_restore=True,
+            ),
+        )
+        for items in permutations(observations)
+    ]
+    assert all(result == results[0] for result in results)
+    assert results[0]["status"] == "complete"
+    assert results[0]["reason_codes"] == []
+    assert results[0]["comparable_pair_count"] == 1
+    assert results[0]["window_start_utc"] == "2026-11-20T03:00:00Z"
+    assert results[0]["n2_blocked"] is False
+
+
+def test_manual_candidate_does_not_block_a_scheduled_window() -> None:
+    observations = [
+        _pilot_success(
+            120, arm="baseline", created_at="2026-11-20T03:00:00Z", dow="Fri"
+        ),
+        _pilot_success(
+            121,
+            arm="candidate",
+            created_at="2026-11-20T03:48:00Z",
+            dow="Fri",
+            event="workflow_dispatch",
+        ),
+        _pilot_success(
+            122,
+            arm="candidate",
+            created_at="2026-11-20T02:00:00Z",
+            dow="Fri",
+            event="workflow_dispatch",
+        ),
+        _pilot_success(
+            123,
+            arm="candidate",
+            created_at="2026-11-20T04:00:00Z",
+            dow="Fri",
+            event="workflow_dispatch",
+        ),
+    ]
+    result = assess_reduced_pilot_window(
+        observations, **_pilot_options(scheduled_success_total_count=1)
+    )
+    assert result["status"] == "complete"
+    assert result["sample_size_pairs"] == 1
+    assert result["reason_codes"] == []
+
+
+def test_manual_backdated_and_blocking_changes_fail_closed() -> None:
+    manual = assess_reduced_pilot_window(
+        [
+            {
+                "conclusion": "success",
+                "configuration_id": PILOT_CONFIGURATION_ID,
+                "created_at": "2026-11-16T03:00:00Z",
+                "event": "workflow_dispatch",
+                "head_sha": _SHA,
+                "run_id": 80,
+            }
+        ],
+        **_pilot_options(scheduled_success_total_count=0),
+    )
+    assert manual["status"] == "not_opened"
+    assert "manual_event_not_a_start" in manual["reason_codes"]
+    assert "no_suitable_successful_scheduled_nightly" in manual["reason_codes"]
+
+    backdated = assess_reduced_pilot_window(
+        [
+            _pilot_success(
+                81, arm="baseline", created_at="2026-11-14T03:00:00Z", dow="Fri"
+            ),
+            _pilot_success(
+                82, arm="candidate", created_at="2026-11-14T03:48:00Z", dow="Fri"
+            ),
+        ],
+        **_pilot_options(scheduled_success_total_count=2),
+    )
+    assert backdated["status"] == "not_opened"
+    assert "backdated_start" in backdated["reason_codes"]
+
+    blocked = assess_reduced_pilot_window(
+        [
+            _pilot_success(
+                83, arm="baseline", created_at="2026-11-20T03:00:00Z", dow="Fri"
+            ),
+            _pilot_success(
+                84, arm="candidate", created_at="2026-11-20T03:48:00Z", dow="Fri"
+            ),
+        ],
+        **_pilot_options(
+            scheduled_success_total_count=2,
+            cadence_changed=True,
+            retention_reduced=True,
+            shallow_checkout=True,
+            successful_evidence_days=7,
+        ),
+    )
+    assert blocked["equivalence"] == "not_passed"
+    assert blocked["status"] == "unacceptable"
+    assert "cadence_changed" in blocked["reason_codes"]
+    assert "retention_reduced" in blocked["reason_codes"]
+    assert "shallow_checkout" in blocked["reason_codes"]
+    assert "success_retention_below_30" in blocked["reason_codes"]
+
+
+def test_pilot_advance_blocks_on_archive_errors(tmp_path: Path) -> None:
+    assessment = {
+        "equivalence": "passed",
+        "independent_restore": True,
+        "independent_review": True,
+        "n2_blocked": False,
+        "status": "complete",
+    }
+    with pytest.raises(ArchiveError, match="archive unavailable"):
+        require_pilot_advance(assessment, tmp_path / "missing")
+
+    malformed = tmp_path / "malformed"
+    stored = _store(malformed, _raw(), _outcomes())
+    _seal_index(malformed)
+    (stored / "manifest.json").write_text("{", encoding="utf-8")
+    with pytest.raises(ArchiveError, match="malformed"):
+        require_pilot_advance(assessment, malformed)
+
+    checksum = tmp_path / "checksum"
+    stored = _store(checksum, _raw(), _outcomes())
+    _seal_index(checksum)
+    (stored / "raw.json").write_bytes(b'{"id":11}\n')
+    with pytest.raises(ArchiveError, match="checksum mismatch"):
+        require_pilot_advance(assessment, checksum)
+
+    missing = tmp_path / "missing-artifact"
+    removed = _store(missing, _raw(), _outcomes())
+    _seal_index(missing)
+    shutil.rmtree(removed)
+    with pytest.raises(ArchiveError, match="indexed snapshot missing"):
+        require_pilot_advance(assessment, missing)
+
+
+def test_verified_archive_still_blocks_n2_for_an_unopened_pilot(tmp_path: Path) -> None:
+    _store(tmp_path, _raw(), _outcomes())
+    _seal_index(tmp_path)
+    assessment = assess_reduced_pilot_window(
+        [],
+        **_pilot_options(scheduled_success_total_count=0),
+    )
+    with pytest.raises(ArchiveError, match="N2 stays blocked"):
+        require_pilot_advance(assessment, tmp_path)
+
+
+class _PilotApiClient:
+    def __init__(self) -> None:
+        self.workflow = (REPO_ROOT / archive_module.WORKFLOW_PATH).read_bytes()
+        self.clock_ranges = {
+            130: ("2026-11-20T03:00:00Z", "2026-11-20T03:00:01Z"),
+            131: ("2026-11-20T03:47:00Z", "2026-11-20T03:48:00Z"),
+        }
+        self.jobs = []
+        for job_id, conclusion in _results().items():
+            name = job_id
+            if job_id == "generated-artifact-daily":
+                name = "Generated artifact assertions (daily)"
+            elif job_id in {
+                "tests",
+                "e2e",
+                "security",
+                "duplication",
+                "import-linter",
+                "zizmor",
+            }:
+                name = f"{job_id} / {job_id}-complete"
+            self.jobs.append(
+                {"name": name, "status": "completed", "conclusion": conclusion}
+            )
+        self.jobs.extend(
+            [
+                {
+                    "name": "tests / Unit fast (unit-domain)",
+                    "status": "completed",
+                    "conclusion": "success",
+                },
+                {
+                    "name": "tests / conditional lane",
+                    "status": "completed",
+                    "conclusion": "skipped",
+                },
+            ]
+        )
+
+    def json(self, args: list[str]) -> dict:
+        if "/contents/" in args[1]:
+            assert args[1].endswith(f"?ref={_SHA}")
+            blob = hashlib.sha1(
+                f"blob {len(self.workflow)}\0".encode() + self.workflow,
+                usedforsecurity=False,
+            ).hexdigest()
+            return {
+                "encoding": "base64",
+                "content": base64.b64encode(self.workflow).decode(),
+                "sha": blob,
+            }
+        assert "/attempts/" in args[1] and "/jobs?" in args[1]
+        run_id = int(args[1].split("/runs/")[1].split("/", 1)[0])
+        clock_start, clock_end = self.clock_ranges[run_id]
+        jobs = [
+            {
+                **job,
+                **(
+                    {"started_at": clock_start, "completed_at": clock_end}
+                    if job["conclusion"] != "skipped"
+                    else {}
+                ),
+            }
+            for job in self.jobs
+        ]
+        return {"jobs": jobs, "total_count": len(jobs)}
+
+
+def _pilot_api_runs() -> list[dict]:
+    return [
+        {**_raw(run_id, head=_SHA), "created_at": stamp}
+        for run_id, stamp in (
+            (130, "2026-11-20T03:00:00Z"),
+            (131, "2026-11-20T03:47:00Z"),
+        )
+    ]
+
+
+def _archived_pilot_assessment(root: Path) -> dict[str, object]:
+    observations = [
+        pilot_observation_from_archive(root, run_id=run_id, run_attempt=1, arm=arm)
+        for run_id, arm in ((130, "baseline"), (131, "candidate"))
+    ]
+    return assess_reduced_pilot_window(
+        observations,
+        **_pilot_options(
+            scheduled_success_total_count=2,
+            independent_review=True,
+            independent_restore=True,
+        ),
+    )
+
+
+def _archived_pilot_pair(root: Path) -> dict[str, object]:
+    client = _PilotApiClient()
+    for run in _pilot_api_runs():
+        raw, outcomes, manifest = build_attempt_archive(
+            client, "owner/repository", run, pilot=True
+        )
+        assert "configuration_id" not in raw
+        write_snapshot(root, raw=raw, outcomes=outcomes, manifest=manifest)
+    _seal_index(root)
+    return _archived_pilot_assessment(root)
+
+
+def test_pilot_archive_runs_binds_real_api_configuration_and_job_names(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runs = _pilot_api_runs()
+    monkeypatch.setattr(
+        archive_module, "collect_selected_runs", lambda *args, **kwargs: runs
+    )
+    archive_runs(
+        _PilotApiClient(),
+        "owner/repository",
+        workflow="nightly.yml",
+        branch="main",
+        event="schedule",
+        limit=2,
+        output=tmp_path,
+        pilot=True,
+    )
+    assessment = _archived_pilot_assessment(tmp_path)
+    assert assessment["n2_blocked"] is False
+    jobs = assessment["evaluated_pairs"][0]["baseline"]["job_conclusions"]
+    assert jobs["generated-artifact-daily"] == "success"
+    assert jobs["tests"] == "success"
+    assert (
+        assessment["evaluated_pairs"][0]["baseline"]["api_job_conclusions"][
+            "tests / conditional lane"
+        ]
+        == "skipped"
+    )
+    require_pilot_advance(assessment, tmp_path)
+
+
+@pytest.mark.parametrize(
+    "created,clock_day,dow,dom,month",
+    [
+        ("2026-11-16", "2026-11-17", "Tue", "17", "11"),
+        ("2026-11-30", "2026-12-01", "Tue", "01", "12"),
+        ("2027-01-01", "2027-01-02", "Sat", "02", "01"),
+    ],
+)
+def test_archived_retry_calendar_comes_from_this_attempts_clock_job(
+    tmp_path: Path,
+    created: str,
+    clock_day: str,
+    dow: str,
+    dom: str,
+    month: str,
+) -> None:
+    client = _PilotApiClient()
+    client.clock_ranges[130] = (f"{clock_day}T03:00:00Z", f"{clock_day}T03:00:01Z")
+    run = {
+        **_pilot_api_runs()[0],
+        "created_at": f"{created}T03:00:00Z",
+        "run_attempt": 2,
+    }
+    raw, outcomes, manifest = build_attempt_archive(
+        client, "owner/repository", run, pilot=True
+    )
+    write_snapshot(tmp_path, raw=raw, outcomes=outcomes, manifest=manifest)
+    _seal_index(tmp_path)
+    observation = pilot_observation_from_archive(
+        tmp_path, run_id=130, run_attempt=2, arm="baseline"
+    )
+    assert (observation["dow"], observation["dom"], observation["month"]) == (
+        dow,
+        dom,
+        month,
+    )
+    assert observation["calendar_source"] == "clock_job_utc_interval"
+    assert archive_module._job_block_reason(observation) is None
+
+
+@pytest.mark.parametrize(
+    "start,end",
+    [
+        (None, None),
+        ("2026-11-20T23:59:59Z", "2026-11-21T00:00:01Z"),
+        ("2026-11-20T03:00:01Z", "2026-11-20T03:00:00Z"),
+    ],
+)
+def test_archived_clock_with_ambiguous_or_missing_date_stays_unknown(
+    tmp_path: Path,
+    start: str | None,
+    end: str | None,
+) -> None:
+    client = _PilotApiClient()
+    client.clock_ranges[130] = (start, end)
+    raw, outcomes, manifest = build_attempt_archive(
+        client, "owner/repository", _pilot_api_runs()[0], pilot=True
+    )
+    write_snapshot(tmp_path, raw=raw, outcomes=outcomes, manifest=manifest)
+    _seal_index(tmp_path)
+    observation = pilot_observation_from_archive(
+        tmp_path, run_id=130, run_attempt=1, arm="baseline"
+    )
+    assert observation["calendar_source"] == "unknown"
+    assert observation["dow"] is observation["dom"] is observation["month"] is None
+    assert archive_module._job_block_reason(observation) == "duty_unknown"
+
+
+@pytest.mark.parametrize(
+    "evidence", ["late_week", "missing", "late_child", "missing_child"]
+)
+@pytest.mark.parametrize("attempt", [1, 2])
+def test_retry_cannot_retroactively_complete_a_historical_window(
+    tmp_path: Path,
+    evidence: str,
+    attempt: int,
+) -> None:
+    client = _PilotApiClient()
+    if evidence == "late_week":
+        client.clock_ranges = dict.fromkeys(
+            (130, 131), ("2026-11-27T03:00:00Z", "2026-11-27T03:00:01Z")
+        )
+    elif evidence == "missing":
+        client.clock_ranges = dict.fromkeys((130, 131), (None, None))
+    for run in _pilot_api_runs():
+        raw, outcomes, manifest = build_attempt_archive(
+            client, "owner/repository", {**run, "run_attempt": attempt}, pilot=True
+        )
+        if evidence == "late_child":
+            # Preserve clock's valid day while another executed job finishes a week later.
+            outcomes["jobs"][1]["completed_at"] = "2026-11-27T03:00:01Z"
+            archive_module._bind_hashes(raw, outcomes, manifest)
+        elif evidence == "missing_child":
+            outcomes["jobs"][1]["started_at"] = None
+            archive_module._bind_hashes(raw, outcomes, manifest)
+        write_snapshot(tmp_path, raw=raw, outcomes=outcomes, manifest=manifest)
+    _seal_index(tmp_path)
+    observations = [
+        pilot_observation_from_archive(
+            tmp_path, run_id=run_id, run_attempt=attempt, arm=arm
+        )
+        for run_id, arm in ((130, "baseline"), (131, "candidate"))
+    ]
+    result = assess_reduced_pilot_window(
+        observations,
+        **_pilot_options(
+            scheduled_success_total_count=2,
+            independent_review=True,
+            independent_restore=True,
+        ),
+    )
+    assert result["n2_blocked"] is True
+    assert result["equivalence"] == "not_passed"
+    with pytest.raises(ArchiveError, match="N2 stays blocked"):
+        require_pilot_advance(result, tmp_path)
+
+
+def test_retry_inside_window_requires_confirmed_execution_bounds() -> None:
+    start = datetime(2026, 11, 20, 3, tzinfo=UTC)
+    close = start + timedelta(minutes=48)
+    observation = {
+        "run_attempt": 2,
+        "attempt_execution": {
+            "started_at": "2026-11-20T03:01:00Z",
+            "completed_at": "2026-11-20T03:47:00Z",
+        },
+    }
+    assert (
+        archive_module._attempt_execution_in_window(observation, start, close) is True
+    )
+    assert (
+        archive_module._attempt_execution_in_window({"run_attempt": 2}, start, close)
+        is False
+    )
+    observation["attempt_execution"]["completed_at"] = "2026-11-20T03:49:00Z"
+    assert (
+        archive_module._attempt_execution_in_window(observation, start, close) is False
+    )
+
+
+def test_archive_gate_accepts_a_retry_with_confirmed_execution_inside_window(
+    tmp_path: Path,
+) -> None:
+    client = _PilotApiClient()
+    client.clock_ranges[130] = ("2026-11-20T03:01:00Z", "2026-11-20T03:01:01Z")
+    for run in _pilot_api_runs():
+        run = {**run, "run_attempt": 2 if run["id"] == 130 else 1}
+        raw, outcomes, manifest = build_attempt_archive(
+            client, "owner/repository", run, pilot=True
+        )
+        write_snapshot(tmp_path, raw=raw, outcomes=outcomes, manifest=manifest)
+    _seal_index(tmp_path)
+    observations = [
+        pilot_observation_from_archive(
+            tmp_path, run_id=run_id, run_attempt=attempt, arm=arm
+        )
+        for run_id, attempt, arm in ((130, 2, "baseline"), (131, 1, "candidate"))
+    ]
+    result = assess_reduced_pilot_window(
+        observations,
+        **_pilot_options(
+            scheduled_success_total_count=2,
+            independent_review=True,
+            independent_restore=True,
+        ),
+    )
+    assert result["n2_blocked"] is False
+    require_pilot_advance(result, tmp_path)
+
+
+def test_attempt_execution_keeps_precision_at_the_window_boundary() -> None:
+    execution = archive_module._pilot_attempt_execution(
+        {
+            "jobs": [
+                {
+                    "conclusion": "success",
+                    "started_at": "2026-11-20T03:01:00Z",
+                    "completed_at": "2026-11-20T03:48:00.001Z",
+                }
+            ]
+        }
+    )
+    assert execution is not None
+    observation = {"run_attempt": 2, "attempt_execution": execution}
+    assert (
+        archive_module._attempt_execution_in_window(
+            observation,
+            datetime(2026, 11, 20, 3, tzinfo=UTC),
+            datetime(2026, 11, 20, 3, 48, tzinfo=UTC),
+        )
+        is False
+    )
+
+
+def test_pilot_advance_requires_the_evaluated_archive(tmp_path: Path) -> None:
+    assessment = _archived_pilot_pair(tmp_path / "pilot")
+    assert assessment["n2_blocked"] is False
+    require_pilot_advance(assessment, tmp_path / "pilot")
+    unrelated = tmp_path / "unrelated"
+    _store(unrelated, _raw(), _outcomes())
+    _seal_index(unrelated)
+    assert verify_archive(unrelated)["status"] == "verified"
+    with pytest.raises(
+        ArchiveError, match="window start is not in the verified archive"
+    ):
+        require_pilot_advance(assessment, unrelated)
+
+
+def test_pilot_requires_collected_configuration_instead_of_an_api_custom_field(
+    tmp_path: Path,
+) -> None:
+    raw = {**_raw(130, head=_SHA), "configuration_id": PILOT_CONFIGURATION_ID}
+    _store(tmp_path, raw, _outcomes())
+    _seal_index(tmp_path)
+    with pytest.raises(ArchiveError, match="configuration evidence is missing"):
+        pilot_observation_from_archive(
+            tmp_path, run_id=130, run_attempt=1, arm="baseline"
+        )
+
+
+@pytest.mark.parametrize("mutation", ["cadence", "checksum", "code_sha"])
+def test_pilot_collector_rejects_unverified_workflow_configuration(
+    mutation: str,
+) -> None:
+    client = _PilotApiClient()
+    if mutation == "cadence":
+        client.workflow = client.workflow.replace(b"dow == 'Mon'", b"dow == 'Fri'", 1)
+    if mutation == "cadence":
+        with pytest.raises(ArchiveError, match="cadence drifted"):
+            build_attempt_archive(
+                client, "owner/repository", _pilot_api_runs()[0], pilot=True
+            )
+        return
+    raw, outcomes, _ = build_attempt_archive(
+        client, "owner/repository", _pilot_api_runs()[0], pilot=True
+    )
+    configuration = outcomes["pilot_configuration"]
+    configuration[
+        "workflow_blob_sha" if mutation == "checksum" else "workflow_code_sha"
+    ] = "0" * 40
+    with pytest.raises(ArchiveError, match="checksum mismatch|identity mismatch"):
+        archive_module._pilot_configuration_jobs(raw, outcomes)
+
+
+@pytest.mark.parametrize("conclusion", ["failure", "cancelled", "unknown", "skipped"])
+def test_pilot_reusable_job_results_fail_closed(conclusion: str) -> None:
+    client = _PilotApiClient()
+    for job in client.jobs:
+        if job["name"].startswith("tests / "):
+            job["conclusion"] = conclusion
+    raw, outcomes, _ = build_attempt_archive(
+        client, "owner/repository", _pilot_api_runs()[0], pilot=True
+    )
+    jobs = archive_module._pilot_configuration_jobs(raw, outcomes)
+    normalized, _ = archive_module._pilot_archive_job_results(outcomes, jobs)
+    observation = _pilot_success(
+        130,
+        arm="baseline",
+        created_at="2026-11-20T03:00:00Z",
+        dow="Fri",
+        job_conclusions=normalized,
+    )
+    assert archive_module._job_block_reason(observation) is not None
+
+
+def test_pilot_equivalence_preserves_reusable_child_outcome_differences(
+    tmp_path: Path,
+) -> None:
+    assessment = _archived_pilot_pair(tmp_path)
+    pair = assessment["evaluated_pairs"][0]
+    pair["candidate"]["api_job_conclusions"]["tests / conditional lane"] = "success"
+    reasons = []
+    assert (
+        archive_module._pair_equivalence(pair["baseline"], pair["candidate"], reasons)
+        == "not_passed"
+    )
+    assert "pair_not_equivalent" in reasons
+
+
+@pytest.mark.parametrize("change", ["unknown_name", "duplicate_name", "incomplete"])
+def test_pilot_job_mapping_rejects_ambiguous_or_incomplete_evidence(
+    change: str,
+) -> None:
+    client = _PilotApiClient()
+    if change == "unknown_name":
+        client.jobs[0]["name"] = "unrecognized job"
+    elif change == "duplicate_name":
+        client.jobs.append(dict(client.jobs[0]))
+    else:
+        client.jobs[0]["status"] = "in_progress"
+    raw, outcomes, _ = build_attempt_archive(
+        client, "owner/repository", _pilot_api_runs()[0], pilot=True
+    )
+    jobs = archive_module._pilot_configuration_jobs(raw, outcomes)
+    with pytest.raises(
+        ArchiveError, match="identity is ambiguous or unknown|duplicate or incomplete"
+    ):
+        archive_module._pilot_archive_job_results(outcomes, jobs)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("head_sha", "b" * 40),
+        ("event", "workflow_dispatch"),
+        ("created_at", "2026-11-20T03:01:00Z"),
+    ],
+)
+def test_pilot_advance_rechecks_the_archived_window_start(
+    tmp_path: Path, field: str, value: str
+) -> None:
+    assessment = _archived_pilot_pair(tmp_path)
+    assessment["window_start_observation"][field] = value
+    with pytest.raises(
+        ArchiveError, match="window start is not in the verified archive"
+    ):
+        require_pilot_advance(assessment, tmp_path)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("run_attempt", 2),
+        ("head_sha", "b" * 40),
+        ("tested_sha", "b" * 40),
+        ("configuration_id", "other"),
+        ("raw_sha256", "0" * 64),
+        ("outcomes_sha256", "0" * 64),
+        ("job_conclusions", {"clock": "failure"}),
+        ("attempt_execution", {"started_at": "2026-11-27T03:00:00Z"}),
+    ],
+)
+def test_pilot_advance_rejects_mismatched_evidence(
+    tmp_path: Path, field: str, value: object
+) -> None:
+    assessment = _archived_pilot_pair(tmp_path)
+    assessment["evaluated_pairs"][0]["candidate"][field] = value
+    with pytest.raises(ArchiveError):
+        require_pilot_advance(assessment, tmp_path)
+
+
+def test_historical_ledger_and_archive_bytes_match_pinned_baseline() -> None:
+    fixture = Path(__file__).with_name("fixtures") / "n1_historical_baseline.json"
+    baseline = json.loads(fixture.read_text(encoding="utf-8"))
+    assert baseline["baseline_sha"] == BASELINE_SHA
+    archive = REPO_ROOT / "reports/governance/n1-shadow-window/unacceptable"
+    paths = [REPO_ROOT / "reports/governance/n1-shadow-window/ledger.json"]
+    paths.extend(path for path in archive.rglob("*") if path.is_file())
+    actual = {
+        path.relative_to(REPO_ROOT).as_posix(): oracle_sha256(path.read_bytes())
+        for path in paths
+    }
+    assert actual == baseline["files"]
