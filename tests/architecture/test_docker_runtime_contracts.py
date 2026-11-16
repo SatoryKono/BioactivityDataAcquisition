@@ -1400,7 +1400,9 @@ def test_main_docker_validation_only_decouples_main_push_from_publish_approval()
         "(github.event_name != 'push' || github.ref != 'refs/heads/main') }}"
     )
 
-    publish = workflow["jobs"]["docker-push"]
+    publish = _load_yaml(ROOT / ".github/workflows/docker-publish.yml")["jobs"][
+        "docker-push"
+    ]
     assert publish["environment"] == "ghcr-publish"
     assert publish["concurrency"]["group"] == "docker-ghcr-push-${{ github.run_id }}"
     assert publish["concurrency"]["cancel-in-progress"] is False
@@ -1422,8 +1424,7 @@ _TRUSTED_CACHE_TO = (
     "${{ (inputs.cache-write == true && github.event.repository.fork == false && "
     "(github.event_name == 'push' || github.event_name == 'schedule' || "
     "github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/main' || "
-    "github.ref == 'refs/heads/nightly') && (inputs.caller-sha == '' || "
-    "inputs.caller-sha == github.sha)) && 'type=gha,mode=max' || '' }}"
+    "github.ref == 'refs/heads/nightly')) && 'type=gha,mode=max' || '' }}"
 )
 
 
@@ -1440,25 +1441,20 @@ def test_docker_pr_build_reads_main_cache_without_exporting_branch_cache() -> No
     assert "pull_request" not in cache_to
 
 
-def test_docker_workflow_call_checks_out_caller_sha_and_limits_cache_write() -> None:
+def test_docker_workflow_call_checks_out_github_sha_and_limits_cache_write() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     trigger = workflow.get("on", workflow.get(True))
     assert isinstance(trigger, dict)
     inputs = trigger["workflow_call"]["inputs"]
+    assert set(inputs) == {"cache-write"}
     assert inputs["cache-write"]["type"] == "boolean"
     assert inputs["cache-write"]["default"] is False
-    assert inputs["caller-sha"]["type"] == "string"
-    assert inputs["caller-sha"]["default"] == ""
-    assert inputs["publish"]["type"] == "boolean"
-    assert inputs["publish"]["default"] is False
-    assert inputs["artifact-run-id"]["type"] == "string"
-    assert inputs["artifact-run-id"]["default"] == ""
-    assert (
-        trigger["workflow_call"]["outputs"]["image-digest"]["value"]
-        == "${{ jobs.docker-push.outputs.digest }}"
-    )
+    assert "outputs" not in trigger["workflow_call"]
+    rendered_workflow = json.dumps(workflow)
+    assert "inputs.caller-sha" not in rendered_workflow
+    assert "actions/checkout@" in rendered_workflow
 
-    tested_ref = "${{ inputs.caller-sha || github.sha }}"
+    tested_ref = "${{ github.sha }}"
     for job in workflow["jobs"].values():
         for step in job.get("steps") or []:
             if step.get("name") != "Checkout code":
@@ -1479,32 +1475,35 @@ def test_docker_workflow_call_checks_out_caller_sha_and_limits_cache_write() -> 
 
     caller = _load_yaml(ROOT / ".github/workflows/main-integrity.yml")["jobs"]["docker"]
     assert caller["if"] == "github.ref == 'refs/heads/main'"
-    assert caller["with"]["cache-write"] is True
-    assert caller["with"]["caller-sha"] == "${{ github.sha }}"
-    assert caller["with"]["publish"] is False
+    assert caller["with"] == {"cache-write": True}
+    assert caller["permissions"] == {"contents": "read", "security-events": "write"}
 
 
 def test_docker_push_uses_environment_and_does_not_publish_latest_on_main() -> None:
-    workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    workflow = _load_yaml(ROOT / ".github/workflows/docker-publish.yml")
     job = workflow["jobs"]["docker-push"]
     rendered = json.dumps(job)
 
     assert job.get("environment") == "ghcr-publish"
     assert ":latest" not in rendered
     assert "docker/build-push-action@" not in rendered
-    assert "bioetl-scanned-image-${{ inputs.caller-sha || github.sha }}" in rendered
+    assert "actions/checkout@" not in rendered
+    assert "bioetl-scanned-image-${{ inputs.source-sha }}" in rendered
     assert "docker manifest inspect" in rendered
 
 
 def test_docker_push_requires_all_validation_jobs() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     jobs = workflow["jobs"]
-    ancestors = _workflow_ancestors(jobs, "docker-push")
+    ancestors = _workflow_ancestors(jobs, "docker-complete")
 
     assert "docker-runtime-contracts" in ancestors
     assert "docker-lint" in ancestors
     assert "docker-compose-validate" in ancestors
     assert "docker-build" in ancestors
+    publish = _load_yaml(ROOT / ".github/workflows/docker-publish.yml")
+    assert _workflow_needs(publish["jobs"]["docker-push"]) == ["docker-publish-gate"]
+    assert "actions/checkout@" not in json.dumps(publish)
     complete = jobs["docker-complete"]
     assert complete["permissions"] == {"contents": "read"}
     assert set(_workflow_needs(complete)) == {
@@ -1528,9 +1527,9 @@ def test_ghcr_publish_waits_outside_the_main_integrity_conclusion() -> None:
         "${{ github.ref != 'refs/heads/main' }}"
     )
     caller = integrity["jobs"]["docker"]
-    assert caller["with"]["publish"] is False
+    assert caller["with"] == {"cache-write": True}
     assert "artifact-run-id" not in caller["with"]
-    assert caller["permissions"]["actions"] == "read"
+    assert caller["permissions"] == {"contents": "read", "security-events": "write"}
 
     workflow = _load_yaml(ROOT / ".github/workflows/main-ghcr-publish.yml")
     trigger = workflow.get("on", workflow.get(True))
@@ -1544,10 +1543,9 @@ def test_ghcr_publish_waits_outside_the_main_integrity_conclusion() -> None:
         "github.event.workflow_run.event == 'push' && "
         "github.event.workflow_run.head_branch == 'main'"
     )
+    assert job["uses"] == "./.github/workflows/docker-publish.yml"
     assert job["with"] == {
-        "publish": True,
-        "cache-write": False,
-        "caller-sha": "${{ github.event.workflow_run.head_sha }}",
+        "source-sha": "${{ github.event.workflow_run.head_sha }}",
         "artifact-run-id": "${{ github.event.workflow_run.id }}",
     }
     assert job["permissions"] == {
@@ -1560,20 +1558,17 @@ def test_ghcr_publish_waits_outside_the_main_integrity_conclusion() -> None:
     }
 
     docker = _load_yaml(ROOT / ".github/workflows/docker.yml")
-    jobs = docker["jobs"]
-    gate = jobs["docker-publish-gate"]
+    assert "docker-push" not in docker["jobs"]
+    assert "actions/checkout@" not in json.dumps(
+        _load_yaml(ROOT / ".github/workflows/docker-publish.yml")
+    )
+    publish = _load_yaml(ROOT / ".github/workflows/docker-publish.yml")
+    gate = publish["jobs"]["docker-publish-gate"]
     assert "environment" not in gate
-    assert "github.event_name == 'workflow_run'" in gate["if"]
+    assert gate["if"] == "github.ref == 'refs/heads/main'"
     assert gate["permissions"] == {"contents": "read"}
-    for name in (
-        "docker-runtime-contracts",
-        "docker-lint",
-        "docker-compose-validate",
-        "docker-build",
-    ):
-        assert jobs[name]["if"] == "inputs.artifact-run-id == ''"
-    assert jobs["docker-complete"]["if"] == ("always() && inputs.artifact-run-id == ''")
-    push = jobs["docker-push"]
+    assert docker["jobs"]["docker-complete"]["if"] == "always()"
+    push = publish["jobs"]["docker-push"]
     assert "docker-publish-gate" in _workflow_needs(push)
     assert push["permissions"]["actions"] == "read"
     downloads = [
@@ -1581,14 +1576,9 @@ def test_ghcr_publish_waits_outside_the_main_integrity_conclusion() -> None:
         for step in push["steps"]
         if str(step.get("uses", "")).startswith("actions/download-artifact@")
     ]
-    assert len(downloads) == 2
-    same_run = next(
-        step for step in downloads if "run-id" not in (step.get("with") or {})
-    )
-    cross_run = next(step for step in downloads if "run-id" in (step.get("with") or {}))
-    assert "inputs.artifact-run-id == ''" in same_run["if"]
-    assert cross_run["with"]["run-id"] == "${{ inputs.artifact-run-id }}"
-    assert "inputs.artifact-run-id != ''" in cross_run["if"]
+    assert len(downloads) == 1
+    assert downloads[0]["with"]["run-id"] == "${{ inputs.artifact-run-id }}"
+    assert downloads[0]["with"]["name"] == "bioetl-scanned-image-${{ inputs.source-sha }}"
 
 
 def test_trivy_sarif_matches_main_configurations_without_dropping_findings() -> None:
@@ -1646,9 +1636,7 @@ def test_docker_built_image_uses_one_canonical_trivy_scan_and_blocks_all_medium_
     )
     evidence_run = str(evidence["run"])
     assert "trivy image" in evidence_run
-    assert "bioetl:${{ inputs.caller-sha || github.sha }}" in str(
-        evidence.get("env", {})
-    )
+    assert "bioetl:${{ github.sha }}" in str(evidence.get("env", {}))
     assert "--format json" in evidence_run
     assert "--output reports/security/trivy-results.json" in evidence_run
     assert "--exit-code 0" in evidence_run

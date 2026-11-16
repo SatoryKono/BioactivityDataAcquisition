@@ -991,14 +991,13 @@ def sync_inventory_panel_counts(inventory: list[DashboardInventoryItem]) -> None
     for start, end, value in sorted(edits, reverse=True):
         rendered = rendered[:start] + value + rendered[end:]
     if rendered != original:
-        destination = DASHBOARD_INVENTORY_CONTRACT.resolve()
-        temporary = destination.with_name(destination.name + ".tmp")
-        if temporary.parent != destination.parent:
-            raise ValueError(
-                "dashboard-inventory: temporary path left the contract directory"
-            )
-        temporary.write_text(rendered, encoding="utf-8")
-        temporary.replace(destination)
+        from scripts.engineering.common.repo_paths import write_text_confined
+
+        write_text_confined(
+            DASHBOARD_INVENTORY_CONTRACT,
+            rendered,
+            allow_external_absolute=True,
+        )
 
 
 def main(argv: list[str] | None = None) -> int:

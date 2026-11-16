@@ -134,7 +134,7 @@ from checks that run only for matching paths.
 | **CodeQL**             | `codeql.yml`             | `analyze`                                                               | Python and Actions SAST uploaded to GitHub code scanning                                                            |
 | **OpenSSF Scorecard**  | `scorecard.yml`          | `analysis`                                                              | Weekly non-blocking supply-chain scorecard baseline (SARIF to Security tab)                             |
 | **zizmor**             | `zizmor.yml`             | `zizmor`                                                                | High-confidence GitHub Actions YAML audit on workflow/action changes                                    |
-| **Docker Build**       | `docker.yml`             | `docker-lint`, `docker-compose-validate`, `docker-build`, `docker-complete`, `docker-publish-gate`, `docker-push` | Hadolint, compose syntax, full Trivy evidence (CRITICAL+HIGH+MEDIUM+UNKNOWN), blocking CRITICAL+HIGH+MEDIUM gate, complete PR SBOM/baseline artifact. Main Integrity ends at `docker-complete`. `main-ghcr-publish.yml` promotes the exact scanned image without rebuild through Environment `ghcr-publish` (tested SHA and ref name only, no `:latest`). A stale SHA does not request the environment |
+| **Docker Build**       | `docker.yml`, `docker-publish.yml` | `docker-lint`, `docker-compose-validate`, `docker-build`, `docker-complete`, `docker-publish-gate`, `docker-push` | Hadolint, compose syntax, full Trivy evidence (CRITICAL+HIGH+MEDIUM+UNKNOWN), blocking CRITICAL+HIGH+MEDIUM gate, complete PR SBOM/baseline artifact. Validation checks out `github.sha` only. Main Integrity ends at `docker-complete`. `main-ghcr-publish.yml` calls `docker-publish.yml`, which has no checkout, and promotes the exact scanned image through Environment `ghcr-publish` (tested SHA and ref name only, no `:latest`). A stale SHA does not request the environment |
 
 ### 2.3.1 CodeQL ownership and alert triage
 
@@ -775,29 +775,28 @@ permissions:
 | Permission               | Workflows That Use It                             |
 | ------------------------ | ------------------------------------------------- |
 | `contents: read`         | All workflows (default)                           |
-| `actions: read`          | docker.yml `docker-push` cross-run artifact download; both callers grant it |
+| `actions: read`          | docker-publish.yml `docker-push` cross-run artifact download; `main-ghcr-publish.yml` grants it |
 | `contents: write`        | (none in active `release.yml`; asset-upload job removed) |
-| `packages: write`        | docker.yml `docker-push` (GHCR; Environment `ghcr-publish`) |
+| `packages: write`        | docker-publish.yml `docker-push` (GHCR; Environment `ghcr-publish`) |
 | `security-events: write` | docker.yml (Trivy SARIF upload)                   |
 
-`docker-push` publishes GHCR images only when the caller sets `publish: true`,
-the ref is `main`, and the tested SHA is still `main` HEAD. `main-integrity.yml`
-calls `docker.yml` with `publish: false`, so the Main Integrity conclusion ends
-at `docker-complete` and does not wait on `ghcr-publish`. `main-ghcr-publish.yml`
-runs after a successful Main Integrity push on `main` and calls `docker.yml`
-with `publish: true`, downloading the already scanned image. Tags are the tested
-SHA (`caller-sha`, otherwise `github.sha`) and `github.ref_name`. The job does
-not publish `:latest`. The protected job signs provenance for the verified
-published manifest digest with the SHA-pinned `actions/attest-build-provenance`
-action and pushes the attestation to GHCR. It does not rebuild the image.
-The reusable caller declares the same permission ceiling. A stale SHA is skipped
-by `docker-publish-gate` before the environment request. After approval, the
-head-guard still no-ops if HEAD moved. Reviewer `@SatoryKono` and branch `main`
-stay on `ghcr-publish`. `cancelled` and `waiting` are not success. Ref-wide
-`cancel-in-progress: true` is not restored. The publish job uses run-scoped
-concurrency so one protected publish cannot cancel a newer validation run.
-| `id-token: write` | release.yml build provenance and TestPyPI trusted publishing (`publish-testpypi`); docker.yml protected `docker-push` provenance |
-| `attestations: write` | release.yml `build` for `dist/*`; docker.yml `docker-push` for the published manifest digest |
+`docker-push` publishes GHCR images only when `main-ghcr-publish.yml` calls
+`docker-publish.yml`, the ref is `main`, and `source-sha` is still `main` HEAD.
+`docker-publish.yml` does not check out code. `main-integrity.yml` calls
+`docker.yml` for validation only, so the Main Integrity conclusion ends at
+`docker-complete` and does not wait on `ghcr-publish`. Tags are `source-sha`
+and `github.ref_name`. The job does not publish `:latest`. The protected job
+signs provenance for the verified published manifest digest with the SHA-pinned
+`actions/attest-build-provenance` action and pushes the attestation to GHCR.
+It does not rebuild the image. The reusable caller declares the same permission
+ceiling. A stale SHA is skipped by `docker-publish-gate` before the environment
+request. After approval, the head-guard still no-ops if HEAD moved. Reviewer
+`@SatoryKono` and branch `main` stay on `ghcr-publish`. `cancelled` and
+`waiting` are not success. Ref-wide `cancel-in-progress: true` is not restored.
+The publish job uses run-scoped concurrency so one protected publish cannot
+cancel a newer validation run.
+| `id-token: write` | release.yml build provenance and TestPyPI trusted publishing (`publish-testpypi`); docker-publish.yml protected `docker-push` provenance |
+| `attestations: write` | release.yml `build` for `dist/*`; docker-publish.yml `docker-push` for the published manifest digest |
 | `issues: write`          | contract-tests.yml (auto-create issue on failure); memory-freshness.yml `open-review-issue`; diagram-nightly.yml `nightly-phase2`; stale.yml; pr-hygiene.yml |
 | `pull-requests: write`   | stale.yml; pr-hygiene.yml; labeler.yml |
 
@@ -805,7 +804,7 @@ Live publishing/deployment environment controls (API-verified 2026-08-30):
 
 | Environment | Owner / reviewer | Allowed refs | Purpose |
 | --- | --- | --- | --- |
-| `ghcr-publish` | `@SatoryKono` | branch `main` | `main-ghcr-publish.yml` calls `docker.yml` `docker-push` for immutable tested-SHA and ref-name GHCR tags |
+| `ghcr-publish` | `@SatoryKono` | branch `main` | `main-ghcr-publish.yml` calls `docker-publish.yml` `docker-push` for immutable tested-SHA and ref-name GHCR tags |
 | `observability-render-host` | `@SatoryKono` | branch `main` | reviewed manual execution on the self-hosted render runner |
 | `testpypi` | `@SatoryKono` | branch `main`; tags `v*` | reviewed manual `workflow_dispatch` OIDC publish (`dry_run == false`) |
 | `pypi` | `@SatoryKono` | tags `v*` | retained Environment; **unbound** by `release.yml` after `publish-pypi` removal |

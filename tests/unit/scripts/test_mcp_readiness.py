@@ -19,7 +19,7 @@ from scripts.ai.codex.mcp_readiness import readiness_report
 from scripts.ai.codex.native_mcp_config import ConfigCapture
 
 pytestmark = pytest.mark.unit
-SECRET = "private-control-marker-not-for-logs"
+CONTROL_MARKER = "private-control-marker-not-for-logs"
 
 
 def capture(tmp_path, **updates):
@@ -38,7 +38,7 @@ def capture(tmp_path, **updates):
 CONTROL = {
     "tool": "read_file",
     "arguments": {"path": "README.md"},
-    "contains_all": [SECRET],
+    "contains_all": [CONTROL_MARKER],
 }
 
 
@@ -64,7 +64,7 @@ class Session:
                 "serverInfo": {"name": "filesystem"},
             },
             "tools/list": {"tools": [{"name": "read_file"}]},
-            "tools/call": {"content": [{"type": "text", "text": SECRET}]},
+            "tools/call": {"content": [{"type": "text", "text": CONTROL_MARKER}]},
         }[method]
 
     def notify_initialized(self):
@@ -99,7 +99,7 @@ def test_tool_success_does_not_invent_backend_or_ordinary_session_acceptance(tmp
     assert row["backend_identity_status"] == "NOT_TESTED"
     assert row["status"] == "NOT_TESTED" and not value["ready"]
     assert value["ordinary_user_session"] == "NOT_TESTED"
-    assert SECRET not in json.dumps(value)
+    assert CONTROL_MARKER not in json.dumps(value)
     assert session.closed
 
 
@@ -124,7 +124,7 @@ def test_tool_success_does_not_invent_backend_or_ordinary_session_acceptance(tmp
             {
                 "tools/call": {
                     "isError": True,
-                    "content": [{"type": "text", "text": SECRET}],
+                    "content": [{"type": "text", "text": CONTROL_MARKER}],
                 }
             },
             "TOOL_REPORTED_ERROR",
@@ -137,7 +137,7 @@ def test_transport_and_empty_success_never_prove_readiness(tmp_path, overrides, 
     assert value["status"] == "FAIL"
     assert value["results"][0]["detail"] == reason
     assert not value["ready"] and session.closed
-    assert SECRET not in json.dumps(value)
+    assert CONTROL_MARKER not in json.dumps(value)
 
 
 @pytest.mark.parametrize(
@@ -219,7 +219,7 @@ def test_paginated_catalog_is_read_before_control_call(tmp_path):
 
 
 def test_private_rotation_and_final_capture_failure_invalidate_results(tmp_path):
-    before = capture(tmp_path, env={"TOKEN": SECRET})
+    before = capture(tmp_path, env={"TOKEN": CONTROL_MARKER})
     after = ConfigCapture(tmp_path, deepcopy(before.payload))
     after.payload["config"]["mcp_servers"]["filesystem"]["env"]["TOKEN"] = "rotated"
     value = report(before, Session(), after=lambda: after)
@@ -227,12 +227,12 @@ def test_private_rotation_and_final_capture_failure_invalidate_results(tmp_path)
     assert value["status"] == "STALE"
 
     def unavailable():
-        raise RuntimeError(SECRET)
+        raise RuntimeError(CONTROL_MARKER)
 
     value = report(before, Session(), after=unavailable)
     assert value["results"][0]["status"] == "STALE"
     assert value["status"] == "STALE"
-    assert SECRET not in json.dumps(value)
+    assert CONTROL_MARKER not in json.dumps(value)
 
 
 def test_memory_read_graph_and_mutations_are_not_diagnostic_controls(tmp_path):
@@ -264,7 +264,7 @@ for line in sys.stdin:
         environment={},
     )
     assert result["results"][0]["phases"]["tool"]["status"] == "PASS"
-    assert SECRET not in json.dumps(result)
+    assert CONTROL_MARKER not in json.dumps(result)
 
 
 def test_streamable_sse_ignores_notification_and_preserves_response():
@@ -280,8 +280,8 @@ def test_streamable_sse_ignores_notification_and_preserves_response():
 
 def test_rpc_errors_never_disclose_server_messages():
     with pytest.raises(ProbeError, match="RPC_ERROR") as error:
-        rpc_result({"error": {"code": -1, "message": SECRET}})
-    assert SECRET not in str(error.value)
+        rpc_result({"error": {"code": -1, "message": CONTROL_MARKER}})
+    assert CONTROL_MARKER not in str(error.value)
 
 
 @pytest.fixture
@@ -325,7 +325,7 @@ def http_mcp_fixture():
                     "serverInfo": {"name": "filesystem"},
                 },
                 "tools/list": {"tools": [{"name": "read_file"}]},
-                "tools/call": {"content": [{"type": "text", "text": SECRET}]},
+                "tools/call": {"content": [{"type": "text", "text": CONTROL_MARKER}]},
             }[payload["method"]]
             raw = json.dumps(
                 {"jsonrpc": "2.0", "id": payload["id"], "result": result}
@@ -400,13 +400,13 @@ def test_http_exchange_keeps_session_auth_and_payloads_private(
         required=["filesystem"],
         profile="stable",
         controls={"filesystem": CONTROL},
-        environment={"FIXTURE_TOKEN": SECRET},
+        environment={"FIXTURE_TOKEN": CONTROL_MARKER},
     )
     assert result["results"][0]["phases"]["tool"]["status"] == "PASS"
     assert seen[0][2] is None
     assert all(row[2] == "fixture-session" for row in seen[1:])
-    assert all(row[3] == "Bearer " + SECRET for row in seen)
-    assert SECRET not in json.dumps(result)
+    assert all(row[3] == "Bearer " + CONTROL_MARKER for row in seen)
+    assert CONTROL_MARKER not in json.dumps(result)
 
 
 @pytest.mark.parametrize(
@@ -623,7 +623,7 @@ def test_task_memory_restriction_survives_environment_filter(monkeypatch, mode):
     from scripts.ai.codex.mcp_probe_client import probe_environment
 
     monkeypatch.setenv("BIOETL_AI_MEMORY_MODE", mode)
-    monkeypatch.setenv("UNRELATED_SECRET", SECRET)
+    monkeypatch.setenv("UNRELATED_SECRET", CONTROL_MARKER)
     result = probe_environment(
         {"env": {"BIOETL_AI_MEMORY_MODE": "read-write"}},
         {"BIOETL_AI_MEMORY_MODE": "read-write"},
@@ -791,10 +791,10 @@ def test_declared_process_environment_is_inherited_without_unrelated_secrets(
 ):
     from scripts.ai.codex.mcp_probe_client import probe_environment
 
-    monkeypatch.setenv("SYNTHETIC_MCP_TOKEN", SECRET)
-    monkeypatch.setenv("UNRELATED_SECRET", SECRET)
+    monkeypatch.setenv("SYNTHETIC_MCP_TOKEN", CONTROL_MARKER)
+    monkeypatch.setenv("UNRELATED_SECRET", CONTROL_MARKER)
     result = probe_environment(reference, {})
-    assert result["SYNTHETIC_MCP_TOKEN"] == SECRET
+    assert result["SYNTHETIC_MCP_TOKEN"] == CONTROL_MARKER
     assert "UNRELATED_SECRET" not in result
     assert (
         probe_environment(reference, {"SYNTHETIC_MCP_TOKEN": "repository-value"})[
@@ -919,7 +919,7 @@ def test_invalid_probe_plan_returns_not_tested_without_launch(
     if mode != "missing-root":
         (tmp_path / plan.parent).mkdir(parents=True)
     if mode == "invalid-json":
-        (tmp_path / plan).write_text(SECRET, encoding="utf-8")
+        (tmp_path / plan).write_text(CONTROL_MARKER, encoding="utf-8")
     if mode == "unsafe-path":
         plan = Path("../outside.json")
     assert (
@@ -938,7 +938,7 @@ def test_invalid_probe_plan_returns_not_tested_without_launch(
         "status": "NOT_TESTED",
         "detail": "probe plan unavailable or invalid",
     }
-    assert SECRET not in output.out + output.err
+    assert CONTROL_MARKER not in output.out + output.err
 
 
 @pytest.mark.parametrize(
@@ -946,13 +946,13 @@ def test_invalid_probe_plan_returns_not_tested_without_launch(
     [
         {"bearer_token_env_var": "SYNTHETIC_TOKEN"},
         {"env_http_headers": {"X-Token": "SYNTHETIC_TOKEN"}},
-        {"http_headers": {"X-Token": SECRET}},
+        {"http_headers": {"X-Token": CONTROL_MARKER}},
     ],
 )
 def test_cleartext_remote_credentials_are_refused_before_connection(credential):
     from scripts.ai.codex.mcp_http_probe import HttpProbeClient
 
-    environment = {"SYNTHETIC_TOKEN": SECRET}
+    environment = {"SYNTHETIC_TOKEN": CONTROL_MARKER}
     with pytest.raises(ProbeError, match="UNSUPPORTED_HTTP_URL"):
         HttpProbeClient(
             {"url": "http://synthetic.invalid/mcp", **credential}, None, environment

@@ -55,13 +55,7 @@ jobs:
     uses: ./.github/workflows/docker.yml
     with:
       cache-write: true
-      caller-sha: ${{ github.sha }}
-      # Conclusion ends at docker-complete. GHCR publish is main-ghcr-publish.yml.
-      publish: false
+      # Conclusion ends at docker-complete. GHCR publish is docker-publish.yml.
     permissions:
       contents: read
-      actions: read
-      packages: write
       security-events: write
-      id-token: write
-      attestations: write

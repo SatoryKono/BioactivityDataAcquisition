@@ -803,7 +803,7 @@ def test_nightly_deterministic_lanes_stay_daily_until_shadow_acceptance() -> Non
 
 def test_syft_sbom_is_generated_on_release_and_ghcr_push() -> None:
     release = _load_yaml(RELEASE_WORKFLOW)
-    docker = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    docker = _load_yaml(ROOT / ".github/workflows/docker-publish.yml")
     sbom_sha = "66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c"
     assert sbom_sha in policy.ALLOWED_USES["anchore/sbom-action"]
     release_uses = _step_uses(release, "build")
@@ -1314,7 +1314,7 @@ def test_scorecard_token_permissions_define_workflow_readonly_defaults() -> None
 def test_build_provenance_binds_release_files_and_published_ghcr_digest() -> None:
     """Provenance covers built files and the exact promoted manifest, with scoped OIDC."""
     release = _load_yaml(RELEASE_WORKFLOW)
-    docker = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    docker = _load_yaml(ROOT / ".github/workflows/docker-publish.yml")
     action = "actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8"
     build = release["jobs"]["build"]
     publish = docker["jobs"]["docker-push"]
@@ -1338,13 +1338,13 @@ def test_build_provenance_binds_release_files_and_published_ghcr_digest() -> Non
     assert publish["steps"].index(push_step) < publish["steps"].index(image_attest)
     assert publish["environment"] == "ghcr-publish"
     assert publish["if"] == (
-        "always() && inputs.publish == true && "
         "needs.docker-publish-gate.result == 'success' && "
-        "needs.docker-publish-gate.outputs.current == 'true' && "
-        "(inputs.artifact-run-id != '' || needs.docker-complete.result == 'success')"
+        "needs.docker-publish-gate.outputs.current == 'true'"
     )
     assert release["permissions"] == docker["permissions"] == {"contents": "read"}
-    caller = _load_yaml(ROOT / ".github/workflows/main-integrity.yml")["jobs"]["docker"]
+    caller = _load_yaml(ROOT / ".github/workflows/main-ghcr-publish.yml")["jobs"][
+        "publish"
+    ]
     for permission in ("id-token", "attestations"):
         assert caller["permissions"][permission] == publish["permissions"][permission]
     for name, job in docker["jobs"].items():
@@ -1407,22 +1407,15 @@ def test_pr_required_fetch_depth_keeps_class_lane_history() -> None:
     assert checkout_depth("fast-governance") == 1
     assert checkout_depth("pr-gate-complete") == 1
 
-    pull_request, dispatch = checkout_steps("class-lane")
-    assert pull_request["if"] == "github.event_name == 'pull_request'"
-    assert pull_request["with"]["persist-credentials"] is False
-    assert (
-        pull_request["with"]["ref"]
-        == "${{ needs['classify-changes'].outputs.head_sha }}"
-    )
-    assert int(pull_request["with"]["fetch-depth"]) == 0
-    assert pull_request["with"]["filter"] == "blob:none"
-    assert dispatch["if"] == "github.event_name == 'workflow_dispatch'"
-    assert dispatch["with"]["ref"] == "${{ github.sha }}"
-    assert "needs" not in str(dispatch["with"]["ref"])
-    assert "head_sha" not in str(dispatch["with"]["ref"])
-    assert dispatch["with"]["persist-credentials"] is False
-    assert int(dispatch["with"]["fetch-depth"]) == 0
-    assert dispatch["with"]["filter"] == "blob:none"
+    checkouts = checkout_steps("class-lane")
+    assert len(checkouts) == 1
+    checkout = checkouts[0]
+    assert checkout["with"]["persist-credentials"] is False
+    assert checkout["with"]["ref"] == "${{ github.sha }}"
+    assert "needs" not in str(checkout["with"]["ref"])
+    assert "head_sha" not in str(checkout["with"]["ref"])
+    assert int(checkout["with"]["fetch-depth"]) == 0
+    assert checkout["with"]["filter"] == "blob:none"
     setup_node = next(
         step for step in jobs["class-lane"]["steps"] if step.get("id") == "setup-node"
     )
