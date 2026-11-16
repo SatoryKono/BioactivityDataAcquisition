@@ -7,19 +7,36 @@ import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
+from typing import cast
 from uuid import UUID
 
+from bioetl.application.core.base import BasePipeline
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
-from bioetl.composition.factories.pipeline.assembler import create_pipeline_factory
+from bioetl.composition.factories.pipeline.assembler import (
+    GenericPipelineFactory,
+    create_pipeline_factory,
+)
 from bioetl.composition.factories.pipeline.registry import chembl_target_factory
 from bioetl.composition.runtime_builders.observability_builder import (
     build_observability_bundle,
 )
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.ports import PipelineCreateRunnerRequest
-from bioetl.domain.types import BronzeRecord, HealthStatus, RunType
-from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config_from_root
+from bioetl.domain.types import (
+    BronzeRecord,
+    GoldSchemaType,
+    HealthStatus,
+    RunID,
+    RunType,
+)
+from bioetl.infrastructure.config.contract_policy_loader import (
+    load_pipeline_contract_policy,
+)
+from bioetl.infrastructure.config import ObservabilitySettings
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config_from_root,
+)
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.storage.target_fk_repair import (
     RecoveredTargetSource,
@@ -62,7 +79,15 @@ class _FrozenAPISource:
         """The local immutable response has already passed acquisition checks."""
         return HealthStatus.HEALTHY
 
-    async def fetch(self, entity_type: str, **kwargs: object) -> AsyncIterator[BronzeRecord]:
+    async def fetch(
+        self,
+        entity_type: str,
+        limit: int | None = None,
+        query: str | None = None,
+        filter_ids: list[str] | None = None,
+        filter_field: str | None = None,
+        offset: int | None = None,
+    ) -> AsyncIterator[BronzeRecord]:
         """Replay the complete verified missing-target cohort once."""
         if entity_type != "target":
             raise ValueError("Recovery source supports target only")
@@ -76,6 +101,8 @@ def _prepare_inputs(
 ) -> tuple[TargetRepairBaseline, RecoveredTargetSource, Path]:
     root = request.repo_root.resolve(strict=True)
     reports = (root / "reports" / "local").resolve()
+    if not reports.is_relative_to(root):
+        raise ValueError("reports/local must remain physically inside the repository")
     destination = request.output_directory.resolve()
     if not destination.is_relative_to(reports) or destination == reports:
         raise ValueError("Recovery output must be a new directory under reports/local")
@@ -108,31 +135,49 @@ async def prepare_target_fk_repair(request: TargetFKRepairRequest) -> Path:
     )
     if config.target_classification.mode != "off":
         raise ValueError("V30 recovery requires classification mode off")
-    if config.contracts.active_version != "3.0.0" or config.contracts.write_versions != ["3.0.0"]:
+    contract = load_pipeline_contract_policy("chembl", "target")
+    if contract.active_version != "3.0.0" or contract.write_versions != ["3.0.0"]:
         raise ValueError("V30 recovery requires the single 3.0.0 write contract")
+    configuration_bytes = json.dumps(
+        {
+            "pipeline": config.model_dump(mode="json"),
+            "contract_policy": contract.model_dump(mode="json"),
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode()
+    configuration_path = destination / "execution" / "configuration.json"
+    configuration_path.parent.mkdir(parents=True)
+    configuration_path.write_bytes(configuration_bytes + b"\n")
     settings = Settings(
         test_mode=True,
         env="dev",
         data_dir=destination / "execution" / "data",
         report_root=destination / "execution" / "reports",
         metrics_enabled=False,
-        observability={"metrics_enabled": False, "metrics_server_enabled": False, "tracing_enabled": False, "dq_monitor_enabled": False},
-        _env_file=None,
+        observability=ObservabilitySettings(
+            metrics_enabled=False,
+            metrics_server_enabled=False,
+            tracing_enabled=False,
+            dq_monitor_enabled=False,
+        ),
+        _env_file=None,  # type: ignore[call-arg]  # BaseSettings runtime-only kwarg.
     )
     observability = build_observability_bundle(
         pipeline="chembl_target",
-        run_id=request.run_id,
+        run_id=RunID(request.run_id),
         settings=settings,
         yaml_config=config,
     )
     source_adapter = _FrozenAPISource(source)
+    registered = cast(GenericPipelineFactory[BasePipeline], chembl_target_factory)
     factory = create_pipeline_factory(
         "chembl_target",
-        chembl_target_factory.pipeline_class,
+        registered.pipeline_class,
         "chembl",
-        silver_schema=chembl_target_factory.silver_schema,
-        gold_schema=chembl_target_factory.gold_schema,
-        pandera_silver_schema=chembl_target_factory.pandera_silver_schema,
+        silver_schema=registered.silver_schema,
+        gold_schema=cast(GoldSchemaType, registered.gold_schema),
+        pandera_silver_schema=registered.pandera_silver_schema,
         transformer_class=TargetTransformer,
         data_source_creator=lambda *args, **kwargs: source_adapter,
     )
@@ -144,7 +189,7 @@ async def prepare_target_fk_repair(request: TargetFKRepairRequest) -> Path:
     )
     runner = factory.create_runner(
         PipelineCreateRunnerRequest(
-            run_id=request.run_id,
+            run_id=RunID(request.run_id),
             started_at=request.started_at,
             runtime=runtime,
             settings=settings,
@@ -156,23 +201,30 @@ async def prepare_target_fk_repair(request: TargetFKRepairRequest) -> Path:
     metrics = runner.execution_metrics
     for key in ("records_silver", "records_gold"):
         if metrics.get(key) != len(source.records):
-            raise ValueError(f"Actual pipeline did not retain full recovery cohort: {key}")
+            raise ValueError(
+                f"Actual pipeline did not retain full recovery cohort: {key}"
+            )
     reread = read_recovered_target_source(
         request.source_directory, expected_ids=baseline.missing_ids
     )
     if reread.reference != source.reference:
         raise ValueError("Recovery acquisition changed during execution")
-    serialized = config.model_dump(mode="json")
     execution = {
         "pipeline": "chembl_target",
         "run_id": str(request.run_id),
         "started_at": request.started_at.isoformat(),
         "status": "completed",
         "metrics": dict(metrics),
-        "resolved_config_sha256": hashlib.sha256(
-            json.dumps(serialized, sort_keys=True, separators=(",", ":")).encode()
-        ).hexdigest(),
-        "settings": {"isolated_storage_paths": True, "test_mode": True, "network_source": False},
+        "resolved_configuration": {
+            "path": str(configuration_path),
+            "sha256": hashlib.sha256(configuration_path.read_bytes()).hexdigest(),
+        },
+        "contract_policy": contract.model_dump(mode="json"),
+        "settings": {
+            "isolated_storage_paths": True,
+            "test_mode": True,
+            "network_source": False,
+        },
     }
     return publish_repair_candidate(
         baseline,

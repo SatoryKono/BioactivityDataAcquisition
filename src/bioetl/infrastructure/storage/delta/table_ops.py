@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import shutil
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 from urllib.parse import unquote, urlparse
@@ -49,7 +50,14 @@ def _read_records_from_active_parquet_files(
     if not file_uris:
         return []
 
-    tables = [_read_active_file(table, uri, columns) for uri in file_uris]
+    if columns == []:
+        count = sum(
+            pq.read_metadata(resolve_parquet_file_uri(uri)).num_rows
+            for uri in file_uris
+        )
+        return [{} for _ in range(count)]
+    partition_info = _partition_info(table)
+    tables = [_read_active_file(uri, columns, partition_info) for uri in file_uris]
     if len(tables) == 1:
         rows: list[BronzeRecord] = tables[0].to_pylist()
         return rows
@@ -57,30 +65,51 @@ def _read_records_from_active_parquet_files(
     return cast("list[BronzeRecord]", concatenated.to_pylist())
 
 
+@dataclass(frozen=True)
+class _PartitionInfo:
+    root: Path
+    columns: list[str]
+    schema: pa.Schema
+    values: dict[str, dict[str, str | None]]
+
+
+def _partition_info(table: DeltaTable) -> _PartitionInfo | None:
+    columns = table.metadata().partition_columns
+    if not columns:
+        return None
+    return _PartitionInfo(
+        Path(resolve_parquet_file_uri(table.table_uri)).resolve(),
+        columns,
+        delta_schema_to_pyarrow(table.schema()),
+        {
+            item["path"]: item["partition_values"]
+            for item in table.get_add_actions().to_pylist()
+        },
+    )
+
+
 def _read_active_file(
-    table: DeltaTable, file_uri: str, columns: list[str] | None
+    file_uri: str, columns: list[str] | None, partition_info: _PartitionInfo | None
 ) -> pa.Table:
     """Restore partition columns from Delta actions, including typed nulls.
 
     Parquet payloads omit partition fields. Inferring them from Hive directory
     names loses Delta's types and depends on PyArrow's version-specific defaults.
     """
-    partition_columns = table.metadata().partition_columns
+    partition_columns = partition_info.columns if partition_info else []
     physical_columns = (
         None if columns is None else [c for c in columns if c not in partition_columns]
     )
     result = pq.read_table(
         resolve_parquet_file_uri(file_uri), columns=physical_columns, use_threads=False
     )
-    if not partition_columns:
+    if partition_info is None:
         return result
-    schema = delta_schema_to_pyarrow(table.schema())
-    root = Path(resolve_parquet_file_uri(table.table_uri)).resolve()
+    schema, root = partition_info.schema, partition_info.root
     relative = (
         Path(resolve_parquet_file_uri(file_uri)).resolve().relative_to(root).as_posix()
     )
-    actions = {item["path"]: item for item in table.get_add_actions().to_pylist()}
-    values = actions[relative]["partition_values"]
+    values = partition_info.values[relative]
     for name in partition_columns:
         if columns is not None and name not in columns:
             continue

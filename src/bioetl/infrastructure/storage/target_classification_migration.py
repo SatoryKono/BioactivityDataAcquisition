@@ -237,24 +237,10 @@ def promote_target_migration(
             "TargetMigrationJournal",
             json.loads((checked["backup"] / "journal.json").read_bytes()),
         )
-        if state["phase"] != "prepared" or state["paths"] != {
-            k: str(v) for k, v in checked.items()
-        }:
-            raise ValueError("migration is not the prepared occurrence")
-        if state.get("deployment_binding") != (
-            deployment.document() if deployment else {}
-        ):
-            raise ValueError("deployment settings/config changed since preparation")
+        _assert_prepared_identity(checked, state, deployment)
         verify_target_dependencies(paths.workspace, state["dependencies"])
         verify_target_dependencies(paths.workspace, state["dependency_backups"])
-        for name in ("silver", "gold", "config"):
-            if _tree_hashes(checked[name]) != state["original_hashes"][name]:
-                raise ValueError("canonical bytes changed since preparation")
-            if (
-                _tree_hashes(checked["candidate_" + name])
-                != state["candidate_hashes"][name]
-            ):
-                raise ValueError("candidate bytes changed since validation")
+        _verify_prepared_bytes(checked, state)
         validate_target_candidate(checked, tuple(state["legacy_include_fields"]))
         if _tree_hashes(checked["assay"]) != state["assay_hashes"]:
             raise ValueError("assay reference cohort changed since preparation")
@@ -270,13 +256,41 @@ def promote_target_migration(
                 _save(checked["backup"], state)
             for name in ("silver", "gold", "config"):
                 if _tree_hashes(checked[name]) != state["candidate_hashes"][name]:
-                    raise ValueError("activated target bundle differs from validated bytes")
+                    raise ValueError(
+                        "activated target bundle differs from validated bytes"
+                    )
         except (OSError, ValueError):
             _restore_pairs(checked, state)
             raise
         state["phase"] = "promoted"
         _save(checked["backup"], state)
         return state
+
+
+def _assert_prepared_identity(
+    checked: dict[str, Path],
+    state: TargetMigrationJournal,
+    deployment: TargetDeploymentBinding | None,
+) -> None:
+    if state["phase"] != "prepared" or state["paths"] != {
+        key: str(value) for key, value in checked.items()
+    }:
+        raise ValueError("migration is not the prepared occurrence")
+    if state.get("deployment_binding") != (deployment.document() if deployment else {}):
+        raise ValueError("deployment settings/config changed since preparation")
+
+
+def _verify_prepared_bytes(
+    checked: dict[str, Path], state: TargetMigrationJournal
+) -> None:
+    for name in ("silver", "gold", "config"):
+        if _tree_hashes(checked[name]) != state["original_hashes"][name]:
+            raise ValueError("canonical bytes changed since preparation")
+        if (
+            _tree_hashes(checked["candidate_" + name])
+            != state["candidate_hashes"][name]
+        ):
+            raise ValueError("candidate bytes changed since validation")
 
 
 def rollback_target_migration(paths: TargetMigrationPaths) -> TargetMigrationJournal:

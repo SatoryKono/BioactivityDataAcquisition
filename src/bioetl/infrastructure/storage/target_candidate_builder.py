@@ -128,7 +128,16 @@ def _safe_output(path: Path, paths: TargetMigrationPaths, *, directory: bool) ->
 
 
 def _assert_output_disjoint(resolved: Path, paths: TargetMigrationPaths) -> None:
-    for original in (paths.silver, paths.gold, paths.assay, paths.config, paths.backup):
+    for original in (
+        paths.silver,
+        paths.gold,
+        paths.assay,
+        paths.config,
+        paths.backup,
+        paths.candidate_silver,
+        paths.candidate_gold,
+        paths.candidate_config,
+    ):
         source = original.resolve()
         if (
             resolved == source

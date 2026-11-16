@@ -71,16 +71,28 @@ def test_scope_review_evidence_is_verified_and_copied(tmp_path):
     evidence = coverage.parent / "eligibility.txt"
     evidence.write_bytes(b"Synthetic independently supplied eligibility proof")
     review = json.loads(review_path.read_bytes())
-    review["evidence_references"] = [{"path": evidence.name, "sha256": sha256(evidence.read_bytes())}]
+    review["evidence_references"] = [
+        {"path": evidence.name, "sha256": sha256(evidence.read_bytes())}
+    ]
     document["review"]["sha256"] = write_fixture_json(review_path, review)
     coverage_hash = write_fixture_json(coverage, document)
-    bundle = build_snapshot_bundle(acquisition=acquisition, acquisition_sha256=acquisition_hash,
-        coverage=coverage, coverage_sha256=coverage_hash, output_dir=tmp_path / "published")
+    bundle = build_snapshot_bundle(
+        acquisition=acquisition,
+        acquisition_sha256=acquisition_hash,
+        coverage=coverage,
+        coverage_sha256=coverage_hash,
+        output_dir=tmp_path / "published",
+    )
     assert bundle.files["sources/coverage/eligibility.txt"] == evidence.read_bytes()
     evidence.write_bytes(b"Changed after review")
     with pytest.raises(ValueError, match="digest mismatch"):
-        build_snapshot_bundle(acquisition=acquisition, acquisition_sha256=acquisition_hash,
-            coverage=coverage, coverage_sha256=coverage_hash, output_dir=tmp_path / "rejected")
+        build_snapshot_bundle(
+            acquisition=acquisition,
+            acquisition_sha256=acquisition_hash,
+            coverage=coverage,
+            coverage_sha256=coverage_hash,
+            output_dir=tmp_path / "rejected",
+        )
     assert not (tmp_path / "rejected").exists()
 
 

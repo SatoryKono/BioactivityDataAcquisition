@@ -6,6 +6,7 @@ from pathlib import Path
 from dataclasses import replace
 
 import pytest
+import yaml
 
 from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
 from bioetl.infrastructure.storage import target_classification_migration as migration
@@ -23,7 +24,14 @@ def paths(tmp_path, monkeypatch):
         (folder / "_delta_log/000.json").write_text(name)
         (folder / "part.parquet").write_bytes(name.encode())
     for name in ("config", "candidate_config"):
-        (tmp_path / (name + ".yaml")).write_text(name)
+        (tmp_path / (name + ".yaml")).write_text(
+            yaml.safe_dump(
+                {
+                    "fixture": name,
+                    "pipeline": {"target_classification": {"mode": "off"}},
+                }
+            )
+        )
     monkeypatch.setattr(migration, "assert_no_managed_writers", lambda: None)
     # These tests isolate filesystem recovery; actual deployment policy has
     # independent loader/resolver regressions.
@@ -49,11 +57,11 @@ def test_promote_and_rollback_restore_physical_logs_data_and_config(paths):
     assert (paths.backup / "copy-silver/_delta_log/000.json").read_text() == "silver"
     migration.promote_target_migration(paths)
     assert (paths.silver / "part.parquet").read_bytes() == b"candidate_silver"
-    assert paths.config.read_text() == "candidate_config"
+    assert yaml.safe_load(paths.config.read_bytes())["fixture"] == "candidate_config"
     migration.rollback_target_migration(paths)
     assert (paths.silver / "part.parquet").read_bytes() == b"silver"
     assert (paths.gold / "_delta_log/000.json").read_text() == "gold"
-    assert paths.config.read_text() == "config"
+    assert yaml.safe_load(paths.config.read_bytes())["fixture"] == "config"
     assert (paths.backup / "failed-silver/part.parquet").exists()
 
 
@@ -93,7 +101,7 @@ def test_second_table_activation_failure_restores_first_table(paths, monkeypatch
         migration.promote_target_migration(paths)
     assert (paths.silver / "part.parquet").read_bytes() == b"silver"
     assert (paths.gold / "part.parquet").read_bytes() == b"gold"
-    assert paths.config.read_text() == "config"
+    assert yaml.safe_load(paths.config.read_bytes())["fixture"] == "config"
 
 
 def test_canonical_change_after_backup_is_not_overwritten(paths):
@@ -130,7 +138,7 @@ def test_interrupted_rollback_can_resume_after_other_pairs_were_restored(
         patch.setattr(Path, "rename", interrupted)
         with pytest.raises(PermissionError, match="interrupted rollback"):
             migration.rollback_target_migration(paths)
-    assert paths.config.read_text() == "config"
+    assert yaml.safe_load(paths.config.read_bytes())["fixture"] == "config"
     assert (paths.gold / "part.parquet").read_bytes() == b"gold"
     migration.rollback_target_migration(paths)
     assert (paths.silver / "part.parquet").read_bytes() == b"silver"

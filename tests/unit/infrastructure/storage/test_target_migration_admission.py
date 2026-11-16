@@ -41,6 +41,42 @@ pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[4]
 
 
+@pytest.mark.parametrize(
+    "argv",
+    [
+        ["python.exe", "-m", "bioetl", "run", "--pipeline", "chembl_target"],
+        ["D:/repo/.venv/Scripts/bioetl.exe", "run", "--pipeline=chembl_target"],
+        ["bioetl.exe", "workflow", "run", "chembl_baseline"],
+        ["bioetl", "run", "chembl_target"],
+        ["python", "D:/repo/reports/workflow-campaigns/runner.py"],
+    ],
+)
+def test_managed_writer_detection_recognizes_actual_argv(argv, monkeypatch):
+    from types import SimpleNamespace
+
+    monkeypatch.setattr(
+        validation.psutil,
+        "process_iter",
+        lambda _: [SimpleNamespace(info={"pid": -1, "cmdline": argv})],
+    )
+    with pytest.raises(RuntimeError, match="managed writer"):
+        validation.assert_no_managed_writers()
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [
+        ["bioetl", "run", "--pipeline", "chembl_target", "--dry-run"],
+        ["bioetl", "workflow", "run", "--help"],
+        ["bioetl", "run", "--pipeline", "chembl_assay"],
+        ["python", "unrelated.py", "run", "chembl_target"],
+        ["bioetl", "workflow", "list"],
+    ],
+)
+def test_read_only_and_unrelated_commands_do_not_block_migration(argv):
+    assert validation._managed_writer_command(argv) is False
+
+
 def _synthetic_profile(tmp_path: Path) -> LoadedIupharProfile:
     """Explicit software fixture; this is not a biological acceptance receipt."""
     raw = canonical_json_bytes({"targetId": 1, "type": "gpcr"}).decode()

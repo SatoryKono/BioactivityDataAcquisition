@@ -131,3 +131,13 @@ def test_failed_build_occurrence_is_not_overwritten(source_bundle):
     with pytest.raises(ValueError, match="occurrence already exists"):
         builder.build_target_candidates(request)
     assert (request.output_dir / "preserved.txt").read_text() == "keep"
+
+
+@pytest.mark.parametrize("name", ["candidate_silver", "candidate_gold"])
+@pytest.mark.parametrize("nested", [False, True])
+def test_build_evidence_cannot_overlap_candidate_tables(source_bundle, name, nested):
+    path = getattr(source_bundle.paths, name)
+    request = replace(source_bundle, output_dir=path / "evidence" if nested else path)
+    with pytest.raises(ValueError, match="overlaps a preserved resource"):
+        builder.build_target_candidates(request)
+    assert not path.exists()

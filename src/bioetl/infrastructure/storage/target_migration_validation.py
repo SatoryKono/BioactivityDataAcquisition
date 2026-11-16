@@ -37,20 +37,33 @@ def assert_no_managed_writers() -> None:
     for process in psutil.process_iter(["pid", "name", "cmdline"]):
         if process.info["pid"] == os.getpid():
             continue
-        command = " ".join(process.info.get("cmdline") or ())
-        if any(
-            marker in command
-            for marker in (
-                "bioetl workflow run",
-                "bioetl run chembl_target",
-                "workflow-campaigns" + os.sep,
-                "workflow-campaigns/",
-                "workflow-campaigns\\",
-            )
-        ):
+        if _managed_writer_command(process.info.get("cmdline") or ()):
             raise RuntimeError(
                 f"managed writer is still active: PID {process.info['pid']}"
             )
+
+
+def _bioetl_arguments(argv: Sequence[str]) -> list[str]:
+    for index, arg in enumerate(argv):
+        if Path(arg).name.lower() in {"bioetl", "bioetl.exe", "bioetl-script.py"}:
+            return list(argv[index + 1 :])
+    return []
+
+
+def _managed_writer_command(argv: Sequence[str]) -> bool:
+    """Recognize executable and python-module calls by argument boundary."""
+    if any("workflow-campaigns" in arg.replace("\\", "/").split("/") for arg in argv):
+        return True
+    args = _bioetl_arguments(argv)
+    if any(flag in args for flag in ("--dry-run", "--help", "-h")):
+        return False
+    if any(
+        args[index : index + 2] == ["workflow", "run"] for index in range(len(args) - 1)
+    ):
+        return True
+    return "run" in args and (
+        "chembl_target" in args or "--pipeline=chembl_target" in args
+    )
 
 
 def _business(row: Mapping[str, object]) -> dict[str, object]:

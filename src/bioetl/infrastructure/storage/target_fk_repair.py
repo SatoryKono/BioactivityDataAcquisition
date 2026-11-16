@@ -8,9 +8,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Mapping, cast
+from typing import cast
 from urllib.parse import urlparse
 
 import pyarrow as pa
@@ -139,6 +141,8 @@ class RecoveredTargetSource:
 
     records: tuple[dict[str, object], ...]
     reference: Mapping[str, object]
+    directory: Path
+    files: Mapping[str, str]
 
 
 def _check_receipt(entry: Mapping[str, object], path: Path) -> None:
@@ -153,22 +157,22 @@ def _check_receipt(entry: Mapping[str, object], path: Path) -> None:
         raise ValueError(f"Acquisition digest or timestamp mismatch: {path}")
 
 
-def read_recovered_target_source(
-    directory: Path, *, expected_ids: set[str]
-) -> RecoveredTargetSource:
-    """Validate actual source bytes against receipts and the exact missing cohort."""
-    root = directory.resolve(strict=True)
-    acquisition = root / "acquisition.json"
-    receipts = json.loads(acquisition.read_bytes())
+def _read_acquisition(root: Path) -> dict[str, dict[str, object]]:
+    receipts = json.loads((root / "acquisition.json").read_bytes())
     if not isinstance(receipts, list) or len(receipts) != 2:
         raise ValueError("Expected exactly targets/status acquisition receipts")
-    by_role = {entry.get("role"): entry for entry in receipts if isinstance(entry, dict)}
+    by_role = {
+        entry.get("role"): entry for entry in receipts if isinstance(entry, dict)
+    }
     if set(by_role) != {"targets", "status"}:
         raise ValueError("Missing or repeated acquisition role")
     for role in ("targets", "status"):
         _check_receipt(by_role[role], root / f"{role}.json")
+    return cast(dict[str, dict[str, object]], by_role)
+
+
+def _read_target_rows(root: Path, expected_ids: set[str]) -> list[dict[str, object]]:
     payload = _object(root / "targets.json")
-    status = _object(root / "status.json")
     records = payload.get("targets")
     page = payload.get("page_meta")
     if not isinstance(records, list) or not all(isinstance(x, dict) for x in records):
@@ -176,8 +180,24 @@ def read_recovered_target_source(
     identifiers = [x.get("target_chembl_id") for x in records]
     if len(set(identifiers)) != len(records) or set(identifiers) != expected_ids:
         raise ValueError("Recovered targets must equal the exact missing FK cohort")
-    if not isinstance(page, dict) or page.get("next") or page.get("total_count") != len(records):
+    if (
+        not isinstance(page, dict)
+        or page.get("next")
+        or page.get("total_count") != len(records)
+    ):
         raise ValueError("Recovery response is incomplete")
+    return records
+
+
+def read_recovered_target_source(
+    directory: Path, *, expected_ids: set[str]
+) -> RecoveredTargetSource:
+    """Validate actual source bytes against receipts and the exact missing cohort."""
+    root = directory.resolve(strict=True)
+    acquisition = root / "acquisition.json"
+    by_role = _read_acquisition(root)
+    records = _read_target_rows(root, expected_ids)
+    status = _object(root / "status.json")
     release = status.get("chembl_db_version")
     if not isinstance(release, str) or not release.startswith("ChEMBL_"):
         raise ValueError("Provider release is unverified")
@@ -194,6 +214,11 @@ def read_recovered_target_source(
                 for role in ("targets", "status")
             },
         },
+        root,
+        {
+            name: _sha256(root / name)
+            for name in ("targets.json", "status.json", "acquisition.json")
+        },
     )
 
 
@@ -206,10 +231,96 @@ def _add_rows(old: pa.Table, new: pa.Table) -> pa.Table:
 
 def _verify_old_rows(old: pa.Table, candidate: pa.Table) -> None:
     expected = {row["target_id"]: row for row in old.to_pylist()}
-    actual = {row["target_id"]: row for row in candidate.select(old.column_names).to_pylist()}
+    actual = {
+        row["target_id"]: row for row in candidate.select(old.column_names).to_pylist()
+    }
     for target_id, row in expected.items():
         if _json_bytes(actual.get(target_id)) != _json_bytes(row):
             raise ValueError(f"Existing target changed: {target_id}")
+
+
+def _read_additions(
+    baseline: TargetRepairBaseline, isolated_data_root: Path
+) -> dict[str, FrozenDelta]:
+    additions = {
+        layer: freeze_delta(isolated_data_root / "output" / layer / "chembl" / "target")
+        for layer in ("silver", "gold")
+    }
+    for layer, item in additions.items():
+        if _ids(item.table) != baseline.missing_ids:
+            raise ValueError(
+                f"Actual {layer} output did not retain every recovered target"
+            )
+    return additions
+
+
+def _validate_destination(
+    destination: Path,
+    baseline: TargetRepairBaseline,
+    additions: Mapping[str, FrozenDelta],
+) -> Path:
+    destination = destination.resolve()
+    protected = [x.path for x in (baseline.silver, baseline.gold, baseline.assay)]
+    protected.extend(x.path for x in additions.values())
+    if any(
+        destination.is_relative_to(p) or p.is_relative_to(destination)
+        for p in protected
+    ):
+        raise ValueError("Candidate destination overlaps an input table")
+    if destination.exists():
+        raise ValueError("Candidate destination must be new")
+    return destination
+
+
+def _write_candidates(
+    destination: Path,
+    baseline: TargetRepairBaseline,
+    tables: Mapping[str, pa.Table],
+    additions: Mapping[str, FrozenDelta],
+) -> dict[str, object]:
+    destination.mkdir(parents=True)
+    references: dict[str, object] = {}
+    for layer, table in tables.items():
+        previous = getattr(baseline, layer)
+        path = destination / layer / "chembl" / "target"
+        write_deltalake(path, table, partition_by=list(previous.partition_columns))
+        actual = freeze_delta(path)
+        _verify_old_rows(previous.table, actual.table)
+        _verify_old_rows(additions[layer].table, actual.table)
+        if _ids(actual.table) != _ids(previous.table) | baseline.missing_ids:
+            raise ValueError("Written candidate cohort changed")
+        references[layer] = actual.reference()
+    return references
+
+
+def _freeze_input_copies(
+    destination: Path, baseline: TargetRepairBaseline, source: RecoveredTargetSource
+) -> dict[str, object]:
+    references: dict[str, object] = {}
+    for layer in ("silver", "gold", "assay"):
+        original = getattr(baseline, layer)
+        copy_root = destination / "frozen-inputs" / layer
+        for relative in original.files:
+            target = copy_root / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(original.path / relative, target)
+        copied = freeze_delta(copy_root)
+        if copied.files != original.files or copied.version != original.version:
+            raise ValueError("Frozen baseline copy does not match original bytes")
+        references[layer] = copied.reference()
+    copy_root = destination / "frozen-inputs" / "source"
+    copy_root.mkdir(parents=True)
+    for name in ("targets.json", "status.json", "acquisition.json"):
+        shutil.copyfile(source.directory / name, copy_root / name)
+    if _file_inventory(copy_root) != source.files:
+        raise ValueError("Frozen acquisition bytes do not match original source pins")
+    copied_source = read_recovered_target_source(
+        copy_root, expected_ids=baseline.missing_ids
+    )
+    if copied_source.records != source.records:
+        raise ValueError("Frozen recovery source does not match original rows")
+    references["new_source"] = dict(copied_source.reference)
+    return references
 
 
 def publish_repair_candidate(
@@ -226,20 +337,8 @@ def publish_repair_candidate(
     exact added-cohort equality, and assay-to-Gold FK closure all pass.
     """
     baseline.verify_unchanged()
-    additions = {
-        layer: freeze_delta(isolated_data_root / "output" / layer / "chembl" / "target")
-        for layer in ("silver", "gold")
-    }
-    for layer, item in additions.items():
-        if _ids(item.table) != baseline.missing_ids:
-            raise ValueError(f"Actual {layer} output did not retain every recovered target")
-    destination = destination.resolve()
-    protected = [x.path for x in (baseline.silver, baseline.gold, baseline.assay)]
-    protected.extend(x.path for x in additions.values())
-    if any(destination.is_relative_to(p) or p.is_relative_to(destination) for p in protected):
-        raise ValueError("Candidate destination overlaps an input table")
-    if destination.exists():
-        raise ValueError("Candidate destination must be new")
+    additions = _read_additions(baseline, isolated_data_root)
+    destination = _validate_destination(destination, baseline, additions)
     tables = {
         layer: _add_rows(getattr(baseline, layer).table, additions[layer].table)
         for layer in ("silver", "gold")
@@ -247,17 +346,8 @@ def publish_repair_candidate(
     refs = {x for x in baseline.assay.table.column("target_id").to_pylist() if x}
     if refs - _ids(tables["gold"]):
         raise ValueError("Assay target FK closure failed")
-    destination.mkdir(parents=True)
-    references: dict[str, object] = {}
-    for layer, table in tables.items():
-        previous = getattr(baseline, layer)
-        path = destination / layer / "chembl" / "target"
-        write_deltalake(path, table, partition_by=list(previous.partition_columns))
-        actual = freeze_delta(path)
-        _verify_old_rows(previous.table, actual.table)
-        if _ids(actual.table) != _ids(previous.table) | baseline.missing_ids:
-            raise ValueError("Written candidate cohort changed")
-        references[layer] = actual.reference()
+    references = _write_candidates(destination, baseline, tables, additions)
+    frozen_inputs = _freeze_input_copies(destination, baseline, source)
     baseline.verify_unchanged()
     document = {
         "artifact": "bioetl_target_fk_repair_candidate",
@@ -265,13 +355,25 @@ def publish_repair_candidate(
         "status": "validated_candidate",
         "contract_version": "3.0.0",
         "classification_mode": "off",
-        "baseline": {name: getattr(baseline, name).reference() for name in ("silver", "gold", "assay")},
+        "baseline": {
+            name: getattr(baseline, name).reference()
+            for name in ("silver", "gold", "assay")
+        },
         "new_source": dict(source.reference),
+        "frozen_inputs": frozen_inputs,
         "execution": dict(execution),
         "candidates": references,
         "added_target_ids": sorted(baseline.missing_ids),
-        "checks": {"old_rows_and_hashes_preserved": True, "exact_additive_cohort": True, "assay_target_fk_closed": True, "source_tables_unchanged": True},
-        "limitations": ["Old provider release NOT_VERIFIED; new rows separately pinned", "Candidate only; no canonical table promotion"],
+        "checks": {
+            "old_rows_and_hashes_preserved": True,
+            "exact_additive_cohort": True,
+            "assay_target_fk_closed": True,
+            "source_tables_unchanged": True,
+        },
+        "limitations": [
+            "Old provider release NOT_VERIFIED; new rows separately pinned",
+            "Candidate only; no canonical table promotion",
+        ],
     }
     manifest = destination / "manifest.json"
     manifest.write_bytes(_json_bytes(document) + b"\n")
