@@ -152,33 +152,7 @@ def _run_post_task_validation(
             "error": str(exc),
         }
 
-    stdout = result.stdout.strip()
-    stderr = result.stderr.strip()
-    try:
-        payload = json.loads(stdout) if stdout else {}
-    except json.JSONDecodeError:
-        return {
-            "status": "runtime_error",
-            "issues": [],
-            "timeout_seconds": timeout_seconds,
-            "error": "validation subprocess returned non-JSON output",
-            "stdout": stdout,
-            "stderr": stderr,
-            "returncode": result.returncode,
-        }
-
-    issues = payload.get("issues", [])
-    if isinstance(issues, list) and result.returncode in (0, 1):
-        return {"status": "completed", "issues": issues}
-
-    return {
-        "status": "runtime_error",
-        "issues": issues if isinstance(issues, list) else [],
-        "timeout_seconds": timeout_seconds,
-        "stdout": stdout,
-        "stderr": stderr,
-        "returncode": result.returncode,
-    }
+    return _post_task_validation_payload(result, timeout_seconds)
 
 
 def _run_post_task_refresh(
@@ -252,43 +226,7 @@ def _run_post_task_refresh(
             "error": str(exc),
         }
 
-    stdout = result.stdout.strip()
-    stderr = result.stderr.strip()
-    try:
-        payload = json.loads(stdout) if stdout else {}
-    except json.JSONDecodeError:
-        return {
-            "ok": False,
-            "status": "runtime_error",
-            "timeout_seconds": timeout_seconds,
-            "artifacts": [],
-            "error": "refresh subprocess returned non-JSON output",
-            "stdout": stdout,
-            "stderr": stderr,
-            "returncode": result.returncode,
-        }
-
-    if not isinstance(payload, dict):
-        return {
-            "ok": False,
-            "status": "runtime_error",
-            "timeout_seconds": timeout_seconds,
-            "artifacts": [],
-            "error": "refresh subprocess returned non-object JSON output",
-            "stdout": stdout,
-            "stderr": stderr,
-            "returncode": result.returncode,
-        }
-    if result.returncode != 0:
-        payload = {
-            **payload,
-            "ok": False,
-            "status": payload.get("status", "runtime_error"),
-            "timeout_seconds": timeout_seconds,
-            "stderr": stderr,
-            "returncode": result.returncode,
-        }
-    return payload
+    return _post_task_refresh_payload(result, timeout_seconds)
 
 
 def prune_episodic_notes(*, apply: bool = False) -> dict[str, Any]:
@@ -709,43 +647,19 @@ def pre_task_workflow(
     missing_artifacts = _pre_task_missing_artifacts(
         resolved_chunks_path, resolved_events_dir
     )
-    if missing_artifacts:
-        retrieval = _empty_pre_task_retrieval(
-            query=retrieval_query,
-            profile=profile,
-            chunks_path=resolved_chunks_path,
-            events_dir=resolved_events_dir,
-            missing_artifacts=missing_artifacts,
-        )
-    else:
-        retrieval = query_all_fn(
-            query=retrieval_query,
-            chunks_path=resolved_chunks_path,
-            events_dir=resolved_events_dir,
-            limit=limit,
-            profile=profile,
-        )
+    retrieval = _retrieve_pre_task_context(
+        missing_artifacts,
+        retrieval_query,
+        profile,
+        resolved_chunks_path,
+        resolved_events_dir,
+        limit,
+        query_all_fn,
+    )
     session_path: Path | None = None
     if create_session_note:
-        session_path = session_note_path or _default_note_path(task_id, kind="session")
-        effective_source_refs = source_refs or ["<add-source-ref>"]
-        _write_note(
-            path=session_path,
-            metadata={
-                **_record_envelope_metadata(
-                    task_id=task_id,
-                    record_id=_slugify_task_id(task_id),
-                    source_refs=effective_source_refs,
-                ),
-                "id": _slugify_task_id(task_id),
-                "title": title,
-                "ttl_days": 14,
-                "confidence": "episodic",
-                "source_refs": effective_source_refs,
-                "summary": "Active task session context.",
-                "query": retrieval_query,
-            },
-            body=_session_note_body(title, retrieval_query, retrieval),
+        session_path = _write_pre_task_session(
+            task_id, title, source_refs, session_note_path, retrieval_query, retrieval
         )
     degraded = bool(retrieval.get("degraded", False))
     return {
@@ -902,26 +816,9 @@ def post_task_workflow(
     if not persistence.can_write:
         if promote_to is not None:
             persistence.require_write()
-        repo_root = _discover_repo_root() or Path(__file__).resolve().parents[3]
-        validation_result = _run_post_task_validation(
-            timeout_seconds=validation_timeout_seconds,
-            repo_root=repo_root.resolve(),
+        return _read_only_post_task_result(
+            task_id, title, persistence.mode.value, validation_timeout_seconds
         )
-        return {
-            "kind": "post-task",
-            "task_id": task_id,
-            "title": title,
-            "summary_note": None,
-            "persistence_mode": persistence.mode.value,
-            "refresh_output_root": None,
-            "refresh_report": None,
-            "prune_report": None,
-            "promoted_note": None,
-            "validation_status": validation_result.get("status", "completed"),
-            "validation_issues": validation_result.get("issues", []),
-            "degraded": False,
-            "ok": not validation_result.get("issues"),
-        }
     summary_path = _write_post_task_summary_note(
         task_id=task_id,
         title=title,
@@ -1393,6 +1290,167 @@ def main(argv: list[str] | None = None) -> int:
     if handler is None:
         parser.error(f"unsupported command: {args.command}")
     return handler(args)
+
+
+def _post_task_validation_payload(
+    result: subprocess.CompletedProcess[str], timeout_seconds: float
+) -> dict[str, Any]:
+    stdout = result.stdout.strip()
+    stderr = result.stderr.strip()
+    try:
+        payload = json.loads(stdout) if stdout else {}
+    except json.JSONDecodeError:
+        return {
+            "status": "runtime_error",
+            "issues": [],
+            "timeout_seconds": timeout_seconds,
+            "error": "validation subprocess returned non-JSON output",
+            "stdout": stdout,
+            "stderr": stderr,
+            "returncode": result.returncode,
+        }
+
+    issues = payload.get("issues", [])
+    if isinstance(issues, list) and result.returncode in (0, 1):
+        return {"status": "completed", "issues": issues}
+
+    return {
+        "status": "runtime_error",
+        "issues": issues if isinstance(issues, list) else [],
+        "timeout_seconds": timeout_seconds,
+        "stdout": stdout,
+        "stderr": stderr,
+        "returncode": result.returncode,
+    }
+
+
+def _post_task_refresh_payload(
+    result: subprocess.CompletedProcess[str], timeout_seconds: float
+) -> dict[str, Any]:
+    stdout = result.stdout.strip()
+    stderr = result.stderr.strip()
+    try:
+        payload = json.loads(stdout) if stdout else {}
+    except json.JSONDecodeError:
+        return {
+            "ok": False,
+            "status": "runtime_error",
+            "timeout_seconds": timeout_seconds,
+            "artifacts": [],
+            "error": "refresh subprocess returned non-JSON output",
+            "stdout": stdout,
+            "stderr": stderr,
+            "returncode": result.returncode,
+        }
+
+    if not isinstance(payload, dict):
+        return {
+            "ok": False,
+            "status": "runtime_error",
+            "timeout_seconds": timeout_seconds,
+            "artifacts": [],
+            "error": "refresh subprocess returned non-object JSON output",
+            "stdout": stdout,
+            "stderr": stderr,
+            "returncode": result.returncode,
+        }
+    if result.returncode != 0:
+        payload = {
+            **payload,
+            "ok": False,
+            "status": payload.get("status", "runtime_error"),
+            "timeout_seconds": timeout_seconds,
+            "stderr": stderr,
+            "returncode": result.returncode,
+        }
+    return payload
+
+
+def _write_pre_task_session(
+    task_id: str,
+    title: str,
+    source_refs: list[str],
+    session_note_path: Path | None,
+    retrieval_query: str,
+    retrieval: dict[str, Any],
+) -> Path:
+    session_path = session_note_path or _default_note_path(task_id, kind="session")
+    effective_source_refs = source_refs or ["<add-source-ref>"]
+    _write_note(
+        path=session_path,
+        metadata={
+            **_record_envelope_metadata(
+                task_id=task_id,
+                record_id=_slugify_task_id(task_id),
+                source_refs=effective_source_refs,
+            ),
+            "id": _slugify_task_id(task_id),
+            "title": title,
+            "ttl_days": 14,
+            "confidence": "episodic",
+            "source_refs": effective_source_refs,
+            "summary": "Active task session context.",
+            "query": retrieval_query,
+        },
+        body=_session_note_body(title, retrieval_query, retrieval),
+    )
+    return session_path
+
+
+def _read_only_post_task_result(
+    task_id: str,
+    title: str,
+    persistence_mode: str,
+    validation_timeout_seconds: float | None,
+) -> dict[str, Any]:
+    repo_root = _discover_repo_root() or Path(__file__).resolve().parents[3]
+    validation_result = _run_post_task_validation(
+        timeout_seconds=validation_timeout_seconds,
+        repo_root=repo_root.resolve(),
+    )
+    return {
+        "kind": "post-task",
+        "task_id": task_id,
+        "title": title,
+        "summary_note": None,
+        "persistence_mode": persistence_mode,
+        "refresh_output_root": None,
+        "refresh_report": None,
+        "prune_report": None,
+        "promoted_note": None,
+        "validation_status": validation_result.get("status", "completed"),
+        "validation_issues": validation_result.get("issues", []),
+        "degraded": False,
+        "ok": not validation_result.get("issues"),
+    }
+
+
+def _retrieve_pre_task_context(
+    missing_artifacts: list[dict[str, str]],
+    retrieval_query: str,
+    profile: str,
+    resolved_chunks_path: Path,
+    resolved_events_dir: Path,
+    limit: int,
+    query_all_fn: Any,
+) -> dict[str, Any]:
+    if missing_artifacts:
+        retrieval = _empty_pre_task_retrieval(
+            query=retrieval_query,
+            profile=profile,
+            chunks_path=resolved_chunks_path,
+            events_dir=resolved_events_dir,
+            missing_artifacts=missing_artifacts,
+        )
+    else:
+        retrieval = query_all_fn(
+            query=retrieval_query,
+            chunks_path=resolved_chunks_path,
+            events_dir=resolved_events_dir,
+            limit=limit,
+            profile=profile,
+        )
+    return retrieval
 
 
 if __name__ == "__main__":

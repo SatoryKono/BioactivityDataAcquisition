@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, replace
+from typing import cast
 
 from .models import (
     ClassificationResult,
@@ -79,16 +80,12 @@ def parse_ec_numbers(raw: str | None) -> tuple[EcNumber, ...]:
     return tuple(_parse_ec_token(token) for token in _split_multi(normalized))
 
 
-def validate_input(
+def _normalized_input_fields(
     row: RawTargetRow,
     *,
-    provenance: RunProvenance,
     glue_fixtures: tuple[GlueFixture, ...] = (),
-    catalog: frozenset[str] = frozenset(),
-    snapshot_taxon: str | None = None,
-) -> ValidatedInput:
-    """Validate one row. An invalid row does not compute derived fields."""
-    row = replace(row, fields=dict(row.fields))
+) -> tuple[dict[str, str | None], list[str]]:
+    """Validate identity before normalizing fields in their declared order."""
     errors: list[str] = []
     if not row.input_row_id:
         errors.append("input_row_id is empty")
@@ -107,6 +104,28 @@ def validate_input(
         normalized[field_name] = value
         if glue_error is not None:
             errors.append(glue_error)
+    return normalized, errors
+
+
+def _copy_input_row(row: RawTargetRow) -> RawTargetRow:
+    """Keep the concrete row type while detaching caller-owned source fields."""
+    # dataclasses.replace preserves the concrete class and its subclass fields.
+    copied: object = replace(row, fields=dict(row.fields))
+    return cast(RawTargetRow, copied)
+
+
+def validate_input(
+    row: RawTargetRow,
+    *,
+    provenance: RunProvenance,
+    glue_fixtures: tuple[GlueFixture, ...] = (),
+    catalog: frozenset[str] = frozenset(),
+    snapshot_taxon: str | None = None,
+) -> ValidatedInput:
+    """Validate one row. An invalid row does not compute derived fields."""
+    row = _copy_input_row(row)
+    fixtures: tuple[GlueFixture, ...] = glue_fixtures
+    normalized, errors = _normalized_input_fields(row, glue_fixtures=fixtures)
     row_hash = sha256_bytes(canonical_json_bytes(row.fields))
     if errors:
         return _invalid(

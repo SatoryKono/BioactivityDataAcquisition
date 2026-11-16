@@ -4,10 +4,14 @@ from __future__ import annotations
 
 from copy import deepcopy
 
+import pytest
+
 from scripts.ops.observability.grafana._audit_presentation import (
     stamp_audit_presentation,
 )
 from scripts.ops.observability.grafana._v2_model_parity import _layout
+
+pytestmark = pytest.mark.unit
 
 
 def test_coverage_expansion_moves_following_sections_once_without_changing_queries():

@@ -59,24 +59,7 @@ def _workflow_artifact_specs(
     relation_type = (
         "PUBLISHES_ARTIFACT" if "upload-artifact" in normalized_uses else "DEPENDS_ON"
     )
-    with_payload = step.get("with")
-    artifact_name = None
-    artifact_path = None
-    if isinstance(with_payload, dict):
-        raw_name = with_payload.get("name")
-        if isinstance(raw_name, str):
-            artifact_name = raw_name
-        raw_path = with_payload.get("path")
-        if isinstance(raw_path, str):
-            artifact_path = raw_path
-    if artifact_name is None:
-        step_name = step.get("name")
-        artifact_name = (
-            step_name
-            if isinstance(step_name, str) and step_name
-            else f"{job_id}-artifact"
-        )
-    return ((f"{workflow_name}::{artifact_name}", relation_type, artifact_path),)
+    return _workflow_named_artifact_specs(workflow_name, job_id, step, relation_type)
 
 
 def _extract_cli_options(raw_command: str) -> tuple[str, ...]:
@@ -163,3 +146,26 @@ def _add_workflow_surface(
         today=today,
         workflow=workflow,
     )
+
+
+def _workflow_named_artifact_specs(
+    workflow_name: str, job_id: str, step: dict[str, object], relation_type: str
+) -> tuple[tuple[str, str, str | None], ...]:
+    with_payload = step.get("with")
+    artifact_name = None
+    artifact_path = None
+    if isinstance(with_payload, dict):
+        raw_name = with_payload.get("name")
+        if isinstance(raw_name, str):
+            artifact_name = raw_name
+        raw_path = with_payload.get("path")
+        if isinstance(raw_path, str):
+            artifact_path = raw_path
+    if artifact_name is None:
+        step_name = step.get("name")
+        artifact_name = (
+            step_name
+            if isinstance(step_name, str) and step_name
+            else f"{job_id}-artifact"
+        )
+    return ((f"{workflow_name}::{artifact_name}", relation_type, artifact_path),)

@@ -107,20 +107,7 @@ def _add_schema_field_surface(
         ingest_wave="repo_sync_v1",
         confidence="high",
     )
-    if spec.drift_classification is None:
-        snapshot.nodes[key].properties.setdefault("drift_classification", None)
-    snapshot.add_relation(
-        project, "HAS_SCHEMA_FIELD", surface, provenance="schema_fields"
-    )
-    snapshot.add_relation(
-        storage_key, "HAS_SCHEMA_FIELD", surface, provenance="schema_fields"
-    )
-    if spec.contract_ref is not None:
-        contract_key = NodeKey("contract_surface", spec.contract_ref)
-        if contract_key in snapshot.nodes:
-            snapshot.add_relation(
-                contract_key, "HAS_SCHEMA_FIELD", surface, provenance="schema_fields"
-            )
+    _add_schema_field_relations(snapshot, project, storage_key, key, surface, spec)
     return surface
 
 
@@ -180,3 +167,27 @@ def _add_storage_surface(
         project, "HAS_STORAGE_SURFACE", surface, provenance="storage_surfaces"
     )
     return surface
+
+
+def _add_schema_field_relations(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    storage_key: NodeKey,
+    key: NodeKey,
+    surface: NodeKey,
+    spec: SchemaFieldSpec,
+) -> None:
+    if spec.drift_classification is None:
+        snapshot.nodes[key].properties.setdefault("drift_classification", None)
+    snapshot.add_relation(
+        project, "HAS_SCHEMA_FIELD", surface, provenance="schema_fields"
+    )
+    snapshot.add_relation(
+        storage_key, "HAS_SCHEMA_FIELD", surface, provenance="schema_fields"
+    )
+    if spec.contract_ref is not None:
+        contract_key = NodeKey("contract_surface", spec.contract_ref)
+        if contract_key in snapshot.nodes:
+            snapshot.add_relation(
+                contract_key, "HAS_SCHEMA_FIELD", surface, provenance="schema_fields"
+            )

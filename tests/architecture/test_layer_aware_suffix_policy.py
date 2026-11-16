@@ -534,8 +534,15 @@ def test_composite_alias_family_is_frozen_to_owner_modules_only() -> None:
     family_rules = {rule.rule_id: rule for rule in policy.family_freeze_rules}
     rule = family_rules["composite_canonical_alias_family"]
 
-    allowed = {(item.symbol, item.path) for item in rule.allowed_symbols}
-    assert allowed == {
+    temporary = {(item.symbol, item.path) for item in rule.allowed_symbols}
+    canonical = {(item.symbol, item.path) for item in rule.canonical_symbols}
+    assert canonical == {
+        (
+            "CompositePipelineRunner",
+            "src/bioetl/application/composite/runner_pkg/runner.py",
+        ),
+    }
+    assert temporary | canonical == {
         (
             "CompositeCheckpointService",
             "src/bioetl/application/composite/checkpoint/service.py",
@@ -549,6 +556,167 @@ def test_composite_alias_family_is_frozen_to_owner_modules_only() -> None:
             "src/bioetl/application/composite/preflight_validator.py",
         ),
     }
+    assert temporary.isdisjoint(canonical)
+
+
+def test_family_freeze_rejects_unknown_canonical_family() -> None:
+    """A misspelled reference must fail instead of disabling the freeze rule."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    with pytest.raises(ValueError, match="references unknown canonical family unknown"):
+        module._family_freeze_rule_from_config(
+            {
+                "rule_id": "reviewed_composite",
+                "description": "Only the registered composite owner is canonical.",
+                "include_path_prefixes": ["src/bioetl/application/composite/"],
+                "match_regex": "^CompositePipelineRunner$",
+                "canonical_family_id": "unknown",
+            },
+            canonical_family_registry=policy.canonical_family_registry,
+        )
+
+
+@pytest.mark.parametrize(
+    ("prefix", "pattern"),
+    [
+        ("src/bioetl/domain/", "^CompositePipelineRunner$"),
+        ("src/bioetl/application/composite/", "^UnregisteredRunner$"),
+    ],
+    ids=["outside-family-path", "outside-family-name"],
+)
+def test_family_freeze_rejects_canonical_reference_without_matching_owner(
+    prefix: str, pattern: str
+) -> None:
+    """A reference cannot grant an allowance outside its reviewed name and scope."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    with pytest.raises(ValueError, match="no matching registered symbols"):
+        module._family_freeze_rule_from_config(
+            {
+                "rule_id": "reviewed_composite",
+                "description": "Only the registered composite owner is canonical.",
+                "include_path_prefixes": [prefix],
+                "match_regex": pattern,
+                "canonical_family_id": "composite_execution",
+            },
+            canonical_family_registry=policy.canonical_family_registry,
+        )
+
+
+@pytest.mark.parametrize(
+    ("relative_path", "registered"),
+    [
+        ("src/bioetl/application/composite/runner_pkg/runner.py", True),
+        ("src/bioetl/application/composite/runner_pkg/unregistered.py", False),
+    ],
+    ids=["canonical-owner", "same-name-wrong-owner"],
+)
+def test_composite_runner_registration_is_bound_to_exact_owner(
+    relative_path: str, registered: bool
+) -> None:
+    """The permanent canonical name must not allow a duplicate in another module."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    rule = next(
+        rule
+        for rule in policy.family_freeze_rules
+        if rule.rule_id == "composite_canonical_alias_family"
+    )
+    violation = module._family_freeze_rule_violation(
+        relative_path=relative_path,
+        symbol_name="CompositePipelineRunner",
+        lineno=7,
+        symbol_kind="class",
+        rule=rule,
+    )
+    if registered:
+        assert violation is None
+    else:
+        assert violation is not None
+        assert violation.location == f"{relative_path}:7"
+        assert "not registered" in violation.details
+
+
+@pytest.mark.parametrize(
+    ("symbol", "relative_path"),
+    [
+        (
+            "CompositePipelineRunner",
+            "src/bioetl/application/composite/runner_pkg/runner.py",
+        ),
+        (
+            "CompositeCheckpointService",
+            "src/bioetl/application/composite/checkpoint/service.py",
+        ),
+    ],
+    ids=["canonical-also-temporary", "only-temporary"],
+)
+def test_canonical_reference_does_not_bypass_temporary_expiry(
+    symbol: str, relative_path: str
+) -> None:
+    """Expired temporary entries remain invalid even beside a canonical reference."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    rule = module._family_freeze_rule_from_config(
+        {
+            "rule_id": "reviewed_composite",
+            "description": "Temporary exceptions still need valid metadata.",
+            "include_path_prefixes": ["src/bioetl/application/composite/"],
+            "match_regex": "^Composite(?:PipelineRunner|CheckpointService)$",
+            "canonical_family_id": "composite_execution",
+            "allowed_symbols": [
+                {
+                    "symbol": symbol,
+                    "path": relative_path,
+                    "issue": "#3443",
+                    "owner": "@bioetl-architecture",
+                    "expires_on": "2000-01-01",
+                    "removal_step": "Remove the temporary exception.",
+                    "reason": "Expired fixture; never a permanent allowance.",
+                }
+            ],
+        },
+        canonical_family_registry=policy.canonical_family_registry,
+    )
+    assert rule is not None
+    with pytest.raises(ValueError, match="has stale expires_on=2000-01-01"):
+        module._validate_loaded_suffix_rule_metadata(
+            function_rules=[], suffix_rules=[], family_rules=[rule]
+        )
+
+
+def test_family_freeze_does_not_promote_compatibility_symbol_to_canonical() -> None:
+    """Compatibility names cannot acquire permanent canonical status via a reference."""
+    module = _load_gate_module()
+    registry = (
+        module.CanonicalFamilyRegistryEntry(
+            family_id="composite_execution",
+            canonical_symbols=(
+                module.CanonicalFamilySymbol(
+                    symbol="MergeService",
+                    path="src/bioetl/application/composite/merger.py",
+                ),
+            ),
+            compatibility_symbols=(
+                module.CanonicalFamilySymbol(
+                    symbol="CompositePipelineRunner",
+                    path="src/bioetl/application/composite/runner_pkg/runner.py",
+                    reason="Compatibility fixture, not a canonical registration.",
+                ),
+            ),
+        ),
+    )
+    with pytest.raises(ValueError, match="no matching registered symbols"):
+        module._family_freeze_rule_from_config(
+            {
+                "rule_id": "reviewed_composite",
+                "description": "Compatibility members cannot grant canonical status.",
+                "include_path_prefixes": ["src/bioetl/application/composite/"],
+                "match_regex": "^CompositePipelineRunner$",
+                "canonical_family_id": "composite_execution",
+            },
+            canonical_family_registry=registry,
+        )
 
 
 def test_provider_connector_adapter_family_is_owned_by_adapter_modules_only() -> None:

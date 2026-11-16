@@ -81,6 +81,19 @@ class _ManifestCopy(TypedDict):
     byte_count: int
 
 
+def _cohort_source_rows(
+    content: bytes, source: str, profile: SourceImport | None
+) -> tuple[RawTargetRow, ...]:
+    """Convert only already verified bytes using the owner-selected profile."""
+    if profile is None:
+        return read_legacy_batch(content)
+    if profile.format_version == "chembl_target_csv_v1":
+        return read_chembl_target_csv_v1(
+            content, source_path=source, target_kind=profile.target_kind
+        )
+    raise ValueError(f"unsupported Stage-0 source import profile: {source}")
+
+
 def _load_verified_copies(
     root: Path,
     copies: list[_ManifestCopy],
@@ -104,18 +117,31 @@ def _load_verified_copies(
         if digest != entry["sha256"] or len(content) != entry["byte_count"]:
             raise ValueError(f"cohort source bytes differ from manifest: {source}")
         profile = imports.get(source)
-        if profile is None:
-            rows.extend(read_legacy_batch(content))
-        elif profile.format_version == "chembl_target_csv_v1":
-            rows.extend(
-                read_chembl_target_csv_v1(
-                    content, source_path=source, target_kind=profile.target_kind
-                )
-            )
-        else:
-            raise ValueError(f"unsupported Stage-0 source import profile: {source}")
+        rows.extend(_cohort_source_rows(content, source, profile))
         hashes.append((source, digest))
     return rows, hashes
+
+
+def _require_cohort_plan(plan: VolumePlan) -> None:
+    """Require the approved execution scope before reading proof artifacts."""
+    if (
+        not plan.approval_reference.strip()
+        or not plan.environment.strip()
+        or plan.expected_rows <= 0
+    ):
+        raise ValueError(
+            "approved cohort, environment and expected count must be pinned"
+        )
+
+
+def _cohort_source_profiles(plan: VolumePlan) -> dict[str, SourceImport]:
+    """Reject ambiguous or unselected conversion profiles after proof checks."""
+    imports = {profile.source_path: profile for profile in plan.source_imports}
+    if len(imports) != len(plan.source_imports) or set(imports) - set(
+        plan.selected_source_paths
+    ):
+        raise ValueError("duplicate or unselected Stage-0 source import profile")
+    return imports
 
 
 def load_admitted_cohort(manifest_path: Path, plan: VolumePlan) -> AdmittedCohort:
@@ -129,21 +155,10 @@ def load_admitted_cohort(manifest_path: Path, plan: VolumePlan) -> AdmittedCohor
     copies = manifest.get("copies")
     if not copies or not plan.selected_source_paths:
         raise ValueError("Stage-0 cohort has no admitted source copies")
-    if (
-        not plan.approval_reference.strip()
-        or not plan.environment.strip()
-        or plan.expected_rows <= 0
-    ):
-        raise ValueError(
-            "approved cohort, environment and expected count must be pinned"
-        )
+    _require_cohort_plan(plan)
     root = manifest_path.parent
     _verified_artifacts(manifest, root)
-    imports = {profile.source_path: profile for profile in plan.source_imports}
-    if len(imports) != len(plan.source_imports) or set(imports) - set(
-        plan.selected_source_paths
-    ):
-        raise ValueError("duplicate or unselected Stage-0 source import profile")
+    imports = _cohort_source_profiles(plan)
     rows, hashes = _load_verified_copies(
         root, copies, plan.selected_source_paths, imports
     )

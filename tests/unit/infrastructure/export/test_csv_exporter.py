@@ -1488,3 +1488,48 @@ async def test_decimal_float_batches_preserve_original_digits(
     assert [row["value"] for row in rows] == [
         "'" + item if item.startswith("-") else item for item in expected
     ]
+
+
+@pytest.mark.parametrize(
+    "escaped_sidecar", [False, True], ids=["published", "raw-sidecar"]
+)
+@pytest.mark.unit
+def test_resolved_export_symlink_boundary_rejects_external_target(
+    tmp_path: Path,
+    mock_logger: MagicMock,
+    monkeypatch: pytest.MonkeyPatch,
+    escaped_sidecar: bool,
+) -> None:
+    """Reject either resolved target before export can touch an external file."""
+    export_root = tmp_path / "exports"
+    export_root.mkdir()
+    external = tmp_path / "external.csv"
+    external.write_bytes(b"id;value\n1;original\n")
+    candidate = export_root / ("table.csv.raw" if escaped_sidecar else "table.csv")
+    original_resolve = Path.resolve
+
+    def resolve_candidate(path: Path, *args, **kwargs) -> Path:
+        if path == candidate:
+            return external
+        return original_resolve(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "resolve", resolve_candidate)
+    exporter = CsvExporter(str(export_root), mock_logger)
+    expected = (
+        "CSV raw sidecar path escapes" if escaped_sidecar else "CSV export path escapes"
+    )
+    with pytest.raises(ValueError, match=expected):
+        exporter._resolve_table_export_paths("table")
+    assert external.read_bytes() == b"id;value\n1;original\n"
+    assert list(export_root.iterdir()) == []
+
+
+@pytest.mark.unit
+def test_legacy_raw_csv_reader_preserves_delimiter_and_values(tmp_path: Path) -> None:
+    """Old plain CSV sidecars remain readable without an Arrow stream header."""
+    raw = tmp_path / "legacy.csv.raw"
+    payload = b'id;value\n1;"alpha;beta"\n2;gamma\n'
+    raw.write_bytes(payload)
+    actual = read_raw_table(raw, delimiter=";")
+    assert actual.to_pydict() == {"id": [1, 2], "value": ["alpha;beta", "gamma"]}
+    assert raw.read_bytes() == payload
