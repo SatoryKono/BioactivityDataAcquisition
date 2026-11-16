@@ -1,6 +1,6 @@
 ---
 name: "py-doc-bot"
-description: "Execute the BioETL py-doc-bot profile for documentation updates, drift remediation, focused or broad documentation audits, runtime mirror sync, and validation."
+description: "Update or audit BioETL documentation and runtime mirrors after a known change. For a code defect use py-debug-bot."
 ---
 
 # py-doc-bot

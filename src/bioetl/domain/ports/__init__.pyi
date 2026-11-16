@@ -364,6 +364,12 @@ from bioetl.domain.ports.storage import (
 from bioetl.domain.ports.storage import (
     coerce_silver_write_request as coerce_silver_write_request,
 )
+from bioetl.domain.ports.target_classification import (
+    TargetClassificationEvidencePort as TargetClassificationEvidencePort,
+)
+from bioetl.domain.ports.target_classification import (
+    TargetClassificationPort as TargetClassificationPort,
+)
 from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
     ForeignKeyReconciliationLayer as ForeignKeyReconciliationLayer,
 )

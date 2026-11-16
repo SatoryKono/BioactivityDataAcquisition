@@ -27,6 +27,9 @@ from bioetl.application.services.export_lineage.debug_export_service import (
     DebugExportService,
 )
 from bioetl.infrastructure.export.debug_export_adapter import DebugExportAdapter
+from bioetl.domain.normalization.profiles.chembl_target_classification import (
+    target_v31_normalization_profile,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_writer import BatchWriteStorageProtocol
@@ -70,6 +73,13 @@ def create_batch_processing_components(
         RecordNormalizationProcessor(
             provider=config.provider,
             entity_type=config.entity_type,
+            profile=(
+                target_v31_normalization_profile()
+                if config.pipeline_name == "chembl_target"
+                and config.content_hash_policy_by_version is not None
+                and config.content_hash_policy_by_version.active_version == "3.1.0"
+                else None
+            ),
             rule_set=config.normalization_rule_set,
             allow_compatibility_fallback=config.allow_compatibility_fallback,
             content_hash_include_fields=config.content_hash_include_fields,

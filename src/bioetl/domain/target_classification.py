@@ -26,7 +26,9 @@ class TargetClassificationInput:
         object.__setattr__(
             self,
             "business_data",
-            MappingProxyType({key: _freeze(value) for key, value in self.business_data.items()}),
+            MappingProxyType(
+                {key: _freeze(value) for key, value in self.business_data.items()}
+            ),
         )
 
 

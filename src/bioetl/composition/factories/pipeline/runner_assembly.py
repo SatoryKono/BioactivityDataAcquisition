@@ -201,6 +201,15 @@ def assemble_runner_impl(
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
     """Assemble the fully wired PipelineRunner for one configured pipeline."""
+    if pipeline.config.pipeline_name == "chembl_target" and yaml_config is not None:
+        from bioetl.infrastructure.config.target_classification_profile import (
+            resolve_target_classification_profile,
+        )
+
+        target_profile = resolve_target_classification_profile(yaml_config)
+        yaml_config = target_profile.resolved_yaml_config
+        silver_schema = target_profile.silver_schema
+        gold_schema = target_profile.gold_schema
     assembly_context = _RunnerAssemblyContext(
         pipeline=pipeline,
         observability=observability,

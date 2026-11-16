@@ -2,17 +2,30 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
 from datetime import datetime
 from functools import partial
+from typing import cast
 
 from bioetl.application.services.control_plane.workflow.ledger_service import (
     WorkflowLedgerService,
 )
+from bioetl.application.services.control_plane.workflow.manifest_service import (
+    WorkflowManifestService,
+)
 from bioetl.application.services.run_reports.observations import (
     bind_run_observations,
     reset_run_observations,
+)
+from bioetl.application.services.target_classification_scope import (
+    TARGET_CLASSIFICATION_DEPENDENCY_KEY,
+    bind_target_classification_dependency,
+    reset_target_classification_dependency,
+)
+from bioetl.application.services.workflow.control_plane._execution_resume_support import (
+    load_resume_manifest,
+    load_resume_state,
 )
 from bioetl.application.services.workflow.control_plane.execution_incremental_metadata import (
     extract_incremental_metadata,
@@ -75,6 +88,9 @@ class WorkflowExecutionService:
         default_factory=lambda: _missing_now_factory
     )
     run_id_factory: Callable[[], RunID] = _missing_run_id_factory
+    dependency_preflight: (
+        Callable[[WorkflowConfig, dict[str, object]], dict[str, object]] | None
+    ) = None
 
     async def run_workflow(
         self,
@@ -108,8 +124,27 @@ class WorkflowExecutionService:
         # RF-004: one observation scope through prepare (create_manifest register)
         # → runner finalize/report so registration soft-failures are not dropped.
         observation_token = bind_run_observations()
+        dependency_token = None
         try:
             try:
+                _restore_workflow_target_dependency(
+                    service=self,
+                    config=config,
+                    launch_context=resolved_launch_context,
+                    resume_requested=bool(
+                        resume_last or resume_manifest_id or resume_run_id
+                    ),
+                )
+                if self.dependency_preflight is not None:
+                    resolved_launch_context.update(
+                        self.dependency_preflight(config, resolved_launch_context)
+                    )
+                binding = resolved_launch_context.get(
+                    TARGET_CLASSIFICATION_DEPENDENCY_KEY
+                )
+                dependency_token = bind_target_classification_dependency(
+                    binding if isinstance(binding, dict) else None
+                )
                 prepared = prepare_workflow_execution(
                     config=config,
                     launch_context=resolved_launch_context,
@@ -148,6 +183,8 @@ class WorkflowExecutionService:
                     incremental=incremental,
                 )
             finally:
+                if dependency_token is not None:
+                    reset_target_classification_dependency(dependency_token)
                 reset_run_observations(observation_token)
         finally:
             await self.workflow_lock_port.release(
@@ -159,6 +196,47 @@ class WorkflowExecutionService:
     def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:
         """Record planned pipeline scopes for workflow-backed selectors."""
         self.workflow_runner.record_expected_pipeline_metrics(config)
+
+
+def _restore_workflow_target_dependency(
+    *,
+    service: WorkflowExecutionService,
+    config: WorkflowConfig,
+    launch_context: dict[str, object],
+    resume_requested: bool,
+) -> None:
+    """Restore a pinned dependency before calculating the resume fingerprint."""
+    if not resume_requested or service.dependency_preflight is None:
+        return
+    state = load_resume_state(
+        workflow_state_port=service.workflow_state_port,
+        workflow_name=config.name,
+        resume_manifest_id=(
+            str(launch_context["resume_manifest_id"])
+            if launch_context.get("resume_manifest_id")
+            else None
+        ),
+        resume_run_id=(
+            str(launch_context["resume_run_id"])
+            if launch_context.get("resume_run_id")
+            else None
+        ),
+    )
+    manifest = load_resume_manifest(
+        manifest_service=cast(WorkflowManifestService, service.manifest_service),
+        latest_state=state,
+    )
+    stored_launch_context = manifest.to_dict()["launch_context"]
+    if not isinstance(stored_launch_context, Mapping):
+        raise ValueError("stored workflow launch context is not a mapping")
+    stored = stored_launch_context.get(TARGET_CLASSIFICATION_DEPENDENCY_KEY)
+    supplied = launch_context.get(TARGET_CLASSIFICATION_DEPENDENCY_KEY)
+    if supplied is not None and supplied != stored:
+        raise ValueError(
+            "resume cannot replace the pinned target classification dependency"
+        )
+    if stored is not None:
+        launch_context[TARGET_CLASSIFICATION_DEPENDENCY_KEY] = stored
 
 
 def _resolve_launch_context(

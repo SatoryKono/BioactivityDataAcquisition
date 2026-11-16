@@ -116,8 +116,24 @@ def _load_runner_yaml_config(
     pipeline_name: str,
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig],
     validate_pk_contract_fn: Callable[[PipelineYamlConfig], None],
+    ctx: PipelineRunContext | None = None,
+    settings: Settings | None = None,
 ) -> PipelineYamlConfig:
     yaml_config = load_pipeline_config_fn(pipeline_name)
+    if pipeline_name == "chembl_target":
+        from bioetl.composition.target_classification import (
+            resolve_target_runtime_config,
+        )
+        from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
+            restore_target_replay_config,
+        )
+
+        if ctx is not None and settings is not None:
+            yaml_config = restore_target_replay_config(
+                ctx=ctx, settings=settings, current_config=yaml_config
+            )
+
+        yaml_config = resolve_target_runtime_config(yaml_config)
     validate_pk_contract_fn(yaml_config)
     return yaml_config
 
@@ -172,6 +188,8 @@ def prepare_runner_context(
         pipeline_name=ctx.pipeline_name,
         load_pipeline_config_fn=load_pipeline_config_fn,
         validate_pk_contract_fn=validate_pk_contract_fn,
+        ctx=effective_ctx,
+        settings=settings,
     )
     observability = _build_runner_observability(
         ctx=effective_ctx,

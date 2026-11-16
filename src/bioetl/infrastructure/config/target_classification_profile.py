@@ -96,7 +96,10 @@ def _enrich_yaml_config(yaml_config: PipelineYamlConfig) -> PipelineYamlConfig:
         update={
             "content_hash_policy": resolved_policy,
             "content_hash": yaml_config.content_hash.model_copy(
-                update={"include": list(include)}
+                update={
+                    "include": list(include),
+                    "exclude": list(policy.exclude_fields),
+                }
             ),
             "column_groups": groups,
             "data_schema": _extend_data_schema(yaml_config.data_schema),

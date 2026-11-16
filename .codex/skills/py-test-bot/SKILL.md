@@ -1,6 +1,6 @@
 ---
 name: "py-test-bot"
-description: "Execute the BioETL py-test-bot profile for focused or broad test planning, failure classification, flaky-test triage, and coverage or regression validation."
+description: "Write, triage, or stabilize BioETL tests, including flakes and coverage gaps. For the root cause of a product bug use py-debug-bot."
 ---
 
 # py-test-bot

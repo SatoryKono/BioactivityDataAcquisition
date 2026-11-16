@@ -16,6 +16,10 @@ from typing import Any
 from urllib.parse import urlunsplit
 
 from bioetl.domain.contracts import gold as gold_contracts
+from bioetl.domain.contracts.gold.chembl_target_classification import (
+    ChEMBLTargetGoldSchemaV31,
+    target_v31_schema_hash,
+)
 from bioetl.domain.normalization.profiles import (
     resolve_normalization_profile_identity,
 )
@@ -239,6 +243,13 @@ def _expected_artifacts() -> dict[Path, str]:
         artifacts[output_path] = (
             json.dumps(current_contract, indent=2, ensure_ascii=False) + "\n"
         )
+
+    # The active V30 export remains byte-for-byte stable while V31 is opt-in.
+    target_v31 = _build_contract(ChEMBLTargetGoldSchemaV31, "chembl_target", "3.1.0")
+    target_v31["x-bioetl-schema-sha256"] = target_v31_schema_hash()
+    artifacts[CONTRACTS_DIR / "chembl_target_v3.1.json"] = (
+        json.dumps(target_v31, indent=2, ensure_ascii=False) + "\n"
+    )
 
     return artifacts
 

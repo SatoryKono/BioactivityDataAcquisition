@@ -110,6 +110,26 @@ class RunContextFactory:
             entity=entity,
             strict=strict_contract_identity,
         )
+        if self.pipeline_name == "chembl_target":
+            from bioetl.composition.target_classification import (
+                target_classification_contract_schema_identity,
+                target_classification_normalization_identity,
+            )
+
+            target_identity = target_classification_contract_schema_identity(
+                yaml_config
+            )
+            if target_identity is not None:
+                normalization = target_classification_normalization_identity(
+                    yaml_config
+                )
+                assert normalization is not None
+                contract_identity = (
+                    contract_identity[0],
+                    *target_identity,
+                    *contract_identity[3:5],
+                    *normalization,
+                )
         resolved_hash = (
             self.config_hash_getter(yaml_config)
             if resolved_config_hash is None

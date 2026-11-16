@@ -111,6 +111,10 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "PublicationMetadataStrategy",
     ),
     "bioetl.domain.ports.protein_classification": ("ProteinClassificationPort",),
+    "bioetl.domain.ports.target_classification": (
+        "TargetClassificationPort",
+        "TargetClassificationEvidencePort",
+    ),
     "bioetl.domain.ports.quality": (
         "BronzeDQAnalyzerPort",
         "BronzeDQConfigPort",

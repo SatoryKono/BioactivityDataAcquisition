@@ -1,6 +1,6 @@
 ---
 name: research-workflow
-description: "Use for structured research, deep investigation, traceable evidence, and multi-stream synthesis with explicit decisions and constrained specifications. Single router: select work via --phase initialize|evidence|synthesis|decisions|specs|complete; phase bodies live in references/phases/."
+description: "Run structured BioETL research with evidence, decisions, and specs in one phase router. For a code change plan use py-plan-bot."
 ---
 
 # Research Workflow (router)

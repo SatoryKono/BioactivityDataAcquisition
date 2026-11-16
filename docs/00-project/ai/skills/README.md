@@ -68,20 +68,18 @@ gate. Use `--sync` to regenerate only `local/`; it does not rewrite
 - `local/` — published mirror for repository-local skills
 - `global/` — entrypoint README only; no skill snapshots currently committed
 - `_references/` — reference bundles overlaid into local mirror
-- `SKILLS-CATALOG.md` — consolidated skill registry
-- `SKILLS-PRACTICAL-INDEX.md` — operational index with practical usage guidance and a recommended top-15 for BioETL
+- `SKILLS-CATALOG.md` — consolidated skill registry of the 14 live skills, plus a retired-name map
+- `SKILLS-PRACTICAL-INDEX.md` — operational index of those 14 live skills
 
-## Current Runtime Status (2026-07-10)
+## Current Runtime Status (2026-11-16)
 
 - The active project-local Codex skills under `.codex/skills/` are
-  `agent-debugging`, `coderabbit-audit`, `new-pipeline`,
-  `observability-dashboard`, `observability-prometheus`, `py-audit-bot`,
-  `py-config-bot`, `py-debug-bot`, `py-doc-bot`, `py-plan-bot`, `py-test-bot`,
-  `research-workflow`, `technical-designer-mermaid`, `vcr-record`, and
-  `verify-architecture` (historical `documentation-cascade-audit`,
-  `nci-analysis`, and `py-code-bot` names were removed).
-- Evidence/decision helper skills are active when present in `.codex/skills/`
-  and share common reference contracts instead of redefining the same workflow.
+  `agent-debugging`, `new-pipeline`, `observability-dashboard`,
+  `observability-prometheus`, `py-audit-bot`, `py-config-bot`, `py-debug-bot`,
+  `py-doc-bot`, `py-plan-bot`, `py-test-bot`, `research-workflow`,
+  `technical-designer-mermaid`, `vcr-record`, and `verify-architecture`.
+- `coderabbit-audit` is a Devin-only skill. Evidence and decision phases are
+  modes of `research-workflow`, not separate skills.
 - Every active project skill is expected to provide `agents/openai.yaml`
   metadata and pass the Codex skill architecture gate.
 

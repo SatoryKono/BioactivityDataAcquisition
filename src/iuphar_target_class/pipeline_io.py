@@ -16,6 +16,89 @@ from .models import RawTargetRow, RunProvenance
 from .pipeline import BatchResult, IndexedSnapshot, RowResult, classify_batch
 from .stage0.io import canonical_json_bytes
 
+BIOETL_TARGET_KERNEL_CSV_V1 = "bioetl_target_kernel_csv_v1"
+_BIOETL_KERNEL_COLUMNS = frozenset(
+    {
+        "input_row_id",
+        "target_kind",
+        "target_chembl_id",
+        "target_id",
+        "uniprot",
+        "organism",
+        "name",
+    }
+)
+_IMPORT_PROVENANCE_COLUMNS = frozenset(
+    {"import_profile", "source_path", "source_sha256", "source_record"}
+)
+
+
+def read_bioetl_target_kernel_csv_v1(
+    content: bytes, *, source_path: str, target_kind: str
+) -> tuple[RawTargetRow, ...]:
+    """Read explicit kernel fields with canonical TaxID text, without guessing.
+
+    This profile keeps ChEMBL and provider identity separate. Species names,
+    padded TaxIDs and unknown sentinels must be converted by a source-owned
+    producer before this boundary; blank taxonomy remains explicitly missing.
+    """
+    if not source_path.strip() or target_kind not in {"protein", "complex"}:
+        raise ValueError("canonical CSV import requires a source and explicit target kind")
+    reader = csv.DictReader(
+        io.StringIO(content.decode("utf-8-sig"), newline=""), strict=True
+    )
+    headers = reader.fieldnames or []
+    _require_bioetl_kernel_header(headers)
+    digest = hashlib.sha256(content).hexdigest()
+    rows = tuple(
+        _bioetl_kernel_row(raw, record, source_path, target_kind, digest)
+        for record, raw in enumerate(reader, 1)
+    )
+    if len({row.input_row_id for row in rows}) != len(rows):
+        raise ValueError("duplicate canonical CSV input_row_id")
+    return rows
+
+
+def _require_bioetl_kernel_header(headers: list[str]) -> None:
+    if (
+        len(headers) != len(set(headers))
+        or not _BIOETL_KERNEL_COLUMNS.issubset(headers)
+        or bool(_IMPORT_PROVENANCE_COLUMNS.intersection(headers))
+        or any(not header.strip() for header in headers)
+    ):
+        raise ValueError("invalid bioetl_target_kernel_csv_v1 header")
+
+
+def _bioetl_kernel_row(
+    raw: dict[str, str],
+    record: int,
+    source_path: str,
+    target_kind: str,
+    digest: str,
+) -> RawTargetRow:
+    if None in raw or any(value is None for value in raw.values()):
+        raise ValueError("invalid CSV row width")
+    identity = raw["input_row_id"]
+    if not identity.strip() or any(mark in identity for mark in ("/", "\n", "\r")):
+        raise ValueError("invalid canonical CSV input_row_id")
+    if raw["target_kind"] != target_kind:
+        raise ValueError("canonical CSV target_kind differs from selected profile")
+    taxon = raw["organism"]
+    if taxon and re.fullmatch(r"[1-9][0-9]*", taxon) is None:
+        raise ValueError("canonical CSV organism must be a positive ASCII TaxID or blank")
+    fields = {
+        key: value
+        for key, value in raw.items()
+        if key not in {"input_row_id", "target_kind"}
+    }
+    fields.update(
+        import_profile=BIOETL_TARGET_KERNEL_CSV_V1,
+        source_path=source_path,
+        source_sha256=digest,
+        source_record=str(record),
+    )
+    return RawTargetRow(identity, fields, target_kind)
+
 
 def read_legacy_batch(content: bytes) -> tuple[RawTargetRow, ...]:
     """Decode a CSV, retaining original legacy class only as a source field."""

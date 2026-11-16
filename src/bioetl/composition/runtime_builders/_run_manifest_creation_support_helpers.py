@@ -86,7 +86,7 @@ def build_manifest_source_refs(
     entity: str,
     required_persistence_profile: str,
 ) -> tuple[RunSourceRef, ...]:
-    return build_run_source_refs(
+    refs = build_run_source_refs(
         ctx=ctx,
         cached_bronze=inputs.cached_bronze,
         settings=inputs.settings,
@@ -94,6 +94,13 @@ def build_manifest_source_refs(
         entity=entity,
         required_persistence_profile=required_persistence_profile,
     )
+    if ctx.pipeline_name == "chembl_target":
+        from bioetl.composition.target_classification import (
+            target_classification_source_refs,
+        )
+
+        refs += target_classification_source_refs(inputs.yaml_config)
+    return refs
 
 
 def assemble_manifest_create_spec(

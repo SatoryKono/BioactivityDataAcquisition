@@ -31,7 +31,9 @@ def _optional_text(row: Mapping[str, object], key: str) -> str | None:
 
 def _strings(row: Mapping[str, object], key: str) -> tuple[str, ...]:
     value = row.get(key, [])
-    if not isinstance(value, list) or any(not isinstance(item, str) or not item.strip() for item in value):
+    if not isinstance(value, list) or any(
+        not isinstance(item, str) or not item.strip() for item in value
+    ):
         raise ValueError(f"invalid provider string list: {key}")
     return tuple(dict.fromkeys(item.strip() for item in value))
 

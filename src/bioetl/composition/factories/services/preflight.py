@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from functools import partial
+from pathlib import Path
+from typing import Protocol, runtime_checkable
+
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.preflight import (
     HealthAggregator,
@@ -13,6 +17,15 @@ from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import HealthMonitorPort, LoggerPort
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.time import SystemClock
+from bioetl.composition.target_classification import validate_target_runtime_dependency
+from bioetl.infrastructure.storage.target_classification_guard import (
+    assert_target_table_compatibility,
+)
+
+
+@runtime_checkable
+class _TablePathResolver(Protocol):
+    def _resolve_table_path(self, table_name: str) -> str: ...
 
 
 def build_preflight_service(
@@ -42,6 +55,34 @@ def build_preflight_service(
         layer_config=_build_preflight_layer_config(
             pipeline.services.storage, yaml_config
         ),
+        dependency_validator=(
+            partial(_validate_target_dependencies, pipeline, yaml_config)
+            if yaml_config is not None
+            and pipeline.config.pipeline_name == "chembl_target"
+            else None
+        ),
+    )
+
+
+def _validate_target_dependencies(
+    pipeline: BasePipeline, config: PipelineYamlConfig
+) -> None:
+    validate_target_runtime_dependency(config)
+    storage = pipeline.services.storage
+    silver = getattr(storage, "silver", None)
+    gold = getattr(storage, "gold", None)
+    if not isinstance(silver, _TablePathResolver) or not isinstance(
+        gold, _TablePathResolver
+    ):
+        raise TypeError(
+            "target preflight requires actual Silver and Gold table path resolvers"
+        )
+    assert_target_table_compatibility(
+        silver_path=Path(
+            silver._resolve_table_path(pipeline.config.effective_silver_table)
+        ),
+        gold_path=Path(gold._resolve_table_path(pipeline.config.effective_gold_table)),
+        mode=config.target_classification.mode,
     )
 
 

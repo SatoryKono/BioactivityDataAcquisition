@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, TypedDict
 
 from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
@@ -125,6 +125,28 @@ def resolve_manifest_publication_context(
                 ),
             ),
         )
+    if ctx.pipeline_name == "chembl_target":
+        from bioetl.composition.target_classification import (
+            target_classification_contract_schema_identity,
+            target_classification_normalization_identity,
+        )
+
+        target_identity = target_classification_contract_schema_identity(
+            inputs.yaml_config
+        )
+        if target_identity is not None:
+            normalization = target_classification_normalization_identity(
+                inputs.yaml_config
+            )
+            assert normalization is not None
+            contract_identity = replace(
+                contract_identity,
+                contract_version=target_identity[0],
+                contract_schema_hash=target_identity[1],
+                normalization_profile_ref=normalization[0],
+                normalization_profile_version=normalization[1],
+                normalization_profile_hash=normalization[2],
+            )
     return ResolvedManifestPublicationContext(
         provider=provider,
         entity=entity,
@@ -163,6 +185,28 @@ def ensure_manifest_publication_identity(
                 ),
             ),
         )
+    if ctx.pipeline_name == "chembl_target":
+        from bioetl.composition.target_classification import (
+            target_classification_contract_schema_identity,
+            target_classification_normalization_identity,
+        )
+
+        target_identity = target_classification_contract_schema_identity(
+            inputs.yaml_config
+        )
+        if target_identity is not None:
+            normalization = target_classification_normalization_identity(
+                inputs.yaml_config
+            )
+            assert normalization is not None
+            contract_identity = replace(
+                contract_identity,
+                contract_version=target_identity[0],
+                contract_schema_hash=target_identity[1],
+                normalization_profile_ref=normalization[0],
+                normalization_profile_version=normalization[1],
+                normalization_profile_hash=normalization[2],
+            )
     return reproducibility_context, contract_identity
 
 

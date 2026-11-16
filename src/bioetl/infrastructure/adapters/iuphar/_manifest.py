@@ -69,5 +69,6 @@ def text(document: Mapping[str, object], key: str) -> str:
 
 
 def header(document: Mapping[str, object], artifact: str) -> None:
-    if document.get("artifact") != artifact or document.get("schema_version") != 1:
+    version = document.get("schema_version")
+    if document.get("artifact") != artifact or type(version) is not int or version != 1:
         raise ValueError("unsupported IUPHAR artifact schema")

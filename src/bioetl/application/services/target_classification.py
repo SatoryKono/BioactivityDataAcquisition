@@ -63,7 +63,9 @@ class TargetClassificationSession:
         self.evidence.publish_result(result, run_id=key[0], batch_id=key[1])
         self._published.setdefault(key[0], set()).add(result.input_row_id)
 
-    def finalize(self, context: PipelineContext) -> TargetClassificationArtifactReference:
+    def finalize(
+        self, context: PipelineContext
+    ) -> TargetClassificationArtifactReference:
         """Complete evidence only after the runner has completed all data writes."""
         run_id = str(context.run_id)
         expected = tuple(sorted(self._published.get(run_id, set())))

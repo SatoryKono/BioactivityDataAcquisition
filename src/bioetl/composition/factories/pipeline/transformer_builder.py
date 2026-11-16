@@ -15,12 +15,19 @@ from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
 )
+from bioetl.infrastructure.config.target_classification_profile import (
+    resolve_target_classification_profile,
+)
+from bioetl.infrastructure.schemas.pipeline_contract_policy import (
+    PipelineContractPolicy,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.core.wiring.transformer import BaseTransformer
     from bioetl.domain.config import PipelineConfig
     from bioetl.domain.ports import ContractPolicyProtocol, MetricsPort, TracingPort
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+    from bioetl.infrastructure.config.settings_api import Settings
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,10 +49,31 @@ class TransformerBuilder:
         pandera_silver_schema: object | None,
         tracer: TracingPort | None,
         metrics: MetricsPort | None,
+        settings: Settings | None = None,
     ) -> BaseTransformer | None:
         """Build transformer instance or return ``None`` when class is absent."""
         if transformer_class is None:
             return None
+
+        entity_type = self.entity_type_extractor(self.pipeline_name)
+        contract_policy = self._load_contract_policy(entity_type)
+        target_profile = None
+        if self.pipeline_name == "chembl_target":
+            target_profile = resolve_target_classification_profile(
+                yaml_config,
+                contract_policy
+                if isinstance(contract_policy, PipelineContractPolicy)
+                else None,
+            )
+            yaml_config = target_profile.resolved_yaml_config
+            contract_policy = target_profile.contract_policy
+            pandera_silver_schema = target_profile.pandera_silver_schema
+            if target_profile.config.mode == "enrich":
+                from bioetl.application.pipelines.chembl.target_classified_transformer import (
+                    TargetClassifiedTransformer,
+                )
+
+                transformer_class = TargetClassifiedTransformer
 
         authoritative_hash_policy = yaml_config.content_hash_policy
         identity_service = EntityIdentityGenerator(
@@ -60,8 +88,6 @@ class TransformerBuilder:
                 else set(yaml_config.content_hash.exclude)
             ),
         )
-        entity_type = self.entity_type_extractor(self.pipeline_name)
-        contract_policy = self._load_contract_policy(entity_type)
         structural_policy = build_structural_policy(
             domain_config=domain_config,
             pandera_silver_schema=pandera_silver_schema,
@@ -73,7 +99,7 @@ class TransformerBuilder:
             contract_policy=contract_policy,
             structural_policy=structural_policy,
         )
-        return transformer_class(
+        transformer = transformer_class(
             provider=self.provider,
             entity_type=entity_type,
             silver_filters=domain_config.silver_filters,
@@ -81,6 +107,23 @@ class TransformerBuilder:
             dependencies=dependencies,
             **publication_vocabulary_kwargs(transformer_class),
         )
+        if target_profile is not None and target_profile.config.enabled:
+            from bioetl.application.pipelines.chembl.target_transformer import (
+                TargetTransformer,
+            )
+            from bioetl.composition.runtime_builders.config_access import get_settings
+            from bioetl.composition.target_classification import (
+                build_target_classification_session,
+            )
+
+            if not isinstance(transformer, TargetTransformer):
+                raise TypeError("target classification requires a TargetTransformer")
+            session = build_target_classification_session(
+                yaml_config, settings or get_settings()
+            )
+            if session is not None:
+                transformer.configure_target_classification(session)
+        return transformer
 
     def _load_contract_policy(
         self, entity_type: str | None

@@ -13,7 +13,12 @@ from typing import TypedDict
 
 from .models import RawTargetRow, RunProvenance
 from .pipeline import BatchResult, IndexedSnapshot, classify_batch
-from .pipeline_io import read_chembl_target_csv_v1, read_legacy_batch
+from .pipeline_io import (
+    BIOETL_TARGET_KERNEL_CSV_V1,
+    read_bioetl_target_kernel_csv_v1,
+    read_chembl_target_csv_v1,
+    read_legacy_batch,
+)
 from .policy import VOLUME_TEST_SECONDS
 from .stage0.io import atomic_write_bytes, canonical_json_bytes
 
@@ -87,6 +92,10 @@ def _cohort_source_rows(
     """Convert only already verified bytes using the owner-selected profile."""
     if profile is None:
         return read_legacy_batch(content)
+    if profile.format_version == BIOETL_TARGET_KERNEL_CSV_V1:
+        return read_bioetl_target_kernel_csv_v1(
+            content, source_path=source, target_kind=profile.target_kind
+        )
     if profile.format_version == "chembl_target_csv_v1":
         return read_chembl_target_csv_v1(
             content, source_path=source, target_kind=profile.target_kind

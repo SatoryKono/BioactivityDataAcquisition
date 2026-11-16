@@ -27,6 +27,11 @@ pytestmark = pytest.mark.architecture
 
 FRONTMATTER_RE = re.compile(r"\A---\n(?P<body>.*?)\n---", re.DOTALL)
 MARKDOWN_LINK_RE = re.compile(r"\[[^\]]+\]\((?P<target>[^)]+)\)")
+NEIGHBOR_SKILL_RE = re.compile(r"use ([a-z0-9-]+)\.$")
+LIVE_SKILL_HEADING = "## Live skills"
+RETIRED_SKILL_HEADING = "## Retired names"
+BACKTICK_SKILL_RE = re.compile(r"`([a-z0-9-]+)`")
+DESCRIPTION_LIMIT = 200
 
 
 def _project_root() -> Path:
@@ -181,3 +186,76 @@ def test_codex_project_skills_do_not_have_user_global_duplicates() -> None:
             "This is a local environment state, not a project code error. "
             "Consider removing or renaming conflicting skills in ~/.codex/skills/."
         )
+
+
+def _runtime_skill_names(root: Path) -> set[str]:
+    return {_expected_skill_name(path) for path in _skill_files(root)}
+
+
+def _live_index_names(text: str, path: Path) -> set[str]:
+    start = text.find(LIVE_SKILL_HEADING)
+    end = text.find(RETIRED_SKILL_HEADING, start + 1)
+    assert start != -1 and end != -1, f"{path} must mark live and retired sections"
+    return set(BACKTICK_SKILL_RE.findall(text[start:end]))
+
+
+def test_codex_skill_descriptions_route_to_one_neighbor() -> None:
+    """Trigger text stays short and points away from the neighboring skill."""
+    root = _project_root()
+    names = _runtime_skill_names(root)
+    problems: list[str] = []
+
+    for skill_path in _skill_files(root):
+        frontmatter = _frontmatter(skill_path)
+        name = str(frontmatter["name"])
+        description = frontmatter.get("description")
+        if not isinstance(description, str):
+            problems.append(f"{name}: description must be a string")
+            continue
+        if len(description) > DESCRIPTION_LIMIT:
+            problems.append(f"{name}: description length {len(description)} > {DESCRIPTION_LIMIT}")
+        match = NEIGHBOR_SKILL_RE.search(description)
+        neighbor = match.group(1) if match else ""
+        if neighbor not in names or neighbor == name:
+            problems.append(f"{name}: description must end with a different live skill")
+
+    assert problems == []
+
+
+def test_devin_shared_skill_descriptions_match_codex() -> None:
+    """Devin may keep its own skill body, but the trigger sentence stays aligned."""
+    root = _project_root()
+    mismatches: list[str] = []
+
+    for skill_path in _skill_files(root):
+        devin_path = root / ".devin" / "skills" / skill_path.parent.name / "SKILL.md"
+        if not devin_path.is_file():
+            mismatches.append(f"missing Devin skill: {skill_path.parent.name}")
+            continue
+        codex_description = _frontmatter(skill_path).get("description")
+        devin_description = _frontmatter(devin_path).get("description")
+        if codex_description != devin_description:
+            mismatches.append(skill_path.parent.name)
+
+    assert mismatches == []
+
+
+def test_docs_skill_indexes_list_only_live_runtime_skills() -> None:
+    """Operator indexes must not advertise skills that are absent from Codex."""
+    root = _project_root()
+    expected = _runtime_skill_names(root)
+    problems: list[str] = []
+    index_paths = (
+        root / "docs" / "00-project" / "ai" / "skills" / "SKILLS-CATALOG.md",
+        root / "docs" / "00-project" / "ai" / "skills" / "SKILLS-PRACTICAL-INDEX.md",
+    )
+
+    for path in index_paths:
+        found = _live_index_names(path.read_text(encoding="utf-8"), path)
+        if found != expected:
+            problems.append(
+                f"{path.relative_to(root).as_posix()}: extra={sorted(found - expected)} "
+                f"missing={sorted(expected - found)}"
+            )
+
+    assert problems == []

@@ -26,6 +26,7 @@ from bioetl.composition.runtime_builders._effective_config_artifact_builder_supp
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
 )
+from bioetl.composition.target_classification import target_classification_config_source_refs
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
@@ -74,7 +75,7 @@ def _create_and_persist_effective_config_artifact_payload(
         source_refs=build_effective_config_source_refs(
             provider=provider,
             entity=resolve_effective_config_entity(provider, entity),
-        ),
+        ) + target_classification_config_source_refs(resolved_config),
         resolution_policy=resolution_policy,
         required_persistence_profile=required_persistence_profile,
         normalization_profile_ref=normalization_profile_ref,

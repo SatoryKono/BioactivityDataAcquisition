@@ -8,17 +8,16 @@ import re
 from collections.abc import Mapping
 from dataclasses import replace
 
-from iuphar_target_class.models import RawTargetRow, RunProvenance
-from iuphar_target_class.pipeline import BatchResult, classify_batch
-from iuphar_target_class.pipeline_io import render_batch
-from iuphar_target_class.stage0.io import canonical_json_bytes
-
 from bioetl.domain.target_classification import (
     TargetClassificationArtifact,
     TargetClassificationBatch,
     TargetClassificationInput,
     TargetClassificationResult,
 )
+from iuphar_target_class.models import RawTargetRow, RunProvenance
+from iuphar_target_class.pipeline import BatchResult, classify_batch
+from iuphar_target_class.pipeline_io import render_batch
+from iuphar_target_class.stage0.io import canonical_json_bytes
 
 from .snapshot_loader import LoadedIupharProfile
 
@@ -86,8 +85,22 @@ def _plain(value: object) -> object:
 
 
 def _raw_fields(data: Mapping[str, object], taxon: str | None) -> dict[str, str | None]:
-    accessions = tuple(dict.fromkeys((*_tokens(data.get("component_accessions")), *_tokens(data.get("target_xref_uniprot_ids")))))
-    synonyms = tuple(dict.fromkeys((*_tokens(data.get("target_protein_synonyms")), *_tokens(data.get("target_gene_synonyms")))))
+    accessions = tuple(
+        dict.fromkeys(
+            (
+                *_tokens(data.get("component_accessions")),
+                *_tokens(data.get("target_xref_uniprot_ids")),
+            )
+        )
+    )
+    synonyms = tuple(
+        dict.fromkeys(
+            (
+                *_tokens(data.get("target_protein_synonyms")),
+                *_tokens(data.get("target_gene_synonyms")),
+            )
+        )
+    )
     return {
         "target_chembl_id": _text(data.get("target_id")),
         # ChEMBL identity is never passed as the kernel's explicit IUPHAR ID.
@@ -104,7 +117,9 @@ def _raw_fields(data: Mapping[str, object], taxon: str | None) -> dict[str, str 
     }
 
 
-def _eligibility(data: Mapping[str, object], species: frozenset[str]) -> tuple[str | None, str | None]:
+def _eligibility(
+    data: Mapping[str, object], species: frozenset[str]
+) -> tuple[str | None, str | None]:
     if data.get("target_type") != "SINGLE PROTEIN":
         return None, "unsupported_target_type"
     try:
@@ -125,31 +140,113 @@ def _unclassified(
     projection = dict.fromkeys(_FIELD_MAP)
     projection["target_class_profile_sha256"] = profile_hash
     payloads: dict[str, object] = {
-        "classification.json": [{"input_row_id": row.input_row_id, "status": "not_applicable", "reason": reason, "raw_fields": _plain(row.business_data)}],
+        "classification.json": [
+            {
+                "input_row_id": row.input_row_id,
+                "status": "not_applicable",
+                "reason": reason,
+                "raw_fields": _plain(row.business_data),
+            }
+        ],
         "evidence.json": [],
         "candidates.json": [],
         "components.json": [],
-        "diagnostics.json": [{"input_row_id": row.input_row_id, "code": reason, "level": "warning"}],
+        "diagnostics.json": [
+            {"input_row_id": row.input_row_id, "code": reason, "level": "warning"}
+        ],
         "metrics.json": {"rows": 1, "not_applicable": 1},
     }
     return TargetClassificationResult(
         row.input_row_id,
         projection,
-        tuple(TargetClassificationArtifact(name, canonical_json_bytes(value)) for name, value in payloads.items()),
+        tuple(
+            TargetClassificationArtifact(name, canonical_json_bytes(value))
+            for name, value in payloads.items()
+        ),
         (reason,),
     )
 
 
 def _row_result(batch: BatchResult, profile_hash: str) -> TargetClassificationResult:
     output = batch.rows[0]
-    projection = {key: getattr(output.result, source) for key, source in _FIELD_MAP.items()}
+    projection = {
+        key: getattr(output.result, source) for key, source in _FIELD_MAP.items()
+    }
     projection["target_class_profile_sha256"] = profile_hash
     return TargetClassificationResult(
         output.result.input_row_id,
         projection,
-        tuple(TargetClassificationArtifact(name, value) for name, value in render_batch(batch).items()),
-        tuple(dict.fromkeys(diagnostic.code for diagnostic in output.result.diagnostics)),
+        tuple(
+            TargetClassificationArtifact(name, value)
+            for name, value in render_batch(batch).items()
+        ),
+        tuple(
+            dict.fromkeys(diagnostic.code for diagnostic in output.result.diagnostics)
+        ),
     )
+
+
+def _request_identities(
+    inputs: tuple[TargetClassificationInput, ...], run_id: str, run_started_at: str
+) -> tuple[str, ...]:
+    if not run_id.strip() or not run_started_at.strip():
+        raise ValueError("classification requires fixed run identity and start time")
+    identities = tuple(row.input_row_id for row in inputs)
+    if len(identities) != len(set(identities)):
+        raise ValueError("duplicate classification input row identities")
+    for identity in identities:
+        if not identity or any(mark in identity for mark in ("/", "\n", "\r")):
+            raise ValueError("invalid classification input row identity")
+    return identities
+
+
+def _adapt_inputs(
+    inputs: tuple[TargetClassificationInput, ...], profile: LoadedIupharProfile
+) -> tuple[list[RawTargetRow], dict[str, TargetClassificationResult]]:
+    results: dict[str, TargetClassificationResult] = {}
+    eligible: list[RawTargetRow] = []
+    for row in inputs:
+        taxon, reason = _eligibility(
+            row.business_data, profile.snapshot.species_taxon_ids
+        )
+        if reason is not None:
+            results[row.input_row_id] = _unclassified(
+                row, profile.profile_sha256, reason
+            )
+        else:
+            eligible.append(
+                RawTargetRow(
+                    row.input_row_id, _raw_fields(row.business_data, taxon), "protein"
+                )
+            )
+    return eligible, results
+
+
+def _project_rows(
+    classified: BatchResult, profile_sha256: str
+) -> dict[str, TargetClassificationResult]:
+    results: dict[str, TargetClassificationResult] = {}
+    for row in classified.rows:
+        invalid = row.result.input_validation_status == "invalid_input"
+        one = replace(
+            classified,
+            rows=(row,),
+            diagnostics=tuple(
+                (key, value)
+                for key, value in classified.diagnostics
+                if key == row.result.input_row_id
+            ),
+            components=(),
+            metrics={
+                "rows": 1,
+                "invalid_rows": int(invalid),
+                "classified_rows": int(bool(row.result.effective_class)),
+                "class_null": int(row.result.effective_class is None),
+            },
+            status="rejected" if invalid else "processed",
+        )
+        results[row.result.input_row_id] = _row_result(one, profile_sha256)
+    return results
 
 
 class IupharTargetClassificationAdapter:
@@ -184,32 +281,28 @@ class IupharTargetClassificationAdapter:
         run_id: str,
         run_started_at: str,
     ) -> TargetClassificationBatch:
-        if not run_id.strip() or not run_started_at.strip():
-            raise ValueError("classification requires fixed run identity and start time")
-        identities = [row.input_row_id for row in inputs]
-        if len(identities) != len(set(identities)):
-            raise ValueError("duplicate classification input row identities")
+        identities = _request_identities(inputs, run_id, run_started_at)
         profile = self._profile
-        results: dict[str, TargetClassificationResult] = {}
-        eligible: list[RawTargetRow] = []
-        for row in inputs:
-            taxon, reason = _eligibility(row.business_data, profile.snapshot.species_taxon_ids)
-            if reason is not None:
-                results[row.input_row_id] = _unclassified(row, self.profile_sha256, reason)
-            else:
-                eligible.append(RawTargetRow(row.input_row_id, _raw_fields(row.business_data, taxon), "protein"))
+        eligible, results = _adapt_inputs(inputs, profile)
         classified = classify_batch(
             tuple(eligible),
             snapshot=profile.snapshot.snapshot,
-            provenance=RunProvenance(self.snapshot_id, profile.normalization_version, profile.rules_version, profile.classification_schema_version, profile.snapshot.retrieved_at, run_started_at),
+            provenance=RunProvenance(
+                self.snapshot_id,
+                profile.normalization_version,
+                profile.rules_version,
+                profile.classification_schema_version,
+                profile.snapshot.retrieved_at,
+                run_started_at,
+            ),
             run_id=run_id,
         )
-        for row in classified.rows:
-            one = replace(classified, rows=(row,), diagnostics=tuple((key, diagnostic) for key, diagnostic in classified.diagnostics if key == row.result.input_row_id), components=())
-            results[row.result.input_row_id] = _row_result(one, self.profile_sha256)
+        results.update(_project_rows(classified, self.profile_sha256))
         metrics = dict(classified.metrics)
         metrics.update(rows=len(inputs), not_applicable=len(inputs) - len(eligible))
-        return TargetClassificationBatch(tuple(results[key] for key in identities), metrics, self.profile_sha256)
+        return TargetClassificationBatch(
+            tuple(results[key] for key in identities), metrics, self.profile_sha256
+        )
 
 
 __all__ = ["IupharTargetClassificationAdapter"]

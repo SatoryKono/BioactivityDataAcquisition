@@ -17,7 +17,9 @@ def bind_target_classification_dependency(
     return _dependency.set(copy.deepcopy(value))
 
 
-def reset_target_classification_dependency(token: Token[dict[str, object] | None]) -> None:
+def reset_target_classification_dependency(
+    token: Token[dict[str, object] | None],
+) -> None:
     _dependency.reset(token)
 
 

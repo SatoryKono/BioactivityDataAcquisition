@@ -98,6 +98,34 @@ def _resolve_replay_parent_manifest(
     return manifest
 
 
+def restore_target_replay_config(
+    *, ctx: PipelineRunContext, settings: Settings, current_config: object
+) -> object:
+    """Restore the saved target profile rather than consulting a newer default."""
+    if ctx.pipeline_name != "chembl_target" or not bool(
+        getattr(ctx, "exact_replay", False)
+    ):
+        return current_config
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+    if not isinstance(current_config, PipelineYamlConfig):
+        return current_config
+    has_parent = bool(
+        getattr(ctx, "replay_of_manifest_id", None)
+        or getattr(ctx, "replay_of_run_id", None)
+    )
+    if not has_parent and not current_config.target_classification.to_domain().enabled:
+        return current_config
+    parent = _resolve_replay_parent_manifest(ctx=ctx, settings=settings)
+    if parent.pipeline_name != "chembl_target":
+        raise ValueError("target replay parent pipeline mismatch")
+    if not parent.resolved_config:
+        raise ValueError("target replay parent has no pinned resolved configuration")
+    from bioetl.composition.target_classification import hydrate_target_runtime_config
+
+    return hydrate_target_runtime_config(parent.resolved_config)
+
+
 def _resolve_parent_bronze_date(*, manifest: RunManifest, settings: Settings) -> str:
     ledger_store = FileRunLedgerStore(
         base_path=control_plane_root(settings, "run_ledger")
@@ -146,6 +174,13 @@ def _collect_manifest_bronze_dates(manifest: RunManifest) -> tuple[str, ...]:
     """Collect the compatibility fallback dates from manifest source refs."""
     dates: set[str] = set()
     for source_ref in manifest.source_refs:
+        if (
+            manifest.pipeline_name == "chembl_target"
+            and source_ref.provider == "iuphar"
+            and source_ref.entity == "target_classification"
+            and source_ref.pipeline_name == manifest.pipeline_name
+        ):
+            continue
         if (
             source_ref.provider != manifest.provider
             or source_ref.entity != manifest.entity

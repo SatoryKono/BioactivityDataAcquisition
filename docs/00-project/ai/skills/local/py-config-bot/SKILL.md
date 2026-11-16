@@ -6,7 +6,7 @@ ______________________________________________________________________
 
 ---
 name: "py-config-bot"
-description: "Execute the BioETL py-config-bot profile for configuration, schema, contract, and pipeline config validation or remediation. Use when changes touch configs, schemas, generated config artifacts, or config-related audit findings."
+description: "Validate or fix BioETL YAML configs, schemas, and pipeline contracts. For a brand-new provider pipeline use new-pipeline."
 ---
 
 # py-config-bot

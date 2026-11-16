@@ -1,6 +1,6 @@
 ---
 name: verify-architecture
-description: Run architecture compliance checks for BioETL (quick/full/category modes) before commit or PR.
+description: "Run BioETL layer, import, and architecture checks before a commit or PR. For a narrative audit use py-audit-bot."
 ---
 
 # Verify Architecture

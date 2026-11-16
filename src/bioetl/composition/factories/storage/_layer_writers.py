@@ -39,10 +39,17 @@ if TYPE_CHECKING:
 
 
 def load_contract_rollout_policy(config: PipelineYamlConfig) -> ContractRolloutPolicy:
-    return load_pipeline_contract_policy(
+    policy = load_pipeline_contract_policy(
         config.provider,
         config.entity_type,
-    ).to_contract_rollout_policy()
+    )
+    if (config.provider, config.entity_type) == ("chembl", "target"):
+        from bioetl.infrastructure.config.target_classification_profile import (
+            resolve_target_classification_profile,
+        )
+
+        policy = resolve_target_classification_profile(config, policy).contract_policy
+    return policy.to_contract_rollout_policy()
 
 
 @dataclass(frozen=True, slots=True)

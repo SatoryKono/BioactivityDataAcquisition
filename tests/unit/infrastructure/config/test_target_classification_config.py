@@ -8,8 +8,12 @@ from pathlib import Path
 import pandas as pd
 import pandera.errors
 import pytest
+from jsonschema import Draft202012Validator
 from pydantic import ValidationError
 
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
 from bioetl.domain.config import PipelineConfig, TableConfig
 from bioetl.domain.config.target_classification import (
@@ -19,12 +23,20 @@ from bioetl.domain.config.target_classification import (
 from bioetl.domain.contracts.gold import ChEMBLTargetGoldSchema
 from bioetl.domain.contracts.gold.chembl_target_classification import (
     ChEMBLTargetGoldSchemaV31,
+    target_v31_schema_hash,
 )
 from bioetl.domain.entities.chembl_structures_foundation import Target
 from bioetl.domain.entities.chembl_target_classification import TargetV31
+from bioetl.domain.normalization.profiles.chembl_target import CHEMBL_TARGET_PROFILE
+from bioetl.domain.normalization.profiles.chembl_target_classification import (
+    target_v31_normalization_profile,
+)
 from bioetl.domain.schemas.chembl.target import TargetSchema, TargetSchemaV31
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
+)
+from bioetl.infrastructure.config.contract_policy_validation import (
+    validate_contract_policy_registry_alignment,
 )
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 from bioetl.infrastructure.config.pipeline_config_api import (
@@ -79,6 +91,34 @@ def _config(mode: str = "off") -> PipelineYamlConfig:
 def test_invalid_and_unpinned_profiles_are_rejected(payload: dict[str, str]) -> None:
     with pytest.raises(ValidationError):
         TargetClassificationYamlConfig.model_validate(payload)
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"mode": "enrich"},
+        {"mode": "shadow", "snapshot_manifest": "snapshot.json"},
+        {"mode": "enrich", "snapshot_manifest": None, "snapshot_manifest_sha256": None},
+        {
+            "mode": "shadow",
+            "snapshot_manifest": "snapshot.json",
+            "snapshot_manifest_sha256": "not-a-hash",
+        },
+    ],
+)
+def test_generated_json_schema_also_rejects_unpinned_profiles(
+    payload: dict[str, object],
+) -> None:
+    validator = Draft202012Validator(TargetClassificationYamlConfig.model_json_schema())
+    assert list(validator.iter_errors(payload))
+    assert validator.is_valid({"mode": "off"})
+    assert validator.is_valid(
+        {
+            "mode": "enrich",
+            "snapshot_manifest": "snapshot.json",
+            "snapshot_manifest_sha256": "a" * 64,
+        }
+    )
 
 
 def test_yaml_profile_roundtrips_to_immutable_domain_config() -> None:
@@ -147,6 +187,7 @@ def test_enrich_selects_one_consistent_additive_contract_without_mutating_input(
     assert profile.contract_policy.read_order == ["3.1.0"]
     assert profile.contract_policy.write_versions == ["3.1.0"]
     assert profile.contract_policy.rollout_mode == "single"
+    validate_contract_policy_registry_alignment(profile.contract_policy)
     assert profile.contract_policy.hash_include == list(
         profile.content_hash_include_fields
     )
@@ -165,6 +206,15 @@ def test_enrich_cannot_fall_back_to_an_unscoped_hash_policy() -> None:
     config = _config("enrich").model_copy(update={"content_hash_policy": None})
     with pytest.raises(ValueError, match="explicit V30/V31"):
         resolve_target_classification_profile(config)
+
+
+def test_switching_mode_does_not_silently_downgrade_a_v31_hash_binding() -> None:
+    enriched = resolve_target_classification_profile(_config("enrich"))
+    disabled = enriched.resolved_yaml_config.model_copy(
+        update={"target_classification": TargetClassificationYamlConfig()}
+    )
+    with pytest.raises(ValueError, match="legacy V30"):
+        resolve_target_classification_profile(disabled)
 
 
 def test_v31_arrow_and_entities_do_not_modify_the_v30_shape() -> None:
@@ -256,3 +306,48 @@ def test_domain_default_is_disabled_without_a_snapshot_claim() -> None:
     assert not value.enabled
     assert value.snapshot_manifest is None
     assert value.snapshot_manifest_sha256 is None
+
+
+def test_v31_identity_hash_tracks_the_actual_schema_model(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    before = target_v31_schema_hash()
+    schema = ChEMBLTargetGoldSchemaV31.to_json_schema()
+    monkeypatch.setattr(
+        ChEMBLTargetGoldSchemaV31,
+        "to_json_schema",
+        classmethod(lambda _: {**schema, "title": "changed-contract"}),
+    )
+    assert len(before) == 64
+    assert target_v31_schema_hash() != before
+
+
+def test_v31_normalization_preserves_legacy_rules_and_accepts_new_hash_fields() -> None:
+    legacy_identity = CHEMBL_TARGET_PROFILE.identity
+    profile = target_v31_normalization_profile()
+    assert profile.fields == CHEMBL_TARGET_PROFILE.fields | set(
+        TARGET_CLASSIFICATION_FIELDS
+    )
+    for name, rule in CHEMBL_TARGET_PROFILE.field_rules.items():
+        assert profile.rule_for(name) is rule
+    for name in TARGET_CLASSIFICATION_FIELDS:
+        rule = profile.rule_for(name)
+        assert rule is not None and rule.include_in_hash
+        assert rule.apply("  frozen decision  ") == "  frozen decision  "
+        assert rule.apply(None) is None
+    binding = resolve_target_classification_profile(_config("enrich"))
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="target",
+        profile=profile,
+        content_hash_policy_authoritative=True,
+        content_hash_include_fields=frozenset(binding.content_hash_include_fields),
+    )
+    source = {"target_id": "CHEMBL1", "iuphar_class": "Enzyme"}
+    first = processor.compute_content_hash(source)
+    assert first != processor.compute_content_hash(
+        {**source, "iuphar_class": "Receptor"}
+    )
+    assert CHEMBL_TARGET_PROFILE.identity == legacy_identity
+    assert CHEMBL_TARGET_PROFILE.fields.isdisjoint(TARGET_CLASSIFICATION_FIELDS)
+    assert profile.identity.profile_hash != legacy_identity.profile_hash
