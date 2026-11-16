@@ -1128,9 +1128,19 @@ def test_a_run_is_not_its_own_oracle() -> None:
     assert result["comparable_pair_count"] == 0
 
 
-@pytest.mark.parametrize("failure_kind", ["failed_run", "weekly_job_difference"])
+@pytest.mark.parametrize(
+    "failure_kind,conclusion",
+    [
+        ("failed_run", "failure"),
+        ("weekly_job_difference", "success"),
+        ("missing_conclusion", None),
+        ("unknown_conclusion", "unknown"),
+        ("empty_conclusion", ""),
+    ],
+)
 def test_every_pair_is_evaluated_independently_of_input_order(
     failure_kind: str,
+    conclusion: str | None,
 ) -> None:
     baseline = _pilot_success(
         101, arm="baseline", created_at="2026-11-20T03:00:00Z", dow="Fri"
@@ -1142,9 +1152,8 @@ def test_every_pair_is_evaluated_independently_of_input_order(
         103, arm="candidate", created_at="2026-11-20T03:47:00Z", dow="Fri"
     )
     reason = "pair_not_success"
-    if failure_kind == "failed_run":
-        later["conclusion"] = "failure"
-    else:
+    later["conclusion"] = conclusion
+    if failure_kind == "weekly_job_difference":
         later["job_conclusions"] = _results(codeql="success")
         reason = "pair_not_equivalent"
     results = [
@@ -1356,6 +1365,10 @@ def test_verified_archive_still_blocks_n2_for_an_unopened_pilot(tmp_path: Path) 
 class _PilotApiClient:
     def __init__(self) -> None:
         self.workflow = (REPO_ROOT / archive_module.WORKFLOW_PATH).read_bytes()
+        self.clock_ranges = {
+            130: ("2026-11-20T03:00:00Z", "2026-11-20T03:00:01Z"),
+            131: ("2026-11-20T03:48:00Z", "2026-11-20T03:48:01Z"),
+        }
         self.jobs = []
         for job_id, conclusion in _results().items():
             name = job_id
@@ -1400,8 +1413,21 @@ class _PilotApiClient:
                 "content": base64.b64encode(self.workflow).decode(),
                 "sha": blob,
             }
-        assert "/attempts/1/jobs?" in args[1]
-        return {"jobs": self.jobs, "total_count": len(self.jobs)}
+        assert "/attempts/" in args[1] and "/jobs?" in args[1]
+        run_id = int(args[1].split("/runs/")[1].split("/", 1)[0])
+        clock_start, clock_end = self.clock_ranges[run_id]
+        jobs = [
+            {
+                **job,
+                **(
+                    {"started_at": clock_start, "completed_at": clock_end}
+                    if job["name"] == "clock"
+                    else {}
+                ),
+            }
+            for job in self.jobs
+        ]
+        return {"jobs": jobs, "total_count": len(jobs)}
 
 
 def _pilot_api_runs() -> list[dict]:
@@ -1471,6 +1497,74 @@ def test_pilot_archive_runs_binds_real_api_configuration_and_job_names(
         == "skipped"
     )
     require_pilot_advance(assessment, tmp_path)
+
+
+@pytest.mark.parametrize(
+    "created,clock_day,dow,dom,month",
+    [
+        ("2026-11-16", "2026-11-17", "Tue", "17", "11"),
+        ("2026-11-30", "2026-12-01", "Tue", "01", "12"),
+        ("2027-01-01", "2027-01-02", "Sat", "02", "01"),
+    ],
+)
+def test_archived_retry_calendar_comes_from_this_attempts_clock_job(
+    tmp_path: Path,
+    created: str,
+    clock_day: str,
+    dow: str,
+    dom: str,
+    month: str,
+) -> None:
+    client = _PilotApiClient()
+    client.clock_ranges[130] = (f"{clock_day}T03:00:00Z", f"{clock_day}T03:00:01Z")
+    run = {
+        **_pilot_api_runs()[0],
+        "created_at": f"{created}T03:00:00Z",
+        "run_attempt": 2,
+    }
+    raw, outcomes, manifest = build_attempt_archive(
+        client, "owner/repository", run, pilot=True
+    )
+    write_snapshot(tmp_path, raw=raw, outcomes=outcomes, manifest=manifest)
+    _seal_index(tmp_path)
+    observation = pilot_observation_from_archive(
+        tmp_path, run_id=130, run_attempt=2, arm="baseline"
+    )
+    assert (observation["dow"], observation["dom"], observation["month"]) == (
+        dow,
+        dom,
+        month,
+    )
+    assert observation["calendar_source"] == "clock_job_utc_interval"
+    assert archive_module._job_block_reason(observation) is None
+
+
+@pytest.mark.parametrize(
+    "start,end",
+    [
+        (None, None),
+        ("2026-11-20T23:59:59Z", "2026-11-21T00:00:01Z"),
+        ("2026-11-20T03:00:01Z", "2026-11-20T03:00:00Z"),
+    ],
+)
+def test_archived_clock_with_ambiguous_or_missing_date_stays_unknown(
+    tmp_path: Path,
+    start: str | None,
+    end: str | None,
+) -> None:
+    client = _PilotApiClient()
+    client.clock_ranges[130] = (start, end)
+    raw, outcomes, manifest = build_attempt_archive(
+        client, "owner/repository", _pilot_api_runs()[0], pilot=True
+    )
+    write_snapshot(tmp_path, raw=raw, outcomes=outcomes, manifest=manifest)
+    _seal_index(tmp_path)
+    observation = pilot_observation_from_archive(
+        tmp_path, run_id=130, run_attempt=1, arm="baseline"
+    )
+    assert observation["calendar_source"] == "unknown"
+    assert observation["dow"] is observation["dom"] is observation["month"] is None
+    assert archive_module._job_block_reason(observation) == "duty_unknown"
 
 
 def test_pilot_advance_requires_the_evaluated_archive(tmp_path: Path) -> None:
@@ -1623,6 +1717,9 @@ def test_pilot_advance_rejects_mismatched_evidence(
     "job,old,new",
     [
         ("codeql", "'Mon'", "'Fri'"),
+        ("codeql", "'Mon'", "'M on'"),
+        ("codeql", "'Mon'", "'Mon '"),
+        ("codeql", "'Mon'", "' Mon'"),
         ("scorecard", "'Mon'", "'Fri'"),
         ("branch-hygiene", "'Mon'", "'Fri'"),
         ("mutation", "'Sun'", "'Fri'"),
@@ -1650,6 +1747,31 @@ def test_inventory_rejects_cadence_drift_in_each_job(
     (workflow / "nightly.yml").write_text(changed, encoding="utf-8")
     with pytest.raises(ArchiveError, match=f"cadence drifted: {job}"):
         nightly_check_inventory(tmp_path)
+
+
+@pytest.mark.parametrize("location", ["condition", "job", "root"])
+def test_nightly_workflow_rejects_duplicate_yaml_keys(location: str) -> None:
+    text = (REPO_ROOT / ".github/workflows/nightly.yml").read_text(encoding="utf-8")
+    if location == "condition":
+        text = text.replace("  codeql:\n", "  codeql:\n    if: false\n", 1)
+    elif location == "job":
+        text += "\n  codeql:\n    if: needs.clock.outputs.dow == 'Mon'\n"
+    else:
+        text += "\npermissions:\n  contents: read\n"
+    with pytest.raises(ArchiveError, match="malformed nightly workflow"):
+        archive_module._validated_workflow_jobs(text)
+
+
+def test_nightly_job_condition_keeps_literal_spaces_and_escaped_quotes() -> None:
+    normalize = archive_module._normalized_job_condition
+    assert normalize(" ${{ needs.clock.outputs.dow == 'Mon' }} ") == normalize(
+        "needs.clock.outputs.dow=='Mon'"
+    )
+    assert normalize(" 'a '' b' == 'a '' b' ") == "'a '' b'=='a '' b'"
+    assert normalize("'M on'") != normalize("'Mon'")
+    for invalid in ("${{ true", "true }}", "'Mon"):
+        with pytest.raises(ArchiveError):
+            normalize(invalid)
 
 
 def test_pilot_record_reports_observed_retention_below_the_floor() -> None:

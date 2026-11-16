@@ -1184,9 +1184,8 @@ def _inside_pilot_window(
 
 
 def _pair_observation_eligible(observation: Mapping[str, object]) -> bool:
-    return _observation_sha(observation) is not None and _conclusion_name(
-        observation
-    ) not in {"missing", "unknown", "synthetic"}
+    # Unknown results must reach the negative pair assessment, not disappear.
+    return _observation_sha(observation) is not None
 
 
 def _pilot_pair_arms(
@@ -1397,6 +1396,7 @@ def _pilot_observation_binding(observation: Mapping[str, object]) -> dict[str, A
         "conclusion",
         "job_conclusions",
         "api_job_conclusions",
+        "calendar_source",
         "dow",
         "dom",
         "month",
@@ -1612,12 +1612,44 @@ def _normalized_job_condition(value: object) -> str:
         return ""
     if not isinstance(value, str):
         raise ArchiveError("nightly job condition is not a string")
-    return "".join(value.strip().removeprefix("${{").removesuffix("}}").split())
+    text = value.strip()
+    if text.startswith("${{") != text.endswith("}}"):
+        raise ArchiveError("nightly job condition has unbalanced expression delimiters")
+    text = text.removeprefix("${{").removesuffix("}}")
+    quoted = False
+    normalized = []
+    for character in text:
+        if character == "'":
+            quoted = not quoted
+        if quoted or not character.isspace():
+            normalized.append(character)
+    if quoted:
+        raise ArchiveError("nightly job condition has an unterminated string")
+    return "".join(normalized)
+
+
+class _UniqueWorkflowLoader(yaml.SafeLoader):
+    """Reject duplicate keys, including keys introduced by YAML merges."""
+
+    def construct_mapping(self, node: yaml.MappingNode, deep: bool = False) -> dict:
+        self.flatten_mapping(node)
+        mapping = super().construct_mapping(node, deep=deep)
+        if len(mapping) != len(node.value):
+            raise yaml.YAMLError("duplicate nightly workflow mapping key")
+        return mapping
+
+
+def _load_unique_workflow(text: str) -> Any:
+    loader = _UniqueWorkflowLoader(text)
+    try:
+        return loader.get_single_data()
+    finally:
+        loader.dispose()
 
 
 def _validated_workflow_jobs(text: str) -> dict[str, Any]:
     try:
-        workflow = yaml.safe_load(text)
+        workflow = _load_unique_workflow(text)
     except yaml.YAMLError as exc:
         raise ArchiveError("malformed nightly workflow") from exc
     jobs = workflow.get("jobs") if isinstance(workflow, Mapping) else None
@@ -2051,8 +2083,7 @@ def _pilot_archive_binding(
         outcomes_bytes
     ) != manifest.get("outcomes_sha256"):
         raise ArchiveError("pilot snapshot checksum changed after verification")
-    stamp = _parse_utc(raw.get("created_at"))
-    if stamp is None:
+    if _parse_utc(raw.get("created_at")) is None:
         raise ArchiveError("pilot snapshot timestamp is unknown")
     jobs = _pilot_configuration_jobs(raw, outcomes)
     configuration = outcomes["pilot_configuration"]
@@ -2066,15 +2097,45 @@ def _pilot_archive_binding(
         "configuration_sha256": oracle_sha256(
             configuration["workflow_source"].encode("utf-8")
         ),
-        "dow": UTC_WEEKDAY_NAMES[stamp.weekday()],
-        "dom": stamp.strftime("%d"),
-        "month": stamp.strftime("%m"),
+        **_pilot_attempt_calendar(outcomes, jobs),
         "job_conclusions": normalized_jobs,
         "api_job_conclusions": api_jobs,
         "raw_sha256": oracle_sha256(raw_bytes),
         "outcomes_sha256": oracle_sha256(outcomes_bytes),
     }
     return _pilot_observation_binding(observation)
+
+
+def _pilot_attempt_calendar(
+    outcomes: Mapping[str, Any], jobs: Mapping[str, Any]
+) -> dict[str, Any]:
+    """A clock job wholly within one UTC day proves its calendar; otherwise unknown.
+
+    Run creation time belongs to the original run, not necessarily this attempt.
+    The jobs API does not expose clock outputs. Never substitute the run date.
+    """
+
+    clocks = [
+        job for job in outcomes["jobs"] if _pilot_job_id(job["name"], jobs) == "clock"
+    ]
+    calendar: dict[str, Any] = {
+        "dow": None,
+        "dom": None,
+        "month": None,
+        "calendar_source": "unknown",
+    }
+    if len(clocks) != 1 or clocks[0].get("conclusion") != "success":
+        return calendar
+    start = _parse_utc(clocks[0].get("started_at"))
+    end = _parse_utc(clocks[0].get("completed_at"))
+    if start is None or end is None or end < start or start.date() != end.date():
+        return calendar
+    return {
+        "dow": UTC_WEEKDAY_NAMES[start.weekday()],
+        "dom": start.strftime("%d"),
+        "month": start.strftime("%m"),
+        "calendar_source": "clock_job_utc_interval",
+    }
 
 
 def pilot_observation_from_archive(
