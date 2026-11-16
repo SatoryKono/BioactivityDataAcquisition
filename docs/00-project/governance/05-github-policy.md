@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.2.19
+Version: 1.2.20
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-11-10'
+  Last verified: '2026-11-16'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md and ADR-047 | Last updated: 2026-11-10*
+*Synced with RULES.md and ADR-047 | Last updated: 2026-11-16*
 
 ______________________________________________________________________
 
@@ -93,7 +93,7 @@ ______________________________________________________________________
 
 ## 2. CI/CD Workflows
 
-BioETL uses **60 GitHub Actions workflows** (including reusable helper workflows).
+BioETL uses **61 GitHub Actions workflows** (including reusable helper workflows).
 That number is the tracked `.github/workflows/*.yml` inventory, not GitHub's
 `GET /actions/workflows` `total_count` (live GET `2026-09-17`: **79** objects =
 50 tracked files + hosted `dynamic/**` workflows + GitHub-only orphan/residual
