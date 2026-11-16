@@ -1741,6 +1741,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         RUN_REPORT_CONTRACTS_TEST,
     ),
     ".github/workflows/docker.yml": (DOCKER_RUNTIME_CONTRACT_TEST,),
+    ".github/workflows/docker-publish.yml": (
+        DOCKER_RUNTIME_CONTRACT_TEST,
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+        GHA_DISABLED_MAP_TEST,
+    ),
     ".github/workflows/main-ghcr-publish.yml": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
@@ -1804,6 +1809,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
     "src/memory/dedup.py": ("tests/unit/memory/test_dedup.py",),
     "src/memory/rag/chunking.py": ("tests/unit/memory/test_rag_indexing.py",),
+    "src/memory/rag/indexing.py": ("tests/unit/memory/test_rag_indexing.py",),
     "configs/quality/mypy_diagnostic_baseline.json": (
         "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
     ),

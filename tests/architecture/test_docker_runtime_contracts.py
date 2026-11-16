@@ -1578,7 +1578,9 @@ def test_ghcr_publish_waits_outside_the_main_integrity_conclusion() -> None:
     ]
     assert len(downloads) == 1
     assert downloads[0]["with"]["run-id"] == "${{ inputs.artifact-run-id }}"
-    assert downloads[0]["with"]["name"] == "bioetl-scanned-image-${{ inputs.source-sha }}"
+    assert (
+        downloads[0]["with"]["name"] == "bioetl-scanned-image-${{ inputs.source-sha }}"
+    )
 
 
 def test_trivy_sarif_matches_main_configurations_without_dropping_findings() -> None:
