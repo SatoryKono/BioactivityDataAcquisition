@@ -50727,7 +50727,7 @@
       "github_issue_url": null,
       "inbound_links": 2,
       "lifecycle": null,
-      "outbound_links": 11,
+      "outbound_links": 17,
       "owner": "BioETL Team",
       "path": "docs/05-operations/runbooks/iuphar-target-classification.md",
       "recommended_action": "keep",
