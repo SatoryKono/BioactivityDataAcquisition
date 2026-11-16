@@ -108,7 +108,8 @@ def _normalized_input_fields(
 
 def _copy_input_row(row: RawTargetRow) -> RawTargetRow:
     """Keep the concrete row type while detaching caller-owned source fields."""
-    return replace(row, fields=dict(row.fields))
+    copied: RawTargetRow = replace(row, fields=dict(row.fields))
+    return copied
 
 
 def validate_input(
