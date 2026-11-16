@@ -81,7 +81,8 @@ def parse_ec_numbers(raw: str | None) -> tuple[EcNumber, ...]:
 
 def _normalized_input_fields(
     row: RawTargetRow,
-    glue_fixtures: tuple[GlueFixture, ...],
+    *,
+    glue_fixtures: tuple[GlueFixture, ...] = (),
 ) -> tuple[dict[str, str | None], list[str]]:
     """Validate identity before normalizing fields in their declared order."""
     errors: list[str] = []
@@ -115,7 +116,8 @@ def validate_input(
 ) -> ValidatedInput:
     """Validate one row. An invalid row does not compute derived fields."""
     row = replace(row, fields=dict(row.fields))
-    normalized, errors = _normalized_input_fields(row, glue_fixtures)
+    fixtures: tuple[GlueFixture, ...] = glue_fixtures
+    normalized, errors = _normalized_input_fields(row, glue_fixtures=fixtures)
     row_hash = sha256_bytes(canonical_json_bytes(row.fields))
     if errors:
         return _invalid(

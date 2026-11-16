@@ -74,6 +74,9 @@ MISSING_MANIFEST_HINT = (
     "Run `python -m memory.tooling.refresh_all` first or pass `--auto-refresh` "
     "to build temporary rebuild-only manifests for this query."
 )
+UNSUPPORTED_QUERY_DISPATCH_COMMAND = (
+    "query dispatch received an unsupported command"
+)
 
 _CONFIDENCE_RANKS = {
     level["id"]: int(level["rank"])
@@ -1602,7 +1605,7 @@ def _dispatch_content_query(args: argparse.Namespace) -> int:
             ),
             as_json=args.json,
         )
-    raise AssertionError("query dispatch received an unsupported command")
+    raise AssertionError(UNSUPPORTED_QUERY_DISPATCH_COMMAND)
 
 
 def _dispatch_file_module_query(args: argparse.Namespace) -> int:
@@ -1682,7 +1685,7 @@ def _dispatch_file_module_query(args: argparse.Namespace) -> int:
             ),
             as_json=args.json,
         )
-    raise AssertionError("query dispatch received an unsupported command")
+    raise AssertionError(UNSUPPORTED_QUERY_DISPATCH_COMMAND)
 
 
 def _dispatch_entity_query(args: argparse.Namespace) -> int:
@@ -1727,7 +1730,7 @@ def _dispatch_entity_query(args: argparse.Namespace) -> int:
         )
     if args.command == "graph":
         return graph_query.main(args.graph_args)
-    raise AssertionError("query dispatch received an unsupported command")
+    raise AssertionError(UNSUPPORTED_QUERY_DISPATCH_COMMAND)
 
 
 if __name__ == "__main__":
