@@ -34,7 +34,7 @@ def acceptance_inputs(tmp_path):
         annotations={"1": ProviderAnnotation("1", "gpcr", (), sha256_bytes(raw.encode()), "9606", raw)},
         family_nodes=(), type_to_class={"gpcr": "Receptor"}, family_to_class={},
     )
-    content = b"input_row_id,target_kind,target_id,organism\nr1,protein,1,9606\n"
+    content = b"input_row_id,target_kind,target_chembl_id,target_id,uniprot,organism,name\nr1,protein,CHEMBL1,1,P12345,9606,Fixture\n"
     (tmp_path / "frozen.csv").write_bytes(content)
     names = ("content_checks.csv", "m_code_versions.csv", "provenance_map.csv", "stage_report.json")
     hashes = {}
@@ -55,6 +55,7 @@ def acceptance_inputs(tmp_path):
         "approval_reference": "synthetic contract test only", "environment": "unit-test",
         "snapshot_manifest_sha256": "a" * 64, "stage0_manifest_sha256": stage0_hash,
         "selected_source_paths": ["source.csv"], "expected_rows": 1,
+        "source_imports": [{"source_path": "source.csv", "format_version": "bioetl_target_kernel_csv_v1", "target_kind": "protein"}],
         "cases": [{"input_row_id": "r1", "expected": {"iuphar_class": "Receptor", "matched_target_id": "1"},
                    "source_references": [{"path": "review.txt", "sha256": sha256_file(tmp_path / "review.txt")}]}],
     })
@@ -68,7 +69,7 @@ def acceptance_inputs(tmp_path):
         "snapshot_manifest_sha256": "a" * 64,
         "artifact_sha256": {"evidence.json": sha256_file(tmp_path / "evidence.json")},
     })
-    provenance = RunProvenance("synthetic-fixture", "fixture", "fixture", "fixture", "frozen", "frozen")
+    provenance = RunProvenance("synthetic-fixture", "bioetl-iuphar-input-v1", "plan-v1-r8", "3.1.0", "frozen", "frozen")
     request = IntegrationAcceptanceRequest(stage0, labels, labels_hash, "a" * 64,
                                            provenance, "reference-fixture", proof, report)
     return request, snapshot
@@ -83,6 +84,19 @@ def test_acceptance_executes_references_and_keeps_accuracy_unaccepted(tmp_path, 
     assert report["reference_cases_accepted"] is True
     assert len(report["output_sha256"]) == 6
     assert (tmp_path / "result/execution-config.json").exists()
+    from bioetl.infrastructure.adapters.iuphar import validate_acceptance_receipt
+
+    validate_acceptance_receipt(report, snapshot_manifest_sha256=request.snapshot_manifest_sha256)
+
+
+def test_unversioned_species_names_cannot_enter_reference_acceptance(tmp_path, acceptance_inputs):
+    request, snapshot = acceptance_inputs
+    labels = json.loads(request.expected_labels.read_bytes())
+    labels.pop("source_imports")
+    request = replace(request, expected_labels_sha256=_write(request.expected_labels, labels))
+    report = run_integration_acceptance(request, snapshot=snapshot, output_dir=tmp_path / "result")
+    assert report["status"] == "BLOCKED_INPUT"
+    assert "canonical TaxID" in report["reason"]
 
 
 def test_reference_mismatch_is_fail_not_an_invented_pass(tmp_path, acceptance_inputs):

@@ -167,6 +167,16 @@ def validate_acceptance_receipt(
         raise ValueError("acceptance belongs to a different IUPHAR snapshot")
     if document.get("reference_cases_accepted") is not True:
         raise ValueError("independent IUPHAR reference cases are not accepted")
+    versions = tuple(
+        document.get(key)
+        for key in (
+            "normalization_version",
+            "rules_version",
+            "classification_schema_version",
+        )
+    )
+    if versions != (NORMALIZATION_VERSION, PLAN_VERSION, CLASSIFICATION_SCHEMA_VERSION):
+        raise ValueError("acceptance versions differ from the executing adapter")
     _executed_checks(document.get("checks"))
     _bound_acceptance_outputs(document)
     text(document, "run_id")

@@ -6,7 +6,7 @@ import csv
 import hashlib
 import io
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict
 from pathlib import Path
 from types import MappingProxyType
@@ -43,7 +43,9 @@ def read_bioetl_target_kernel_csv_v1(
     producer before this boundary; blank taxonomy remains explicitly missing.
     """
     if not source_path.strip() or target_kind not in {"protein", "complex"}:
-        raise ValueError("canonical CSV import requires a source and explicit target kind")
+        raise ValueError(
+            "canonical CSV import requires a source and explicit target kind"
+        )
     reader = csv.DictReader(
         io.StringIO(content.decode("utf-8-sig"), newline=""), strict=True
     )
@@ -59,7 +61,7 @@ def read_bioetl_target_kernel_csv_v1(
     return rows
 
 
-def _require_bioetl_kernel_header(headers: list[str]) -> None:
+def _require_bioetl_kernel_header(headers: Sequence[str]) -> None:
     if (
         len(headers) != len(set(headers))
         or not _BIOETL_KERNEL_COLUMNS.issubset(headers)
@@ -85,8 +87,10 @@ def _bioetl_kernel_row(
         raise ValueError("canonical CSV target_kind differs from selected profile")
     taxon = raw["organism"]
     if taxon and re.fullmatch(r"[1-9][0-9]*", taxon) is None:
-        raise ValueError("canonical CSV organism must be a positive ASCII TaxID or blank")
-    fields = {
+        raise ValueError(
+            "canonical CSV organism must be a positive ASCII TaxID or blank"
+        )
+    fields: dict[str, str | None] = {
         key: value
         for key, value in raw.items()
         if key not in {"input_row_id", "target_kind"}

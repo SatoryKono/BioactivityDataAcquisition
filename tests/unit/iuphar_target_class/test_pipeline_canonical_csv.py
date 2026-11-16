@@ -72,7 +72,9 @@ def test_canonical_profile_matches_numeric_species_and_preserves_provenance():
     batch = classify_batch(
         rows,
         snapshot=snapshot,
-        provenance=RunProvenance("synthetic", "base", "rules", "schema", "t", "t"),
+        provenance=RunProvenance(
+            "synthetic-contract-only", "base", "rules", "schema", "t", "t"
+        ),
         run_id="synthetic-contract-only",
     )
     assert batch.rows[0].result.match_status == "matched"
@@ -94,7 +96,19 @@ def test_canonical_profile_preserves_explicit_taxid_or_blank(taxon):
 
 @pytest.mark.parametrize(
     "taxon",
-    ["Human", "Homo sapiens", "Mouse", "unknown", "0", "-1", "+9606", "09606", " 9606", "9606.0", "９６０６"],
+    [
+        "Human",
+        "Homo sapiens",
+        "Mouse",
+        "unknown",
+        "0",
+        "-1",
+        "+9606",
+        "09606",
+        " 9606",
+        "9606.0",
+        "９６０６",
+    ],
 )
 def test_canonical_profile_rejects_noncanonical_taxonomy_before_matching(taxon):
     with pytest.raises(ValueError, match="positive ASCII TaxID or blank"):
@@ -107,7 +121,9 @@ def test_canonical_profile_rejects_mixed_or_unapproved_row_kind(kind):
         _read(_csv(kind=kind))
 
 
-@pytest.mark.parametrize("source,kind", [("", "protein"), (" ", "protein"), ("a", "unknown")])
+@pytest.mark.parametrize(
+    "source,kind", [("", "protein"), (" ", "protein"), ("a", "unknown")]
+)
 def test_canonical_profile_requires_explicit_source_and_kind(source, kind):
     with pytest.raises(ValueError, match="source and explicit target kind"):
         read_bioetl_target_kernel_csv_v1(_csv(), source_path=source, target_kind=kind)
@@ -138,7 +154,9 @@ def test_canonical_profile_requires_unique_complete_unspoofed_header(content):
         _read(content)
 
 
-@pytest.mark.parametrize("content", [_csv().replace(b",old\r\n", b"\r\n"), _csv() + b"extra\n"])
+@pytest.mark.parametrize(
+    "content", [_csv().replace(b",old\r\n", b"\r\n"), _csv() + b"extra\n"]
+)
 def test_canonical_profile_refuses_wrong_row_width(content):
     with pytest.raises(ValueError, match="CSV row width"):
         _read(content)
@@ -149,15 +167,27 @@ def test_admitted_cohort_executes_explicit_canonical_profile(tmp_path):
     content = _csv()
     source.write_bytes(content)
     proof_names = (
-        "content_checks.csv", "m_code_versions.csv", "provenance_map.csv", "stage_report.json"
+        "content_checks.csv",
+        "m_code_versions.csv",
+        "provenance_map.csv",
+        "stage_report.json",
     )
     for name in proof_names:
         (tmp_path / name).write_bytes(name.encode())
     document = {
         "artifact": "stage0_manifest",
         "stage": "0",
-        "artifact_sha256": {name: hashlib.sha256(name.encode()).hexdigest() for name in proof_names},
-        "copies": [{"source_path": "canonical.csv", "copy_path": "canonical.csv", "sha256": hashlib.sha256(content).hexdigest(), "byte_count": len(content)}],
+        "artifact_sha256": {
+            name: hashlib.sha256(name.encode()).hexdigest() for name in proof_names
+        },
+        "copies": [
+            {
+                "source_path": "canonical.csv",
+                "copy_path": "canonical.csv",
+                "sha256": hashlib.sha256(content).hexdigest(),
+                "byte_count": len(content),
+            }
+        ],
     }
     manifest = tmp_path / "manifest.json"
     manifest.write_text(json.dumps(document), encoding="utf-8")

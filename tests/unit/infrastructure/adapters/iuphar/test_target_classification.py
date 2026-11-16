@@ -53,6 +53,9 @@ def _receipt(snapshot_hash: str) -> dict[str, object]:
         "biological_accuracy_accepted": False,
         "run_id": "contract-run",
         "reviewer_reference": "synthetic-unit-test-expectations",
+        "normalization_version": "bioetl-iuphar-input-v1",
+        "rules_version": "plan-v1-r8",
+        "classification_schema_version": "3.1.0",
     }
 
 

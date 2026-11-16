@@ -233,6 +233,9 @@ def run_integration_acceptance(
         "expected_labels_sha256": request.expected_labels_sha256,
         "reference_cases_accepted": False,
         "biological_accuracy_accepted": False,
+        "normalization_version": request.provenance.normalization_version,
+        "rules_version": request.provenance.rules_version,
+        "classification_schema_version": request.provenance.schema_version,
     }
     try:
         _execute_acceptance(request, snapshot, output_dir, clock, receipt, checks)
@@ -253,6 +256,14 @@ def _execute_acceptance(
     checks: dict[str, str],
 ) -> None:
     spec = _verified_labels(request)
+    imports = spec.get("source_imports", [])
+    if (
+        {item["source_path"] for item in imports} != set(spec["selected_source_paths"])
+        or any(item["format_version"] != "bioetl_target_kernel_csv_v1" for item in imports)
+    ):
+        raise ValueError("integration acceptance requires explicit canonical TaxID input profiles")
+    if request.provenance.snapshot_id != snapshot.snapshot_id:
+        raise ValueError("execution provenance belongs to another snapshot")
     if not snapshot.complete:
         raise ValueError("complete admitted snapshot required")
     cohort = load_admitted_cohort(request.stage0_manifest, _volume_plan(spec))
