@@ -71,6 +71,7 @@ AI_RUNTIME_GOVERNANCE_LINKS_TEST = (
     "tests/architecture/test_ai_runtime_governance_links.py"
 )
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
+MEMORY_RAG_INDEXING_TEST = "tests/unit/memory/test_rag_indexing.py"
 TECH_DEBT_5847_5852_CLOSEOUT_TEST = (
     "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py"
 )
@@ -510,7 +511,7 @@ MEMORY_BASELINE_TEST_TARGETS: tuple[str, ...] = (
     "tests/unit/memory/test_query_facade.py",
     "tests/unit/memory/test_query_layer_ownership.py",
     "tests/unit/memory/test_rag_filters.py",
-    "tests/unit/memory/test_rag_indexing.py",
+    MEMORY_RAG_INDEXING_TEST,
     "tests/unit/memory/test_rag_validation.py",
     "tests/unit/memory/test_record_envelope.py",
     "tests/unit/memory/test_registry.py",
@@ -1751,6 +1752,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         RUN_REPORT_CONTRACTS_TEST,
     ),
     ".github/workflows/docker.yml": (DOCKER_RUNTIME_CONTRACT_TEST,),
+    ".github/workflows/docker-publish.yml": (
+        DOCKER_RUNTIME_CONTRACT_TEST,
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+        GHA_DISABLED_MAP_TEST,
+    ),
     ".github/workflows/main-ghcr-publish.yml": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
@@ -1813,7 +1819,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
     "src/memory/dedup.py": ("tests/unit/memory/test_dedup.py",),
-    "src/memory/rag/chunking.py": ("tests/unit/memory/test_rag_indexing.py",),
+    "src/memory/rag/chunking.py": (MEMORY_RAG_INDEXING_TEST,),
+    "src/memory/rag/indexing.py": (MEMORY_RAG_INDEXING_TEST,),
     "configs/quality/mypy_diagnostic_baseline.json": (
         "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
     ),

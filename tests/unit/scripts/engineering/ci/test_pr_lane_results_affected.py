@@ -727,6 +727,18 @@ def test_affected_targets_map_memory_source_without_test_diff() -> None:
     assert all((repo_root / target).is_file() for target in targets)
 
 
+def test_affected_targets_map_memory_rag_indexing_source() -> None:
+    """Indexing edits select the same RAG regression suite as chunking."""
+    repo_root = Path(__file__).resolve().parents[5]
+    targets = affected_pytest_targets(
+        ["src/memory/rag/indexing.py"],
+        repo_root=repo_root,
+    )
+
+    assert targets == ["tests/unit/memory/test_rag_indexing.py"]
+    assert all((repo_root / target).is_file() for target in targets)
+
+
 def test_affected_targets_fail_closed_without_memory_test(tmp_path: Path) -> None:
     """A mapping never turns an absent test into a passing target."""
     with pytest.raises(ValueError, match="Missing mandatory mapped test targets"):

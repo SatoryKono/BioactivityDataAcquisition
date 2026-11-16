@@ -18,11 +18,13 @@ from typing import Any, TypedDict, cast
 
 import yaml
 
+from scripts.engineering.common.repo_paths import REPO_ROOT
+
 DASHBOARDS_DIR = Path("grafana/dashboards")
 VARIABLES_GUIDE = Path("docs/03-guides/dashboards/variables-guide.md")
 MONITORING_INDEX = Path("docs/03-guides/dashboards/monitoring-index.md")
 SELECTOR_CONTRACT = Path("docs/03-guides/dashboards/contracts/selector-contracts.yaml")
-DASHBOARD_INVENTORY_CONTRACT = Path(
+DASHBOARD_INVENTORY_CONTRACT = REPO_ROOT / Path(
     "docs/03-guides/dashboards/contracts/dashboard-inventory.yaml"
 )
 PROVISIONING_CONFIG = Path("grafana/provisioning/dashboards/bioetl.yaml")
@@ -991,14 +993,13 @@ def sync_inventory_panel_counts(inventory: list[DashboardInventoryItem]) -> None
     for start, end, value in sorted(edits, reverse=True):
         rendered = rendered[:start] + value + rendered[end:]
     if rendered != original:
-        destination = DASHBOARD_INVENTORY_CONTRACT.resolve()
-        temporary = destination.with_name(destination.name + ".tmp")
-        if temporary.parent != destination.parent:
-            raise ValueError(
-                "dashboard-inventory: temporary path left the contract directory"
-            )
-        temporary.write_text(rendered, encoding="utf-8")
-        temporary.replace(destination)
+        from scripts.engineering.common.repo_paths import write_text_confined
+
+        write_text_confined(
+            DASHBOARD_INVENTORY_CONTRACT,
+            rendered,
+            allow_external_absolute=True,
+        )
 
 
 def main(argv: list[str] | None = None) -> int:

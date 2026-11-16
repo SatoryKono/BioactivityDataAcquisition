@@ -521,6 +521,61 @@ def test_scoped_acceptance_uses_the_same_pinned_byte_snapshot(capture, monkeypat
     assert assessed == [manifest["capture_id"]]
 
 
+def test_immutable_acceptance_resolves_relative_manifest_from_cwd_outside_repo(
+    capture, monkeypatch
+):
+    """Relative --immutable-manifest must follow CWD, not REPO_ROOT, after chdir."""
+    from scripts.ops.observability.grafana import (
+        capture_acceptance,
+        check_grafana_dashboard_audit_preflight as preflight,
+    )
+
+    root, path, manifest = capture
+    original = path.read_bytes()
+    assessed = []
+
+    def assess(payload):
+        assessed.append(payload["capture_id"])
+        return {"layout_status": "PASS"}
+
+    monkeypatch.setattr(preflight, "_REPO_ROOT", root)
+    monkeypatch.setattr(capture_acceptance, "assess_manifest", assess)
+    monkeypatch.chdir(path.parent)
+    args = SimpleNamespace(
+        immutable_manifest=Path(path.name),
+        manifest_sha256=hashlib.sha256(original).hexdigest(),
+        expected_commit="a" * 40,
+        acceptance_scope="layout",
+    )
+    assert preflight._immutable_acceptance(args) == 0
+    assert assessed == [manifest["capture_id"]]
+
+
+def test_immutable_acceptance_rejects_symlink_mutable_pointer(capture, monkeypatch):
+    """Symlink to an immutable manifest must keep the mutable pointer name."""
+    from scripts.ops.observability.grafana import (
+        check_grafana_dashboard_audit_preflight as preflight,
+    )
+
+    root, path, _ = capture
+    pointer = path.parent / "render-manifest.json"
+    try:
+        pointer.symlink_to(path.name)
+    except OSError as exc:  # pragma: no cover - host privilege/platform limit
+        pytest.skip(f"symlink unavailable: {exc}")
+
+    monkeypatch.setattr(preflight, "_REPO_ROOT", root)
+    monkeypatch.chdir(path.parent)
+    args = SimpleNamespace(
+        immutable_manifest=Path(pointer.name),
+        manifest_sha256=None,
+        expected_commit="a" * 40,
+        acceptance_scope="provenance",
+    )
+    assert preflight._immutable_acceptance(args) == 1
+    assert provenance.verify_capture(pointer, repo_root=root)["status"] == "FAIL"
+
+
 def test_dynamic_dashboard_selectors_must_be_declared_and_not_explicitly_empty():
     model = {
         "before": {"templating": {"list": [{"name": "stage"}, {"name": "pipeline"}]}}
