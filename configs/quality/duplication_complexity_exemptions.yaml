@@ -15,10 +15,10 @@ path_entries:
   - xenon
   - critical_check
   owner: '@bioetl-memory'
-  expiry: '2026-12-15'
+  expiry: '2026-11-15'
   removal_step: Continue memory graph decomposition before removing the exemption.
-  progress_note: '2026-11-16 maintenance review (#13161): decomposition still in progress,
-    no removal completed; retained until 2026-12-15, report next milestone at review.'
+  progress_note: '2026-09-18 stagger review (#10527): decomposition still in progress,
+    no removal completed; retained until 2026-11-15, report next milestone at review.'
   rationale: Memory maintenance flows carry orchestration branches unrelated to BioETL
     runtime paths.
 - path: src/bioetl/infrastructure/adapters/input/
