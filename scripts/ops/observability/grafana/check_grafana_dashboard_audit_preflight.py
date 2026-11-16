@@ -1927,9 +1927,11 @@ def _immutable_acceptance(args: argparse.Namespace) -> int:
     from scripts.engineering.common.repo_paths import read_bytes_confined
     from scripts.ops.observability.grafana.capture_provenance import verify_capture
 
-    # Resolve relative --immutable-manifest against CWD before confinement so
-    # PNG/attachment checks via manifest_path.parent stay on the same tree.
-    manifest_path = args.immutable_manifest.resolve()
+    # Make relative --immutable-manifest absolute against CWD without
+    # following symlinks, so mutable pointer names stay visible to
+    # manifest_identity_errors while PNG/attachments use the same parent.
+    presented = args.immutable_manifest.expanduser()
+    manifest_path = presented if presented.is_absolute() else Path.cwd() / presented
     manifest_bytes = read_bytes_confined(
         manifest_path,
         allow_external_absolute=True,

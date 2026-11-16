@@ -551,6 +551,31 @@ def test_immutable_acceptance_resolves_relative_manifest_from_cwd_outside_repo(
     assert assessed == [manifest["capture_id"]]
 
 
+def test_immutable_acceptance_rejects_symlink_mutable_pointer(capture, monkeypatch):
+    """Symlink to an immutable manifest must keep the mutable pointer name."""
+    from scripts.ops.observability.grafana import (
+        check_grafana_dashboard_audit_preflight as preflight,
+    )
+
+    root, path, _ = capture
+    pointer = path.parent / "render-manifest.json"
+    try:
+        pointer.symlink_to(path.name)
+    except OSError as exc:  # pragma: no cover - host privilege/platform limit
+        pytest.skip(f"symlink unavailable: {exc}")
+
+    monkeypatch.setattr(preflight, "_REPO_ROOT", root)
+    monkeypatch.chdir(path.parent)
+    args = SimpleNamespace(
+        immutable_manifest=Path(pointer.name),
+        manifest_sha256=None,
+        expected_commit="a" * 40,
+        acceptance_scope="provenance",
+    )
+    assert preflight._immutable_acceptance(args) == 1
+    assert provenance.verify_capture(pointer, repo_root=root)["status"] == "FAIL"
+
+
 def test_dynamic_dashboard_selectors_must_be_declared_and_not_explicitly_empty():
     model = {
         "before": {"templating": {"list": [{"name": "stage"}, {"name": "pipeline"}]}}
