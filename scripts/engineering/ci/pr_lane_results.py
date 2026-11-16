@@ -1416,6 +1416,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "tests/fixtures/contracts/coderabbit-schema.v2.json": (
         "tests/architecture/test_coderabbit_config.py",
     ),
+    "tests/unit/scripts/engineering/ci/fixtures/n1_historical_baseline.json": (
+        NIGHTLY_SHADOW_ARCHIVE_TEST,
+    ),
     "package.json": (
         "tests/architecture/test_observability_dashboard_tooling.py",
         NPM_RUNTIME_TEST,
