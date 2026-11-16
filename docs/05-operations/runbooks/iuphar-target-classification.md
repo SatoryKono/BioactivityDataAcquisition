@@ -51,8 +51,8 @@ not promote production or enable generic dual writing.
 - Work from the repository root using the native Windows interpreter
   `.\.venv-win\Scripts\python.exe`, or the prepared local interpreter on other
   platforms. The commands below use PowerShell.
-- Preserve existing data, configuration, reports, and evidence. Do not modify
-  `.env` files as part of this procedure.
+- Preserve existing data, configuration, reports, and evidence. Leave `.env`
+  files unchanged throughout this procedure.
 - Keep the existing target eligibility filters. This integration does not
   expand the pipeline to protein complexes or change baseline cohort selection.
 - For promotion or rollback, stop and quiesce all writers listed above and
@@ -129,6 +129,9 @@ ingestion. Target preflight rechecks the pinned bytes and both actual writer
 destinations before a backfill can clear target outputs. A V30 destination
 blocks `enrich`; a V31 destination blocks `off`/`shadow`; partial or unrecognized
 table schemas require recovery. Empty candidate destinations are allowed.
+Destructive `backfill`/`rebuild` against an existing V31 table is rejected,
+including limited campaigns. Rebuild into empty candidate destinations and
+use the paired migration procedure to replace the canonical bundle.
 
 ### Interpret classification and evidence
 
@@ -168,6 +171,11 @@ V31 hashes include the nine columns above; V30 hash scope remains unchanged.
    row count, snapshot digest, and independently reviewed per-case outcomes.
    Each case needs source references with verified byte hashes. Do not derive
    expected labels from the classifier output under test.
+   Every selected source must declare the `bioetl_target_kernel_csv_v1`
+   import profile with `target_kind: protein`; its `organism` field contains
+   a canonical positive ASCII TaxID or is empty. Species names are rejected
+   at this boundary. Retain raw source columns and the approved conversion
+   ledger separately; never guess a TaxID or protein eligibility.
 2. Run the actual `chembl_target` pipeline in `shadow` using that same snapshot.
    Preserve its completed evidence manifest and successful run report. A
    standalone kernel invocation does not prove pipeline integration.
@@ -176,7 +184,7 @@ V31 hashes include the nine columns above; V30 hash scope remains unchanged.
    overwrite an earlier occurrence.
 
 ```powershell
-.\.venv-win\Scripts\python.exe -m scripts.engineering.qa.iuphar_target_acceptance `
+.\.venv-win\Scripts\python.exe -m scripts.engineering.qa iuphar-target-acceptance `
   --profile 'PATH_TO_SHADOW_PROFILE_JSON' `
   --profile-sha256 'PROFILE_SHA256' `
   --stage0-manifest 'PATH_TO_STAGE0_MANIFEST' `
@@ -237,15 +245,19 @@ target entity configuration into `legacy_include_fields`. Keep it frozen
 through preparation, promotion, and recovery.
 
 ```powershell
-.\.venv-win\Scripts\python.exe -m scripts.ops.target_classification_migration prepare --plan 'PATH_TO_APPROVED_PLAN_JSON'
-.\.venv-win\Scripts\python.exe -m scripts.ops.target_classification_migration promote --plan 'PATH_TO_APPROVED_PLAN_JSON'
+.\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration prepare --plan 'PATH_TO_APPROVED_PLAN_JSON'
+.\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration promote --plan 'PATH_TO_APPROVED_PLAN_JSON'
 ```
 
 `prepare` validates admission, strict V31 schemas, unique target IDs, unchanged
-legacy business values, V30 hash equivalence, equal full Silver/Gold target
-cohorts, and closure with the non-null baseline assay target cohort. Gold's
+legacy business values and identities, V30/V31 hash recomputation, the complete original target
+cohort separately in each layer, and Gold closure with the non-null final
+baseline assay target cohort. Silver can retain targets removed from Gold
+by the workflow's final reconciliation. Gold's
 `description` alias is mapped back to Silver's `target_description` for the
-legacy hash check. It copies and hashes the entire physical old tables and
+legacy hash check. Every candidate Silver row is classified again against the
+admitted snapshot; its nine new fields and the corresponding Gold projection
+must agree with that result. It copies and hashes the entire physical old tables and
 configuration, then writes `journal.json`.
 
 `promote` rechecks canonical, candidate, and assay bytes and validation before
@@ -271,12 +283,19 @@ error. Keep the maintenance window open through verification.
   retains the stored target configuration/dependency rather than taking the
   current default.
 
+## Compliance
+
+Keep production `"off"` until the admission and promotion procedure has actual
+reviewed inputs. Use one contract for all shared-table writers, preserve
+historical and recovery artifacts, and keep local inference separate from
+direct IUPHAR evidence. Software contract fixtures cannot waive acceptance.
+
 ## Rollback
 
 Keep all writers quiescent and use the same approved plan:
 
 ```powershell
-.\.venv-win\Scripts\python.exe -m scripts.ops.target_classification_migration rollback --plan 'PATH_TO_APPROVED_PLAN_JSON'
+.\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration rollback --plan 'PATH_TO_APPROVED_PLAN_JSON'
 ```
 
 Rollback restores both physical original tables and their original
@@ -302,4 +321,6 @@ acceptance evidence are available and reviewed.
 - [Schema and hash profile selection](../../../src/bioetl/infrastructure/config/target_classification_profile.py)
 - [Evidence publication](../../../src/bioetl/infrastructure/adapters/iuphar/evidence_store.py)
 - [Acceptance implementation](../../../src/iuphar_target_class/integration_acceptance.py)
+- [Acceptance CLI](../../../scripts/engineering/qa/iuphar_target_acceptance.py)
 - [Physical migration and journal](../../../src/bioetl/infrastructure/storage/target_classification_migration.py)
+- [Physical migration CLI](../../../scripts/ops/target_classification_migration.py)

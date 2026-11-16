@@ -9,6 +9,7 @@ from deltalake import write_deltalake
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
 from bioetl.infrastructure.storage.target_classification_guard import (
     assert_target_table_compatibility,
+    get_target_table_profile,
 )
 
 
@@ -48,7 +49,9 @@ def test_enrich_requires_migration_for_real_v30_table(tmp_path: Path) -> None:
         )
 
 
-def test_enrich_accepts_complete_v31_and_empty_candidate_destinations(tmp_path: Path) -> None:
+def test_enrich_accepts_complete_v31_and_empty_candidate_destinations(
+    tmp_path: Path,
+) -> None:
     silver, gold = tmp_path / "silver", tmp_path / "gold"
     assert_target_table_compatibility(silver_path=silver, gold_path=gold, mode="enrich")
     _table(silver, TARGET_CLASSIFICATION_FIELDS)
@@ -56,11 +59,27 @@ def test_enrich_accepts_complete_v31_and_empty_candidate_destinations(tmp_path: 
     assert_target_table_compatibility(silver_path=silver, gold_path=gold, mode="enrich")
 
 
-def test_partial_schema_and_unrecognised_directory_require_recovery(tmp_path: Path) -> None:
+def test_profile_inspection_refuses_mixed_pair_and_supports_partial_run(
+    tmp_path: Path,
+) -> None:
+    silver, gold = tmp_path / "silver", tmp_path / "gold"
+    assert get_target_table_profile(silver_path=silver, gold_path=gold) == "empty"
+    _table(silver)
+    assert get_target_table_profile(silver_path=silver, gold_path=gold) == "V30"
+    _table(gold, TARGET_CLASSIFICATION_FIELDS)
+    with pytest.raises(ValueError, match="mixed V30/V31"):
+        get_target_table_profile(silver_path=silver, gold_path=gold)
+
+
+def test_partial_schema_and_unrecognised_directory_require_recovery(
+    tmp_path: Path,
+) -> None:
     silver, gold = tmp_path / "silver", tmp_path / "gold"
     _table(silver, (TARGET_CLASSIFICATION_FIELDS[0],))
     with pytest.raises(ValueError, match="incomplete target classification"):
-        assert_target_table_compatibility(silver_path=silver, gold_path=gold, mode="enrich")
+        assert_target_table_compatibility(
+            silver_path=silver, gold_path=gold, mode="enrich"
+        )
     other = tmp_path / "unrecognised"
     other.mkdir()
     (other / "precious.bin").write_bytes(b"preserve")

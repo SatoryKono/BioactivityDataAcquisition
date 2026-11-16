@@ -48,7 +48,12 @@ def load_contract_rollout_policy(config: PipelineYamlConfig) -> ContractRolloutP
             resolve_target_classification_profile,
         )
 
-        policy = resolve_target_classification_profile(config, policy).contract_policy
+        resolved_policy = resolve_target_classification_profile(
+            config, policy
+        ).contract_policy
+        if resolved_policy is None:
+            raise ValueError("target writer requires an explicit contract policy")
+        policy = resolved_policy
     return policy.to_contract_rollout_policy()
 
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 from uuid import UUID
 
 from bioetl.composition.control_plane_paths import control_plane_root
@@ -24,6 +24,7 @@ from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManif
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.infrastructure.config.settings_api import Settings
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 def resolve_exact_replay_cached_bronze_context(
@@ -96,6 +97,18 @@ def _resolve_replay_parent_manifest(
             f"run_id '{replay_of_run_id}'"
         )
     return manifest
+
+
+@overload
+def restore_target_replay_config(
+    *, ctx: PipelineRunContext, settings: Settings, current_config: PipelineYamlConfig
+) -> PipelineYamlConfig: ...
+
+
+@overload
+def restore_target_replay_config(
+    *, ctx: PipelineRunContext, settings: Settings, current_config: object
+) -> object: ...
 
 
 def restore_target_replay_config(

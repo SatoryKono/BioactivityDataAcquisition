@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import json
 from types import SimpleNamespace
 
 import pytest
@@ -29,6 +30,45 @@ from scripts.engineering.qa.report_module_coverage_inventory import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize("gate_exit", [1, 2])
+def test_failed_regression_gate_preserves_published_inventory(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, gate_exit: int
+) -> None:
+    from scripts.engineering.qa import report_module_coverage_inventory as reporter
+
+    published = tmp_path / "inventory.json"
+    published.write_bytes(b'{"accepted":true}\n')
+    before = published.read_bytes()
+    monkeypatch.setattr(
+        reporter,
+        "_payload_for_check",
+        lambda _: {"summary": {"source_module_count": 1}},
+    )
+    monkeypatch.setattr(reporter, "_load_module_coverage_gates", lambda *_: {})
+    monkeypatch.setattr(
+        reporter, "evaluate_module_coverage_gates", lambda *_, **__: ["regression"]
+    )
+    monkeypatch.setattr(reporter, "_report_gate_violations", lambda *_: gate_exit)
+    code = reporter.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "--json-out",
+            str(published),
+            "--baseline-json",
+            str(published),
+            "--coverage-xml",
+            str(tmp_path / "coverage.xml"),
+            "--allow-missing-coverage-xml",
+            "--enforce-module-thresholds",
+            "block-regression",
+        ]
+    )
+    assert code == gate_exit
+    assert published.read_bytes() == before
+    assert json.loads(published.read_bytes()) == {"accepted": True}
 
 
 def test_confined_existing_path_returns_first_confined_result(

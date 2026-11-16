@@ -71,6 +71,9 @@ class TargetMigrationPaths:
         }
         for path in paths.values():
             _check_path(path, root)
+        # Canonicalize only after inspecting the caller's path and ancestors.
+        # Otherwise lexical '..' aliases can hide a backup nested in a table.
+        paths = {name: path.resolve() for name, path in paths.items()}
         for name, path in paths.items():
             if any(
                 path == other or path.is_relative_to(other)

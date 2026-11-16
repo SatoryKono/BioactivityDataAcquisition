@@ -33,6 +33,9 @@ from bioetl.application.services.workflow.control_plane.execution_incremental_me
 from bioetl.application.services.workflow.control_plane.execution_preparation import (
     prepare_workflow_execution,
 )
+from bioetl.application.services.workflow.control_plane.execution_preparation_incremental import (
+    _apply_incremental_offset,
+)
 from bioetl.application.services.workflow.control_plane.execution_recording import (
     WorkflowExecutionRecorder,
     record_step_completed,
@@ -40,6 +43,10 @@ from bioetl.application.services.workflow.control_plane.execution_recording impo
     record_transform_commit,
     record_workflow_finished,
     record_workflow_started,
+)
+from bioetl.application.services.workflow.control_plane.mutation_plan import (
+    WorkflowMutationPlan,
+    build_workflow_mutation_plan,
 )
 from bioetl.application.services.workflow.control_plane.selected_snapshot_resume import (
     SelectedSnapshotResumeOptions,
@@ -49,7 +56,7 @@ from bioetl.application.services.workflow.workflow_runner_service import (
     WorkflowRunExecutionResult,
     WorkflowRunnerService,
 )
-from bioetl.domain.control_plane import WorkflowManifest
+from bioetl.domain.control_plane import WorkflowExecutionState, WorkflowManifest
 from bioetl.domain.ports import (
     LockPort,
     WorkflowExecutionStatePort,
@@ -89,7 +96,10 @@ class WorkflowExecutionService:
     )
     run_id_factory: Callable[[], RunID] = _missing_run_id_factory
     dependency_preflight: (
-        Callable[[WorkflowConfig, dict[str, object]], dict[str, object]] | None
+        Callable[
+            [WorkflowConfig, dict[str, object], WorkflowMutationPlan], dict[str, object]
+        ]
+        | None
     ) = None
 
     async def run_workflow(
@@ -127,7 +137,7 @@ class WorkflowExecutionService:
         dependency_token = None
         try:
             try:
-                _restore_workflow_target_dependency(
+                resume_state = _restore_workflow_target_dependency(
                     service=self,
                     config=config,
                     launch_context=resolved_launch_context,
@@ -135,9 +145,23 @@ class WorkflowExecutionService:
                         resume_last or resume_manifest_id or resume_run_id
                     ),
                 )
+                prepare_incremental = incremental
                 if self.dependency_preflight is not None:
+                    if incremental and resume_state is None:
+                        config = _apply_incremental_offset(
+                            config=config, workflow_state_port=self.workflow_state_port
+                        )
+                        prepare_incremental = False
+                    mutation_plan = build_workflow_mutation_plan(
+                        config,
+                        resume_state,
+                        force_steps=force_steps,
+                        repair_steps=repair_steps,
+                    )
                     resolved_launch_context.update(
-                        self.dependency_preflight(config, resolved_launch_context)
+                        self.dependency_preflight(
+                            config, resolved_launch_context, mutation_plan
+                        )
                     )
                 binding = resolved_launch_context.get(
                     TARGET_CLASSIFICATION_DEPENDENCY_KEY
@@ -157,7 +181,7 @@ class WorkflowExecutionService:
                     workflow_state_port=self.workflow_state_port,
                     now_factory=self.now_factory,
                     run_id_factory=lambda: lock_owner_id,
-                    incremental=incremental,
+                    incremental=prepare_incremental,
                 )
                 ledger = self.workflow_ledger_factory(
                     self.workflow_ledger_port,
@@ -204,10 +228,10 @@ def _restore_workflow_target_dependency(
     config: WorkflowConfig,
     launch_context: dict[str, object],
     resume_requested: bool,
-) -> None:
+) -> WorkflowExecutionState | None:
     """Restore a pinned dependency before calculating the resume fingerprint."""
     if not resume_requested or service.dependency_preflight is None:
-        return
+        return None
     state = load_resume_state(
         workflow_state_port=service.workflow_state_port,
         workflow_name=config.name,
@@ -237,6 +261,7 @@ def _restore_workflow_target_dependency(
         )
     if stored is not None:
         launch_context[TARGET_CLASSIFICATION_DEPENDENCY_KEY] = stored
+    return state
 
 
 def _resolve_launch_context(

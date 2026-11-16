@@ -71,13 +71,8 @@ def _require_bioetl_kernel_header(headers: Sequence[str]) -> None:
         raise ValueError("invalid bioetl_target_kernel_csv_v1 header")
 
 
-def _bioetl_kernel_row(
-    raw: dict[str, str],
-    record: int,
-    source_path: str,
-    target_kind: str,
-    digest: str,
-) -> RawTargetRow:
+def _bioetl_kernel_identity(raw: dict[str, str], target_kind: str) -> str:
+    """Require a coherent row before constructing its source provenance."""
     if None in raw or any(value is None for value in raw.values()):
         raise ValueError("invalid CSV row width")
     identity = raw["input_row_id"]
@@ -85,11 +80,25 @@ def _bioetl_kernel_row(
         raise ValueError("invalid canonical CSV input_row_id")
     if raw["target_kind"] != target_kind:
         raise ValueError("canonical CSV target_kind differs from selected profile")
-    taxon = raw["organism"]
+    return identity
+
+
+def _require_canonical_taxon(taxon: str) -> None:
     if taxon and re.fullmatch(r"[1-9][0-9]*", taxon) is None:
         raise ValueError(
             "canonical CSV organism must be a positive ASCII TaxID or blank"
         )
+
+
+def _bioetl_kernel_row(
+    raw: dict[str, str],
+    record: int,
+    source_path: str,
+    target_kind: str,
+    digest: str,
+) -> RawTargetRow:
+    identity = _bioetl_kernel_identity(raw, target_kind)
+    _require_canonical_taxon(raw["organism"])
     fields: dict[str, str | None] = {
         key: value
         for key, value in raw.items()

@@ -5,13 +5,30 @@ from __future__ import annotations
 import os
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import psutil
 import yaml
 
-from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
+from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from bioetl.domain.normalization.json import serialize_json_canonical
+from bioetl.domain.normalization.profiles.chembl_target import CHEMBL_TARGET_PROFILE
+from bioetl.domain.normalization.profiles.chembl_target_classification import (
+    target_v31_normalization_profile,
+)
+from bioetl.domain.transformations import generate_content_hash
+from bioetl.infrastructure.adapters.iuphar.adapter import (
+    IupharTargetClassificationAdapter,
+)
 from bioetl.infrastructure.adapters.iuphar.snapshot_loader import load_profile
+
+if TYPE_CHECKING:
+    from pandera.pandas import DataFrameModel
+
+    from bioetl.domain.normalization.profiles.base import NormalizationProfile
+    from bioetl.infrastructure.adapters.iuphar.snapshot_loader import (
+        LoadedIupharProfile,
+    )
 
 _META = frozenset({"entity_id", "content_hash"})
 
@@ -75,30 +92,96 @@ def compare_target_rows(
     old, new = _by_id(original), _by_id(candidate)
     if old.keys() != new.keys():
         raise ValueError("candidate target IDs differ from the full canonical cohort")
-    identity = EntityIdentityGenerator(
-        content_hash_include_fields=set(legacy_include_fields)
-    )
     for key, previous in old.items():
         current = new[key]
-        for field, value in _business(previous).items():
-            if field not in current or current[field] != value:
-                raise ValueError(
-                    f"candidate changed legacy business field: {key}/{field}"
-                )
-        old_hash = identity.compute_content_hash("chembl", _hash_input(previous))
-        new_legacy_hash = identity.compute_content_hash("chembl", _hash_input(current))
+        _assert_legacy_values(key, previous, current)
+        old_hash = _scoped_target_hash(
+            previous, legacy_include_fields, CHEMBL_TARGET_PROFILE
+        )
+        new_legacy_hash = _scoped_target_hash(
+            current, legacy_include_fields, CHEMBL_TARGET_PROFILE
+        )
         if old_hash != previous.get("content_hash") or old_hash != new_legacy_hash:
             raise ValueError("legacy 3.0 hash equivalence failed")
     return {"rows": len(old), "legacy_hashes_verified": len(old)}
 
 
+def _assert_legacy_values(
+    key: str, previous: Mapping[str, object], current: Mapping[str, object]
+) -> None:
+    """Preserve the original entity identity and every old business value."""
+    if previous.get("entity_id") != current.get("entity_id"):
+        raise ValueError(f"candidate changed legacy entity_id: {key}")
+    for field, value in _business(previous).items():
+        if field not in current or current[field] != value:
+            raise ValueError(f"candidate changed legacy business field: {key}/{field}")
+
+
+def _scoped_target_hash(
+    row: Mapping[str, object],
+    include_fields: tuple[str, ...],
+    profile: NormalizationProfile,
+) -> str:
+    """Recompute the runtime hash of an already normalized persisted row.
+
+    Use the same null and set-like policies as RecordNormalizationProcessor.
+    Gold's description alias is projected back to the canonical Silver field.
+    """
+    record = _hash_input(row)
+    normalized = {
+        field: _normalize_hash_field(profile, field, record[field], record)
+        for field in include_fields
+        if field in record
+    }
+    return str(
+        generate_content_hash(
+            normalized,
+            "chembl",
+            exclude_none=True,
+            include_fields=set(include_fields),
+            set_like_fields=set(profile.set_like_fields),
+            datetime_policy="v2_datetime_utc",
+        )
+    )
+
+
+def _normalize_hash_field(
+    profile: NormalizationProfile,
+    field: str,
+    value: object,
+    record: Mapping[str, object],
+) -> object:
+    """Restore canonical domain field types after Gold storage coercions."""
+    rule = profile.rule_for(field)
+    if rule is None:
+        raise ValueError(f"migration hash field has no normalization rule: {field}")
+    normalized = rule.apply(value, record=record)
+    if isinstance(normalized, dict | list):
+        return serialize_json_canonical(normalized)
+    return normalized
+
+
+def _frozen_v31_hash_fields(
+    paths: dict[str, Path], legacy_include_fields: tuple[str, ...]
+) -> tuple[str, ...]:
+    """Extend the exact canonical V30 scope; candidate YAML cannot weaken it."""
+    config = yaml.safe_load(paths["config"].read_text(encoding="utf-8"))
+    configured = tuple(config["hash_policy"]["hash_policy"]["include_fields"])
+    if not configured or configured != legacy_include_fields:
+        raise ValueError(
+            "migration hash scope differs from the frozen canonical V30 policy"
+        )
+    return tuple(dict.fromkeys((*legacy_include_fields, *TARGET_CLASSIFICATION_FIELDS)))
+
+
 def _read_delta(path: Path) -> list[dict[str, object]]:
     from deltalake import DeltaTable
+    from bioetl.infrastructure.storage.delta.table_ops import read_delta_records
 
     # Arrow's JSON-compatible row boundary is untyped in the installed stubs.
     return cast(
         "list[dict[str, object]]",
-        DeltaTable(str(path)).to_pyarrow_table().to_pylist(),
+        read_delta_records(DeltaTable(str(path))),
     )
 
 
@@ -112,6 +195,31 @@ def validate_target_candidate(
     )
     from bioetl.domain.schemas.chembl.target import TargetSchemaV31
 
+    profile = _load_candidate_profile(paths)
+    v31_include_fields = _frozen_v31_hash_fields(paths, legacy_include_fields)
+    result: dict[str, object] = {}
+    layers = {}
+    for name, schema in (
+        ("silver", TargetSchemaV31),
+        ("gold", ChEMBLTargetGoldSchemaV31),
+    ):
+        result[name], layers[name] = _validate_candidate_layer(
+            name,
+            schema,
+            paths,
+            profile.profile_sha256,
+            legacy_include_fields,
+            v31_include_fields,
+        )
+    _verify_source_classifications(layers, profile)
+    _assert_candidate_cohort_closure(paths, layers["gold"])
+    result["fk_closure"] = "PASS"
+    result["profile_sha256"] = profile.profile_sha256
+    return result
+
+
+def _load_candidate_profile(paths: dict[str, Path]) -> LoadedIupharProfile:
+    """Require the exact admitted enrich profile selected by candidate YAML."""
     config = yaml.safe_load(paths["candidate_config"].read_text(encoding="utf-8"))
     classification = config["pipeline"]["target_classification"]
     if classification["mode"] != "enrich":
@@ -121,38 +229,93 @@ def validate_target_candidate(
         # Entity configuration lives at configs/entities/chembl/target.yaml.
         root = paths["config"].resolve().parents[3]
         profile_path = root / profile_path
-    profile = load_profile(
+    return load_profile(
         profile_path,
         classification["snapshot_manifest_sha256"],
         require_acceptance=True,
     )
-    result: dict[str, object] = {}
-    cohorts = {}
-    for name, schema in (
-        ("silver", TargetSchemaV31),
-        ("gold", ChEMBLTargetGoldSchemaV31),
-    ):
-        old = _read_delta(paths[name])
-        new = _read_delta(paths["candidate_" + name])
-        import pandas as pd
 
-        schema.validate(pd.DataFrame(new), lazy=True)
-        if any(
-            row.get("target_class_profile_sha256") != profile.profile_sha256
-            for row in new
-        ):
-            raise ValueError("candidate rows belong to another IUPHAR profile")
-        result[name] = compare_target_rows(old, new, legacy_include_fields)
-        cohorts[name] = {row["target_id"] for row in new}
-    if cohorts["silver"] != cohorts["gold"]:
-        raise ValueError("Silver/Gold target cohorts differ")
+
+def _validate_candidate_layer(
+    name: str,
+    schema: type[DataFrameModel],
+    paths: dict[str, Path],
+    profile_sha256: str,
+    legacy_include_fields: tuple[str, ...],
+    v31_include_fields: tuple[str, ...],
+) -> tuple[dict[str, int], list[dict[str, object]]]:
+    """Validate one full layer and its unchanged legacy/hash projection."""
+    old = _read_delta(paths[name])
+    new = _read_delta(paths["candidate_" + name])
+    import pandas as pd
+
+    schema.validate(pd.DataFrame(new), lazy=True)
+    if any(row.get("target_class_profile_sha256") != profile_sha256 for row in new):
+        raise ValueError("candidate rows belong to another IUPHAR profile")
+    result = compare_target_rows(old, new, legacy_include_fields)
+    _verify_candidate_hashes(new, v31_include_fields)
+    return result, new
+
+
+def _verify_candidate_hashes(
+    rows: Sequence[Mapping[str, object]], include_fields: tuple[str, ...]
+) -> None:
+    """Reject arbitrary or stale candidate hashes, including classification drift."""
+    profile = target_v31_normalization_profile()
+    for row in rows:
+        if row.get("content_hash") != _scoped_target_hash(row, include_fields, profile):
+            raise ValueError("candidate V31 content hash verification failed")
+
+
+def _verify_source_classifications(
+    layers: Mapping[str, list[dict[str, object]]], profile: LoadedIupharProfile
+) -> None:
+    """Reclassify original Silver inputs, then bind both candidate projections."""
+    adapter = IupharTargetClassificationAdapter(profile)
+    expected: dict[str, Mapping[str, str | None]] = {}
+    for target_id, row in _by_id(layers["silver"]).items():
+        business = {
+            key: value
+            for key, value in _business(row).items()
+            if key not in TARGET_CLASSIFICATION_FIELDS
+        }
+        result = adapter.classify_record(
+            business,
+            input_row_id="migration:" + target_id,
+            run_id="migration-validation",
+            run_started_at="1970-01-01T00:00:00+00:00",
+        )
+        _assert_classification_projection(row, result.projection)
+        expected[target_id] = result.projection
+    for target_id, row in _by_id(layers["gold"]).items():
+        if target_id not in expected:
+            raise ValueError("candidate Gold target has no classified Silver source")
+        _assert_classification_projection(row, expected[target_id])
+
+
+def _assert_classification_projection(
+    row: Mapping[str, object], expected: Mapping[str, str | None]
+) -> None:
+    """Keep direct, local and effective fields equal to the admitted classifier."""
+    for field in TARGET_CLASSIFICATION_FIELDS:
+        if row.get(field) != expected[field]:
+            raise ValueError(
+                f"candidate classification differs from admitted source: {field}"
+            )
+
+
+def _assert_candidate_cohort_closure(
+    paths: dict[str, Path], gold_rows: Sequence[Mapping[str, object]]
+) -> None:
+    """Keep final Gold targets closed against final Gold assay references.
+
+    Baseline reconciliation mutates Gold only; Silver can retain a superset.
+    Each old/new layer's full identity set is checked independently above.
+    """
     assay_targets = {
         row["target_id"]
         for row in _read_delta(paths["assay"])
         if row.get("target_id") is not None
     }
-    if assay_targets != cohorts["gold"]:
+    if assay_targets != set(_by_id(gold_rows)):
         raise ValueError("baseline assay/target foreign-key closure failed")
-    result["fk_closure"] = "PASS"
-    result["profile_sha256"] = profile.profile_sha256
-    return result

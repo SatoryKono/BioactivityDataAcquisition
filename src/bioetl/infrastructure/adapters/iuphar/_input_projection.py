@@ -1,0 +1,116 @@
+"""Shared pure field projection for runtime classification and canonical export."""
+
+from __future__ import annotations
+
+import json
+import math
+import re
+from collections.abc import Mapping
+
+from iuphar_target_class.stage0.io import canonical_json_bytes
+
+_SOURCE_TAXA = {
+    "Homo sapiens": "9606",
+    "Mus musculus": "10090",
+    "Rattus norvegicus": "10116",
+}
+
+
+def _text(value: object) -> str | None:
+    if not isinstance(value, str):
+        return None
+    text = value.strip()
+    return None if not text or text == "unknown" else text
+
+
+def _tokens(value: object) -> tuple[str, ...]:
+    if value is None:
+        return ()
+    if isinstance(value, (list, tuple)):
+        return tuple(part for item in value for part in _tokens(item))
+    text = _text(value)
+    if text is None:
+        return ()
+    if text.startswith("["):
+        loaded = json.loads(text)
+        if not isinstance(loaded, list):
+            raise ValueError("expected a JSON identifier array")
+        return _tokens(loaded)
+    return tuple(part for raw in re.split(r"[|;]", text) if (part := _text(raw)))
+
+
+def _taxon(value: object) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        raise ValueError("taxonomy_id must be a positive integer")
+    if isinstance(value, float):
+        if not math.isfinite(value) or not value.is_integer():
+            raise ValueError("taxonomy_id must be a positive integer")
+        value = int(value)
+    text = str(value).strip()
+    if not text.isascii() or not text.isdecimal() or text.startswith("0"):
+        raise ValueError("taxonomy_id must be a positive integer")
+    return text
+
+
+def plain_target_value(value: object) -> object:
+    if isinstance(value, Mapping):
+        return {key: plain_target_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [plain_target_value(item) for item in value]
+    return value
+
+
+def project_target_fields(data: Mapping[str, object], taxon: str | None) -> dict[str, str | None]:
+    accessions = tuple(
+        dict.fromkeys(
+            (
+                *_tokens(data.get("component_accessions")),
+                *_tokens(data.get("target_xref_uniprot_ids")),
+            )
+        )
+    )
+    synonyms = tuple(
+        dict.fromkeys(
+            (
+                *_tokens(data.get("target_protein_synonyms")),
+                *_tokens(data.get("target_gene_synonyms")),
+            )
+        )
+    )
+    return {
+        "target_chembl_id": _text(data.get("target_id")),
+        # ChEMBL identity is never passed as the kernel's explicit IUPHAR ID.
+        "target_id": _text(data.get("iuphar_target_id")),
+        "uniprot": "|".join(accessions) or None,
+        "organism": taxon,
+        "source_organism": _text(data.get("organism")),
+        "name": _text(data.get("pref_name")),
+        "synonyms": "|".join(synonyms) or None,
+        "ec": "|".join(_tokens(data.get("target_ec_numbers"))) or None,
+        "gene_symbol": _text(data.get("gene_symbol")),
+        "gene_id": _text(data.get("gene_id")),
+        "source_business_data": canonical_json_bytes(plain_target_value(data)).decode("utf-8"),
+    }
+
+
+def target_input_eligibility(
+    data: Mapping[str, object], species: frozenset[str]
+) -> tuple[str | None, str | None]:
+    if data.get("target_type") != "SINGLE PROTEIN":
+        return None, "unsupported_target_type"
+    try:
+        taxon = _taxon(data.get("taxonomy_id"))
+    except ValueError:
+        return None, "invalid_taxonomy_id"
+    if taxon is not None and taxon not in species:
+        return taxon, "unsupported_taxon"
+    source_taxon = _SOURCE_TAXA.get(_text(data.get("organism")) or "")
+    if taxon is not None and source_taxon is not None and taxon != source_taxon:
+        return taxon, "taxonomy_name_conflict"
+    return taxon, None
+
+
+
+__all__ = ["plain_target_value", "project_target_fields", "target_input_eligibility"]

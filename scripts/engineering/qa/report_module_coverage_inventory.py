@@ -1496,6 +1496,10 @@ def main(argv: list[str] | None = None) -> int:
         print("[module-coverage-inventory] artifact is current")
         return gate_exit
 
+    if gate_exit:
+        print("[module-coverage-inventory] regression gate failed; output not published")
+        return gate_exit
+
     _write_text_atomically(args.json_out, rendered, root=repo_root)
     print(
         "[module-coverage-inventory] "

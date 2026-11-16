@@ -13,10 +13,16 @@ from pathlib import Path
 from time import perf_counter
 from typing import NotRequired, TypedDict, cast
 
-from .models import RunProvenance
+from .models import ClassificationResult, RawTargetRow, RunProvenance
 from .pipeline import BatchResult, IndexedSnapshot, classify_batch
-from .pipeline_acceptance import SourceImport, VolumePlan, load_admitted_cohort
+from .pipeline_acceptance import (
+    AdmittedCohort,
+    SourceImport,
+    VolumePlan,
+    load_admitted_cohort,
+)
 from .pipeline_io import render_batch
+from .pipeline_proof import verify_stored_pipeline_proof
 from .policy import VOLUME_TEST_SECONDS
 from .stage0.io import canonical_json_bytes, sha256_bytes, sha256_file
 
@@ -126,30 +132,35 @@ def _check_cases(batch: BatchResult, spec: _ReferenceSpecification, root: Path) 
     if not cases or len(set(identities)) != len(identities):
         raise ValueError("reference cases must have distinct row identities")
     for case in cases:
-        references = case.get("source_references", [])
-        expected = case.get("expected", {})
-        if (
-            not references
-            or not expected
-            or not set(expected).issubset(_EXPECTED_FIELDS)
-        ):
-            raise ValueError(
-                "each reference case needs reviewed source proof and outcomes"
+        _check_reference_case(case, results.get(case["input_row_id"]), root)
+
+
+def _check_reference_sources(references: list[_SourceReference], root: Path) -> None:
+    """Bind reviewed source files to the reference specification directory."""
+    for reference in references:
+        path = (root / reference["path"]).resolve()
+        if not path.is_relative_to(root.resolve()) or path.is_symlink():
+            raise ValueError("reference source escapes its specification root")
+        if sha256_file(path) != reference["sha256"]:
+            raise ValueError("reference source digest mismatch")
+
+
+def _check_reference_case(
+    case: _ReferenceCase, actual: ClassificationResult | None, root: Path
+) -> None:
+    """Compare one source-backed expectation with the executed row result."""
+    references = case.get("source_references", [])
+    expected = case.get("expected", {})
+    if not references or not expected or not set(expected).issubset(_EXPECTED_FIELDS):
+        raise ValueError("each reference case needs reviewed source proof and outcomes")
+    _check_reference_sources(references, root)
+    if actual is None:
+        raise ValueError("reference case is outside the admitted cohort")
+    for field, value in expected.items():
+        if getattr(actual, field) != value:
+            raise AssertionError(
+                f"reference mismatch: {case['input_row_id']} / {field}"
             )
-        for reference in references:
-            path = (root / reference["path"]).resolve()
-            if not path.is_relative_to(root.resolve()) or path.is_symlink():
-                raise ValueError("reference source escapes its specification root")
-            if sha256_file(path) != reference["sha256"]:
-                raise ValueError("reference source digest mismatch")
-        actual = results.get(case["input_row_id"])
-        if actual is None:
-            raise ValueError("reference case is outside the admitted cohort")
-        for field, value in expected.items():
-            if getattr(actual, field) != value:
-                raise AssertionError(
-                    f"reference mismatch: {case['input_row_id']} / {field}"
-                )
 
 
 def _check_evidence(batch: BatchResult) -> None:
@@ -171,45 +182,15 @@ def verify_pipeline_proof(
     path: Path,
     snapshot_sha256: str,
     pipeline_report: Path | None = None,
+    *,
+    provenance: RunProvenance | None = None,
 ) -> str:
-    """Verify an actual Application evidence manifest and successful run report."""
-    proof = json.loads(path.read_bytes())
-    if (
-        proof.get("artifact") != "bioetl_iuphar_pipeline_evidence"
-        or proof.get("pipeline_name") != "chembl_target"
-        or proof.get("mode") not in {"shadow", "enrich"}
-        or proof.get("status") != "complete"
-        or proof.get("snapshot_manifest_sha256") != snapshot_sha256
-        or not proof.get("run_id")
-        or not isinstance(proof.get("row_count"), int)
-        or proof["row_count"] <= 0
-    ):
-        raise ValueError("missing complete, matching target integration occurrence")
-    artifacts = proof.get("artifacts", {})
-    digests = proof.get("artifact_sha256", {})
-    report = proof.get("pipeline_report")
-    if not artifacts and isinstance(digests, dict):
-        artifacts = {
-            name: {"path": name, "sha256": digest} for name, digest in digests.items()
-        }
-    if not artifacts or (not isinstance(report, dict) and pipeline_report is None):
-        raise ValueError("integration proof lacks output bytes or pipeline report")
-    references = list(artifacts.values())
-    if isinstance(report, dict):
-        references.append(report)
-    for item in references:
-        artifact = (path.parent / item["path"]).resolve()
-        if not artifact.is_relative_to(path.parent.resolve()):
-            raise ValueError("integration artifact escapes proof root")
-        if sha256_file(artifact) != item["sha256"]:
-            raise ValueError("integration artifact digest mismatch")
-    report_path = pipeline_report or path.parent / report["path"]
-    run = json.loads(report_path.read_bytes())["identity"]
-    if run.get("run_id") != proof["run_id"] or run.get("status") != "success":
-        raise ValueError("integration run was not a successful matching occurrence")
-    if (run.get("pipeline") or run.get("pipeline_name")) != "chembl_target":
-        raise ValueError("integration proof belongs to another pipeline")
-    return sha256_file(path)
+    """Require a verified row-store occurrence and its source-bound run report."""
+    if provenance is None:
+        raise ValueError("pipeline proof requires expected executed version identities")
+    return verify_stored_pipeline_proof(
+        path, snapshot_sha256, pipeline_report, provenance
+    )
 
 
 def run_integration_acceptance(
@@ -256,56 +237,17 @@ def _execute_acceptance(
     checks: dict[str, str],
 ) -> None:
     spec = _verified_labels(request)
-    imports = spec.get("source_imports", [])
-    if (
-        {item["source_path"] for item in imports} != set(spec["selected_source_paths"])
-        or any(item["format_version"] != "bioetl_target_kernel_csv_v1" for item in imports)
-    ):
-        raise ValueError("integration acceptance requires explicit canonical TaxID input profiles")
-    if request.provenance.snapshot_id != snapshot.snapshot_id:
-        raise ValueError("execution provenance belongs to another snapshot")
-    if not snapshot.complete:
-        raise ValueError("complete admitted snapshot required")
-    cohort = load_admitted_cohort(request.stage0_manifest, _volume_plan(spec))
-    if not cohort.rows or len(cohort.rows) != spec["expected_rows"]:
-        raise ValueError("full admitted cohort count differs from the frozen plan")
+    cohort = _admit_acceptance_cohort(request, snapshot, spec)
     checks["stage0_admission"] = "PASS"
     receipt.update(
         stage0_manifest_sha256=cohort.manifest_sha256,
         reviewer_reference=spec["reviewer_reference"],
     )
-    config = {
-        "snapshot_manifest_sha256": request.snapshot_manifest_sha256,
-        "expected_labels_sha256": request.expected_labels_sha256,
-        "stage0_manifest_sha256": cohort.manifest_sha256,
-        "run_id": request.run_id,
-        "expected_rows": len(cohort.rows),
-    }
-    (output_dir / "execution-config.json").write_bytes(canonical_json_bytes(config))
-    start = clock()
-    batch = classify_batch(
-        cohort.rows,
-        snapshot=snapshot,
-        provenance=request.provenance,
-        run_id=request.run_id,
+    _write_execution_config(request, cohort, output_dir)
+    batch, elapsed = _execute_cohort(request, snapshot, cohort.rows, clock)
+    rendered = _verify_batch_outputs(
+        request, snapshot, cohort.rows, batch, spec, checks
     )
-    elapsed = clock() - start
-    if batch.status != "processed" or not 0 <= elapsed <= VOLUME_TEST_SECONDS:
-        raise AssertionError("full-cohort execution or approved volume limit failed")
-    _check_cases(batch, spec, request.expected_labels.parent)
-    checks["reference_cases"] = "PASS"
-    _check_evidence(batch)
-    checks["evidence_integrity"] = "PASS"
-    rendered = render_batch(batch)
-    repeated = classify_batch(
-        tuple(reversed(cohort.rows)),
-        snapshot=snapshot,
-        provenance=request.provenance,
-        run_id=request.run_id,
-    )
-    if rendered != render_batch(repeated):
-        raise AssertionError("frozen-provenance permutation determinism failed")
-    checks["semantic_determinism"] = "PASS"
     receipt.update(
         output_sha256={name: sha256_bytes(raw) for name, raw in rendered.items()},
         elapsed_seconds=elapsed,
@@ -314,14 +256,114 @@ def _execute_acceptance(
     )
     for name, raw in rendered.items():
         (output_dir / name).write_bytes(raw)
+    _record_pipeline_acceptance(request, receipt)
+    checks["pipeline_integration"] = "PASS"
+    receipt["status"] = "PASS"
+
+
+def _require_canonical_imports(spec: _ReferenceSpecification) -> None:
+    """Allow only the explicit TaxID-preserving integration input profile."""
+    imports = spec.get("source_imports", [])
+    if {item["source_path"] for item in imports} != set(
+        spec["selected_source_paths"]
+    ) or any(
+        item["format_version"] != "bioetl_target_kernel_csv_v1"
+        or item["target_kind"] != "protein"
+        for item in imports
+    ):
+        raise ValueError(
+            "integration acceptance requires explicit canonical TaxID input profiles"
+        )
+
+
+def _admit_acceptance_cohort(
+    request: IntegrationAcceptanceRequest,
+    snapshot: IndexedSnapshot,
+    spec: _ReferenceSpecification,
+) -> AdmittedCohort:
+    """Bind complete Stage-0 rows and execution provenance to this snapshot."""
+    _require_canonical_imports(spec)
+    if request.provenance.snapshot_id != snapshot.snapshot_id:
+        raise ValueError("execution provenance belongs to another snapshot")
+    if not snapshot.complete:
+        raise ValueError("complete admitted snapshot required")
+    cohort = load_admitted_cohort(request.stage0_manifest, _volume_plan(spec))
+    if not cohort.rows or len(cohort.rows) != spec["expected_rows"]:
+        raise ValueError("full admitted cohort count differs from the frozen plan")
+    return cohort
+
+
+def _write_execution_config(
+    request: IntegrationAcceptanceRequest, cohort: AdmittedCohort, output_dir: Path
+) -> None:
+    """Preserve the exact run inputs before executing classification."""
+    config = {
+        "snapshot_manifest_sha256": request.snapshot_manifest_sha256,
+        "expected_labels_sha256": request.expected_labels_sha256,
+        "stage0_manifest_sha256": cohort.manifest_sha256,
+        "run_id": request.run_id,
+        "expected_rows": len(cohort.rows),
+    }
+    (output_dir / "execution-config.json").write_bytes(canonical_json_bytes(config))
+
+
+def _execute_cohort(
+    request: IntegrationAcceptanceRequest,
+    snapshot: IndexedSnapshot,
+    rows: tuple[RawTargetRow, ...],
+    clock: Callable[[], float],
+) -> tuple[BatchResult, float]:
+    """Run the complete cohort within the existing approved volume bound."""
+    start = clock()
+    batch = classify_batch(
+        rows,
+        snapshot=snapshot,
+        provenance=request.provenance,
+        run_id=request.run_id,
+    )
+    elapsed = clock() - start
+    if batch.status != "processed" or not 0 <= elapsed <= VOLUME_TEST_SECONDS:
+        raise AssertionError("full-cohort execution or approved volume limit failed")
+    return batch, elapsed
+
+
+def _verify_batch_outputs(
+    request: IntegrationAcceptanceRequest,
+    snapshot: IndexedSnapshot,
+    rows: tuple[RawTargetRow, ...],
+    batch: BatchResult,
+    spec: _ReferenceSpecification,
+    checks: dict[str, str],
+) -> Mapping[str, bytes]:
+    """Verify reviewed outcomes, evidence and frozen permutation determinism."""
+    _check_cases(batch, spec, request.expected_labels.parent)
+    checks["reference_cases"] = "PASS"
+    _check_evidence(batch)
+    checks["evidence_integrity"] = "PASS"
+    rendered = render_batch(batch)
+    repeated = classify_batch(
+        tuple(reversed(rows)),
+        snapshot=snapshot,
+        provenance=request.provenance,
+        run_id=request.run_id,
+    )
+    if rendered != render_batch(repeated):
+        raise AssertionError("frozen-provenance permutation determinism failed")
+    checks["semantic_determinism"] = "PASS"
+    return rendered
+
+
+def _record_pipeline_acceptance(
+    request: IntegrationAcceptanceRequest, receipt: dict[str, object]
+) -> None:
+    """Attach only a verified real pipeline occurrence to the receipt."""
     if request.pipeline_proof is None:
         raise ValueError("actual target pipeline integration proof is missing")
     receipt["pipeline_proof_sha256"] = verify_pipeline_proof(
         request.pipeline_proof,
         request.snapshot_manifest_sha256,
         request.pipeline_report,
+        provenance=request.provenance,
     )
     if request.pipeline_report is not None:
         receipt["pipeline_report_sha256"] = sha256_file(request.pipeline_report)
-    checks["pipeline_integration"] = "PASS"
-    receipt["status"] = "PASS"

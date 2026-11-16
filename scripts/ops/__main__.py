@@ -6,6 +6,8 @@ Usage:
     python -m scripts.ops --help
 
 Stable commands:
+    target-classification-migration
+                       Prepare, promote, or restore paired target tables
     salt-rotate        Rotate PII hashing salt
     check-observability-ports
                        Compare published observability endpoints with container health
@@ -99,6 +101,9 @@ COMMAND_SPECS = {
 
 COMMAND_SPECS.update(
     {
+        "target-classification-migration": module_command(
+            "scripts.ops.target_classification_migration"
+        ),
         "promote-router-host-release": module_command(
             "scripts.ops.observability.promote_router_host_release"
         ),

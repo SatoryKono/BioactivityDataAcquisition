@@ -13,7 +13,7 @@ from iuphar_target_class.integration_acceptance import (
 from iuphar_target_class.models import RunProvenance
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--profile", type=Path, required=True)
     parser.add_argument("--profile-sha256", required=True)
@@ -25,7 +25,7 @@ def main() -> int:
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--run-started-at", required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     profile = load_profile(args.profile, args.profile_sha256, require_acceptance=False)
     if not profile.snapshot.completeness.publishable:
         parser.error("reference acceptance requires a publishable snapshot")

@@ -6,6 +6,7 @@ Usage:
     python -m scripts.engineering.qa --help
 
 Commands:
+    iuphar-target-acceptance Execute pinned IUPHAR reference and pipeline acceptance
     check-naming         Naming convention audit
     check-architecture   Infrastructure architecture compatibility check
     check-app-deps       Application dependency compatibility check
@@ -206,6 +207,7 @@ COMMAND_MODULES: dict[str, str] = {
     "analyze-duplicate-functions": "scripts.engineering.qa.analyze_duplicate_functions",
     "calibrate-hotspots": "scripts.engineering.qa.calibrate_hotspot_budgets",
     "proof-or-stop": "memory.proof_cli",
+    "iuphar-target-acceptance": "scripts.engineering.qa.iuphar_target_acceptance",
     "check-dashboard-visual-semantics": "scripts.engineering.qa.check_dashboard_visual_semantics",
     "check-dashboard-performance-budgets": (
         "scripts.engineering.qa.check_dashboard_performance_budgets"

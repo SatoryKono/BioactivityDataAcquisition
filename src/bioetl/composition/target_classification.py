@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import replace
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -13,7 +14,17 @@ from bioetl.application.services.target_classification_scope import (
     TARGET_CLASSIFICATION_DEPENDENCY_KEY,
     get_target_classification_dependency,
 )
-from bioetl.composition.runtime_builders.config_access import load_pipeline_config
+from bioetl.application.services.workflow.control_plane.mutation_plan import (
+    WorkflowMutationPlan,
+    build_workflow_mutation_plan,
+)
+from bioetl.composition.target_workflow_mutation import (
+    validate_workflow_target_mutations,
+)
+from bioetl.composition.runtime_builders.config_access import (
+    load_pipeline_config,
+    get_settings,
+)
 from bioetl.domain.control_plane import RunInputSnapshotRef, RunSourceRef
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 from bioetl.domain.filtering.silver_config import FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS
@@ -27,7 +38,11 @@ from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.target_classification_profile import (
     resolve_target_classification_profile,
 )
+from bioetl.infrastructure.config.contract_identity_resolution import (
+    RunManifestContractIdentity,
+)
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.domain.workflow import WorkflowConfig
 
 if TYPE_CHECKING:
     from bioetl.domain.workflow import WorkflowConfig
@@ -95,8 +110,29 @@ def target_classification_normalization_identity(
     return identity.profile_name, identity.profile_version, identity.profile_hash
 
 
+def apply_target_contract_identity(
+    config: object, identity: RunManifestContractIdentity
+) -> RunManifestContractIdentity:
+    """Apply only the selected V31 schema/normalization anchors, preserving DQ."""
+    schema_identity = target_classification_contract_schema_identity(config)
+    if schema_identity is None:
+        return identity
+    normalization = target_classification_normalization_identity(config)
+    assert normalization is not None
+    return replace(
+        identity,
+        contract_version=schema_identity[0],
+        contract_schema_hash=schema_identity[1],
+        normalization_profile_ref=normalization[0],
+        normalization_profile_version=normalization[1],
+        normalization_profile_hash=normalization[2],
+    )
+
+
 def load_target_runtime_profile(
     config: PipelineYamlConfig,
+    *,
+    require_new_admission: bool = True,
 ) -> LoadedIupharProfile | None:
     """Read and verify the exact envelope; never substitute a latest snapshot."""
     classification = config.target_classification.to_domain()
@@ -108,7 +144,7 @@ def load_target_runtime_profile(
     return load_profile(
         path.resolve(),
         classification.snapshot_manifest_sha256 or "",
-        require_acceptance=classification.mode == "enrich",
+        require_acceptance=classification.mode == "enrich" and require_new_admission,
     )
 
 
@@ -127,11 +163,17 @@ def build_target_classification_session(
         mode=mode,
         snapshot_manifest_sha256=classifier.snapshot_manifest_sha256,
         profile_sha256=classifier.profile_sha256,
+        normalization_version=profile.normalization_version,
+        rules_version=profile.rules_version,
+        classification_schema_version=profile.classification_schema_version,
     )
     return TargetClassificationSession(
         classifier=classifier,
         evidence=store,
         mode=mode,
+        normalization_version=profile.normalization_version,
+        rules_version=profile.rules_version,
+        classification_schema_version=profile.classification_schema_version,
     )
 
 
@@ -205,14 +247,45 @@ def target_classification_config_source_refs(config: object) -> list[ConfigSourc
 
 
 def preflight_workflow_target_dependencies(
-    config: WorkflowConfig, launch_context: dict[str, object]
+    config: WorkflowConfig,
+    launch_context: dict[str, object],
+    mutation_plan: WorkflowMutationPlan | None = None,
+    *,
+    settings: Settings | None = None,
 ) -> dict[str, object]:
     """Admit a target dependency before the first workflow step can mutate data."""
-    if not any(
-        getattr(step, "pipeline_name", None) == "chembl_target" for step in config.steps
-    ):
-        return {}
     stored = launch_context.get(TARGET_CLASSIFICATION_DEPENDENCY_KEY)
+    target = _workflow_target_config(stored)
+    plan = mutation_plan or build_workflow_mutation_plan(config)
+    admission = validate_workflow_target_mutations(
+        config,
+        target,
+        settings or get_settings(),
+        plan,
+        load_pipeline_config,
+    )
+    if not admission.required and stored is None:
+        return {}
+    profile = load_target_runtime_profile(
+        target, require_new_admission=admission.pending_writes
+    )
+    binding: dict[str, object] = {"target_config": target.model_dump(mode="json")}
+    if profile is not None:
+        binding.update(
+            {
+                "profile_sha256": profile.profile_sha256,
+                "profile_uri": profile.profile_uri,
+                "snapshot_manifest_sha256": profile.snapshot.snapshot_manifest_sha256,
+                "snapshot_uri": profile.snapshot.immutable_uri,
+                "snapshot_id": profile.snapshot.snapshot.snapshot_id,
+            }
+        )
+    if isinstance(stored, Mapping) and dict(stored) != binding:
+        raise ValueError("stored target classification dependency identity changed")
+    return {TARGET_CLASSIFICATION_DEPENDENCY_KEY: binding}
+
+
+def _workflow_target_config(stored: object) -> PipelineYamlConfig:
     if isinstance(stored, Mapping):
         payload = stored.get("target_config")
         if not isinstance(payload, Mapping):
@@ -220,25 +293,7 @@ def preflight_workflow_target_dependencies(
         target = hydrate_target_runtime_config(payload)
     else:
         target = load_pipeline_config("chembl_target")
-    target = resolve_target_classification_profile(target).resolved_yaml_config
-    profile = load_target_runtime_profile(target)
-    binding: dict[str, object] = {"target_config": target.model_dump(mode="json")}
-    if profile is None:
-        if isinstance(stored, Mapping) and dict(stored) != binding:
-            raise ValueError("stored target classification dependency identity changed")
-        return {TARGET_CLASSIFICATION_DEPENDENCY_KEY: binding}
-    binding.update(
-        {
-            "profile_sha256": profile.profile_sha256,
-            "profile_uri": profile.profile_uri,
-            "snapshot_manifest_sha256": profile.snapshot.snapshot_manifest_sha256,
-            "snapshot_uri": profile.snapshot.immutable_uri,
-            "snapshot_id": profile.snapshot.snapshot.snapshot_id,
-        }
-    )
-    if isinstance(stored, Mapping) and dict(stored) != binding:
-        raise ValueError("stored target classification dependency identity changed")
-    return {TARGET_CLASSIFICATION_DEPENDENCY_KEY: binding}
+    return resolve_target_classification_profile(target).resolved_yaml_config
 
 
 __all__ = [

@@ -274,9 +274,13 @@ def get_workflow_execution_service(
             run_id_factory=lambda: create_runtime_occurrence_run_id(
                 "workflow_execution"
             ),
-            dependency_preflight=import_module(
-                "bioetl.composition.target_classification"
-            ).preflight_workflow_target_dependencies,
+            dependency_preflight=lambda config, launch_context, mutation_plan: (
+                import_module(
+                    "bioetl.composition.target_classification"
+                ).preflight_workflow_target_dependencies(
+                    config, launch_context, mutation_plan, settings=settings
+                )
+            ),
         ),
     )
 

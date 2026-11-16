@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 from pathlib import Path
+from dataclasses import replace
 
 import pytest
 
 from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
 from bioetl.infrastructure.storage import target_classification_migration as migration
-from bioetl.infrastructure.storage.target_migration_validation import compare_target_rows
+from bioetl.infrastructure.storage.target_migration_validation import (
+    compare_target_rows,
+)
 
 
 @pytest.fixture
@@ -22,11 +25,19 @@ def paths(tmp_path, monkeypatch):
     for name in ("config", "candidate_config"):
         (tmp_path / (name + ".yaml")).write_text(name)
     monkeypatch.setattr(migration, "assert_no_managed_writers", lambda: None)
-    monkeypatch.setattr(migration, "validate_target_candidate", lambda *_: {"synthetic_test": True})
+    monkeypatch.setattr(
+        migration, "validate_target_candidate", lambda *_: {"synthetic_test": True}
+    )
     return migration.TargetMigrationPaths(
-        tmp_path, tmp_path / "silver", tmp_path / "gold", tmp_path / "assay",
-        tmp_path / "config.yaml", tmp_path / "candidate_silver",
-        tmp_path / "candidate_gold", tmp_path / "candidate_config.yaml", tmp_path / "backup",
+        tmp_path,
+        tmp_path / "silver",
+        tmp_path / "gold",
+        tmp_path / "assay",
+        tmp_path / "config.yaml",
+        tmp_path / "candidate_silver",
+        tmp_path / "candidate_gold",
+        tmp_path / "candidate_config.yaml",
+        tmp_path / "backup",
     )
 
 
@@ -50,6 +61,19 @@ def test_candidate_change_after_validation_refuses_mutation(paths):
         migration.promote_target_migration(paths)
     assert (paths.gold / "part.parquet").read_bytes() == b"gold"
     assert not (paths.backup / "original-silver").exists()
+
+
+def test_lexical_parent_alias_cannot_hide_a_backup_inside_canonical_table(paths):
+    nested = paths.workspace / "reports" / ".." / "silver" / "backup"
+    with pytest.raises(ValueError, match="disjoint"):
+        replace(paths, backup=nested).checked()
+    assert not (paths.silver / "backup").exists()
+
+
+def test_lexical_aliases_are_resolved_before_identity_comparisons(paths):
+    alias = paths.workspace / "silver" / ".." / "gold"
+    with pytest.raises(ValueError, match="disjoint"):
+        replace(paths, candidate_silver=alias).checked()
 
 
 def test_second_table_activation_failure_restores_first_table(paths, monkeypatch):
@@ -87,7 +111,9 @@ def test_live_writer_blocks_even_preparation(paths, monkeypatch):
     assert not paths.backup.exists()
 
 
-def test_interrupted_rollback_can_resume_after_other_pairs_were_restored(paths, monkeypatch):
+def test_interrupted_rollback_can_resume_after_other_pairs_were_restored(
+    paths, monkeypatch
+):
     migration.prepare_target_migration(paths, legacy_include_fields=("target_id",))
     migration.promote_target_migration(paths)
     rename = Path.rename
@@ -105,7 +131,9 @@ def test_interrupted_rollback_can_resume_after_other_pairs_were_restored(paths, 
     assert (paths.gold / "part.parquet").read_bytes() == b"gold"
     migration.rollback_target_migration(paths)
     assert (paths.silver / "part.parquet").read_bytes() == b"silver"
-    assert (paths.backup / "failed-silver/part.parquet").read_bytes() == b"candidate_silver"
+    assert (
+        paths.backup / "failed-silver/part.parquet"
+    ).read_bytes() == b"candidate_silver"
 
 
 def test_full_cohort_required_and_new_class_does_not_change_legacy_hash():
@@ -114,7 +142,9 @@ def test_full_cohort_required_and_new_class_does_not_change_legacy_hash():
     old = {"target_id": "CHEMBL1", "pref_name": "Fixture"}
     old["content_hash"] = identity.compute_content_hash("chembl", old)
     candidate = {**old, "iuphar_class": "Receptor", "content_hash": "new-v31-hash"}
-    assert compare_target_rows([old], [candidate], fields)["legacy_hashes_verified"] == 1
+    assert (
+        compare_target_rows([old], [candidate], fields)["legacy_hashes_verified"] == 1
+    )
     with pytest.raises(ValueError, match="full canonical cohort"):
         compare_target_rows([old, {**old, "target_id": "CHEMBL2"}], [candidate], fields)
     with pytest.raises(ValueError, match="legacy business field"):

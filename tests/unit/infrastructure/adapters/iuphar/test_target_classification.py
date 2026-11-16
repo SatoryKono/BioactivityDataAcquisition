@@ -182,6 +182,16 @@ def test_valid_reference_receipt_admits_enrich_contract_fixture(tmp_path):
     assert profile.snapshot.completeness.publishable
 
 
+@pytest.mark.parametrize(
+    "field", ["normalization_version", "rules_version", "classification_schema_version"]
+)
+def test_receipt_from_another_execution_version_cannot_admit_enrich(field):
+    receipt = _receipt("a" * 64)
+    receipt[field] = "unreviewed-version"
+    with pytest.raises(ValueError, match="acceptance versions"):
+        validate_acceptance_receipt(receipt, snapshot_manifest_sha256="a" * 64)
+
+
 def test_complete_version_unverified_snapshot_is_not_publishable(tmp_path):
     profile = _profile(
         tmp_path,

@@ -99,6 +99,9 @@ class LocalTargetClassificationEvidenceStore:
         mode: str = "shadow",
         snapshot_manifest_sha256: str,
         profile_sha256: str,
+        normalization_version: str | None = None,
+        rules_version: str | None = None,
+        classification_schema_version: str | None = None,
     ) -> None:
         if mode not in {"shadow", "enrich"}:
             raise ValueError("evidence store needs shadow or enrich mode")
@@ -106,6 +109,11 @@ class LocalTargetClassificationEvidenceStore:
         self._mode = mode
         self._snapshot_hash = require_sha256(snapshot_manifest_sha256)
         self._profile_hash = require_sha256(profile_sha256)
+        self._versions = {
+            "normalization_version": normalization_version,
+            "rules_version": rules_version,
+            "classification_schema_version": classification_schema_version,
+        }
         self._lock = RLock()
 
     def _run_root(self, run_id: str) -> Path:
@@ -182,6 +190,7 @@ class LocalTargetClassificationEvidenceStore:
                 "snapshot_manifest_sha256": self._snapshot_hash,
                 "profile_sha256": self._profile_hash,
                 "status": "complete",
+                **self._versions,
                 "row_count": len(row_ids),
                 "input_row_ids": sorted(row_ids),
                 "artifact_sha256": artifacts,

@@ -228,7 +228,7 @@ async def run_postrun_phase(host: _PipelineRunnerExecutionHostProtocol) -> None:
             "finalize_target_classification",
             None,
         )
-        if callable(finalize):
+        if pipeline is not None and callable(finalize):
             finalize(pipeline.context)
     emit_postrun_observability(host, result, runner_stage=_POSTRUN_STAGE_NAME)
 

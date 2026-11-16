@@ -14,7 +14,7 @@ from bioetl.infrastructure.storage.target_classification_migration import (
 )
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("prepare", "promote", "rollback"))
     parser.add_argument(
@@ -23,7 +23,7 @@ def main() -> int:
         required=True,
         help="JSON: explicit paths and frozen legacy_include_fields",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     document = json.loads(args.plan.read_bytes())
     paths = TargetMigrationPaths(
         **{key: Path(value) for key, value in document["paths"].items()}

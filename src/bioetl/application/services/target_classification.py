@@ -5,11 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
+from bioetl.application.services.run_reports.observations import record_run_observation
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.ports.target_classification import (
+    from bioetl.domain.ports import (
         TargetClassificationEvidencePort,
         TargetClassificationPort,
     )
@@ -26,6 +27,9 @@ class TargetClassificationSession:
     classifier: TargetClassificationPort
     evidence: TargetClassificationEvidencePort
     mode: Literal["shadow", "enrich"]
+    normalization_version: str
+    rules_version: str
+    classification_schema_version: str
     _pending: dict[tuple[str, str, int], TargetClassificationResult] = field(
         default_factory=dict, init=False
     )
@@ -69,7 +73,25 @@ class TargetClassificationSession:
         """Complete evidence only after the runner has completed all data writes."""
         run_id = str(context.run_id)
         expected = tuple(sorted(self._published.get(run_id, set())))
-        return self.evidence.finalize_run(run_id=run_id, expected_row_ids=expected)
+        reference = self.evidence.finalize_run(run_id=run_id, expected_row_ids=expected)
+        record_run_observation(
+            "Target Classification",
+            verdict="OK",
+            reason="verified_target_classification_evidence",
+            facts={
+                "run_id": run_id,
+                "mode": self.mode,
+                "snapshot_manifest_sha256": self.classifier.snapshot_manifest_sha256,
+                "profile_sha256": self.classifier.profile_sha256,
+                "normalization_version": self.normalization_version,
+                "rules_version": self.rules_version,
+                "classification_schema_version": self.classification_schema_version,
+                "row_count": len(expected),
+                "evidence_manifest_uri": reference.uri,
+                "evidence_manifest_sha256": reference.sha256,
+            },
+        )
+        return reference
 
 
 __all__ = ["TargetClassificationSession"]
