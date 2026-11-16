@@ -1180,7 +1180,26 @@ def _inside_pilot_window(
     stamp = _parse_utc(observation.get("created_at"))
     if stamp is None or stamp < start or stamp > close:
         return False
-    return _observation_run_id(observation) is not None
+    return _observation_run_id(observation) is not None and _retry_execution_in_window(
+        observation, start, close
+    )
+
+
+def _retry_execution_in_window(
+    observation: Mapping[str, object], start: datetime, close: datetime
+) -> bool:
+    if observation.get("run_attempt", 1) == 1:
+        return True
+    execution = observation.get("attempt_execution")
+    if not isinstance(execution, Mapping):
+        return False
+    actual_start = _parse_utc(execution.get("started_at"))
+    actual_end = _parse_utc(execution.get("completed_at"))
+    return (
+        actual_start is not None
+        and actual_end is not None
+        and start <= actual_start <= actual_end <= close
+    )
 
 
 def _pair_observation_eligible(observation: Mapping[str, object]) -> bool:
@@ -1283,6 +1302,10 @@ def _scheduled_start_reason(
         return "created_at_unknown"
     if stamp < decision:
         return "backdated_start"
+    if not _retry_execution_in_window(
+        observation, stamp, stamp + timedelta(minutes=PILOT_DURATION_MINUTES)
+    ):
+        return "attempt_execution_not_in_window"
     return None
 
 
@@ -1298,6 +1321,7 @@ def _suitable_scheduled_successes(
     if decision is None:
         raise ArchiveError("pilot decision instant is not UTC")
     suitable: list[Mapping[str, object]] = []
+    excluded: list[str] = []
     for observation in observations:
         if _is_synthetic_observation(observation):
             reasons.append("synthetic_event")
@@ -1311,8 +1335,11 @@ def _suitable_scheduled_successes(
         if reason is None:
             suitable.append(observation)
         else:
-            reasons.append(reason)
-    if not suitable and any(
+            excluded.append(reason)
+    if suitable:
+        return suitable
+    reasons.extend(excluded)
+    if any(
         item.get("event") == "workflow_dispatch" and item.get("conclusion") == "success"
         for item in observations
     ):
@@ -1397,6 +1424,7 @@ def _pilot_observation_binding(observation: Mapping[str, object]) -> dict[str, A
         "job_conclusions",
         "api_job_conclusions",
         "calendar_source",
+        "attempt_execution",
         "dow",
         "dom",
         "month",
@@ -2098,12 +2126,37 @@ def _pilot_archive_binding(
             configuration["workflow_source"].encode("utf-8")
         ),
         **_pilot_attempt_calendar(outcomes, jobs),
+        "attempt_execution": _pilot_attempt_execution(outcomes),
         "job_conclusions": normalized_jobs,
         "api_job_conclusions": api_jobs,
         "raw_sha256": oracle_sha256(raw_bytes),
         "outcomes_sha256": oracle_sha256(outcomes_bytes),
     }
     return _pilot_observation_binding(observation)
+
+
+def _pilot_attempt_execution(outcomes: Mapping[str, Any]) -> dict[str, str] | None:
+    """Bound the actual attempt by every executed job; missing timing stays unknown."""
+
+    intervals = []
+    for job in outcomes["jobs"]:
+        if job.get("conclusion") == "skipped":
+            continue
+        start = _parse_utc(job.get("started_at"))
+        end = _parse_utc(job.get("completed_at"))
+        if start is None or end is None or end < start:
+            return None
+        intervals.append((start, end))
+    if not intervals:
+        return None
+    return {
+        "started_at": min(start for start, _ in intervals)
+        .isoformat()
+        .replace(UTC_OFFSET_SUFFIX, "Z"),
+        "completed_at": max(end for _, end in intervals)
+        .isoformat()
+        .replace(UTC_OFFSET_SUFFIX, "Z"),
+    }
 
 
 def _pilot_attempt_calendar(

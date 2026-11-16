@@ -1226,6 +1226,37 @@ def test_pilot_pairs_cannot_borrow_a_scheduled_start_from_another_sha() -> None:
         assert "no_comparable_pair" in result["reason_codes"]
 
 
+def test_excluded_historical_start_does_not_poison_a_valid_window() -> None:
+    observations = [
+        _pilot_success(
+            101, arm="baseline", created_at="2026-11-20T03:00:00Z", dow="Fri"
+        ),
+        _pilot_success(
+            102, arm="candidate", created_at="2026-11-20T03:48:00Z", dow="Fri"
+        ),
+        _pilot_success(
+            99, arm="baseline", created_at="2026-11-13T03:00:00Z", dow="Fri"
+        ),
+    ]
+    results = [
+        assess_reduced_pilot_window(
+            list(items),
+            **_pilot_options(
+                scheduled_success_total_count=3,
+                independent_review=True,
+                independent_restore=True,
+            ),
+        )
+        for items in permutations(observations)
+    ]
+    assert all(result == results[0] for result in results)
+    assert results[0]["status"] == "complete"
+    assert results[0]["reason_codes"] == []
+    assert results[0]["comparable_pair_count"] == 1
+    assert results[0]["window_start_utc"] == "2026-11-20T03:00:00Z"
+    assert results[0]["n2_blocked"] is False
+
+
 def test_manual_candidate_does_not_block_a_scheduled_window() -> None:
     observations = [
         _pilot_success(
@@ -1421,7 +1452,7 @@ class _PilotApiClient:
                 **job,
                 **(
                     {"started_at": clock_start, "completed_at": clock_end}
-                    if job["name"] == "clock"
+                    if job["conclusion"] != "skipped"
                     else {}
                 ),
             }
@@ -1567,6 +1598,118 @@ def test_archived_clock_with_ambiguous_or_missing_date_stays_unknown(
     assert archive_module._job_block_reason(observation) == "duty_unknown"
 
 
+@pytest.mark.parametrize("evidence", ["late_week", "missing", "late_child"])
+def test_retry_cannot_retroactively_complete_a_historical_window(
+    tmp_path: Path, evidence: str
+) -> None:
+    client = _PilotApiClient()
+    if evidence == "late_week":
+        client.clock_ranges = dict.fromkeys(
+            (130, 131), ("2026-11-27T03:00:00Z", "2026-11-27T03:00:01Z")
+        )
+    elif evidence == "missing":
+        client.clock_ranges = dict.fromkeys((130, 131), (None, None))
+    for run in _pilot_api_runs():
+        raw, outcomes, manifest = build_attempt_archive(
+            client, "owner/repository", {**run, "run_attempt": 2}, pilot=True
+        )
+        if evidence == "late_child":
+            # Preserve clock's valid day while another executed job finishes a week later.
+            outcomes["jobs"][1]["completed_at"] = "2026-11-27T03:00:01Z"
+            archive_module._bind_hashes(raw, outcomes, manifest)
+        write_snapshot(tmp_path, raw=raw, outcomes=outcomes, manifest=manifest)
+    _seal_index(tmp_path)
+    observations = [
+        pilot_observation_from_archive(tmp_path, run_id=run_id, run_attempt=2, arm=arm)
+        for run_id, arm in ((130, "baseline"), (131, "candidate"))
+    ]
+    result = assess_reduced_pilot_window(
+        observations,
+        **_pilot_options(
+            scheduled_success_total_count=2,
+            independent_review=True,
+            independent_restore=True,
+        ),
+    )
+    assert result["n2_blocked"] is True
+    assert result["equivalence"] == "not_passed"
+    with pytest.raises(ArchiveError, match="N2 stays blocked"):
+        require_pilot_advance(result, tmp_path)
+
+
+def test_retry_inside_window_requires_confirmed_execution_bounds() -> None:
+    start = datetime(2026, 11, 20, 3, tzinfo=UTC)
+    close = start + timedelta(minutes=48)
+    observation = {
+        "run_attempt": 2,
+        "attempt_execution": {
+            "started_at": "2026-11-20T03:01:00Z",
+            "completed_at": "2026-11-20T03:47:00Z",
+        },
+    }
+    assert archive_module._retry_execution_in_window(observation, start, close) is True
+    assert (
+        archive_module._retry_execution_in_window({"run_attempt": 2}, start, close)
+        is False
+    )
+    observation["attempt_execution"]["completed_at"] = "2026-11-20T03:49:00Z"
+    assert archive_module._retry_execution_in_window(observation, start, close) is False
+
+
+def test_archive_gate_accepts_a_retry_with_confirmed_execution_inside_window(
+    tmp_path: Path,
+) -> None:
+    client = _PilotApiClient()
+    client.clock_ranges[130] = ("2026-11-20T03:01:00Z", "2026-11-20T03:01:01Z")
+    for run in _pilot_api_runs():
+        run = {**run, "run_attempt": 2 if run["id"] == 130 else 1}
+        raw, outcomes, manifest = build_attempt_archive(
+            client, "owner/repository", run, pilot=True
+        )
+        write_snapshot(tmp_path, raw=raw, outcomes=outcomes, manifest=manifest)
+    _seal_index(tmp_path)
+    observations = [
+        pilot_observation_from_archive(
+            tmp_path, run_id=run_id, run_attempt=attempt, arm=arm
+        )
+        for run_id, attempt, arm in ((130, 2, "baseline"), (131, 1, "candidate"))
+    ]
+    result = assess_reduced_pilot_window(
+        observations,
+        **_pilot_options(
+            scheduled_success_total_count=2,
+            independent_review=True,
+            independent_restore=True,
+        ),
+    )
+    assert result["n2_blocked"] is False
+    require_pilot_advance(result, tmp_path)
+
+
+def test_attempt_execution_keeps_precision_at_the_window_boundary() -> None:
+    execution = archive_module._pilot_attempt_execution(
+        {
+            "jobs": [
+                {
+                    "conclusion": "success",
+                    "started_at": "2026-11-20T03:01:00Z",
+                    "completed_at": "2026-11-20T03:48:00.001Z",
+                }
+            ]
+        }
+    )
+    assert execution is not None
+    observation = {"run_attempt": 2, "attempt_execution": execution}
+    assert (
+        archive_module._retry_execution_in_window(
+            observation,
+            datetime(2026, 11, 20, 3, tzinfo=UTC),
+            datetime(2026, 11, 20, 3, 48, tzinfo=UTC),
+        )
+        is False
+    )
+
+
 def test_pilot_advance_requires_the_evaluated_archive(tmp_path: Path) -> None:
     assessment = _archived_pilot_pair(tmp_path / "pilot")
     assert assessment["n2_blocked"] is False
@@ -1702,6 +1845,7 @@ def test_pilot_advance_rechecks_the_archived_window_start(
         ("raw_sha256", "0" * 64),
         ("outcomes_sha256", "0" * 64),
         ("job_conclusions", {"clock": "failure"}),
+        ("attempt_execution", {"started_at": "2026-11-27T03:00:00Z"}),
     ],
 )
 def test_pilot_advance_rejects_mismatched_evidence(
