@@ -74,9 +74,7 @@ MISSING_MANIFEST_HINT = (
     "Run `python -m memory.tooling.refresh_all` first or pass `--auto-refresh` "
     "to build temporary rebuild-only manifests for this query."
 )
-UNSUPPORTED_QUERY_DISPATCH_COMMAND = (
-    "query dispatch received an unsupported command"
-)
+UNSUPPORTED_QUERY_DISPATCH_COMMAND = "query dispatch received an unsupported command"
 
 _CONFIDENCE_RANKS = {
     level["id"]: int(level["rank"])

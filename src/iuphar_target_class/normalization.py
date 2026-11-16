@@ -106,6 +106,11 @@ def _normalized_input_fields(
     return normalized, errors
 
 
+def _copy_input_row(row: RawTargetRow) -> RawTargetRow:
+    """Keep the concrete row type while detaching caller-owned source fields."""
+    return replace(row, fields=dict(row.fields))
+
+
 def validate_input(
     row: RawTargetRow,
     *,
@@ -115,7 +120,7 @@ def validate_input(
     snapshot_taxon: str | None = None,
 ) -> ValidatedInput:
     """Validate one row. An invalid row does not compute derived fields."""
-    row = replace(row, fields=dict(row.fields))
+    row = _copy_input_row(row)
     fixtures: tuple[GlueFixture, ...] = glue_fixtures
     normalized, errors = _normalized_input_fields(row, glue_fixtures=fixtures)
     row_hash = sha256_bytes(canonical_json_bytes(row.fields))
