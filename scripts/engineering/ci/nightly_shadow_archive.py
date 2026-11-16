@@ -17,7 +17,7 @@ import sys
 from collections.abc import Mapping, Sequence
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 from urllib.parse import quote, urlencode
 
 import yaml
@@ -356,7 +356,8 @@ def assess_shadow_window(
     elif len(shas) != 1:
         reasons.append("mixed_tested_sha")
     if any(
-        not isinstance(run.get("head_sha"), str) or not run["head_sha"].strip()
+        not isinstance(run.get("head_sha"), str)
+        or not cast(str, run["head_sha"]).strip()
         for run in runs
     ):
         reasons.append("missing_tested_sha")
@@ -536,7 +537,11 @@ def build_attempt_archive(
         run_id,
         attempt,
     )
-    raw = dict(run.get("raw_api") if isinstance(run.get("raw_api"), Mapping) else run)
+    raw = dict(
+        cast(Mapping[str, Any], run.get("raw_api"))
+        if isinstance(run.get("raw_api"), Mapping)
+        else run
+    )
     raw["run_attempt"] = attempt
     pagination_status = oracle_pagination(
         observation["jobs_fetched"],
