@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-10-15'
+  Last verified: '2026-11-17'
 
 ______________________________________________________________________
 
@@ -112,7 +112,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## 5. KPI and Weekly Control
+## 5. KPI control
 
 Current KPI model for docs outside nav:
 
@@ -120,12 +120,17 @@ Current KPI model for docs outside nav:
 - Blocking hard limit: `not_in_nav <= 135`.
 - Blocking orphan budget: `orphan_candidates <= 0`.
 
-Weekly CI control:
+Manual CI control:
 
 - Workflow: `.github/workflows/docs-kpi-weekly.yml`
+- Trigger in YAML: `workflow_dispatch` only. No `schedule` and no cron.
+- GitHub state: `disabled_manually`, decision `keep-disabled`
+  (`docs/00-project/governance/05-github-policy.md`). While that state holds,
+  `workflow_dispatch` does not start the workflow. Enabling it is a separate
+  decision. The commands below are the local way to run the same checks.
 - Commands:
   - `uv run python -m scripts.docs check-drift --runtime-mirrors --freshness`
-  - `uv run python -m scripts.docs check-kpi`
+  - `uv run python -m scripts.docs check-kpi --fail-on-breach`
 - Outputs:
   - `reports/docs-kpi/docs-kpi-weekly.json`
   - `reports/docs-kpi/docs-kpi-weekly.md`
@@ -133,7 +138,7 @@ Weekly CI control:
 
 Failure policy:
 
-- Weekly job fails if any blocking KPI is breached:
+- The manual job fails if any blocking KPI is breached:
   - hard limit exceeded,
   - orphan budget exceeded,
   - growth above baseline detected.

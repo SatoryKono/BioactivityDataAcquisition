@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-11-16'
+  Last verified: '2026-11-17'
 
 ______________________________________________________________________
 
@@ -122,7 +122,7 @@ new spend/safety decision.
 | `architecture.yml` | `Architecture Metrics` | `workflow_dispatch` | `active` | `active` | Heavy architecture metrics and periodic boundary baselines |
 | `contract-tests.yml` | `Monthly Contract Tests` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Live API lane stays local; schedule removed (#11190) |
 | `diagram-nightly.yml` | `Diagram Nightly Regression` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Nightly canary and phase2 stay off; PR lint is docs.yml (#11196) |
-| `docs-kpi-weekly.yml` | `Docs KPI Weekly` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly docs KPI plus calendar runtime-mirror/freshness drift |
+| `docs-kpi-weekly.yml` | `Docs KPI Weekly` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Manual workflow_dispatch docs KPI: runtime-mirror and freshness drift, then check-kpi. No schedule |
 | `github-settings-quarterly-review.yml` | `Quarterly GitHub Settings Review` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Read-only quarterly GitHub settings review delegated by `nightly.yml` |
 | `memory-freshness.yml` | `Memory freshness` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Repository memory freshness and contract checks |
 | `memory-retention.yml` | `Memory Retention Policy` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly and change-triggered non-destructive episodic-memory retention policy check |
@@ -165,10 +165,10 @@ enable heavy nightlies without Actions spend evidence. Do not reopen #9975 or
 | `chembl-baseline-smoke.yml` | Optional smoke; not a `pr-required.yml` owner |
 | `coderabbit.yml` | Third-party CLI review; extra Actions spend |
 | `contract-governance-fast-check.yml` | Overlaps `schema-governance.yml`; not a `pr-required.yml` owner |
-| `contract-tests.yml` | Monthly live-API lane; extra spend. Schedule removed (#11190) |
+| `contract-tests.yml` | KEEP-DISABLED live-API lane. `workflow_dispatch` only; schedule removed (#11190). Do not add a cron |
 | `dashboard-render-host.yml` | Self-hosted dispatch-only; enable only when the observability host is required |
 | `diagram-nightly.yml` | Nightly canary and full-corpus phase2. Actions billing will not return. PR diagram lint stays in `docs.yml` (#11196) |
-| `docs-kpi-weekly.yml` | Optional weekly KPI; do not change KPI thresholds to justify enable |
+| `docs-kpi-weekly.yml` | Optional manual KPI (`workflow_dispatch` only). Do not add a cron or change KPI thresholds to justify enable |
 | `labeler.yml` | `pull_request_target`; re-enable only after live GitHub labels match `.github/labeler.yml` and `docs/00-project/governance/github-label-taxonomy.md` |
 | `memory-freshness.yml` | Optional memory lane; not a `pr-required.yml` owner |
 | `memory-retention.yml` | Optional memory lane; extra scheduled spend |
