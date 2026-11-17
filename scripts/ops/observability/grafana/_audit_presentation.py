@@ -349,6 +349,18 @@ def mark_native_snapshot_clocks(dashboard: dict) -> None:
                 "content": content,
             }
             options["content"] = content.replace("CURRENT:", "PERIOD END SNAPSHOT:")
+        if panel.get("type") == "text" and "PERIOD END SNAPSHOT:" in options.get(
+            "content", ""
+        ):
+            panel["description"] = (
+                options[_CURRENT_PRESENTATION]["description"]
+                .replace("CURRENT", "PERIOD END SNAPSHOT")
+                .replace(
+                    "current fleet telemetry",
+                    "fleet telemetry at the selected period end",
+                )
+                .replace("current scope", "selected period-end scope")
+            )
         if panel.get("description", "").startswith(_SNAPSHOT_PREFIX):
             original = panel["options"][_CURRENT_PRESENTATION]
             panel.update(title=original["title"], description=original["description"])

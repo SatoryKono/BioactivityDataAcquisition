@@ -26,12 +26,15 @@ def test_native_scope_banner_matches_period_end_queries_and_restores_live_profil
     banner = next(p for p in source["panels"] if p["id"] == 9400)
     assert "PERIOD END SNAPSHOT:" in banner["options"]["content"]
     assert "CURRENT:" not in banner["options"]["content"]
+    assert "CURRENT" not in banner["description"]
+    assert "PERIOD END SNAPSHOT" in banner["description"]
     before = deepcopy(source)
     mark_native_snapshot_clocks(source)
     assert source == before
     adaptive = project(source)
     live_banner = next(p for p in adaptive["panels"] if p["id"] == 9400)
     assert "CURRENT:" in live_banner["options"]["content"]
+    assert "CURRENT" in live_banner["description"]
     assert "PERIOD END SNAPSHOT:" not in live_banner["options"]["content"]
     assert "bioetlCurrentPresentation" not in json.dumps(adaptive)
     live_status = next(p for p in adaptive["panels"] if p["id"] == 9401)
