@@ -16,6 +16,8 @@ from bioetl.infrastructure.storage.target_fk_repair import (
     read_recovered_target_source,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _write(path: Path, records: list[dict], *, partition: bool = False) -> None:
     write_deltalake(

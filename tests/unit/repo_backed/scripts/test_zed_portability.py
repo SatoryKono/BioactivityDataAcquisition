@@ -50,7 +50,9 @@ def _tasks(zed_root: Path = TEMPLATE_ROOT) -> list[ZedTask]:
     )
 
 
-def test_task_commands_are_bound_to_the_current_checkout(zed_config_root: Path) -> None:
+def test_repo_backed_task_commands_are_bound_to_the_current_checkout(
+    zed_config_root: Path,
+) -> None:
     tasks = _tasks(zed_config_root)
     assert len({task["label"] for task in tasks}) == len(tasks)
     for task in tasks:
@@ -61,7 +63,7 @@ def test_task_commands_are_bound_to_the_current_checkout(zed_config_root: Path) 
         assert task["reveal"] == "always"
 
 
-def test_interpreter_task_preserves_python_code_in_powershell(
+def test_repo_backed_interpreter_task_preserves_python_code_in_powershell(
     zed_config_root: Path,
 ) -> None:
     if os.name != "nt":
@@ -95,7 +97,7 @@ def test_interpreter_task_preserves_python_code_in_powershell(
     assert "SyntaxError" not in result.stderr
 
 
-def test_pytest_tasks_distinguish_quick_and_project_settings(
+def test_repo_backed_pytest_tasks_distinguish_quick_and_project_settings(
     zed_config_root: Path,
 ) -> None:
     tasks = {task["label"]: task for task in _tasks(zed_config_root)}
@@ -126,7 +128,9 @@ def test_pytest_tasks_distinguish_quick_and_project_settings(
     assert tagged == [PROJECT_LABEL]
 
 
-def test_ruff_tasks_use_the_project_python_module(zed_config_root: Path) -> None:
+def test_repo_backed_ruff_tasks_use_the_project_python_module(
+    zed_config_root: Path,
+) -> None:
     tasks = {task["label"]: task for task in _tasks(zed_config_root)}
     assert tasks["Ruff: check current file"]["args"] == [
         "-m",
@@ -143,7 +147,9 @@ def test_ruff_tasks_use_the_project_python_module(zed_config_root: Path) -> None
     ]
 
 
-def test_lsp_uses_native_discovery_without_machine_paths(zed_config_root: Path) -> None:
+def test_repo_backed_lsp_uses_native_discovery_without_machine_paths(
+    zed_config_root: Path,
+) -> None:
     settings = json.loads(
         (zed_config_root / "settings.json").read_text(encoding="utf-8")
     )
@@ -195,7 +201,9 @@ def _run_task(root: Path, label: str, source: str) -> subprocess.CompletedProces
     )
 
 
-def test_project_task_runs_from_a_relocated_checkout(relocated_checkout: Path) -> None:
+def test_repo_backed_project_task_runs_from_a_relocated_checkout(
+    relocated_checkout: Path,
+) -> None:
     result = _run_task(
         relocated_checkout,
         PROJECT_LABEL,
@@ -208,7 +216,9 @@ def test_project_task_runs_from_a_relocated_checkout(relocated_checkout: Path) -
     assert "1 passed" in result.stdout
 
 
-def test_project_task_preserves_strict_markers(relocated_checkout: Path) -> None:
+def test_repo_backed_project_task_preserves_strict_markers(
+    relocated_checkout: Path,
+) -> None:
     result = _run_task(
         relocated_checkout,
         PROJECT_LABEL,
@@ -218,7 +228,7 @@ def test_project_task_preserves_strict_markers(relocated_checkout: Path) -> None
     assert "undeclared_marker" in result.stdout + result.stderr
 
 
-def test_quick_task_explicitly_disables_project_addopts(
+def test_repo_backed_quick_task_explicitly_disables_project_addopts(
     relocated_checkout: Path,
 ) -> None:
     result = _run_task(
@@ -234,7 +244,7 @@ def test_quick_task_explicitly_disables_project_addopts(
 
 
 @pytest.mark.parametrize("label", [PROJECT_LABEL, QUICK_LABEL])
-def test_tasks_write_platform_cache_without_touching_old_cache(
+def test_repo_backed_tasks_write_platform_cache_without_touching_old_cache(
     relocated_checkout: Path,
     label: str,
 ) -> None:
@@ -253,7 +263,7 @@ def test_tasks_write_platform_cache_without_touching_old_cache(
 
 
 @pytest.mark.parametrize("label", [PROJECT_LABEL, QUICK_LABEL])
-def test_cache_redirection_keeps_warnings_as_errors(
+def test_repo_backed_cache_redirection_keeps_warnings_as_errors(
     relocated_checkout: Path, label: str
 ) -> None:
     result = _run_task(

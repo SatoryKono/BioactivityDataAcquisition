@@ -17,6 +17,8 @@ from bioetl.infrastructure.storage.target_classification_migration import (
 )
 from iuphar_target_class.stage0.io import sha256_file
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def deployment(tmp_path, monkeypatch):

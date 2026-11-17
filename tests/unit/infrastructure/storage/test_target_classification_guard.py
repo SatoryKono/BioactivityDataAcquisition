@@ -12,6 +12,8 @@ from bioetl.infrastructure.storage.target_classification_guard import (
     get_target_table_profile,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _table(path: Path, fields: tuple[str, ...] = ()) -> None:
     write_deltalake(

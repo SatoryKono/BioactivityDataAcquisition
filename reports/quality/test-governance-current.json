@@ -500,13 +500,6 @@
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_consume_headers"
-    },
-    {
-      "category": "weak_no_value",
-      "line": "34",
-      "path": "tests/unit/iuphar_target_class/test_integration_acceptance.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_reference_conflict_codes_compare_json_collections"
     }
   ],
   "assertless_category_counts": {
@@ -514,7 +507,7 @@
     "benchmark_or_performance": 0,
     "helper_asserted": 1,
     "intentional_no_exception_contract": 66,
-    "weak_no_value": 1
+    "weak_no_value": 0
   },
   "assertless_examples": [
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
@@ -802,47 +795,10 @@
       "categories": {
         "intentional_no_exception_contract": 1
       }
-    },
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py": {
-      "assertless_tests": 1,
-      "categories": {
-        "weak_no_value": 1
-      }
     }
   },
-  "assertless_total_candidates": 68,
-  "budget_violations": [
-    {
-      "actual": 1,
-      "budget": "refined_assertless_max",
-      "expected_max": 0,
-      "metric": "refined_assertless_tests"
-    },
-    {
-      "actual": 10,
-      "budget": "duplicate_test_names_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_names"
-    },
-    {
-      "actual": 20,
-      "budget": "duplicate_test_name_occurrences_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_name_occurrences"
-    },
-    {
-      "actual": 53,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    },
-    {
-      "actual": 1,
-      "budget": "uuid4_call_sites_max",
-      "expected_max": 0,
-      "metric": "uuid4_call_sites"
-    }
-  ],
+  "assertless_total_candidates": 67,
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -987,157 +943,16 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "integration": 1,
-        "unit": 1
-      },
-      "locations": [
-        "tests/integration/ide/test_zed_portability.py:296",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:256"
-      ],
-      "name": "test_cache_redirection_keeps_warnings_as_errors",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "integration": 1,
-        "unit": 1
-      },
-      "locations": [
-        "tests/integration/ide/test_zed_portability.py:95",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:64"
-      ],
-      "name": "test_interpreter_task_preserves_python_code_in_powershell",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "integration": 1,
-        "unit": 1
-      },
-      "locations": [
-        "tests/integration/ide/test_zed_portability.py:177",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:146"
-      ],
-      "name": "test_lsp_uses_native_discovery_without_machine_paths",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "integration": 1,
-        "unit": 1
-      },
-      "locations": [
-        "tests/integration/ide/test_zed_portability.py:251",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:211"
-      ],
-      "name": "test_project_task_preserves_strict_markers",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "integration": 1,
-        "unit": 1
-      },
-      "locations": [
-        "tests/integration/ide/test_zed_portability.py:238",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:198"
-      ],
-      "name": "test_project_task_runs_from_a_relocated_checkout",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "integration": 1,
-        "unit": 1
-      },
-      "locations": [
-        "tests/integration/ide/test_zed_portability.py:127",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:98"
-      ],
-      "name": "test_pytest_tasks_distinguish_quick_and_project_settings",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "integration": 1,
-        "unit": 1
-      },
-      "locations": [
-        "tests/integration/ide/test_zed_portability.py:261",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:221"
-      ],
-      "name": "test_quick_task_explicitly_disables_project_addopts",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "integration": 1,
-        "unit": 1
-      },
-      "locations": [
-        "tests/integration/ide/test_zed_portability.py:160",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:129"
-      ],
-      "name": "test_ruff_tasks_use_the_project_python_module",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "integration": 1,
-        "unit": 1
-      },
-      "locations": [
-        "tests/integration/ide/test_zed_portability.py:77",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:53"
-      ],
-      "name": "test_task_commands_are_bound_to_the_current_checkout",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "integration": 1,
-        "unit": 1
-      },
-      "locations": [
-        "tests/integration/ide/test_zed_portability.py:277",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:237"
-      ],
-      "name": "test_tasks_write_platform_cache_without_touching_old_cache",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    }
-  ],
+  "duplicate_test_name_inventory": [],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 10,
-    "duplicate_occurrences": 20,
+    "cross_file_groups": 0,
+    "duplicate_occurrences": 0,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 10
+    "total_duplicate_names": 0
   },
-  "duplicate_test_name_occurrences": 20,
-  "duplicate_test_names": 10,
+  "duplicate_test_name_occurrences": 0,
+  "duplicate_test_names": 0,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1157,64 +972,10 @@
     ]
   },
   "intentional_no_exception_contract": 66,
-  "markerless_examples": [
-    "tests/unit/composition/test_target_fk_repair.py:137",
-    "tests/unit/composition/test_target_fk_repair.py:149",
-    "tests/unit/composition/test_target_migration_binding.py:58",
-    "tests/unit/composition/test_target_migration_binding.py:68",
-    "tests/unit/composition/test_target_migration_binding.py:78",
-    "tests/unit/composition/test_target_migration_binding.py:87",
-    "tests/unit/composition/test_target_migration_rehearsal.py:107",
-    "tests/unit/composition/test_target_migration_rehearsal.py:167",
-    "tests/unit/composition/test_target_migration_rehearsal.py:205",
-    "tests/unit/composition/test_target_migration_rehearsal.py:212",
-    "tests/unit/composition/test_target_migration_rehearsal.py:224",
-    "tests/unit/composition/test_target_migration_rehearsal.py:253",
-    "tests/unit/infrastructure/storage/test_target_candidate_builder.py:99",
-    "tests/unit/infrastructure/storage/test_target_candidate_builder.py:120",
-    "tests/unit/infrastructure/storage/test_target_candidate_builder.py:129",
-    "tests/unit/infrastructure/storage/test_target_candidate_builder.py:136",
-    "tests/unit/infrastructure/storage/test_target_classification_guard.py:44",
-    "tests/unit/infrastructure/storage/test_target_classification_guard.py:52",
-    "tests/unit/infrastructure/storage/test_target_classification_guard.py:62",
-    "tests/unit/infrastructure/storage/test_target_classification_guard.py:74",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:57",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:70",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:79",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:86",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:92",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:109",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:117",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:127",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:152",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:192",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:208",
-    "tests/unit/infrastructure/storage/test_target_fk_repair.py:88",
-    "tests/unit/infrastructure/storage/test_target_fk_repair.py:122",
-    "tests/unit/infrastructure/storage/test_target_fk_repair.py:137",
-    "tests/unit/infrastructure/storage/test_target_fk_repair.py:170",
-    "tests/unit/infrastructure/storage/test_target_fk_repair.py:176",
-    "tests/unit/infrastructure/storage/test_target_fk_repair.py:188",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:61",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:264",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:284",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:300",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:314",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:325",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:342",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:356",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:390",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:400",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:469",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:485",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:501",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:515",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:531",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:548"
-  ],
-  "markerless_test_functions": 53,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
-  "refined_assertless_tests": 1,
+  "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
@@ -1726,13 +1487,6 @@
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_consume_headers"
-      },
-      {
-        "category": "weak_no_value",
-        "line": "34",
-        "path": "tests/unit/iuphar_target_class/test_integration_acceptance.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_reference_conflict_codes_compare_json_collections"
       }
     ],
     "assertless_category_counts": {
@@ -1740,7 +1494,7 @@
       "benchmark_or_performance": 0,
       "helper_asserted": 1,
       "intentional_no_exception_contract": 66,
-      "weak_no_value": 1
+      "weak_no_value": 0
     },
     "assertless_examples": [
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
@@ -1769,7 +1523,7 @@
       "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py:507",
       "tests/unit/infrastructure/test_storage_factory.py:820"
     ],
-    "assertless_total_candidates": 68,
+    "assertless_total_candidates": 67,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -1914,157 +1668,16 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "integration": 1,
-          "unit": 1
-        },
-        "locations": [
-          "tests/integration/ide/test_zed_portability.py:296",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:256"
-        ],
-        "name": "test_cache_redirection_keeps_warnings_as_errors",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "integration": 1,
-          "unit": 1
-        },
-        "locations": [
-          "tests/integration/ide/test_zed_portability.py:95",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:64"
-        ],
-        "name": "test_interpreter_task_preserves_python_code_in_powershell",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "integration": 1,
-          "unit": 1
-        },
-        "locations": [
-          "tests/integration/ide/test_zed_portability.py:177",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:146"
-        ],
-        "name": "test_lsp_uses_native_discovery_without_machine_paths",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "integration": 1,
-          "unit": 1
-        },
-        "locations": [
-          "tests/integration/ide/test_zed_portability.py:251",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:211"
-        ],
-        "name": "test_project_task_preserves_strict_markers",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "integration": 1,
-          "unit": 1
-        },
-        "locations": [
-          "tests/integration/ide/test_zed_portability.py:238",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:198"
-        ],
-        "name": "test_project_task_runs_from_a_relocated_checkout",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "integration": 1,
-          "unit": 1
-        },
-        "locations": [
-          "tests/integration/ide/test_zed_portability.py:127",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:98"
-        ],
-        "name": "test_pytest_tasks_distinguish_quick_and_project_settings",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "integration": 1,
-          "unit": 1
-        },
-        "locations": [
-          "tests/integration/ide/test_zed_portability.py:261",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:221"
-        ],
-        "name": "test_quick_task_explicitly_disables_project_addopts",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "integration": 1,
-          "unit": 1
-        },
-        "locations": [
-          "tests/integration/ide/test_zed_portability.py:160",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:129"
-        ],
-        "name": "test_ruff_tasks_use_the_project_python_module",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "integration": 1,
-          "unit": 1
-        },
-        "locations": [
-          "tests/integration/ide/test_zed_portability.py:77",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:53"
-        ],
-        "name": "test_task_commands_are_bound_to_the_current_checkout",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "integration": 1,
-          "unit": 1
-        },
-        "locations": [
-          "tests/integration/ide/test_zed_portability.py:277",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:237"
-        ],
-        "name": "test_tasks_write_platform_cache_without_touching_old_cache",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      }
-    ],
+    "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 10,
-      "duplicate_occurrences": 20,
+      "cross_file_groups": 0,
+      "duplicate_occurrences": 0,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 10
+      "total_duplicate_names": 0
     },
-    "duplicate_test_name_occurrences": 20,
-    "duplicate_test_names": 10,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -2083,64 +1696,10 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/composition/test_target_fk_repair.py:137",
-      "tests/unit/composition/test_target_fk_repair.py:149",
-      "tests/unit/composition/test_target_migration_binding.py:58",
-      "tests/unit/composition/test_target_migration_binding.py:68",
-      "tests/unit/composition/test_target_migration_binding.py:78",
-      "tests/unit/composition/test_target_migration_binding.py:87",
-      "tests/unit/composition/test_target_migration_rehearsal.py:107",
-      "tests/unit/composition/test_target_migration_rehearsal.py:167",
-      "tests/unit/composition/test_target_migration_rehearsal.py:205",
-      "tests/unit/composition/test_target_migration_rehearsal.py:212",
-      "tests/unit/composition/test_target_migration_rehearsal.py:224",
-      "tests/unit/composition/test_target_migration_rehearsal.py:253",
-      "tests/unit/infrastructure/storage/test_target_candidate_builder.py:99",
-      "tests/unit/infrastructure/storage/test_target_candidate_builder.py:120",
-      "tests/unit/infrastructure/storage/test_target_candidate_builder.py:129",
-      "tests/unit/infrastructure/storage/test_target_candidate_builder.py:136",
-      "tests/unit/infrastructure/storage/test_target_classification_guard.py:44",
-      "tests/unit/infrastructure/storage/test_target_classification_guard.py:52",
-      "tests/unit/infrastructure/storage/test_target_classification_guard.py:62",
-      "tests/unit/infrastructure/storage/test_target_classification_guard.py:74",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:57",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:70",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:79",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:86",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:92",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:109",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:117",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:127",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:152",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:192",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:208",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:88",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:122",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:137",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:170",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:176",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:188",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:61",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:264",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:284",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:300",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:314",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:325",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:342",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:356",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:390",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:400",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:469",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:485",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:501",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:515",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:531",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:548"
-    ],
-    "markerless_test_functions": 53,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
-    "refined_assertless_tests": 1,
+    "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
@@ -2156,8 +1715,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3364,
-      "test_python_file_count": 3617,
+      "test_glob_file_count": 3365,
+      "test_python_file_count": 3618,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2197,170 +1756,35 @@
       "top_level_directory_count": 16,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [
-      {
-        "count": 2,
-        "examples": [
-          "tests/integration/ide/test_zed_portability.py:296",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:256"
-        ],
-        "name": "test_cache_redirection_keeps_warnings_as_errors"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/integration/ide/test_zed_portability.py:95",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:64"
-        ],
-        "name": "test_interpreter_task_preserves_python_code_in_powershell"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/integration/ide/test_zed_portability.py:177",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:146"
-        ],
-        "name": "test_lsp_uses_native_discovery_without_machine_paths"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/integration/ide/test_zed_portability.py:251",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:211"
-        ],
-        "name": "test_project_task_preserves_strict_markers"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/integration/ide/test_zed_portability.py:238",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:198"
-        ],
-        "name": "test_project_task_runs_from_a_relocated_checkout"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/integration/ide/test_zed_portability.py:127",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:98"
-        ],
-        "name": "test_pytest_tasks_distinguish_quick_and_project_settings"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/integration/ide/test_zed_portability.py:261",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:221"
-        ],
-        "name": "test_quick_task_explicitly_disables_project_addopts"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/integration/ide/test_zed_portability.py:160",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:129"
-        ],
-        "name": "test_ruff_tasks_use_the_project_python_module"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/integration/ide/test_zed_portability.py:77",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:53"
-        ],
-        "name": "test_task_commands_are_bound_to_the_current_checkout"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/integration/ide/test_zed_portability.py:277",
-          "tests/unit/repo_backed/scripts/test_zed_portability.py:237"
-        ],
-        "name": "test_tasks_write_platform_cache_without_touching_old_cache"
-      }
-    ],
-    "total_test_files": 3364,
-    "total_test_functions": 33689,
+    "top_duplicate_test_names": [],
+    "total_test_files": 3365,
+    "total_test_functions": 33693,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 1
+    "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "771c7e26ce8f5ff04cae05c1a42ed5ea3b92da9fea8ccda41e2eccfa47d7088a",
+  "source_tree_sha256": "181d54c1d86a642b0316eca2bcbce1ab694438ffa217f9a470d44e549c057649",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 68,
+    "assertless_total_candidates": 67,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 20,
-    "duplicate_test_names": 10,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "intentional_no_exception_contract": 66,
-    "markerless_examples": [
-      "tests/unit/composition/test_target_fk_repair.py:137",
-      "tests/unit/composition/test_target_fk_repair.py:149",
-      "tests/unit/composition/test_target_migration_binding.py:58",
-      "tests/unit/composition/test_target_migration_binding.py:68",
-      "tests/unit/composition/test_target_migration_binding.py:78",
-      "tests/unit/composition/test_target_migration_binding.py:87",
-      "tests/unit/composition/test_target_migration_rehearsal.py:107",
-      "tests/unit/composition/test_target_migration_rehearsal.py:167",
-      "tests/unit/composition/test_target_migration_rehearsal.py:205",
-      "tests/unit/composition/test_target_migration_rehearsal.py:212",
-      "tests/unit/composition/test_target_migration_rehearsal.py:224",
-      "tests/unit/composition/test_target_migration_rehearsal.py:253",
-      "tests/unit/infrastructure/storage/test_target_candidate_builder.py:99",
-      "tests/unit/infrastructure/storage/test_target_candidate_builder.py:120",
-      "tests/unit/infrastructure/storage/test_target_candidate_builder.py:129",
-      "tests/unit/infrastructure/storage/test_target_candidate_builder.py:136",
-      "tests/unit/infrastructure/storage/test_target_classification_guard.py:44",
-      "tests/unit/infrastructure/storage/test_target_classification_guard.py:52",
-      "tests/unit/infrastructure/storage/test_target_classification_guard.py:62",
-      "tests/unit/infrastructure/storage/test_target_classification_guard.py:74",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:57",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:70",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:79",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:86",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:92",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:109",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:117",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:127",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:152",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:192",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:208",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:88",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:122",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:137",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:170",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:176",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:188",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:61",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:264",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:284",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:300",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:314",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:325",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:342",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:356",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:390",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:400",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:469",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:485",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:501",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:515",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:531",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:548"
-    ],
-    "markerless_test_functions": 53,
-    "refined_assertless_tests": 1,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
+    "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 1
+    "uuid4_call_sites": 0
   },
   "test_file_inventory": {
     "pytest_python_files": [
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3364,
-    "test_python_file_count": 3617,
+    "test_glob_file_count": 3365,
+    "test_python_file_count": 3618,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2400,90 +1824,9 @@
     "top_level_directory_count": 16,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [
-    {
-      "count": 2,
-      "examples": [
-        "tests/integration/ide/test_zed_portability.py:296",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:256"
-      ],
-      "name": "test_cache_redirection_keeps_warnings_as_errors"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/integration/ide/test_zed_portability.py:95",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:64"
-      ],
-      "name": "test_interpreter_task_preserves_python_code_in_powershell"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/integration/ide/test_zed_portability.py:177",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:146"
-      ],
-      "name": "test_lsp_uses_native_discovery_without_machine_paths"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/integration/ide/test_zed_portability.py:251",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:211"
-      ],
-      "name": "test_project_task_preserves_strict_markers"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/integration/ide/test_zed_portability.py:238",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:198"
-      ],
-      "name": "test_project_task_runs_from_a_relocated_checkout"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/integration/ide/test_zed_portability.py:127",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:98"
-      ],
-      "name": "test_pytest_tasks_distinguish_quick_and_project_settings"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/integration/ide/test_zed_portability.py:261",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:221"
-      ],
-      "name": "test_quick_task_explicitly_disables_project_addopts"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/integration/ide/test_zed_portability.py:160",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:129"
-      ],
-      "name": "test_ruff_tasks_use_the_project_python_module"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/integration/ide/test_zed_portability.py:77",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:53"
-      ],
-      "name": "test_task_commands_are_bound_to_the_current_checkout"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/integration/ide/test_zed_portability.py:277",
-        "tests/unit/repo_backed/scripts/test_zed_portability.py:237"
-      ],
-      "name": "test_tasks_write_platform_cache_without_touching_old_cache"
-    }
-  ],
-  "total_test_files": 3364,
-  "total_test_functions": 33689,
+  "top_duplicate_test_names": [],
+  "total_test_files": 3365,
+  "total_test_functions": 33693,
   "unreviewed_assertion_bypass_count": 0,
-  "uuid4_call_sites": 1
+  "uuid4_call_sites": 0
 }

@@ -31,6 +31,8 @@ from iuphar_target_class.stage0.io import (
     sha256_file,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _write(path, document):
     path.write_bytes(canonical_json_bytes(document))
@@ -62,6 +64,7 @@ def test_reference_conflict_codes_compare_json_collections(
         "expected": {"conflict_codes": codes},
     }
     actual = replace(batch.rows[0].result, conflict_codes=tuple(codes))
+    assert actual.conflict_codes == tuple(codes)
     _check_reference_case(case, actual, tmp_path, frozenset({"conflict_codes"}))
 
 

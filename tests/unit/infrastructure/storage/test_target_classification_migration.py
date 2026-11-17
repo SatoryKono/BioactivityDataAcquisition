@@ -16,6 +16,8 @@ from bioetl.infrastructure.storage.target_migration_validation import (
     compare_target_rows,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def paths(tmp_path, monkeypatch):

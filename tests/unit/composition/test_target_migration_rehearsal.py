@@ -42,6 +42,8 @@ from tests.unit.infrastructure.storage.test_target_migration_dependencies import
     deployment as make_dependency_fixture,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def rehearsal(tmp_path, monkeypatch):

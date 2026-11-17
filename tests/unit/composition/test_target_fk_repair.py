@@ -6,7 +6,7 @@ import json
 from datetime import datetime, UTC
 from pathlib import Path
 from shutil import copytree, ignore_patterns
-from uuid import uuid4
+from uuid import UUID
 
 import pyarrow as pa
 import pytest
@@ -21,6 +21,8 @@ from bioetl.composition.bootstrap.target_fk_repair import (
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 from bioetl.infrastructure.config.settings_api import Settings
 from tests.unit.infrastructure.storage.test_target_fk_repair import make_source
+
+pytestmark = pytest.mark.unit
 
 
 def _raw_record() -> dict:
@@ -76,7 +78,7 @@ def repair_request(tmp_path, monkeypatch):
         root,
         source,
         root / "reports/local/repair",
-        uuid4(),
+        UUID("00000000-0000-4000-8000-0000000000a1"),
         datetime(2026, 11, 16, 18, 0, tzinfo=UTC),
     )
 

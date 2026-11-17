@@ -26,6 +26,8 @@ from tests.unit.infrastructure.storage.test_target_migration_admission import (
     _synthetic_profile,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(params=[False, True], ids=["plain-gold", "scd-gold"])
 def source_bundle(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, request):

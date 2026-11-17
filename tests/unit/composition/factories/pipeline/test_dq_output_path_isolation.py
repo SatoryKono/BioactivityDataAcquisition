@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
-from uuid import uuid4
+from uuid import UUID
 
 import pytest
 from deltalake import DeltaTable
@@ -122,7 +122,7 @@ async def test_real_factory_preserves_canonical_dq_and_writes_isolated_data_and_
     )
     runner = factory.create_runner(
         PipelineCreateRunnerRequest(
-            run_id=uuid4(),
+            run_id=UUID("00000000-0000-4000-8000-0000000000a1"),
             started_at=FIXED_TEST_TIME,
             runtime=RuntimeConfig(
                 run_type=RunType.INCREMENTAL, limit=1, strict_validation=True
