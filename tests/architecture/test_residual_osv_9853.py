@@ -85,6 +85,11 @@ def test_policy_documents_residual_osv_exception() -> None:
     assert "grafana/plugins" in text
     assert "ADR-010" in text
     assert "#9859" in text
+    # Picomatch is remediated by local backport (#13180/#13181), not an OSV-gate
+    # allowlist (AGENTS.md forbids growing exemptions).
+    assert "4.0.8-bioetl.17" in text
+    assert "picomatch-backport" in text
+    assert "allowlists **only this GHSA id**" not in text
 
 
 def test_residual_osv_exception_has_not_expired() -> None:
@@ -157,6 +162,7 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
         **audited_overrides,
         "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
         "braces": "$braces",
+        "picomatch": "$picomatch",
         "@istanbuljs/load-nyc-config": {"js-yaml": "4.3.2"},
     }
     scenes_pkg = _json(SCENES_PKG)
@@ -169,6 +175,7 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
         **audited_overrides,
         "@grafana/scenes": {"react-router-dom": "7.18.4"},
         "braces": "$braces",
+        "picomatch": "$picomatch",
         "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
         "@istanbuljs/load-nyc-config": {"js-yaml": "4.3.2"},
     }
