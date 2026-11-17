@@ -158,7 +158,7 @@ def test_run_explorer_styles_processing_without_obsolete_columns() -> None:
 
     assert panel["fieldConfig"]["defaults"]["custom"]["wrapText"] is False
     assert props["Pipeline"]["custom.inspect"] is True
-    assert panel["options"]["footer"]["enablePagination"] is True
+    assert panel["options"]["footer"]["enablePagination"] is False
 
 
 def test_run_explorer_hidden_fields_cannot_enable_table_wide_wrapping() -> None:
