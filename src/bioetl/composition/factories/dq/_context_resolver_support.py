@@ -10,6 +10,9 @@ from typing import TYPE_CHECKING, cast, get_args, get_origin
 from pydantic import BaseModel
 
 from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
+from bioetl.composition.factories.storage._context_resolution import (
+    rebase_local_data_path,
+)
 from bioetl.domain.value_objects.dq_report import SilverDQCheckType
 
 if TYPE_CHECKING:
@@ -230,6 +233,31 @@ def extract_dq_output_paths_impl(
         flat_structure=has_flat_structure_fn(silver_config)
         or has_flat_structure_fn(gold_config),
     )
+
+
+def rebase_dq_output_paths(
+    paths: DQOutputPathsContext,
+    settings: Settings,
+) -> DQOutputPathsContext:
+    """Place canonical ``data/output/<layer>/...`` DQ dirs under ``data_dir``.
+
+    Uses the same ``rebase_local_data_path`` branch as ``resolve_layer_path``
+    when YAML paths are honored. Test mode still keeps the provider/entity
+    suffix; only the runtime root changes.
+    """
+    return DQOutputPathsContext(
+        bronze_path=_rebase_dq_layer_path(paths.bronze_path, settings.bronze_path),
+        silver_path=_rebase_dq_layer_path(paths.silver_path, settings.silver_path),
+        gold_path=_rebase_dq_layer_path(paths.gold_path, settings.gold_path),
+        flat_structure=paths.flat_structure,
+    )
+
+
+def _rebase_dq_layer_path(configured: str | None, layer_root: Path) -> str | None:
+    """Rebase one configured DQ directory onto its settings layer root."""
+    if not configured:
+        return configured
+    return str(rebase_local_data_path(Path(configured), Path(layer_root)))
 
 
 def is_dq_report_enabled_impl(config: PipelineYamlConfig) -> bool:
