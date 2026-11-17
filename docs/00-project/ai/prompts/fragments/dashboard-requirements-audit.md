@@ -169,7 +169,7 @@ Below-fold: walk the shipped JSON, not this fragment.
 ### 6. Incident Workspace `bioetl-incident-v1`
 - Question: What is the highest-confidence active suspect, and which current/global runtime, provider, or control-plane evidence explains it?
 - Answer panel: 2010 Inspect Ranked Suspects
-- Next action token: Open Pipeline Diagnostics
+- Next action token: Open domain diagnostics
 - Basis tokens: TIME RANGE; VALID EMPTY
 - Data: Suspects are GLOBAL. VALID_EMPTY is not a healthy fleet. Scope status palette is OK/WARN/CRIT/UNKNOWN. CRIT is rule urgency, not confirmed cause.
 - Snapshot panels: 100. Refresh `60s`, timezone `browser`.
