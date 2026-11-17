@@ -21,7 +21,7 @@ CONSUMERS = (
     "grafana/plugins/bioetl-scenes-app",
     "grafana/plugins/bioetl-selectorshell-panel",
 )
-ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.3.tgz"
+ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.4.tgz"
 
 
 def test_picomatch_surface_is_tarball_only() -> None:
@@ -45,7 +45,7 @@ def test_picomatch_archive_matches_reviewed_source() -> None:
         expected={
             "upstream_commit": "7be3276fb8bd215a8c73fa066bcaf696c244ad88",
             "advisory": "GHSA-fc5q-39xc-vjpf",
-            "local_version": "4.0.8-bioetl.3",
+            "local_version": "4.0.8-bioetl.4",
         },
     )
 
@@ -55,28 +55,38 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
     assert_consumers_pin_archive(
         [consumer],
         package_name="picomatch",
-        version="4.0.8-bioetl.3",
+        version="4.0.8-bioetl.4",
         archive=ARCHIVE,
-        forbidden_versions=("2.3.2", "4.0.7", "4.0.8-bioetl.1", "4.0.8-bioetl.2"),
+        forbidden_versions=(
+            "2.3.2",
+            "4.0.7",
+            "4.0.8-bioetl.1",
+            "4.0.8-bioetl.2",
+            "4.0.8-bioetl.3",
+        ),
     )
 
 
 @pytest.mark.parametrize(
-    "pattern",
+    ("pattern", "repeat"),
     [
-        "+(*)",
-        "+(*a)",
-        "*(*)",
-        "*(*a)",
-        "+(@(*a))",
-        "*(@(*a))",
-        "+(@(*))",
-        "+(@(*))b",
-        "+(*)b",
+        ("+(*)", 32),
+        ("+(*a)", 32),
+        ("*(*)", 32),
+        ("*(*a)", 32),
+        ("+(@(*a))", 32),
+        ("*(@(*a))", 32),
+        ("+(@(*))", 32),
+        ("+(@(*))b", 32),
+        ("+(*)b", 32),
+        # Nested ambiguous alternation needs a longer attack to hang pre-fix.
+        ("+(@(a|aa))", 48),
+        ("*(@(a|aa))", 48),
     ],
 )
 def test_repeated_and_nested_extglob_wildcards_finish_with_bounded_input(
     pattern: str,
+    repeat: int,
     tmp_path: Path,
 ) -> None:
     with tarfile.open(ARCHIVE) as packed:
@@ -91,10 +101,11 @@ def test_repeated_and_nested_extglob_wildcards_finish_with_bounded_input(
             destination.write_bytes(content.read())
     code = (
         "const p=require(process.argv[1]);"
-        "console.log(p.makeRe(process.argv[2]).test('a'.repeat(32)+'!'));"
+        "const n=Number(process.argv[3]);"
+        "console.log(p.makeRe(process.argv[2]).test('a'.repeat(n)+'!'));"
     )
     result = subprocess.run(
-        ["node", "-e", code, str(tmp_path / "package"), pattern],
+        ["node", "-e", code, str(tmp_path / "package"), pattern, str(repeat)],
         capture_output=True,
         text=True,
         timeout=3,
