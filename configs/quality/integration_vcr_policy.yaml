@@ -202,6 +202,7 @@ tracked_suite_inventory:
     - tests/integration/test_incident_explanations.py
     - tests/integration/test_json_hash_stability.py
     - tests/integration/test_live_green_acceptance.py
+    - tests/integration/test_native_incident_scope_banner.py
     - tests/integration/test_organism_classification_csv_coverage.py
     - tests/integration/test_pipeline_diagnostics_evidence_actions.py
     - tests/integration/test_pipeline_diagnostics_retirement.py
