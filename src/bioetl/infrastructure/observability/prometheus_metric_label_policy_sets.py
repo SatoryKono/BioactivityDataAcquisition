@@ -92,7 +92,9 @@ _STAGE_LABEL_METRICS = frozenset(
 )
 _STAGE_MODEL_LABEL_METRICS = frozenset({"bioetl_stage_records_total"})
 _STAGE_BACKLOG_LABEL_METRICS = frozenset({"bioetl_stage_backlog_records"})
-_STAGE_LAG_LABEL_METRICS = frozenset({"bioetl_stage_lag_seconds"})
+_STAGE_LAG_LABEL_METRICS = frozenset(
+    {"bioetl_stage_lag_seconds", "bioetl_stage_snapshot_observed_timestamp_seconds"}
+)
 _FLOW_STAGE_LABEL_METRICS = frozenset({"bioetl_record_flow_records_total"})
 _BATCH_LIFECYCLE_LABEL_METRICS = frozenset(
     {

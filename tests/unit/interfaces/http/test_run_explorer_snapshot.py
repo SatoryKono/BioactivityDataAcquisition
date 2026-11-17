@@ -26,7 +26,7 @@ pytestmark = pytest.mark.unit
 _COMPLETED = datetime(2026, 9, 26, 12, 0, tzinfo=UTC)
 _DEFAULT_URL = (
     "/ops/observability/pipeline-run-reports"
-    "?pipeline=.*&limit=10&run_id=-&view=recent"
+    "?pipeline=.*&limit=20&run_id=-&view=recent"
     "&workflow=.*&run_type=.*&lookup_run_id="
 )
 
@@ -79,6 +79,43 @@ def test_parsed_default_url_is_the_hot_key() -> None:
     assert not is_default_recent_browse(**_browse_kwargs(scoped, limit=10))
 
 
+@pytest.mark.parametrize("limit", [1, 10, 20])
+def test_twenty_row_snapshot_serves_bounded_requests_without_rescanning(
+    monkeypatch: pytest.MonkeyPatch, limit: int
+) -> None:
+    scan = Mock(side_effect=AssertionError("A cached browse must not rescan disk"))
+    monkeypatch.setattr(snapshot_module, "list_recent_pipeline_runs", scan)
+    cache = RunExplorerSnapshotCache()
+    cache._stored = {
+        **_page(),
+        "items": [{**_row(), "run_id": f"run-{index}"} for index in range(20)],
+        "count": 20,
+    }
+    query = _parsed_default_query()
+    result = snapshot_module.take_default_recent_snapshot(
+        cache, **_browse_kwargs(query, limit=limit)
+    )
+    assert result is not None
+    assert result["count"] == limit
+    assert [row["run_id"] for row in result["items"]] == [
+        f"run-{index}" for index in range(limit)
+    ]
+    assert cache._stored["count"] == len(cache._stored["items"]) == 20
+    assert (
+        snapshot_module.take_default_recent_snapshot(
+            cache, **_browse_kwargs(query, limit=21)
+        )
+        is None
+    )
+    assert (
+        snapshot_module.take_default_recent_snapshot(
+            cache, **_browse_kwargs({**query, "workflow": "other"}, limit=limit)
+        )
+        is None
+    )
+    scan.assert_not_called()
+
+
 @pytest.mark.asyncio
 async def test_refresh_strips_cached_age_and_materialize_uses_request_clock(
     monkeypatch: pytest.MonkeyPatch,
@@ -98,7 +135,7 @@ async def test_refresh_strips_cached_age_and_materialize_uses_request_clock(
         _run_report_store=Mock(),
     )
     await cache.refresh_once(source)
-    assert seen[0]["limit"] == 10
+    assert seen[0]["limit"] == 20
     assert seen[0]["resolver"] is None
     assert seen[0]["pipeline"] == ".*"
     assert seen[0]["selected_run_id"] == "-"

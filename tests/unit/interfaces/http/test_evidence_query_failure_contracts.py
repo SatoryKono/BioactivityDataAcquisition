@@ -13,6 +13,7 @@ from bioetl.interfaces.http import (
 )
 from bioetl.interfaces.http import _selected_run_report_assessment as assessment
 from bioetl.interfaces.http._forensic_request_budget import ForensicEndpointUnavailable
+from bioetl.interfaces.http._selected_run_status_cache import SelectedRunStatusCache
 
 pytestmark = pytest.mark.unit
 
@@ -21,16 +22,13 @@ pytestmark = pytest.mark.unit
 async def test_selected_status_timeout_retains_request_id_for_investigation(
     monkeypatch,
 ):
-    class _PassthroughCache:
-        async def read(self, query: object, factory: object) -> object:
-            return await factory()  # type: ignore[misc]
-
+    cache = SelectedRunStatusCache()
     host = SimpleNamespace(
         _read_required_param=lambda query, name: "chembl_assay",
         _read_optional_param=lambda query, name: "run",
         _forensic_endpoint_limiter=Mock(),
         _send_payload_response=AsyncMock(),
-        _selected_run_status_cache=_PassthroughCache(),
+        _selected_run_status_cache=cache,
     )
     monkeypatch.setattr(
         status,
@@ -42,7 +40,10 @@ async def test_selected_status_timeout_retains_request_id_for_investigation(
         ),
     )
     writer = object()
-    await status.handle_selected_run_status(host, writer, {})
+    try:
+        await status.handle_selected_run_status(host, writer, {})
+    finally:
+        await cache.close()
     args = host._send_payload_response.await_args.args
     assert args[0] is writer and args[1] == 200
     assert args[2]["request_id"] == "correlation"

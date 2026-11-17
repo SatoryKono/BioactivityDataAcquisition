@@ -409,6 +409,7 @@
     "bioetl_stage_backlog_records",
     "bioetl_stage_lag_seconds",
     "bioetl_stage_records_total",
+    "bioetl_stage_snapshot_observed_timestamp_seconds",
     "bioetl_storage_optimization_total",
     "bioetl_structural_policy_events_total",
     "bioetl_structural_policy_shadow_comparisons_total",
@@ -833,6 +834,7 @@
     "bioetl_stage_backlog_records",
     "bioetl_stage_lag_seconds",
     "bioetl_stage_records_total",
+    "bioetl_stage_snapshot_observed_timestamp_seconds",
     "bioetl_storage_optimization_total",
     "bioetl_structural_policy_events_total",
     "bioetl_structural_policy_shadow_comparisons_total",
@@ -1106,6 +1108,7 @@
     "bioetl_stage_backlog_records",
     "bioetl_stage_lag_seconds",
     "bioetl_stage_records_total",
+    "bioetl_stage_snapshot_observed_timestamp_seconds",
     "bioetl_storage_optimization_total",
     "bioetl_structural_policy_events_total",
     "bioetl_structural_policy_shadow_comparisons_total",
@@ -1495,6 +1498,7 @@
       "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
       "docs/02-architecture/observability-layers.md",
       "docs/03-guides/dashboards/archive/audit-protocols/dux4-field-override-inventory.json",
+      "docs/03-guides/dashboards/dashboard-v2-updates.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
@@ -1503,7 +1507,8 @@
       "docs/05-operations/01-monitoring-guide.md",
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-incident-v1.json"
+      "grafana/dashboards/bioetl-incident-v1.json",
+      "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_data_source_retries_total": [
       "docs/03-guides/metrics-monitoring.md",
@@ -2388,6 +2393,12 @@
       "grafana/README.md",
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
+    "bioetl_stage_snapshot_observed_timestamp_seconds": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "docs/03-guides/metrics-monitoring.md",
+      "docs/04-reference/observability/metrics-catalog.md",
+      "grafana/dashboards/bioetl-incident-v1.json"
+    ],
     "bioetl_storage_optimization_total": [
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
@@ -2694,6 +2705,7 @@
     "bioetl_stage_backlog_records",
     "bioetl_stage_lag_seconds",
     "bioetl_stage_records_total",
+    "bioetl_stage_snapshot_observed_timestamp_seconds",
     "bioetl_storage_optimization_total",
     "bioetl_structural_policy_events_total",
     "bioetl_structural_policy_shadow_comparisons_total",
@@ -3002,6 +3014,7 @@
     "bioetl_stage_backlog_records",
     "bioetl_stage_lag_seconds",
     "bioetl_stage_records_total",
+    "bioetl_stage_snapshot_observed_timestamp_seconds",
     "bioetl_storage_optimization_total",
     "bioetl_structural_policy_events_total",
     "bioetl_structural_policy_shadow_comparisons_total",
@@ -3403,6 +3416,7 @@
     "bioetl_stage_backlog_records",
     "bioetl_stage_lag_seconds",
     "bioetl_stage_records_total",
+    "bioetl_stage_snapshot_observed_timestamp_seconds",
     "bioetl_storage_optimization_total",
     "bioetl_structural_policy_events_total",
     "bioetl_structural_policy_shadow_comparisons_total",
@@ -4407,6 +4421,9 @@
     "bioetl_stage_records_total": [
       "observed_series_count=0"
     ],
+    "bioetl_stage_snapshot_observed_timestamp_seconds": [
+      "observed_series_count=0"
+    ],
     "bioetl_storage_optimization_total": [
       "observed_series_count=0"
     ],
@@ -4962,6 +4979,9 @@
       "src/bioetl/application/observability/pipeline_metrics.py"
     ],
     "bioetl_stage_records_total": [
+      "src/bioetl/application/observability/pipeline_metrics.py"
+    ],
+    "bioetl_stage_snapshot_observed_timestamp_seconds": [
       "src/bioetl/application/observability/pipeline_metrics.py"
     ],
     "bioetl_storage_optimization_total": [

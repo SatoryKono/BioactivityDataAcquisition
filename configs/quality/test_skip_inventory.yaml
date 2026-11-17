@@ -99,6 +99,34 @@ allowed_categories:
   - snapshot_refresh_write_mode
   - temporary_known_failure
 entries:
+  - path: tests/integration/observability/test_evening_dashboard_queries.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-observability"
+    linked_issue: "#13168"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-11-17"
+    rationale: >
+      Two existing promtool availability guards moved unchanged from the unit suite.
+      The queries execute against controlled local fixtures when promtool is
+      available; no provider calls, live pipelines or network credentials are
+      required. This records an existing conditional guard, not a new skip.
+  - path: tests/integration/observability/test_overview_donor_jsonata.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-observability"
+    linked_issue: "#13168"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-11-17"
+    rationale: >
+      Existing Node.js/JSONata fixture availability guard moved unchanged from
+      the unit suite. Available engines evaluate controlled saved-run payloads
+      without external requests. This records an existing conditional guard;
+      no additional suppression or result qualification is introduced.
   - path: tests/integration/test_github_project_transport.py
     suite: integration
     category: conditional_environment_guard

@@ -371,10 +371,9 @@ dashboards:
         render_profiles: *id001
         required_columns:
         - Context
-        - Run ID
-        - Execution
-        - Verdict
-        - Context checked at
+        - Read at
+        - Saved assessment at
+        - Saved age · not source age
       '9402':
         title: Inspect Run Identity
         role: guidance
@@ -729,8 +728,8 @@ dashboards:
         title: Monitor Active Blocker Count
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -1857,8 +1856,8 @@ dashboards:
         title: Monitor Replay
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -1885,8 +1884,8 @@ dashboards:
         title: Track Checkpoint
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -2104,8 +2103,8 @@ dashboards:
         title: Monitor Global Alerts
         role: causes_table
         tier: 1
-        scope: global
-        scope_class: global
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: event_empty
         state_model:
@@ -2170,8 +2169,8 @@ dashboards:
         title: Inspect Ranked Suspects
         role: forensic_table
         tier: 1
-        scope: global
-        scope_class: global
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -2262,8 +2261,8 @@ dashboards:
         title: Review Stage Progress
         role: forensic_table
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -2282,11 +2281,11 @@ dashboards:
         render_profiles:
         - desktop_dark
       '2461':
-        title: Inspect Current Missing Stage Signals
+        title: Inspect Snapshot Missing Stage Signals
         role: forensic_table
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -2434,8 +2433,8 @@ dashboards:
         title: Compare Ledger Appends by Type & Status
         role: trend
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -2508,8 +2507,8 @@ dashboards:
         title: Review Runtime Blockers
         role: severity_table
         tier: 1
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -2536,8 +2535,8 @@ dashboards:
         title: Monitor Coverage
         role: forensic_table
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -2604,8 +2603,8 @@ dashboards:
         title: Monitor Scope Status
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -2730,8 +2729,8 @@ dashboards:
         title: Inspect Telemetry Coverage
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -2773,11 +2772,11 @@ dashboards:
         - full_light
         - zoom_200
       '9701':
-        title: Review Current Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h
+        title: Review Snapshot Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h
         role: evidence_table
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -2870,8 +2869,8 @@ dashboards:
         title: Monitor Pipeline Status
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -2898,8 +2897,8 @@ dashboards:
         title: Monitor Global Alerts (Full)
         role: forensic_table
         tier: 3
-        scope: global
-        scope_class: global
+        scope: time_range
+        scope_class: time_range
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
@@ -2923,8 +2922,8 @@ dashboards:
         title: Inspect Global Suspects (Full)
         role: forensic_table
         tier: 3
-        scope: global
-        scope_class: global
+        scope: time_range
+        scope_class: time_range
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
@@ -2945,8 +2944,33 @@ dashboards:
         title: Inspect Global Signal Measurements
         role: forensic_table
         tier: 3
-        scope: global
-        scope_class: global
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - UNKNOWN
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '22012':
+        title: Inspect Stage Snapshot Clocks · period end
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -3024,10 +3048,9 @@ dashboards:
         render_profiles: *id001
         required_columns:
         - Context
-        - Run ID
-        - Execution
-        - Verdict
-        - Context checked at
+        - Read at
+        - Saved assessment at
+        - Saved age · not source age
       '1000':
         title: ''
         role: navigation
@@ -3051,8 +3074,8 @@ dashboards:
         title: Monitor Global Alerts
         role: evidence_table
         tier: 3
-        scope: global
-        scope_class: global
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: event_empty
         state_model:
@@ -3068,7 +3091,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: &id012
+        render_profiles:
         - full_dark
         - full_light
         - zoom_200
@@ -3276,7 +3299,7 @@ dashboards:
         - backend_error
         render_profiles: *id005
       '9604':
-        title: Review Overall Verdict
+        title: Review Saved Run Verdict
         role: indicator
         tier: 3
         scope: selected_run
@@ -3303,43 +3326,59 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id011
-      '22005':
-        title: Monitor Global Alerts (Full)
-        role: evidence_table
-        tier: 3
-        scope: global
-        scope_class: global
+      '9605':
+        title: Review Snapshot Fleet Alerts
+        role: indicator
+        tier: 1
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
-        empty_state_class: event_empty
+        empty_state_class: telemetry_missing
         state_model:
-        - VALID_EMPTY
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
+        - VALID_EMPTY
         - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
+        - next_action
         fixture_cases:
         - populated
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id012
-      '32005':
-        title: Browse Global Alerts
-        role: row_group
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
+        render_profiles: *id011
+      '9606':
+        title: Review Processing Anchor Age · 24h / 72h · period end
+        role: freshness
+        tier: 1
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
-        - N/A
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
-        - operator_guidance
+        - evidence_scope
+        - no_data
+        - next_action
         fixture_cases:
-        - not_applicable
-        render_profiles: *id012
+        - populated
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id011
   bioetl-run-explorer-v1:
     panels:
       '1':
@@ -3376,7 +3415,7 @@ dashboards:
         - full_light
         - zoom_200
       '3010':
-        title: Inspect Recent Runs (last 10)
+        title: Inspect Recent Runs (last 20)
         role: forensic_table
         tier: 1
         scope: global

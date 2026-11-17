@@ -1,3 +1,65 @@
+## CI contract corrections — 2026-11-17
+
+Alert completeness, missing-sample semantics, repeatable CURRENT evidence and
+scope/time handoffs are covered by the source UX check report
+`docs/reports/dashboard-ux-checks/2026-11-17.md` (evidence, not a normative source).
+The released host-image snapshot and the adaptive candidate have separate
+provenance. Existing acceptance statuses and saved ERROR are unchanged; this
+source report does not claim a new browser or runtime acceptance pass.
+
+## Consolidated audit corrections — 2026-11-16
+
+Replay Readiness explicitly requires a Run ID before requesting the shared
+selected-status assessment. Its selection state cannot reuse the Overview AUTO
+cache and the evidence table shows one selection instruction instead of 44
+unrequested anchors. Overview and DQ retain AUTO selection. Missing required
+replay evidence remains INSUFFICIENT; saved ERROR verdicts are preserved.
+
+Run Context separates the saved assessment timestamp, HTTP cache freshness and
+query evaluation time. Overview distinguishes saved run outcome from current
+pipeline health in the first navigation band. Provider Check explains cached
+Bronze as NOT PROBED; incomplete contract-exclusion accounting points to the
+stage evidence. Explorer descriptions consistently state 20 launches. The saved refresh value
+is 1m (60 seconds), matching the Grafana interval list; 60s was not selectable.
+
+Stable UID suffixes and role-specific variables remain unchanged. The shared
+status vocabulary documents their separate meanings and the existing cache,
+workflow-publication and refresh clocks; it introduces no launch-cadence SLA.
+Existing acceptance declarations and LA issue states are unchanged.
+
+## Twenty recent launches in one wide table — 2026-11-16
+
+Run Explorer requests and retains up to 20 recent launches, newest first and
+independent of the dashboard time range. The wide adaptive table respects the
+disabled pagination option; rows use scrolling when the panel is too short.
+The compact summary and its per-run navigation remain available. All status,
+scope and exact-run handoff semantics are unchanged.
+The background browse snapshot covers 20 rows and also serves smaller unscoped
+limits without a second catalog scan. Scoped or larger requests retain their
+normal query path; no filter is silently widened to All.
+
+## Workflow failure explanation and FK scope — 2026-11-16
+
+Run Overview uses a smaller paginated FK comparison panel. Recorded failed and
+skipped FK steps remain visible even when no comparison counts or snapshots
+were produced: Workflow step identifies the step, Result states FAILED or
+SKIPPED, and Interpretation retains its recorded error type and message.
+Unrecorded scope and counts remain UNKNOWN. The short overall reason reads
+Workflow failed; the saved ERROR verdict and evidence revision are unchanged.
+Only the exactly bound parent workflow can contribute these details.
+
+## Wide catalog decision fields — 2026-11-16
+
+The optional adaptive Run Explorer wide table exposes Workflow, Duration,
+Replay Readiness and Data Quality alongside Pipeline, Run ID, Started and
+Overview. Replay Readiness retains its existing contract; it does not assert
+that an independent reproduction has succeeded. Missing duration and incomplete
+evidence retain the backend values. The compact four-field summary, native
+fallback, full Details view, row identity and last-ten-launch scope are unchanged.
+
+All five active dashboards share the ordered navigation header. Its links retain
+the selected time range and each target's explicitly allowed context variables.
+
 ## Selected-run source and catalog checks — 2026-11-13
 
 Static checks cover dashboard-specific selected-run variables, generated request
@@ -465,3 +527,28 @@ CURRENT stat получает то же преобразование ровно 
 библиотечных случаев и ограничения описаны в
 UX-отчёте `docs/reports/dashboard-ux-checks/2026-11-15.md`. Live browser/render acceptance
 остаётся `NOT_RUN`; полный integration и итоговый CI ещё требуются.
+
+
+## 2026-11-17 — saved outcomes, current signals and clock provenance
+
+All five active dashboards expose the same ordered navigation bus. Run Explorer
+keeps twenty launches in a wide, unpaginated table with a 30-unit panel; compact
+row details remain available. Workflow passports and Data Quality actions use
+the clicked row's context. Replay requires an explicit run instead of borrowing
+an AUTO assessment. Workflow failure details and FK comparison scope retain the
+saved verdict while making its evidence readable.
+
+Overview separates saved run assessment from complete CURRENT fleet alert
+counts and processing-anchor age. The historical name
+`bioetl_data_freshness_seconds` identifies a successful-DQ run-start anchor,
+not a provider input-event or completion clock. Incident retains complete
+suspect/alert lists, distinguishes diagnostic priority from alert severity and
+cause verification, and exposes exact-scope stage snapshot clocks. Legacy
+missing projection and input-event times remain UNKNOWN; gateway publication
+is not substituted for either.
+
+The bounded stage-projection timestamp emitter is implemented and tested for
+future runner integration. Existing retained snapshots cannot be retrospectively
+assigned a producing run or primary event clock. Local visual evidence covers
+pinned runtime overlays (Overview 241 / Incident 165), rather than deployment of
+the whole PR candidate. Existing acceptance statuses remain unchanged.

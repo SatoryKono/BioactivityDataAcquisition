@@ -180,7 +180,7 @@ def _ensure_timepicker(data: dict[str, Any]) -> bool:
 def _normalize_dashboard_defaults(data: dict[str, Any]) -> list[str]:
     changed = []
     for key, desired in (
-        ("refresh", "60s"),
+        ("refresh", "1m"),
         ("time", {"from": "now-12h", "to": "now"}),
     ):
         if data.get(key) != desired:

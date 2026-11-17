@@ -58,6 +58,15 @@ coverage refresh:
 ## Freshness note
 
 Re-verified on 2026-11-17 at source commit
+`f39053c1840173e49ed64eac8a3673f70bcf9eca`: `git ls-tree -r --name-only f39053c1840173e49ed64eac8a3673f70bcf9eca -- tests`
+contains **3333 tracked `test_*.py` modules**. The three canonical configuration
+sources listed above remain present and readable. This verification covers only
+`verification_scope: tracked_test_module_inventory`; the date is not a new
+test run, coverage measurement, or release/acceptance decision. The historical
+2026-10-08 17-shard evidence and all prior outcomes below are unchanged; its
+remote artifacts were not re-verified by this source census.
+
+A separate source-only census on 2026-11-17 at commit
 `4837b8207d1676a7c70a8627662e968e2409a212`: the canonical source list and historical shard manifest
 remain present. The tracked tree contains 3,332 files with basenames
 matching `test_*.py` under `tests/`, counted from

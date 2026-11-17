@@ -217,7 +217,7 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
         )
     assert selector.endswith("}]))")
     assert target.get("url") == (
-        "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10"
+        "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20"
         "&run_id=${run_id}&view=recent&workflow=${workflow}"
         "&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}"
     )
@@ -244,7 +244,7 @@ def test_pfill_12_workflow_browser_is_not_panel_3010() -> None:
     assert 3010 in panels
     assert 3020 not in panels
     browse = panels[3010]
-    assert browse.get("title") == "Inspect Recent Runs (last 10)"
+    assert browse.get("title") == "Inspect Recent Runs (last 20)"
     browse_url = ((browse.get("targets") or [])[0]).get("url")
     assert "pipeline-run-reports" in str(browse_url)
     assert "workflow-run-reports" not in str(browse_url)

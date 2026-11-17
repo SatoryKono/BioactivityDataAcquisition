@@ -23,6 +23,7 @@ __all__ = sorted(
         "CIRCUIT_BREAKER_SUCCESS_TOTAL",
         "CIRCUIT_BREAKER_TRIPS_TOTAL",
         "DATA_FRESHNESS_SECONDS",
+        "STAGE_SNAPSHOT_OBSERVED_TIMESTAMP_SECONDS",
         "DQ_ANOMALY_DETECTED",
         "DQ_BASELINE_SAMPLES",
         "DQ_BASELINE_UPDATED",
@@ -102,7 +103,15 @@ STAGE_BACKLOG_RECORDS = Gauge(
 
 STAGE_LAG_SECONDS = Gauge(
     "bioetl_stage_lag_seconds",
-    "Current bounded unresolved stage lag in seconds for canonical stage backlogs",
+    "Elapsed run time at the stage snapshot when backlog is nonzero; "
+    "not the age of an input record or the current wall-clock age of retained evidence",
+    ["pipeline", "run_type", "stage"],
+)
+
+STAGE_SNAPSHOT_OBSERVED_TIMESTAMP_SECONDS = Gauge(
+    "bioetl_stage_snapshot_observed_timestamp_seconds",
+    "Unix timestamp when application projected stage backlog and elapsed-run lag; "
+    "not input-record event time or Pushgateway publication time; zero is an invalid clock",
     ["pipeline", "run_type", "stage"],
 )
 
@@ -271,8 +280,8 @@ DQ_VALIDATION_RECORD_COUNT = Gauge(
 
 DATA_FRESHNESS_SECONDS = Gauge(
     "bioetl_data_freshness_seconds",
-    "Unix timestamp in seconds for the last successful data ingestion "
-    "for pipeline/entity; consumers derive lag via time() - metric",
+    "Unix run-start timestamp used as processing anchor by a successful DQ evaluation "
+    "for pipeline/entity; not provider event time or ingestion completion time",
     ["pipeline", "entity"],
 )
 

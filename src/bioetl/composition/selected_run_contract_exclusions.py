@@ -64,6 +64,11 @@ def _limits_for_pipeline(
     ):
         return None, None
     root = resolve_configs_root(configs_root)
+    if configs_root is None and not root.is_dir():
+        # Installed readers have no repository marker beside site-packages.
+        # Use their existing working-directory config mount only in that case;
+        # an explicit root and a real checkout always retain precedence.
+        root = resolve_configs_root(prefer_cwd_configs=True)
     entity_path = root / "entities" / provider / f"{entity}.yaml"
     if not entity_path.is_file():
         return None, None

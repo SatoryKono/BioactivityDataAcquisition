@@ -6,12 +6,18 @@
 ## Scope and layout
 
 The page contains a two-line scope banner (y=0/h=3) and Inspect Recent Runs
-(last 10), y=3/h=13. Visible selectors are Ops HTTP catalog options
+(last 20), y=3/h=30. Visible selectors are Ops HTTP catalog options
 (`filter-options` for Workflow, Pipeline, Run Type, Selected Run).
 Workflow=All, Pipeline=All, Run Type=All and Run ID=- are the defaults.
-The newest ten launches are shown together without pagination,
+The newest twenty launches are shown together without pagination,
 independently of the dashboard time range. Filters and exact Run ID lookup apply
-before the global ten-row limit. No dashboard navigation band is shown here.
+before the global twenty-row limit. The shared navigation band remains above the catalog.
+The wide table retains Grafana's readable small rows (36px), with room for all
+twenty rows and wrapped headers. Scroll the page, rather than an inner table,
+to reach the last launch. The operator approved page scrolling on 2026-11-16;
+the bounded catalog is recorded in the layout contract as a page-containment
+exception. Internal and horizontal scrolling remain prohibited. The adaptive
+compact view keeps its existing single-run summary, controls and full details.
 
 ## Columns and links
 
@@ -74,7 +80,7 @@ this presentation contract; `--check` detects drift. The full navigation generat
 also invokes this contract last, after older layout migrations.
 
 Run the recent-run API tests, presentation tests, dashboard operator-readability,
-first-window no-scroll and selection-action tests. Verify ten populated rows,
+first-window no-scroll and selection-action tests. Verify twenty populated rows,
 status links and passport/report targets in the browser. A source-bound API with
 matching row fields is required; an old runtime image is not acceptance.
 
@@ -86,5 +92,5 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | ID | Title | Type |
 | --- | --- | --- |
 | 1 | Understand Run Scope | text |
-| 3010 | Inspect Recent Runs (last 10) | table |
+| 3010 | Inspect Recent Runs (last 20) | table |
 <!-- END SHIPPED PANEL INVENTORY -->

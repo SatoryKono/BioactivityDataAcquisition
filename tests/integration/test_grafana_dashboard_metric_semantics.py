@@ -207,8 +207,8 @@ def test_summary_queries_do_not_mask_absence_with_vector_zero() -> None:
             )
 
 
-def test_workflow_selected_range_counters_use_zero_valid_empty_state() -> None:
-    """Workflow cards use selected-range deltas; display zero via noValue, not PromQL."""
+def test_workflow_selected_range_counters_preserve_missing_telemetry() -> None:
+    """Observed zero is valid; missing counter samples cannot prove zero failures."""
     dashboard = load_dashboard(_require_dashboard("bioetl-incident-v1.json"))
     expected_panels = {
         "Track Failed Workflow Runs",
@@ -238,12 +238,16 @@ def test_workflow_selected_range_counters_use_zero_valid_empty_state() -> None:
             f"{panel_title} must not mask absence with PromQL 'or vector(0)'"
         )
         defaults = panel.get("fieldConfig", {}).get("defaults", {})
-        assert defaults.get("noValue") == "0", (
-            f"{panel_title} must keep noValue='0' for zero-valid event-count semantics"
+        assert defaults.get("noValue") == "UNKNOWN · no samples", (
+            f"{panel_title} must distinguish absent telemetry from an observed zero"
         )
         description = str(panel.get("description", "")).lower()
         assert "selected" in description
         assert "zero means no" in description or "`0` means no" in description
+        assert "missing samples remain unknown" in description
+        assert (
+            "empty selected-range result is rendered through novalue" not in description
+        )
 
 
 def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> None:
@@ -377,7 +381,7 @@ def test_runtime_selected_count_zeroes_are_scope_anchored() -> None:
             f"{panel_title} must not convert missing selected scope into false OK"
         )
         defaults = panel.get("fieldConfig", {}).get("defaults", {})
-        assert defaults.get("noValue") == "UNKNOWN"
+        assert defaults.get("noValue") == "UNKNOWN · no samples"
 
 
 def test_runtime_alert_condition_summaries_are_telemetry_anchored() -> None:
@@ -427,7 +431,7 @@ def test_runtime_alert_condition_summaries_are_telemetry_anchored() -> None:
             anchor_metric in expr and anchor_scope in expr for expr in expressions
         )
         defaults = panel.get("fieldConfig", {}).get("defaults", {})
-        assert defaults.get("noValue") == "UNKNOWN"
+        assert defaults.get("noValue") == "UNKNOWN · no samples"
 
 
 def test_latency_p95_panels_preserve_no_data_state() -> None:
@@ -683,7 +687,10 @@ def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
             f"{panel_title} must preserve UNKNOWN/NO DATA instead of synthetic OK"
         )
         defaults = panel.get("fieldConfig", {}).get("defaults", {})
-        assert defaults.get("noValue") == "UNKNOWN", (
+        expected_empty = (
+            "UNKNOWN" if panel_title == "Monitor Coverage" else "UNKNOWN · no samples"
+        )
+        assert defaults.get("noValue") == expected_empty, (
             f"{panel_title} must render missing runtime telemetry as UNKNOWN"
         )
 
@@ -788,7 +795,7 @@ def test_runtime_freshness_handoff_preserves_missing_telemetry() -> None:
         "Freshness handoff must anchor zero only to existing freshness telemetry"
     )
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    assert defaults.get("noValue") == "UNKNOWN"
+    assert defaults.get("noValue") == "UNKNOWN · no samples"
 
 
 def test_provider_failure_rate_panel_uses_neutral_zero_and_policy_thresholds() -> None:

@@ -2,7 +2,16 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
+
+_RECORDED_AT = "Recorded at"
+_EVENT_FRESHNESS = "Event freshness"
+_GLOBAL_CURRENT = "GLOBAL / CURRENT"
+_GLOBAL_RANGE = "GLOBAL / TIME RANGE"
+_OPERATOR_TIME_UNIT = "time:YYYY-MM-DD HH:mm"
+
 _WIDTH = "custom.width"
+_CELL_OPTIONS = "custom.cellOptions"
 _CUSTOM_HIDDEN = "custom.hidden"
 _NOT_PROVIDED = "Not provided"
 _NOT_VERIFIED = "Not verified"
@@ -99,7 +108,7 @@ def _configure_confidence(panel: dict, override) -> None:
     override(
         panel,
         "Confidence",
-        "custom.cellOptions",
+        _CELL_OPTIONS,
         {"type": "color-text", "wrapText": False},
     )
     override(
@@ -122,7 +131,7 @@ def _configure_owner_next_step(panel: dict, override) -> None:
     for field, display in (("owner", "Owner"), ("next_step", "Next step")):
         override(panel, field, "displayName", display)
         override(panel, field, "noValue", _SEE_RUNBOOK)
-        override(panel, field, "custom.cellOptions", dict(_CELL_NO_WRAP))
+        override(panel, field, _CELL_OPTIONS, dict(_CELL_NO_WRAP))
         _set_field_hidden(panel, field, hidden=False, override=override)
 
 
@@ -191,17 +200,21 @@ def _stamp_named_alert_runbooks(expr: str) -> str:
 
 def _stamp_ranked_suspect_expr(panel: dict, *, summary: bool) -> None:
     if not summary:
-        panel["targets"][0].pop("expr", None)
+        # Legacy Dashboard-DS consumers inherit their donor. CURRENT detail
+        # consumers deliberately own the same query at their own current clock.
+        if "panelId" in panel["targets"][0]:
+            panel["targets"][0].pop("expr", None)
         return
     panel["targets"][0]["expr"] = (
-        "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace("
+        "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace("
         "bioetl_incident_ranked_evidence,"
         '"object","$1","object","(.*) / $"),'
         '"route_pipeline",".*","pipeline","unknown"),'
         '"owner","BioETL Team","reason","infrastructure_failed"),'
         '"next_step","Open pipeline-failure-critical.md","reason","infrastructure_failed"),'
         '"owner","See runbook","owner","^$"),'
-        '"next_step","See runbook","next_step","^$")'
+        '"next_step","See runbook","next_step","^$"),'
+        '"freshness","Not verified: no event timestamp","","")'
     )
 
 
@@ -453,3 +466,407 @@ def _measurements(panels: dict[int, dict]) -> None:
     )
     row = panels[2099]
     row["panels"] = [p for p in row["panels"] if p["id"] != 22011] + [detail]
+
+
+def stage_clock_query() -> str:
+    """One row per threshold-crossing stage and clock; absent clocks stay NaN."""
+    scope = (
+        "group by(pipeline,run_type,stage)("
+        "(max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or "
+        '(max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!="validation"}) > 0))'
+    )
+    observed = "max by(pipeline,run_type,stage)((bioetl_stage_snapshot_observed_timestamp_seconds > 0) <= time())"
+    published = 'max by(pipeline,run_type)((push_time_seconds{job="bioetl",pipeline!="",run_type!=""} > 0) <= time())'
+    missing = f"({scope} * NaN)"
+    clocks = (
+        (
+            "Latest stage projection",
+            f"(({observed} and on(pipeline,run_type,stage) {scope}) or {missing})",
+            "Application projection; not input-record event time",
+        ),
+        (
+            "Gateway publication",
+            f"(({scope} * on(pipeline,run_type) group_left {published}) or {missing})",
+            "Pushgateway job=bioetl; not stage observation time",
+        ),
+        (
+            "Input-record event",
+            missing,
+            "Not instrumented; no source event clock in these metrics",
+        ),
+    )
+    rows = []
+    for clock, expr, basis in clocks:
+        expr = f'label_replace(({expr} * 1000),"clock","{clock}","","")'
+        expr = f'label_replace({expr},"basis","{basis}","","")'
+        rows.append(f'label_join({expr},"scope"," / ","pipeline","run_type","stage")')
+    return " or ".join(f"({row})" for row in rows)
+
+
+def add_stage_source_clocks(payload: dict) -> None:
+    """Attach a bounded clock drilldown to the existing diagnostic row."""
+    detail = {
+        "id": 22012,
+        "type": "table",
+        "title": "Inspect Stage Snapshot Clocks",
+        "description": (
+            "GLOBAL / CURRENT · Same threshold-crossing pipeline / run type / stage scope as Signal Measurements. "
+            "Stage lag is elapsed run time sampled when backlog is nonzero, not the age of the oldest source record; retained lag does not keep increasing. "
+            "Latest stage projection is the application's latest snapshot clock, only when emitted; it does not date the selected 15m maximum, which may belong to an earlier projection. Gateway publication is the retained job=bioetl push time, not event, scrape or run-start time. "
+            "Input-record event time is not instrumented. Missing, zero or future clocks remain UNKNOWN; a recent publication never fills a missing observation. "
+            "Do not associate a newer backfill or an entity-level processing anchor with an old incremental stage snapshot. Dates use dashboard timezone. "
+            "Legacy snapshots cannot establish their producing run or input-event freshness. Cause verification remains separate."
+        ),
+        "gridPos": {"x": 0, "y": 47, "w": 24, "h": 10},
+        "datasource": {"type": "prometheus", "uid": "prometheus"},
+        "targets": [
+            {
+                "refId": "A",
+                "expr": stage_clock_query(),
+                "datasource": {"type": "prometheus", "uid": "prometheus"},
+                "instant": True,
+                "range": False,
+                "format": "table",
+            }
+        ],
+        "transformations": [
+            {
+                "id": "organize",
+                "options": {
+                    "excludeByName": dict.fromkeys(
+                        ("__name__", "pipeline", "run_type", "stage", "Time"), True
+                    ),
+                    "indexByName": {"scope": 0, "clock": 1, "Value": 2, "basis": 3},
+                    "renameByName": {
+                        "scope": "Scope",
+                        "clock": "Clock",
+                        "Value": _RECORDED_AT,
+                        "basis": "Basis",
+                    },
+                },
+            }
+        ],
+        "fieldConfig": {
+            "defaults": {
+                "noValue": "UNKNOWN · not recorded",
+                "unit": "none",
+                "custom": {
+                    "align": "left",
+                    "minWidth": 50,
+                    "inspect": True,
+                    "wrapText": True,
+                    "cellOptions": {"type": "auto", "wrapText": True},
+                },
+            },
+            "overrides": [
+                {
+                    "matcher": {"id": "byName", "options": name},
+                    "properties": [{"id": _WIDTH, "value": width}],
+                }
+                for name, width in (
+                    ("Scope", 360),
+                    ("Clock", 180),
+                    (_RECORDED_AT, 230),
+                    ("Basis", 420),
+                )
+            ]
+            + [
+                {
+                    "matcher": {"id": "byName", "options": _RECORDED_AT},
+                    "properties": [
+                        {"id": "unit", "value": _OPERATOR_TIME_UNIT},
+                        {
+                            "id": "mappings",
+                            "value": [
+                                {
+                                    "type": "special",
+                                    "options": {
+                                        "match": "null+nan",
+                                        "result": {
+                                            "text": "UNKNOWN · not recorded",
+                                            "color": "gray",
+                                        },
+                                    },
+                                }
+                            ],
+                        },
+                    ],
+                }
+            ],
+        },
+        "options": {
+            "showHeader": True,
+            "cellHeight": "lg",
+            "enablePagination": True,
+            "footer": {"enablePagination": True},
+        },
+    }
+    row = next(p for p in payload["panels"] if p["id"] == 2099)
+    row["panels"] = [p for p in row["panels"] if p["id"] != 22012] + [detail]
+    measurements = next(p for p in row["panels"] if p["id"] == 22011)
+    measurements["links"] = [
+        {
+            "title": "Inspect stage snapshot clocks",
+            "url": "/d/bioetl-incident-v1/5-incident-workspace?viewPanel=22012"
+            "&${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}"
+            "&${run_id:queryparam}&${__url_time_range}",
+            "targetBlank": False,
+            "includeVars": False,
+        }
+    ]
+
+
+def preserve_evidence_rows(panel: dict) -> None:
+    panel["transformations"] = [
+        item for item in panel.get("transformations", []) if item["id"] != "limit"
+    ]
+    panel["options"].setdefault("footer", {})["enablePagination"] = True
+    panel["options"]["enablePagination"] = True
+
+
+def _mark_absent_samples(item: dict) -> None:
+    defaults = item.setdefault("fieldConfig", {}).setdefault("defaults", {})
+    defaults["noValue"] = "UNKNOWN · no samples"
+    for mapping in defaults.get("mappings", []):
+        if (
+            mapping.get("type") == "special"
+            and mapping.get("options", {}).get("match") == "null"
+        ):
+            mapping["options"]["result"] = {"text": "UNKNOWN", "color": "gray"}
+
+
+def _explain_missing_samples(items: list[dict]) -> None:
+    for item in items:
+        if item["id"] == 9991:
+            item["options"]["content"] = (
+                '<div style="font-size:16px;line-height:20px">UNKNOWN means no matching samples or an unpublished reason. Check Observability Signals and <a href="/d/bioetl-incident-v1/5-incident-workspace?viewPanel=2461&amp;${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${__url_time_range}">missing stage signals</a>. Query time is not event time.</div>'
+            )
+        if item.get("type") in {"stat", "gauge", "bargauge"}:
+            _mark_absent_samples(item)
+        if item["id"] in {9996, 9997}:
+            item["description"] = item["description"].replace(
+                ", including when an empty selected-range result is rendered through noValue",
+                " in observed counter samples; missing samples remain UNKNOWN",
+            )
+        _explain_missing_samples(item.get("panels", []))
+
+
+def _urgency_label(panel: dict) -> None:
+    """Change the display label while retaining the canonical Severity field."""
+    matches = [
+        o
+        for o in panel["fieldConfig"]["overrides"]
+        if o.get("matcher", {}).get("options") in {"Severity", "Signal urgency"}
+    ]
+    properties = {p["id"]: p for override in matches for p in override["properties"]}
+    properties["displayName"] = {"id": "displayName", "value": "Diagnostic priority"}
+    # Ranked-runtime rules encode failing=2 / degraded=1. These are ranking
+    # scores, not the warning/critical severity labels on ALERTS. In particular,
+    # a 300s stage lag produces a warning alert, not a verified critical cause.
+    properties["mappings"] = {
+        "id": "mappings",
+        "value": [
+            {
+                "type": "value",
+                "options": {
+                    "0": {"text": "UNKNOWN", "color": "gray"},
+                    "1": {"text": "ELEVATED", "color": "orange"},
+                    "2": {"text": "HIGH", "color": "red"},
+                },
+            }
+        ],
+    }
+    normalized = {
+        "matcher": {"id": "byName", "options": "Severity"},
+        "properties": [properties[key] for key in sorted(properties)],
+    }
+    kept = [o for o in panel["fieldConfig"]["overrides"] if o not in matches]
+    kept.insert(1, normalized)
+    kept = [o for o in kept if o.get("matcher", {}).get("options") != _EVENT_FRESHNESS]
+    kept.append(
+        {
+            "matcher": {"id": "byName", "options": _EVENT_FRESHNESS},
+            "properties": [
+                {"id": "custom.hidden", "value": False},
+                {"id": _WIDTH, "value": 140},
+                {
+                    "id": "mappings",
+                    "value": [
+                        {
+                            "type": "value",
+                            "options": {
+                                "Not verified: no event timestamp": {
+                                    "text": "UNKNOWN · no event time"
+                                }
+                            },
+                        }
+                    ],
+                },
+                {
+                    "id": _CELL_OPTIONS,
+                    "value": {"type": "auto", "wrapText": True},
+                },
+            ],
+        }
+    )
+    panel["fieldConfig"]["overrides"] = kept
+    for item in panel.get("transformations", []):
+        if item["id"] == "organize":
+            item["options"]["renameByName"].update(
+                Value="Severity", freshness=_EVENT_FRESHNESS
+            )
+            order = item["options"]["indexByName"]
+            fields = [
+                name for name in sorted(order, key=order.get) if name != "freshness"
+            ]
+            fields.insert(fields.index("confidence") + 1, "freshness")
+            item["options"]["indexByName"] = {
+                name: index for index, name in enumerate(fields)
+            }
+
+
+def apply_incident_evidence_clocks(payload, panels):
+    """Retain every current suspect and explain missing event clocks and samples."""
+    add_stage_source_clocks(payload)
+    for item in _walk_panels(payload["panels"]):
+        if item["id"] in {907, 893}:
+            item["description"] = item["description"].replace(
+                "TIME RANGE · CURRENT", "CURRENT"
+            )
+        elif item["id"] == 2460:
+            _configure_stage_progress(item)
+        elif item["id"] == 8807:
+            item["description"] = item["description"].replace(
+                "CURRENT · TIME RANGE", "TIME RANGE"
+            )
+        elif item["id"] == 22011:
+            _configure_current_measurements(item)
+    suspect = panels[2010]
+    _stamp_ranked_suspect_expr(suspect, summary=True)
+    organize = next(t for t in suspect["transformations"] if t["id"] == "organize")
+    organize["options"]["renameByName"]["freshness"] = _EVENT_FRESHNESS
+    _urgency_label(suspect)
+    preserve_evidence_rows(suspect)
+    suspect["description"] = (
+        suspect["description"]
+        .replace(_GLOBAL_RANGE, _GLOBAL_CURRENT)
+        .replace(
+            "Summary shows up to two rows; open all rows for complete evidence.",
+            "All returned suspects remain available through pagination; the row count includes every suspect. Severity is retained even when cause and event freshness are Not verified.",
+        )
+    )
+    suspect["links"][0]["title"] = "Open all suspects (no row truncation)"
+    suspect["description"] += (
+        " Diagnostic priority HIGH=2 / ELEVATED=1 is ranking, not Prometheus alert severity. "
+        "Neither this rank nor FIRING verifies a cause or an event timestamp."
+    )
+    preserve_evidence_rows(panels[2005])
+    panels[2005]["links"][0]["title"] = "Open all global alerts (no row truncation)"
+    fleet = panels.get(8808)
+    if fleet:
+        _explain_missing_samples(fleet.get("panels", []))
+    _configure_incident_detail_rows(payload["panels"])
+
+
+def _walk_panels(items):
+    for item in items:
+        yield item
+        yield from _walk_panels(item.get("panels", []))
+
+
+def _configure_stage_progress(item: dict) -> None:
+    preserve_evidence_rows(item)
+    # Direct Grafana 13 table rendering uses the top-level option;
+    # retain the legacy footer option for native dashboard migration.
+    item["options"]["enablePagination"] = True
+    item["options"]["sortBy"] = [{"displayName": "Lag", "desc": True}]
+    item["description"] = item["description"].replace(
+        "CURRENT stage snapshots and TIME RANGE-independent 5m throughput.",
+        "CURRENT · Stage snapshots and fixed 5m throughput; the historical dashboard range does not set this clock.",
+    )
+    item["description"] = item["description"].replace(
+        "Maximum observed value per stage across selected run types; inspect one Run Type for exact values.",
+        "One row per observed pipeline / run type / stage. All returned groups remain available through pagination, sorted by lag; missing measures stay UNKNOWN. Inspect Selected Run separately for exact-run evidence.",
+    )
+
+
+def _configure_current_measurements(item: dict) -> None:
+    # This drilldown explains the CURRENT ranked answer. It must not
+    # evaluate its 15m operands at a historical dashboard end.
+    item["description"] = item["description"].replace(_GLOBAL_RANGE, _GLOBAL_CURRENT)
+    item["description"] = item["description"].replace(
+        "Event and publication timestamps are not provided by these gauges: freshness and current run liveness cannot be verified.",
+        "Lag is elapsed run time sampled when backlog is nonzero, not input-record event age. Inspect Stage Snapshot Clocks for application observation and Pushgateway publication; legacy observation and source-event times remain UNKNOWN.",
+    )
+    item["fieldConfig"]["defaults"]["custom"]["wrapText"] = True
+    widths = {
+        "Scope": 320,
+        "Signal": 140,
+        "Value": 90,
+        "Unit": 90,
+        "Threshold": 220,
+        "Window": 140,
+        "Freshness": 130,
+        "Evaluated": 160,
+    }
+    for override in item["fieldConfig"]["overrides"]:
+        field = override.get("matcher", {}).get("options")
+        if field in widths:
+            for prop in override["properties"]:
+                if prop["id"] == _WIDTH:
+                    prop["value"] = widths[field]
+        if field == "Evaluated":
+            override["properties"].append({"id": "unit", "value": _OPERATOR_TIME_UNIT})
+    item["fieldConfig"]["overrides"].append(
+        {
+            "matcher": {"id": "byName", "options": "Freshness"},
+            "properties": [
+                {
+                    "id": "mappings",
+                    "value": [
+                        {
+                            "type": "value",
+                            "options": {
+                                "Not verified: observed/published timestamps not provided": {
+                                    "text": _NOT_VERIFIED
+                                }
+                            },
+                        }
+                    ],
+                }
+            ],
+        }
+    )
+
+
+def _configure_incident_detail_rows(rows: list[dict]) -> None:
+    for row in rows:
+        for child in row.get("panels", []):
+            if child["id"] in {22005, 22010}:
+                preserve_evidence_rows(child)
+            if child["id"] == 9701:
+                child["links"] = [
+                    {
+                        "title": "Inspect current workflow evidence",
+                        "url": "/d/bioetl-incident-v1/5-incident-workspace?viewPanel=9701&${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${__url_time_range}",
+                        "targetBlank": False,
+                        "includeVars": False,
+                    }
+                ]
+            if child["id"] == 22010:
+                # Native shares the selected-end snapshot. The managed CURRENT
+                # projection resolves this raw donor before replacing either
+                # panel, then runs it at its independently verified current time.
+                child["datasource"] = {"type": "datasource", "uid": "-- Dashboard --"}
+                child["targets"] = [
+                    {
+                        "panelId": 2010,
+                        "refId": "A",
+                        "withTransforms": False,
+                        "datasource": {"type": "datasource", "uid": "-- Dashboard --"},
+                    }
+                ]
+                child["description"] = child["description"].replace(
+                    _GLOBAL_RANGE, _GLOBAL_CURRENT
+                )
+                _urgency_label(child)

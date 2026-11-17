@@ -71,15 +71,19 @@ def test_provider_status_uses_filtered_vectors_in_severity_order():
     assert "Source unavailable" in description
     assert "VALID EMPTY" in description
     assert "SELECT RUN" in description
-    # Align with Review Provider Evidence: Cached Bronze → —, not raw check_result.
-    assert panel["options"]["reduceOptions"]["fields"] == "/^check_result_display$/"
+    # The canvas displays the saved categorical result and a separate probe
+    # reason/time note. Cached Bronze is NOT PROBED, never a healthy probe.
+    assert panel["type"] == "canvas"
+    assert {
+        e["config"]["text"]["field"] for e in panel["options"]["root"]["elements"]
+    } == {"check_result_display", "provider_check_note"}
     assert any(
         t.get("id") == "filterFieldsByName"
         and t.get("options", {}).get("include", {}).get("names")
-        == ["check_result_display"]
+        == ["check_result_display", "provider_check_note"]
         for t in panel.get("transformations") or []
     )
-    assert "—" in json.dumps(
+    assert "NOT PROBED" in json.dumps(
         panel["fieldConfig"]["defaults"]["mappings"], ensure_ascii=False
     )
     blob = json.dumps(panel)

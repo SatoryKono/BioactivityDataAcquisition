@@ -15,12 +15,12 @@
       }
     ]
   },
-  "description": "Run Explorer: latest 10 launches across all pipelines by start time, from reports and the control-plane catalog. Defaults Workflow/Pipeline/Run Type=All, Run ID=-. Details use exact Ops HTTP evidence; run_id never a Prometheus label.",
+  "description": "Run Explorer: latest 20 launches across all pipelines by start time, from reports and the control-plane catalog. Defaults Workflow/Pipeline/Run Type=All, Run ID=-. Details use exact Ops HTTP evidence; run_id never a Prometheus label. Saved refresh is 1m (60 seconds), matching the refresh selector. CURRENT managed panels use their own clock. Canonical presentation contract: dashboard-2.0; UID v1/v2 suffixes are stable compatibility identifiers. Shared selectors are Workflow, Pipeline, Run Type and Run ID; local lookup, derived selectors and diagnostic views have role-specific scope. Saved outcomes, current alert urgency, coverage and replay readiness are distinct state vocabularies.",
   "editable": true,
   "graphTooltip": 1,
   "id": null,
   "links": [],
-  "refresh": "60s",
+  "refresh": "1m",
   "schemaVersion": 42,
   "tags": [
     "bioetl",
@@ -275,7 +275,7 @@
         "query": "",
         "hide": 0,
         "skipUrlSync": false,
-        "description": "Exact UUID within the current Workflow/Pipeline/Run Type, including launches older than the latest ten. Does not replace Selected Run until a matching row is found. Clear to browse recent launches."
+        "description": "Exact UUID within the current Workflow/Pipeline/Run Type, including launches older than the latest twenty. Does not replace Selected Run until a matching row is found. Clear to browse recent launches."
       }
     ]
   },
@@ -383,9 +383,9 @@
       "options": {
         "bioetlDisplayTitle": "Understand Run Scope",
         "mode": "html",
-        "content": "<div style=\"max-width:96ch;padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:20px;white-space:normal;overflow-wrap:anywhere;box-sizing:border-box\"><a href=\"/d/bioetl-run-explorer-v1/1-run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\"><strong>Reset filters</strong></a><br>Last 10 launches · independent of the time range</div>"
+        "content": "<div style=\"max-width:96ch;padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:20px;white-space:normal;overflow-wrap:anywhere;box-sizing:border-box\"><a href=\"/d/bioetl-run-explorer-v1/1-run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\"><strong>Reset filters</strong></a><br>Last 20 launches · independent of the time range</div>"
       },
-      "description": "Browse the latest 10 launches across All pipelines by start time. Workflow and Run Type filter the list. The dashboard time picker does not filter this table. Running means a recorded start without a terminal event, not a live health probe. REPORT MISSING means no final report is available. Defaults All / All / All and run_id=- select no exact run. Effective refresh: 60s; timezone: browser.",
+      "description": "Browse the latest 20 launches across All pipelines by start time. Workflow and Run Type filter the list. The dashboard time picker does not filter this table. Running means a recorded start without a terminal event, not a live health probe. REPORT MISSING means no final report is available. Defaults All / All / All and run_id=- select no exact run. Effective refresh: 60s; timezone: browser.",
       "links": [
         {
           "title": "Run-manifest inspection runbook",
@@ -398,10 +398,10 @@
     {
       "id": 3010,
       "type": "table",
-      "title": "Inspect Recent Runs (last 10)",
-      "description": "GLOBAL · BROWSE the launch catalog filtered by Workflow/Pipeline/Run Type. Last 10 launches, newest Started first, independent of the time range. Workflow and Pipeline open passports. Run ID opens the persisted Report. Pipeline shows the entity component beside Provider; the full canonical pipeline is retained for tooltips and every handoff. The full UUID is available in the cell tooltip and cell inspection without widening the column or wrapping the row. Overview is processing status, not replay readiness. Saved Evidence, Data Quality and Replay Readiness use exact-run verified evidence. N/A means unsupported/legacy assessment. INCOMPLETE means missing required evidence. IN PROGRESS requires an explicit assessment queue/running signal and is never inferred. QUERY ERROR is a source failure; VALID EMPTY means no matching launches. Rows are artifact-backed: a tree_missing index means saved run artifacts are absent; verify backing with verify_report_bind.py. Running is a recorded state, not proof of current liveness. Missing reports have no link. Compact view: Pipeline, Run ID, Started, Overview and Replay Readiness. Workflow, Provider, Duration, Saved Evidence and Data Quality remain in the table data inspector. Their handoff actions are also in the Run ID menu. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. F-13 workflow rule: when the row workflow label is empty/missing, handoffs omit var-workflow (do not emit null/empty workflow).",
+      "title": "Inspect Recent Runs (last 20)",
+      "description": "GLOBAL · BROWSE the launch catalog filtered by Workflow/Pipeline/Run Type. Last 20 launches, newest Started first, independent of the time range. All twenty rows fit the wide table without pagination or internal scrolling; scroll the page to see the complete catalog. Workflow and Pipeline open passports. Run ID opens the persisted Report. Pipeline shows the entity component beside Provider; the full canonical pipeline is retained for tooltips and every handoff. The full UUID is available in the cell tooltip and cell inspection without widening the column or wrapping the row. Overview is processing status, not replay readiness. Saved Evidence, Data Quality and Replay Readiness use exact-run verified evidence. N/A means unsupported/legacy assessment. INCOMPLETE means missing required evidence. IN PROGRESS requires an explicit assessment queue/running signal and is never inferred. QUERY ERROR is a source failure; VALID EMPTY means no matching launches. Rows are artifact-backed: a tree_missing index means saved run artifacts are absent; verify backing with verify_report_bind.py. Running is a recorded state, not proof of current liveness. Missing reports have no link. Compact view: Pipeline, Run ID, Started, Overview and Replay Readiness. Workflow, Provider, Duration, Saved Evidence and Data Quality remain in the table data inspector. Their handoff actions are also in the Run ID menu. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. F-13 workflow rule: when the row workflow label is empty/missing, handoffs omit var-workflow (do not emit null/empty workflow).",
       "gridPos": {
-        "h": 13,
+        "h": 30,
         "w": 24,
         "x": 0,
         "y": 3
@@ -1578,7 +1578,8 @@
             "displayName": "Started",
             "desc": true
           }
-        ]
+        ],
+        "enablePagination": false
       },
       "targets": [
         {
@@ -1588,7 +1589,7 @@
           "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\", \"pipeline_label\": \"VALID EMPTY\"}] : items.($merge([$, {\"workflow_id\": workflow_id != \"\" ? workflow_id : \"N/A\", \"run_label\": $substring(run_id,0,8) & \"…\", \"pipeline_label\": $substringAfter(pipeline, provider & \"_\") ? $substringAfter(pipeline, provider & \"_\") : pipeline, \"workflow_passport_path\": $substringAfter(workflow_passport_url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\"), \"pipeline_passport_path\": $substringAfter(pipeline_passport_url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\")}]))",
           "source": "url",
           "type": "json",
-          "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}",
+          "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -1687,7 +1688,7 @@
         {
           "id": "limit",
           "options": {
-            "limitField": 10
+            "limitField": 20
           }
         }
       ],

@@ -41,7 +41,9 @@ def test_empty_states_name_a_reason() -> None:
     assert "no Run ID selected" in _CHECKPOINT_EMPTY_ROWS
     assert "checkpoint anchors were not recorded" in _CHECKPOINT_EMPTY_ROWS
     assert "checkpoint comparison returned no rows" in _CHECKPOINT_EMPTY_ROWS
-    assert "excluded UNKNOWN" in _OV_EXCL
+    assert "Limits unavailable; check config" in _OV_EXCL
+    assert "Accounting incomplete; inspect stages" in _OV_EXCL
+    assert "contract_exclusions_soft_limit = null" in _OV_EXCL
     assert "FK comparison rows were not returned" in _OV_RECON
 
 

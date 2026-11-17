@@ -201,10 +201,59 @@ function RunDetails({fields, row, isRuns, onDismiss}: Readonly<{
   );
 }
 
+function hasRunIdentity(frame: DataFrame): boolean {
+  return Boolean(frame.fields.find((field) => field.name === 'run_id')?.values.some(
+    (value) => typeof value === 'string' && value !== '' && value !== '-',
+  ));
+}
+
+function runsCatalogStatus(frame: DataFrame, isRuns: boolean): React.ReactNode {
+  if (!isRuns || hasRunIdentity(frame)) {
+    return null;
+  }
+  const validEmpty = frame.fields.find((field) => label(field) === 'Pipeline')?.values[0] === 'VALID EMPTY';
+  return <div className={shell}>{validEmpty ? 'VALID EMPTY · No matching launches' : 'UNKNOWN · No run identity'}</div>;
+}
+
+function resolveSummaryFields(
+  frame: DataFrame,
+  fields: Field[],
+  compactFields: AdaptiveTableOptions['compactFields'],
+): Field[] {
+  if (!compactFields) {
+    return fields;
+  }
+  return compactFields
+    .map((name) => frame.fields.find((field) => label(field) === name))
+    .filter((field): field is Field => Boolean(field));
+}
+
+function selectDetailFields(
+  frame: DataFrame,
+  fields: Field[],
+  viewMode: AdaptiveTableOptions['viewMode'],
+  isRuns: boolean,
+): Field[] {
+  const identityNames = new Set(['run_id', 'pipeline', 'run_type', 'workflow_scope']);
+  const runExtraLabels = new Set(['Workflow', 'Provider', 'Duration', 'Saved Evidence', 'Data Quality']);
+  return frame.fields.filter((field) =>
+    viewMode === 'rows'
+    || fields.includes(field)
+    || identityNames.has(field.name)
+    || (isRuns && runExtraLabels.has(label(field)))
+  );
+}
+
 const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) => {
   const { data, width, height, options, fieldConfig, timeRange } = props;
+  const rawFrame = data.series.find((item) => item.length > 0);
   const [page, setPage] = useState(0);
-  const [detailRow, setDetailRow] = useState<number | null>(null);
+  const [selection, setSelection] = useState<{ frame: DataFrame | undefined; row: number | null }>({ frame: rawFrame, row: null });
+  // An index belongs to one response, including evidence without run_id.
+  // Clear it before committing a replacement frame with a different row order.
+  if (selection.frame !== rawFrame) {
+    setSelection({ frame: rawFrame, row: null });
+  }
   const [host, setHost] = useState<HTMLDivElement | null>(null);
   const [bounds, setBounds] = useState<{ width: number; height: number } | null>(null);
   useLayoutEffect(() => {
@@ -218,7 +267,6 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
     return () => observer.disconnect();
   }, [host]);
   const viewport = useSyncExternalStore(subscribeViewport, () => window.innerWidth, () => 1920);
-  const rawFrame = data.series.find((item) => item.length > 0);
   const frame = useMemo(() => rawFrame ? {
     ...rawFrame, fields: rawFrame.fields.map(safeField),
   } : undefined, [rawFrame]);
@@ -247,30 +295,22 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
   if (!frame || fields.length === 0) {
     return <div className={shell}>UNKNOWN · No matching data</div>;
   }
-  if (isRuns && !frame.fields.find((field) => field.name === 'run_id')?.values.some((value) => typeof value === 'string' && value !== '' && value !== '-')) {
-    const validEmpty = frame.fields.find((field) => label(field) === 'Pipeline')?.values[0] === 'VALID EMPTY';
-    return <div className={shell}>{validEmpty ? 'VALID EMPTY · No matching launches' : 'UNKNOWN · No run identity'}</div>;
-  }
+  const catalogStatus = runsCatalogStatus(frame, isRuns);
+  if (catalogStatus !== null) { return catalogStatus; }
   // Explicit compact summaries may use metadata hidden from the wide table.
-  const summaryFields = options.compactFields
-    ? options.compactFields.map((name) => frame.fields.find((field) => label(field) === name)).filter((field): field is Field => Boolean(field))
-    : fields;
+  const summaryFields = resolveSummaryFields(frame, fields, options.compactFields);
   if (isCompact && options.compactFields && summaryFields.length !== options.compactFields.length) {
     return <div className={shell}>UNKNOWN · Required fields unavailable</div>;
   }
 
-  const detailFields = frame.fields.filter((field) =>
-    options.viewMode === 'rows' || fields.includes(field) || ['run_id', 'pipeline', 'run_type', 'workflow_scope'].includes(field.name)
-    || (isRuns && ['Workflow', 'Provider', 'Duration', 'Saved Evidence', 'Data Quality'].includes(label(field)))
-  );
-
+  const detailFields = selectDetailFields(frame, fields, options.viewMode, isRuns);
 
   return (
     <div ref={setHost} className={isCompact ? `${shell} ${compact}` : nativeShell} data-bioetl-adaptive-table={isCompact ? 'compact' : 'wide'}>
       {isCompact ? (
         <CompactRows fields={summaryFields} row={row} isRuns={isRuns} isPaged={isPaged}
           title={props.title} currentPage={currentPage} rowCount={rowOrder.length}
-          onPageChange={setPage} onDetails={setDetailRow} />
+          onPageChange={setPage} onDetails={(row) => setSelection({ frame: rawFrame, row })} />
       ) : (
         <Table
           data={displayFrame as DataFrame}
@@ -279,7 +319,7 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
           width={Math.max(0, (bounds?.width ?? width) - 2)}
           height={Math.max(0, (bounds?.height ?? height) - 2)}
           fieldConfig={fieldConfig}
-          enablePagination={isPaged || options.enablePagination === true || options.footer?.enablePagination === true}
+          enablePagination={(isPaged && !isRuns) || options.enablePagination === true || options.footer?.enablePagination === true}
           cellHeight={options.cellHeight}
           noHeader={options.showHeader === false}
           sortBy={options.sortBy}
@@ -289,7 +329,8 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
           timeRange={timeRange}
         />
       )}
-      <RunDetails fields={detailFields} row={detailRow} isRuns={isRuns} onDismiss={() => setDetailRow(null)} />
+      <RunDetails fields={detailFields} row={selection.frame === rawFrame ? selection.row : null} isRuns={isRuns}
+        onDismiss={() => setSelection({ frame: rawFrame, row: null })} />
     </div>
   );
 };

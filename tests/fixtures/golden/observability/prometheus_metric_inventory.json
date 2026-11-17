@@ -117,6 +117,7 @@
         "bioetl_pipeline_stage_expected",
         "bioetl_stage_backlog_records",
         "bioetl_stage_lag_seconds",
+        "bioetl_stage_snapshot_observed_timestamp_seconds",
         "bioetl_checkpoint_saved_at_seconds",
         "bioetl_replay_lag_seconds",
         "bioetl_manifest_ledger_integrity_ratio",

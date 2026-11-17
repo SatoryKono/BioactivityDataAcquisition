@@ -66,7 +66,7 @@ it('queries now without historical input and retains units and the original quer
   act(() => done(0, 42));
   expect(screen.getByTestId('current-native')).toHaveTextContent('"values":[42]');
   expect(screen.getByTestId('current-native')).toHaveTextContent('"unit":"s"');
-  expect(screen.getByText('2026-11-13 20:00 UTC')).toBeInTheDocument();
+  expect(screen.getByText('2026-11-13 20:00 UTC · 1 row')).toBeInTheDocument();
 });
 it('keeps the current clock when only the historical period changes', () => {
   const panel = props();
@@ -156,4 +156,17 @@ it('keeps the full transformed frame when current tables use compact row details
   expect(rendered.options.compactFields).toEqual(['Value']);
   expect(rendered.series[0].fields[1].values).toEqual(['retained for details']);
   expect(rendered.fieldConfig).toEqual(panel.fieldConfig);
+});
+
+it('shows the full returned row count and retains the third signal for the renderer', () => {
+  render(<CurrentPanel {...props()} />);
+  act(() => {
+    const timeRange = (runners[0].run.mock.calls[0][0] as QueryRunnerOptions).timeRange;
+    runners[0].events.next({state: LoadingState.Done, timeRange,
+      series: [{length: 3, fields: [{name: 'Alert', type: 'string',
+        values: ['throughput', 'backlog', 'stage-lag'], config: {}}]}],
+    } as PanelData);
+  });
+  expect(screen.getByText('2026-11-13 20:00 UTC · 3 rows')).toBeInTheDocument();
+  expect(screen.getByTestId('current-native')).toHaveTextContent('stage-lag');
 });

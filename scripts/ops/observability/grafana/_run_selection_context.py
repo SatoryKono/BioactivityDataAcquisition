@@ -2,6 +2,27 @@
 
 from __future__ import annotations
 
+# Share the offset-safe parser with Incident; never compare missing dates.
+_OPERATOR_TIME_UNIT = "time:YYYY-MM-DD HH:mm"
+
+_TIMESTAMP_SECONDS = (
+    "$secs := function($t){( "
+    "$tail := $substring($t, 19); "
+    "$rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; "
+    "$zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : "
+    "($contains($rest, '+') ? '+' : '-')); "
+    "$digits := $rest != '' ? $substringBefore($rest, $zone) : ''; "
+    "$frac := $digits != '' ? $number('0.' & $digits) : 0; "
+    "$sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); "
+    "$off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : "
+    "$substringAfter($tail, '-')); "
+    "$oh := $off != '' ? $number($substring($off, 0, 2)) : 0; "
+    "$om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; "
+    "$toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 "
+    "+ $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac "
+    "- $sign * ($oh*3600 + $om*60) )}; "
+)
+
 RUN_SELECTION_CONTEXT = (
     '($requested := "${run_id:percentencode}"; '
     "$auto := $requested in ['', '-', 'All', '$__all', '%24__all', '__all', '*', '%2A']; "
@@ -10,6 +31,11 @@ RUN_SELECTION_CONTEXT = (
     "$pipelineAll := $requestedPipeline in ['', 'All', '$__all', '%24__all', '.*', '*', '%2A', '.%2A']; "
     "$pipelineMismatch := $hasRun and $type(pipeline) = 'string' and $not($pipelineAll) "
     "and $encodeUrlComponent(pipeline) != $requestedPipeline; "
+    "$savedAt := summary[0].evaluation_at; "
+    + _TIMESTAMP_SECONDS
+    + "$savedMillis := $savedAt ? $secs($savedAt) * 1000 : null; "
+    "$savedAge := $savedMillis != null and $savedMillis <= $millis() "
+    "? $floor(($millis() - $savedMillis) / 1000) : null; "
     "[{'_bioetl_frame':'selection_context', "
     "'context': $auto ? ($hasRun ? 'AUTO · latest run in scope' : "
     "(reason = 'no_runs_in_scope' ? 'NO RUN · empty scope' : 'Context unavailable')) "
@@ -19,7 +45,13 @@ RUN_SELECTION_CONTEXT = (
     "'execution_state': $type(execution_state) = 'string' and execution_state != '' "
     "? execution_state : 'UNKNOWN', "
     "'verdict': $type(verdict) = 'string' and verdict != '' ? verdict : 'UNKNOWN', "
-    "'context_checked_at': $now()}])"
+    "'context_checked_at': $now(), "
+    "'saved_assessment_at': $savedAt, 'assessment_age_seconds': $savedAge, "
+    "'evidence_freshness': ($cache := status_cache; "
+    "$saved := summary[0].evaluation_at; "
+    "($cache.state = 'fresh' ? 'Cache FRESH' : $cache.state = 'stale' ? 'Cache STALE' : 'Cache UNKNOWN') "
+    "& ($type($cache.fresh_seconds)='number' ? ' (fresh < ' & $string($cache.fresh_seconds) & ' s)' : '') "
+    "& '; saved ' & ($saved ? $substring($saved,0,10) & ' ' & $substring($saved,11,5) & ' ' & ($substring($saved,-1)='Z' ? 'UTC' : $substring($saved,-6)) : 'Not recorded'))}])"
 )
 
 
@@ -111,11 +143,39 @@ def stamp_run_selection_context(payload: dict) -> None:
                 },
                 "overrides": [
                     {
+                        "matcher": {"id": "byName", "options": "Evidence freshness"},
+                        "properties": [
+                            {
+                                "id": "custom.cellOptions",
+                                "value": {"type": "color-text", "wrapText": True},
+                            },
+                            {
+                                "id": "mappings",
+                                "value": [
+                                    {
+                                        "type": "regex",
+                                        "options": {
+                                            "pattern": "^Cache STALE.*",
+                                            "result": {"color": "orange"},
+                                        },
+                                    },
+                                    {
+                                        "type": "regex",
+                                        "options": {
+                                            "pattern": "^Cache UNKNOWN.*",
+                                            "result": {"color": "gray"},
+                                        },
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    {
                         "matcher": {"id": "byName", "options": "Context checked at"},
                         "properties": [
-                            {"id": "unit", "value": "time:YYYY-MM-DD HH:mm"},
+                            {"id": "unit", "value": _OPERATOR_TIME_UNIT},
                         ],
-                    }
+                    },
                 ],
             },
             "transformations": [
@@ -143,6 +203,7 @@ def stamp_run_selection_context(payload: dict) -> None:
                             "names": [
                                 "context",
                                 "context_checked_at",
+                                "evidence_freshness",
                             ]
                         }
                     },
@@ -164,14 +225,77 @@ def stamp_run_selection_context(payload: dict) -> None:
                         "indexByName": {
                             "context": 0,
                             "context_checked_at": 1,
+                            "evidence_freshness": 2,
                         },
                         "renameByName": {
                             "context": "Context",
                             "context_checked_at": "Context checked at",
+                            "evidence_freshness": "Evidence freshness",
                         },
                     },
                 },
             ],
             "links": [],
         }
+    )
+    # A fresh HTTP cache is not fresh source evidence. Display the saved clock
+    # and its age; keep cache policy in the raw context for inspection only.
+    names = [
+        "context",
+        "context_checked_at",
+        "saved_assessment_at",
+        "assessment_age_seconds",
+    ]
+    for transform in panel["transformations"]:
+        options = transform["options"]
+        if transform["id"] == "filterFieldsByName":
+            options["include"]["names"] = names
+        elif transform["id"] == "convertFieldType":
+            options["conversions"].append(
+                {"targetField": "saved_assessment_at", "destinationType": "time"}
+            )
+        elif transform["id"] == "organize":
+            options["indexByName"] = {name: index for index, name in enumerate(names)}
+            options["renameByName"] = dict(
+                zip(
+                    names,
+                    [
+                        "Context",
+                        "Read at",
+                        "Saved assessment at",
+                        "Saved age · not source age",
+                    ],
+                    strict=True,
+                )
+            )
+    panel["fieldConfig"]["overrides"].extend(
+        [
+            {
+                "matcher": {"id": "byName", "options": "Read at"},
+                "properties": [{"id": "unit", "value": _OPERATOR_TIME_UNIT}],
+            },
+            {
+                "matcher": {"id": "byName", "options": "Saved assessment at"},
+                "properties": [
+                    {"id": "unit", "value": _OPERATOR_TIME_UNIT},
+                    {"id": "noValue", "value": "Not recorded"},
+                ],
+            },
+            {
+                "matcher": {
+                    "id": "byName",
+                    "options": "Saved age · not source age",
+                },
+                "properties": [
+                    {"id": "unit", "value": "s"},
+                    {"id": "noValue", "value": "Not recorded"},
+                    {"id": "color", "value": {"mode": "fixed", "fixedColor": "text"}},
+                ],
+            },
+        ]
+    )
+    panel["description"] += (
+        " Saved assessment at is the persisted assessment clock, and Saved age is elapsed time since that clock. "
+        "No cadence or freshness threshold for the run's source data is provided by this endpoint: source freshness remains Not verified. "
+        "The reader cache policy does not establish source freshness and is available only in raw context inspection."
     )

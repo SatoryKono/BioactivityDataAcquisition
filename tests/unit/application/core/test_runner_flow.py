@@ -31,14 +31,44 @@ from __future__ import annotations
 
 import pytest
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import MagicMock, call, patch
 
 from bioetl.application.core import runner_flow
+from bioetl.application.core.runner_flow_metrics import record_flow_invariants
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_stage_snapshot_clock_is_captured_once_and_does_not_redate_the_run() -> None:
+    observed = datetime(2026, 11, 11, 16, 39, 51, 123456, tzinfo=UTC)
+    host = _Host(diagnostics=None, execution_metrics={"records_fetched": 48})
+    host._context.started_at = observed - timedelta(seconds=407.315231)
+    clock = MagicMock(return_value=observed)
+    record_flow_invariants(host, current_time_fn=clock)
+    clock.assert_called_once_with()
+    calls = host._services.metrics.set_gauge.call_args_list
+    observations = [
+        c.args
+        for c in calls
+        if c.args[0] == "bioetl_stage_snapshot_observed_timestamp_seconds"
+    ]
+    assert len(observations) == 3
+    assert {c[1] for c in observations} == {observed.timestamp()}
+    assert {c[2]["stage"] for c in observations} == {
+        "ingestion",
+        "validation",
+        "output",
+    }
+    lag = [c.args for c in calls if c.args[0] == "bioetl_stage_lag_seconds"]
+    assert {c[2]["stage"]: c[1] for c in lag} == {
+        "ingestion": 407.315231,
+        "validation": 0.0,
+        "output": 0.0,
+    }
+    assert all(set(c[2]) == {"pipeline", "run_type", "stage"} for c in observations)
 
 
 class _Host:
@@ -439,7 +469,7 @@ def test_stage_metrics_keep_order_counts_and_backlog_conditioned_lag(
 
     host = _Host(diagnostics={}, execution_metrics=execution_metrics)
     with patch(
-        "bioetl.application.observability.pipeline_metrics.PipelineMetricsRecorder"
+        "bioetl.application.core.runner_flow_metrics.PipelineMetricsRecorder"
     ) as recorder:
         record_flow_invariants(
             host, current_time_fn=lambda: datetime(2026, 4, 29, 12, 0, 10, tzinfo=UTC)

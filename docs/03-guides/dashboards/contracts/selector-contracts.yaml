@@ -54,6 +54,8 @@ selector_taxonomy:
   - execution_fingerprint
   context_hidden:
     shipped:
+    - selected_run_id
+    - selected_pipeline
     - pipeline_context
     - adapter
     - provider_hint
@@ -65,7 +67,6 @@ selector_taxonomy:
     - provider_context
     - provider_context_exact
     reserved_future:
-    - selected_run_id
     - selected_manifest_id
     - selected_started_at
   forensic_only:
