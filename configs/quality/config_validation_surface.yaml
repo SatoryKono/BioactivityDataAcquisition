@@ -111,6 +111,15 @@ families:
     validation_depth: documentation
     enforcing_surfaces:
       - tests/architecture/test_config_validation_surface.py
+  - family_id: ide_workspace_templates
+    path_prefixes:
+      - configs/ide/
+    owner: "@bioetl-platform"
+    validation_mechanism: ide_template_contract_tests
+    validation_depth: semantic
+    enforcing_surfaces:
+      - tests/unit/repo_backed/scripts/test_zed_portability.py
+      - tests/unit/repo_backed/scripts/test_zed_workspace_config.py
   - family_id: naming_exceptions
     path_prefixes:
       - configs/naming_exceptions.yaml
