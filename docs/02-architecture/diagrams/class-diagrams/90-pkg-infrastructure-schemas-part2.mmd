@@ -1,13 +1,25 @@
 %% Title: Package Family: infrastructure/schemas (Part 2/4)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 2/4; modules: composite_validation, workflow_config, base_schemas_pubchem, pipeline_config_common.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 2/4; modules: composite_config, composite_validation, workflow_config.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
-%% @nodes   30
+%% @nodes   25
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
+
+    namespace composite_config {
+        class CompositeConfigFileSchema
+        class CompositeConfigSchema
+        class NormalizedAnchorPolicySchema
+        class NormalizedJoinKeyPolicySchema
+        class PubchemCompoundAnchorSchema
+        class PubchemCompoundJoinBoundarySchema
+        class PublicationIdentityJoinPolicySchema
+        class UniprotIdMappingAnchorSchema
+        class UniprotIdMappingJoinBoundarySchema
+    }
 
     namespace composite_validation {
         class CompositeDQSchema
@@ -29,24 +41,4 @@ classDiagram
         class WorkflowReconcileRowsConfigSchema
         class WorkflowRunOptionsSchema
         class WorkflowTransformStepSchema
-    }
-
-    namespace base_schemas_pubchem {
-        class BaseFilterColumnSchema
-        class BaseGoldColumnFilterConfig
-        class BaseGoldFiltersConfig
-        class BaseGoldListContainsFilterConfig
-        class BaseGoldListLengthFilterConfig
-        class BaseGoldRangeFilterConfig
-        class BaseInputFilterConfig
-    }
-
-    namespace pipeline_config_common {
-        class CircuitBreakerYamlConfig
-        class ConditionalValidationConfig
-        class CrossFieldValidationConfig
-        class CsvExportConfig
-        class DQReportYamlConfig
-        class DQYamlConfig
-        class FieldValidationConfig
     }

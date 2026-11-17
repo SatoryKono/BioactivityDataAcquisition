@@ -296,6 +296,12 @@ _Generated: 2026-10-14T08:23:10+03:00_
 
 ---
 
+## Pkg Application Services Evidence Location
+
+![90-pkg-application-services-evidence-location](./90-pkg-application-services-evidence-location.svg)
+
+---
+
 ## Pkg Application Services Execution
 
 ![90-pkg-application-services-execution](./90-pkg-application-services-execution.svg)
@@ -473,6 +479,12 @@ _Generated: 2026-10-14T08:23:10+03:00_
 ## Pkg Domain Control Plane Part2
 
 ![90-pkg-domain-control-plane-part2](./90-pkg-domain-control-plane-part2.svg)
+
+---
+
+## Pkg Domain Control Plane Part3
+
+![90-pkg-domain-control-plane-part3](./90-pkg-domain-control-plane-part3.svg)
 
 ---
 
@@ -728,12 +740,6 @@ _Generated: 2026-10-14T08:23:10+03:00_
 
 ---
 
-## Pkg Infrastructure Quality
-
-![90-pkg-infrastructure-quality](./90-pkg-infrastructure-quality.svg)
-
----
-
 ## Pkg Infrastructure Quarantine
 
 ![90-pkg-infrastructure-quarantine](./90-pkg-infrastructure-quarantine.svg)
@@ -764,9 +770,15 @@ _Generated: 2026-10-14T08:23:10+03:00_
 
 ---
 
-## Pkg Infrastructure Storage Bronze
+## Pkg Infrastructure Storage Bronze Part1
 
-![90-pkg-infrastructure-storage-bronze](./90-pkg-infrastructure-storage-bronze.svg)
+![90-pkg-infrastructure-storage-bronze-part1](./90-pkg-infrastructure-storage-bronze-part1.svg)
+
+---
+
+## Pkg Infrastructure Storage Bronze Part2
+
+![90-pkg-infrastructure-storage-bronze-part2](./90-pkg-infrastructure-storage-bronze-part2.svg)
 
 ---
 

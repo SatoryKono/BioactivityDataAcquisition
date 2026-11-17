@@ -1,11 +1,11 @@
 %% Title: Package Family: composition
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition; modules: bootstrap_contexts, _service_registry, _pipeline_execution, observability, pipeline_runner_request, _registration.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition; modules: bootstrap_contexts, _service_registry, _pipeline_execution, control_plane_paths, observability, pipeline_runner_request.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
-%% @nodes   18
+%% @nodes   20
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -25,6 +25,11 @@ classDiagram
     namespace pipeline_execution {
         class ArchiveOptions
         class VacuumOptions
+    }
+
+    namespace control_plane_paths {
+        class EvidenceLocationBindingContext
+        class FileEvidenceReadContextFactory
     }
 
     namespace observability {

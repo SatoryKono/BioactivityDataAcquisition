@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" aria-roledescription="classDiagram" viewBox="0 0 960 114">
+  <title>Package Family: domain/control_plane (Part 3/3)</title>
+  <text x="16" y="32" font-family="Inter,sans-serif" font-size="14">ContractRegistry</text>
+  <text x="16" y="54" font-family="Inter,sans-serif" font-size="14">RunLedgerReplayProjection</text>
+  <text x="16" y="76" font-family="Inter,sans-serif" font-size="14">WorkflowLedgerEntry</text>
+</svg>

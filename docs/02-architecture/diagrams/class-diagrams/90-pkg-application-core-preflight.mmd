@@ -1,13 +1,18 @@
 %% Title: Package Family: application/core/preflight
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/core/preflight; modules: service, _observability, health_aggregator, medallion_validator.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/core/preflight; modules: medallion_validator, service, _observability, health_aggregator.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
-%% @nodes   5
+%% @nodes   6
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
+
+    namespace medallion_validator {
+        class MedallionConfigValidator
+        class PreflightLayerConfig
+    }
 
     namespace service {
         class PreflightService
@@ -20,8 +25,4 @@ classDiagram
 
     namespace health_aggregator {
         class HealthAggregator
-    }
-
-    namespace medallion_validator {
-        class MedallionConfigValidator
     }

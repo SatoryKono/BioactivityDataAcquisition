@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" aria-roledescription="classDiagram" viewBox="0 0 960 268">
+  <title>Package Family: application/services/evidence_location</title>
+  <text x="16" y="32" font-family="Inter,sans-serif" font-size="14">EvidenceLocationLegacyRootPolicy</text>
+  <text x="16" y="54" font-family="Inter,sans-serif" font-size="14">EvidenceLocationResolveResult</text>
+  <text x="16" y="76" font-family="Inter,sans-serif" font-size="14">EvidenceReadContext</text>
+  <text x="16" y="98" font-family="Inter,sans-serif" font-size="14">EvidenceReadContextFactoryProtocol</text>
+  <text x="16" y="120" font-family="Inter,sans-serif" font-size="14">EvidenceLocationRegisterRequest</text>
+  <text x="16" y="142" font-family="Inter,sans-serif" font-size="14">EvidenceLocationRegistrationOutcome</text>
+  <text x="16" y="164" font-family="Inter,sans-serif" font-size="14">EvidenceLocationVerifyOutcome</text>
+  <text x="16" y="186" font-family="Inter,sans-serif" font-size="14">EvidenceLocationRegistrationService</text>
+  <text x="16" y="208" font-family="Inter,sans-serif" font-size="14">_RegisterAndReadPort</text>
+  <text x="16" y="230" font-family="Inter,sans-serif" font-size="14">EvidenceLocationResolver</text>
+</svg>

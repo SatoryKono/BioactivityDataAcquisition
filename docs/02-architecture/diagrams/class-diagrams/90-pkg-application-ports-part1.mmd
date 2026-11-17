@@ -1,13 +1,26 @@
 %% Title: Package Family: application/ports (Part 1/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/application/ports; part 1/2; modules: providers, control_plane, operations.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/application/ports; part 1/2; modules: control_plane, providers, operations.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
-%% @nodes   26
+%% @nodes   28
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
+
+    namespace control_plane {
+        class ControlPlaneArtifactLifecycleStoreProtocol
+        class EvidenceReadContext
+        class EvidenceReadContextOpenerProtocol
+        class ForensicRunDiffServiceProtocol
+        class HistoricalReplayClosureServiceProtocol
+        class HistoricalReplayCorpusServiceProtocol
+        class HistoricalReplayUniverseServiceProtocol
+        class LineageInspectionServiceProtocol
+        class RunManifestInspectionServiceProtocol
+        class WorkflowInspectionServiceProtocol
+    }
 
     namespace providers {
         class AdapterCreatorProtocol
@@ -20,17 +33,6 @@ classDiagram
         class ProviderSettingsProtocol
         class SecretValueProviderProtocol
         class SupportAwareDataSourceCreatorProtocol
-    }
-
-    namespace control_plane {
-        class ControlPlaneArtifactLifecycleStoreProtocol
-        class ForensicRunDiffServiceProtocol
-        class HistoricalReplayClosureServiceProtocol
-        class HistoricalReplayCorpusServiceProtocol
-        class HistoricalReplayUniverseServiceProtocol
-        class LineageInspectionServiceProtocol
-        class RunManifestInspectionServiceProtocol
-        class WorkflowInspectionServiceProtocol
     }
 
     namespace operations {

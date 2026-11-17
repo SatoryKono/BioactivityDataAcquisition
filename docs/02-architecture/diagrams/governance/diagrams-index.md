@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-24'
+  Last verified: '2026-11-17'
 
 ______________________________________________________________________
 
 # BioETL Architecture Diagrams Index
 
-*Updated: 2026-09-24*
+*Updated: 2026-11-17*
 
 > **Canonical root:** [docs/02-architecture/diagrams/](../README.md)
 > **Diagram governance:** [ADR-040](../../decisions/ADR-040-diagram-governance.md)
@@ -23,7 +23,7 @@ ______________________________________________________________________
 
 - Canonical `.mmd` sources:
   - `architecture/` — 89 files
-  - `class-diagrams/` — 147 files
+  - `class-diagrams/` — 149 files
   - `foundation/` — 55 files
   - `providers/` — 28 files
   - `sequence/` — 5 files

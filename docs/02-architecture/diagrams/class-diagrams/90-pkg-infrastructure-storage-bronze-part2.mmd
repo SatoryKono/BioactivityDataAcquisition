@@ -1,0 +1,57 @@
+%% Title: Package Family: infrastructure/storage/bronze (Part 2/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/bronze; part 2/2; modules: cleanup_group_members, cleanup_group_records, cleanup_group_recovery, cleanup_posix, cleanup_preview_mixin, facade_contracts.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-11-17
+%% @level   Package Family / Inventory Slice
+%% @nodes   11
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace cleanup_group_members {
+        class GroupMemberRecovery
+    }
+
+    namespace cleanup_group_records {
+        class GroupRecordStore
+    }
+
+    namespace cleanup_group_recovery {
+        class GroupRecoveryCoordinator
+    }
+
+    namespace cleanup_posix {
+        class _StageOrigin
+    }
+
+    namespace cleanup_preview_mixin {
+        class BronzeCleanupPreviewMixin
+    }
+
+    namespace facade_contracts {
+        class BronzeWriterRuntimeServices
+    }
+
+    namespace io_mixin {
+        class BronzeWriterIOMixin
+    }
+
+    namespace metadata_mixin {
+        class BronzeWriterMetadataMixin
+    }
+
+    namespace side_effects_mixin {
+        class BronzeWriterSideEffectsMixin
+    }
+
+    namespace validation_mixin {
+        class BronzeWriterValidationMixin
+    }
+
+    namespace write_execution {
+        class _BronzeWriteExecutionHostProtocol
+    }
+
+    GroupMemberRecovery <|-- GroupRecoveryCoordinator
+    GroupRecordStore <|-- GroupMemberRecovery
