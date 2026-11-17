@@ -1,5 +1,7 @@
 """Generated memory must not recursively enter filesystem-fallback RAG builds."""
 
+from __future__ import annotations
+
 from pathlib import Path
 
 import pytest

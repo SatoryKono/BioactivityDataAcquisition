@@ -9,7 +9,10 @@ import pytest
 
 import memory.query as memory_query
 from memory.query import main, query_all
-from tests.helpers.memory_manifests import write_test_retrieval_layers
+from tests.helpers.memory_manifests import (
+    snapshot_test_memory_artifacts,
+    write_test_retrieval_layers,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -22,7 +25,7 @@ def test_all_preserves_available_layers_without_refresh(
     chunks, events = write_test_retrieval_layers(
         tmp_path, rag_ready=rag_ready, timeline_ready=timeline_ready
     )
-    before = sorted(tmp_path.rglob("*"))
+    before = snapshot_test_memory_artifacts(tmp_path)
 
     payload = query_all(
         query="memory_subsystem",
@@ -41,7 +44,7 @@ def test_all_preserves_available_layers_without_refresh(
         | ({"timeline_events"} if not timeline_ready else set())
     )
     assert payload["refresh_report"] is None
-    assert sorted(tmp_path.rglob("*")) == before
+    assert snapshot_test_memory_artifacts(tmp_path) == before
 
 
 def test_all_cli_reports_degradation_as_json_with_nonzero_exit(
@@ -108,3 +111,26 @@ def test_single_layer_queries_do_not_inspect_other_layer(
             query="memory", event_family=None, event_type=None, events_dir=events
         )
     assert payload["count"] == 1
+
+
+@pytest.mark.parametrize("source_refs", [1, 0, False, "ref", "", {}])
+def test_invalid_timeline_source_refs_preserves_rag_and_catalog(
+    tmp_path: Path, source_refs: object
+) -> None:
+    chunks, events = write_test_retrieval_layers(
+        tmp_path, rag_ready=True, timeline_ready=True, query="memory"
+    )
+    event_path = events / "runs.jsonl"
+    event = json.loads(event_path.read_text(encoding="utf-8"))
+    event["source_refs"] = source_refs
+    event_path.write_text(json.dumps(event) + "\n", encoding="utf-8")
+
+    payload = query_all(query="memory", chunks_path=chunks, events_dir=events)
+
+    assert payload["degraded"] is True
+    assert payload["results"]["rag"][0]["id"] == "chunk-1"
+    assert payload["results"]["catalog"]
+    assert payload["results"]["timeline"] == []
+    assert [item["kind"] for item in payload["missing_artifacts"]] == [
+        "timeline_events"
+    ]

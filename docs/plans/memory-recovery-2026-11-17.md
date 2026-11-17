@@ -33,15 +33,22 @@ forced process termination. The publication branch gets its own scoped identity.
 | RF-001 | complete | Source identity captured; 20 protected backup members preserve both existing profiles, registry, configuration and seed. |
 | RF-002 | complete | Partial retrieval, CLI status, cwd rendering, derived exclusions and reviewed navigation are implemented; focused tests and type checks pass. |
 | RF-003 | complete | The preparation profile was stopped without force and preserved. Publication profile `7d49cd51ec16...` is independently registered, active and READY on port 55005. |
-| RF-004 | partial | Native config/read verified a session-only workspace override without a forced MCP cwd. Current-chat Memory tools remain unavailable; normal-session native acceptance is NOT_TESTED. |
+| RF-004 | partial_current_chat | Separate native Codex app-server acceptance passed on 2026-11-17 at `704db6024d55...`: native discovery/read_graph, foreign-workspace refusal and a positive control after refusal. Current-conversation tool inventory is NOT_AVAILABLE, so current-chat native acceptance remains NOT_TESTED. These are separate scopes. |
 | RF-005 | source_checked | Full RAG/timeline and strict read-only acceptance passed at `cbbd4e9a03e...`: 8124 eligible/indexed sources, 66889 chunks, no stale/missing sources, and zero changes across 14784 observed files. Repeat after the final source commit. |
 | RF-006 | complete_scoped | Publication-profile stdio acceptance passed: bounded read, reconnect persistence, probe cleanup, foreign-workspace refusal and positive control. This does not qualify native current-chat tools. |
 | RF-007 | deferred | Existing main recovery requires an explicit reviewed reconciliation of reused process identity; no PID termination or record deletion. |
-| RF-008 | finalizing | Focused Memory suite: 98 passed, one Windows symlink skip; selector suite: 309 passed. PR #13169 CI is green at `cbbd4e9a03e...`. Regenerate the scripts inventory, then bind final checks and closeout to the resulting head. Native acceptance remains NOT_TESTED. |
+| RF-008 | finalizing | Focused Memory suite: 98 passed, one Windows symlink skip; selector suite: 309 passed. PR #13169 CI is green at `cbbd4e9a03e...`. Regenerate the scripts inventory, then bind final checks and closeout to the resulting head. Separate native app-server acceptance passed at `704db6024d55...`; current-chat acceptance remains NOT_TESTED. |
 
 RF-002 precedes the final RF-005 build. MCP checks in RF-006 require RF-003;
 local retrieval checks in RF-006 require RF-005.
 RF-007 is independent and cannot block safe preparation of the new profile.
+
+RF-004 has two distinct acceptance records. The separate native check used
+session-only workspace args, ephemeral threads and zero model turns; it did
+not set a global MCP cwd or change user configuration. It qualified the pinned
+Codex client's native MCP discovery and bounded reads in the publication
+worktree. It did not add tools to this existing conversation. Its successful
+result must never be substituted for current-chat acceptance.
 
 The historical checked-in seed remains unchanged. Source review found obsolete
 version, orchestration and dashboard assertions. The new profile instead uses

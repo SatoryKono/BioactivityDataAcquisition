@@ -113,3 +113,15 @@ def write_test_retrieval_layers(
             encoding="utf-8",
         )
     return chunks, events
+
+
+def snapshot_test_memory_artifacts(
+    root: Path,
+) -> dict[str, tuple[bytes, int] | None]:
+    """Capture paths, file content and mtimes to detect retrieval writes."""
+    return {
+        path.relative_to(root).as_posix(): (
+            (path.read_bytes(), path.stat().st_mtime_ns) if path.is_file() else None
+        )
+        for path in sorted(root.rglob("*"))
+    }

@@ -7,7 +7,10 @@ from pathlib import Path
 import pytest
 
 from memory.tooling.workflow import pre_task_workflow
-from tests.helpers.memory_manifests import write_test_retrieval_layers
+from tests.helpers.memory_manifests import (
+    snapshot_test_memory_artifacts,
+    write_test_retrieval_layers,
+)
 
 pytestmark = pytest.mark.integration
 
@@ -26,7 +29,7 @@ def test_read_only_pre_task_preserves_available_layers(
     chunks, events = write_test_retrieval_layers(
         tmp_path, rag_ready=rag_ready, timeline_ready=timeline_ready
     )
-    before = sorted(tmp_path.rglob("*"))
+    before = snapshot_test_memory_artifacts(tmp_path)
 
     result = pre_task_workflow(
         task_id="partial-context",
@@ -46,4 +49,4 @@ def test_read_only_pre_task_preserves_available_layers(
     assert result["retrieval"]["results"]["catalog"]
     assert result["session_note"] is None
     assert result["refresh_report"] is None
-    assert sorted(tmp_path.rglob("*")) == before
+    assert snapshot_test_memory_artifacts(tmp_path) == before
