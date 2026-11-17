@@ -7,5 +7,5 @@ const picomatch = require(path.join(root, 'node_modules', 'picomatch'));
 
 assert.equal(picomatch.makeRe('*.js').test('a.js'), true);
 assert.equal(picomatch.makeRe('*.js').test('a.md'), false);
-assert.equal(require(path.join(root, 'node_modules', 'picomatch', 'package.json')).version, '4.0.8-bioetl.7');
+assert.equal(require(path.join(root, 'node_modules', 'picomatch', 'package.json')).version, '4.0.8-bioetl.8');
 console.log('picomatch backport ok');
