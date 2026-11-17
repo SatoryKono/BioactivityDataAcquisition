@@ -32,7 +32,7 @@ trend evidence only.
 - Source run id: `local-host-hooks-final-capture-20261116-07`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `58615fd0e0753236dbdfb6985fe143a90ca5e9be04ef5726d05674df2543eb66`
+- Source tree sha256: `2ed9e4070a62605fef963b69c8d12701ef799ae4891cdedfe2311938de9973d7`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-11-16T00:48:39.065584+00:00`
 
