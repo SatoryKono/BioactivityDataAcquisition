@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import math
 import re
 from collections.abc import Mapping, Sequence
 
 import pyarrow as pa
 
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from bioetl.infrastructure.schemas.silver_chembl_core import CHEMBL_TARGET_SCHEMA
 from iuphar_target_class.csv_io import read_csv_records
 from iuphar_target_class.stage0.io import (
     canonical_csv_bytes,
@@ -25,6 +27,10 @@ from .cohort_contract import (
     CohortExportRequest,
     _validate_request,
 )
+
+_TRUE_TOKENS = frozenset({"true", "1", "yes"})
+_FALSE_TOKENS = frozenset({"false", "0", "no"})
+_SCHEMA_FIELDS = {field.name: field.type for field in CHEMBL_TARGET_SCHEMA}
 
 
 def _source_rows(raw: bytes, source_format: str) -> tuple[Mapping[str, object], ...]:
@@ -78,22 +84,97 @@ def render_canonical_target_rows(
     )
 
 
+def _restore_normalized_silver_types(
+    row: Mapping[str, object],
+) -> dict[str, object]:
+    """Rebuild Silver scalar types so CSV transport matches Arrow/runtime rows."""
+    restored: dict[str, object] = {}
+    for key, value in row.items():
+        field_type = _SCHEMA_FIELDS.get(key)
+        if field_type is None:
+            restored[key] = value
+            continue
+        if value == "" or value is None:
+            restored[key] = None
+            continue
+        if pa.types.is_boolean(field_type):
+            restored[key] = _as_bool(value, key)
+        elif pa.types.is_integer(field_type):
+            restored[key] = _as_int(value, key)
+        elif pa.types.is_floating(field_type):
+            restored[key] = _as_float(value, key)
+        else:
+            restored[key] = value
+    return restored
+
+
+def _as_bool(value: object, field: str) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        token = value.strip().casefold()
+        if token in _TRUE_TOKENS:
+            return True
+        if token in _FALSE_TOKENS:
+            return False
+    raise ValueError(f"normalized Silver field {field} must be a boolean")
+
+
+def _as_int(value: object, field: str) -> int:
+    if isinstance(value, bool):
+        raise ValueError(f"normalized Silver field {field} must be an integer")
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        if not math.isfinite(value) or not value.is_integer():
+            raise ValueError(f"normalized Silver field {field} must be an integer")
+        return int(value)
+    if isinstance(value, str):
+        text = value.strip()
+        if re.fullmatch(r"-?[1-9]\d*|0", text, flags=re.ASCII) is not None:
+            return int(text)
+    raise ValueError(f"normalized Silver field {field} must be an integer")
+
+
+def _as_float(value: object, field: str) -> float:
+    if isinstance(value, bool):
+        raise ValueError(f"normalized Silver field {field} must be a float")
+    if isinstance(value, (int, float)):
+        number = float(value)
+        if not math.isfinite(number):
+            raise ValueError(f"normalized Silver field {field} must be a float")
+        return number
+    if isinstance(value, str):
+        text = value.strip()
+        try:
+            number = float(text)
+        except ValueError as error:
+            raise ValueError(
+                f"normalized Silver field {field} must be a float"
+            ) from error
+        if not math.isfinite(number):
+            raise ValueError(f"normalized Silver field {field} must be a float")
+        return number
+    raise ValueError(f"normalized Silver field {field} must be a float")
+
+
 def _canonical_row(
     row: Mapping[str, object], request: CohortExportRequest
 ) -> dict[str, str]:
-    _validate_source_row(row)
+    typed = _restore_normalized_silver_types(row)
+    _validate_source_row(typed)
     data = {
         key: value
-        for key, value in row.items()
+        for key, value in typed.items()
         if not key.startswith("_") and key not in {"entity_id", "content_hash"}
     }
     direct_column = request.direct_iuphar_id_column
     if direct_column is not None:
-        data["iuphar_target_id"] = _direct_identity(row, direct_column)
+        data["iuphar_target_id"] = _direct_identity(typed, direct_column)
     taxon = str(data["taxonomy_id"])
     fields = project_target_fields(data, taxon)
     return {
-        "input_row_id": "chembl.target:" + str(row["target_id"]),
+        "input_row_id": "chembl.target:" + str(typed["target_id"]),
         "target_kind": "protein",
         **{name: fields[name] or "" for name in _COLUMNS[2:]},
     }

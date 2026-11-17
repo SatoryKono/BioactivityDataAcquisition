@@ -193,17 +193,79 @@ def test_evidence_cannot_be_selected_as_a_cohort(tmp_path: Path):
 
 
 def test_raw_and_canonical_hashes_are_distinct_and_source_unchanged(tmp_path: Path):
+    from bioetl.infrastructure.adapters.iuphar.canonical_target_rows import (
+        _restore_normalized_silver_types,
+    )
+
     export, request, row = _export(tmp_path)
     assert (
         sha256_file(request.source_path) == request.source_sha256 == export.raw_sha256
     )
     assert export.canonical_sha256 != export.raw_sha256
     assert export.raw_copy_path.read_bytes() == request.source_path.read_bytes()
+    typed = _restore_normalized_silver_types(row)
     parsed = next(csv.DictReader(io.StringIO(export.canonical_path.read_text())))
-    assert {name: parsed[name] for name in project_target_fields(row, "9606")} == {
-        name: value or "" for name, value in project_target_fields(row, "9606").items()
+    assert {name: parsed[name] for name in project_target_fields(typed, "9606")} == {
+        name: value or ""
+        for name, value in project_target_fields(typed, "9606").items()
     }
     assert parsed["target_id"] == "" and parsed["target_chembl_id"] == "CHEMBL1"
+
+
+def test_csv_and_arrow_sources_share_typed_source_business_data(tmp_path: Path):
+    source, row = _source(
+        tmp_path,
+        species_group_flag="False",
+        primary_component_id="12.0",
+        target_description="",
+    )
+    csv_request = CohortExportRequest(
+        source,
+        sha256_file(source),
+        CSV_SOURCE_FORMAT,
+        NORMALIZED_TARGET_SCHEMA,
+        "synthetic typed CSV mapping",
+        "unit-test",
+    )
+    csv_export = export_canonical_cohort(csv_request, output_dir=tmp_path / "csv")
+    table = pa.Table.from_pylist(
+        [
+            {
+                **row,
+                "taxonomy_id": 9606,
+                "species_group_flag": False,
+                "primary_component_id": 12.0,
+                "target_description": None,
+            }
+        ]
+    )
+    sink = pa.BufferOutputStream()
+    with pa.ipc.new_stream(sink, table.schema) as writer:
+        writer.write_table(table)
+    arrow_source = tmp_path / "source.arrow"
+    arrow_source.write_bytes(sink.getvalue().to_pybytes())
+    arrow_request = CohortExportRequest(
+        arrow_source,
+        sha256_file(arrow_source),
+        ARROW_SOURCE_FORMAT,
+        NORMALIZED_TARGET_SCHEMA,
+        "synthetic typed Arrow mapping",
+        "unit-test",
+    )
+    arrow_export = export_canonical_cohort(arrow_request, output_dir=tmp_path / "arrow")
+    assert (
+        csv_export.canonical_path.read_bytes()
+        == arrow_export.canonical_path.read_bytes()
+    )
+    business = json.loads(
+        next(csv.DictReader(io.StringIO(csv_export.canonical_path.read_text())))[
+            "source_business_data"
+        ]
+    )
+    assert business["taxonomy_id"] == 9606
+    assert business["species_group_flag"] is False
+    assert business["primary_component_id"] == 12.0
+    assert business["target_description"] is None
 
 
 @pytest.mark.parametrize(
