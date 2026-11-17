@@ -82,7 +82,7 @@ entries:
       - description
     owner: BioETL Team
     semantic_role: chembl_target_descriptive_metadata
-    rationale: Target v3.1 Gold keeps the same source-specific biological target description as v3.0 and does not promote it to a generic cross-entity alias.
+    rationale: Target description remains source-specific biological target text on the v3.1 Gold contract and must not be treated as a generic cross-entity description alias.
 
   - surface: gold_json_property
     path: docs/04-reference/contracts/gold/composite_target_v1.0.json

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -37,6 +38,30 @@ _OTHER_COHORT = "pipeline proof belongs to another admitted cohort"
 _TRANSPORT_RAW_FIELDS = frozenset(
     {"import_profile", "source_path", "source_sha256", "source_record"}
 )
+_SOURCE_BUSINESS_DATA = "source_business_data"
+
+
+def _drop_null_mapping_entries(value: object) -> object:
+    """Treat explicit JSON null like a missing key for business-field digests."""
+    if isinstance(value, Mapping):
+        return {
+            str(key): _drop_null_mapping_entries(item)
+            for key, item in value.items()
+            if item is not None
+        }
+    if isinstance(value, list):
+        return [_drop_null_mapping_entries(item) for item in value]
+    return value
+
+
+def _normalize_source_business_data(value: object) -> object:
+    if not isinstance(value, str) or not value:
+        return None if value == "" else value
+    try:
+        loaded = json.loads(value)
+    except json.JSONDecodeError:
+        return value
+    return canonical_json_bytes(_drop_null_mapping_entries(loaded)).decode("utf-8")
 
 
 def _classification_input_projection(
@@ -49,8 +74,15 @@ def _classification_input_projection(
     for key, value in fields.items():
         if key in _TRANSPORT_RAW_FIELDS:
             continue
+        name = str(key)
         # Canonical CSV keeps blanks as ""; runtime projection uses None.
-        projected[str(key)] = None if value == "" else value
+        if value == "":
+            projected[name] = None
+            continue
+        if name == _SOURCE_BUSINESS_DATA:
+            projected[name] = _normalize_source_business_data(value)
+            continue
+        projected[name] = value
     return projected
 
 
