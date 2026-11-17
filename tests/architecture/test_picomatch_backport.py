@@ -22,7 +22,7 @@ CONSUMERS = (
     "grafana/plugins/bioetl-scenes-app",
     "grafana/plugins/bioetl-selectorshell-panel",
 )
-ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.16.tgz"
+ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.17.tgz"
 
 
 @pytest.fixture
@@ -61,7 +61,7 @@ def test_picomatch_archive_matches_reviewed_source() -> None:
         expected={
             "upstream_commit": "7be3276fb8bd215a8c73fa066bcaf696c244ad88",
             "advisory": "GHSA-fc5q-39xc-vjpf",
-            "local_version": "4.0.8-bioetl.16",
+            "local_version": "4.0.8-bioetl.17",
         },
     )
 
@@ -71,7 +71,7 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
     assert_consumers_pin_archive(
         [consumer],
         package_name="picomatch",
-        version="4.0.8-bioetl.16",
+        version="4.0.8-bioetl.17",
         archive=ARCHIVE,
         forbidden_versions=(
             "2.3.2",
@@ -323,3 +323,20 @@ def test_sequential_quantified_extglobs_finish(
         check=True,
     )
     assert result.stdout.strip() == "false"
+
+
+def test_unclosed_bracket_body_compiles_linearly(packed_picomatch: Path) -> None:
+    code = (
+        "const p=require(process.argv[1]);"
+        "p.makeRe('@('+'['.repeat(60000)+')');"
+        "console.log('compiled');"
+    )
+    result = subprocess.run(
+        ["node", "-e", code, str(packed_picomatch)],
+        capture_output=True,
+        text=True,
+        timeout=3,
+        check=True,
+    )
+    assert result.stdout.strip() == "compiled"
+

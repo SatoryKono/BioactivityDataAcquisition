@@ -87,7 +87,7 @@ def test_policy_documents_residual_osv_exception() -> None:
     assert "#9859" in text
     # Picomatch is remediated by local backport (#13180/#13181), not an OSV-gate
     # allowlist (AGENTS.md forbids growing exemptions).
-    assert "4.0.8-bioetl.16" in text
+    assert "4.0.8-bioetl.17" in text
     assert "picomatch-backport" in text
     assert "allowlists **only this GHSA id**" not in text
 
