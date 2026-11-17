@@ -86,6 +86,34 @@ def test_classification_input_projection_ignores_csv_transport_metadata():
     assert "import_profile" not in _classification_input_projection(csv_side)
 
 
+def test_classification_input_projection_equates_null_and_absent_business_fields():
+    silver_side = {
+        "target_id": "1",
+        "organism": "9606",
+        "source_business_data": json.dumps(
+            {"target_id": "CHEMBL1", "protein_classifications": None},
+            separators=(",", ":"),
+            sort_keys=True,
+        ),
+    }
+    runtime_side = {
+        "target_id": "1",
+        "organism": "9606",
+        "source_business_data": json.dumps(
+            {"target_id": "CHEMBL1"},
+            separators=(",", ":"),
+            sort_keys=True,
+        ),
+    }
+    assert _classification_input_projection(
+        silver_side
+    ) == _classification_input_projection(runtime_side)
+    projected = _classification_input_projection(silver_side)
+    assert "protein_classifications" not in json.loads(
+        projected["source_business_data"]
+    )
+
+
 def test_stale_pipeline_proof_rejects_changed_cohort_semantics(acceptance_inputs):
     request, snapshot = acceptance_inputs
     changed = RawTargetRow(

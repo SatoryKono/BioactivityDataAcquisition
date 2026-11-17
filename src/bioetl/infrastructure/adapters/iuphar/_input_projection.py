@@ -56,8 +56,18 @@ def _taxon(value: object) -> str | None:
 
 
 def plain_target_value(value: object) -> object:
+    """Normalize nested business payloads for shared runtime/export digests.
+
+    Nullable Silver schema fields materialize as explicit ``None``; runtime
+    classifier inputs omit the same keys. Dropping null-valued mapping entries
+    keeps ``source_business_data`` identical across both paths.
+    """
     if isinstance(value, Mapping):
-        return {key: plain_target_value(item) for key, item in value.items()}
+        return {
+            key: plain_target_value(item)
+            for key, item in value.items()
+            if item is not None
+        }
     if isinstance(value, (list, tuple)):
         return [plain_target_value(item) for item in value]
     return value

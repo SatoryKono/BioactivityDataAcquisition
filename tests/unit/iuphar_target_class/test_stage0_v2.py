@@ -265,7 +265,72 @@ def test_csv_and_arrow_sources_share_typed_source_business_data(tmp_path: Path):
     assert business["taxonomy_id"] == 9606
     assert business["species_group_flag"] is False
     assert business["primary_component_id"] == 12.0
-    assert business["target_description"] is None
+    assert "target_description" not in business
+
+
+def test_full_silver_nullables_match_runtime_absent_projection(tmp_path: Path):
+    """Silver schema nulls must share the runtime business-field projection."""
+    from bioetl.infrastructure.schemas.silver_chembl_core import CHEMBL_TARGET_SCHEMA
+
+    runtime = {
+        "target_id": "CHEMBL1",
+        "target_type": "SINGLE PROTEIN",
+        "taxonomy_id": 9606,
+        "pref_name": "Fixture",
+        "organism": "Homo sapiens",
+        "component_accessions": '["P12345"]',
+        "target_protein_synonyms": "alias1|alias2",
+        "target_ec_numbers": "1.1.1.1",
+    }
+    silver = {
+        field.name: None
+        for field in CHEMBL_TARGET_SCHEMA
+        if not field.name.startswith("_")
+        and field.name not in {"entity_id", "content_hash"}
+    }
+    silver.update(runtime)
+    assert "protein_classifications" in silver
+    assert silver["protein_classifications"] is None
+    assert project_target_fields(runtime, "9606") == project_target_fields(
+        silver, "9606"
+    )
+    business = json.loads(project_target_fields(silver, "9606")["source_business_data"])
+    assert "protein_classifications" not in business
+    stream = io.StringIO(newline="")
+    writer = csv.DictWriter(
+        stream,
+        fieldnames=list(silver),
+        lineterminator="\n",
+    )
+    writer.writeheader()
+    writer.writerow(
+        {
+            key: "" if value is None else value
+            for key, value in silver.items()
+            if key not in {"entity_id", "content_hash"} and not str(key).startswith("_")
+        }
+    )
+    source = tmp_path / "full-silver.csv"
+    source.write_bytes(stream.getvalue().encode())
+    export = export_canonical_cohort(
+        CohortExportRequest(
+            source,
+            sha256_file(source),
+            CSV_SOURCE_FORMAT,
+            NORMALIZED_TARGET_SCHEMA,
+            "full Silver nullable round-trip",
+            "unit-test",
+        ),
+        output_dir=tmp_path / "export",
+    )
+    imported = next(
+        csv.DictReader(io.StringIO(export.canonical_path.read_text(encoding="utf-8")))
+    )
+    assert (
+        imported["source_business_data"]
+        == project_target_fields(runtime, "9606")["source_business_data"]
+    )
+    assert "protein_classifications" not in json.loads(imported["source_business_data"])
 
 
 @pytest.mark.parametrize(
