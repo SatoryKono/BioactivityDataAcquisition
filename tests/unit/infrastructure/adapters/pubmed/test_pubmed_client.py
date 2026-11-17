@@ -381,9 +381,7 @@ async def test_get_pmids_raises_when_next_page_is_empty(
 @pytest.mark.asyncio
 async def test_get_pmids_raises_when_page_repeats(adapter, mock_http_client) -> None:
     """A repeated idlist must not be returned as the whole count."""
-    mock_http_client.get = AsyncMock(
-        return_value=_esearch_page(count=5, ids=["1"])
-    )
+    mock_http_client.get = AsyncMock(return_value=_esearch_page(count=5, ids=["1"]))
 
     with pytest.raises(PaginationTruncatedError) as caught:
         await adapter._get_pmids("cancer", 5)
@@ -410,6 +408,35 @@ async def test_get_pmids_raises_when_repeated_page_fills_count(
         await adapter._get_pmids("cancer", 4)
 
     assert caught.value.reason == "repeated_page"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "payload",
+    [[], {"esearchresult": None}, {"esearchresult": {"idlist": "1"}}],
+)
+async def test_get_pmids_rejects_malformed_esearch_payload(
+    adapter, mock_http_client, payload: object
+) -> None:
+    """A broken ESearch body must not look like a successful empty search."""
+    response = MagicMock()
+    response.json.return_value = payload
+    mock_http_client.get = AsyncMock(return_value=response)
+
+    with pytest.raises(PaginationTruncatedError) as caught:
+        await adapter._get_pmids("cancer", 10)
+
+    assert caught.value.reason == "malformed_payload"
+
+
+@pytest.mark.asyncio
+async def test_get_pmids_accepts_explicit_empty_idlist(
+    adapter, mock_http_client
+) -> None:
+    """A result object with an empty idlist is a real empty search."""
+    mock_http_client.get = AsyncMock(return_value=_esearch_page(count="0", ids=[]))
+
+    assert await adapter._get_pmids("cancer", 10) == []
 
 
 @pytest.mark.asyncio
@@ -443,9 +470,7 @@ async def test_resolve_pmids_for_fetch_signals_short_default_ceiling(
     adapter, mock_http_client
 ) -> None:
     """The default 10000 ceiling is not a complete result when count is larger."""
-    mock_http_client.get = AsyncMock(
-        return_value=_esearch_page(count=12000, ids=["1"])
-    )
+    mock_http_client.get = AsyncMock(return_value=_esearch_page(count=12000, ids=["1"]))
 
     with pytest.raises(PaginationTruncatedError) as caught:
         await resolve_pmids_for_fetch(adapter, query=None, limit=None)

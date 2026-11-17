@@ -53,8 +53,9 @@ class PubMedSearchMixin(PubMedAdapterStateMixin):
             ``retstart`` or rejected as truncation.
 
         Raises:
-            PaginationTruncatedError: ``count`` exceeds the collected ids and
-                another ``retstart`` page does not advance the scan.
+            PaginationTruncatedError: ``count`` exceeds the collected ids, a
+                later page does not advance, or the ESearch payload is not a
+                result object.
         """
         try:
             return await PubMedSearchMixin._collect_pmids(self, search_term, max_count)
@@ -79,12 +80,26 @@ class PubMedSearchMixin(PubMedAdapterStateMixin):
         for page_count in range(1, _MAX_ESEARCH_PAGES + 1):
             if len(collected) >= max_count:
                 break
-            page_ids, page_count_value = await PubMedSearchMixin._fetch_esearch_page(
-                self,
-                search_term,
-                retstart=retstart,
-                retmax=max_count - len(collected),
-            )
+            try:
+                (
+                    page_ids,
+                    page_count_value,
+                ) = await PubMedSearchMixin._fetch_esearch_page(
+                    self,
+                    search_term,
+                    retstart=retstart,
+                    retmax=max_count - len(collected),
+                )
+            except PubMedSearchPayloadError:
+                _raise_pubmed_search_truncated(
+                    self,
+                    reason="malformed_payload",
+                    page_count=page_count,
+                    retstart=retstart,
+                    reported_count=reported_count,
+                    collected_count=len(collected),
+                    max_count=max_count,
+                )
             if page_count_value is not None:
                 reported_count = page_count_value
             if _esearch_result_still_short(len(collected), max_count, reported_count):
@@ -333,23 +348,32 @@ def _esearch_stall_reason(
     return None
 
 
+class PubMedSearchPayloadError(Exception):
+    """ESearch JSON is not a result object and must not look like no hits."""
+
+
 def _parse_esearch_payload(payload: object) -> tuple[list[str], int | None]:
     """Read ``idlist`` and numeric ``count`` from an ESearch JSON object."""
     if not isinstance(payload, Mapping):
+        raise PubMedSearchPayloadError("ESearch payload is not an object")
+    if "esearchresult" not in payload:
         return [], None
-    result = payload.get("esearchresult")
+    result = payload["esearchresult"]
     if not isinstance(result, Mapping):
-        return [], None
+        raise PubMedSearchPayloadError("ESearch esearchresult is not an object")
     return (
-        _parse_esearch_idlist(result.get("idlist")),
+        _require_esearch_idlist(result),
         _coerce_esearch_count(result.get("count")),
     )
 
 
-def _parse_esearch_idlist(raw_ids: object) -> list[str]:
-    """Normalize an ESearch id list to strings."""
-    if not isinstance(raw_ids, list):
+def _require_esearch_idlist(result: Mapping[str, object]) -> list[str]:
+    """Return PMID strings, or an empty list when ``idlist`` is absent."""
+    if "idlist" not in result:
         return []
+    raw_ids = result["idlist"]
+    if not isinstance(raw_ids, list):
+        raise PubMedSearchPayloadError("ESearch idlist is not a list")
     return [str(item) for item in raw_ids if item is not None]
 
 
